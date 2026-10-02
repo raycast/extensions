@@ -1,4 +1,3 @@
-import { t } from "./i18n.ts";
 import { constants } from "node:fs";
 import * as fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -41,7 +40,7 @@ const TEMP =
   /^\.pending-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.tmp$/;
 function uuid(value: unknown): string {
   const result = id(value);
-  if (!UUID.test(result)) invalid(t("事件 ID 无效"));
+  if (!UUID.test(result)) invalid("Invalid event ID");
   return result;
 }
 function code(error: unknown): string | undefined {
@@ -52,7 +51,7 @@ function safeError(error: unknown): LibraryError {
     ? error
     : new LibraryError(
         "UNAVAILABLE",
-        t("目录或文件不可用；未写入，请检查本地下载和权限"),
+        "Directory or file unavailable; not saved. Check local download and permissions",
       );
 }
 
@@ -69,15 +68,19 @@ export async function configureDirectory(
       : selected.startsWith("~/")
         ? path.join(homedir(), selected.slice(2))
         : selected;
-  if (!path.isAbsolute(expanded)) invalid(t("数据目录必须为绝对路径"));
+  if (!path.isAbsolute(expanded))
+    invalid("Data directory must be an absolute path");
   try {
     if (!custom) await fs.mkdir(expanded, { recursive: true, mode: 0o700 });
     const root = await fs.realpath(expanded);
-    if (!(await fs.stat(root)).isDirectory()) invalid(t("数据目录不存在"));
+    if (!(await fs.stat(root)).isDirectory())
+      invalid("Data directory does not exist");
     const entries = await fs.readdir(root);
     const allowed = new Set(["events", "icons", ".DS_Store"]);
     if (entries.some((n) => !allowed.has(n)))
-      invalid(t("请选择空目录或仅包含 events/icons 的专用目录"));
+      invalid(
+        "Choose an empty dedicated directory or one containing only events/icons",
+      );
     if (!entries.includes("events"))
       await fs.mkdir(path.join(root, "events"), { mode: 0o700 }).catch((e) => {
         if (code(e) !== "EEXIST") throw e;
@@ -99,10 +102,16 @@ async function checkedDirectory(directory: string): Promise<string> {
     (await fs.realpath(directory)) !== directory ||
     !(await fs.lstat(directory)).isDirectory()
   )
-    throw new LibraryError("UNAVAILABLE", t("请重新确认专用目录路径"));
+    throw new LibraryError(
+      "UNAVAILABLE",
+      "Reconfirm the dedicated directory path",
+    );
   const allowed = new Set(["events", "icons", ".DS_Store"]);
   if ((await fs.readdir(directory)).some((n) => !allowed.has(n)))
-    throw new LibraryError("CORRUPT", t("专用目录出现未知文件"));
+    throw new LibraryError(
+      "CORRUPT",
+      "Unknown file found in dedicated directory",
+    );
   const events = path.join(directory, "events");
   const stat = await fs.lstat(events);
   if (
@@ -110,7 +119,10 @@ async function checkedDirectory(directory: string): Promise<string> {
     stat.isSymbolicLink() ||
     (await fs.realpath(events)) !== events
   )
-    throw new LibraryError("CORRUPT", t("events 必须是专用目录内的真实子目录"));
+    throw new LibraryError(
+      "CORRUPT",
+      "events must be a real subdirectory of the dedicated directory",
+    );
   const icons = path.join(directory, "icons");
   try {
     const iconStat = await fs.lstat(icons);
@@ -121,7 +133,7 @@ async function checkedDirectory(directory: string): Promise<string> {
     )
       throw new LibraryError(
         "CORRUPT",
-        t("icons 必须是专用目录内的真实子目录"),
+        "icons must be a real subdirectory of the dedicated directory",
       );
   } catch (e) {
     if ((e as NodeJS.ErrnoException)?.code === "ENOENT") {
@@ -138,13 +150,17 @@ async function checkedDirectory(directory: string): Promise<string> {
 async function readBounded(file: string, max: number): Promise<string> {
   const before = await fs.lstat(file);
   if (!before.isFile() || before.isSymbolicLink())
-    throw new LibraryError("CORRUPT", t("拒绝非普通文件或符号链接"));
-  if (before.size > max) throw new LibraryError("LIMIT", t("文件超过大小上限"));
+    throw new LibraryError(
+      "CORRUPT",
+      "Regular files only; symlinks are rejected",
+    );
+  if (before.size > max)
+    throw new LibraryError("LIMIT", "File exceeds size limit");
   const handle = await fs.open(file, constants.O_RDONLY | constants.O_NOFOLLOW);
   try {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.ino !== before.ino || stat.dev !== before.dev)
-      throw new LibraryError("CORRUPT", t("文件在读取前发生变化"));
+      throw new LibraryError("CORRUPT", "File changed before it could be read");
     const buffer = Buffer.alloc(max + 1);
     let size = 0;
     while (size < buffer.length) {
@@ -157,7 +173,7 @@ async function readBounded(file: string, max: number): Promise<string> {
       if (!bytesRead) break;
       size += bytesRead;
     }
-    if (size > max) throw new LibraryError("LIMIT", t("文件超过大小上限"));
+    if (size > max) throw new LibraryError("LIMIT", "File exceeds size limit");
     return new TextDecoder("utf-8", { fatal: true }).decode(
       buffer.subarray(0, size),
     );
@@ -169,7 +185,7 @@ async function readBounded(file: string, max: number): Promise<string> {
 export function validateEvent(value: unknown): LibraryEvent {
   const raw = object(value);
   if (raw.schemaVersion !== 1)
-    throw new LibraryError("UNKNOWN_SCHEMA", t("不支持的事件版本"));
+    throw new LibraryError("UNKNOWN_SCHEMA", "Unsupported event version");
   keys(raw, ["schemaVersion", "eventId", "occurredAt", "mutations", "visits"]);
   const eventId = uuid(raw.eventId);
   const entities = new Set<string>();
@@ -179,19 +195,20 @@ export function validateEvent(value: unknown): LibraryEvent {
     if (m.entity !== "bookmark" && m.entity !== "catalog") invalid();
     const entityId = id(m.entityId);
     const key = entityKey(m.entity, entityId);
-    if (entities.has(key)) invalid(t("单事务不能重复修改同一实体"));
+    if (entities.has(key))
+      invalid("Cannot change the same entity twice in one transaction");
     entities.add(key);
     const baseHeads = array(m.baseHeads).map(uuid);
     if (
       new Set(baseHeads).size !== baseHeads.length ||
       baseHeads.includes(eventId)
     )
-      invalid(t("父版本重复或自引用"));
+      invalid("Duplicate parent version or self-reference");
     const result =
       m.entity === "catalog"
         ? validateCatalog(m.value)
         : validateBookmark(m.value);
-    if (result.id !== entityId) invalid(t("实体 ID 不一致"));
+    if (result.id !== entityId) invalid("Entity ID mismatch");
     return { entity: m.entity, entityId, baseHeads, value: result };
   });
   const visits: Visit[] = array(raw.visits).map((v) => {
@@ -199,7 +216,8 @@ export function validateEvent(value: unknown): LibraryEvent {
     keys(o, ["bookmarkId", "usedAt"]);
     return { bookmarkId: id(o.bookmarkId), usedAt: timestamp(o.usedAt) };
   });
-  if (!mutations.length && !visits.length) invalid(t("空事务被拒绝"));
+  if (!mutations.length && !visits.length)
+    invalid("Empty transaction rejected");
   return {
     schemaVersion: 1,
     eventId,
@@ -216,7 +234,7 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
     const event = validateEvent(raw);
     const prior = events.get(event.eventId);
     if (prior && canonical(prior) !== canonical(event))
-      throw new LibraryError("CORRUPT", t("同一事件 ID 内容不同"));
+      throw new LibraryError("CORRUPT", "Same event ID has different content");
     events.set(event.eventId, event);
   }
   const versions = new Map<string, Map<string, Mutation>>();
@@ -241,7 +259,10 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
         advanced = true;
       }
     if (!advanced)
-      throw new LibraryError("CORRUPT", t("事件事务依赖缺失或存在环"));
+      throw new LibraryError(
+        "CORRUPT",
+        "Event transaction has missing or circular dependencies",
+      );
   }
   const heads: Heads = Object.create(null);
   const candidates = new Map<string, Candidate[]>();
@@ -254,7 +275,7 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
         if (!versionsForEntity.has(parent))
           throw new LibraryError(
             "CORRUPT",
-            t("父事件尚未到达本机或引用了错误实体"),
+            "Parent event has not arrived locally or references the wrong entity",
           );
         consumed.add(parent);
       }
@@ -266,7 +287,8 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
           remaining.delete(eventId);
           advanced = true;
         }
-      if (!advanced) throw new LibraryError("CORRUPT", t("事件依赖存在环"));
+      if (!advanced)
+        throw new LibraryError("CORRUPT", "Circular event dependency");
     }
     heads[key] = [...versionsForEntity.keys()]
       .filter((eventId) => !consumed.has(eventId))
@@ -295,7 +317,8 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
         entityKey: key,
         reason: "multiple-heads",
         candidates: options,
-        message: t("多个并发版本，必须明确选择后才能继续写入"),
+        message:
+          "Multiple concurrent versions; select one explicitly before writing",
       });
       continue;
     }
@@ -310,7 +333,10 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
   for (const e of events.values())
     for (const v of e.visits) {
       if (!versions.has(entityKey("bookmark", v.bookmarkId)))
-        throw new LibraryError("CORRUPT", t("访问事件引用不存在的书签"));
+        throw new LibraryError(
+          "CORRUPT",
+          "Visit event references a nonexistent bookmark",
+        );
       state.visitCounts[v.bookmarkId] =
         (state.visitCounts[v.bookmarkId] ?? 0) + 1;
       latest[v.bookmarkId] = Math.max(latest[v.bookmarkId] ?? 0, v.usedAt);
@@ -335,7 +361,8 @@ export function replayEvents(input: LibraryEvent[]): LibraryState {
         entityKey: key,
         reason: "invalid-locations",
         candidates: candidates.get(key)!,
-        message: t("分类引用不存在或删除状态与回收站位置矛盾；请修复位置"),
+        message:
+          "Category reference is missing or deletion state conflicts with Trash location; repair locations",
       });
     }
   }
@@ -352,22 +379,28 @@ async function scan(
     (name) => name !== ".DS_Store",
   );
   if (names.length > MAX_EVENTS * 2)
-    throw new LibraryError("LIMIT", t("目录文件数超过上限"));
+    throw new LibraryError("LIMIT", "Directory file count exceeds limit");
   if (names.filter((name) => !TEMP.test(name)).length > MAX_EVENTS)
-    throw new LibraryError("LIMIT", t("事件数超过 10,000 上限"));
+    throw new LibraryError("LIMIT", "Event count exceeds the 10,000 limit");
   let bytes = 0;
   const events: LibraryEvent[] = [];
   for (const name of names.sort()) {
     const file = path.join(folder, name);
     const stat = await fs.lstat(file);
     if (stat.isSymbolicLink() || !stat.isFile())
-      throw new LibraryError("CORRUPT", t("事件目录包含非普通文件"));
+      throw new LibraryError(
+        "CORRUPT",
+        "Events directory contains a non-regular file",
+      );
     if (TEMP.test(name)) continue;
     if (!name.endsWith(".json") || !UUID.test(name.slice(0, -5)))
-      throw new LibraryError("CORRUPT", t("事件目录包含未知正式文件"));
+      throw new LibraryError(
+        "CORRUPT",
+        "Events directory contains an unknown committed file",
+      );
     bytes += stat.size;
     if (bytes > MAX_TOTAL_BYTES || events.length >= MAX_EVENTS)
-      throw new LibraryError("LIMIT", t("事件库超过首版容量上限"));
+      throw new LibraryError("LIMIT", "Event library exceeds capacity limit");
     let event: LibraryEvent;
     try {
       const content = await readBounded(
@@ -382,10 +415,13 @@ async function scan(
         ["LIMIT", "UNKNOWN_SCHEMA"].includes(e.code)
       )
         throw e;
-      throw new LibraryError("CORRUPT", t`事件无效：${name}`);
+      throw new LibraryError("CORRUPT", `Invalid event: ${name}`);
     }
     if (`${event.eventId}.json` !== name)
-      throw new LibraryError("CORRUPT", t("事件文件名与内容不一致"));
+      throw new LibraryError(
+        "CORRUPT",
+        "Event filename does not match content",
+      );
     events.push(event);
   }
   await checkedDirectory(directory);
@@ -420,7 +456,7 @@ export async function publishEvent(
   const folder = await checkedDirectory(directory);
   const data = canonical(validateEvent(event));
   if (Buffer.byteLength(data) > MAX_EVENT_BYTES)
-    throw new LibraryError("LIMIT", t("事务超过 10 MiB，未写入"));
+    throw new LibraryError("LIMIT", "Transaction exceeds 10 MiB; not saved");
   const temp = path.join(folder, `.pending-${randomUUID()}.tmp`);
   const final = path.join(folder, `${event.eventId}.json`);
   const before = await fs.lstat(folder);
@@ -442,7 +478,7 @@ export async function publishEvent(
       tempStat.isSymbolicLink() ||
       !tempStat.isFile()
     )
-      throw new LibraryError("WRITE_FAILED", t("目录在写入时发生变化"));
+      throw new LibraryError("WRITE_FAILED", "Directory changed during write");
     await fs.link(temp, final);
     published = true;
     try {
@@ -451,9 +487,12 @@ export async function publishEvent(
       if ((await readBounded(final, MAX_EVENT_BYTES)) !== data)
         throw new LibraryError(
           "WRITE_FAILED",
-          t("发布后核验失败；不要自动重试，请重新读取"),
+          "Post-publish verification failed; do not retry automatically. Reload instead",
         );
-      return { cleanupWarning: t("本地已写入；临时文件清理失败，未重试提交") };
+      return {
+        cleanupWarning:
+          "Saved locally, but temporary-file cleanup failed; commit was not retried",
+      };
     }
     return {};
   } catch (e) {
@@ -462,8 +501,8 @@ export async function publishEvent(
     throw new LibraryError(
       "WRITE_FAILED",
       published
-        ? t("可能已写入，请重新读取，禁止自动重试")
-        : t("未发布事件：文件系统不支持安全发布、无权限或文件已存在"),
+        ? "May have been saved; reload and do not retry automatically"
+        : "Event not published: filesystem cannot publish safely, permission denied, or file already exists",
     );
   }
 }
@@ -499,11 +538,15 @@ async function writeTransaction(
   if (!sameHeads(state.heads, request.expectedHeads))
     throw new LibraryError(
       "STALE_HEADS",
-      t("数据已变化，请重新打开表单或预览"),
+      "Data changed; reopen the form or preview",
     );
   if (state.status !== "ready" && !resolving)
-    throw new LibraryError("CONFLICT", t("存在未解决冲突，全库暂停普通写入"));
-  if (resolving && request.visits?.length) invalid(t("解决冲突不能追加访问"));
+    throw new LibraryError(
+      "CONFLICT",
+      "Unresolved conflicts; normal writes are paused for the entire library",
+    );
+  if (resolving && request.visits?.length)
+    invalid("Cannot add visits while resolving conflicts");
   const event = validateEvent({
     schemaVersion: 1,
     eventId: randomUUID(),
@@ -518,7 +561,7 @@ async function writeTransaction(
         { key: state.heads[entityKey(m.entity, m.entityId)] ?? [] },
       )
     )
-      throw new LibraryError("STALE_HEADS", t("实体父版本已变化"));
+      throw new LibraryError("STALE_HEADS", "Entity parent version changed");
     if (m.entity === "bookmark") {
       const bookmark = m.value as Bookmark;
       const bases = events.flatMap((e) =>
@@ -539,14 +582,16 @@ async function writeTransaction(
             base.lastUsed === bookmark.lastUsed,
         )
       )
-        invalid(t("编辑不能修改访问基数；请选择已有版本的基数"));
+        invalid(
+          "Editing cannot change the base visit count; choose an existing version's count",
+        );
     }
   }
   const next = replayEvents([...events, event]);
   if (next.status !== "ready")
     throw new LibraryError(
       "CONFLICT",
-      t("事务未解决所有冲突或产生无效分类引用，未写入"),
+      "Transaction did not resolve all conflicts or created an invalid category reference; not saved",
     );
   const size = Buffer.byteLength(canonical(event));
   if (
@@ -554,7 +599,10 @@ async function writeTransaction(
     bytes + size > MAX_TOTAL_BYTES ||
     size > MAX_EVENT_BYTES
   )
-    throw new LibraryError("LIMIT", t("事务或事件库超过容量上限，未写入"));
+    throw new LibraryError(
+      "LIMIT",
+      "Transaction or event library exceeds capacity; not saved",
+    );
   const publication = await publishEvent(directory, event);
   const result = await readLibrary(directory);
   return {

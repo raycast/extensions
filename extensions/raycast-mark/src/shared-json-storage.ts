@@ -1,4 +1,3 @@
-import { t } from "./i18n.ts";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs/promises";
@@ -26,7 +25,7 @@ export function setSharedJsonStorage(value?: typeof RaycastStorage) {
   storage = value;
 }
 function requireStorage() {
-  if (!storage) throw new Error(t("共享 JSON 存储尚未就绪"));
+  if (!storage) throw new Error("Shared JSON storage not ready");
   return storage;
 }
 
@@ -40,13 +39,15 @@ function validateIconData(value: string, title: string) {
       value,
     );
   if (!match || !match[2] || match[2].length % 4 !== 0)
-    throw new Error(t`图标数据格式无效，拒绝写入共享 JSON：${title}`);
+    throw new Error(`Invalid icon data; shared JSON write rejected: ${title}`);
   const bytes = Buffer.from(match[2], "base64");
   if (
     bytes.toString("base64") !== match[2] ||
     bytes.byteLength > MAX_ICON_BYTES
   )
-    throw new Error(t`图标超过 2 MiB 或编码无效，拒绝写入共享 JSON：${title}`);
+    throw new Error(
+      `Icon exceeds 2 MiB or encoding is invalid; shared JSON write rejected: ${title}`,
+    );
   return `data:${match[1]};base64,${match[2]}`;
 }
 
@@ -61,7 +62,9 @@ export async function readSharedJson(file: string) {
     stat.isSymbolicLink() ||
     stat.size > MAX_SHARED_JSON_BYTES
   )
-    throw new Error(t("共享 JSON 缺失、不是普通文件或超过 10 MiB；已阻断写入"));
+    throw new Error(
+      "Shared JSON is missing, not a regular file, or over 10 MiB; writes blocked",
+    );
   const handle = await fs.open(
     file,
     fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW,
@@ -69,10 +72,10 @@ export async function readSharedJson(file: string) {
   try {
     const opened = await handle.stat();
     if (!opened.isFile() || opened.dev !== stat.dev || opened.ino !== stat.ino)
-      throw new Error(t("共享 JSON 在读取时发生变化；已阻断写入"));
+      throw new Error("Shared JSON changed while being read; writes blocked");
     const bytes = await handle.readFile();
     if (bytes.byteLength > MAX_SHARED_JSON_BYTES)
-      throw new Error(t("共享 JSON 超过 10 MiB；已阻断写入"));
+      throw new Error("Shared JSON exceeds 10 MiB; writes blocked");
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } finally {
     await handle.close();
@@ -122,7 +125,9 @@ export function sharedJsonText(
     if (!icon) return bookmark;
     if (icon.type === "custom") {
       if (!icon.data)
-        throw new Error(t`图标数据缺失，拒绝写入共享 JSON：${bookmark.title}`);
+        throw new Error(
+          `Icon data missing; shared JSON write rejected: ${bookmark.title}`,
+        );
       return {
         ...bookmark,
         icon: { ...icon, data: validateIconData(icon.data, bookmark.title) },
@@ -135,10 +140,14 @@ export function sharedJsonText(
       };
     if (icon.type !== "file") return bookmark;
     if (!icon.path)
-      throw new Error(t`图标路径缺失，拒绝写入共享 JSON：${bookmark.title}`);
+      throw new Error(
+        `Icon path missing; shared JSON write rejected: ${bookmark.title}`,
+      );
     const data = iconBytes.get(icon.path);
     if (!data)
-      throw new Error(t`图标文件缺失，拒绝写入共享 JSON：${bookmark.title}`);
+      throw new Error(
+        `Icon file missing; shared JSON write rejected: ${bookmark.title}`,
+      );
     const ext = path.extname(icon.path).slice(1).toLowerCase();
     const mime: Record<string, string> = {
       png: "image/png",
@@ -150,7 +159,9 @@ export function sharedJsonText(
       ico: "image/x-icon",
     };
     if (!mime[ext])
-      throw new Error(t`图标格式不支持，拒绝写入共享 JSON：${bookmark.title}`);
+      throw new Error(
+        `Unsupported icon format; shared JSON write rejected: ${bookmark.title}`,
+      );
     return {
       ...bookmark,
       icon: {
@@ -189,24 +200,28 @@ export async function exportSharedJson(directory: string, state: LibraryState) {
     if (icon?.type !== "file") continue;
     const file = icon.path;
     if (!file || !path.isAbsolute(file))
-      throw new Error(t`图标路径无效，拒绝写入：${bookmark.title}`);
+      throw new Error(`Invalid icon path; write rejected: ${bookmark.title}`);
     const before = await fs.lstat(file);
     if (!before.isFile() || before.isSymbolicLink())
-      throw new Error(t`图标文件不可用，拒绝写入：${bookmark.title}`);
+      throw new Error(
+        `Icon file unavailable; write rejected: ${bookmark.title}`,
+      );
     const real = await fs.realpath(file);
     const relative = path.relative(iconsRoot, real);
     if (relative.startsWith("..") || path.isAbsolute(relative))
       throw new Error(
-        t`图标不在本地库 icons 目录，拒绝写入：${bookmark.title}`,
+        `Icon is outside the local library's icons directory; write rejected: ${bookmark.title}`,
       );
     const stat = await fs.lstat(file);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size > MAX_ICON_BYTES)
-      throw new Error(t`图标文件不可用，拒绝写入：${bookmark.title}`);
+      throw new Error(
+        `Icon file unavailable; write rejected: ${bookmark.title}`,
+      );
     iconBytes.set(file, (await fs.readFile(file)).toString("base64"));
   }
   const text = sharedJsonText(state, iconBytes);
   if (Buffer.byteLength(text) > MAX_SHARED_JSON_BYTES)
-    throw new Error(t("共享 JSON 超过 10 MiB；已阻断写入"));
+    throw new Error("Shared JSON exceeds 10 MiB; writes blocked");
   return text;
 }
 
@@ -217,7 +232,9 @@ async function publishLocked(
   expected: string,
 ) {
   if (digest(await readSharedJson(file)) !== expected)
-    throw new Error(t("写入前共享 JSON 再次变化；拒绝覆盖"));
+    throw new Error(
+      "Shared JSON changed again before writing; overwrite rejected",
+    );
   const text = await exportSharedJson(directory, state);
   const temp = path.join(
     path.dirname(file),
@@ -232,7 +249,9 @@ async function publishLocked(
       await handle.close();
     }
     if (digest(await readSharedJson(file)) !== expected)
-      throw new Error(t("写入前共享 JSON 再次变化；拒绝覆盖"));
+      throw new Error(
+        "Shared JSON changed again before writing; overwrite rejected",
+      );
     await fs.rename(temp, file);
     await updateSharedJsonBaseline(text, text);
   } finally {
@@ -254,7 +273,7 @@ async function writeSharedJson<
   if (!file) return operation();
   const baseline = await sharedJsonBaseline();
   if (!baseline.remote)
-    throw new Error(t("共享 JSON 尚未初始化；请重新连接以阻断写入"));
+    throw new Error("Shared JSON is not initialized; reconnect before writing");
   const lock = `${file}.lock`;
   let lockHandle;
   let ownsLock: { dev: number; ino: number } | undefined;
@@ -262,16 +281,18 @@ async function writeSharedJson<
     lockHandle = await fs.open(lock, "wx", 0o600);
     ownsLock = await lockHandle.stat();
     if (digest(await readSharedJson(file)) !== baseline.remote)
-      throw new Error(t("共享 JSON 已被外部修改；当前写入已阻断"));
+      throw new Error(
+        "Shared JSON was modified externally; current write blocked",
+      );
     const result = await operation();
     try {
       await publishLocked(file, directory, result.state, baseline.remote);
       return result;
     } catch (error) {
-      const message = error instanceof Error ? error.message : t("未知错误");
+      const message = error instanceof Error ? error.message : "Unknown error";
       return {
         ...result,
-        warning: t`${result.warning ? `${result.warning}${t("；")}` : ""}本地事务已成功，但共享 JSON 未更新：${message}`,
+        warning: `${result.warning ? `${result.warning}; ` : ""}Local transaction succeeded, but shared JSON was not updated: ${message}`,
       } as T;
     }
   } finally {

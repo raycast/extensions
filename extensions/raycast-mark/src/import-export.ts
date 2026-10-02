@@ -1,4 +1,3 @@
-import { t } from "./i18n.ts";
 import { createHash, randomUUID } from "node:crypto";
 import * as fs from "node:fs/promises";
 import path from "node:path";
@@ -61,7 +60,7 @@ function ready(state: LibraryState) {
   if (state.status !== "ready")
     throw new LibraryError(
       state.status === "blocked" ? "CORRUPT" : "CONFLICT",
-      t("仅可对已验证且无冲突的库导入或完整导出"),
+      "Import or complete export requires a verified conflict-free library",
     );
 }
 function sameLocations(a: Location[], b: Location[]): boolean {
@@ -77,7 +76,9 @@ function rejectSecrets(value: unknown): void {
         key,
       )
     )
-      invalid(t("导入含设置或秘密字段，请先移除（未显示字段值）"));
+      invalid(
+        "Import contains settings or secrets; remove them first (values not shown)",
+      );
     rejectSecrets(child);
   }
 }
@@ -87,12 +88,12 @@ export function previewJsonImport(
 ): ImportPlan {
   ready(state);
   if (Buffer.byteLength(text) > MAX_EVENT_BYTES)
-    throw new LibraryError("LIMIT", t("导入超过 10 MiB"));
+    throw new LibraryError("LIMIT", "Import exceeds 10 MiB");
   let raw: Record<string, unknown>;
   try {
     raw = object(JSON.parse(text));
   } catch {
-    invalid(t("JSON 无效或不是对象"));
+    invalid("Invalid JSON or not an object");
   }
   rejectSecrets(raw);
   keys(raw, ["schemaVersion", "source", "groups", "bookmarks"]);
@@ -104,14 +105,20 @@ export function previewJsonImport(
   ]);
   if (raw.schemaVersion !== undefined) {
     if (raw.schemaVersion !== 1)
-      throw new LibraryError("UNKNOWN_SCHEMA", t("不支持的导入版本或来源"));
+      throw new LibraryError(
+        "UNKNOWN_SCHEMA",
+        "Unsupported import version or source",
+      );
     if (raw.source !== undefined && !knownSources.has(String(raw.source)))
-      throw new LibraryError("UNKNOWN_SCHEMA", t("不支持的导入版本或来源"));
+      throw new LibraryError(
+        "UNKNOWN_SCHEMA",
+        "Unsupported import version or source",
+      );
   } else if (
     raw.source !== undefined &&
     !knownSources.has(String(raw.source))
   ) {
-    invalid(t("旧格式不得声明未知来源"));
+    invalid("Legacy format cannot declare an unknown source");
   }
   const counts = {
     bookmarks: 0,
@@ -177,7 +184,7 @@ export function previewJsonImport(
         const createdAt = time(sub.createdAt, now);
         const members = array(sub.bookmarkIds).map(id);
         if (new Set(members).size !== members.length)
-          invalid(t("旧分类成员索引重复"));
+          invalid("Duplicate legacy category membership index");
         for (const member of members)
           index.set(member, [
             ...(index.get(member) ?? []),
@@ -210,7 +217,7 @@ export function previewJsonImport(
           isDeleted: s.isDeleted,
         })),
       });
-      warnings.push(t`按固定 ID 补齐特殊分类 ${base.id}`);
+      warnings.push(`Added missing special category with fixed ID ${base.id}`);
     } else if (!existing.children.some((s) => s.id === base.children[0].id)) {
       existing.children.push({
         ...base.children[0],
@@ -218,7 +225,9 @@ export function previewJsonImport(
         lastSyncedAt: undefined,
         isDeleted: undefined,
       });
-      warnings.push(t`按固定 ID 补齐特殊位置 ${base.children[0].id}`);
+      warnings.push(
+        `Added missing special location with fixed ID ${base.children[0].id}`,
+      );
     }
   }
   const catalog = validateCatalog({ id: "catalog", groups });
@@ -248,22 +257,26 @@ export function previewJsonImport(
     ]);
     const bookmarkId = makeId(b.id);
     if (seen.has(bookmarkId))
-      invalid(t("导入中书签 ID 重复，请先合并重复记录"));
+      invalid("Duplicate bookmark ID in import; merge duplicates first");
     seen.add(bookmarkId);
     const indexed = index.get(bookmarkId) ?? [];
     let locs: Location[];
     if (b.locations !== undefined) {
       locs = locations(b.locations);
       if (!sameLocations(locs, indexed))
-        invalid(t("旧成员索引与 locations 矛盾，请在源文件明确修复后重试"));
+        invalid(
+          "Legacy membership index conflicts with locations; fix the source file and retry",
+        );
     } else locs = indexed;
     if (!locs.length) {
       locs = [b.isDeleted === true ? TRASH_LOCATION : DEFAULT_LOCATION];
-      warnings.push(t`无位置书签已分配默认位置（ID: ${bookmarkId}）`);
+      warnings.push(
+        `Bookmark without location assigned to Default (ID: ${bookmarkId})`,
+      );
     }
     const inTrash = locs.some((l) => l.groupId === TRASH_LOCATION.groupId);
     if (b.isDeleted !== undefined && b.isDeleted !== inTrash)
-      invalid(t("删除状态与旧回收站位置矛盾"));
+      invalid("Deletion state conflicts with legacy Trash location");
     const createdAt = time(b.createdAt, now);
     // Validation rejects unknown fields before a whitelist snapshot is constructed.
     const result = validateBookmark({
@@ -298,7 +311,7 @@ export function previewJsonImport(
           ),
       )
     )
-      invalid(t("书签引用无效分类"));
+      invalid("Bookmark references an invalid category");
     if (
       result.prevLocations?.some(
         (l) =>
@@ -309,7 +322,9 @@ export function previewJsonImport(
           ),
       )
     )
-      warnings.push(t("历史恢复位置已有删除，恢复时会回退到默认位置"));
+      warnings.push(
+        "Previous restore location was deleted; restoration will use Default",
+      );
     if (
       result.icon &&
       (result.icon.type === "file" ||
@@ -320,18 +335,21 @@ export function previewJsonImport(
     return result;
   });
   for (const member of index.keys())
-    if (!seen.has(member)) invalid(t("旧分类索引引用不存在书签"));
+    if (!seen.has(member))
+      invalid("Legacy category index references a nonexistent bookmark");
   counts.bookmarks = bookmarks.length;
   counts.groups = catalog.groups.length;
   if (counts.generatedIds)
-    warnings.push(t`${counts.generatedIds} 个缺失 ID 已在本预览固定生成`);
+    warnings.push(
+      `${counts.generatedIds} missing IDs generated for this preview`,
+    );
   if (counts.missingTimes)
     warnings.push(
-      t`${counts.missingTimes} 个缺失时间：createdAt 使用预览时间，updatedAt 使用 createdAt；已有时间按原毫秒值保留`,
+      `${counts.missingTimes} missing timestamps: createdAt uses preview time, updatedAt uses createdAt; existing millisecond timestamps are preserved`,
     );
   if (counts.attachments)
     warnings.push(
-      t`${counts.attachments} 个图标附件将在导入时落盘；旧 file 路径不读取，改为使用站点图标`,
+      `${counts.attachments} icon attachments will be saved on import; old file paths are never read and site icons are used instead`,
     );
   const merged = structuredClone(state.catalog);
   for (const g of catalog.groups) {
@@ -372,7 +390,7 @@ export function previewJsonImport(
       counts.sameUrl++;
     if (local) {
       warnings.push(
-        t`已有 ID ${incoming.id}：保留本地访问统计，导入统计不覆盖`,
+        `Existing ID ${incoming.id}: local visit counts are preserved; imported counts do not overwrite them`,
       );
       const mutation = bookmarkMutation(state, incoming);
       if (
@@ -391,7 +409,9 @@ export function previewJsonImport(
     } else mutations.push(bookmarkMutation(state, incoming));
   }
   if (counts.sameUrl)
-    warnings.push(t`${counts.sameUrl} 个不同 ID 同 URL，保留为独立书签`);
+    warnings.push(
+      `${counts.sameUrl} same URLs with different IDs are kept as separate bookmarks`,
+    );
   return {
     data: { catalog, bookmarks },
     warnings: [...new Set(warnings)],
@@ -507,7 +527,7 @@ export async function applyJsonImport(
 ) {
   for (const difference of plan.differences)
     if (!["local", "incoming"].includes(decisions[difference.entityKey]))
-      invalid(t("请明确选择所有同 ID 差异"));
+      invalid("Select a choice for every same-ID difference");
   const mutations: Mutation[] = [];
   let staging: string | undefined;
   let committing = false;
@@ -598,13 +618,13 @@ export async function exportPortableJson(
     if (icon?.type !== "file" || !icon.path) continue;
     const file = await fs
       .realpath(icon.path)
-      .catch(() => invalid(t("图标文件已丢失，无法完整导出")));
+      .catch(() => invalid("Icon file missing; cannot export completely"));
     const relative = path.relative(iconsRoot, file);
     if (relative.startsWith("..") || path.isAbsolute(relative))
-      invalid(t("图标不在本地库目录，无法安全导出"));
+      invalid("Icon is outside the local library; cannot export safely");
     const kind = mime[path.extname(file).slice(1).toLowerCase()];
     if (!kind || (await fs.stat(file)).size > 2 * 1024 * 1024)
-      invalid(t("图标格式或大小无效"));
+      invalid("Invalid icon format or size");
     bookmark.icon = {
       type: "custom",
       data: `data:${kind};base64,${(await fs.readFile(file)).toString("base64")}`,
@@ -613,7 +633,7 @@ export async function exportPortableJson(
   }
   const data = JSON.stringify(payload, null, 2);
   if (Buffer.byteLength(data) > MAX_EVENT_BYTES)
-    invalid(t("备份超过 10 MiB，无法完整导出"));
+    invalid("Backup exceeds 10 MiB; cannot export completely");
   return data;
 }
 /** Explicit user destination only. Refuses existing files and all paths inside this library. */
@@ -621,7 +641,7 @@ export async function saveJsonExport(
   directory: string,
   destination: string,
 ): Promise<void> {
-  if (!path.isAbsolute(destination)) invalid(t("导出路径必须是绝对路径"));
+  if (!path.isAbsolute(destination)) invalid("Export path must be absolute");
   const root = await fs.realpath(directory);
   const parent = await fs.realpath(path.dirname(destination));
   const target = path.join(parent, path.basename(destination));
@@ -632,7 +652,7 @@ export async function saveJsonExport(
       relative !== ".." &&
       !path.isAbsolute(relative))
   )
-    invalid(t("不能导出到事件数据目录"));
+    invalid("Cannot export into the events data directory");
   const data = await exportPortableJson(root, await readLibrary(root));
   let handle;
   try {
@@ -642,7 +662,7 @@ export async function saveJsonExport(
   } catch {
     throw new LibraryError(
       "WRITE_FAILED",
-      t("无法导出：目标已存在或写入失败；请检查目标文件，不覆盖重试"),
+      "Export failed: destination exists or write failed; check the destination before retrying without overwriting",
     );
   } finally {
     await handle?.close();

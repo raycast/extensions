@@ -159,78 +159,140 @@ function textIconFor(title: string, url: string, bgColor: string): Icon {
   };
 }
 
-async function fetchBinary(
+const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+
+interface ResolvedAddress {
+  address: string;
+  family: number;
+}
+
+export interface FetchBinaryDeps {
+  resolveHost: (host: string) => Promise<ResolvedAddress[]>;
+  isPublicAddress: (address: string) => boolean;
+}
+
+const defaultFetchDeps: FetchBinaryDeps = {
+  resolveHost: (host) => lookup(host, { all: true }),
+  isPublicAddress: isPublicIconAddress,
+};
+
+type HopResult =
+  | { kind: "ok"; bytes: Buffer; contentType: string }
+  | { kind: "redirect"; location: string }
+  | { kind: "fail" };
+
+// Validates one hop (initial URL or a redirect target) and returns the address to pin.
+async function validateHop(
+  target: URL,
+  deps: FetchBinaryDeps,
+): Promise<ResolvedAddress | null> {
+  if (
+    !["http:", "https:"].includes(target.protocol) ||
+    target.username ||
+    target.password
+  )
+    return null;
+  const host = target.hostname.replace(/^\[|\]$/g, "");
+  if (/(^|\.)(localhost|local|internal|test|invalid)$/i.test(host)) return null;
+  const addresses = isIP(host)
+    ? [{ address: host, family: isIP(host) }]
+    : await deps.resolveHost(host);
+  if (
+    !addresses.length ||
+    addresses.some(({ address }) => !deps.isPublicAddress(address))
+  )
+    return null;
+  return addresses[0]!;
+}
+
+function requestHop(
+  target: URL,
+  { address, family }: ResolvedAddress,
+  maxBytes: number,
+  accept: string,
+): Promise<HopResult> {
+  return new Promise((resolve) => {
+    const get = target.protocol === "https:" ? httpsGet : httpGet;
+    const request = get(
+      target,
+      {
+        headers: { "User-Agent": USER_AGENT, Accept: accept },
+        // Pin the validated address so DNS cannot change between check and connect.
+        lookup: (_hostname, options, callback) =>
+          options.all
+            ? callback(null, [{ address, family }])
+            : callback(null, address, family),
+      },
+      async (response) => {
+        const status = response.statusCode ?? 0;
+        if (REDIRECT_STATUSES.has(status)) {
+          const location = response.headers.location;
+          response.resume();
+          resolve(location ? { kind: "redirect", location } : { kind: "fail" });
+          return;
+        }
+        if (
+          status < 200 ||
+          status >= 300 ||
+          Number(response.headers["content-length"] || 0) > maxBytes
+        ) {
+          response.resume();
+          resolve({ kind: "fail" });
+          return;
+        }
+        const chunks: Buffer[] = [];
+        let size = 0;
+        try {
+          for await (const chunk of response) {
+            size += chunk.length;
+            if (size > maxBytes) {
+              response.destroy();
+              resolve({ kind: "fail" });
+              return;
+            }
+            chunks.push(chunk);
+          }
+          resolve({
+            kind: "ok",
+            bytes: Buffer.concat(chunks),
+            contentType: String(response.headers["content-type"] || ""),
+          });
+        } catch {
+          resolve({ kind: "fail" });
+        }
+      },
+    );
+    const timer = setTimeout(() => request.destroy(), ICON_FETCH_TIMEOUT_MS);
+    request.on("close", () => clearTimeout(timer));
+    request.on("error", () => resolve({ kind: "fail" }));
+  });
+}
+
+// Follows at most MAX_REDIRECTS redirects; every hop is re-validated (scheme, credentials,
+// host name, and resolved addresses) before any connection is made to it.
+export async function fetchBinary(
   url: string,
   maxBytes: number,
   accept: string,
+  deps: FetchBinaryDeps = defaultFetchDeps,
 ): Promise<{ bytes: Buffer; contentType: string; finalUrl: string } | null> {
   try {
-    const target = new URL(url);
-    if (
-      !["http:", "https:"].includes(target.protocol) ||
-      target.username ||
-      target.password
-    )
-      return null;
-    const host = target.hostname.replace(/^\[|\]$/g, "");
-    if (/(^|\.)(localhost|local|internal|test|invalid)$/i.test(host))
-      return null;
-    const addresses = isIP(host)
-      ? [{ address: host, family: isIP(host) }]
-      : await lookup(host, { all: true });
-    if (
-      !addresses.length ||
-      addresses.some(({ address }) => !isPublicIconAddress(address))
-    )
-      return null;
-    const { address, family } = addresses[0]!;
-    // ponytail: Redirects are refused; supporting them requires validating and pinning every hop.
-    return await new Promise((resolve) => {
-      const get = target.protocol === "https:" ? httpsGet : httpGet;
-      const request = get(
-        target,
-        {
-          headers: { "User-Agent": USER_AGENT, Accept: accept },
-          lookup: (_hostname, _options, callback) =>
-            callback(null, address, family),
-        },
-        async (response) => {
-          if (
-            !response.statusCode ||
-            response.statusCode < 200 ||
-            response.statusCode >= 300 ||
-            Number(response.headers["content-length"] || 0) > maxBytes
-          ) {
-            response.resume();
-            resolve(null);
-            return;
-          }
-          const chunks: Buffer[] = [];
-          let size = 0;
-          try {
-            for await (const chunk of response) {
-              size += chunk.length;
-              if (size > maxBytes) {
-                response.destroy();
-                resolve(null);
-                return;
-              }
-              chunks.push(chunk);
-            }
-            resolve({
-              bytes: Buffer.concat(chunks),
-              contentType: String(response.headers["content-type"] || ""),
-              finalUrl: target.href,
-            });
-          } catch {
-            resolve(null);
-          }
-        },
-      );
-      const timer = setTimeout(() => request.destroy(), ICON_FETCH_TIMEOUT_MS);
-      request.on("close", () => clearTimeout(timer));
-      request.on("error", () => resolve(null));
-    });
+    let target = new URL(url);
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      const pinned = await validateHop(target, deps);
+      if (!pinned) return null;
+      const result = await requestHop(target, pinned, maxBytes, accept);
+      if (result.kind === "ok")
+        return {
+          bytes: result.bytes,
+          contentType: result.contentType,
+          finalUrl: target.href,
+        };
+      if (result.kind === "fail") return null;
+      target = new URL(result.location, target);
+    }
+    return null;
   } catch {
     return null;
   }

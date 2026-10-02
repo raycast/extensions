@@ -1,4 +1,3 @@
-import { t } from "./i18n.ts";
 /** Templates may only occur after the authority, never in credentials/host/scheme. */
 export function normalizeBookmarkUrl(raw: string): string {
   if (
@@ -8,7 +7,7 @@ export function normalizeBookmarkUrl(raw: string): string {
     /[\s\\]/u.test(raw) ||
     [...raw].some((c) => c.charCodeAt(0) < 32)
   )
-    throw new Error(t("INVALID_INPUT: 不支持的网址"));
+    throw new Error("INVALID_INPUT: Unsupported URL");
   const input = raw.trim();
   const value = /^https?:\/\//i.test(input)
     ? input
@@ -18,13 +17,13 @@ export function normalizeBookmarkUrl(raw: string): string {
       : `https://${input}`;
   const authority = value.match(/^https?:\/\/[^/?#]+/i)?.[0];
   if (!authority || /[{}]/.test(authority))
-    throw new Error(t("INVALID_INPUT: 模板不能改变协议或主机"));
+    throw new Error("INVALID_INPUT: Template cannot change protocol or host");
   const fields = [...value.matchAll(/\{([^{}]+)\}/g)];
   if (
     /[{}]/.test(value.replace(/\{[^{}]+\}/g, "")) ||
     fields.some((m) => !/^[\p{L}\p{N}_-]{1,64}$/u.test(m[1]))
   )
-    throw new Error(t("INVALID_INPUT: 模板名称无效"));
+    throw new Error("INVALID_INPUT: Invalid template name");
   const parsed = new URL(value.replace(/\{[^{}]+\}/g, "parameter"));
   if (
     !["http:", "https:"].includes(parsed.protocol) ||
@@ -32,7 +31,7 @@ export function normalizeBookmarkUrl(raw: string): string {
     parsed.password ||
     !parsed.hostname
   )
-    throw new Error(t("INVALID_INPUT: 不支持的网址"));
+    throw new Error("INVALID_INPUT: Unsupported URL");
   return value;
 }
 
@@ -56,7 +55,7 @@ export function resolveLaunchUrl(
       !values[name].trim() ||
       values[name].length > 4096
     )
-      throw new Error(t("INVALID_INPUT: 请填写全部模板参数"));
+      throw new Error("INVALID_INPUT: Fill all template parameters");
     return encodeURIComponent(values[name]);
   });
   normalizeBookmarkUrl(result);

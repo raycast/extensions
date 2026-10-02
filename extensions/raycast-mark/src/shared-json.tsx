@@ -1,4 +1,3 @@
-import { t } from "./i18n.ts";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { useEffect, useState } from "react";
@@ -94,11 +93,14 @@ export default function SharedJsonForm({
     const differenceCount = plan.differences.length + missingLocally;
     const accepted = await confirmAlert({
       title: differenceCount
-        ? t`本地库与文件不一致（${differenceCount} 项）`
-        : t("确认连接共享文件？"),
-      message: t`已验证 JSON：${plan.counts.bookmarks} 条书签、${plan.counts.groups} 个分组。${differenceCount ? t("继续后以文件为准更新当前本地库；若要保留本地内容，请取消并先从“设置与数据”导出备份。") : t("文件与当前库一致。")}\n\n原事件目录不会删除。\n${file}`,
+        ? `Local library differs from file (${differenceCount} items)`
+        : "Connect shared file?",
+      message: `Validated JSON: ${plan.counts.bookmarks} bookmarks, ${plan.counts.groups} groups. ${differenceCount ? "Continuing updates the local library from this file. To keep local content, cancel and export a backup from Settings & Data first." : "The file matches the current library."}
+
+The original events directory will not be deleted.
+${file}`,
       primaryAction: {
-        title: t("使用此文件"),
+        title: "Use This File",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -115,7 +117,7 @@ export default function SharedJsonForm({
         raw !== (await readSharedJson(file)) ||
         canonical(state) !== canonical(await readLibrary(root))
       )
-        throw new Error(t("数据已变化，请重新打开表单或预览"));
+        throw new Error("Data changed; reopen the form or preview");
       const imported = chosen.mutations.length
         ? await applyJsonImport(root, chosen, decisions)
         : { state };
@@ -126,7 +128,7 @@ export default function SharedJsonForm({
     onSaved(result.state);
     await showToast({
       style: Toast.Style.Success,
-      title: t("已连接共享 JSON"),
+      title: "Shared JSON connected",
     });
     pop();
   }
@@ -142,7 +144,7 @@ export default function SharedJsonForm({
       name === ".." ||
       name.includes("\0")
     )
-      throw new Error(t("请选择目录并输入有效的 .json 文件名"));
+      throw new Error("Choose a directory and enter a valid .json filename");
     return withExternalSharedJson(async () => {
       const target = path.join(directory, name);
       const raw = await exportPortableJson(root, await readLibrary(root));
@@ -175,7 +177,9 @@ export default function SharedJsonForm({
           }
         }
         if (cleanupFailed)
-          throw new Error(t`新文件写入失败且清理失败，请手工检查：${target}`);
+          throw new Error(
+            `Writing and cleaning up the new file failed; check manually: ${target}`,
+          );
         throw error;
       } finally {
         await handle?.close().catch(() => undefined);
@@ -183,7 +187,7 @@ export default function SharedJsonForm({
       await setSharedJsonSource(target, raw, raw);
       await showToast({
         style: Toast.Style.Success,
-        title: t("已创建共享 JSON"),
+        title: "Shared JSON created",
       });
       pop();
     });
@@ -191,18 +195,18 @@ export default function SharedJsonForm({
 
   return (
     <Form
-      navigationTitle={t("共享 JSON 数据源")}
+      navigationTitle="Shared JSON Source"
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("使用已有 JSON 文件")}
+            title="Use Existing JSON File"
             icon={Icon.Link}
             onSubmit={async (values) => {
               const file = (values.existing as string[] | undefined)?.[0];
               if (!file) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("请选择 JSON 文件"),
+                  title: "Select a JSON file",
                 });
                 return;
               }
@@ -211,15 +215,15 @@ export default function SharedJsonForm({
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("连接失败，文件未覆盖"),
+                  title: "Connection failed; file not overwritten",
                   message:
-                    error instanceof Error ? error.message : t("文件无效"),
+                    error instanceof Error ? error.message : "Invalid file",
                 });
               }
             }}
           />
           <Action.SubmitForm
-            title={t("新建 JSON 并初始化本地库")}
+            title="Create JSON and Initialize Local Library"
             icon={Icon.Plus}
             onSubmit={async (values) => {
               try {
@@ -227,9 +231,9 @@ export default function SharedJsonForm({
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("创建失败，未覆盖文件"),
+                  title: "Creation failed; file not overwritten",
                   message:
-                    error instanceof Error ? error.message : t("文件无效"),
+                    error instanceof Error ? error.message : "Invalid file",
                 });
               }
             }}
@@ -238,33 +242,31 @@ export default function SharedJsonForm({
       }
     >
       <Form.Description
-        title={t("已有 JSON")}
-        text={t`有效文件作为权威数据源；确认后才会应用到当前本地库。损坏、缺失或冲突时阻断写入。${connectedPath ? t` 当前连接：${connectedPath}` : t(" 当前未连接。")}`}
+        title="Existing JSON"
+        text={`A valid file becomes the authoritative source after confirmation. Writes are blocked if it is corrupt, missing, or conflicted.${connectedPath ? ` Connected: ${connectedPath}` : " Not connected."}`}
       />
       <Form.FilePicker
         id="existing"
-        title={t("选择 JSON 文件")}
+        title="Choose JSON File"
         canChooseDirectories={false}
         canChooseFiles
         allowMultipleSelection={false}
       />
       <Form.Separator />
       <Form.Description
-        title={t("新建 JSON")}
-        text={t(
-          "仅在目标文件不存在时创建；使用当前本地库初始化，图标随 JSON 内嵌保存。可选择 iCloud Drive 目录。",
-        )}
+        title="New JSON"
+        text="Created only when the destination does not exist. Initialized from the local library, with icons embedded in JSON. You may choose an iCloud Drive directory."
       />
       <Form.FilePicker
         id="directory"
-        title={t("保存目录")}
+        title="Save Directory"
         canChooseDirectories
         canChooseFiles={false}
         allowMultipleSelection={false}
       />
       <Form.TextField
         id="filename"
-        title={t("文件名")}
+        title="Filename"
         defaultValue="goose-marks.json"
       />
     </Form>
@@ -279,18 +281,20 @@ export async function refreshSharedJson(root: string, state: LibraryState) {
     const raw = await readSharedJson(file);
     const baseline = await sharedJsonBaseline();
     if (!baseline.remote || !baseline.local)
-      throw new Error(t("共享 JSON 基线缺失；为避免覆盖，请重新连接文件"));
+      throw new Error(
+        "Shared JSON baseline missing; reconnect the file to avoid overwriting data",
+      );
     const local = await exportPortableJson(root, current);
     if (sharedJsonDigest(raw) === baseline.remote) {
       if (sharedJsonDigest(local) !== baseline.local)
         throw new Error(
-          t("本地库有尚未写入共享 JSON 的变更；请先导出备份，再重新连接文件"),
+          "Local changes are not yet in shared JSON; export a backup, then reconnect the file",
         );
       return canonical(current) === canonical(state) ? state : current;
     }
     if (sharedJsonDigest(local) !== baseline.local)
       throw new Error(
-        t("共享文件与本地库均有变化；检测到冲突，已阻断同步和写入"),
+        "Both shared file and local library changed; sync and writes are blocked due to conflict",
       );
     const plan = previewJsonImport(raw, current);
     const chosen = authoritativePlan(plan, current);

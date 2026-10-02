@@ -1,4 +1,4 @@
-import { categoryTitle, t } from "./i18n.ts";
+import { categoryTitle } from "./model.ts";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs/promises";
 import path from "node:path";
@@ -134,15 +134,15 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("无法删除分类"),
+        title: "Cannot delete category",
         message: failureMessage(error),
       });
       return;
     }
     const confirmed = await confirmAlert({
-      title: t`删除${subGroupId ? t("子分类") : t("一级分类")}？`,
-      message: t`受影响的 ${affectedCount} 个书签将${target === "trash" ? t("移入回收站") : t("移至默认位置")}；分类与书签在同一事务写入。`,
-      primaryAction: { title: t("删除"), style: Alert.ActionStyle.Destructive },
+      title: `Delete${subGroupId ? "subcategory" : "top-level category"}?`,
+      message: `The affected ${affectedCount} bookmarks will be ${target === "trash" ? "Move to Trash" : "moved to the default location"}; the category and bookmarks are saved in one transaction.`,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
     try {
@@ -153,13 +153,13 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
       setState(result.state);
       await showToast({
         style: Toast.Style.Success,
-        title: t("已删除分类"),
-        message: result.warning ?? t`受影响书签 ${affectedCount} 个`,
+        title: "Category deleted",
+        message: result.warning ?? `Affected bookmarks: ${affectedCount} items`,
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未写入"),
+        title: "Not saved",
         message: failureMessage(error),
       });
     }
@@ -171,8 +171,8 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
     if (chosen.length !== state.conflicts.length) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("还有冲突未选择版本"),
-        message: t`已选择 ${chosen.length}/${state.conflicts.length}`,
+        title: "Some conflicts still need a version selected",
+        message: `Selected ${chosen.length}/${state.conflicts.length}`,
       });
       return;
     }
@@ -186,13 +186,13 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
       setResolutions({});
       await showToast({
         style: Toast.Style.Success,
-        title: t("冲突已解决"),
-        message: result.warning ?? t`已提交 ${chosen.length} 个版本`,
+        title: "Conflicts resolved",
+        message: result.warning ?? `Committed ${chosen.length} versions`,
       });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未写入"),
+        title: "Not saved",
         message: failureMessage(error),
       });
     }
@@ -201,13 +201,13 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
   const recoveryActions = (
     <ActionPanel>
       <Action
-        title={t("重新加载")}
+        title="Reload"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={load}
       />
       <Action
-        title={t("打开扩展设置")}
+        title="Open Extension Preferences"
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
@@ -217,7 +217,11 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
   if (failure) {
     return (
       <Detail
-        markdown={t`# 无法读取本地库\n\n${failure}\n\n请确认数据目录存在且为专用目录（空或仅含 \`events\`）。切换目录只改变本机配置，不搬迁、不删除旧库。`}
+        markdown={`# Cannot Read Local Library
+
+${failure}
+
+Ensure the data directory exists and is dedicated (empty or containing only \`events\`). Changing directories changes only local settings; it does not move or delete the old library.`}
         actions={recoveryActions}
       />
     );
@@ -226,7 +230,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
   if (!root || !state) {
     return (
       <List isLoading>
-        <List.EmptyView title={t("正在读取本地库")} />
+        <List.EmptyView title="Reading Local Library" />
       </List>
     );
   }
@@ -235,12 +239,18 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
     const issues = state.issues
       .map(
         (issue) =>
-          `- \`${issue.code}\` ${issue.message}${issue.file ? `（${issue.file}）` : ""}`,
+          `- \`${issue.code}\` ${issue.message}${issue.file ? ` (${issue.file})` : ""}`,
       )
       .join("\n");
     return (
       <Detail
-        markdown={t`# 本地库已暂停写入\n\n存在损坏、缺父、未知版本或超限的数据；不会以空库覆盖，也不会自动清理未知文件。\n\n${issues}\n\n数据目录：\`${root}\``}
+        markdown={`# Local Library Is Read-Only
+
+Corrupt, missing-parent, unknown-version, or oversized data was found. The library will not be overwritten with an empty one, and unknown files will not be removed automatically.
+
+${issues}
+
+Data directory: \`${root}\``}
         actions={recoveryActions}
       />
     );
@@ -253,40 +263,38 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={t("设置与数据")}
-      searchBarPlaceholder={t("搜索分类或功能")}
+      navigationTitle="Settings & Data"
+      searchBarPlaceholder="Search categories or features"
     >
-      <List.Section title={t("数据目录")}>
+      <List.Section title="Data Directory">
         <List.Item
           title={root}
-          subtitle={t(
-            "专用目录：本地配置项；切换只改变本机配置，不搬迁、不删除旧库",
-          )}
+          subtitle="Dedicated directory: local setting only; changing it does not move or delete the old library"
           icon={Icon.Folder}
           accessories={[
             {
               text: ready
-                ? t("可写入")
+                ? "Writable"
                 : conflicted
-                  ? t("只读：存在冲突")
-                  : t("只读"),
+                  ? "Read-only: conflicts"
+                  : "Read-only",
             },
-            { text: t`书签 ${state.bookmarks.length}` },
+            { text: `Bookmarks: ${state.bookmarks.length}` },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={t("打开扩展设置（修改数据目录）")}
+                title="Open Extension Preferences (Change Data Directory)"
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
               />
               <Action
-                title={t("校验自选目录")}
+                title="Validate Custom Directory"
                 icon={Icon.Checkmark}
                 onAction={() => push(<DirectoryForm />)}
               />
               <Action.Push
-                title={t("连接共享 JSON 数据源…")}
+                title="Connect Shared JSON Source…"
                 icon={Icon.Link}
                 target={
                   <SharedJsonForm
@@ -297,11 +305,11 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                 }
               />
               <Action.CopyToClipboard
-                title={t("复制数据目录")}
+                title="Copy Data Directory"
                 content={root}
               />
               <Action
-                title={t("重新加载")}
+                title="Reload"
                 icon={Icon.ArrowClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={load}
@@ -313,8 +321,8 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
 
       {conflicted && (
         <List.Section
-          title={t`未解决冲突（${state.conflicts.length}）`}
-          subtitle={t("普通写入已暂停，仅允许解决冲突")}
+          title={`Unresolved Conflicts (${state.conflicts.length})`}
+          subtitle="Normal writes are paused; only conflict resolution is allowed"
         >
           {state.conflicts.map((conflict) => {
             const chosen = resolutions[conflict.entityKey];
@@ -325,17 +333,17 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                 subtitle={conflict.message}
                 icon={Icon.Warning}
                 accessories={[
-                  { tag: t`${conflict.candidates.length} 个版本` },
+                  { tag: `${conflict.candidates.length} versions` },
                   {
                     text: chosen
-                      ? t`已选择 ${chosen.eventId.slice(0, 8)}`
-                      : t("未选择"),
+                      ? `Selected ${chosen.eventId.slice(0, 8)}`
+                      : "Not selected",
                   },
                 ]}
                 actions={
                   <ActionPanel>
                     <Action
-                      title={t("查看版本并选择")}
+                      title="View Versions and Select"
                       icon={Icon.List}
                       onAction={() =>
                         push(
@@ -358,13 +366,13 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
             );
           })}
           <List.Item
-            title={t("应用全部冲突解决")}
-            subtitle={t`已选择 ${Object.keys(resolutions).length}/${state.conflicts.length}；必须一次解决全部冲突`}
+            title="Apply All Conflict Resolutions"
+            subtitle={`Selected ${Object.keys(resolutions).length}/${state.conflicts.length}; all conflicts must be resolved together`}
             icon={Icon.Checkmark}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("应用全部冲突解决")}
+                  title="Apply All Conflict Resolutions"
                   icon={Icon.Checkmark}
                   onAction={applyResolutions}
                 />
@@ -375,14 +383,14 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
       )}
 
       {ready && (
-        <List.Section title={t("分类")}>
+        <List.Section title="Categories">
           <List.Item
-            title={t("新建一级分类")}
+            title="New Top-Level Category"
             icon={Icon.Plus}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("新建一级分类")}
+                  title="New Top-Level Category"
                   icon={Icon.Plus}
                   onAction={() =>
                     push(
@@ -406,12 +414,12 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
               <Fragment key={group.id}>
                 <List.Item
                   title={categoryTitle(group.id, group.name)}
-                  subtitle={t`一级分类 · 书签 ${memberCount(state, group.id)}`}
+                  subtitle={`Top-level category · Bookmarks: ${memberCount(state, group.id)}`}
                   icon={Icon.Folder}
                   actions={
                     <ActionPanel>
                       <Action
-                        title={t("新建子分类")}
+                        title="New Subcategory"
                         icon={Icon.Plus}
                         onAction={() =>
                           push(
@@ -426,7 +434,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                         }
                       />
                       <Action
-                        title={t("重命名")}
+                        title="Rename"
                         icon={Icon.Pencil}
                         shortcut={Keyboard.Shortcut.Common.Edit}
                         onAction={() =>
@@ -444,7 +452,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                       {!fixed && (
                         <>
                           <Action
-                            title={t("删除（书签移至默认位置）")}
+                            title="Delete (Move Bookmarks to Default)"
                             icon={Icon.Trash}
                             style={Action.Style.Destructive}
                             onAction={() =>
@@ -456,7 +464,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                             }
                           />
                           <Action
-                            title={t("删除（书签移入回收站）")}
+                            title="Delete (Move Bookmarks to Trash)"
                             icon={Icon.Trash}
                             style={Action.Style.Destructive}
                             shortcut={Keyboard.Shortcut.Common.Remove}
@@ -473,12 +481,12 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                   <List.Item
                     key={sub.id}
                     title={`↳ ${categoryTitle(sub.id, sub.name)}`}
-                    subtitle={t`子分类 · 书签 ${memberCount(state, group.id, sub.id)}`}
+                    subtitle={`Subcategory · Bookmarks: ${memberCount(state, group.id, sub.id)}`}
                     accessories={[{ tag: categoryTitle(group.id, group.name) }]}
                     actions={
                       <ActionPanel>
                         <Action
-                          title={t("重命名")}
+                          title="Rename"
                           icon={Icon.Pencil}
                           shortcut={Keyboard.Shortcut.Common.Edit}
                           onAction={() =>
@@ -497,7 +505,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                         {!fixed && (
                           <>
                             <Action
-                              title={t("删除（书签移至默认位置）")}
+                              title="Delete (Move Bookmarks to Default)"
                               icon={Icon.Trash}
                               style={Action.Style.Destructive}
                               onAction={() =>
@@ -505,7 +513,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                               }
                             />
                             <Action
-                              title={t("删除（书签移入回收站）")}
+                              title="Delete (Move Bookmarks to Trash)"
                               icon={Icon.Trash}
                               style={Action.Style.Destructive}
                               shortcut={Keyboard.Shortcut.Common.Remove}
@@ -526,26 +534,26 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
       )}
 
       {ready && (
-        <List.Section title={t("图标")}>
+        <List.Section title="Icons">
           <List.Item
-            title={t("补全缺失图标")}
-            subtitle={t("为无图标或文字占位的书签抓取 favicon 并写入 icons/")}
+            title="Fill Missing Icons"
+            subtitle="Fetch favicons for bookmarks with missing or placeholder icons and save to icons/"
             icon={Icon.Image}
             accessories={[
               {
-                text: t`${state.bookmarks.filter((b) => !b.isDeleted && (!b.icon || b.icon.type === "text")).length} 待处理`,
+                text: `${state.bookmarks.filter((b) => !b.isDeleted && (!b.icon || b.icon.type === "text")).length} pending`,
               },
             ]}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("补全缺失图标")}
+                  title="Fill Missing Icons"
                   icon={Icon.Image}
                   onAction={() =>
                     void (async () => {
                       const toast = await showToast({
                         style: Toast.Style.Animated,
-                        title: t("正在补全图标"),
+                        title: "Filling missing icons",
                       });
                       try {
                         const map = await backfillMissingIcons(
@@ -554,7 +562,7 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                         );
                         if (!map.size) {
                           toast.style = Toast.Style.Success;
-                          toast.title = t("没有需要补全的图标");
+                          toast.title = "No icons need filling";
                           return;
                         }
                         const mutations = state.bookmarks
@@ -574,11 +582,11 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
                         });
                         setState(result.state);
                         toast.style = Toast.Style.Success;
-                        toast.title = t`已补全 ${map.size} 个图标`;
+                        toast.title = `Filled ${map.size} icons`;
                         toast.message = result.warning;
                       } catch (error) {
                         toast.style = Toast.Style.Failure;
-                        toast.title = t("补全失败");
+                        toast.title = "Failed to fill icons";
                         toast.message = failureMessage(error);
                       }
                     })()
@@ -591,15 +599,15 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
       )}
 
       {ready && (
-        <List.Section title={t("导入导出")}>
+        <List.Section title="Import & Export">
           <List.Item
-            title={t("导入 JSON")}
-            subtitle={t("先预览统计与警告，再逐项决定同 ID 差异；一次事务写入")}
+            title="Import JSON"
+            subtitle="Preview counts and warnings, choose each same-ID difference, then write in one transaction"
             icon={Icon.Download}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("导入 JSON")}
+                  title="Import JSON"
                   icon={Icon.Download}
                   onAction={() =>
                     push(
@@ -615,13 +623,13 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
             }
           />
           <List.Item
-            title={t("导出 JSON")}
-            subtitle={t("另存到你选择的目录；不覆盖现有文件，不写回数据目录")}
+            title="Export JSON"
+            subtitle="Save in a directory you choose; existing files and the data directory are never overwritten"
             icon={Icon.Upload}
             actions={
               <ActionPanel>
                 <Action
-                  title={t("导出 JSON")}
+                  title="Export JSON"
                   icon={Icon.Upload}
                   onAction={() => push(<ExportForm root={root} />)}
                 />
@@ -631,19 +639,23 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
         </List.Section>
       )}
 
-      <List.Section title={t("AI（可选 BYOK）")}>
+      <List.Section title="AI (optional BYOK)">
         <List.Item
-          title={t`协议：${ai.protocol}`}
-          subtitle={t`服务：${ai.baseUrl || t("未配置")} · 模型：${ai.model || t("未配置")}`}
+          title={`Protocol: ${ai.protocol}`}
+          subtitle={`Service: ${ai.baseUrl || "Not configured"} · Model: ${ai.model || "Not configured"}`}
           icon={Icon.Stars}
           accessories={[
-            { text: ai.apiKey ? t("已配置该协议 Key") : t("缺少该协议 Key") },
-            { text: t("仅在你主动发送时请求") },
+            {
+              text: ai.apiKey
+                ? "Key configured for this protocol"
+                : "Key missing for this protocol",
+            },
+            { text: "Requests are sent only when you initiate them" },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={t("打开扩展设置")}
+                title="Open Extension Preferences"
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
               />
@@ -657,8 +669,9 @@ export default function Command({ onClose }: { onClose?: () => void } = {}) {
 
 function conflictTitle(conflict: Conflict): string {
   const value = conflict.candidates[0]?.value;
-  if (value && !isCatalog(value)) return value.title || t`书签 ${value.id}`;
-  return t("分类表（Catalog）");
+  if (value && !isCatalog(value))
+    return value.title || `Bookmarks: ${value.id}`;
+  return "Category Table (Catalog)";
 }
 
 type CategoryMode =
@@ -691,7 +704,7 @@ function CategoryForm({
     if (!nextName) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("请填写分类名称"),
+        title: "Enter a category name",
       });
       return;
     }
@@ -705,13 +718,21 @@ function CategoryForm({
         createdAt: now,
         updatedAt: now,
         children: [
-          { id: randomUUID(), name: "未分类", createdAt: now, updatedAt: now },
+          {
+            id: randomUUID(),
+            name: "Uncategorized",
+            createdAt: now,
+            updatedAt: now,
+          },
         ],
       });
     } else {
       const target = catalog.groups.find((g) => g.id === groupId);
       if (!target) {
-        await showToast({ style: Toast.Style.Failure, title: t("分类不存在") });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Category not found",
+        });
         return;
       }
       if (mode === "create-sub") {
@@ -729,7 +750,7 @@ function CategoryForm({
         if (!child) {
           await showToast({
             style: Toast.Style.Failure,
-            title: t("分类不存在"),
+            title: "Category not found",
           });
           return;
         }
@@ -745,24 +766,24 @@ function CategoryForm({
       onSaved(result.state);
       await showToast({
         style: Toast.Style.Success,
-        title: t("已保存分类"),
+        title: "Category saved",
         message: result.warning ?? nextName,
       });
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未写入"),
+        title: "Not saved",
         message: failureMessage(error),
       });
     }
   }
 
   const titles: Record<CategoryMode, string> = {
-    "create-group": t("新建一级分类"),
-    "create-sub": t`在 ${group?.name ?? ""} 中新建子分类`,
-    "rename-group": t("重命名一级分类"),
-    "rename-sub": t("重命名子分类"),
+    "create-group": "New Top-Level Category",
+    "create-sub": `Create a subcategory in ${group?.name ?? ""} `,
+    "rename-group": "Rename Top-Level Category",
+    "rename-sub": "Rename Subcategory",
   };
 
   return (
@@ -771,7 +792,7 @@ function CategoryForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("保存")}
+            title="Save"
             icon={Icon.Checkmark}
             onSubmit={save}
           />
@@ -780,14 +801,14 @@ function CategoryForm({
     >
       <Form.TextField
         id="name"
-        title={t("名称")}
+        title="Name"
         value={name}
         onChange={setName}
         autoFocus
       />
       <Form.Description
-        title={t("说明")}
-        text={t("分类改动与书签移动在同一事务写入；默认分类与回收站不可删除。")}
+        title="Note"
+        text="Category changes and bookmark moves are saved in one transaction; Default and Trash cannot be deleted."
       />
     </Form>
   );
@@ -844,10 +865,10 @@ function ConflictView({
   }
 
   return (
-    <List navigationTitle={t("选择要保留的版本")}>
+    <List navigationTitle="Choose Version to Keep">
       <List.Section
-        title={t`${conflict.candidates.length} 个并发版本`}
-        subtitle={t("选择后返回上一页；全部冲突选择完才能应用")}
+        title={`${conflict.candidates.length} concurrent versions`}
+        subtitle="Select a version and return; all conflicts must be selected before applying"
       >
         {conflict.candidates.map((candidate) => {
           const value = candidate.value;
@@ -858,18 +879,18 @@ function ConflictView({
               key={candidate.eventId}
               title={
                 catalog
-                  ? t`分类表：${value.groups.length} 个一级分类`
-                  : bookmark!.title || t`书签 ${bookmark!.id}`
+                  ? `Category table: ${value.groups.length} top-level categories`
+                  : bookmark!.title || `Bookmarks: ${bookmark!.id}`
               }
               subtitle={
                 catalog
                   ? value.groups
                       .map((g) => categoryTitle(g.id, g.name))
-                      .join(t("、"))
+                      .join(", ")
                   : [
                       bookmark!.url,
                       bookmark!.desc ?? "",
-                      t`位置：${bookmark!.locations.map((l) => locationLabel(state.catalog, l)).join(t("，"))}`,
+                      `Locations: ${bookmark!.locations.map((l) => locationLabel(state.catalog, l)).join(", ")}`,
                     ]
                       .filter(Boolean)
                       .join("\n")
@@ -882,10 +903,12 @@ function ConflictView({
                     : Icon.Bookmark
               }
               accessories={[
-                { tag: t`版本 ${candidate.eventId.slice(0, 8)}` },
-                ...(bookmark?.isDeleted ? [{ tag: t("墓碑（已删除）") }] : []),
+                { tag: `Version ${candidate.eventId.slice(0, 8)}` },
+                ...(bookmark?.isDeleted
+                  ? [{ tag: "Tombstone (deleted)" }]
+                  : []),
                 ...(bookmark?.visits !== undefined
-                  ? [{ text: t`基数 ${bookmark.visits} 次` }]
+                  ? [{ text: `Base: ${bookmark.visits} visits` }]
                   : []),
                 ...(bookmark
                   ? [{ date: new Date(bookmark.updatedAt ?? 0) }]
@@ -894,19 +917,19 @@ function ConflictView({
               actions={
                 <ActionPanel>
                   <Action
-                    title={t("选择并保留此版本")}
+                    title="Select and Keep This Version"
                     icon={Icon.Checkmark}
                     onAction={() => choose(candidate, "keep")}
                   />
                   {bookmark && (
                     <>
                       <Action
-                        title={t("选择并移入回收站")}
+                        title="Select and Move to Trash"
                         icon={Icon.Trash}
                         onAction={() => choose(candidate, "trash")}
                       />
                       <Action
-                        title={t("选择并修复到默认位置")}
+                        title="Select and Repair to Default"
                         icon={Icon.ArrowCounterClockwise}
                         onAction={() => choose(candidate, "default")}
                       />
@@ -934,27 +957,27 @@ function ImportFileForm({
   const { push } = useNavigation();
   return (
     <Form
-      navigationTitle={t("导入 JSON")}
+      navigationTitle="Import JSON"
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("预览导入")}
+            title="Preview Import"
             icon={Icon.Download}
             onSubmit={async (values: Form.Values) => {
               const picked = (values.file as string[] | undefined)?.[0];
               if (!picked) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("请选择 JSON 文件"),
+                  title: "Select a JSON file",
                 });
                 return;
               }
               try {
                 const stat = await fs.lstat(picked);
                 if (!stat.isFile() || stat.isSymbolicLink())
-                  throw new Error(t("请选择普通文件"));
+                  throw new Error("Select a regular file");
                 if (stat.size > MAX_EVENT_BYTES)
-                  throw new Error(t("文件超过 10 MiB 上限"));
+                  throw new Error("File exceeds the 10 MiB limit");
                 const plan = previewJsonImport(
                   await fs.readFile(picked, "utf8"),
                   state,
@@ -965,7 +988,7 @@ function ImportFileForm({
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("预览失败"),
+                  title: "Preview failed",
                   message: failureMessage(error),
                 });
               }
@@ -975,14 +998,14 @@ function ImportFileForm({
       }
     >
       <Form.Description
-        title={t("接受的格式")}
-        text={t(
-          "本插件导出的 JSON，或 goose-mark / 旧 marks 的 {groups, bookmarks} 格式。remote/cache base64 图标会解码写入 icons/ 并转为 file；设置与 API Key 会被拒绝。",
-        )}
+        title="Accepted Formats"
+        text={
+          "JSON exported by this extension, or the {groups, bookmarks} format from goose-mark / older marks. Remote/cache base64 icons are decoded into icons/ as files; settings and API keys are rejected."
+        }
       />
       <Form.FilePicker
         id="file"
-        title={t("JSON 文件")}
+        title="JSON File"
         canChooseDirectories={false}
         allowMultipleSelection={false}
       />
@@ -1013,15 +1036,15 @@ function ImportPreview({
     if (remaining) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t`还有 ${remaining} 个同 ID 差异未选择`,
+        title: `There are ${remaining} same-ID differences not selected`,
       });
       return;
     }
     if (!effective.length) {
       await showToast({
         style: Toast.Style.Success,
-        title: t("无变化"),
-        message: t("导入内容与本地一致，未写入事件"),
+        title: "No changes",
+        message: "Imported content matches local data; no event was written",
       });
       pop();
       return;
@@ -1031,39 +1054,39 @@ function ImportPreview({
       onSaved(result.state);
       await showToast({
         style: Toast.Style.Success,
-        title: t("导入已写入本地"),
-        message: result.warning ?? t`提交 ${effective.length} 个实体`,
+        title: "Import saved locally",
+        message: result.warning ?? `Committed ${effective.length} entities`,
       });
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未写入"),
+        title: "Not saved",
         message: failureMessage(error),
       });
     }
   }
 
   return (
-    <List navigationTitle={t("导入预览")}>
-      <List.Section title={t("统计")}>
+    <List navigationTitle="Import Preview">
+      <List.Section title="Statistics">
         <List.Item
-          title={t`书签 ${plan.counts.bookmarks} · 一级分类 ${plan.counts.groups}`}
-          subtitle={t`生成 ID ${plan.counts.generatedIds} · 缺失时间 ${plan.counts.missingTimes} · 与本地完全相同 ${plan.counts.identical}`}
+          title={`Bookmarks: ${plan.counts.bookmarks} · Top-level categories: ${plan.counts.groups}`}
+          subtitle={`Generated IDs: ${plan.counts.generatedIds} · Missing timestamps: ${plan.counts.missingTimes} · Identical to local: ${plan.counts.identical}`}
         />
         <List.Item
-          title={t`附件/图标字段 ${plan.counts.attachments}`}
-          subtitle={t("仅被动保留字段值；不读取、不复制、不下载附件")}
+          title={`Attachment/icon fields: ${plan.counts.attachments}`}
+          subtitle="Field values are preserved without reading, copying, or downloading attachments"
           icon={plan.counts.attachments ? Icon.Warning : Icon.Document}
         />
         <List.Item
-          title={t`不同 ID 同 URL ${plan.counts.sameUrl}`}
-          subtitle={t("只提示，不会自动合并或删除多归属")}
+          title={`Same URL with different IDs: ${plan.counts.sameUrl}`}
+          subtitle="Notice only; no automatic merging or removal of multiple locations"
           icon={plan.counts.sameUrl ? Icon.Info : Icon.Document}
         />
       </List.Section>
       {plan.warnings.length > 0 && (
-        <List.Section title={t("警告")}>
+        <List.Section title="Warnings">
           {plan.warnings.map((warning) => (
             <List.Item key={warning} title={warning} icon={Icon.Warning} />
           ))}
@@ -1071,8 +1094,8 @@ function ImportPreview({
       )}
       {plan.differences.length > 0 && (
         <List.Section
-          title={t`同 ID 差异（${plan.differences.length}）`}
-          subtitle={t("必须逐项选择，不能静默覆盖")}
+          title={`Same-ID Differences (${plan.differences.length})`}
+          subtitle="Choose each difference; never overwrite silently"
         >
           {plan.differences.map((difference) => (
             <List.Item
@@ -1080,16 +1103,16 @@ function ImportPreview({
               title={difference.entityKey}
               subtitle={
                 isCatalog(difference.local)
-                  ? t`本地 ${(difference.local as Catalog).groups.length} 个一级分类 → 导入后 ${(difference.incoming as Catalog).groups.length} 个`
-                  : t`本地「${(difference.local as Bookmark).title}」/ 导入「${(difference.incoming as Bookmark).title}」`
+                  ? `Local: ${(difference.local as Catalog).groups.length} top-level categories → after import: ${(difference.incoming as Catalog).groups.length} items`
+                  : `Local “${(difference.local as Bookmark).title}” / Incoming “${(difference.incoming as Bookmark).title}”`
               }
               accessories={[
-                { tag: decisions[difference.entityKey] ?? t("未选择") },
+                { tag: decisions[difference.entityKey] ?? "Not selected" },
               ]}
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title={t("查看完整差异并选择")}
+                    title="View Full Difference and Select"
                     icon={Icon.Document}
                     target={
                       <ImportDifference
@@ -1109,23 +1132,19 @@ function ImportPreview({
           ))}
         </List.Section>
       )}
-      <List.Section title={t("应用")}>
+      <List.Section title="Apply">
         <List.Item
-          title={t("应用导入")}
-          subtitle={t`待提交实体 ${effective.length} · 未选择差异 ${remaining}`}
+          title="Apply Import"
+          subtitle={`Entities to commit: ${effective.length} · Unselected differences: ${remaining}`}
           icon={Icon.Checkmark}
           actions={
             <ActionPanel>
               <Action
-                title={t("应用导入")}
+                title="Apply Import"
                 icon={Icon.Checkmark}
                 onAction={apply}
               />
-              <Action
-                title={t("取消")}
-                icon={Icon.XmarkCircle}
-                onAction={pop}
-              />
+              <Action title="Cancel" icon={Icon.XmarkCircle} onAction={pop} />
             </ActionPanel>
           }
         />
@@ -1144,18 +1163,18 @@ function ImportDifference({
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle={t`导入差异：${difference.entityKey}`}
+      navigationTitle={`Import Difference: ${difference.entityKey}`}
       actions={
         <ActionPanel>
           <Action
-            title={t("保留本地版本")}
+            title="Keep Local Version"
             onAction={() => {
               onChoose("local");
               pop();
             }}
           />
           <Action
-            title={t("采用导入版本")}
+            title="Use Incoming Version"
             onAction={() => {
               onChoose("incoming");
               pop();
@@ -1165,10 +1184,8 @@ function ImportDifference({
       }
     >
       <Form.Description
-        title={t("说明")}
-        text={t(
-          "逐字段比较本地与导入值（含网址、删除状态、位置、描述、标签与完整分类结构）。选择后还需回到预览应用；现有访问统计不被导入值覆盖。",
-        )}
+        title="Note"
+        text="Compare local and incoming values field by field (URL, deletion status, locations, description, tags, and full category structure). Return to the preview to apply; imported values do not overwrite visit counts."
       />
       {[
         ...new Set([
@@ -1178,16 +1195,20 @@ function ImportDifference({
       ].map((field) => {
         const local =
           JSON.stringify(Reflect.get(difference.local, field), null, 2) ??
-          t("（无此字段）");
+          "(no field)";
         const incoming =
           JSON.stringify(Reflect.get(difference.incoming, field), null, 2) ??
-          t("（无此字段）");
+          "(no field)";
         return (
           <Fragment key={field}>
             <Form.Separator />
             <Form.Description
-              title={`${field}${local === incoming ? t("（相同）") : t("（有差异）")}`}
-              text={t`本地：\n${local}\n\n导入：\n${incoming}`}
+              title={`${field}${local === incoming ? "(same)" : "(different)"}`}
+              text={`Local:
+${local}
+
+Incoming:
+${incoming}`}
             />
           </Fragment>
         );
@@ -1200,18 +1221,18 @@ function ExportForm({ root }: { root: string }) {
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle={t("导出 JSON")}
+      navigationTitle="Export JSON"
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("导出")}
+            title="Export"
             icon={Icon.Upload}
             onSubmit={async (values: Form.Values) => {
               const directory = (values.directory as string[] | undefined)?.[0];
               if (!directory) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("请选择导出目录"),
+                  title: "Select an export directory",
                 });
                 return;
               }
@@ -1223,14 +1244,14 @@ function ExportForm({ root }: { root: string }) {
                 await saveJsonExport(root, destination);
                 await showToast({
                   style: Toast.Style.Success,
-                  title: t("已导出本地已验证数据"),
+                  title: "Verified local data exported",
                   message: destination,
                 });
                 pop();
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("未导出"),
+                  title: "Not exported",
                   message: failureMessage(error),
                 });
               }
@@ -1240,14 +1261,12 @@ function ExportForm({ root }: { root: string }) {
       }
     >
       <Form.Description
-        title={t("说明")}
-        text={t(
-          "只导出已验证且无冲突的数据；不包含 API 配置、数据目录路径或运行时设置。目标文件已存在时会拒绝写入，不覆盖。",
-        )}
+        title="Note"
+        text="Only verified, conflict-free data is exported; API settings, directory paths, and runtime preferences are excluded. Existing destination files are never overwritten."
       />
       <Form.FilePicker
         id="directory"
-        title={t("导出目录")}
+        title="Export Directory"
         canChooseDirectories
         canChooseFiles={false}
         allowMultipleSelection={false}
@@ -1260,42 +1279,52 @@ function DirectoryForm() {
   const { push } = useNavigation();
   return (
     <Form
-      navigationTitle={t("校验自选数据目录")}
+      navigationTitle="Validate Custom Data Directory"
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("校验")}
+            title="Validate"
             icon={Icon.Checkmark}
             onSubmit={async (values: Form.Values) => {
               const picked = (values.directory as string[] | undefined)?.[0];
               if (!picked) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("请选择一个已存在的目录"),
+                  title: "Select an existing directory",
                 });
                 return;
               }
               try {
                 const real = await fs.realpath(picked);
                 if (!(await fs.lstat(real)).isDirectory())
-                  throw new Error(t("请选择目录而不是文件"));
+                  throw new Error("Select a directory, not a file");
                 const entries = await fs.readdir(real);
                 const allowed = new Set(["events", "icons", ".DS_Store"]);
                 if (entries.some((entry) => !allowed.has(entry)))
                   throw new Error(
-                    t`目录必须为空或仅含 events/icons，当前包含：${entries.slice(0, 5).join(t("、"))}`,
+                    `Directory must be empty or contain only events/icons; currently contains: ${entries.slice(0, 5).join(", ")}`,
                   );
                 push(
                   <Detail
-                    markdown={t`# 目录可用\n\n\`${real}\`\n\n把这个路径填入扩展设置中的“Dedicated Data Directory”，然后重新加载命令：\n\n1. 命令 → 扩展设置（本命令的“打开扩展设置”操作）\n2. 粘贴上面的路径并保存\n3. 回到本命令重新加载\n\n切换只改变本机配置，不搬迁、不删除旧库；iCloud Drive 目录可用，但同步延迟、占位文件和并发写入不在本插件保证范围内。`}
+                    markdown={`# Directory Available
+
+\`${real}\`
+
+Enter this path in “Dedicated Data Directory” under extension preferences, then reload:
+
+1. Command → Extension Preferences (the “Open Extension Preferences” action)
+2. Paste the path and save
+3. Return and reload
+
+Changing directories only changes local settings; it does not move or delete the old library. iCloud Drive can be used, but sync delays, placeholders, and concurrent writes are not guaranteed by this extension.`}
                     actions={
                       <ActionPanel>
                         <Action.CopyToClipboard
-                          title={t("复制路径")}
+                          title="Copy Path"
                           content={real}
                         />
                         <Action
-                          title={t("打开扩展设置")}
+                          title="Open Extension Preferences"
                           icon={Icon.Gear}
                           onAction={openExtensionPreferences}
                         />
@@ -1306,7 +1335,7 @@ function DirectoryForm() {
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: t("目录不可用"),
+                  title: "Directory Unavailable",
                   message: failureMessage(error),
                 });
               }
@@ -1316,14 +1345,12 @@ function DirectoryForm() {
       }
     >
       <Form.Description
-        title={t("只做校验")}
-        text={t(
-          "这里只读取所选目录做检查，不创建、不搬迁、不删除数据，也不会替你写入扩展设置（Raycast 未提供写 preference 的 API）。",
-        )}
+        title="Validation Only"
+        text="Only reads the selected directory for validation. No data is created, moved, or deleted, and preferences are not written for you (Raycast has no API for writing them)."
       />
       <Form.FilePicker
         id="directory"
-        title={t("目录")}
+        title="Directory"
         canChooseDirectories
         canChooseFiles={false}
         allowMultipleSelection={false}

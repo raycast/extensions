@@ -1,4 +1,4 @@
-import { categoryTitle, t } from "./i18n.ts";
+import { categoryTitle } from "./model.ts";
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
 import {
@@ -32,11 +32,11 @@ import { commit } from "./repository.ts";
 
 /** Stable failure text for the three commands; never includes API keys or raw responses. */
 export function failureMessage(error: unknown): string {
-  if (error instanceof LibraryError) return `${error.code}：${error.message}`;
+  if (error instanceof LibraryError) return `${error.code}: ${error.message}`;
   if (error instanceof AIError) return error.message;
   return error instanceof Error && error.message
     ? error.message
-    : t("发生未知错误");
+    : "Unknown error";
 }
 
 const LOCATION_PREFIX = "loc:";
@@ -120,14 +120,14 @@ export function BookmarkForm({
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("网址无效"),
+        title: "Invalid URL",
         message: failureMessage(error),
       });
       return;
     }
     const nextTitle = title.trim();
     if (!nextTitle) {
-      await showToast({ style: Toast.Style.Failure, title: t("请填写标题") });
+      await showToast({ style: Toast.Style.Failure, title: "Enter a title" });
       return;
     }
     const nextLocations = deleted
@@ -136,8 +136,8 @@ export function BookmarkForm({
     if (!nextLocations.length) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("请至少选择一个分类位置"),
-        message: t("如需移出所有分类，请使用“移入回收站”"),
+        title: "Select at least one category location",
+        message: "To remove all categories, move the bookmark to Trash",
       });
       return;
     }
@@ -189,14 +189,14 @@ export function BookmarkForm({
       onSaved(result.state, value);
       await showToast({
         style: Toast.Style.Success,
-        title: bookmark ? t("已更新书签") : t("已新增书签"),
+        title: bookmark ? "Bookmark updated" : "Bookmark added",
         message: result.warning ?? value.title,
       });
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("未写入"),
+        title: "Not saved",
         message: failureMessage(error),
       });
     } finally {
@@ -214,7 +214,7 @@ export function BookmarkForm({
     if (!Object.keys(selected).length) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("所选字段没有可发送的内容"),
+        title: "The selected fields have no content to send",
       });
       return;
     }
@@ -225,44 +225,42 @@ export function BookmarkForm({
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t("AI 配置无效"),
+        title: "Invalid AI configuration",
         message: failureMessage(error),
       });
       return;
     }
     const confirmed = await confirmAlert({
       icon: Icon.Stars,
-      title: t("发送所选字段到 AI 服务？"),
+      title: "Send selected fields to the AI service?",
       message: [
-        t`协议：${config.protocol}`,
-        t`服务：${endpoint}`,
-        t`模型：${config.model || t("未配置")}`,
-        t`发送字段：${Object.keys(selected)
+        `Protocol: ${config.protocol}`,
+        `Service: ${endpoint}`,
+        `Model: ${config.model || "Not configured"}`,
+        `Fields sent: ${Object.keys(selected)
           .map(
             (key) =>
               ({
-                title: t("标题"),
-                url: t("网址"),
-                desc: t("描述"),
-                tags: t("标签"),
+                title: "Title",
+                url: "URL",
+                desc: "Description",
+                tags: "Tags",
               })[key as "title" | "url" | "desc" | "tags"],
           )
-          .join(t("、"))}`,
+          .join(", ")}`,
         "",
-        t(
-          "不会发送分类位置、访问统计或目录路径。API Key 仅作为认证头发送至上述服务，不进入提示词、书签库或导出；建议需你确认才填入表单。",
-        ),
+        "Category locations, visit counts, and directory paths are not sent. The API key is sent only as an authentication header to the service above; it is never included in prompts, the library, or exports. Suggestions require your approval before filling the form.",
       ].join("\n"),
-      primaryAction: { title: t("发送") },
+      primaryAction: { title: "Send" },
     });
     if (!confirmed) return;
     const controller = new AbortController();
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: t("正在请求 AI 建议"),
+      title: "Requesting AI suggestions",
       message: endpoint,
       primaryAction: {
-        title: t("取消"),
+        title: "Cancel",
         onAction: () => controller.abort(),
       },
     });
@@ -287,7 +285,7 @@ export function BookmarkForm({
       );
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("未获得建议");
+      toast.title = "No suggestions received";
       toast.message = failureMessage(error);
     }
   }
@@ -295,16 +293,16 @@ export function BookmarkForm({
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle={bookmark ? t("编辑书签") : t("新增书签")}
+      navigationTitle={bookmark ? "Edit Bookmark" : "Add Bookmark"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={bookmark ? t("保存修改") : t("新增书签")}
+            title={bookmark ? "Save Changes" : "Add Bookmark"}
             icon={Icon.Checkmark}
             onSubmit={save}
           />
           <Action
-            title={t("AI 建议（BYOK）")}
+            title="AI Suggestions (BYOK)"
             icon={Icon.Stars}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={requestSuggestion}
@@ -314,40 +312,42 @@ export function BookmarkForm({
     >
       <Form.TextField
         id="url"
-        title={t("网址")}
+        title="URL"
         value={url}
         onChange={setUrl}
         placeholder="https://example.com/{query}"
-        info={t("只接受 http(s)；{name} 为模板参数，打开时逐项填写")}
+        info={
+          "Only http(s) URLs are accepted; {name} is a template parameter filled in when opening"
+        }
       />
       <Form.TextField
         id="title"
-        title={t("标题")}
+        title="Title"
         value={title}
         onChange={setTitle}
       />
       <Form.TextArea
         id="desc"
-        title={t("描述")}
+        title="Description"
         value={desc}
         onChange={setDesc}
       />
       <Form.TextField
         id="tags"
-        title={t("标签")}
+        title="Tags"
         value={tagsText}
         onChange={setTagsText}
-        placeholder={t("多个标签用逗号分隔")}
+        placeholder="Separate tags with commas"
       />
       {deleted ? (
         <Form.Description
-          title={t("分类位置")}
-          text={t("此书签位于回收站；恢复后才可修改分类位置。")}
+          title="Category Locations"
+          text="This bookmark is in Trash; restore it before editing category locations."
         />
       ) : (
         <Form.TagPicker
           id="locations"
-          title={t("分类位置（可多选）")}
+          title="Category Locations (multiple)"
           value={locations}
           onChange={setLocations}
         >
@@ -362,34 +362,32 @@ export function BookmarkForm({
       )}
       <Form.Checkbox
         id="pinned"
-        title={t("收藏")}
-        label={t("加入 Favorites（置顶）")}
+        title="Favorite"
+        label="Add to Favorites (pin)"
         value={pinned}
         onChange={setPinned}
       />
       <Form.Checkbox
         id="allowUniversal"
-        title={t("万能匹配")}
-        label={t("本地搜索无结果时作为回退候选")}
+        title="Universal Match"
+        label="Use as a fallback when local search has no results"
         value={allowUniversal}
         onChange={setAllowUniversal}
       />
       <Form.Description
-        title={t("AI 隐私")}
-        text={t(
-          "只有下面勾选的字段会在你主动触发时发送给所选协议的服务；建议不会自动保存。",
-        )}
+        title="AI Privacy"
+        text="Only selected fields are sent to the chosen service when you request it; suggestions are not saved automatically."
       />
       <Form.TagPicker
         id="aiFields"
-        title={t("AI 发送字段")}
+        title="Fields to Send to AI"
         value={aiFields}
         onChange={setAiFields}
       >
-        <Form.TagPicker.Item value="title" title={t("标题")} />
-        <Form.TagPicker.Item value="url" title={t("网址")} />
-        <Form.TagPicker.Item value="desc" title={t("描述")} />
-        <Form.TagPicker.Item value="tags" title={t("标签")} />
+        <Form.TagPicker.Item value="title" title="Title" />
+        <Form.TagPicker.Item value="url" title="URL" />
+        <Form.TagPicker.Item value="desc" title="Description" />
+        <Form.TagPicker.Item value="tags" title="Tags" />
       </Form.TagPicker>
     </Form>
   );
@@ -415,12 +413,12 @@ function SuggestionDetail({
   );
   return (
     <Form
-      navigationTitle={t("AI 建议（尚未应用）")}
+      navigationTitle="AI Suggestions (not applied)"
       actions={
         <ActionPanel>
           {hasSuggestion && (
             <Action
-              title={t("填入表单")}
+              title="Fill Form"
               icon={Icon.Pencil}
               onAction={() => {
                 onApply();
@@ -428,38 +426,38 @@ function SuggestionDetail({
               }}
             />
           )}
-          <Action title={t("返回表单")} icon={Icon.ArrowLeft} onAction={pop} />
+          <Action title="Back to Form" icon={Icon.ArrowLeft} onAction={pop} />
         </ActionPanel>
       }
     >
-      <Form.Description title={t("服务")} text={endpoint} />
+      <Form.Description title="Service" text={endpoint} />
       <Form.Description
-        title={t("当前标题")}
-        text={current.title || t("（空）")}
+        title="Current Title"
+        text={current.title || "(empty)"}
       />
       <Form.Description
-        title={t("建议标题")}
-        text={suggestion.title ?? t("（不修改）")}
+        title="Suggested Title"
+        text={suggestion.title ?? "(unchanged)"}
       />
       <Form.Description
-        title={t("当前描述")}
-        text={current.desc || t("（空）")}
+        title="Current Description"
+        text={current.desc || "(empty)"}
       />
       <Form.Description
-        title={t("建议描述")}
-        text={suggestion.desc ?? t("（不修改）")}
+        title="Suggested Description"
+        text={suggestion.desc ?? "(unchanged)"}
       />
       <Form.Description
-        title={t("当前标签")}
-        text={current.tags.join(", ") || t("（空）")}
+        title="Current Tags"
+        text={current.tags.join(", ") || "(empty)"}
       />
       <Form.Description
-        title={t("建议标签")}
-        text={suggestion.tags?.join(", ") ?? t("（不修改）")}
+        title="Suggested Tags"
+        text={suggestion.tags?.join(", ") ?? "(unchanged)"}
       />
       <Form.Description
-        title={t("说明")}
-        text={t("以上内容按纯文本展示。填入表单不会保存，仍需你提交表单。")}
+        title="Note"
+        text="Shown as plain text. Filling the form does not save; you still need to submit it."
       />
     </Form>
   );
