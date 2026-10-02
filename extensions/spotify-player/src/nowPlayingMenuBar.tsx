@@ -31,8 +31,6 @@ import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { removeFromPlaylist } from "./api/removeFromPlaylist";
-import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
-import removeTrackFromPlaylistCache from "./helpers/removeTrackFromPlaylistCache";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { useMe } from "./hooks/useMe";
@@ -314,14 +312,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
                       playlistId: playlist.id as string,
                       trackUris: [{ uri: uri as string }],
                     });
-                    await removeTrackFromPlaylistCache(playlist.id as string, uri as string);
                     showHUD(`Removed from ${playlist.name}`);
                   } else {
                     await addToPlaylist({
                       playlistId: playlist.id as string,
                       trackUris: [uri as string],
                     });
-                    await addTrackToPlaylistCache(playlist.id as string, { uri } as TrackObject);
                     showHUD(`Added to ${playlist.name}`);
                   }
                 } catch (err) {

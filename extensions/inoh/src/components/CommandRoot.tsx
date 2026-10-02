@@ -1,38 +1,21 @@
-import { List, Action, ActionPanel, open, showToast, Toast, useNavigation, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, Action, ActionPanel, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useDecks } from "../hooks/useDecks";
 import { useDictionarySearch } from "../hooks/useDictionarySearch";
 import { useUserCardIds } from "../hooks/useUserCardIds";
 import { useSubscriptionState } from "../hooks/useSubscriptionState";
-import { describePlanBadge } from "../lib/subscription";
-import type { SubscriptionState } from "../lib/subscription";
-import { PLANS_URL } from "../constants";
-import { addCardToDeck, removeCardFromDeck } from "../lib/card";
+import { useDraftWord } from "../hooks/useDraftWord";
+import { describeAccountHeader } from "../lib/subscription";
+import { addCardAfterSignIn, addCardWithFeedback } from "../lib/card-actions";
 import { pronounceWord } from "../lib/audio";
 import { AccountActionSection } from "./AccountActionSection";
 import { AppsActionSection } from "./AppsActionSection";
+import { buildBrowseActions, buildMissingWordView } from "./search-empty-states";
 import { EntryDetail } from "./EntryDetail";
-import { RequestCardForm } from "./RequestCardForm";
 import { SignInView } from "./SignInView";
 import type { DictionaryEntry } from "../types";
-
-/**
- * Header text: the account, plus a plan badge once the plan has been read
- * (e.g. "Inoh · me@example.com · Plus", or "… · Plus · ends 1 Sep" when a
- * change is pending). The header is the one place a List shows something at
- * all times without spending a row, so it carries the badge; the matching
- * plan action lives in the Account section.
- */
-function _buildNavigationTitle(
-  email: string | undefined,
-  subscriptionState: SubscriptionState | undefined,
-): string | undefined {
-  if (!email) return undefined;
-  const parts = ["Inoh", email];
-  if (subscriptionState) parts.push(describePlanBadge(subscriptionState));
-  return parts.join(" · ");
-}
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Shared root component for all commands.
@@ -56,6 +39,11 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
 
   const { results, isLoading: isSearching, error: searchError } = useDictionarySearch(searchText);
 
+  const { savedWord, saveWord, saveWordForUser } = useDraftWord({
+    user,
+    onSignInRequired: promptSignIn,
+  });
+
   useEffect(() => {
     if (initialSearchText) {
       setSearchText(initialSearchText);
@@ -78,33 +66,73 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
   const hasResults = !!results?.length;
   const isSignedIn = !!user;
 
-  // Logged-out users can search freely; adding a card needs an account.
-  function promptSignIn() {
+  // Reason: derived, not reset in an effect — typing takes the saved view down with it.
+  const isSavedWordOnScreen = savedWord !== null && savedWord === searchText.trim();
+
+  /**
+   * What a visitor was doing when the sign-in view interrupted them, resumed
+   * with the account that signed in.
+   *
+   * Reason: the account is passed rather than read from state. This callback
+   * was created in a render where there was no user, and `refreshAuth` only
+   * schedules the next render, so anything the callback reads from state is
+   * still the signed-out version when it runs.
+   */
+  const resumeAfterSignInRef = useRef<((signedInUser: User) => void) | null>(null);
+
+  /**
+   * Opens the sign-in view, and carries on with whatever the visitor was
+   * trying to do once they are in.
+   *
+   * Reason: a signed-out action that names signing in has to go there, and
+   * then finish the job. Sending someone to sign in and dropping them back
+   * where they started makes them ask for the same thing twice.
+   *
+   * @param afterSignIn - What they were doing, run once they are signed in
+   */
+  function promptSignIn(afterSignIn?: (signedInUser: User) => void) {
+    resumeAfterSignInRef.current = afterSignIn ?? null;
     push(<SignInView onAuthenticated={handleAuthenticated} />);
   }
 
-  // Reason: keyed off `user` (not `isSignedIn`) so TypeScript narrows away null.
-  const accountActions = user ? (
-    <AccountActionSection user={user} subscriptionState={subscriptionState} onSignOut={signOut} />
-  ) : null;
+  const accountActions = (
+    <AccountActionSection
+      user={user ?? null}
+      subscriptionState={subscriptionState}
+      onSignIn={promptSignIn}
+      onSignOut={signOut}
+    />
+  );
 
   const appsActions = <AppsActionSection />;
 
   // Reason: `refreshAuth` loads the session before popping the sign-in view,
   // so the search list renders signed-in state immediately.
-  async function handleAuthenticated() {
+  async function handleAuthenticated(signedInUser: User) {
     await refreshAuth();
     pop();
+
+    // Reason: a ref rather than state. The sign-in view closed over this
+    // function when it was pushed, so anything set after that point is only
+    // visible through a ref.
+    const resume = resumeAfterSignInRef.current;
+    resumeAfterSignInRef.current = null;
+    resume?.(signedInUser);
   }
 
+  /**
+   * Adds the card, sending a signed-out visitor through sign-in first.
+   *
+   * Reason: both the signed-in and the signed-out row action call this, so the
+   * rule for what happens after signing in lives in one place. The account
+   * comes from the resume callback rather than `user`, which is still the
+   * signed-out value in the closure the callback was created in.
+   *
+   * @param entry - The dictionary entry whose card is being added
+   */
   async function handleAddCard(entry: DictionaryEntry) {
-    if (!isSignedIn) {
-      promptSignIn();
-      return;
-    }
-
-    if (!selectedDeckId) {
-      await showToast({ style: Toast.Style.Failure, title: "No deck selected" });
+    if (!user) {
+      promptSignIn((signedInUser) => addCardAfterSignIn(signedInUser.id, entry, revalidateUserCards));
       return;
     }
 
@@ -117,59 +145,26 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       return;
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Adding card..." });
-
-    const result = await addCardToDeck(user.id, entry, selectedDeckId);
-
-    if (result.success) {
-      const addedCardId = result.cardId;
-      toast.style = Toast.Style.Success;
-      toast.title = "Card added";
-      toast.message = `${entry.word} · press ⌘Z to undo`;
-      toast.primaryAction = {
-        title: "Undo",
-        shortcut: { modifiers: ["cmd"], key: "z" },
-        onAction: async (addedToast) => {
-          addedToast.style = Toast.Style.Animated;
-          addedToast.title = "Undoing...";
-          const undo = await removeCardFromDeck(addedCardId);
-          if (undo.success) {
-            addedToast.style = Toast.Style.Success;
-            addedToast.title = "Card removed";
-            addedToast.message = entry.word;
-            addedToast.primaryAction = undefined;
-            revalidateUserCards();
-          } else {
-            addedToast.style = Toast.Style.Failure;
-            addedToast.title = "Couldn't undo";
-            addedToast.message = undo.error;
-          }
-        },
-      };
-      revalidateUserCards();
-      return;
-    }
-
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to add card";
-    toast.message = result.error;
-
-    if (result.isPlanLimit) {
-      toast.primaryAction = {
-        title: "Upgrade Plan",
-        onAction: async (limitToast) => {
-          await open(PLANS_URL);
-          await limitToast.hide();
-        },
-      };
-    }
+    await addCardWithFeedback(user.id, entry, selectedDeckId, revalidateUserCards);
   }
+
+  const panelSections = { accountActions, appsActions };
+  const browseActions = buildBrowseActions({ ...panelSections, isSignedIn });
+  const missingWordView = buildMissingWordView({
+    ...panelSections,
+    searchText,
+    isSignedIn,
+    isSavedWordOnScreen,
+    onSignIn: promptSignIn,
+    onSaveWord: saveWord,
+    onSaveWordForUser: saveWordForUser,
+  });
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={hasResults}
-      navigationTitle={_buildNavigationTitle(user?.email, subscriptionState)}
+      navigationTitle={describeAccountHeader(user?.email, subscriptionState)}
       searchText={searchText}
       searchBarPlaceholder="Search for a word..."
       onSearchTextChange={setSearchText}
@@ -185,31 +180,18 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       }
     >
       {searchText.length === 0 ? (
-        <List.EmptyView title="Type a word to search" icon={Icon.MagnifyingGlass} />
+        <List.EmptyView title="Type a word to search" icon={Icon.MagnifyingGlass} actions={browseActions} />
       ) : isSearching && !results ? (
-        <List.EmptyView title="Searching..." icon={Icon.MagnifyingGlass} />
+        <List.EmptyView title="Searching..." icon={Icon.MagnifyingGlass} actions={browseActions} />
       ) : searchError ? (
-        <List.EmptyView title="Search Failed" description={searchError.message} icon={Icon.ExclamationMark} />
-      ) : results && results.length === 0 ? (
         <List.EmptyView
-          title={`No results for "${searchText}"`}
-          icon={Icon.XMarkCircle}
-          actions={
-            <ActionPanel>
-              {isSignedIn ? (
-                <Action
-                  title="Request Card"
-                  icon={Icon.PlusCircle}
-                  onAction={() => push(<RequestCardForm userId={user.id} initialWord={searchText} />)}
-                />
-              ) : (
-                <Action title="Sign in to Request a Card" icon={Icon.Key} onAction={promptSignIn} />
-              )}
-              {accountActions}
-              {appsActions}
-            </ActionPanel>
-          }
+          title="Search Failed"
+          description={searchError.message}
+          icon={Icon.ExclamationMark}
+          actions={browseActions}
         />
+      ) : results && results.length === 0 ? (
+        missingWordView
       ) : (
         (results || []).map((entry) => {
           const isAlreadyInDeck = isSignedIn && userCardIds.has(entry.id);
@@ -226,7 +208,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
                   {isSignedIn ? (
                     <Action title="Add to Deck" icon={Icon.Plus} onAction={() => handleAddCard(entry)} />
                   ) : (
-                    <Action title="Sign in to Add Cards" icon={Icon.Key} onAction={promptSignIn} />
+                    <Action title="Sign in to Add Cards" icon={Icon.Key} onAction={() => handleAddCard(entry)} />
                   )}
                   <Action
                     title="Pronounce"

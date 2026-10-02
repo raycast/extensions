@@ -51,9 +51,6 @@ export async function startCaffeinate(
   additionalArgs?: string,
   reason?: CaffeinationReason,
 ) {
-  if (hudMessage) {
-    await showHUD(hudMessage);
-  }
   await stopCaffeinate({ menubar: false, status: false });
 
   if (process.platform === "win32") {
@@ -65,7 +62,15 @@ export async function startCaffeinate(
   }
 
   await setCaffeinationReason(reason);
-  await update(updates, true);
+
+  // showHUD closes the window and Raycast 2 unloads view commands, so spawn
+  // and persist must finish first. Don't await menu-bar/status refreshes
+  // before the HUD — they run in their own processes once launchCommand is called.
+  const refresh = update(updates, true);
+  if (hudMessage) {
+    await showHUD(hudMessage);
+  }
+  await refresh;
 }
 
 export async function stopCaffeinate(
@@ -73,9 +78,6 @@ export async function stopCaffeinate(
   hudMessage?: string,
   options?: { pauseRunningSchedule?: boolean },
 ) {
-  if (hudMessage) {
-    await showHUD(hudMessage);
-  }
   let pausedSchedule: Schedule | undefined;
   if (options?.pauseRunningSchedule) {
     const schedule = await getSchedule();
@@ -99,16 +101,23 @@ export async function stopCaffeinate(
     throw e;
   }
   await setCaffeinationReason(undefined);
-  await update(updates, false);
+
+  const refresh = update(updates, false);
+  if (hudMessage) {
+    await showHUD(hudMessage);
+  }
+  await refresh;
 }
 
 async function update(updates: Updates, caffeinated: boolean) {
+  const tasks: Promise<void>[] = [];
   if (updates.menubar) {
-    await tryLaunchCommand("index", { caffeinated });
+    tasks.push(tryLaunchCommand("index", { caffeinated }));
   }
   if (updates.status) {
-    await tryLaunchCommand("status", { caffeinated, skipScheduleMonitorHeartbeat: true });
+    tasks.push(tryLaunchCommand("status", { caffeinated, skipScheduleMonitorHeartbeat: true }));
   }
+  await Promise.all(tasks);
 }
 
 async function tryLaunchCommand(

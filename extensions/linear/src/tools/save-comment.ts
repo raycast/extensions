@@ -1,8 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
-import { serializeComment } from "./commentUtils";
 import {
   client,
   findExact,
@@ -12,6 +7,8 @@ import {
   resolveProject,
   tryGet,
 } from "./linearUtils";
+import { serializeComment } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input {
   body: string;
@@ -26,7 +23,7 @@ interface Input {
   statusUpdateType?: "project" | "initiative";
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const linearClient = client();
 
   if ((input.id || input.parentId) && input.statusUpdateType) {

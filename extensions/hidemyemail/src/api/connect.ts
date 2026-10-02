@@ -21,9 +21,10 @@ import {
   iCloudNetworkError,
   iCloudServiceNotActivatedError,
   iCloudSessionExpiredError,
+  iCloudTermsError,
 } from "./errors";
 import { LocalStorage } from "@raycast/api";
-import { getNestedHeader, hashPassword } from "./utils";
+import { getNestedHeader, hashPassword, SrpProtocol } from "./utils";
 
 const ENDPOINTS = {
   DEFAULT: {
@@ -83,7 +84,11 @@ export class iCloudSession {
         return response;
       },
       (error) => {
-        if (error.response && error.response.status === 409) {
+        // A 409 from the sign-in endpoints is Apple's "2FA required" signal, not a failure.
+        // Anywhere else it is a real error and must not be silently treated as success.
+        const url: string = error.config?.url ?? "";
+        const isSignIn = url.endsWith("/signin") || url.endsWith("/signin/complete");
+        if (error.response && error.response.status === 409 && isSignIn) {
           return Promise.resolve(error.response);
         }
         return Promise.reject(error);
@@ -289,12 +294,20 @@ export class iCloudService {
     this.webservices = this.data?.webservices;
   }
 
+  /**
+   * Trust token issued by Apple after a completed 2FA challenge, sent back on sign-in so
+   * Apple recognises the device and skips the challenge. Empty until one has been stored.
+   */
+  get trustTokens(): string[] {
+    const trustToken = this.sessionData?.trustToken as string | undefined;
+    return trustToken ? [trustToken] : [];
+  }
+
   async authenticateWithPassword(password: string) {
     try {
       const data: Record<string, unknown> = { accountName: this.appleID, password: password };
       data["rememberMe"] = true;
-
-      if (this.sessionData?.trust_token) data["trustTokens"] = [this.sessionData.trust_token];
+      data["trustTokens"] = this.trustTokens;
 
       const headers = this.getAuthHeaders(true);
       const params = { isRememberMeEnabled: true };
@@ -326,11 +339,14 @@ export class iCloudService {
       });
       const salt = Buffer.from(response.data.salt, "base64");
       const iterations = response.data.iteration;
+      // Apple picks one of the protocols offered above and it decides how the password is
+      // hashed. Assuming s2k when Apple asked for s2k_fo silently computes the wrong key.
+      const protocol = response.data.protocol as SrpProtocol;
 
       // NOTE: there could be the unlikely scenario that salt/iterations changes in between these two calls
 
       // Ephemeral client key `a` (which is secret)
-      const hashedPassword = hashPassword(password, salt, iterations);
+      const hashedPassword = hashPassword(password, salt, iterations, protocol);
       const a = await SRP.genKey();
       const srpClient = new SrpClient(SRP.params[2048], salt, Buffer.from(this.appleID), hashedPassword, a);
 
@@ -362,7 +378,7 @@ export class iCloudService {
           m1: m1.toString("base64"),
           m2: m2.toString("base64"),
           rememberMe: true,
-          trustTokens: [],
+          trustTokens: this.trustTokens,
         };
         // Sets session token
         await this.session.request("post", `${this.authEndpoint}/signin/complete`, {
@@ -393,6 +409,34 @@ export class iCloudService {
         throw new iCloudFailedLoginError("Invalid authentication token.", { cause: error });
       throw error;
     }
+
+    // Apple withholds the web session cookie until updated iCloud Terms are accepted.
+    // Without this check the login "succeeds" and every later call fails with an
+    // opaque 401 "Missing X-APPLE-WEBAUTH-TOKEN cookie".
+    if ((this.data as unknown as Record<string, unknown>)?.termsUpdateNeeded) {
+      throw new iCloudTermsError(
+        "Apple has updated the iCloud Terms & Conditions. Please sign in at icloud.com, " +
+          "accept the new terms, then log in again.",
+      );
+    }
+
+    // accountLogin returns a fresh webservices map, so refresh it here rather than only
+    // at the end of authenticate(). Otherwise a post-2FA trust login keeps the reduced
+    // pre-2FA map
+    if (this.data?.webservices) this.webservices = this.data.webservices;
+
+    // An untrusted (pre-2FA) login has no session cookie yet, but a trusted
+    // one must have it. Failing here keeps the error at its source instead of surfacing
+    // it as a 401 from an unrelated webservice call later.
+    if (this.isTrustedSession) {
+      const cookies = this.session.cookieJar.serializeSync()?.cookies ?? [];
+      if (!cookies.some((cookie) => cookie.key === "X-APPLE-WEBAUTH-TOKEN")) {
+        throw new iCloudFailedLoginError(
+          "iCloud accepted the login but issued no session cookie. Please sign in at " +
+            "icloud.com, complete any pending prompts, then try again.",
+        );
+      }
+    }
   }
 
   async validateToken() {
@@ -419,10 +463,9 @@ export class iCloudService {
       data,
       headers,
     });
-    const isTrusted = await this.trustSession();
-    if (!isTrusted) {
-      console.log("Failed to request trust. You will likely be prompted for the code again in the coming weeks");
-    }
+    // Propagates error: without a trusted session there is no session cookie, so reporting
+    // success here would leave the caller thinking it is logged in when it is not.
+    await this.trustSession();
   }
 
   async sendVerificationCode() {
@@ -451,14 +494,9 @@ export class iCloudService {
   async trustSession() {
     const headers = this.getAuthHeaders(true);
 
-    try {
-      await this.session.request("get", `${this.authEndpoint}/2sv/trust`, { headers });
-      await this.authenticateWithToken();
-      return true;
-    } catch (error) {
-      console.log("Session trust failed.");
-      return false;
-    }
+    await this.session.request("get", `${this.authEndpoint}/2sv/trust`, { headers });
+    await this.authenticateWithToken();
+    return true;
   }
 
   async logOut() {

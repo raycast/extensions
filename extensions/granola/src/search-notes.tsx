@@ -10,7 +10,11 @@ import { sortNotesByDate, NoteListItem, FolderFilterDropdown } from "./component
 import { toError } from "./utils/errorUtils";
 import { getFolderNoteResults } from "./utils/searchUtils";
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
   const { folders, isLoading: foldersLoading } = useFolders();
   const { noteData, isLoading, hasError, error } = useGranolaData();

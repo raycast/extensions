@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 import { getProjects, project } from "./composables/FetchData";
 import { getTokens, onTokenChange } from "./composables/WebClient";
 
-const Actions = (props: { projectID: string; isBillable: boolean }) => {
+const Actions = (props: { projectID: string; projectKey: string | undefined; isBillable: boolean }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={`${BaseUrl}/projects/${props.projectID}`} />
-      <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/projects/${props.projectID}`} />
+      <Action.OpenInBrowser url={`${BaseUrl}/projects/${props.projectKey ?? props.projectID}`} />
+      <Action.CopyToClipboard
+        title={"Copy URL to Clipboard"}
+        content={`${BaseUrl}/projects/${props.projectKey ?? props.projectID}`}
+      />
       <Action.CopyToClipboard
         icon={Icon.Envelope}
         title="Copy Project Mail Address"
@@ -25,7 +28,7 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
         title="Log Time"
         shortcut={{
           macOS: { modifiers: ["ctrl", "cmd"], key: "enter" },
-          Windows: { modifiers: ["ctrl", "windows"], key: "enter" },
+          Windows: { modifiers: ["ctrl", "alt"], key: "enter" },
         }}
         onAction={async () => {
           try {
@@ -112,7 +115,13 @@ const ProjectItem = (props: { project: project }) => {
       title={props.project.name}
       subtitle={props.project.company?.name}
       accessories={[{ text: props.project.projectKey }]}
-      actions={<Actions projectID={props.project.id} isBillable={props.project.isBillableByDefault} />}
+      actions={
+        <Actions
+          projectID={props.project.id}
+          projectKey={props.project.projectKey}
+          isBillable={props.project.isBillableByDefault}
+        />
+      }
     />
   );
 };

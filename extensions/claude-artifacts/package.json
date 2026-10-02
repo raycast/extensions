@@ -19,6 +19,13 @@
       "subtitle": "Claude Artifacts",
       "description": "Quickly find and open Claude Artifacts",
       "mode": "view"
+    },
+    {
+      "name": "doctor",
+      "title": "Run Doctor",
+      "subtitle": "Claude Artifacts",
+      "description": "Check that artifact tracking is working and recover publishes the hook missed",
+      "mode": "view"
     }
   ],
   "tools": [],

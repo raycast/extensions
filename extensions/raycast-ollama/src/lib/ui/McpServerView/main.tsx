@@ -55,7 +55,7 @@ export function McpServerView(): React.JSX.Element {
           {props.mcpServerName && McpServer && (
             <ActionPanel.Submenu title="Delete" icon={Icon.Trash} shortcut={Shortcut.Remove}>
               <Action
-                title={`Yes, Delete "${props.mcpServerName}" Mcp Server`}
+                title={`Yes, Delete "${props.mcpServerName}" MCP Server`}
                 icon={Icon.CheckCircle}
                 onAction={async () => {
                   await DeleteMcpServer(props.mcpServerName as string, McpServer, setMcpServer);

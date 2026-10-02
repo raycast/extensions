@@ -1,4 +1,4 @@
-import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Grid, Icon, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { setMaxListeners } from "node:events";
 import { useCallback, useRef, useState } from "react";
@@ -7,6 +7,7 @@ import { initTraktClient } from "../lib/client";
 import { APP_MAX_LISTENERS } from "../lib/constants";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "../lib/detail-helpers";
 import { getScreenshotUrl } from "../lib/helper";
+import { markEpisodeWatched } from "../lib/media-mutations";
 import { TraktEpisodeListItem, TraktShowBaseItem } from "../lib/schema";
 import { EpisodeActionPanel, episodeTraktUrl } from "./episode-actions";
 import { GenericGrid } from "./generic-grid";
@@ -58,34 +59,8 @@ export const EpisodeGrid = ({
     },
   );
 
-  const addEpisodeToHistory = useCallback(async (episode: TraktEpisodeListItem) => {
-    await traktClient.shows.addEpisodeToHistory({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: episode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-    });
-  }, []);
-
-  const checkInEpisode = useCallback(async (episode: TraktEpisodeListItem) => {
-    await traktClient.shows.checkInEpisode({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: episode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-    });
+  const markWatched = useCallback(async (episode: TraktEpisodeListItem) => {
+    await markEpisodeWatched(traktClient, episode.ids.trakt, { signal: abortable.current?.signal });
   }, []);
 
   const handleAction = useActionRunner<TraktEpisodeListItem>({ setActionLoading });
@@ -124,16 +99,10 @@ export const EpisodeGrid = ({
           imdbId={(episode) => episode.ids.imdb}
           actions={[
             {
-              title: "Check-In",
+              title: "Mark as Watched",
               icon: Icon.Checkmark,
-              shortcut: Keyboard.Shortcut.Common.Edit,
-              onAction: (episode) => handleAction(episode, checkInEpisode, "Episode checked-in"),
-            },
-            {
-              title: "Add to History",
-              icon: Icon.Clock,
-              shortcut: Keyboard.Shortcut.Common.Duplicate,
-              onAction: (episode) => handleAction(episode, addEpisodeToHistory, "Episode added to history"),
+              onAction: (episode) =>
+                handleAction(episode, markWatched, `Marked S${episode.season}E${episode.number} as watched`),
             },
           ]}
         />

@@ -6,14 +6,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import { parseResult } from "../util/parser";
 import * as music from "../util/scripts";
-import { Playlist } from "../util/models";
-
-// Define the playlist kind to request. We're using "user" as in the UI.
-enum PlaylistKind {
-  ALL = "all",
-  USER = "user",
-  SUBSCRIPTION = "subscription",
-}
+import { Playlist, PlaylistKind } from "../util/models";
 
 type Input = {
   /**

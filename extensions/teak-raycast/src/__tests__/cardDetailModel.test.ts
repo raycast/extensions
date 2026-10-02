@@ -1,12 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import type { RaycastCard } from "../lib/api";
-import {
+import { createRaycastApiMock } from "./raycastApiMock";
+
+mock.module("@raycast/api", () => createRaycastApiMock(false));
+
+const {
   getCardTitle,
   getDetailStatusChips,
   getHeroMediaUrl,
   getOpenableUrl,
   isHttpUrl,
-} from "../lib/cardDetailModel";
+} = await import("../lib/cardDetailModel");
 
 const baseCard: RaycastCard = {
   appUrl: "https://app.teakvault.com/?card=card_123456",

@@ -1,5 +1,12 @@
 # OmniFocus Changelog
 
+## [Planned Date support] - 2026-09-14
+
+### Added
+
+- Planned Date field in the Add a Task form (requires OmniFocus 4.7 or later)
+- Planned dates shown in task lists and task details
+
 ## [1.2.1] - 2025-05-13
 
 ### Fixed

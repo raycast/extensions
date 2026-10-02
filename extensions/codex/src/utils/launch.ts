@@ -1,5 +1,4 @@
-import { Clipboard, getPreferenceValues, open, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { getPreferenceValues, open, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { stat } from "node:fs/promises";
 import nodePath from "node:path";
@@ -9,10 +8,15 @@ import { expandTildePath } from "./shell";
 
 const execFileAsync = promisify(execFile);
 
+type CodexNewThreadMode = Preferences["newThreadMode"];
+
 type NewThreadInput = {
   prompt?: string;
   path?: string;
+  mode?: CodexNewThreadMode;
 };
+
+const newThreadModes: readonly CodexNewThreadMode[] = ["codex", "work", "chat"];
 
 const codexAppUrl = "codex://";
 const newCodexThreadUrl = "codex://threads/new";
@@ -23,39 +27,64 @@ const codexAppLaunchTimeoutMs = 15000;
 const codexAppLaunchPollIntervalMs = 250;
 const codexAppSettleDelayMs = 2000;
 
+export function buildCodexThreadUrl(threadId: string): string {
+  return `codex://threads/${threadId}`;
+}
+
+export async function openCodexThread(threadId: string): Promise<void> {
+  await open(buildCodexThreadUrl(threadId));
+}
+
 export async function openCodexApp(): Promise<void> {
   await open(codexAppUrl);
+  await activateCodexApp();
+}
+
+export async function openCodexProject(projectId: string): Promise<void> {
+  const id = projectId.trim();
+  if (!id) {
+    throw new Error("Project ID is required.");
+  }
+
+  const params = new URLSearchParams({ projectId: id });
+  await ensureCodexAppIsReady();
+  // The new alias handles projectId alone and leaves the app's mode unchanged.
+  await open(`codex://new?${params.toString()}`);
+  await activateCodexApp();
+}
+
+// Opening codex:// does not reliably bring an already-running app to the front,
+// so nudge whichever handler is installed.
+async function activateCodexApp(): Promise<void> {
+  for (const bundleId of codexAppBundleIds) {
+    try {
+      await execFileAsync("/usr/bin/open", ["-b", bundleId]);
+      return;
+    } catch {
+      // Not installed. Try the next handler.
+    }
+  }
 }
 
 export async function openNewCodexThread(
   input: NewThreadInput = {},
 ): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
-  const defaultWorkingDirectory = preferences.defaultProjectDirectory;
-  const projectPath = await resolveProjectDirectory(
-    input.path ?? defaultWorkingDirectory,
-  );
+  const mode = resolveNewThreadMode(input.mode ?? preferences.newThreadMode);
+  // Chat has no working directory, so a missing folder must not block it.
+  const projectPath =
+    mode === "chat"
+      ? undefined
+      : await resolveProjectDirectory(
+          input.path ?? preferences.defaultProjectDirectory,
+        );
   const prompt = input.prompt?.trim();
 
   await ensureCodexAppIsReady();
-  await open(buildNewThreadUrl({ path: projectPath, prompt }));
+  await open(buildNewThreadUrl({ path: projectPath, prompt, mode }));
   await showHUD(
     prompt ? "Initialized new thread with prompt" : "Initialized new thread",
   );
-}
-
-export async function openNewCodexThreadFromClipboard(): Promise<void> {
-  try {
-    const prompt = (await Clipboard.readText())?.trim();
-    if (!prompt) {
-      await showHUD("Clipboard does not contain text");
-      return;
-    }
-
-    await openNewCodexThread({ prompt });
-  } catch (error) {
-    await showFailureToast(error, { title: "Unable to start Codex thread" });
-  }
 }
 
 // A deep link sent while the app is cold-starting gets dropped, opening an
@@ -80,12 +109,24 @@ async function ensureCodexAppIsReady(): Promise<void> {
 }
 
 async function isCodexAppRunning(): Promise<boolean> {
-  const results = await Promise.all(
-    codexAppBundleIds.map((bundleId) =>
-      execFileAsync("lsappinfo", ["find", `bundleid=${bundleId}`]),
-    ),
-  );
-  return results.some(({ stdout }) => stdout.trim().length > 0);
+  // Checked in order and stopped at the first hit, so the common case spawns
+  // one probe per poll rather than one per handler. A probe that cannot run
+  // says nothing about the other handler, so it must not fail the whole check.
+  for (const bundleId of codexAppBundleIds) {
+    try {
+      const { stdout } = await execFileAsync("lsappinfo", [
+        "find",
+        `bundleid=${bundleId}`,
+      ]);
+      if (stdout.trim().length > 0) {
+        return true;
+      }
+    } catch {
+      // Try the next handler.
+    }
+  }
+
+  return false;
 }
 
 async function resolveProjectDirectory(
@@ -111,7 +152,17 @@ async function resolveProjectDirectory(
   return expandedPath;
 }
 
-function buildNewThreadUrl({ path, prompt }: NewThreadInput): string {
+// The app rejects the whole link on an unknown mode, so an unexpected stored
+// value falls back to Codex instead of opening nothing.
+function resolveNewThreadMode(value: string | undefined): CodexNewThreadMode {
+  return newThreadModes.find((mode) => mode === value) ?? "codex";
+}
+
+function buildNewThreadUrl({
+  path,
+  prompt,
+  mode = "codex",
+}: NewThreadInput): string {
   const params = new URLSearchParams();
 
   if (prompt) {
@@ -122,6 +173,8 @@ function buildNewThreadUrl({ path, prompt }: NewThreadInput): string {
     params.set("path", path);
   }
 
-  const query = params.toString();
-  return query ? `${newCodexThreadUrl}?${query}` : newCodexThreadUrl;
+  // Always send mode. Without it the app stays in whatever mode it last used.
+  params.set("mode", mode);
+
+  return `${newCodexThreadUrl}?${params.toString()}`;
 }

@@ -4,6 +4,7 @@ Read and explore Kagi News articles and sources seamlessly in Raycast.
 
 ## Features
 
+- Ask Kagi News questions directly in Raycast AI (@Kagi News): browse a category or search across all dates in natural language.  
 - Access all news categories (World, Technology, Science, etc.), automatically updated from the Kagi News API.  
 - Article summaries include images, key points, perspectives, timelines, and more.  
 - Personalize article summaries by activating or deactivating over 30 sections.  

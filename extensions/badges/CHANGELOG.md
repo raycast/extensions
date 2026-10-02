@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Improvement] - 2026-09-21
+
+- Add an entry for acquiring 3D badge models
+
 ## [Bugfix] - 2026-08-08
 
 - Show `labelColor` when `label` is empty

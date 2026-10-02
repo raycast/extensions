@@ -97,7 +97,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
       text: values.text,
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
-      onTranslateAction: "none",
+      viewInCurrentCommand: true,
       formality: values.formality ?? "default",
     });
 
@@ -281,9 +281,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
         </>
       )}
       <Form.TextArea id="translation" title="Translation" value={translation} />
-      {translation.length > 0 && (
-        <Form.Description title="Copied" text="Rich text is on the clipboard. Paste with ⌘V." />
-      )}
+      {translation.length > 0 && <Form.Description title="Status" text="Translation complete." />}
       {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
         <Form.Description title="Transliteration" text={transliteration} />
       )}

@@ -1,23 +1,14 @@
-import { getSelectedText, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { EntryList } from "./views";
+import { getSelectedText, launchCommand, LaunchType, showHUD } from "@raycast/api";
 
-const SeletctedCmd = () => {
-  const [initQuery, setQuery] = useState<string>("");
-  useEffect(() => {
-    (async () => {
-      try {
-        const selectedText = await getSelectedText();
-        setQuery(selectedText);
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Cannot get selected text",
-          message: String(error),
-        });
-      }
-    })();
-  }, []);
-  return <EntryList initQuery={initQuery} />;
-};
-export default SeletctedCmd;
+export default async function Command() {
+  try {
+    const selectedText = await getSelectedText();
+    await launchCommand({
+      name: "fromCmd",
+      type: LaunchType.UserInitiated,
+      context: { selectedText },
+    });
+  } catch (error) {
+    await showHUD(`Cannot get selected text: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

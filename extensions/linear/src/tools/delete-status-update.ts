@@ -1,12 +1,9 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client } from "./linearUtils";
+import { withLinear } from "./withLinear";
 
 type Input = { type: "project" | "initiative"; id: string };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const result =
     input.type === "project"
       ? await client().archiveProjectUpdate(input.id)

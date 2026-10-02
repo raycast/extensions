@@ -17,8 +17,11 @@ const Actions = (props: {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={`${BaseUrl}/tasks/${props.taskId}`} />
-      <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
+      <Action.OpenInBrowser url={`${BaseUrl}/tasks/${props.taskKey ?? props.taskId}`} />
+      <Action.CopyToClipboard
+        title={"Copy URL to Clipboard"}
+        content={`${BaseUrl}/tasks/${props.taskKey ?? props.taskId}`}
+      />
       <Action.Push
         icon={Icon.Pencil}
         title="Edit Task"
@@ -54,7 +57,7 @@ const Actions = (props: {
       )}
       <Action.CopyToClipboard
         title={"Copy Task ID"}
-        content={props.taskKey ? props.taskKey : props.taskId}
+        content={props.taskKey ?? props.taskId}
         shortcut={{
           macOS: { modifiers: ["ctrl"], key: "i" },
           Windows: { modifiers: ["ctrl"], key: "i" },
@@ -65,7 +68,7 @@ const Actions = (props: {
         title="Log Time"
         shortcut={{
           macOS: { modifiers: ["ctrl", "cmd"], key: "enter" },
-          Windows: { modifiers: ["ctrl", "windows"], key: "enter" },
+          Windows: { modifiers: ["ctrl", "alt"], key: "enter" },
         }}
         onAction={async () => {
           try {

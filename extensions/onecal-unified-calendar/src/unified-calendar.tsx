@@ -13,10 +13,15 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { authorize, logout } from "./api/oauth";
 import { connectMcp } from "./api/mcp";
-import { fetchUnifiedCalendar, filterClones, OneCalEvent } from "./api/onecal";
+import {
+  fetchUnifiedCalendar,
+  filterClones,
+  OneCalEvent,
+  withAuthUser,
+} from "./api/onecal";
 import { buildMockData } from "./api/mock";
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 
 export default function UnifiedCalendar(
   props: LaunchProps<{ arguments: Arguments.UnifiedCalendar }>,
@@ -241,7 +246,7 @@ function FeaturedMeetingItem(props: {
             <Action.OpenInBrowser
               title="Join Meeting"
               icon={Icon.Video}
-              url={event.meetingUrl}
+              url={withAuthUser(event.meetingUrl, event.accountEmail)}
             />
           )}
           <Action.OpenInBrowser
@@ -303,7 +308,7 @@ function EventItem(props: {
             <Action.OpenInBrowser
               title="Join Meeting"
               icon={Icon.Video}
-              url={event.meetingUrl}
+              url={withAuthUser(event.meetingUrl, event.accountEmail)}
             />
           )}
           <Action.CopyToClipboard title="Copy Title" content={event.title} />

@@ -5,7 +5,7 @@
  *
  * Note: Homebrew does NOT support concurrent `brew upgrade` commands.
  * Running multiple upgrade processes simultaneously causes lock errors.
- * However, Homebrew 5.0 supports concurrent downloads via HOMEBREW_DOWNLOAD_CONCURRENCY.
+ * However, Homebrew supports concurrent downloads via HOMEBREW_DOWNLOAD_CONCURRENCY.
  *
  * Strategy for faster upgrades:
  * 1. Pre-fetch all packages concurrently using `brew fetch`
@@ -17,8 +17,9 @@ import { OutdatedResults } from "../types";
 import { restrictToSelection } from "../upgrade-selection";
 import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
-import { getErrorMessage, ensureError, StaleProcessError, BrewLockError } from "../errors";
+import { getErrorMessage, ensureError, StaleProcessError, BrewLockError, upgradeSkipReason } from "../errors";
 import { preferences } from "../preferences";
+import { brewPinnedIdentifiers, isPinnedPackage, normalizeOutdatedResults } from "./helpers";
 
 /// Upgrade Types
 
@@ -72,8 +73,8 @@ export interface UpgradeSummary {
   upgraded: UpgradePackage[];
   failed: UpgradePackage[];
   skipped: UpgradePackage[];
-  /** True if the run was cancelled before all packages were upgraded */
-  cancelled: boolean;
+  /** True if the run was canceled before all packages were upgraded */
+  canceled: boolean;
 }
 
 /**
@@ -82,7 +83,7 @@ export interface UpgradeSummary {
 export interface UpgradeOptions {
   /** Include auto-updating casks */
   greedy?: boolean;
-  /** Pre-fetch all packages before upgrading (uses Homebrew 5.0 concurrent downloads) */
+  /** Pre-fetch all packages before upgrading (uses Homebrew's concurrent downloads) */
   prefetch?: boolean;
   /** Continue upgrading remaining packages if one fails */
   continueOnError?: boolean;
@@ -116,7 +117,7 @@ export function upgradeKey(pkg: UpgradePackage): string {
  * Upgrade all outdated packages, reporting progress via events.
  *
  * Features:
- * - Optional pre-fetching with Homebrew 5.0 concurrent downloads
+ * - Optional pre-fetching with Homebrew's concurrent downloads
  * - Pinned formulae are skipped
  * - Continue upgrading remaining packages when one fails
  * - Cancellation via AbortSignal
@@ -147,18 +148,27 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     cmd += " --greedy";
   }
   const result = await execBrewWithProgress(cmd, undefined, cancel, execOptions);
-  const outdated = JSON.parse(result.stdout) as OutdatedResults;
+  const outdated = normalizeOutdatedResults(JSON.parse(result.stdout) as OutdatedResults);
 
-  // Pinned formulae cannot be upgraded, so exclude them from the run
-  let packages: UpgradePackage[] = [
-    ...outdated.formulae.filter((formula) => !formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
+  // Pinned packages cannot be upgraded, so exclude them from the run.
+  // This matters because we name every package explicitly: Homebrew only warns
+  // about a pinned package on a bare `brew upgrade`, but errors (exit 1) when it
+  // is named. Leaving one in would report a deliberate skip as a failure.
+  //
+  // Read the pin state from disk rather than trusting the payload: a package
+  // pinned in another command, or outside Raycast, is pinned in Homebrew's eyes
+  // whatever this snapshot says. One snapshot of both pin directories per run.
+  const pins = await brewPinnedIdentifiers();
+  const isPinned = (name: string, isCask: boolean) => isPinnedPackage(pins, name, isCask);
+
+  const all: UpgradePackage[] = [
+    ...outdated.formulae.map((formula) => ({ name: formula.name, isCask: false })),
     ...outdated.casks.map((cask) => ({ name: cask.name, isCask: true })),
   ];
-  const pinned: UpgradePackage[] = outdated.formulae
-    .filter((formula) => formula.pinned)
-    .map((formula) => ({ name: formula.name, isCask: false }));
+  let packages: UpgradePackage[] = all.filter((pkg) => !isPinned(pkg.name, pkg.isCask));
+  const pinned: UpgradePackage[] = all.filter((pkg) => isPinned(pkg.name, pkg.isCask));
 
-  // Honour the selection: upgrade only the reviewed packages that are still
+  // Honor the selection: upgrade only the reviewed packages that are still
   // outdated. Everything else stays untouched.
   if (options?.selection) {
     packages = restrictToSelection(packages, options.selection);
@@ -169,7 +179,7 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Pinned" });
   }
 
-  const summary: UpgradeSummary = { upgraded: [], failed: [], skipped: [...pinned], cancelled: false };
+  const summary: UpgradeSummary = { upgraded: [], failed: [], skipped: [...pinned], canceled: false };
 
   if (packages.length === 0) {
     actionsLogger.log("No packages to upgrade");
@@ -186,9 +196,16 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   });
 
   // Step 3 (optional): Pre-fetch all packages concurrently
-  // This leverages Homebrew 5.0's HOMEBREW_DOWNLOAD_CONCURRENCY for parallel downloads
+  // This leverages HOMEBREW_DOWNLOAD_CONCURRENCY for parallel downloads
   if (prefetch && packages.length > 1) {
     onEvent?.({ type: "prefetch" });
+    // Batch progress only — deliberately NOT attributed to a row. brew prints
+    // every `Fetching <name> from <tap>` line while ENQUEUEING (cmd/fetch.rb),
+    // then downloads the queue concurrently, so those lines say what is about to
+    // be fetched, not what is downloading now. Marking rows from them would race
+    // through the whole list and then park on whichever was announced last.
+    // The toast reports the batch; per-row status resumes at the sequential
+    // upgrade loop below, where it is real.
     const onFetchProgress = (progress: BrewProgress) => onEvent?.({ type: "prefetch", progress });
 
     // Fetch formulae and casks separately (brew fetch syntax)
@@ -216,17 +233,17 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
   for (const pkg of packages) {
     if (cancel?.aborted) {
-      summary.cancelled = true;
+      summary.canceled = true;
     }
 
-    // Skip the remaining packages once cancelled, locked out or stopped by an error
-    if (summary.cancelled || stop) {
+    // Skip the remaining packages once canceled, locked out or stopped by an error
+    if (summary.canceled || stop) {
       summary.skipped.push(pkg);
       onEvent?.({
         type: "package",
         package: pkg,
         status: "skipped",
-        message: summary.cancelled ? "Cancelled" : "Skipped",
+        message: summary.canceled ? "Canceled" : "Skipped",
       });
       continue;
     }
@@ -235,12 +252,21 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
     try {
       const cmd = `upgrade ${pkg.isCask ? "--cask " : ""}${pkg.name}`;
-      await execBrewWithProgress(
+      const result = await execBrewWithProgress(
         cmd,
         (progress) => onEvent?.({ type: "package", package: pkg, status: "upgrading", progress }),
         cancel,
         { ...execOptions, packageName: pkg.name },
       );
+
+      // Exit 0 does not mean it was upgraded: Homebrew warns and skips a
+      // disabled, unavailable or already-current package.
+      const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, pkg.name);
+      if (declined) {
+        summary.skipped.push(pkg);
+        onEvent?.({ type: "package", package: pkg, status: "skipped", message: declined });
+        continue;
+      }
 
       summary.upgraded.push(pkg);
       onEvent?.({ type: "package", package: pkg, status: "upgraded" });
@@ -250,9 +276,9 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
       // Cancellation aborts the running brew process: treat it as skipped
       if (cancel?.aborted || error.name === "AbortError") {
-        summary.cancelled = true;
+        summary.canceled = true;
         summary.skipped.push(pkg);
-        onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Cancelled" });
+        onEvent?.({ type: "package", package: pkg, status: "skipped", message: "Canceled" });
         continue;
       }
 
@@ -288,7 +314,7 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     upgraded: summary.upgraded.length,
     failed: summary.failed.length,
     skipped: summary.skipped.length,
-    cancelled: summary.cancelled,
+    canceled: summary.canceled,
   });
 
   return summary;

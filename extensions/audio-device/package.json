@@ -50,14 +50,30 @@
       "title": "Set Output Volume",
       "subtitle": "Audio Device",
       "description": "Set the volume of an output device.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "0-100",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "set-input-volume",
       "title": "Set Input Volume",
       "subtitle": "Audio Device",
       "description": "Set the volume of an input device.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "0-100",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "auto-switch-input",

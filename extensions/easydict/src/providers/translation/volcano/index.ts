@@ -1,38 +1,17 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
 import { genVolcanoSign } from "@/providers/shared/volcano-sign";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError, logWarn } from "@/utils/logger";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logError, logWarn } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "../base";
-
-export interface VolcanoTranslateResult {
-  TranslationList?: VolcanoTranslationList[];
-  ResponseMetadata: VolcanoResponseMetaData;
-}
-
-interface VolcanoResponseMetaData {
-  RequestId: string;
-  Action: string;
-  Version: Date;
-  Service: string;
-  Region: string;
-  Error?: VolcanoError;
-}
-
-interface VolcanoTranslationList {
-  Translation: string;
-  DetectedSourceLanguage?: string;
-}
-
-interface VolcanoError {
-  Code: string;
-  Message: string;
-}
+import { invalidResponse } from "../response";
 
 /**
  * Volcengine Translate API.
@@ -42,7 +21,7 @@ interface VolcanoError {
 export class VolcanoTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Volcano;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
     const from = getLangCode(fromLanguage, "volcanoLangCode");
     const to = getLangCode(toLanguage, "volcanoLangCode");
@@ -67,31 +46,27 @@ export class VolcanoTranslateProvider extends BaseNonStreamingTranslateProvider 
     const url = signObject.getUrl();
     const config = signObject.getConfig();
 
-    const volcanoResult = await timedFetch<VolcanoTranslateResult>(url, {
+    const volcanoResult = await timedFetch<unknown>(url, {
       method: "POST",
       body: params,
       headers: config.headers,
       signal,
     });
 
-    const volcanoError = volcanoResult.ResponseMetadata?.Error;
-
-    if (volcanoError) {
-      logError(this.type, `translate error: ${volcanoError.Message}`);
-      throw new RequestError(TranslationType.Volcano, volcanoError.Message || "", volcanoError.Code || "");
+    if (!isRecord(volcanoResult)) throw invalidResponse(this.type);
+    if (volcanoResult.ResponseMetadata !== undefined) {
+      if (!isRecord(volcanoResult.ResponseMetadata)) throw invalidResponse(this.type);
+      const error = volcanoResult.ResponseMetadata.Error;
+      if (error !== undefined) {
+        if (!isRecord(error) || typeof error.Message !== "string" || typeof error.Code !== "string")
+          throw invalidResponse(this.type);
+        logError(this.type, `translate error: ${error.Message}`);
+        throw new RequestError(this.type, error.Message, error.Code);
+      }
     }
-
-    if (!volcanoResult.TranslationList) {
-      throw new Error("Volcano translate: no translation list");
-    }
-
-    const translations = volcanoResult.TranslationList[0].Translation.split("\n");
-
-    return {
-      type: TranslationType.Volcano,
-      result: volcanoResult,
-      translations,
-      queryWordInfo,
-    };
+    if (volcanoResult.TranslationList === undefined) throw new Error("Volcano translate: no translation list");
+    const translated = Array.isArray(volcanoResult.TranslationList) ? volcanoResult.TranslationList[0] : undefined;
+    if (!isRecord(translated) || typeof translated.Translation !== "string") throw invalidResponse(this.type);
+    return { kind: "translation", query: queryWordInfo, paragraphs: translated.Translation.split("\n") };
   }
 }

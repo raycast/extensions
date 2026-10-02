@@ -1,4 +1,4 @@
-import { fetchArticles, safeParseDate } from "../utils";
+import { fetchArticles, safeParseDate, truncateText } from "../utils";
 import { getPreferenceValues } from "@raycast/api";
 
 /**
@@ -26,8 +26,8 @@ export default async function getLatestArticles(input: Input) {
    * Get user preferences for maximum posts
    * Falls back to default value of 90 if not specified
    */
-  const preferences = getPreferenceValues();
-  const maxPosts = parseInt(preferences.maxPosts as string) || 90;
+  const preferences = getPreferenceValues<Preferences>();
+  const maxPosts = Number.parseInt(preferences.maxPosts, 10) || 90;
 
   /**
    * Determine the limit for articles to return
@@ -70,7 +70,7 @@ export default async function getLatestArticles(input: Input) {
       title: article.title,
       link: article.link,
       pubDate: article.pubDate,
-      description: article.description,
+      description: truncateText(article.description, 500),
       creator: article.creator || "Unknown",
       categories: article.categories || [],
     })),

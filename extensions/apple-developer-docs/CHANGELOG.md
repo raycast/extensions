@@ -1,5 +1,8 @@
 # Apple Developer Docs Changelog
 
+## [Fix Search API Streaming Protocol] - 2026-09-20
+- Updated Apple Developer search to consume the current JSONL streaming query API.
+
 ## [Fix Search History] - 2026-05-25
 - Search history items are now filtered by the current search text, so they no longer push unrelated entries above live results.
 

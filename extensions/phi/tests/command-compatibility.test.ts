@@ -7,6 +7,7 @@ const phi = vi.hoisted(() => ({
 
 vi.mock("../src/phi", () => ({
   MINIMUM_PHI_VERSION: "2.4.0",
+  PHI_SCRIPTING_API_V2_MINIMUM_VERSION: "2.9.0",
   requirePhiVersion: phi.requirePhiVersion,
 }));
 
@@ -76,6 +77,14 @@ describe("Phi command compatibility", () => {
 
     expect(phi.requirePhiVersion).toHaveBeenCalledWith("2.6.0");
     expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("requires scripting API version 2 for the new native commands", async () => {
+    await runPhiCommand("new-kiosk-window", vi.fn());
+    await runPhiCommand("new-incognito-space", vi.fn());
+
+    expect(phi.requirePhiVersion).toHaveBeenNthCalledWith(1, "2.9.0", 2);
+    expect(phi.requirePhiVersion).toHaveBeenNthCalledWith(2, "2.9.0", 2);
   });
 
   it("does not run the command when its Phi version is unsupported", async () => {

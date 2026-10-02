@@ -6,25 +6,68 @@ import {
   brewInstallPath,
   brewIsInstalled,
   brewIsOutdated,
+  brewHost,
   brewUninstallCommand,
   brewUpgradeCommand,
+  caskHasSymlinkArtifacts,
+  HOMEBREW_7,
   type Cask,
   type Formula,
   type OutdatedCask,
   type OutdatedFormula,
   type UpgradePackageStatus,
 } from "../utils";
+import { uninstallableReason } from "../utils/brew/installability";
+import { hasNextPage } from "../utils/paging";
 import { useTerminalApp } from "../utils/terminal";
+import { useBrewMajorVersion } from "../hooks/useBrewMajorVersion";
+import type { PagingProps } from "./list";
 import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
+import { InstallPreview, UpgradePreview } from "./installPreview";
 
-const ToggleSidebarAction = (props: { onToggleSidebar: () => void }) => (
+/**
+ * Outdated only — the caller gates on it: an up-to-date package has no plan to
+ * show, and the dry run would come back with brew's "already installed" line.
+ *
+ * ⌘⌥I, not the ⌘⇧I that Preview Install uses: Show Upgrades already binds ⌘⇧I
+ * to the whole-machine Preview Upgrades, and one action cannot mean two scopes
+ * — so the single-package preview takes one binding that is free in both panels.
+ */
+const PreviewUpgradeAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => (
+  <Action.Push
+    title="Preview Upgrade"
+    icon={Icon.Eye}
+    shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+    target={<UpgradePreview target={props.item} onAction={props.onAction} />}
+  />
+);
+
+const PreviewInstallAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => (
+  <Action.Push
+    title="Preview Install"
+    icon={Icon.Eye}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+    target={<InstallPreview item={props.item} onAction={props.onAction} />}
+  />
+);
+
+export const ToggleSidebarAction = (props: { onToggleSidebar: () => void }) => (
   <Action
     title="Toggle Sidebar"
     icon={Icon.AppWindowSidebarRight}
     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
     onAction={props.onToggleSidebar}
+  />
+);
+
+export const RefreshAction = (props: { onRefresh: () => void }) => (
+  <Action
+    title="Refresh"
+    icon={Icon.ArrowClockwise}
+    shortcut={Keyboard.Shortcut.Common.Refresh}
+    onAction={props.onRefresh}
   />
 );
 
@@ -36,6 +79,9 @@ const SortByPopularityAction = (props: { sortByPopularity: boolean; onToggleSort
   <Action
     title={props.sortByPopularity ? "Sort by Relevance" : "Sort by Popularity"}
     icon={props.sortByPopularity ? Icon.Text : Icon.LineChart}
+    // ⌘⇧P is free: Keyboard.Shortcut.Common.Pin is ⌘. on macOS (verified
+    // against the Raycast 2.4.1 runtime), so the Pin action here does not collide.
+    // The API docs say ⌘⇧P and are wrong — see raycast/extensions#30879.
     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     onAction={props.onToggleSort}
   />
@@ -57,10 +103,74 @@ const ToggleDescriptionAction = (props: { showDescription: boolean; onToggleDesc
  * and mixing them into the install/upgrade section buries the action you
  * actually came for.
  */
+/**
+ * Move the result window. Rendered in every row's panel, not only on the footer
+ * row, so paging does not require scrolling to the bottom first.
+ *
+ * Next/Previous are ⌘↓/⌘↑; First/Last are ⌘⇧↑/⌘⇧↓, written out rather
+ * than taken from `Common.MoveUp`/`MoveDown`. Those two constants mean "move
+ * the selected item", not "jump to a page", and the Raycast runtime resolves
+ * them to ⌘⌥↑/⌘⌥↓ — NOT the ⌘⇧ arrows that `@raycast/eslint-plugin` 2.2.0
+ * reports for them. Validate bindings against the runtime, never the linter.
+ * The dedicated page/home/end keys would read better — they mean exactly this
+ * and nothing else — but a laptop keyboard has none of them, so those bindings
+ * were unreachable for most users.
+ *
+ * The footer row also makes Next Page its PRIMARY action, so ⏎ pages forward
+ * without needing any of these.
+ */
+export const PagingSection = (props: { paging: PagingProps }) => {
+  const { paging } = props;
+  const hasNext = hasNextPage(paging.page, paging.totalPages);
+  const hasPrevious = paging.page > 0;
+
+  if (!hasNext && !hasPrevious) {
+    return null;
+  }
+  return (
+    <ActionPanel.Section title={`Page ${paging.page + 1} of ${paging.totalPages}`}>
+      {hasNext && (
+        <Action
+          title="Next Page"
+          icon={Icon.ArrowRightCircle}
+          shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+          onAction={() => paging.goToPage(paging.page + 1)}
+        />
+      )}
+      {hasPrevious && (
+        <Action
+          title="Previous Page"
+          icon={Icon.ArrowLeftCircle}
+          shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
+          onAction={() => paging.goToPage(paging.page - 1)}
+        />
+      )}
+      {hasPrevious && (
+        <Action
+          title="First Page"
+          icon={Icon.ChevronUp}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+          onAction={() => paging.goToPage(0)}
+        />
+      )}
+      {hasNext && (
+        <Action
+          title="Last Page"
+          icon={Icon.ChevronDown}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+          onAction={() => paging.goToPage(paging.totalPages - 1)}
+        />
+      )}
+    </ActionPanel.Section>
+  );
+};
+
 const ViewSection = (props: {
   onToggleSidebar?: () => void;
   /** Whether the detail sidebar is currently on screen. */
   metadataPanelVisible?: boolean;
+  /** Page navigation, when the matches span more than one page. */
+  paging?: PagingProps;
   showDescription?: boolean;
   onToggleDescription?: () => void;
   sortByPopularity?: boolean;
@@ -77,23 +187,29 @@ const ViewSection = (props: {
   // Details" — the latter read as a variant of the "Show Details" push action.
   const canToggleDescription = props.onToggleDescription != undefined && props.metadataPanelVisible === true;
 
-  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children) {
+  if (!props.onToggleSidebar && !canToggleDescription && !props.onToggleSort && !props.children && !props.paging) {
     return null;
   }
   return (
-    <ActionPanel.Section title="View">
-      {props.onToggleSidebar && <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />}
-      {canToggleDescription && props.onToggleDescription && (
-        <ToggleDescriptionAction
-          showDescription={props.showDescription ?? true}
-          onToggleDescription={props.onToggleDescription}
-        />
-      )}
-      {props.children}
-      {props.onToggleSort && (
-        <SortByPopularityAction sortByPopularity={props.sortByPopularity ?? false} onToggleSort={props.onToggleSort} />
-      )}
-    </ActionPanel.Section>
+    <>
+      {props.paging && <PagingSection paging={props.paging} />}
+      <ActionPanel.Section title="View">
+        {props.onToggleSidebar && <ToggleSidebarAction onToggleSidebar={props.onToggleSidebar} />}
+        {canToggleDescription && props.onToggleDescription && (
+          <ToggleDescriptionAction
+            showDescription={props.showDescription ?? true}
+            onToggleDescription={props.onToggleDescription}
+          />
+        )}
+        {props.children}
+        {props.onToggleSort && (
+          <SortByPopularityAction
+            sortByPopularity={props.sortByPopularity ?? false}
+            onToggleSort={props.onToggleSort}
+          />
+        )}
+      </ActionPanel.Section>
+    </>
   );
 };
 
@@ -122,6 +238,8 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
 );
 
 export function CaskActionPanel(props: {
+  /** Page navigation, rendered in every row so paging works from anywhere. */
+  paging?: PagingProps;
   cask: Cask;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
@@ -153,12 +271,17 @@ export function CaskActionPanel(props: {
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  const { major } = useBrewMajorVersion();
+  // brew takes no cask lock on link/unlink, so nothing but this stops two
+  // overlapping runs. `Action` has no disabled prop: drop the section instead.
+  const [linkInFlight, setLinkInFlight] = React.useState(false);
 
   function installedActionPanel() {
     return (
       <ActionPanel>
         <ActionPanel.Section>
           {brewIsOutdated(cask) && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
+          {brewIsOutdated(cask) && <PreviewUpgradeAction item={cask} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -167,6 +290,12 @@ export function CaskActionPanel(props: {
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          <Actions.PinAction item={cask} kind="cask" onAction={props.onAction} />
+          {/* Offered unconditionally. Gating it on !brewIsOutdated hid it in the
+              exact case it exists for: a STALE flag. A cached outdated:true that
+              the user has since resolved elsewhere would leave Upgrade as the
+              only way to correct the row. */}
+          <Actions.CheckForUpdatesAction item={cask} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -192,28 +321,44 @@ export function CaskActionPanel(props: {
             shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         </ActionPanel.Section>
+        {major !== undefined && major >= HOMEBREW_7 && caskHasSymlinkArtifacts(cask) !== false && !linkInFlight && (
+          <ActionPanel.Section title="Symlinks">
+            <Actions.CaskLinkAction cask={cask} action="link" onBusy={setLinkInFlight} onAction={props.onAction} />
+            <Actions.CaskLinkAction cask={cask} action="unlink" onBusy={setLinkInFlight} onAction={props.onAction} />
+          </ActionPanel.Section>
+        )}
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
-          <Action.CopyToClipboard
-            title="Copy Uninstall Command"
-            content={brewUninstallCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Uninstall in ${terminalName}`}
-            icon={terminalIcon}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
-          />
+          {/* A pinned package cannot be uninstalled without --force, which the
+              command builder does not add — so no command is offered to paste. */}
+          {!cask.pinned && (
+            <>
+              <Action.CopyToClipboard
+                title="Copy Uninstall Command"
+                content={brewUninstallCommand(cask)}
+                // ⌘⇧⌥C, matching the same action in the outdated panel. It cannot
+                // stay on ⌘⌥C: that is Common.CopyName, which Copy Cask URL holds
+                // in this same panel.
+                shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+              />
+              <Action
+                title={`Run Uninstall in ${terminalName}`}
+                icon={terminalIcon}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
+              />
+            </>
+          )}
         </ActionPanel.Section>
 
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
         </ActionPanel.Section>
 
         <ViewSection
+          paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
           metadataPanelVisible={props.metadataPanelVisible}
           showDescription={props.showDescription}
@@ -227,10 +372,15 @@ export function CaskActionPanel(props: {
   }
 
   function uninstalledActionPanel() {
+    // brew would refuse this one (disabled, wrong OS, macOS version, arch), and
+    // `--adopt` runs the same `check_requirements`. `Action` has no disabled
+    // prop, so omitting the actions is the only honest form; the Copy actions
+    // stay for anyone deliberately running it themselves (e.g. `arch -x86_64`).
+    const blocked = uninstallableReason(cask, brewHost) !== undefined;
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
+          {!blocked && <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -238,32 +388,45 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {!blocked && <PreviewInstallAction item={cask} onAction={props.onAction} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={brewInstallCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            // ⌘⌥I joins the install family (⌘I Install, ⌘⇧I Preview Install).
+            // ⌘⌥C is Common.CopyName here (Copy Cask URL) and ⌘⇧⌥C is Copy Adopt
+            // Command; Preview Upgrade's ⌘⌥I is installed-only, so this panel is free.
+            shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           />
-          <Action
-            title={`Run Install in ${terminalName}`}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
-          />
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Adopt in ${terminalName}`}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
-          />
+          {!blocked && (
+            <Action
+              title={`Run Install in ${terminalName}`}
+              icon={terminalIcon}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
+            />
+          )}
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(cask)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
+          {!blocked && (
+            <Action
+              title={`Run Adopt in ${terminalName}`}
+              icon={terminalIcon}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
+            />
+          )}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -290,6 +453,7 @@ export function CaskActionPanel(props: {
           />
         </ActionPanel.Section>
         <ViewSection
+          paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
           metadataPanelVisible={props.metadataPanelVisible}
           showDescription={props.showDescription}
@@ -309,6 +473,8 @@ export function CaskActionPanel(props: {
 }
 
 export function FormulaActionPanel(props: {
+  /** Page navigation, rendered in every row so paging works from anywhere. */
+  paging?: PagingProps;
   formula: Formula;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
@@ -346,6 +512,7 @@ export function FormulaActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           {brewIsOutdated(formula) && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
+          {brewIsOutdated(formula) && <PreviewUpgradeAction item={formula} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -354,7 +521,12 @@ export function FormulaActionPanel(props: {
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
-          <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.PinAction item={formula} kind="formula" onAction={props.onAction} />
+          {/* Offered unconditionally. Gating it on !brewIsOutdated hid it in the
+              exact case it exists for: a STALE flag. A cached outdated:true that
+              the user has since resolved elsewhere would leave Upgrade as the
+              only way to correct the row. */}
+          <Actions.CheckForUpdatesAction item={formula} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -382,21 +554,31 @@ export function FormulaActionPanel(props: {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
-          <Action.CopyToClipboard
-            title="Copy Uninstall Command"
-            content={brewUninstallCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Uninstall in ${terminalName}`}
-            style={Action.Style.Destructive}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
-          />
+          {/* A pinned package cannot be uninstalled without --force, which the
+              command builder does not add — so no command is offered to paste. */}
+          {!formula.pinned && (
+            <>
+              <Action.CopyToClipboard
+                title="Copy Uninstall Command"
+                content={brewUninstallCommand(formula)}
+                // ⌘⇧⌥C, matching the same action in the outdated panel. It cannot
+                // stay on ⌘⌥C: that is Common.CopyName, which Copy Formula URL holds
+                // in this same panel.
+                shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+              />
+              <Action
+                title={`Run Uninstall in ${terminalName}`}
+                style={Action.Style.Destructive}
+                icon={terminalIcon}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
+              />
+            </>
+          )}
         </ActionPanel.Section>
 
         <ViewSection
+          paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
           metadataPanelVisible={props.metadataPanelVisible}
           showDescription={props.showDescription}
@@ -412,10 +594,15 @@ export function FormulaActionPanel(props: {
   }
 
   function uninstalledActionPanel() {
+    // brew would refuse this one (disabled, wrong OS, macOS version, arch), and
+    // `--adopt` runs the same `check_requirements`. `Action` has no disabled
+    // prop, so omitting the actions is the only honest form; the Copy actions
+    // stay for anyone deliberately running it themselves (e.g. `arch -x86_64`).
+    const blocked = uninstallableReason(formula, brewHost) !== undefined;
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
+          {!blocked && <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -423,6 +610,7 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {!blocked && <PreviewInstallAction item={formula} onAction={props.onAction} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
@@ -434,25 +622,37 @@ export function FormulaActionPanel(props: {
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={brewInstallCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            // ⌘⌥I joins the install family (⌘I Install, ⌘⇧I Preview Install).
+            // ⌘⌥C is Common.CopyName here (Copy Formula URL) and ⌘⇧⌥C is Copy Adopt
+            // Command; Preview Upgrade's ⌘⌥I is installed-only, so this panel is free.
+            shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
           />
-          <Action
-            title={`Run Install in ${terminalName}`}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
-          />
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Adopt in ${terminalName}`}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
-          />
+          {!blocked && (
+            <Action
+              title={`Run Install in ${terminalName}`}
+              icon={terminalIcon}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+            />
+          )}
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(formula)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
+          {!blocked && (
+            <Action
+              title={`Run Adopt in ${terminalName}`}
+              icon={terminalIcon}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
+            />
+          )}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -480,6 +680,7 @@ export function FormulaActionPanel(props: {
         </ActionPanel.Section>
 
         <ViewSection
+          paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
           metadataPanelVisible={props.metadataPanelVisible}
           showDescription={props.showDescription}
@@ -501,13 +702,21 @@ export function FormulaActionPanel(props: {
 
 interface OutdatedActionProps {
   outdated: OutdatedCask | OutdatedFormula;
+  /**
+   * Which kind this is, stated rather than sniffed. Both kinds report `pinned`,
+   * so a value guard cannot separate them, and `isCask()` depends on the
+   * synthetic `token` from `normalizeOutdatedResults` having been applied.
+   */
+  isCask: boolean;
+  /**
+   * Effective pin state. The payload's own `pinned` can be a stale snapshot
+   * from an in-flight fetch, and the review view tracks the live value in its
+   * pin overrides — so every guard here reads this, not the payload.
+   */
+  pinned?: boolean;
   /** Called when the upgrade starts or finishes, e.g. to show its status in a list */
   onUpgrade?: (status: UpgradePackageStatus) => void;
   onAction: (result: boolean) => void;
-}
-
-function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
-  return (o as OutdatedFormula).pinned != undefined;
 }
 
 /**
@@ -527,6 +736,7 @@ export function OutdatedUpgradeAction(props: OutdatedActionProps) {
   return (
     <Actions.FormulaUpgradeAction
       formula={props.outdated}
+      pinned={props.pinned ?? props.outdated.pinned === true}
       onStart={() => props.onUpgrade?.("upgrading")}
       onSkip={() => props.onUpgrade?.("skipped")}
       onAction={onUpgradeAction}
@@ -535,38 +745,68 @@ export function OutdatedUpgradeAction(props: OutdatedActionProps) {
 }
 
 /**
- * Per-package sections shared by the outdated surfaces: single upgrade, pin,
- * refresh, copy/terminal commands and uninstall. A fragment so Show Upgrades
- * can append them beneath its selection actions.
+ * Per-package sections shared by the outdated surfaces: pin, copy/terminal
+ * commands, refresh and uninstall. A fragment so Show Upgrades can append them
+ * beneath its own upgrade actions.
+ *
+ * The upgrade actions themselves are NOT here: every caller hoists them into
+ * the panel's first section, so that the run action lands in the second slot,
+ * where Raycast binds ⌘↩.
  */
 export function OutdatedActionSections(
   props: OutdatedActionProps & {
     /**
-     * Omit the per-package upgrade action from the sections. For rows that
-     * hoist that action to the panel's first slot (so a run action can take
-     * the second slot, where Raycast binds ⌘↩) without listing it twice.
-     */
-    omitUpgrade?: boolean;
-    /**
      * Omit the pin action. For rows that hoist a selection-aware pin action
-     * of their own — two Pin entries with different selection behaviour would
+     * of their own — two Pin entries with different selection behavior would
      * otherwise share the panel.
      */
     omitPin?: boolean;
+    /**
+     * Omit the upgrade COMMAND actions (copy / run in terminal). For a pinned
+     * package: brew refuses an explicitly named pinned package outright
+     * (cmd/upgrade.rb, cask/upgrade.rb), so handing the user
+     * `brew upgrade --cask docker` to paste is handing them a command that
+     * cannot succeed until they unpin.
+     */
+    omitUpgradeCommand?: boolean;
+    /**
+     * Actions that belong beside Pin — Show Upgrades' selection actions, which
+     * act on the same row and so share its section rather than opening one of
+     * their own. Typed off ActionPanel.Section: see ViewSection.
+     */
+    children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
   },
 ) {
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  const pinned = props.pinned ?? outdated.pinned === true;
 
   return (
     <>
+      {(props.children != undefined || !props.omitPin) && (
+        <ActionPanel.Section>
+          {props.children}
+          {!props.omitPin && (
+            <Actions.PinAction item={outdated} kind={props.isCask ? "cask" : "formula"} onAction={props.onAction} />
+          )}
+        </ActionPanel.Section>
+      )}
+      {!(props.omitUpgradeCommand ?? pinned) && (
+        <ActionPanel.Section>
+          <Action.CopyToClipboard
+            title="Copy Upgrade Command"
+            content={brewUpgradeCommand(outdated)}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Upgrade in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
-        {!props.omitUpgrade && (
-          <OutdatedUpgradeAction outdated={outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
-        )}
-        {!props.omitPin && isPinable(outdated) && (
-          <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />
-        )}
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
@@ -575,32 +815,27 @@ export function OutdatedActionSections(
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.CopyToClipboard
-          title="Copy Upgrade Command"
-          content={brewUpgradeCommand(outdated)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-        />
-        <Action
-          title={`Run Upgrade in ${terminalName}`}
-          icon={terminalIcon}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
-        <Action.CopyToClipboard
-          title="Copy Uninstall Command"
-          content={brewUninstallCommand(outdated)}
-          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-        />
-        <Action
-          title={`Run Uninstall in ${terminalName}`}
-          icon={terminalIcon}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-          onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
-        />
+        <Actions.FormulaUninstallAction formula={outdated} pinned={pinned} onAction={props.onAction} />
+        {/* brew refuses to uninstall a pinned package without --force, and the
+            command builder does not add it — so a pinned row is offered no
+            uninstall command it could paste. The action above handles it, with
+            an explicit unpin confirmation. */}
+        {!pinned && (
+          <>
+            <Action.CopyToClipboard
+              title="Copy Uninstall Command"
+              content={brewUninstallCommand(outdated)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+            <Action
+              title={`Run Uninstall in ${terminalName}`}
+              icon={terminalIcon}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
+            />
+          </>
+        )}
       </ActionPanel.Section>
     </>
   );
@@ -615,14 +850,20 @@ export function OutdatedActionPanel(
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OutdatedUpgradeAction outdated={props.outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
+        <OutdatedUpgradeAction
+          outdated={props.outdated}
+          isCask={props.isCask}
+          pinned={props.pinned}
+          onUpgrade={props.onUpgrade}
+          onAction={props.onAction}
+        />
         <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
       </ActionPanel.Section>
       <OutdatedActionSections
         outdated={props.outdated}
-        onUpgrade={props.onUpgrade}
+        isCask={props.isCask}
         onAction={props.onAction}
-        omitUpgrade
+        pinned={props.pinned}
       />
     </ActionPanel>
   );
@@ -633,7 +874,15 @@ export function OutdatedActionPanel(
  *
  * Other brew actions are omitted, since Homebrew does not support concurrent processes.
  */
-export function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedFormula; onCancel: () => void }) {
+export function UpgradingActionPanel(props: {
+  outdated: OutdatedCask | OutdatedFormula;
+  /** Effective pin state; the payload's own value may be a stale snapshot. */
+  pinned?: boolean;
+  onCancel: () => void;
+}) {
+  // A pinned row is skipped by the run, and brew refuses a named pinned
+  // package — so it gets no upgrade command to copy.
+  const pinned = props.pinned ?? props.outdated.pinned === true;
   return (
     <ActionPanel>
       <Action
@@ -642,11 +891,13 @@ export function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedF
         style={Action.Style.Destructive}
         onAction={props.onCancel}
       />
-      <Action.CopyToClipboard
-        title="Copy Upgrade Command"
-        content={brewUpgradeCommand(props.outdated)}
-        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-      />
+      {!pinned && (
+        <Action.CopyToClipboard
+          title="Copy Upgrade Command"
+          content={brewUpgradeCommand(props.outdated)}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
+      )}
     </ActionPanel>
   );
 }

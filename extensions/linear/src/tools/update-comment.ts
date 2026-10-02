@@ -5,7 +5,8 @@ import { withAccessToken } from "@raycast/utils";
 import { appendFileAttachments } from "../api/attachments";
 import { getLinearClient, linear } from "../api/linearClient";
 
-import { serializeComment } from "./commentUtils";
+import { serializeComment } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = {
   /** The comment content in markdown format */
@@ -18,7 +19,7 @@ type Input = {
   id: string;
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
+export default withLinear(async (inputs: Input) => {
   const { linearClient } = getLinearClient();
   const body = await appendFileAttachments(inputs.body, inputs.attachmentPaths);
   const result = await linearClient.updateComment(inputs.id, { body });

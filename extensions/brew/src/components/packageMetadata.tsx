@@ -16,15 +16,17 @@ import { Color, Detail, Icon, Image, List } from "@raycast/api";
 import {
   Cask,
   Formula,
-  brewInstalledVersion,
-  brewIsInstalled,
-  brewIsOutdated,
-  isCask,
+  formatPackageVersion,
   brewPrefix,
+  brewHost,
+  brewIsInstalled,
   analyticsRows,
   packageStatus,
+  caskLanguagesText,
 } from "../utils";
+import { uninstallableReason } from "../utils/brew/installability";
 import { PackageDetailState } from "../hooks/usePackageDetail";
+import { STATUS_COLOR, UNINSTALLABLE_ICON, WARNING_ICON } from "./palette";
 
 export type MetadataRow =
   | { kind: "label"; key: string; title: string; text: string; color?: Color; icon?: Image.ImageLike }
@@ -52,36 +54,32 @@ export interface MetadataOptions {
 /// Row builders
 
 /**
- * The version line: what is INSTALLED, plus what is available when they differ.
- *
- * Never leads with `versions.stable` on an installed package — that is the
- * version on offer, not the one present, and labelling it "installed" claimed a
- * version the user did not have.
+ * A checkmark prefix, so an installed dependency reads as such without relying
+ * on color alone. U+2713 rather than an SF Symbols codepoint: this has to
+ * render on Windows too.
  */
-export function formatPackageVersion(item: Cask | Formula): string {
-  const cask = isCask(item);
-  const available = cask ? item.version : item.versions.stable;
-  const installedVersion = brewInstalledVersion(item);
-
-  const status: string[] = [];
-  if (!cask && item.versions.bottle) {
-    status.push("bottled");
-  }
-  if (brewIsInstalled(item)) {
-    status.push("installed");
-  }
-  if (!cask && item.installed?.first()?.installed_as_dependency) {
-    status.push("dependency");
-  }
-
-  const version =
-    installedVersion && brewIsOutdated(item) ? `${installedVersion} → ${available}` : (installedVersion ?? available);
-
-  return status.length > 0 ? `${version} (${status.join(", ")})` : version;
-}
+const INSTALLED_TAG_PREFIX = "✓ ";
 
 function dependencyTags(names: string[] | undefined, isInstalled: (name: string) => boolean) {
-  return (names ?? []).map((name) => ({ text: name, color: isInstalled(name) ? Color.Green : Color.SecondaryText }));
+  return (names ?? []).map((name) =>
+    isInstalled(name)
+      ? { text: `${INSTALLED_TAG_PREFIX}${name}`, color: STATUS_COLOR.ok }
+      : { text: name, color: STATUS_COLOR.muted },
+  );
+}
+
+/** Append a tag row and its separator, or nothing when there is nothing to show. */
+function pushTagRow(
+  rows: MetadataRow[],
+  key: string,
+  title: string,
+  tags: { text: string; color?: Color.ColorLike }[] | undefined,
+): void {
+  if (!tags || tags.length === 0) {
+    return;
+  }
+  rows.push({ kind: "separator", key: `${key}-sep` });
+  rows.push({ kind: "tags", key, title, tags });
 }
 
 /** Leading rows shared by both kinds: the lifecycle warning, then the prose. */
@@ -95,10 +93,31 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       key: "status",
       title: status.title,
       text: status.text,
-      color: Color.Orange,
-      icon: { source: Icon.Warning, tintColor: Color.Orange },
+      color: STATUS_COLOR.attention,
+      icon: WARNING_ICON,
     });
     rows.push({ kind: "separator", key: "status-sep" });
+  }
+
+  // Why brew would refuse this package here — the verdict, next to the
+  // requirement rows that state the constraint. A disabled package already
+  // says so in the status row above, so it is not repeated: gated on the
+  // record's own `disabled`, NOT on `status`, which arrives with the async
+  // detail fetch (and never at all if that fetch fails) and would otherwise
+  // let the red row render first and then be replaced.
+  if (!brewIsInstalled(item) && item.disabled !== true) {
+    const reason = uninstallableReason(item, brewHost);
+    if (reason) {
+      rows.push({
+        kind: "label",
+        key: "installability",
+        title: "Can't Install",
+        text: reason,
+        color: STATUS_COLOR.error,
+        icon: UNINSTALLABLE_ICON,
+      });
+      rows.push({ kind: "separator", key: "installability-sep" });
+    }
   }
 
   if (!options.showDescription) {
@@ -110,7 +129,7 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
       key: "caveats",
       title: "Caveats",
       text: caveats ? "Yes" : "None",
-      icon: caveats ? { source: Icon.Info, tintColor: Color.Blue } : undefined,
+      icon: caveats ? { source: Icon.Info, tintColor: STATUS_COLOR.info } : undefined,
     });
     rows.push({ kind: "separator", key: "prose-sep" });
   }
@@ -118,17 +137,25 @@ function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: st
   return rows;
 }
 
-/** Trailing statistics rows, identical in both views. */
-function statisticsRows(options: MetadataOptions): MetadataRow[] {
+/**
+ * Trailing statistics rows, identical in both views.
+ *
+ * Empty for a package from a third-party tap, separator included — Homebrew
+ * publishes analytics for its own two taps only, so there is nothing there to
+ * head with a rule.
+ */
+function statisticsRows(options: MetadataOptions, tap: string | null | undefined): MetadataRow[] {
+  const rows = analyticsRows(options.detail.data, options.detail.failed, tap);
+  if (rows.length === 0) return [];
   return [
     { kind: "separator", key: "stats-sep" },
-    ...analyticsRows(options.detail.data, options.detail.failed).map(
+    ...rows.map(
       (row): MetadataRow => ({
         kind: "label",
         key: `stat-${row.key}`,
         title: row.title,
         text: row.text,
-        icon: row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText } : undefined,
+        icon: row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: STATUS_COLOR.muted } : undefined,
       }),
     ),
   ];
@@ -162,6 +189,8 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ...leadingRows(formula, options, formulaCaveatsText(formula)),
     homepageRow(formula.homepage, options),
     { kind: "separator", key: "homepage-sep" },
+    { kind: "label", key: "tap", title: "Tap", text: formula.tap || missing(options) },
+    { kind: "separator", key: "tap-sep" },
   ];
 
   if (formula.license) {
@@ -181,10 +210,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ["build-dependencies", "Build Dependencies", formula.build_dependencies],
     ["conflicts", "Conflicts With", formula.conflicts_with],
   ] as const) {
-    if (names && names.length > 0) {
-      rows.push({ kind: "separator", key: `${key}-sep` });
-      rows.push({ kind: "tags", key, title, tags: dependencyTags(names, options.isInstalled) });
-    }
+    pushTagRow(rows, key, title, names && dependencyTags(names, options.isInstalled));
   }
 
   if (formula.pinned) {
@@ -196,7 +222,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     rows.push({ kind: "label", key: "keg-only", title: "Keg Only", text: "Yes" });
   }
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, formula.tap)];
 }
 
 export function caskMetadataRows(cask: Cask, options: MetadataOptions): MetadataRow[] {
@@ -211,34 +237,49 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
   ];
 
+  // Casks depend on formulae and other casks, not only an OS version
+  // (cask/dsl/depends_on.rb).
+  const packageDeps = [...(cask.depends_on?.formula ?? []), ...(cask.depends_on?.cask ?? [])];
+  pushTagRow(rows, "dependencies", "Dependencies", dependencyTags(packageDeps, options.isInstalled));
+
+  pushTagRow(
+    rows,
+    "arch",
+    "Architecture",
+    cask.depends_on?.arch?.map(({ type, bits }) => ({ text: bits ? `${type}${bits}` : type })),
+  );
+
   const macos = cask.depends_on?.macos;
-  if (macos) {
-    rows.push({ kind: "separator", key: "macos-sep" });
-    rows.push({
-      kind: "tags",
-      key: "macos",
-      title: "macOS Version",
-      tags: Object.entries(macos)
+  pushTagRow(
+    rows,
+    "macos",
+    "macOS Version",
+    macos &&
+      Object.entries(macos)
         .filter(([, values]) => values)
         .map(([key, values]) => ({ text: `${key} ${values.join(", ")}` })),
-    });
-  }
+  );
 
   const conflicts = cask.conflicts_with?.cask;
-  if (conflicts && conflicts.length > 0) {
-    rows.push({ kind: "separator", key: "conflicts-sep" });
-    rows.push({
-      kind: "tags",
-      key: "conflicts",
-      title: "Conflicts With",
-      tags: dependencyTags(conflicts, options.isInstalled),
-    });
+  pushTagRow(rows, "conflicts", "Conflicts With", conflicts && dependencyTags(conflicts, options.isInstalled));
+
+  const languages = caskLanguagesText(cask.languages);
+  if (languages) {
+    rows.push({ kind: "separator", key: "languages-sep" });
+    rows.push({ kind: "label", key: "languages", title: "Languages", text: languages });
+  }
+
+  // The list's tack accessory is hidden while the metadata panel is open
+  // (list.tsx), so this is the only pin indicator a cask has in that view.
+  if (cask.pinned) {
+    rows.push({ kind: "separator", key: "pinned-sep" });
+    rows.push({ kind: "label", key: "pinned", title: "Pinned", text: "Yes" });
   }
 
   rows.push({ kind: "separator", key: "auto-sep" });
   rows.push({ kind: "label", key: "auto-updates", title: "Auto Updates", text: cask.auto_updates ? "Yes" : "No" });
 
-  return [...rows, ...statisticsRows(options)];
+  return [...rows, ...statisticsRows(options, cask.tap)];
 }
 
 /// Renderers — one per metadata namespace, both driven by the rows above

@@ -34,19 +34,20 @@ Commands that do more than open a target are not listed — those are scripts, a
 
 Script Commands give you two strings — a title and a `packageName` shown as the subtitle — and no fields for scope, brand or category. This extension reads three axes out of those two strings:
 
-| Title                  | packageName        | Means                           |
-| ---------------------- | ------------------ | ------------------------------- |
-| `Netflix`              | `Netflix · #media` | package Netflix, category media |
-| `Watch Later`          | `YouTube · #media` | a sub-page of YouTube           |
-| `@work · Abacus Board` | `Jira`             | scoped to the work environment  |
+| Title          | packageName             | Means                           |
+| -------------- | ----------------------- | ------------------------------- |
+| `Netflix`      | `Netflix · #media`      | package Netflix, category media |
+| `Watch Later`  | `YouTube · #media`      | a sub-page of YouTube           |
+| `Sprint Board` | `Linear · @work · #dev` | scoped to the work environment  |
 
-- **`@environment · `** leads the title. It gets its own section in the list, so a work link never sits silently among personal ones.
-- **`· #category`** trails the subtitle rather than the title, because Raycast renders titles in full and metadata in the title is metadata in the column you read for content.
-- **The package** is the app or service — `YouTube`, `The Orchard`, `npm`.
+- **The title is only ever the name.** Raycast renders it bold and in full, so anything else put there is read first on every row and separates none of them.
+- **`· @environment`** sits on the subtitle. It gets its own section in the list, so a work link never sits silently among personal ones. Commands written when the sigil led the title (`@work · Sprint Board`) are still read the same way; only what gets written changed.
+- **`· #category`** trails the subtitle, for the same reason: metadata in the title is metadata in the column you read for content.
+- **The package** is the app or service — `YouTube`, `The Guardian`, `npm`.
 
 None of it is required. A command written by someone who has never seen this parses fine — it simply has no environment and no category, and its package is whatever the field holds.
 
-The **Create Link Command** form offers the environments and categories already present in your own commands, with a _New…_ escape, so the vocabulary stays yours. It also learns package names: once a link to `theorchard.atlassian.net` is filed under `Jira`, the next one suggests `Jira` rather than `Atlassian`.
+The **Create Link Command** form offers the environments and categories already present in your own commands, with a _New…_ escape, so the vocabulary stays yours. It also learns package names: once a link to `acme.atlassian.net` is filed under `Jira`, the next one suggests `Jira` rather than `Atlassian`.
 
 ## Preferences
 

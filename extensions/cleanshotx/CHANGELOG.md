@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [New screenshots] - 2026-09-11
+
+- Update screenshots to match the branding
+
 ## [Preset management commands] - 2026-03-04
 
 - Add new commands to manage recording presets

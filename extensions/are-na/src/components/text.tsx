@@ -50,13 +50,20 @@ export function TextBlockView({ block }: TextBlockViewProps) {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <Action.OpenInBrowser
+            url={url}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
+          />
           <Action.CopyToClipboard
             content={rawText || "No content available"}
             title="Copy Text Content"
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
           />
-          <Action.CopyToClipboard content={url} title="Copy Block URL" shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action.CopyToClipboard
+            content={url}
+            title="Copy Block URL"
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
+          />
         </ActionPanel>
       }
     />

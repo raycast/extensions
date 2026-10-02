@@ -9,6 +9,7 @@ import { useCachedState } from "@raycast/utils";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 import { getErrorMessage } from "./errors";
+import { matchesOwnerSearchFilter } from "./repository-filter";
 
 export const WEB_IDES: {
   title: string;
@@ -145,9 +146,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }
 
   if (searchFilter) {
-    // Converting query filter string to regexp:
-    const repositoryFilter = `${searchFilter.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
-    data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
+    data = data.filter((r) => matchesOwnerSearchFilter(r.nameWithOwner, searchFilter));
   }
 
   return { data, visitRepository, updateRepository, removeRepository };

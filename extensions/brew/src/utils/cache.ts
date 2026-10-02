@@ -14,13 +14,26 @@ import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
-import { filter } from "stream-json/filters/Filter";
-import { streamArray } from "stream-json/streamers/StreamArray";
+// Kebab-case with the extension: stream-json 3.x exposes everything through an
+// `exports` map and the old PascalCase subpaths (`filters/Filter`) resolve to
+// nothing. `@types/stream-json` is deliberately NOT installed — it still
+// describes 1.x, so it type-checks the dead specifiers clean while they fail at
+// runtime. 3.x ships its own types.
+import { filter } from "stream-json/filters/filter.js";
+import { streamArray } from "stream-json/streamers/stream-array.js";
 import { pipeline as streamPipeline } from "stream/promises";
-import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
+import {
+  DownloadProgressCallback,
+  ChunkedCacheConfig,
+  ChunkedCacheMeta,
+  CacheIndex,
+  IndexEntry,
+  ChunkedBuildHooks,
+} from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
+import { copyLogsAction } from "./toast";
 
 /// Cache Paths
 
@@ -119,7 +132,12 @@ export async function clearCache(): Promise<void> {
   } catch (err) {
     const error = ensureError(err);
     cacheLogger.error("Failed to clear cache", { error: error.message });
-    await showToast(Toast.Style.Failure, "Failed to clear cache", error.message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to clear cache",
+      message: error.message,
+      primaryAction: copyLogsAction(`Failed to clear cache\n\n${error.message}`, { hideToast: true }),
+    });
   }
 }
 
@@ -163,8 +181,22 @@ const valid_keys = [
   "build_dependencies",
   "installed",
   "keg_only",
-  "linked_key",
+  "linked_keg",
   "pinned",
+  // Platform constraints, so the list can tell that brew would refuse to
+  // install a package here. `\bdisabled\b` does not match `disable_reason`.
+  "requirements",
+  "disabled",
+  "languages",
+  // `artifacts` survives the filter but is NOT stored. Every cask carries one,
+  // and keeping the arrays puts the chunked cask cache at 6.75 MB — inflating
+  // exactly the per-page memory the sliding-window paging exists to cap. It
+  // still has to reach the build to be read at all, so `compactCaskArtifacts`
+  // (the `compact` hook, passed by `caskRemote`) derives the one boolean the UI
+  // asks of it and drops the array before the record is written to a chunk.
+  // That leaves the chunks at 2.79 MB with the Symlinks section still gated
+  // precisely — measured against the live API on 2026-09-18, 7,728 casks.
+  "artifacts",
 ];
 
 /**
@@ -339,7 +371,16 @@ export async function downloadRemoteToCache(
 const CHUNK_SIZE = 500;
 
 /** Current schema version for chunked cache */
-export const CHUNKED_CACHE_VERSION = 1;
+// 3: `artifacts` dropped from `valid_keys` (see the note there). Bumped so the
+// oversized v2 cask cache is rebuilt rather than carried until brew next
+// updates, which is what makes the memory saving land for existing users.
+// 4: `artifacts` reduced to the derived `has_symlink_artifacts` instead of
+// being dropped outright, so the Symlinks section is gated precisely again. A
+// v3 cask chunk has neither field and would leave every cask reading "unknown".
+// 5: the cask build writes `adopt-index.json` beside the chunks. A v4 directory
+// does not have it, and Adopt cannot tell that from a catalog with nothing
+// adoptable in it.
+export const CHUNKED_CACHE_VERSION = 5;
 
 /**
  * Get configuration for chunked cache paths.
@@ -415,17 +456,36 @@ export async function isChunkedCacheValid(
 export type IndexExtractor<T> = (item: T, chunkNumber: number, indexInChunk: number) => IndexEntry;
 
 /**
- * Build chunked cache from source JSON file.
- * Streams through the source, writing chunks and building an index.
+ * The tail of the build queue. Every build — formulae and casks alike — waits
+ * for the one before it. Each parses a whole catalog. Measured as the smallest
+ * heap cap a build survives: 40 MB for one, 64 MB for both at once, 44 MB for
+ * both queued. On top of the running command, the concurrent pair crossed
+ * Raycast's 100 MB cap on the first Search after a cache-version bump. The per-type `buildInProgress` mutexes in `fetch.ts`
+ * cannot prevent that; they are per type.
  */
-export async function buildChunkedCache<T>(
+let buildQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Build chunked cache from source JSON file.
+ * Streams through the source, writing chunks and building an index. Builds run
+ * one at a time — see `buildQueue`.
+ */
+export function buildChunkedCache<T>(...args: Parameters<typeof buildChunkedCacheNow<T>>): Promise<void> {
+  const run = buildQueue.then(() => buildChunkedCacheNow<T>(...args));
+  buildQueue = run.catch(() => {});
+  return run;
+}
+
+async function buildChunkedCacheNow<T>(
   sourcePath: string,
   sourceUrl: string,
   config: ChunkedCacheConfig,
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
+  hooks: ChunkedBuildHooks<T> = {},
 ): Promise<void> {
+  const { onRecord, compact, writeSidecar } = hooks;
   // Check for abort before starting
   if (signal?.aborted) {
     const error = new Error("Aborted");
@@ -493,7 +553,13 @@ export async function buildChunkedCache<T>(
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
-        const item = data.value as T;
+        const raw = data.value as T;
+        // BEFORE compact, which deletes fields — this is the only point in the
+        // build where the record is still whole.
+        onRecord?.(raw);
+        // Compact BEFORE indexing, so the index is extracted from the record
+        // that will actually be on disk rather than from a fuller one.
+        const item = compact ? compact(raw) : raw;
         const indexInChunk = currentChunk.length;
 
         // Build index entry
@@ -557,7 +623,23 @@ export async function buildChunkedCache<T>(
         };
         await writeFile(path.join(partialDir, "meta.json"), JSON.stringify(meta));
 
-        // Atomically swap partial -> baseDir. Doing this last means a failed
+        // A sidecar serves ONE feature; the chunks and index serve every
+        // command. So its failure is logged and swallowed: letting it reject
+        // here would fail the whole build, and after a cache-version bump
+        // there is no valid stale cache to fall back to — which would leave
+        // Search unable to load anything over a file only Adopt reads.
+        if (writeSidecar) {
+          try {
+            await writeSidecar(partialDir);
+          } catch (err) {
+            cacheLogger.warn("Failed to write cache sidecar", {
+              type: config.type,
+              error: ensureError(err).message,
+            });
+          }
+        }
+
+        // Swap partial -> baseDir. Doing this last means a failed
         // build leaves any prior cache intact for the fall-back path to use.
         await rm(config.baseDir, { recursive: true, force: true }).catch(() => {});
         await rename(partialDir, config.baseDir);

@@ -1,73 +1,138 @@
-import { getPreferenceValues, OAuth } from "@raycast/api";
-import fetch from "node-fetch";
+import { environment, getPreferenceValues, launchCommand, LaunchType, OAuth, popToRoot } from "@raycast/api";
+import { setTimeout as delay } from "node:timers/promises";
 
-// Create an OAuth client ID via https://console.developers.google.com/apis/credentials
-// As application type choose "iOS" (required for PKCE)
-// As Bundle ID enter: com.raycast
-const clientId = getPreferenceValues().clientId;
+export type AuthorizationErrorDetails = {
+  message: string;
+  needsPreferences: boolean;
+};
 
-export const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.AppURI,
-  providerName: "Google",
-  providerIcon: "google-logo.png",
-  providerId: "google",
-  description: "Connect your Google account",
-});
+class OAuthConfigurationError extends Error {}
+
+function createClient(): OAuth.PKCEClient {
+  return new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.AppURI,
+    providerName: "Google",
+    providerIcon: "google-logo.png",
+    providerId: "google",
+    description: "Sign in once to access your Google Tasks",
+  });
+}
+
+// Keep token storage shared, but give every authorization attempt fresh native state.
+export const client = createClient();
 
 // Authorization
 
-export async function authorize(): Promise<void> {
-  const tokenSet = await client.getTokens();
-  if (tokenSet?.accessToken) {
-    if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
-    }
-    return;
+function getClientId(): string {
+  const clientId = getPreferenceValues().clientId?.trim();
+  if (!clientId) {
+    throw new OAuthConfigurationError("Add your Google OAuth Client ID in the extension preferences.");
   }
-
-  const authRequest = await client.authorizationRequest({
-    endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    clientId: clientId,
-    scope: "https://www.googleapis.com/auth/tasks",
-  });
-  const { authorizationCode } = await client.authorize(authRequest);
-  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  return clientId;
 }
 
-async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("code", authCode);
-  params.append("verifier", authRequest.codeVerifier);
-  params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", authRequest.redirectURI);
+export async function authorize(): Promise<boolean> {
+  const clientId = getClientId();
+  const authClient = createClient();
+  const tokenSet = await authClient.getTokens();
+  if (tokenSet?.accessToken) {
+    if (!tokenSet.isExpired()) return false;
+    if (tokenSet.refreshToken) {
+      await authClient.setTokens(await refreshTokens(clientId, tokenSet.refreshToken));
+      return false;
+    }
+    await authClient.removeTokens();
+  }
+
+  const authRequest = await authClient.authorizationRequest({
+    endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    clientId,
+    scope: "https://www.googleapis.com/auth/tasks",
+    extraParameters: {
+      access_type: "offline",
+      prompt: "consent",
+    },
+  });
+  const { authorizationCode } = await authClient.authorize(authRequest);
+  await authClient.setTokens(await fetchTokens(clientId, authRequest, authorizationCode));
+  return true;
+}
+
+export async function reconnect(): Promise<boolean> {
+  await client.removeTokens();
+  return authorize();
+}
+
+export async function dismissAuthorizationOverlay(): Promise<void> {
+  const command = environment.entryPointName || environment.commandName;
+  await delay(1500);
+
+  void launchCommand({
+    name: command,
+    type: LaunchType.UserInitiated,
+  }).catch(() => undefined);
+  await delay(300);
+  void popToRoot();
+}
+
+export function describeAuthorizationError(error: unknown): AuthorizationErrorDetails {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
+    message: message || "Google authorization could not be completed.",
+    needsPreferences: error instanceof OAuthConfigurationError,
+  };
+}
+
+async function fetchTokens(
+  clientId: string,
+  authRequest: OAuth.AuthorizationRequest,
+  authCode: string,
+): Promise<OAuth.TokenResponse> {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    code: authCode,
+    code_verifier: authRequest.codeVerifier,
+    grant_type: "authorization_code",
+    redirect_uri: authRequest.redirectURI,
+  });
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     body: params,
   });
   if (!response.ok) {
-    console.error("fetch tokens error:", await response.text());
-    throw new Error(response.statusText);
+    throw await oauthResponseError(response);
   }
   return (await response.json()) as OAuth.TokenResponse;
 }
 
-async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("refresh_token", refreshToken);
-  params.append("grant_type", "refresh_token");
+async function refreshTokens(clientId: string, refreshToken: string): Promise<OAuth.TokenResponse> {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
+  });
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     body: params,
   });
   if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+    throw await oauthResponseError(response);
   }
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
+}
+
+async function oauthResponseError(response: Response): Promise<Error> {
+  const body = await response.text();
+  let message = response.statusText;
+  try {
+    const details = JSON.parse(body) as { error?: string; error_description?: string };
+    message = details.error_description ?? details.error ?? message;
+  } catch {
+    // Keep the HTTP status when the provider does not return JSON.
+  }
+  return new Error(message || "Google rejected the OAuth request.");
 }

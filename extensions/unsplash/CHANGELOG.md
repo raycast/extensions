@@ -1,5 +1,9 @@
 # Unsplash Changelog
 
+## [Fix Liked Images Pagination] - 2026-09-16
+
+- Fixed the Liked Images command only showing the first page of likes (~10 images) by paging through all of the user's likes
+
 ## [Fix Windows OAuth] - 2026-08-06
 
 - Fixed OAuth token exchange failing with "Bad Request" on Windows by pinning a consistent redirect URI, setting explicit `Content-Type` on the token request, and trimming API keys

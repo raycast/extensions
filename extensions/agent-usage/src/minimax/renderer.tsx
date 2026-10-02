@@ -1,12 +1,14 @@
 import { List } from "@raycast/api";
 
 import { formatDuration } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
@@ -18,6 +20,7 @@ export function formatMiniMaxUsageText(usage: MiniMaxUsage | null, error: MiniMa
   if (fallback !== null) return fallback;
   const u = usage as MiniMaxUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = "MiniMax Usage";
 
   const codingModel = getCodingModelRemain(u.modelRemains);
@@ -27,16 +30,16 @@ export function formatMiniMaxUsageText(usage: MiniMaxUsage | null, error: MiniMa
     const intervalPercent = getIntervalPercent(codingModel);
     if (intervalPercent !== null) {
       text += `\n\n5h Limit (${formatDuration(codingModel.remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(intervalPercent)}`;
-      text += `\n${intervalPercent}% remaining`;
+      text += `\n${generateAsciiBar(toDisplayPercent(intervalPercent, mode))}`;
+      text += `\n${formatPercentDisplay(intervalPercent, mode)}`;
       text += `\nResets In: ${formatDuration(codingModel.remains_time / 1000)}`;
     }
 
     const weeklyPercent = getWeeklyPercent(codingModel);
     if (weeklyPercent !== null) {
       text += `\n\nWeekly Limit (${formatDuration(codingModel.weekly_remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(weeklyPercent)}`;
-      text += `\n${weeklyPercent}% remaining`;
+      text += `\n${generateAsciiBar(toDisplayPercent(weeklyPercent, mode))}`;
+      text += `\n${formatPercentDisplay(weeklyPercent, mode)}`;
       text += `\nResets In: ${formatDuration(codingModel.weekly_remains_time / 1000)}`;
     }
   }
@@ -50,6 +53,7 @@ export function renderMiniMaxDetail(usage: MiniMaxUsage | null, error: MiniMaxEr
   const u = usage as MiniMaxUsage;
 
   const codingModel = getCodingModelRemain(u.modelRemains);
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -65,7 +69,7 @@ export function renderMiniMaxDetail(usage: MiniMaxUsage | null, error: MiniMaxEr
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="5h Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
+                  text={`${generateAsciiBar(toDisplayPercent(percent, mode))} ${formatPercentDisplay(percent, mode)}`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -83,7 +87,7 @@ export function renderMiniMaxDetail(usage: MiniMaxUsage | null, error: MiniMaxEr
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Weekly Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
+                  text={`${generateAsciiBar(toDisplayPercent(percent, mode))} ${formatPercentDisplay(percent, mode)}`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -135,14 +139,15 @@ export function getMiniMaxAccessory(
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   const percent = intervalPercent ?? weeklyPercent ?? 0;
   const parts: string[] = [];
-  if (intervalPercent !== null) parts.push(`5h: ${intervalPercent}%`);
-  if (weeklyPercent !== null) parts.push(`Weekly: ${weeklyPercent}%`);
+  if (intervalPercent !== null) parts.push(`5h: ${toDisplayPercent(intervalPercent, mode)}%`);
+  if (weeklyPercent !== null) parts.push(`Weekly: ${toDisplayPercent(weeklyPercent, mode)}%`);
 
   return {
     icon: generatePieIcon(percent),
-    text: `${percent}%`,
+    text: `${toDisplayPercent(percent, mode)}%`,
     tooltip: parts.join(" | "),
   };
 }

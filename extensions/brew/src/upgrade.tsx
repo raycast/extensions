@@ -48,7 +48,6 @@ function UpgradeContent() {
       outdated={upgrade.outdated ?? data}
       isLoading={isLoading || upgrade.isUpgrading}
       filterType={filter}
-      navigationTitle="Upgrade"
       searchBarPlaceholder={upgrade.isUpgrading ? "Upgrading…" : undefined}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       icon={(item, isCask) => statusIcon(upgrade.states.get(upgradeKey({ name: item.name, isCask })))}

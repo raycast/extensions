@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
-import { isDeepStrictEqual } from "util";
 import {
   EntryLike,
   EntryType,
@@ -107,7 +106,7 @@ export function filterEntriesByType(filter: EntryType | null) {
 }
 
 export function filterUnpinnedEntries(pinnedEntries: EntryLike[]) {
-  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isDeepStrictEqual(pinnedEntry, entry)) === undefined;
+  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isSameEntry(pinnedEntry, entry)) === undefined;
 }
 
 export function getErrorMessage(error: unknown): string {
@@ -149,6 +148,15 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
 
 export function isValidHexColor(color: string): boolean {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
+
+/**
+ * VS Code stores file URIs with a lowercase drive letter (e.g. `file:///c:/...`),
+ * so `fileURLToPath()` yields `c:\...`. Uppercase it for display since
+ * Windows paths are case-insensitive. No-op on other platforms.
+ */
+export function uppercaseWindowsDriveLetter(displayPath: string): string {
+  return displayPath.replace(/^([a-z]:)/, (match) => match.toUpperCase());
 }
 
 export const isWin = process.platform === "win32";

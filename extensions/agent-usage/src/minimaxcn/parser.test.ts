@@ -103,3 +103,26 @@ test("getCodingModelRemain falls back to MinimaxCN-M* model name (backward compa
 test("getCodingModelRemain returns null for empty list", () => {
   assert.equal(getCodingModelRemain([]), null);
 });
+
+test("getIntervalPercent returns null when 5h quota is exhausted and reset is still pending", () => {
+  // Models the renderer fix: total=0, status still 1, no remaining_percent field,
+  // but reset is 1h away. The detail panel must keep the row visible (0% placeholder).
+  const exhausted: MinimaxCNModelRemain = {
+    start_time: 0,
+    end_time: 0,
+    remains_time: 3600000,
+    current_interval_total_count: 0,
+    current_interval_usage_count: 0,
+    model_name: "general",
+    current_weekly_total_count: 0,
+    current_weekly_usage_count: 0,
+    weekly_start_time: 0,
+    weekly_end_time: 0,
+    weekly_remains_time: 86400000,
+    current_interval_status: 1,
+    current_weekly_status: 1,
+    current_weekly_remaining_percent: 50,
+  };
+  assert.equal(getIntervalPercent(exhausted), null);
+  assert.equal(getWeeklyPercent(exhausted), 50);
+});

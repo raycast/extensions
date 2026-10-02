@@ -221,5 +221,8 @@
       "description": "Check for duplicate bookmarks when saving a new bookmark. If enabled, shows a warning when attempting to save a URL that already exists.",
       "label": "Check for Duplicates"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

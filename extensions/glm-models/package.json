@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glm-models",
+  "version": "1.0.0",
+  "title": "GLM Models",
+  "description": "Use Z.ai / BigModel GLM models inside Raycast AI Chat, Quick AI and AI Commands",
+  "icon": "icon.png",
+  "author": "paulgit",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "check-setup",
+      "title": "Check Setup",
+      "subtitle": "GLM Models",
+      "mode": "view",
+      "icon": "icon.png",
+      "description": "Validate your API key and platform settings against the Z.ai / BigModel API"
+    },
+    {
+      "name": "refresh-models",
+      "title": "Refresh Models",
+      "subtitle": "GLM Models",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "description": "Re-fetch the list of GLM models available to your account"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "API key from the platform you pick below. Create one at z.ai → API Keys, or open.bigmodel.cn → API Keys. Keys from the two platforms are not interchangeable."
+    },
+    {
+      "name": "platform",
+      "title": "Platform",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "zai",
+          "title": "Z.ai (pay-as-you-go)"
+        },
+        {
+          "value": "bigmodel",
+          "title": "BigModel (pay-as-you-go)"
+        },
+        {
+          "value": "custom",
+          "title": "Custom base URL"
+        }
+      ],
+      "description": "Where your API key was created. Z.ai and BigModel are separate platforms with separate keys — pick the one matching your key. Pay-as-you-go API keys only: GLM Coding Plan and Team Plan keys are not supported."
+    },
+    {
+      "name": "customBaseUrl",
+      "title": "Custom Base URL",
+      "type": "textfield",
+      "required": false,
+      "description": "HTTPS OpenAI-compatible base URL, used when Platform is set to Custom (e.g. https://open.bigmodel.cn/api/paas/v4/)"
+    },
+    {
+      "name": "extraModels",
+      "title": "Extra Models",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional comma-separated model IDs to always include in the model list"
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "1.0.46",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "ai": "5.0.222"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.11.0",
+    "typescript": "^5.8.0"
+  }
+}

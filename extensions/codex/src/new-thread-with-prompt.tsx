@@ -1,13 +1,10 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Form,
   Icon,
-  LocalStorage,
-  Toast,
   getPreferenceValues,
-  openExtensionPreferences,
-  showToast,
 } from "@raycast/api";
 import {
   showFailureToast,
@@ -15,8 +12,9 @@ import {
   useForm,
   usePromise,
 } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { openNewCodexThread } from "./utils/launch";
+import { validateOnSubmitOnly } from "./utils/raycast";
 import {
   buildProjectsFolderOptions,
   loadProjectsFolderRecords,
@@ -32,7 +30,6 @@ type FormValues = {
 
 const defaultDirectoryItemValue = "__codex_use_default_project__";
 const customPathItemValue = "__codex_custom_path__";
-const projectsFolderTipShownKey = "projects-folder-tip-shown";
 const projectsFolderTip =
   "Tip: Set a Working Directory Root in the extension settings to list its subfolders here.";
 
@@ -45,10 +42,6 @@ export default function Command() {
   );
   const isCustomPath = selectedDirectoryValue === customPathItemValue;
 
-  useEffect(() => {
-    void showProjectsFolderTipOnce(preferences.projectsDirectory);
-  }, [preferences.projectsDirectory]);
-
   const folderScan = usePromise(loadProjectsFolderRecords, [
     preferences.projectsDirectory,
   ]);
@@ -56,6 +49,8 @@ export default function Command() {
     loadRecentWorkingDirectoryRecords,
     [],
     {
+      // Counts only decorate folders under the Working Directory Root.
+      execute: Boolean(folderScan.data?.records.length),
       failureToastOptions: { title: "Couldn't load thread counts" },
     },
   );
@@ -118,14 +113,14 @@ export default function Command() {
     >
       <Form.TextArea
         title="Prompt"
-        placeholder="Describe the task for Codex..."
+        placeholder="Describe the task for Codex…"
         autoFocus
-        {...itemProps.prompt}
+        {...validateOnSubmitOnly(itemProps.prompt)}
       />
       <Form.Dropdown
         id="workingDirectory"
         title="Working Directory"
-        placeholder="Search folders..."
+        placeholder="Search folders…"
         value={selectedDirectoryValue}
         onChange={setSelectedDirectoryValue}
         info={getWorkingDirectoryInfo({
@@ -139,13 +134,13 @@ export default function Command() {
         <Form.Dropdown.Item
           value={defaultDirectoryItemValue}
           title={getDefaultDirectoryTitle(defaultWorkingDirectory)}
-          icon="⭐"
+          icon={{ source: Icon.Star, tintColor: Color.Yellow }}
           keywords={getDefaultDirectoryKeywords(defaultWorkingDirectory)}
         />
         <Form.Dropdown.Item
           value={customPathItemValue}
           title="Choose Folder"
-          icon="📂"
+          icon={Icon.Folder}
           keywords={["custom", "path", "other"]}
         />
         {folderOptions.length > 0 && workingDirectoryRoot ? (
@@ -171,38 +166,11 @@ export default function Command() {
           canChooseFiles={false}
           allowMultipleSelection={false}
           autoFocus
-          {...itemProps.path}
+          {...validateOnSubmitOnly(itemProps.path)}
         />
       ) : null}
     </Form>
   );
-}
-
-async function showProjectsFolderTipOnce(
-  projectsDirectory: string | undefined,
-): Promise<void> {
-  if (projectsDirectory?.trim()) {
-    return;
-  }
-
-  if (await LocalStorage.getItem(projectsFolderTipShownKey)) {
-    return;
-  }
-
-  await LocalStorage.setItem(projectsFolderTipShownKey, true);
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Folder Configuration",
-    message:
-      "Set your Default Working Directory and Working Directory Root in extension settings",
-    primaryAction: {
-      title: "Open Settings",
-      onAction: (toast) => {
-        void openExtensionPreferences();
-        void toast.hide();
-      },
-    },
-  });
 }
 
 function resolveSubmittedPath(

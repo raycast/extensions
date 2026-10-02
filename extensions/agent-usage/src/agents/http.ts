@@ -21,6 +21,8 @@ export interface HttpFetchOptions {
   body?: string;
   timeoutMs?: number;
   unauthorizedMessage?: string;
+  /** When set, HTTP 403 responses are surfaced as an unauthorized error with this message. */
+  forbiddenMessage?: string;
 }
 
 export interface HttpFetchError {
@@ -31,6 +33,8 @@ export interface HttpFetchError {
 export interface HttpFetchResult {
   data: unknown;
   error: HttpFetchError | null;
+  /** HTTP status code when a response was received, undefined for transport-level failures. */
+  status?: number;
 }
 
 function getProxyUrl(url: string): string | null {
@@ -126,6 +130,7 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
     body,
     timeoutMs = 10000,
     unauthorizedMessage = "Authorization token expired or invalid. Please update it in extension settings.",
+    forbiddenMessage,
   } = options;
 
   const controller = new AbortController();
@@ -153,15 +158,23 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
     clearTimeout(timeoutId);
 
     if (response.status === 401) {
-      return { data: null, error: { type: "unauthorized", message: unauthorizedMessage } };
+      return { data: null, error: { type: "unauthorized", message: unauthorizedMessage }, status: response.status };
+    }
+
+    if (response.status === 403 && forbiddenMessage) {
+      return { data: null, error: { type: "unauthorized", message: forbiddenMessage }, status: response.status };
     }
 
     if (!response.ok) {
-      return { data: null, error: { type: "unknown", message: `HTTP ${response.status}: ${response.statusText}` } };
+      return {
+        data: null,
+        error: { type: "unknown", message: `HTTP ${response.status}: ${response.statusText}` },
+        status: response.status,
+      };
     }
 
     const data = await response.json();
-    return { data, error: null };
+    return { data, error: null, status: response.status };
   } catch (err) {
     clearTimeout(timeoutId);
     if (err instanceof Error && err.name === "AbortError") {

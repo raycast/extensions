@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from "../utils";
+import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError, copyLogsAction } from "../utils";
 import { DetailMetadata, formulaMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
-/**
- * Check if a formula has minimal data (from fast list) vs full data.
- */
+/** Whether this formula looks like a summary record and should be refetched. */
 function hasMinimalData(formula: Formula): boolean {
-  // Minimal formulae have missing or empty homepage, tap, or desc
+  // A summary record has missing or empty homepage, tap, or desc
   return !formula.homepage || !formula.tap || !formula.desc;
 }
 
@@ -60,6 +58,10 @@ export function FormulaInfo(props: {
           if (props.formula.installed?.length > 0) {
             fullFormula.installed = props.formula.installed;
           }
+          // Local `brew info --json=v2` always reports `requirements: []`, so
+          // the refetch would otherwise erase the "Can't Install" verdict the
+          // list computed from the API index.
+          fullFormula.requirements = props.formula.requirements ?? fullFormula.requirements;
           setFormula(fullFormula);
           uiLogger.log("Formula info loaded", {
             name: fullFormula.name,
@@ -70,6 +72,10 @@ export function FormulaInfo(props: {
         } else {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to load formula info";
+          toast.primaryAction = copyLogsAction(
+            `Failed to load formula info\n\nFormula: ${props.formula.name}\nbrew info --json=v2 returned no record.`,
+            { hideToast: true },
+          );
         }
       } catch (err) {
         clearTimeout(timeoutId);
@@ -81,6 +87,14 @@ export function FormulaInfo(props: {
         });
         toast.style = Toast.Style.Failure;
         toast.title = isTimeout ? "Formula info load timed out" : "Failed to load formula info";
+        toast.primaryAction = copyLogsAction(
+          [
+            isTimeout ? "Formula info load timed out" : "Failed to load formula info",
+            `Formula: ${props.formula.name}`,
+            `Error: ${ensureError(err).name}: ${ensureError(err).message}`,
+          ].join("\n"),
+          { hideToast: true },
+        );
       } finally {
         setIsLoading(false);
       }

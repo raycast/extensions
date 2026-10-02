@@ -259,14 +259,15 @@ export function CardDetail({
     };
   }, [card.id, card]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       const mutationState = favoriteMutationRef.current;
       if (mutationState.timer) {
         clearTimeout(mutationState.timer);
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   const openableUrl = getOpenableUrl(cardState);
   const domain = getCardDomain(cardState);

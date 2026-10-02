@@ -1,15 +1,20 @@
-import { Action, ActionPanel, Icon, List, useNavigation, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { playUrl } from "./api/player";
 import { useAllRadio } from "./hooks/useAllRadio";
 import { cache } from "./lib/cache";
 import { type Radio, remove } from "./lib/radioDB";
+import { exportRadios } from "./lib/radioImportExport";
 import { RadioStationAddEditForm } from "./components/RadioStationAddEditForm";
+import { RadiosImportForm } from "./components/RadiosImportForm";
 import { RadioDetails } from "./components/RadioDetails";
 import { usePlayerUrl } from "./hooks/usePlayerUrl";
 import { usePlayerStatus } from "./hooks/usePlayerStatus";
 import { PlayerMode } from "./api/player";
 import { type UseActionOptions, useAction } from "./hooks/useAction";
+import { createLog } from "./lib/debug";
+
+const logger = createLog("radio");
 
 interface RadioActionProps {
   playerUrl?: string;
@@ -85,6 +90,50 @@ const DeleteRadioAction: FC<RadioActionProps> = ({ radio, onSuccess, onActionSta
   );
 };
 
+const ImportRadiosAction: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
+  const { push } = useNavigation();
+  const onImportAction = useCallback(() => push(<RadiosImportForm onSubmitSuccess={onSuccess} />), [onSuccess]);
+
+  return (
+    <Action
+      title="Import Radios"
+      icon={Icon.Upload}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "i" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+      }}
+      onAction={onImportAction}
+    />
+  );
+};
+
+const ExportRadiosAction: FC<{ onActionStateChange?: (isPerforming: boolean) => void }> = ({ onActionStateChange }) => {
+  const [isExporting, setIsExporting] = useState(false);
+  const onExportAction = useCallback(async () => {
+    setIsExporting(true);
+
+    try {
+      const path = await exportRadios();
+      showToast({ title: "Radios exported", message: path, style: Toast.Style.Success });
+    } catch (error) {
+      logger.error(`Failed to export radios: ${error}`);
+      showToast({ title: "Failed to export radios", style: Toast.Style.Failure });
+    } finally {
+      setIsExporting(false);
+    }
+  }, []);
+  useEffect(() => onActionStateChange?.(isExporting), [isExporting]);
+
+  return (
+    <Action
+      title="Export Radios"
+      icon={Icon.Download}
+      shortcut={Keyboard.Shortcut.Common.Save}
+      onAction={onExportAction}
+    />
+  );
+};
+
 export default function Command() {
   const { push } = useNavigation();
   const { data: playerUrl } = usePlayerUrl();
@@ -109,6 +158,21 @@ export default function Command() {
   const onAddRadioAction = useCallback(() => {
     push(<RadioStationAddEditForm onSubmitSuccess={onAddRadioSuccess} />);
   }, [onAddRadioSuccess]);
+  const listManagementActions = useMemo(
+    () => (
+      <ActionPanel.Section title="Manage Radios">
+        <Action
+          title="Add Radio"
+          icon={Icon.PlusCircle}
+          shortcut={Keyboard.Shortcut.Common.New}
+          onAction={onAddRadioAction}
+        />
+        <ImportRadiosAction onSuccess={refreshRadio} />
+        <ExportRadiosAction onActionStateChange={onPerformingActionStateChange} />
+      </ActionPanel.Section>
+    ),
+    [onAddRadioAction, refreshRadio, onPerformingActionStateChange],
+  );
 
   return (
     <List
@@ -116,6 +180,7 @@ export default function Command() {
       navigationTitle="Your favorite radio stations"
       searchBarPlaceholder="Search your favorite radio"
       onSelectionChange={onSelectionChange}
+      actions={<ActionPanel>{listManagementActions}</ActionPanel>}
       isShowingDetail
       filtering
     >
@@ -143,12 +208,7 @@ export default function Command() {
                   onActionStateChange={onPerformingActionStateChange}
                 />
               </ActionPanel.Section>
-              <Action
-                title="Add Radio"
-                icon={Icon.PlusCircle}
-                shortcut={Keyboard.Shortcut.Common.New}
-                onAction={onAddRadioAction}
-              />
+              {listManagementActions}
             </ActionPanel>
           }
         />

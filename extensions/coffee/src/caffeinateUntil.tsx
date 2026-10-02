@@ -88,16 +88,13 @@ export default function Command(props: { arguments: Arguments.CaffeinateUntil })
         <ActionPanel>
           <Action.SubmitForm
             title="Caffeinate"
-            onSubmit={(values: { target: Date | null }) => {
+            onSubmit={async (values: { target: Date | null }) => {
               if (!values.target) {
                 showToast(Toast.Style.Failure, "Please select a time");
                 return;
               }
-              // Reset nav first so popToRoot doesn't race with showHUD inside
-              // startCaffeinate and cut the HUD short. The caffeinate work
-              // continues asynchronously after the view unmounts.
+              await caffeinateUntilTarget(values.target);
               popToRoot();
-              caffeinateUntilTarget(values.target);
             }}
           />
         </ActionPanel>

@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+import { parseAdditionalHomes } from "../agents/home-dirs.ts";
+
 const DEFAULT_CODEX_AUTH_FILE = path.join(os.homedir(), ".codex", "auth.json");
 
 interface CodexAuthFile {
@@ -130,14 +132,7 @@ export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env): string |
 }
 
 export function parseAdditionalCodexHomes(value: string, homeDir: string = os.homedir()): string[] {
-  const homes = value
-    .split(/[\n,]/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry) => (entry === "~" ? homeDir : entry.startsWith("~/") ? path.join(homeDir, entry.slice(2)) : entry))
-    .map((entry) => path.resolve(entry));
-
-  return [...new Set(homes)];
+  return parseAdditionalHomes(value, homeDir);
 }
 
 function readCodexLoginAuth(authFilePath: string): CodexAuthData {

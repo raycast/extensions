@@ -1,12 +1,14 @@
-import { ActionPanel, Detail, LocalStorage, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Detail, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { useGameData } from "../lib/fetcher";
 import { useIsLoggedIn } from "../lib/hooks";
-import { GameData, GameDataSimple, GameSimple } from "../types";
+import { getHowLongToBeatUrl, getYouTubeUrl, SteamGameError } from "../lib/games";
+import { GameDataSimple, GameSimple } from "../types";
 import { LaunchActions } from "./Actions";
 
 export const GameDetails = ({ game }: { game: GameSimple | GameDataSimple }) => {
-  const { data: gameData, isError: error } = useGameData<GameData>({ appid: game.appid });
+  const { data: gameData, isLoading, isError: error } = useGameData({ appid: game.appid });
   const once = useRef(false);
   const isLoggedIn = useIsLoggedIn();
 
@@ -22,13 +24,9 @@ ${gameData.short_description}
   // To do more here we would need an html to md converter
 
   useEffect(() => {
-    if (error?.status === 404 && !once.current) {
+    if (error instanceof SteamGameError && error.status === 404 && !once.current) {
       once.current = true;
-      showToast({
-        title: "Error",
-        message: error.message,
-        style: Toast.Style.Failure,
-      });
+      showFailureToast(error, { title: "Error" });
     }
   }, [error]);
 
@@ -45,9 +43,15 @@ ${gameData.short_description}
 
   return (
     <Detail
-      isLoading={!gameData}
+      isLoading={isLoading}
       navigationTitle={gameData?.name}
-      markdown={error ? error?.message : markdown}
+      markdown={
+        error instanceof SteamGameError && error.status === 404
+          ? "Steam has no store page for this game."
+          : error
+            ? error.message
+            : markdown
+      }
       actions={
         error ? null : (
           <ActionPanel>
@@ -73,12 +77,12 @@ ${gameData.short_description}
                 target={gameData.metacritic.url}
               />
             ) : null}
-            {gameData?.developers?.length > 0 ? (
+            {gameData?.developers?.length ? (
               <Detail.Metadata.TagList title="Developers">
                 <Detail.Metadata.TagList.Item color={"#67c0f4"} text={gameData?.developers[0]} />
               </Detail.Metadata.TagList>
             ) : null}
-            {gameData?.categories?.length > 0 ? (
+            {gameData?.categories?.length ? (
               <>
                 <Detail.Metadata.Separator />
                 <Detail.Metadata.TagList title="Categories">
@@ -115,6 +119,15 @@ ${gameData.short_description}
                 target={`https://store.steampowered.com/app/${gameData.steam_appid}`}
                 text="Steam Page"
               />
+            ) : null}
+            {gameData?.steam_appid ? (
+              <Detail.Metadata.Link title="" target={`steam://store/${gameData.steam_appid}`} text="Open in Steam" />
+            ) : null}
+            {gameData?.name ? (
+              <Detail.Metadata.Link title="" target={getHowLongToBeatUrl(gameData.name)} text="HowLongToBeat" />
+            ) : null}
+            {gameData?.name ? (
+              <Detail.Metadata.Link title="" target={getYouTubeUrl(gameData.name)} text="YouTube" />
             ) : null}
             {gameData?.website ? <Detail.Metadata.Link title="" text="Website" target={gameData.website} /> : null}
           </Detail.Metadata>

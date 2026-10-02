@@ -44,20 +44,20 @@ export function getFirstChar(text: string): string {
   return firstChar ? String.fromCodePoint(firstChar) : "";
 }
 
-export function projectIcon(project: Project): Image.ImageLike {
-  const svgSource = () => {
-    return getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
+export function projectIcon(project: Project, avatarSources: Record<string, string>): Image.ImageLike {
+  const textIcon = getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
+  return {
+    source: avatarSources[projectIconUrl(project) ?? ""] ?? textIcon,
+    mask: Image.Mask.Circle,
+    fallback: textIcon,
   };
-  let result: string = GitLabIcons.project;
-  // TODO check also namespace for icon
-  if (project.avatar_url) {
-    result = project.avatar_url;
-  } else if (project.owner && project.owner.avatar_url) {
-    result = project.owner.avatar_url;
-  } else {
-    result = svgSource();
-  }
-  return { source: result, mask: Image.Mask.Circle, fallback: svgSource() };
+}
+
+/** Project title for dropdowns; drops the top-level group unless `showRepositoryGroupName` is enabled. */
+export function projectDropdownTitle(project: Project): string {
+  return getPreferences().showRepositoryGroupName
+    ? project.name_with_namespace
+    : project.name_with_namespace.split(" / ").slice(1).join(" / ") || project.name;
 }
 
 export function getIdFromGqlId(id: string): number {
@@ -158,6 +158,10 @@ export function capitalizeFirstLetter(name: string): string {
 export function toFormValues(values: Record<string, unknown>): Record<string, string> {
   const formValues: Record<string, string> = {};
   for (const [key, value] of Object.entries(values)) {
+    if (typeof value === "boolean") {
+      formValues[key] = String(value);
+      continue;
+    }
     if (value) {
       if (Array.isArray(value)) {
         if (value.length > 0) {
@@ -287,6 +291,7 @@ export interface Preferences {
   token?: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
+  showRepositoryGroupName: boolean;
   primaryaction: "browser" | "detail";
   poptoroot: boolean;
   includeEpicAncestor: boolean;

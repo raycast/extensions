@@ -1,5 +1,12 @@
 # Claude Usage (ccusage) Changelog
 
+## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
+
+### Fixed
+
+- Only set `npm_config_prefix` to `~/.npm-global` when that directory exists — pointing npm at a missing prefix made npx fail with ENOENT on nvm/Homebrew installs, breaking every command
+- Report the actual failure reason (spawn error, exit code, signal, or timeout, with stderr) when the ccusage CLI fails, instead of a misleading "No output received"
+
 ## [Fable support and per-model limits] - 2026-08-29
 
 ### Added

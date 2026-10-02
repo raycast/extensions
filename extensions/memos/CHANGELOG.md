@@ -1,5 +1,9 @@
 # Send To Memos Changelog
 
+## [Fix] - 2026-09-20
+
+- fix: dismiss Send Memo after a successful send on Raycast 2 (close the window and clear the command).
+
 ## [Fix] - 2026-04-20
 
 - fix: restore memo listing for newer Memos instances by resolving the current user via `/api/v1/auth/me` and listing memos with the authenticated user's `parent` resource name.

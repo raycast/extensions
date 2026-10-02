@@ -5,7 +5,7 @@ import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
 import type { AgentStatus } from "./lib/types";
-import { ErrorView, shortcuts, statusIcon, statusTitle } from "./lib/ui";
+import { ErrorView, ManageSessionsAction, shortcuts, statusIcon, statusTitle } from "./lib/ui";
 
 type Filter = "all" | AgentStatus;
 
@@ -19,7 +19,22 @@ export default function Command() {
   return (
     <List
       isLoading={snapshot.isLoading}
-      searchBarPlaceholder="Search agents, names, projects, paths…"
+      searchBarPlaceholder={
+        snapshot.session
+          ? `Search agents, names, projects, paths in ${snapshot.session}…`
+          : "Search agents, names, projects, paths…"
+      }
+      actions={
+        <ActionPanel>
+          <ManageSessionsAction />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={shortcuts.refresh}
+            onAction={snapshot.revalidate}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Agents" value={filter} onChange={(value) => setFilter(value as Filter)}>
           <List.Dropdown.Item value="all" title="All Agents" />
@@ -88,6 +103,7 @@ export default function Command() {
                   shortcut={shortcuts.refresh}
                   onAction={snapshot.revalidate}
                 />
+                <ManageSessionsAction />
               </ActionPanel>
             }
           />

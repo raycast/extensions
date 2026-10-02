@@ -9,6 +9,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { usePost } from "../hooks/use-post";
 import { deletePost, updatePost } from "../lib/notra";
@@ -100,20 +101,19 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
             <ActionPanel.Section>
               <Action.Push
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<EditPostForm onPostUpdated={refreshPostState} post={post} />}
                 title="Edit Post"
               />
               <Action
                 icon={post.status === "published" ? Icon.Pencil : Icon.Upload}
                 onAction={handleStatusChange}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 title={post.status === "published" ? "Move to Draft" : "Publish Post"}
               />
               <Action
                 icon={Icon.Trash}
                 onAction={handleDelete}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title="Delete Post"
               />
@@ -129,17 +129,17 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
               <Action
                 icon={Icon.ArrowClockwise}
                 onAction={() => revalidate()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 title="Refresh"
               />
               <Action.CopyToClipboard
                 content={post.markdown}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 title="Copy Markdown"
               />
               <Action.CopyToClipboard
                 content={notraUrl(`/content/${post.id}`)}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
                 title="Copy Link"
               />
             </ActionPanel.Section>

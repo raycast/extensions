@@ -6,6 +6,8 @@
   "description": "Generate QR codes and manage dynamic (editable) QR codes with scan analytics, straight from Raycast.",
   "icon": "openqr-icon.png",
   "author": "sam_moreton",
+  "owner": "openqr",
+  "access": "public",
   "categories": [
     "Data",
     "Productivity",

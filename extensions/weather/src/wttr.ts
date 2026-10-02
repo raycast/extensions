@@ -243,6 +243,9 @@ export function getCurrentFeelLikeTemperature(
     return;
   }
   const value = getUnitSystem() === UnitSystem.Imperial ? curcon.FeelsLikeF : curcon.FeelsLikeC;
+  if (!value) {
+    return;
+  }
   const unit = getTemperatureUnit();
   const valueAndUnit = `${value} ${unit}`;
   return { value, unit, valueAndUnit };

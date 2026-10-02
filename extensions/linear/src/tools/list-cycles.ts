@@ -1,8 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, collectFiltered, CursorPageInput } from "./linearUtils";
+import { mapPage, serializeCycle } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input extends CursorPageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -11,9 +9,9 @@ interface Input extends CursorPageInput {
   /** Filter the team's cycles */ type?: "current" | "previous" | "next";
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const team = await client().team(input.teamId);
-  return collectFiltered(
+  const page = await collectFiltered(
     ({ first, after }) => team.cycles({ first, after }),
     (cycle) =>
       !input.type ||
@@ -22,4 +20,5 @@ export default withAccessToken(linear)(async (input: Input) => {
       (input.type === "next" && cycle.isNext),
     input,
   );
+  return mapPage(page, serializeCycle);
 });

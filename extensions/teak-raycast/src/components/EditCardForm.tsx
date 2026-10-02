@@ -25,8 +25,8 @@ interface EditCardFormValues {
   tags: string;
 }
 
-const parseTags = (value: string): string[] => {
-  return Array.from(
+const parseTags = (value: string): string[] =>
+  Array.from(
     new Set(
       value
         .split(",")
@@ -34,7 +34,6 @@ const parseTags = (value: string): string[] => {
         .filter(Boolean),
     ),
   );
-};
 
 export function EditCardForm({ card, onCardUpdated }: EditCardFormProps) {
   const { pop } = useNavigation();

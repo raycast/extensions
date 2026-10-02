@@ -62,7 +62,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.25",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/utils": "^2.3.1",
     "axios": "^1.8.4",
     "axios-cookiejar-support": "^5.0.3",
     "fast-srp-hap": "^2.0.4",

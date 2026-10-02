@@ -10,6 +10,7 @@ import { showToast, Toast } from "@raycast/api";
 import {
   actionsLogger,
   brewUpgradeOutdated,
+  copyLogsAction,
   ensureError,
   formatCount,
   markOutdatedSnapshotDirty,
@@ -90,6 +91,7 @@ export function useBrewUpgrade(): BrewUpgrade {
       // Progress is reported via the toast: only the package status is reflected in the list
       let total = 0;
       let finished = 0;
+      let inRun = new Set<string>();
 
       try {
         const summary = await brewUpgradeOutdated({
@@ -107,6 +109,10 @@ export function useBrewUpgrade(): BrewUpgrade {
                 break;
               case "start":
                 total = event.packages.length;
+                // The counter denominator. Pinned packages are reported as
+                // skipped but were filtered out before the run, so they are not
+                // in here — count only what the run actually attempts.
+                inRun = new Set(event.packages.map(upgradeKey));
                 setOutdated(event.outdated);
                 break;
               case "prefetch":
@@ -122,7 +128,10 @@ export function useBrewUpgrade(): BrewUpgrade {
                   if (event.status === "upgrading") {
                     toast.updateTitle(`Upgrading ${event.package.name} (${finished + 1}/${total})`);
                     toast.updateMessage("");
-                  } else if (event.status !== "skipped") {
+                  } else if (inRun.has(upgradeKey(event.package))) {
+                    // Terminal status for a package this run attempted. A runtime
+                    // decline counts; a pinned skip does not, because it was never
+                    // in the denominator.
                     finished += 1;
                   }
                   setState(upgradeKey(event.package), { status: event.status, message: event.message });
@@ -132,20 +141,25 @@ export function useBrewUpgrade(): BrewUpgrade {
           },
         });
 
-        if (summary.cancelled) {
+        if (summary.canceled) {
           toast.hide();
           await showToast({
             style: Toast.Style.Failure,
-            title: "Upgrade Cancelled",
+            title: "Upgrade Canceled",
             message: `${formatCount(summary.upgraded.length, "package")} upgraded`,
           });
         } else if (summary.failed.length > 0) {
           // Keep the window open so the failed packages remain visible
           toast.hide();
+          const failedNames = summary.failed.map((pkg) => pkg.name).join(", ");
           await showToast({
             style: Toast.Style.Failure,
             title: `Failed to upgrade ${formatCount(summary.failed.length, "package")}`,
-            message: summary.failed.map((pkg) => pkg.name).join(", "),
+            message: failedNames,
+            primaryAction: copyLogsAction(
+              `Failed to upgrade ${formatCount(summary.failed.length, "package")}\n\n${failedNames}`,
+              { hideToast: true },
+            ),
           });
         } else if (summary.upgraded.length === 0) {
           await toast.showSuccessHUD("Nothing to upgrade");
@@ -157,8 +171,8 @@ export function useBrewUpgrade(): BrewUpgrade {
         toast.hide();
 
         if (error.name === "AbortError") {
-          actionsLogger.log("Upgrade cancelled by user");
-          await showToast({ style: Toast.Style.Failure, title: "Upgrade Cancelled" });
+          actionsLogger.log("Upgrade canceled by user");
+          await showToast({ style: Toast.Style.Failure, title: "Upgrade Canceled" });
         } else {
           actionsLogger.error("Upgrade failed", { name: error.name, message: error.message });
           await showBrewFailureToast("Upgrade failed", error);

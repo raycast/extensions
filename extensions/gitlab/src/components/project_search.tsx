@@ -2,14 +2,14 @@ import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { gitlab } from "../common";
-import { Project, searchData } from "../gitlabapi";
+import { dataToProject, GitLabProjectJson, Project } from "../gitlabapi";
 import { getPreferences } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
 
 export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
-  const { projects, isLoading } = useSearch(searchText, scope);
+  const { projects, isLoading, pagination } = useSearch(searchText, scope);
   const isMembership = scope === ProjectScope.membership;
 
   return (
@@ -17,6 +17,7 @@ export function ProjectSearchList() {
       searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
+      pagination={pagination}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
@@ -38,48 +39,35 @@ export function ProjectSearchList() {
   );
 }
 
+const PROJECT_SEARCH_PAGE_SIZE = 30;
+
 export function useSearch(
   query: string | undefined,
   scope: string,
 ): {
   projects: Project[];
   isLoading: boolean;
+  pagination: List.Props["pagination"];
 } {
-  const active = getPreferences().active ?? false;
-  const isMembership = scope === ProjectScope.membership;
-
-  const { data: membershipProjects, isLoading: membershipLoading } = useCachedPromise(
-    async (limitActive: boolean): Promise<Project[]> =>
-      gitlab.getUserProjects({ search: "", ...(limitActive && { active: "true" }) }, true),
-    [active],
-    { initialData: [], execute: isMembership },
+  const { data, isLoading, pagination } = useCachedPromise(
+    (searchQuery: string, projectScope: string, active: boolean) =>
+      async ({ page }: { page: number }) => {
+        const { data, hasMore } = await gitlab.fetchPaged(
+          "projects",
+          {
+            ...(projectScope === ProjectScope.membership
+              ? { min_access_level: "30", ...(searchQuery && { search: searchQuery, search_namespaces: "true" }) }
+              : { membership: "false", ...(searchQuery && { search: searchQuery, in: "title" }) }),
+            ...(active && { active: "true" }),
+          },
+          page + 1,
+          PROJECT_SEARCH_PAGE_SIZE,
+        );
+        return { data: ((data as GitLabProjectJson[]) ?? []).map(dataToProject), hasMore };
+      },
+    [query ?? "", scope, getPreferences().active ?? false],
+    { initialData: [], keepPreviousData: true },
   );
 
-  const { data: allProjects, isLoading: allLoading } = useCachedPromise(
-    async (searchQuery: string, isActive: boolean): Promise<Project[]> =>
-      gitlab.getProjects({
-        searchText: searchQuery,
-        searchIn: "title",
-        membership: "false",
-        active: isActive,
-      }),
-    [query ?? "", active],
-    { initialData: [], execute: !isMembership },
-  );
-
-  if (isMembership) {
-    return {
-      projects: searchData<Project[]>(membershipProjects, {
-        search: query || "",
-        keys: ["name_with_namespace"],
-        limit: 50,
-      }),
-      isLoading: membershipLoading,
-    };
-  }
-
-  return {
-    projects: allProjects,
-    isLoading: allLoading,
-  };
+  return { projects: data, isLoading, pagination };
 }

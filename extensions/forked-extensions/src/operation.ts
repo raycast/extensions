@@ -69,7 +69,8 @@ class Operation {
       const shouldContinue = await this.confirmCloudSyncedRepositoryPath();
       if (!shouldContinue) return;
 
-      this.showToast({ title: "Initializing repository" });
+      const existingRepository = localForkedRepository || (await git.getForkedRepository());
+      if (existingRepository !== forkedRepository) await this.showToast({ title: "Initializing repository" });
       const initializedRepository = await git.initRepository(forkedRepository);
       await git.checkIfSparseCheckoutEnabled();
       await git.setUpstream(initializedRepository);

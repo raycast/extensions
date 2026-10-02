@@ -1,5 +1,13 @@
 # Laravel Forge Changelog
 
+## [Fix] - 2026-09-28
+
+- Stop sending dropped connections, rejected tokens, rate limits and Forge outages to the extension's error reports
+
+## [Improvements] - 2026-09-03
+
+- Name the extension in every request to Forge, so their support can trace calls this extension made
+
 ## [Fix] - 2026-08-29
 
 - Show active deployments in the menu bar again, including ones waiting at pending or failed during the build

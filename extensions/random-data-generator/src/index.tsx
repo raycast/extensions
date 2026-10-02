@@ -12,21 +12,24 @@ import { buildItems } from "@/utils";
 type LocalStorageValues = { pinnedItemIds: string };
 
 export default function FakerList() {
+  const [locale, setLocale] = useState(fakerClient.locale);
   const [items, setItems] = useState<Item[]>([]);
   const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
   const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
 
-  // Simple locale change - no regeneration, no loops
-  const handleLocaleChange = useCallback(() => {
-    // Just update locale, user needs to manually refresh
+  const handleLocaleChange = useCallback((nextLocale: string) => {
+    fakerClient.setLocale(nextLocale);
+    LocalStorage.setItem("locale", nextLocale);
+    setLocale(nextLocale);
+    setItems(buildItems("", fakerClient.faker));
   }, []);
 
   useEffect(() => {
     const init = async () => {
-      const locale = ((await LocalStorage.getItem("locale")) as string) || "en";
-      fakerClient.setLocale(locale);
-      const newItems = buildItems("", fakerClient.faker);
-      setItems(newItems);
+      const storedLocale = ((await LocalStorage.getItem("locale")) as string) || "en";
+      fakerClient.setLocale(storedLocale);
+      setLocale(storedLocale);
+      setItems(buildItems("", fakerClient.faker));
     };
     init();
   }, []);
@@ -62,18 +65,18 @@ export default function FakerList() {
   };
 
   return (
-    <List isShowingDetail searchBarAccessory={<Locales onChange={handleLocaleChange} />}>
+    <List isShowingDetail searchBarAccessory={<Locales value={locale} onChange={handleLocaleChange} />}>
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (
-            <FakerListItem key={item.id} item={item} unpin={unpin} />
+            <FakerListItem key={`${locale}:${item.id}`} item={item} unpin={unpin} />
           ))}
         </List.Section>
       )}
       {_.map(groupedItems, (items, section) => (
         <List.Section key={section} title={_.startCase(section)}>
           {_.map(items, (item) => (
-            <FakerListItem key={item.id} item={item} pin={pin} />
+            <FakerListItem key={`${locale}:${item.id}`} item={item} pin={pin} />
           ))}
         </List.Section>
       ))}

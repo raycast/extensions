@@ -30,6 +30,24 @@
       "mode": "view",
       "preferences": [
         {
+          "type": "dropdown",
+          "name": "primaryAction",
+          "title": "Primary Action",
+          "description": "The action performed when pressing Enter on a download",
+          "required": false,
+          "default": "open",
+          "data": [
+            {
+              "title": "Open",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        },
+        {
           "type": "checkbox",
           "name": "showHiddenFiles",
           "label": "Show Hidden Files",

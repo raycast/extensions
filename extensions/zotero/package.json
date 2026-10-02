@@ -192,6 +192,15 @@
       "default": false,
       "label": "Wrap PDF Path in Quotes",
       "description": "Wrap the copied PDF path in quotation marks"
+    },
+    {
+      "name": "order_by_opens",
+      "type": "checkbox",
+      "title": "Order by Last Opened",
+      "required": false,
+      "default": false,
+      "label": "Order Empty Results by Last Opened",
+      "description": "When the search is empty, show entries you opened most recently first. Tracks when you open a PDF, the Zotero entry, the original link, or reveal a PDF in Finder"
     }
   ],
   "dependencies": {

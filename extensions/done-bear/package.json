@@ -8,6 +8,8 @@
   ],
   "license": "MIT",
   "author": "mblode",
+  "owner": "donebear",
+  "access": "public",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

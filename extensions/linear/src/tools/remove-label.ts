@@ -3,6 +3,9 @@ import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { serializeIssue } from "./serializers";
+import { withLinear } from "./withLinear";
+
 type Input = {
   /** The ID of the issue to add the label to. Format is a combination of a team key and a unique number, like `ENG-123` */
   issueId: string;
@@ -11,7 +14,7 @@ type Input = {
   labelId: string;
 };
 
-export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
+export default withLinear(async ({ issueId, labelId }: Input) => {
   const { linearClient } = getLinearClient();
   const issue = await linearClient.issue(issueId);
   const currentLabelIds = issue.labelIds || [];
@@ -24,7 +27,12 @@ export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
     throw new Error("Failed to remove label");
   }
 
-  return result.issue;
+  const updatedIssue = await result.issue;
+  if (!updatedIssue) {
+    throw new Error("Failed to remove label");
+  }
+
+  return serializeIssue(updatedIssue);
 });
 
 export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }: Input) => {

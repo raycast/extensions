@@ -1,18 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import {
-  Icon,
-  List,
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  clearSearchBar,
-  showToast,
-  Toast,
-  Color,
-} from "@raycast/api";
-import { getSessions, connectToSession, isTmuxRunning, Session } from "./sesh";
+import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { getSessions, connectToSession, Session } from "./sesh";
+import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
 import { openApp } from "./app";
+import { WindowList } from "./windows";
 
 function getIcon(session: Session) {
   switch (session.Src) {
@@ -47,59 +40,77 @@ function formatScore(score: number) {
 }
 
 export default function ConnectCommand() {
-  const [sessions, setSessions] = useState<Array<Session>>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  async function getAndSetSessions() {
-    try {
-      const sessions = await getSessions();
-      setSessions(sessions);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't get sessions",
-        message: typeof error === "string" ? error : "Unknown reason",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    (async () => {
-      if (!(await isTmuxRunning())) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "tmux isn't running",
-          message: "Please start tmux before using this command.",
-        });
-        setIsLoading(false);
-        return;
-      }
-      await getAndSetSessions();
-    })();
-  }, []);
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    async () => {
+      await checkSetup();
+      return (await getSessions()) ?? [];
+    },
+    [],
+    {
+      keepPreviousData: true,
+      onError: (error) => {
+        if (isSetupError(error)) {
+          return;
+        }
+        showFailureToast(error, { title: "Couldn't get sessions" });
+      },
+    },
+  );
+  const sessions = isSetupError(error) ? [] : (data ?? []);
 
   async function connect(session: string) {
     try {
-      setIsLoading(true);
+      setIsConnecting(true);
       await connectToSession(session);
       await openApp();
       await closeMainWindow();
       await clearSearchBar();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't connect to session",
-        message: typeof error === "string" ? error : "Unknown reason",
-      });
+      await showFailureToast(error, { title: "Couldn't connect to session" });
     } finally {
-      setIsLoading(false);
+      setIsConnecting(false);
     }
   }
 
+  const refreshAction = (
+    <Action
+      title="Refresh Sessions"
+      icon={Icon.ArrowClockwise}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      onAction={revalidate}
+    />
+  );
+
+  function renderEmptyView() {
+    const setupEmptyView = renderSetupEmptyView(error, refreshAction);
+    if (setupEmptyView) {
+      return setupEmptyView;
+    }
+    if (error) {
+      return (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't load sessions"
+          description="Press ⌘R to retry."
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      );
+    }
+    return (
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title="No sessions found"
+        description="Press ⌘R to refresh."
+        actions={<ActionPanel>{refreshAction}</ActionPanel>}
+      />
+    );
+  }
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || isConnecting}>
+      {renderEmptyView()}
       {sessions.map((session, index) => {
         const accessories = [];
 
@@ -126,6 +137,14 @@ export default function ConnectCommand() {
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
+                {session.Src === "tmux" && (
+                  <Action.Push
+                    title="Search Windows"
+                    icon={Icon.AppWindowList}
+                    target={<WindowList session={session.Name} />}
+                  />
+                )}
+                {refreshAction}
               </ActionPanel>
             }
           />

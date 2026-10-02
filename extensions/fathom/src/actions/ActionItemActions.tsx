@@ -44,7 +44,7 @@ export function ActionItemActions({
           title="Copy All Action Items"
           content={allItemsCopyContent}
           icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
       </ActionPanel.Section>
 

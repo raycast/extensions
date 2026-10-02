@@ -19,6 +19,26 @@
       "title": "Mirror Displays",
       "description": "Choose which display to mirror, or turn off mirroring.",
       "mode": "view"
+    },
+    {
+      "name": "toggle-mirroring",
+      "title": "Toggle Mirroring",
+      "description": "Turn display mirroring off if it's on, or on (using your default direction) if it's off. Bind this to a hotkey for instant toggling.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultToggleDirection",
+      "title": "Default Toggle Direction",
+      "description": "Which direction to mirror when Toggle Mirroring turns mirroring on.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mac",
+      "data": [
+        { "title": "Mac → External", "value": "mac" },
+        { "title": "External → Mac", "value": "external" }
+      ]
     }
   ],
   "dependencies": {

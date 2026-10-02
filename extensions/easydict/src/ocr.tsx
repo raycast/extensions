@@ -5,7 +5,7 @@ import { chmod } from "fs/promises";
 import { join } from "path";
 import { x } from "tinyexec";
 
-import { logError, logTrace } from "@/utils/logger";
+import { logError, logTrace } from "@/shared/logger";
 
 const recognizeText = async () => {
   const command = join(environment.assetsPath, "recognizeText");
