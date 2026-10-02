@@ -78,8 +78,18 @@ type StreamingLinks = { spotify?: string; tidal?: string; apple?: string };
 // trusted by its host alone.
 const STREAMING_HOSTS: Record<keyof StreamingLinks, (url: URL) => boolean> = {
   spotify: (url) => url.hostname === "open.spotify.com" && url.pathname.startsWith("/track/"),
-  tidal: (url) => url.hostname.endsWith("tidal.com") && url.pathname.includes("/track/"),
-  apple: (url) => url.hostname === "music.apple.com",
+  tidal: (url) =>
+    (url.hostname === "tidal.com" || url.hostname.endsWith(".tidal.com")) && url.pathname.includes("/track/"),
+  apple: (url) => appleTrackId(url) !== undefined,
+};
+
+// A track id lives in `?i=` on an album URL or as the last segment of a song URL
+// (music.apple.com/us/song/<slug>/<id>); any other Apple Music page is not a track.
+const appleTrackId = (url: URL): string | undefined => {
+  if (url.hostname !== "music.apple.com") return undefined;
+  if (/\/album\//.test(url.pathname)) return url.searchParams.get("i") ?? undefined;
+  const song = url.pathname.match(/\/song\/(?:[^/]+\/)?(\d+)\/?$/);
+  return song?.[1];
 };
 
 const parseUrl = (value: string): URL | undefined => {
@@ -175,7 +185,20 @@ export const shareLinks = async (track: Track): Promise<ShareLink[]> => {
   links.push(exactOr("tidal", streaming.tidal, tidalSearchUrl(query)));
 
   // song.link resolves every other service client-side when the friend opens it.
-  const songlink = deezer ? `https://song.link/d/${deezer.id}` : apple ? `https://song.link/i/${apple.id}` : undefined;
+  // Exact sources only, in order: Deezer, then MusicBrainz Spotify, then MusicBrainz Apple.
+  let songlink: string | undefined;
+  if (deezer) {
+    songlink = `https://song.link/d/${deezer.id}`;
+  }
+  if (!songlink && streaming.spotify) {
+    const spotifyId = parseUrl(streaming.spotify)?.pathname.split("/track/")[1]?.split("?")[0];
+    if (spotifyId) songlink = `https://song.link/s/${spotifyId}`;
+  }
+  if (!songlink && streaming.apple) {
+    const appleUrl = parseUrl(streaming.apple);
+    const itunesId = appleUrl && appleTrackId(appleUrl);
+    if (itunesId) songlink = `https://song.link/i/${itunesId}`;
+  }
   if (songlink) links.push({ platform: "songlink", url: songlink, confidence: "exact" });
   return links;
 };

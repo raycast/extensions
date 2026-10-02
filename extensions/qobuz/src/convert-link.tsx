@@ -3,7 +3,7 @@ import { showFailureToast, usePromise } from "@raycast/utils";
 import { readNowPlayingTrackId, type Album, type Track } from "@kud/qobuz";
 import { appLink, BRAND, deepLink, formatDuration, getClient } from "./lib/client";
 import { convertFromQobuz, type FromQobuzResult } from "./lib/convert";
-import { enabledLinks, shareClipboard, shareQuery, type ShareLink } from "./lib/share";
+import { shareClipboard, shareQuery, ytMusicSearchUrl, type ShareLink } from "./lib/share";
 
 const EMPTY_MESSAGE = [
   "# Nothing playing in Qobuz",
@@ -36,12 +36,11 @@ export default function Command() {
 
 const renderMetadata = (data: FromQobuzResult | null | undefined) => {
   if (!data) return undefined;
-  const enabled = enabledLinks(data.links);
   return (
     <Detail.Metadata>
       <TrackFacts track={data.track} />
       <Detail.Metadata.Separator />
-      {enabled
+      {data.links
         .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
         .map((link) => (
           <Detail.Metadata.TagList key={link.platform} title={LINK_LABEL[link.platform]}>
@@ -58,7 +57,6 @@ const renderMetadata = (data: FromQobuzResult | null | undefined) => {
 const renderActions = (data: FromQobuzResult | null | undefined) => {
   if (!data) return undefined;
 
-  const enabled = enabledLinks(data.links);
   const trackUrl = deepLink.track(data.track.id);
   return (
     <ActionPanel>
@@ -74,8 +72,13 @@ const renderActions = (data: FromQobuzResult | null | undefined) => {
       />
       <Action.CopyToClipboard title="Copy Artist & Title" content={shareQuery(data.track)} />
       <ActionPanel.Section title="Other Services">
-        {enabled
-          .filter((link) => link.platform !== "qobuz")
+        <Action.OpenInBrowser
+          title="Search on YouTube Music"
+          icon={Icon.MagnifyingGlass}
+          url={ytMusicSearchUrl(shareQuery(data.track))}
+        />
+        {data.links
+          .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
           .map((link) => (
             <Action.OpenInBrowser
               key={link.platform}
