@@ -50,7 +50,8 @@ pass-cli vault list
 ## Preferences
 
 - **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Primary Action**: What Enter does on an item: view its details (default) or copy the password
+- **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
+- **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
@@ -68,6 +69,18 @@ Generate Password has its own preferences for the settings it starts with. They 
 - **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
 - **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
 - **Capitalization**: Capitalize passphrase words (on by default)
+
+## Filling Logins (macOS)
+
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+
+To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 
 ## Troubleshooting
 

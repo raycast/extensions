@@ -7,6 +7,8 @@ import ts from "typescript";
 import * as refresh from "./refresh";
 import * as format from "./format";
 import * as shortcuts from "./shortcuts";
+import * as fillSequence from "./fill-sequence";
+import * as keyPress from "./key-press";
 import { Item, ItemDetail, PassCliError } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -51,6 +53,34 @@ function actions(element: unknown): Element["props"][] {
   return [props, ...[props.children].flat().flatMap(actions)];
 }
 
+test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
+  const externalApp = { name: "Example", bundleId: "com.example.app" };
+  const otherApp = { name: "Other", bundleId: "com.example.other" };
+  const raycast = { name: "Raycast", bundleId: "com.raycast.macos" };
+  for (const initialApp of [externalApp, raycast, undefined]) {
+    let frontmostApp: typeof externalApp | undefined = initialApp;
+    const { getTargetApp } = loadView("autofill.ts", {
+      "@raycast/api": {
+        PopToRootType: { Suspended: "suspended" },
+        closeMainWindow: async () => {
+          frontmostApp = otherApp;
+        },
+        getFrontmostApplication: async () => frontmostApp,
+      },
+      "@raycast/utils": {},
+      "./fill-sequence": fillSequence,
+      "./key-press": keyPress,
+    }) as unknown as { getTargetApp: () => Promise<typeof externalApp> };
+    if (initialApp === externalApp) {
+      const target = await getTargetApp();
+      assert.equal(target.bundleId, externalApp.bundleId);
+      assert.equal(target.name, externalApp.name);
+    } else {
+      await assert.rejects(getTargetApp(), /Couldn't find the app to fill/);
+    }
+  }
+});
+
 const item: Item = {
   shareId: "vault",
   itemId: "login",
@@ -62,8 +92,9 @@ const item: Item = {
   email: "test@example.com",
 };
 
-function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = item, detail?: ItemDetail) {
+function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: Item = item, detail?: ItemDetail) {
   const events: string[] = [];
+  const fills: { values: string[]; target: unknown }[] = [];
   const contents: string[] = [];
   const { ItemActions } = loadView("item-actions.tsx", {
     react: { memo: (component: Component) => component },
@@ -91,6 +122,17 @@ function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = it
       },
       showToast: async () => undefined,
     },
+    "./autofill": {
+      canFillFrontmostApp: true,
+      getTargetApp: async () => {
+        events.push("target");
+        return { name: "Example", bundleId: "com.example.app" };
+      },
+      fillApp: async (target: unknown, request: { values: string[] }) => {
+        events.push("fill");
+        fills.push({ ...request, target });
+      },
+    },
     "./format": { websiteLabels: () => [] },
     "./item-view": {},
     "./note-view": {},
@@ -100,15 +142,20 @@ function itemActions(primaryAction?: "details" | "copy", selectedItem: Item = it
   const panel = ItemActions({
     item: selectedItem,
     detail,
-    store: { peek: () => ({ ...selectedItem, password: "fake-secret" }) },
+    store: {
+      peek: () => {
+        if (primaryAction === "fill") events.push("load");
+        return detail ?? { ...selectedItem, password: "fake-secret" };
+      },
+    },
     isShowingDetail: true,
     onToggleDetail: () => undefined,
     onUse: () => events.push("use"),
   });
-  return { entries: actions(panel), events, contents };
+  return { entries: actions(panel), events, fills, contents };
 }
 
-test("Enter views details by default and copies passwords only when selected in preferences", async () => {
+test("Enter views details by default and copies or fills only when selected in preferences", async () => {
   const titles = (entries: Element["props"][]) => entries.filter((entry) => entry.title).map((entry) => entry.title);
   assert.equal(titles(itemActions().entries)[0], "View Details");
   const { entries, events } = itemActions("copy");
@@ -126,11 +173,24 @@ test("Enter views details by default and copies passwords only when selected in 
   const addedPassword = { ...item, password: "fake-secret" };
   assert.equal(titles(itemActions("copy", { ...item, hasPassword: false }, addedPassword).entries)[0], "Copy Password");
   assert.equal(titles(itemActions("copy", item, { ...item, password: undefined }).entries)[0], "View Details");
+
+  const filling = itemActions("fill");
+  assert.equal(titles(filling.entries)[0], "Fill Login");
+  await (filling.entries.find((entry) => entry.title === "Fill Login")?.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(filling.fills[0].values), [item.email, "fake-secret"]);
+  assert.deepEqual(filling.events, ["target", "load", "use", "fill"]);
+  assert.equal((filling.fills[0].target as { bundleId: string }).bundleId, "com.example.app");
+  assert.equal(titles(itemActions("fill", { ...item, hasPassword: false }).entries)[0], "View Details");
+  assert.ok(titles(itemActions("fill", { ...item, hasPassword: false }).entries).includes("Paste Email"));
 });
 
-test("copying item fields uses loaded values and omits fields removed since the cached listing", async () => {
+test("copying and pasting item fields uses loaded values and omits fields removed since the cached listing", async () => {
   const loaded = { ...item, username: "new-user", email: "new@example.com", title: "New title" };
-  const { entries, contents } = itemActions(undefined, item, loaded);
+  const { entries, contents, fills } = itemActions(undefined, item, loaded);
+  const pasteUsername = entries.find((entry) => entry.title === "Paste Username");
+  assert.ok(pasteUsername);
+  await (pasteUsername.onAction as () => Promise<void>)();
+  assert.deepEqual(Array.from(fills[0].values), [loaded.username]);
   for (const title of ["Copy Username", "Copy Email", "Copy Title"]) {
     await (entries.find((entry) => entry.title === title)!.onAction as () => Promise<void>)();
   }
@@ -141,7 +201,9 @@ test("copying item fields uses loaded values and omits fields removed since the 
     { ...item, username: undefined, email: undefined },
   );
   assert.equal(
-    removed.entries.some((entry) => entry.title === "Copy Username" || entry.title === "Copy Email"),
+    removed.entries.some((entry) =>
+      ["Copy Username", "Copy Email", "Paste Username", "Paste Email"].includes(String(entry.title)),
+    ),
     false,
   );
 });

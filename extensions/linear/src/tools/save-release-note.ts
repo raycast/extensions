@@ -1,7 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import {
   applyPatch,
   client,
@@ -10,6 +6,8 @@ import {
   resolveReleaseNote,
   resolveReleasePipeline,
 } from "./linearUtils";
+import { serializeReleaseNote } from "./serializers";
+import { withLinear } from "./withLinear";
 type Input = {
   id?: string;
   pipeline?: string;
@@ -38,7 +36,7 @@ async function releaseFields(input: Input) {
     rangeToReleaseId: input.rangeToRelease ? (await resolveRelease(input.rangeToRelease)).id : undefined,
   };
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.id) {
     if (input.content !== undefined && input.patch) throw new Error("Pass content or patch, not both.");
     const note = await resolveReleaseNote(input.id);
@@ -46,7 +44,9 @@ export default withAccessToken(linear)(async (input: Input) => {
       ? applyPatch(note.documentContent?.content ?? "", input.patch as ContentPatch[])
       : input.content;
     const result = await note.update({ title: input.title, content, ...(await releaseFields(input)) });
-    return result.releaseNote;
+    const updated = result.success ? await result.releaseNote : undefined;
+    if (!updated) throw new Error("Failed to update release notes.");
+    return serializeReleaseNote(updated, { content: true });
   }
   if (!input.pipeline) throw new Error("pipeline is required when creating release notes.");
   if (!input.releases && !(input.rangeFromRelease && input.rangeToRelease))
@@ -59,5 +59,7 @@ export default withAccessToken(linear)(async (input: Input) => {
     content: input.content,
     ...(await releaseFields(input)),
   });
-  return result.releaseNote;
+  const created = result.success ? await result.releaseNote : undefined;
+  if (!created) throw new Error("Failed to create release notes.");
+  return serializeReleaseNote(created, { content: true });
 });

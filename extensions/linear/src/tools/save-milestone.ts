@@ -1,10 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, resolveMilestone, resolveProject } from "./linearUtils";
+import { serializeMilestone } from "./serializers";
+import { withLinear } from "./withLinear";
 type Input = { project: string; id?: string; name?: string; description?: string; targetDate?: string };
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const project = await resolveProject(input.project);
   if (input.id) {
     const milestone = await resolveMilestone(project.id, input.id);
@@ -13,8 +11,9 @@ export default withAccessToken(linear)(async (input: Input) => {
       description: input.description,
       targetDate: input.targetDate,
     });
-    if (!result.success) throw new Error("Failed to update project milestone.");
-    return result.projectMilestone;
+    const updated = result.success ? await result.projectMilestone : undefined;
+    if (!updated) throw new Error("Failed to update project milestone.");
+    return serializeMilestone(updated);
   }
   if (!input.name) throw new Error("name is required when creating a milestone.");
   const result = await client().createProjectMilestone({
@@ -23,6 +22,7 @@ export default withAccessToken(linear)(async (input: Input) => {
     description: input.description,
     targetDate: input.targetDate,
   });
-  if (!result.success) throw new Error("Failed to create project milestone.");
-  return result.projectMilestone;
+  const created = result.success ? await result.projectMilestone : undefined;
+  if (!created) throw new Error("Failed to create project milestone.");
+  return serializeMilestone(created);
 });

@@ -5,6 +5,15 @@
 - Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
 - Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
 
+## [Fill Logins] - 2026-10-02
+
+- Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
+- Filling only types into the app Raycast was opened from, and stops if another app comes in front
+- Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
+- Fill Login (macOS) choice for the Primary Action preference, to fill with Enter
+- Fill Login preference, off by default: press Return after the password to submit the login form
+- Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
+
 ## [Item Details Panel] - 2026-10-02
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden

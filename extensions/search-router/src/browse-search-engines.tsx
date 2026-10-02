@@ -13,9 +13,14 @@ import {
 import { useMemo, useState } from "react";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines, removeCustomSearchEngine } from "./data/custom-search-engines";
-import { getBuiltinSearchEngine, getEffectiveSearchEngines } from "./data/search-engines";
+import {
+  getBuiltinSearchEngine,
+  getCustomSearchEnginesByTrigger,
+  getEffectiveAliases,
+  getEffectiveSearchEngines,
+} from "./data/search-engines";
 import type { SearchEngine } from "./types";
-import { useDefaultSearchEngine } from "./data/cache";
+import { resolveDefaultSearchEngine, useDefaultSearchEngine } from "./data/cache";
 import Fuse from "fuse.js";
 import AddCustomSearchEngine from "./add-custom-search-engine";
 
@@ -23,14 +28,32 @@ type FilterType = "all" | "custom" | "builtin";
 
 const getCustomEngineTag = (engine: SearchEngine) => {
   const overriddenBuiltin = getBuiltinSearchEngine(engine.t);
-  return overriddenBuiltin ? `Overrides ${overriddenBuiltin.s}` : "Custom";
+  if (!overriddenBuiltin) return "Custom";
+  return overriddenBuiltin.t === engine.t
+    ? `Overrides ${overriddenBuiltin.s}`
+    : `Overrides !${engine.t} (${overriddenBuiltin.s} alias)`;
 };
 
 export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
-  const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines());
+  const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines);
   const { push } = useNavigation();
+
+  const customTriggers = useMemo(() => new Set(customSearchEngines.map((engine) => engine.t)), [customSearchEngines]);
+
+  const getAliases = useMemo(() => {
+    const customEnginesByTrigger = getCustomSearchEnginesByTrigger(customSearchEngines);
+    const aliasesByEngine = new Map<SearchEngine, string[]>();
+    return (engine: SearchEngine) => {
+      let aliases = aliasesByEngine.get(engine);
+      if (!aliases) {
+        aliases = getEffectiveAliases(engine, customEnginesByTrigger);
+        aliasesByEngine.set(engine, aliases);
+      }
+      return aliases;
+    };
+  }, [customSearchEngines]);
 
   const filteredByType = useMemo(() => {
     switch (filter) {
@@ -43,13 +66,20 @@ export default function BrowseSearchEngines() {
     }
   }, [filter, customSearchEngines]);
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(filteredByType, {
+  // Build the index on the first search and keep it while the engine list is unchanged.
+  const getFuse = useMemo(() => {
+    let fuse: Fuse<SearchEngine> | undefined;
+    return () =>
+      (fuse ??= new Fuse(filteredByType, {
         keys: [
           {
             name: "t",
             weight: 1,
+          },
+          {
+            name: "ts",
+            weight: 1,
+            getFn: getAliases,
           },
           {
             name: "s",
@@ -64,23 +94,26 @@ export default function BrowseSearchEngines() {
             weight: 0.3,
           },
         ],
-      }),
-    [filteredByType],
-  );
+      }));
+  }, [filteredByType, getAliases]);
 
   const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
+  const effectiveDefaultSearchEngine = useMemo(
+    () => resolveDefaultSearchEngine(defaultSearchEngine, customSearchEngines),
+    [defaultSearchEngine, customSearchEngines],
+  );
 
+  const trimmedSearch = searchText.replace(/!/g, "").trim();
   const filteredSearchEngines = useMemo(() => {
-    const trimmedSearch = searchText.replace(/!/g, "").trim();
     if (!trimmedSearch) {
       return filteredByType.slice(0, 20);
     }
 
-    const result = fuse.search(trimmedSearch, {
+    const result = getFuse().search(trimmedSearch, {
       limit: 20,
     });
     return result.map((r) => r.item);
-  }, [searchText, filteredByType, fuse]);
+  }, [trimmedSearch, filteredByType, getFuse]);
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
     setDefaultSearchEngine(searchEngine);
@@ -125,6 +158,7 @@ export default function BrowseSearchEngines() {
 
   return (
     <List
+      filtering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Browse search engines by shortcut or name..."
       searchBarAccessory={
@@ -165,9 +199,10 @@ export default function BrowseSearchEngines() {
         }
       />
       {filteredSearchEngines.map((searchEngine) => {
-        const isOverridden =
-          !searchEngine.isCustom && customSearchEngines.some((engine) => engine.t === searchEngine.t);
-        const isDefault = !isOverridden && searchEngine.t === defaultSearchEngine?.t;
+        const isOverridden = !searchEngine.isCustom && customTriggers.has(searchEngine.t);
+        const isDefault = searchEngine === effectiveDefaultSearchEngine;
+        const aliases = getAliases(searchEngine);
+        const aliasShortcuts = aliases.map((alias) => `!${alias}`);
 
         return (
           <List.Item
@@ -176,6 +211,14 @@ export default function BrowseSearchEngines() {
             subtitle={`!${searchEngine.t}`}
             accessories={[
               { tag: searchEngine.ad || searchEngine.d },
+              ...(aliases.length
+                ? [
+                    {
+                      text: `Aliases: ${aliasShortcuts.slice(0, 3).join(", ")}${aliases.length > 3 ? "…" : ""}`,
+                      tooltip: aliasShortcuts.join(", "),
+                    },
+                  ]
+                : []),
               { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
               { tag: searchEngine.isCustom ? getCustomEngineTag(searchEngine) : undefined },
               { text: isDefault ? "Default" : "" },
@@ -205,10 +248,7 @@ export default function BrowseSearchEngines() {
                     title="Add Custom Search Engine"
                     icon={Icon.Plus}
                     onAction={handleAddEngine}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "n" },
-                      Windows: { modifiers: ["ctrl"], key: "n" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
                   {searchEngine.isCustom ? (
                     <>
@@ -216,10 +256,7 @@ export default function BrowseSearchEngines() {
                         title="Edit Custom Search Engine"
                         icon={Icon.Pencil}
                         onAction={() => handleCustomizeEngine(searchEngine)}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd"], key: "e" },
-                          Windows: { modifiers: ["ctrl"], key: "e" },
-                        }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                       />
                       <Action
                         title="Delete Custom Search Engine"
@@ -248,6 +285,13 @@ export default function BrowseSearchEngines() {
                         Windows: { modifiers: ["ctrl", "shift"], key: "s" },
                       }}
                     />
+                  )}
+                  {aliases.length > 0 && (
+                    <ActionPanel.Submenu title="Copy Alias" icon={Icon.CopyClipboard}>
+                      {aliases.map((alias) => (
+                        <Action.CopyToClipboard key={alias} title={`Copy !${alias}`} content={`!${alias}`} />
+                      ))}
+                    </ActionPanel.Submenu>
                   )}
                   <Action.CopyToClipboard
                     title="Copy Search Engine Domain"

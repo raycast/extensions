@@ -76,7 +76,7 @@ async function performLookup(query: string): Promise<string | null> {
       // Reverse lookup: address -> ENS name
       const name = await provider.lookupAddress(query);
       return name;
-    } else if (query.endsWith(".eth")) {
+    } else if (query.includes(".") && query.length > 2) {
       // Forward resolution: ENS name -> address
       const address = await provider.resolveName(query);
       return address;
