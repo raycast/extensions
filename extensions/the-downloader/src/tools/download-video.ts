@@ -20,6 +20,7 @@ import { detectSource } from "../lib/detect.js";
 import { isValidUrl, normalizeUrl } from "../lib/url.js";
 import { filetypeGuidance } from "../lib/filetype.js";
 import { recordDownload } from "../lib/history.js";
+import { assertPublicHost } from "../lib/safe-fetch.js";
 
 type Input = {
   /**
@@ -46,6 +47,9 @@ export default async function tool(input: Input) {
   if (source === "gallery" || source === "spotify") {
     throw new Error(`${filetypeGuidance(source)} Use the “Download” command to fetch this URL.`);
   }
+  // A prompt-injected link could point yt-dlp at the router or cloud metadata
+  // and save the answer to the download folder; read-link refuses those too.
+  await assertPublicHost(url, { action: "download" });
 
   const ytdlPath = getytdlPath();
   const ffmpegPath = getffmpegPath();

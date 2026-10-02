@@ -2,7 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import http from "node:http";
 import zlib from "node:zlib";
 import { AddressInfo } from "node:net";
-import { BlockedAddressError, HttpError, isBlockedAddress, isBlockedHostname, safeFetch } from "../src/lib/safe-fetch";
+import {
+  BlockedAddressError,
+  HttpError,
+  assertPublicHost,
+  isBlockedAddress,
+  isBlockedHostname,
+  safeFetch,
+} from "../src/lib/safe-fetch";
 
 describe("isBlockedAddress", () => {
   it.each([
@@ -231,5 +238,29 @@ describe("safeFetch", () => {
         .end(zlib.brotliCompressSync("<p>brotli</p>"));
     expect((await safeFetch(`http://s.test:${port}/gz`, onlyLoopback)).body.toString()).toBe("<p>zipped</p>");
     expect((await safeFetch(`http://s.test:${port}/br`, onlyLoopback)).body.toString()).toBe("<p>brotli</p>");
+  });
+});
+
+describe("assertPublicHost", () => {
+  const publicOnly = async () => [{ address: "93.184.216.34", family: 4 as const }];
+
+  it("lets a public host through", async () => {
+    await expect(assertPublicHost("https://rumble.com/v1-clip.html", { resolve: publicOnly })).resolves.toBeUndefined();
+  });
+
+  it("refuses local names, private literals and names that resolve to the local network", async () => {
+    const rebind = async () => [
+      { address: "93.184.216.34", family: 4 as const },
+      { address: "169.254.169.254", family: 4 as const },
+    ];
+    const opts = { resolve: publicOnly, action: "download" };
+    await expect(assertPublicHost("http://192.168.1.1/video.mp4", opts)).rejects.toThrow(
+      "Won't download 192.168.1.1: it's a local or private network address.",
+    );
+    await expect(assertPublicHost("http://[::1]:8080/", opts)).rejects.toThrow(BlockedAddressError);
+    await expect(assertPublicHost("http://router.local/", opts)).rejects.toThrow(BlockedAddressError);
+    await expect(assertPublicHost("http://metadata.test/", { resolve: rebind })).rejects.toThrow(
+      "Won't read metadata.test",
+    );
   });
 });

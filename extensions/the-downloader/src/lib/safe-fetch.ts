@@ -16,8 +16,8 @@ import zlib from "node:zlib";
 
 /** Thrown when a link points at a local or private network address. */
 export class BlockedAddressError extends Error {
-  constructor(host: string) {
-    super(`Won't read ${host}: it's a local or private network address.`);
+  constructor(host: string, action = "read") {
+    super(`Won't ${action} ${host}: it's a local or private network address.`);
     this.name = "BlockedAddressError";
   }
 }
@@ -173,6 +173,25 @@ async function checkedAddresses(host: string, resolve: Resolver, allow: (ip: str
   // One private answer is enough to refuse: a rebinding name mixes both.
   if (addresses.some((a) => !allow(a.address))) throw new BlockedAddressError(host);
   return addresses;
+}
+
+/**
+ * Refuses a link whose host is local or resolves to a local or private address,
+ * for links handed to another program (yt-dlp) that resolves the name itself.
+ * That can't pin the checked address the way `safeFetch` does, but a link that
+ * points at the router, a service on this Mac or cloud metadata stops here.
+ */
+export async function assertPublicHost(
+  url: string,
+  options: { resolve?: Resolver; action?: string } = {},
+): Promise<void> {
+  const host = new URL(url).hostname.replace(/^\[|\]$/g, "");
+  try {
+    await checkedAddresses(host, options.resolve ?? systemResolve, (ip) => !isBlockedAddress(ip));
+  } catch (error) {
+    if (error instanceof BlockedAddressError) throw new BlockedAddressError(host, options.action);
+    throw new Error(`Couldn't find ${host}.`);
+  }
 }
 
 function decoder(encoding: string | undefined): Transform | undefined {

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import dns from "node:dns";
 import fs from "node:fs";
 
 vi.mock("../src/lib/ytdlp", () => ({
@@ -7,6 +8,10 @@ vi.mock("../src/lib/ytdlp", () => ({
   runVideoDownload: vi.fn(),
 }));
 vi.mock("../src/lib/history", () => ({ recordDownload: vi.fn() }));
+// Every host resolves to a public address unless a test says otherwise; no real DNS in tests.
+vi.mock("node:dns", () => ({
+  default: { promises: { lookup: vi.fn(async () => [{ address: "93.184.216.34", family: 4 }]) } },
+}));
 
 import { fetchVideoInfo, runVideoDownload } from "../src/lib/ytdlp";
 import tool from "../src/tools/download-video";
@@ -76,6 +81,16 @@ describe("download-video tool", () => {
 
   it("refuses anything that isn't an http(s) URL before it can reach yt-dlp as an option", async () => {
     await expect(tool({ url: "--batch-file=/etc/hosts" })).rejects.toThrow(/Invalid URL/);
+    expect(fetchVideoInfo).not.toHaveBeenCalled();
+    expect(runVideoDownload).not.toHaveBeenCalled();
+  });
+
+  it("refuses local and private addresses, as read-link does", async () => {
+    await expect(tool({ url: "http://192.168.1.1/video.mp4" })).rejects.toThrow(/local or private network address/);
+    await expect(tool({ url: "http://169.254.169.254/latest/meta-data/" })).rejects.toThrow(/local or private/);
+    await expect(tool({ url: "http://nas.local/clip.mp4" })).rejects.toThrow(/local or private/);
+    vi.mocked(dns.promises.lookup).mockResolvedValueOnce([{ address: "127.0.0.1", family: 4 }] as never);
+    await expect(tool({ url: "https://looks-public.example/clip" })).rejects.toThrow(/local or private/);
     expect(fetchVideoInfo).not.toHaveBeenCalled();
     expect(runVideoDownload).not.toHaveBeenCalled();
   });
