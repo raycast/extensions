@@ -10,28 +10,35 @@
     "Data"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search",
       "title": "Search IPAM",
+      "subtitle": "phpIPAM",
       "description": "Search phpIPAM for addresses, subnets, VLANs and VRFs",
       "mode": "view"
     },
     {
       "name": "browse-sections",
       "title": "Browse Sections",
+      "subtitle": "phpIPAM",
       "description": "Browse phpIPAM sections and drill into their subnets",
       "mode": "view"
     },
     {
       "name": "browse-subnets",
       "title": "Browse Subnets",
+      "subtitle": "phpIPAM",
       "description": "List and filter all subnets across all sections",
       "mode": "view"
     },
     {
       "name": "first-free",
       "title": "First Free Address",
+      "subtitle": "phpIPAM",
       "description": "Find and copy the first free IP address of a subnet",
       "mode": "view"
     }

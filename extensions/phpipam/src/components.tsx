@@ -11,7 +11,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { usePromise, showFailureToast } from "@raycast/utils";
 
 import { ApiError, apiSettingsUrl, phpipam, webBaseUrl } from "./api";
 import type { IpAddress, Subnet } from "./types";
@@ -50,11 +50,7 @@ async function openAddressInBrowser(address: IpAddress, sectionId?: string) {
     }
     await open(addressWebUrl(section, s(address.subnetId), s(address.id)));
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open address",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Could not open address" });
   }
 }
 
@@ -76,9 +72,8 @@ export async function copyFirstFreeAddress(subnet: Subnet) {
     await toast.hide();
     await showHUD(`Copied ${ip}`);
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Search failed";
-    toast.message = error instanceof Error ? error.message : String(error);
+    await toast.hide();
+    await showFailureToast(error, { title: "Search failed" });
   }
 }
 
@@ -402,7 +397,7 @@ export function ErrorView({
   onRetry?: () => void;
 }) {
   return (
-    <List navigationTitle="phpIPAM">
+    <List>
       <List.Item
         icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
         title="Request failed"
