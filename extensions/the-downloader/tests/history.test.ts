@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { LocalStorage } from "@raycast/api";
 import { DownloadSession } from "../src/lib/download-session";
 import {
@@ -133,6 +133,8 @@ describe("deletions", () => {
     expect(wasDeleted(d, "x", 500)).toBe(true);
     expect(wasDeleted(d, "y", 50)).toBe(true);
     expect(wasDeleted(d, "y", 500)).toBe(false);
+    // Recorded in the clear's own millisecond: only the clear's list of IDs can tell.
+    expect(wasDeleted(d, "y", 100)).toBe(false);
   });
 });
 
@@ -186,6 +188,31 @@ describe("storage", () => {
     await removeFromHistory("fresh");
     await recording;
     expect(await ids()).toEqual([]);
+  });
+
+  describe("in the same millisecond as Clear History", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(1_000);
+    });
+    afterEach(() => vi.useRealTimers());
+
+    it("still re-records a download made right after the clear", async () => {
+      await clearHistory();
+      const recording = recordDownload(entry("later"));
+      await vi.waitFor(async () => expect(await ids()).toContain("later"));
+      await staleWrite(["theirs"]);
+      await recording;
+      expect(await ids()).toEqual(["later", "theirs"]);
+    });
+
+    it("keeps a download cleared that was recorded just before", async () => {
+      const recording = recordDownload(entry("fresh"));
+      await vi.waitFor(async () => expect(await ids()).toContain("fresh"));
+      await clearHistory();
+      await recording;
+      expect(await ids()).toEqual([]);
+    });
   });
 
   it("still re-records a download made after the history was cleared", async () => {

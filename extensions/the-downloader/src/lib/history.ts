@@ -153,7 +153,7 @@ const REMOVED_LIMIT = 200;
 export type HistoryDeletions = {
   /** When the history was last cleared (ms). */
   clearedAt: number;
-  /** IDs removed one by one since then, oldest first. */
+  /** IDs removed since then, oldest first: one by one, or by the clear itself. */
   removed: string[];
 };
 
@@ -169,9 +169,13 @@ export function parseDeletions(raw: string | undefined): HistoryDeletions {
   }
 }
 
-/** True when the user removed the entry, or cleared the history after it was recorded at `recordedAt`. */
+/**
+ * True when the user removed the entry, or cleared the history after it was
+ * recorded at `recordedAt`. A clear in the entry's own millisecond counts only
+ * when the clear listed it, so a download recorded right after a clear stays.
+ */
 export function wasDeleted(deletions: HistoryDeletions, id: string, recordedAt: number): boolean {
-  return deletions.removed.includes(id) || deletions.clearedAt >= recordedAt;
+  return deletions.removed.includes(id) || deletions.clearedAt > recordedAt;
 }
 
 /** Save a deletion marker. Throws when it can't be saved. */
@@ -269,11 +273,16 @@ export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
 
 /** Clear the history. Rejects, leaving it as it was, when the clear can't be saved. */
 export function clearHistory(): Promise<HistoryEntry[]> {
-  // Everything recorded before now is covered by `clearedAt`.
+  // Everything recorded before now is covered by `clearedAt`; the entries being
+  // cleared are listed too, for those recorded in this same millisecond. Newest
+  // last, so they're the ones kept within the limit.
   return mutate(
     () => [],
     undefined,
     VERIFY_ATTEMPTS,
-    () => saveDeletion(() => ({ clearedAt: Date.now(), removed: [] })),
+    async () => {
+      const cleared = parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)).map((e) => e.id);
+      await saveDeletion(() => ({ clearedAt: Date.now(), removed: cleared.reverse() }));
+    },
   ).written;
 }
