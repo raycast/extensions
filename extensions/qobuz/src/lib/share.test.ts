@@ -5,8 +5,8 @@ import type { Track } from "@kud/qobuz";
 const mockTrack = (overrides: Partial<Track> = {}): Track => ({
   id: 123,
   title: "Test Track",
-  artist: { name: "Test Artist" },
-  album: { id: 456, title: "Test Album", image: { small: "", large: "" } },
+  artist: { id: 789, name: "Test Artist" },
+  album: { id: "456", title: "Test Album" },
   duration: 200,
   hires: true,
   isrc: "USRC12345678",
@@ -14,8 +14,8 @@ const mockTrack = (overrides: Partial<Track> = {}): Track => ({
 });
 
 const mockFetch = (responses: Map<string, unknown>) => {
-  vi.mocked(fetch).mockImplementation(async (url: string | URL) => {
-    const key = url.toString();
+  vi.mocked(fetch).mockImplementation(async (input: string | URL | Request) => {
+    const key = input instanceof Request ? input.url : input.toString();
     const response = responses.get(key);
     if (response === undefined) {
       return new Response(null, { status: 404 });
@@ -58,7 +58,7 @@ describe("shareLinks", () => {
       ],
     };
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse],
         ["https://api.deezer.com/track/isrc:USRC12345678", { id: 999, link: "https://deezer.com/track/999" }],
       ]),
@@ -81,7 +81,11 @@ describe("shareLinks", () => {
         },
       ],
     };
-    mockFetch(new Map([["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse]]));
+    mockFetch(
+      new Map<string, unknown>([
+        ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse],
+      ]),
+    );
     const track = mockTrack({ isrc: "USRC12345678" });
     const links = await shareLinks(track);
 
@@ -98,7 +102,11 @@ describe("shareLinks", () => {
         },
       ],
     };
-    mockFetch(new Map([["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse]]));
+    mockFetch(
+      new Map<string, unknown>([
+        ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse],
+      ]),
+    );
     const track = mockTrack({ isrc: "USRC12345678" });
     const links = await shareLinks(track);
 
@@ -112,7 +120,7 @@ describe("shareLinks", () => {
       recordings: [{ relations: [{ url: { resource: "https://music.apple.com/gb/song/test-track/1440833098" } }] }],
     };
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse],
         ["https://api.deezer.com/track/isrc:USRC12345678", {}],
       ]),
@@ -136,7 +144,7 @@ describe("shareLinks", () => {
       ],
     };
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", { recordings: [] }],
         ["https://api.deezer.com/track/isrc:USRC12345678", {}],
         ["https://itunes.apple.com/search?term=Test%20Artist%20Test%20Track&entity=song&limit=5", itunesResponse],
@@ -159,7 +167,7 @@ describe("shareLinks", () => {
       ],
     };
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingResponse],
         ["https://api.deezer.com/track/isrc:USRC12345678", {}], // Deezer miss
       ]),
@@ -180,7 +188,7 @@ describe("shareLinks", () => {
       recordings: [{ relations: [{ url: { resource: "https://open.spotify.com/track/spotify123" } }] }],
     };
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingWithSpotify],
         ["https://api.deezer.com/track/isrc:USRC12345678", { id: 999, link: "https://deezer.com/track/999" }],
       ]),
@@ -193,7 +201,7 @@ describe("shareLinks", () => {
     // Test MusicBrainz Spotify when Deezer misses
     vi.clearAllMocks();
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingWithSpotify],
         ["https://api.deezer.com/track/isrc:USRC12345678", {}],
       ]),
@@ -209,7 +217,7 @@ describe("shareLinks", () => {
     };
     vi.clearAllMocks();
     mockFetch(
-      new Map([
+      new Map<string, unknown>([
         ["https://musicbrainz.org/ws/2/isrc/USRC12345678?inc=url-rels&fmt=json", streamingWithApple],
         ["https://api.deezer.com/track/isrc:USRC12345678", {}],
       ]),
