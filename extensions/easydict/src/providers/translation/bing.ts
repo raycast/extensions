@@ -1,47 +1,16 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { userAgent } from "@/consts";
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
-import {
-  ensureBingConfig,
-  getBingHost,
-  incrementBingConfigCount,
-  requestBingConfig,
-} from "@/providers/shared/bing-config";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions, TranslationResult } from "@/types/query";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logWarn } from "@/utils/logger";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
+import { getBingHost, requestBingConfig } from "@/providers/shared/bing-config";
+import { requestBing } from "@/providers/shared/bing-request";
+import { RequestError } from "@/shared/errors";
+import { logWarn } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
-
-export interface BingTranslateResult {
-  detectedLanguage: BingDetectedLanguage;
-  translations: BingTranslation[];
-}
-
-interface BingDetectedLanguage {
-  language: string;
-  score: number;
-}
-
-interface BingTranslation {
-  text: string;
-  to: string;
-  sentLen: BingSentLen;
-  transliteration?: BingTransliteration;
-}
-
-interface BingSentLen {
-  srcSentLen: number[];
-  transSentLen: number[];
-}
-
-interface BingTransliteration {
-  script: string;
-  text: string;
-}
 
 /**
  * Request Microsoft Bing Web Translator.
@@ -49,7 +18,7 @@ interface BingTransliteration {
 export class BingTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Bing;
 
-  protected async doTranslate(queryWordInfo: QueryInput, options: RequestOptions = {}): Promise<TranslationResult> {
+  protected async doTranslate(queryWordInfo: QueryInput, options: RequestOptions = {}): Promise<TranslationContent> {
     return this.doTranslateInternal(queryWordInfo, options, 0);
   }
 
@@ -57,27 +26,17 @@ export class BingTranslateProvider extends BaseNonStreamingTranslateProvider {
     queryWordInfo: QueryInput,
     { signal }: RequestOptions = {},
     retryCount: number,
-  ): Promise<TranslationResult> {
+  ): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
     const fromLang = getLangCode(fromLanguage, "bingLangCode") ?? "";
     const toLang = getLangCode(toLanguage, "bingLangCode") ?? "";
 
-    const bingConfig = await ensureBingConfig();
-    const { IG, key, token } = bingConfig;
-    const IIDString = incrementBingConfigCount();
-
-    const data = {
+    const { url: finalUrl, data: responseData } = await requestBing({
       text: word,
-      fromLang: fromLang,
+      fromLang,
       to: toLang,
-      token: token,
-      key: key,
-    };
-
-    const bingHost = getBingHost();
-    const url = `https://${bingHost}/ttranslatev3?isVertical=1&IG=${IG}&IID=${IIDString}`;
-
-    const { url: finalUrl, data: responseData } = await this.makeRequest(url, data, signal);
+      signal,
+    });
 
     // Get new host
     const newBingHost = new URL(finalUrl).host;
@@ -98,48 +57,11 @@ export class BingTranslateProvider extends BaseNonStreamingTranslateProvider {
       throw new RequestError(TranslationType.Bing, "Bing translate response is empty");
     }
 
-    const responseArray = responseData as unknown[];
-    const bingTranslateResult = responseArray[0] as BingTranslateResult | undefined;
-    if (!bingTranslateResult?.translations?.length) {
-      throw new RequestError(TranslationType.Bing, "Bing translate response is invalid");
+    const first = Array.isArray(responseData) ? responseData[0] : undefined;
+    const translated = isRecord(first) && Array.isArray(first.translations) ? first.translations[0] : undefined;
+    if (!isRecord(translated) || typeof translated.text !== "string") {
+      throw new RequestError(TranslationType.Bing, "Bing translate response is invalid", "INVALID_RESPONSE");
     }
-
-    const translations = bingTranslateResult.translations[0].text.split("\n");
-
-    return {
-      type: TranslationType.Bing,
-      queryWordInfo,
-      result: bingTranslateResult,
-      translations,
-    };
-  }
-
-  private async makeRequest(
-    requestUrl: string,
-    data: Record<string, string>,
-    signal?: AbortSignal,
-  ): Promise<{ url: string; data: unknown }> {
-    const response = await timedFetch.raw(requestUrl, {
-      method: "POST",
-      body: new URLSearchParams(data).toString(),
-      headers: {
-        "User-Agent": userAgent,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      redirect: "manual",
-      signal,
-    });
-
-    const finalUrl = response.url;
-
-    // Handle redirect manually - POST body needs to be resent
-    if (response.status >= 300 && response.status < 400) {
-      const redirectUrl = response.headers.get("location");
-      if (redirectUrl) {
-        return this.makeRequest(redirectUrl, data, signal);
-      }
-    }
-
-    return { url: finalUrl, data: response._data };
+    return { kind: "translation", query: queryWordInfo, paragraphs: translated.text.split("\n") };
   }
 }

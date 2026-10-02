@@ -1,5 +1,5 @@
 /** Typed SnapTrade endpoints used by Folio. All GET except the Connection Portal link. */
-import { snaptrade } from "./api";
+import { snaptrade, type FetchMeta } from "./api";
 import type {
   Account,
   AllAccountPositionsResponse,
@@ -11,28 +11,41 @@ import type {
   PaginatedActivities,
 } from "./types";
 
-export function listAccounts(fresh = false): Promise<Account[]> {
-  return snaptrade<Account[]>("/accounts", { fresh, ttlMs: 120_000 });
+export function listAccounts(fresh = false, meta?: FetchMeta): Promise<Account[]> {
+  return snaptrade<Account[]>("/accounts", { fresh, ttlMs: 120_000, meta });
 }
 
 /** GET /accounts/{id}/balances. (The older /holdings endpoint returns 410 for newer SnapTrade accounts.) */
-export function getAccountBalances(accountId: string, fresh = false): Promise<Balance[]> {
-  return snaptrade<Balance[]>(`/accounts/${encodeURIComponent(accountId)}/balances`, { fresh, ttlMs: 90_000 });
+export function getAccountBalances(accountId: string, fresh = false, meta?: FetchMeta): Promise<Balance[]> {
+  return snaptrade<Balance[]>(`/accounts/${encodeURIComponent(accountId)}/balances`, { fresh, ttlMs: 90_000, meta });
 }
 
 /** GET /accounts/{id}/positions/all: equities, ETFs, crypto, funds and options in one list. */
-export function getAccountPositions(accountId: string, fresh = false): Promise<AllAccountPositionsResponse> {
+export function getAccountPositions(
+  accountId: string,
+  fresh = false,
+  meta?: FetchMeta,
+): Promise<AllAccountPositionsResponse> {
   return snaptrade<AllAccountPositionsResponse>(`/accounts/${encodeURIComponent(accountId)}/positions/all`, {
     fresh,
     ttlMs: 90_000,
+    meta,
   });
 }
+
+/**
+ * Balance history and activities are never live: SnapTrade serves them from its own store, which
+ * changes only at its nightly sync or when a brokerage is (re)connected. Fetching them more often
+ * returns the same data and uses up the account's rate limit, so they're cached for an hour. ⌘R
+ * (and refreshing in Connect Brokerage) clears the cache.
+ */
+const STORED_DATA_TTL_MS = 3_600_000;
 
 export async function getBalanceHistory(accountId: string, fresh = false): Promise<AccountValueHistoryResponse | null> {
   try {
     return await snaptrade<AccountValueHistoryResponse>(`/accounts/${encodeURIComponent(accountId)}/balanceHistory`, {
       fresh,
-      ttlMs: 120_000,
+      ttlMs: STORED_DATA_TTL_MS,
     });
   } catch {
     // Optional on some plans/brokerages. Missing history just means "no day change", never a fake one.
@@ -53,7 +66,7 @@ export async function getAccountActivities(
     const res = await snaptrade<PaginatedActivities>(`/accounts/${encodeURIComponent(accountId)}/activities`, {
       query: { startDate, endDate, offset, limit },
       fresh,
-      ttlMs: 120_000,
+      ttlMs: STORED_DATA_TTL_MS,
     });
     const data = res.data ?? [];
     out.push(...data);

@@ -5,11 +5,13 @@ import {
   dayChange,
   filterActivities,
   flattenPositions,
+  isRecentSnapshot,
   netWorth,
   quietStreak,
   searchPositions,
   withWeights,
 } from "../src/lib/portfolio.ts";
+import type { Activity } from "../src/lib/types.ts";
 import { formatMoney, mask } from "../src/lib/format.ts";
 import { FIXTURE_ACCOUNTS, FIXTURE_ACTIVITIES, FIXTURE_HOLDINGS } from "../src/fixtures/index.ts";
 import type { AccountSnapshot } from "../src/lib/types.ts";
@@ -152,4 +154,126 @@ test("dayChange reports completeness per currency instead of passing off a parti
   assert.equal(usd.complete, true);
   assert.equal(usd.amount, 100);
   assert.equal(dayChange(snapshots), null, "no history at all → null, never zero");
+});
+
+test("dayChange only adds up changes over the same dates", () => {
+  // Like the real logs: two Wealthsimple accounts with history ending Sep 28, Webull every other day to Oct 1.
+  const [ws1, ws2, wb] = snapshots
+    .slice(0, 3)
+    .map((s) => ({ ...s, account: { ...s.account, balance: { total: { amount: 1, currency: "CAD" } } } }));
+  const result = dayChange([
+    { ...ws1, dayChange: { amount: -44.3, currency: "CAD", asOf: "2026-09-28", from: "2026-09-27" } },
+    { ...ws2, dayChange: { amount: -6.09, currency: "CAD", asOf: "2026-09-28", from: "2026-09-27" } },
+    { ...wb, dayChange: { amount: -0.8, currency: "CAD", asOf: "2026-10-01", from: "2026-09-29" } },
+  ])!;
+  const cad = result.find((c) => c.currency === "CAD")!;
+  assert.equal(cad.asOf, "2026-10-01", "the most recent period wins");
+  assert.equal(cad.from, "2026-09-29");
+  assert.equal(cad.amount, -0.8, "Sep 27→28 changes aren't mixed in");
+  assert.equal(cad.covered, 1);
+  assert.equal(cad.otherDates, 2);
+  assert.equal(cad.complete, false);
+});
+
+test("dayChange: same end date but a different start is a different period", () => {
+  const [a, b] = snapshots
+    .slice(0, 2)
+    .map((s) => ({ ...s, account: { ...s.account, balance: { total: { amount: 1, currency: "CAD" } } } }));
+  const cad = dayChange([
+    { ...a, dayChange: { amount: 10, currency: "CAD", asOf: "2026-10-01", from: "2026-09-30" } },
+    { ...b, dayChange: { amount: 5, currency: "CAD", asOf: "2026-10-01", from: "2026-09-29" } },
+  ])!.find((c) => c.currency === "CAD")!;
+  assert.equal(cad.covered, 1);
+  assert.equal(cad.otherDates, 1);
+  assert.equal(cad.complete, false);
+  assert.equal(cad.from, "2026-09-30", "the shorter period wins a tie");
+  assert.equal(cad.amount, 10);
+  const reversed = dayChange([
+    { ...b, dayChange: { amount: 5, currency: "CAD", asOf: "2026-10-01", from: "2026-09-29" } },
+    { ...a, dayChange: { amount: 10, currency: "CAD", asOf: "2026-10-01", from: "2026-09-30" } },
+  ])!.find((c) => c.currency === "CAD")!;
+  assert.equal(reversed.amount, 10, "account order doesn't change the result");
+});
+
+test("dayChange: the period most accounts share wins over a lone one with the same end date", () => {
+  const [a, b, c] = snapshots
+    .slice(0, 3)
+    .map((s) => ({ ...s, account: { ...s.account, balance: { total: { amount: 1, currency: "CAD" } } } }));
+  const cad = dayChange([
+    { ...a, dayChange: { amount: 1, currency: "CAD", asOf: "2026-10-01", from: "2026-09-30" } },
+    { ...b, dayChange: { amount: 2, currency: "CAD", asOf: "2026-10-01", from: "2026-09-29" } },
+    { ...c, dayChange: { amount: 4, currency: "CAD", asOf: "2026-10-01", from: "2026-09-29" } },
+  ])!.find((x) => x.currency === "CAD")!;
+  assert.equal(cad.amount, 6);
+  assert.equal(cad.covered, 2);
+});
+
+test("isRecentSnapshot: within the last 2 days counts as current, older doesn't", () => {
+  const now = new Date("2026-10-01T00:51:22Z");
+  assert.equal(isRecentSnapshot("2026-10-01", now), true);
+  assert.equal(isRecentSnapshot("2026-09-29", now), true);
+  assert.equal(isRecentSnapshot("2026-09-28", now), false);
+  assert.equal(isRecentSnapshot("2026-09-28", new Date("2026-10-01T00:00:00.000Z")), false, "exact boundary");
+  assert.equal(isRecentSnapshot("2026-09-29", new Date("2026-10-01T23:59:59.000Z")), true);
+  assert.equal(isRecentSnapshot("not a date", now), false);
+});
+
+test("internal cash transfers count as deposits and restart Fog's idle clock", () => {
+  const transferIn: Activity = {
+    id: "t1",
+    type: "INTERNAL_CASH_TRANSFER_IN",
+    amount: 1068.77,
+    trade_date: "2026-08-31T14:33:15Z",
+  };
+  const transferOut: Activity = {
+    id: "t2",
+    type: "INTERNAL_CASH_TRANSFER_OUT",
+    amount: -850,
+    trade_date: "2026-07-09T14:36:37Z",
+  };
+  const buy: Activity = { id: "b1", type: "BUY", amount: -100, trade_date: "2026-08-01T15:00:00Z" };
+  const deposits = filterActivities([transferIn, transferOut, buy], "deposits");
+  assert.deepEqual(
+    deposits.map((a) => a.id),
+    ["t1", "t2"],
+  );
+  const fog = computeFog(snapshots, [transferIn, transferOut, buy], new Date("2026-09-10T00:00:00Z"), 365);
+  assert.equal(fog.lastDeposit?.toISOString(), "2026-08-31T14:33:15.000Z");
+  assert.equal(fog.idleDays, 9, "counted from the transfer in, not the older buy");
+});
+
+test("a transfer between two listed accounts isn't new money for Fog", () => {
+  const out: Activity = {
+    id: "o",
+    type: "INTERNAL_CASH_TRANSFER_OUT",
+    amount: -25,
+    trade_date: "2026-09-08T15:35:20Z",
+    account: { id: "rrsp" },
+  };
+  const into: Activity = {
+    id: "i",
+    type: "INTERNAL_CASH_TRANSFER_IN",
+    amount: 25,
+    trade_date: "2026-09-08T15:35:21Z",
+    account: { id: "tfsa" },
+  };
+  const buy: Activity = { id: "b", type: "BUY", amount: -100, trade_date: "2026-08-01T15:00:00Z" };
+  const now = new Date("2026-09-10T00:00:00Z");
+  const fog = computeFog(snapshots, [out, into, buy], now, 365);
+  assert.equal(fog.lastDeposit, null, "matched by a transfer out of another listed account");
+  assert.equal(fog.idleDays, 39, "still counted from the buy");
+  const fromOutside = computeFog(snapshots, [into, buy], now, 365);
+  assert.equal(fromOutside.idleDays, 1, "a transfer in from an account Folio doesn't see still counts");
+});
+
+test("net worth counts accounts SnapTrade reported no total for instead of dropping them silently", () => {
+  const noTotal = { ...FIXTURE_ACCOUNTS[0], id: "z", balance: { total: null } };
+  const noAmount = { ...FIXTURE_ACCOUNTS[0], id: "w", balance: { total: { currency: "CAD" } } };
+  const nw = netWorth([FIXTURE_ACCOUNTS[0], noTotal, noAmount]);
+  assert.equal(nw.accountCount, 1);
+  assert.equal(nw.missing, 2);
+  assert.equal(netWorth(FIXTURE_ACCOUNTS).missing, 0);
+  const closed = { ...FIXTURE_ACCOUNTS[0], id: "c", status: "closed" as const, balance: { total: null } };
+  const loc = { ...FIXTURE_ACCOUNTS[0], id: "l", account_category: "LOC" as const, balance: { total: null } };
+  assert.equal(netWorth([closed, loc]).missing, 0, "closed and line-of-credit accounts aren't 'left out'");
 });

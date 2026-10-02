@@ -222,14 +222,14 @@ function ProductItem(props: {
             title="Open on MemRadar"
             url={product.url}
             icon={Icon.Globe}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "return" }, Windows: { modifiers: ["ctrl"], key: "return" } }}
           />
           <Action.CopyToClipboard title="Copy Price" content={money(product.price_usd)} />
           {lowPoint ? <Action.CopyToClipboard title="Copy All-Time Low" content={money(lowPoint.price_usd)} /> : null}
           <Action
             title={showingDetail ? "Hide Side Pane" : "Show Side Pane"}
             icon={Icon.Sidebar}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
             onAction={props.onToggleDetail}
           />
           <Action

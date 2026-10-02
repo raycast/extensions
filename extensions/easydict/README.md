@@ -1,85 +1,59 @@
+<p align="right">
+  <a href="./README_ZH.md">中文</a> &nbsp;&nbsp;|&nbsp;&nbsp; English
+</p>
+
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1671180098.png" height="256">
-  <h1 align="center">Raycast Easydict</h1>
-  <h4 align="center"> Easily look up words or translate text. </p>
-<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇹🇷 🇱🇹 🇱🇻 🇺🇦 🇧🇬 🇮🇩 🇲🇾 🇸🇮 🇪🇪 🇻🇳 🇮🇷 🇵🇰 🇹🇱 🇹🇦 🇮🇳 🇵🇭 🇫🇮 🇰🇭 🇱🇦 🇧🇳 🇲🇲 🇳🇴 🇷🇸 🇭🇷 🇲🇳 🇮🇱 </p>
+  <img src="https://raw.githubusercontent.com/tisfeng/Raycast-Easydict/main/assets/extension-icon.png" height="128">
+</p>
 
-_Originally developed by [tisfeng](https://github.com/tisfeng), currently maintained by [maxchang3](https://github.com/maxchang3)._
+<h1 align="center">Raycast Easydict</h1>
 
+<p align="center">
+  Easily look up words or translate text
 </p>
 
 <p align="center">
   <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
     <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
   </a>
-  <details>
-  <summary>💡 <b>Looking for the native macOS app?</b> Check out the standalone Easydict App!</summary>
-
-[Easydict](https://github.com/tisfeng/Easydict) is a concise and easy-to-use translation dictionary macOS App that allows you to easily and elegantly look up words or translate text, feel free to try it!
-
-| Look up word | Translate text |
-| - | - |
-| ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg) | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png) |
-
-| OCR screenshot translate | Auto select translate |
-| - | - |
-| ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.26.25-1674185209.gif) | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.01.35-1674183779.gif) |
-
-  </details>
 </p>
 
-## What is Raycast Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
+<p align="right">
+  <sup>
+    <em>
+      Originally developed by <a href="https://github.com/tisfeng">tisfeng</a>, currently maintained by
+      <a href="https://github.com/maxchang3">maxchang3</a>.
+    </em>
+  </sup>
+</p>
 
-`Easydict` is a simple and easy-to-use dictionary app for looking up words and translating text. It works out of the box, automatically detects the input language, and supports [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/) for dictionary lookup.
+## What is Raycast Easydict?
 
-For translation, it supports macOS System Translation, [DeepL](https://www.deepl.com/translator), [Google Translate](https://translate.google.com), [Bing Translator](https://www.bing.com/translator), [Baidu Translate](https://fanyi.baidu.com/), [Tencent Translate](https://fanyi.qq.com/), [Volcano Engine Translation](https://www.volcengine.com/product/machine-translation), [Youdao Translate](https://fanyi.youdao.com/), and [Caiyun Translate](https://fanyi.caiyunapp.com/#/). You can also use LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
+**Raycast Easydict** is a simple, easy-to-use dictionary and translation extension for Raycast, supporting quick word lookups and text translation. In addition to traditional dictionary and translation services, it also supports AI-powered translation and lookup, including Raycast AI and OpenAI-compatible endpoints.
+
+Beyond quick lookups, Raycast Easydict also works as a lightweight language-learning tool: save results to review offline, view Chinese character stroke-order diagrams, and export them to [Anki](https://apps.ankiweb.net/) for spaced-repetition practice.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png" width="49%" />
   <img src="https://github.com/user-attachments/assets/268ced8a-1ba8-47f4-bee5-bc3af4987c7a" width="49%" />
 </p>
 
-## Installation
-
-This is an extension of Raycast, so you need to install [Raycast](https://www.raycast.com/) first.
-
-> [Raycast](https://www.raycast.com/) is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
-
-### Install from Raycast Store
-
-<a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install"><img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
-</a>
-
-### Manually Install
-
-```bash
-git clone https://github.com/tisfeng/Raycast-Easydict.git && cd Raycast-Easydict
-
-npm install && npm run dev
-```
+<sup>💡 <b>Looking for the native macOS app?</b> Try the standalone [Easydict App](https://github.com/tisfeng/Easydict)</sup>
 
 ## Features
 
-- [x] 🆕 Supports [optional local query caching](#query-cache), off by default.
-- [x] 🆕 Support Raycast for Windows (most features are adapted).
-- [x] 🆕 Supports using LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
-- [x] Works out of the box for easily looking up words or translating text.
-- [x] Automatically detects input languages and queries your preferred target language.
-- [x] Provides rich query information, including basic translations, pronunciations, exam coverage, parts of speech, tenses, and web phrases.
-- [x] Automatically queries selected text (enabled by default).
-- [x] Supports screenshot OCR translation.
-- [x] Supports opening the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) for quick lookups (if installed on your Mac).
-- [x] Supports automatic audio playback of word pronunciations (use `Cmd + S` to play manually).
-- [x] Supports Youdao Text-to-Speech (TTS).
-- [x] Supports manually sorting query results.
-- [x] Supports [Arguments](https://developers.raycast.com/information/lifecycle/arguments).
-- [x] Supports [Fallback Commands](https://manual.raycast.com/settings#Fallback%20Commands).
-- [x] Supports system proxies.
-- [x] Supports Linguee and Youdao Dictionary.
-- [x] Supports macOS System Translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
-- [x] Supports 48+ languages.
-- [x] 🆕 Supports saving completed results as Favorite Words for offline browsing and management.
-- [x] 🆕 Supports viewing stroke-order diagrams for Chinese characters from live and saved translation results.
+**Look up and translate**
+
+- 📦 **Out of the box**: look up words and translate text, with automatic language detection and a preferred target language; auto-queries selected text (on by default) and supports OCR screenshot translation (macOS only).
+- 🎨 **Rich results**: translations, pronunciations, exam coverage, parts of speech, tenses and word forms, web phrases.
+- 🌐 **Multiple services**: dictionary lookup with Youdao and Linguee; translation with 🍎 Apple System Translation, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun; 🤖 AI translation and lookup with Raycast AI or any OpenAI-compatible endpoint, including a dictionary mode that builds structured entries for words and terms.
+- 🔊 **Auto pronunciation**: plays the word audio automatically after a query, with Youdao TTS for other languages.
+
+**Learn and review**
+
+- ✍️ **Stroke order**: view Chinese character stroke-order diagrams to help with memorization and writing.
+- ⭐ **Favorite Words**: save complete results for offline browsing and management.
+- 🧠 **Anki review**: export favorites to [Anki](https://apps.ankiweb.net/) for spaced-repetition review.
 
 **_If you like this extension, please give it a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
 
@@ -94,17 +68,11 @@ npm install && npm run dev
 </p>
 
 
-### Favorite Words
+### Favorite Words & Chinese Stroke Order
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/be9efa47-1a19-443e-ab49-b0813a830f26" width="49%" />
-</p>
-
-### Arguments
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/arguments-1666060638.png" width="49%" />
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png" width="49%" />
+  <img src="https://github.com/user-attachments/assets/f6a39ed5-d3ae-46e5-bb35-d0645c278e15" width="49%" />
+  <img src="https://github.com/user-attachments/assets/81b8154e-8d1b-4d2c-8665-92a3520f91da" width="49%" />
 </p>
 
 ### Dictionary Details
@@ -123,7 +91,7 @@ npm install && npm run dev
 | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1666538642.png) | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png) |
 | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png) | ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822163332948-1661157213.png) |
 
-### Show More Details（Shortcut `Cmd + M`）
+### Show More Details (Shortcut `Cmd + M`)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png" width="49%" />
@@ -134,12 +102,29 @@ npm install && npm run dev
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1663604001.png" width="49%" />
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1663604086.png" width="49%" />
+  <img src="https://github.com/user-attachments/assets/94e8f82d-c7b9-456e-b01f-d291926cfcac" width="49%" />
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1666538717.png" width="49%" />
-</p>
+
+## Installation
+
+This is an extension of Raycast, so you need to install [Raycast](https://www.raycast.com/) first. Easydict works on both macOS and Windows.
+
+> [Raycast](https://www.raycast.com/) is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
+
+### Install from Raycast Store
+
+<a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
+  <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+</a>
+
+### Manually Install
+
+```bash
+git clone https://github.com/tisfeng/Raycast-Easydict.git && cd Raycast-Easydict
+
+npm install && npm run dev
+```
 
 ## Configuration
 
@@ -147,11 +132,24 @@ Easydict works well out of the box. The following options help you customize its
 
 ### Manage Providers
 
-Use **Manage Providers** to reorder built-in and AI providers. The list labels each provider type and shows Enabled/Disabled status (AI providers can also be Invalid); reorder with `Cmd+Shift+Up/Down` on macOS or `Ctrl+Shift+Up/Down` on Windows. Edit, test, enable, disable, duplicate, or delete AI providers there; configure built-in providers in Extension Settings. AI providers can use Raycast AI or custom OpenAI-compatible endpoints. Presets include OpenAI, Gemini, DeepSeek, OpenRouter, SiliconFlow, Zhipu GLM, Kimi, MiniMax, Xiaomi MiMo, OpenCode Zen, and OpenCode Go.
+Use the **Manage Providers** command to manage AI providers and to set the order in which all providers are queried.
 
-Choose **Plain Translation** or **AI-Generated Dictionary Entry**. Models are discovered automatically when available; you can also enter a model name manually. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults are selected per preset. Some models may fail to return valid structured dictionary output and require a retry, and dictionary generation may take longer.
+**Providers and order**
 
-Legacy OpenAI and Gemini settings with an API key migrate automatically the next time you open Search Word or Manage Providers. Migration preserves connection settings, enablement, and ordering; existing imported providers keep their edits. Manage the resulting providers only in **Manage Providers**: old Extension Settings are retained as import sources and no longer run separate providers. Deleting a provider does not import it again, and providers previously retired remain removed. **Add from Legacy OpenAI/Gemini Settings…** opens a prefilled form to create another copy, initially disabled. On another device, migration waits until that device has the legacy API key; it does not transfer provider profiles between devices. If configuration cannot be read or migrated, other built-in services remain available and Manage Providers offers a retry.
+- Built-in providers are listed here for ordering only; enable and configure them in Extension Settings.
+- Reorder any provider with **Move Up**/**Move Down** (`Cmd+Option+Up/Down` on macOS, `Ctrl+Alt+Up/Down` on Windows).
+
+**AI providers**
+
+- AI providers connect to **Raycast AI** or any **OpenAI-compatible endpoint**.
+- Built-in presets cover common providers: pick yours, add the API key, and adjust the model if needed. If yours is missing, [contributions are welcome](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/development/adding-ai-provider.md).
+- **Word & Term Results** chooses **Plain Translation** or **AI-Generated Dictionary Entry**. Dictionary mode builds a structured entry for words and terms — pronunciation, senses, examples, and word forms — while other input is translated normally; it can be slower and may need a retry.
+
+**Legacy migration**
+
+- OpenAI and Gemini settings with an API key migrate automatically the next time you open Search Word or Manage Providers, preserving connection settings, enablement, and order.
+- The old settings remain import sources only; **Add from Legacy OpenAI/Gemini Settings…** copies them into a new provider, initially disabled.
+- Migration is per device (each device needs the legacy API key) and offers a retry if it fails.
 
 ### Preferred Languages
 
@@ -179,6 +177,18 @@ For example, if you input a sentence arbitrarily, it will be translated into the
 
 </details>
 
+### Select Target Language
+
+<details><summary> Specify the target language. This option is turned off by default. </summary>
+
+<p>
+
+By default, the extension will automatically select the preferred language as the target translation language. However, sometimes if you want to manually specify a language as the target language, you can turn on this option in the preferences and then you can temporarily select another target language in the action panel.
+
+</p>
+
+</details>
+
 ### Automatic Query Selected Text
 
 <details><summary> Automatic query selected text of the frontmost application, this option is turned on by default. </summary>
@@ -197,7 +207,7 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 <p>
 
-Note that when this option is started, the voice will be played only when the query is judged to be `is_Word` and in English, e.g. `good`, `look for`, etc. For other queries, the voice can be played with the shortcut `Cmd + S`.
+Note that when this option is started, the voice will be played only when the query is judged to be `is_Word` and in English, e.g. `good`, `look for`, etc. Use **Read Query Text** to play other queries manually.
 
 The content of playing voice: English words are pronounced by the online Youdao dictionary first, and other words are pronounced by the TTS service of Youdao translation. For long text playback, use the say command.
 
@@ -205,21 +215,15 @@ The content of playing voice: English words are pronounced by the online Youdao 
 
 </details>
 
-Use `Cmd + S` to play the pronunciation of words manually.
+Use these shortcuts from a query result:
+
+| Action | macOS | Windows |
+| --- | --- | --- |
+| Read Query Text | `Cmd+R` | `Ctrl+R` |
+| Read Result Text | `Cmd+Shift+R` | `Ctrl+Shift+R` |
+| Requery All Services | `Cmd+Option+R` | `Ctrl+Alt+R` |
 
 ![beauty](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/beauty-1660917383.png)
-
-### Select Target Language
-
-<details><summary> Specify the target language. This option is turned off by default. </summary>
-
-<p>
-
-By default, the extension will automatically select the preferred language as the target translation language. However, sometimes if you want to manually specify a language as the target language, you can turn on this option in the preferences and then you can temporarily select another target language in the action panel.
-
-</p>
-
-</details>
 
 ### Query Cache
 
@@ -235,13 +239,53 @@ Cached results show a clock indicator. Use these actions to manage them:
 
 Fresh results from requerying or regeneration replace the cached result when the corresponding cache mode allows caching that input.
 
-### 🍎 Apple Translate
+### Favorite Storage and Recovery
 
-`Easydict` support MacOS system translate, for more information, please see [How to use macOS Apple System Translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)
+Favorites remain available offline after upgrading. Older versions only see the snapshot from before the upgrade, and edits made in either version do not sync between formats.
+
+If saved favorites cannot be read, Favorite Words keeps the original data and blocks changes. Use **Export Original Data** to save a local JSON backup, or **Restore from Backup** to select a valid backup; **Restore Previous-Version Favorites** recovers the retained collection when the current data is damaged. The current data is backed up before either restore. Backups are stored locally in the extension support directory, and **Open Backup Folder** reveals them. Data from a newer version stays read-only: export it and open it with a compatible Easydict version.
+
+### Anki Preferences
+
+These preferences control how Favorite Words are sent to [Anki](#anki).
+
+- **Add Favorites to Anki Automatically**: also add each new favorite to Anki (off by default).
+- **Anki Deck**: the deck that receives the cards (default `Easydict`); the deck and an `Easydict` note type are created on first use.
+- **AnkiConnect URL**: the address of the AnkiConnect add-on (default `http://127.0.0.1:8765`); change it when AnkiConnect listens on a custom port or on another machine.
 
 ### System Proxy
 
 `Easydict` supports system proxy. To use it, turn on `Use System Proxy Settings` in the Raycast extension settings. When enabled, all network requests will be sent through the system proxy. This is useful for services that require a proxy (e.g., Google Translate in China) or for counter IP blocking (some services such as Linguee have frequency restrictions on IPs). **Enabling proxy may slow down response time, so please enable it only when needed.**
+
+## Integrations
+
+### Anki
+
+Favorite Words can be sent to [Anki](https://apps.ankiweb.net/) for spaced-repetition review through the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on (code `2055492159`).
+
+- **Add cards**: Keep Anki open, then use **Add to Anki** (`Cmd + Option + A`, `Ctrl + Shift + A` on Windows) or **Add All to Anki** from a favorite's action menu. If Anki is not running, the word is still saved to Favorites and can be sent later with **Add All to Anki**.
+- **Cards**: The front shows the word, phonetic, and pronunciation (the saved audio is downloaded into Anki and plays automatically); the back shows translations and dictionary explanations. Words already in the deck are skipped, so **Add All to Anki** can be run again after saving new favorites. Removing a favorite does not delete its Anki card, so review history is kept.
+
+The deck, the AnkiConnect address, and automatic adding are configured in [Anki Preferences](#anki-preferences).
+
+### PopClip
+
+You need to install [PopClip](https://pilotmoon.com/popclip/) first, then add a shortcut key for `Easydict`, such as `Cmd + E`, then you can open `Easydict` quickly with `PopClip`!
+
+Usage: Select the following code block, `PopClip` will show "Install Easydict", just click it.
+
+```
+  # popclip
+  name: Easydict
+  icon: search E
+  key combo: command E
+```
+
+> Ref: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+
+### Eudic
+
+If the [Eudic](https://www.eudic.net/v4/en/app/eudic) dictionary app is installed, **Open in Eudic App** opens the queried word in it (macOS).
 
 ## Supported Languages
 
@@ -333,6 +377,8 @@ Google and DeepL translations support system proxy. To enable proxy, turn on `Us
 
 > Note ⚠️: Google Translate China site (translate.google.cn) is currently unavailable. You can only use the international version (translate.google.com), so you may need to enable a proxy to use Google Translate.
 
+🍎 Apple System Translation requires a one-time setup with the Shortcuts app; see [How to use macOS Apple System Translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md).
+
 Supported translation languages:
 
 <!-- automd:easydictTranslationTable locale="en" -->
@@ -408,24 +454,13 @@ The following tutorial (from [`Bob`](https://bobtranslate.com/guide/advance/serv
 
 ![](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/A2ECFJ-1664270926.png)
 
-## Integrations
-
-### PopClip
-
-You need to install [PopClip](https://pilotmoon.com/popclip/) first, then add a shortcut key for `Easydict`, such as `Cmd + E`, then you can open `Easydict` quickly with `PopClip`!
-
-Usage: Select the following code block, `PopClip` will show "Install Easydict", just click it.
-
-```
-  # popclip
-  name: Easydict
-  icon: search E
-  key combo: command E
-```
-
-> Ref: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
-
 ## Acknowledgements
 
 - This project was inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and [Bob](https://github.com/ripperhe/Bob), and its initial version was based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot). `Easydict` improves upon the original project by refining the UI, adding practical new features, removing overly complex operations, and heavily optimizing performance.
 - The OCR Translate feature is based on [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/). Special thanks to [aidevjoe](https://github.com/aidevjoe) for the PR: [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41).
+
+<p align="center">
+  <a href="https://github.com/tisfeng/Raycast-Easydict/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=tisfeng/Raycast-Easydict" alt="Contributors" />
+  </a>
+</p>

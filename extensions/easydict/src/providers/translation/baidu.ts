@@ -1,34 +1,18 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
 import { ProviderConfig } from "@/providers/shared/config";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { md5 } from "@/utils/crypto";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError, logWarn } from "@/utils/logger";
+import { md5 } from "@/shared/crypto";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logError, logWarn } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
-
-export interface BaiduTranslateResult {
-  from?: string;
-  to?: string;
-  trans_result?: BaiduTranslateItem[];
-  error_code?: string;
-  error_msg?: string;
-}
-
-export interface BaiduTranslateItem {
-  src: string;
-  dst: string;
-}
-
-export interface BaiduWebLanguageDetect {
-  error?: number;
-  msg?: string;
-  lan?: string;
-}
+import { invalidResponse } from "./response";
 
 /**
  * Baidu translate. Cost time: ~0.4s
@@ -38,19 +22,14 @@ export interface BaiduWebLanguageDetect {
 export class BaiduTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Baidu;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
     const from = getLangCode(fromLanguage, "baiduLangCode");
     const to = getLangCode(toLanguage, "baiduLangCode");
 
     if (!from || !to) {
       logWarn(this.type, `translate not support language: ${fromLanguage} to ${toLanguage}`);
-      return {
-        type: TranslationType.Baidu,
-        result: undefined,
-        translations: [],
-        queryWordInfo,
-      };
+      return { kind: "translation", query: queryWordInfo, paragraphs: [] };
     }
 
     const baiduAppId = ProviderConfig.baiduAppId;
@@ -70,20 +49,23 @@ export class BaiduTranslateProvider extends BaseNonStreamingTranslateProvider {
       sign: sign,
     };
 
-    const baiduResult = await timedFetch<BaiduTranslateResult>(url, { params, signal });
+    const baiduResult = await timedFetch<unknown>(url, { params, signal });
 
-    if (baiduResult.trans_result) {
-      const translations = baiduResult.trans_result.map((item) => item.dst);
-
-      return {
-        type: TranslationType.Baidu,
-        result: baiduResult,
-        translations,
-        queryWordInfo,
-      };
+    if (!isRecord(baiduResult)) throw invalidResponse(this.type);
+    if (baiduResult.trans_result !== undefined) {
+      if (!Array.isArray(baiduResult.trans_result)) throw invalidResponse(this.type);
+      const paragraphs = baiduResult.trans_result.map((item: unknown) => {
+        if (!isRecord(item) || typeof item.dst !== "string") throw invalidResponse(this.type);
+        return item.dst;
+      });
+      return { kind: "translation", query: queryWordInfo, paragraphs };
     }
-
+    if (
+      typeof baiduResult.error_msg !== "string" ||
+      (baiduResult.error_code !== undefined && typeof baiduResult.error_code !== "string")
+    )
+      throw invalidResponse(this.type);
     logError(this.type, `translate error: ${baiduResult.error_msg}`);
-    throw new RequestError(TranslationType.Baidu, baiduResult.error_msg || "", baiduResult.error_code || "");
+    throw new RequestError(this.type, baiduResult.error_msg, baiduResult.error_code ?? "");
   }
 }

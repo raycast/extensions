@@ -4,7 +4,7 @@ import path from "node:path";
 import { getStatus, uploadFile } from "../api/client";
 import type { Upload } from "../api/types";
 import { showAktarFailure } from "./errors";
-import { expiryWarning, isExpiryNotSetUp } from "./expiry";
+import { expiryNote, expiryWarning, isExpiryNotSetUp } from "./expiry";
 import { fetchFormat, formatUploads } from "./output";
 
 export type UploadTarget = {
@@ -13,6 +13,8 @@ export type UploadTarget = {
   prefix?: string;
   /** Days until Aktar deletes the files; 0 or undefined keeps them. Not allowed together with `prefix`. */
   expires?: number;
+  /** A new name for the upload, extension included. Only used when uploading a single file. */
+  filename?: string;
 };
 
 /** Keeps regular files and reports how many folders (or missing paths) were skipped. */
@@ -45,13 +47,16 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
 
   const uploads: Upload[] = [];
   const failures: string[] = [];
+  const { filename, ...destination } = target;
   for (const [index, filePath] of paths.entries()) {
-    const name = path.basename(filePath);
+    const rename = paths.length === 1 ? filename : undefined;
+    const name = rename || path.basename(filePath);
     toast.title = paths.length > 1 ? `Uploading ${index + 1} of ${paths.length}` : `Uploading ${name}`;
     toast.message = paths.length > 1 ? name : undefined;
     try {
       const upload = await uploadFile(filePath, {
-        ...target,
+        ...destination,
+        filename: rename,
         onProgress: (fraction) => {
           toast.message = `${paths.length > 1 ? `${name} · ` : ""}${Math.round(fraction * 100)}%`;
         },
@@ -85,8 +90,16 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
   const warning = expiryWarning(uploads, target.expires);
   if (failures.length === 0) {
     toast.style = Toast.Style.Success;
-    toast.title = uploads.length === 1 ? `Uploaded ${uploads[0].filename}` : `Uploaded ${uploads.length} files`;
-    toast.message = uploads.length === 1 ? "Link copied to clipboard" : "Links copied to clipboard";
+    if (uploads.length === 1) {
+      toast.title = uploads[0].reused ? "Already uploaded" : `Uploaded ${uploads[0].filename}`;
+      toast.message = uploads[0].reused
+        ? `Copied the existing link${warning ? "" : expiryNote(uploads[0])}`
+        : "Link copied to clipboard";
+    } else {
+      const summary = batchSummary(uploads);
+      toast.title = summary.title;
+      toast.message = `${summary.note}Links copied to clipboard`;
+    }
     if (warning) {
       toast.style = Toast.Style.Failure;
       toast.message = `${toast.message}. ${warning}`;
@@ -96,8 +109,24 @@ export async function uploadPaths(paths: string[], target: UploadTarget = {}): P
     }
   } else {
     toast.style = Toast.Style.Failure;
-    toast.title = `Uploaded ${uploads.length} of ${paths.length} files`;
-    toast.message = warning ? `${failures[0]}. ${warning}` : failures[0];
+    const reused = uploads.filter((upload) => upload.reused).length;
+    toast.title = `Uploaded ${uploads.length - reused} of ${paths.length} files`;
+    toast.message = `${reused > 0 ? `${reused} already uploaded. ` : ""}${warning ? `${failures[0]}. ${warning}` : failures[0]}`;
   }
   return uploads;
+}
+
+/**
+ * The title for several finished uploads, counting only the files that were
+ * actually uploaded, and a note ("2 already uploaded. ") for the ones whose
+ * existing links Aktar reused instead.
+ */
+export function batchSummary(uploads: Upload[]) {
+  const reused = uploads.filter((upload) => upload.reused).length;
+  const uploaded = uploads.length - reused;
+  if (uploaded === 0) return { title: `All ${reused} files already uploaded`, note: "" };
+  return {
+    title: `Uploaded ${uploaded} ${uploaded === 1 ? "file" : "files"}`,
+    note: reused > 0 ? `${reused} already uploaded. ` : "",
+  };
 }

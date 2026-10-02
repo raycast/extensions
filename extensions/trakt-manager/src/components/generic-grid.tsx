@@ -1,6 +1,7 @@
 import { Grid } from "@raycast/api";
 
 export const GenericGrid = <T,>({
+  accessory,
   actions,
   aspectRatio,
   columns,
@@ -18,6 +19,7 @@ export const GenericGrid = <T,>({
   throttle,
   title,
 }: {
+  accessory?: (item: T) => Grid.Item.Props["accessory"];
   actions: (item: T) => Grid.Item.Props["actions"];
   aspectRatio: Grid.Props["aspectRatio"];
   columns?: Grid.Props["columns"];
@@ -54,6 +56,7 @@ export const GenericGrid = <T,>({
           title={title(item)}
           subtitle={subtitle ? subtitle(item) : ""}
           content={poster(item)}
+          accessory={accessory?.(item)}
           actions={actions(item)}
         />
       ))}
