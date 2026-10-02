@@ -3,7 +3,7 @@
   "name": "gamaliel",
   "title": "Bible Q&A",
   "description": "Ask a biblical question. Gamaliel reads the relevant passages first, then answers with scripture links.",
-  "icon": "gamaliel-logo.png",
+  "icon": "gamaliel-mark.png",
   "author": "cirne",
   "keywords": [
     "bible",
@@ -27,7 +27,7 @@
       "title": "Bible Q&A",
       "subtitle": "Gamaliel",
       "description": "Ask a question and get a biblical answer with scripture links.",
-      "icon": "gamaliel-logo.png",
+      "icon": "gamaliel-mark.png",
       "mode": "view"
     }
   ],
