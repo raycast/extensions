@@ -103,7 +103,7 @@ function isInternal() {
 }
 
 export function getClientId() {
-  if (environment.raycastVersion.split(".").length === 4) {
+  if (process.platform === "win32") {
     return isInternal()
       ? "690234628480-ic526rvseca4983uujs693rnqh49kgjh.apps.googleusercontent.com"
       : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";

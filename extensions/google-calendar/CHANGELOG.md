@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Improve Platform Detection] - {PR_MERGE_DATE}
+
+- Use the operating system to detect Windows instead of relying on the Raycast version format.
+
 ## [Fix AI contact search caching] - 2026-08-27
 
 - Key AI contact-search results by query and retry empty results so the tool matches the regular Search Contacts command.
