@@ -25,22 +25,38 @@ enum RecorderError: LocalizedError {
     }
 }
 
-private final class RecordingDelegate: NSObject, SCRecordingOutputDelegate, SCStreamDelegate {
+// All mutable callback state is protected by lock.
+final class RecordingDelegate: NSObject, SCRecordingOutputDelegate, SCStreamDelegate, @unchecked Sendable {
     private let lock = NSLock()
     private var storedFailureMessage: String?
+    private var finished = false
 
     var failureMessage: String? {
         lock.withLock { storedFailureMessage }
     }
 
-    private func recordFailure(_ error: any Error) {
+    func recordFailure(_ error: any Error) {
         lock.withLock {
             if storedFailureMessage == nil { storedFailureMessage = error.localizedDescription }
         }
     }
 
     func recordingOutputDidStartRecording(_ output: SCRecordingOutput) {}
-    func recordingOutputDidFinishRecording(_ output: SCRecordingOutput) {}
+    func recordingOutputDidFinishRecording(_ output: SCRecordingOutput) { markFinished() }
+
+    func markFinished() { lock.withLock { finished = true } }
+
+    func waitForCompletion(timeout: Duration = .seconds(30)) async throws {
+        let deadline = ContinuousClock.now + timeout
+        while true {
+            if let message = failureMessage { throw RecorderError.captureFailed(message) }
+            if lock.withLock({ finished }) { return }
+            guard ContinuousClock.now < deadline else {
+                throw RecorderError.captureFailed("Timed out waiting for the recording file to finish. Source audio will be preserved.")
+            }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+    }
     func recordingOutput(_ output: SCRecordingOutput, didFailWithError error: any Error) { recordFailure(error) }
     func stream(_ stream: SCStream, didStopWithError error: any Error) { recordFailure(error) }
 }
@@ -79,23 +95,30 @@ private final class CaptureController {
     }
 
     func run() async throws {
-        try await startSegment()
-        indicator.show()
-        try updateState(.recording, message: "Recording")
-        while phase == .recording || phase == .paused {
-            if let failureMessage = delegate?.failureMessage {
-                phase = .failed
-                indicator.hide()
-                try updateState(.failed, message: "Recording stopped unexpectedly: \(failureMessage)")
-                throw RecorderError.captureFailed(failureMessage)
+        do {
+            try await startSegment()
+            indicator.show()
+            try updateState(.recording, message: "Recording")
+            while phase == .recording || phase == .paused {
+                if let failureMessage = delegate?.failureMessage {
+                    throw RecorderError.captureFailed(failureMessage)
+                }
+                if let request = nextControlRequest(in: controlDirectory) {
+                    try await handle(request)
+                } else {
+                    try await Task.sleep(for: .milliseconds(100))
+                }
             }
-            if let request = nextControlRequest(in: controlDirectory) {
-                try await handle(request)
-            } else {
-                try await Task.sleep(for: .milliseconds(100))
-            }
+            try await finalize()
+        } catch {
+            indicator.hide()
+            // Quiesce the writer before exposing recovery files, including a
+            // stream installed before startCapture() failed.
+            if stream != nil { try? await stopSegment() }
+            let sources = segmentURLs + (currentSegmentURL.map { [$0] } ?? [])
+            let recovery = preserveRecordingSources(sources, beside: mp3URL)
+            throw RecorderError.processingFailed("\(error.localizedDescription) \(recovery)")
         }
-        try await finalize()
     }
 
     private func handle(_ request: ControlRequest) async throws {
@@ -133,20 +156,17 @@ private final class CaptureController {
         let output = SCRecordingOutput(configuration: recordingConfig, delegate: delegate)
         let stream = SCStream(filter: filter, configuration: config, delegate: delegate)
         try stream.addRecordingOutput(output)
-        try await stream.startCapture()
         self.stream = stream
         self.delegate = delegate
         currentSegmentURL = url
+        try await stream.startCapture()
         segmentStartedAt = Date()
     }
 
     private func stopSegment() async throws {
         guard let stream, let url = currentSegmentURL else { return }
         try await stream.stopCapture()
-        try await Task.sleep(for: .milliseconds(500))
-        if let failureMessage = delegate?.failureMessage {
-            throw RecorderError.captureFailed(failureMessage)
-        }
+        try await delegate?.waitForCompletion()
         if let started = segmentStartedAt { elapsedSeconds += Date().timeIntervalSince(started) }
         segmentURLs.append(url)
         self.stream = nil

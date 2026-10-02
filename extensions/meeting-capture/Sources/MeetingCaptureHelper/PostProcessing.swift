@@ -32,10 +32,6 @@ func mergeAudioSegments(_ segmentURLs: [URL], to outputURL: URL) async throws {
     guard !segmentURLs.isEmpty else {
         throw PostProcessingError.encodingFailed("no recorded audio segments")
     }
-    if segmentURLs.count == 1 {
-        try FileManager.default.copyItem(at: segmentURLs[0], to: outputURL)
-        return
-    }
     let composition = AVMutableComposition()
     guard let compositionTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) else {
         throw PostProcessingError.encodingFailed("could not create audio composition")
@@ -43,8 +39,17 @@ func mergeAudioSegments(_ segmentURLs: [URL], to outputURL: URL) async throws {
     var insertionTime = CMTime.zero
     for url in segmentURLs {
         let asset = AVURLAsset(url: url)
-        guard let track = try await asset.loadTracks(withMediaType: .audio).first else { continue }
+        guard let track = try await asset.loadTracks(withMediaType: .audio).first else {
+            throw PostProcessingError.encodingFailed("recorded segment has no audio track: \(url.lastPathComponent)")
+        }
         let duration = try await asset.load(.duration)
+        guard duration.isNumeric, duration > .zero else {
+            throw PostProcessingError.encodingFailed("recorded segment has no valid audio duration: \(url.lastPathComponent)")
+        }
+        if segmentURLs.count == 1 {
+            try FileManager.default.copyItem(at: url, to: outputURL)
+            return
+        }
         try compositionTrack.insertTimeRange(CMTimeRange(start: .zero, duration: duration), of: track, at: insertionTime)
         insertionTime = CMTimeAdd(insertionTime, duration)
     }
@@ -311,5 +316,23 @@ private func runProcess(executable: URL, arguments: [String], failureContext: St
         let message = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         let detail = message.isEmpty ? "exit status \(process.terminationStatus)" : message
         throw PostProcessingError.encodingFailed("\(failureContext): \(detail)")
+    }
+}
+
+/// Copy rather than move: even an unfinished or damaged segment remains at
+/// its original path if recovery fails or the recorder is still closing it.
+func preserveRecordingSources(_ sources: [URL], beside recordingURL: URL) -> String {
+    let existing = Array(Set(sources)).filter { FileManager.default.fileExists(atPath: $0.path) }
+    guard !existing.isEmpty else { return "No source audio files were available for recovery." }
+    let directory = recordingURL.deletingPathExtension().appendingPathExtension("recovery")
+    do {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        for source in existing {
+            let destination = directory.appendingPathComponent(source.lastPathComponent.trimmingCharacters(in: CharacterSet(charactersIn: ".")))
+            try FileManager.default.copyItem(at: source, to: destination)
+        }
+        return "Source audio was preserved at \(directory.path). These segments may require repair if capture ended unexpectedly."
+    } catch {
+        return "Source audio remains at: \(existing.map(\.path).joined(separator: ", ")). Recovery copy failed: \(error.localizedDescription)"
     }
 }

@@ -59,6 +59,8 @@ While recording, the signed native helper also shows a small click-through panel
 - Invalid transitions are harmless: Start while active, Pause while idle/paused, Continue while idle/recording, and Stop while idle/finalizing/transcribing report the current state without altering audio.
 - Files use timestamps such as `Meeting_2026-09-15_22-05-30.mp3`; same-second collisions receive `_2`, `_3`, and so on.
 - Permission denial, missing helper, recorder failure, and finalization failure produce a failure toast.
+- Pause and Stop wait for macOS to finish writing the recording before processing it. A missing finish callback fails safely after 30 seconds.
+- Capture, pause, continue, or merge failures preserve source audio. The error reports a visible `.recovery` folder beside the intended MP3, or the original source paths if copying fails. Incomplete segments may require repair. Segments with no audio are rejected rather than silently omitted.
 - A detached helper avoids relying on Raycast keeping a no-view command alive.
 - The panel uses the display's current `visibleFrame`, avoiding the menu bar, Dock, and camera housing; display changes reposition it safely.
 - Long meetings are captured to disk rather than accumulated in memory. Encoding uses a temporary WAV in the destination volume and transcription streams results from the finalized capture.
