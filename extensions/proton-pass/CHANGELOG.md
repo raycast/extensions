@@ -6,7 +6,7 @@
 - Filling only types into the app Raycast was opened from, and stops if another app comes in front
 - Paste Email, Paste Username, Paste Password and Paste 2FA Code (⌘⇧T) actions, for logins split over several screens
 - Fill Login (macOS) choice for the Primary Action preference, to fill with Enter
-- Submit After Filling preference (off by default) presses Return after the password
+- Fill Login preference, off by default: press Return after the password to submit the login form
 - Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
 
 ## [Item Details Panel] - 2026-10-02

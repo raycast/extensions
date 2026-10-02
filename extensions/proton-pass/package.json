@@ -93,7 +93,7 @@
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "What Enter does on an item. Fill Login pastes into the app you were using.",
+      "description": "What Enter does on an item.",
       "default": "details",
       "required": false,
       "data": [
@@ -114,9 +114,9 @@
     {
       "name": "submitAfterFill",
       "type": "checkbox",
-      "title": "Submit After Filling",
+      "title": "Fill Login",
       "label": "Press Return after the password",
-      "description": "Submits the login form after Fill Login.",
+      "description": "Submits the login form.",
       "default": false,
       "required": false
     },

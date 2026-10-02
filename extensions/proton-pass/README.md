@@ -53,7 +53,7 @@ pass-cli vault list
 - **Default Password Length**: Length for generated passwords (default: 20)
 - **Default Password Type**: Random characters or memorable passphrase
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
-- **Submit After Filling**: Press Return after filling the password (off by default)
+- **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
