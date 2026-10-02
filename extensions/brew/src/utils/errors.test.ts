@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { isAbortError } from "./errors";
+import { getErrorMessage, isAbortError } from "./errors";
 
 describe("isAbortError", () => {
   it("recognizes the abort a DOM AbortController raises", () => {
@@ -30,5 +30,21 @@ describe("isAbortError", () => {
     expect(isAbortError("AbortError")).toBe(false);
     expect(isAbortError(undefined)).toBe(false);
     expect(isAbortError(null)).toBe(false);
+  });
+});
+
+describe("getErrorMessage", () => {
+  it("names the missing repository instead of git's command line", () => {
+    // Real stderr from `brew tap jundot/omlx` without its URL.
+    const error = Object.assign(new Error("Command failed: brew tap jundot/omlx"), {
+      stderr: [
+        "==> Tapping jundot/omlx",
+        "Cloning into '/opt/homebrew/Library/Taps/jundot/homebrew-omlx'...",
+        "remote: Repository not found.",
+        "fatal: repository 'https://github.com/jundot/homebrew-omlx/' not found",
+        "Error: Failure while executing; `/usr/bin/env GIT_TERMINAL_PROMPT=0 git -c core.hooksPath=/dev/null clone https://github.com/jundot/homebrew-omlx` exited with 128.",
+      ].join("\n"),
+    });
+    expect(getErrorMessage(error)).toBe("No repo found at github.com/jundot/homebrew-omlx");
   });
 });

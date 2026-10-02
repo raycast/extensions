@@ -118,6 +118,21 @@
       "mode": "view"
     },
     {
+      "name": "manage-taps",
+      "title": "Manage Taps",
+      "subtitle": "Brew",
+      "description": "Add, trust & remove third-party Homebrew taps, and explore what they provide",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "tap",
+          "placeholder": "user/repo",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "services-menu",
       "title": "Services Menu Bar",
       "subtitle": "Brew",
@@ -287,6 +302,6 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion": "5.0.12"
   }
 }

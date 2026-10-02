@@ -1,5 +1,14 @@
 # Brew Changelog
 
+## [Third-party taps] - 2026-10-02
+
+- New **Manage Taps** command: every tap you have added is a section listing the formulae and casks it provides, with a dropdown to narrow to one tap. Add a tap by typing `user/repo` (or `user/repo <url>` for a repository not named `homebrew-…`), and remove it, or on Homebrew 7 trust and stop trusting it, from any of its rows
+- A tap that only adds `brew` commands gets one row naming them; ↵ opens its repository
+- Search recognizes a pasted `user/repo/name`, or a whole line from a project's install page, and offers it as a row: one confirmation adds the tap, trusts that one package and installs it
+- Homebrew 7 trusts a package by itself whenever a command names it, so Install, Upgrade, both previews and the Run in Terminal actions now ask first, and trust only that package, never its tap
+- A package from a third-party tap is now installed by its full name, so one that shares a name with a Homebrew package can no longer install the wrong one
+- Fixed: a package from a third-party tap no longer shows the install status of a same-named Homebrew package in the sidebar
+
 ## [Adopt Apps] - 2026-10-01
 
 - New **Adopt Apps** command: finds apps already on your Mac that Homebrew has a cask for, and hands them to Homebrew so they upgrade with everything else
