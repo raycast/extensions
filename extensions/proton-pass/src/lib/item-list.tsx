@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
 import { hostnameOf, itemKey, toOpenableUrl } from "./format";
 import { ItemActions } from "./item-actions";
@@ -64,6 +64,10 @@ export function ItemList({
     [items, selectedKey, firstItem],
   );
   const activeKey = selectedItem ? itemKey(selectedItem) : undefined;
+  // The first suggestion is selected when the list appears. After that, Raycast reports the selection: setting it
+  // back on every move made Raycast recentre the list each time, which flickered.
+  const initialSelection = useRef<string | undefined>(undefined);
+  if (initialSelection.current === undefined && suggested[0]) initialSelection.current = itemKey(suggested[0]);
   // Hidden details do not fetch secrets; copy actions can load them on demand.
   const {
     detail: visibleDetail,
@@ -127,7 +131,7 @@ export function ItemList({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
-      selectedItemId={activeKey}
+      selectedItemId={initialSelection.current}
       onSelectionChange={setSelectedKey}
       searchBarAccessory={searchBarAccessory}
     >

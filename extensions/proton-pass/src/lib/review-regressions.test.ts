@@ -465,7 +465,7 @@ test("hiding item details stops automatic secret loads while showing them select
   }
 });
 
-test("list selection follows the visible item and clears when search has no selection", () => {
+test("details follow the selection Raycast reports, which is only set when the list appears", () => {
   const harness = hookHarness();
   let requested: Item | undefined;
   const { ItemList } = loadView("item-list.tsx", {
@@ -504,13 +504,13 @@ test("list selection follows the visible item and clears when search has no sele
   const initial = render([item, second], [item]);
   assert.equal(initial.props.selectedItemId, format.itemKey(item));
   (initial.props.onSelectionChange as (id: string | null) => void)(format.itemKey(second));
-  assert.equal(render([item, second], [item]).props.selectedItemId, format.itemKey(second));
+  // Not sent back to Raycast, which would recentre the list on every move.
+  assert.equal(render([item, second], [item]).props.selectedItemId, format.itemKey(item));
   assert.equal(requested, second);
   const changedVault = render([anotherVault]);
-  assert.equal(changedVault.props.selectedItemId, format.itemKey(anotherVault));
   assert.equal(requested, anotherVault);
   (changedVault.props.onSelectionChange as (id: string | null) => void)(null);
-  assert.equal(render([anotherVault]).props.selectedItemId, undefined);
+  render([anotherVault]);
   assert.equal(requested, undefined);
 });
 

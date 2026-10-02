@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Smoother List Scrolling] - {PR_MERGE_DATE}
+
+- The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
+
 ## [Item Details Panel] - 2026-10-02
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden
