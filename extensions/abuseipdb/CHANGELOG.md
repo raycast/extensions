@@ -1,6 +1,6 @@
 # AbuseIPDB Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - Check any IPv4 or IPv6 address against AbuseIPDB, with an optional command argument
 - Check the first IP address found in the clipboard
