@@ -1,0 +1,71 @@
+instructions: |
+  Use convert-font when the user asks to convert a local font file. Supported inputs are TTF, OTF, WOFF, WOFF2, and EOT. Supported targets are ttf, woff, woff2, and eot. OTF is supported as an input only; never offer or request OTF output.
+  Every tool requires an exact filePath supplied by the user. Prefer absolute paths. Preserve Windows drive letters and backslashes. Never invent a path or claim to read the current Finder or File Explorer selection. Ask for the file path when it is missing.
+  Pass outputDirectory to convert-font only when the user specifies a destination directory. It must already exist. Otherwise omit it to save beside the source. Existing output files are never overwritten. If a conversion fails because the output exists, tell the user to move or rename that file before trying again.
+  Invoke convert-font directly and let its tool confirmation obtain approval before writing. Do not add a separate chat confirmation. Report the returned outputPath and any warnings. WOFF and WOFF2 preserve the source outlines and tables. Converting CFF outlines to TTF or EOT can change rendering, hinting, and advanced layout tables.
+  Use inspect-font for family, style, weight, glyph count, format, outlines, and metadata questions. It only reads the file and does not display a visual preview.
+  Use generate-font-face-css when the user asks for @font-face CSS. Return its CSS to the conversation. Do not claim that this tool copies the CSS to the clipboard.
+evals:
+  - input: "@font-converter Convert /Users/me/Fonts/Example.otf to WOFF2."
+    mocks:
+      convert-font:
+        inputPath: "/Users/me/Fonts/Example.otf"
+        outputPath: "/Users/me/Fonts/Example.woff2"
+        inputFormat: "otf"
+        outputFormat: "woff2"
+        inputBytes: 12000
+        outputBytes: 6000
+        warnings: []
+    expected:
+      - callsTool:
+          name: "convert-font"
+          arguments:
+            filePath: "/Users/me/Fonts/Example.otf"
+            targetFormat: "woff2"
+  - input: "@font-converter What are the family, weight, and glyph count of /Users/me/Fonts/Example.woff2?"
+    mocks:
+      inspect-font:
+        filePath: "/Users/me/Fonts/Example.woff2"
+        format: "woff2"
+        family: "Example"
+        subfamily: "Regular"
+        weight: 400
+        style: "normal"
+        unitsPerEm: 1000
+        glyphCount: 200
+        version: "Version 1.0"
+        copyright: "Example font"
+        sizeBytes: 6000
+        outlines: "cff"
+    expected:
+      - callsTool:
+          name: "inspect-font"
+          arguments:
+            filePath: "/Users/me/Fonts/Example.woff2"
+  - input: "@font-converter Generate @font-face CSS for /Users/me/Fonts/Example.otf."
+    mocks:
+      generate-font-face-css:
+        filePath: "/Users/me/Fonts/Example.otf"
+        css: "@font-face {\n  font-family: 'Example';\n  src: url('Example.otf') format('opentype');\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n}"
+    expected:
+      - callsTool:
+          name: "generate-font-face-css"
+          arguments:
+            filePath: "/Users/me/Fonts/Example.otf"
+  - input: '@font-converter Convert C:\Users\me\Fonts\Example.otf to WOFF and save it in C:\Users\me\WebFonts.'
+    mocks:
+      convert-font:
+        inputPath: 'C:\Users\me\Fonts\Example.otf'
+        outputPath: 'C:\Users\me\WebFonts\Example.woff'
+        inputFormat: "otf"
+        outputFormat: "woff"
+        inputBytes: 12000
+        outputBytes: 7000
+        warnings: []
+    expected:
+      - callsTool:
+          name: "convert-font"
+          arguments:
+            filePath: 'C:\Users\me\Fonts\Example.otf'
+            targetFormat: "woff"
+            outputDirectory: 'C:\Users\me\WebFonts'
