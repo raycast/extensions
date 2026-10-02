@@ -9,7 +9,7 @@
 - Submit After Filling preference (off by default) presses Return after the password
 - Filled values go through the clipboard as concealed, and the previous clipboard is restored afterwards, also as concealed since it can be a secret
 
-## [Item Details Panel] - {PR_MERGE_DATE}
+## [Item Details Panel] - 2026-10-02
 
 - Search Items shows a details panel next to the list, toggled with ⌘D. Every item shows the same rows in the same place: username, email, password, 2FA code with countdown, websites, note, vault, type and last modification date, with "—" for empty fields. Custom fields come last, and their copy actions also work with the panel hidden
 - Notes are masked like passwords; Show Note (⌘⇧N) opens the full note
