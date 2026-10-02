@@ -98,14 +98,14 @@ async function readPref<T>(key: string, source: "defaults" | "container"): Promi
   }
 }
 
-function splitList(value: string | undefined, fallback: string[]): Set<string> {
+/** 공백·쉼표로 나뉜 설정 문자열. 확장자는 앞의 점을 떼고 소문자로, 폴더 이름은 cmarks와 같이 그대로(대소문자·점 유지) 비교한다. */
+function splitList(value: string | undefined, fallback: string[], kind: "extensions" | "folders"): Set<string> {
   if (!value || !value.trim()) return new Set(fallback);
-  return new Set(
-    value
-      .split(/[\s,]+/)
-      .map((s) => s.trim().replace(/^\./, "").toLowerCase())
-      .filter(Boolean),
-  );
+  const items = value
+    .split(/[\s,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return new Set(kind === "extensions" ? items.map((s) => s.replace(/^\./, "").toLowerCase()) : items);
 }
 
 export interface Filter {
@@ -119,15 +119,14 @@ export async function loadFilter(): Promise<Filter> {
     readPref<string>("ignoredDirectories", "defaults"),
   ]);
   return {
-    extensions: splitList(extensions, DEFAULT_EXTENSIONS),
-    ignored: splitList(ignored, DEFAULT_IGNORED),
+    extensions: splitList(extensions, DEFAULT_EXTENSIONS, "extensions"),
+    ignored: splitList(ignored, DEFAULT_IGNORED, "folders"),
   };
 }
 
 /** 워크스페이스 폴더의 마크다운 파일을 모두 모은다(숨김 폴더·무시 폴더 제외, 심볼릭 링크는 따라가지 않음). */
 export async function listMarkdownFiles(workspaces: Workspace[], filter: Filter): Promise<MarkdownFile[]> {
   const files: MarkdownFile[] = [];
-  const ignoredLower = new Set([...filter.ignored].map((s) => s.toLowerCase()));
   for (const workspace of workspaces) {
     await walk(workspace.root, 0);
     if (files.length >= MAX_FILES) break;
@@ -145,7 +144,7 @@ export async function listMarkdownFiles(workspaces: Workspace[], filter: Filter)
         if (entry.name.startsWith(".")) continue;
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-          if (ignoredLower.has(entry.name.toLowerCase())) continue;
+          if (filter.ignored.has(entry.name)) continue; // cmarks와 같이 이름 그대로 비교
           await walk(full, depth + 1);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).slice(1).toLowerCase();
