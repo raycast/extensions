@@ -78,7 +78,9 @@ export function withStrava(Command: ComponentType) {
   const Authorized = withAccessToken({
     async authorize() {
       try {
-        return await provider.authorize();
+        const token = await provider.authorize();
+        authorizationError = undefined;
+        return token;
       } catch (error) {
         authorizationError =
           error instanceof Error ? error : new Error("Could not connect to Strava. Please try again.");

@@ -8,8 +8,8 @@ const source = ts.transpileModule(readFileSync("src/api/custom-auth.ts", "utf8")
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
 }).outputText;
 
-function setup({ stored, status = 200, payload, networkError, invalidJSON } = {}) {
-  const calls = { requests: [], saved: [], authorization: [] };
+function setup({ stored, status = 200, payload, networkError, invalidJSON, statuses, cancelled } = {}) {
+  const calls = { requests: [], saved: [], authorization: [], removed: 0 };
   const module = { exports: {} };
   runInNewContext(source, {
     exports: module.exports,
@@ -23,8 +23,8 @@ function setup({ stored, status = 200, payload, networkError, invalidJSON } = {}
         calls.requests.push({ url, options });
         if (networkError) throw new Error("request includes secret-value");
         return {
-          ok: status === 200,
-          status,
+          ok: (statuses?.[calls.requests.length - 1] ?? status) === 200,
+          status: statuses?.[calls.requests.length - 1] ?? status,
           json: async () => {
             if (invalidJSON) throw new Error("secret-value");
             return payload ?? { access_token: "new-access", refresh_token: "rotated-refresh", expires_in: 21600 };
@@ -35,12 +35,19 @@ function setup({ stored, status = 200, payload, networkError, invalidJSON } = {}
   });
   const client = {
     getTokens: async () => stored,
+    removeTokens: async () => {
+      calls.removed++;
+      stored = undefined;
+    },
     setTokens: async (tokens) => calls.saved.push(tokens),
     authorizationRequest: async (options) => {
       calls.authorization.push(options);
       return { toURL: () => "authorization-url" };
     },
-    authorize: async () => ({ authorizationCode: "one-time-code" }),
+    authorize: async () => {
+      if (cancelled) throw new Error("Sign-in cancelled");
+      return { authorizationCode: "one-time-code" };
+    },
   };
   return {
     calls,
@@ -102,7 +109,8 @@ for (const status of [400, 401, 403, 429, 500]) {
     });
     await assert.rejects(make().authorize(), (error) => !error.message.includes("secret-value"));
     assert.equal(calls.saved.length, 0);
-    assert.equal(calls.authorization.length, 0);
+    assert.equal(calls.authorization.length, status === 400 || status === 401 ? 1 : 0);
+    assert.equal(calls.removed, status === 400 || status === 401 ? 1 : 0);
   });
 }
 
@@ -126,4 +134,45 @@ test("absolute token expiry is converted for Raycast's token storage", async () 
   });
   await make().authorize();
   assert.ok(calls.saved[0].expiresIn > 3595 && calls.saved[0].expiresIn <= 3600);
+});
+
+for (const status of [400, 401]) {
+  test(`rejected refresh (HTTP ${status}) clears tokens and signs in again`, async () => {
+    const { make, calls } = setup({
+      stored: { accessToken: "expired", refreshToken: "revoked", isExpired: () => true },
+      statuses: [status, 200],
+    });
+    assert.equal(await make().authorize(), "new-access");
+    assert.equal(calls.removed, 1);
+    assert.equal(calls.authorization.length, 1);
+    assert.deepEqual(
+      calls.requests.map(({ options }) => options.body.get("grant_type")),
+      ["refresh_token", "authorization_code"],
+    );
+    assert.equal(calls.saved[0].refreshToken, "rotated-refresh");
+  });
+}
+
+test("a network failure during refresh preserves tokens without opening sign-in", async () => {
+  const { make, calls } = setup({
+    stored: { accessToken: "expired", refreshToken: "existing-refresh", isExpired: () => true },
+    networkError: true,
+  });
+  await assert.rejects(make().authorize(), /Could not reach Strava/);
+  assert.equal(calls.removed, 0);
+  assert.equal(calls.authorization.length, 0);
+});
+
+test("cancelling renewed sign-in does not restore the rejected refresh token", async () => {
+  const { make, calls } = setup({
+    stored: { accessToken: "expired", refreshToken: "revoked", isExpired: () => true },
+    status: 400,
+    cancelled: true,
+  });
+  const provider = make();
+  await assert.rejects(provider.authorize(), /Sign-in cancelled/);
+  await assert.rejects(provider.authorize(), /Sign-in cancelled/);
+  assert.equal(calls.requests.length, 1);
+  assert.equal(calls.removed, 1);
+  assert.equal(calls.authorization.length, 2);
 });

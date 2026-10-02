@@ -105,3 +105,42 @@ test("successful OAuth mounts workouts with the real access token", async () => 
   assert.equal((await complete()).type, "Workouts");
   assert.deepEqual(calls, { authorize: 1, command: 1 });
 });
+
+test("successful reauthorization clears an earlier error in the same wrapper", async () => {
+  let authorize;
+  let ConnectedCommand;
+  let attempts = 0;
+  const exports = {};
+  const jsx = (type, props) => ({ type, props });
+  runInNewContext(source, {
+    exports,
+    Error,
+    require(name) {
+      if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+      if (name === "react" || name === "@raycast/api") return {};
+      if (name === "@raycast/utils")
+        return {
+          withAccessToken: (options) => {
+            authorize = options.authorize;
+            return (Component) => (ConnectedCommand = Component);
+          },
+        };
+      if (name === "./api/auth")
+        return {
+          provider: {
+            authorize: async () => {
+              if (++attempts === 1) throw new Error("Sign-in cancelled");
+              return "new-token";
+            },
+          },
+        };
+      throw new Error(`Unexpected import: ${name}`);
+    },
+  });
+  const Workouts = () => null;
+  exports.withStrava(Workouts);
+  assert.equal(await authorize(), "");
+  assert.notEqual(ConnectedCommand().type, Workouts);
+  assert.equal(await authorize(), "new-token");
+  assert.equal(ConnectedCommand().type, Workouts);
+});

@@ -1,8 +1,10 @@
 import type { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
-type Client = Pick<OAuth.PKCEClient, "getTokens" | "setTokens" | "authorizationRequest" | "authorize">;
+type Client = Pick<OAuth.PKCEClient, "getTokens" | "setTokens" | "removeTokens" | "authorizationRequest" | "authorize">;
 type TokenResponse = OAuth.TokenResponse & { expires_at?: number };
+
+class AuthorizationRejectedError extends Error {}
 
 // Each personal app has its own Raycast token store. Secrets are sent only to
 // Strava's token endpoint, never in the browser URL or via the shared proxy.
@@ -41,7 +43,7 @@ export function createCustomStravaProvider<T extends Client>(client: T, clientId
     if (!response.ok) {
       // Do not surface raw OAuth responses: they can contain credentials.
       if (response.status === 400 || response.status === 401) {
-        throw new Error(
+        throw new AuthorizationRejectedError(
           "Strava could not authorize your app. Check your Client ID and Client Secret in extension preferences. If needed, sign out of Strava there and reconnect.",
         );
       }
@@ -88,7 +90,14 @@ export function createCustomStravaProvider<T extends Client>(client: T, clientId
       const tokens = await client.getTokens();
       if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
       if (tokens?.refreshToken) {
-        return exchange({ grant_type: "refresh_token", refresh_token: tokens.refreshToken });
+        try {
+          return await exchange({ grant_type: "refresh_token", refresh_token: tokens.refreshToken });
+        } catch (error) {
+          // Only discard rejected credentials. Temporary failures should leave
+          // the saved connection available for the next refresh attempt.
+          if (!(error instanceof AuthorizationRejectedError)) throw error;
+          await client.removeTokens();
+        }
       }
       const request = await client.authorizationRequest({
         endpoint: "https://www.strava.com/oauth/authorize",
