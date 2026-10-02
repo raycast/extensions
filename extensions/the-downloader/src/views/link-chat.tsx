@@ -41,7 +41,7 @@ import {
 } from "../lib/link-context.js";
 import { fetchImages, imageDecision, imageQuestion } from "../lib/link-images.js";
 import { linkKindOf, loadLinkContext } from "../lib/link-loader.js";
-import { escapeMarkdown, withoutImages } from "../lib/format.js";
+import { errorText, escapeMarkdown, withoutImages } from "../lib/format.js";
 import { formatCount, qualityName } from "../lib/media-info.js";
 import { timestampUrl } from "../lib/sources/video.js";
 import { uniqueFilePath } from "../lib/unique-path.js";
@@ -594,7 +594,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       await showToast({
         style: Toast.Style.Failure,
         title: "Couldn't clear the saved chat",
-        message: error instanceof Error ? error.message : String(error),
+        message: errorText(error),
       });
     }
   }

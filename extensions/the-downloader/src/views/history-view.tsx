@@ -21,7 +21,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { CARD_W, historyCardSvg } from "../lib/charts.js";
-import { escapeMarkdown, formatBytes, formatClock, plural } from "../lib/format.js";
+import { errorText, escapeMarkdown, formatBytes, formatClock, plural } from "../lib/format.js";
 import {
   HistoryEntry,
   HistoryFilter,
@@ -127,8 +127,6 @@ async function downloadAgain(url: string) {
     });
   }
 }
-
-const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /**
  * Everything downloaded with The Downloader, newest first and grouped by day.

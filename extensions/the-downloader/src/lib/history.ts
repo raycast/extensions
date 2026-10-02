@@ -194,19 +194,21 @@ const VERIFY_ATTEMPTS = 2;
  * change re-applied if another command's write undid it). `verified` never
  * rejects.
  *
- * `before` runs in the same queue step, just ahead of the change: a deletion
- * saves its marker there, so no other write can land in between, and a marker
- * that can't be saved rejects `written` with the list untouched.
+ * `before` runs in the same queue step, with the stored list, just ahead of the
+ * change: a deletion saves its marker there, so no other write can land in
+ * between, and a marker that can't be saved rejects `written` with the list
+ * untouched.
  */
 function mutate(
   change: (list: HistoryEntry[]) => HistoryEntry[],
   applied?: (list: HistoryEntry[]) => boolean | Promise<boolean>,
   attempts = VERIFY_ATTEMPTS,
-  before?: () => Promise<void>,
+  before?: (list: HistoryEntry[]) => Promise<void>,
 ): { written: Promise<HistoryEntry[]>; verified: Promise<void> } {
   const written = writeChain.then(async () => {
-    await before?.();
-    const list = change(parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)));
+    const current = parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY));
+    await before?.(current);
+    const list = change(current);
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     return list;
   });
@@ -280,9 +282,6 @@ export function clearHistory(): Promise<HistoryEntry[]> {
     () => [],
     undefined,
     VERIFY_ATTEMPTS,
-    async () => {
-      const cleared = parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY)).map((e) => e.id);
-      await saveDeletion(() => ({ clearedAt: Date.now(), removed: cleared.reverse() }));
-    },
+    (list) => saveDeletion(() => ({ clearedAt: Date.now(), removed: list.map((e) => e.id).reverse() })),
   ).written;
 }

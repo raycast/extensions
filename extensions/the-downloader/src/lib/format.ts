@@ -64,6 +64,11 @@ export function progressMessage(p: { percent?: number; speed?: number; eta?: num
   return parts.join(" · ");
 }
 
+/** An error's message for a toast. */
+export function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
  * Backslash-escape Markdown syntax so text from a site (a video title, say)
  * renders as plain text — a `[title](url)` can't become a link.

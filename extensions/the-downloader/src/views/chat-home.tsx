@@ -18,14 +18,12 @@ import {
 import { EnginePreference, engineSettings } from "../lib/ai-engines.js";
 import { StoredChat, deleteChat, loadChats } from "../lib/chat-store.js";
 import { LinkKind } from "../lib/link-context.js";
-import { escapeMarkdown, plural, withoutImages } from "../lib/format.js";
+import { errorText, escapeMarkdown, plural, withoutImages } from "../lib/format.js";
 import { hostOf, safeImageUrl } from "../lib/kinds.js";
 import { linkKindOf } from "../lib/link-loader.js";
 import { isValidUrl, normalizeUrl } from "../utils.js";
 import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { LinkChat } from "./link-chat.js";
-
-const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 type Candidate = { url: string; title: string; icon: Icon };
 
