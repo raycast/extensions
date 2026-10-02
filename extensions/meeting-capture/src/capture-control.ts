@@ -12,6 +12,7 @@ import { access, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { DEFAULT_RECORDING_DIRECTORY } from "./constants.js";
+import { waitFor } from "./capture-wait.js";
 
 const execFileAsync = promisify(execFile);
 type Phase =
@@ -55,19 +56,6 @@ async function alive(pid: number): Promise<boolean> {
   } catch {
     return false;
   }
-}
-async function waitFor(
-  file: string,
-  predicate: (state: State) => boolean,
-  timeout = 15_000,
-): Promise<State> {
-  const deadline = Date.now() + timeout;
-  while (Date.now() < deadline) {
-    const state = await readState(file);
-    if (state && predicate(state)) return state;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error("Meeting Capture did not acknowledge the command in time.");
 }
 
 type LaunchLockOwner = { pid: number; createdAt: number };
@@ -216,7 +204,7 @@ export async function runCaptureAction(action: CaptureAction) {
         let started: State;
         try {
           started = await waitFor(
-            stateFile,
+            () => readState(stateFile),
             (state) =>
               ["recording", "permissionRequired", "failed"].includes(
                 state.phase,
@@ -258,7 +246,7 @@ export async function runCaptureAction(action: CaptureAction) {
       { flag: "wx" },
     );
     const acknowledged = await waitFor(
-      stateFile,
+      () => readState(stateFile),
       (state) => state.requestID === id || state.phase === "failed",
     );
     if (acknowledged.phase === "failed")
