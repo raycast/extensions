@@ -28,12 +28,12 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
       try {
         const messages: Message[] = [{ role: "user", content: question }];
 
-        const fullResponse = await streamAIResponse(messages, model, setStreamingText);
+        const answer = await streamAIResponse(messages, model, setStreamingText);
 
         const newConversation: Conversation = {
           id: Date.now().toString(),
           title: question,
-          messages: [...messages, { role: "assistant", content: fullResponse }],
+          messages: [...messages, answer],
           timestamp: Date.now(),
           model,
         };

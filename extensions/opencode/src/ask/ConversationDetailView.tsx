@@ -23,7 +23,7 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
   const [userQuestion, setUserQuestion] = useState("");
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(0);
+  const [selectedMessageIndex, setSelectedMessageIndex] = useState(Math.max(conversation.messages.length - 2, 0));
   const [localMessages, setLocalMessages] = useState<Message[]>(conversation.messages);
   const [model, setModel] = useState(conversation.model);
 
@@ -39,9 +39,9 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
         const messages: Message[] = [...localMessages, { role: "user", content: question }];
         const modelToUse = selectedModel || model;
 
-        const fullResponse = await streamAIResponse(messages, modelToUse, setStreamingText);
+        const answer = await streamAIResponse(messages, modelToUse, setStreamingText);
 
-        const exchange: Message[] = [messages[messages.length - 1], { role: "assistant", content: fullResponse }];
+        const exchange: Message[] = [messages[messages.length - 1], answer];
         const newMessages: Message[] = [...localMessages, ...exchange];
 
         // Append to the saved record, not this view's snapshot, so a reply streaming in
@@ -84,11 +84,13 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
       setUserQuestion(question);
       setStreamingText("");
       setIsGenerating(true);
+      // The in-progress pair is listed first; select it so the stream is visible.
+      setSelectedMessageIndex(localMessages.length);
       setViewMode("list");
 
       await generateResponse(question, values.model);
     },
-    [generateResponse],
+    [generateResponse, localMessages.length],
   );
 
   const qaPairs = useMemo(() => {
