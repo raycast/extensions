@@ -1,6 +1,6 @@
 # Slack Status Change
 
-## [Fix Stable Preset IDs] - {PR_MERGE_DATE}
+## [Fix Stable Preset IDs] - 2026-10-02
 
 - Use stable IDs for default presets so quicklinks survive storage resets
 - Improve the error message when a linked preset is not found
