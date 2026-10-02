@@ -104,8 +104,21 @@
         {
           "title": "Copy Password",
           "value": "copy"
+        },
+        {
+          "title": "Fill Login (macOS)",
+          "value": "fill"
         }
       ]
+    },
+    {
+      "name": "submitAfterFill",
+      "type": "checkbox",
+      "title": "Fill Login",
+      "label": "Press Return after the password",
+      "description": "Submits the login form.",
+      "default": false,
+      "required": false
     },
     {
       "name": "copyPasswordTransient",

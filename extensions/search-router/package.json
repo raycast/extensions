@@ -79,15 +79,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
-    "fuse.js": "^7.4.0"
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2",
+    "fuse.js": "^7.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.9.1",
-    "eslint": "^10.4.1",
-    "typescript": "^6.0.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "eslint": "^10.11.0",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build",

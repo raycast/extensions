@@ -18,6 +18,7 @@
 /extensions/aave-search                                             @smbdy
 /extensions/ableton-live                                            @dch09
 /extensions/abstract-api                                            @andreaselia
+/extensions/abuseipdb                                               @gabrielbelli
 /extensions/accordance                                              @entupo
 /extensions/acqua                                                   @FezVrasta
 /extensions/active-mississaugua                                     @Aayush9029
@@ -347,6 +348,7 @@
 /extensions/caschys-blog                                            @Olli0103
 /extensions/catenary-raycast                                        @quacksire
 /extensions/catppuccin                                              @dvhsh
+/extensions/caviarde                                                @Gldywn
 /extensions/cc0-lib                                                 @0xN1
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/ccfddl                                                  @ViGeng
@@ -472,6 +474,7 @@
 /extensions/codesnap                                                @Mokkapps @pernielsentikaer
 /extensions/codex                                                   @asifk987
 /extensions/codex-claude-cli                                        @WerrySs @0xdhrv
+/extensions/codex-dictation                                         @ertembiyik
 /extensions/codex-manager                                           @josedefreitas91 @pernielsentikaer
 /extensions/codex-reset-forecast                                    @Astatine-213-Tian
 /extensions/codex-sessions                                          @jomatsu
@@ -1077,6 +1080,7 @@
 /extensions/gles-to-malioc                                          @RomanVPX
 /extensions/glide                                                   @titouv
 /extensions/glimpse                                                 @LegendarySpy
+/extensions/glm-models                                              @paulgit
 /extensions/global-media-key                                        @douo
 /extensions/globalping                                              @valent1d
 /extensions/glossary                                                @javierarce
@@ -1990,6 +1994,7 @@
 /extensions/orbita                                                  @tcelestino
 /extensions/orbstack                                                @nicholasq
 /extensions/orc-pictures                                            @TheOrcDev
+/extensions/orca                                                    @codecube01
 /extensions/origami                                                 @xilopaint
 /extensions/orion                                                   @Plonq @erics118 @giannisanni @szpony
 /extensions/orshot                                                  @rishimohan
@@ -2093,6 +2098,7 @@
 /extensions/photoroom-image-editing                                 @ubuntudroid
 /extensions/php-docs                                                @comes @pernielsentikaer
 /extensions/php-toolbox                                             @inxilpro
+/extensions/phpipam                                                 @frdmn
 /extensions/phpmon                                                  @nicoverbruggen
 /extensions/pi-drill                                                @nikinadruhou @pernielsentikaer
 /extensions/pia-controls                                            @Yakitrak @vxirau
@@ -2185,6 +2191,7 @@
 /extensions/prisma-cli-commands                                     @rajmasha
 /extensions/prisma-docs-search                                      @petradonka @petradonka @yusifaliyevpro
 /extensions/prisma-postgres                                         @AmanVarshney01 @pernielsentikaer
+/extensions/prismical                                               @nchopra
 /extensions/pritunl                                                 @mprokopov
 /extensions/privatebin                                              @sedlacek-martin
 /extensions/privileges                                              @ph00lt0 @riesinger
@@ -2674,6 +2681,7 @@
 /extensions/snippetsurfer                                           @mkitane @mkitane @ridemountainpig
 /extensions/soaring-symbols                                         @anhthang
 /extensions/social-network-trends                                   @koinzhang
+/extensions/socialfaktory                                           @adifsgaid
 /extensions/solana-explorer                                         @TrGiLong @AnishDe12020
 /extensions/solana-wallets-generation                               @uladkaminski
 /extensions/solidtime                                               @cupcakearmy @xmok
@@ -2851,6 +2859,7 @@
 /extensions/teamup-rooms                                            @drewwatkins11
 /extensions/teamwork                                                @workeffortwaste
 /extensions/techcrunch                                              @khlebobul
+/extensions/techgedoens                                             @marcelismus
 /extensions/techmeme                                                @Tien-Lam
 /extensions/telegram                                                @ikupenov
 /extensions/teleport                                                @lamberttraccard @BBonnet22

@@ -1,8 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, resolveRelease, resolveReleasePipeline } from "./linearUtils";
+import { serializeRelease } from "./serializers";
+import { withLinear } from "./withLinear";
 
 function date(value?: string): Date | null | undefined {
   return value === "null" ? null : value === undefined ? undefined : new Date(value);
@@ -40,7 +38,7 @@ async function resolveStage(pipelineId: string, query?: string) {
   if (!stage) throw new Error(`No release stage found for "${query}".`);
   return stage.id;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.id) {
     const release = await resolveRelease(input.id);
     if (input.pipeline) {
@@ -60,7 +58,9 @@ export default withAccessToken(linear)(async (input: Input) => {
       completedAt: date(input.completedAt),
       commitSha: input.commitSha,
     });
-    return result.release;
+    const updated = result.success ? await result.release : undefined;
+    if (!updated) throw new Error("Failed to update release.");
+    return serializeRelease(updated);
   }
   if (!input.name || !input.pipeline) throw new Error("name and pipeline are required when creating a release.");
   const pipeline = await resolveReleasePipeline(input.pipeline);
@@ -77,5 +77,7 @@ export default withAccessToken(linear)(async (input: Input) => {
     completedAt: date(input.completedAt),
     commitSha: input.commitSha,
   });
-  return result.release;
+  const created = result.success ? await result.release : undefined;
+  if (!created) throw new Error("Failed to create release.");
+  return serializeRelease(created);
 });
