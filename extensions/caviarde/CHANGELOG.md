@@ -1,6 +1,6 @@
 # Caviarde Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-02
 
 - Mask and Paste: replace personal data in the clipboard with placeholders, then
   paste the result
