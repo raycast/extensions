@@ -24,7 +24,7 @@ type ExtensionPreferences = {
   "showGitInfoInList": boolean,
   /** Editor App - The editor app to use */
   "editorApp"?: import("@raycast/api").Application,
-  /** Terminal App - The terminal app to use */
+  /** Terminal App - The terminal app to use. On Windows, supported terminals are Windows Terminal, Windows PowerShell, PowerShell 7, and Command Prompt. */
   "terminalApp"?: import("@raycast/api").Application,
   /** Browser App - The browser app to use */
   "browserApp"?: import("@raycast/api").Application,

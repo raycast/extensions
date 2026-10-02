@@ -111,7 +111,7 @@
       "type": "appPicker",
       "name": "terminalApp",
       "title": "Terminal App",
-      "description": "The terminal app to use",
+      "description": "The terminal app to use. On Windows, supported terminals are Windows Terminal, Windows PowerShell, PowerShell 7, and Command Prompt.",
       "required": true,
       "default": {
         "macOS": "Terminale",
