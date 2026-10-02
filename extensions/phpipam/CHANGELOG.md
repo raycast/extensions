@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-02
 
 - Initial release
 - Global search across addresses (IP, hostname, description, owner, MAC), subnets, VLANs and VRFs
