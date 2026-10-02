@@ -2188,6 +2188,7 @@
 /extensions/prisma-cli-commands                                     @rajmasha
 /extensions/prisma-docs-search                                      @petradonka @petradonka @yusifaliyevpro
 /extensions/prisma-postgres                                         @AmanVarshney01 @pernielsentikaer
+/extensions/prismical                                               @nchopra
 /extensions/pritunl                                                 @mprokopov
 /extensions/privatebin                                              @sedlacek-martin
 /extensions/privileges                                              @ph00lt0 @riesinger
