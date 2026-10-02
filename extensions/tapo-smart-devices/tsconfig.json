@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "noUnusedLocals": true,
+    "types": ["node"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx"

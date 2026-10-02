@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "try-museum",
+  "title": "Museum",
+  "description": "Find public domain artworks by color. Browse palettes, copy images, and discover art from museum collections.",
+  "icon": "museum-icon.png",
+  "author": "ray.dhruv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-art-by-color",
+      "title": "Search Art by Color",
+      "description": "Find artworks using a hex value, CSS color name, RGB, or HSL color",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "color",
+          "type": "text",
+          "placeholder": "Color (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-art-from-clipboard",
+      "title": "Search Art from Clipboard or Selection",
+      "description": "Find art matching the color in selected text, falling back to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "pick-color-from-screen",
+      "title": "Pick Color from Screen",
+      "description": "Pick a screen color with the Color Picker extension and find matching art",
+      "mode": "view"
+    },
+    {
+      "name": "random-artwork",
+      "title": "Random Artwork",
+      "description": "Discover a random public domain artwork and its palette",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-artworks",
+      "title": "Search Artworks",
+      "description": "Find public domain art by CSS color, ranked using Museum color matching."
+    },
+    {
+      "name": "get-artwork-palette",
+      "title": "Get Artwork Palette",
+      "description": "Get an artwork and its palette by exact catalog ID returned from search-artworks."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "colord": "^2.10.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "preferences": [
+    {
+      "name": "resultCount",
+      "type": "dropdown",
+      "title": "Result Count",
+      "description": "Maximum artworks shown in color searches",
+      "required": false,
+      "default": "48",
+      "data": [
+        {
+          "title": "24",
+          "value": "24"
+        },
+        {
+          "title": "48",
+          "value": "48"
+        },
+        {
+          "title": "96",
+          "value": "96"
+        }
+      ]
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "Action performed when you press Enter on an artwork",
+      "required": false,
+      "default": "details",
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "details"
+        },
+        {
+          "title": "Copy Image",
+          "value": "copy"
+        },
+        {
+          "title": "Open Source Page",
+          "value": "source"
+        }
+      ]
+    },
+    {
+      "name": "wallpaperScreen",
+      "type": "dropdown",
+      "title": "Wallpaper Screens",
+      "description": "On macOS, set wallpaper on all screens or the screen containing the pointer",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Screens",
+          "value": "all"
+        },
+        {
+          "title": "Screen with Pointer",
+          "value": "current"
+        }
+      ]
+    },
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "title": "Catalog Refresh Interval",
+      "description": "How often to check Museum for catalog changes. Use Refresh Catalog to check immediately.",
+      "required": false,
+      "default": "24",
+      "data": [
+        {
+          "title": "Every Hour",
+          "value": "1"
+        },
+        {
+          "title": "Daily",
+          "value": "24"
+        },
+        {
+          "title": "Weekly",
+          "value": "168"
+        }
+      ]
+    }
+  ]
+}

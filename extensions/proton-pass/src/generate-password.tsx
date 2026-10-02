@@ -135,7 +135,7 @@ export default function Command() {
       return;
     }
 
-    await Clipboard.copy(password, { transient: preferences.copyPasswordTransient ?? true });
+    await Clipboard.copy(password, { concealed: preferences.copyPasswordTransient ?? true });
     showToast({
       style: Toast.Style.Success,
       title: "Password Copied",

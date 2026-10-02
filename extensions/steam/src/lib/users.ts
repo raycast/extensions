@@ -1,5 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { GameDataSimple } from "../types";
+import { steamFetch } from "./http";
 
 type SteamApiErrorOptions = {
   status?: number;
@@ -98,6 +99,23 @@ const STEAM_API_BASE = "https://api.steampowered.com";
 const STEAM_COMMUNITY_BASE = "https://steamcommunity.com";
 let communitySessionPromise: Promise<{ sessionId: string; cookie: string }> | undefined;
 
+const steamIdCache = new Cache({ namespace: "steam-id" });
+
+// The Steam ID preference also takes a profile URL or custom URL name, which the key resolves once
+export async function resolveOwnSteamId(input: string, key: string) {
+  const value = input.trim();
+  const direct = getSteamIdFromInput(value);
+  if (direct) return direct;
+  const vanity = getVanityFromInput(value);
+  if (!vanity) throw new SteamApiError("Steam ID should be a 17-digit ID, a profile URL, or your custom URL name.");
+  const cached = steamIdCache.get(vanity.toLowerCase());
+  if (cached) return cached;
+  const steamid = await resolveVanityUrl(vanity, key);
+  if (!steamid) throw new SteamApiError(`No Steam profile found for "${vanity}".`);
+  steamIdCache.set(vanity.toLowerCase(), steamid);
+  return steamid;
+}
+
 export function getSteamWebApiKey() {
   const { token } = getPreferenceValues<Preferences>();
   return (token || "").trim();
@@ -184,6 +202,7 @@ export async function searchSteamUsers(
   const results: SteamUserSearchResult[] = [];
 
   const exactMatch = await resolveSteamUserIdentifier(query, key).catch((error: unknown) => {
+    if (isRejectedKeyError(error)) throw error;
     warnings.push(getErrorMessage(error));
     return undefined;
   });
@@ -226,6 +245,7 @@ export async function searchSteamUsers(
         }
       }
     } catch (error) {
+      if (isRejectedKeyError(error)) throw error;
       warnings.push(`Community search failed: ${getErrorMessage(error)}`);
     }
   }
@@ -323,6 +343,10 @@ async function resolveVanityUrl(vanity: string, key: string) {
   return response.response.steamid;
 }
 
+export async function getProfileCountry(steamid: string, key: string) {
+  return (await getPlayerSummary(steamid, key))?.loccountrycode;
+}
+
 async function getPlayerSummary(steamid: string, key: string) {
   const summaries = await getPlayerSummaries([steamid], key);
   return summaries[0];
@@ -405,8 +429,9 @@ async function steamApiFetch<T>(path: string, key: string, params: Record<string
     if (value !== undefined) url.searchParams.set(name, String(value));
   }
 
-  const response = await fetchJson<T>(url, { headers: { Accept: "application/json" } });
-  return response;
+  return fetchJson<T>(url, { headers: { Accept: "application/json" } }).catch((error: unknown) => {
+    throw isRejectedKeyError(error) ? rejectedKeyError(error) : error;
+  });
 }
 
 async function searchSteamCommunityUsers(query: string, maxResults: number) {
@@ -427,7 +452,6 @@ async function searchSteamCommunityUsers(query: string, maxResults: number) {
       Accept: "application/json",
       Cookie: session.cookie,
       Referer: `${STEAM_COMMUNITY_BASE}/search/users/`,
-      "User-Agent": "Mozilla/5.0",
     },
   });
 
@@ -451,10 +475,8 @@ async function getCommunitySession() {
 }
 
 async function fetchCommunitySession() {
-  const response = await fetch(`${STEAM_COMMUNITY_BASE}/`, {
-    headers: {
-      "User-Agent": "Mozilla/5.0",
-    },
+  const response = await steamFetch(`${STEAM_COMMUNITY_BASE}/`, {
+    headers: {},
   });
 
   if (!response.ok) {
@@ -480,7 +502,7 @@ async function fetchCommunitySession() {
 }
 
 async function fetchJson<T>(url: URL, init?: RequestInit) {
-  const response = await fetch(url, init);
+  const response = await steamFetch(url, init);
 
   if (!response.ok) {
     const text = await response.text();
@@ -591,4 +613,12 @@ function isExpectedPrivateProfileError(error: unknown) {
   if (!(error instanceof Error)) return false;
 
   return /\b(401|403)\b/.test(error.message) || /unauthorized|forbidden/i.test(error.message);
+}
+
+export function isRejectedKeyError(error: unknown) {
+  return error instanceof SteamApiError && (error.status === 401 || error.status === 403);
+}
+
+function rejectedKeyError(error: unknown) {
+  return new SteamApiError("Steam rejected the Web API Key", { status: (error as SteamApiError).status });
 }

@@ -38,6 +38,7 @@ const fixtures = {
       {
         id: "item-login",
         state: "Active",
+        modify_time: "2025-06-01T12:34:56",
         content: {
           title: "Example Login",
           content: {

@@ -1,5 +1,19 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Devino MCP Servers] - 2026-10-01
+
+- Add 13 remote MCP servers from Devino Solutions to the official registry: BioFlow, DoDomain, GetItDone, Notifly, Postify, Sendly, Shorty, SnapVisor, SuperBooks, uNotes, upAPI, Uptimely, VoiceLabs. Each is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.
+
+## [Fix Linear Installation and Clarify Runtime Setup] - 2026-10-01
+
+- Connect Linear directly in Raycast without requiring Node.js or the npm proxy, and update its endpoint for other clients.
+- Show the proxy command and Node.js requirement for other clients alongside Linear's direct Raycast setup.
+- Show Node.js and uv setup requirements in server details and document how to resolve missing executable errors.
+
+## [Add Trvlrr MCP Server] - 2026-10-01
+
+- Add Trvlrr to the official registry: a travel journal and trip planner — trips taken and planned with their flights, stays, activities and expenses, lifetime travel stats and, with Trvlrr Plus, photo search; ask about a trip, add a booking or import a trip from anywhere. Hosted remote Streamable HTTP server at https://trvlrr.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Trvlrr account, no API key.
+
 ## [Add 60fps MCP Server] - 2026-09-30
 
 - Add 60fps to the official registry: real iOS interactions from shipping apps, with the motion breakdown and SwiftUI to build them. Search 2,000+ interactions in plain language, read the motion anatomy behind each one and get starter SwiftUI tuned to the real timing. Read-only. Hosted remote Streamable HTTP server at https://mcp.60fps.design/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and a paid 60fps MCP licence, no API key.

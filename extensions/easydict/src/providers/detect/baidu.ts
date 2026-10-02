@@ -3,61 +3,35 @@
 import querystring from "node:querystring";
 
 import { myPreferences } from "@/consts";
-import { baiduMap, getYoudaoLangCode, isValidLangCode } from "@/core/language/utils";
-import { LanguageDetectType } from "@/types/api";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError } from "@/utils/logger";
+import type { DetectionObservation } from "@/core/detect/types";
+import { getLanguageFromProviderCode, isLanguageCode } from "@/core/language/utils";
+import { LanguageDetectType } from "@/core/results/kinds";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
 
-import type { DetectOptions } from "./base";
-import { BaseDetectProvider } from "./base";
+import { BaseDetectProvider, type DetectOptions } from "./base";
+import { detectionNumber, detectionObject, detectionString } from "./response";
 
-interface BaiduWebLanguageDetect {
-  error?: number;
-  msg?: string;
-  lan?: string;
-}
-
-export class BaiduDetectProvider extends BaseDetectProvider<BaiduWebLanguageDetect> {
+export class BaiduDetectProvider extends BaseDetectProvider {
   type = LanguageDetectType.Baidu;
 
-  isEnabled(): boolean {
+  isEnabled() {
     return myPreferences.enableBaiduLanguageDetect;
   }
 
-  protected async doDetect(text: string, options?: DetectOptions) {
-    const url = "https://fanyi.baidu.com/langdetect";
-    const params = { query: text };
-
-    const response = await timedFetch<BaiduWebLanguageDetect>(url, {
-      method: "POST",
-      body: querystring.stringify(params),
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      signal: options?.signal,
-    });
-
-    if (response.error === 0) {
-      const baiduLanguageId = response.lan || "";
-      const youdaoLanguageId = getYoudaoLangCode(baiduLanguageId, baiduMap);
-      const isConfirmed = isValidLangCode(youdaoLanguageId);
-
-      return {
-        type: LanguageDetectType.Baidu,
-        sourceLangCode: baiduLanguageId,
-        youdaoLangCode: youdaoLanguageId,
-        confirmed: isConfirmed,
-        result: response,
-      };
-    }
-
-    const errorInfo = new RequestError(
-      LanguageDetectType.Baidu,
-      response.msg || "",
-      response.error ? response.error.toString() : "",
+  protected async doDetect(text: string, options?: DetectOptions): Promise<DetectionObservation> {
+    const response = detectionObject(
+      await timedFetch<unknown>("https://fanyi.baidu.com/langdetect", {
+        method: "POST",
+        body: querystring.stringify({ query: text }),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        signal: options?.signal,
+      }),
     );
-    logError(this.type, `detect error: ${response.msg}`);
-    throw errorInfo;
+    const code = detectionNumber(response.error);
+    if (code !== 0)
+      throw new RequestError(this.type, response.msg === undefined ? "" : detectionString(response.msg), String(code));
+    const language = getLanguageFromProviderCode(detectionString(response.lan), "baiduLangCode");
+    return { kind: "single", type: this.type, language: isLanguageCode(language) ? language : undefined };
   }
 }

@@ -50,10 +50,13 @@ pass-cli vault list
 ## Preferences
 
 - **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Transient Clipboard**: Clear password from clipboard after pasting
-- **Background Refresh**: Automatically refresh cached vault and item data
-- **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
-- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
+- **Primary Action**: What Enter does on an item: view its details (default) or copy the password
+- **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
+- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
+- **Item List**:
+  - Refresh items in the background, even when the cache is still fresh
+  - Suggest logins for the active browser tab (requires the Raycast browser extension)
+  - Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
 
 ### Generate Password
 

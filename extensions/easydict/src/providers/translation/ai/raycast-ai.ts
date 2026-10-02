@@ -2,39 +2,36 @@
 
 import { AI, environment } from "@raycast/api";
 
-import { getRaycastAIModel } from "@/ai-providers/runtime";
-import type { RaycastAIProfile } from "@/ai-providers/types";
+import type { TranslationContent } from "@/core/content/types";
 import { getLanguageEnglishName } from "@/core/language/utils";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions, StreamChunk } from "@/core/results/types";
+import type { RaycastAIRuntimeConfig } from "@/providers/profiles/runtime";
 import { BaseStreamingTranslateProvider } from "@/providers/translation/base";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions, StreamChunk, TranslationResult } from "@/types/query";
-import { CancelledError, RequestError } from "@/utils/errors";
-import { logTrace } from "@/utils/logger";
+import { CancelledError, RequestError } from "@/shared/errors";
+import { logTrace } from "@/shared/logger";
 
 import { createTranslationPromptSpec, renderTranslationTextPrompt } from "./prompt";
 
-export class RaycastAITranslateProvider extends BaseStreamingTranslateProvider<{ translatedText: string }> {
+export class RaycastAITranslateProvider extends BaseStreamingTranslateProvider {
   type = TranslationType.OpenAI;
 
-  constructor(private readonly profile: Readonly<RaycastAIProfile>) {
+  constructor(private readonly config: RaycastAIRuntimeConfig) {
     super();
   }
 
   protected override get logLabel() {
-    return this.profile.name;
+    return this.config.name;
   }
 
   protected async *doTranslate(
     queryWordInfo: QueryInput,
     { signal }: RequestOptions = {},
-  ): AsyncGenerator<StreamChunk, TranslationResult<{ translatedText: string }>, unknown> {
+  ): AsyncGenerator<StreamChunk, TranslationContent, unknown> {
     if (!environment.canAccess(AI)) {
       throw new RequestError(this.type, "Raycast AI is unavailable. Raycast Pro and AI access are required.");
     }
-    const model = getRaycastAIModel(this.profile.model);
-    if (!model) {
-      throw new RequestError(this.type, `The configured Raycast AI model is unavailable: ${this.profile.model}`);
-    }
+    const model = this.config.model;
 
     const fromLanguage = getLanguageEnglishName(queryWordInfo.fromLanguage);
     const toLanguage = getLanguageEnglishName(queryWordInfo.toLanguage);
@@ -49,10 +46,9 @@ export class RaycastAITranslateProvider extends BaseStreamingTranslateProvider<{
     const translatedText = yield* streamRaycastAIAnswer(answer, signal);
 
     return {
-      type: this.type,
-      queryWordInfo,
-      translations: [translatedText],
-      result: { translatedText },
+      kind: "translation",
+      query: queryWordInfo,
+      paragraphs: [translatedText],
     };
   }
 }
@@ -103,7 +99,7 @@ async function* streamRaycastAIAnswer(
   try {
     while (true) {
       while (emittedChunks < chunks.length) {
-        yield { content: chunks[emittedChunks], role: "assistant" };
+        yield { content: chunks[emittedChunks] };
         emittedChunks += 1;
       }
       if (failure !== undefined) throw failure;

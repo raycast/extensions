@@ -19,7 +19,7 @@
     "denis_ufimtsev",
     "sapoepsilon",
     "theherk",
-    "chris_van_es",
+    "cvanes",
     "vicampuzano",
     "ErBlack",
     "byheaven",
@@ -641,6 +641,43 @@
       "subtitle": "Obsidian",
       "description": "Manage and run custom append actions",
       "mode": "view"
+    },
+    {
+      "name": "quickCaptureCommand",
+      "title": "Quick Capture",
+      "subtitle": "Obsidian",
+      "description": "Capture a note, task, or shopping item without the Advanced URI plugin.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Obsidian Vault",
+          "required": false,
+          "description": "Name of the vault that contains the capture files. If omitted, the first available vault is used."
+        },
+        {
+          "name": "dailyNotePath",
+          "type": "textfield",
+          "title": "Daily Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault, for example Daily Notes/{date}.md"
+        },
+        {
+          "name": "todoNotePath",
+          "type": "textfield",
+          "title": "To Do Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault."
+        },
+        {
+          "name": "shoppingNotePath",
+          "type": "textfield",
+          "title": "Shopping Note Path",
+          "required": false,
+          "description": "Existing Markdown file path within the vault."
+        }
+      ]
     }
   ],
   "tools": [

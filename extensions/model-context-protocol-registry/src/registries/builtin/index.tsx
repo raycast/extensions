@@ -4,6 +4,7 @@ import { SUPPORTED_CLIENTS } from "../../shared/mcp";
 import { RegistryProps } from "../types";
 import { COMMUNITY_ENTRIES, OFFICIAL_ENTRIES } from "./entries";
 import { getAccessories } from "./utils";
+import { getRaycastServer, getSetupMarkdown } from "./configuration";
 import { InstallServerToClientAction } from "./actions";
 import { RegistryEntry } from "./types";
 import { useApplications } from "../../shared/application";
@@ -39,7 +40,7 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
             accessories={getAccessories(entry)}
             detail={
               <List.Item.Detail
-                markdown={`# ${entry.title}\n\n${entry.description}`}
+                markdown={`# ${entry.title}\n\n${entry.description ?? ""}\n\n${getSetupMarkdown(entry)}`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     {entry.homepage && (
@@ -49,10 +50,15 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
                         target={entry.homepage}
                       />
                     )}
-                    <List.Item.Detail.Metadata.Label
-                      title="Type"
-                      text={"command" in entry.configuration ? "stdio" : "SSE"}
-                    />
+                    {entry.remoteUrl && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title="Raycast" text="HTTP" />
+                        <List.Item.Detail.Metadata.Link title="URL" text={entry.remoteUrl} target={entry.remoteUrl} />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Other Clients" text="Local Proxy" />
+                      </>
+                    )}
+                    <List.Item.Detail.Metadata.Label title="Type" text="stdio" />
                     <List.Item.Detail.Metadata.Label title="Command" text={entry.configuration.command} />
                     {entry.configuration.args && (
                       <List.Item.Detail.Metadata.TagList title="Arguments">
@@ -85,16 +91,11 @@ function Registry(props: RegistryProps & { entries: RegistryEntry[] }) {
                       }}
                       title="Raycast"
                       server={{
-                        transport: "stdio",
+                        ...getRaycastServer(entry),
                         icon:
                           typeof entry.icon === "string" && Object.values(Icon).includes(entry.icon as Icon)
                             ? (entry.icon as Icon)
                             : undefined,
-                        name: entry.title,
-                        description: entry.description,
-                        command: entry.configuration.command,
-                        args: entry.configuration.args,
-                        env: entry.configuration.env,
                       }}
                     />
                     <ActionPanel.Section>

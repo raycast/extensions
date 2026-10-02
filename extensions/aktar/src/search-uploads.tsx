@@ -18,6 +18,7 @@ import { deleteUpload, getStatus, isConnectionError, listDestinations, listUploa
 import type { OutputFormat, Upload } from "./api/types";
 import { BucketBrowser } from "./components/BucketBrowser";
 import { ConnectionEmptyView } from "./components/ConnectionEmptyView";
+import { QRCodeView } from "./components/QRCodeView";
 import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
@@ -136,6 +137,12 @@ export default function Command() {
                   <Action.CopyToClipboard title={`Copy ${FORMAT_TITLES[format]}`} content={upload.formats[format]} />
                   <Action.Paste title={`Paste ${FORMAT_TITLES[format]}`} content={upload.formats[format]} />
                   <Action.OpenInBrowser url={upload.url} />
+                  <Action.Push
+                    title="Show QR Code"
+                    icon={Icon.Mobile}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    target={<QRCodeView name={upload.filename} link={upload.url} />}
+                  />
                   <Action
                     title={isShowingDetail ? "Hide Details" : "Show Details"}
                     icon={Icon.Sidebar}

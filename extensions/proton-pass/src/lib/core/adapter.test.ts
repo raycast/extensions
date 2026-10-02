@@ -124,6 +124,9 @@ test("lists active items and strips full-list secrets", async () => {
     username: "alice",
     email: "alice@example.com",
     hasTotp: true,
+    hasPassword: true,
+    modifiedAt: "2025-06-01T12:34:56.000Z",
+    hasNote: false,
   });
 });
 

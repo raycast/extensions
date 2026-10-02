@@ -208,20 +208,29 @@
       "required": false
     },
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "What Enter does on an item.",
+      "default": "details",
+      "required": false,
+      "data": [
+        {
+          "title": "View Details",
+          "value": "details"
+        },
+        {
+          "title": "Copy Password",
+          "value": "copy"
+        }
+      ]
+    },
+    {
       "name": "copyPasswordTransient",
       "type": "checkbox",
       "title": "Transient Clipboard",
-      "label": "Clear password from clipboard after paste",
-      "description": "When enabled, passwords will be cleared from clipboard after pasting",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "enableBackgroundRefresh",
-      "type": "checkbox",
-      "title": "Background Refresh",
-      "label": "Automatically refresh cached vault and item data",
-      "description": "When enabled, cached results will refresh in the background",
+      "label": "Keep copied secrets out of clipboard history",
+      "description": "Passwords, 2FA codes, notes and hidden fields.",
       "default": true,
       "required": false
     },
@@ -229,7 +238,7 @@
       "name": "cacheExpiration",
       "type": "dropdown",
       "title": "Cache Expiration",
-      "description": "How long cached metadata is considered fresh. Older data is still shown instantly while it refreshes in the background.",
+      "description": "How long cached items stay fresh.",
       "default": "5",
       "required": false,
       "data": [
@@ -260,18 +269,36 @@
       ]
     },
     {
+      "name": "enableBackgroundRefresh",
+      "type": "checkbox",
+      "title": "Item List",
+      "label": "Refresh items in the background",
+      "description": "Even when the cache is still fresh.",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "enableWebIntegration",
       "type": "checkbox",
-      "title": "Web Integration",
-      "label": "Match active browser tab URL in Search Items",
-      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
+      "title": "",
+      "label": "Suggest logins for the active browser tab",
+      "description": "Requires the Raycast browser extension.",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "showWebsiteIcons",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show website icons",
+      "description": "From Raycast's favicon provider, which receives the domains.",
+      "default": false,
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
