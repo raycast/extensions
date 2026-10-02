@@ -188,7 +188,7 @@ export function SubnetListItem({
       keywords={[
         s(subnet.description),
         ...label.split("/"),
-        `vlan ${vlanNumber}`,
+        ...(vlanNumber ? [`vlan ${vlanNumber}`] : []),
       ]}
       actions={
         <ActionPanel>
