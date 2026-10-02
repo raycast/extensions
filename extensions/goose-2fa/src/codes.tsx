@@ -22,10 +22,7 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
   const [quickDone, setQuickDone] = useState(false);
   const [group, setGroup] = useState<string>(ALL_GROUPS);
   const codes = useOtpCodes(vault.accounts);
-  const tallies = useMemo(
-    () => buildGroupTallies(vault.groups, vault.accounts),
-    [vault.groups, vault.accounts],
-  );
+  const tallies = useMemo(() => buildGroupTallies(vault.groups, vault.accounts), [vault.groups, vault.accounts]);
   const visible = useMemo(() => {
     const byGroup = filterByGroup(vault.accounts, group === ALL_GROUPS ? null : group);
     return filterAccounts(byGroup, query);
@@ -47,7 +44,7 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
       <Action title={"Reload Data Source"} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
       {vault.lockHeld !== null && (
         <Action
-          title={"Remove Stale Lock (ensure no other client is writing)"}
+          title={"Remove Stale Lock (Ensure No Other Client Is Writing)"}
           icon={Icon.LockUnlocked}
           style={Action.Style.Destructive}
           onAction={async () => {
@@ -55,7 +52,11 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
             await showToast(
               removed
                 ? { style: Toast.Style.Success, title: "Stale lock removed", message: "Please retry your last change." }
-                : { style: Toast.Style.Failure, title: "Lock file not found", message: "It may have been released by its owner." },
+                : {
+                    style: Toast.Style.Failure,
+                    title: "Lock file not found",
+                    message: "It may have been released by its owner.",
+                  },
             );
           }}
         />
@@ -77,12 +78,23 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
           <Grid.Dropdown tooltip={"Groups"} value={group} onChange={setGroup}>
             <Grid.Dropdown.Item title={`All Accounts (${vault.accounts.length})`} value={ALL_GROUPS} />
             {tallies.map((tally) => (
-              <Grid.Dropdown.Item key={tally.id} title={`${tally.id === UNGROUPED_KEY ? "Ungrouped" : tally.name} (${tally.count})`} value={tally.id} />
+              <Grid.Dropdown.Item
+                key={tally.id}
+                title={`${tally.id === UNGROUPED_KEY ? "Ungrouped" : tally.name} (${tally.count})`}
+                value={tally.id}
+              />
             ))}
           </Grid.Dropdown>
         }
       >
-        <Grid.EmptyView title={"No Accounts"} actions={<ActionPanel><Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} /></ActionPanel>} />
+        <Grid.EmptyView
+          title={"No Accounts"}
+          actions={
+            <ActionPanel>
+              <Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} />
+            </ActionPanel>
+          }
+        />
         {vault.message && (
           <Grid.Section title={"Action Required"}>
             <Grid.Item content={Icon.Warning} title={"Data Source"} subtitle={vault.message} actions={issueActions} />
@@ -99,7 +111,14 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
                 title={account.note || account.name}
                 subtitle={/^\d+$/.test(code) ? formatCode(code) : "…"}
                 keywords={[account.name, account.issuer, account.note ?? "", account.remark ?? ""]}
-                actions={<CodeActions account={account} code={code} enterAction={preferences.enterAction ?? "copy"} closeAfterCopy={preferences.closeAfterCopy ?? true} />}
+                actions={
+                  <CodeActions
+                    account={account}
+                    code={code}
+                    enterAction={preferences.enterAction ?? "copy"}
+                    closeAfterCopy={preferences.closeAfterCopy ?? true}
+                  />
+                }
               />
             );
           })}
@@ -127,7 +146,14 @@ export default function Codes(props: LaunchProps<{ arguments: { query?: string }
         </List.Dropdown>
       }
     >
-      <List.EmptyView title={"No Accounts"} actions={<ActionPanel><Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} /></ActionPanel>} />
+      <List.EmptyView
+        title={"No Accounts"}
+        actions={
+          <ActionPanel>
+            <Action.Push title={"Open Settings & Data"} icon={Icon.Gear} target={<ManageData />} />
+          </ActionPanel>
+        }
+      />
       {vault.message ? (
         <List.Section title={"Action Required"}>
           <List.Item
@@ -170,15 +196,11 @@ function CodeItem({
   enterAction: "copy" | "paste";
   closeAfterCopy: boolean;
 }) {
-  const groupName = account.groupId
-    ? groups.find((candidate) => candidate.id === account.groupId)?.name
-    : undefined;
+  const groupName = account.groupId ? groups.find((candidate) => candidate.id === account.groupId)?.name : undefined;
   const subtitle = [account.issuer, groupName, account.remark].filter(Boolean).join(" · ");
   const accessories = [
     { text: /^\d+$/.test(code) ? formatCode(code) : "…" },
-    account.type === "totp"
-      ? { text: remaining >= 0 ? `${remaining}s` : "" }
-      : { text: `HOTP #${account.counter}` },
+    account.type === "totp" ? { text: remaining >= 0 ? `${remaining}s` : "" } : { text: `HOTP #${account.counter}` },
   ];
 
   return (
@@ -193,7 +215,12 @@ function CodeItem({
   );
 }
 
-function CodeActions({ account, code, enterAction, closeAfterCopy }: {
+function CodeActions({
+  account,
+  code,
+  enterAction,
+  closeAfterCopy,
+}: {
   account: AccountData;
   code: string;
   enterAction: "copy" | "paste";

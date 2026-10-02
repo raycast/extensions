@@ -17,7 +17,12 @@ export default function ScanQr() {
   const vault = useVault();
   const [entries, setEntries] = useState<ScannedEntry[]>([]);
   const [status, setStatus] = useState<"scanning" | "ready" | "empty">("scanning");
-  const newInputs = new Set(deduplicateImports(entries.map((entry) => entry.input), vault.accounts).newAccounts);
+  const newInputs = new Set(
+    deduplicateImports(
+      entries.map((entry) => entry.input),
+      vault.accounts,
+    ).newAccounts,
+  );
 
   useEffect(() => {
     let active = true;
@@ -64,7 +69,11 @@ export default function ScanQr() {
     const inputs = chosen.map((entry) => entry.input);
     const preview = deduplicateImports(inputs, getVaultState().accounts);
     if (!preview.newAccounts.length) {
-      await showToast({ style: Toast.Style.Success, title: "Accounts Already Exist", message: "No duplicate accounts were imported." });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Accounts Already Exist",
+        message: "No duplicate accounts were imported.",
+      });
       return;
     }
     const ok = await commit(
@@ -75,7 +84,10 @@ export default function ScanQr() {
   };
 
   return (
-    <List isLoading={status === "scanning" || vault.syncStatus === "writing"} searchBarPlaceholder={"Search scan results"}>
+    <List
+      isLoading={status === "scanning" || vault.syncStatus === "writing"}
+      searchBarPlaceholder={"Search scan results"}
+    >
       {status === "empty" ? (
         <List.Item
           icon={Icon.MagnifyingGlass}

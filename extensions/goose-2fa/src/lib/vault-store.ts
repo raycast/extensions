@@ -11,7 +11,14 @@ import {
   type SyncLockInfo,
 } from "../../vendor/shared/sync-protocol";
 import { readLocalVault, writeLocalVault } from "./local-vault";
-import { clearVaultLock, normalizePath, readVaultFile, resolveVaultPath, writeVaultFile, type VaultFileRead } from "./vault-file";
+import {
+  clearVaultLock,
+  normalizePath,
+  readVaultFile,
+  resolveVaultPath,
+  writeVaultFile,
+  type VaultFileRead,
+} from "./vault-file";
 import { mergeExternalSnapshot } from "./vault-ops";
 
 export type VaultSyncStatus = "idle" | "loading" | "writing" | "success" | "error" | "conflict";
@@ -56,7 +63,8 @@ export interface VaultState {
   conflict: VaultConflict | null;
 }
 
-const fileMissingMessage = () => "Data source file is missing or empty. No changes were saved to prevent data loss. You can create a new data source file.";
+const fileMissingMessage = () =>
+  "Data source file is missing or empty. No changes were saved to prevent data loss. You can create a new data source file.";
 const WATCH_INTERVAL = 3000;
 
 let state: VaultState = {
@@ -120,11 +128,22 @@ export async function loadVault(): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
   let selected = preferences.dataFile?.trim() || "";
   try {
-    const override = JSON.parse((await LocalStorage.getItem<string>(SOURCE_OVERRIDE_KEY)) || "null") as { filePath?: unknown; preference?: unknown } | null;
-    if (override && override.preference === (preferences.dataFile || "") && typeof override.filePath === "string") selected = override.filePath;
-  } catch { /* 无效的路径偏好不会覆盖已选文件 */ }
+    const override = JSON.parse((await LocalStorage.getItem<string>(SOURCE_OVERRIDE_KEY)) || "null") as {
+      filePath?: unknown;
+      preference?: unknown;
+    } | null;
+    if (override && override.preference === (preferences.dataFile || "") && typeof override.filePath === "string")
+      selected = override.filePath;
+  } catch {
+    /* 无效的路径偏好不会覆盖已选文件 */
+  }
   if (selected && (!path.isAbsolute(normalizePath(selected)) || path.extname(selected).toLowerCase() !== ".json")) {
-    setState({ status: "ready", syncStatus: "error", message: "Data source must be an absolute path to a .json file; existing data was not written.", needsCreate: false });
+    setState({
+      status: "ready",
+      syncStatus: "error",
+      message: "Data source must be an absolute path to a .json file; existing data was not written.",
+      needsCreate: false,
+    });
     return;
   }
   const filePath = selected ? resolveVaultPath(selected) : "";
@@ -140,7 +159,8 @@ export async function loadVault(): Promise<void> {
         source: "local",
         status: "ready",
         syncStatus: "error",
-        message: "Raycast Local Vault contains invalid data. Original values were preserved and writes are disabled. Choose a data source file in preferences or explicitly rebuild the vault.",
+        message:
+          "Raycast Local Vault contains invalid data. Original values were preserved and writes are disabled. Choose a data source file in preferences or explicitly rebuild the vault.",
         notice: null,
         needsCreate: false,
         localBroken: true,
@@ -184,9 +204,12 @@ export async function loadVault(): Promise<void> {
 
   // 读不到/解析不了都不当成空库：保留当前数据（或本地库）并停止写入，等用户处理。
   const local = await readLocalVault();
-  const fallback = state.accounts.length > 0
-    ? { accounts: state.accounts, groups: state.groups, trash: state.trash }
-    : (local.status === "ok" ? local.snapshot : { accounts: [], groups: [], trash: [] });
+  const fallback =
+    state.accounts.length > 0
+      ? { accounts: state.accounts, groups: state.groups, trash: state.trash }
+      : local.status === "ok"
+        ? local.snapshot
+        : { accounts: [], groups: [], trash: [] };
   const missing = read.status === "missing" || read.status === "empty";
   baseline = null;
   setState({
@@ -221,7 +244,9 @@ export async function refreshVault(): Promise<void> {
     status: "ready",
     syncStatus: "success",
     message: null,
-    notice: corrected ? "Data source corrected using trash rules and the HOTP counter floor." : "Reloaded from data source file.",
+    notice: corrected
+      ? "Data source corrected using trash rules and the HOTP counter floor."
+      : "Reloaded from data source file.",
     needsCreate: false,
     conflict: null,
   });
@@ -236,7 +261,8 @@ async function pollExternal(): Promise<void> {
   if (read.status !== "ok") {
     if (read.status === "missing" || read.status === "empty") {
       const missing = read.status;
-      if (!state.needsCreate) setState({ syncStatus: "error", message: messageForRead({ status: missing }), needsCreate: true });
+      if (!state.needsCreate)
+        setState({ syncStatus: "error", message: messageForRead({ status: missing }), needsCreate: true });
     }
     return;
   }
@@ -268,7 +294,8 @@ async function persist(
     if (state.localBroken && !options.allowCreate) {
       setState({
         syncStatus: "error",
-        message: "Local Vault contains invalid data; writes are disabled. Explicitly rebuild it or use a data source file.",
+        message:
+          "Local Vault contains invalid data; writes are disabled. Explicitly rebuild it or use a data source file.",
         notice: null,
       });
       return false;
@@ -304,7 +331,11 @@ async function persist(
         syncStatus: "conflict",
         message: "Data source has not been verified; writes are disabled. Reload it first.",
         notice: null,
-        conflict: { snapshot: fresh.snapshot, content: fresh.content, stat: { mtimeMs: fresh.mtimeMs, size: fresh.size } },
+        conflict: {
+          snapshot: fresh.snapshot,
+          content: fresh.content,
+          stat: { mtimeMs: fresh.mtimeMs, size: fresh.size },
+        },
       });
       return false;
     }
@@ -313,7 +344,11 @@ async function persist(
         syncStatus: "conflict",
         message: "Another app changed the data source. Your changes were not saved. Choose which version to keep.",
         notice: null,
-        conflict: { snapshot: fresh.snapshot, content: fresh.content, stat: { mtimeMs: fresh.mtimeMs, size: fresh.size } },
+        conflict: {
+          snapshot: fresh.snapshot,
+          content: fresh.content,
+          stat: { mtimeMs: fresh.mtimeMs, size: fresh.size },
+        },
       });
       return false;
     }
@@ -341,8 +376,13 @@ async function persist(
     if (reread.status === "ok") {
       setState({
         syncStatus: "conflict",
-        message: "Another app changed the data source before saving. Your changes were not saved. Choose which version to keep.",
-        conflict: { snapshot: reread.snapshot, content: reread.content, stat: { mtimeMs: reread.mtimeMs, size: reread.size } },
+        message:
+          "Another app changed the data source before saving. Your changes were not saved. Choose which version to keep.",
+        conflict: {
+          snapshot: reread.snapshot,
+          content: reread.content,
+          stat: { mtimeMs: reread.mtimeMs, size: reread.size },
+        },
       });
       return false;
     }
@@ -352,7 +392,10 @@ async function persist(
   const lock = result.status === "locked" ? parseSyncLockInfo(result.lockContent) : null;
   setState({
     syncStatus: "error",
-    message: result.status === "locked" ? lockMessage(lock) : "Could not write data source; existing file was not overwritten.",
+    message:
+      result.status === "locked"
+        ? lockMessage(lock)
+        : "Could not write data source; existing file was not overwritten.",
     notice: null,
     lockHeld: lock,
     conflict: null,
@@ -368,9 +411,7 @@ function lockMessage(lock: SyncLockInfo | null): string {
 }
 
 /** 所有改动的唯一入口：只有写盘成功才更新内存，避免出现没保存的“影子数据”。 */
-export async function updateVault(
-  updater: (snapshot: SyncSnapshot) => SyncSnapshot,
-): Promise<boolean> {
+export async function updateVault(updater: (snapshot: SyncSnapshot) => SyncSnapshot): Promise<boolean> {
   const next = updater({ accounts: state.accounts, groups: state.groups, trash: state.trash });
   return persist(next);
 }

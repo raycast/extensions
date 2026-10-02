@@ -8,14 +8,25 @@ const deliveringHotp = new Set<string>();
 export type DeliveryMode = "copy" | "paste" | "type";
 
 /** 复制 / 粘贴 / 真实输入。HOTP 必须先落盘递增，成功才允许把这个码交出去。 */
-export async function deliverCode(account: AccountData, code: string, mode: DeliveryMode, closeAfterCopy = true): Promise<boolean> {
+export async function deliverCode(
+  account: AccountData,
+  code: string,
+  mode: DeliveryMode,
+  closeAfterCopy = true,
+): Promise<boolean> {
   if (!/^\d+$/.test(code)) {
     await showToast({ style: Toast.Style.Failure, title: "Code Unavailable", message: "Please try again shortly." });
     return false;
   }
   if (account.type === "hotp") {
     const current = getVaultState().accounts.find((item) => item.id === account.id);
-    if (!current || current.type !== "hotp" || current.counter !== account.counter || current.secret !== account.secret || deliveringHotp.has(account.id)) {
+    if (
+      !current ||
+      current.type !== "hotp" ||
+      current.counter !== account.counter ||
+      current.secret !== account.secret ||
+      deliveringHotp.has(account.id)
+    ) {
       await showToast({ style: Toast.Style.Failure, title: "Code Changed", message: "Refresh and try again." });
       return false;
     }

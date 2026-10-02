@@ -53,11 +53,7 @@ export function snapshotFromLocal(raw: { accounts: unknown; groups: unknown; tra
   };
 }
 
-export function createAccount(
-  input: NewAccountInput,
-  groups: VaultGroup[],
-  groupId: string | null,
-): AccountData {
+export function createAccount(input: NewAccountInput, groups: VaultGroup[], groupId: string | null): AccountData {
   return {
     ...input,
     id: crypto.randomUUID(),
@@ -101,11 +97,7 @@ export function toBackupJson(snapshot: SyncSnapshot): string {
   return exportAsSyncJson(snapshot.accounts, snapshot.groups, snapshot.trash);
 }
 
-export function upsertAccount(
-  accounts: AccountData[],
-  id: string,
-  patch: Partial<AccountData>,
-): AccountData[] {
+export function upsertAccount(accounts: AccountData[], id: string, patch: Partial<AccountData>): AccountData[] {
   return accounts.map((account) => (account.id === id ? { ...account, ...patch } : account));
 }
 
@@ -124,9 +116,10 @@ export function moveToTrash(snapshot: SyncSnapshot, id: string): SyncSnapshot {
 export function restoreFromTrash(snapshot: SyncSnapshot, id: string): SyncSnapshot {
   const account = snapshot.trash.find((candidate) => candidate.id === id);
   if (!account) return snapshot;
-  const { deletedAt: _deletedAt, ...restored } = account;
+  const restored: AccountData = { ...account };
+  delete restored.deletedAt;
   return {
-    accounts: [...snapshot.accounts, restored as AccountData],
+    accounts: [...snapshot.accounts, restored],
     groups: snapshot.groups,
     trash: snapshot.trash.filter((candidate) => candidate.id !== id),
   };

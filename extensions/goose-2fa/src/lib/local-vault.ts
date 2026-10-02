@@ -9,9 +9,7 @@ const KEYS = {
   trash: "goose-2fa-trash",
 } as const;
 
-export type LocalVaultRead =
-  | { status: "ok"; snapshot: SyncSnapshot }
-  | { status: "broken"; keys: string[] };
+export type LocalVaultRead = { status: "ok"; snapshot: SyncSnapshot } | { status: "broken"; keys: string[] };
 
 /** 读本地库。坏值不当成空库：原值原样保留，由用户显式重建或改用数据源文件。 */
 export async function readLocalVault(): Promise<LocalVaultRead> {

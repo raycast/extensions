@@ -22,7 +22,9 @@ export function useOtpCodes(accounts: AccountData[]): Record<string, OtpCode> {
   const now = useClockSeconds();
   const [codes, setCodes] = useState<Record<string, OtpCode>>({});
   const signature = accounts
-    .map((account) => [account.id, account.type, account.counter, account.period, account.digits, account.algorithm].join(":"))
+    .map((account) =>
+      [account.id, account.type, account.counter, account.period, account.digits, account.algorithm].join(":"),
+    )
     .join("|");
 
   useEffect(() => {

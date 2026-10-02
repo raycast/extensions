@@ -31,23 +31,48 @@ import {
   setAccountGroup,
   setAccountText,
 } from "./lib/vault-ops";
-import { clearCreatedSource, createDataSource, clearSyncLock, getVaultState, refreshVault, resetLocalVault, resolveConflict, selectCreatedSource, useVault } from "./lib/vault-store";
+import {
+  clearCreatedSource,
+  createDataSource,
+  clearSyncLock,
+  getVaultState,
+  refreshVault,
+  resetLocalVault,
+  resolveConflict,
+  selectCreatedSource,
+  useVault,
+} from "./lib/vault-store";
 import ScanQr from "./scan-qr";
 
-const statusLabel = { idle: "Idle", loading: "Loading", writing: "Saving", success: "Up to date", error: "Error", conflict: "Conflict" };
+const statusLabel = {
+  idle: "Idle",
+  loading: "Loading",
+  writing: "Saving",
+  success: "Up to date",
+  error: "Error",
+  conflict: "Conflict",
+};
 
 export default function ManageData() {
   const vault = useVault();
   const { push } = useNavigation();
 
   return (
-    <List navigationTitle={"Settings & Data"} isLoading={vault.status === "loading" || vault.syncStatus === "writing"} searchBarPlaceholder={"Search accounts or groups"}>
+    <List
+      navigationTitle={"Settings & Data"}
+      isLoading={vault.status === "loading" || vault.syncStatus === "writing"}
+      searchBarPlaceholder={"Search accounts or groups"}
+    >
       <List.Section title={"Settings"}>
         <List.Item
           icon={Icon.Gear}
           title={"Layout, Return Action & Close After Copy"}
           subtitle={"Choose list or grid, copy or paste in extension preferences; reopen the main view afterward"}
-          actions={<ActionPanel><Action title={"Open Extension Preferences"} icon={Icon.Gear} onAction={openExtensionPreferences} /></ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action title={"Open Extension Preferences"} icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       </List.Section>
       <List.Section title={"Data Source"}>
@@ -55,7 +80,11 @@ export default function ManageData() {
           icon={Icon.SaveDocument}
           title={"Save Current Data as a Sync File"}
           subtitle={"Choose a folder and filename; the new file becomes the data source"}
-          actions={<ActionPanel><Action.Push title={"Save Current Data"} icon={Icon.SaveDocument} target={<CreateSourceForm />} /></ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.Push title={"Save Current Data"} icon={Icon.SaveDocument} target={<CreateSourceForm />} />
+            </ActionPanel>
+          }
         />
         <List.Item
           icon={vault.source === "file" ? Icon.HardDrive : Icon.Desktop}
@@ -64,17 +93,21 @@ export default function ManageData() {
           accessories={vault.conflict ? [{ text: "Conflict Needs Resolution", icon: Icon.Warning }] : undefined}
           actions={
             <ActionPanel>
-              <Action
-                title={"Reload Data Source"}
-                icon={Icon.ArrowClockwise}
-                onAction={() => void refreshVault()}
-              />
+              <Action title={"Reload Data Source"} icon={Icon.ArrowClockwise} onAction={() => void refreshVault()} />
               <Action title={"Open Extension Preferences"} icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.Push title={"Save Current Data as a Sync File"} icon={Icon.SaveDocument} target={<CreateSourceForm />} />
-              <Action title={"Use File or Local Vault from Extension Preferences"} icon={Icon.ArrowCounterClockwise} onAction={() => void clearCreatedSource()} />
+              <Action.Push
+                title={"Save Current Data as a Sync File"}
+                icon={Icon.SaveDocument}
+                target={<CreateSourceForm />}
+              />
+              <Action
+                title={"Use File or Local Vault from Extension Preferences"}
+                icon={Icon.ArrowCounterClockwise}
+                onAction={() => void clearCreatedSource()}
+              />
               {vault.source === "file" && vault.needsCreate && (
                 <Action
-                  title={"Create Data Source File (save current data)"}
+                  title={"Create Data Source File (Save Current Data)"}
                   icon={Icon.NewDocument}
                   onAction={() => void createDataSource()}
                 />
@@ -82,12 +115,12 @@ export default function ManageData() {
               {vault.localBroken && (
                 <ActionPanel.Section title={"Local Vault Corrupted"}>
                   <Action
-                    title={"Open Extension Preferences (use a data source file)"}
+                    title={"Open Extension Preferences (Use a Data Source File)"}
                     icon={Icon.Gear}
                     onAction={() => void openExtensionPreferences()}
                   />
                   <Action
-                    title={"Rebuild Local Vault (discard corrupted data)"}
+                    title={"Rebuild Local Vault (Discard Corrupted Data)"}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={async () => {
@@ -95,7 +128,11 @@ export default function ManageData() {
                       await showToast(
                         ok
                           ? { style: Toast.Style.Success, title: "Local vault rebuilt" }
-                          : { style: Toast.Style.Failure, title: "Local vault not rebuilt", message: getVaultState().message ?? "Please try again." },
+                          : {
+                              style: Toast.Style.Failure,
+                              title: "Local vault not rebuilt",
+                              message: getVaultState().message ?? "Please try again.",
+                            },
                       );
                     }}
                   />
@@ -104,15 +141,23 @@ export default function ManageData() {
               {vault.lockHeld !== null && (
                 <ActionPanel.Section title={"Stale Lock"}>
                   <Action
-                    title={"Remove Stale Lock (ensure no other client is writing)"}
+                    title={"Remove Stale Lock (Ensure No Other Client Is Writing)"}
                     icon={Icon.LockUnlocked}
                     style={Action.Style.Destructive}
                     onAction={async () => {
                       const removed = await clearSyncLock();
                       await showToast(
                         removed
-                          ? { style: Toast.Style.Success, title: "Stale lock removed", message: "Please retry your last change." }
-                          : { style: Toast.Style.Failure, title: "Lock file not found", message: "It may have been released by its owner." },
+                          ? {
+                              style: Toast.Style.Success,
+                              title: "Stale lock removed",
+                              message: "Please retry your last change.",
+                            }
+                          : {
+                              style: Toast.Style.Failure,
+                              title: "Lock file not found",
+                              message: "It may have been released by its owner.",
+                            },
                       );
                     }}
                   />
@@ -120,9 +165,13 @@ export default function ManageData() {
               )}
               {vault.conflict && (
                 <ActionPanel.Section title={"Conflict"}>
-                  <Action title={"Use File Version"} icon={Icon.Download} onAction={() => void resolveConflict("file")} />
                   <Action
-                    title={"Use Local Version (overwrite file)"}
+                    title={"Use File Version"}
+                    icon={Icon.Download}
+                    onAction={() => void resolveConflict("file")}
+                  />
+                  <Action
+                    title={"Use Local Version (Overwrite File)"}
                     icon={Icon.Upload}
                     style={Action.Style.Destructive}
                     onAction={() => void resolveConflict("local")}
@@ -161,9 +210,13 @@ export default function ManageData() {
             subtitle={`${vault.accounts.filter((account) => account.groupId === group.id).length} accounts`}
             actions={
               <ActionPanel>
-                <Action title={"Rename Group"} icon={Icon.Pencil} onAction={() => push(<GroupForm mode="rename" group={group} />)} />
                 <Action
-                  title={"Delete Group (accounts become ungrouped)"}
+                  title={"Rename Group"}
+                  icon={Icon.Pencil}
+                  onAction={() => push(<GroupForm mode="rename" group={group} />)}
+                />
+                <Action
+                  title={"Delete Group (Accounts Become Ungrouped)"}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => void commit((snapshot) => removeGroup(snapshot, group.id), "Group deleted")}
@@ -220,7 +273,11 @@ export default function ManageData() {
           icon={Icon.Camera}
           title={"Scan Screenshot"}
           subtitle={"Capture and scan QR or migration codes"}
-          actions={<ActionPanel><Action.Push title={"Scan Screenshot"} icon={Icon.Camera} target={<ScanQr />} /></ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.Push title={"Scan Screenshot"} icon={Icon.Camera} target={<ScanQr />} />
+            </ActionPanel>
+          }
         />
         <List.Item
           icon={Icon.Download}
@@ -288,7 +345,11 @@ function AccountItem({
       accessories={[{ text: account.type.toUpperCase() }]}
       actions={
         <ActionPanel>
-          <Action title={"Edit Note & Name"} icon={Icon.Pencil} onAction={() => push(<AccountForm mode="edit" account={account} />)} />
+          <Action
+            title={"Edit Note & Name"}
+            icon={Icon.Pencil}
+            onAction={() => push(<AccountForm mode="edit" account={account} />)}
+          />
           <ActionPanel.Section title={"Move to Group"}>
             <Action
               title={"Ungrouped"}
@@ -300,7 +361,9 @@ function AccountItem({
                 key={group.id}
                 title={group.name}
                 icon={Icon.Folder}
-                onAction={() => void commit((snapshot) => setAccountGroup(snapshot, account.id, group.id), "Account moved")}
+                onAction={() =>
+                  void commit((snapshot) => setAccountGroup(snapshot, account.id, group.id), "Account moved")
+                }
               />
             ))}
           </ActionPanel.Section>
@@ -341,7 +404,11 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
                   remark: values.remark,
                 });
                 if (!input) {
-                  await showToast({ style: Toast.Style.Failure, title: "Invalid account details", message: "Check the Base32 secret, digits and period." });
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Invalid account details",
+                    message: "Check the Base32 secret, digits and period.",
+                  });
                   return;
                 }
                 const groupId = values.group === UNGROUPED ? null : values.group;
@@ -368,9 +435,7 @@ function AccountForm({ mode, account }: { mode: "create" | "edit"; account?: Acc
     >
       <Form.TextField id="name" title={"Name"} defaultValue={account?.name} placeholder="alice@example.com" />
       <Form.TextField id="issuer" title={"Issuer"} defaultValue={account?.issuer} placeholder="GitHub" />
-      {mode === "create" && (
-        <Form.TextField id="secret" title={"Base32 Secret"} placeholder="JBSWY3DPEHPK3PXP" />
-      )}
+      {mode === "create" && <Form.TextField id="secret" title={"Base32 Secret"} placeholder="JBSWY3DPEHPK3PXP" />}
       {mode === "create" && (
         <Form.Dropdown id="type" title={"Type"} defaultValue="totp">
           <Form.Dropdown.Item value="totp" title={"TOTP (time-based)"} />
@@ -408,9 +473,10 @@ function GroupForm({ mode, group }: { mode: "create" | "rename"; group?: VaultGr
             title={mode === "create" ? "Create" : "Save"}
             onSubmit={async (values: FormValues) => {
               const name = values.name ?? "";
-              const ok = mode === "create"
-                ? await commit((snapshot) => addGroup(snapshot, name).snapshot, "Group created")
-                : await commit((snapshot) => renameGroup(snapshot, group?.id ?? "", name), "Group renamed");
+              const ok =
+                mode === "create"
+                  ? await commit((snapshot) => addGroup(snapshot, name).snapshot, "Group created")
+                  : await commit((snapshot) => renameGroup(snapshot, group?.id ?? "", name), "Group renamed");
               if (ok) pop();
             }}
           />
@@ -439,7 +505,11 @@ function ImportForm() {
                 if (statSync(target).size > 5 * 1024 * 1024) throw new Error("Backup exceeds 5 MB");
                 text = readFileSync(target, "utf8");
               } catch {
-                await showToast({ style: Toast.Style.Failure, title: "Could Not Read File", message: "Check the path, permissions and 5 MB limit." });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could Not Read File",
+                  message: "Check the path, permissions and 5 MB limit.",
+                });
                 return;
               }
               if (!previewImport(text, getVaultState())) {
@@ -468,25 +538,40 @@ function ImportPreview({ text }: { text: string }) {
     <List navigationTitle={"Import Preview"} searchBarPlaceholder={"Search accounts to import"}>
       <List.Section title={`Accounts: ${preview.added} new, ${preview.dupeCount} duplicates skipped`}>
         {imported.map((account: NewAccountInput, index) => (
-          <List.Item key={`${account.issuer}:${account.name}:${index}`} icon={Icon.Key} title={account.note || account.name} subtitle={account.issuer} />
+          <List.Item
+            key={`${account.issuer}:${account.name}:${index}`}
+            icon={Icon.Key}
+            title={account.note || account.name}
+            subtitle={account.issuer}
+          />
         ))}
       </List.Section>
       <List.Section title={`${groupCount} groups will be added`}>
-        {preview.snapshot.groups.slice(current.groups.length).map((group) => <List.Item key={group.id} icon={Icon.Folder} title={group.name} />)}
+        {preview.snapshot.groups.slice(current.groups.length).map((group) => (
+          <List.Item key={group.id} icon={Icon.Folder} title={group.name} />
+        ))}
       </List.Section>
       <List.Item
         icon={Icon.Warning}
         title={"Confirm Import"}
         subtitle={"Secrets are hidden; they will be available in your local data source after import."}
-        actions={<ActionPanel><Action title={`Import ${preview.added} accounts`} icon={Icon.Download} onAction={async () => {
-          const currentPreview = previewImport(text, getVaultState());
-          if (!currentPreview) {
-            await showToast({ style: Toast.Style.Failure, title: "Could Not Parse Backup" });
-            return;
-          }
-          const ok = await commit(() => currentPreview.snapshot, `Imported ${currentPreview.added} accounts`);
-          if (ok) pop();
-        }} /></ActionPanel>}
+        actions={
+          <ActionPanel>
+            <Action
+              title={`Import ${preview.added} Accounts`}
+              icon={Icon.Download}
+              onAction={async () => {
+                const currentPreview = previewImport(text, getVaultState());
+                if (!currentPreview) {
+                  await showToast({ style: Toast.Style.Failure, title: "Could Not Parse Backup" });
+                  return;
+                }
+                const ok = await commit(() => currentPreview.snapshot, `Imported ${currentPreview.added} accounts`);
+                if (ok) pop();
+              }}
+            />
+          </ActionPanel>
+        }
       />
     </List>
   );
@@ -524,7 +609,9 @@ function ExportForm() {
       }
     >
       <Form.TextField id="path" title={"Export Path"} value={path} onChange={setPath} />
-      <Form.Description text={"The full data source (including IDs and trash) can be used as a data source on another device."} />
+      <Form.Description
+        text={"The full data source (including IDs and trash) can be used as a data source on another device."}
+      />
     </Form>
   );
 }
@@ -533,31 +620,68 @@ const UNGROUPED = "__ungrouped__";
 
 function CreateSourceForm() {
   const { pop } = useNavigation();
-  return <Form navigationTitle={"Save Current Data as a Sync File"} actions={<ActionPanel><Action.SubmitForm title={"Save and Use This File"} onSubmit={async (values: { directory?: string[]; fileName?: string }) => {
-    const directory = values.directory?.[0];
-    const name = values.fileName?.trim() || "goose-2fa.json";
-    if (!directory || !path.isAbsolute(directory) || !/^[^/\\\0]+\.json$/i.test(name)) {
-      await showToast({ style: Toast.Style.Failure, title: "Choose a folder and enter a .json filename" });
-      return;
-    }
-    try {
-      if (!statSync(directory).isDirectory()) throw new Error("Folder does not exist");
-      const target = resolveVaultPath(path.join(realpathSync.native(directory), name));
-      if (getVaultState().localBroken) throw new Error("Local vault is corrupted; incomplete data cannot be written to a new file");
-      const current = getVaultState();
-      const result = await writeVaultFile(target, exportAsSyncJson(current.accounts, current.groups, current.trash), null, true);
-      if (result.status !== "ok") throw new Error(result.status === "conflict" ? "File already exists; select it in extension preferences" : "Could not create file; check folder permissions or write lock");
-      await selectCreatedSource(target);
-      await showToast({ style: Toast.Style.Success, title: "Data source created", message: target });
-      pop();
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Creation Failed", message: error instanceof Error ? error.message : String(error) });
-    }
-  }} /></ActionPanel>}>
-    <Form.FilePicker id="directory" title={"Save Folder"} allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
-    <Form.TextField id="fileName" title={"Filename"} defaultValue="goose-2fa.json" />
-    <Form.Description text={"File contains plaintext 2FA secrets. Select the same iCloud file on another computer to sync. Existing files are never overwritten."} />
-  </Form>;
+  return (
+    <Form
+      navigationTitle={"Save Current Data as a Sync File"}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title={"Save and Use This File"}
+            onSubmit={async (values: { directory?: string[]; fileName?: string }) => {
+              const directory = values.directory?.[0];
+              const name = values.fileName?.trim() || "goose-2fa.json";
+              if (!directory || !path.isAbsolute(directory) || !/^[^/\\\0]+\.json$/i.test(name)) {
+                await showToast({ style: Toast.Style.Failure, title: "Choose a folder and enter a .json filename" });
+                return;
+              }
+              try {
+                if (!statSync(directory).isDirectory()) throw new Error("Folder does not exist");
+                const target = resolveVaultPath(path.join(realpathSync.native(directory), name));
+                if (getVaultState().localBroken)
+                  throw new Error("Local vault is corrupted; incomplete data cannot be written to a new file");
+                const current = getVaultState();
+                const result = await writeVaultFile(
+                  target,
+                  exportAsSyncJson(current.accounts, current.groups, current.trash),
+                  null,
+                  true,
+                );
+                if (result.status !== "ok")
+                  throw new Error(
+                    result.status === "conflict"
+                      ? "File already exists; select it in extension preferences"
+                      : "Could not create file; check folder permissions or write lock",
+                  );
+                await selectCreatedSource(target);
+                await showToast({ style: Toast.Style.Success, title: "Data source created", message: target });
+                pop();
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Creation Failed",
+                  message: error instanceof Error ? error.message : String(error),
+                });
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="directory"
+        title={"Save Folder"}
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+      />
+      <Form.TextField id="fileName" title={"Filename"} defaultValue="goose-2fa.json" />
+      <Form.Description
+        text={
+          "File contains plaintext 2FA secrets. Select the same iCloud file on another computer to sync. Existing files are never overwritten."
+        }
+      />
+    </Form>
+  );
 }
 
 interface FormValues {
