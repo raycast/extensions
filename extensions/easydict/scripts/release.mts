@@ -2,7 +2,8 @@
 /**
  * Release helpers for the Raycast Store workflow.
  *
- *   node scripts/release.mts check
+ *   node scripts/release.mts check [--development]
+ *   node scripts/release.mts prepare [--apply]
  *   node scripts/release.mts sync --checkout <path> [--apply]
  *   node scripts/release.mts backfill --checkout <path> [--ref <git-ref>]
  *   node scripts/release.mts pr --checkout <path> [--title <title>] [--apply]
@@ -68,6 +69,7 @@ function parseArgs(argv: string[]) {
   let branch: string | undefined;
   let remote: string | undefined;
   let apply = false;
+  let development = false;
   let help = false;
 
   const nextValue = (flagIndex: number, flag: string): string => {
@@ -84,6 +86,7 @@ function parseArgs(argv: string[]) {
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index];
     if (argument === "--apply") apply = true;
+    else if (argument === "--development") development = true;
     else if (argument === "--help" || argument === "-h") help = true;
     else if (argument === "--checkout") checkout = nextValue(index++, "--checkout");
     else if (argument.startsWith("--checkout=")) checkout = inlineValue(argument, "--checkout");
@@ -97,7 +100,7 @@ function parseArgs(argv: string[]) {
     else if (argument.startsWith("--remote=")) remote = inlineValue(argument, "--remote");
     else fail(`Unknown argument: ${argument}`);
   }
-  return { command, checkout, ref, title, branch, remote, apply, help };
+  return { command, checkout, ref, title, branch, remote, development, apply, help };
 }
 
 function releaseVersion(): string {
@@ -107,34 +110,80 @@ function releaseVersion(): string {
   return version;
 }
 
-/** check: validate the release version trio before opening the draft PR. */
-function commandCheck() {
-  const consts = readFileSync(path.join(repoRoot, "src/consts.ts"), "utf8");
-  const version = releaseVersion();
-
+/** The version and date of the top CHANGELOG entry, which may be unreleased. */
+function topChangelogEntry(): { version: string; date: string } {
   const changelog = readFileSync(path.join(repoRoot, "CHANGELOG.md"), "utf8");
   const entry = /^## \[v([^\]]+)\] - (.+)$/m.exec(changelog);
   if (!entry) fail("Could not find the top CHANGELOG entry, expected '## [vX.Y.Z] - ...'");
-  const [, changelogVersion] = entry;
+  return { version: entry[1], date: entry[2].trim() };
+}
 
-  if (changelogVersion !== version) {
-    fail(`CHANGELOG entry (v${changelogVersion}) does not match EASYDICT_VERSION (v${version})`);
+/** Compare dotted numeric versions. */
+function compareVersions(a: string, b: string): number {
+  const left = a.split(".").map(Number);
+  const right = b.split(".").map(Number);
+  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
+    const diff = (left[index] || 0) - (right[index] || 0);
+    if (diff) return Math.sign(diff);
   }
-  ok(`CHANGELOG and EASYDICT_VERSION agree on v${version}`);
+  return 0;
+}
 
-  const changelogDate = entry[2].trim();
-  if (changelogDate === "{PR_MERGE_DATE}") {
-    ok("The {PR_MERGE_DATE} placeholder is intact");
-  } else if (/^\d{4}-\d{2}-\d{2}$/.test(changelogDate)) {
-    ok(`The merge date is filled in (${changelogDate}) — expected after syncing back from the Store`);
+/** The English notes from RELEASE_MARKDOWN, unescaped from the TypeScript template literal. */
+function releaseMarkdownEnglish(consts: string): string {
+  const start = consts.indexOf("## [v${EASYDICT_VERSION}]");
+  if (start < 0) fail("RELEASE_MARKDOWN has no '## [v${EASYDICT_VERSION}]' heading");
+  const rest = consts.slice(start);
+  const separator = rest.search(/\n---\n/);
+  const english = (separator === -1 ? rest : rest.slice(0, separator)).split("\n").slice(1).join("\n").trim();
+  return english.replaceAll("\\`", "`");
+}
+
+/** The CHANGELOG section for `version` and the English RELEASE_MARKDOWN must stay verbatim copies. */
+function checkReleaseNotes(consts: string, version: string) {
+  if (changelogSection(version) !== releaseMarkdownEnglish(consts)) {
+    fail(`The v${version} CHANGELOG section and the English RELEASE_MARKDOWN differ; keep them in sync`);
+  }
+  ok(`The v${version} release notes match the CHANGELOG`);
+}
+
+/** check: validate the release version trio before opening the draft PR. */
+function commandCheck(development: boolean) {
+  const consts = readFileSync(path.join(repoRoot, "src/consts.ts"), "utf8");
+  const version = releaseVersion();
+  const { version: topVersion, date: topDate } = topChangelogEntry();
+
+  if (development) {
+    const changelog = readFileSync(path.join(repoRoot, "CHANGELOG.md"), "utf8");
+    if (!changelog.includes(`## [v${version}]`)) {
+      fail(`CHANGELOG has no v${version} section for EASYDICT_VERSION to fall back on`);
+    }
+    if (compareVersions(topVersion, version) < 0) {
+      fail(`The top CHANGELOG entry (v${topVersion}) is older than EASYDICT_VERSION (v${version})`);
+    }
+    ok(`CHANGELOG top entry v${topVersion} is not behind EASYDICT_VERSION (v${version})`);
   } else {
-    fail(`The top CHANGELOG entry needs {PR_MERGE_DATE} or a filled date, found "${changelogDate}"`);
+    if (topVersion !== version) {
+      fail(`CHANGELOG entry (v${topVersion}) does not match EASYDICT_VERSION (v${version})`);
+    }
+    ok(`CHANGELOG and EASYDICT_VERSION agree on v${version}`);
+
+    if (topDate === "{PR_MERGE_DATE}") {
+      ok("The {PR_MERGE_DATE} placeholder is intact");
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(topDate)) {
+      ok(`The merge date is filled in (${topDate}) — expected after syncing back from the Store`);
+    } else {
+      fail(`The top CHANGELOG entry needs {PR_MERGE_DATE} or a filled date, found "${topDate}"`);
+    }
   }
 
   if (!consts.includes("## [v${EASYDICT_VERSION}]")) {
     fail("RELEASE_MARKDOWN has no '## [v${EASYDICT_VERSION}]' heading");
   }
   ok("RELEASE_MARKDOWN carries the same version");
+  checkReleaseNotes(consts, version);
+
+  if (development) return;
 
   const branch = git(repoRoot, ["branch", "--show-current"]);
   if (!branch) warn("Detached HEAD; releases are prepared on dev/release");
@@ -147,6 +196,35 @@ function commandCheck() {
   if (modified.length) warn(`The working tree has ${modified.length} uncommitted path(s)`);
   if (untracked.length) warn(`${untracked.length} untracked path(s) will not be mirrored; commit them before syncing`);
   if (!modified.length && !untracked.length) ok("The working tree is clean");
+}
+
+/** prepare: adopt the version from the top CHANGELOG entry into EASYDICT_VERSION. */
+function commandPrepare(apply: boolean) {
+  const { version, date } = topChangelogEntry();
+  const current = releaseVersion();
+
+  if (current === version) {
+    ok(`EASYDICT_VERSION is already v${version}`);
+  } else {
+    const constsPath = path.join(repoRoot, "src/consts.ts");
+    const consts = readFileSync(constsPath, "utf8");
+    const updated = consts.replace(
+      `export const EASYDICT_VERSION = "${current}"`,
+      `export const EASYDICT_VERSION = "${version}"`,
+    );
+    if (updated === consts) fail("Could not rewrite EASYDICT_VERSION in src/consts.ts");
+
+    if (!apply) {
+      info(`Would set EASYDICT_VERSION from v${current} to v${version} (top CHANGELOG entry, date ${date}).`);
+      info("Pass --apply to write src/consts.ts.");
+      return;
+    }
+
+    writeFileSync(constsPath, updated);
+    ok(`EASYDICT_VERSION updated from v${current} to v${version}`);
+  }
+
+  info("Next: refresh the bilingual RELEASE_MARKDOWN body, then run `node scripts/release.mts check`.");
 }
 
 function summarizeMirror(listing: string[]) {
@@ -377,6 +455,9 @@ function printUsage() {
 
 Commands:
   check                         Validate the release version trio on dev/release.
+       [--development]          Accept a CHANGELOG entry ahead of EASYDICT_VERSION (used by CI).
+  prepare                       Adopt the top CHANGELOG version into EASYDICT_VERSION.
+         [--apply]              Write src/consts.ts; without it a dry run runs.
   sync --checkout <path>        Mirror the committed content (HEAD) into the Store checkout.
        [--apply]                Write the changes; without it a dry run runs.
   backfill --checkout <path>    Report the files the merged Store copy changed.
@@ -396,7 +477,10 @@ if (args.help) {
 } else {
   switch (args.command) {
     case "check":
-      commandCheck();
+      commandCheck(args.development);
+      break;
+    case "prepare":
+      commandPrepare(args.apply);
       break;
     case "sync":
       commandSync(args.checkout, args.apply);
