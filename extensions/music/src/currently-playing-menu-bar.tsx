@@ -16,6 +16,7 @@ const showCoverImage = iconType === "cover-image";
 
 const DROPDOWN_TRACK_MAX = 60;
 const DROPDOWN_ARTIST_MAX = 40;
+const DROPDOWN_ARTIST_GAP = " ";
 
 const truncate = (text: string, max: number) => (text.length <= max ? text : text.substring(0, max).trim() + "…");
 
@@ -99,7 +100,10 @@ export default function CurrentlyPlayingMenuBarCommand() {
         cleanupTitle,
       })
     : "";
-  const dropdownArtist = currentTrack ? truncate(currentTrack.artist, DROPDOWN_ARTIST_MAX) : undefined;
+  // A leading space adds a little separation between title and artist.
+  const dropdownArtist = currentTrack
+    ? `${DROPDOWN_ARTIST_GAP}${truncate(currentTrack.artist, DROPDOWN_ARTIST_MAX)}`
+    : undefined;
   // Full, untruncated text on hover in case either part was cut off.
   const dropdownTooltip = currentTrack
     ? formatTitle({
