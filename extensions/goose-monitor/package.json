@@ -32,24 +32,6 @@
   ],
   "preferences": [
     {
-      "name": "language",
-      "title": "Interface Language",
-      "description": "Choose the language used inside the extension. Store metadata remains in English.",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Chinese (Simplified)",
-          "value": "zh-CN"
-        }
-      ]
-    },
-    {
       "name": "sharedSettingsFilePath",
       "title": "Shared Settings JSON File",
       "description": "Select an existing shared JSON file. Switch between this preference and an override in Settings; neither path is overwritten automatically.",

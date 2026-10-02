@@ -25,13 +25,13 @@ import {
   formatKillError,
   formatProtectedReason,
   formatTransferError,
+  t,
   type Messages,
 } from "./lib/i18n";
 import { killProcess } from "./lib/kill";
 import { keywordsForRow } from "./lib/search";
 import { refreshSnapshot } from "./lib/snapshot";
 import type { AppRow, Capabilities, CategoryId, Helper } from "./lib/types";
-import { useMessages } from "./locale";
 import SettingsTransfer from "./settings-transfer";
 import { readSharedSettings, replaceSharedSettings, type SharedSettingsFile } from "./lib/shared-settings";
 import type { PortableSettings } from "./lib/settings-transfer";
@@ -80,7 +80,6 @@ const netSortsOf = (t: Messages): SortOption[] => [
 ];
 
 export default function ManageProcesses() {
-  const t = useMessages();
   const preferences = getPreferenceValues<Preferences>();
   const preferencePath = preferences.sharedSettingsFilePath?.trim() ?? "";
   const { value: overridePath, setValue: setOverridePath } = useLocalStorage<string>("sharedSettingsOverridePath", "");
@@ -153,8 +152,8 @@ export default function ManageProcesses() {
       setSharedStatus(t.sharedSynced);
     } catch (error) {
       sharedBaseline.current = null;
-      setSharedStatus(`${formatTransferError(error, t)}; ${t.notOverwritten}`);
-      await showToast({ style: Toast.Style.Failure, title: t.sharedNotSaved, message: formatTransferError(error, t) });
+      setSharedStatus(`${formatTransferError(error)}; ${t.notOverwritten}`);
+      await showToast({ style: Toast.Style.Failure, title: t.sharedNotSaved, message: formatTransferError(error) });
     }
   };
   useEffect(() => {
@@ -176,7 +175,7 @@ export default function ManageProcesses() {
       } catch (error) {
         if (!active) return;
         sharedBaseline.current = null;
-        setSharedStatus(`${formatTransferError(error, t)}; ${t.notOverwritten}`);
+        setSharedStatus(`${formatTransferError(error)}; ${t.notOverwritten}`);
       }
     };
     void poll();
@@ -295,7 +294,6 @@ export default function ManageProcesses() {
 
   return (
     <List
-      navigationTitle={t.processes}
       isLoading={isLoading && rows.length === 0}
       selectedItemId={selected}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}

@@ -7,7 +7,7 @@ export type SharedSettingsFile = { settings: PortableSettings; digest: string };
 
 function checkedPath(filePath: string): string {
   if (!path.isAbsolute(filePath) || !filePath.toLowerCase().endsWith(".json"))
-    throw new Error("请在 Raycast 偏好中填写绝对 JSON 文件路径");
+    throw new Error("Enter an absolute JSON file path in Raycast preferences");
   return path.normalize(filePath);
 }
 
@@ -15,7 +15,7 @@ export async function readSharedSettings(filePath: string): Promise<SharedSettin
   const target = checkedPath(filePath);
   const stat = await lstat(target);
   if (stat.isSymbolicLink() || !stat.isFile() || stat.size > 16_384)
-    throw new Error("共享设置不是有效的普通 JSON 文件");
+    throw new Error("Shared settings must be a valid regular JSON file");
   const raw = await readFile(target, "utf8");
   return { settings: parseSettingsTransfer(raw), digest: createHash("sha256").update(raw).digest("hex") };
 }
@@ -46,7 +46,7 @@ export async function createSharedSettings(filePath: string, settings: PortableS
     await handle.sync();
     const created = await readSharedSettings(target);
     if (created.digest !== createHash("sha256").update(json).digest("hex"))
-      throw new Error("新建期间文件发生变化；未接受该文件为基线");
+      throw new Error("File changed during creation; it was not accepted as the baseline");
     await handle.close();
     return created;
   } catch (error) {
@@ -73,12 +73,14 @@ export async function replaceSharedSettings(
   try {
     lockIdentity = await lockHandle.stat();
     const current = await readSharedSettings(target);
-    if (current.digest !== expectedDigest) throw new Error("共享文件已被外部修改，已阻止覆盖；请先重新读取");
+    if (current.digest !== expectedDigest)
+      throw new Error("Shared file changed elsewhere; overwrite blocked. Reload it first");
     const json = serializeSettingsTransfer(settings);
     const temp = await writeTemp(target, json);
     try {
       const beforeReplace = await readSharedSettings(target);
-      if (beforeReplace.digest !== expectedDigest) throw new Error("写入期间共享文件发生变化，已阻止覆盖");
+      if (beforeReplace.digest !== expectedDigest)
+        throw new Error("Shared file changed during writing; overwrite blocked");
       await rename(temp, target);
     } finally {
       await unlink(temp).catch(() => undefined);

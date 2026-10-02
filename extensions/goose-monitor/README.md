@@ -12,7 +12,7 @@ A [Raycast](https://raycast.com) extension for macOS.
 - **Safe termination & post-exit verification.** Before sending `SIGTERM`, the extension verifies process identities against a fresh snapshot to ensure recycled PIDs are never terminated by mistake. Signals are delivered deepest-children-first to prevent respawning, and process exit is re-verified after signalling. If a process ignores `SIGTERM`, it suggests Force Quit.
 - **Force Quit with SIGKILL.** Force Quit sends `SIGKILL` directly across the process tree to immediately terminate stubborn or hanging apps.
 - **On-demand metric collection.** High-overhead two-frame network rate sampling (`nettop`, ~1s) only runs when viewing the **Network** category. Categories like **All**, **CPU**, **Memory**, **GUI**, and **Background** skip it completely for instantaneous (<100ms) listing and refreshes.
-- **English by default.** The extension UI defaults to English. Choose **Chinese (Simplified)** under the **Interface Language** preference to switch languages; Store metadata remains in English.
+- **English interface.** The extension UI is in English.
 
 ## Installation
 
@@ -42,7 +42,6 @@ Other scripts:
 
 | Preference                | Type     | Default       | Description                                                                 |
 | ------------------------- | -------- | ------------- | --------------------------------------------------------------------------- |
-| Interface Language       | Dropdown | English       | Choose English or Chinese (Simplified) for the extension UI.                |
 | Shared Settings JSON File | File     | Not set       | Optional shared settings file path. A separate override path can be chosen in Settings & Data Transfer. |
 | Refresh Interval         | Dropdown | Every 3 seconds | Refresh the process list every 1, 2, 3, or 5 seconds, or turn refresh off.  |
 | Show PID                 | Checkbox | Off           | Show each process ID in the list.                                           |

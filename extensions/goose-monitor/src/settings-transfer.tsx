@@ -11,9 +11,8 @@ import {
   Toast,
 } from "@raycast/api";
 import path from "node:path";
-import { useMessages } from "./locale";
 import { defaultSort } from "./lib/categories";
-import { formatTransferError } from "./lib/i18n";
+import { formatTransferError, t } from "./lib/i18n";
 import {
   parseSettingsTransfer,
   serializeSettingsTransfer,
@@ -59,7 +58,6 @@ export default function SettingsTransfer({
   onCreate,
   onApplyLocal,
 }: Props) {
-  const t = useMessages();
   return (
     <List navigationTitle={t.settingsTransfer}>
       <List.Item
@@ -87,7 +85,7 @@ export default function SettingsTransfer({
                   await showToast({
                     style: Toast.Style.Failure,
                     title: t.exportFailed,
-                    message: formatTransferError(error, t),
+                    message: formatTransferError(error),
                   });
                 }
               }}
@@ -118,7 +116,7 @@ export default function SettingsTransfer({
                   await showToast({
                     style: Toast.Style.Failure,
                     title: t.importFailed,
-                    message: formatTransferError(error, t),
+                    message: formatTransferError(error),
                   });
                 }
               }}
@@ -163,7 +161,7 @@ export default function SettingsTransfer({
                       await showToast({
                         style: Toast.Style.Failure,
                         title: t.createFailed,
-                        message: formatTransferError(error, t),
+                        message: formatTransferError(error),
                       });
                     }
                   }}
@@ -179,7 +177,7 @@ export default function SettingsTransfer({
                       await showToast({
                         style: Toast.Style.Failure,
                         title: t.notWritten,
-                        message: formatTransferError(error, t),
+                        message: formatTransferError(error),
                       });
                     }
                   }}
@@ -206,7 +204,6 @@ export default function SettingsTransfer({
 }
 
 function ExistingFileForm({ onSelect }: { onSelect: (path: string) => Promise<void> }) {
-  const t = useMessages();
   return (
     <Form
       navigationTitle={t.selectSharedFile}
@@ -227,7 +224,7 @@ function ExistingFileForm({ onSelect }: { onSelect: (path: string) => Promise<vo
                 await showToast({
                   style: Toast.Style.Failure,
                   title: t.selectionFailed,
-                  message: formatTransferError(error, t),
+                  message: formatTransferError(error),
                 });
               }
             }}
@@ -247,7 +244,6 @@ function ExistingFileForm({ onSelect }: { onSelect: (path: string) => Promise<vo
 }
 
 function NewFileForm({ onCreate }: { onCreate: (path: string) => Promise<void> }) {
-  const t = useMessages();
   return (
     <Form
       navigationTitle={t.chooseFolder}
@@ -269,7 +265,7 @@ function NewFileForm({ onCreate }: { onCreate: (path: string) => Promise<void> }
                 await showToast({
                   style: Toast.Style.Failure,
                   title: t.notCreated,
-                  message: formatTransferError(error, t),
+                  message: formatTransferError(error),
                 });
               }
             }}
