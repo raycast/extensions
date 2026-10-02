@@ -39,7 +39,7 @@ import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
-import { runMonolithSave, webpageOutputPath } from "../lib/monolith.js";
+import { reserveWebpagePath, runMonolithSave } from "../lib/monolith.js";
 import { DownloadInit, DownloadSession } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
 import { QUALITY_VALUES, QualityValue, estimateQuality, maxHeight, qualityTitle } from "../lib/estimate.js";
@@ -448,7 +448,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
       try {
         const { filePath } = await runMonolithSave(getMonolithPath(), {
           url: submitUrl,
-          outputPath: webpageOutputPath(folder, submitUrl),
+          outputPath: reserveWebpagePath(folder, submitUrl),
           noJavaScript: values.saveMode === "lightweight",
           idleMs: getIdleTimeoutMs(),
           abortSignal: signal,

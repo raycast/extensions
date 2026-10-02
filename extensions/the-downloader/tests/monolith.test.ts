@@ -1,10 +1,19 @@
 import { describe, it, expect, vi } from "vitest";
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "node:child_process";
-import { buildMonolithArgs, webpageFilename, runMonolithSave, webpageOutputPath } from "../src/lib/monolith";
+import {
+  buildMonolithArgs,
+  reserveWebpagePath,
+  webpageFilename,
+  runMonolithSave,
+  webpageOutputPath,
+} from "../src/lib/monolith";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -151,5 +160,39 @@ describe("webpageOutputPath", () => {
     expect(webpageOutputPath("/out", "https://example.com/news", (p) => taken.has(p))).toBe(
       "/out/example.com-news (2).html",
     );
+  });
+});
+
+describe("reserveWebpagePath", () => {
+  it("takes the name at once, so two saves of one page started together get different files", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
+    try {
+      const first = reserveWebpagePath(dir, "https://example.com/a");
+      const second = reserveWebpagePath(dir, "https://example.com/a");
+      expect(path.basename(first)).toBe("example.com-a.html");
+      expect(path.basename(second)).toBe("example.com-a (2).html");
+      expect(fs.existsSync(first) && fs.existsSync(second)).toBe(true);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("removes the reserved empty file when the save fails", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
+    try {
+      const outputPath = reserveWebpagePath(dir, "https://example.com/bad");
+      const child = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+      const promise = runMonolithSave("/opt/homebrew/bin/monolith", {
+        url: "https://example.com/bad",
+        outputPath,
+        noJavaScript: false,
+      });
+      child.emit("close", 1);
+      await expect(promise).rejects.toThrow();
+      expect(fs.existsSync(outputPath)).toBe(false);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

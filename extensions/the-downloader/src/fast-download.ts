@@ -23,7 +23,7 @@ import { resolveBrowser } from "./lib/browsers.js";
 import { AbortError } from "./lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
-import { runMonolithSave, webpageOutputPath } from "./lib/monolith.js";
+import { reserveWebpagePath, runMonolithSave } from "./lib/monolith.js";
 import { progressMessage } from "./lib/format.js";
 import { DownloadKind, DownloadSession } from "./lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "./lib/history.js";
@@ -306,7 +306,6 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     if (!fs.existsSync(monolithPath)) return handOff("monolith", url);
     await ensureFreshTools(["monolith"]);
 
-    const outputPath = webpageOutputPath(downloadPath, url);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving Webpage" });
     const { signal } = attachStop(toast);
     const session = track(
@@ -318,7 +317,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     try {
       const { filePath } = await runMonolithSave(monolithPath, {
         url,
-        outputPath,
+        outputPath: reserveWebpagePath(downloadPath, url),
         noJavaScript: webpageSaveMode === "lightweight",
         idleMs: getIdleTimeoutMs(),
         abortSignal: signal,
