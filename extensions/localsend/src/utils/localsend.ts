@@ -9,6 +9,16 @@ export const MULTICAST_PORT = 53317;
 const DEFAULT_HTTP_PORT = 53318;
 const PROTOCOL_VERSION = "2.1";
 
+export class DiscoveryError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+  ) {
+    super(message);
+    this.name = "DiscoveryError";
+  }
+}
+
 const getPreferences = (): Preferences => {
   try {
     return getPreferenceValues<Preferences>();
@@ -104,18 +114,38 @@ export const getDeviceInfo = (): DeviceInfo => {
 };
 
 export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSendDevice[]> =>
-  new Promise((resolve) => {
+  new Promise((resolve, reject) => {
     const devices = new Map<string, LocalSendDevice>();
     const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
     const deviceInfo = getDeviceInfo();
+    let closed = false;
+    let timer: NodeJS.Timeout | undefined;
+
+    const closeOnce = (err?: Error) => {
+      if (closed) return;
+      closed = true;
+      clearTimeout(timer);
+      try {
+        socket.close();
+      } catch {
+        // ignore errors during close
+      }
+      if (err) {
+        reject(err);
+      } else {
+        resolve(Array.from(devices.values()));
+      }
+    };
 
     socket.on("error", (err) => {
       console.error("Socket error:", err);
-      socket.close();
-      resolve(Array.from(devices.values()));
+      const code = (err as NodeJS.ErrnoException).code || "UNKNOWN";
+      const discoveryErr = new DiscoveryError(err.message, code);
+      closeOnce(discoveryErr);
     });
 
     socket.on("message", (msg, rinfo) => {
+      if (closed) return;
       try {
         const data = JSON.parse(msg.toString()) as DeviceInfo;
 
@@ -131,9 +161,13 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
 
         devices.set(rinfo.address, device);
 
-        if (data.announce) {
+        if (data.announce && !closed) {
           const response = { ...deviceInfo, announce: false };
-          socket.send(JSON.stringify(response), MULTICAST_PORT, MULTICAST_ADDRESS);
+          socket.send(JSON.stringify(response), MULTICAST_PORT, MULTICAST_ADDRESS, (sendErr) => {
+            if (sendErr) {
+              console.error("Error sending response:", sendErr);
+            }
+          });
         }
       } catch (error) {
         console.error("Error parsing multicast message:", error);
@@ -141,21 +175,28 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
     });
 
     socket.bind({ port: MULTICAST_PORT, exclusive: false }, () => {
+      if (closed) return;
       try {
         socket.addMembership(MULTICAST_ADDRESS);
         socket.setBroadcast(true);
 
         const announcement = { ...deviceInfo, announce: true };
         const message = Buffer.from(JSON.stringify(announcement));
-        socket.send(message, MULTICAST_PORT, MULTICAST_ADDRESS);
+        if (!closed) {
+          socket.send(message, MULTICAST_PORT, MULTICAST_ADDRESS, (sendErr) => {
+            if (sendErr) {
+              console.error("Error sending announcement:", sendErr);
+            }
+          });
+        }
       } catch (error) {
         console.error("Error setting up multicast:", error);
+        closeOnce(error instanceof Error ? error : new DiscoveryError(String(error), "SETUP_FAILED"));
       }
     });
 
-    setTimeout(() => {
-      socket.close();
-      resolve(Array.from(devices.values()));
+    timer = setTimeout(() => {
+      closeOnce();
     }, timeout);
   });
 
