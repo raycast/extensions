@@ -294,31 +294,33 @@ export default function Command() {
         ) : undefined
       }
     >
-      <List.EmptyView
-        icon={{ source: "icon.png" }}
-        title={error ? "Could not load Amp runners" : "No local Amp runners"}
-        description={
-          error || "Turn on “Use This Mac as a Runner” in Amp Settings."
-        }
-        actions={
-          <ActionPanel>
-            <Action
-              title="Refresh Runners"
-              icon={Icon.ArrowClockwise}
-              onAction={refresh}
-            />
-            <Action
-              title="Open Amp Runner Settings"
-              icon={Icon.Gear}
-              onAction={openAmpRunnerSettings}
-            />
-            <Action
-              title="Open Extension Preferences"
-              onAction={openExtensionPreferences}
-            />
-          </ActionPanel>
-        }
-      />
+      {runners.length === 0 ? (
+        <List.EmptyView
+          icon={{ source: "icon.png" }}
+          title={error ? "Could not load Amp runners" : "No local Amp runners"}
+          description={
+            error || "Turn on “Use This Mac as a Runner” in Amp Settings."
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Runners"
+                icon={Icon.ArrowClockwise}
+                onAction={refresh}
+              />
+              <Action
+                title="Open Amp Runner Settings"
+                icon={Icon.Gear}
+                onAction={openAmpRunnerSettings}
+              />
+              <Action
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {selectedRunner ? (
         <List.Section
           key={selectedRunner.runnerId}
