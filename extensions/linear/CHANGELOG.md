@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Fix AI Tool Errors] - {PR_MERGE_DATE}
+## [Fix AI Tool Errors] - 2026-10-02
 
 - Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.
 - AI tools now return plain, explicitly shaped data instead of Linear SDK objects. Related entities like assignees, teams, states, and labels are returned as compact references.
