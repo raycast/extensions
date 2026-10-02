@@ -34,6 +34,8 @@ export default function Command() {
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(values: { prompt: string; ratio: string }) {
+    // One run at a time: a second Enter during a run would start another job and spend more credits.
+    if (busy) return;
     if (!values.prompt.trim()) {
       await showToast({
         style: Toast.Style.Failure,
