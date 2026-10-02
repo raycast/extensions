@@ -33,6 +33,7 @@ for ARCH in arm64 x86_64; do
   /usr/bin/make -j"$(/usr/sbin/sysctl -n hw.logicalcpu)"
   /usr/bin/make install
 done
+/bin/mkdir -p "$(dirname "$OUTPUT")"
 /usr/bin/lipo -create \
   "$BUILD_DIR/install-arm64/bin/lame" \
   "$BUILD_DIR/install-x86_64/bin/lame" \
