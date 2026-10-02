@@ -298,7 +298,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
     });
   }, [validUrl, missingTool, source, filetype, url, refetchMeta]);
 
-  const liveStream = !!video && isLiveStream(video);
+  // Only the current URL's metadata counts: while a new one loads, `video` is the
+  // previous link's. A live link submitted before its probe ends is still refused
+  // by yt-dlp itself (see `buildVideoDownloadArgs`).
+  const liveStream = !metaLoading && !!video && isLiveStream(video);
 
   /** Start a download view for this submit. yt-dlp metadata, when fetched, fills in the title and details. */
   function openSession(init: Omit<DownloadInit, "title" | "meta">, withMeta: boolean): DownloadSession {

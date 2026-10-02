@@ -34,6 +34,8 @@ describe("buildVideoDownloadArgs", () => {
       "--ffmpeg-location",
       "/ff",
       "--no-playlist",
+      "--match-filter",
+      "!is_live",
       "--format",
       "bestaudio/best",
       "--extract-audio",
@@ -73,6 +75,8 @@ describe("buildVideoDownloadArgs", () => {
       "--ffmpeg-location",
       "/ff",
       "--no-playlist",
+      "--match-filter",
+      "!is_live",
       "--format",
       "bestvideo+bestaudio/best",
       "--merge-output-format",
@@ -98,6 +102,13 @@ describe("buildVideoDownloadArgs", () => {
     // showed one video's title and then downloaded the entire playlist.
     expect(buildVideoDownloadArgs({ ...base, format: "bestaudio#mp3" })).toContain("--no-playlist");
     expect(buildVideoDownloadArgs({ ...base, format: "best#mp4" })).toContain("--no-playlist");
+  });
+
+  it("skips a stream that is live right now, in every download path", () => {
+    // Without it a live link records until someone stops it: progress keeps
+    // arriving, so the idle watchdog never fires.
+    const args = buildVideoDownloadArgs({ ...base, format: "best#mp4" });
+    expect(args[args.indexOf("--match-filter") + 1]).toBe("!is_live");
   });
 
   it("adds the deno JS runtime when denoPath is given", () => {
@@ -127,6 +138,18 @@ describe("runVideoDownload", () => {
 
     await expect(promise).resolves.toEqual({ filePath: "/out/My Video.mp4" });
     expect(onProgress).toHaveBeenCalledWith(42);
+  });
+
+  it("rejects when yt-dlp skipped the link as a live stream", async () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+
+    const promise = runVideoDownload("/yt-dlp", options, vi.fn());
+
+    child.stdout.emit("data", Buffer.from("[download] Launch Live does not pass filter (!is_live), skipping ..\n"));
+    child.emit("close", 0);
+
+    await expect(promise).rejects.toThrow("Live streams are not supported");
   });
 
   it("ignores untagged path-like lines (e.g. post-processor [ExtractAudio] Destination) — they no longer overwrite the real after_move filepath", async () => {

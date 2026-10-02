@@ -104,6 +104,11 @@ const FILEPATH_LINE_RE = new RegExp(`^${FILEPATH_TAG}(.+)$`);
  * title and live-status the form inspected, not the whole playlist. A pure
  * playlist URL (no video reference) still downloads every entry.
  *
+ * `--match-filter !is_live` skips a stream that is live right now, whichever
+ * command started the download: progress keeps arriving from a live stream, so
+ * the idle watchdog would never stop it. yt-dlp then exits 0 with a "does not
+ * pass filter" line, which `runVideoDownload` turns into an error.
+ *
  * `--newline` makes yt-dlp terminate each progress update with a real newline.
  * On a pipe (non-TTY) it otherwise redraws progress with bare `\r`, which a
  * line-buffered reader would sit on until the download finished.
@@ -115,7 +120,15 @@ const FILEPATH_LINE_RE = new RegExp(`^${FILEPATH_TAG}(.+)$`);
  * and the merge step apart; `--no-quiet` (yt-dlp 2023.07+) brings them back.
  */
 export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
-  const args = ["-o", a.outputTemplate, "--ffmpeg-location", a.ffmpegPath, "--no-playlist"];
+  const args = [
+    "-o",
+    a.outputTemplate,
+    "--ffmpeg-location",
+    a.ffmpegPath,
+    "--no-playlist",
+    "--match-filter",
+    "!is_live",
+  ];
   if (a.denoPath) {
     args.push("--js-runtimes", `deno:${a.denoPath}`);
   }
@@ -160,9 +173,11 @@ export async function runVideoDownload(
   onEvent?: (event: YtdlpEvent) => void,
 ): Promise<VideoDownloadResult> {
   let filePath = "";
+  let skippedLive = false;
   // Line-buffered (via onStdoutLine) so a tagged filepath split across two
   // stream chunks is still matched whole.
   const handleLine = (line: string) => {
+    if (/does not pass filter \(!is_live\)/.test(line)) skippedLive = true;
     const event = parseYtdlpLine(line);
     if (event) {
       if (event.type === "progress" && event.progress.percent !== undefined) onProgress(event.progress.percent);
@@ -180,6 +195,7 @@ export async function runVideoDownload(
     onStdoutLine: handleLine,
     abortSignal: options.abortSignal,
   });
+  if (code === 0 && skippedLive) throw new Error("Live streams are not supported");
   if (code === 0) return { filePath };
   throw new Error(stderr.trim() || `yt-dlp exited with code ${code}`);
 }
