@@ -18,7 +18,7 @@ export default function Command() {
                 icon={Icon.Binoculars}
                 target={<LicenseDetailView license={license} />}
               />
-              <Action.OpenInBrowser title="Open in Browser" url={license.url} />
+              <Action.OpenInBrowser url={license.url} />
             </ActionPanel>
           }
         />
