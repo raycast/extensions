@@ -43,6 +43,7 @@
 - Spotify errors are only reported as a private or unreachable playlist when Spotify's API actually said so.
 - A Spotify download that saves no tracks says "Nothing downloaded" instead of reporting success.
 - The Rosetta prompt is based on the spotDL binary itself: an Intel-only build asks for Rosetta wherever it's installed, and a native one (like Homebrew's) never does. The auto-downloaded spotDL is only installed when its SHA-256 checksum verifies.
+- spotDL (the auto-downloaded one or Homebrew's) now runs with its own settings folder inside the extension's support folder: the Spotify Client Secret goes to spotDL through a private config file instead of its command line, and your own `~/.spotdl` setup is never read or cleared. With Spotify: User Authentication on, you'll sign in to Spotify once more.
 - On Windows, ffmpeg installs and updates through its own winget package (`yt-dlp.FFmpeg`), and Stop ends the whole process tree, including an ffmpeg merge.
 - Download History refreshes while it's open, shows titles as plain text, and re-applies an entry or removal that a download finishing in another command overwrote.
 - Update checks and upgrades are time-limited, so a stalled Homebrew or winget can't hold up a download, and long downloads no longer keep all of the tools' output in memory.
