@@ -1,5 +1,12 @@
 # Workouts Changelog
 
+## [Personal Strava Apps and Connection Fixes] - {PR_MERGE_DATE}
+
+- Connect using your own Strava app with required Client ID and Client Secret preferences and automatic OAuth token refresh.
+- Add step-by-step setup instructions and links in the extension and README.
+- Handle missing credentials, sign-in failures, and API errors without crashing.
+- Improve empty states and recovery actions for workouts, routes, leaderboards, and menu bar totals.
+
 ## [Improved Search Command Display] - 2026-03-29
 
 - Show activity name as the list item title instead of the sport type (which is already conveyed by the icon)
