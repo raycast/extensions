@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-10-02
 
 - Adds Z.ai and BigModel GLM models to Raycast's AI Chat, Quick AI and AI Commands via Raycast's extension AI model provider API
 - Live model discovery from the platform's `/models` endpoint, enriched with titles, context windows and capabilities from models.dev (24h cache), with a curated fallback so the picker is never empty
