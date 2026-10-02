@@ -115,7 +115,13 @@ export const __raycast = {
   toasts: [] as MockToast[],
   huds: [] as string[],
   clipboard: [] as string[],
+  /** Every show and hide in order (`show:<title>`, `hide`), to assert sequencing. */
+  events: [] as string[],
+  /** When each toast was shown (`performance.now()`), to assert spacing. */
+  toastShownAt: new Map<MockToast, number>(),
   reset() {
+    __raycast.events.length = 0;
+    __raycast.toastShownAt.clear();
     __raycast.confirmAlertResponse = true;
     __raycast.alerts.length = 0;
     __raycast.toasts.length = 0;
@@ -161,9 +167,13 @@ class MockToast {
 
   async show(): Promise<void> {
     __raycast.toasts.push(this);
+    __raycast.events.push(`show:${this.title}`);
+    __raycast.toastShownAt.set(this, performance.now());
   }
 
-  async hide(): Promise<void> {}
+  async hide(): Promise<void> {
+    __raycast.events.push("hide");
+  }
 }
 
 export { MockToast as Toast };

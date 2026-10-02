@@ -118,9 +118,12 @@ export async function confirmAndRun(
   }); // before the await
   // Named so it can be detached below: a listener left on the caller's signal
   // outlives this run and would hide whatever toast is on screen later.
+  // The hide resolves late (it waits out a recent progress update), so the
+  // abort path awaits it before showing a toast of its own.
+  let hiding: Promise<void> | undefined;
   const onExternalAbort = () => {
     handle.abort?.abort();
-    handle.hide(); // the toast's own Cancel action hides itself; an external abort must too
+    hiding = handle.hide(); // the toast's own Cancel action hides itself; an external abort must too
   };
   opts.cancel?.addEventListener("abort", onExternalAbort, { once: true });
   const signal = handle.abort?.signal;
@@ -173,6 +176,9 @@ export async function confirmAndRun(
   } catch (err) {
     if (signal?.aborted) {
       actionsLogger.log("Run canceled", { title: opts.title, completed, of: commands.length });
+      // The toast's own Cancel button hid it at once; this still waits out a
+      // progress update sent just before, which would land on the next toast.
+      await (hiding ?? handle.hide());
       // Toast already hidden by the Cancel action. Say how far it got: a
       // partial run leaves the system in a state neither before nor after.
       if (completed > 0) {

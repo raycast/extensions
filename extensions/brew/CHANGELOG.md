@@ -1,7 +1,8 @@
 # Brew Changelog
 
-## [Remove Tap fix] - {PR_MERGE_DATE}
+## [Remove Tap and install toast fixes] - {PR_MERGE_DATE}
 
+- Fixed: the progress toast could stay on "Installing …" with a Cancel button after an install had finished, instead of turning into the success toast
 - Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled
 
 ## [Third-party taps] - 2026-10-02

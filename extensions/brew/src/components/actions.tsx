@@ -800,7 +800,7 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
   // returns false without showing anything — so hide it here rather than leave
   // a spinner claiming work is still happening. The modal in between means
   // there is no race with the toasts confirmAndRun shows after a confirm.
-  handle.hide();
+  void handle.hide();
   // The display form, not brewExecutable(): confirmAndRun resolves `brew` off
   // the configured install. Not listed in the sheet — the preview prose says it.
   return await confirmAndRun([`brew ${action} --cask ${brewIdentifier(cask)}`], {

@@ -212,21 +212,32 @@ describe("untapCommands", () => {
     expect(
       untapCommands("steipete/tap", { formulae: ["steipete/tap/birdclaw"], casks: ["steipete/tap/codexbar"] }),
     ).toEqual([
-      "brew uninstall --cask steipete/tap/codexbar",
-      "brew uninstall --formula steipete/tap/birdclaw",
+      "HOMEBREW_NO_AUTOREMOVE=1 brew uninstall --cask steipete/tap/codexbar",
+      "HOMEBREW_NO_AUTOREMOVE=1 brew uninstall --formula steipete/tap/birdclaw",
       "brew untap steipete/tap",
     ]);
   });
 
   it("names every package of a kind in one uninstall", () => {
     expect(untapCommands("a/b", { formulae: ["a/b/one", "a/b/two"], casks: [] })).toEqual([
-      "brew uninstall --formula a/b/one a/b/two",
+      "HOMEBREW_NO_AUTOREMOVE=1 brew uninstall --formula a/b/one a/b/two",
       "brew untap a/b",
     ]);
   });
 
   it("is a plain untap when nothing is installed", () => {
     expect(untapCommands("a/b", { formulae: [], casks: [] })).toEqual(["brew untap a/b"]);
+  });
+
+  // Uninstalling the casks would otherwise autoremove the tap's own formulae
+  // that were installed only as their dependencies, and the explicit formula
+  // uninstall would then fail on a package that is gone, keeping the tap.
+  it("turns autoremove off for every uninstall", () => {
+    const commands = untapCommands("a/b", { formulae: ["a/b/one"], casks: ["a/b/two"] });
+    expect(commands.filter((c) => c.includes(" uninstall "))).toHaveLength(2);
+    for (const c of commands.filter((c) => c.includes(" uninstall "))) {
+      expect(c.startsWith("HOMEBREW_NO_AUTOREMOVE=1 ")).toBe(true);
+    }
   });
 
   it("never passes --force", () => {

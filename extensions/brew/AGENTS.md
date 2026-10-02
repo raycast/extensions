@@ -205,7 +205,12 @@ restated as a per-package verdict.
 - **Toast handles act on whichever toast is visible.** `hide()` and the update
   helpers carry no toast id, so hiding "ours" can dismiss someone else's. Settle
   an animated toast by _replacing_ it with `showToast`, not by mutating it. See
-  the comment above `settle` in `src/utils/toast.ts`.
+  the comment above `settle` in `src/utils/toast.ts`. Replacing is not enough
+  on its own: every property change sends the toast's full options, so an
+  update sent in the same tick as the replacement can land on top of it. A
+  finished install read "Installing … / Operation completed successfully" with
+  a live Cancel button. `showActionToast` drops updates once it is settling and
+  holds the final toast until the last update is `UPDATE_SETTLE_MS` old.
 - **`execBrewWithProgress` checks `cancel.aborted` before it spawns.** Its
   abort listener is attached after an `await`, and an abort that fired during
   that await is already spent — so brew started although the user had pressed
@@ -321,9 +326,13 @@ packages first only from Homebrew 6.0.13 (`cmd/untap.rb`, 2026-07-23); before
 then it untaps and leaves them installed, while the confirmation says they are
 uninstalled. `untapCommands` spells the steps out instead: `uninstall --cask`,
 then `uninstall --formula`, then a plain `untap`, and `confirmAndRun` stops at
-the first failure, so a package brew refuses to remove keeps its tap. Note that
-`brew uninstall` autoremoves orphaned dependencies afterward, even when the
-named package failed, unless `HOMEBREW_NO_AUTOREMOVE` is set.
+the first failure, so a package brew refuses to remove keeps its tap. The
+uninstalls run with `HOMEBREW_NO_AUTOREMOVE=1`, as `untap --force` effectively
+does (neither `cmd/untap.rb` nor `uninstall.rb` autoremoves). `brew uninstall`
+otherwise autoremoves orphaned dependencies afterward, even when the named
+package failed: uninstalling the casks would remove the tap's formulae that
+were installed only as their dependencies, and the formula step would then
+fail on a package already gone, leaving the tap in place.
 
 ## Adopt Apps
 
