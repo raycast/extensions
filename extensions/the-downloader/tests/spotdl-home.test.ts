@@ -83,3 +83,29 @@ describe.skipIf(process.platform === "win32")("runSpotdlDownload with the extens
     expect(output).toContain(`"client_secret":"${SECRET}"`);
   });
 });
+
+describe.skipIf(process.platform === "win32")("runSpotdlDownload when the private home can't be prepared", () => {
+  it("runs spotDL the old way but leaves the user's own spotDL token cache alone", async () => {
+    const supportDir = fs.mkdtempSync(path.join(os.tmpdir(), "spotdl-support-"));
+    const realHome = fs.mkdtempSync(path.join(os.tmpdir(), "spotdl-realhome-"));
+    const binary = path.join(supportDir, "spotdl");
+    fs.writeFileSync(binary, '#!/bin/sh\necho "HOME=$HOME" >&2\nexit 1\n', { mode: 0o755 });
+    // A file where the private home's folder should go, so its config can't be written.
+    fs.writeFileSync(spotdlHome(supportDir), "");
+    const cache = path.join(realHome, ".spotdl", ".spotipy");
+    fs.mkdirSync(path.dirname(cache), { recursive: true });
+    fs.writeFileSync(cache, "{}");
+
+    const savedHome = process.env.HOME;
+    process.env.HOME = realHome;
+    try {
+      const error = await runSpotdlDownload(binary, { ...base, supportDir }, () => undefined).catch((e) => e);
+      expect((error as SpotdlDownloadError).rawOutput).toContain(`HOME=${realHome}`);
+      // The fingerprint lives in the private home, so a check against the real
+      // home would find none and delete the user's cache.
+      expect(fs.existsSync(cache)).toBe(true);
+    } finally {
+      process.env.HOME = savedHome;
+    }
+  });
+});

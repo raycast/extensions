@@ -254,17 +254,21 @@ export async function runSpotdlDownload(
     options.supportDir && usesPrivateHome(realPathOf(binaryPath), realPathOf(options.supportDir))
       ? spotdlHome(options.supportDir)
       : undefined;
+  let fellBack = false;
   if (privateHome) {
     try {
       writeSpotdlConfig(privateHome, options.clientId, options.clientSecret);
     } catch {
       privateHome = undefined; // can't prepare it — run spotDL the old way rather than fail the download
+      fellBack = true;
     }
   }
-  if (options.supportDir) {
-    // Clear a token cached for other credentials (spotDL #2606) — in the private
-    // home when there is one, which also keeps its own fingerprint, so the
-    // user's real ~/.spotdl is never touched.
+  // Clear a token cached for other credentials (spotDL #2606) — in the private
+  // home when there is one, which also keeps its own fingerprint, so the user's
+  // real ~/.spotdl is never touched. After a fallback the fingerprint is in the
+  // private home, so a check against the real home would find none and delete
+  // the user's own cache: skip it for that run.
+  if (options.supportDir && !fellBack) {
     invalidateSpotipyCacheIfStale(
       privateHome ?? options.supportDir,
       options.clientId,
