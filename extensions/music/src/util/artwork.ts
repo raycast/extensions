@@ -106,8 +106,13 @@ async function extract(key: string, artist: string, album: string, name: string)
       set expectedAlbum to item 3 of argv
       set expectedName to item 4 of argv
       tell application "Music"
-        if player state is stopped then return "none"
-        set t to current track
+        -- Artwork belongs to the track, not playback state, so a stopped player
+        -- is fine. No current track at all (e.g. between tracks) is transient.
+        try
+          set t to current track
+        on error
+          return "mismatch"
+        end try
         if (artist of t) is not expectedArtist or (album of t) is not expectedAlbum then return "mismatch"
         if expectedAlbum is "" and (name of t) is not expectedName then return "mismatch"
         if (count of artworks of t) is 0 then return "none"
@@ -131,7 +136,8 @@ async function extract(key: string, artist: string, album: string, name: string)
     { timeout: 5_000 },
   ).catch(() => "none");
 
-  if (result === "mismatch") return undefined; // transient, try again next poll
+  // Track changed or none loaded yet: transient, so record no miss and retry next poll.
+  if (result === "mismatch") return undefined;
 
   if (result === "ok") {
     try {
