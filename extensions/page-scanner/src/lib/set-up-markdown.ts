@@ -58,6 +58,11 @@ export function setUpMarkdown(progress: Progress | undefined, error: string | un
     ...helper,
     "## 2. Press Connect in the browser",
     ...connect,
-    ...(connected ? ["**All set.** Run **Scan Current Tab** from Raycast."] : []),
+    ...(connected && helperDone ? ["**All set.** Run **Scan Current Tab** from Raycast."] : []),
+    ...(connected && progress.helper === "incomplete"
+      ? [
+          `**Ready in ${progress.browsers.join(", ")}.** Scan Current Tab works there now; install the helper to use the other browsers too.`,
+        ]
+      : []),
   ].join("\n\n");
 }
