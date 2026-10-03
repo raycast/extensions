@@ -522,7 +522,7 @@ npm audit
 
 ## Store release
 
-Scan timing is stored in `index_meta`: `last_started_at` and `last_ended_at` are epoch milliseconds. Starting a rebuild clears the prior end and duration; finalization records the end and duration after FTS maintenance. Missing timestamps in older indexes are not inferred. A missing end for a recorded start indicates a running or interrupted build, not successful completion. Search Index Settings displays local dates and times when opened or refreshed.
+Scan timing is stored in `index_meta`: `last_started_at` and `last_ended_at` are epoch milliseconds. The total and the enumeration/setup, metadata, database, and FTS phases use `last_duration_ms`, `last_enumeration_ms`, `last_metadata_ms`, `last_database_ms`, and `last_fts_ms`. Starting a rebuild clears the prior completion metadata; finalization records all timings after FTS maintenance. Search Index Settings displays the phases with their share of total time and derives unmeasured overhead from the difference. Missing values in older indexes are not inferred. A missing end for a recorded start indicates a running or interrupted build, not successful completion.
 
 The manifest author must be the Raycast handle `raycast_file_search`. Keep the icon a 512 × 512 PNG and the screenshots 2000 × 1250 PNGs. Check every screenshot for personal paths, filenames, and account labels before publishing.
 

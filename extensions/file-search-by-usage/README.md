@@ -38,7 +38,7 @@ Changes take effect on the next rebuild. Settings edits are saved one at a time;
 
 You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
 
-Search Index Settings shows the last scan's local start and end times and total duration. An unrecorded end means the scan is still running or was interrupted. Older indexes show “Not recorded” until the next rebuild.
+Search Index Settings shows the last scan's local start and end times, total duration, and a breakdown for enumeration and setup, metadata reads, database writes, FTS rebuilding, and other overhead. An unrecorded end means the scan is still running or was interrupted. Older indexes show “Not recorded” until the next rebuild.
 
 ## Searching
 

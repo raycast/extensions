@@ -302,7 +302,7 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           resumeFtsSync(opened.db);
           if (report !== undefined)
             report.timings.ftsMs = performance.now() - ftsStarted;
-          writeScanEnded(opened.db, startedAt, Date.now());
+          writeScanEnded(opened.db, startedAt, Date.now(), report?.timings);
         } finally {
           try {
             opened.db.close();

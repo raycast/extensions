@@ -310,8 +310,21 @@ export type IndexStats = {
   directories: number;
   symlinks: number;
   lastDurationMs?: number;
+  lastEnumerationMs?: number;
+  lastMetadataMs?: number;
+  lastDatabaseMs?: number;
+  lastFtsMs?: number;
+  lastOtherMs?: number;
   lastStartedAt?: number;
   lastEndedAt?: number;
+};
+
+/** Rebuild phases persisted for the settings screen after a completed scan. */
+export type ScanPhaseDurations = {
+  enumerationMs: number;
+  metadataMs: number;
+  databaseMs: number;
+  ftsMs: number;
 };
 
 /** Counts for the settings screen. One grouped scan of the table. */
@@ -344,10 +357,13 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
     }
   }
 
-  const duration = db
-    .prepare("SELECT value FROM index_meta WHERE key = 'last_duration_ms'")
-    .get() as { value: string } | undefined;
-  const lastDurationMs = duration ? Number.parseInt(duration.value, 10) : NaN;
+  const duration = (key: string): number | undefined => {
+    const row = db
+      .prepare("SELECT value FROM index_meta WHERE key = ?")
+      .get(key) as { value: string } | undefined;
+    const value = Number(row?.value);
+    return Number.isFinite(value) && value >= 0 ? value : undefined;
+  };
   const timestamp = (key: string): number | undefined => {
     const row = db
       .prepare("SELECT value FROM index_meta WHERE key = ?")
@@ -355,6 +371,27 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
     const value = Number(row?.value);
     return Number.isFinite(value) && value > 0 ? value : undefined;
   };
+
+  const lastDurationMs = duration("last_duration_ms");
+  const lastEnumerationMs = duration("last_enumeration_ms");
+  const lastMetadataMs = duration("last_metadata_ms");
+  const lastDatabaseMs = duration("last_database_ms");
+  const lastFtsMs = duration("last_fts_ms");
+  const lastOtherMs =
+    lastDurationMs !== undefined &&
+    lastEnumerationMs !== undefined &&
+    lastMetadataMs !== undefined &&
+    lastDatabaseMs !== undefined &&
+    lastFtsMs !== undefined
+      ? Math.max(
+          0,
+          lastDurationMs -
+            lastEnumerationMs -
+            lastMetadataMs -
+            lastDatabaseMs -
+            lastFtsMs,
+        )
+      : undefined;
 
   return {
     bytes,
@@ -364,9 +401,12 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
     symlinks,
     lastStartedAt: timestamp("last_started_at"),
     lastEndedAt: timestamp("last_ended_at"),
-    lastDurationMs: Number.isFinite(lastDurationMs)
-      ? lastDurationMs
-      : undefined,
+    lastDurationMs,
+    lastEnumerationMs,
+    lastMetadataMs,
+    lastDatabaseMs,
+    lastFtsMs,
+    lastOtherMs,
   };
 }
 
@@ -377,9 +417,14 @@ export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
     db.prepare(
       "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_started_at', ?)",
     ).run(String(startedAt));
-    db.exec(
-      "DELETE FROM index_meta WHERE key IN ('last_ended_at', 'last_duration_ms')",
-    );
+    db.exec(`DELETE FROM index_meta WHERE key IN (
+      'last_ended_at',
+      'last_duration_ms',
+      'last_enumeration_ms',
+      'last_metadata_ms',
+      'last_database_ms',
+      'last_fts_ms'
+    )`);
     db.exec("COMMIT");
   } catch (error) {
     rollback(db);
@@ -392,6 +437,7 @@ export function writeScanEnded(
   db: DatabaseSync,
   startedAt: number,
   endedAt: number,
+  timings?: ScanPhaseDurations,
 ): void {
   db.exec("BEGIN IMMEDIATE");
   try {
@@ -399,6 +445,12 @@ export function writeScanEnded(
       "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_ended_at', ?)",
     ).run(String(endedAt));
     writeLastDuration(db, endedAt - startedAt);
+    if (timings) {
+      writeDuration(db, "last_enumeration_ms", timings.enumerationMs);
+      writeDuration(db, "last_metadata_ms", timings.metadataMs);
+      writeDuration(db, "last_database_ms", timings.databaseMs);
+      writeDuration(db, "last_fts_ms", timings.ftsMs);
+    }
     db.exec("COMMIT");
   } catch (error) {
     rollback(db);
@@ -417,10 +469,15 @@ function rollback(db: DatabaseSync): void {
 
 /** Record how long the last scan took, for the stats screen. */
 export function writeLastDuration(db: DatabaseSync, elapsedMs: number): void {
+  writeDuration(db, "last_duration_ms", elapsedMs);
+}
+
+/** Store one nonnegative duration under a stable index_meta key. */
+function writeDuration(db: DatabaseSync, key: string, elapsedMs: number): void {
   db.prepare(
-    "INSERT INTO index_meta (key, value) VALUES ('last_duration_ms', ?) " +
+    "INSERT INTO index_meta (key, value) VALUES (?, ?) " +
       "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-  ).run(String(Math.max(0, Math.round(elapsedMs))));
+  ).run(key, String(Math.max(0, Math.round(elapsedMs))));
 }
 
 /** Remove only the derived index files, under the caller's indexing lock. */

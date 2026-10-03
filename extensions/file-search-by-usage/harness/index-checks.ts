@@ -1525,8 +1525,13 @@ export async function indexChecks(assert: Assert) {
     );
     assert(stats.bytes > 0, "disk usage is reported");
     assert(
-      stats.lastDurationMs === undefined,
-      "an unrecorded duration is absent rather than zero",
+      stats.lastDurationMs === undefined &&
+        stats.lastEnumerationMs === undefined &&
+        stats.lastMetadataMs === undefined &&
+        stats.lastDatabaseMs === undefined &&
+        stats.lastFtsMs === undefined &&
+        stats.lastOtherMs === undefined,
+      "unrecorded total and phase durations are absent rather than zero",
     );
     writeLastDuration(statsOpen.db, 135_736);
     assert(
@@ -1550,18 +1555,35 @@ export async function indexChecks(assert: Assert) {
         activeStats.lastDurationMs === undefined,
       "starting a scan records its start and clears stale completion metadata",
     );
-    writeScanEnded(statsOpen.db, 1_000, 1_250);
+    writeScanEnded(statsOpen.db, 1_000, 1_250, {
+      enumerationMs: 40,
+      metadataMs: 70,
+      databaseMs: 80,
+      ftsMs: 30,
+    });
     const endedStats = readIndexStats(statsOpen.db, statsFile);
     assert(
       endedStats.lastStartedAt === 1_000 &&
         endedStats.lastEndedAt === 1_250 &&
-        endedStats.lastDurationMs === 250,
-      "scan timestamps and total duration round-trip",
+        endedStats.lastDurationMs === 250 &&
+        endedStats.lastEnumerationMs === 40 &&
+        endedStats.lastMetadataMs === 70 &&
+        endedStats.lastDatabaseMs === 80 &&
+        endedStats.lastFtsMs === 30 &&
+        endedStats.lastOtherMs === 30,
+      "scan timestamps, total duration, phases, and overhead round-trip",
     );
     writeScanStarted(statsOpen.db, 2_000);
+    const restartedStats = readIndexStats(statsOpen.db, statsFile);
     assert(
-      readIndexStats(statsOpen.db, statsFile).lastEndedAt === undefined,
-      "an interrupted next scan cannot show the previous scan's end",
+      restartedStats.lastEndedAt === undefined &&
+        restartedStats.lastDurationMs === undefined &&
+        restartedStats.lastEnumerationMs === undefined &&
+        restartedStats.lastMetadataMs === undefined &&
+        restartedStats.lastDatabaseMs === undefined &&
+        restartedStats.lastFtsMs === undefined &&
+        restartedStats.lastOtherMs === undefined,
+      "an interrupted next scan cannot show the previous scan's completion timings",
     );
     statsOpen.db.close();
 
@@ -2426,8 +2448,13 @@ export async function indexChecks(assert: Assert) {
       timing.lastStartedAt !== undefined &&
         timing.lastEndedAt !== undefined &&
         timing.lastEndedAt >= timing.lastStartedAt &&
-        timing.lastDurationMs === timing.lastEndedAt - timing.lastStartedAt,
-      "orchestrated builds persist start, end, and full duration",
+        timing.lastDurationMs === timing.lastEndedAt - timing.lastStartedAt &&
+        timing.lastEnumerationMs !== undefined &&
+        timing.lastMetadataMs !== undefined &&
+        timing.lastDatabaseMs !== undefined &&
+        timing.lastFtsMs !== undefined &&
+        timing.lastOtherMs !== undefined,
+      "orchestrated builds persist start, end, total duration, and phase timings",
     );
     builtRead.db.close();
   }

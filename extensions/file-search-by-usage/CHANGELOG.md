@@ -4,7 +4,7 @@
 
 - Download the pinned fd 10.5.0 macOS release automatically when fd is not installed, verify its SHA-256 checksum and version, and reuse only an unchanged cached executable.
 
-- Show the last index scan's start and end times and duration, including final index maintenance, in Search Index Settings.
+- Show the last index scan's start and end times, total duration, and phase-by-phase timing breakdown in Search Index Settings.
 
 - Show the end of long result paths, with the full location available on hover.
 

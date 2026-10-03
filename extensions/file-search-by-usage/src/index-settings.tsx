@@ -34,6 +34,16 @@ import { cloudStorageIndexRoots } from "./lib/index-build";
 import { displayPath } from "./lib/read-dir";
 import { formatDuration, formatIndexBytes } from "./lib/format";
 
+function formatPhaseDuration(
+  elapsedMs: number | undefined,
+  totalMs: number | undefined,
+): string {
+  if (elapsedMs === undefined) return "Not recorded";
+  const duration = formatDuration(elapsedMs);
+  if (totalMs === undefined || totalMs <= 0) return duration;
+  return `${duration} · ${Math.round((elapsedMs / totalMs) * 100)}%`;
+}
+
 /**
  * Search Index Settings.
  *
@@ -497,6 +507,38 @@ export default function Command() {
                     stats.lastDurationMs === undefined
                       ? "Not recorded"
                       : formatDuration(stats.lastDurationMs),
+                  ],
+                  [
+                    "Last Enumeration / Setup",
+                    formatPhaseDuration(
+                      stats.lastEnumerationMs,
+                      stats.lastDurationMs,
+                    ),
+                  ],
+                  [
+                    "Last Metadata Reads",
+                    formatPhaseDuration(
+                      stats.lastMetadataMs,
+                      stats.lastDurationMs,
+                    ),
+                  ],
+                  [
+                    "Last Database Writes",
+                    formatPhaseDuration(
+                      stats.lastDatabaseMs,
+                      stats.lastDurationMs,
+                    ),
+                  ],
+                  [
+                    "Last FTS Rebuild",
+                    formatPhaseDuration(stats.lastFtsMs, stats.lastDurationMs),
+                  ],
+                  [
+                    "Last Other Overhead",
+                    formatPhaseDuration(
+                      stats.lastOtherMs,
+                      stats.lastDurationMs,
+                    ),
                   ],
                 ] as const
               ).map(([label, value]) => (
