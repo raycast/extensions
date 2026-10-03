@@ -55,7 +55,7 @@ and keeps the result in Raycast's support directory.
   30 seconds, and the next run (opening Search Files, or the background refresh) continues from there.
 - During the first crawl, partial results are already searchable.
 - Afterwards, the previous complete index is kept until a new crawl finishes.
-- Opened files are cached by revision for a week, so reopening an unchanged file is instant.
+- Opened files are kept for 24 hours, so reopening an unchanged file is instant.
 
 Only `/my-files` is indexed; "Shared with me", Photos and the trash are not.
 
