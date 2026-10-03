@@ -27,6 +27,11 @@ export interface UserDataState {
   favorites: Favorite[];
 }
 
+// The exported service creates a token-bound instance for each call. Keep the
+// queue shared across instances, and separate users so account changes cannot
+// redirect an in-flight mutation.
+const favoriteToggles = new Map<string, Promise<boolean>>();
+
 export class UserDataService {
   constructor(private readonly repository: UserDataRepository) {}
 
@@ -46,16 +51,26 @@ export class UserDataService {
 
   async toggleFavorite(accessToken: string, identifier: FavoriteIdentifier): Promise<boolean> {
     const profile = await this.ensureProfile(accessToken);
-    const favorites = await this.repository.getFavorites(profile.id);
-    const existing = favorites.find((favorite) => matchesFavorite(favorite, identifier));
+    const pending = (favoriteToggles.get(profile.id) ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(async () => {
+        const favorites = await this.repository.getFavorites(profile.id);
+        const existing = favorites.find((favorite) => matchesFavorite(favorite, identifier));
 
-    if (existing) {
-      await this.repository.removeFavorite(profile.id, existing.id);
-      return false;
+        if (existing) {
+          await this.repository.removeFavorite(profile.id, existing.id);
+          return false;
+        }
+
+        await this.repository.addFavorite(profile.id, identifier);
+        return true;
+      });
+    favoriteToggles.set(profile.id, pending);
+    try {
+      return await pending;
+    } finally {
+      if (favoriteToggles.get(profile.id) === pending) favoriteToggles.delete(profile.id);
     }
-
-    await this.repository.addFavorite(profile.id, identifier);
-    return true;
   }
 
   private async ensureProfile(accessToken: string): Promise<UserProfile> {

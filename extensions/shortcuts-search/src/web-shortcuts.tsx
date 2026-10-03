@@ -4,7 +4,7 @@ import { useApps } from "./load/apps-provider";
 import { useAppShortcuts } from "./load/app-shortcuts-provider";
 import { ShortcutsList } from "./view/shortcuts-list";
 import { getFrontmostBrowserTarget } from "./engine/frontmost-hostname-fetcher";
-import { matchesHostname } from "./engine/hostname-matcher";
+import { findHostnameMatch } from "./engine/hostname-matcher";
 import { exitWithMessage } from "./view/exit-action";
 
 export default function WebShortcuts() {
@@ -32,7 +32,7 @@ export default function WebShortcuts() {
       return;
     }
 
-    const foundApp = apps.find((app) => app.hostname !== undefined && matchesHostname(app.hostname, hostname));
+    const foundApp = findHostnameMatch(apps, hostname);
     if (!foundApp) {
       exitWithMessage(`Shortcuts not available for application ${hostname}`);
       return;

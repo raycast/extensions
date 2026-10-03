@@ -92,7 +92,7 @@ export function ShortcutsList({
       searchBarAccessory={
         <KeymapDropdown
           keymaps={keymaps.map((keymap) => keymap.title)}
-          value={selectedKeymap?.title}
+          value={selectKeymap(keymaps, selectedKeymapTitle)?.title}
           initialValue={initialKeymapTitle}
           onKeymapChange={setSelectedKeymapTitle}
         />

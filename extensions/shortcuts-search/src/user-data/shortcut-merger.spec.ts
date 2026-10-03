@@ -2,6 +2,7 @@ import type { Application } from "../model/internal/internal-models";
 import { Modifiers } from "../model/internal/modifiers";
 import type { UserCustomizations } from "./models";
 import { ShortcutMerger } from "./shortcut-merger";
+import * as platform from "../load/platform";
 
 function baseApplication(): Application {
   return {
@@ -38,6 +39,34 @@ function emptyCustomizations(overrides: Partial<UserCustomizations> = {}): UserC
 }
 
 describe("ShortcutMerger", () => {
+  it.each(["macos", "windows"] as const)("merges only saved keymaps for %s before matching titles", (current) => {
+    const platformMock = jest.spyOn(platform, "getPlatform").mockReturnValue(current);
+    const customizations = emptyCustomizations({
+      customKeymaps: ["macos", "windows", "all", "none"].map((scope) => ({
+        id: scope,
+        baseAppSlug: "safari",
+        title: "Default",
+        platforms: scope === "all" ? undefined : scope === "none" ? [] : [scope],
+        sections: [
+          {
+            id: scope,
+            keymapId: scope,
+            title: "Personal",
+            sortOrder: 0,
+            shortcuts: [{ id: scope, title: scope, key: "ctrl+t", isDeleted: false, sortOrder: 0 }],
+          },
+        ],
+      })),
+    });
+    const base = baseApplication();
+    base.keymaps[0].platforms = [current];
+    const [merged] = new ShortcutMerger(customizations).mergeShortcuts([base], customizations);
+    expect(merged.keymaps[0].platforms).toEqual([current]);
+    expect(merged.keymaps[0].sections[1].hotkeys.map((shortcut) => shortcut.title)).toEqual([current, "all"]);
+    expect(customizations.customKeymaps).toHaveLength(4);
+    platformMock.mockRestore();
+  });
+
   it("adds custom sections and shortcuts to an official application", () => {
     const customizations = emptyCustomizations({
       customKeymaps: [

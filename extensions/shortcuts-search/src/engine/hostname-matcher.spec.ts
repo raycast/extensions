@@ -1,4 +1,4 @@
-import { matchesHostname } from "./hostname-matcher";
+import { findHostnameMatch, matchesHostname } from "./hostname-matcher";
 
 describe("matchesHostname", () => {
   describe("exact matching", () => {
@@ -41,5 +41,26 @@ describe("matchesHostname", () => {
     it("does not match partial suffix", () => {
       expect(matchesHostname("*.zendesk.com", "fakezendesk.com")).toBe(false);
     });
+  });
+});
+
+describe("findHostnameMatch", () => {
+  const catalog = { slug: "public", hostname: "example.com" };
+  const custom = { slug: "custom", hostname: "www.example.com" };
+  const wildcard = { slug: "wildcard", hostname: "*.example.com" };
+
+  it.each([
+    [catalog, custom],
+    [wildcard, catalog, custom],
+    [custom, catalog],
+  ])("prefers an exact host over aliases and wildcards regardless of catalog order", (...apps) =>
+    expect(findHostnameMatch(apps, "www.example.com")).toBe(custom)
+  );
+
+  it("retains www fallback, wildcard support, and exact-host isolation", () => {
+    expect(findHostnameMatch([catalog], "www.example.com")).toBe(catalog);
+    expect(findHostnameMatch([wildcard], "mail.example.com")).toBe(wildcard);
+    expect(findHostnameMatch([catalog], "www.example.com.evil.test")).toBeUndefined();
+    expect(findHostnameMatch([custom], "example.com")).toBeUndefined();
   });
 });

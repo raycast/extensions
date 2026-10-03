@@ -2,6 +2,7 @@ import { closeMainWindow, getPreferenceValues, popToRoot, PopToRootType, showToa
 import { runShortcuts } from "../engine/shortcut-runner";
 import { Modifiers } from "../model/internal/modifiers";
 import { ShortcutsList } from "./shortcuts-list";
+import { useState } from "react";
 
 jest.mock(
   "@raycast/api",
@@ -19,7 +20,10 @@ jest.mock(
   }),
   { virtual: true }
 );
-jest.mock("react", () => ({ ...jest.requireActual("react"), useState: (value: unknown) => [value, jest.fn()] }));
+jest.mock("react", () => ({
+  ...jest.requireActual("react"),
+  useState: jest.fn((value: unknown) => [value, jest.fn()]),
+}));
 jest.mock("../load/platform", () => ({ getPlatform: () => "macos" }));
 jest.mock("../load/key-codes-provider", () => ({ __esModule: true, default: () => ({ data: { c: "8" } }) }));
 jest.mock("./account-actions", () => ({ AccountActions: "AccountActions" }));
@@ -77,4 +81,38 @@ it("keeps the visible list open when the delay is invalid", async () => {
   expect(runShortcuts).not.toHaveBeenCalled();
   expect(popToRoot).not.toHaveBeenCalled();
   expect(showToast).toHaveBeenCalledTimes(1);
+});
+
+const application = {
+  name: "Editor",
+  slug: "editor",
+  keymaps: ["Default", "Alternative"].map((title) => ({
+    title,
+    sections: [{ title: "Edit", hotkeys: [{ title: `${title} shortcut`, sequence: [] }] }],
+  })),
+};
+
+it("allows Raycast to restore the saved keymap before controlling the dropdown", () => {
+  const setSelection = jest.fn();
+  jest.mocked(useState).mockImplementationOnce(() => [undefined, setSelection]);
+  const first = ShortcutsList({ application }) as React.JSX.Element;
+  expect(first.props.searchBarAccessory.props.value).toBeUndefined();
+  first.props.searchBarAccessory.props.onKeymapChange("Alternative");
+  expect(setSelection).toHaveBeenCalledWith("Alternative");
+
+  jest.mocked(useState).mockImplementationOnce(() => ["Alternative", setSelection]);
+  const restored = ShortcutsList({ application }) as React.JSX.Element;
+  expect(restored.props.searchBarAccessory.props.value).toBe("Alternative");
+  expect(restored.props.children[0].props.children[0].props.title).toBe("Alternative shortcut");
+});
+
+it("honors a favorite's explicit keymap and releases a stale stored choice", () => {
+  const explicit = ShortcutsList({ application, initialKeymapTitle: "Alternative" }) as React.JSX.Element;
+  expect(explicit.props.searchBarAccessory.props.value).toBe("Alternative");
+  expect(explicit.props.searchBarAccessory.props.initialValue).toBe("Alternative");
+
+  jest.mocked(useState).mockImplementationOnce(() => ["Removed keymap", jest.fn()]);
+  const stale = ShortcutsList({ application }) as React.JSX.Element;
+  expect(stale.props.searchBarAccessory.props.value).toBeUndefined();
+  expect(stale.props.children[0].props.children[0].props.title).toBe("Default shortcut");
 });
