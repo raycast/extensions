@@ -21,81 +21,120 @@ struct CompletionCard: View {
     let extend: (Int) -> Void
     let menuChanged: (Bool) -> Void
     @State private var menuOpen = false
-    @State private var hoveredMinutes: Int?
+    @State private var hoveredMinutes: Int = 5
+    private let previewExpanded: Bool
     private let crimson = Color(red: 0.48, green: 0.12, blue: 0.20)
-    static let width: CGFloat = 600
-    static let height: CGFloat = 140
-    static let expandedHeight: CGFloat = 254
+    // Reference artwork is rendered at 2x: 1240 × 284 px → 620 × 142 pt.
+    static let width: CGFloat = 620
+    static let height: CGFloat = 142
+    static let expandedHeight: CGFloat = 252
+
+    init(taskName: String, workTime: String, dismiss: @escaping () -> Void,
+         extend: @escaping (Int) -> Void, menuChanged: @escaping (Bool) -> Void,
+         initiallyExpanded: Bool = false) {
+        self.taskName = taskName
+        self.workTime = workTime
+        self.dismiss = dismiss
+        self.extend = extend
+        self.menuChanged = menuChanged
+        previewExpanded = initiallyExpanded
+        _menuOpen = State(initialValue: initiallyExpanded)
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            HStack(alignment: .center, spacing: 18) {
-                Image(systemName: "stopwatch")
-                    .font(.system(size: 33, weight: .ultraLight))
-                    .foregroundColor(Color(red: 0.94, green: 0.61, blue: 0.65))
-                    .frame(width: 42, height: 50)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Time’s up").font(.system(size: 23, weight: .semibold)).foregroundColor(.white)
-                    Text(taskName).font(.system(size: 14)).foregroundColor(.white.opacity(0.85))
-                        .lineLimit(2).truncationMode(.tail).help(taskName)
-                    Text(workTime).font(.system(size: 13)).foregroundColor(.white.opacity(0.55))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            ZStack(alignment: .topLeading) {
+                ReferenceTimerMark().frame(width: 40, height: 48).offset(x: 47, y: 51)
+                Text("Time’s up").font(.system(size: 24, weight: .semibold))
+                    .foregroundColor(.white).offset(x: 126, y: 35)
+                Text(taskName).font(.system(size: 18, weight: .regular))
+                    .foregroundColor(Color(red: 0.77, green: 0.77, blue: 0.80))
+                    .lineLimit(1).truncationMode(.tail).help(taskName)
+                    .frame(width: 212, alignment: .leading).offset(x: 126, y: 70)
+                Text(workTime).font(.system(size: 16, weight: .regular))
+                    .foregroundColor(Color(red: 0.49, green: 0.49, blue: 0.52))
+                    .offset(x: 126, y: 96)
                 Button(action: dismiss) {
-                    Text("Dismiss").frame(width: 98, height: 42)
-                        .background(LinearGradient(colors: [Color.white.opacity(0.06), Color.white.opacity(0.015)], startPoint: .top, endPoint: .bottom))
-                        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.white.opacity(0.28), lineWidth: 1))
+                    Text("Dismiss").frame(width: 107, height: 43)
+                        .background(LinearGradient(colors: [Color.white.opacity(0.055), Color.white.opacity(0.015)], startPoint: .top, endPoint: .bottom))
+                        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.white.opacity(0.30), lineWidth: 1))
                         .cornerRadius(11)
                 }.buttonStyle(.plain).accessibilityLabel("Dismiss completion notification")
+                    .offset(x: 353, y: 51)
                 Button {
                     menuOpen.toggle()
-                    hoveredMinutes = nil
+                    hoveredMinutes = 5
                     menuChanged(menuOpen)
                 } label: {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 9) {
                         Text("Extend")
-                        Rectangle().fill(Color.white.opacity(0.10)).frame(width: 1, height: 22)
-                        Image(systemName: "chevron.down").font(.system(size: 12, weight: .medium))
-                    }.frame(width: 116, height: 42)
-                        .background(LinearGradient(colors: [crimson.opacity(0.8), Color(red: 0.24, green: 0.06, blue: 0.10)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        Rectangle().fill(Color.black.opacity(0.16)).frame(width: 1, height: 26)
+                        Image(systemName: "chevron.down").font(.system(size: 14, weight: .regular))
+                    }.frame(width: 121, height: 43)
+                        .background(LinearGradient(colors: [Color(red: 0.39, green: 0.14, blue: 0.19), Color(red: 0.18, green: 0.05, blue: 0.075)], startPoint: .topLeading, endPoint: .bottomTrailing))
                         .overlay(RoundedRectangle(cornerRadius: 11).stroke(LinearGradient(colors: [Color(red: 0.92, green: 0.43, blue: 0.50).opacity(0.85), crimson.opacity(0.45)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
                         .cornerRadius(11)
                 }.buttonStyle(.plain).accessibilityLabel("Extend task")
                     .accessibilityValue(menuOpen ? "Expanded" : "Collapsed")
+                    .offset(x: 473, y: 51)
             }
-            .font(.system(size: 15, weight: .medium)).foregroundColor(.white.opacity(0.95))
-            .padding(.horizontal, 26)
-            .frame(width: Self.width, height: Self.height)
-            .background(LinearGradient(stops: [.init(color: crimson.opacity(0.26), location: 0), .init(color: Color.black.opacity(0.14), location: 0.4), .init(color: crimson.opacity(0.22), location: 1)], startPoint: .bottomLeading, endPoint: .topTrailing))
-            .background(Color(red: 0.055, green: 0.055, blue: 0.065).opacity(0.65))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(LinearGradient(colors: [Color.white.opacity(0.22), Color(red: 0.84, green: 0.49, blue: 0.55).opacity(0.75), Color.white.opacity(0.12)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1))
+            .font(.system(size: 17, weight: .regular)).foregroundColor(.white.opacity(0.97))
+            .frame(width: Self.width, height: Self.height, alignment: .topLeading)
+            .background {
+                ZStack {
+                    Color(red: 0.055, green: 0.06, blue: 0.07).opacity(0.88)
+                    RadialGradient(colors: [Color(red: 0.45, green: 0.10, blue: 0.16).opacity(0.4), .clear], center: .bottomLeading, startRadius: 0, endRadius: 160)
+                    RadialGradient(colors: [Color(red: 0.51, green: 0.19, blue: 0.25).opacity(0.4), .clear], center: .topTrailing, startRadius: 0, endRadius: 165)
+                    LinearGradient(colors: [Color.white.opacity(0.045), .clear], startPoint: .top, endPoint: .bottom)
+                }
+            }
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.17), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(LinearGradient(stops: [.init(color: Color(red: 0.80, green: 0.47, blue: 0.52).opacity(0.8), location: 0), .init(color: .clear, location: 0.4), .init(color: .clear, location: 0.6), .init(color: Color(red: 0.70, green: 0.34, blue: 0.42).opacity(0.72), location: 1)], startPoint: .topTrailing, endPoint: .bottomLeading), lineWidth: 1.2))
             .clipShape(RoundedRectangle(cornerRadius: 20))
-            if menuOpen {
+            if menuOpen || previewExpanded {
                 VStack(spacing: 0) {
                     ForEach([5, 10, 15], id: \.self) { minutes in
                         Button { extend(minutes) } label: {
                             Text("\(minutes) min")
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 17, weight: .regular))
                                 .foregroundColor(.white.opacity(0.92))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.leading, 18).frame(height: 43)
+                                .padding(.leading, 19).frame(height: 41)
                                 .background(hoveredMinutes == minutes ? crimson.opacity(0.5) : Color.clear)
                                 .cornerRadius(9)
-                        }.buttonStyle(.plain).onHover { inside in hoveredMinutes = inside ? minutes : nil }
+                        }.buttonStyle(.plain).onHover { inside in hoveredMinutes = inside ? minutes : 5 }
                         if minutes != 15 { Rectangle().fill(Color.white.opacity(0.065)).frame(height: 1).padding(.horizontal, 10) }
                     }
                 }
-                .padding(4).frame(width: 142)
+                .padding(.horizontal, 4).padding(.vertical, 8).frame(width: 144)
+                .background(Color(red: 0.10, green: 0.10, blue: 0.12).opacity(0.95))
                 .background(CompletionGlass())
-                .background(Color(red: 0.10, green: 0.10, blue: 0.12).opacity(0.75))
                 .overlay(RoundedRectangle(cornerRadius: 13).stroke(Color.white.opacity(0.22), lineWidth: 1))
                 .clipShape(RoundedRectangle(cornerRadius: 13))
                 .shadow(color: .black.opacity(0.4), radius: 12, y: 7)
-                .offset(x: Self.width - 142 - 22, y: 104)
+                .offset(x: 469, y: 101)
             }
         }
-        .frame(width: Self.width, height: menuOpen ? Self.expandedHeight : Self.height, alignment: .topLeading)
+        .frame(width: Self.width, height: menuOpen || previewExpanded ? Self.expandedHeight : Self.height, alignment: .topLeading)
         .environment(\.colorScheme, .dark)
+    }
+}
+
+struct ReferenceTimerMark: View {
+    private let red = Color(red: 0.77, green: 0.32, blue: 0.36)
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Circle().stroke(Color.white.opacity(0.93), lineWidth: 1.8)
+                .frame(width: 36, height: 36).offset(x: 2, y: 9)
+            Circle().trim(from: 0, to: 0.5).stroke(red, style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+                .rotationEffect(.degrees(-90)).frame(width: 36, height: 36).offset(x: 2, y: 9)
+            Capsule().fill(red).frame(width: 15, height: 2).offset(x: 12, y: 1)
+            Path { path in
+                path.move(to: CGPoint(x: 20, y: 20))
+                path.addLine(to: CGPoint(x: 20, y: 27))
+                path.addLine(to: CGPoint(x: 26, y: 32))
+            }.stroke(Color.white.opacity(0.92), style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+        }.accessibilityHidden(true)
     }
 }
 
@@ -446,7 +485,7 @@ final class TaskMenuBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func testCompletionUI() {
         let wasActive = NSApplication.shared.isActive
-        showCompletion(TaskSession(taskName: "Review the proposal — 長いタスク名の表示確認", durationMinutes: 30,
+        showCompletion(TaskSession(taskName: "Review the proposal", durationMinutes: 30,
                                    startedAt: 0, endsAt: 1_800_000, status: "finished"))
         guard let panel = completionPanel else { preconditionFailure("No completion panel") }
         precondition(panel.styleMask.contains(.nonactivatingPanel))
@@ -459,7 +498,12 @@ final class TaskMenuBar: NSObject, NSApplicationDelegate, NSMenuDelegate {
         resizeCompletion(open: false)
         precondition(panel.frame.height == CompletionCard.height && panel.frame.maxY == top)
         precondition(NSApplication.shared.isActive == wasActive)
-        if CommandLine.arguments.count == 3, let view = panel.contentView {
+        if CommandLine.arguments.count >= 3, let view = panel.contentView {
+            if CommandLine.arguments.contains("--expanded"), let host = view.subviews.last as? NSHostingView<CompletionCard> {
+                host.rootView = CompletionCard(taskName: "Review the proposal", workTime: "30 min",
+                                               dismiss: {}, extend: { _ in }, menuChanged: { _ in }, initiallyExpanded: true)
+                resizeCompletion(open: true)
+            }
             view.layoutSubtreeIfNeeded()
             RunLoop.main.run(until: Date().addingTimeInterval(0.2))
             if let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
