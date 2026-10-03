@@ -1,6 +1,6 @@
 # Schwab Portfolio Changelog
 
-## [Connection and Portfolio Clarity] - {PR_MERGE_DATE}
+## [Connection and Portfolio Clarity] - 2026-10-03
 
 - Check saved app credentials and sign in again with Schwab Connection Status
 - Preserve sessions after temporary refresh failures and refresh rejected access tokens
