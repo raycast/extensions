@@ -51,6 +51,7 @@ const SOURCE_LABELS: Record<string, string> = {
   dataDetector: "macOS data detector",
   nameTagger: "macOS name tagger",
   languageModel: "on-device model",
+  ner: "privmask name model",
 };
 
 // Confidence is the primary signal: red is structurally certain, yellow is a
@@ -121,6 +122,8 @@ export default function Command() {
         text,
         dictionaryPath: preferences.dictionaryPath?.trim() || null,
         useModel: preferences.useModel,
+        useNameModel: preferences.useNameModel,
+        nameModelPath: preferences.nameModelPath?.trim() || null,
       };
 
       try {
