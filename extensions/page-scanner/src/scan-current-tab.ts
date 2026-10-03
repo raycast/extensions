@@ -74,7 +74,7 @@ export default async function scanCurrentTab(): Promise<void> {
     );
     if (!scan.answer.ok) return fail(toast, failure(scan));
 
-    await deliver(scan.answer, prefs.afterScan ?? "copy");
+    await deliver(toast, scan.answer, prefs.afterScan ?? "copy");
   } catch (error) {
     await fail(toast, {
       title: "Page Scanner did not answer",
@@ -88,7 +88,13 @@ function saveDirectory(prefs: Preferences.ScanCurrentTab): string {
   return chosen ? chosen : join(homedir(), "Downloads");
 }
 
-async function deliver(answer: ScanAnswer, after: Preferences.ScanCurrentTab["afterScan"]): Promise<void> {
+async function deliver(
+  toast: Toast,
+  answer: ScanAnswer,
+  after: Preferences.ScanCurrentTab["afterScan"],
+): Promise<void> {
+  // The HUD says it is done; the animated toast would otherwise stay up after the command returns.
+  await toast.hide();
   const { path } = answer;
   // With `--markdown beside` the text lands next to the file; the file is what is handed on.
   const markdown = answer.page?.markdownPath;

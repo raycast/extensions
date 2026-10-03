@@ -74,6 +74,7 @@ export default function SetUp() {
       toast.message = `It runs on ${result.answer.node}.`;
       await refresh();
     } catch (reason) {
+      await toast.hide();
       await showFailureToast(reason, { title: "Could not install the helper" });
     } finally {
       setInstalling(false);
