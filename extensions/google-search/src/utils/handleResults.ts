@@ -1,8 +1,9 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { nanoid } from "nanoid";
-import { Preferences, SearchResult } from "./types";
-import fetch from "node-fetch";
 import iconv from "iconv-lite";
+import { nanoid } from "nanoid";
+import fetch from "node-fetch";
+import { getSearchUrl } from "./resultUtils";
+import { Preferences, SearchResult } from "./types";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -31,7 +32,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
       id: nanoid(),
       query: searchText,
       description: `Search Google for '${searchText}'`,
-      url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+      url: getSearchUrl(searchText),
     },
   ];
 
@@ -60,7 +61,7 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
 
   const results: SearchResult[] = [];
 
-  json[1].map((item: string, i: number) => {
+  json[1].forEach((item: string, i: number) => {
     const type = json[4]["google:suggesttype"][i];
     const description = json[2][i];
 
@@ -77,7 +78,7 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
         id: nanoid(),
         query: item,
         description: `Search Google for '${item}'`,
-        url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
+        url: getSearchUrl(item),
       });
     }
   });

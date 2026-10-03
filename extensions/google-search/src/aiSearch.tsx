@@ -1,5 +1,5 @@
 import { GoogleSearchList } from "./GoogleSearchList";
 
 export default function Command() {
-  return <GoogleSearchList initialMode="default" />;
+  return <GoogleSearchList initialMode="ai" />;
 }
