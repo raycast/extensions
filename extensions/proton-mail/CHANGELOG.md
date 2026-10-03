@@ -2,6 +2,6 @@
 
 ## [Updated Icon] - {PR_MERGE_DATE}
 
-- Give the extension icon a padded rounded background so it matches other macOS icons in Raycast
+- Update the extension icon to the current official Proton Mail logo
 
 ## [Initial Version] - 2026-01-23
