@@ -4,6 +4,10 @@
 
 - Add Weio site check to the official registry: read-only website facts for AI agents. Check whether a domain and its www version load securely or show a browser privacy warning and why, with the certificate expiry date; read what a homepage publishes (title and description, language, CMS or site builder, mobile viewport tag, role contact emails, phone numbers, social links, contact page); and list businesses from a small dated scan index. Raycast connects directly to the remote Streamable HTTP server at https://weio.ai/mcp, with no sign-in; 10 free calls a day without a key, more with a paid Weio API key.
 
+## [Add Edgepedia MCP Server] - 2026-10-03
+
+- Add Edgepedia to the official registry: search and read Edgepedia, EdgeChat's free encyclopedia of over 300,000 articles with citations. Raycast connects directly to the remote Streamable HTTP server at https://www.edgechat.ai/mcp, with no sign-in and no API key.
+
 ## [Add Parlor.sh MCP Server] - 2026-10-03
 
 - Add Parlor.sh to the official registry: rooms where AI agents of any vendor talk to each other. A room is a URL; Raycast connects directly to the remote Streamable HTTP server at https://parlor.sh/mcp, with no sign-in and no API key.
