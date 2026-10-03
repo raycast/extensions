@@ -1,6 +1,6 @@
-import { Action, Tool } from "@raycast/api";
+import { Action, Tool, getPreferenceValues } from "@raycast/api";
 import Process from "../models/Process";
-import { KillSignal, kill, waitForExit } from "../utilities/killProcess";
+import { KillSignal, kill, resolveKillSignal, waitForExit } from "../utilities/killProcess";
 import { CommandExitError } from "../utilities/runCommand";
 
 type Input = {
@@ -37,10 +37,11 @@ export default async function tool({ port }: Input) {
   const uniquePids = [...new Set(pids.map(Number))];
   if (uniquePids.length === 0) return `No process is listening on port ${port}.`;
 
-  await kill(uniquePids, KillSignal.TERM);
+  const killSignal = resolveKillSignal(getPreferenceValues<Preferences>().killSignal);
+  await kill(uniquePids, killSignal);
   const stillRunning = await waitForExit(uniquePids);
   if (stillRunning.length > 0) {
-    return `SIGTERM was sent to port ${port}, but process ${stillRunning.join(", ")} is still running.`;
+    return `${killSignal === KillSignal.KILL ? "SIGKILL" : "SIGTERM"} was sent to port ${port}, but process ${stillRunning.join(", ")} is still running.`;
   }
 
   return `Killed process ${uniquePids.join(", ")} listening on port ${port}.`;

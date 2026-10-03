@@ -1,6 +1,6 @@
-import { Action, Tool } from "@raycast/api";
+import { Action, Tool, getPreferenceValues } from "@raycast/api";
 import Process from "../models/Process";
-import { KillSignal, kill, killall, waitForExit } from "../utilities/killProcess";
+import { KillSignal, kill, killall, resolveKillSignal, waitForExit } from "../utilities/killProcess";
 import { isWindows } from "../utilities/platform";
 
 type Input = {
@@ -8,7 +8,7 @@ type Input = {
   pid: number;
   /** Kill this process, every process with its name, or its parent. */
   target: "process" | "all" | "parent";
-  /** Use SIGTERM by default, or SIGKILL when requested. Windows always uses taskkill. */
+  /** Use the configured kill signal by default, with SIGTERM for "ask", or override it when requested. Windows always uses taskkill. */
   signal?: "term" | "kill";
 };
 
@@ -23,13 +23,18 @@ export const confirmation: Tool.Confirmation<Input> = async ({ pid, target }) =>
 });
 
 /** Perform a kill action from Open Ports for a PID returned by list-open-ports. */
-export default async function tool({ pid, target, signal = "term" }: Input) {
+export default async function tool({ pid, target, signal }: Input) {
   if (!Number.isInteger(pid) || pid <= 0) return "The PID must be a positive integer.";
 
   const process = (await Process.getCurrent()).find((item) => item.pid === pid);
   if (process === undefined) return `Process ${pid} is not listening on an open TCP port.`;
 
-  const killSignal = signal === "kill" ? KillSignal.KILL : KillSignal.TERM;
+  const killSignal =
+    signal === undefined
+      ? resolveKillSignal(getPreferenceValues<Preferences>().killSignal)
+      : signal === "kill"
+        ? KillSignal.KILL
+        : KillSignal.TERM;
   if (target === "all") {
     if (process.name === undefined) return `Process ${pid} has no name to use for Kill All.`;
     await killall(process.name, killSignal);
