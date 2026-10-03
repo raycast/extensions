@@ -61,9 +61,11 @@ export async function collectSnapshot(
     withProcesses
       ? attempt<ProcessEnergy[]>("top", [], async () =>
           parseTop(
+            // Three blocks, of which only the last is read: the first is since boot, and the second
+            // misses about 0.2 s of CPU (a process using a full core read 79% at -s 1, then 99.8%).
             await runner("/usr/bin/top", [
               "-l",
-              "2",
+              "3",
               "-s",
               "1",
               "-o",

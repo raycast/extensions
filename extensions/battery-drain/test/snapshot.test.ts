@@ -135,6 +135,19 @@ describe("collectSnapshot", () => {
     expect(topArgs[topArgs.indexOf("-n") + 1]).toBe("50");
   });
 
+  it("reads CPU from top's second interval, since the first one comes out low", async () => {
+    // Measured on a process using a full core (ps: 5.0 s of CPU in 5 s): top -l 4 -s 1 read 79.2%, then
+    // 99.8% and 99.9%. The first interval misses about 0.2 s whatever its length (88% at -s 2, 91.5% at
+    // -s 3), so a process at 100% read 72-84% and kept crossing the 80% runaway threshold.
+    let topArgs: string[] = [];
+    const runner: Runner = async (cmd, args) => {
+      if (cmd === "/usr/bin/top") topArgs = args;
+      return "";
+    };
+    await collectSnapshot(runner, 1000);
+    expect(topArgs.slice(topArgs.indexOf("-l"), topArgs.indexOf("-l") + 4)).toEqual(["-l", "3", "-s", "1"]);
+  });
+
   describe("with SMC", () => {
     it("shows the live system draw from SMC over ioreg's once-a-minute one", async () => {
       const s = await collectSnapshot(fakeRunner(), 1000, { smc: async () => ({ PSTR: 8.2 }) });

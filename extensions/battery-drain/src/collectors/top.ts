@@ -3,7 +3,8 @@ import { ProcessEnergy } from "../types";
 const HEADER = /^PID\s+POWER\s+%CPU\s+COMMAND/;
 const ROW = /^\s*(\d+)\s+([\d.]+)\s+([\d.]+)\s+(.+?)\s*$/;
 
-// top -l 2 prints two blocks; the first reports since-boot usage, so only the last one is used.
+// top -l N prints N blocks; the first reports since-boot usage and the second runs low (see
+// collectSnapshot), so only the last one is used.
 export function parseTop(text: string): ProcessEnergy[] {
   const lines = text.split("\n");
   let header = -1;

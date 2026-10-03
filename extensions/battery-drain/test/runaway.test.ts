@@ -88,12 +88,11 @@ describe("detectRunaways", () => {
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
   });
 
-  it("flags a process whose lifetime average is hot at a lower reading while the history never saw it cool", () => {
-    // Measured: the menu bar's samples read yes at 72% throughout, so no streak ever reached 80%.
-    const halfHour: [number, ProcessInfo][] = [[42, { etimeSec: 1800, cpuTimeSec: 1795, user: "me" }]];
-    const history = [16, 18, 20, 22, 24, 26, 28].map((m) => hot(m * MIN, 42, "yes", 72));
-    const s = snap(30 * MIN, [{ pid: 42, command: "yes", cpu: 72 }], halfHour);
-    expect(detectRunaways(history, s)).toEqual([{ pid: 42, command: "yes", cpu: 72, sinceSec: 1800 }]);
+  it("does not flag a process on its lifetime average alone while it reads below the threshold", () => {
+    // It ran hot for hours and now sits at 65%: its lifetime average says it ran hot, not that it still does.
+    const tenHours: [number, ProcessInfo][] = [[42, { etimeSec: 36000, cpuTimeSec: 34000, user: "me" }]];
+    const history = [600, 605, 610].map((m) => hot(m * MIN, 42, "yes", 65));
+    expect(detectRunaways(history, snap(615 * MIN, [{ pid: 42, command: "yes", cpu: 65 }], tenHours))).toEqual([]);
   });
 
   it("does not flag a slowed process on its lifetime average once the history saw it drop below the exit share", () => {

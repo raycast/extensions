@@ -64,20 +64,13 @@ export function detectRunaways(samples: Sample[], snapshot: Snapshot, th: Thresh
     if (p.pid <= 0 || p.cpu < exitCpu) continue;
 
     const info = snapshot.processInfo.get(p.pid);
-    const start = processStart(snapshot.t, info);
-    const history = readingsOf(samples, p.pid, p.command, start, snapshot.t);
+    const history = readingsOf(samples, p.pid, p.command, processStart(snapshot.t, info), snapshot.t);
     const fromHistory = streakSec(history, snapshot.t, p.cpu, th);
-    // A hot lifetime average shows the process ran hot, not that it still does. Below the threshold now,
-    // it counts only if the history never saw the process cool below the exit share since it started
-    // (a sample within a minute of the rounded start may predate it); with no history to ask, the
-    // threshold itself applies.
+    // A hot lifetime average shows the process ran hot, not that it still does, so on its own it needs
+    // the threshold now; the exit share applies only to a streak the history has seen.
     const lifetimeHot =
       info !== undefined && info.etimeSec >= th.runawayMinSec && info.cpuTimeSec / info.etimeSec >= th.runawayCpu / 100;
-    const sinceStart = history.filter((r) => start === undefined || r.t - start >= 60_000);
-    const stillHot =
-      p.cpu >= th.runawayCpu ||
-      (sinceStart.length > 0 && sinceStart.every((r) => r.cpu !== undefined && r.cpu >= exitCpu));
-    const fromCpuTime = lifetimeHot && stillHot ? info.etimeSec : 0;
+    const fromCpuTime = lifetimeHot && p.cpu >= th.runawayCpu ? info.etimeSec : 0;
 
     const sinceSec = Math.max(fromHistory, fromCpuTime);
     if (sinceSec >= th.runawayMinSec) {
