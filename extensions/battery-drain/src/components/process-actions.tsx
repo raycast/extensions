@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { userInfo } from "node:os";
-import { canTerminate, sameProcess, starterTarget, terminate, TerminateResult } from "../actions/process";
+import { showFailureToast } from "@raycast/utils";
+import { canTerminate, recheckProcess, starterTarget, terminate, TerminateResult } from "../actions/process";
 import { run } from "../collectors/exec";
 import { readProcesses } from "../collectors/ps";
 import { ProcessInfo } from "../types";
@@ -33,8 +34,14 @@ async function end(
   if (!confirmed) return;
 
   // The list can be seconds old and the dialog may have stayed open: check the pid still is that process.
-  const now = await readProcesses([p.pid], run).catch(() => new Map<number, ProcessInfo>());
-  if (seen.info && !sameProcess(seen.info, seen.at, now.get(p.pid), Date.now())) {
+  const check = seen.info
+    ? await recheckProcess(p.pid, seen.info, seen.at, (pids) => readProcesses(pids, run))
+    : { status: "same" as const };
+  if (check.status === "unknown") {
+    await showFailureToast(check.error, { title: `Could not check ${p.command}`, message: "Nothing was sent" });
+    return;
+  }
+  if (check.status === "changed") {
     await showToast({
       style: Toast.Style.Failure,
       title: `${p.command} is no longer running`,

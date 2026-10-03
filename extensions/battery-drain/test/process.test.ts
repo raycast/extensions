@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { canTerminate, processKind, sameProcess, starterTarget, terminate } from "../src/actions/process";
+import { canTerminate, processKind, recheckProcess, sameProcess, starterTarget, terminate } from "../src/actions/process";
 
 describe("starterTarget", () => {
   const owner = (user: string) => ({ etimeSec: 1, cpuTimeSec: 0, user, ppid: 1, command: "x", path: "x" });
@@ -61,6 +61,34 @@ describe("sameProcess", () => {
 
   it("is not the same process when it has exited", () => {
     expect(sameProcess(seen, 100_000, undefined, 115_000)).toBe(false);
+  });
+});
+
+describe("recheckProcess", () => {
+  const seen = { command: "caffeinate", etimeSec: 60 }; // seen at t = 100 s, so started at 40 s
+  const read = (row?: { command: string; etimeSec: number }) => async (pids: number[]) =>
+    new Map(row ? [[pids[0], row]] : []);
+  const at = () => 115_000;
+
+  it("is the same process when the pid still runs what the list showed", async () => {
+    expect(await recheckProcess(42, seen, 100_000, read({ command: "caffeinate", etimeSec: 75 }), at)).toEqual({
+      status: "same",
+    });
+  });
+
+  it("has changed when the pid is gone or now runs something else", async () => {
+    expect(await recheckProcess(42, seen, 100_000, read(), at)).toEqual({ status: "changed" });
+    expect(await recheckProcess(42, seen, 100_000, read({ command: "Safari", etimeSec: 75 }), at)).toEqual({
+      status: "changed",
+    });
+  });
+
+  it("is unknown, not gone, when ps itself fails: nothing may be signalled on a guess", async () => {
+    const error = Object.assign(new Error("Command failed: /bin/ps"), { killed: true, signal: "SIGTERM" });
+    const failing = async () => {
+      throw error;
+    };
+    expect(await recheckProcess(42, seen, 100_000, failing, at)).toEqual({ status: "unknown", error });
   });
 });
 

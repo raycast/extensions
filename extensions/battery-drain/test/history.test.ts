@@ -87,6 +87,13 @@ describe("toSample when processes were not measured", () => {
     expect(s.procs.some((p) => p.pid === 99)).toBe(true);
     expect(s.procsMissing).toBeUndefined();
   });
+
+  it("keeps a runaway's dip below the threshold too, so the history does not end its streak", () => {
+    const processes = Array.from({ length: 12 }, (_, i) => ({ pid: i + 1, command: `p${i}`, energy: 50 + i, cpu: 5 }));
+    processes.push({ pid: 99, command: "compiler", energy: 10, cpu: 70 }); // 80% threshold; 60% keeps a flag
+    const s = toSample({ ...base([]), processes });
+    expect(s.procs.some((p) => p.pid === 99)).toBe(true);
+  });
 });
 
 describe("prune", () => {

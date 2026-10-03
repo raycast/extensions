@@ -1,4 +1,5 @@
 import { processStart } from "../analysis/notify";
+import { RUNAWAY_EXIT_SHARE } from "../analysis/runaway";
 import { THRESHOLDS } from "../analysis/thresholds";
 import { Lock, noLock } from "./lock";
 import { Sample, Snapshot } from "../types";
@@ -31,7 +32,8 @@ export function toSample(s: Snapshot, runawayCpu: number = THRESHOLDS.runawayCpu
   const byEnergy = [...s.processes].sort((a, b) => b.energy - a.energy);
   const kept = [
     ...byEnergy.slice(0, PROCS_PER_SAMPLE),
-    ...byEnergy.slice(PROCS_PER_SAMPLE).filter((p) => p.cpu >= runawayCpu),
+    // At the exit share, not the threshold: a flagged runaway's dip must stay in the history.
+    ...byEnergy.slice(PROCS_PER_SAMPLE).filter((p) => p.cpu >= runawayCpu * RUNAWAY_EXIT_SHARE),
   ];
   const procs = kept.map((p) => ({
     pid: p.pid,

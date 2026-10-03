@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, environment, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { groupByApp } from "./analysis/apps";
 import { chargingExplanation } from "./analysis/battery";
@@ -13,6 +14,7 @@ import { visibleRows } from "./analysis/visible";
 import { nextPollDelay, timeWeightedAverage } from "./analysis/stats";
 import { collectSnapshot, hasProcessSample, mergeSnapshot } from "./collectors/snapshot";
 import { AppItem } from "./components/app-item";
+import { LiveLabel } from "./components/live-label";
 import { ProcessActions } from "./components/process-actions";
 import { raycastStorage } from "./history/raycast-storage";
 import { combineHistory, loadHistory, MAX_AGE_MS, toSample } from "./history/store";
@@ -97,23 +99,27 @@ export default function Command() {
       const first = count === 0;
       const processes = count % PROCESS_POLL_EVERY === 0;
       count++;
-      const s = await collectSnapshot(undefined, undefined, { processes }).catch(() => undefined);
+      let error: unknown;
+      const s = await collectSnapshot(undefined, undefined, { processes }).catch((e) => {
+        error = e;
+        return undefined;
+      });
       if (cancelled) return;
       if (first && tick > 0 && quietRefresh.current) {
         quietRefresh.current = false;
         setRefreshing(false);
       } else if (first && tick > 0) {
         setRefreshing(false);
-        showToast(
-          s
-            ? {
-                style: Toast.Style.Success,
-                title: "Refreshed",
-                // Without SMC, watts barely move between refreshes (macOS updates them once a minute).
-                message: s.battery.systemLoadLive ? undefined : "System watts update about once a minute",
-              }
-            : { style: Toast.Style.Failure, title: "Could not refresh", message: "Showing the last readings" },
-        );
+        if (s) {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Refreshed",
+            // Without SMC, watts barely move between refreshes (macOS updates them once a minute).
+            message: s.battery.systemLoadLive ? undefined : "System watts update about once a minute",
+          });
+        } else {
+          showFailureToast(error, { title: "Could not refresh", message: "Showing the last readings" });
+        }
       }
       if (s) {
         setSnapshot((prev) => mergeSnapshot(prev, s));
@@ -212,12 +218,7 @@ export default function Command() {
   const showNow = b?.systemLoadW !== undefined || hasBattery || ioregFailed;
 
   return (
-    <List
-      isShowingDetail
-      isLoading={!snapshot || refreshing}
-      // Shown in the window's footer, so the data age stays visible whichever row is selected.
-      navigationTitle={updated ? `Diagnose Battery Drain · updated at ${updated}` : "Diagnose Battery Drain"}
-    >
+    <List isShowingDetail isLoading={!snapshot || refreshing}>
       {warning && (
         <List.Section title="Warning">
           <List.Item
@@ -229,7 +230,7 @@ export default function Command() {
         </List.Section>
       )}
       {showNow && (
-        <List.Section title="Now">
+        <List.Section title="Now" subtitle={updated ? `updated at ${updated}` : undefined}>
           <List.Item
             // The system draw leads the row; its chip icon matches the menu bar and carries the level color.
             icon={{
@@ -245,11 +246,11 @@ export default function Command() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     {nowRows.power.map((r) => (
-                      <List.Item.Detail.Metadata.Label key={r.title} title={r.title} text={r.text} />
+                      <LiveLabel key={r.title} title={r.title} text={r.text} />
                     ))}
                     {nowRows.battery.length > 0 && <List.Item.Detail.Metadata.Separator />}
                     {nowRows.battery.map((r) => (
-                      <List.Item.Detail.Metadata.Label key={r.title} title={r.title} text={r.text} />
+                      <LiveLabel key={r.title} title={r.title} text={r.text} />
                     ))}
                   </List.Item.Detail.Metadata>
                 }
@@ -315,14 +316,10 @@ export default function Command() {
                         {/* The list row truncates long names; the detail has room for them. */}
                         <List.Item.Detail.Metadata.Label title="Process" text={displayName(p.command)} />
                         <List.Item.Detail.Metadata.Label title="PID" text={String(p.pid)} />
-                        <List.Item.Detail.Metadata.Label title="CPU" text={`${p.cpu.toFixed(1)}%`} />
-                        <List.Item.Detail.Metadata.Label title="Energy Impact" text={p.energy.toFixed(1)} />
-                        {info && (
-                          <List.Item.Detail.Metadata.Label title="Running For" text={formatDuration(info.etimeSec)} />
-                        )}
-                        {info && (
-                          <List.Item.Detail.Metadata.Label title="CPU Time" text={formatDuration(info.cpuTimeSec)} />
-                        )}
+                        <LiveLabel title="CPU" text={`${p.cpu.toFixed(1)}%`} />
+                        <LiveLabel title="Energy Impact" text={p.energy.toFixed(1)} />
+                        {info && <LiveLabel title="Running For" text={formatDuration(info.etimeSec)} />}
+                        {info && <LiveLabel title="CPU Time" text={formatDuration(info.cpuTimeSec)} />}
                         {info && <List.Item.Detail.Metadata.Label title="User" text={info.user} />}
                       </List.Item.Detail.Metadata>
                     }
@@ -361,7 +358,7 @@ export default function Command() {
                       {origin?.via && <List.Item.Detail.Metadata.Label title="Via" text={origin.via} />}
                       <List.Item.Detail.Metadata.Label title="Assertion" text={bl.assertion} />
                       <List.Item.Detail.Metadata.Label title="Name" text={bl.name} />
-                      <List.Item.Detail.Metadata.Label title="Held For" text={formatDuration(bl.heldSec)} />
+                      <LiveLabel title="Held For" text={formatDuration(bl.heldSec)} />
                     </List.Item.Detail.Metadata>
                   }
                 />

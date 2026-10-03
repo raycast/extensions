@@ -1,5 +1,5 @@
 import { Color, environment, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { groupByApp } from "./analysis/apps";
 import { chargingExplanation } from "./analysis/battery";
@@ -22,7 +22,14 @@ type State = { snapshot: Snapshot; history: Sample[]; runaways: Runaway[] };
 
 const THIRTY_MIN = 30 * 60 * 1000;
 
-const openDiagnose = () => launchCommand({ name: "diagnose-battery-drain", type: LaunchType.UserInitiated });
+// launchCommand throws when Diagnose Battery Drain is disabled in Raycast's settings.
+const openDiagnose = async () => {
+  try {
+    await launchCommand({ name: "diagnose-battery-drain", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open Diagnose Battery Drain" });
+  }
+};
 
 // A desktop Mac has neither battery nor power telemetry: show the icon alone rather than a permanent "– W".
 const menuTitle = (s: Snapshot) =>

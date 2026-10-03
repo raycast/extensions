@@ -56,6 +56,27 @@ export function sameProcess(
   return Math.abs(startedSeen - startedNow) <= START_TOLERANCE_MS;
 }
 
+export type Recheck = { status: "same" } | { status: "changed" } | { status: "unknown"; error: unknown };
+
+/**
+ * Re-reads the pid just before a signal. A missing pid reads as no row (see readProcesses), so a
+ * throw means ps itself failed: that is "unknown", never "gone", and nothing may be signalled.
+ */
+export async function recheckProcess(
+  pid: number,
+  seen: { command: string; etimeSec: number },
+  seenAt: number,
+  read: (pids: number[]) => Promise<Map<number, { command: string; etimeSec: number }>>,
+  now: () => number = Date.now,
+): Promise<Recheck> {
+  try {
+    const current = (await read([pid])).get(pid);
+    return { status: sameProcess(seen, seenAt, current, now()) ? "same" : "changed" };
+  } catch (error) {
+    return { status: "unknown", error };
+  }
+}
+
 export type TerminateResult = "exited" | "still-running" | "not-found" | "permission-denied";
 
 type Deps = {

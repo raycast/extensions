@@ -60,6 +60,34 @@ describe("detectRunaways", () => {
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
   });
 
+  it("stays runaway on Diagnose's first reading, which comes out low (72%) while the command starts", () => {
+    // Measured: yes read 84% steadily and 72% on every first poll after Diagnose opened.
+    const history = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20].map((m) => hot(m * MIN, 42, "yes", 84));
+    const s = snap(21 * MIN, [{ pid: 42, command: "yes", cpu: 72 }], young);
+    expect(detectRunaways(history, s)).toEqual([{ pid: 42, command: "yes", cpu: 72, sinceSec: 21 * 60 }]);
+  });
+
+  it("keeps a flagged streak through a dip that stays above three quarters of the threshold", () => {
+    const history = [hot(0), hot(4 * MIN), hot(8 * MIN), hot(12 * MIN), hot(16 * MIN), hot(18 * MIN, 42, "yes", 70)];
+    const s = snap(22 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young);
+    expect(detectRunaways(history, s)).toEqual([{ pid: 42, command: "yes", cpu: 99, sinceSec: 22 * 60 }]);
+  });
+
+  it("lets go once a flagged process drops below three quarters of the threshold", () => {
+    const history = [0, 5, 10, 15, 20].map((m) => hot(m * MIN));
+    expect(detectRunaways(history, snap(21 * MIN, [{ pid: 42, command: "yes", cpu: 50 }], young))).toEqual([]);
+  });
+
+  it("does not flag a process that stayed between three quarters of the threshold and the threshold", () => {
+    const history = [0, 5, 10, 15, 20].map((m) => hot(m * MIN, 42, "yes", 75));
+    expect(detectRunaways(history, snap(21 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
+  });
+
+  it("restarts the count at a dip that comes before the process was flagged", () => {
+    const history = [hot(0), hot(5 * MIN), hot(8 * MIN, 42, "yes", 70), hot(10 * MIN), hot(15 * MIN)];
+    expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
+  });
+
   it("does not let a reused PID inherit another command's streak", () => {
     const history = [0, 5, 10, 15].map((m) => hot(m * MIN, 42, "old-proc"));
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
