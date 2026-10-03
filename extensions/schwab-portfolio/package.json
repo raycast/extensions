@@ -72,6 +72,13 @@
   ],
   "commands": [
     {
+      "name": "connection-status",
+      "title": "Schwab Connection Status",
+      "subtitle": "Schwab Portfolio",
+      "description": "Check saved app credentials and sign in again without repeating developer setup",
+      "mode": "view"
+    },
+    {
       "name": "portfolio",
       "title": "View Portfolio",
       "subtitle": "Schwab Portfolio",
