@@ -2,9 +2,9 @@
 
 ## [Item Counts and Shared Vaults] - {PR_MERGE_DATE}
 
-- Search Items shows the vault shown, or All Items, as a section header with its number of items; suggestions get their own count
+- The vault menu of Search Items shows the number of items in each vault, and in all vaults. The selected one stays in the search bar
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
-- List Vaults marks the vaults shared with you with an icon, whose tooltip gives your role (Manager, Editor or Viewer)
+- List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
 
 ## [Fill Logins] - 2026-10-02
 

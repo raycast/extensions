@@ -32,6 +32,10 @@ export function vaultShareListArgs(): string[] {
   return ["share", "list", "--only-vaults", "true", "--output", "json"];
 }
 
+export function vaultMemberListArgs(shareId: string): string[] {
+  return ["vault", "member", "list", `--share-id=${shareId}`, "--output", "json"];
+}
+
 // IDs are passed as `--flag=value`: they are base64url and can start with "-", which pass-cli would
 // otherwise parse as another option ("unexpected argument '-5' found").
 export function itemListArgs(shareId: string): string[] {
@@ -85,6 +89,8 @@ export interface PassCliAdapter {
   listVaults(): Promise<Vault[]>;
   /** The user's role on each vault, by share ID. */
   listVaultRoles(): Promise<Map<string, VaultRole>>;
+  /** Number of people with access to a vault, the user included. */
+  countVaultMembers(shareId: string): Promise<number>;
   listItems(shareId: string, vaultName: string): Promise<Item[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
@@ -126,6 +132,14 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
         throw new PassCliError("Unexpected share list output from pass-cli.", "invalid_output");
       }
       return normalizeShareRoles(rawShares);
+    },
+    countVaultMembers: async (shareId) => {
+      const data = parseJson(await run(vaultMemberListArgs(shareId)), "vault member list");
+      const members = Array.isArray(data) ? data : isRecord(data) ? data.members : undefined;
+      if (!Array.isArray(members)) {
+        throw new PassCliError("Unexpected vault member list output from pass-cli.", "invalid_output");
+      }
+      return members.length;
     },
     listItems: async (shareId, vaultName) => {
       const data = parseJson(await run(itemListArgs(shareId)), "item list");

@@ -11,6 +11,14 @@ export interface Vault {
   name: string;
   itemCount?: number;
   role?: VaultRole;
+  /** Whether other people have access to the vault. */
+  isShared?: boolean;
+}
+
+/** How a vault is shared: the user's role on it, and whether other people have access, when known. */
+export interface VaultSharing {
+  role: VaultRole;
+  isShared?: boolean;
 }
 
 export interface Item {

@@ -8,6 +8,7 @@ import {
   itemTotpArgs,
   itemViewArgs,
   vaultListArgs,
+  vaultMemberListArgs,
   vaultShareListArgs,
 } from "./adapter";
 import { CommandDescriptor } from "./exec";
@@ -95,6 +96,7 @@ test("returns false for the real unauthenticated CLI failure", async () => {
 test("uses exact list, view, and TOTP CLI arguments", () => {
   assert.deepEqual(vaultListArgs(), ["vault", "list", "--output", "json"]);
   assert.deepEqual(vaultShareListArgs(), ["share", "list", "--only-vaults", "true", "--output", "json"]);
+  assert.deepEqual(vaultMemberListArgs("X"), ["vault", "member", "list", "--share-id=X", "--output", "json"]);
   assert.deepEqual(itemListArgs("X"), ["item", "list", "--share-id=X", "--output", "json", "--show-secrets"]);
   assert.deepEqual(itemViewArgs("X", "Y"), ["item", "view", "--share-id=X", "--item-id=Y", "--output", "json"]);
   assert.deepEqual(itemTotpArgs("X", "Y"), ["item", "totp", "--share-id=X", "--item-id=Y", "--output", "json"]);
@@ -123,6 +125,12 @@ test("reads the user's role on each vault from the share list", async () => {
       ["vault-2", "viewer"],
     ]),
   );
+});
+
+test("counts the members of a vault, the user included", async () => {
+  const adapter = createPassCliAdapter(fakeCommand("json:vault-members"));
+
+  assert.equal(await adapter.countVaultMembers("vault-1"), 2);
 });
 
 test("lists active items and strips full-list secrets", async () => {

@@ -1,17 +1,17 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { listVaultRoles, listVaultsAndItems } from "./lib/pass-cli";
-import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
+import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedItems, getCachedVaults, setCachedItems, setCachedVaults } from "./lib/cache";
-import { countItemsByVault, formatItemCount } from "./lib/item-counts";
+import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
 import { platformShortcut } from "./lib/shortcuts";
-import { sharedVaultTooltip } from "./lib/vault-sharing";
+import { sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
 
-/** Marks the vaults shared with you; your own vaults get nothing, since that's most of them. */
-function sharedAccessory(role: VaultRole | undefined): List.Item.Accessory | undefined {
-  const tooltip = sharedVaultTooltip(role);
+/** Marks shared vaults, whether you shared them or they were shared with you. */
+function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
+  const tooltip = sharedVaultTooltip(vault);
   return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
 }
 
@@ -46,25 +46,16 @@ export default function Command() {
 
     try {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
-      const [listing, roles] = await Promise.all([
+      const [listing, sharing] = await Promise.all([
         listVaultsAndItems(),
-        // Roles only mark the vaults shared with you: when they can't be listed, the cached ones stay.
-        listVaultRoles().catch(() => undefined),
+        // Sharing only adds an icon: when it can't be listed, the vaults keep what the cache knew.
+        listVaultSharing().catch(() => undefined),
       ]);
       const { items, failedVaults } = listing;
-      const knownRoles = roles ?? new Map(cachedVaults?.data.map((vault) => [vault.shareId, vault.role] as const));
-      const freshVaults = listing.vaults.map((vault) => ({
-        ...vault,
-        role: knownRoles.get(vault.shareId) ?? vault.role,
-      }));
+      const freshVaults = withSharing(listing.vaults, sharing, cachedVaults?.data);
       setVaults(freshVaults);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
-      const counted = countItemsByVault(
-        freshVaults.filter((vault) => !failed.has(vault.shareId)),
-        items,
-      );
-      // Vaults whose items couldn't be listed keep their earlier count, if any.
-      setItemCounts((previous) => new Map([...[...previous].filter(([shareId]) => failed.has(shareId)), ...counted]));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
       await Promise.all([setCachedVaults(freshVaults), failed.size === 0 ? setCachedItems(items, true) : undefined]);
     } catch (err: unknown) {
       // The counts of an ended session must not show up again.
@@ -193,7 +184,7 @@ export default function Command() {
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
-              sharedAccessory(vault.role),
+              sharedAccessory(vault),
               vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
             ].filter((accessory) => accessory !== undefined)}
             actions={

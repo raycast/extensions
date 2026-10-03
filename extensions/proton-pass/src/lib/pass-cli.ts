@@ -6,7 +6,7 @@ import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
 import { runBrowserLogin } from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
-import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultRole } from "./types";
+import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
@@ -105,15 +105,6 @@ export async function listVaults(): Promise<Vault[]> {
   }
 }
 
-/** The user's role on each vault, by share ID. A vault the user doesn't own was shared with them. */
-export async function listVaultRoles(): Promise<Map<string, VaultRole>> {
-  if (USE_MOCK_DATA) {
-    await ensureMockCacheCleared();
-    return new Map(MOCK_VAULTS.flatMap((vault) => (vault.role ? [[vault.shareId, vault.role] as const] : [])));
-  }
-  return (await getAdapter()).listVaultRoles();
-}
-
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
   try {
     return await (await getAdapter()).listItems(shareId, vaultName);
@@ -186,6 +177,36 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
   const vaults = await listVaults();
   if (USE_MOCK_DATA) return { vaults, items: await listItems(undefined, vaults), failedVaults: [] };
   return { vaults, ...(await listItemsOfVaults(vaults)) };
+}
+
+/**
+ * How each vault is shared, by share ID. Vaults the user doesn't own were shared with them; for the user's own
+ * vaults, the members are counted, one call per vault, in parallel like the item listing. A count that fails
+ * leaves `isShared` unknown.
+ */
+export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
+  if (USE_MOCK_DATA) {
+    await ensureMockCacheCleared();
+    return new Map(
+      MOCK_VAULTS.flatMap((vault) =>
+        vault.role ? [[vault.shareId, { role: vault.role, isShared: vault.role !== "owner" || vault.isShared }]] : [],
+      ),
+    );
+  }
+
+  const adapter = await getAdapter();
+  const roles = Array.from(await adapter.listVaultRoles());
+  return new Map(
+    await mapWithConcurrency(
+      roles,
+      VAULT_LIST_CONCURRENCY,
+      async ([shareId, role]): Promise<[string, VaultSharing]> => {
+        if (role !== "owner") return [shareId, { role, isShared: true }];
+        const members = await adapter.countVaultMembers(shareId).catch(() => undefined);
+        return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
+      },
+    ),
+  );
 }
 
 export async function getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail> {

@@ -16,6 +16,7 @@ const expectedArgs = {
   "json:vaults-array": ["vault", "list", "--output", "json"],
   "json:vaults-wrapper": ["vault", "list", "--output", "json"],
   "json:vault-shares": ["share", "list", "--only-vaults", "true", "--output", "json"],
+  "json:vault-members": ["vault", "member", "list", "--share-id=vault-1", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
@@ -46,6 +47,24 @@ const fixtures = {
       },
     ],
   },
+  "vault-members": [
+    {
+      member_share_id: "member-1",
+      email: "alice@example.com",
+      name: "Alice",
+      is_group_share: false,
+      role: "Owner",
+      target_type: "Vault",
+    },
+    {
+      member_share_id: "member-2",
+      email: "bob@example.com",
+      name: "Bob",
+      is_group_share: false,
+      role: "Viewer",
+      target_type: "Vault",
+    },
+  ],
   "items-full": {
     items: [
       {
