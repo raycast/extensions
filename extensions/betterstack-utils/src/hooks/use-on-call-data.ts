@@ -77,6 +77,7 @@ function findPrimarySchedule(calendars: Calendar[]): Optional<Calendar> {
   return (
     calendars.find((calendar) => calendar.name?.trim().toLowerCase() === normalizedPrimaryName) ??
     calendars.find((calendar) => calendar.isDefault) ??
-    calendars.find((calendar) => calendar.name?.toLowerCase().includes(normalizedPrimaryName))
+    calendars.find((calendar) => calendar.name?.toLowerCase().includes(normalizedPrimaryName)) ??
+    calendars.at(0)
   );
 }
