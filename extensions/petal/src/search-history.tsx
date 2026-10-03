@@ -42,7 +42,12 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search transcriptions">
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder="Search transcriptions"
+      selectedItemId={records[0]?.entry.id}
+    >
       {!isLoading && records.length === 0 && (
         <List.EmptyView
           title="No history entries"
@@ -71,6 +76,7 @@ export default function Command() {
         return (
           <List.Item
             key={record.entry.id}
+            id={record.entry.id}
             icon={modelIconForModelID(record.entry.modelID)}
             title={title}
             accessories={[{ text: `${chars} chars` }, { date: record.date }]}

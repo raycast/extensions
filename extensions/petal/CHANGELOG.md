@@ -1,5 +1,11 @@
 # Petal Changelog
 
+## [Latest History First and Live Model List] - {PR_MERGE_DATE}
+
+- `Search History` now selects the newest transcription each time it opens
+- `Switch Model` reads the model list from Petal, so new models and download status show up without an extension update
+- Updated the built-in model list to Petal's current models, with an NVIDIA icon for Parakeet
+
 ## [Initial Version] - 2026-03-10
 
 - Added `Start Recording` command (`petal://start`)

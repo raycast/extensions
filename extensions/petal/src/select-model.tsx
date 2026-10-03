@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, openCommandPreferences, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
-  PETAL_MODELS,
+  DEFAULT_MODEL_ID,
   checkPetalInstallation,
   getModelsDirectoryPath,
+  loadPetalModels,
   openPetalDeepLink,
   readDefaultString,
   writeDefaultString,
@@ -12,18 +13,16 @@ import {
 export default function Command() {
   const modelsDirectory = getModelsDirectoryPath();
 
-  const {
-    data: selectedModelID,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(async () => {
+  const { data, isLoading, revalidate } = useCachedPromise(async () => {
     const id = await readDefaultString("selected_model_id");
-    return id || "qwen3-asr-0.6b-4bit";
+    return { selectedModelID: id || DEFAULT_MODEL_ID, models: loadPetalModels() };
   }, []);
+  const selectedModelID = data?.selectedModelID;
+  const models = data?.models ?? [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Switch model">
-      {PETAL_MODELS.map((model) => {
+      {models.map((model) => {
         const isSelected = model.id === selectedModelID;
         return (
           <List.Item
@@ -35,8 +34,14 @@ export default function Command() {
               ...(model.recommended
                 ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Recommended" }]
                 : []),
-              { text: model.supportsSmart ? "Smart" : "Verbatim" },
-              ...(model.size ? [{ text: model.size }] : []),
+              ...(model.supportsLiveTranscription ? [{ tag: { value: "Live", color: Color.Blue } }] : []),
+              ...(model.isDownloaded === false
+                ? [{ icon: Icon.Download, text: model.size, tooltip: "Download required" }]
+                : model.isDownloaded
+                  ? [{ icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Downloaded" }]
+                  : model.size
+                    ? [{ text: model.size }]
+                    : []),
             ]}
             detail={
               <List.Item.Detail
@@ -45,7 +50,13 @@ export default function Command() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Model ID" text={model.id} />
                     <List.Item.Detail.Metadata.Label title="Provider" text={model.provider} />
-                    <List.Item.Detail.Metadata.Label title="Supports Smart" text={model.supportsSmart ? "Yes" : "No"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Live Transcription"
+                      text={model.supportsLiveTranscription ? "Yes" : "No"}
+                    />
+                    {model.isDownloaded !== undefined && (
+                      <List.Item.Detail.Metadata.Label title="Downloaded" text={model.isDownloaded ? "Yes" : "No"} />
+                    )}
                     <List.Item.Detail.Metadata.Label title="Selected" text={isSelected ? "Yes" : "No"} />
                     {model.size && <List.Item.Detail.Metadata.Label title="Size" text={model.size} />}
                     <List.Item.Detail.Metadata.Label title="Models Folder" text={modelsDirectory} />
