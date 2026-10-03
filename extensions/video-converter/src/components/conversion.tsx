@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import path from "path";
-import { ActionPanel, Action, Toast, Icon, List, showInFinder, showToast } from "@raycast/api";
-import { getProgressIcon, showFailureToast } from "@raycast/utils";
+import { ActionPanel, Action, Toast, Icon, List, showInFinder, showToast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { cancelConversion, ConversionTask, convertVideo } from "../utils/ffmpeg";
 import type { FormValues } from "../types";
 import { CONVERSION_STATUS, LOADING_MESSAGES, ERROR_MESSAGES } from "../constants";
@@ -19,26 +19,32 @@ export default function Conversion({ values }: { values: FormValues }) {
     const startConversion = async () => {
       try {
         setIsLoading(true);
-        showToast({
+        const toast = await showToast({
           style: Toast.Style.Animated,
           title: LOADING_MESSAGES.INITIALIZING,
         });
 
         await convertVideo(values, (t) => {
           setTasks(t.map((x) => ({ ...x })));
+          if (t.some((task) => task.status !== "queued")) {
+            setIsLoading(false);
+            toast.title = LOADING_MESSAGES.CONVERTING;
+            toast.message = `${t.filter((task) => task.status === "done").length}/${t.length} files completed`;
+          }
         });
-        setIsLoading(false);
       } catch (error) {
         showFailureToast(error, {
           title: ERROR_MESSAGES.CONVERSION_FAILED,
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     startConversion();
   }, []);
 
-  if (tasks.length === 0) return null;
+  if (tasks.length === 0) return <List isLoading={isLoading} />;
 
   const isCompletedStatus = (
     status: (typeof CONVERSION_STATUS)[keyof typeof CONVERSION_STATUS],
@@ -53,9 +59,9 @@ export default function Conversion({ values }: { values: FormValues }) {
   if (completed && !isCompleted) {
     setIsCompleted(true);
     showToast({
-      title: "Conversion Completed",
-      message: `All ${tasks.length} files have been converted.`,
-      style: Toast.Style.Success,
+      title: tasks.every((t) => t.status === "done") ? "Conversion Completed" : "Conversion Finished",
+      message: `${tasks.filter((t) => t.status === "done").length} of ${tasks.length} files converted.`,
+      style: tasks.some((t) => t.status === "error") ? Toast.Style.Failure : Toast.Style.Success,
     });
   }
 
@@ -79,7 +85,8 @@ export default function Conversion({ values }: { values: FormValues }) {
           const subtitle = {
             [CONVERSION_STATUS.DONE]: "Done",
             [CONVERSION_STATUS.ERROR]: "Error",
-            [CONVERSION_STATUS.CONVERTING]: `Converting... ${t.fps} fps`,
+            [CONVERSION_STATUS.CONVERTING]:
+              values.videoFormat === "gif" ? "Encoding GIF…" : `Converting... ${t.fps} fps`,
             [CONVERSION_STATUS.QUEUED]: "Queued",
             [CONVERSION_STATUS.CANCELLED]: "Cancelled",
           };
@@ -87,7 +94,7 @@ export default function Conversion({ values }: { values: FormValues }) {
           const icons = {
             [CONVERSION_STATUS.DONE]: Icon.Checkmark,
             [CONVERSION_STATUS.ERROR]: Icon.XMarkCircle,
-            [CONVERSION_STATUS.CONVERTING]: getProgressIcon(t.progress / 100),
+            [CONVERSION_STATUS.CONVERTING]: Icon.CircleProgress,
             [CONVERSION_STATUS.QUEUED]: Icon.Clock,
             [CONVERSION_STATUS.CANCELLED]: Icon.XMarkCircle,
           };
@@ -101,7 +108,15 @@ export default function Conversion({ values }: { values: FormValues }) {
               accessories={[{ text: percent }]}
               actions={
                 <ActionPanel>
-                  <Action title="Show in Finder" onAction={() => showInFinder(t.file)} icon={Icon.Finder} />
+                  <Action
+                    title={process.platform === "win32" ? "Open Containing Folder" : "Show in Finder"}
+                    onAction={() =>
+                      process.platform === "win32"
+                        ? open(path.dirname(t.status === "done" ? t.outputFile || t.file : t.file))
+                        : showInFinder(t.status === "done" ? t.outputFile || t.file : t.file)
+                    }
+                    icon={Icon.Folder}
+                  />
                   {!completed && (
                     <Action
                       title="Cancel Conversion"
