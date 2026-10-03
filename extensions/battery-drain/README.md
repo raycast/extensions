@@ -50,7 +50,7 @@ Two things worth knowing from it. A system process that shows up as a runaway (`
 This applies to the chip icon on the Now row in Diagnose Battery Drain; it is green when all is well. The menu bar icon keeps the menu bar's own color: there, a runaway process shows as a warning inside the menu and as a notification.
 
 - **Orange:** three consecutive readings at or above the high-draw threshold (25 W by default), or the same process at an energy impact of 50 or more for three samples in a row. A single spike does not count.
-- **Red:** a process has held at least 80% of a CPU core for 15 minutes or more, either observed over the history (the menu bar's, or Diagnose Battery Drain's own samples while it is open) or inferred from its total CPU time since it started. Once flagged, it stays red until it drops below three quarters of that share (60% by default): a single low reading, such as the first one Diagnose Battery Drain takes while it opens, does not clear it.
+- **Red:** a process has held at least 80% of a CPU core for 15 minutes or more, either observed over the history (the menu bar's, or Diagnose Battery Drain's own samples while it is open) or inferred from its total CPU time since it started. Once flagged, it stays red until it drops below three quarters of that share (60% by default): a single low reading, such as the first one Diagnose Battery Drain takes while it opens, does not clear it. A process known only from its total CPU time stays red below the share only while the history has not seen it drop below three quarters of it; with no history, it needs the full share.
 
 ## Preferences
 

@@ -11,30 +11,33 @@ export type Runaway = { pid: number; command: string; cpu: number; sinceSec: num
  */
 export const RUNAWAY_EXIT_SHARE = 0.75;
 
+type Reading = { t: number; cpu: number | undefined };
+
 /**
- * Seconds of the hot streak ending at the snapshot, matched on pid, command and, when both are known,
- * start time: an old process of the same name on a reused pid must not lend the new one its streak.
- * The streak counts readings at or above the threshold; once it has lasted long enough to be flagged,
- * readings down to RUNAWAY_EXIT_SHARE of the threshold carry it on instead of ending it.
+ * The process's CPU in each measured sample up to now, matched on pid, command and, when both are known,
+ * start time: an old process of the same name on a reused pid must not lend the new one its history.
+ * Undefined where it was not among the processes a sample keeps, which is below the exit share.
  */
-function streakSec(
-  samples: Sample[],
-  pid: number,
-  command: string,
-  start: number | undefined,
-  now: number,
-  nowCpu: number,
-  th: Thresholds,
-): number {
+function readingsOf(samples: Sample[], pid: number, command: string, start: number | undefined, now: number) {
+  return (
+    samples
+      // top failed on that run: no process was measured, which says nothing about this one.
+      .filter((s) => !s.procsMissing && s.t <= now)
+      .map((s): Reading => ({
+        t: s.t,
+        cpu: s.procs.find((x) => x.pid === pid && sameCommand(x.cmd, command) && sameStart(x.start, start))?.cpu,
+      }))
+  );
+}
+
+/**
+ * Seconds of the hot streak ending at the snapshot. The streak counts readings at or above the threshold;
+ * once it has lasted long enough to be flagged, readings down to RUNAWAY_EXIT_SHARE of the threshold carry
+ * it on instead of ending it.
+ */
+function streakSec(history: Reading[], now: number, nowCpu: number, th: Thresholds): number {
   const exitCpu = th.runawayCpu * RUNAWAY_EXIT_SHARE;
-  const readings = samples
-    // top failed on that run: no process was measured, which says nothing about this one.
-    .filter((s) => !s.procsMissing && s.t <= now)
-    .map((s) => ({
-      t: s.t,
-      cpu: s.procs.find((x) => x.pid === pid && sameCommand(x.cmd, command) && sameStart(x.start, start))?.cpu,
-    }));
-  readings.push({ t: now, cpu: nowCpu });
+  const readings = [...history, { t: now, cpu: nowCpu }];
 
   let since: number | undefined;
   let flagged = false;
@@ -55,16 +58,26 @@ function streakSec(
 }
 
 export function detectRunaways(samples: Sample[], snapshot: Snapshot, th: Thresholds = THRESHOLDS): Runaway[] {
+  const exitCpu = th.runawayCpu * RUNAWAY_EXIT_SHARE;
   const runaways: Runaway[] = [];
   for (const p of snapshot.processes) {
-    if (p.pid <= 0 || p.cpu < th.runawayCpu * RUNAWAY_EXIT_SHARE) continue;
+    if (p.pid <= 0 || p.cpu < exitCpu) continue;
 
     const info = snapshot.processInfo.get(p.pid);
-    const fromHistory = streakSec(samples, p.pid, p.command, processStart(snapshot.t, info), snapshot.t, p.cpu, th);
-    const fromCpuTime =
-      info && info.etimeSec >= th.runawayMinSec && info.cpuTimeSec / info.etimeSec >= th.runawayCpu / 100
-        ? info.etimeSec
-        : 0;
+    const start = processStart(snapshot.t, info);
+    const history = readingsOf(samples, p.pid, p.command, start, snapshot.t);
+    const fromHistory = streakSec(history, snapshot.t, p.cpu, th);
+    // A hot lifetime average shows the process ran hot, not that it still does. Below the threshold now,
+    // it counts only if the history never saw the process cool below the exit share since it started
+    // (a sample within a minute of the rounded start may predate it); with no history to ask, the
+    // threshold itself applies.
+    const lifetimeHot =
+      info !== undefined && info.etimeSec >= th.runawayMinSec && info.cpuTimeSec / info.etimeSec >= th.runawayCpu / 100;
+    const sinceStart = history.filter((r) => start === undefined || r.t - start >= 60_000);
+    const stillHot =
+      p.cpu >= th.runawayCpu ||
+      (sinceStart.length > 0 && sinceStart.every((r) => r.cpu !== undefined && r.cpu >= exitCpu));
+    const fromCpuTime = lifetimeHot && stillHot ? info.etimeSec : 0;
 
     const sinceSec = Math.max(fromHistory, fromCpuTime);
     if (sinceSec >= th.runawayMinSec) {

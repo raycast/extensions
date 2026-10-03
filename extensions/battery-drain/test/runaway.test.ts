@@ -88,6 +88,27 @@ describe("detectRunaways", () => {
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
   });
 
+  it("flags a process whose lifetime average is hot at a lower reading while the history never saw it cool", () => {
+    // Measured: the menu bar's samples read yes at 72% throughout, so no streak ever reached 80%.
+    const halfHour: [number, ProcessInfo][] = [[42, { etimeSec: 1800, cpuTimeSec: 1795, user: "me" }]];
+    const history = [16, 18, 20, 22, 24, 26, 28].map((m) => hot(m * MIN, 42, "yes", 72));
+    const s = snap(30 * MIN, [{ pid: 42, command: "yes", cpu: 72 }], halfHour);
+    expect(detectRunaways(history, s)).toEqual([{ pid: 42, command: "yes", cpu: 72, sinceSec: 1800 }]);
+  });
+
+  it("does not flag a slowed process on its lifetime average once the history saw it drop below the exit share", () => {
+    const tenHours: [number, ProcessInfo][] = [[42, { etimeSec: 36000, cpuTimeSec: 34000, user: "me" }]];
+    const history = [hot(600 * MIN), hot(605 * MIN, 42, "yes", 20), hot(610 * MIN, 42, "yes", 65)];
+    const s = snap(615 * MIN, [{ pid: 42, command: "yes", cpu: 65 }], tenHours);
+    expect(detectRunaways(history, s)).toEqual([]);
+  });
+
+  it("asks the full threshold of a lifetime average when there is no history to confirm it", () => {
+    const tenHours: [number, ProcessInfo][] = [[42, { etimeSec: 36000, cpuTimeSec: 34000, user: "me" }]];
+    expect(detectRunaways([], snap(0, [{ pid: 42, command: "yes", cpu: 65 }], tenHours))).toEqual([]);
+    expect(detectRunaways([], snap(0, [{ pid: 42, command: "yes", cpu: 85 }], tenHours))).toHaveLength(1);
+  });
+
   it("does not let a reused PID inherit another command's streak", () => {
     const history = [0, 5, 10, 15].map((m) => hot(m * MIN, 42, "old-proc"));
     expect(detectRunaways(history, snap(16 * MIN, [{ pid: 42, command: "yes", cpu: 99 }], young))).toEqual([]);
