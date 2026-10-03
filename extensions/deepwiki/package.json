@@ -96,6 +96,7 @@
     "typescript": "~5.9.3"
   },
   "scripts": {
+    "test": "tsc --module commonjs --target es2021 --esModuleInterop --skipLibCheck --strict --outDir .test-build tests/*.test.ts && node --test .test-build/tests/*.test.js",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

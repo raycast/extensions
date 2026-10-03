@@ -15,5 +15,5 @@ export async function getDeepWikiPage(repoIdentifier: string): Promise<{ url: st
     throw new Error("No documentation was found on this DeepWiki page.")
   }
 
-  return { url: pageUrl, content: content.slice(0, 30000) }
+  return { url: pageUrl, content }
 }
