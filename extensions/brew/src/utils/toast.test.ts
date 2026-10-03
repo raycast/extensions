@@ -56,6 +56,21 @@ describe("showActionToast", () => {
     expect(__raycast.toasts[0].messages).toEqual(["Pouring foo"]);
   });
 
+  // The finished toast stays up for the settle gap with its Cancel still
+  // showing. A click then must not abort finished work or send a hide, which
+  // carries no id and could dismiss the result toast that replaces it.
+  it("ignores Cancel once the work has finished", async () => {
+    const handle = showActionToast({ title: "Installing Tinycast", cancelable: true });
+    handle.updateMessage("Operation completed successfully");
+    const settled = handle.showSuccessHUD("Installed Tinycast");
+    await flushMicrotasks();
+    await __raycast.toasts[0].primaryAction?.onAction(__raycast.toasts[0]);
+    await settled;
+    expect(handle.abort?.signal.aborted).toBe(false);
+    expect(__raycast.events).not.toContain("hide");
+    expect(__raycast.events.at(-1)).toBe("show:Installed Tinycast");
+  });
+
   it("still forwards progress while running", () => {
     const handle = showActionToast({ title: "Installing Tinycast", cancelable: true });
     handle.updateMessage("Downloading 40%");

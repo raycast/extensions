@@ -82,6 +82,10 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     options.primaryAction = {
       title: "Cancel",
       onAction: () => {
+        // Finished work stays on screen for the settle gap with Cancel still
+        // showing: aborting it would do nothing, and the id-less hide could
+        // dismiss the result toast that replaces it.
+        if (settled) return;
         settled = true; // a progress update after this would bring the toast back
         controller?.abort();
         toast.hide();

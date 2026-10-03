@@ -210,7 +210,8 @@ restated as a per-package verdict.
   update sent in the same tick as the replacement can land on top of it. A
   finished install read "Installing … / Operation completed successfully" with
   a live Cancel button. `showActionToast` drops updates once it is settling and
-  holds the final toast until the last update is `UPDATE_SETTLE_MS` old.
+  holds the final toast until the last update is `UPDATE_SETTLE_MS` old;
+  `hide()` waits the same gap, and Cancel does nothing once it has begun.
 - **`execBrewWithProgress` checks `cancel.aborted` before it spawns.** Its
   abort listener is attached after an `await`, and an abort that fired during
   that await is already spent — so brew started although the user had pressed
