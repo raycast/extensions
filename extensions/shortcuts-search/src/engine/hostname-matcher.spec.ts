@@ -9,6 +9,13 @@ describe("matchesHostname", () => {
     it("does not match different hostnames", () => {
       expect(matchesHostname("app.fastmail.com", "mail.fastmail.com")).toBe(false);
     });
+
+    it("matches a catalog domain against the browser's www hostname", () => {
+      expect(matchesHostname("github.com", "www.github.com")).toBe(true);
+      expect(matchesHostname("www.github.com", "www.github.com")).toBe(true);
+      expect(matchesHostname("github.com", "www.github.com.evil.example")).toBe(false);
+      expect(matchesHostname("github.com", "other.github.com")).toBe(false);
+    });
   });
 
   describe("wildcard matching", () => {
@@ -19,6 +26,7 @@ describe("matchesHostname", () => {
     it("matches any subdomain", () => {
       expect(matchesHostname("*.zendesk.com", "acme.zendesk.com")).toBe(true);
       expect(matchesHostname("*.zendesk.com", "support.zendesk.com")).toBe(true);
+      expect(matchesHostname("*.zendesk.com", "www.zendesk.com")).toBe(true);
     });
 
     it("does not match bare domain without subdomain", () => {

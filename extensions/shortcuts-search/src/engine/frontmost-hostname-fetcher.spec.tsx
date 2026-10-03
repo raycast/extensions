@@ -6,6 +6,20 @@ import { getFrontmostBrowserTarget, getFrontmostHostname } from "./frontmost-hos
 import { runAppleScript } from "@raycast/utils";
 import { getPlatform } from "../load/platform";
 import { getWindowsFrontmostBrowserTarget } from "./windows-hostname-fetcher";
+import { matchesHostname } from "./hostname-matcher";
+import { validateTarget } from "./execution-target";
+
+it("matches www catalog aliases without changing the captured macOS URL or host", async () => {
+  jest.mocked(getPlatform).mockReturnValue("macos");
+  const url = "https://www.github.com/user/repo?q=1";
+  jest.mocked(runAppleScript).mockResolvedValue(JSON.stringify({ bundleId: "com.apple.Safari", url }));
+  const target = await getFrontmostBrowserTarget();
+  expect(target).toEqual({ kind: "browser", bundleId: "com.apple.Safari", hostname: "www.github.com", url });
+  if (!target || target.kind !== "browser") throw new Error("Expected browser target");
+  expect(matchesHostname("github.com", target.hostname)).toBe(true);
+  expect(() => validateTarget(target)).not.toThrow();
+  expect(() => validateTarget({ ...target, hostname: "github.com" })).toThrow("Web page target changed");
+});
 it("preserves the complete macOS browser target", async () => {
   jest.mocked(getPlatform).mockReturnValue("macos");
   jest

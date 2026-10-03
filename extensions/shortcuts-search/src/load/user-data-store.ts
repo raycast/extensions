@@ -14,6 +14,8 @@ export function createUserDataStore(dependencies: {
   let snapshotToken: string | null = null;
   let generation = 0;
   let pending: Promise<void> | null = null;
+  let pendingAllowsAuthorization = false;
+  let queuedAuthorization: Promise<void> | null = null;
   const listeners = new Set<() => void>();
   const update = (next: PrivateSnapshot) => {
     snapshot = next;
@@ -23,11 +25,30 @@ export function createUserDataStore(dependencies: {
     snapshotToken = null;
     generation++;
     pending = null;
+    pendingAllowsAuthorization = false;
+    queuedAuthorization = null;
     update({ data: null, isLoading: false, initialized: false });
   };
   const revalidate = (allow = false): Promise<void> => {
-    if (pending) return pending;
+    if (pending) {
+      if (!allow || pendingAllowsAuthorization) return pending;
+      if (queuedAuthorization) return queuedAuthorization;
+      const version = generation;
+      // A background read cannot consume a later explicit request to sign in.
+      // Wait for it, then authorize only if it did not load an account or get reset.
+      const queued = pending
+        .then(() => {
+          if (generation !== version || snapshot.data) return;
+          return revalidate(true);
+        })
+        .finally(() => {
+          if (queuedAuthorization === queued) queuedAuthorization = null;
+        });
+      queuedAuthorization = queued;
+      return queued;
+    }
     const version = ++generation;
+    pendingAllowsAuthorization = allow;
     update({ ...snapshot, isLoading: true, error: undefined });
     const operation = (async () => {
       try {

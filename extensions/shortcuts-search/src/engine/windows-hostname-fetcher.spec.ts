@@ -4,6 +4,23 @@ import { getFrontmostApplication } from "@raycast/api";
 import { runPowerShellScript } from "@raycast/utils";
 import { getWindowsFrontmostBrowserTarget } from "./windows-hostname-fetcher";
 import { buildWindowsCaptureScript, normalizeBrowserUrl, parseWindowsTarget } from "./windows-target";
+import { matchesHostname } from "./hostname-matcher";
+import { validateTarget } from "./execution-target";
+
+it("matches www catalog aliases without weakening Windows URL and address guards", () => {
+  const url = "https://www.github.com/user/repo?q=1";
+  const addressValue = "www.github.com/user/repo?q=1";
+  const target = parseWindowsTarget(
+    JSON.stringify({ windowsProcessName: "chrome", processId: 1, windowHandle: "2", url, addressValue }),
+    "chrome",
+    true
+  );
+  expect(target).toMatchObject({ hostname: "www.github.com", url, documentUrl: url, addressValue });
+  if (target.kind !== "browser") throw new Error("Expected browser target");
+  expect(matchesHostname("github.com", target.hostname)).toBe(true);
+  expect(() => validateTarget(target)).not.toThrow();
+  expect(() => validateTarget({ ...target, hostname: "github.com" })).toThrow("Web page target changed");
+});
 it("captures the browser identified by Raycast, using its window root rather than the focused child element", async () => {
   jest.mocked(getFrontmostApplication).mockResolvedValue({ name: "Chrome", path: "C:\\Apps\\chrome.exe" });
   jest.mocked(runPowerShellScript).mockResolvedValue(
