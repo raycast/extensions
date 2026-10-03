@@ -17,7 +17,7 @@ import {
   Detail,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import {
   listFolders,
   fetchEmails,
@@ -126,6 +126,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [showPreview, setShowPreview] = useCachedState("show-preview", false);
 
   // Fetch folders
   const {
@@ -228,7 +229,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={selectedEmailUid !== null}
+      isShowingDetail={showPreview}
       searchBarPlaceholder="Search emails..."
       searchBarAccessory={
         <FilterDropdowns
@@ -249,20 +250,26 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
       }}
     >
       {loadedEmails && loadedEmails.length > 0 ? (
-        loadedEmails.map((email, index) => (
-          <EmailListItem
-            key={email.uid}
-            email={demoMode ? anonymizeEmail(email, index) : email}
-            folder={selectedFolder}
-            filter={filter}
-            isSelected={selectedEmailUid === email.uid}
-            onRefresh={revalidateEmails}
-            onLoadMore={hasMore ? handleLoadMore : undefined}
-            isLoadingMore={isLoadingMore}
-            emailCount={loadedEmails.length}
-            demoMode={demoMode}
-            onToggleDemoMode={() => setDemoMode(!demoMode)}
-          />
+        groupByDay(loadedEmails).map((section) => (
+          <List.Section key={section.title} title={section.title}>
+            {section.emails.map(({ email, index }) => (
+              <EmailListItem
+                key={email.uid}
+                email={demoMode ? anonymizeEmail(email, index) : email}
+                folder={selectedFolder}
+                filter={filter}
+                isSelected={selectedEmailUid === email.uid}
+                showPreview={showPreview}
+                onTogglePreview={() => setShowPreview(!showPreview)}
+                onRefresh={revalidateEmails}
+                onLoadMore={hasMore ? handleLoadMore : undefined}
+                isLoadingMore={isLoadingMore}
+                emailCount={loadedEmails.length}
+                demoMode={demoMode}
+                onToggleDemoMode={() => setDemoMode(!demoMode)}
+              />
+            ))}
+          </List.Section>
         ))
       ) : (
         <List.EmptyView
@@ -273,6 +280,28 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
       )}
     </List>
   );
+}
+
+// Sections like Mail: Today, Yesterday, then one per month
+function groupByDay(emails: Email[]): { title: string; emails: { email: Email; index: number }[] }[] {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+  const sections: { title: string; emails: { email: Email; index: number }[] }[] = [];
+  emails.forEach((email, index) => {
+    const date = new Date(email.date);
+    let title: string;
+    if (date >= startOfToday) title = "Today";
+    else if (date >= startOfYesterday) title = "Yesterday";
+    else title = date.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+    const last = sections[sections.length - 1];
+    if (last?.title === title) last.emails.push({ email, index });
+    else sections.push({ title, emails: [{ email, index }] });
+  });
+  return sections;
 }
 
 interface FilterDropdownsProps {
@@ -346,6 +375,8 @@ interface EmailListItemProps {
   folder: string;
   filter: EmailFilter;
   isSelected: boolean;
+  showPreview: boolean;
+  onTogglePreview: () => void;
   onRefresh: () => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
@@ -452,6 +483,8 @@ function EmailListItem({
   folder,
   filter,
   isSelected,
+  showPreview,
+  onTogglePreview,
   onRefresh,
   onLoadMore,
   isLoadingMore,
@@ -472,12 +505,14 @@ function EmailListItem({
         email.hasAttachment ? { icon: Icon.Paperclip } : {},
         { date: email.date, tooltip: email.date.toLocaleString() },
       ].filter((a) => Object.keys(a).length > 0)}
-      detail={isSelected ? <EmailDetail email={email} folder={folder} demoMode={demoMode} /> : undefined}
+      detail={showPreview && isSelected ? <EmailDetail email={email} folder={folder} demoMode={demoMode} /> : undefined}
       actions={
         <EmailActions
           email={email}
           folder={folder}
           filter={filter}
+          showPreview={showPreview}
+          onTogglePreview={onTogglePreview}
           onRefresh={onRefresh}
           onLoadMore={onLoadMore}
           isLoadingMore={isLoadingMore}
@@ -719,7 +754,7 @@ function ExpandedEmailView({ email, folder, onRefresh, initialDemoMode }: Expand
                 title="Download Attachments"
                 icon={Icon.Download}
                 onAction={handleDownloadAttachments}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
               />
             )}
           </ActionPanel.Section>
@@ -792,6 +827,8 @@ interface EmailActionsProps {
   email: Email;
   folder: string;
   filter: EmailFilter;
+  showPreview: boolean;
+  onTogglePreview: () => void;
   onRefresh: () => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
@@ -804,6 +841,8 @@ function EmailActions({
   email,
   folder,
   filter,
+  showPreview,
+  onTogglePreview,
   onRefresh,
   onLoadMore,
   isLoadingMore,
@@ -958,6 +997,12 @@ function EmailActions({
           onAction={handleExpandEmail}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
         />
+        <Action
+          title={showPreview ? "Hide Preview" : "Show Preview"}
+          icon={Icon.Sidebar}
+          onAction={onTogglePreview}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+        />
         <Action title="Reply" icon={Icon.Reply} onAction={handleReply} shortcut={{ modifiers: ["cmd"], key: "r" }} />
         <Action
           title="Reply All"
@@ -982,7 +1027,7 @@ function EmailActions({
             title="Download Attachments"
             icon={Icon.Download}
             onAction={handleDownloadAttachments}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           />
         )}
         <Action
