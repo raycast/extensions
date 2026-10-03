@@ -1,4 +1,4 @@
-import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
+import { ImapFlow, MailboxObject, ListResponse, MessageStructureObject } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Email, EmailAddress, Folder } from "./types";
@@ -223,6 +223,41 @@ function extractPreview(source: Buffer | undefined): string {
   return "";
 }
 
+type BodyPart = { part: string; charset?: string };
+
+// Find the displayable text and HTML parts, skipping attachments and forwarded messages
+function findBodyParts(
+  node: MessageStructureObject | undefined,
+  found: { text?: BodyPart; html?: BodyPart } = {},
+): { text?: BodyPart; html?: BodyPart } {
+  if (!node) return found;
+  const type = node.type?.toLowerCase();
+
+  if (node.childNodes?.length) {
+    if (type !== "message/rfc822") {
+      for (const child of node.childNodes) findBodyParts(child, found);
+    }
+    return found;
+  }
+
+  if (node.disposition === "attachment") return found;
+  // A single-part message has no part number; IMAP addresses its body as part 1
+  const bodyPart = { part: node.part || "1", charset: node.parameters?.charset };
+  if (type === "text/plain" && !found.text) found.text = bodyPart;
+  if (type === "text/html" && !found.html) found.html = bodyPart;
+  return found;
+}
+
+function decodePart(content: Buffer | null | undefined, charset?: string): string | undefined {
+  if (!content) return undefined;
+  try {
+    return new TextDecoder(charset || "utf-8").decode(content);
+  } catch {
+    // Unknown charset label
+    return new TextDecoder("utf-8").decode(content);
+  }
+}
+
 export async function fetchEmailBody(
   folderPath: string,
   uid: number,
@@ -232,31 +267,38 @@ export async function fetchEmailBody(
     const lock = await client.getMailboxLock(folderPath);
 
     try {
-      const message = await client.fetchOne(
-        uid,
-        {
-          source: true,
-        },
-        { uid: true },
-      );
+      if (inlineImages) {
+        // Opening the original in the browser needs the inline images, which live in other parts of the message
+        const message = await client.fetchOne(uid, { source: true }, { uid: true });
+        if (!message || !message.source) {
+          return {};
+        }
+        const parsed: ParsedMail = await simpleParser(message.source as Buffer, {
+          skipHtmlToText: true,
+          skipTextToHtml: true,
+          skipTextLinks: true,
+        });
+        return { text: parsed.text, html: parsed.html || undefined };
+      }
 
-      if (!message || !message.source) {
+      // Only download the text and HTML parts: the full source includes every attachment,
+      // so a short email with a few photos used to download several MB
+      const message = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+      if (!message || !message.bodyStructure) {
+        return {};
+      }
+      const { text, html } = findBodyParts(message.bodyStructure);
+      const parts = [text, html].filter((part): part is BodyPart => !!part).map(({ part }) => part);
+      if (parts.length === 0) {
         return {};
       }
 
-      // Skip the conversions we don't use. Inlining images rewrites every cid: reference as a base64 data URI,
-      // which can turn the HTML into several MB, so only do it when the full HTML is opened in the browser.
-      const parsed: ParsedMail = await simpleParser(message.source as Buffer, {
-        skipHtmlToText: true,
-        skipTextToHtml: true,
-        skipTextLinks: true,
-        skipImageLinks: !inlineImages,
-      });
+      const downloaded = await client.downloadMany(String(uid), parts, { uid: true });
+      const decode = (bodyPart?: BodyPart) =>
+        bodyPart &&
+        decodePart(downloaded[bodyPart.part]?.content, downloaded[bodyPart.part]?.meta?.charset || bodyPart.charset);
 
-      return {
-        text: parsed.text,
-        html: parsed.html || undefined,
-      };
+      return { text: decode(text), html: decode(html) };
     } finally {
       lock.release();
     }
