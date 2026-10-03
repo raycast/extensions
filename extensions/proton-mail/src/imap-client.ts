@@ -223,7 +223,11 @@ function extractPreview(source: Buffer | undefined): string {
   return "";
 }
 
-export async function fetchEmailBody(folderPath: string, uid: number): Promise<{ text?: string; html?: string }> {
+export async function fetchEmailBody(
+  folderPath: string,
+  uid: number,
+  { inlineImages = false }: { inlineImages?: boolean } = {},
+): Promise<{ text?: string; html?: string }> {
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
 
@@ -240,7 +244,14 @@ export async function fetchEmailBody(folderPath: string, uid: number): Promise<{
         return {};
       }
 
-      const parsed: ParsedMail = await simpleParser(message.source as Buffer);
+      // Skip the conversions we don't use. Inlining images rewrites every cid: reference as a base64 data URI,
+      // which can turn the HTML into several MB, so only do it when the full HTML is opened in the browser.
+      const parsed: ParsedMail = await simpleParser(message.source as Buffer, {
+        skipHtmlToText: true,
+        skipTextToHtml: true,
+        skipTextLinks: true,
+        skipImageLinks: !inlineImages,
+      });
 
       return {
         text: parsed.text,
