@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Weio site check MCP Server] - {PR_MERGE_DATE}
+## [Add Weio site check MCP Server] - 2026-10-03
 
 - Add Weio site check to the official registry: read-only website facts for AI agents. Check whether a domain and its www version load securely or show a browser privacy warning and why, with the certificate expiry date; read what a homepage publishes (title and description, language, CMS or site builder, mobile viewport tag, role contact emails, phone numbers, social links, contact page); and list businesses from a small dated scan index. Raycast connects directly to the remote Streamable HTTP server at https://weio.ai/mcp, with no sign-in; 10 free calls a day without a key, more with a paid Weio API key.
 
