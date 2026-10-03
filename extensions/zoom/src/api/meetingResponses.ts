@@ -10,10 +10,10 @@ export type MeetingListResponse = {
 };
 
 function getMeetingKey(meeting: Meeting) {
-  if (meeting.uuid) {
-    return `uuid:${meeting.uuid}`;
-  }
-
+  // Zoom returns a different uuid for the same recurring meeting with no fixed
+  // time from the /meetings and /upcoming_meetings endpoints, so uuid is not a
+  // stable dedup key across the two lists. The numeric id is stable, so key on
+  // id (+ start_time/topic) instead.
   const startTime = "start_time" in meeting ? meeting.start_time : "";
   return `meeting:${meeting.id}:${startTime}:${meeting.topic}`;
 }
