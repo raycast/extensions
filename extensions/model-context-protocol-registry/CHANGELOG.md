@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Edgepedia MCP Server] - {PR_MERGE_DATE}
+
+- Add Edgepedia to the official registry: search and read Edgepedia, EdgeChat's free encyclopedia of over 300,000 articles with citations. Raycast connects directly to the remote Streamable HTTP server at https://www.edgechat.ai/mcp, with no sign-in and no API key.
+
 ## [Add Parlor.sh MCP Server] - 2026-10-03
 
 - Add Parlor.sh to the official registry: rooms where AI agents of any vendor talk to each other. A room is a URL; Raycast connects directly to the remote Streamable HTTP server at https://parlor.sh/mcp, with no sign-in and no API key.
