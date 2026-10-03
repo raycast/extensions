@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -60,11 +60,159 @@ export default function Command(props?: LaunchProps<{ arguments: CommandArgument
     );
   }
 
-  return <EmailList initialFolder={folder} initialFilter={filter as EmailFilter} />;
+  return <Mailboxes initialFolder={folder} initialFilter={filter as EmailFilter} />;
+}
+
+// Mailboxes first, like Mail: the command opens the inbox (or a quicklink's folder) right away,
+// and Esc comes back here to switch folders
+function Mailboxes({ initialFolder, initialFilter }: { initialFolder?: string; initialFilter?: EmailFilter }) {
+  const { push } = useNavigation();
+  const { data: folders, isLoading, error, revalidate } = useFolders();
+
+  // Refresh counts when coming back from a folder
+  const openFolder = useCallback(
+    (path: string, filter?: EmailFilter) => push(<EmailList folder={path} initialFilter={filter} />, revalidate),
+    [push, revalidate],
+  );
+
+  const openedInitialFolder = useRef(false);
+  useEffect(() => {
+    if (openedInitialFolder.current) return;
+    openedInitialFolder.current = true;
+    openFolder(initialFolder || "INBOX", initialFilter);
+  }, [openFolder, initialFolder, initialFilter]);
+
+  // The connection is shared by every view, so only close it when the command closes
+  useEffect(() => {
+    return () => {
+      disconnectClient().catch(console.error);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Connection Error",
+        message: error.message || "Failed to connect to Proton Mail Bridge",
+      });
+    }
+  }, [error]);
+
+  const { mailboxes, userFolders } = groupFolders(folders || []);
+  const renderFolder = (folder: Folder) => (
+    <FolderListItem key={folder.path} folder={folder} onOpen={() => openFolder(folder.path)} onRefresh={revalidate} />
+  );
+
+  return (
+    <List isLoading={isLoading} navigationTitle="Mailboxes" searchBarPlaceholder="Filter mailboxes...">
+      <List.Section title="Mailboxes">{mailboxes.map(renderFolder)}</List.Section>
+      <List.Section title="Folders">{userFolders.map(renderFolder)}</List.Section>
+    </List>
+  );
+}
+
+// Same function for every view, so they share one cache entry
+async function listFoldersWithCounts() {
+  return await listFolders({ withCounts: true });
+}
+
+function useFolders() {
+  return useCachedPromise(listFoldersWithCounts, []);
+}
+
+function FolderListItem({
+  folder,
+  onOpen,
+  onRefresh,
+  onBack,
+}: {
+  folder: Folder;
+  onOpen: () => void;
+  onRefresh: () => void;
+  onBack?: () => void;
+}) {
+  const { push } = useNavigation();
+  const accessories: List.Item.Accessory[] = [];
+  if (folder.unseenCount) {
+    accessories.push({ tag: { value: `${folder.unseenCount}`, color: Color.Blue }, tooltip: "Unread" });
+  }
+  if (folder.messagesCount !== undefined) {
+    accessories.push({ text: `${folder.messagesCount}`, tooltip: "Emails" });
+  }
+
+  return (
+    <List.Item
+      title={folderDisplayName(folder.path)}
+      icon={getFolderIcon(folder)}
+      accessories={accessories}
+      actions={
+        <ActionPanel>
+          <Action title="Open Folder" icon={Icon.ArrowRight} onAction={onOpen} />
+          <Action
+            title="Compose New Email"
+            icon={Icon.NewDocument}
+            onAction={() => push(<ComposeForm mode="new" />)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={onRefresh}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          {onBack && <BackToFoldersAction onBack={onBack} />}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+// Esc already goes back, but the action makes it discoverable in ⌘K
+function BackToFoldersAction({ onBack }: { onBack: () => void }) {
+  return (
+    <Action
+      title="Back to Folders"
+      icon={Icon.ArrowLeft}
+      onAction={onBack}
+      shortcut={{ modifiers: ["cmd"], key: "[" }}
+    />
+  );
+}
+
+function folderSegments(folder: Folder): string[] {
+  return folder.delimiter ? folder.path.split(folder.delimiter) : [folder.path];
+}
+
+// Folders one level below `parentPath`
+function childFolders(folders: Folder[], parentPath: string): Folder[] {
+  return folders.filter((folder) => {
+    if (hasFlag(folder.flags, "\\Noselect") || !folder.delimiter) return false;
+    const parts = folderSegments(folder);
+    return parts.length > 1 && parts.slice(0, -1).join(folder.delimiter) === parentPath;
+  });
+}
+
+// System mailboxes, plus the first level of the user's folders. Bridge nests them under "Folders/" and
+// labels under "Labels/"; on other servers, top-level folders simply show up as mailboxes.
+function groupFolders(folders: Folder[]): { mailboxes: Folder[]; userFolders: Folder[] } {
+  const selectable = folders.filter((folder) => !hasFlag(folder.flags, "\\Noselect"));
+  return {
+    mailboxes: selectable.filter((folder) => folderSegments(folder).length === 1),
+    userFolders: selectable.filter((folder) => {
+      const parts = folderSegments(folder);
+      return parts.length === 2 && parts[0] === "Folders";
+    }),
+  };
+}
+
+function folderDisplayName(path: string): string {
+  if (path.toUpperCase() === "INBOX") return "Inbox";
+  return path.split("/").pop() || path;
 }
 
 interface EmailListProps {
-  initialFolder?: string;
+  folder: string;
   initialFilter?: EmailFilter;
 }
 
@@ -115,11 +263,13 @@ function anonymizeEmail(email: Email, index: number): Email {
   };
 }
 
-function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
+function EmailList({ folder: selectedFolder, initialFilter }: EmailListProps) {
+  const { push, pop } = useNavigation();
+  const { data: folders, revalidate: revalidateFolders } = useFolders();
+  const subfolders = childFolders(folders || [], selectedFolder);
   const prefs = getPreferenceValues<Preferences>();
   const pageSize = parseInt(prefs.emailsToLoad || "50", 10);
 
-  const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");
   const [filter, setFilter] = useState<EmailFilter>(initialFilter || "all");
   const [selectedEmailUid, setSelectedEmailUid] = useState<number | null>(null);
   const [loadedEmails, setLoadedEmails] = useState<Email[]>([]);
@@ -128,14 +278,6 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
 
-  // Fetch folders
-  const {
-    data: folders,
-    isLoading: foldersLoading,
-    error: foldersError,
-  } = useCachedPromise(async () => {
-    return await listFolders();
-  }, []);
   const permanentDelete = deletesPermanently(selectedFolder, folders || []);
 
   // Fetch emails for selected folder
@@ -197,50 +339,24 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     }
   }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      disconnectClient().catch(console.error);
-    };
-  }, []);
-
   // Handle errors
   useEffect(() => {
-    if (foldersError || emailsError) {
-      const error = foldersError || emailsError;
+    if (emailsError) {
       showToast({
         style: Toast.Style.Failure,
         title: "Connection Error",
-        message: error?.message || "Failed to connect to Proton Mail Bridge",
+        message: emailsError.message || "Failed to connect to Proton Mail Bridge",
       });
     }
-  }, [foldersError, emailsError]);
-
-  const handleFolderChange = useCallback((newFolder: string) => {
-    setSelectedFolder(newFolder);
-    setSelectedEmailUid(null);
-  }, []);
-
-  const handleFilterChange = useCallback((newFilter: string) => {
-    setFilter(newFilter as EmailFilter);
-  }, []);
-
-  const isLoading = foldersLoading || emailsLoading;
+  }, [emailsError]);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={emailsLoading}
+      navigationTitle={folderDisplayName(selectedFolder)}
       isShowingDetail={selectedEmailUid !== null}
       searchBarPlaceholder="Search emails..."
-      searchBarAccessory={
-        <FilterDropdowns
-          folders={folders || []}
-          selectedFolder={selectedFolder}
-          onFolderChange={handleFolderChange}
-          filter={filter}
-          onFilterChange={handleFilterChange}
-        />
-      }
+      searchBarAccessory={<FilterDropdown filter={filter} onFilterChange={setFilter} />}
       onSelectionChange={(id) => {
         if (id) {
           const uid = parseInt(id, 10);
@@ -250,6 +366,19 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         }
       }}
     >
+      {subfolders.length > 0 && (
+        <List.Section title="Folders">
+          {subfolders.map((folder) => (
+            <FolderListItem
+              key={folder.path}
+              folder={folder}
+              onOpen={() => push(<EmailList folder={folder.path} />, revalidateFolders)}
+              onRefresh={revalidateFolders}
+              onBack={pop}
+            />
+          ))}
+        </List.Section>
+      )}
       {loadedEmails && loadedEmails.length > 0 ? (
         loadedEmails.map((email, index) => (
           <EmailListItem
@@ -271,55 +400,32 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         <List.EmptyView
           icon={Icon.Envelope}
           title="No Emails"
-          description={`No emails found in ${selectedFolder}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
+          description={`No emails found in ${folderDisplayName(selectedFolder)}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
+          actions={
+            <ActionPanel>
+              <BackToFoldersAction onBack={pop} />
+            </ActionPanel>
+          }
         />
       )}
     </List>
   );
 }
 
-interface FilterDropdownsProps {
-  folders: Folder[];
-  selectedFolder: string;
-  onFolderChange: (folder: string) => void;
+// Folders live on the Mailboxes screen, so the dropdown only holds filters
+function FilterDropdown({
+  filter,
+  onFilterChange,
+}: {
   filter: EmailFilter;
-  onFilterChange: (filter: string) => void;
-}
-
-function FilterDropdowns({ folders, selectedFolder, onFolderChange, filter, onFilterChange }: FilterDropdownsProps) {
-  // Combine folder and filter into a single value for the dropdown
-  const combinedValue = `${selectedFolder}::${filter}`;
-
-  // Filter out \Noselect folders (containers that can't hold messages)
-  const selectableFolders = folders.filter((folder) => !hasFlag(folder.flags, "\\Noselect"));
-
-  const handleChange = (value: string) => {
-    // Check if it's a filter value
-    if (["all", "unread", "read", "attachment"].includes(value)) {
-      onFilterChange(value);
-    } else {
-      // It's a folder path
-      onFolderChange(value);
-    }
-  };
-
+  onFilterChange: (filter: EmailFilter) => void;
+}) {
   return (
-    <List.Dropdown tooltip="Select Folder or Filter" value={combinedValue.split("::")[0]} onChange={handleChange}>
-      <List.Dropdown.Section title="Folders">
-        {selectableFolders.map((folder) => (
-          <List.Dropdown.Item key={folder.path} title={folder.name} value={folder.path} icon={getFolderIcon(folder)} />
-        ))}
-      </List.Dropdown.Section>
-      <List.Dropdown.Section title="Filter">
-        <List.Dropdown.Item title={`All${filter === "all" ? " ✓" : ""}`} value="all" icon={Icon.List} />
-        <List.Dropdown.Item title={`Unread${filter === "unread" ? " ✓" : ""}`} value="unread" icon={Icon.Circle} />
-        <List.Dropdown.Item title={`Read${filter === "read" ? " ✓" : ""}`} value="read" icon={Icon.CheckCircle} />
-        <List.Dropdown.Item
-          title={`Has Attachment${filter === "attachment" ? " ✓" : ""}`}
-          value="attachment"
-          icon={Icon.Paperclip}
-        />
-      </List.Dropdown.Section>
+    <List.Dropdown tooltip="Filter" value={filter} onChange={(value) => onFilterChange(value as EmailFilter)}>
+      <List.Dropdown.Item title="All" value="all" icon={Icon.List} />
+      <List.Dropdown.Item title="Unread" value="unread" icon={Icon.Circle} />
+      <List.Dropdown.Item title="Read" value="read" icon={Icon.CheckCircle} />
+      <List.Dropdown.Item title="Has Attachment" value="attachment" icon={Icon.Paperclip} />
     </List.Dropdown>
   );
 }
@@ -338,9 +444,22 @@ function getFolderIcon(folder: Folder): Icon {
       return Icon.ExclamationMark;
     case "\\Archive":
       return Icon.Box;
+    case "\\Flagged":
+      return Icon.Star;
+    case "\\All":
+      return Icon.Tray;
     default:
-      if (folder.path.toUpperCase() === "INBOX") return Icon.Envelope;
-      return Icon.Folder;
+      // Bridge doesn't flag every system mailbox with a special-use attribute
+      switch (folder.path.toLowerCase()) {
+        case "inbox":
+          return Icon.Envelope;
+        case "starred":
+          return Icon.Star;
+        case "all mail":
+          return Icon.Tray;
+        default:
+          return Icon.Folder;
+      }
   }
 }
 
@@ -842,7 +961,7 @@ function EmailActions({
   demoMode,
   onToggleDemoMode,
 }: EmailActionsProps) {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const isUnread = !hasFlag(email.flags, "\\Seen");
   const fromAddress = email.from[0]?.address || "";
 
@@ -1058,6 +1177,10 @@ function EmailActions({
           onAction={handleCopyAsMarkdown}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
         />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Navigation">
+        <BackToFoldersAction onBack={pop} />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Quicklinks">
