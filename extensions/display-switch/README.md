@@ -46,7 +46,8 @@ Once approved in the Raycast Store, it can also be installed from that registry.
 
 ## Install in Raycast
 
-Store review is pending. For a local install:
+Submitted for [Raycast Store review](https://github.com/raycast/extensions/pull/31870).
+The listing will appear after approval. For a local install:
 
 ```sh
 git clone https://github.com/niechen/display-switch.git
