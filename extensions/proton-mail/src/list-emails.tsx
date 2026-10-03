@@ -569,7 +569,9 @@ function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
           <List.Item.Detail.Metadata.Label title="Date" text={email.date.toLocaleString()} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Status">
-            {!hasFlag(email.flags, "\\Seen") && (
+            {hasFlag(email.flags, "\\Seen") ? (
+              <List.Item.Detail.Metadata.TagList.Item text="Read" color={Color.Green} />
+            ) : (
               <List.Item.Detail.Metadata.TagList.Item text="Unread" color={Color.Blue} />
             )}
             {email.hasAttachment && <List.Item.Detail.Metadata.TagList.Item text="Attachment" color={Color.Orange} />}
