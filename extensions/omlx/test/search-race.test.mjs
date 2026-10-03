@@ -462,43 +462,147 @@ test("unmount cancels debounce and invalidates both successful and failed in-fli
   }
 });
 
-for (const running of [false, true]) {
-  for (const completed of [false, true]) {
-    test(`late health (${running}) does not overwrite ${completed ? "completed" : "pending"} search`, async () => {
-      const app = await mount();
-      app.search("current");
-      if (completed) {
-        await app.advance();
-        app.searches[0].resolve([model("current")]);
-        await settle();
-      }
-      const writes = app.writes.length;
-      app.health.resolve(running);
+for (const completed of [false, true]) {
+  test(`late online health does not overwrite ${completed ? "completed" : "pending"} search`, async () => {
+    const app = await mount();
+    app.search("current");
+    if (completed) {
+      await app.advance();
+      app.searches[0].resolve([model("current")]);
       await settle();
-      assert.equal(app.writes.length, writes);
-      assert.equal(app.render().props.isLoading, !completed);
-      assert.deepEqual(app.titles(), completed ? ["current"] : []);
-      if (running) {
-        app.recommendations.resolve({
-          trending: [model("trending")],
-          popular: [],
-        });
-        await settle();
-        assert.equal(app.render().props.isLoading, !completed);
-        assert.deepEqual(app.titles(), completed ? ["current"] : []);
-      }
+    }
+    const writes = app.writes.length;
+    app.health.resolve(true);
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.equal(app.render().props.isLoading, !completed);
+    assert.deepEqual(app.titles(), completed ? ["current"] : []);
+    app.recommendations.resolve({
+      trending: [model("trending")],
+      popular: [],
     });
-  }
+    await settle();
+    assert.equal(app.render().props.isLoading, !completed);
+    assert.deepEqual(app.titles(), completed ? ["current"] : []);
+  });
 }
 
-test("empty source switch invalidates initialization even without a search query", async () => {
+test("late offline health overrides a completed search with the offline view", async () => {
   const app = await mount();
-  app.source("modelscope");
-  const writes = app.writes.length;
+  app.search("current");
+  await app.advance();
+  app.searches[0].resolve([model("current")]);
+  await settle();
+  assert.deepEqual(app.titles(), ["current"]);
   app.health.resolve(false);
   await settle();
+  assert.equal(app.timers.size, 0);
+  assert.equal(app.empty(), "oMLX Server Offline");
+  assert.deepEqual(app.titles(), []);
+});
+
+// The search request is genuinely unresolved when health turns offline:
+// these fail if the offline branch stops invalidating the search
+// generation, because the later settlement would pass the guard.
+for (const [mode, label] of [
+  ["resolve", "resolves"],
+  ["reject", "rejects"],
+]) {
+  test(`late offline health overrides an in-flight search that later ${label}`, async () => {
+    const app = await mount();
+    app.search("current");
+    await app.advance();
+    assert.equal(app.searches.length, 1);
+    app.health.resolve(false);
+    await settle();
+    assert.equal(app.timers.size, 0);
+    assert.equal(app.empty(), "oMLX Server Offline");
+    assert.deepEqual(app.titles(), []);
+    const writes = app.writes.length;
+    if (mode === "resolve") app.searches[0].resolve([model("late")]);
+    else app.searches[0].reject(new Error("server went down"));
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.equal(app.toasts.length, 0);
+    assert.equal(app.empty(), "oMLX Server Offline");
+    assert.deepEqual(app.titles(), []);
+  });
+}
+
+test("offline health invalidates a failure toast already awaiting settlement", async () => {
+  const app = await mount();
+  app.search("fails");
+  await app.advance();
+  app.searches[0].reject(new Error("failure"));
+  await settle();
+  assert.equal(app.toasts.length, 1);
+  assert.equal(app.toasts[0].options.title, "Search failed");
+  assert.equal(app.toasts[0].options.style, "failure");
+  assert.equal(app.render().props.isLoading, true);
+  app.health.resolve(false);
+  await settle();
+  assert.equal(app.empty(), "oMLX Server Offline");
+  const writes = app.writes.length;
+  app.toasts[0].resolve({});
+  await settle();
   assert.equal(app.writes.length, writes);
-  assert.equal(app.empty(), "Search for Models on ModelScope");
+  assert.equal(app.toasts.length, 1);
+  assert.equal(app.empty(), "oMLX Server Offline");
+  assert.deepEqual(app.titles(), []);
+});
+
+for (const mode of ["resolve", "reject"]) {
+  test(`offline then unmount prevents state writes when an in-flight search ${mode}s`, async () => {
+    const app = await mount();
+    app.search("current");
+    await app.advance();
+    assert.equal(app.searches.length, 1);
+    app.health.resolve(false);
+    await settle();
+    assert.equal(app.empty(), "oMLX Server Offline");
+    app.unmount();
+    const writes = app.writes.length;
+    if (mode === "resolve") app.searches[0].resolve([model("late")]);
+    else app.searches[0].reject(new Error("after offline and unmount"));
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.equal(
+      app.writes.some((write) => !write.mounted),
+      false,
+    );
+    assert.equal(app.toasts.length, 0);
+    assert.equal(app.timers.size, 0);
+  });
+}
+
+test("offline health cancels a pending search debounce before it starts", async () => {
+  const app = await mount();
+  app.search("pending");
+  await app.advance(299);
+  assert.equal(app.timers.size, 1);
+  assert.equal(app.searches.length, 0);
+  app.health.resolve(false);
+  await settle();
+  assert.equal(app.timers.size, 0);
+  assert.equal(app.empty(), "oMLX Server Offline");
+  const writes = app.writes.length;
+  await app.advance(1);
+  assert.equal(app.searches.length, 0);
+  assert.equal(app.toasts.length, 0);
+  assert.equal(app.writes.length, writes);
+  assert.equal(app.empty(), "oMLX Server Offline");
+  assert.deepEqual(app.titles(), []);
+});
+
+test("empty source switch cannot suppress a late offline result", async () => {
+  const app = await mount();
+  app.source("modelscope");
+  app.health.resolve(false);
+  await settle();
+  const writes = app.writes.length;
+  await settle();
+  assert.equal(app.writes.length, writes);
+  assert.equal(app.empty(), "oMLX Server Offline");
   assert.equal(app.timers.size, 0);
 });
 

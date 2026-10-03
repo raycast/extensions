@@ -21,66 +21,102 @@ import {
   removeMsTask,
   retryHfDownload,
   retryMsDownload,
+  type DownloadSource,
   type TrackedDownload,
 } from "./lib/omlx";
 
 type ViewState = "loading" | "not-installed" | "offline" | "ready";
 
+type SourceErrors = Partial<Record<DownloadSource, string>>;
+
+const SOURCE_LABELS: Record<DownloadSource, string> = {
+  huggingface: "Hugging Face",
+  modelscope: "ModelScope",
+};
+
 export default function ManageDownloads() {
   const [tasks, setTasks] = useState<TrackedDownload[]>([]);
+  const [sourceErrors, setSourceErrors] = useState<SourceErrors>({});
   const [viewState, setViewState] = useState<ViewState>("loading");
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
+  const refreshingRef = useRef(false);
+  const queuedRefreshRef = useRef(false);
 
-  const refresh = useCallback(async () => {
-    if (!isOmlxInstalled()) {
-      setViewState("not-installed");
+  // Serialize polls, but coalesce manual/action refreshes into one follow-up:
+  // an action may mutate the backend while an older snapshot is in flight.
+  const refresh = useCallback(async function refresh(
+    queueIfBusy = true,
+  ): Promise<void> {
+    if (!mountedRef.current) return;
+    if (refreshingRef.current) {
+      if (queueIfBusy) queuedRefreshRef.current = true;
       return;
     }
-
-    const running = await isServerRunning();
-    if (!running) {
-      setViewState("offline");
-      return;
-    }
-
+    refreshingRef.current = true;
     try {
-      const data = await fetchDownloads();
+      if (!isOmlxInstalled()) {
+        setViewState("not-installed");
+        return;
+      }
+
+      const running = await isServerRunning();
+      if (!mountedRef.current) return;
+      if (!running) {
+        setViewState("offline");
+        return;
+      }
+
+      const { tasks: data, errors } = await fetchDownloads();
+      if (!mountedRef.current) return;
       setTasks(data);
+      setSourceErrors(errors);
       setViewState("ready");
       notifyIfUpdateAvailable();
     } catch (error) {
+      if (!mountedRef.current) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch downloads",
         message: error instanceof Error ? error.message : "Unknown error",
       });
-      setViewState("ready");
+      if (mountedRef.current) setViewState("ready");
+    } finally {
+      refreshingRef.current = false;
+      if (mountedRef.current && queuedRefreshRef.current) {
+        queuedRefreshRef.current = false;
+        void refresh();
+      }
     }
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     refresh();
+    return () => {
+      mountedRef.current = false;
+      queuedRefreshRef.current = false;
+    };
   }, [refresh]);
 
+  const hasActive = tasks.some(
+    (t) => t.status === "pending" || t.status === "downloading",
+  );
+  const hasUnavailableSource = Object.keys(sourceErrors).length > 0;
+  // One stable interval: active tasks use 1s polling, otherwise unavailable
+  // sources retry at 5s. Fresh result arrays do not reset the timer.
+  const pollDelay =
+    viewState === "ready"
+      ? hasActive
+        ? 1000
+        : hasUnavailableSource
+          ? 5000
+          : null
+      : null;
   useEffect(() => {
-    const hasActive = tasks.some(
-      (t) => t.status === "pending" || t.status === "downloading",
-    );
-
-    if (hasActive && !intervalRef.current) {
-      intervalRef.current = setInterval(refresh, 1000);
-    } else if (!hasActive && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [tasks, refresh]);
+    if (pollDelay === null) return;
+    const interval = setInterval(() => refresh(false), pollDelay);
+    return () => clearInterval(interval);
+  }, [pollDelay, refresh]);
 
   if (viewState === "not-installed") {
     return (
@@ -129,8 +165,36 @@ export default function ManageDownloads() {
   const completed = tasks.filter((t) => t.status === "completed");
   const failed = tasks.filter((t) => t.status === "failed");
   const cancelled = tasks.filter((t) => t.status === "cancelled");
+  const sourceErrorEntries = Object.entries(sourceErrors) as [
+    DownloadSource,
+    string,
+  ][];
+  const hasSourceErrors = sourceErrorEntries.length > 0;
+  const errorText = sourceErrorEntries
+    .map(([source, error]) => `${SOURCE_LABELS[source]}: ${error}`)
+    .join(" — ");
 
   if (tasks.length === 0 && viewState === "ready") {
+    if (hasSourceErrors) {
+      return (
+        <List>
+          <List.EmptyView
+            icon={Icon.ExclamationMark}
+            title="Download Sources Unavailable"
+            description={errorText}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={refresh}
+                />
+              </ActionPanel>
+            }
+          />
+        </List>
+      );
+    }
     return (
       <List>
         <List.EmptyView
@@ -160,6 +224,27 @@ export default function ManageDownloads() {
 
   return (
     <List isLoading={viewState === "loading"}>
+      {hasSourceErrors && (
+        <List.Section title="Source errors">
+          {sourceErrorEntries.map(([source, error]) => (
+            <List.Item
+              key={source}
+              title={`${SOURCE_LABELS[source]} unavailable`}
+              subtitle={error}
+              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={refresh}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
       {active.length > 0 && (
         <List.Section title="Downloading">
           {active.map((t) => (

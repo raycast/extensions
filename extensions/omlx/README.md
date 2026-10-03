@@ -30,7 +30,7 @@ Search HuggingFace and ModelScope for models to download. Filter to MLX-only mod
 
 ### Manage Downloads
 
-Track HuggingFace and ModelScope download progress with live updates. Cancel, retry, or remove downloads; ModelScope tasks are labeled by source.
+Track HuggingFace and ModelScope download progress with live updates. Cancel, retry, or remove downloads; ModelScope tasks are labeled by source. If one source is unavailable, the other source's downloads stay visible with an inline warning and automatic recovery checks.
 
 ### Serving Stats
 

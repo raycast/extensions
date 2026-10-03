@@ -440,6 +440,48 @@ export async function startHfDownload(repoId: string): Promise<HfTask> {
   return data.task;
 }
 
+/**
+ * Validate a tasks endpoint response. A 200 with an unexpected shape
+ * (missing/null/non-array tasks, malformed task entries) must become a
+ * per-source error inside the backend promise, not a throw that discards
+ * the other backend's healthy tasks.
+ */
+function parseTasksResponse(data: unknown, sourceLabel: string): HfTask[] {
+  const tasks = (data as { tasks?: unknown } | null)?.tasks;
+  if (
+    !Array.isArray(tasks) ||
+    tasks.some((task) => {
+      if (typeof task !== "object" || task === null || Array.isArray(task)) {
+        return true;
+      }
+      const entry = task as Record<string, unknown>;
+      // Check fields consumed by rendering and actions, not unused metadata.
+      // Error and completion time may be absent/null before a task finishes.
+      return (
+        typeof entry.task_id !== "string" ||
+        typeof entry.repo_id !== "string" ||
+        ![
+          "pending",
+          "downloading",
+          "completed",
+          "failed",
+          "cancelled",
+        ].includes(entry.status as string) ||
+        ![entry.progress, entry.total_size, entry.downloaded_size].every(
+          (value) => typeof value === "number" && Number.isFinite(value),
+        ) ||
+        (entry.error != null && typeof entry.error !== "string") ||
+        (entry.completed_at != null &&
+          (typeof entry.completed_at !== "number" ||
+            !Number.isFinite(entry.completed_at)))
+      );
+    })
+  ) {
+    throw new Error(`Invalid ${sourceLabel} tasks response`);
+  }
+  return tasks as HfTask[];
+}
+
 export async function fetchHfTasks(): Promise<HfTask[]> {
   const response = await adminFetch(`${getBaseUrl()}/admin/api/hf/tasks`, {
     method: "GET",
@@ -448,8 +490,7 @@ export async function fetchHfTasks(): Promise<HfTask[]> {
     const text = await response.text();
     throw new Error(`Failed to fetch tasks: ${text.slice(0, 200)}`);
   }
-  const data = (await response.json()) as { tasks: HfTask[] };
-  return data.tasks;
+  return parseTasksResponse(await response.json(), "HuggingFace");
 }
 
 export async function cancelHfDownload(taskId: string): Promise<void> {
@@ -535,8 +576,7 @@ export async function fetchMsTasks(): Promise<HfTask[]> {
     }
     throw new Error(`Failed to fetch ModelScope tasks: ${text.slice(0, 200)}`);
   }
-  const data = (await response.json()) as { tasks: HfTask[] };
-  return data.tasks;
+  return parseTasksResponse(await response.json(), "ModelScope");
 }
 
 export async function cancelMsDownload(taskId: string): Promise<void> {
@@ -580,21 +620,52 @@ export interface TrackedDownload extends HfTask {
 }
 
 /**
+ * Combined result from both download backends. When only one backend
+ * fails, its error is reported per-source while the other backend's
+ * tasks stay visible; a complete failure of both backends throws.
+ */
+export interface DownloadsResult {
+  tasks: TrackedDownload[];
+  /** Per-source fetch errors, present only for a failed backend. */
+  errors: Partial<Record<DownloadSource, string>>;
+}
+
+function settlementError(reason: unknown): string {
+  return reason instanceof Error ? reason.message : String(reason);
+}
+
+/**
  * Downloads from both sources. oMLX runs separate downloaders per source
  * with separate task IDs, so actions must be routed by `source`. The
  * ModelScope backend is optional (503 when not initialized); if it is
  * unavailable, HuggingFace downloads are still returned instead of
- * failing the whole view.
+ * failing the whole view. A single-backend failure returns the other
+ * backend's tasks with a per-source error; both failing throws.
  */
-export async function fetchDownloads(): Promise<TrackedDownload[]> {
-  const [hfTasks, msTasks] = await Promise.all([
-    fetchHfTasks(),
-    fetchMsTasks(),
-  ]);
-  return [
-    ...hfTasks.map((t) => ({ ...t, source: "huggingface" as const })),
-    ...msTasks.map((t) => ({ ...t, source: "modelscope" as const })),
-  ];
+export async function fetchDownloads(): Promise<DownloadsResult> {
+  const [hf, ms] = await Promise.allSettled([fetchHfTasks(), fetchMsTasks()]);
+  const tasks: TrackedDownload[] = [];
+  const errors: Partial<Record<DownloadSource, string>> = {};
+  if (hf.status === "fulfilled") {
+    tasks.push(
+      ...hf.value.map((t) => ({ ...t, source: "huggingface" as const })),
+    );
+  } else {
+    errors.huggingface = settlementError(hf.reason);
+  }
+  if (ms.status === "fulfilled") {
+    tasks.push(
+      ...ms.value.map((t) => ({ ...t, source: "modelscope" as const })),
+    );
+  } else {
+    errors.modelscope = settlementError(ms.reason);
+  }
+  if (hf.status === "rejected" && ms.status === "rejected") {
+    throw new Error(
+      [errors.huggingface, errors.modelscope].filter(Boolean).join("; "),
+    );
+  }
+  return { tasks, errors };
 }
 
 export interface OmlxLogs {

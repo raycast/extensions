@@ -148,6 +148,27 @@ for (const terminal of ["done", "finish", "eof"]) {
 }
 
 for (const terminal of ["done", "finish", "eof"]) {
+  test(`empty arguments fail for input-requiring tools when the callback says so at ${terminal}`, () => {
+    const parser = createSseParser({
+      acceptsEmptyInput: (name) => name === "noop",
+    });
+    assert.deepEqual(
+      parser.feed(toolCallDelta(0, "call_1", "get_time", "")),
+      [],
+    );
+    assert.throws(
+      () =>
+        terminal === "done"
+          ? parser.feed(DONE)
+          : terminal === "finish"
+            ? parser.feed(finishEvent("tool_calls"))
+            : parser.flush(),
+      /requires input but received none/,
+    );
+  });
+}
+
+for (const terminal of ["done", "finish", "eof"]) {
   test(`parameterless tool call with empty arguments string emits empty input at ${terminal}`, () => {
     const parser = createSseParser();
     assert.deepEqual(

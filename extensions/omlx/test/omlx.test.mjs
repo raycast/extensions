@@ -148,9 +148,10 @@ for (const scenario of ["no update", "failed check"]) {
 
 test("mixed downloads preserve source even when task IDs collide", async (t) => {
   const h = await harness(t, () => json({ tasks: [task] }));
-  const downloads = await h.lib.fetchDownloads();
+  const { tasks, errors } = await h.lib.fetchDownloads();
+  assert.deepEqual(errors, {});
   assert.deepEqual(
-    downloads.map((d) => `${d.source}:${d.task_id}`),
+    tasks.map((d) => `${d.source}:${d.task_id}`),
     ["huggingface:same-id", "modelscope:same-id"],
   );
 });
@@ -161,36 +162,244 @@ test("documented optional ModelScope unavailability preserves HuggingFace tasks"
       ? json({ detail: "ModelScope downloader not initialized" }, 503)
       : json({ tasks: [task] }),
   );
+  const { tasks, errors } = await h.lib.fetchDownloads();
+  assert.deepEqual(errors, {});
   assert.deepEqual(
-    (await h.lib.fetchDownloads()).map((d) => d.source),
+    tasks.map((d) => d.source),
     ["huggingface"],
   );
 });
 
 for (const status of [401, 403, 500, 503]) {
-  test(`ModelScope ${status} failure is surfaced rather than hidden`, async (t) => {
+  test(`ModelScope ${status} failure is surfaced while HuggingFace tasks stay visible`, async (t) => {
     const h = await harness(t, (path) =>
       path.includes("/ms/")
         ? json({ detail: "Unexpected failure" }, status)
         : json({ tasks: [task] }),
     );
-    await assert.rejects(
-      h.lib.fetchDownloads(),
-      /Failed to fetch ModelScope tasks/,
+    const { tasks, errors } = await h.lib.fetchDownloads();
+    assert.deepEqual(
+      tasks.map((d) => d.source),
+      ["huggingface"],
     );
+    assert.match(errors.modelscope, /Failed to fetch ModelScope tasks/);
+    assert.match(errors.modelscope, /Unexpected failure/);
   });
 }
 
-test("ModelScope network and malformed JSON errors propagate", async (t) => {
+test("ModelScope network and malformed JSON errors are surfaced per source", async (t) => {
   let networkError = true;
   const h = await harness(t, (path) => {
     if (!path.includes("/ms/")) return json({ tasks: [task] });
     if (networkError) throw new Error("Synthetic network failure");
     return new Response("invalid JSON");
   });
-  await assert.rejects(h.lib.fetchDownloads(), /Synthetic network failure/);
+  const first = await h.lib.fetchDownloads();
+  assert.deepEqual(
+    first.tasks.map((d) => d.source),
+    ["huggingface"],
+  );
+  assert.match(first.errors.modelscope, /Synthetic network failure/);
   networkError = false;
-  await assert.rejects(h.lib.fetchDownloads(), SyntaxError);
+  const second = await h.lib.fetchDownloads();
+  assert.match(
+    second.errors.modelscope,
+    /Failed to fetch ModelScope tasks|not valid JSON/,
+  );
+});
+
+test("both download backends failing is an explicit failure", async (t) => {
+  const h = await harness(t, () => json({ detail: "Backend down" }, 500));
+  await assert.rejects(
+    h.lib.fetchDownloads(),
+    (error) => error instanceof Error && error.message.includes("; "),
+  );
+});
+
+const malformedTaskShapes = [
+  ["null response", null],
+  ["array response", []],
+  ["missing tasks key", {}],
+  ["null tasks", { tasks: null }],
+  ["non-array tasks", { tasks: {} }],
+  ["non-object task entries", { tasks: [task, "garbage"] }],
+  ["null task entry", { tasks: [task, null] }],
+  ["array task entry", { tasks: [task, []] }],
+  ["empty task entry", { tasks: [task, {}] }],
+  ...[
+    "task_id",
+    "repo_id",
+    "status",
+    "progress",
+    "total_size",
+    "downloaded_size",
+  ].map((field) => {
+    const entry = { ...task };
+    delete entry[field];
+    return [`missing ${field}`, { tasks: [task, entry] }];
+  }),
+  ...[
+    ["task_id", 123],
+    ["task_id", null],
+    ["repo_id", {}],
+    ["repo_id", null],
+    ["status", "unknown"],
+    ["status", null],
+    ["status", 1],
+    ["progress", "10"],
+    ["progress", null],
+    ["total_size", "100"],
+    ["total_size", null],
+    ["downloaded_size", "10"],
+    ["downloaded_size", null],
+    ["error", { message: "failed" }],
+    ["error", 1],
+    ["completed_at", "123"],
+    ["completed_at", {}],
+  ].map(([field, value]) => [
+    `invalid ${field} (${JSON.stringify(value)})`,
+    { tasks: [task, { ...task, [field]: value }] },
+  ]),
+];
+
+for (const [source, label, route, healthySource] of [
+  ["huggingface", "HuggingFace", "/hf/", "modelscope"],
+  ["modelscope", "ModelScope", "/ms/", "huggingface"],
+]) {
+  for (const [name, payload] of malformedTaskShapes) {
+    test(`malformed ${source} ${name} becomes a per-source error while the other backend stays visible`, async (t) => {
+      const h = await harness(t, (path) =>
+        path.includes(route) ? json(payload) : json({ tasks: [task] }),
+      );
+      const { tasks, errors } = await h.lib.fetchDownloads();
+      assert.deepEqual(tasks, [{ ...task, source: healthySource }]);
+      assert.deepEqual(errors, {
+        [source]: `Invalid ${label} tasks response`,
+      });
+
+      const tool = await import(
+        await compile("../src/tools/get-download-progress.ts", {
+          "@raycast/api": h.api,
+          "../lib/omlx": h.libUri,
+        })
+      );
+      const result = await tool.default();
+      assert.deepEqual(result.downloads, [
+        {
+          taskId: task.task_id,
+          repoId: task.repo_id,
+          source: healthySource,
+          status: task.status,
+          progress: "10%",
+          downloaded: "10.0 B",
+          totalSize: "100.0 B",
+          error: undefined,
+        },
+      ]);
+      assert.equal(result.sourceErrors.length, 1);
+      assert.ok(result.sourceErrors[0].endsWith(errors[source]));
+    });
+  }
+
+  for (const field of [
+    "progress",
+    "total_size",
+    "downloaded_size",
+    "completed_at",
+  ]) {
+    test(`malformed ${source} non-finite ${field} is rejected`, async (t) => {
+      const h = await harness(t, (path) =>
+        path.includes(route)
+          ? new Response(
+              `{"tasks":[${JSON.stringify(task).replace(
+                `"${field}":${task[field]}`,
+                `"${field}":1e400`,
+              )}]}`,
+              { headers: { "Content-Type": "application/json" } },
+            )
+          : json({ tasks: [task] }),
+      );
+      const { tasks, errors } = await h.lib.fetchDownloads();
+      assert.deepEqual(tasks, [{ ...task, source: healthySource }]);
+      assert.equal(errors[source], `Invalid ${label} tasks response`);
+    });
+  }
+
+  test(`malformed ${source} response with no healthy downloads stays visible in progress tool`, async (t) => {
+    const h = await harness(t, (path) =>
+      path.includes(route) ? json({ tasks: [{}] }) : json({ tasks: [] }),
+    );
+    const tool = await import(
+      await compile("../src/tools/get-download-progress.ts", {
+        "@raycast/api": h.api,
+        "../lib/omlx": h.libUri,
+      })
+    );
+    const result = await tool.default();
+    assert.deepEqual(result.downloads, []);
+    assert.equal(result.message, "Some download sources could not be fetched");
+    assert.equal(result.sourceErrors.length, 1);
+    assert.ok(
+      result.sourceErrors[0].endsWith(`Invalid ${label} tasks response`),
+    );
+  });
+
+  test(`${source} task validation accepts optional metadata and all upstream statuses`, async (t) => {
+    const entries = [
+      "pending",
+      "downloading",
+      "completed",
+      "failed",
+      "cancelled",
+    ].map((status, index) => ({
+      task_id: `task-${index}`,
+      repo_id: "example/model",
+      status,
+      progress: 0,
+      total_size: 0,
+      downloaded_size: 0,
+      ...(index % 2 === 0 ? { error: null, completed_at: null } : {}),
+      speed_bps: 0,
+    }));
+    const h = await harness(t, (path) =>
+      json({ tasks: path.includes(route) ? entries : [] }),
+    );
+    const result = await h.lib.fetchDownloads();
+    assert.deepEqual(
+      result.tasks,
+      entries.map((entry) => ({ ...entry, source })),
+    );
+    assert.deepEqual(result.errors, {});
+  });
+}
+
+test("both backends returning malformed shapes is an explicit failure", async (t) => {
+  const h = await harness(t, () => json({}));
+  await assert.rejects(
+    h.lib.fetchDownloads(),
+    (error) =>
+      error instanceof Error &&
+      /Invalid HuggingFace tasks response/.test(error.message) &&
+      /Invalid ModelScope tasks response/.test(error.message),
+  );
+});
+
+test("download progress never reports no downloads when a source failed", async (t) => {
+  const h = await harness(t, (path) =>
+    path.includes("/ms/")
+      ? json({ detail: "Unexpected failure" }, 500)
+      : json({ tasks: [] }),
+  );
+  const tool = await import(
+    await compile("../src/tools/get-download-progress.ts", {
+      "@raycast/api": h.api,
+      "../lib/omlx": h.libUri,
+    })
+  );
+  const result = await tool.default();
+  assert.deepEqual(result.downloads, []);
+  assert.match(result.message, /could not be fetched/);
+  assert.match(result.sourceErrors[0], /ModelScope/);
 });
 
 test("ModelScope client actions use source-specific encoded task endpoints", async (t) => {
@@ -377,3 +586,240 @@ test("an interrupted completion never flushes a pending tool call", async (t) =>
   }, /Synthetic stream interruption/);
   assert.deepEqual(parts, []);
 });
+
+function completionStream(deltas) {
+  return () =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          for (const delta of deltas) {
+            controller.enqueue(new TextEncoder().encode(delta));
+          }
+          controller.close();
+        },
+      }),
+    );
+}
+
+const toolCallEvent = (args) =>
+  `data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_1","function":{"name":"tool_under_test","arguments":"${args}"}}]},"finish_reason":null}]}
+
+`;
+const finishEvent =
+  'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n\n';
+
+for (const [name, schema, args, expected] of [
+  ["parameterless tool with no schema", undefined, "", {}],
+  [
+    "optional-only schema",
+    { type: "object", properties: { x: { type: "string" } } },
+    "",
+    {},
+  ],
+  [
+    "nullable object schema",
+    { type: ["object", "null"], properties: { x: { type: "string" } } },
+    "",
+    {},
+  ],
+  ["empty required list", { type: "object", required: [] }, "", {}],
+  [
+    "zero property bounds",
+    { type: "object", minProperties: 0, maxProperties: 0 },
+    "",
+    {},
+  ],
+  ["positive maximum", { type: "object", maxProperties: 3 }, "", {}],
+  [
+    "enum containing empty object",
+    { type: "object", enum: [{ q: "x" }, {}] },
+    "",
+    {},
+  ],
+  ["empty object const", { type: "object", const: {} }, "", {}],
+  [
+    "closed object",
+    {
+      type: "object",
+      additionalProperties: false,
+      unevaluatedProperties: false,
+    },
+    "",
+    {},
+  ],
+  [
+    "vacuous property constraints",
+    {
+      type: "object",
+      properties: { q: false },
+      patternProperties: { ".*": false },
+      propertyNames: false,
+    },
+    "",
+    {},
+  ],
+  [
+    "vacuous dependencies",
+    {
+      type: "object",
+      dependentRequired: { a: ["b"] },
+      dependentSchemas: { a: false },
+      dependencies: { a: { required: ["b"] } },
+    },
+    "",
+    {},
+  ],
+  [
+    "constraints for other instance types",
+    {
+      type: "object",
+      minItems: 1,
+      contains: false,
+      minLength: 1,
+      minimum: 1,
+    },
+    "",
+    {},
+  ],
+  [
+    "annotated standard schema",
+    {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      title: "Optional input",
+      default: { q: "x" },
+      $defs: { input: { required: ["q"] } },
+    },
+    "",
+    {},
+  ],
+  ["explicit empty object", { type: "object" }, "{}", {}],
+]) {
+  test(`empty arguments emit empty input for a ${name}`, async (t) => {
+    const h = await harness(
+      t,
+      completionStream([toolCallEvent(args), finishEvent]),
+    );
+    const parserUri = await compile("../src/sse-parser.ts");
+    const provider = await import(
+      await compile("../src/models.ts", {
+        "@raycast/api": h.api,
+        "./lib/omlx": h.libUri,
+        "./sse-parser": parserUri,
+      })
+    );
+    const parts = [];
+    for await (const part of provider.streamCompletion(
+      { id: "synthetic-model" },
+      { messages: [], tools: { tool_under_test: { inputSchema: schema } } },
+    ))
+      parts.push(part);
+    assert.deepEqual(parts, [
+      {
+        type: "tool-call",
+        toolCallId: "call_1",
+        toolName: "tool_under_test",
+        input: expected,
+      },
+    ]);
+  });
+}
+
+for (const [name, schema] of [
+  [
+    "required-input schema",
+    { type: "object", required: ["q"], properties: { q: { type: "string" } } },
+  ],
+  ["composed schema", { anyOf: [{ type: "object" }] }],
+  ["unknown tool", undefined],
+  [
+    "minProperties schema",
+    { type: "object", minProperties: 1, properties: { q: { type: "string" } } },
+  ],
+  ["enum schema", { type: "object", enum: [{ q: "x" }] }],
+  ["non-object enum", { type: "object", enum: [null, [], "{}"] }],
+  ["empty enum", { type: "object", enum: [] }],
+  ["nonempty const", { type: "object", const: { q: "x" } }],
+  ["non-object const", { type: "object", const: [] }],
+  [
+    "conflicting safe enum and required",
+    { type: "object", enum: [{}], required: ["q"] },
+  ],
+  [
+    "conflicting safe const and bounds",
+    { type: "object", const: {}, minProperties: 1 },
+  ],
+  ["not schema", { type: "object", not: { const: {} } }],
+  [
+    "safe but unsupported not schema",
+    { type: "object", not: { type: "string" } },
+  ],
+  ["allOf schema", { type: "object", allOf: [{ required: [] }] }],
+  ["oneOf schema", { type: "object", oneOf: [{ type: "object" }] }],
+  ["reference schema", { type: "object", $ref: "#/$defs/input" }],
+  ["dynamic reference schema", { type: "object", $dynamicRef: "#input" }],
+  ["recursive reference schema", { type: "object", $recursiveRef: "#" }],
+  ["unknown assertion", { type: "object", customRequired: ["q"] }],
+  [
+    "unknown dialect",
+    { type: "object", $schema: "https://example.invalid/schema" },
+  ],
+  ["custom vocabulary", { type: "object", $vocabulary: {} }],
+  ["non-object type", { type: "string" }],
+  ["invalid type union", { type: ["object", "unknown"] }],
+  ["invalid required", { type: "object", required: false }],
+  ["negative minimum", { type: "object", minProperties: -1 }],
+  ["negative maximum", { type: "object", maxProperties: -1 }],
+  ["fractional maximum", { type: "object", maxProperties: 0.5 }],
+  ["invalid maximum", { type: "object", maxProperties: "0" }],
+  ["invalid enum", { type: "object", enum: {} }],
+  ["invalid properties", { type: "object", properties: null }],
+  ["non-plain schema", new Date(0)],
+  ["inherited constraint", Object.create({ required: ["q"] })],
+  [
+    "conditional schema",
+    { type: "object", if: { type: "object" }, then: { required: ["q"] } },
+  ],
+  ["standalone then schema", { type: "object", then: { required: ["q"] } }],
+  ["standalone else schema", { type: "object", else: { required: ["q"] } }],
+  [
+    "invalid dependentRequired schema",
+    { type: "object", dependentRequired: null },
+  ],
+]) {
+  test(`empty arguments fail instead of fabricating input for a ${name}`, async (t) => {
+    const h = await harness(
+      t,
+      name === "unknown tool"
+        ? // Unknown tool: nothing offered, so any empty call is rejected.
+          completionStream([
+            toolCallEvent("").replace("tool_under_test", "unoffered_tool"),
+            finishEvent,
+          ])
+        : completionStream([toolCallEvent(""), finishEvent]),
+    );
+    const parserUri = await compile("../src/sse-parser.ts");
+    const provider = await import(
+      await compile("../src/models.ts", {
+        "@raycast/api": h.api,
+        "./lib/omlx": h.libUri,
+        "./sse-parser": parserUri,
+      })
+    );
+    const parts = [];
+    await assert.rejects(async () => {
+      for await (const part of provider.streamCompletion(
+        { id: "synthetic-model" },
+        {
+          messages: [],
+          tools:
+            name === "unknown tool"
+              ? {}
+              : { tool_under_test: { inputSchema: schema } },
+        },
+      ))
+        parts.push(part);
+    }, /requires input but received none/);
+    assert.deepEqual(parts, []);
+  });
+}

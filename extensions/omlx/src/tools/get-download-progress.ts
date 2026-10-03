@@ -1,8 +1,23 @@
 import { fetchDownloads, formatBytes } from "../lib/omlx";
 
+const SOURCE_LABELS: Record<string, string> = {
+  huggingface: "Hugging Face",
+  modelscope: "ModelScope",
+};
+
 export default async function () {
-  const downloads = await fetchDownloads();
+  const { tasks: downloads, errors } = await fetchDownloads();
+  const sourceErrors = Object.entries(errors).map(
+    ([source, error]) => `${SOURCE_LABELS[source] ?? source}: ${error}`,
+  );
   if (downloads.length === 0) {
+    if (sourceErrors.length > 0) {
+      return {
+        downloads: [],
+        sourceErrors,
+        message: "Some download sources could not be fetched",
+      };
+    }
     return { downloads: [], message: "No active or recent downloads" };
   }
 
@@ -17,5 +32,6 @@ export default async function () {
       totalSize: formatBytes(t.total_size),
       error: t.error || undefined,
     })),
+    ...(sourceErrors.length > 0 ? { sourceErrors } : {}),
   };
 }

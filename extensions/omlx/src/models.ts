@@ -93,6 +93,125 @@ function convertTools(
   }));
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object") return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+/**
+ * Prove that a plain schema accepts {} without implementing a full validator.
+ * Property-local constraints are vacuous with no properties; required, bounds,
+ * enum and const are checked explicitly. Compositions, references, negation,
+ * conditionals and unknown keywords remain conservative rejections.
+ */
+export function acceptsEmptyObject(parameters: unknown): boolean {
+  if (parameters == null) return true; // no schema declared: tool takes no input
+  if (!isPlainObject(parameters)) return false;
+
+  return Object.entries(parameters).every(([keyword, value]) => {
+    switch (keyword) {
+      case "type": {
+        const types = Array.isArray(value) ? value : [value];
+        return (
+          types.includes("object") &&
+          types.every((type) =>
+            [
+              "object",
+              "null",
+              "array",
+              "string",
+              "number",
+              "integer",
+              "boolean",
+            ].includes(type),
+          )
+        );
+      }
+      case "required":
+        return Array.isArray(value) && value.length === 0;
+      case "minProperties":
+        return value === 0;
+      case "maxProperties":
+        return (
+          typeof value === "number" && Number.isInteger(value) && value >= 0
+        );
+      case "enum":
+        return (
+          Array.isArray(value) &&
+          value.some(
+            (entry) => isPlainObject(entry) && Object.keys(entry).length === 0,
+          )
+        );
+      case "const":
+        return isPlainObject(value) && Object.keys(value).length === 0;
+      // These keywords only evaluate existing properties, so none can reject {}.
+      case "properties":
+      case "patternProperties":
+      case "dependentRequired":
+      case "dependentSchemas":
+      case "dependencies":
+      case "$defs":
+      case "definitions":
+        return isPlainObject(value);
+      case "additionalProperties":
+      case "unevaluatedProperties":
+      case "propertyNames":
+        return typeof value === "boolean" || isPlainObject(value);
+      // Standard assertions for other instance types do not apply to objects.
+      case "minimum":
+      case "maximum":
+      case "exclusiveMinimum":
+      case "exclusiveMaximum":
+      case "multipleOf":
+      case "minLength":
+      case "maxLength":
+      case "pattern":
+      case "format":
+      case "contentEncoding":
+      case "contentMediaType":
+      case "contentSchema":
+      case "items":
+      case "additionalItems":
+      case "prefixItems":
+      case "contains":
+      case "minContains":
+      case "maxContains":
+      case "minItems":
+      case "maxItems":
+      case "uniqueItems":
+      case "unevaluatedItems":
+        return true;
+      // Annotations do not assert anything about the instance.
+      case "$id":
+      case "id":
+      case "$anchor":
+      case "$comment":
+      case "title":
+      case "description":
+      case "default":
+      case "examples":
+      case "deprecated":
+      case "readOnly":
+      case "writeOnly":
+        return true;
+      case "$schema":
+        return (
+          typeof value === "string" &&
+          [
+            "http://json-schema.org/draft-04/schema#",
+            "http://json-schema.org/draft-06/schema#",
+            "http://json-schema.org/draft-07/schema#",
+            "https://json-schema.org/draft/2019-09/schema",
+            "https://json-schema.org/draft/2020-12/schema",
+          ].includes(value)
+        );
+      default:
+        return false;
+    }
+  });
+}
+
 function convertMessages(
   messages: NonNullable<Parameters<AI.StreamCompletion>[1]["messages"]>,
 ): unknown[] {
@@ -226,7 +345,20 @@ export const streamCompletion: AI.StreamCompletion = async function* (
     response.body as import("stream/web").ReadableStream,
   );
 
-  const parser = createSseParser();
+  // Empty tool arguments are only valid for tools whose schema accepts an
+  // empty object; unknown tools are rejected conservatively. web_search is
+  // provider-executed (injected below/intercepted) and requires a query.
+  const acceptsEmpty = new Map<string, boolean>();
+  for (const tool of openaiTools ?? []) {
+    acceptsEmpty.set(
+      tool.function.name,
+      acceptsEmptyObject(tool.function.parameters),
+    );
+  }
+  acceptsEmpty.set("web_search", false);
+  const parser = createSseParser({
+    acceptsEmptyInput: (name) => acceptsEmpty.get(name) ?? false,
+  });
 
   for await (const chunk of nodeStream) {
     for (const part of parser.feed(chunk as Uint8Array | string)) {

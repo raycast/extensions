@@ -20,9 +20,22 @@ interface ToolCallAccumulator {
   arguments: string;
 }
 
+/** Options for the stream parser. */
+export interface SseParserOptions {
+  /**
+   * Whether a tool accepts an empty arguments object. Backed by the
+   * offered tool's input schema; when it returns false, a tool call that
+   * ends without arguments fails the completion instead of passing a
+   * fabricated empty input. Absent (generic parser) accepts empty
+   * arguments for every tool.
+   */
+  acceptsEmptyInput?: (toolName: string) => boolean;
+}
+
 const NEWLINE_BYTE = 10;
 
-export function createSseParser() {
+export function createSseParser(options?: SseParserOptions) {
+  const acceptsEmpty = options?.acceptsEmptyInput ?? (() => true);
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   let pendingBytes: Uint8Array = new Uint8Array(0);
@@ -39,10 +52,26 @@ export function createSseParser() {
       }
       let input: unknown;
       try {
-        // Parameterless tools stream an empty arguments string; parse that
-        // as an empty object rather than aborting the completion.
-        input = tc.arguments.trim() === "" ? {} : JSON.parse(tc.arguments);
-      } catch {
+        if (tc.arguments.trim() === "") {
+          // Parameterless tools stream an empty arguments string; only
+          // pass an empty input for tools whose schema accepts it, so an
+          // incomplete call to an input-requiring tool fails explicitly.
+          if (!acceptsEmpty(tc.name)) {
+            throw new Error(
+              `Tool "${tc.name}" requires input but received none from oMLX`,
+            );
+          }
+          input = {};
+        } else {
+          input = JSON.parse(tc.arguments);
+        }
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.startsWith(`Tool "${tc.name}" requires input`)
+        ) {
+          throw error;
+        }
         throw new Error("Invalid tool call arguments received from oMLX");
       }
       parts.push({

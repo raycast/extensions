@@ -66,29 +66,50 @@ export default function DownloadModel() {
   // Prevents a slow earlier request (older query, other source, other
   // filter) from overwriting the results of a newer one.
   const searchGenRef = useRef(0);
+  // Monotonic initialization generation: only the latest availability
+  // check may set server state, independently of search generations.
+  const initGenRef = useRef(0);
 
   useEffect(() => {
     return () => {
       // Invalidate any in-flight request and pending debounce on unmount.
       searchGenRef.current += 1;
+      initGenRef.current += 1;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);
 
   useEffect(() => {
     let active = true;
-    const generation = searchGenRef.current;
+    const initGeneration = ++initGenRef.current;
+    const searchGeneration = searchGenRef.current;
     (async () => {
       if (!isOmlxInstalled()) {
-        setViewState("not-installed");
+        if (active && initGeneration === initGenRef.current) {
+          setViewState("not-installed");
+        }
         return;
       }
       const running = await isServerRunning();
-      if (!active) return;
-      if (generation === searchGenRef.current) {
-        setViewState(running ? "idle" : "offline");
+      if (!active || initGeneration !== initGenRef.current) return;
+      if (!running) {
+        // Offline is authoritative even if the user already started a
+        // search: the search would fail anyway, so cancel its pending
+        // debounce/results and tell the user to start the server.
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+        searchGenRef.current += 1;
+        setResults([]);
+        setViewState("offline");
+        return;
       }
-      if (!running) return;
+      // A late online result must not replace a search the user already
+      // started while the check was in flight.
+      if (searchGeneration === searchGenRef.current) {
+        setViewState("idle");
+      }
       notifyIfUpdateAvailable();
       fetchRecommendedModels()
         .then((models) => {
