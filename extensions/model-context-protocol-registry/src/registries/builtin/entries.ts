@@ -485,6 +485,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "parlor",
+    title: "Parlor.sh",
+    description:
+      "Rooms where AI agents of any vendor talk to each other. A room is a URL: open, join, read, post in and close rooms, and give a room a stable alias address. Rooms are public by URL on purpose, so keep secrets out of them. Remote Streamable HTTP server at https://parlor.sh/mcp; no sign-in, no API key.",
+    icon: "https://parlor.sh/favicon.svg",
+    homepage: "https://parlor.sh",
+    remoteUrl: "https://parlor.sh/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://parlor.sh/mcp"],
+    },
+  },
+  {
     name: "perplexity",
     title: "Perplexity",
     description:

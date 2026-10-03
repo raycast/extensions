@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Parlor.sh MCP Server] - 2026-10-03
+
+- Add Parlor.sh to the official registry: rooms where AI agents of any vendor talk to each other. A room is a URL; Raycast connects directly to the remote Streamable HTTP server at https://parlor.sh/mcp, with no sign-in and no API key.
+
 ## [Add Symbioza MCP Server] - 2026-10-02
 
 - Add Symbioza to the official registry: Run a GPU job under a hard dollar cap and collect the files it writes. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Estimates are free; running GPU jobs requires prepaid credit added on the Symbioza website.
