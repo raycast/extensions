@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio"
-import fetch from "node-fetch"
 import { getDeepWikiUrls } from "./deepwiki-url"
 
 export async function getDeepWikiPage(repoIdentifier: string): Promise<{ url: string; content: string }> {
