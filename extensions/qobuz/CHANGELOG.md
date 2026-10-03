@@ -1,5 +1,10 @@
 # Qobuz Changelog
 
+## [Fix media keys] - 2026-10-03
+
+- Fix play, next, previous, forward and rewind failing on Macs whose Swift toolchain is out of step with the macOS SDK: the media key is now posted through JavaScript for Automation, so nothing is compiled on your machine
+- Show a clear error naming System Settings → Privacy & Security → Accessibility when the permission is missing
+
 ## [Copy Share Links] - 2026-10-02
 
 - Convert Track Link is now Show Current Track; converting a pasted link moved to Copy Share Links

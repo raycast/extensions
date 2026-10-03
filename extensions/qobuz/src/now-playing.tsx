@@ -70,8 +70,8 @@ export default function Command() {
   const control = (key: Parameters<typeof sendMediaKey>[0]) => async () => {
     try {
       await sendMediaKey(key);
-    } catch {
-      await showHUD("Couldn't control Qobuz — grant Accessibility permission");
+    } catch (error) {
+      await showHUD(error instanceof Error ? error.message : "Couldn't control Qobuz");
     }
     // The menu-bar repaints on its interval — Raycast tears this command down
     // when the menu closes, so there's no reliable way to refresh it sooner.
