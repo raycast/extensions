@@ -21,7 +21,7 @@ import {
   formatModelName,
   getDashboardUrl,
   isCacheSourcedModel,
-  isNonChatModelType,
+  nonChatModelKind,
   isOmlxInstalled,
   isServerRunning,
   notifyIfUpdateAvailable,
@@ -391,11 +391,14 @@ function ModelDetail({ model: m }: { model: OmlxModelStatus }) {
   ].filter(Boolean);
 
   // Tokenizers/embeddings fall through oMLX's audio detection as "llm";
-  // label them by what they actually are instead of the raw type.
-  const typeLabel = isNonChatModelType(m.config_model_type, m.id)
-    ? m.config_model_type.toLowerCase().includes("tokenizer")
+  // label them by what they actually are instead of the raw type. The kind
+  // comes from the same signals as the AI-picker filter, so rerankers that
+  // share a chat architecture type are labeled correctly.
+  const kind = nonChatModelKind(m.config_model_type, m.id);
+  const typeLabel = kind
+    ? kind === "tokenizer"
       ? "Tokenizer"
-      : m.config_model_type.toLowerCase().includes("rerank")
+      : kind === "reranker"
         ? "Reranker"
         : "Embedding"
     : `${m.model_type.toUpperCase()} (${m.config_model_type})`;

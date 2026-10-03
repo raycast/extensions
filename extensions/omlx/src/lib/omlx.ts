@@ -39,17 +39,31 @@ const EMBEDDING_MODEL_TYPES = new Set([
   "colqwen2-5",
 ]);
 
+/**
+ * Classify a non-chat model from its config type and id.
+ * Returns "tokenizer", "embedding", "reranker", or null for chat models.
+ */
+export function nonChatModelKind(
+  configModelType: string,
+  id?: string,
+): "tokenizer" | "embedding" | "reranker" | null {
+  const type = (configModelType ?? "").toLowerCase();
+  const name = (id ?? "").toLowerCase();
+  if (type.includes("tokenizer")) return "tokenizer";
+  if (type.includes("reranker") || type.includes("ranking")) return "reranker";
+  if (name.includes("reranker") || name.includes("reranking"))
+    return "reranker";
+  if (EMBEDDING_MODEL_TYPES.has(type)) return "embedding";
+  if (name.includes("embedding")) return "embedding";
+  return null;
+}
+
 /** True when the config declares a non-chat architecture (tokenizer, embedding, reranker). */
 export function isNonChatModelType(
   configModelType: string,
   id?: string,
 ): boolean {
-  const type = (configModelType ?? "").toLowerCase();
-  if (type.includes("tokenizer")) return true;
-  if (EMBEDDING_MODEL_TYPES.has(type)) return true;
-  if (type.includes("reranker") || type.includes("ranking")) return true;
-  const name = (id ?? "").toLowerCase();
-  return name.includes("embedding") || name.includes("reranker");
+  return nonChatModelKind(configModelType, id) != null;
 }
 
 // Models downloaded by a plain huggingface_hub/modelscope client live in the

@@ -39,7 +39,9 @@ export function createSseParser() {
       }
       let input: unknown;
       try {
-        input = JSON.parse(tc.arguments);
+        // Parameterless tools stream an empty arguments string; parse that
+        // as an empty object rather than aborting the completion.
+        input = tc.arguments.trim() === "" ? {} : JSON.parse(tc.arguments);
       } catch {
         throw new Error("Invalid tool call arguments received from oMLX");
       }

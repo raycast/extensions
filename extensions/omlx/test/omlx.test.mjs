@@ -300,6 +300,17 @@ test("non-chat model types are detected without false positives on chat models",
   assert.equal(lib.isNonChatModelType("qwen3_5"), false);
   assert.equal(lib.isNonChatModelType("qwen3_5_vl"), false);
   assert.equal(lib.isNonChatModelType(""), false);
+  assert.equal(lib.nonChatModelKind("s3_tokenizer_v2"), "tokenizer");
+  assert.equal(
+    lib.nonChatModelKind("qwen3_5", "Qwen3-Reranker-8B"),
+    "reranker",
+  );
+  assert.equal(lib.nonChatModelKind("jina_reranker"), "reranker");
+  assert.equal(
+    lib.nonChatModelKind("qwen3_5", "Qwen3-Embedding-4B"),
+    "embedding",
+  );
+  assert.equal(lib.nonChatModelKind("qwen3_5"), null);
 });
 
 test("cache-sourced models are detected by Hub cache paths", async (t) => {

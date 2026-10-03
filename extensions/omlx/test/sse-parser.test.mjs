@@ -147,6 +147,30 @@ for (const terminal of ["done", "finish", "eof"]) {
   });
 }
 
+for (const terminal of ["done", "finish", "eof"]) {
+  test(`parameterless tool call with empty arguments string emits empty input at ${terminal}`, () => {
+    const parser = createSseParser();
+    assert.deepEqual(
+      parser.feed(toolCallDelta(0, "call_1", "get_time", "")),
+      [],
+    );
+    const parts =
+      terminal === "done"
+        ? [...parser.feed(DONE), ...parser.flush()]
+        : terminal === "finish"
+          ? [...parser.feed(finishEvent("tool_calls")), ...parser.flush()]
+          : parser.flush();
+    assert.deepEqual(parts, [
+      {
+        type: "tool-call",
+        toolCallId: "call_1",
+        toolName: "get_time",
+        input: {},
+      },
+    ]);
+  });
+}
+
 test("final tool event without a newline is emitted exactly once at EOF", () => {
   const bytes = toolCallDelta(0, "call_1", "noop", '{"value":1}');
   const parser = createSseParser();
