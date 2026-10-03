@@ -17,6 +17,7 @@ export interface ConversionTask {
   ffmpeg?: ffmpeg.FfmpegCommand;
   abortController?: AbortController;
   outputFile?: string;
+  warning?: string;
   status: "converting" | "done" | "queued" | "error" | "cancelled";
 }
 const audioCodecs: Record<string, string> = {
@@ -99,7 +100,10 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
 
     const outputPath = getAvailableFilePath(outputDir, fileName, params.videoFormat);
     task.outputFile = outputPath;
-    if (["cancelled"].includes(task.status)) return;
+    if (["cancelled"].includes(task.status)) {
+      progress(task);
+      return;
+    }
     if (params.videoFormat === "gif") {
       task.abortController = new AbortController();
       await encodeGif({
@@ -114,11 +118,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
           progress(task);
         },
       });
-      task.status = "done";
-      task.progress = 100;
-      task.elapsed = Math.floor((Date.now() - task.started.getTime()) / 1000);
-      progress(task);
-      if (params.deleteOriginalFiles) await deleteFile(task.file);
+      await finishConversion(task, params, progress);
       return;
     }
 
@@ -153,7 +153,10 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
       available,
       (encoder) => probeHardwareEncoder(tools.ffmpeg, encoder),
     );
-    if (["cancelled"].includes(task.status)) return;
+    if (["cancelled"].includes(task.status)) {
+      progress(task);
+      return;
+    }
     const audioCodec = audioCodecs[params.videoFormat] || audioCodecs.default;
     if (!params.removeAudio && !available.has(audioCodec)) {
       throw new Error(`FFmpeg is missing ${audioCodec}. Install a full FFmpeg build.`);
@@ -194,12 +197,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
         reject(err);
       });
       video.on("end", () => {
-        task.status = "done";
-        task.progress = 100;
-        task.elapsed = Math.floor((new Date().getTime() - task.started.getTime()) / 1000);
-        progress(task);
-        if (params.deleteOriginalFiles) deleteFile(task.file);
-        resolve(true);
+        void finishConversion(task, params, progress).then(() => resolve(true), reject);
       });
       video.on("progress", (p) => {
         if (p.percent) task.progress = Math.round(p.percent);
@@ -279,6 +277,20 @@ function getAvailableFilePath(outputDir: string, fileName: string, extension: st
   return fullPath;
 }
 
-function deleteFile(filePath: string): Promise<void> {
-  return fs.promises.unlink(filePath);
+async function finishConversion(
+  task: ConversionTask,
+  params: FormValues,
+  progress: (task: ConversionTask) => void,
+): Promise<void> {
+  task.status = "done";
+  task.progress = 100;
+  task.elapsed = Math.floor((Date.now() - task.started.getTime()) / 1000);
+  if (params.deleteOriginalFiles) {
+    try {
+      await fs.promises.unlink(task.file);
+    } catch (error) {
+      task.warning = `Converted, but could not delete original: ${error instanceof Error ? error.message : String(error)}`;
+    }
+  }
+  progress(task);
 }

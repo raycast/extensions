@@ -1,10 +1,11 @@
-import { describe, expect, test, beforeAll, afterAll } from "bun:test";
+import { describe, expect, test, beforeAll, afterAll, spyOn } from "bun:test";
 import { execFileSync } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
 import {
   inspectMedia,
+  selectDuration,
   parseFrameRate,
   estimateVideoBytes,
   gifFps,
@@ -13,7 +14,7 @@ import {
 } from "../src/utils/mediaInfo";
 import { encodeGif, estimateGifBytes } from "../src/utils/gifski";
 import { findExecutable, findFFmpegTools } from "../src/utils/ffmpegRuntime";
-import { convertVideo } from "../src/utils/ffmpeg";
+import { convertVideo, cancelConversion, type ConversionTask } from "../src/utils/ffmpeg";
 import type { FormValues } from "../src/types";
 
 const values: FormValues = {
@@ -44,6 +45,11 @@ test("frame rate parsing and automatic FPS", () => {
   expect(gifFps("", info)).toBe(30);
   expect(gifFps("12", info)).toBe(12);
   expect(() => gifFps("", { ...info, fps: 0 })).toThrow();
+});
+test("invalid stream durations fall back to the container duration", () => {
+  for (const value of ["N/A", "0", 0, -1, undefined, Infinity]) expect(selectDuration(value, "12.5")).toBe(12.5);
+  expect(selectDuration("2.5", "12.5")).toBe(2.5);
+  expect(() => selectDuration("N/A", "N/A")).toThrow();
 });
 test("GIF quality and FPS validation", () => {
   for (const quality of ["0", "101", "NaN", "50.5", ""]) expect(() => validateGifSettings(quality, "")).toThrow();
@@ -118,6 +124,54 @@ describe.skipIf(!hasTools)("FFmpeg and gifski integration", () => {
     expect(streams(output)[0].width).toBe(96);
     const gifInfo = await inspectMedia(output);
     expect(gifInfo.duration).toBeCloseTo(metadata.duration, 1);
+  });
+  test("cancellation during setup publishes cancelled status", async () => {
+    for (const atEncoderSetup of [false, true]) {
+      let cancelled = false;
+      let snapshot: ConversionTask[] = [];
+      await convertVideo(
+        { ...values, videoFiles: [input], outputFolder: [directory], rename: "cancel-setup" },
+        (tasks) => {
+          snapshot = tasks.map((task) => ({ ...task }));
+          if (!cancelled && tasks[0].status === "converting" && (!atEncoderSetup || tasks[0].ffmpeg)) {
+            cancelled = true;
+            cancelConversion();
+          }
+        },
+      );
+      expect(cancelled).toBe(true);
+      expect(snapshot[0].status).toBe("cancelled");
+      expect(fs.existsSync(path.join(directory, "cancel-setup.mp4"))).toBe(false);
+    }
+  });
+  test("failed original deletion preserves successful outputs and continues the batch", async () => {
+    const unlink = spyOn(fs.promises, "unlink").mockRejectedValue(new Error("Permission denied"));
+    try {
+      for (const format of ["gif", "mp4"] as const) {
+        let snapshot: ConversionTask[] = [];
+        await convertVideo(
+          {
+            ...values,
+            videoFormat: format,
+            videoFiles: [input, input],
+            outputFolder: [directory],
+            rename: `delete-failure-${format}`,
+            deleteOriginalFiles: true,
+          },
+          (tasks) => {
+            snapshot = tasks.map((task) => ({ ...task }));
+          },
+        );
+        expect(snapshot.map((task) => task.status)).toEqual(["done", "done"]);
+        for (const task of snapshot) {
+          expect(task.warning).toContain("Permission denied");
+          expect(fs.existsSync(task.outputFile!)).toBe(true);
+        }
+      }
+      expect(fs.existsSync(input)).toBe(true);
+    } finally {
+      unlink.mockRestore();
+    }
   });
   test("sample estimate uses the same encoder settings as output", async () => {
     const estimated = await estimateGifBytes(input, metadata, "50", "12", new AbortController().signal);

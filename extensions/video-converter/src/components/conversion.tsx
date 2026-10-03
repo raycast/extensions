@@ -83,7 +83,7 @@ export default function Conversion({ values }: { values: FormValues }) {
           const percent = isDone ? `Completed in ${formatElapsed(t.elapsed)}` : `${t.progress}%`;
 
           const subtitle = {
-            [CONVERSION_STATUS.DONE]: "Done",
+            [CONVERSION_STATUS.DONE]: t.warning ? "Done — original retained" : "Done",
             [CONVERSION_STATUS.ERROR]: "Error",
             [CONVERSION_STATUS.CONVERTING]:
               values.videoFormat === "gif" ? "Encoding GIF…" : `Converting... ${t.fps} fps`,
@@ -105,7 +105,7 @@ export default function Conversion({ values }: { values: FormValues }) {
               title={path.basename(t.file)}
               subtitle={subtitle[t.status]}
               icon={icons[t.status]}
-              accessories={[{ text: percent }]}
+              accessories={[{ text: percent }, ...(t.warning ? [{ icon: Icon.Warning, tooltip: t.warning }] : [])]}
               actions={
                 <ActionPanel>
                   <Action

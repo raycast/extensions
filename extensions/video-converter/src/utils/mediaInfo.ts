@@ -28,7 +28,7 @@ export async function inspectMedia(file: string, signal?: AbortSignal): Promise<
   );
   const data = JSON.parse(stdout);
   const video = data.streams?.find((stream: { codec_type: string }) => stream.codec_type === "video");
-  const duration = Number(video?.duration || data.format?.duration);
+  const duration = selectDuration(video?.duration, data.format?.duration);
   if (!video || !Number.isFinite(duration) || duration <= 0) throw new Error("Cannot read video duration");
   return {
     duration,
@@ -67,4 +67,10 @@ export function estimateVideoBytes(values: FormValues, info: MediaInfo): number 
 
 export function formatSize(bytes: number): string {
   return bytes < 1_000_000 ? `${(bytes / 1000).toFixed(0)} KB` : `${(bytes / 1_000_000).toFixed(1)} MB`;
+}
+
+export function selectDuration(streamDuration: unknown, formatDuration: unknown): number {
+  const duration = [streamDuration, formatDuration].map(Number).find((value) => Number.isFinite(value) && value > 0);
+  if (duration === undefined) throw new Error("Cannot read video duration");
+  return duration;
 }

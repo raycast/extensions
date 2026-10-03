@@ -22,9 +22,15 @@ export default function GifSettings({
       <Form.TextField
         id="gifFps"
         title="FPS"
-        value={values.gifFps || sourceFps}
+        value={values.gifFps}
         onChange={(value) => onChange("gifFps", value)}
-        placeholder="From source video"
+        placeholder={
+          values.videoFiles.length > 1
+            ? "Auto — each source video"
+            : sourceFps
+              ? `Auto — ${sourceFps} FPS`
+              : "Auto — from source video"
+        }
         info="Defaults to each source video's FPS (up to 100). Clear to restore automatic FPS. GIF timing is rounded to hundredths of a second."
       />
     </>
