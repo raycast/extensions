@@ -209,6 +209,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://dchub.cloud/mcp"],
     },
+    remoteUrl: "https://dchub.cloud/mcp",
   },
   {
     name: "git",
