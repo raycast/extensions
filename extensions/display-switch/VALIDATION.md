@@ -6,7 +6,7 @@ Studio Display (main), built-in Retina display, and Mi Monitor (rotated 270°).
 ## Passed
 
 - TypeScript strict type checking and Prettier formatting.
-- 12 controller tests: on/off round trip, last-active-display protection,
+- 14 controller tests: on/off round trip, last-active-display protection,
   duplicate names, disconnected displays, invalid IDs, malformed/duplicate
   backend records, mirrors, enable-all recovery, state verification,
   idempotency, and topology changes between reads.
@@ -62,3 +62,20 @@ screen and keep another screen active.
 
 UUID failure and layout-error cases were injected in native tests; these were
 not induced on physical hardware.
+
+- Native recovery tests reject a reused numeric ID with a different UUID, an
+  unavailable UUID, and a record from a previous boot. The requested UUID is
+  passed explicitly through set and layout restoration.
+- Pending-layout records survive inventory refreshes within the current boot;
+  successful restoration clears pending state, and a new boot discards it.
+- List-lock tests verify read retries and immediate mutation conflict rejection.
+- Recovery timeout covers the bounded 128-display inventory and read-lock wait.
+- Toggle feedback follows the selected UUID when the hardware name changes.
+- Independent source compilation and signing for both architectures produced
+  binaries whose SHA-256 hashes exactly matched the bundled executables.
+- Release archive inspection confirms native source and manifest are included.
+
+The Store metadata screenshot is still outstanding. Raycast opened for capture,
+but UI automation returned a ScreenCaptureKit failure and then screenshot
+unavailable before a native Store capture could be saved. The existing README
+screenshots remain raw, real captures rather than substitutes for Store metadata.

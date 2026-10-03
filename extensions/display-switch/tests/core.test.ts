@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { Display, DisplayController, parseDisplays, resolveDisplay, displayWarnings } from "../src/core";
+import { Display, DisplayController, parseDisplays, resolveDisplay, displayWarnings, helperTimeout } from "../src/core";
 const one: Display = {
   id: "11111111-1111-1111-1111-111111111111",
   name: "Studio Display",
@@ -109,4 +109,22 @@ test("layout warning preserves confirmed enabled state for set and enable-all", 
   assert.equal(displayWarnings(enabled), warning);
   assert.equal((await controller.enableAll())[1].enabled, true);
   assert.throws(() => parseDisplays(JSON.stringify([{ ...one, warning: 42 }])));
+});
+
+test("recovery and lock-waiting reads allow the full 128-display confirmation budget", () => {
+  assert.ok(helperTimeout("enable-all") > 128 * 4_000 + 15_000);
+  assert.ok(helperTimeout("list") > 600_000);
+  assert.equal(helperTimeout("set"), 15_000);
+});
+test("selected UUID identifies a successful toggle after its display name changes", async () => {
+  const controller = new DisplayController(async (args) =>
+    JSON.stringify(
+      args[0] === "list"
+        ? [one, { ...two, name: "Cached name", enabled: false }]
+        : [one, { ...two, name: "New hardware name", enabled: true }],
+    ),
+  );
+  const selected = resolveDisplay(await controller.list(), "Cached name");
+  const result = await controller.set(selected.id, !selected.enabled);
+  assert.equal(resolveDisplay(result, selected.id).name, "New hardware name");
 });

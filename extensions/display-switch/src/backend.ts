@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
-import { DisplayController } from "./core";
+import { DisplayController, helperTimeout } from "./core";
 
 export const controller = new DisplayController(
   (args) =>
@@ -12,7 +12,7 @@ export const controller = new DisplayController(
         return;
       }
       const helper = join(environment.assetsPath, `display-control-${arch === "x64" ? "x86_64" : "arm64"}`);
-      execFile(helper, args, { timeout: 15000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+      execFile(helper, args, { timeout: helperTimeout(args[0]), maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
         if (error)
           reject(
             new Error(

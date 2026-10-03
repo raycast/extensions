@@ -47,3 +47,10 @@ Metadata and a process lock are stored under
 `~/Library/Application Support/Display Switch/`. Changes last only for the
 current macOS login session. Hardware and OS compatibility limits are documented
 in the extension README and VALIDATION.md.
+
+Hashes alone establish integrity, not source equivalence. Run
+`npm run verify:native-source` on macOS to compile and sign both architectures
+into a separate temporary directory and compare them with the bundled binaries.
+This requires the compiler recorded in the manifest; with a different compiler,
+first rebuild the helpers. The standalone repository's CI independently runs
+that source build and comparison on every push.

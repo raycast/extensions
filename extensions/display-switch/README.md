@@ -118,3 +118,9 @@ Displays for which macOS cannot provide a stable UUID are omitted from the list;
 they still count in the native last-display safety check. If a display turns on
 but its previous resolution or position cannot be restored, the command reports
 it as On and shows a layout warning. Adjust its layout in System Settings.
+
+Enable All Displays enables every identifiable connected display, including
+screens disabled by other software. It also retries any pending saved-layout
+restoration. A failed layout restoration preserves the original mode and position
+until that retry succeeds. Recovery refuses cached numeric IDs whose UUID no
+longer matches; if macOS cannot identify an offline screen, reconnect its cable.

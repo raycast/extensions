@@ -19,6 +19,12 @@ export function displayWarnings(displays: Display[]): string | undefined {
   );
 }
 
+// SkyLight's inventory is bounded at 128; each enable confirmation can take
+// four seconds. Reads may wait behind that recovery lock.
+export function helperTimeout(command: string): number {
+  return command === "enable-all" || command === "list" ? 660_000 : 15_000;
+}
+
 export type Runner = (args: string[]) => Promise<string>;
 const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 
