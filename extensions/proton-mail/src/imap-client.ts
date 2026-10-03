@@ -1,4 +1,4 @@
-import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
+import { ImapFlow, MailboxObject, ListResponse, SearchObject } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Email, EmailAddress, Folder } from "./types";
@@ -113,6 +113,7 @@ export async function fetchEmails(
   limit: number = 50,
   filter?: "unread" | "read" | "attachment",
   offset: number = 0,
+  query?: string,
 ): Promise<Email[]> {
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
@@ -124,11 +125,15 @@ export async function fetchEmails(
       }
 
       // Build search query based on filter
-      let searchQuery: { all?: boolean; seen?: boolean } = { all: true };
+      let searchQuery: SearchObject = { all: true };
       if (filter === "unread") {
         searchQuery = { seen: false };
       } else if (filter === "read") {
         searchQuery = { seen: true };
+      }
+      const searchText = query?.trim();
+      if (searchText) {
+        searchQuery.or = [{ subject: searchText }, { from: searchText }];
       }
 
       // Search for messages
