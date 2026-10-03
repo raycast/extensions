@@ -37,8 +37,8 @@ export function buildAvailabilityWindows(now: DateTime, createdAt?: Optional<str
   return [
     { label: "Today", range: { from: today, to: today } },
     { label: "Last 7 days", range: { from: now.minus({ days: 7 }).toISODate() ?? "", to: today } },
-    { label: "Last 30 days", range: { from: now.minus({ months: 1 }).toISODate() ?? "", to: today } },
-    { label: "Last 365 days", range: { from: now.minus({ years: 1 }).toISODate() ?? "", to: today } },
+    { label: "Last 30 days", range: { from: now.minus({ days: 30 }).toISODate() ?? "", to: today } },
+    { label: "Last 365 days", range: { from: now.minus({ days: 365 }).toISODate() ?? "", to: today } },
     { label: buildAllTimeLabel(now, createdAt), range: {} },
   ];
 }

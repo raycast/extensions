@@ -32,12 +32,21 @@ function StatusPageDetailContent({ statusPage }: StatusPageDetailProps) {
   const [markdown, setMarkdown] = useState("");
 
   useEffect(() => {
+    let isStale = false;
+
     renderStatusPageDetail({ statusPage, sections, isLoading })
-      .then(setMarkdown)
+      .then((renderedMarkdown) => {
+        if (!isStale) setMarkdown(renderedMarkdown);
+      })
       .catch((error) => {
+        if (isStale) return;
         const message = error instanceof Error ? error.message : String(error);
         setMarkdown(`## Status page render error\n\n\`\`\`\n${message}\n\`\`\``);
       });
+
+    return () => {
+      isStale = true;
+    };
   }, [statusPage, sections, isLoading]);
 
   if (isError) {
@@ -53,7 +62,7 @@ function StatusPageDetailContent({ statusPage }: StatusPageDetailProps) {
         <StatusPageActionPanel
           url={statusPage.url}
           onRefresh={refresh}
-          onCopyAsPng={() => copyAsPng({ statusPage, sections })}
+          onCopyAsPng={isLoading ? undefined : () => copyAsPng({ statusPage, sections })}
         />
       }
     />

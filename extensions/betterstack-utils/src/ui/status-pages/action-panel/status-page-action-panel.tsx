@@ -6,14 +6,14 @@ import { RefreshAction } from "@/ui/status-pages/action-panel/actions/refresh-ac
 interface StatusPageActionPanelProps {
   url: string;
   onRefresh: () => void;
-  onCopyAsPng: () => void;
+  onCopyAsPng?: () => void;
 }
 
 export function StatusPageActionPanel({ url, onRefresh, onCopyAsPng }: StatusPageActionPanelProps) {
   return (
     <ActionPanel>
       <OpenStatusPageInBrowserAction url={url} />
-      <CopyStatusPageDetailAsPngAction onCopyAsPng={onCopyAsPng} />
+      {onCopyAsPng && <CopyStatusPageDetailAsPngAction onCopyAsPng={onCopyAsPng} />}
       <RefreshAction onRefresh={onRefresh} />
     </ActionPanel>
   );

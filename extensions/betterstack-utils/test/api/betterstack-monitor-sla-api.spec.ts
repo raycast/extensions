@@ -73,6 +73,14 @@ describe("buildAvailabilityWindows", () => {
     ]);
   });
 
+  it("uses fixed day counts across short months and leap years", () => {
+    const afterLeapDay = DateTime.fromObject({ year: 2028, month: 3, day: 15 });
+    const windows = buildAvailabilityWindows(afterLeapDay);
+
+    expect(windows[2].range).toEqual({ from: "2028-02-14", to: "2028-03-15" });
+    expect(windows[3].range).toEqual({ from: "2027-03-16", to: "2028-03-15" });
+  });
+
   it("includes the day count in the All time label when createdAt is known", () => {
     const createdAt = now.minus({ days: 100 }).toISO() ?? undefined;
     const windows = buildAvailabilityWindows(now, createdAt);
