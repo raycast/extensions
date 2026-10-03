@@ -2,7 +2,7 @@
 
 ## [Dependency Updates] - {PR_MERGE_DATE}
 
-- Update Raycast API, utilities, and extension dependencies
+- Update utilities and extension dependencies while retaining Raycast API v1 compatibility
 
 ## [Bug Fixes] - 2026-06-15
 

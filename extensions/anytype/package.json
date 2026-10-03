@@ -780,7 +780,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.6.2",
+    "@raycast/api": "^1.104.24",
     "@raycast/utils": "^2.3.2",
     "date-fns": "4.4.0",
     "emoji-regex": "11.0.0",
@@ -809,7 +809,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "npx @raycast/api@1 publish",
     "prepare": "husky",
     "evals": "npx ray evals"
   },
