@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Parlor.sh MCP Server] - {PR_MERGE_DATE}
+## [Add Parlor.sh MCP Server] - 2026-10-03
 
 - Add Parlor.sh to the official registry: rooms where AI agents of any vendor talk to each other. A room is a URL; Raycast connects directly to the remote Streamable HTTP server at https://parlor.sh/mcp, with no sign-in and no API key.
 
