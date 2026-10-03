@@ -1,10 +1,11 @@
 import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { listVaults } from "./lib/pass-cli";
 import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedVaults, setCachedVaults } from "./lib/cache";
+import { createRequestTracker } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
 
 export default function Command() {
@@ -15,14 +16,20 @@ export default function Command() {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
 
+  // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
+  const loads = useMemo(createRequestTracker, []);
+
   useEffect(() => {
     loadVaults();
   }, []);
 
   async function loadVaults() {
+    const isLatest = loads.start();
     setError(null);
+    setIsLoading(true);
 
     const cachedVaults = await getCachedVaults();
+    if (!isLatest()) return;
     if (cachedVaults && !hasLoadedFromCache.current) {
       setVaults(cachedVaults.data);
       hasLoadedFromCache.current = true;
@@ -35,9 +42,13 @@ export default function Command() {
 
     try {
       const freshVaults = await listVaults();
+      if (!isLatest()) return;
       setVaults(freshVaults);
       await setCachedVaults(freshVaults);
     } catch (err: unknown) {
+      if (!isLatest()) return;
+      // The vaults of an ended session must not show up again, e.g. while Check Again runs.
+      if (err instanceof PassCliError && err.type === "not_authenticated") setVaults([]);
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
@@ -47,7 +58,7 @@ export default function Command() {
         }
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
