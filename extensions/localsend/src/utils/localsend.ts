@@ -119,8 +119,6 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
     const socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
     const deviceInfo = getDeviceInfo();
     let closed = false;
-    let timer: NodeJS.Timeout | undefined;
-
     const closeOnce = (err?: Error) => {
       if (closed) return;
       closed = true;
@@ -136,6 +134,10 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
         resolve(Array.from(devices.values()));
       }
     };
+
+    const timer = setTimeout(() => {
+      closeOnce();
+    }, timeout);
 
     socket.on("error", (err) => {
       console.error("Socket error:", err);
@@ -194,10 +196,6 @@ export const discoverDevicesMulticast = async (timeout = 5000): Promise<LocalSen
         closeOnce(error instanceof Error ? error : new DiscoveryError(String(error), "SETUP_FAILED"));
       }
     });
-
-    timer = setTimeout(() => {
-      closeOnce();
-    }, timeout);
   });
 
 export const discoverDevicesHTTP = async (): Promise<LocalSendDevice[]> => {
