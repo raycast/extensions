@@ -20,11 +20,26 @@ export interface ScanPreferences {
 /** What the extension's setting means, as a preference value. */
 const EXTENSION = "extension";
 
-export function scanArgs(prefs: ScanPreferences, target: { tabId: number; browserId: string; out: string }): string[] {
+/**
+ * `{host}` as the CLI fills it for an address (`hostOf` in its batch.ts). `scan --tab` has no
+ * address to fill it from and writes `page`, so the name would be the same for every site.
+ */
+export function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "").replace(/\./g, "-") || "page";
+  } catch {
+    return "page";
+  }
+}
+
+export function scanArgs(
+  prefs: ScanPreferences,
+  target: { tabId: number; url: string; browserId: string; out: string },
+): string[] {
   const args = ["scan", "--tab", String(target.tabId), "--browser", target.browserId];
   args.push("--out", target.out);
   const name = prefs.fileName?.trim();
-  if (name) args.push("--name", name);
+  if (name) args.push("--name", name.replaceAll("{host}", hostOf(target.url)));
   args.push("--format", prefs.format ?? "pdf");
   args.push("--page-size", prefs.pageSize ?? "a4");
   if (prefs.markdown && prefs.markdown !== "none") args.push("--markdown", prefs.markdown);

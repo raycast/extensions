@@ -9,6 +9,8 @@ export interface Progress {
   helper: HelperState;
   helperNode: string | null;
   browsers: string[];
+  /** For `incomplete`: the browsers the helper is not set up in yet. */
+  withoutHelper?: string[];
 }
 
 export const STORE_URL = "https://chromewebstore.google.com/detail/page-scanner/oinkohacnbkapdnnhpidmoidmidlgaoj";
@@ -30,12 +32,17 @@ export function setUpMarkdown(progress: Progress | undefined, error: string | un
             "**Needs repair.** It was set up before Page Scanner came to Edge Add-ons, so Edge cannot start it yet.",
             "Press **Repair Helper** below to set it up again for both stores.",
           ]
-        : helperDone
-          ? ["**Done.**"]
-          : [
-              "**To do.**",
-              "Press **Install Helper** below. It tells Chrome, Edge, Brave, Arc and Vivaldi where the helper is, and changes nothing else.",
-            ];
+        : progress.helper === "incomplete"
+          ? [
+              `**Not in every browser.** ${(progress.withoutHelper ?? []).join(", ") || "A browser"} came after the helper was installed, so it cannot start the helper yet.`,
+              "Press **Install Helper** below to set it up there too.",
+            ]
+          : helperDone
+            ? ["**Done.**"]
+            : [
+                "**To do.**",
+                "Press **Install Helper** below. It tells Chrome, Edge, Brave, Arc and Vivaldi where the helper is, and changes nothing else.",
+              ];
   const connect = connected
     ? [`**Done.** Connected: ${progress.browsers.join(", ")}.`]
     : [

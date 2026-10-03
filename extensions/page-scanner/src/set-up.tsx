@@ -15,7 +15,7 @@ import { showFailureToast } from "@raycast/utils";
 import { runCli, type BrowsersAnswer, type StatusAnswer } from "./lib/cli";
 import { installHelper } from "./lib/helper";
 import { openCommand } from "./lib/open-command";
-import { helperState } from "./lib/helper-state";
+import { browsersWithoutHelper, helperState } from "./lib/helper-state";
 import { setUpMarkdown, STORE_URL, type Progress } from "./lib/set-up-markdown";
 
 const POLL_MS = 3_000;
@@ -25,10 +25,11 @@ async function readProgress(): Promise<Progress> {
   if (!status.answer.ok) throw new Error(status.answer.message);
   const helper = helperState(status.answer);
   // `browsers` starts the daemon, which the helper waits for before it connects anything.
-  const connected = helper === "ready" ? await runCli<BrowsersAnswer>(["browsers"]) : null;
+  const connected = helper === "ready" || helper === "incomplete" ? await runCli<BrowsersAnswer>(["browsers"]) : null;
   return {
     helper,
     helperNode: status.answer.nativeHost.node,
+    withoutHelper: browsersWithoutHelper(status.answer),
     browsers: connected?.answer.ok ? connected.answer.browsers.map((b) => b.label) : [],
   };
 }
@@ -97,7 +98,9 @@ export default function SetUp() {
           ) : null}
           {needsHelper ? (
             <Action
-              title={progress.helper === "missing" ? "Install Helper" : "Repair Helper"}
+              title={
+                progress.helper === "missing" || progress.helper === "incomplete" ? "Install Helper" : "Repair Helper"
+              }
               icon={Icon.Download}
               onAction={install}
             />

@@ -67,6 +67,7 @@ export default async function scanCurrentTab(): Promise<void> {
     const scan = await runCli<ScanAnswer>(
       scanArgs(prefs, {
         tabId: pick.tab.tabId,
+        url: pick.tab.url,
         browserId: tabs.answer.browserId,
         out: saveDirectory(prefs),
       }),
@@ -134,7 +135,8 @@ async function repairIfBroken(toast: Toast): Promise<boolean> {
     });
     return false;
   }
-  if (state === "ready") {
+  // A browser installed since the helper is the user's to set up, from Set Up.
+  if (state === "ready" || state === "incomplete") {
     await fail(toast, notConnected());
     return false;
   }
