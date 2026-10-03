@@ -67,12 +67,12 @@
     {
       "name": "get-download-progress",
       "title": "Get Download Progress",
-      "description": "Check the progress of active and recent model downloads."
+      "description": "Check the progress of active and recent model downloads from HuggingFace and ModelScope. Each download carries a source (huggingface or modelscope) — pass it along to actions like cancel-download."
     },
     {
       "name": "cancel-download",
       "title": "Cancel Download",
-      "description": "Cancel an active model download. Use get-download-progress first to find the task ID."
+      "description": "Cancel an active model download. Use get-download-progress first to find the task ID and its source (huggingface or modelscope); pass the source along, it defaults to huggingface."
     },
     {
       "name": "get-recommended-models",
@@ -175,7 +175,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.1"
+    "@raycast/api": "^2.6.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
@@ -190,6 +190,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --test 'test/*.test.mjs'",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [

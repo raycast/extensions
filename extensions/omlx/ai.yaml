@@ -3,7 +3,7 @@ instructions: |
   Use list-models before load-model, eject-model, pin-model, or get-model-stats to resolve a model name to its exact ID.
   When the user says "eject all idle models" or "eject everything except X", call list-models first to get loaded models, then call eject-model for each one that matches.
   Use search-models or get-recommended-models before download-model to find the HuggingFace repo ID. Use get-recommended-models when the user asks what's trending or popular without a specific query.
-  Use get-download-progress before cancel-download to find the task ID.
+  Use get-download-progress before cancel-download to find the task ID and its source. Pass the source to cancel-download when it is modelscope; it defaults to huggingface.
   Use get-server-status to check if the server is running before suggesting load or eject actions.
   Model IDs are exact strings like "Qwen3.8-27B-4bit" — always resolve them via list-models, never guess.
   When reporting stats, include units: "tok/s" for speed, "%" for cache efficiency, "GB" for memory.
@@ -124,6 +124,7 @@ evals:
         downloads:
           - taskId: "abc123"
             repoId: "mlx-community/Llama-3.1-8B-4bit"
+            source: "huggingface"
             status: "downloading"
             progress: "67%"
             downloaded: "3.2 GB"
@@ -131,6 +132,37 @@ evals:
     expected:
       - callsTool: "get-download-progress"
       - includes: "67%"
+
+  - input: "@omlx cancel the ModelScope download"
+    mocks:
+      get-download-progress:
+        downloads:
+          - taskId: "ms-555"
+            repoId: "mlx-community/Qwen3-8B-4bit"
+            source: "modelscope"
+            status: "downloading"
+            progress: "42%"
+            downloaded: "2.1 GB"
+            totalSize: "5.0 GB"
+          - taskId: "hf-777"
+            repoId: "mlx-community/Llama-3.1-8B-4bit"
+            source: "huggingface"
+            status: "downloading"
+            progress: "67%"
+            downloaded: "3.2 GB"
+            totalSize: "4.8 GB"
+      cancel-download:
+        success: true
+        taskId: "ms-555"
+        source: "modelscope"
+        message: "Download cancelled"
+    expected:
+      - callsTool: "get-download-progress"
+      - callsTool:
+          name: "cancel-download"
+          arguments:
+            taskId: "ms-555"
+            source: "modelscope"
 
   - input: "@omlx load the 9B model"
     mocks:

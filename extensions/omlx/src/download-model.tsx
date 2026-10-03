@@ -62,6 +62,18 @@ export default function DownloadModel() {
   const [mlxOnly, setMlxOnly] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryRef = useRef("");
+  // Monotonic search generation: only the latest search may update state.
+  // Prevents a slow earlier request (older query, other source, other
+  // filter) from overwriting the results of a newer one.
+  const searchGenRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      // Invalidate any in-flight request and pending debounce on unmount.
+      searchGenRef.current += 1;
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -84,6 +96,8 @@ export default function DownloadModel() {
 
   const doSearch = useCallback((text: string, src: Source, mlx: boolean) => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    searchGenRef.current += 1;
+    const generation = searchGenRef.current;
 
     if (!text.trim()) {
       setResults([]);
@@ -95,9 +109,11 @@ export default function DownloadModel() {
     timerRef.current = setTimeout(async () => {
       try {
         const models = await SOURCE_CONFIG[src].search(text.trim(), 20, mlx);
+        if (generation !== searchGenRef.current) return;
         setResults(models);
         setViewState("ready");
       } catch (error) {
+        if (generation !== searchGenRef.current) return;
         await showToast({
           style: Toast.Style.Failure,
           title: "Search failed",

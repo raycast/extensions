@@ -6,6 +6,7 @@ import {
   formatModelName,
   type OmlxModelStatus,
 } from "./lib/omlx";
+import { createSseParser } from "./sse-parser";
 
 function buildDescription(model: OmlxModelStatus): string {
   const parts: string[] = [];
@@ -160,12 +161,6 @@ function convertMessages(
     .flat();
 }
 
-interface ToolCallAccumulator {
-  id: string;
-  name: string;
-  arguments: string;
-}
-
 export const streamCompletion: AI.StreamCompletion = async function* (
   model,
   request,
@@ -223,89 +218,19 @@ export const streamCompletion: AI.StreamCompletion = async function* (
     response.body as import("stream/web").ReadableStream,
   );
 
-  let buffer = "";
-  const toolCalls = new Map<number, ToolCallAccumulator>();
+  const parser = createSseParser();
 
   for await (const chunk of nodeStream) {
-    buffer += typeof chunk === "string" ? chunk : Buffer.from(chunk).toString();
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const data = line.slice(6).trim();
-      if (data === "[DONE]") {
-        for (const tc of toolCalls.values()) {
-          let input: unknown = {};
-          try {
-            input = JSON.parse(tc.arguments);
-          } catch {
-            /* use empty */
-          }
-          yield {
-            type: "tool-call" as const,
-            toolCallId: tc.id,
-            toolName: tc.name,
-            input,
-          };
-        }
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.model === "keepalive") continue;
-        const delta = parsed.choices?.[0]?.delta;
-        const finishReason = parsed.choices?.[0]?.finish_reason;
-
-        if (delta?.reasoning_content) {
-          yield {
-            type: "reasoning-delta" as const,
-            textDelta: delta.reasoning_content,
-          };
-        }
-        if (delta?.content) {
-          yield { type: "text-delta" as const, textDelta: delta.content };
-        }
-
-        if (delta?.tool_calls) {
-          for (const tc of delta.tool_calls) {
-            const idx = tc.index ?? 0;
-            if (tc.id) {
-              toolCalls.set(idx, {
-                id: tc.id,
-                name: tc.function?.name ?? "",
-                arguments: tc.function?.arguments ?? "",
-              });
-            } else {
-              const existing = toolCalls.get(idx);
-              if (existing && tc.function?.arguments) {
-                existing.arguments += tc.function.arguments;
-              }
-            }
-          }
-        }
-
-        if (finishReason === "tool_calls") {
-          for (const tc of toolCalls.values()) {
-            let input: unknown = {};
-            try {
-              input = JSON.parse(tc.arguments);
-            } catch {
-              /* use empty */
-            }
-            yield {
-              type: "tool-call" as const,
-              toolCallId: tc.id,
-              toolName: tc.name,
-              input,
-            };
-          }
-          toolCalls.clear();
-        }
-      } catch {
-        // skip malformed chunks
-      }
+    for (const part of parser.feed(chunk as Uint8Array | string)) {
+      yield part;
     }
+    if (parser.isDone()) break;
+  }
+
+  // Normal end-of-stream: consume a trailing data event that arrived
+  // without a newline and emit tool calls that never got a terminal
+  // marker (finish_reason / [DONE]).
+  for (const part of parser.flush()) {
+    yield part;
   }
 };

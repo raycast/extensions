@@ -466,6 +466,76 @@ export async function startMsDownload(modelId: string): Promise<HfTask> {
   return data.task;
 }
 
+export async function fetchMsTasks(): Promise<HfTask[]> {
+  const response = await adminFetch(`${getBaseUrl()}/admin/api/ms/tasks`, {
+    method: "GET",
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch ModelScope tasks: ${text.slice(0, 200)}`);
+  }
+  const data = (await response.json()) as { tasks: HfTask[] };
+  return data.tasks;
+}
+
+export async function cancelMsDownload(taskId: string): Promise<void> {
+  const response = await adminFetch(
+    `${getBaseUrl()}/admin/api/ms/cancel/${encodeURIComponent(taskId)}`,
+    { method: "POST" },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Cancel failed: ${text.slice(0, 200)}`);
+  }
+}
+
+export async function retryMsDownload(taskId: string): Promise<void> {
+  const response = await adminFetch(
+    `${getBaseUrl()}/admin/api/ms/retry/${encodeURIComponent(taskId)}`,
+    { method: "POST" },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Retry failed: ${text.slice(0, 200)}`);
+  }
+}
+
+export async function removeMsTask(taskId: string): Promise<void> {
+  const response = await adminFetch(
+    `${getBaseUrl()}/admin/api/ms/task/${encodeURIComponent(taskId)}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Remove failed: ${text.slice(0, 200)}`);
+  }
+}
+
+export type DownloadSource = "huggingface" | "modelscope";
+
+/** A download task tagged with the backend (HuggingFace or ModelScope) it runs on. */
+export interface TrackedDownload extends HfTask {
+  source: DownloadSource;
+}
+
+/**
+ * Downloads from both sources. oMLX runs separate downloaders per source
+ * with separate task IDs, so actions must be routed by `source`. The
+ * ModelScope backend is optional (503 when not initialized); if it is
+ * unavailable, HuggingFace downloads are still returned instead of
+ * failing the whole view.
+ */
+export async function fetchDownloads(): Promise<TrackedDownload[]> {
+  const [hfTasks, msTasks] = await Promise.all([
+    fetchHfTasks(),
+    fetchMsTasks().catch(() => [] as HfTask[]),
+  ]);
+  return [
+    ...hfTasks.map((t) => ({ ...t, source: "huggingface" as const })),
+    ...msTasks.map((t) => ({ ...t, source: "modelscope" as const })),
+  ];
+}
+
 export interface OmlxLogs {
   logs: string;
   total_lines: number;
@@ -485,6 +555,9 @@ export async function fetchLogs(): Promise<OmlxLogs> {
 
 let updateCheckResult: UpdateCheckResponse | null = null;
 let updateCheckDone = false;
+// Passive update toasts are shown at most once per command runtime;
+// otherwise the 1s download polling would resurface it constantly.
+let updateToastShown = false;
 
 export async function checkUpdateOnce(): Promise<UpdateCheckResponse | null> {
   if (updateCheckDone) return updateCheckResult;
@@ -498,8 +571,10 @@ export async function checkUpdateOnce(): Promise<UpdateCheckResponse | null> {
 }
 
 export async function notifyIfUpdateAvailable(): Promise<void> {
+  if (updateToastShown) return;
   const result = await checkUpdateOnce();
   if (!result?.update_available) return;
+  updateToastShown = true;
   const version = result.latest_version ?? "newer version";
   await showToast({
     style: Toast.Style.Success,

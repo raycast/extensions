@@ -10,21 +10,24 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   cancelHfDownload,
-  fetchHfTasks,
+  cancelMsDownload,
+  fetchDownloads,
   formatBytes,
   getDashboardUrl,
   isOmlxInstalled,
   isServerRunning,
   notifyIfUpdateAvailable,
   removeHfTask,
+  removeMsTask,
   retryHfDownload,
-  type HfTask,
+  retryMsDownload,
+  type TrackedDownload,
 } from "./lib/omlx";
 
 type ViewState = "loading" | "not-installed" | "offline" | "ready";
 
 export default function ManageDownloads() {
-  const [tasks, setTasks] = useState<HfTask[]>([]);
+  const [tasks, setTasks] = useState<TrackedDownload[]>([]);
   const [viewState, setViewState] = useState<ViewState>("loading");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -41,7 +44,7 @@ export default function ManageDownloads() {
     }
 
     try {
-      const data = await fetchHfTasks();
+      const data = await fetchDownloads();
       setTasks(data);
       setViewState("ready");
       notifyIfUpdateAvailable();
@@ -160,28 +163,44 @@ export default function ManageDownloads() {
       {active.length > 0 && (
         <List.Section title="Downloading">
           {active.map((t) => (
-            <TaskItem key={t.task_id} task={t} onRefresh={refresh} />
+            <TaskItem
+              key={`${t.source}:${t.task_id}`}
+              task={t}
+              onRefresh={refresh}
+            />
           ))}
         </List.Section>
       )}
       {failed.length > 0 && (
         <List.Section title="Failed">
           {failed.map((t) => (
-            <TaskItem key={t.task_id} task={t} onRefresh={refresh} />
+            <TaskItem
+              key={`${t.source}:${t.task_id}`}
+              task={t}
+              onRefresh={refresh}
+            />
           ))}
         </List.Section>
       )}
       {cancelled.length > 0 && (
         <List.Section title="Cancelled">
           {cancelled.map((t) => (
-            <TaskItem key={t.task_id} task={t} onRefresh={refresh} />
+            <TaskItem
+              key={`${t.source}:${t.task_id}`}
+              task={t}
+              onRefresh={refresh}
+            />
           ))}
         </List.Section>
       )}
       {completed.length > 0 && (
         <List.Section title="Completed">
           {completed.map((t) => (
-            <TaskItem key={t.task_id} task={t} onRefresh={refresh} />
+            <TaskItem
+              key={`${t.source}:${t.task_id}`}
+              task={t}
+              onRefresh={refresh}
+            />
           ))}
         </List.Section>
       )}
@@ -193,11 +212,18 @@ function TaskItem({
   task,
   onRefresh,
 }: {
-  task: HfTask;
+  task: TrackedDownload;
   onRefresh: () => Promise<void>;
 }) {
   const icon = getTaskIcon(task);
   const accessories = getTaskAccessories(task);
+  // oMLX runs separate downloaders per source; route every action to the
+  // backend the task actually runs on.
+  const cancel =
+    task.source === "modelscope" ? cancelMsDownload : cancelHfDownload;
+  const retry =
+    task.source === "modelscope" ? retryMsDownload : retryHfDownload;
+  const remove = task.source === "modelscope" ? removeMsTask : removeHfTask;
 
   return (
     <List.Item
@@ -217,7 +243,7 @@ function TaskItem({
                   title: "Cancelling...",
                 });
                 try {
-                  await cancelHfDownload(task.task_id);
+                  await cancel(task.task_id);
                   toast.style = Toast.Style.Success;
                   toast.title = "Download cancelled";
                   await onRefresh();
@@ -239,7 +265,7 @@ function TaskItem({
               style={Action.Style.Destructive}
               onAction={async () => {
                 try {
-                  await removeHfTask(task.task_id);
+                  await remove(task.task_id);
                   await onRefresh();
                 } catch (error) {
                   await showToast({
@@ -262,7 +288,7 @@ function TaskItem({
                   title: "Retrying...",
                 });
                 try {
-                  await retryHfDownload(task.task_id);
+                  await retry(task.task_id);
                   toast.style = Toast.Style.Success;
                   toast.title = "Download restarted";
                   await onRefresh();
@@ -290,7 +316,7 @@ function TaskItem({
   );
 }
 
-function getTaskIcon(task: HfTask): List.Item.Props["icon"] {
+function getTaskIcon(task: TrackedDownload): List.Item.Props["icon"] {
   switch (task.status) {
     case "downloading":
       return { source: Icon.Download, tintColor: Color.Blue };
@@ -306,11 +332,17 @@ function getTaskIcon(task: HfTask): List.Item.Props["icon"] {
   }
 }
 
-function getTaskAccessories(task: HfTask): List.Item.Accessory[] {
+function getTaskAccessories(task: TrackedDownload): List.Item.Accessory[] {
+  // HuggingFace is the default assumption; tag ModelScope rows so users
+  // can tell where a download runs.
+  const sourceTag: List.Item.Accessory[] =
+    task.source === "modelscope"
+      ? [{ tag: { value: "ModelScope", color: Color.SecondaryText } }]
+      : [];
   switch (task.status) {
     case "downloading":
     case "pending": {
-      const accessories: List.Item.Accessory[] = [];
+      const accessories: List.Item.Accessory[] = [...sourceTag];
       if (task.progress > 0) {
         accessories.push({
           tag: {
@@ -330,18 +362,19 @@ function getTaskAccessories(task: HfTask): List.Item.Accessory[] {
     case "cancelled":
       return task.error
         ? [
+            ...sourceTag,
             {
               text:
                 task.error.slice(0, 60) + (task.error.length > 60 ? "…" : ""),
             },
           ]
-        : [];
+        : sourceTag;
     case "completed":
       return task.completed_at > 0
-        ? [{ text: relativeTime(task.completed_at) }]
-        : [];
+        ? [...sourceTag, { text: relativeTime(task.completed_at) }]
+        : sourceTag;
     default:
-      return [];
+      return sourceTag;
   }
 }
 
