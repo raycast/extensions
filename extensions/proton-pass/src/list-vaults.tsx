@@ -99,7 +99,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} />;
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} onCheckAgain={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {

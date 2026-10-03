@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
 import { loginWithBrowser } from "./pass-cli";
 import { platformShortcut } from "./shortcuts";
 import { openTerminalForLogin } from "./terminal";
@@ -25,8 +25,14 @@ export async function loginWithBrowserAndReload(reload: () => Promise<void>) {
   }
 }
 
+interface NotLoggedInViewProps {
+  onLogin: () => void;
+  /** Loads again, e.g. once a login started elsewhere has completed. */
+  onCheckAgain: () => void;
+}
+
 /** Shown when the session has ended, with a way to log in again. */
-export function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
+export function NotLoggedInView({ onLogin, onCheckAgain }: NotLoggedInViewProps) {
   return (
     <List>
       <List.EmptyView
@@ -40,6 +46,12 @@ export function NotLoggedInView({ onLogin }: { onLogin: () => void }) {
         actions={
           <ActionPanel>
             <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
+            <Action
+              title="Check Again"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={onCheckAgain}
+            />
             {process.platform === "darwin" && (
               <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
             )}
