@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Article, fetchArticleFeedPage } from "./articles";
 
 const ARTICLE_ARCHIVE_KEY = "article-archive-v1";
@@ -6,7 +6,9 @@ const MAX_INCREMENTAL_FEED_PAGES = 20;
 const MAX_BACKFILL_FEED_PAGES = 200;
 const MAX_ARCHIVE_ARTICLES = 2_000;
 const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
+const MAX_BACKFILL_ARTICLE_BYTES = MAX_ARCHIVE_BYTES - 512 * 1024;
 const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
+const ARCHIVE_LIMIT_TITLE = "Article Archive Limit Reached";
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
@@ -26,6 +28,11 @@ type StoredArticleArchive = {
   updatedAt: string;
 };
 
+type ArticleBackfillResult = {
+  articles: Article[];
+  limitMessage?: string;
+};
+
 const retentionRank: Record<ArticleRetention, number> = {
   week: 0,
   month: 1,
@@ -38,6 +45,19 @@ export function normalizeArticleRetention(value: string | undefined): ArticleRet
 }
 
 export async function refreshArticleArchive(retention: ArticleRetention): Promise<ArchivedArticle[]> {
+  try {
+    return await refreshArticleArchiveStrict(retention);
+  } catch (error) {
+    const storedArchive = await readStoredArchive();
+    if (storedArchive) {
+      return storedArchive.articles;
+    }
+
+    throw error;
+  }
+}
+
+export async function refreshArticleArchiveStrict(retention: ArticleRetention): Promise<ArchivedArticle[]> {
   return runArchiveUpdate(() => performArticleArchiveRefresh(retention));
 }
 
@@ -45,10 +65,14 @@ async function performArticleArchiveRefresh(retention: ArticleRetention): Promis
   const storedArchive = await readStoredArchive();
   const existingArticles = storedArchive?.articles ?? [];
   const shouldBackfill = !storedArchive || retentionRank[retention] > retentionRank[storedArchive.retention];
-  const fetchedArticles = shouldBackfill
-    ? await fetchArticlesForRetention(retention)
-    : await fetchArticlesUntilKnown(existingArticles);
-  const mergedArticles = mergeArticles(existingArticles, fetchedArticles);
+  const backfillResult = shouldBackfill ? await fetchArticlesForRetention(retention) : undefined;
+  const fetchedArticles = backfillResult?.articles ?? (await fetchArticlesUntilKnown(existingArticles));
+
+  // Other Raycast commands can update read or favorite state while a feed request is in progress.
+  // Re-read immediately before merging so the refresh does not overwrite those newer values.
+  const latestStoredArchive = await readStoredArchive();
+  const latestExistingArticles = latestStoredArchive?.articles ?? existingArticles;
+  const mergedArticles = mergeArticles(latestExistingArticles, fetchedArticles);
   const retainedArticles = applyRetention(mergedArticles, retention);
 
   await writeStoredArchive({
@@ -56,6 +80,14 @@ async function performArticleArchiveRefresh(retention: ArticleRetention): Promis
     retention,
     updatedAt: new Date().toISOString(),
   });
+
+  if (backfillResult?.limitMessage && environment.launchType === LaunchType.UserInitiated) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: ARCHIVE_LIMIT_TITLE,
+      message: backfillResult.limitMessage,
+    });
+  }
 
   return retainedArticles;
 }
@@ -157,7 +189,7 @@ async function runArchiveUpdate<T>(update: () => Promise<T>): Promise<T> {
   return queuedUpdate;
 }
 
-async function fetchArticlesForRetention(retention: ArticleRetention): Promise<Article[]> {
+async function fetchArticlesForRetention(retention: ArticleRetention): Promise<ArticleBackfillResult> {
   const cutoff = getRetentionCutoff(retention);
   const articles: Article[] = [];
   const articleIds = new Set<string>();
@@ -168,23 +200,25 @@ async function fetchArticlesForRetention(retention: ArticleRetention): Promise<A
     const newArticles = pageArticles.filter((article) => !articleIds.has(article.id));
 
     if (pageArticles.length === 0 || newArticles.length === 0) {
-      return articles;
+      return { articles };
     }
 
     if (articles.length + newArticles.length > MAX_ARCHIVE_ARTICLES) {
-      throw new Error(
-        `The initial archive import exceeds the ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} article safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
+      return {
+        articles,
+        limitMessage: `The initial archive import reached the ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} article safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      };
     }
 
     const newArticleBytes = newArticles.reduce(
       (total, article) => total + getSerializedByteLength(JSON.stringify(article)),
       0,
     );
-    if (fetchedArticleBytes + newArticleBytes > MAX_ARCHIVE_BYTES) {
-      throw new Error(
-        `The initial archive import exceeds the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
+    if (fetchedArticleBytes + newArticleBytes > MAX_BACKFILL_ARTICLE_BYTES) {
+      return {
+        articles,
+        limitMessage: `The initial archive import reached the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      };
     }
 
     for (const article of newArticles) {
@@ -194,17 +228,18 @@ async function fetchArticlesForRetention(retention: ArticleRetention): Promise<A
     fetchedArticleBytes += newArticleBytes;
 
     if (cutoff && pageArticles.some((article) => article.publishedAt < cutoff)) {
-      return articles;
+      return { articles };
     }
 
     if (page === MAX_BACKFILL_FEED_PAGES) {
-      throw new Error(
-        `The initial archive import reached the ${MAX_BACKFILL_FEED_PAGES.toLocaleString("en-US")} page safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
+      return {
+        articles,
+        limitMessage: `The initial archive import reached the ${MAX_BACKFILL_FEED_PAGES.toLocaleString("en-US")} page safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      };
     }
   }
 
-  return articles;
+  return { articles };
 }
 
 async function fetchArticlesUntilKnown(existingArticles: ArchivedArticle[]): Promise<Article[]> {

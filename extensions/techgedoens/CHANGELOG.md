@@ -1,5 +1,12 @@
 # Changelog
 
+## [Archive Reliability] - 2026-10-03
+
+- Keep saved articles visible when a feed refresh fails.
+- Preserve newer read and favorite states during background refreshes.
+- Store partial archive imports when a safety limit is reached and show the precise reason.
+- Continue search pagination normally after changing the query during a page load.
+
 ## [Initial Release] - 2026-10-02
 
 - Browse the latest Techgedöns articles in a compact list.

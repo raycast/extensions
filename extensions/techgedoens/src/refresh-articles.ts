@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues, LaunchType, showHUD, updateCommandMetadata } from "@raycast/api";
-import { normalizeArticleRetention, readArticleArchive, refreshArticleArchive } from "./article-archive";
+import { normalizeArticleRetention, readArticleArchive, refreshArticleArchiveStrict } from "./article-archive";
 import { ARTICLE_COUNT } from "./articles";
 import { refreshArticleCache } from "./article-cache";
 import { strings } from "./strings";
@@ -12,7 +12,7 @@ export default async function RefreshArticlesCommand() {
     const previousArticleIds = new Set((await readArticleArchive()).map((article) => article.id));
     const [latestArticles, archivedArticles] = await Promise.all([
       refreshArticleCache(ARTICLE_COUNT),
-      refreshArticleArchive(retention),
+      refreshArticleArchiveStrict(retention),
     ]);
     const updateTime = new Intl.DateTimeFormat(translations.locale, {
       dateStyle: "short",
