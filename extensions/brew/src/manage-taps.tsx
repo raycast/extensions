@@ -117,7 +117,10 @@ async function addTap(target: TapTarget, trustSupported: boolean, onDone: () => 
   const user = target.tap.split("/")[0];
   const commands = [brewTapCommand("tap", target.tap, ...(target.url ? [target.url] : []))];
   if (trustSupported) commands.push(brewTapCommand("trust", "--tap", target.tap));
-  const ok = await confirmAndRun(commands, {
+  // Refresh after any attempt: the tap can be added although trusting it then fails.
+  let started = false;
+  await confirmAndRun(commands, {
+    beforeRun: async () => (started = true),
     title: `Add ${target.tap}?`,
     showCommands: false,
     confirmTitle: "Add Tap",
@@ -131,7 +134,7 @@ async function addTap(target: TapTarget, trustSupported: boolean, onDone: () => 
       failure: `Failed to add ${target.tap}`,
     },
   });
-  if (ok) onDone();
+  if (started) onDone();
 }
 
 async function trustTap(tap: Tap, onDone: () => void) {
@@ -170,7 +173,12 @@ async function untap(tap: Tap, installed: TapInstalls | undefined, onDone: () =>
   const known = installed ?? { formulae: [], casks: [] };
   const uninstalls = [...known.casks, ...known.formulae];
   const uninstallFirst = uninstalls.length > 0;
-  const ok = await confirmAndRun(untapCommands(tap.name, known), {
+  // Refresh after any attempt, not only a complete one: when the casks are
+  // uninstalled and a formula then fails, a stale list would make a retry try
+  // to uninstall the casks again, fail there, and never reach the formula.
+  let started = false;
+  await confirmAndRun(untapCommands(tap.name, known), {
+    beforeRun: async () => (started = true),
     title: uninstallFirst
       ? `Uninstall ${formatCount(uninstalls.length, "Package")} and Remove ${tap.name}?`
       : `Remove ${tap.name}?`,
@@ -186,7 +194,7 @@ async function untap(tap: Tap, installed: TapInstalls | undefined, onDone: () =>
       failure: `Failed to remove ${tap.name}`,
     },
   });
-  if (ok) onDone();
+  if (started) onDone();
 }
 
 /**
