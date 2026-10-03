@@ -81,6 +81,15 @@ async function readInput(): Promise<string> {
   return (await Clipboard.readText()) ?? "";
 }
 
+/** Whether the masker substituted exactly this finding. */
+function isReplacementOf(replacement: Replacement, finding: Finding) {
+  return (
+    replacement.location === finding.location &&
+    replacement.length === finding.length &&
+    replacement.kind === finding.kind
+  );
+}
+
 /** Keeps a path's underscores and brackets out of the markdown renderer. */
 function escapeMarkdown(value: string) {
   // As character references, not backslash escapes: Raycast reads `\[ … \]`
@@ -214,22 +223,21 @@ export default function Command() {
     };
   }, [input, selected, selectionKey]);
 
-  // Of two overlapping findings, only the longer is substituted. The shorter
-  // would be a choice that changes nothing, so it is left out of the list —
-  // until the longer one is left alone, when it is substituted and listed again.
+  // Of two overlapping findings, only the longer is substituted. One that lies
+  // inside another's replacement has already gone with it, so listing it would
+  // offer a choice that changes nothing, and say "left as it is" of text that
+  // is not. It is left out until the longer one is left alone. Containment,
+  // not overlap: the longer one, left alone, overlaps the shorter's
+  // replacement, and must stay listed so it can be masked again.
   const shown = useMemo(() => {
     const replacements = masked?.replacements ?? [];
     return findings.filter(
       (finding) =>
         !replacements.some(
           (replacement) =>
-            replacement.location < finding.location + finding.length &&
-            finding.location < replacement.location + replacement.length &&
-            !(
-              replacement.location === finding.location &&
-              replacement.length === finding.length &&
-              replacement.kind === finding.kind
-            ),
+            !isReplacementOf(replacement, finding) &&
+            replacement.location <= finding.location &&
+            finding.location + finding.length <= replacement.location + replacement.length,
         ),
     );
   }, [findings, masked]);
@@ -250,13 +258,15 @@ export default function Command() {
   const notices = response?.notices ?? [];
   const previewText = masked?.text || input || "";
   /**
-   * Where a finding is in the preview: its placeholder, which every occurrence
-   * of the same value shares, or the text itself while it is left alone.
+   * Where a finding is in the preview: its own placeholder, which every
+   * occurrence of the same value shares, or the text itself while it is left
+   * alone. Matched by position, so a finding left alone is not pointed at
+   * another occurrence that was replaced.
    */
   const previewOf = (finding: Finding) =>
     renderPreview(
       previewText,
-      masked?.replacements.find((replacement) => replacement.original === finding.text)?.placeholder ?? finding.text,
+      masked?.replacements.find((replacement) => isReplacementOf(replacement, finding))?.placeholder ?? finding.text,
     );
   // Both halves have to be current: the scan, and the masking of what it found.
   const ready = !waitingForModel && masked?.of === selectionKey;
