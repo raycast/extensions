@@ -33,6 +33,7 @@ import {
   writeScanEnded,
 } from "../src/lib/index-db";
 import {
+  DEFAULT_BATCH_ROWS,
   fdArguments,
   normalizeRoots,
   redundantLinks,
@@ -630,6 +631,10 @@ export async function indexChecks(assert: Assert) {
   fs.rmSync(dupOutside, { recursive: true, force: true });
 
   // ------------------------------------------------------------ fd invocation
+  assert(
+    DEFAULT_BATCH_ROWS === 5_000,
+    "index writes use the benchmarked 5,000-row transaction size",
+  );
   const args = fdArguments("/some/root");
   assert(
     args.includes("--print0") &&
@@ -642,6 +647,20 @@ export async function indexChecks(assert: Assert) {
   assert(
     args[args.length - 1] === "/some/root" && args[args.length - 2] === ".",
     "the root is the search path and the pattern matches everything",
+  );
+  const searchPathArgs = fdArguments("/some/root", {
+    useSearchPath: true,
+    fdThreads: 8,
+  });
+  assert(
+    searchPathArgs.includes("--search-path") &&
+      searchPathArgs.at(-1) === "/some/root" &&
+      !searchPathArgs.includes(".") &&
+      searchPathArgs.some(
+        (arg, index) =>
+          arg === "--threads" && searchPathArgs[index + 1] === "8",
+      ),
+    "benchmark tuning can remove the match-all regex and set fd's worker count",
   );
   for (const exclusion of INDEX_EXCLUSIONS)
     assert(
@@ -719,6 +738,18 @@ export async function indexChecks(assert: Assert) {
       spawnFd: () => fdOutput(observed),
     },
     Date.now() + 60_000,
+  );
+  assert(
+    first.timings.enumerationMs >= 0 &&
+      first.timings.metadataMs >= 0 &&
+      first.timings.databaseMs >= 0 &&
+      Math.abs(
+        first.elapsedMs -
+          first.timings.enumerationMs -
+          first.timings.metadataMs -
+          first.timings.databaseMs,
+      ) < 1,
+    "scan timings separate enumeration, metadata, and database work",
   );
   assert(
     first.complete,
@@ -1711,6 +1742,7 @@ export async function indexChecks(assert: Assert) {
     withLock: async <T>(work: (owned: () => void) => Promise<T>) =>
       work(() => {}),
     roots: [progA, progB],
+    tuning: { batchRows: 1_000 },
     lookupFd: () => ({ kind: "found", path: "/unused", source: "known" }),
     onProgress: (progress) => reported.push({ ...progress }),
     spawnFd: (args) => {
@@ -2103,6 +2135,13 @@ export async function indexChecks(assert: Assert) {
   assert(
     built.kind === "done" && built.report.complete,
     "the orchestration builds an index and reports completion",
+  );
+  assert(
+    built.kind === "done" &&
+      built.report.timings.ftsMs >= 0 &&
+      built.report.timings.metadataMs >= 0 &&
+      built.report.timings.databaseMs >= 0,
+    "orchestration records the final FTS rebuild separately",
   );
   assert(ownedChecks > 0, "lock ownership is asserted before the scan writes");
   const builtRead = openIndexForRead(buildFile);

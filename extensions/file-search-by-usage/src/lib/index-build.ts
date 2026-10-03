@@ -12,6 +12,7 @@ import {
 import {
   ScanProgress,
   ScanReport,
+  ScanTuning,
   describeScan,
   normalizeRoots,
   scanRoots,
@@ -104,6 +105,8 @@ export type BuildOptions = {
   lookupFd?: (preference?: string) => FdLookup | Promise<FdLookup>;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
+  /** Benchmark-only overrides; normal rebuilds use the production defaults. */
+  tuning?: ScanTuning;
 };
 
 /**
@@ -176,11 +179,12 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
       // the duration and rebuild once, in a finally so a failed or cancelled
       // scan cannot leave the index permanently out of step.
       const startedAt = Date.now();
+      let report: ScanReport | undefined;
       try {
         assertOwned();
         writeScanStarted(opened.db, startedAt);
         suspendFtsSync(opened.db);
-        const report = await scanRoots({
+        report = await scanRoots({
           fd: lookup.path,
           roots,
           db: opened.db,
@@ -193,6 +197,7 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           onProgress: options.onProgress,
           spawnFd: options.spawnFd,
           assertOwned,
+          tuning: options.tuning,
         });
         return {
           kind: "done" as const,
@@ -210,7 +215,10 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           options.onFinishing?.();
           await new Promise((resolve) => setTimeout(resolve, 0));
           assertOwned();
+          const ftsStarted = performance.now();
           resumeFtsSync(opened.db);
+          if (report !== undefined)
+            report.timings.ftsMs = performance.now() - ftsStarted;
           writeScanEnded(opened.db, startedAt, Date.now());
         } finally {
           try {

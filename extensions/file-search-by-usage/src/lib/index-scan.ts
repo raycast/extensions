@@ -34,9 +34,28 @@ export const INDEX_EXCLUSIONS = [
 ] as const;
 
 /** Paths stat'ed at once. Bounded so a slow mount cannot queue unboundedly. */
-const STAT_CONCURRENCY = 16;
+export const DEFAULT_STAT_CONCURRENCY = 16;
 /** Rows per transaction. Large enough to amortise fsync, small enough to bound memory. */
-const BATCH_ROWS = 1_000;
+export const DEFAULT_BATCH_ROWS = 5_000;
+
+export type ScanTimings = {
+  /** fd traversal, decoding, exclusions, and scan orchestration. */
+  enumerationMs: number;
+  /** lstat, plus target reads for symbolic links. */
+  metadataMs: number;
+  /** SQLite upserts, cleanup, counts, and root bookkeeping. */
+  databaseMs: number;
+  /** Final FTS rebuild. Set by the rebuild orchestrator. */
+  ftsMs: number;
+};
+
+/** Optional knobs used by the benchmark harness; production uses the defaults. */
+export type ScanTuning = {
+  fdThreads?: number;
+  statConcurrency?: number;
+  batchRows?: number;
+  useSearchPath?: boolean;
+};
 
 export type ScanStop = "time-limit" | "item-limit" | "cancelled";
 
@@ -61,6 +80,7 @@ export type RootOutcome = {
   /** Rows written to the database. */
   indexed: number;
   elapsedMs: number;
+  timings: Omit<ScanTimings, "ftsMs">;
   /** True only when fd finished the whole root and stale rows were removed. */
   complete: boolean;
   stopped?: ScanStop;
@@ -93,6 +113,7 @@ export type ScanOptions = {
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
   assertOwned?: () => void;
+  tuning?: ScanTuning;
 };
 
 /**
@@ -216,6 +237,10 @@ export type FdScanOptions = {
   useIgnoreFiles?: boolean;
   /** User globs, added to the built-in exclusions. Passed to fd verbatim. */
   patterns?: readonly string[];
+  /** Override fd's default worker count. Used only by the benchmark harness. */
+  fdThreads?: number;
+  /** Omit the match-all regex and provide the root with --search-path. */
+  useSearchPath?: boolean;
 };
 
 /** fd arguments. Kept in one place so the effective scope stays auditable. */
@@ -229,9 +254,13 @@ export function fdArguments(
     showHidden = true,
     useIgnoreFiles = false,
     patterns = [],
+    fdThreads,
+    useSearchPath = false,
   } = typeof options === "boolean" ? { showHidden: options } : options;
 
   const args = ["--absolute-path", "--print0", "--follow", "--show-errors"];
+  if (fdThreads !== undefined)
+    args.push("--threads", String(Math.max(1, Math.trunc(fdThreads))));
   if (useIgnoreFiles) {
     // fd only applies gitignore rules inside a repository unless told otherwise.
     args.push("--no-require-git");
@@ -243,8 +272,12 @@ export function fdArguments(
   if (showHidden) args.push("--hidden");
   for (const exclusion of INDEX_EXCLUSIONS) args.push("--exclude", exclusion);
   for (const pattern of patterns) args.push("--exclude", pattern);
-  // A bare pattern of "." matches every entry; the root is the search path.
-  args.push(".", root);
+  if (useSearchPath) {
+    args.push("--search-path", root);
+  } else {
+    // A bare pattern of "." matches every entry; the root is the search path.
+    args.push(".", root);
+  }
   return args;
 }
 
@@ -366,11 +399,12 @@ async function describe(entry: Observed, root: string): Promise<FileRow> {
 async function describeAll(
   entries: Observed[],
   root: string,
+  concurrency: number,
 ): Promise<FileRow[]> {
   const rows: FileRow[] = [];
   let next = 0;
   const workers = Array.from(
-    { length: Math.min(STAT_CONCURRENCY, entries.length) },
+    { length: Math.min(concurrency, entries.length) },
     async () => {
       for (;;) {
         const index = next++;
@@ -444,9 +478,33 @@ export async function scanRoot(
     onProgress,
     assertOwned,
   } = options;
-  const started = Date.now();
+  const startedAt = Date.now();
+  const timingStarted = performance.now();
+  const statConcurrency = Math.max(
+    1,
+    Math.trunc(options.tuning?.statConcurrency ?? DEFAULT_STAT_CONCURRENCY),
+  );
+  const batchRows = Math.max(
+    1,
+    Math.trunc(options.tuning?.batchRows ?? DEFAULT_BATCH_ROWS),
+  );
+  let metadataMs = 0;
+  let databaseMs = 0;
+  const finishTimings = () => {
+    const elapsedMs = performance.now() - timingStarted;
+    return {
+      elapsedMs,
+      timings: {
+        enumerationMs: Math.max(0, elapsedMs - metadataMs - databaseMs),
+        metadataMs,
+        databaseMs,
+      },
+    };
+  };
+  let databaseStarted = performance.now();
   const scanId = nextScanId(db);
   const upsert = db.prepare(UPSERT);
+  databaseMs += performance.now() - databaseStarted;
 
   let scanned = 0;
   let indexed = 0;
@@ -455,6 +513,7 @@ export async function scanRoot(
 
   const commit = (rows: FileRow[]) => {
     if (rows.length === 0) return;
+    const startedWrite = performance.now();
     assertOwned?.();
     db.exec("BEGIN IMMEDIATE");
     try {
@@ -469,6 +528,8 @@ export async function scanRoot(
     } catch (writeError) {
       rollback(db);
       throw writeError;
+    } finally {
+      databaseMs += performance.now() - startedWrite;
     }
   };
 
@@ -476,12 +537,15 @@ export async function scanRoot(
   const flush = async () => {
     if (pending.length === 0) return;
     const batch = pending.splice(0, pending.length);
-    commit(await describeAll(batch, root));
+    const startedMetadata = performance.now();
+    const rows = await describeAll(batch, root, statConcurrency);
+    metadataMs += performance.now() - startedMetadata;
+    commit(rows);
     onProgress?.({
       root,
       scanned,
       indexed,
-      elapsedMs: Date.now() - started,
+      elapsedMs: Date.now() - startedAt,
     });
   };
 
@@ -490,11 +554,13 @@ export async function scanRoot(
     const stats = await fsp.stat(root);
     if (!stats.isDirectory()) throw new Error("not a directory");
   } catch {
+    const timing = finishTimings();
     return {
       root,
       scanned: 0,
       indexed: 0,
-      elapsedMs: Date.now() - started,
+      elapsedMs: timing.elapsedMs,
+      timings: timing.timings,
       complete: false,
       error: "This location is unavailable.",
     };
@@ -505,6 +571,8 @@ export async function scanRoot(
     useIgnoreFiles: options.useIgnoreFiles,
     // Ownership exclusions stay last so user include globs cannot cause overlap.
     patterns: [...(options.patterns ?? []), ...linkExclusions],
+    fdThreads: options.tuning?.fdThreads,
+    useSearchPath: options.tuning?.useSearchPath,
   });
   // Parent walks skip the nested root itself; fd does not emit its search root.
   if (
@@ -550,7 +618,7 @@ export async function scanRoot(
           path: isDir ? raw.slice(0, -1) : raw,
           isDir,
         });
-        if (pending.length >= BATCH_ROWS) {
+        if (pending.length >= batchRows) {
           await flush();
           if (signal?.aborted) {
             stopped = "cancelled";
@@ -606,6 +674,7 @@ export async function scanRoot(
   const complete = stopped === undefined && error === undefined;
   if (complete) {
     // Only now is absence meaningful: fd walked the whole root.
+    databaseStarted = performance.now();
     assertOwned?.();
     db.exec("BEGIN IMMEDIATE");
     try {
@@ -625,9 +694,12 @@ export async function scanRoot(
     } catch (deleteError) {
       rollback(db);
       throw deleteError;
+    } finally {
+      databaseMs += performance.now() - databaseStarted;
     }
   }
 
+  databaseStarted = performance.now();
   const counted = db
     .prepare("SELECT count(*) AS n FROM files WHERE root = ?")
     .get(root) as { n: number } | undefined;
@@ -644,12 +716,16 @@ export async function scanRoot(
        files = excluded.files,
        note = excluded.note`,
   ).run(root, Date.now(), complete ? 1 : 0, files, note);
+  databaseMs += performance.now() - databaseStarted;
+
+  const timing = finishTimings();
 
   return {
     root,
     scanned,
     indexed,
-    elapsedMs: Date.now() - started,
+    elapsedMs: timing.elapsedMs,
+    timings: timing.timings,
     complete,
     stopped,
     error,
@@ -661,6 +737,7 @@ export type ScanReport = {
   scanned: number;
   indexed: number;
   elapsedMs: number;
+  timings: ScanTimings;
   /** True when every root completed. */
   complete: boolean;
   /** Roots dropped from scope, whose rows this scan removed. */
@@ -709,9 +786,10 @@ function forgetUnconfiguredRoots(
 
 /** Index every root in turn, sharing one time budget. */
 export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
-  const started = Date.now();
+  const startedAt = Date.now();
+  const timingStarted = performance.now();
   const budget = options.budgetMs ?? 900_000;
-  const deadline = started + budget;
+  const deadline = startedAt + budget;
   const roots = await resolveRoots(options.roots);
   const outcomes: RootOutcome[] = [];
 
@@ -735,7 +813,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
             root: progress.root,
             scanned: doneScanned + progress.scanned,
             indexed: doneIndexed + progress.indexed,
-            elapsedMs: Date.now() - started,
+            elapsedMs: Date.now() - startedAt,
           }),
       }
     : { ...options, roots };
@@ -747,6 +825,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
         scanned: 0,
         indexed: 0,
         elapsedMs: 0,
+        timings: { enumerationMs: 0, metadataMs: 0, databaseMs: 0 },
         complete: false,
         stopped: options.signal?.aborted ? "cancelled" : "time-limit",
       });
@@ -765,15 +844,33 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
     roots.length > 0 &&
     !options.signal?.aborted &&
     outcomes.every((o) => o.complete);
-  const forgotten = complete
-    ? forgetUnconfiguredRoots(options.db, roots, options.assertOwned)
-    : [];
+  let databaseMs = outcomes.reduce(
+    (sum, outcome) => sum + outcome.timings.databaseMs,
+    0,
+  );
+  let forgotten: string[] = [];
+  if (complete) {
+    const forgetStarted = performance.now();
+    forgotten = forgetUnconfiguredRoots(options.db, roots, options.assertOwned);
+    databaseMs += performance.now() - forgetStarted;
+  }
 
+  const elapsedMs = performance.now() - timingStarted;
+  const metadataMs = outcomes.reduce(
+    (sum, outcome) => sum + outcome.timings.metadataMs,
+    0,
+  );
   return {
     roots: outcomes,
     scanned: outcomes.reduce((sum, outcome) => sum + outcome.scanned, 0),
     indexed: outcomes.reduce((sum, outcome) => sum + outcome.indexed, 0),
-    elapsedMs: Date.now() - started,
+    elapsedMs,
+    timings: {
+      enumerationMs: Math.max(0, elapsedMs - metadataMs - databaseMs),
+      metadataMs,
+      databaseMs,
+      ftsMs: 0,
+    },
     complete,
     forgotten,
   };

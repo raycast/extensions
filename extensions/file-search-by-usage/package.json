@@ -89,7 +89,8 @@
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
     "harness": "node_modules/.bin/esbuild harness/rank-harness.ts --bundle --platform=node --format=cjs --external:esbuild --external:react --external:react-test-renderer --outfile=harness/.build/rank-harness.cjs --log-level=warning && node harness/.build/rank-harness.cjs",
-    "harness:live": "npm run harness -- --live"
+    "harness:live": "npm run harness -- --live",
+    "benchmark:index": "node_modules/.bin/esbuild harness/index-benchmark.ts --bundle --platform=node --format=cjs --outfile=harness/.build/index-benchmark.cjs --log-level=warning && node harness/.build/index-benchmark.cjs"
   },
   "platforms": [
     "macOS"
