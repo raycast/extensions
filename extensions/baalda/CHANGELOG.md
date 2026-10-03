@@ -1,6 +1,6 @@
 # Baalda Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-03
 
 - Quick Capture command for instant note capture into a vault
 - Search Notes command (semantic + keyword across vaults) with reader and append
