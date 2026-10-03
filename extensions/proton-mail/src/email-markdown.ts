@@ -9,6 +9,8 @@ export interface EmailMarkdownOptions {
 const MAX_IMAGE_WIDTH = 560;
 // Images at or below this size are treated as icons (social links, spacers) and dropped
 const ICON_SIZE = 48;
+// Longer alt texts are image descriptions, not link names
+const MAX_ALT_LABEL_LENGTH = 40;
 
 // Zero-width and filler characters that newsletters pad their preheader with
 const INVISIBLE_CHARS = new RegExp(
@@ -138,7 +140,9 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
       let label = content.replace(/\s+/g, " ").trim();
       if (!label) {
         // Image-only link (logo, social icon) shown without images: fall back to the alt text
-        label = (element.querySelector("img")?.getAttribute("alt") || "").trim();
+        const alt = (element.querySelector("img")?.getAttribute("alt") || "").replace(/\s+/g, " ").trim();
+        // Short alts name the target (logo, social network); long ones describe the picture
+        if (alt.length <= MAX_ALT_LABEL_LENGTH) label = alt;
       }
       if (!label) return "";
       if (looksLikeUrl(label)) label = shortUrlLabel(href);
@@ -150,8 +154,19 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
   return turndown;
 }
 
+// Product cards often link both the image and the title, so without images the alt text repeats the title
+function dropRepeatedBlocks(markdown: string): string {
+  const withoutUrls = (block: string) => block.replace(/\]\([^)]*\)/g, "]").trim();
+  return markdown
+    .split("\n\n")
+    .filter(
+      (block, index, blocks) => index === 0 || !block.trim() || withoutUrls(block) !== withoutUrls(blocks[index - 1]),
+    )
+    .join("\n\n");
+}
+
 function tidyMarkdown(markdown: string): string {
-  return (
+  return dropRepeatedBlocks(
     markdown
       .replace(INVISIBLE_CHARS, "")
       .replace(NBSP, " ")
@@ -161,7 +176,7 @@ function tidyMarkdown(markdown: string): string {
       // Separators stacked by nested layout tables
       .replace(/(\n\s*---\s*){2,}/g, "\n\n---\n\n")
       .replace(/\n{3,}/g, "\n\n")
-      .trim()
+      .trim(),
   );
 }
 
