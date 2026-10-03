@@ -49,10 +49,9 @@ export interface ActionToastHandle {
  * visible toast outright, so it needs no `hide()` first — and adding one would
  * open an `await` gap in which another writer could claim the slot.
  */
-async function settle(toast: Toast, style: Toast.Style, title: string, hudMessage: string): Promise<void> {
+async function settle(style: Toast.Style, title: string, hudMessage: string): Promise<void> {
   if (preferences.closeAfterAction) {
-    // Close window and show HUD. Dismissal is best-effort: it must not gate the HUD.
-    toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
+    // Close window and show HUD. The handle dismissed the toast before waiting.
     await showHUD(hudMessage);
   } else {
     await showToast({ style, title });
@@ -74,6 +73,7 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
   };
 
   let settled = false;
+  let hidden = false;
   let lastUpdateAt: number | undefined;
   let controller: AbortController | undefined;
 
@@ -87,6 +87,7 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
         // dismiss the result toast that replaces it.
         if (settled) return;
         settled = true; // a progress update after this would bring the toast back
+        hidden = true;
         controller?.abort();
         toast.hide();
       },
@@ -114,9 +115,19 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     const wait = UPDATE_SETTLE_MS - (performance.now() - lastUpdateAt);
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
   };
+  // Hide at once, never after the gap: an id-less hide sent late closes
+  // whatever is on screen by then.
+  const hideNow = () => {
+    if (hidden) return;
+    hidden = true;
+    toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
+  };
   const finish = async (style: Toast.Style, title: string, hudMessage: string) => {
+    // With Close After Action the toast is dismissed, not replaced, so the
+    // dismissal goes out now. It must not gate the HUD.
+    if (preferences.closeAfterAction) hideNow();
     await quiesce();
-    await settle(toast, style, title, hudMessage);
+    await settle(style, title, hudMessage);
   };
 
   return {
@@ -125,9 +136,14 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     updateTitle: (title: string) => mutate(() => (toast.title = title)),
     showSuccessHUD: (message: string) => finish(Toast.Style.Success, message, `✅ ${message}`),
     showFailureHUD: (message: string) => finish(Toast.Style.Failure, message, `❌ ${message}`),
+    // The hide goes out at once: it carries no id, so sent after the gap it
+    // would close whatever is on screen by then (a failure toast, another
+    // action's progress). Only the promise waits, so a caller that shows a
+    // toast of its own next is still clear of a late update. Not sent twice
+    // after the toast's own Cancel already hid it.
     hide: async () => {
+      hideNow();
       await quiesce();
-      await toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
     },
   };
 }

@@ -58,7 +58,7 @@ async function runServiceAction(action: ServiceAction, name: string, mutate: Ser
     await run();
     await toast.showSuccessHUD(`${copy.past} ${target}`);
   } catch (err) {
-    toast.hide();
+    await toast.hide();
     await showBrewFailureToast(`Failed to ${copy.verb.toLowerCase()} ${target}`, ensureError(err), {
       retryAction: run,
     });

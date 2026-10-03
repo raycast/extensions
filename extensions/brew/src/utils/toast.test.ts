@@ -7,6 +7,7 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 import { __raycast } from "./__mocks__/raycast-api";
+import { preferences } from "./preferences";
 import { showActionToast } from "./toast";
 
 const flushMicrotasks = async () => {
@@ -69,6 +70,43 @@ describe("showActionToast", () => {
     expect(handle.abort?.signal.aborted).toBe(false);
     expect(__raycast.events).not.toContain("hide");
     expect(__raycast.events.at(-1)).toBe("show:Installed Tinycast");
+  });
+
+  // A hide carries no id either. Sent late, it closes whatever is on screen by
+  // then: a service's failure toast, or the next action's progress toast. So it
+  // goes out at once, and only the promise waits out the gap.
+  it("sends the hide at once and resolves after the gap", async () => {
+    const handle = showActionToast({ title: "Upgrading", cancelable: true });
+    handle.updateMessage("Pouring foo");
+    const hiding = handle.hide();
+    expect(__raycast.events.at(-1)).toBe("hide");
+    await hiding;
+  });
+
+  it("does not hide again after its own Cancel hid it", async () => {
+    const handle = showActionToast({ title: "Fix All", cancelable: true });
+    handle.updateMessage("Running fix 2 of 2…");
+    await __raycast.toasts[0].primaryAction?.onAction(__raycast.toasts[0]);
+    await handle.hide();
+    expect(__raycast.events.filter((e) => e === "hide")).toHaveLength(1);
+  });
+
+  // With Close After Action on, the finish dismisses the toast and shows a HUD.
+  // That dismissal is a hide like any other: sent after the gap, it would close
+  // a toast another action put up meanwhile.
+  it("with Close After Action, dismisses at once and shows the HUD after the gap", async () => {
+    preferences.closeAfterAction = true;
+    try {
+      const handle = showActionToast({ title: "Installing Tinycast", cancelable: true });
+      handle.updateMessage("Operation completed successfully");
+      const finishing = handle.showSuccessHUD("Installed Tinycast");
+      expect(__raycast.events.at(-1)).toBe("hide");
+      await finishing;
+      expect(__raycast.events.filter((e) => e === "hide")).toHaveLength(1);
+      expect(__raycast.huds).toEqual(["✅ Installed Tinycast"]);
+    } finally {
+      preferences.closeAfterAction = false;
+    }
   });
 
   it("still forwards progress while running", () => {

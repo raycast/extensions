@@ -435,9 +435,12 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
       actionsLogger.log("Trusted package for install", { package: brewIdentifier(item) });
     }
   } catch (err) {
+    // Await the hide: a late "Finding …" update would land on the next toast.
+    await handle.hide();
     await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));
     return false;
   }
+  await handle.hide();
   if (!item) {
     await showBrewFailureToast(
       `${target.tap} has no package named ${name}`,
