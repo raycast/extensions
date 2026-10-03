@@ -4,7 +4,8 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 
 const BUNDLE_ID = "com.gabrielepartiti.kaiku";
-const RELEASES_URL = "https://github.com/gabry-ts/kaiku/releases/latest";
+export const RELEASES_URL = "https://github.com/gabry-ts/kaiku/releases/latest";
+const TIMEOUT_MS = 20000;
 
 export class KaikuNotInstalledError extends Error {
   constructor() {
@@ -39,7 +40,7 @@ export async function openKaiku(url: string): Promise<boolean> {
   return true;
 }
 
-/** Runs a recording control command and shows a short confirmation. */
+/** Hands a recording control command to Kaiku and shows that it was sent. Kaiku does the rest. */
 export async function control(route: string, done: string) {
   if (await openKaiku(`kaiku://${route}`)) await showHUD(done);
 }
@@ -64,12 +65,16 @@ export async function callTools(calls: { name: string; arguments: Record<string,
     const finish = (error?: Error, texts?: string[]) => {
       if (finished) return;
       finished = true;
+      clearTimeout(deadline);
       child.kill();
       if (error) reject(error);
       else resolve(texts ?? []);
     };
 
+    const deadline = setTimeout(() => finish(new Error("Kaiku did not answer in time")), TIMEOUT_MS);
     child.on("error", (e) => finish(e));
+    child.stdin.on("error", (e) => finish(e));
+    child.stdout.on("error", (e) => finish(e));
     child.on("exit", () => finish(new Error("kaiku-mcp stopped unexpectedly")));
     child.stdout.on("data", (chunk: Buffer) => {
       buffer += decoder.write(chunk);

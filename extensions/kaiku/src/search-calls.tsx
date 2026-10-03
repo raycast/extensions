@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, showHUD, show
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { Call, readSummary, readTranscript, searchCalls } from "./lib/calls";
-import { KaikuNotInstalledError, openKaiku, showNotInstalled } from "./lib/kaiku";
+import { KaikuNotInstalledError, RELEASES_URL, openKaiku, showNotInstalled } from "./lib/kaiku";
 
 function dateText(iso: string) {
   const d = new Date(iso);
@@ -41,7 +41,7 @@ export default function Command() {
       if (!id) return { id: "", text: "" };
       if (hasSummary) return { id, text: await readSummary(id) };
       if (!hasTranscript) return { id, text: "" };
-      return { id, text: await readTranscript(id, 3000) };
+      return { id, text: await readTranscript(id, 3000, false) };
     },
     [call?.id, call?.hasSummary, call?.hasTranscript],
   );
@@ -53,7 +53,8 @@ export default function Command() {
     if (c.id === call?.id) {
       const text = preview.data?.id === c.id ? preview.data.text : "";
       if (text) parts.push(text);
-      else if (!c.hasTranscript) parts.push("No transcript yet.");
+      else if (preview.error) parts.push(`Couldn't load the preview: ${preview.error.message}`);
+      else if (!preview.isLoading && preview.data?.id === c.id) parts.push("No transcript yet.");
     }
     return parts.join("\n\n");
   }
@@ -68,7 +69,18 @@ export default function Command() {
       onSearchTextChange={setText}
       onSelectionChange={setSelected}
     >
-      {error && !(error instanceof KaikuNotInstalledError) ? (
+      {error instanceof KaikuNotInstalledError ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Kaiku is not installed"
+          description="Download it from GitHub, then search your calls here."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open Download Page" url={RELEASES_URL} />
+            </ActionPanel>
+          }
+        />
+      ) : error ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Could not read your calls" description={error.message} />
       ) : (
         <List.EmptyView title="No calls found" />
@@ -130,10 +142,16 @@ export default function Command() {
                 />
               ) : null}
               <Action.ShowInFinder path={c.folder} />
+              {preview.error && c.id === call?.id ? (
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => preview.revalidate()} />
+              ) : null}
             </ActionPanel>
           }
         />
       ))}
+      {data?.truncated ? (
+        <List.Section title="Showing the latest 100 calls. Refine your search to see others." />
+      ) : null}
     </List>
   );
 }

@@ -11,6 +11,6 @@ Control [Kaiku](https://github.com/gabry-ts/kaiku), the macOS call recorder, and
 
 ## Privacy
 
-Everything stays on your Mac. Searching and reading calls goes through the `kaiku-mcp` helper inside the Kaiku app, and the recording commands talk to the app with `kaiku://` links. The extension sends nothing over the network.
+The extension itself makes no network requests. Searching and reading calls goes through the `kaiku-mcp` helper inside the Kaiku app, and the recording commands talk to the app with `kaiku://` links.
 
-Answers to Ask Calls come from the chat provider you picked in Kaiku's settings.
+Answers to Ask Calls come from the chat provider you picked in Kaiku's settings, which may be a cloud service.
