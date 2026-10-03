@@ -215,7 +215,7 @@ private func runNameModel(_ payload: DetectRequest) -> NameModelRun {
     // The whole input is read, a chunk at a time, so length no longer costs
     // coverage — but a chunk that failed is text nothing looked at for names,
     // and that is the one gap no other layer covers.
-    if let notice = unexaminedNotice(failures: outcome.failures, chunks: outcome.chunks) {
+    if let notice = unexaminedNotice(failures: outcome.failures, chunks: outcome.chunks, nameModelRan: names.ran) {
       notices.append(notice)
     }
     return DetectResponse(
@@ -244,16 +244,21 @@ private func runNameModel(_ payload: DetectRequest) -> NameModelRun {
 /// list of differing reasons is not a sentence.
 ///
 /// Only ever a partial loss — a run where every chunk failed is reported as a
-/// model that never ran, before this is reached.
+/// model that never ran, before this is reached. When the name model ran, it
+/// read the whole text, so that text was still looked at — by it alone.
 private func unexaminedNotice(
   failures: [BatchedNameRun.ChunkFailure],
-  chunks: Int
+  chunks: Int,
+  nameModelRan: Bool
 ) -> String? {
   guard !failures.isEmpty else { return nil }
   let reasons = Set(failures.map(\.reason))
   let because = reasons.count == 1 ? " (\(reasons.first!))" : ""
-  return "\(failures.count) of \(chunks) parts of the text could not be examined, "
-    + "so that text was not checked for names\(because)."
+  let consequence =
+    nameModelRan
+    ? "so that text was checked for names by the privmask name model alone"
+    : "so that text was not checked for names"
+  return "\(failures.count) of \(chunks) parts of the text could not be examined, \(consequence)\(because)."
 }
 
 /// What to say when the model did not run.

@@ -109,9 +109,11 @@ function renderPreview(text: string, highlight?: string) {
     escapeMarkdown(value).replace(/^ +| {2,}/g, (spaces) => "\u00a0".repeat(spaces.length));
   // Inline code, not bold: CommonMark does not open `**` between a Japanese
   // character and punctuation, which is where a placeholder sits. A placeholder
-  // never holds a backtick, but text left alone might; doubled backticks with
-  // spaces inside hold one.
-  const mark = highlight?.includes("`") ? `\`\` ${highlight} \`\`` : `\`${highlight}\``;
+  // never holds a backtick, but text left alone might: a code span holds any
+  // run of backticks shorter than its delimiter, padded with a space.
+  const longestRun = Math.max(0, ...(highlight?.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = "`".repeat(longestRun + 1);
+  const mark = longestRun > 0 ? `${fence} ${highlight} ${fence}` : `${fence}${highlight}${fence}`;
   return (
     text
       .split("\n")
