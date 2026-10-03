@@ -110,43 +110,50 @@
       "name": "manage-models",
       "title": "Manage Models",
       "description": "View, load, eject, pin, and delete oMLX models",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "server-status",
       "title": "Serving Stats",
       "description": "View oMLX serving stats, speed, cache efficiency, and active models",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "start-stop",
       "title": "Start/Stop Server",
       "description": "Start, stop, or restart the oMLX server",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "download-model",
       "title": "Download Model",
       "description": "Search and download models from HuggingFace",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "manage-downloads",
       "title": "Manage Downloads",
       "description": "View download progress, cancel, retry, or remove downloads",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "check-updates",
       "title": "Check for Updates",
       "description": "Check if a new version of oMLX is available",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "oMLX"
     },
     {
       "name": "open-dashboard",
       "title": "Open Web Dashboard",
       "description": "Open the oMLX web dashboard in your browser",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "oMLX"
     }
   ],
   "preferences": [
@@ -184,5 +191,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

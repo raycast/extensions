@@ -7,11 +7,11 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { isOmlxInstalled, isServerRunning } from "./lib/omlx";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const OMLX_CLI = `${process.env.HOME}/.omlx/bin/omlx`;
 
@@ -48,7 +48,7 @@ export default function StartStop() {
       title: "Starting oMLX...",
     });
     try {
-      await execAsync(`"${OMLX_CLI}" start`);
+      await execFileAsync(OMLX_CLI, ["start"]);
       const started = await waitForServer(true);
       if (started) {
         setState("running");
@@ -72,7 +72,7 @@ export default function StartStop() {
       title: "Stopping oMLX...",
     });
     try {
-      await execAsync(`"${OMLX_CLI}" stop`);
+      await execFileAsync(OMLX_CLI, ["stop"]);
       const stopped = await waitForServer(false);
       if (stopped) {
         setState("stopped");
@@ -96,7 +96,7 @@ export default function StartStop() {
       title: "Restarting oMLX...",
     });
     try {
-      await execAsync(`"${OMLX_CLI}" restart`);
+      await execFileAsync(OMLX_CLI, ["restart"]);
       const restarted = await waitForServer(true);
       if (restarted) {
         setState("running");

@@ -1,6 +1,6 @@
 # oMLX Changelog
 
-## [Download, Stats, and Vision] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Download Model: search and download from HuggingFace and ModelScope
 - Manage Downloads: track progress, cancel, retry, remove downloads
@@ -17,9 +17,6 @@
 - MLX-only filter toggle for HuggingFace search
 - ModelScope as alternative model source
 - Consistent action ordering across all commands
-
-## [Initial Release] - {PR_MERGE_DATE}
-
 - AI Model Provider: use oMLX models natively in AI Chat, Quick AI, and AI Commands
 - Manage Models: load, eject, pin, and delete models
 - Serving Stats: speed, cache efficiency, memory, and active model monitoring

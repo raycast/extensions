@@ -1,4 +1,5 @@
 instructions: |
+  Benchmarking is not supported by this extension. For benchmark requests, explain this limitation and direct the user to the oMLX web dashboard. Checking server status or listing models does not enable benchmarking; do not load/eject models, change server state, or substitute historical usage stats for a benchmark.
   Use list-models before load-model, eject-model, pin-model, or get-model-stats to resolve a model name to its exact ID.
   When the user says "eject all idle models" or "eject everything except X", call list-models first to get loaded models, then call eject-model for each one that matches.
   Use search-models or get-recommended-models before download-model to find the HuggingFace repo ID. Use get-recommended-models when the user asks what's trending or popular without a specific query.
@@ -131,13 +132,114 @@ evals:
       - callsTool: "get-download-progress"
       - includes: "67%"
 
-  - input: "@omlx can you run a benchmark?"
-    mocks: {}
+  - input: "@omlx load the 9B model"
+    mocks:
+      list-models:
+        - id: "Qwen3.8-27B-4bit"
+          loaded: false
+          type: "vlm"
+          size: "15.5 GB"
+        - id: "Qwen3.8-9B-mlx-4Bit"
+          loaded: false
+          type: "llm"
+          size: "4.8 GB"
+      load-model:
+        success: true
+        modelId: "Qwen3.8-9B-mlx-4Bit"
+        message: "Qwen3.8-9B-mlx-4Bit loading"
     expected:
-      - not:
-          callsTool: "list-models"
+      - callsTool: "list-models"
+      - callsTool:
+          name: "load-model"
+          arguments:
+            modelId: "Qwen3.8-9B-mlx-4Bit"
+
+  - input: "@omlx can you start the server?"
+    mocks:
+      get-server-status:
+        running: false
+        version: "0.6.4"
+      start-server:
+        success: true
+        message: "oMLX server started"
+    expected:
+      - callsTool: "start-server"
+
+  - input: "@omlx stop the server"
+    mocks:
+      get-server-status:
+        running: true
+        version: "0.6.4"
+      stop-server:
+        success: true
+        message: "oMLX server stopped"
+    expected:
+      - callsTool: "stop-server"
+
+  - input: "@omlx download a small embedding model"
+    mocks:
+      search-models:
+        - repoId: "mlx-community/all-MiniLM-L6-v2-4bit"
+          name: "all-MiniLM-L6-v2"
+          size: "22 MB"
+          params: "22M"
+      download-model:
+        success: true
+        taskId: "dl-1234"
+        repoId: "mlx-community/all-MiniLM-L6-v2-4bit"
+        message: "Download started for mlx-community/all-MiniLM-L6-v2-4bit"
+    expected:
+      - callsTool: "search-models"
+      - callsTool:
+          name: "download-model"
+          arguments:
+            repoId: "mlx-community/all-MiniLM-L6-v2-4bit"
+
+  - input: "@omlx pin the 27B model"
+    mocks:
+      list-models:
+        - id: "Qwen3.8-27B-4bit"
+          loaded: true
+          pinned: false
+          type: "vlm"
+          size: "15.5 GB"
+      pin-model:
+        success: true
+        modelId: "Qwen3.8-27B-4bit"
+        pinned: true
+        message: "Qwen3.8-27B-4bit pinned"
+    expected:
+      - callsTool: "list-models"
+      - callsTool:
+          name: "pin-model"
+          arguments:
+            modelId: "Qwen3.8-27B-4bit"
+            pin: true
+
+  - input: "@omlx can you run a benchmark?"
+    mocks:
+      get-server-status:
+        running: true
+        version: "0.6.4"
+      list-models:
+        - id: "Qwen3.8-9B-mlx-4Bit"
+          loaded: true
+          type: "llm"
+          size: "4.8 GB"
+    expected:
       - not:
           callsTool: "get-model-stats"
       - not:
-          callsTool: "get-server-status"
+          callsTool: "load-model"
+      - not:
+          callsTool: "eject-model"
+      - not:
+          callsTool: "pin-model"
+      - not:
+          callsTool: "start-server"
+      - not:
+          callsTool: "stop-server"
+      - not:
+          callsTool: "restart-server"
       - includes: "web dashboard"
+      - matches: "([Bb]enchmark[^.!?]{0,160}(not supported|unsupported|not available|not possible|not.*directly)|([Cc]annot|[Cc]an't|[Uu]nable|[Dd]oes not support|[Dd]oesn't support)[^.!?]{0,100}benchmark)"

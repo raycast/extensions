@@ -1,9 +1,9 @@
 import { Tool } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { isServerRunning } from "../lib/omlx";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const OMLX_CLI = `${process.env.HOME}/.omlx/bin/omlx`;
 
 export const confirmation: Tool.Confirmation<
@@ -13,7 +13,7 @@ export const confirmation: Tool.Confirmation<
 });
 
 export default async function () {
-  await execAsync(`${OMLX_CLI} restart`);
+  await execFileAsync(OMLX_CLI, ["restart"]);
 
   for (let i = 0; i < 15; i++) {
     await new Promise((r) => setTimeout(r, 1000));
