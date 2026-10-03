@@ -13,7 +13,7 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
 import { categoryName, environmentName, facetCounts, splitPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
@@ -21,6 +21,7 @@ import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
 /** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
 const NEW_VALUE = "\u0000new";
@@ -116,7 +117,8 @@ const Command = () => {
   const preferences = getPreferenceValues<Preferences>();
   const directories = parseDirectoryPreference(preferences.scriptDirectories);
 
-  const [title, setTitle] = useState("");
+  const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
+  const { title } = titleState;
   const [target, setTarget] = useState("");
   const [environment, setEnvironment] = useState("");
   const [newEnvironment, setNewEnvironment] = useState("");
@@ -146,6 +148,26 @@ const Command = () => {
   // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
   // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
   const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
+
+  /**
+   * The title is a field the person owns, so the suggestion is offered to it rather than bound to it: a bound
+   * value would snap back the moment they typed over it. It is re-offered whenever it changes, which covers
+   * Target and Desktop App, the two inputs that change what the command *does*, and also the collection
+   * finishing discovery after the person has started typing, so a host it files under `Jira` stops being
+   * titled `Atlassian`. The brand is resolved the same way the Package placeholder is, so the title and the
+   * subtitle agree.
+   */
+  const titleSuggestion = suggestTitle({
+    target,
+    brand: packageForTarget(target.trim(), learned) ?? brandFor(target.trim()),
+    desktopApplication: desktopApplication || undefined,
+  });
+
+  useEffect(() => setTitleState((state) => titleSuggested(state, titleSuggestion)), [titleSuggestion]);
+
+  // A field left empty falls back to the suggestion, so Enter while the field is still focused and empty
+  // creates the same command tabbing away would.
+  const effectiveTitle = title.trim() || titleSuggestion || "";
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
   // only the resolved string.
@@ -219,9 +241,9 @@ const Command = () => {
 
   const placeholder = findPlaceholder(target);
   const filename =
-    title.trim() && target.trim()
+    effectiveTitle && target.trim()
       ? scriptFilename({
-          title,
+          title: effectiveTitle,
           target,
           environment: chosenEnvironment || undefined,
           packageName: resolvedPackage || undefined,
@@ -230,7 +252,7 @@ const Command = () => {
   const preview = filename && placeholder ? `${filename} — prompts for “${placeholder}”` : filename;
 
   const submit = async () => {
-    if (!title.trim() || !target.trim()) {
+    if (!effectiveTitle || !target.trim()) {
       await showFailureToast(new Error("A title and a target are both required"), { title: "Nothing to create" });
       return;
     }
@@ -245,7 +267,7 @@ const Command = () => {
     try {
       const path = await createScript({
         directory,
-        title,
+        title: effectiveTitle,
         target,
         reuseIcon: await reusableIcon(discovered?.commands ?? [], directory, resolvedPackage),
         environment: chosenEnvironment,
@@ -279,7 +301,15 @@ const Command = () => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Netflix" value={title} onChange={setTitle} />
+      <Form.TextField
+        id="title"
+        title="Title"
+        placeholder="Netflix"
+        info="Suggested from the target. Leave it empty to use the suggestion."
+        value={title}
+        onChange={(next) => setTitleState((state) => titleEdited(state, next))}
+        onBlur={() => setTitleState((state) => (state.title.trim() ? state : titleSuggested(state, titleSuggestion)))}
+      />
       <Form.TextField
         id="target"
         title="Target"

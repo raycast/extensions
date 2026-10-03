@@ -11,17 +11,29 @@ import {
   Keyboard,
   openExtensionPreferences,
   LocalStorage,
+  Color,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
-import { BrowserProfile } from "./types";
+import { BrowserProfile, SortMode } from "./types";
 import { detectAllProfiles } from "./utils/browserDetector";
 import { buildTargetUrl } from "./utils/urlHelper";
 import { launchBrowserProfile } from "./utils/launcher";
-import { toggleFavorite, removeCustomProfile } from "./utils/storage";
+import {
+  toggleFavorite,
+  removeCustomProfile,
+  getSortMode,
+  setSortMode,
+  getCustomProfileOrder,
+  getProfileLaunchCounts,
+  recordProfileLaunch,
+  setLastSeenVersion,
+} from "./utils/storage";
 import { AddCustomProfileForm } from "./components/AddCustomProfileForm";
 import { RenameProfileForm } from "./components/RenameProfileForm";
 import { FeedbackForm } from "./components/FeedbackForm";
 import { UserManualView } from "./components/UserManualView";
+import { ChangelogView } from "./components/ChangelogView";
+import { ReorderProfilesView } from "./components/ReorderProfilesView";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.BrowserRouter; fallbackText?: string }>) {
   const preferences = getPreferenceValues<Preferences>();
@@ -36,15 +48,48 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
   const [filterText, setFilterText] = useState<string>("");
 
+  const CURRENT_VERSION = "1.1";
+  const ANNOUNCEMENT_STORAGE_KEY = `browser_router_announcement_${CURRENT_VERSION}_dismissed`;
   const [hasSeenManual, setHasSeenManual] = useState<boolean | null>(null);
+  const [showUpdateBanner, setShowUpdateBanner] = useState<boolean>(false);
 
   useEffect(() => {
-    async function checkFirstRun() {
-      const seen = await LocalStorage.getItem<boolean>("hasSeenUserManual");
-      setHasSeenManual(!!seen);
+    async function checkFirstRunAndVersion() {
+      const [seenManual, dismissed] = await Promise.all([
+        LocalStorage.getItem<boolean>("hasSeenUserManual"),
+        LocalStorage.getItem<boolean>(ANNOUNCEMENT_STORAGE_KEY),
+      ]);
+
+      if (!seenManual) {
+        // First-run user: show User Manual, silently mark announcement dismissed so they do not see duplicate intro
+        await LocalStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, true);
+        await setLastSeenVersion(CURRENT_VERSION);
+        setHasSeenManual(false);
+        setShowUpdateBanner(false);
+      } else {
+        setHasSeenManual(true);
+        // Existing user: show update banner if not dismissed yet
+        if (!dismissed) {
+          setShowUpdateBanner(true);
+        }
+      }
     }
-    checkFirstRun();
+    checkFirstRunAndVersion();
   }, []);
+
+  async function markUpdateBannerSeen() {
+    await LocalStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, true);
+    await setLastSeenVersion(CURRENT_VERSION);
+    setShowUpdateBanner(false);
+  }
+
+  async function handleDismissUpdateBanner() {
+    await markUpdateBannerSeen();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Announcement Dismissed",
+    });
+  }
 
   async function handleDismissFirstRun() {
     await LocalStorage.setItem("hasSeenUserManual", true);
@@ -52,13 +97,24 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
   }
 
   const [profiles, setProfiles] = useState<BrowserProfile[]>([]);
+  const [sortMode, setSortModeState] = useState<SortMode>("alphabetical");
+  const [customOrder, setCustomOrderState] = useState<string[]>([]);
+  const [launchCounts, setLaunchCountsState] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function loadProfiles() {
     setIsLoading(true);
     try {
-      const detected = await detectAllProfiles();
+      const [detected, savedSortMode, savedCustomOrder, savedLaunchCounts] = await Promise.all([
+        detectAllProfiles(),
+        getSortMode(),
+        getCustomProfileOrder(),
+        getProfileLaunchCounts(),
+      ]);
       setProfiles(detected);
+      setSortModeState(savedSortMode);
+      setCustomOrderState(savedCustomOrder);
+      setLaunchCountsState(savedLaunchCounts);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       await showToast({
@@ -81,7 +137,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
   }, [searchQuery, preferences.defaultSearchEngine, preferences.customSearchUrl]);
 
   async function handleLaunch(profile: BrowserProfile, incognito = false) {
-    await launchBrowserProfile(profile, targetUrl || undefined, incognito);
+    const success = await launchBrowserProfile(profile, targetUrl || undefined, incognito);
+    if (success) {
+      await recordProfileLaunch(profile.id);
+      setLaunchCountsState((prev) => ({
+        ...prev,
+        [profile.id]: (prev[profile.id] || 0) + 1,
+      }));
+    }
   }
 
   async function handleToggleFavorite(profileId: string) {
@@ -102,21 +165,96 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
     });
   }
 
-  // Filter profiles when in "filter" mode, or show all when in "query" mode
-  const displayedProfiles = useMemo(() => {
-    if (mode !== "filter" || !filterText.trim()) {
-      return profiles;
+  function getSortModeLabel(mode: SortMode): string {
+    switch (mode) {
+      case "alphabetical":
+        return "Alphabetical (A → Z)";
+      case "reverse-alphabetical":
+        return "Reverse Alphabetical (Z → A)";
+      case "frequently-used":
+        return "Most Frequently Used";
+      case "custom":
+        return "Custom Order";
+      default:
+        return "Alphabetical";
     }
-    const q = filterText.toLowerCase().trim();
-    return profiles.filter((p) => {
-      const matchDisplay = p.displayName.toLowerCase().includes(q);
-      const matchBrowser = p.browserName.toLowerCase().includes(q);
-      const matchProfile = p.profileName.toLowerCase().includes(q);
-      const matchDir = p.profileDirectory.toLowerCase().includes(q);
-      const matchEmail = p.email ? p.email.toLowerCase().includes(q) : false;
-      return matchDisplay || matchBrowser || matchProfile || matchDir || matchEmail;
+  }
+
+  async function handleSwitchSortMode(mode: SortMode) {
+    await setSortMode(mode);
+    setSortModeState(mode);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Sorted by ${getSortModeLabel(mode)}`,
     });
-  }, [profiles, mode, filterText]);
+  }
+
+  function handleOrderChanged(newIds: string[], newMode?: SortMode) {
+    setCustomOrderState(newIds);
+    setSortModeState(newMode || "custom");
+  }
+
+  function getSortedProfilesForReorder(): BrowserProfile[] {
+    return [...profiles].sort((a, b) => {
+      const idxA = customOrder.indexOf(a.id);
+      const idxB = customOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      const browserCmp = a.browserName.localeCompare(b.browserName, undefined, { sensitivity: "base" });
+      if (browserCmp !== 0) return browserCmp;
+      return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+    });
+  }
+
+  // Filter profiles when in "filter" mode, or show all when in "query" mode (sorted according to sortMode)
+  const displayedProfiles = useMemo(() => {
+    const list =
+      mode !== "filter" || !filterText.trim()
+        ? profiles
+        : profiles.filter((p) => {
+            const q = filterText.toLowerCase().trim();
+            const matchDisplay = p.displayName.toLowerCase().includes(q);
+            const matchBrowser = p.browserName.toLowerCase().includes(q);
+            const matchProfile = p.profileName.toLowerCase().includes(q);
+            const matchDir = p.profileDirectory.toLowerCase().includes(q);
+            const matchEmail = p.email ? p.email.toLowerCase().includes(q) : false;
+            return matchDisplay || matchBrowser || matchProfile || matchDir || matchEmail;
+          });
+
+    return [...list].sort((a, b) => {
+      if (sortMode === "reverse-alphabetical") {
+        const browserCmp = b.browserName.localeCompare(a.browserName, undefined, { sensitivity: "base" });
+        if (browserCmp !== 0) return browserCmp;
+        return b.displayName.localeCompare(a.displayName, undefined, { sensitivity: "base" });
+      }
+
+      if (sortMode === "frequently-used") {
+        const countA = launchCounts[a.id] || 0;
+        const countB = launchCounts[b.id] || 0;
+        if (countB !== countA) return countB - countA;
+        const browserCmp = a.browserName.localeCompare(b.browserName, undefined, { sensitivity: "base" });
+        if (browserCmp !== 0) return browserCmp;
+        return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+      }
+
+      if (sortMode === "custom") {
+        const idxA = customOrder.indexOf(a.id);
+        const idxB = customOrder.indexOf(b.id);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        const browserCmp = a.browserName.localeCompare(b.browserName, undefined, { sensitivity: "base" });
+        if (browserCmp !== 0) return browserCmp;
+        return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+      }
+
+      // Default: "alphabetical"
+      const browserCmp = a.browserName.localeCompare(b.browserName, undefined, { sensitivity: "base" });
+      if (browserCmp !== 0) return browserCmp;
+      return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+    });
+  }, [profiles, mode, filterText, sortMode, customOrder, launchCounts]);
 
   const favorites = useMemo(() => displayedProfiles.filter((p) => p.isFavorite), [displayedProfiles]);
   const allOther = useMemo(() => displayedProfiles.filter((p) => !p.isFavorite), [displayedProfiles]);
@@ -137,11 +275,34 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
 
   function renderProfileItem(profile: BrowserProfile) {
     const icon = getProfileIcon(profile);
-    const accessories: List.Item.Accessory[] = [
-      {
-        text: `Profile: ${profile.profileDirectory}`,
-      },
-    ];
+    const accessories: List.Item.Accessory[] = [];
+
+    if (profile.isFavorite) {
+      accessories.push({
+        icon: { source: Icon.Star, tintColor: Color.Yellow },
+        tooltip: "Favorite Profile",
+      });
+    }
+
+    if (profile.isCustom) {
+      accessories.push({
+        tag: { value: "Custom", color: Color.Purple },
+      });
+    }
+
+    if (sortMode === "custom") {
+      const rankIdx = customOrder.indexOf(profile.id);
+      if (rankIdx !== -1) {
+        accessories.push({ text: `#${rankIdx + 1}` });
+      }
+    } else if (sortMode === "frequently-used") {
+      const count = launchCounts[profile.id] || 0;
+      accessories.push({ text: `${count} launch${count === 1 ? "" : "es"}` });
+    }
+
+    accessories.push({
+      text: `Profile: ${profile.profileDirectory}`,
+    });
 
     return (
       <List.Item
@@ -197,13 +358,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                 onAction={() => handleToggleFavorite(profile.id)}
               />
               <Action.Push
-                title="Rename Display Name…"
+                title="Rename Display Name."
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<RenameProfileForm profile={profile} onRenamed={loadProfiles} />}
               />
               <Action.Push
-                title="Add Custom Profile…"
+                title="Add Custom Profile."
                 icon={Icon.Plus}
                 shortcut={Keyboard.Shortcut.Common.New}
                 target={<AddCustomProfileForm onProfileAdded={loadProfiles} />}
@@ -215,6 +376,49 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "backspace" }}
                   onAction={() => handleDeleteCustom(profile.id)}
+                />
+              ) : null}
+            </ActionPanel.Section>
+
+            <ActionPanel.Section title="Profile Sorting & Arrangement">
+              <ActionPanel.Submenu
+                title={`Sort: ${getSortModeLabel(sortMode)}`}
+                icon={Icon.BarChart}
+                shortcut={Keyboard.Shortcut.Common.Save}
+              >
+                <Action
+                  title="Alphabetical (a → Z)"
+                  icon={sortMode === "alphabetical" ? Icon.Checkmark : Icon.Text}
+                  onAction={() => handleSwitchSortMode("alphabetical")}
+                />
+                <Action
+                  title="Reverse Alphabetical (Z → a)"
+                  icon={sortMode === "reverse-alphabetical" ? Icon.Checkmark : Icon.Text}
+                  onAction={() => handleSwitchSortMode("reverse-alphabetical")}
+                />
+                <Action
+                  title="Most Frequently Used (MRU)"
+                  icon={sortMode === "frequently-used" ? Icon.Checkmark : Icon.BarChart}
+                  onAction={() => handleSwitchSortMode("frequently-used")}
+                />
+                <Action
+                  title="Custom Order"
+                  icon={sortMode === "custom" ? Icon.Checkmark : Icon.List}
+                  onAction={() => handleSwitchSortMode("custom")}
+                />
+              </ActionPanel.Submenu>
+
+              {sortMode === "custom" ? (
+                <Action.Push
+                  title="Reorder Profiles Layout…"
+                  icon={Icon.List}
+                  shortcut={Keyboard.Shortcut.Common.OpenWith}
+                  target={
+                    <ReorderProfilesView
+                      initialProfiles={getSortedProfilesForReorder()}
+                      onOrderChanged={handleOrderChanged}
+                    />
+                  }
                 />
               ) : null}
             </ActionPanel.Section>
@@ -231,6 +435,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
                 icon={Icon.Envelope}
                 shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
                 target={<FeedbackForm />}
+              />
+              <Action.Push
+                title="What's New (Changelog)"
+                icon={Icon.Stars}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                target={<ChangelogView onDismiss={markUpdateBannerSeen} />}
               />
             </ActionPanel.Section>
 
@@ -283,6 +493,37 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
         </List.Dropdown>
       }
     >
+      {showUpdateBanner ? (
+        <List.Section title="Announcement">
+          <List.Item
+            id="update-announcement-banner"
+            icon={{ source: Icon.Stars, tintColor: Color.Purple }}
+            title="Browser Router Updated"
+            subtitle="See what's new in v1.1"
+            accessories={[
+              { tag: { value: "NEW", color: Color.Green } },
+              { text: "Changelog", icon: Icon.ChevronRight },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View What's New"
+                  icon={Icon.Eye}
+                  target={<ChangelogView onDismiss={markUpdateBannerSeen} />}
+                  onPush={markUpdateBannerSeen}
+                />
+                <Action
+                  title="Dismiss Announcement"
+                  icon={Icon.XMarkCircle}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  onAction={handleDismissUpdateBanner}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
+
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
         title="No Matching Profiles"
@@ -300,7 +541,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
               onAction={() => setMode("query")}
             />
             <Action.Push
-              title="Add Custom Profile…"
+              title="Add Custom Profile."
               icon={Icon.Plus}
               target={<AddCustomProfileForm onProfileAdded={loadProfiles} />}
             />
@@ -315,9 +556,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Browse
         }
       />
 
-      {favorites.length > 0 ? <List.Section title="Favorites">{favorites.map(renderProfileItem)}</List.Section> : null}
+      {sortMode !== "custom" && favorites.length > 0 ? (
+        <List.Section title="Favorites">{favorites.map(renderProfileItem)}</List.Section>
+      ) : null}
 
-      <List.Section title={sectionTitle}>{allOther.map(renderProfileItem)}</List.Section>
+      <List.Section title={sectionTitle}>
+        {sortMode === "custom" ? displayedProfiles.map(renderProfileItem) : allOther.map(renderProfileItem)}
+      </List.Section>
     </List>
   );
 }

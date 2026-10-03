@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.raycast-env
+.env
+.env.*
+!.env.example
+# Local-only agent/workspace files — `ray publish` copies the whole working
+# tree and commits with `git add .`, so anything untracked + ignored here
+# stays out of the Store PR (tracked files would be committed regardless).
+AGENTS.md
+.zcode/
+.zcodeignore

@@ -48,6 +48,10 @@ export interface Redis extends Service {
   redisId: string;
   applicationStatus: "idle";
 }
+export interface Libsql extends Service {
+  libsqlId: string;
+  applicationStatus: "idle";
+}
 export interface Compose extends Service {
   composeId: string;
   composeStatus: "idle" | "done";
@@ -61,6 +65,8 @@ export interface ServiceCollections {
   postgres: Postgres[];
   redis: Redis[];
   compose: Compose[];
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  libsql?: Libsql[];
 }
 
 export interface Environment extends ServiceCollections {
@@ -70,6 +76,15 @@ export interface Environment extends ServiceCollections {
   createdAt: string;
   env: string;
   projectId: ProjectId;
+  /** The environment Dokploy opens a project on. Not sent by older instances. */
+  isDefault?: boolean;
+}
+
+export interface Tag {
+  tagId: string;
+  name: string;
+  /** A hex color like `#3b82f6`, or unset. */
+  color?: string | null;
 }
 
 export interface ProjectBase {
@@ -79,6 +94,8 @@ export interface ProjectBase {
   createdAt: string;
   organizationId: string;
   env: string;
+  /** Dokploy v0.29.0+ only - older instances don't send this key at all. */
+  projectTags?: { tag: Tag }[];
 }
 
 export interface ModernProject extends ProjectBase {

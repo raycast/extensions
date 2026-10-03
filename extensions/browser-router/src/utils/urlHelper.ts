@@ -1,3 +1,13 @@
+function isValidIpv4(host: string): boolean {
+  const parts = host.split(".");
+  if (parts.length !== 4) return false;
+  return parts.every((p) => {
+    if (!/^\d{1,3}$/.test(p)) return false;
+    const n = Number(p);
+    return n >= 0 && n <= 255;
+  });
+}
+
 export function isLikelyUrl(input: string): boolean {
   const trimmed = input.trim();
   if (!trimmed) return false;
@@ -7,7 +17,7 @@ export function isLikelyUrl(input: string): boolean {
     return true;
   }
 
-  // Explicit web protocols (must have a host following the protocol)
+  // Explicit web protocols (must have a valid host following protocol)
   if (/^https?:\/\/[^\s/]+/i.test(trimmed) || /^ftp:\/\/[^\s/]+/i.test(trimmed)) {
     return true;
   }
@@ -27,13 +37,21 @@ export function isLikelyUrl(input: string): boolean {
     return true;
   }
 
-  // IPv4 address with optional port / path
-  if (/^(\d{1,3}\.){3}\d{1,3}(:\d+)?(\/.*)?$/.test(trimmed)) {
+  // IPv4 address with optional port / path (validates 0-255 octets)
+  const ipv4Match = trimmed.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/.*)?$/);
+  if (ipv4Match && isValidIpv4(ipv4Match[1])) {
     return true;
   }
 
   // Domain name without spaces (e.g. github.com, sub.domain.co.uk/docs)
   if (!/\s/.test(trimmed)) {
+    // Exclude standalone programming file names/keywords with non-TLD file extensions (e.g. react.js, node.js)
+    // Note: real country-code TLDs like .sh, .py, .rs, and .md are preserved as valid domains.
+    const codeExtPattern = /\.(js|ts|jsx|tsx|cpp|cs|json|txt|log|env|yml|yaml|xml|bat|cmd|exe|dll)$/i;
+    if (!trimmed.includes("/") && codeExtPattern.test(trimmed)) {
+      return false;
+    }
+
     const domainPattern = /^[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)*\.[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
     if (domainPattern.test(trimmed)) {
       return true;
@@ -65,7 +83,7 @@ export function buildTargetUrl(input: string, searchEngine: string = "google", c
       }
       return `http://${trimmed}`;
     }
-    // Localhost or IPv4 -> http://
+    // Localhost or valid IPv4 -> http://
     if (/^localhost/i.test(trimmed) || /^(\d{1,3}\.){3}\d{1,3}/.test(trimmed)) {
       return `http://${trimmed}`;
     }

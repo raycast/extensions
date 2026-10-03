@@ -11,6 +11,7 @@ import {
 import { exec } from "child_process";
 import { promisify } from "util";
 import { Action, ActionType } from "./types";
+import { sanitizeShellEnvironment } from "./shell-env";
 import {
   getActiveBrowserAfterRaycastCloses,
   getUrlOpenApplication,
@@ -124,7 +125,7 @@ async function openFolder(folderPath: string): Promise<void> {
 }
 
 async function runCommand(command: string): Promise<void> {
-  await execAsync(command);
+  await execAsync(command, { env: sanitizeShellEnvironment(process.env) });
 }
 
 export function getActionIcon(type: ActionType | "group"): Icon {

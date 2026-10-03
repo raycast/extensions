@@ -3,6 +3,12 @@ export let updatedReminders = [];
 export let priorityUpdates = [];
 export let titleAndNotesUpdates = [];
 export let moveToListUpdates = [];
+export let reminderQueries = [];
+export let completedReminderQueries = [];
+let queryHandler;
+export function setQueryHandler(handler) {
+  queryHandler = handler;
+}
 
 export function resetMockState() {
   createdReminders = [];
@@ -10,24 +16,28 @@ export function resetMockState() {
   priorityUpdates = [];
   titleAndNotesUpdates = [];
   moveToListUpdates = [];
+  reminderQueries = [];
+  completedReminderQueries = [];
+  queryHandler = undefined;
+}
+
+function getReminderNotes(payload) {
+  let notes = payload.notes;
+  if (payload.tags && payload.tags.length > 0) {
+    const formattedTags = payload.tags.map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+    notes = notes ? `${notes}\n\n${formattedTags}` : formattedTags;
+  }
+  return notes ?? "";
 }
 
 export async function createReminder(payload) {
-  let notes = payload.notes;
-  if (payload.tags && payload.tags.length > 0) {
-    const formattedTags = payload.tags
-      .map((t) => (t.startsWith("#") ? t : `#${t}`))
-      .join(" ");
-    notes = notes ? `${notes}\n\n${formattedTags}` : formattedTags;
-  }
-
   const reminder = {
     id: `reminder-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     openUrl: "x-apple-reminderkit://REMCDReminder/123",
     attachedUrls: payload.url ? [payload.url] : [],
     url: payload.url,
     title: payload.title,
-    notes: notes ?? "",
+    notes: getReminderNotes(payload),
     dueDate: payload.dueDate ?? "",
     isCompleted: false,
     priority: payload.priority ?? "",
@@ -35,7 +45,9 @@ export async function createReminder(payload) {
     isRecurring: Boolean(payload.recurrence),
     recurrenceRule: payload.recurrence ? `Repeats ${payload.recurrence.frequency}` : "",
     list: payload.listId ? { id: payload.listId, title: "List", color: "#000000", isDefault: false } : null,
-    location: payload.address ? { address: payload.address, proximity: payload.proximity ?? "", radius: payload.radius } : null,
+    location: payload.address
+      ? { address: payload.address, proximity: payload.proximity ?? "", radius: payload.radius }
+      : null,
     creationDate: new Date(),
   };
 
@@ -44,21 +56,13 @@ export async function createReminder(payload) {
 }
 
 export async function updateReminder(payload) {
-  let notes = payload.notes;
-  if (payload.tags && payload.tags.length > 0) {
-    const formattedTags = payload.tags
-      .map((t) => (t.startsWith("#") ? t : `#${t}`))
-      .join(" ");
-    notes = notes ? `${notes}\n\n${formattedTags}` : formattedTags;
-  }
-
   const reminder = {
     id: payload.reminderId,
     openUrl: `x-apple-reminderkit://REMCDReminder/${payload.reminderId}`,
     attachedUrls: payload.url ? [payload.url] : [],
     url: payload.url,
     title: payload.title ?? "Updated Reminder",
-    notes: notes ?? "",
+    notes: getReminderNotes(payload),
     dueDate: payload.dueDate ?? "",
     isCompleted: payload.isCompleted ?? false,
     priority: payload.priority ?? "",
@@ -88,9 +92,13 @@ export async function moveToList(payload) {
 export async function toggleCompletionStatus() {}
 export async function setDueDate() {}
 export async function deleteReminder() {}
-export async function getData() {
+export async function getData(listId, searchText) {
+  reminderQueries.push({ listId, searchText });
+  if (queryHandler) return queryHandler({ listId, searchText, completed: false });
   return { reminders: [], lists: [] };
 }
-export async function getCompletedReminders() {
+export async function getCompletedReminders(listId, searchText) {
+  completedReminderQueries.push({ listId, searchText });
+  if (queryHandler) return queryHandler({ listId, searchText, completed: true });
   return [];
 }

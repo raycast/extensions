@@ -1,6 +1,7 @@
+import { withStrava } from "./with-strava";
 import { ActionPanel, List, Action, Toast, showToast, Color, Image, Icon } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { PAGE_SIZE, exportRoute, getRoutes, provider } from "./api/client";
+import { useCachedPromise } from "@raycast/utils";
+import { PAGE_SIZE, exportRoute, getRoutes } from "./api/client";
 import { useEffect } from "react";
 import { SportType, StravaRoute } from "./api/types";
 import { sportIcons, sportNames } from "./constants";
@@ -17,8 +18,21 @@ const routeTypeToSportType = {
 };
 
 export function Route({ route, isLoading }: { route: StravaRoute; isLoading: boolean }) {
+  async function downloadRoute(fileType: "gpx" | "tcx") {
+    try {
+      const fileStream = await exportRoute(route.id_str, fileType);
+      await saveFileToDesktop(route.name, fileType, fileStream);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not download route",
+        message: error instanceof Error ? error.message : "Please try again later.",
+      });
+    }
+  }
+
   const formattedDistance = formatDistance(route.distance);
-  const mapboxImage = generateMapboxImage(route.map.summary_polyline);
+  const mapboxImage = generateMapboxImage(route.map?.summary_polyline);
   const elevationGain = formatElevationGain(route.elevation_gain);
   const formattedMovingTime = new Date(route.estimated_moving_time * 1000).toISOString().substring(11, 19);
   const sportType = routeTypeToSportType[route.type as keyof typeof routeTypeToSportType] ?? SportType.Workout;
@@ -77,18 +91,14 @@ export function Route({ route, isLoading }: { route: StravaRoute; isLoading: boo
               title="Download GPX"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={() => {
-                exportRoute(route.id_str, "gpx").then((fileStream) => saveFileToDesktop(route.name, "gpx", fileStream));
-              }}
+              onAction={() => downloadRoute("gpx")}
             />
             <Action
               // eslint-disable-next-line @raycast/prefer-title-case
               title="Download TCX"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-              onAction={() => {
-                exportRoute(route.id_str, "tcx").then((fileStream) => saveFileToDesktop(route.name, "tcx", fileStream));
-              }}
+              onAction={() => downloadRoute("tcx")}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -103,6 +113,7 @@ function Routes() {
     data: routes,
     pagination,
     error,
+    revalidate,
   } = useCachedPromise(
     () => async (options: { page: number }) => {
       const newData = await getRoutes(options.page + 1, PAGE_SIZE);
@@ -124,9 +135,18 @@ function Routes() {
   return (
     <List searchBarPlaceholder="Search routes" isLoading={isLoading} pagination={pagination} throttle isShowingDetail>
       {routes?.map((route) => <Route key={route.id} route={route} isLoading={isLoading} />)}
-      {routes?.length === 0 && !isLoading && <List.EmptyView title="No routes found" />}
+      <List.EmptyView
+        title={error ? "Could Not Load Routes" : "No Routes Found"}
+        description={error?.message}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action.OpenInBrowser title="View on Strava" url="https://www.strava.com/athlete/routes" />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
 
-export default withAccessToken(provider)(Routes);
+export default withStrava(Routes);

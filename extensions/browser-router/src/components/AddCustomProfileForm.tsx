@@ -1,3 +1,4 @@
+import fs from "fs";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import path from "path";
 import { useState } from "react";
@@ -43,11 +44,18 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
       setBrowserNameError(undefined);
     }
 
-    if (!executablePath.trim()) {
+    const cleanExe = executablePath.trim().replace(/^"|"$/g, "");
+    if (!cleanExe) {
       setExecutableError("Executable path is required");
       hasError = true;
     } else {
-      setExecutableError(undefined);
+      try {
+        fs.accessSync(cleanExe, fs.constants.F_OK);
+        setExecutableError(undefined);
+      } catch {
+        setExecutableError("File not found. Please verify that this .exe file exists on disk.");
+        hasError = true;
+      }
     }
 
     if (hasError) return;

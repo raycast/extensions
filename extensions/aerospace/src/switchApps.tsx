@@ -8,7 +8,7 @@ import {
   Keyboard,
   LaunchProps,
   List,
-  popToRoot,
+  PopToRootType,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -37,8 +37,10 @@ import { resolveWindowScope, WINDOW_SCOPE_STORAGE_KEY } from "./utils/windowScop
 type SwitchAppsLaunchContext = { searchText?: string; workspace?: WindowScope };
 
 async function finishWindowAction(): Promise<void> {
-  await popToRoot({ clearSearchBar: true });
-  await closeMainWindow({ clearRootSearch: true });
+  await closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
 }
 
 async function runWindowAction(title: string, operation: () => Promise<void>): Promise<void> {

@@ -19,7 +19,7 @@ vi.mock("tinyexec", () => ({
   x: vi.fn(),
 }));
 
-vi.mock("@/utils/logger", () => ({
+vi.mock("@/shared/logger", () => ({
   logError: vi.fn(),
   logTrace: vi.fn(),
   logWarn: vi.fn(),

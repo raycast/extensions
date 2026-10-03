@@ -4,6 +4,9 @@ import { useFrecencySorting } from "@raycast/utils";
 import { AddInstance } from "./instances";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
 import ServiceLogs from "./service-logs";
+import { OpenWebsiteAction } from "./open-website";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { servicePagePath } from "./dokploy-pages";
 import { Candidate, FailedInstance, loadCandidates } from "./candidates";
 
 /**
@@ -143,6 +146,19 @@ export default function DeployService() {
                       onPush={() => visitItem(candidate)}
                     />
                     <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+                    {(candidate.deployType === "application" || candidate.deployType === "compose") && (
+                      <OpenWebsiteAction
+                        service={{ id: candidate.id, type: candidate.deployType, name: candidate.name }}
+                        url={candidate.url}
+                        headers={candidate.headers}
+                        onOpen={() => void visitItem(candidate)}
+                      />
+                    )}
+                    <OpenInDokployAction
+                      url={candidate.url}
+                      path={servicePagePath({ ...candidate, type: candidate.deployType })}
+                      onOpen={() => void visitItem(candidate)}
+                    />
                   </ActionPanel>
                 }
               />

@@ -32,6 +32,9 @@
       "required": false
     }
   ],
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Communication",
     "Productivity"

@@ -12,7 +12,7 @@
     "josh_carty",
     "smpeotn",
     "radek_cabaj",
-    "ray.dhruv"
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
@@ -68,6 +68,51 @@
       "description": "The URL to use when searching. The text \"%query%\" will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
+    },
+    {
+      "name": "sortProfiles",
+      "title": "Sort Profiles",
+      "type": "dropdown",
+      "required": false,
+      "default": "name",
+      "description": "Order of profiles in Switch Profiles and Move Current Tab.",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Last Used",
+          "value": "lastUsed"
+        }
+      ]
+    },
+    {
+      "name": "popToRootAfterOpen",
+      "title": "After Opening",
+      "label": "Return to Raycast root search",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "After a profile action completes, go back to Raycast's root search instead of reopening on the profile view."
+    },
+    {
+      "name": "directSwitch",
+      "title": "Enter Key",
+      "label": "Bring profile to front on Enter",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Selecting a profile brings it to front immediately. Show Bookmarks moves to ⌘↵."
+    },
+    {
+      "name": "focusWithoutNewWindow",
+      "title": "Bring to Front",
+      "label": "Don't open a new window if one is already open",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Bring to Front reuses the profile's open window. If Chrome can't switch to it, show an error instead of opening a duplicate window. A profile with no open window still gets one."
     }
   ],
   "dependencies": {

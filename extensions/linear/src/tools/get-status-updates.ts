@@ -1,9 +1,8 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveInitiative, resolveProject, resolveUser } from "./linearUtils";
+import { mapPage, serializeStatusUpdate } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type ProjectUpdateFilter = NonNullable<Parameters<LinearClient["projectUpdates"]>[0]>["filter"];
 type InitiativeUpdateFilter = NonNullable<Parameters<LinearClient["initiativeUpdates"]>[0]>["filter"];
@@ -22,9 +21,11 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.id)
-    return input.type === "project" ? client().projectUpdate(input.id) : client().initiativeUpdate(input.id);
+    return serializeStatusUpdate(
+      input.type === "project" ? await client().projectUpdate(input.id) : await client().initiativeUpdate(input.id),
+    );
   const project = input.project ? await resolveProject(input.project) : undefined;
   const initiative = input.initiative ? await resolveInitiative(input.initiative) : undefined;
   const user = input.user ? await resolveUser(input.user) : undefined;
@@ -38,11 +39,12 @@ export default withAccessToken(linear)(async (input: Input) => {
       createdAt: createdAfter ? { gte: createdAfter } : undefined,
       updatedAt: updatedAfter ? { gte: updatedAfter } : undefined,
     };
-    return collect(
+    const page = await collect(
       ({ first, after }) =>
         client().projectUpdates({ first, after, filter, includeArchived: input.includeArchived, orderBy }),
       input,
     );
+    return mapPage(page, serializeStatusUpdate);
   }
   const filter: InitiativeUpdateFilter = {
     initiative: initiative ? { id: { eq: initiative.id } } : undefined,
@@ -50,9 +52,10 @@ export default withAccessToken(linear)(async (input: Input) => {
     createdAt: createdAfter ? { gte: createdAfter } : undefined,
     updatedAt: updatedAfter ? { gte: updatedAfter } : undefined,
   };
-  return collect(
+  const page = await collect(
     ({ first, after }) =>
       client().initiativeUpdates({ first, after, filter, includeArchived: input.includeArchived, orderBy }),
     input,
   );
+  return mapPage(page, serializeStatusUpdate);
 });

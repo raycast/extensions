@@ -12,6 +12,7 @@ export const SERVICE_ACTIONS: Record<string, LifecycleAction[]> = {
   mysql: ["deploy", "rebuild", "start", "stop", "reload"],
   postgres: ["deploy", "rebuild", "start", "stop", "reload"],
   redis: ["deploy", "rebuild", "start", "stop", "reload"],
+  libsql: ["deploy", "rebuild", "start", "stop", "reload"],
 };
 
 export const LIFECYCLE_ID_FIELDS: Record<string, string> = {
@@ -21,6 +22,7 @@ export const LIFECYCLE_ID_FIELDS: Record<string, string> = {
   mysql: "mysqlId",
   postgres: "postgresId",
   redis: "redisId",
+  libsql: "libsqlId",
   compose: "composeId",
 };
 

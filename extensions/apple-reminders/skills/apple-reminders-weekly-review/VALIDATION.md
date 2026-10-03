@@ -1,12 +1,29 @@
 # Public API validation
 
+## September 30, 2026 review fixes
+
+Validated the fixes for all five Greptile findings on PR #31751. Missing list IDs now fail for both reminder readers, search rows clear while the query changes, reads wait for a 300 ms typing pause, and date search uses the English month names displayed in the UI.
+
+| Check                                       | Result                                     |
+| ------------------------------------------- | ------------------------------------------ |
+| `npm test`                                  | Passed: 93 Node tests and 9 Swift tests    |
+| `npm run lint`                              | Passed, including bundled-skill validation |
+| `npx tsc --noEmit`                          | Passed                                     |
+| `fallow dupes`                              | No duplicate groups                        |
+| `npm run build`                             | Passed                                     |
+| Month-search test with `-AppleLocale fr_FR` | Passed                                     |
+
+`npm test` now runs both suites. Hook regression tests use the real Raycast query hooks with mocked native calls and an in-memory cache. They cover stale rows during typing, a list change or failure, and late responses during the debounce delay. Swift tests cover missing versus empty lists, smart views, and English month search alongside the existing result-limit regressions. Tests do not read or write the user's reminders. AI evaluations and interactive Raycast checks were not rerun for these review fixes.
+
+## September 24, 2026 skill validation
+
 Checked on September 24, 2026 with Node 24.12.0 and npm 11.6.2. The manifest and lockfile resolve the public `@raycast/api` 2.5.0 release. No PR, push, or publication is part of this change.
 
-| Check | Result |
-| --- | --- |
-| `npm run build` | Passed |
-| `npm run lint` | Passed, including bundled-skill validation |
-| `npm run test` | Passed |
+| Check           | Result                                     |
+| --------------- | ------------------------------------------ |
+| `npm run build` | Passed                                     |
+| `npm run lint`  | Passed, including bundled-skill validation |
+| `npm run test`  | Passed                                     |
 
 Manifest tool registrations, existing AI instructions/evals, and runtime source are unchanged. All bundled `SKILL.md` files have matching names and directories and stay within 30–90 lines.
 

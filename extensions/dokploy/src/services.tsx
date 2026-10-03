@@ -19,6 +19,9 @@ import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
 import ServiceSchedules from "./service-schedules";
+import { OpenWebsiteAction } from "./open-website";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { servicePagePath } from "./dokploy-pages";
 import Templates from "./templates";
 import { DatabaseActions } from "./database-actions";
 import { ACTION_ICONS, ACTION_LABELS, SERVICE_ACTIONS, runServiceAction, statusAccessory } from "./service-actions";
@@ -90,6 +93,7 @@ export default function Services({
     ...scope.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
     ...scope.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
     ...scope.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
+    ...(scope.libsql ?? []).map((l) => ({ ...l, type: "libsql", id: l.libsqlId, status: l.applicationStatus })),
     ...scope.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
 
@@ -131,6 +135,10 @@ export default function Services({
         case "postgres":
           body = { postgresId: id };
           endpoint = "postgres.remove";
+          break;
+        case "libsql":
+          body = { libsqlId: id };
+          endpoint = "libsql.remove";
           break;
         case "redis":
           body = { redisId: id };
@@ -174,6 +182,7 @@ export default function Services({
     mysql: "mysql.svg",
     postgres: "postgres.svg",
     redis: "redis.svg",
+    libsql: "libsql.svg",
   };
 
   const totalServices = getTotalServices(scope);
@@ -311,6 +320,24 @@ export default function Services({
                       target={<ServiceSchedules service={{ ...service, type: service.type }} />}
                     />
                   )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <OpenWebsiteAction
+                      service={{ id: service.id, type: service.type, name: service.name }}
+                      url={url}
+                      headers={headers}
+                      onOpen={() => void visitItem(service)}
+                    />
+                  )}
+                  <OpenInDokployAction
+                    url={url}
+                    path={servicePagePath({
+                      projectId: environment.projectId,
+                      environmentId: environment.environmentId,
+                      type: service.type,
+                      id: service.id,
+                    })}
+                    onOpen={() => void visitItem(service)}
+                  />
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />

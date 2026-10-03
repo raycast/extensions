@@ -1,5 +1,49 @@
 # Dokploy Changelog
 
+## [Open in Dokploy] - 2026-10-01
+
+- Add `Open in Dokploy` (Cmd+Shift+O) to `Projects`, `Environments`, `Services`, `Deploy Service` and `Deployments`, which opens that project, environment or service in Dokploy's web panel. From `Deployments` it opens the service's Deployments tab. On Dokploy older than v0.25.0 (no environments yet) the old page paths are used.
+
+## [Open Website] - 2026-09-30
+
+- Add `Open Website` (Cmd+O) to Applications and Compose stacks in `Services`, `Deploy Service` and `Deployments`, so a service's site opens without going through its domains first. With one domain it opens right away, with several you pick one, and disabled domains are skipped.
+
+## [Project Tags] - 2026-09-29
+
+- Show each project's tags in `Projects`, in the tag's own color. Typing a tag name in the search bar finds the projects that carry it.
+- Add `Filter by Tag` to `Projects` to show only the projects with one tag. The choice is remembered per instance, and `Show All Projects` clears it.
+- Add `Edit Tags` to each project to add or remove its tags, and `Create Tag` to make a new tag (name and color) and add it to that project in one step.
+- Add `Refresh` to `Projects`.
+- Tags need Dokploy v0.29.0 or later. On older instances the list looks the same as before.
+
+## [Container Files and Docker Events] - 2026-09-29
+
+- Add `Browse Files` to running containers in the Docker list: a read-only view of the container's folders and text files (the first 512 KB of a large file), with `Copy Path` and `Copy Content`.
+- Add `Docker Events`: container, image, volume and network events on the server from the last 5 minutes up to 24 hours, newest first, with each event's details one shortcut away.
+- Both need Dokploy v0.30.0 or later.
+
+## [Container Actions] - 2026-09-29
+
+- Add `Restart`, `Start`, `Stop`, `Kill` and `Remove Container` to the Docker containers list. Only the actions that fit the container's current state are shown. `Stop`, `Kill` and `Remove` ask for confirmation first, and for an application's Swarm-managed container the confirmation explains that Swarm will start a replacement. Everything except `Restart` needs Dokploy v0.29.0 or later.
+- Add `Refresh` to the Docker containers list.
+
+## [Stop Builds and Cancel Queued Deployments] - 2026-09-29
+
+- Add `Stop Running Builds` and `Cancel Queued Deployments` to a service's deployment history, each with a confirmation. Stopping builds affects every build on that service's server, and the confirmation says so.
+- Fix `Cancel` showing on running Application and Compose deployments, where it always failed with "Deployment is not running". Dokploy can only cancel schedule runs that way, so it now only shows when it can work.
+
+## [Enable or Disable a Domain] - 2026-09-28
+
+- Add `Enable Domain` / `Disable Domain` to a service's domains (Dokploy v0.30.0+). Disabling asks for confirmation first. On a Compose stack, the change applies on the next redeploy.
+
+## [Faster Deployments Feed] - 2026-09-28
+
+- `Deployments` now loads each instance with a single request on Dokploy v0.29.0+, instead of one request per service. Services that have never been deployed are no longer listed. Older instances keep working the previous way.
+
+## [libSQL Services] - 2026-09-28
+
+- Show libSQL databases (Dokploy v0.29.0+) in `Services`, `Deploy Service`, and the AI tools, with Deploy, Rebuild, Start, Stop, Reload, `View Logs`, `View Environment`, and `Delete`. They were previously left out entirely.
+
 ## [Fix Database Names in Deploy Service, Deployments, and AI Tools] - 2026-09-27
 
 - Fix databases showing up by their id, with no status, in `Deploy Service`, `Deployments`, and the AI tools on recent Dokploy versions, which stopped including database names and statuses in the project list these read from. The AI tools can find a database by name again.

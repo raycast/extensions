@@ -41,11 +41,11 @@ function tokenAccessories(token: ThemeColor): List.Item.Accessory[] {
 type ViewMode = "list" | "grid";
 
 /**
- * Tile for a token whose colour could not be resolved.
+ * Tile for a token whose color could not be resolved.
  *
  * `Icon.Circle` draws a small glyph centred in an otherwise empty cell, which is
  * exactly what made a grid of unresolved tokens look broken. An SVG data URI is
- * rendered as an image and fills the tile the way a colour swatch does — the
+ * rendered as an image and fills the tile the way a color swatch does — the
  * same technique the color-hunt extension uses for its multi-band palette tiles.
  */
 /** Grid titles drop the `--` prefix; the name itself is unchanged everywhere else. */
@@ -54,7 +54,7 @@ function gridTitle(token: ThemeColor): string {
   return name.startsWith("--") ? name.slice(2) : name;
 }
 
-/** A tintable 6-digit hex, or undefined when the colour is translucent or unresolved. */
+/** A tintable 6-digit hex, or undefined when the color is translucent or unresolved. */
 function opaqueHex(token: ThemeColor): string | undefined {
   const hex = token.hex;
   if (!hex) return undefined;
@@ -172,7 +172,7 @@ export function ThemeTokensListView({ theme, stylesheetUrls, pageUrl }: ThemeTok
   //    stylesheet that happens to say `#ff0000`; resolving is not precedence.
   // 2. WITHIN one source, prefer the token that actually resolved. This is what
   //    repairs a cache entry written before `hex` existed: the deep scan returns
-  //    the same declaration with a colour attached, and a name-only "already
+  //    the same declaration with a color attached, and a name-only "already
   //    seen" check discarded it, which is why every grid tile was a hatch.
   const rank = (token: ThemeColor) => (token.source === "stylesheet" ? 0 : 1);
   const byName = new Map<string | undefined, ThemeColor>();
@@ -237,9 +237,9 @@ export function ThemeTokensListView({ theme, stylesheetUrls, pageUrl }: ThemeTok
               {items.map((token) => (
                 <Grid.Item
                   key={`${token.source}-${token.name}`}
-                  // `opaqueHex` is undefined for a translucent colour: Raycast tints
+                  // `opaqueHex` is undefined for a translucent color: Raycast tints
                   // have no alpha, so showing one as its opaque RGB would display a
-                  // colour the site does not use.
+                  // color the site does not use.
                   content={
                     opaqueHex(token)
                       ? { color: { light: opaqueHex(token)!, dark: opaqueHex(token)!, adjustContrast: false } }

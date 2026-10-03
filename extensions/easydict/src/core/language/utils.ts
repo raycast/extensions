@@ -1,96 +1,68 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { languageCatalog } from "./catalog";
 import { languageItemList } from "./consts";
-import type { LanguageItem } from "./types";
+import type { LanguageCode, LanguageDefinition, LanguageItem, ProviderLanguageCodes, SourceLanguage } from "./types";
 
 export const maxLineLengthOfChineseTextDisplay = 45;
 export const maxLineLengthOfEnglishTextDisplay = 90;
 
-type LangCodeKeys = {
-  [K in keyof LanguageItem]: LanguageItem[K] extends string | undefined ? K : never;
-}[keyof LanguageItem];
+const catalog: Record<SourceLanguage, LanguageDefinition> = languageCatalog;
 
-export function getLanguageItem(youdaoCode: string): LanguageItem {
-  return languageItemList.find((i) => i.youdaoLangCode === youdaoCode) ?? languageItemList[0];
+export function isSourceLanguage(value: unknown): value is SourceLanguage {
+  return typeof value === "string" && Object.hasOwn(catalog, value);
 }
 
-export function getLangCode<K extends Extract<keyof LanguageItem, LangCodeKeys>>(
-  youdaoCode: string,
-  field: K,
-): LanguageItem[K] {
-  const item = getLanguageItem(youdaoCode);
-  return item[field];
+export function isLanguageCode(value: unknown): value is LanguageCode {
+  return value !== "auto" && isSourceLanguage(value);
 }
 
-function buildReverseMap(field: LangCodeKeys): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const item of languageItemList) {
-    const code = item[field as keyof LanguageItem] as string | undefined;
-    if (code) map.set(code, item.youdaoLangCode);
-  }
-  return map;
+/** Normalize manifest aliases while preserving existing query and storage codes. */
+export function parseSourceLanguage(value: unknown): SourceLanguage | undefined {
+  if (value === "fil") return "tl";
+  if (value === "sr") return "sr-Latn";
+  return isSourceLanguage(value) ? value : undefined;
 }
 
-export const bingMap = buildReverseMap("bingLangCode");
-export const googleMap = buildReverseMap("googleLangCode");
-export const baiduMap = buildReverseMap("baiduLangCode");
-export const tencentMap = buildReverseMap("tencentLangCode");
-export const tencentDetectMap = buildReverseMap("tencentDetectCode");
-export const volcanoMap = buildReverseMap("volcanoLangCode");
-
-export function getYoudaoLangCode(serviceCode: string, map: Map<string, string>): string {
-  return map.get(serviceCode) ?? languageItemList[0].youdaoLangCode;
+export function lookupLanguageItem(code: string): LanguageItem | undefined {
+  const language = parseSourceLanguage(code);
+  return languageItemList.find((item) => item.youdaoLangCode === language);
 }
 
-/**
- * Return language item from deepL language id, if not found, return auto language item
- */
-export function getLanguageItemFromDeepLSourceCode(deepLLangCode: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    if (langItem.deepLSourceId === deepLLangCode) {
-      return langItem;
-    }
-  }
-  return languageItemList[0];
+export function getLanguageItem(code: string): LanguageItem {
+  const item = lookupLanguageItem(code);
+  if (!item) throw new Error(`Unknown language: ${code}`);
+  return item;
 }
 
-/**
- * Get language item from franc language code.
- */
-export function getLanguageItemFromFrancCode(francLangCode: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    if (langItem.francLangCode === francLangCode) {
-      return langItem;
-    }
-  }
-  return languageItemList[0];
+export function getLangCode(code: string, field: keyof ProviderLanguageCodes): string | undefined {
+  const language = parseSourceLanguage(code);
+  return language === undefined ? undefined : catalog[language].codes[field];
 }
 
-/**
- * Get language title from youdao language code. eg. en -> English
- */
-export function getLanguageEnglishName(youdaoLangCode: string): string {
-  return getLanguageItem(youdaoLangCode).langEnglishName;
+/** DeepL source/franc historically choose the first match; other provider maps choose the last. */
+export function getLanguageFromProviderCode(
+  code: string,
+  field: keyof ProviderLanguageCodes,
+): SourceLanguage | undefined {
+  if (!code) return undefined;
+  const matches = (item: LanguageItem) => catalog[item.youdaoLangCode].codes[field] === code;
+  const item =
+    field === "deepLSourceId" || field === "francLangCode"
+      ? languageItemList.find(matches)
+      : languageItemList.findLast(matches);
+  return item?.youdaoLangCode;
 }
 
-/**
- * Check language code is valid, except 'auto', ''
- */
-export function isValidLangCode(LangCode: string): boolean {
-  if (LangCode === "auto" || LangCode.length === 0) {
-    return false;
-  }
-  return true;
+export function getLanguageItemFromDeepLSourceCode(code: string): LanguageItem | undefined {
+  const language = getLanguageFromProviderCode(code, "deepLSourceId");
+  return language === undefined ? undefined : getLanguageItem(language);
 }
 
-/**
- * Get another language item except chinese from language item array.
- *
- * eg: [en, zh-CHS] --> en
- * eg: [zh-CHS, fr] --> fr
- */
-export function getLanguageOfTwoExceptChinese(youdaoLangCodes: [string, string]): string | undefined {
-  if (youdaoLangCodes.includes("zh-CHS")) {
-    return youdaoLangCodes[0] === "zh-CHS" ? youdaoLangCodes[1] : youdaoLangCodes[0];
-  }
+export function getLanguageEnglishName(code: string): string {
+  return lookupLanguageItem(code)?.langEnglishName ?? code;
+}
+
+export function getLanguageOfTwoExceptChinese(codes: [string, string]): string | undefined {
+  if (codes.includes("zh-CHS")) return codes[0] === "zh-CHS" ? codes[1] : codes[0];
 }

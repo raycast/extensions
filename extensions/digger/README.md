@@ -51,6 +51,7 @@ Digger surfaces contextual information about any website without needing to open
 
 - Stylesheets and scripts
 - Favicon, Apple Touch Icons, and Open Graph images
+- SVGs on demand — inline, sprite symbols, and image, favicon and in-page CSS references — with Copy as SVG, Copy as PNG (macOS), and Export as SVG
 - Font detection (Google Fonts, Adobe Fonts, Bunny Fonts, Fontshare, Fonts.com, Font Awesome, custom)
 - Theme color
 

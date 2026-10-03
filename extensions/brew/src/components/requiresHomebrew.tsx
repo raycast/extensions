@@ -23,7 +23,12 @@ export function RequiresHomebrew(props: { major: number; feature: string; onUpda
               title="Update Homebrew"
               icon={Icon.Download}
               onAction={async () => {
-                const ok = await confirmAndRun(["brew update"], { title: "Update Homebrew?" });
+                const ok = await confirmAndRun(["brew update"], {
+                  title: "Update Homebrew?",
+                  confirmTitle: "Update",
+                  showCommands: false,
+                  message: "Downloads the latest Homebrew and refreshes its package lists.",
+                });
                 if (ok) {
                   invalidateBrewMajorVersion();
                   props.onUpdated?.();
