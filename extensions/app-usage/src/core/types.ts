@@ -24,7 +24,10 @@ export interface SamplerState {
  * like once all of it has been subtracted.
  */
 export interface DaySlice {
-  /** Epoch millis the window started at. Decides which hour bucket it lands in. */
+  /**
+   * Epoch millis the window started at. The store spreads the window over every
+   * hour it covers, active time first and idle after.
+   */
   at: number;
   app: { key: string; name: string; seconds: number } | null;
   /** Seconds in this window the machine was idle. */

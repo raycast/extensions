@@ -12,11 +12,6 @@ const MAX_GAP_MS = INTERVAL_MS * 2;
  * data no view can reach. */
 const DEFAULT_RETENTION_DAYS = 30;
 
-interface Preferences {
-  retentionDays?: string;
-  excludedApps?: string;
-}
-
 function parseExcluded(raw?: string): Set<string> {
   return new Set(
     (raw ?? "")
@@ -24,6 +19,10 @@ function parseExcluded(raw?: string): Set<string> {
       .map((entry) => entry.trim().toLowerCase())
       .filter(Boolean),
   );
+}
+
+function isExcluded(excluded: Set<string>, name: string, key?: string): boolean {
+  return excluded.has(name.toLowerCase()) || (key !== undefined && excluded.has(key.toLowerCase()));
 }
 
 function parseRetentionDays(raw?: string): number {
@@ -55,17 +54,22 @@ export default async function collect(): Promise<void> {
   if (frontmost) {
     const name = frontmost.name;
     const bundleId = frontmost.bundleId;
-    const isExcluded =
-      excluded.has(name.toLowerCase()) || (bundleId !== undefined && excluded.has(bundleId.toLowerCase()));
 
     // Excluded apps are dropped here, before anything reaches disk. Not even the
     // state file learns their name.
-    if (!isExcluded) {
+    if (!isExcluded(excluded, name, bundleId)) {
       current = { key: bundleId ?? name, name };
     }
   }
 
-  const { slice, nextState } = tick(now, current, idleSeconds, state, { maxGapMs: MAX_GAP_MS });
+  // The saved app passed the exclusion list as it stood last tick. If the user has
+  // since excluded it, the window it opened must not be recorded either.
+  const previous =
+    state && state.lastKey !== "" && isExcluded(excluded, state.lastName, state.lastKey)
+      ? { ...state, lastKey: "", lastName: "" }
+      : state;
+
+  const { slice, nextState } = tick(now, current, idleSeconds, previous, { maxGapMs: MAX_GAP_MS });
 
   if (slice) {
     await store.record(slice);

@@ -1,4 +1,10 @@
-import { getApplications, Icon } from "@raycast/api";
+import { environment, getApplications, Icon } from "@raycast/api";
+import * as path from "node:path";
+
+/** Where converted icons are cached. Shared so the erase action can find it. */
+export function iconCacheDir(): string {
+  return path.join(environment.supportPath, "icon-cache");
+}
 
 /**
  * Bundle id to application path, so a row can show the app's real icon.
@@ -16,7 +22,7 @@ export async function loadIconPaths(): Promise<Map<string, string>> {
 }
 
 export function iconFor(key: string, paths: Map<string, string> | undefined) {
-  const path = paths?.get(key.toLowerCase());
+  const appPath = paths?.get(key.toLowerCase());
   // An uninstalled app, or a row keyed by name because it had no bundle id.
-  return path ? { fileIcon: path } : Icon.AppWindow;
+  return appPath ? { fileIcon: appPath } : Icon.AppWindow;
 }

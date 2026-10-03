@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { after, before, describe, it } from "node:test";
-import { createStore, localDateKey, localHour, shiftDays } from "./store";
+import { createStore, localDateKey, localHour, shiftDays, splitByHour } from "./store";
 
 let root = "";
 
@@ -34,6 +34,37 @@ describe("shiftDays", () => {
     const at = new Date(2026, 2, 20, 0, 30).getTime();
     assert.equal(new Date(shiftDays(at, -30)).getHours(), 0);
     assert.equal(new Date(shiftDays(at, -30)).getMinutes(), 30);
+  });
+});
+
+describe("splitByHour", () => {
+  it("keeps a window inside one hour whole", () => {
+    assert.deepEqual(splitByHour(AT, 60), [{ date: "2026-09-14", hour: 10, seconds: 60 }]);
+  });
+
+  it("splits a window that crosses the hour", () => {
+    const start = new Date(2026, 8, 14, 11, 59, 30).getTime();
+    assert.deepEqual(splitByHour(start, 60), [
+      { date: "2026-09-14", hour: 11, seconds: 30 },
+      { date: "2026-09-14", hour: 12, seconds: 30 },
+    ]);
+  });
+
+  it("splits a window that crosses midnight into two dates", () => {
+    const start = new Date(2026, 8, 14, 23, 59, 20).getTime();
+    assert.deepEqual(splitByHour(start, 60), [
+      { date: "2026-09-14", hour: 23, seconds: 40 },
+      { date: "2026-09-15", hour: 0, seconds: 20 },
+    ]);
+  });
+
+  it("never loses or invents a second to rounding", () => {
+    const start = new Date(2026, 8, 14, 11, 59, 59, 600).getTime();
+    const pieces = splitByHour(start, 45);
+    assert.equal(
+      pieces.reduce((sum, piece) => sum + piece.seconds, 0),
+      45,
+    );
   });
 });
 
@@ -106,6 +137,29 @@ describe("store", () => {
     const removed = await store.prune(30, AT);
     assert.equal(removed, 1);
     assert.deepEqual(await store.listDays(), ["2026-09-04", "2026-09-14"]);
+  });
+
+  it("keeps exactly as many dates as the retention setting, today included", async () => {
+    const store = createStore(path.join(root, "prune-boundary-case"));
+    for (const offset of [0, 29, 30]) {
+      await store.record({ at: shiftDays(AT, -offset), app: { key: "com.a", name: "A", seconds: 10 }, idleSeconds: 0 });
+    }
+
+    assert.equal(await store.prune(30, AT), 1);
+    assert.deepEqual(await store.listDays(), ["2026-08-16", "2026-09-14"]);
+  });
+
+  it("files a window that crosses midnight under both dates", async () => {
+    const store = createStore(path.join(root, "midnight-case"));
+    const start = new Date(2026, 8, 14, 23, 59, 30).getTime();
+    await store.record({ at: start, app: { key: "com.a", name: "A", seconds: 40 }, idleSeconds: 20 });
+
+    const before = await store.readDay("2026-09-14");
+    const after = await store.readDay("2026-09-15");
+    assert.equal(before?.apps["com.a"]?.hours[23], 30);
+    assert.equal(after?.apps["com.a"]?.hours[0], 10);
+    assert.equal(before?.idle, undefined, "idle closes the window, so it all lands after midnight");
+    assert.equal(after?.idle?.[0], 20);
   });
 
   it("ignores a nonsensical retention value rather than deleting everything", async () => {

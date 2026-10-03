@@ -14,6 +14,7 @@ import {
   type RangeId,
   type Report,
 } from "./core/report";
+import { ClearDataAction } from "./clear";
 import { createStore } from "./core/store";
 import { iconFor, loadIconPaths } from "./icons";
 
@@ -165,6 +166,9 @@ export default function DailyUsage() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => revalidate()}
                   />
+                  <ActionPanel.Section>
+                    <ClearDataAction onCleared={revalidate} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

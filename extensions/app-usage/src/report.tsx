@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, environment, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import * as path from "node:path";
 import { useState } from "react";
 import {
   baselineDates,
@@ -24,7 +23,8 @@ import {
 } from "./core/report";
 import { appIconPng } from "./core/appicon";
 import { createStore, type Store } from "./core/store";
-import { iconFor, loadIconPaths } from "./icons";
+import { ClearDataAction } from "./clear";
+import { iconCacheDir, iconFor, loadIconPaths } from "./icons";
 
 interface Loaded {
   report: Report;
@@ -54,8 +54,6 @@ async function load(range: RangeId): Promise<Loaded> {
   };
 }
 
-const ICON_CACHE_DIR = "icon-cache";
-
 /**
  * Convert the selected app's icon once, lazily.
  *
@@ -66,7 +64,7 @@ async function heroIcon(key: string | null, paths: Map<string, string> | undefin
   if (!key || !paths) return null;
   const appPath = paths.get(key.toLowerCase());
   if (!appPath) return null;
-  return appIconPng(appPath, key, path.join(environment.supportPath, ICON_CACHE_DIR));
+  return appIconPng(appPath, key, iconCacheDir());
 }
 
 function RowMetadata({ row, loaded }: { row: ReportRow; loaded: Loaded }) {
@@ -136,6 +134,11 @@ export default function UsageReport() {
           icon={Icon.Clock}
           title="Nothing recorded yet"
           description="App Usage samples the focused app once a minute while Raycast is running. Check back in a few minutes."
+          actions={
+            <ActionPanel>
+              <ClearDataAction onCleared={revalidate} />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section
@@ -181,6 +184,9 @@ export default function UsageReport() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => revalidate()}
                   />
+                  <ActionPanel.Section>
+                    <ClearDataAction onCleared={revalidate} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

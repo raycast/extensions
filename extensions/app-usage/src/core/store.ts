@@ -31,6 +31,43 @@ export function localHour(epochMs: number): number {
   return new Date(epochMs).getHours();
 }
 
+/** Start of the next local hour. setHours copes with DST where adding 3600000ms would not. */
+function nextHourStart(epochMs: number): number {
+  const d = new Date(epochMs);
+  d.setHours(d.getHours() + 1, 0, 0, 0);
+  const next = d.getTime();
+  return next > epochMs ? next : epochMs + 3_600_000;
+}
+
+export interface HourPiece {
+  date: string;
+  hour: number;
+  seconds: number;
+}
+
+/**
+ * Spread `seconds` starting at `startMs` over the local hours they fall in.
+ *
+ * A one-minute window from 11:59:30 belongs half to 11 o'clock and half to noon,
+ * and one from 23:59:30 straddles two day files. Rounding the running total
+ * rather than each piece keeps the pieces summing to exactly `seconds`.
+ */
+export function splitByHour(startMs: number, seconds: number): HourPiece[] {
+  const pieces: HourPiece[] = [];
+  const endMs = startMs + seconds * 1000;
+  let from = startMs;
+  let assigned = 0;
+
+  while (from < endMs) {
+    const to = Math.min(nextHourStart(from), endMs);
+    const upTo = Math.round((to - startMs) / 1000);
+    if (upTo > assigned) pieces.push({ date: localDateKey(from), hour: localHour(from), seconds: upTo - assigned });
+    assigned = upTo;
+    from = to;
+  }
+  return pieces;
+}
+
 function emptyHours(): number[] {
   return new Array<number>(HOURS_IN_DAY).fill(0);
 }
@@ -94,31 +131,42 @@ export function createStore(root: string) {
     return hours;
   }
 
-  /** Add one sampling window to its day and hour bucket. */
+  /**
+   * Add one sampling window to the day and hour buckets it covers.
+   *
+   * Active time opens the window and idle closes it, since idle is measured back
+   * from the end of the window.
+   */
   async function record(slice: DaySlice): Promise<void> {
-    const date = localDateKey(slice.at);
-    const hour = localHour(slice.at);
+    const appPieces = slice.app ? splitByHour(slice.at, slice.app.seconds) : [];
+    const idlePieces =
+      slice.idleSeconds > 0 ? splitByHour(slice.at + (slice.app?.seconds ?? 0) * 1000, slice.idleSeconds) : [];
+    const dates = [...new Set([...appPieces, ...idlePieces].map((piece) => piece.date))];
 
-    const day: DayFile = (await readDay(date)) ?? { v: 1, date, apps: {} };
+    for (const date of dates) {
+      const day: DayFile = (await readDay(date)) ?? { v: 1, date, apps: {} };
 
-    if (slice.app) {
-      const existing = day.apps[slice.app.key];
-      const entry = existing ?? { name: slice.app.name, hours: emptyHours() };
-      if (entry.hours.length !== HOURS_IN_DAY) entry.hours = fixedHours(entry.hours);
+      const appToday = appPieces.filter((piece) => piece.date === date);
+      if (slice.app && appToday.length > 0) {
+        const existing = day.apps[slice.app.key];
+        const entry = existing ?? { name: slice.app.name, hours: emptyHours() };
+        if (entry.hours.length !== HOURS_IN_DAY) entry.hours = fixedHours(entry.hours);
 
-      entry.hours[hour] = (entry.hours[hour] ?? 0) + slice.app.seconds;
-      // Keep the display name fresh if the app was renamed.
-      entry.name = slice.app.name;
-      day.apps[slice.app.key] = entry;
+        for (const piece of appToday) entry.hours[piece.hour] = (entry.hours[piece.hour] ?? 0) + piece.seconds;
+        // Keep the display name fresh if the app was renamed.
+        entry.name = slice.app.name;
+        day.apps[slice.app.key] = entry;
+      }
+
+      const idleToday = idlePieces.filter((piece) => piece.date === date);
+      if (idleToday.length > 0) {
+        const idle = day.idle?.length === HOURS_IN_DAY ? day.idle : fixedHours(day.idle);
+        for (const piece of idleToday) idle[piece.hour] = (idle[piece.hour] ?? 0) + piece.seconds;
+        day.idle = idle;
+      }
+
+      await writeJsonAtomic(dayFile(date), day);
     }
-
-    if (slice.idleSeconds > 0) {
-      const idle = day.idle?.length === HOURS_IN_DAY ? day.idle : fixedHours(day.idle);
-      idle[hour] = (idle[hour] ?? 0) + slice.idleSeconds;
-      day.idle = idle;
-    }
-
-    await writeJsonAtomic(dayFile(date), day);
   }
 
   /** Every recorded date, ascending. */
@@ -134,11 +182,12 @@ export function createStore(root: string) {
     }
   }
 
-  /** Drop day files older than the retention window. */
+  /** Drop day files older than the retention window. The window counts today, as the report's ranges do. */
   async function prune(retentionDays: number, nowMs: number): Promise<number> {
     if (!Number.isFinite(retentionDays) || retentionDays <= 0) return 0;
 
-    const cutoff = localDateKey(shiftDays(nowMs, -retentionDays));
+    // Oldest date to keep. 30 days ending today starts 29 days back.
+    const cutoff = localDateKey(shiftDays(nowMs, -(retentionDays - 1)));
     const dates = await listDays();
     let removed = 0;
 
