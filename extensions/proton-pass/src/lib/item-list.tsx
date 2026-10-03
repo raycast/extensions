@@ -30,6 +30,8 @@ export interface ItemListProps {
   /** Shown first, in their own section, e.g. logins matching the active browser tab. */
   suggestedItems?: Item[];
   suggestionsTitle?: string;
+  /** Title of the section of the other items, e.g. the vault shown. */
+  sectionTitle?: string;
   isLoading: boolean;
   navigationTitle?: string;
   searchBarAccessory?: List.Props["searchBarAccessory"];
@@ -41,6 +43,7 @@ export function ItemList({
   items,
   suggestedItems = [],
   suggestionsTitle = "Suggested",
+  sectionTitle = "All Items",
   isLoading,
   navigationTitle,
   searchBarAccessory,
@@ -144,13 +147,18 @@ export function ItemList({
             ) : undefined
           }
         />
-      ) : suggested.length > 0 ? (
-        <>
-          <List.Section title={suggestionsTitle}>{suggested.map(renderItem)}</List.Section>
-          <List.Section title="All Items">{others.map(renderItem)}</List.Section>
-        </>
       ) : (
-        others.map(renderItem)
+        // Each section shows its number of items.
+        <>
+          {suggested.length > 0 && (
+            <List.Section title={suggestionsTitle} subtitle={suggested.length.toLocaleString()}>
+              {suggested.map(renderItem)}
+            </List.Section>
+          )}
+          <List.Section title={sectionTitle} subtitle={others.length.toLocaleString()}>
+            {others.map(renderItem)}
+          </List.Section>
+        </>
       )}
     </List>
   );

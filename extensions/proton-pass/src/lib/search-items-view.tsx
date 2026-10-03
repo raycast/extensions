@@ -228,6 +228,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       items={isLoadingActiveTab ? [] : filteredItems}
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
+      sectionTitle={
+        selectedVaultId === ALL_VAULTS_VALUE
+          ? "All Items"
+          : (vaults.find((vault) => vault.shareId === selectedVaultId)?.name ?? initialVault?.name)
+      }
       isLoading={isLoading || isLoadingActiveTab}
       navigationTitle={initialVault ? "Search Items" : undefined}
       searchBarAccessory={

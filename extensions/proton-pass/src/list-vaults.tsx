@@ -1,14 +1,16 @@
 import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import { listVaults } from "./lib/pass-cli";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { listVaultsAndItems } from "./lib/pass-cli";
 import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
-import { getCachedVaults, setCachedVaults } from "./lib/cache";
+import { getCachedItems, getCachedVaults, setCachedItems, setCachedVaults } from "./lib/cache";
+import { countItemsByVault, formatItemCount } from "./lib/item-counts";
 import { platformShortcut } from "./lib/shortcuts";
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
   const preferences = getPreferenceValues<Preferences>();
@@ -22,9 +24,11 @@ export default function Command() {
   async function loadVaults() {
     setError(null);
 
-    const cachedVaults = await getCachedVaults();
+    const [cachedVaults, cachedItems] = await Promise.all([getCachedVaults(), getCachedItems()]);
     if (cachedVaults && !hasLoadedFromCache.current) {
       setVaults(cachedVaults.data);
+      // The items cache only holds complete listings, so every cached vault gets a count.
+      if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
       if (!cachedVaults.isStale && !backgroundRefreshEnabled) {
@@ -34,9 +38,17 @@ export default function Command() {
     }
 
     try {
-      const freshVaults = await listVaults();
+      // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
+      const { vaults: freshVaults, items, failedVaults } = await listVaultsAndItems();
       setVaults(freshVaults);
-      await setCachedVaults(freshVaults);
+      const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
+      const counted = countItemsByVault(
+        freshVaults.filter((vault) => !failed.has(vault.shareId)),
+        items,
+      );
+      // Vaults whose items couldn't be listed keep their earlier count, if any.
+      setItemCounts((previous) => new Map([...[...previous].filter(([shareId]) => failed.has(shareId)), ...counted]));
+      await Promise.all([setCachedVaults(freshVaults), failed.size === 0 ? setCachedItems(items, true) : undefined]);
     } catch (err: unknown) {
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
@@ -50,6 +62,11 @@ export default function Command() {
       setIsLoading(false);
     }
   }
+
+  const shownVaults = useMemo(
+    () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
+    [vaults, itemCounts],
+  );
 
   function getRoleIcon(role: VaultRole): Icon {
     switch (role) {
@@ -181,15 +198,13 @@ export default function Command() {
           description="You don't have any vaults yet or they couldn't be loaded."
         />
       ) : (
-        vaults.map((vault) => (
+        shownVaults.map((vault) => (
           <List.Item
             key={vault.shareId}
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
-              vault.itemCount === undefined
-                ? undefined
-                : { text: `${vault.itemCount} ${vault.itemCount === 1 ? "item" : "items"}` },
+              vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
               vault.role === undefined
                 ? undefined
                 : {

@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Item Counts] - {PR_MERGE_DATE}
+
+- Search Items shows the vault shown, or All Items, as a section header with its number of items; suggestions get their own count
+- List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
