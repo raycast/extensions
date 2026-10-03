@@ -283,6 +283,52 @@ test("Manage Downloads actions route cancel/retry/remove to the row's source", a
   );
 });
 
+test("non-chat model types are detected without false positives on chat models", async (t) => {
+  const api = uri(
+    'export const getPreferenceValues = () => ({});\nexport const open = async () => {};\nexport const showToast = async () => ({});\nexport const Toast = { Style: { Success: "success" } };',
+  );
+  const lib = await import(
+    await compile("../src/lib/omlx.ts", { "@raycast/api": api })
+  );
+  assert.equal(lib.isNonChatModelType("s3_tokenizer_v2"), true);
+  assert.equal(lib.isNonChatModelType("bert"), true);
+  assert.equal(lib.isNonChatModelType("modernbert"), true);
+  assert.equal(lib.isNonChatModelType("colqwen2_5"), true);
+  assert.equal(lib.isNonChatModelType("jina_reranker"), true);
+  assert.equal(lib.isNonChatModelType("qwen3_5", "Qwen3-Embedding-4B"), true);
+  assert.equal(lib.isNonChatModelType("qwen3_5", "Qwen3.8-27B-4bit"), false);
+  assert.equal(lib.isNonChatModelType("qwen3_5"), false);
+  assert.equal(lib.isNonChatModelType("qwen3_5_vl"), false);
+  assert.equal(lib.isNonChatModelType(""), false);
+});
+
+test("cache-sourced models are detected by Hub cache paths", async (t) => {
+  const api = uri(
+    'export const getPreferenceValues = () => ({});\nexport const open = async () => {};\nexport const showToast = async () => ({});\nexport const Toast = { Style: { Success: "success" } };',
+  );
+  const lib = await import(
+    await compile("../src/lib/omlx.ts", { "@raycast/api": api })
+  );
+  assert.equal(
+    lib.isCacheSourcedModel(
+      "/Users/x/.cache/huggingface/hub/models--org--name/snapshots/abc",
+    ),
+    true,
+  );
+  assert.equal(
+    lib.isCacheSourcedModel("/Users/x/.cache/modelscope/hub/models--org--name"),
+    true,
+  );
+  assert.equal(
+    lib.isCacheSourcedModel(
+      "/Users/x/.omlx/models/mlx-community/Qwen3-8B-4bit",
+    ),
+    false,
+  );
+  assert.equal(lib.isCacheSourcedModel(""), false);
+  assert.equal(lib.isCacheSourcedModel(undefined), false);
+});
+
 test("an interrupted completion never flushes a pending tool call", async (t) => {
   const h = await harness(
     t,

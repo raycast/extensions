@@ -4,6 +4,7 @@ import {
   isServerRunning,
   formatBytes,
   formatModelName,
+  isNonChatModelType,
   type OmlxModelStatus,
 } from "./lib/omlx";
 import { createSseParser } from "./sse-parser";
@@ -25,7 +26,14 @@ export const getModels: AI.GetModels = async () => {
   const models = await fetchModelsStatus();
 
   return models
-    .filter((m) => !m.is_helper && !m.is_hidden)
+    .filter(
+      (m) =>
+        // Non-chat models (tokenizers, embeddings, rerankers) cannot serve
+        // chat completions — keep them out of the Raycast AI picker.
+        !m.is_helper &&
+        !m.is_hidden &&
+        !isNonChatModelType(m.config_model_type, m.id),
+    )
     .map((model) => ({
       id: model.id,
       title: formatModelName(model.id),

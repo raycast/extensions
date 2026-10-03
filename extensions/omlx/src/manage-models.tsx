@@ -20,6 +20,8 @@ import {
   formatBytes,
   formatModelName,
   getDashboardUrl,
+  isCacheSourcedModel,
+  isNonChatModelType,
   isOmlxInstalled,
   isServerRunning,
   notifyIfUpdateAvailable,
@@ -331,6 +333,12 @@ function ModelItem({
           />
           <Action.CopyToClipboard title="Copy Name" content={model.id} />
           {!model.is_helper && (
+            <Action.ShowInFinder
+              title="Reveal in Finder"
+              path={model.model_path}
+            />
+          )}
+          {!model.is_helper && !isCacheSourcedModel(model.model_path) && (
             <Action
               title="Delete Model"
               icon={Icon.Trash}
@@ -382,6 +390,16 @@ function ModelDetail({ model: m }: { model: OmlxModelStatus }) {
     m.thinking_default ? "Thinking" : null,
   ].filter(Boolean);
 
+  // Tokenizers/embeddings fall through oMLX's audio detection as "llm";
+  // label them by what they actually are instead of the raw type.
+  const typeLabel = isNonChatModelType(m.config_model_type, m.id)
+    ? m.config_model_type.toLowerCase().includes("tokenizer")
+      ? "Tokenizer"
+      : m.config_model_type.toLowerCase().includes("rerank")
+        ? "Reranker"
+        : "Embedding"
+    : `${m.model_type.toUpperCase()} (${m.config_model_type})`;
+
   return (
     <List.Item.Detail
       metadata={
@@ -390,10 +408,7 @@ function ModelDetail({ model: m }: { model: OmlxModelStatus }) {
           {m.pinned && (
             <Detail.Metadata.Label title="Pinned" icon={Icon.Tack} />
           )}
-          <Detail.Metadata.Label
-            title="Type"
-            text={`${m.model_type.toUpperCase()} (${m.config_model_type})`}
-          />
+          <Detail.Metadata.Label title="Type" text={typeLabel} />
           <Detail.Metadata.Label title="Engine" text={m.engine_type} />
 
           <Detail.Metadata.Separator />

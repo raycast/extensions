@@ -26,6 +26,41 @@ export interface OmlxModelsStatusResponse {
   models: OmlxModelStatus[];
 }
 
+// Non-chat model types oMLX reports through /v1/models/status. oMLX's audio
+// detection covers known audio families, but rare tokenizer types (e.g.
+// "s3_tokenizer_v2") fall through to "llm" — these signals catch them.
+const EMBEDDING_MODEL_TYPES = new Set([
+  "bert",
+  "xlm-roberta",
+  "xlm_roberta",
+  "modernbert",
+  "siglip",
+  "colqwen2_5",
+  "colqwen2-5",
+]);
+
+/** True when the config declares a non-chat architecture (tokenizer, embedding, reranker). */
+export function isNonChatModelType(
+  configModelType: string,
+  id?: string,
+): boolean {
+  const type = (configModelType ?? "").toLowerCase();
+  if (type.includes("tokenizer")) return true;
+  if (EMBEDDING_MODEL_TYPES.has(type)) return true;
+  if (type.includes("reranker") || type.includes("ranking")) return true;
+  const name = (id ?? "").toLowerCase();
+  return name.includes("embedding") || name.includes("reranker");
+}
+
+// Models downloaded by a plain huggingface_hub/modelscope client live in the
+// shared Hub cache, not oMLX's model directory. oMLX discovers and lists
+// them, but its delete API only searches its own model directory — deletion
+// from the extension cannot succeed for these.
+export function isCacheSourcedModel(modelPath: string): boolean {
+  const cacheMarkers = ["/.cache/huggingface/hub/", "/.cache/modelscope/hub/"];
+  return cacheMarkers.some((marker) => (modelPath ?? "").includes(marker));
+}
+
 export interface OmlxServerStatus {
   version: string;
   uptime_seconds: number;
