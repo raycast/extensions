@@ -6,7 +6,7 @@ import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
 import { runBrowserLogin } from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
-import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault } from "./types";
+import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultRole } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
@@ -103,6 +103,15 @@ export async function listVaults(): Promise<Vault[]> {
     if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
     throw error;
   }
+}
+
+/** The user's role on each vault, by share ID. A vault the user doesn't own was shared with them. */
+export async function listVaultRoles(): Promise<Map<string, VaultRole>> {
+  if (USE_MOCK_DATA) {
+    await ensureMockCacheCleared();
+    return new Map(MOCK_VAULTS.flatMap((vault) => (vault.role ? [[vault.shareId, vault.role] as const] : [])));
+  }
+  return (await getAdapter()).listVaultRoles();
 }
 
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {

@@ -1,12 +1,19 @@
-import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { listVaultsAndItems } from "./lib/pass-cli";
+import { listVaultRoles, listVaultsAndItems } from "./lib/pass-cli";
 import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedItems, getCachedVaults, setCachedItems, setCachedVaults } from "./lib/cache";
 import { countItemsByVault, formatItemCount } from "./lib/item-counts";
 import { platformShortcut } from "./lib/shortcuts";
+import { sharedVaultTooltip } from "./lib/vault-sharing";
+
+/** Marks the vaults shared with you; your own vaults get nothing, since that's most of them. */
+function sharedAccessory(role: VaultRole | undefined): List.Item.Accessory | undefined {
+  const tooltip = sharedVaultTooltip(role);
+  return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
+}
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -39,7 +46,17 @@ export default function Command() {
 
     try {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
-      const { vaults: freshVaults, items, failedVaults } = await listVaultsAndItems();
+      const [listing, roles] = await Promise.all([
+        listVaultsAndItems(),
+        // Roles only mark the vaults shared with you: when they can't be listed, the cached ones stay.
+        listVaultRoles().catch(() => undefined),
+      ]);
+      const { items, failedVaults } = listing;
+      const knownRoles = roles ?? new Map(cachedVaults?.data.map((vault) => [vault.shareId, vault.role] as const));
+      const freshVaults = listing.vaults.map((vault) => ({
+        ...vault,
+        role: knownRoles.get(vault.shareId) ?? vault.role,
+      }));
       setVaults(freshVaults);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       const counted = countItemsByVault(
@@ -69,36 +86,6 @@ export default function Command() {
     () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
     [vaults, itemCounts],
   );
-
-  function getRoleIcon(role: VaultRole): Icon {
-    switch (role) {
-      case "owner":
-        return Icon.Crown;
-      case "manager":
-        return Icon.PersonCircle;
-      case "editor":
-        return Icon.Pencil;
-      case "viewer":
-        return Icon.Eye;
-      default:
-        return Icon.Eye;
-    }
-  }
-
-  function getRoleColor(role: VaultRole): Color {
-    switch (role) {
-      case "owner":
-        return Color.Yellow;
-      case "manager":
-        return Color.Blue;
-      case "editor":
-        return Color.Green;
-      case "viewer":
-        return Color.SecondaryText;
-      default:
-        return Color.SecondaryText;
-    }
-  }
 
   if (error?.type === "not_installed") {
     return (
@@ -206,17 +193,8 @@ export default function Command() {
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
+              sharedAccessory(vault.role),
               vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
-              vault.role === undefined
-                ? undefined
-                : {
-                    tag: {
-                      value: vault.role,
-                      color: getRoleColor(vault.role),
-                    },
-                    icon: getRoleIcon(vault.role),
-                    tooltip: `Role: ${vault.role}`,
-                  },
             ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>

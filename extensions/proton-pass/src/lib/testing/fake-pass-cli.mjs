@@ -15,6 +15,7 @@ const expectedArgs = {
   "malformed-json": ["vault", "list", "--output", "json"],
   "json:vaults-array": ["vault", "list", "--output", "json"],
   "json:vaults-wrapper": ["vault", "list", "--output", "json"],
+  "json:vault-shares": ["share", "list", "--only-vaults", "true", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
@@ -32,6 +33,18 @@ const fixtures = {
   "vaults-array": [{ share_id: "vault-1", name: "Personal", item_count: 3, role: "Owner" }],
   "vaults-wrapper": {
     vaults: [{ name: "Work", vault_id: "vault-id-2", share_id: "vault-2" }],
+  },
+  "vault-shares": {
+    shares: [
+      { id: "vault-1", name: "Personal", share_type: "Vault", share_role: "Owner" },
+      { id: "vault-2", name: "Work", share_type: "Vault", share_role: "Viewer" },
+      {
+        id: "vault-3",
+        name: "Shared Projects",
+        share_type: "Vault",
+        share_role: { Custom: { name: "4", permission: 2 } },
+      },
+    ],
   },
   "items-full": {
     items: [
