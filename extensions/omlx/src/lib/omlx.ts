@@ -144,13 +144,14 @@ function authHeaders(): Record<string, string> {
 
 let adminSessionCookie: string | null = null;
 
-async function getAdminSession(): Promise<string> {
+async function getAdminSession(signal?: AbortSignal): Promise<string> {
   if (adminSessionCookie) return adminSessionCookie;
 
   const response = await fetch(`${getBaseUrl()}/admin/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ api_key: getApiKey() }),
+    signal,
   });
   if (!response.ok) {
     throw new Error("Failed to authenticate with oMLX admin API");
@@ -166,8 +167,10 @@ async function getAdminSession(): Promise<string> {
   return adminSessionCookie;
 }
 
-async function adminHeaders(): Promise<Record<string, string>> {
-  const session = await getAdminSession();
+async function adminHeaders(
+  signal?: AbortSignal,
+): Promise<Record<string, string>> {
+  const session = await getAdminSession(signal);
   return {
     "Content-Type": "application/json",
     Cookie: `omlx_admin_session=${session}`,
@@ -177,11 +180,14 @@ async function adminHeaders(): Promise<Record<string, string>> {
 async function adminFetch(url: string, init: RequestInit): Promise<Response> {
   const response = await fetch(url, {
     ...init,
-    headers: await adminHeaders(),
+    headers: await adminHeaders(init.signal ?? undefined),
   });
   if (response.status === 401) {
     adminSessionCookie = null;
-    return fetch(url, { ...init, headers: await adminHeaders() });
+    return fetch(url, {
+      ...init,
+      headers: await adminHeaders(init.signal ?? undefined),
+    });
   }
   return response;
 }
@@ -482,9 +488,14 @@ function parseTasksResponse(data: unknown, sourceLabel: string): HfTask[] {
   return tasks as HfTask[];
 }
 
+// One deadline per backend covers login, a possible 401 retry, and body
+// consumption. allSettled must not leave a healthy source waiting forever.
+const DOWNLOAD_TASK_TIMEOUT_MS = 10_000;
+
 export async function fetchHfTasks(): Promise<HfTask[]> {
   const response = await adminFetch(`${getBaseUrl()}/admin/api/hf/tasks`, {
     method: "GET",
+    signal: AbortSignal.timeout(DOWNLOAD_TASK_TIMEOUT_MS),
   });
   if (!response.ok) {
     const text = await response.text();
@@ -559,6 +570,7 @@ export async function startMsDownload(modelId: string): Promise<HfTask> {
 export async function fetchMsTasks(): Promise<HfTask[]> {
   const response = await adminFetch(`${getBaseUrl()}/admin/api/ms/tasks`, {
     method: "GET",
+    signal: AbortSignal.timeout(DOWNLOAD_TASK_TIMEOUT_MS),
   });
   if (!response.ok) {
     const text = await response.text();

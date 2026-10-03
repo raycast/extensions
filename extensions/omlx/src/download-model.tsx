@@ -69,6 +69,10 @@ export default function DownloadModel() {
   // Monotonic initialization generation: only the latest availability
   // check may set server state, independently of search generations.
   const initGenRef = useRef(0);
+  // Successful server responses are availability evidence; typing, source
+  // changes, and failed searches are not. Keep this separate from search
+  // generations so an older health failure cannot discard newer success.
+  const searchSuccessRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -83,6 +87,7 @@ export default function DownloadModel() {
     let active = true;
     const initGeneration = ++initGenRef.current;
     const searchGeneration = searchGenRef.current;
+    const searchSuccess = searchSuccessRef.current;
     (async () => {
       if (!isOmlxInstalled()) {
         if (active && initGeneration === initGenRef.current) {
@@ -93,9 +98,10 @@ export default function DownloadModel() {
       const running = await isServerRunning();
       if (!active || initGeneration !== initGenRef.current) return;
       if (!running) {
-        // Offline is authoritative even if the user already started a
-        // search: the search would fail anyway, so cancel its pending
-        // debounce/results and tell the user to start the server.
+        // A successful search (including empty results) since this check
+        // started is newer server evidence. Otherwise invalidate pending
+        // searches and awaiting failure toasts, regardless of user edits.
+        if (searchSuccessRef.current !== searchSuccess) return;
         if (timerRef.current) {
           clearTimeout(timerRef.current);
           timerRef.current = null;
@@ -126,6 +132,7 @@ export default function DownloadModel() {
     if (timerRef.current) clearTimeout(timerRef.current);
     searchGenRef.current += 1;
     const generation = searchGenRef.current;
+    const availabilityGeneration = initGenRef.current;
 
     if (!text.trim()) {
       setResults([]);
@@ -137,6 +144,10 @@ export default function DownloadModel() {
     timerRef.current = setTimeout(async () => {
       try {
         const models = await SOURCE_CONFIG[src].search(text.trim(), 20, mlx);
+        if (availabilityGeneration !== initGenRef.current) return;
+        // Even a superseded query proves server availability. Record that
+        // independently, without letting its stale results overwrite the UI.
+        searchSuccessRef.current += 1;
         if (generation !== searchGenRef.current) return;
         setResults(models);
         setViewState("ready");

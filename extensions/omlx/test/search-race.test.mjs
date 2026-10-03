@@ -487,16 +487,83 @@ for (const completed of [false, true]) {
   });
 }
 
-test("late offline health overrides a completed search with the offline view", async () => {
+for (const empty of [false, true]) {
+  test(`late offline health preserves a completed ${empty ? "empty" : "nonempty"} successful search`, async () => {
+    const app = await mount();
+    app.search("current");
+    await app.advance();
+    app.searches[0].resolve(empty ? [] : [model("current")]);
+    await settle();
+    const writes = app.writes.length;
+    app.health.resolve(false);
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.equal(app.render().props.isLoading, false);
+    assert.equal(app.empty(), empty ? "No Models Found" : undefined);
+    assert.deepEqual(app.titles(), empty ? [] : ["current"]);
+  });
+}
+
+for (const empty of [false, true]) {
+  test(`superseded query's ${empty ? "empty" : "nonempty"} success is availability evidence without applying stale results`, async () => {
+    const app = await mount();
+    app.search("old");
+    await app.advance();
+    app.search("new");
+    const writes = app.writes.length;
+    app.searches[0].resolve(empty ? [] : [model("old")]);
+    await settle();
+    assert.equal(app.writes.length, writes);
+    app.health.resolve(false);
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.equal(app.render().props.isLoading, true);
+    assert.equal(app.timers.size, 1);
+    assert.deepEqual(app.titles(), []);
+    await app.advance();
+    app.searches[1].resolve([model("new")]);
+    await settle();
+    assert.deepEqual(app.titles(), ["new"]);
+  });
+}
+
+for (const transition of ["search", "clear", "source"]) {
+  test(`newer success still supersedes old offline health after ${transition}`, async () => {
+    const app = await mount();
+    await seed(app);
+    if (transition === "search") app.search("next");
+    if (transition === "clear") app.search("");
+    if (transition === "source") app.source("modelscope");
+    const writes = app.writes.length;
+    const titles = app.titles();
+    const empty = app.empty();
+    app.health.resolve(false);
+    await settle();
+    assert.equal(app.writes.length, writes);
+    assert.deepEqual(app.titles(), titles);
+    assert.equal(app.empty(), empty);
+    assert.equal(app.render().props.isLoading, transition !== "clear");
+    if (transition !== "clear") {
+      assert.equal(app.timers.size, 1);
+      await app.advance();
+      app.searches[1].resolve([model("next")]);
+      await settle();
+      assert.deepEqual(app.titles(), ["next"]);
+    }
+  });
+}
+
+test("completed failed search without success cannot suppress offline health", async () => {
   const app = await mount();
-  app.search("current");
+  app.search("fails");
   await app.advance();
-  app.searches[0].resolve([model("current")]);
+  app.searches[0].reject(new Error("failure"));
   await settle();
-  assert.deepEqual(app.titles(), ["current"]);
+  app.toasts[0].resolve({});
+  await settle();
+  assert.equal(app.empty(), "No Models Found");
   app.health.resolve(false);
   await settle();
-  assert.equal(app.timers.size, 0);
   assert.equal(app.empty(), "oMLX Server Offline");
   assert.deepEqual(app.titles(), []);
 });
@@ -594,17 +661,22 @@ test("offline health cancels a pending search debounce before it starts", async 
   assert.deepEqual(app.titles(), []);
 });
 
-test("empty source switch cannot suppress a late offline result", async () => {
-  const app = await mount();
-  app.source("modelscope");
-  app.health.resolve(false);
-  await settle();
-  const writes = app.writes.length;
-  await settle();
-  assert.equal(app.writes.length, writes);
-  assert.equal(app.empty(), "oMLX Server Offline");
-  assert.equal(app.timers.size, 0);
-});
+for (const transition of ["clear", "source", "typed source"]) {
+  test(`${transition} without successful server evidence cannot suppress offline health`, async () => {
+    const app = await mount();
+    if (transition !== "source") app.search("pending");
+    if (transition === "clear") app.search("");
+    else app.source("modelscope");
+    app.health.resolve(false);
+    await settle();
+    const writes = app.writes.length;
+    await app.advance();
+    assert.equal(app.writes.length, writes);
+    assert.equal(app.empty(), "oMLX Server Offline");
+    assert.equal(app.timers.size, 0);
+    assert.equal(app.searches.length, 0);
+  });
+}
 
 test("empty filter switch invalidates generation even after clearing the query", async () => {
   const app = await ready();
