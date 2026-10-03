@@ -1,5 +1,9 @@
 # Schwab Portfolio Changelog
 
+## [Consistent Position Returns] - {PR_MERGE_DATE}
+
+- Use the same unrealized return calculation in portfolio views and AI answers, including short positions and option multipliers
+
 ## [Connection and Portfolio Clarity] - 2026-10-03
 
 - Check saved app credentials and sign in again with Schwab Connection Status
