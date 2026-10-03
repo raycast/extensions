@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { controller, errorMessage } from "./backend";
-import { Display } from "./core";
+import { Display, displayWarnings } from "./core";
 
 export default function Command() {
   const [displays, setDisplays] = useState<Display[]>([]);
@@ -14,10 +14,19 @@ export default function Command() {
     setLoading(true);
     setError(undefined);
     try {
-      setDisplays(await operation());
-      if (title) await showToast({ style: Toast.Style.Success, title });
+      const result = await operation();
+      setDisplays(result);
+      const warning = displayWarnings(result);
+      if (title || warning)
+        await showToast({ style: Toast.Style.Success, title: title ?? "Display Switch", message: warning });
     } catch (error) {
       const message = errorMessage(error);
+      // A failed helper can still have changed macOS topology. Do not leave stale Off rows.
+      try {
+        setDisplays(await controller.list());
+      } catch {
+        setDisplays([]);
+      }
       setError(message);
       await showToast({
         style: Toast.Style.Failure,

@@ -11,6 +11,7 @@ struct Display: Codable {
     let mirrored: Bool
     let width: Int
     let height: Int
+    var warning: String? = nil
 }
 struct SavedDisplay: Codable {
     var name: String
@@ -38,10 +39,20 @@ func online() throws -> [CGDirectDisplayID] {
     try check(CGGetOnlineDisplayList(count, &ids, &count), "Read displays")
     return Array(ids.prefix(Int(count)))
 }
-func uuid(_ id: CGDirectDisplayID) -> String {
-    guard let value = CGDisplayCreateUUIDFromDisplayID(id)?.takeRetainedValue() else { return "invalid-\(id)" }
+func uuid(_ id: CGDirectDisplayID) -> String? {
+    guard let value = CGDisplayCreateUUIDFromDisplayID(id)?.takeRetainedValue() else { return nil }
     return CFUUIDCreateString(nil, value) as String
 }
+// A display without a stable UUID remains part of the native safety inventory,
+// but cannot be safely targeted or cached by the extension.
+func identifiedIDs(_ ids: [CGDirectDisplayID], identity: (CGDirectDisplayID) -> String?) -> [(CGDirectDisplayID, String)] {
+    ids.compactMap { id in identity(id).map { (id, $0) } }
+}
+func bestEffortLayout(_ operation: () throws -> Void) -> String? {
+    do { try operation(); return nil }
+    catch { return "Display is on, but its previous layout could not be restored: \(error)" }
+}
+var warnings: [String: String] = [:]
 func enabled(_ id: CGDirectDisplayID) -> Bool { CGDisplayIsActive(id) != 0 || CGDisplayIsInMirrorSet(id) != 0 }
 typealias ConfigureEnabled = @convention(c) (CGDisplayConfigRef?, CGDirectDisplayID, Bool) -> Int32
 func configureFunction() throws -> ConfigureEnabled {
@@ -82,7 +93,7 @@ func allIDs() throws -> [CGDirectDisplayID] {
 }
 func knownID(_ key: String) throws -> CGDirectDisplayID? {
     let ids = try online()
-    if let id = ids.first(where: { uuid($0).caseInsensitiveCompare(key) == .orderedSame }) { return id }
+    if let id = ids.first(where: { uuid($0)?.caseInsensitiveCompare(key) == .orderedSame }) { return id }
     guard let record = saved.first(where: { $0.key.caseInsensitiveCompare(key) == .orderedSame })?.value,
           record.disabledByUs == true, record.boot == bootIdentity(),
           let id = record.cgID, !ids.contains(id), try allIDs().contains(id),
@@ -91,9 +102,8 @@ func knownID(_ key: String) throws -> CGDirectDisplayID? {
 }
 func snapshot(_ ids: [CGDirectDisplayID]) throws {
     let screens = NSScreen.screens
-    for id in ids {
+    for (id, key) in identifiedIDs(ids, identity: uuid) {
         let name = screens.first { ($0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value == id }?.localizedName
-        let key = uuid(id)
         if enabled(id) {
             let rect = CGDisplayBounds(id)
             saved[key] = SavedDisplay(name: name ?? saved[key]?.name ?? (CGDisplayIsBuiltin(id) != 0 ? "Built-in Display" : "Display \(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))"), x: Int32(rect.origin.x), y: Int32(rect.origin.y), mode: CGDisplayCopyDisplayMode(id)?.ioDisplayModeID, cgID: id, builtIn: CGDisplayIsBuiltin(id) != 0, disabledByUs: false, boot: bootIdentity(), width: Int(rect.width), height: Int(rect.height))
@@ -104,9 +114,9 @@ func snapshot(_ ids: [CGDirectDisplayID]) throws {
 func displays() throws -> [Display] {
     let ids = try online()
     try snapshot(ids)
-    var result = ids.map { id in
+    var result = identifiedIDs(ids, identity: uuid).map { id, key in
         let rect = CGDisplayBounds(id)
-        return Display(id: uuid(id), name: saved[uuid(id)]?.name ?? "Display \(id)", enabled: enabled(id), builtIn: CGDisplayIsBuiltin(id) != 0, main: CGDisplayIsMain(id) != 0, mirrored: CGDisplayIsInMirrorSet(id) != 0, width: Int(rect.width), height: Int(rect.height))
+        return Display(id: key, name: saved[key]?.name ?? "Display \(id)", enabled: enabled(id), builtIn: CGDisplayIsBuiltin(id) != 0, main: CGDisplayIsMain(id) != 0, mirrored: CGDisplayIsInMirrorSet(id) != 0, width: Int(rect.width), height: Int(rect.height), warning: warnings[key])
     }
     let full = try allIDs()
     for (key, record) in saved where record.disabledByUs == true && record.boot == bootIdentity() {
@@ -136,7 +146,9 @@ func set(_ id: CGDirectDisplayID, _ state: Bool) throws {
     }
     let configure = try configureFunction()
     _ = try allIDs() // Do not disable unless the recovery API is available.
-    let key = ids.contains(id) ? uuid(id) : saved.first(where: { $0.value.cgID == id && $0.value.disabledByUs == true })!.key
+    guard let key = ids.contains(id) ? uuid(id) : saved.first(where: { $0.value.cgID == id && $0.value.disabledByUs == true })?.key else {
+        throw Failure.message("macOS did not provide a stable UUID for this display. No displays were changed.")
+    }
     try snapshot(ids)
     if !state {
         saved[key]?.disabledByUs = true
@@ -153,22 +165,23 @@ func set(_ id: CGDirectDisplayID, _ state: Bool) throws {
     try check(CGCompleteDisplayConfiguration(config, .forSession), "Apply display change")
     try waitFor(id, state)
     if state, let previous = saved[key] {
-        var layout: CGDisplayConfigRef?
-        try check(CGBeginDisplayConfiguration(&layout), "Begin layout restore")
-        do {
+        // Power state was confirmed above; layout errors must not turn enable into a failure.
+        saved[key]?.disabledByUs = false
+        try save()
+        warnings[key] = bestEffortLayout {
+            var layout: CGDisplayConfigRef?
+            var completed = false
+            defer { if !completed, let layout { CGCancelDisplayConfiguration(layout) } }
+            try check(CGBeginDisplayConfiguration(&layout), "Begin layout restore")
             if let modeID = previous.mode,
                let modes = CGDisplayCopyAllDisplayModes(id, [kCGDisplayShowDuplicateLowResolutionModes: true] as CFDictionary) as? [CGDisplayMode],
                let mode = modes.first(where: { $0.ioDisplayModeID == modeID }) {
                 try check(CGConfigureDisplayWithDisplayMode(layout, id, mode, nil), "Restore resolution")
             }
             try check(CGConfigureDisplayOrigin(layout, id, previous.x, previous.y), "Restore position")
-        } catch {
-            if let layout { CGCancelDisplayConfiguration(layout) }
-            throw error
+            try check(CGCompleteDisplayConfiguration(layout, .forSession), "Restore display layout")
+            completed = true
         }
-        try check(CGCompleteDisplayConfiguration(layout, .forSession), "Restore display layout")
-        saved[key]?.disabledByUs = false
-        try save()
     }
 }
 func output<T: Encodable>(_ value: T) throws {
@@ -176,6 +189,7 @@ func output<T: Encodable>(_ value: T) throws {
     encoder.outputFormatting = [.sortedKeys]
     print(String(decoding: try encoder.encode(value), as: UTF8.self))
 }
+// CLI entry point.
 do {
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     let lock = open(directory.appendingPathComponent("control.lock").path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)

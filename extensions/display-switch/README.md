@@ -113,3 +113,8 @@ Tinycast supports the Raycast list/action components and the `child_process`
 execution used here: [compatibility](https://tinycast.dev/docs/extensions/compatibility/)
 and [folder installation](https://tinycast.dev/docs/extensions/installing/).
 See [VALIDATION.md](VALIDATION.md) for the actual hardware and launcher checks.
+
+Displays for which macOS cannot provide a stable UUID are omitted from the list;
+they still count in the native last-display safety check. If a display turns on
+but its previous resolution or position cannot be restored, the command reports
+it as On and shows a layout warning. Adjust its layout in System Settings.

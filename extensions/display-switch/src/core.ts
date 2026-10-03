@@ -7,6 +7,16 @@ export interface Display {
   mirrored: boolean;
   width: number;
   height: number;
+  warning?: string;
+}
+
+export function displayWarnings(displays: Display[]): string | undefined {
+  return (
+    displays
+      .map((display) => display.warning)
+      .filter(Boolean)
+      .join("\n") || undefined
+  );
 }
 
 export type Runner = (args: string[]) => Promise<string>;
@@ -24,6 +34,7 @@ export function parseDisplays(stdout: string): Display[] {
       !uuid.test(row.id) ||
       typeof row.name !== "string" ||
       !row.name ||
+      (row.warning !== undefined && row.warning !== null && typeof row.warning !== "string") ||
       ["enabled", "builtIn", "main", "mirrored"].some((key) => typeof row[key] !== "boolean") ||
       ["width", "height"].some((key) => !Number.isFinite(row[key]) || row[key] < 0) ||
       ids.has(row.id.toLowerCase())

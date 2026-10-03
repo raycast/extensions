@@ -6,7 +6,7 @@ Studio Display (main), built-in Retina display, and Mi Monitor (rotated 270°).
 ## Passed
 
 - TypeScript strict type checking and Prettier formatting.
-- 11 controller tests: on/off round trip, last-active-display protection,
+- 12 controller tests: on/off round trip, last-active-display protection,
   duplicate names, disconnected displays, invalid IDs, malformed/duplicate
   backend records, mirrors, enable-all recovery, state verification,
   idempotency, and topology changes between reads.
@@ -45,3 +45,20 @@ To repeat a hardware test, run `node scripts/verify-hardware.mjs DISPLAY_UUID`.
 It briefly disables the selected display, checks that a new process still lists
 it, and always attempts restoration in a finally block. Choose a secondary
 screen and keep another screen active.
+
+## PR review regressions
+
+- Injected missing-UUID inventory entry: valid displays remain discoverable;
+  the unidentified display is excluded from targeting, without changing the
+  full native inventory used for last-display protection.
+- Injected failures at layout begin, resolution, origin, and completion:
+  each returns valid JSON with enabled=true and a layout warning.
+- Controller regression confirms set and enable-all accept the confirmed On
+  state alongside a warning; non-string warnings remain invalid.
+- After rebuilding both helpers, live inventory returned the built-in display
+  as On. The hardware test stopped before mutation because only one display
+  was connected; a new physical off/on cycle was not performed.
+- The list refreshes from macOS even after a failed command, to avoid stale state.
+
+UUID failure and layout-error cases were injected in native tests; these were
+not induced on physical hardware.

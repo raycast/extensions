@@ -66,7 +66,8 @@
     "build:native": "node scripts/build-helper.mjs",
     "lint": "ray lint --exit-on-error --non-interactive",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test:native": "node scripts/test-native.mjs"
   },
   "dependencies": {
     "@raycast/api": "2.6.2"

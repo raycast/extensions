@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { Display, DisplayController, parseDisplays, resolveDisplay } from "../src/core";
+import { Display, DisplayController, parseDisplays, resolveDisplay, displayWarnings } from "../src/core";
 const one: Display = {
   id: "11111111-1111-1111-1111-111111111111",
   name: "Studio Display",
@@ -97,4 +97,16 @@ test("refresh catches topology changes between toggle reads", async () => {
   });
   await assert.rejects(controller.toggle(one.name), /last active/);
   assert.equal(calls, 2);
+});
+
+test("layout warning preserves confirmed enabled state for set and enable-all", async () => {
+  const warning = "Display is on, but its previous layout could not be restored: Restore position failed";
+  const controller = new DisplayController(async (args) =>
+    JSON.stringify(args[0] === "list" ? [one, { ...two, enabled: false }] : [one, { ...two, enabled: true, warning }]),
+  );
+  const enabled = await controller.set(two.id, true);
+  assert.equal(enabled[1].enabled, true);
+  assert.equal(displayWarnings(enabled), warning);
+  assert.equal((await controller.enableAll())[1].enabled, true);
+  assert.throws(() => parseDisplays(JSON.stringify([{ ...one, warning: 42 }])));
 });
