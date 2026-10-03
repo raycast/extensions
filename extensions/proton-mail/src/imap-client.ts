@@ -74,7 +74,7 @@ export async function listFolders(): Promise<Folder[]> {
       path: item.path,
       name: item.name,
       delimiter: item.delimiter,
-      flags: item.flags,
+      flags: Array.from(item.flags ?? []),
       specialUse: item.specialUse,
     }));
 
@@ -137,10 +137,22 @@ export async function fetchEmails(
         return [];
       }
 
-      // Get the most recent messages with offset for pagination
-      const uids = searchResult as number[];
-      const sortedUids = uids.sort((a: number, b: number) => b - a);
+      // UIDs follow the order messages were added to the mailbox (Bridge sync, moves), not their date,
+      // so sort on the internal date before picking the page
+      const datedUids: { uid: number; time: number }[] = [];
+      for await (const message of client.fetch(searchResult, { uid: true, internalDate: true }, { uid: true })) {
+        const time = message.internalDate ? new Date(message.internalDate).getTime() : 0;
+        datedUids.push({ uid: message.uid, time: Number.isNaN(time) ? 0 : time });
+      }
+      datedUids.sort((a, b) => b.time - a.time || b.uid - a.uid);
+      let sortedUids = datedUids.map(({ uid }) => uid);
+      if (filter === "attachment") {
+        sortedUids = await findUidsWithAttachments(client, sortedUids, offset + limit);
+      }
       const limitedUids = sortedUids.slice(offset, offset + limit);
+      if (limitedUids.length === 0) {
+        return [];
+      }
 
       const emails: Email[] = [];
 
@@ -156,12 +168,6 @@ export async function fetchEmails(
         { uid: true }, // Tell fetch to interpret limitedUids as UIDs, not sequence numbers
       )) {
         const hasAttachment = checkHasAttachment(message.bodyStructure);
-
-        // Skip if filtering by attachment and no attachment
-        if (filter === "attachment" && !hasAttachment) {
-          continue;
-        }
-
         const envelope = message.envelope;
         const email: Email = {
           uid: message.uid,
@@ -171,7 +177,7 @@ export async function fetchEmails(
           to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
           cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
           date: envelope?.date || new Date(),
-          flags: message.flags instanceof Set ? message.flags : new Set(message.flags || []),
+          flags: Array.from(message.flags ?? []),
           hasAttachment,
           preview: extractPreview(message.source),
         };
@@ -185,6 +191,24 @@ export async function fetchEmails(
       lock.release();
     }
   });
+}
+
+// IMAP has no standard search key for attachments, so scan body structures newest first,
+// in chunks, until there are enough matches to fill the requested page
+async function findUidsWithAttachments(client: ImapFlow, sortedUids: number[], needed: number): Promise<number[]> {
+  const CHUNK_SIZE = 100;
+  const matches: number[] = [];
+
+  for (let start = 0; start < sortedUids.length && matches.length < needed; start += CHUNK_SIZE) {
+    const chunk = sortedUids.slice(start, start + CHUNK_SIZE);
+    const withAttachment = new Set<number>();
+    for await (const message of client.fetch(chunk, { uid: true, bodyStructure: true }, { uid: true })) {
+      if (checkHasAttachment(message.bodyStructure)) withAttachment.add(message.uid);
+    }
+    matches.push(...chunk.filter((uid) => withAttachment.has(uid)));
+  }
+
+  return matches;
 }
 
 function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: unknown[] } | undefined): boolean {
