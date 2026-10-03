@@ -90,14 +90,28 @@ export default function Command() {
   const [filter, setFilter] = useState("");
 
   const reload = useCallback(async () => {
-    const [loaded, roots] = await Promise.all([
-      loadIndexSettings(),
-      cloudStorageIndexRoots(),
-    ]);
-    setSettings(loaded);
-    setCloudRoots(roots);
-    setStats(readStats(searchIndexPath()));
-    setLoading(false);
+    setLoading(true);
+    try {
+      const [loaded, roots] = await Promise.all([
+        loadIndexSettings(),
+        cloudStorageIndexRoots(),
+      ]);
+      setSettings(loaded);
+      setCloudRoots(roots);
+      setStats(readStats(searchIndexPath()));
+    } catch {
+      setSettings(undefined);
+      setCloudRoots([]);
+      setStats(undefined);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Settings could not be loaded",
+        message:
+          "Close this screen and try again. Your settings are untouched.",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -129,7 +143,11 @@ export default function Command() {
             ? "Extension data was reset while this screen was open."
             : "Wait for any indexing or data deletion to finish, then retry. Your other data is untouched.",
       });
-      setSettings(await loadIndexSettings());
+      try {
+        setSettings(await loadIndexSettings());
+      } catch {
+        setSettings(undefined);
+      }
       return false;
     } finally {
       saving.current = false;
@@ -280,7 +298,15 @@ export default function Command() {
       // Ranking is the extension's job elsewhere; here the list is a form.
       filtering={false}
     >
-      {settings === undefined ? null : (
+      {settings === undefined ? (
+        loading ? null : (
+          <List.EmptyView
+            icon={Icon.Warning}
+            title="Settings could not be loaded"
+            description="Close this screen and try again. Your settings are untouched."
+          />
+        )
+      ) : (
         <>
           <List.Section
             title="Search Scopes"

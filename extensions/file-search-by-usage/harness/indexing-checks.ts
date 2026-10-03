@@ -1471,13 +1471,14 @@ async function indexSettingsStoreChecks(
     if (key === SETTINGS_KEY) throw new Error("Synthetic storage failure");
   };
   const afterReadFailure = await test.settings.loadIndexSettings().then(
-    (settings) => settings,
     () => undefined,
+    (error: unknown) => error,
   );
   test.reading.before = async () => {};
   assert(
-    afterReadFailure !== undefined && same(afterReadFailure, DEFAULT_SETTINGS),
-    "a settings read that throws loads the defaults rather than failing",
+    afterReadFailure instanceof Error &&
+      afterReadFailure.message === "Synthetic storage failure",
+    "a settings storage failure is preserved instead of becoming default scopes",
   );
 
   const fresh = storeAt(path.join(root, "index-settings-save"));

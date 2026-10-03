@@ -9,6 +9,7 @@ import {
   cloudPathCandidates,
   standardPathCandidates,
 } from "../src/lib/starting-paths";
+import { discoverSharedCloudFolders } from "../src/lib/shared-cloud-folders";
 import { Entry } from "../src/lib/types";
 
 /**
@@ -57,6 +58,57 @@ export async function cachedEntryChecks(
   } finally {
     fsp.readdir = originalReaddir;
   }
+
+  const sharedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "shared-cloud-"));
+  const shortcutRoot = path.join(
+    sharedRoot,
+    "GoogleDrive-example",
+    ".shortcut-targets-by-id",
+  );
+  for (let i = 0; i < 6; i++)
+    fs.mkdirSync(path.join(shortcutRoot, `id-${i}`, `folder-${i}`), {
+      recursive: true,
+    });
+  try {
+    const found = await discoverSharedCloudFolders(
+      new AbortController().signal,
+      { cloudRoot: sharedRoot, maxFolders: 3 },
+    );
+    assert(
+      found.length === 3,
+      "shared-cloud discovery caps the number of returned folders",
+    );
+
+    const originalOpendir = fsp.opendir;
+    let releaseStalled = () => {};
+    const stalled = new Promise<never>((_resolve, reject) => {
+      releaseStalled = () => reject(new Error("Synthetic stalled provider"));
+    });
+    fsp.opendir = ((dir, ...args: unknown[]) =>
+      String(dir) === sharedRoot
+        ? stalled
+        : Reflect.apply(originalOpendir, fsp, [
+            dir,
+            ...args,
+          ])) as typeof fsp.opendir;
+    const started = Date.now();
+    try {
+      const timedOut = await discoverSharedCloudFolders(
+        new AbortController().signal,
+        { cloudRoot: sharedRoot, budgetMs: 20 },
+      );
+      assert(
+        timedOut.length === 0 && Date.now() - started < 500,
+        "a stalled shared-cloud provider cannot block search past its deadline",
+      );
+    } finally {
+      releaseStalled();
+      fsp.opendir = originalOpendir;
+    }
+  } finally {
+    fs.rmSync(sharedRoot, { recursive: true, force: true });
+  }
+
   const pool = createReadPool(1);
   const immediate = new AbortController();
   let started = 0;

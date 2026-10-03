@@ -5,6 +5,7 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { getEventListeners } from "node:events";
 import {
   DirectorySnapshot,
   observeDirectory,
@@ -12,6 +13,7 @@ import {
 } from "../src/lib/directory-listing";
 import { createWorkQueue } from "../src/lib/work-queue";
 import { readBoundedDirectory } from "../src/lib/bounded-directory";
+import { canonicalPathAsync } from "../src/lib/read-dir";
 
 const turn = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -218,6 +220,113 @@ export async function liveSearchChecks(
     }
   } finally {
     fs.rmSync(stallRoot, { recursive: true, force: true });
+  }
+
+  /*
+   * Timed-out provider reads keep their physical slots until the filesystem
+   * responds. They must not consume the separate pool used by local folders.
+   */
+  const isolationRoot = fs.mkdtempSync(
+    path.join(os.tmpdir(), "live-cloud-isolation-"),
+  );
+  const stalledCloud = path.join(
+    isolationRoot,
+    "Library",
+    "CloudStorage",
+    "Provider",
+  );
+  const healthyCloud = path.join(
+    isolationRoot,
+    "Library",
+    "CloudStorage",
+    "OtherProvider",
+  );
+  const healthyLocal = path.join(isolationRoot, "Documents");
+  fs.mkdirSync(stalledCloud, { recursive: true });
+  fs.mkdirSync(healthyCloud, { recursive: true });
+  fs.mkdirSync(healthyLocal, { recursive: true });
+  for (let i = 0; i < 12; i++)
+    fs.writeFileSync(path.join(stalledCloud, `cloud-${i}.txt`), "cloud");
+  fs.writeFileSync(path.join(healthyLocal, "local.txt"), "local");
+  fs.writeFileSync(path.join(healthyCloud, "other-cloud.txt"), "cloud");
+  const originalStat = fsp.stat;
+  let releaseCloud = () => {};
+  const blockedCloud = new Promise<void>((resolve) => {
+    releaseCloud = resolve;
+  });
+  try {
+    fsp.stat = (async (full, ...args: unknown[]) => {
+      if (String(full).startsWith(stalledCloud + path.sep)) await blockedCloud;
+      return Reflect.apply(originalStat, fsp, [full, ...args]);
+    }) as typeof fsp.stat;
+
+    const cloud = await readDirectoryAsync(stalledCloud, false, undefined, {
+      budgetMs: 30,
+    });
+    const local = await readDirectoryAsync(healthyLocal, false, undefined, {
+      budgetMs: 500,
+    });
+    const otherCloud = await readDirectoryAsync(
+      healthyCloud,
+      false,
+      undefined,
+      { budgetMs: 500 },
+    );
+    assert(
+      cloud.truncated > 0 &&
+        local.error === undefined &&
+        local.entries.some((entry) => entry.name === "local.txt") &&
+        otherCloud.error === undefined &&
+        otherCloud.entries.some((entry) => entry.name === "other-cloud.txt"),
+      "one stalled cloud provider cannot consume slots needed by local folders or another provider",
+    );
+  } finally {
+    releaseCloud();
+    fsp.stat = originalStat;
+    fs.rmSync(isolationRoot, { recursive: true, force: true });
+  }
+
+  // Every early return must detach the caller listener and cancel its timer.
+  const listenerController = new AbortController();
+  const missingDirectory = path.join(os.tmpdir(), "missing-listener-fixture");
+  for (let i = 0; i < 3; i++)
+    await readDirectoryAsync(
+      missingDirectory,
+      false,
+      listenerController.signal,
+      {
+        budgetMs: 25,
+      },
+    );
+  assert(
+    getEventListeners(listenerController.signal, "abort").length === 0,
+    "failed directory reads do not leak abort listeners across refreshes",
+  );
+
+  // Ranking writes canonicalize aliases, but a cold provider realpath must not
+  // freeze the worker that handles the user action.
+  const originalRealpath = fsp.realpath;
+  const stalledCanonical = path.join(
+    os.tmpdir(),
+    "Library",
+    "CloudStorage",
+    "StalledProvider",
+    "file.txt",
+  );
+  try {
+    fsp.realpath = (async (full, ...args: unknown[]) => {
+      if (String(full) === stalledCanonical)
+        return new Promise<never>(() => {});
+      return Reflect.apply(originalRealpath, fsp, [full, ...args]);
+    }) as typeof fsp.realpath;
+    const started = Date.now();
+    const resolved = await canonicalPathAsync(stalledCanonical, 25);
+    assert(
+      resolved === stalledCanonical && Date.now() - started < 500,
+      "stalled alias resolution falls back quickly instead of blocking an action",
+    );
+  } finally {
+    fsp.realpath = originalRealpath;
   }
 
   /*

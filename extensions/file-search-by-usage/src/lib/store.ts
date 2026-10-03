@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { dataGeneration, withStorageLock } from "./storage-lock";
 import { VisitLog } from "./types";
-import { canonicalPath } from "./read-dir";
+import { canonicalPathAsync } from "./read-dir";
 import {
   Abbreviations,
   emsScore,
@@ -37,10 +37,11 @@ export async function recordVisit(
   path: string,
   generation = dataGeneration(),
 ): Promise<VisitLog> {
+  const target = await canonicalPathAsync(path);
   return withStorageLock(async (assertCurrent) => {
     const loaded = await loadVisitLog();
-    // Canonical paths merge usage across aliases.
-    const updated = recordEms(loaded, canonicalPath(path), Date.now());
+    // Canonical paths merge aliases when the provider resolves promptly.
+    const updated = recordEms(loaded, target, Date.now());
 
     const { log } = pruneVisits(updated);
     await save(log, assertCurrent);
@@ -49,15 +50,17 @@ export async function recordVisit(
 }
 
 export async function resetVisit(path: string): Promise<VisitLog> {
+  const generation = dataGeneration();
+  const target = await canonicalPathAsync(path);
   return withStorageLock(async (assertCurrent) => {
     const log = await loadVisitLog();
     const items = { ...log.items };
-    delete items[canonicalPath(path)];
+    delete items[target];
     delete items[path];
     const next = { tick: log.tick, items };
     await save(next, assertCurrent);
     return next;
-  }, dataGeneration());
+  }, generation);
 }
 
 export async function clearVisits(): Promise<VisitLog> {
@@ -90,12 +93,13 @@ export async function recordAbbreviation(
   target: string,
   generation = dataGeneration(),
 ): Promise<Abbreviations> {
+  if (normalizedQuery.trim() === "") return loadAbbreviations();
+  const resolvedTarget = await canonicalPathAsync(target);
   return withStorageLock(async (assertCurrent) => {
-    if (normalizedQuery.trim() === "") return loadAbbreviations();
     const next = mergeAbbreviation(
       await loadAbbreviations(),
       normalizedQuery.trim().toLowerCase(),
-      canonicalPath(target),
+      resolvedTarget,
     );
     assertCurrent();
     await LocalStorage.setItem(ABBREV_KEY, JSON.stringify(next));
@@ -120,8 +124,9 @@ export async function loadPins(): Promise<string[]> {
 }
 
 export async function togglePin(rawTarget: string): Promise<string[]> {
+  const generation = dataGeneration();
+  const target = await canonicalPathAsync(rawTarget);
   return withStorageLock(async (assertCurrent) => {
-    const target = canonicalPath(rawTarget);
     const pins = await loadPins();
     const next = pins.includes(target)
       ? pins.filter((p) => p !== target)
@@ -129,7 +134,7 @@ export async function togglePin(rawTarget: string): Promise<string[]> {
     assertCurrent();
     await LocalStorage.setItem(PINS_KEY, JSON.stringify(next));
     return next;
-  }, dataGeneration());
+  }, generation);
 }
 
 const SEARCHES_KEY = "searches";

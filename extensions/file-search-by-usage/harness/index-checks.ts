@@ -10,6 +10,8 @@ import { scopeExceptionChecks } from "./scope-exception-checks";
 import { findFd, FD_DIRECTORIES } from "../src/lib/fd";
 import {
   ensureFd,
+  deletePortableFd,
+  FD_INSTALL_BUDGET_MS,
   PORTABLE_FD_VERSION,
   portableFdAsset,
   verifyArchiveChecksum,
@@ -39,7 +41,9 @@ import {
   redundantLinks,
   resolveRoots,
   scanRoot,
+  scanRoots,
   describeScan,
+  describeScanProgress,
   INDEX_EXCLUSIONS,
 } from "../src/lib/index-scan";
 import { queryIndex } from "../src/lib/db-search";
@@ -55,11 +59,17 @@ import {
   configuredRoots,
   describeSettings,
   parseSettings,
+  parseSettingsResult,
   removePattern,
   removeScope,
   serializeSettings,
 } from "../src/lib/index-settings";
-import { cloudStorageIndexRoots, rebuildIndex } from "../src/lib/index-build";
+import {
+  cloudStorageIndexRootResult,
+  cloudStorageIndexRoots,
+  rebuildIndex,
+} from "../src/lib/index-build";
+import { runWithBestEffortSideEffect } from "../src/lib/best-effort-action";
 import {
   IndexCoverage,
   closeIndexReader,
@@ -117,6 +127,28 @@ function rowPaths(db: DatabaseSync): string[] {
 
 export async function indexChecks(assert: Assert) {
   await scopeExceptionChecks(assert);
+  // Optional ranking persistence must never stand between the user and Open.
+  let rejectRanking!: (reason: Error) => void;
+  const ranking = new Promise<never>((_resolve, reject) => {
+    rejectRanking = reject;
+  });
+  let opened = false;
+  const opening = runWithBestEffortSideEffect(
+    async () => {
+      opened = true;
+    },
+    () => ranking,
+  );
+  assert(
+    opened,
+    "the primary action starts without waiting for ranking storage",
+  );
+  rejectRanking(new Error("Synthetic ranking storage failure"));
+  await opening;
+  assert(
+    opened,
+    "a ranking storage failure does not reject a completed primary action",
+  );
   // ---------------------------------------------------------------- fd lookup
   const fakeProbe = (allowed: string[]) => (candidate: string) =>
     allowed.includes(candidate);
@@ -236,6 +268,19 @@ export async function indexChecks(assert: Assert) {
   assert(
     invalidPortablePreference.kind === "unusable" && fdProgress.length === 0,
     "an invalid explicit fd preference is reported without an automatic download",
+  );
+  const cancelledDownload = new AbortController();
+  cancelledDownload.abort();
+  const cancelledPortable = await ensureFd({
+    supportPath: tempDir("fd-cancelled"),
+    signal: cancelledDownload.signal,
+    lookupFd: () => ({ kind: "missing", reason: "not installed" }),
+  });
+  assert(
+    FD_INSTALL_BUDGET_MS === 60_000 &&
+      cancelledPortable.kind === "missing" &&
+      /cancelled/u.test(cancelledPortable.reason),
+    "portable fd installation is cancellable and has a one-minute ceiling",
   );
 
   // ------------------------------------------------------------- FTS building
@@ -370,6 +415,10 @@ export async function indexChecks(assert: Assert) {
     "absent settings mean the defaults",
   );
   assert(
+    parseSettingsResult(undefined).authoritative,
+    "genuinely absent settings authorize the documented defaults",
+  );
+  assert(
     defaultScopes("/Users/example").join("|") === "/Users/example",
     "the default scope is the home folder",
   );
@@ -410,6 +459,11 @@ export async function indexChecks(assert: Assert) {
     "unparseable settings fall back to the defaults instead of throwing",
   );
   assert(
+    !parseSettingsResult("not json").authoritative &&
+      !parseSettingsResult("null").authoritative,
+    "recovery defaults from corrupt storage cannot authorize scope cleanup",
+  );
+  assert(
     parseSettings("[1,2,3]").includeDrive && parseSettings("null").includeDrive,
     "a value of the wrong shape falls back too",
   );
@@ -421,6 +475,12 @@ export async function indexChecks(assert: Assert) {
       !partialSaved.includeDrive &&
       partialSaved.includeHidden === DEFAULT_SETTINGS.includeHidden,
     "missing fields take their individual defaults",
+  );
+  assert(
+    !parseSettingsResult(
+      JSON.stringify({ scopes: ["/a"], includeDrive: false }),
+    ).authoritative,
+    "a truncated settings record cannot authorize scope cleanup",
   );
   const dirty = parseSettings(
     JSON.stringify({
@@ -435,6 +495,13 @@ export async function indexChecks(assert: Assert) {
   assert(
     parseSettings(serializeSettings(dirty)).scopes.join(",") === "/a,/b",
     "settings survive a round trip",
+  );
+  assert(
+    parseSettingsResult(serializeSettings(DEFAULT_SETTINGS)).authoritative &&
+      !parseSettingsResult(
+        JSON.stringify({ ...DEFAULT_SETTINGS, scopes: [" /a "] }),
+      ).authoritative,
+    "only a complete, clean settings record authorizes destructive cleanup",
   );
 
   // The defaults are no longer empty, so editing rules are checked against a
@@ -919,6 +986,75 @@ export async function indexChecks(assert: Assert) {
   );
   timedDb.close();
 
+  // The whole-run deadline also covers root canonicalization. A cloud mount
+  // can stall in realpath before fd ever starts.
+  const resolveDir = tempDir("resolve-deadline");
+  const resolveRoot = path.join(resolveDir, "root");
+  fs.mkdirSync(resolveRoot);
+  const resolveDb = openWritable(resolveDir);
+  const originalRealpath = fsp.realpath;
+  try {
+    fsp.realpath = (async (full, ...args: unknown[]) => {
+      if (String(full) === resolveRoot) return new Promise<never>(() => {});
+      return Reflect.apply(originalRealpath, fsp, [full, ...args]);
+    }) as typeof fsp.realpath;
+    const started = Date.now();
+    const bounded = await scanRoots({
+      fd: "/unused",
+      roots: [resolveRoot],
+      db: resolveDb,
+      budgetMs: 40,
+      spawnFd: () => fdOutput([]),
+    });
+    assert(
+      Date.now() - started < 1000 &&
+        !bounded.complete &&
+        bounded.roots[0]?.stopped === "time-limit",
+      "stalled root resolution cannot hold the rebuild lock past its deadline",
+    );
+  } finally {
+    fsp.realpath = originalRealpath;
+    resolveDb.close();
+    fs.rmSync(resolveDir, { recursive: true, force: true });
+  }
+
+  // The same deadline covers metadata reads after fd has enumerated a path.
+  const metadataDir = tempDir("metadata-deadline");
+  const metadataRoot = path.join(metadataDir, "root");
+  const stalledPath = path.join(metadataRoot, "stalled.txt");
+  fs.mkdirSync(metadataRoot);
+  fs.writeFileSync(stalledPath, "x");
+  const metadataDb = openWritable(metadataDir);
+  const originalLstat = fsp.lstat;
+  try {
+    fsp.lstat = (async (full, ...args: unknown[]) => {
+      if (String(full) === stalledPath) return new Promise<never>(() => {});
+      return Reflect.apply(originalLstat, fsp, [full, ...args]);
+    }) as typeof fsp.lstat;
+    const started = Date.now();
+    const bounded = await scanRoot(
+      metadataRoot,
+      {
+        fd: "/unused",
+        roots: [metadataRoot],
+        db: metadataDb,
+        tuning: { batchRows: 1 },
+        spawnFd: () => fdOutput([stalledPath]),
+      },
+      Date.now() + 40,
+    );
+    assert(
+      Date.now() - started < 1000 &&
+        !bounded.complete &&
+        bounded.stopped === "time-limit",
+      "stalled metadata cannot hold the rebuild lock past its deadline",
+    );
+  } finally {
+    fsp.lstat = originalLstat;
+    metadataDb.close();
+    fs.rmSync(metadataDir, { recursive: true, force: true });
+  }
+
   // A root that is gone leaves its saved coverage alone.
   const missingRoot = path.join(scanDir, "never-existed");
   const rootsBeforeVanish = readIndexRoots(scanDb).length;
@@ -1150,6 +1286,20 @@ export async function indexChecks(assert: Assert) {
   assert(
     names(parseQuery("archive ext:GZ")).join("|") === "archive.tar.gz",
     "extension matching is case-insensitive",
+  );
+  for (let i = 0; i < 51; i++) {
+    add(`/idx/wildcard-${i}.test`);
+    add(`/idx/percent-${i}.text`);
+  }
+  add("/idx/wildcard-target.te_t", { age: DAY });
+  add("/idx/percent-target.te%t", { age: DAY });
+  assert(
+    names(parseQuery("wildcard ext:te_t")).join("|") === "wildcard-target.te_t",
+    "an underscore in an extension stays literal before the candidate limit",
+  );
+  assert(
+    names(parseQuery("percent ext:te%t")).join("|") === "percent-target.te%t",
+    "a percent sign in an extension stays literal before the candidate limit",
   );
   assert(
     names(parseQuery("annual size:>1000")).join("|") ===
@@ -1608,6 +1758,25 @@ export async function indexChecks(assert: Assert) {
     "and the status line stops reporting it as an indexed location",
   );
 
+  // Cleanup must also see an empty recorded root. Looking only at `files`
+  // leaves stale zero-row locations in the status forever.
+  closeIndexReader();
+  const emptyRoot = path.join(scopeDir, "empty-old-root");
+  const emptyWriter = openIndexForWrite(scopeFile);
+  if (emptyWriter.kind === "opened") {
+    emptyWriter.db
+      .prepare(
+        `INSERT INTO index_roots (root, scanned_at, complete, files, note)
+         VALUES (?, ?, 1, 0, NULL)`,
+      )
+      .run(emptyRoot, Date.now());
+    emptyWriter.db.close();
+  }
+  assert(
+    coverageRoots().includes(emptyRoot),
+    "the fixture records an empty indexed location",
+  );
+
   // A run that did not finish must not be read as "the root was removed".
   const reAdded = await rebuildIndex({
     file: scopeFile,
@@ -1622,6 +1791,28 @@ export async function indexChecks(assert: Assert) {
   assert(
     reAdded.kind === "done" && reAdded.report.complete,
     "putting the root back indexes it again",
+  );
+  assert(
+    reAdded.kind === "done" &&
+      reAdded.report.forgotten.includes(emptyRoot) &&
+      !coverageRoots().includes(emptyRoot),
+    "a complete scan removes stale root metadata even when that root had no files",
+  );
+  const unreadableSettings = await rebuildIndex({
+    file: scopeFile,
+    withLock: pass,
+    loadSettings: async () => {
+      throw new Error("Synthetic settings read failure");
+    },
+    lookupFd: foundFdStub,
+    spawnFd: () => fdOutput([]),
+  });
+  assert(
+    unreadableSettings.kind === "failed" &&
+      unreadableSettings.message === "Synthetic settings read failure" &&
+      coverageRoots().sort().join("\0") === [rootA, rootB].sort().join("\0") &&
+      searchIndex(scopeFile, parseQuery("doc")).entries.length === 2,
+    "a failed settings read cannot authorize cleanup of saved scopes",
   );
   const cappedRescan = await rebuildIndex({
     file: scopeFile,
@@ -1644,6 +1835,53 @@ export async function indexChecks(assert: Assert) {
     "so the out-of-scope root's rows survive a scan that did not finish",
   );
   closeIndexReader();
+
+  // Malformed settings fall back for usability, but that fallback is not
+  // evidence that nested custom coverage was intentionally removed.
+  const fallbackDir = tempDir("settings-fallback");
+  const fallbackFile = path.join(fallbackDir, "index.sqlite");
+  const fallbackParent = path.join(fallbackDir, "parent");
+  const fallbackChild = path.join(fallbackParent, "custom");
+  fs.mkdirSync(fallbackChild, { recursive: true });
+  const seededFallback = await rebuildIndex({
+    file: fallbackFile,
+    withLock: pass,
+    roots: [fallbackParent, fallbackChild],
+    lookupFd: foundFdStub,
+    spawnFd: (args) => {
+      const current = args.at(-1)!;
+      return fdOutput([
+        path.join(current, `${path.basename(current)}-doc.txt`),
+      ]);
+    },
+  });
+  const preservedFallback = await rebuildIndex({
+    file: fallbackFile,
+    withLock: pass,
+    loadSettingsResult: async () => ({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        scopes: [fallbackParent],
+        includeDrive: false,
+      },
+      authoritative: false,
+    }),
+    lookupFd: foundFdStub,
+    spawnFd: () => fdOutput([path.join(fallbackParent, "parent-new.txt")]),
+  });
+  const fallbackRead = openIndexForRead(fallbackFile);
+  assert(
+    seededFallback.kind === "done" &&
+      preservedFallback.kind === "done" &&
+      preservedFallback.report.forgotten.length === 0 &&
+      fallbackRead.kind === "opened" &&
+      queryIndex(fallbackRead.db, parseQuery("custom-doc")).entries.length ===
+        1,
+    "recovery settings preserve prior nested scope coverage during a parent scan",
+  );
+  if (fallbackRead.kind === "opened") fallbackRead.db.close();
+  closeIndexReader();
+  fs.rmSync(fallbackDir, { recursive: true, force: true });
 
   // A settings edit wins if it finishes before the rebuild takes its lock.
   // Exercise real scan cleanup: stale roots must neither delete re-added
@@ -1709,6 +1947,22 @@ export async function indexChecks(assert: Assert) {
     // Leave without resuming, exactly as a killed process would.
     killedOpen.db.close();
 
+    closeIndexReader();
+    const activeLock = path.join(killedDir, "google-drive-indexing.lock");
+    fs.mkdirSync(activeLock);
+    const activeRebuild = searchIndex(killedFile, parseQuery("before"));
+    assert(
+      activeRebuild.status === "ready" && activeRebuild.entries.length === 1,
+      "readers may keep using the previous FTS snapshot while a rebuild lock is active",
+    );
+    fs.rmSync(activeLock, { recursive: true, force: true });
+    const stranded = searchIndex(killedFile, parseQuery("during"));
+    assert(
+      stranded.status === "failed" &&
+        /did not finish synchronizing/u.test(stranded.error ?? ""),
+      "readers reject stranded FTS state instead of serving silently stale results",
+    );
+
     const reopened = openIndexForWrite(killedFile);
     assert(reopened.kind === "opened", "the index reopens after the kill");
     if (reopened.kind === "opened") {
@@ -1726,6 +1980,7 @@ export async function indexChecks(assert: Assert) {
       );
       reopened.db.close();
     }
+    closeIndexReader();
   }
   fs.rmSync(killedDir, { recursive: true, force: true });
 
@@ -1913,6 +2168,21 @@ export async function indexChecks(assert: Assert) {
     "deleting an absent index is not an error",
   );
 
+  const portableSupport = tempDir("portable-delete");
+  const portableRoot = path.join(portableSupport, "portable-fd");
+  fs.mkdirSync(path.join(portableRoot, "installed"), { recursive: true });
+  fs.writeFileSync(path.join(portableRoot, "installed", "fd"), "binary");
+  fs.writeFileSync(path.join(portableRoot, ".download-part"), "archive");
+  assert(
+    deletePortableFd(portableSupport) === 13 && !fs.existsSync(portableRoot),
+    "deleting extension data removes and counts the portable fd cache",
+  );
+  assert(
+    deletePortableFd(portableSupport) === 0,
+    "deleting an absent portable fd cache is not an error",
+  );
+  fs.rmSync(portableSupport, { recursive: true, force: true });
+
   assert(
     countIndexedFiles(searchDb) > 0,
     "the indexed file count is available for the status line",
@@ -2006,8 +2276,8 @@ export async function indexChecks(assert: Assert) {
         abbreviations: 1,
         cacheBytes: 1024,
       }),
-      "1 ranked item, 1 pin, 1 search, 1 learned shortcut, and 1.0 KB of index",
-      "one of each kind is reported in the singular, with the index size",
+      "1 ranked item, 1 pin, 1 search, 1 learned shortcut, and 1.0 KB of cached data",
+      "one of each kind is reported in the singular, with the cache size",
     ],
     [
       erasedOf({
@@ -2017,22 +2287,22 @@ export async function indexChecks(assert: Assert) {
         abbreviations: 37,
         cacheBytes: 1024 * 1024 * 3,
       }),
-      "1234567 ranked items, 4096 pins, 120 searches, 37 learned shortcuts, and 3.0 MB of index",
+      "1234567 ranked items, 4096 pins, 120 searches, 37 learned shortcuts, and 3.0 MB of cached data",
       "large counts are printed in full, and the size picks its own unit",
     ],
     [
       erasedOf({ cacheBytes: 512 }),
-      `${noIndex}, and 512 B of index`,
+      `${noIndex}, and 512 B of cached data`,
       "half a kilobyte is reported in bytes rather than rounded to a kilobyte",
     ],
     [
       erasedOf({ cacheBytes: 1536 }),
-      `${noIndex}, and 1.5 KB of index`,
+      `${noIndex}, and 1.5 KB of cached data`,
       "a kilobyte and a half keeps its half",
     ],
     [
       erasedOf({ cacheBytes: 1 }),
-      `${noIndex}, and 1 B of index`,
+      `${noIndex}, and 1 B of cached data`,
       "a single byte is reported as one byte, not as nought kilobytes",
     ],
     [
@@ -2175,11 +2445,14 @@ export async function indexChecks(assert: Assert) {
   if (interruptedRead.kind === "opened") {
     const timing = readIndexStats(interruptedRead.db, buildFile);
     assert(
-      interrupted.kind === "failed" &&
+      interrupted.kind === "done" &&
+        !ftsSuspended(interruptedRead.db) &&
         timing.lastStartedAt !== undefined &&
-        timing.lastEndedAt === undefined &&
-        timing.lastDurationMs === undefined,
-      "a failed finalization does not retain the previous build's completion",
+        timing.lastEndedAt !== undefined &&
+        timing.lastDurationMs !== undefined &&
+        queryIndex(interruptedRead.db, parseQuery("orchestrated")).entries
+          .length === 1,
+      "optional finishing feedback cannot interrupt FTS repair or completion",
     );
     interruptedRead.db.close();
   } else {
@@ -2187,12 +2460,12 @@ export async function indexChecks(assert: Assert) {
   }
   fs.rmSync(buildDir, { recursive: true, force: true });
 
-  const cloudRoots = await cloudStorageIndexRoots(
-    path.join(tempDir("cloud"), "absent"),
-  );
+  const absentCloud = path.join(tempDir("cloud"), "absent");
+  const cloudResult = await cloudStorageIndexRootResult(absentCloud);
+  const cloudRoots = await cloudStorageIndexRoots(absentCloud);
   assert(
-    cloudRoots.length === 0,
-    "a missing CloudStorage directory yields no roots",
+    cloudRoots.length === 0 && !cloudResult.authoritative,
+    "a missing CloudStorage directory yields no roots without authorizing cleanup",
   );
   const cloud = tempDir("cloud2");
   const providers = [
@@ -2204,29 +2477,35 @@ export async function indexChecks(assert: Assert) {
   for (const provider of providers) fs.mkdirSync(path.join(cloud, provider));
   fs.mkdirSync(path.join(cloud, ".locator"));
   fs.writeFileSync(path.join(cloud, "GoogleDrive-file"), "not a directory");
-  fs.symlinkSync(path.join(cloud, "absent"), path.join(cloud, "Unavailable"));
+  const unavailableProvider = path.join(cloud, "Unavailable");
+  fs.symlinkSync(path.join(cloud, "absent"), unavailableProvider);
   const linkedProvider = tempDir("linked-provider");
   fs.symlinkSync(linkedProvider, path.join(cloud, "LinkedProvider"));
-  const detected = await cloudStorageIndexRoots(cloud);
+  const discovered = await cloudStorageIndexRoots(cloud);
   assert(
-    !detected.includes(path.join(cloud, ".locator")),
+    !discovered.includes(path.join(cloud, ".locator")),
     "CloudStorage metadata .locator is not an automatic search scope",
   );
   assert(
     providers.every((provider) =>
-      detected.includes(path.join(cloud, provider)),
+      discovered.includes(path.join(cloud, provider)),
     ),
     "CloudStorage discovery includes every provider, not only Google Drive",
   );
   assert(
-    detected.includes(path.join(cloud, "LinkedProvider")) &&
-      detected.length === providers.length + 1,
-    "CloudStorage discovery follows directory links and skips files and unavailable targets",
+    discovered.includes(path.join(cloud, "LinkedProvider")) &&
+      discovered.includes(unavailableProvider) &&
+      discovered.length === providers.length + 2,
+    "CloudStorage discovery follows directory links and retains unavailable providers",
   );
+  fs.unlinkSync(unavailableProvider);
+  const detected = await cloudStorageIndexRoots(cloud);
   assert(
     (await cloudStorageIndexRoots(path.join(cloud, "GoogleDrive-file")))
-      .length === 0,
-    "an unreadable CloudStorage listing yields no detected roots",
+      .length === 0 &&
+      !(await cloudStorageIndexRootResult(path.join(cloud, "GoogleDrive-file")))
+        .authoritative,
+    "an unreadable CloudStorage listing yields no detected roots and cannot authorize cleanup",
   );
   for (const enabled of [true, false]) {
     const saved = parseSettings(
@@ -2265,6 +2544,74 @@ export async function indexChecks(assert: Assert) {
     "all detected provider scopes contribute searchable files without a home scope",
   );
   if (cloudRead.kind === "opened") cloudRead.db.close();
+
+  // If provider discovery fails but an ordinary scope remains readable, that
+  // local success still cannot be used to delete the saved cloud providers.
+  const discoveryDir = tempDir("cloud-discovery-failure");
+  const discoveryFile = path.join(discoveryDir, "index.sqlite");
+  const discoveryLocal = path.join(discoveryDir, "local");
+  const discoveryCloud = path.join(discoveryDir, "cloud-provider");
+  fs.mkdirSync(discoveryLocal);
+  fs.mkdirSync(discoveryCloud);
+  const seededDiscovery = await rebuildIndex({
+    file: discoveryFile,
+    withLock: async (work) => work(() => {}),
+    lookupFd: foundFd,
+    roots: [discoveryLocal, discoveryCloud],
+    spawnFd: (args) =>
+      fdOutput([path.join(args.at(-1)!, `${path.basename(args.at(-1)!)}.txt`)]),
+  });
+  const failedDiscovery = await rebuildIndex({
+    file: discoveryFile,
+    withLock: async (work) => work(() => {}),
+    lookupFd: foundFd,
+    loadSettingsResult: async () => ({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        scopes: [discoveryLocal],
+        includeDrive: true,
+      },
+      authoritative: true,
+    }),
+    discoverCloudRoots: async () => ({ roots: [], authoritative: false }),
+    spawnFd: () => fdOutput([path.join(discoveryLocal, "local-new.txt")]),
+  });
+  const discoveryRead = openIndexForRead(discoveryFile);
+  assert(
+    seededDiscovery.kind === "done" &&
+      failedDiscovery.kind === "done" &&
+      failedDiscovery.report.forgotten.length === 0 &&
+      discoveryRead.kind === "opened" &&
+      queryIndex(discoveryRead.db, parseQuery("cloud-provider")).entries
+        .length === 1,
+    "failed cloud discovery preserves saved providers while readable local scopes refresh",
+  );
+  if (discoveryRead.kind === "opened") discoveryRead.db.close();
+  closeIndexReader();
+  fs.rmSync(discoveryDir, { recursive: true, force: true });
+
+  // An auto-detected provider that goes offline remains a configured root. Its
+  // failed scan makes absence non-authoritative, so the previous rows survive.
+  fs.rmSync(linkedProvider, { recursive: true, force: true });
+  const offlineRoots = await cloudStorageIndexRoots(cloud);
+  const offlineBuild = await rebuildIndex({
+    file: cloudIndex,
+    withLock: async (work) => work(() => {}),
+    lookupFd: foundFd,
+    roots: configuredRoots({ ...DEFAULT_SETTINGS, scopes: [] }, offlineRoots),
+    spawnFd: (args) => fdOutput([path.join(args.at(-1)!, "report.txt")]),
+  });
+  const offlineRead = openIndexForRead(cloudIndex);
+  assert(
+    offlineBuild.kind === "done" &&
+      !offlineBuild.report.complete &&
+      offlineBuild.report.forgotten.length === 0 &&
+      offlineRead.kind === "opened" &&
+      queryIndex(offlineRead.db, parseQuery("report")).entries.length ===
+        providers.length + 1,
+    "a temporarily unavailable cloud provider keeps its saved search results",
+  );
+  if (offlineRead.kind === "opened") offlineRead.db.close();
   fs.rmSync(cloud, { recursive: true, force: true });
   fs.rmSync(linkedProvider, { recursive: true, force: true });
 
@@ -2287,10 +2634,20 @@ export async function indexChecks(assert: Assert) {
   });
   assert(
     report.includes("8 indexed") &&
-      report.includes("10 seen") &&
+      !report.includes("seen") &&
       report.includes("time limit") &&
       !report.includes("%"),
-    `the scan summary reports counts and elapsed time with no invented percentage (${report})`,
+    `the scan summary reports one useful count and elapsed time with no invented percentage (${report})`,
+  );
+  assert(
+    describeScanProgress({ indexed: 150_000, elapsedMs: 3000 }) ===
+      "150,000 indexed (50,000/s) · 3s",
+    "indexing progress reports the average completed-item rate",
+  );
+  assert(
+    describeScanProgress({ indexed: 5000, elapsedMs: 500 }) ===
+      "5,000 indexed · 1s",
+    "indexing progress waits one second before estimating a rate",
   );
   const forgotReport = describeScan({
     roots: [

@@ -136,35 +136,74 @@ function cleanFlag(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
-/** Turn a stored string into settings, falling back to defaults per field. */
-export function parseSettings(raw: string | undefined): IndexSettings {
-  if (!raw) return { ...DEFAULT_SETTINGS };
+export type ParsedIndexSettings = {
+  settings: IndexSettings;
+  /** False when recovery defaults replaced malformed stored configuration. */
+  authoritative: boolean;
+};
+
+function validStoredList(value: unknown, max: number): value is string[] {
+  if (!Array.isArray(value) || value.length > max) return false;
+  const clean = cleanList(value, max, []);
+  return (
+    clean.length === value.length &&
+    clean.every((item, index) => item === value[index])
+  );
+}
+
+/**
+ * Parse stored settings and retain whether they can authorize scope cleanup.
+ *
+ * Defaults keep the command usable after malformed storage, but a fallback is
+ * not evidence that a previously configured scope was intentionally removed.
+ */
+export function parseSettingsResult(
+  raw: string | undefined,
+): ParsedIndexSettings {
+  if (raw === undefined)
+    return { settings: { ...DEFAULT_SETTINGS }, authoritative: true };
   let value: unknown;
   try {
     value = JSON.parse(raw);
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return { settings: { ...DEFAULT_SETTINGS }, authoritative: false };
   }
   if (typeof value !== "object" || value === null)
-    return { ...DEFAULT_SETTINGS };
+    return { settings: { ...DEFAULT_SETTINGS }, authoritative: false };
   const record = value as Record<string, unknown>;
   return {
-    scopes: cleanList(record.scopes, MAX_SCOPES, DEFAULT_SETTINGS.scopes),
-    patterns: cleanList(
-      record.patterns,
-      MAX_PATTERNS,
-      DEFAULT_SETTINGS.patterns,
-    ),
-    includeDrive: cleanFlag(record.includeDrive, DEFAULT_SETTINGS.includeDrive),
-    includeHidden: cleanFlag(
-      record.includeHidden,
-      DEFAULT_SETTINGS.includeHidden,
-    ),
-    useIgnoreFiles: cleanFlag(
-      record.useIgnoreFiles,
-      DEFAULT_SETTINGS.useIgnoreFiles,
-    ),
+    settings: {
+      scopes: cleanList(record.scopes, MAX_SCOPES, DEFAULT_SETTINGS.scopes),
+      patterns: cleanList(
+        record.patterns,
+        MAX_PATTERNS,
+        DEFAULT_SETTINGS.patterns,
+      ),
+      includeDrive: cleanFlag(
+        record.includeDrive,
+        DEFAULT_SETTINGS.includeDrive,
+      ),
+      includeHidden: cleanFlag(
+        record.includeHidden,
+        DEFAULT_SETTINGS.includeHidden,
+      ),
+      useIgnoreFiles: cleanFlag(
+        record.useIgnoreFiles,
+        DEFAULT_SETTINGS.useIgnoreFiles,
+      ),
+    },
+    authoritative:
+      validStoredList(record.scopes, MAX_SCOPES) &&
+      validStoredList(record.patterns, MAX_PATTERNS) &&
+      typeof record.includeDrive === "boolean" &&
+      typeof record.includeHidden === "boolean" &&
+      typeof record.useIgnoreFiles === "boolean",
   };
+}
+
+/** Turn a stored string into settings, falling back to defaults per field. */
+export function parseSettings(raw: string | undefined): IndexSettings {
+  return parseSettingsResult(raw).settings;
 }
 
 export function serializeSettings(settings: IndexSettings): string {

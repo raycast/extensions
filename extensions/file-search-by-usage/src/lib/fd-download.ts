@@ -34,6 +34,7 @@ const ASSETS: Record<PortableFdArchitecture, PortableFdAsset> = {
 
 const RELEASE_BASE = `https://github.com/sharkdp/fd/releases/download/v${PORTABLE_FD_VERSION}`;
 const MAX_ARCHIVE_BYTES = 16 * 1024 * 1024;
+export const FD_INSTALL_BUDGET_MS = 60_000;
 const MANIFEST_NAME = "manifest.json";
 
 type PortableFdManifest = {
@@ -90,10 +91,34 @@ function portableDirectory(
   architecture: PortableFdArchitecture,
 ): string {
   return path.join(
-    supportPath,
-    "portable-fd",
+    portableRoot(supportPath),
     `v${PORTABLE_FD_VERSION}-${architecture}`,
   );
+}
+
+function portableRoot(supportPath: string): string {
+  return path.join(supportPath, "portable-fd");
+}
+
+function treeBytes(full: string): number {
+  let stats: fs.Stats;
+  try {
+    stats = fs.lstatSync(full);
+  } catch {
+    return 0;
+  }
+  if (!stats.isDirectory()) return stats.size;
+  return fs
+    .readdirSync(full)
+    .reduce((total, name) => total + treeBytes(path.join(full, name)), 0);
+}
+
+/** Remove the verified portable tool and any interrupted download artifacts. */
+export function deletePortableFd(supportPath: string): number {
+  const root = portableRoot(supportPath);
+  const bytes = treeBytes(root);
+  fs.rmSync(root, { recursive: true, force: true });
+  return bytes;
 }
 
 function abortError(): Error {
@@ -112,19 +137,34 @@ async function run(
     const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
     const output: Buffer[] = [];
     const errors: Buffer[] = [];
-    const onAbort = () => child.kill("SIGTERM");
+    let settled = false;
+    const finish = (work: () => void) => {
+      if (settled) return;
+      settled = true;
+      signal?.removeEventListener("abort", onAbort);
+      work();
+    };
+    const onAbort = () => {
+      child.kill("SIGKILL");
+      child.stdout.destroy();
+      child.stderr.destroy();
+      child.unref();
+      finish(() => reject(abortError()));
+    };
     signal?.addEventListener("abort", onAbort, { once: true });
     child.stdout.on("data", (chunk: Buffer) => output.push(chunk));
     child.stderr.on("data", (chunk: Buffer) => errors.push(chunk));
-    child.once("error", reject);
+    child.once("error", (error) => finish(() => reject(error)));
     child.once("close", (code) => {
-      signal?.removeEventListener("abort", onAbort);
-      if (signal?.aborted) return reject(abortError());
-      if (code === 0) return resolve(Buffer.concat(output).toString("utf8"));
+      if (signal?.aborted) return finish(() => reject(abortError()));
+      if (code === 0)
+        return finish(() => resolve(Buffer.concat(output).toString("utf8")));
       const detail = Buffer.concat(errors).toString("utf8").trim();
-      reject(
-        new Error(
-          `${path.basename(command)} stopped with status ${code}${detail ? `: ${detail}` : ""}`,
+      finish(() =>
+        reject(
+          new Error(
+            `${path.basename(command)} stopped with status ${code}${detail ? `: ${detail}` : ""}`,
+          ),
         ),
       );
     });
@@ -181,7 +221,7 @@ async function installPortableFd(
   architecture: PortableFdArchitecture,
   asset: PortableFdAsset,
 ): Promise<string> {
-  const root = path.join(options.supportPath, "portable-fd");
+  const root = portableRoot(options.supportPath);
   const destination = portableDirectory(options.supportPath, architecture);
   const installed = await readVerifiedPortable(
     destination,
@@ -259,13 +299,29 @@ export async function ensureFd(options: EnsureFdOptions): Promise<FdLookup> {
       reason: `Automatic fd download does not support ${architecture}.`,
     };
   const asset = ASSETS[architecture];
+  const deadline = AbortSignal.timeout(FD_INSTALL_BUDGET_MS);
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, deadline])
+    : deadline;
   try {
-    const binary = await installPortableFd(options, architecture, asset);
+    const binary = await installPortableFd(
+      { ...options, signal },
+      architecture,
+      asset,
+    );
     return { kind: "found", path: binary, source: "portable" };
   } catch (error) {
     return {
       kind: "missing",
-      reason: `fd could not be downloaded and verified: ${error instanceof Error ? error.message : String(error)}`,
+      reason: `fd could not be downloaded and verified: ${
+        signal.aborted
+          ? options.signal?.aborted
+            ? abortError().message
+            : "fd download timed out after one minute."
+          : error instanceof Error
+            ? error.message
+            : String(error)
+      }`,
     };
   }
 }

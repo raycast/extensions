@@ -32,7 +32,7 @@ src/components/use-event-handles.ts  stable callbacks released on view unmount
 src/components/use-directory-listing.ts  watched folder-listing subscription
 src/components/use-cached-entries.ts  one bounded validation pass per memory source
 src/components/use-standard-places.ts  start locations, read off the render path
-src/components/use-shared-cloud-folders.ts  unindexed Drive roots, read after the first frame
+src/components/use-shared-cloud-folders.ts  bounded shared-folder candidates after the first frame
 src/components/use-path-bar-listing.ts  the typed-path listing and its exact-match entry
 src/components/use-search-history-recording.ts  settled-query recording and learned pairings
 src/lib/types.ts            shared entry, visit, and sort types
@@ -54,6 +54,7 @@ src/lib/history.ts          exponential usage history and abbreviations
 src/lib/read-dir.ts         directory reads, path helpers, and cloud locations
 src/lib/bounded-directory.ts  opendir read that stops one entry past its limit
 src/lib/directory-listing.ts  asynchronous metadata reads, watching, and polling
+src/lib/shared-cloud-folders.ts  bounded Google Drive shortcut-target discovery
 src/lib/bounded-reads.ts    physical read limits and removable cancelled waiters
 src/lib/recent-validation.ts  shared bounded pool for recent-result metadata
 src/lib/work-queue.ts       independent workers and cancellation-aware backpressure
@@ -77,6 +78,7 @@ src/lib/indexing-lock.ts    cross-process exclusion for indexing, settings, and 
 src/lib/owned-lock.ts       ownership-checked lock acquisition and cleanup
 src/lib/storage-lock.ts     short storage transactions and reset generations
 src/lib/store.ts            LocalStorage persistence
+src/lib/best-effort-action.ts  primary actions isolated from ranking writes
 src/lib/erase.ts            data deletion under both locks
 src/lib/discovered.ts       caches nothing writes, kept only so deletion removes them
 src/lib/navigation-diagnostics.ts  development-only navigation and heap logging
@@ -113,7 +115,7 @@ The filesystem scans do not import `@raycast/api`, so the harness can exercise t
 Raycast's native `List` throttle coalesces typing for about 250 ms before it delivers the latest query to the extension. After that, name search is one synchronous SQLite query behind a 20 ms debounce. Nothing streams. The native delay applies to Everywhere and to folder filtering, and it is not part of worker timing samples.
 
 1. Load visits and pins, saved searches, learned pairings, and the index coverage summary. Their readiness, plus any applicable cached-path validation, is what the initial list waits on.
-2. Collect the applicable memory and direct-read sources: folder children, standard locations, visited and pinned paths, learned queries, discovered shared-folder roots, and explicit path listings. Attach previously cached usage to folder children.
+2. Collect the applicable memory and direct-read sources: folder children, standard locations, visited and pinned paths, learned queries, bounded Google Drive shared-folder targets, and explicit path listings. Attach previously cached usage to folder children.
 3. For a global name query, after the debounce, query the index with usable terms of at least three characters as ANDed filename-prefix phrases. SQL filters run before the 50 newest matches are selected. Folder, explicit-path, hidden-only, and filter-only searches skip the index.
 4. Merge, filter, deduplicate, and rank the applicable sources, keep at most 50 rows, and publish once no result-producing stage is running. A short global query issues no FTS lookup, so its memory results render while the index stage reports that it needs more characters.
 5. Warm optional folder usage metadata in the background for the next query, folder visit, or refresh. Do not publish it to the current list.
@@ -135,7 +137,7 @@ fd --absolute-path --print0 --follow --show-errors --no-ignore --hidden
 
 `--hidden` follows the hidden-files setting. `--no-ignore` is replaced by `--no-require-git` when ignore files are respected. The user's patterns are appended as further `--exclude` values.
 
-Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. File contents are never read.
+Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. The physical-read pool stays bounded if a provider ignores cancellation, while the rebuild deadline lets the indexing lock move on. File contents are never read.
 
 fd canonicalises the root it is given, so `/var/x` comes back as `/private/var/x`. `resolveRoots` realpaths the configured roots before the scan, which keeps exact-path lookups working and stops one root appearing under two spellings. `normalizeRoots` removes exact duplicates and orders nested scopes before parents; it does not discard explicit child scopes. Parent walks receive anchored, glob-escaped exclusions for each child scope, and parent-level symlink aliases yield to an independently configured target. A nested root gets its own directory row because fd does not emit the search root.
 
@@ -145,15 +147,15 @@ Exclusions match traversed paths rather than resolved symlink targets. For examp
 
 Stale cleanup covers the completed scope's path range as well as its recorded owner, excluding every configured child scope. This removes obsolete rows inherited from an older parent-only index, while a failed or partial child scan keeps its saved paths even if its parent completes. Removing a child scope lets a completed parent scan apply its exclusions again. Cleanup never treats a mere path-prefix match as containment.
 
-Rows are written in `BEGIN IMMEDIATE` transactions of 1,000. Each scan takes a new `scan_id`. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
+Rows are written in `BEGIN IMMEDIATE` transactions of 5,000. Each scan takes a new `scan_id`. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
 
 ### Configurable scope
 
-`src/lib/index-settings.ts` holds the scopes, the user's exclusion patterns, and three flags, as one JSON value in LocalStorage that is read on every rebuild. Parsing falls back per field rather than wholesale, because a corrupt or hand-edited value must not be what stops someone indexing. A field that is missing or is not a list falls back to its default, so a truncated file still indexes the home folder. A field holding an empty list stays empty, because a user who removed every scope meant it. Those two cases look alike and are not: treating a missing list as an empty one meant a truncated file indexed nothing. Lists are trimmed, deduplicated, and bounded at 32 scopes and 128 patterns.
+`src/lib/index-settings.ts` holds the scopes, the user's exclusion patterns, and three flags, as one JSON value in LocalStorage that is read on every rebuild. Parsing falls back per field rather than wholesale, because a corrupt or hand-edited value must not be what stops someone indexing. A field that is missing or is not a list falls back to its default, so a truncated file still indexes the home folder. A field holding an empty list stays empty, because a user who removed every scope meant it. Those two cases look alike and are not: treating a missing list as an empty one meant a truncated file indexed nothing. Lists are trimmed, deduplicated, and bounded at 32 scopes and 128 patterns. A malformed or incomplete stored value is marked non-authoritative: fallback scopes may be scanned, but they cannot authorize deletion of previously indexed roots. A LocalStorage read failure stops the rebuild instead of substituting defaults.
 
 Scopes must be absolute. fd receives the root directly, so a relative path would resolve against whatever directory the Raycast process happens to have.
 
-Defaults are the home folder plus every detected folder under `~/Library/CloudStorage`, with hidden indexing and ignore-file handling off. `cloudStorageIndexRoots` accepts all provider names, follows directory links, and skips files, unavailable targets, and the internal `.locator` folder. The built-in `**/CloudStorage/.locator` exclusion also prevents indexing that folder through a home-folder scan, including when hidden indexing is enabled. The settings screen lists detected folders even when no home scope is configured. **Include Cloud Storage** retains the serialized `includeDrive` key, so existing on/off choices survive the upgrade. Normalization deduplicates aliases while retaining explicit nested scopes, including descendants of `/`. `/Applications` is not a default scope. The editable default patterns exclude temporary files, caches, `Library/Application Support`, the three Containers directories, and Mail, while keeping document storage such as iCloud Drive. Turning off cloud detection does not exclude cloud paths under the home scope.
+Defaults are the home folder plus every detected folder under `~/Library/CloudStorage`, with hidden indexing and ignore-file handling off. `cloudStorageIndexRoots` accepts all provider names, follows directory links, skips files and the internal `.locator` folder, and retains an unavailable provider link so its saved coverage survives a temporary unmount. Provider discovery has a three-second deadline. A failed or incomplete discovery is non-authoritative: readable local scopes may refresh, but no saved provider is removed. The built-in `**/CloudStorage/.locator` exclusion also prevents indexing that folder through a home-folder scan, including when hidden indexing is enabled. The settings screen lists detected folders even when no home scope is configured. **Include Cloud Storage** retains the serialized `includeDrive` key, so existing on/off choices survive the upgrade. Normalization deduplicates aliases while retaining explicit nested scopes, including descendants of `/`. `/Applications` is not a default scope. The editable default patterns exclude temporary files, caches, `Library/Application Support`, the three Containers directories, and Mail, while keeping document storage such as iCloud Drive. Turning off cloud detection does not exclude cloud paths under the home scope.
 
 Patterns are passed to fd verbatim as `--exclude` values, so fd's glob syntax is the syntax: nothing to translate, and no pattern language of our own to maintain. `INDEX_EXCLUSIONS` always applies on top, and the editor shows it read-only, so the effective scope is visible on one screen.
 
@@ -163,7 +165,7 @@ The editor is a command rather than a preferences pane, because manifest prefere
 
 Every row's first action is non-destructive. The search bar doubles as the pattern input, so Return has to add rather than delete whichever row is selected; removal uses `Keyboard.Shortcut.Common.Remove`. The editor accepts one settings save at a time, including any failure rollback; overlapping edits ask the user to retry without changing the displayed settings. Reset uses the same save path and does not reload settings after completion.
 
-A root removed from the configuration would otherwise keep its rows forever, because `scanRoot` only deletes stale rows for roots it scanned. `forgetUnconfiguredRoots` drops rows and coverage for any root outside the configured set, but only when every configured root completed. After a partial, failed, or cancelled run there is no way to tell a removed root from one the run did not reach, and deleting on that basis would throw away an index because a mount was slow.
+A root removed from the configuration would otherwise keep its rows forever, because `scanRoot` only deletes stale rows for roots it scanned. `forgetUnconfiguredRoots` drops rows and coverage, including zero-row coverage records, for any root outside the configured set, but only when every configured root completed and both settings and provider discovery were authoritative. During non-authoritative recovery, prior roots are also ownership exclusions so a successful parent scan cannot delete a protected nested scope by path. After a partial, failed, cancelled, or configuration-recovery run there is no evidence that an absent root was intentionally removed.
 
 ### Storage and queries
 
@@ -181,7 +183,7 @@ Type, hidden-file, extension, date, and size filters are pushed into the SQL `WH
 
 The read connection is cached per process in `index-reader.ts`. A local rebuild drops it; a statement failure closes it and reports `failed`. Missing and failed opens are retried on next access, so a rebuild launched elsewhere can make an absent index available without restarting search. A missing or wrong-version database falls back to memory. A connection opened before a failing pragma or schema read is closed explicitly.
 
-Bulk scans suspend FTS maintenance and restore it once after scanning, including after a partial scan. During a scan, committed rows can be newer than the name index, and new names become searchable when FTS is rebuilt. Finalization failures propagate as a failed build, connections close in `finally`, and the suspended marker lets the next writer recover. The standalone command and the search action share one progress and outcome path.
+Bulk scans suspend FTS maintenance and restore it once after scanning, including after a partial scan. During a scan, committed rows can be newer than the name index, and new names become searchable when FTS is rebuilt. Optional UI feedback cannot interrupt finalization. Connections close in `finally`, the suspended marker lets the next writer recover, and a reader refuses a stranded suspended index once no rebuild lock is active instead of serving silently stale FTS results. The standalone command and the search action share one progress and outcome path.
 
 Write connections use WAL with `synchronous=NORMAL`, a 5-second `busy_timeout`, and an 8 MB page cache. WAL is what lets a search read while a rebuild writes. `PRAGMA user_version` carries the schema version; a version mismatch or a corruption error rebuilds the file from scratch rather than failing the command.
 
@@ -195,7 +197,7 @@ Everything typed is data. FTS5 has its own grammar, so an unquoted term goes thr
 
 Other bounds sit with their owners: a folder listing retains 3,000 children, and each cached source returns 50 matching entries. Coverage status reads the small `index_roots` summaries the writer maintains rather than counting rows in `files`; a full-table count costs about 55 ms warm and 2.56 s on first access. Those summaries are saved scan totals, not live counts of uncheckpointed work during a rebuild. The settings screen can still request detailed index statistics.
 
-A crawl has a shared 15-minute budget and accepts an optional entry cap. A per-root abort timer stops fd at the remaining deadline even when stdout is idle, and the timer is cleared when that root finishes. Pending metadata reads and the final FTS rebuild are not preemptible, so this is not a hard deadline for the whole command. Reaching a limit marks unfinished coverage partial and preserves unseen rows.
+A crawl has a shared 15-minute budget and accepts an optional entry cap. The deadline covers root resolution, alias discovery, root validation, fd enumeration, and metadata admission. It stops fd even when stdout is idle; if a filesystem call or child process ignores cancellation, the bounded caller releases the indexing lock while the physical operation remains isolated in its pool. The synchronous final FTS rebuild is not preemptible, so the limit is not a hard deadline for the whole command. A missing portable `fd` download has its own one-minute ceiling. Reaching a limit marks unfinished coverage partial and preserves unseen rows.
 
 ### Cancellation
 
@@ -319,7 +321,7 @@ The weights are in `src/lib/score.ts`. `rank-sources.ts` is pure: callers provid
 | Positional name quality        |            30 | None                                   |
 | Depth below the current folder | -12 per level | None                                   |
 
-Recorded usage is an exponential moving sum. Open and Navigate into Folder each record one use. Native Open With, Show in Finder, and all three Copy actions record one use through their completion callbacks, sharing `markVisited` via `RowHandlers.onUse`; opening an action menu alone does not count. Only Open and folder entry learn the query-to-item pairing. Quick Look, showing details, selection, and Up record nothing. The clock does not advance while the extension is idle, so the score adapts as new work replaces old work without decaying because the user took time away.
+Recorded usage is an exponential moving sum. Open and Navigate into Folder each record one use. Native Open With, Show in Finder, and all three Copy actions record one use through their completion callbacks, sharing `markVisited` via `RowHandlers.onUse`; opening an action menu alone does not count. Only Open and folder entry learn the query-to-item pairing. The primary Open action starts before its ranking writes finish, and a storage failure cannot stop it; native action callbacks likewise ignore ranking-write failures. Quick Look, showing details, selection, and Up record nothing. The clock does not advance while the extension is idle, so the score adapts as new work replaces old work without decaying because the user took time away.
 
 The usage contribution passes through `log2`, so repeated uses give diminishing returns. History is capped at 2,000 paths, and entries whose decayed value falls below 0.01 are pruned.
 
@@ -348,7 +350,7 @@ A Drive shortcut and its resolved target have different paths but the same devic
 
 At scan time, root-level aliases yield to explicitly configured target scopes. An alias to an ancestor of a separate scope keeps its unrelated contents but excludes the child scope's projected alias path, avoiding duplicate traversal.
 
-`Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups use that path, while the row still displays and opens the familiar shortcut path. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
+`Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups prefer that path, while the row still displays and opens the familiar shortcut path. Action-time canonicalization is asynchronous and falls back to the visible path after 250 ms so a stalled cloud provider cannot freeze Open, Copy, or Pin. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
 
 ## Caches and storage
 
@@ -362,13 +364,14 @@ At scan time, root-level aliases yield to explicitly configured target scopes. A
 | `recent-files` Cache                    | Legacy imported metadata, retained only for cleanup      |
 | `usage-meta` Cache                      | Per-directory usage metadata from `mdls`                 |
 | `file-index.sqlite` in the support dir  | The fd-built name index; hundreds of MB for a full Drive |
+| `portable-fd` in the support dir        | Verified downloaded `fd` executable and manifest         |
 | Default Cache (`useCachedState`)        | `sort-mode` and `type-filter`; retained by data deletion |
 
 `readUsageMetaResult` processes paths in batches of 25, four processes at a time, under one overall deadline. The helper defaults to 250 ms; the browser allows 3,000 ms for its nonblocking warmup of at most 50 uncached paths. If one path makes a batch fail, that batch is divided within its remaining budget to isolate the bad path, reading both halves together. The first batch that does not finish cleanly stops the pass, and batches that finished alongside it keep their metadata. The helper reports partial and error status, but the browser does not turn optional warmup failures into search failures. Query changes, scope changes, and unmount abort the warmup, and a storage-generation check prevents writes after deletion.
 
 This `mdls` pass is the only Spotlight call. It supplements the extension's own usage history and the filesystem modification dates, because the fd-built index collects neither macOS use counts nor last-used dates. When the metadata is unavailable, the folder's entries are still listed and ranking uses the other signals. No Spotlight search is attempted.
 
-**Delete All Data and Cache…** clears every LocalStorage key, the `recent-files` and `usage-meta` Cache namespaces, the legacy `discovered` and `shared-folders` namespaces, and the index database with its `-wal` and `-shm` files. It closes the cached read connection first, so a search running at that moment reports a missing index rather than reading an unlinked file. It removes those three paths by name and nothing else in that directory. It does not touch the default Cache used for type and sort choices, the extension preferences, the development diagnostic log, or any user file. Any new namespace holding search data has to be added to `eraseEverything` explicitly.
+**Delete All Data and Cache…** clears every LocalStorage key, the `recent-files` and `usage-meta` Cache namespaces, the legacy `discovered` and `shared-folders` namespaces, the index database with its `-wal` and `-shm` files, and the `portable-fd` directory. It closes the cached read connection first, so a search running at that moment reports a missing index rather than reading an unlinked file. It removes only those named extension-owned paths. It does not touch the default Cache used for type and sort choices, the extension preferences, the development diagnostic log, or any user file. A later rebuild downloads `fd` again if no system copy is available. Any new namespace holding search data has to be added to `eraseEverything` explicitly.
 
 `clearLegacyCaches` exists so deletion can remove the `discovered` and `shared-folders` namespaces from installations that still have them. Nothing writes to either. Delete that module once no install carries them.
 
@@ -380,7 +383,7 @@ Deletion acquires the lock before reading or clearing any store, so an in-flight
 
 ## Performance notes
 
-An open folder listing uses eight independent workers and publishes its initial result once, with a 3,000-entry cap and a three-second deadline. Names are read with `opendir`, stopping one entry past the cap rather than buffering the whole folder, so the omission count is a lower bound. Enumeration order comes from the filesystem, and ranking sorts what was admitted. Typing filters the listing in memory. A filesystem watcher refreshes changed entries, and a five-second poll covers missed events. Only the initial read is pending: a refresh keeps the previous listing until its replacement is ready, and an unchanged read reuses the entire snapshot. Children and their frozen cached usage are prepared synchronously in the same render, without an effect that would hide rows, which is what stops a background poll from resetting the selection. Changing directory, changing hidden visibility, or refreshing starts a new subscription; closing one stops the watcher and the poll and discards unfinished results.
+An open folder listing uses eight workers and publishes its initial result once, with a 3,000-entry cap and a three-second deadline. Local reads and each cloud provider have separate physical-read pools, so one stalled provider cannot consume the slots needed by a local folder or another provider. Names are read with `opendir`, stopping one entry past the cap rather than buffering the whole folder, so the omission count is a lower bound. Enumeration order comes from the filesystem, and ranking sorts what was admitted. Typing filters the listing in memory. A filesystem watcher refreshes changed entries, and a five-second poll covers missed events. Only the initial read is pending: a refresh keeps the previous listing until its replacement is ready, and an unchanged read reuses the entire snapshot. Children and their frozen cached usage are prepared synchronously in the same render, without an effect that would hide rows, which is what stops a background poll from resetting the selection. Changing directory, changing hidden visibility, or refreshing starts a new subscription; closing one stops the watcher and the poll, removes its abort listener and timer, and discards unfinished results.
 
 Filename sorting reuses one numeric `Intl.Collator`. Candidate metadata uses the `lstat` result directly for ordinary entries and follows the target for symbolic links. Cached-path checks and standard-location discovery run asynchronously, outside rendering, and cloud-location discovery has a one-second deadline. Starting candidates are pins, the 40 highest-scoring visited paths, and standard locations; validation returns at most 50 matches for the current query and type, so nonmatching pins cannot crowd out matching visits.
 
@@ -476,9 +479,10 @@ Several checks compile a span of a shipped component and run it with stubbed dep
 - fd discovery across install locations, an absolute preference, and a missing binary
 - MATCH construction: FTS operators, quotes, punctuation-only terms, and the three-character policy
 - hostile queries that must return nothing without raising
-- schema creation, corruption recovery, and version-mismatch rebuild
+- schema creation, corruption recovery, version-mismatch rebuild, and stranded FTS-state recovery
 - the fd argument array, NUL framing split across chunk boundaries, and names containing quotes and tabs
 - refresh semantics: a complete scan removing stale rows, a partial scan merging, and failed, cancelled, time-limited, unavailable, and disappeared roots preserving
+- non-authoritative settings and cloud-provider discovery preserving prior and nested scope coverage
 - root normalization, and fd's canonicalization of the root it is given
 - a root dropped from the configuration, and an incomplete rescan leaving it alone
 - every filter in SQL, symlink `storagePath`, truncation reporting, and the 50-candidate budget
@@ -489,9 +493,9 @@ Several checks compile a span of a shipped component and run it with stubbed dep
 - settings parsing, including unparseable values, wrong-shaped values, missing fields, and dirty lists
 - scope and pattern editing, with duplicates, bounds, relative paths, and built-in patterns
 - configured settings reaching the real fd argument array, through `rebuildIndex`
-- detection and indexing of multiple CloudStorage providers without a home scope, directory links, unavailable targets, and saved automatic-scope choices
+- detection and indexing of multiple CloudStorage providers without a home scope, directory links, unavailable targets, bounded discovery, and saved automatic-scope choices
 
-`harness/performance-checks.ts` covers bounded asynchronous directory reads, metadata parity, watcher and polling freshness, unchanged snapshot identity, cancellation, and scan subprocess cleanup. `harness/folder-usage-checks.ts` confirms that optional usage reads never block the initial list, that late metadata stays out of the current query, and that successful negative reads do not starve later candidates.
+`harness/performance-checks.ts` covers bounded asynchronous directory reads, metadata parity, watcher and polling freshness, unchanged snapshot identity, cancellation, and scan subprocess cleanup. `harness/live-search-checks.ts` covers per-provider read isolation, abort-listener cleanup, and bounded action-time canonicalization. `harness/folder-usage-checks.ts` confirms that optional usage reads never block the initial list, that late metadata stays out of the current query, and that successful negative reads do not starve later candidates.
 
 `harness/indexing-checks.ts` exercises shared locking across rebuilds, settings saves, and deletion. Its settings regressions cover configuration changes before lock acquisition, overlapping editor saves, failed-save rollback, retries, and resetting defaults without a stale reload.
 

@@ -4,6 +4,7 @@ import {
   IndexSettings,
   SETTINGS_KEY,
   parseSettings,
+  parseSettingsResult,
   serializeSettings,
 } from "./index-settings";
 import {
@@ -21,13 +22,19 @@ import { withIndexingLock } from "./indexing-lock";
  */
 
 export async function loadIndexSettings(): Promise<IndexSettings> {
-  try {
-    const raw = await LocalStorage.getItem<string>(SETTINGS_KEY);
-    return parseSettings(typeof raw === "string" ? raw : undefined);
-  } catch {
-    // A settings read must never be what stops someone indexing.
-    return { ...DEFAULT_SETTINGS };
-  }
+  /*
+   * Missing or malformed values safely parse as defaults. A storage read
+   * failure is different: the rebuild must stop rather than use defaults as
+   * evidence that the user's saved scopes were removed.
+   */
+  const raw = await LocalStorage.getItem<string>(SETTINGS_KEY);
+  return parseSettings(typeof raw === "string" ? raw : undefined);
+}
+
+/** Rebuilds also need to know whether settings may authorize root deletion. */
+export async function loadIndexSettingsForRebuild() {
+  const raw = await LocalStorage.getItem<string>(SETTINGS_KEY);
+  return parseSettingsResult(typeof raw === "string" ? raw : undefined);
 }
 
 /**

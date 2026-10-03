@@ -4,6 +4,7 @@ import path from "node:path";
 import { findFd, describeFdLookup, FdLookup } from "./fd";
 import {
   openIndexForWrite,
+  readIndexRoots,
   resumeFtsSync,
   suspendFtsSync,
   writeScanStarted,
@@ -23,6 +24,8 @@ import {
   IndexSettings,
   configuredRoots,
 } from "./index-settings";
+import type { ParsedIndexSettings } from "./index-settings";
+import { createReadPool } from "./bounded-reads";
 
 /**
  * Rebuilding the index.
@@ -31,9 +34,9 @@ import {
  * at no other time.
  *
  * The exclusion lock is injected rather than imported: it is the same lock that
- * keeps rebuilding, settings changes, and data deletion apart. Passing it keeps this module free of `@raycast/api`
- * so the harness can exercise the orchestration directly. See index-rebuild.ts
- * for the wiring the commands use.
+ * keeps rebuilding, settings changes, and data deletion apart. Passing it keeps
+ * this module free of `@raycast/api` so the harness can exercise the
+ * orchestration directly. See index-rebuild.ts for the wiring the commands use.
  */
 
 /** Serialises index writes, settings changes, and deletion. Undefined when busy. */
@@ -41,7 +44,7 @@ export type ExclusionLock = <T>(
   work: (assertOwned: () => void) => Promise<T>,
 ) => Promise<T | undefined>;
 
-/** Default ceiling for a whole rebuild. An fd crawl of one Drive took ~189s. */
+/** Default ceiling for a whole rebuild. One large mounted cloud crawl took ~189s. */
 export const REBUILD_BUDGET_MS = 900_000;
 
 export type BuildOutcome =
@@ -54,29 +57,79 @@ export type BuildOutcome =
  * All locally mounted provider folders under CloudStorage.
  *
  * Provider and account names vary; only the internal .locator folder is skipped.
- * stat follows directory links and skips files and unavailable targets.
+ * Directory entries are kept even when the provider is temporarily unavailable:
+ * the scan can then preserve its saved coverage instead of mistaking it for a
+ * provider the user removed. stat follows usable links and still skips files.
  */
+export type CloudStorageRootResult = {
+  roots: string[];
+  /** False when provider discovery failed, timed out, or stopped early. */
+  authoritative: boolean;
+};
+
+const cloudDiscoveryRead = createReadPool(8);
+const CLOUD_DISCOVERY_BUDGET_MS = 3000;
+
+export async function cloudStorageIndexRootResult(
+  cloudRoot = path.join(os.homedir(), "Library", "CloudStorage"),
+  options: { signal?: AbortSignal; budgetMs?: number } = {},
+): Promise<CloudStorageRootResult> {
+  const active = new AbortController();
+  const stop = () => active.abort();
+  options.signal?.addEventListener("abort", stop, { once: true });
+  if (options.signal?.aborted) stop();
+  const timer = setTimeout(stop, options.budgetMs ?? CLOUD_DISCOVERY_BUDGET_MS);
+  try {
+    let entries;
+    try {
+      entries = await cloudDiscoveryRead(
+        `cloud-roots:${cloudRoot}`,
+        () => fsp.readdir(cloudRoot, { withFileTypes: true }),
+        active.signal,
+      );
+    } catch {
+      return { roots: [], authoritative: false };
+    }
+    const roots: string[] = [];
+    for (const entry of entries) {
+      if (active.signal.aborted)
+        return { roots: normalizeRoots(roots), authoritative: false };
+      if (entry.name === ".locator") continue;
+      const full = path.join(cloudRoot, entry.name);
+      if (entry.isDirectory()) {
+        roots.push(full);
+        continue;
+      }
+      try {
+        // Follow links when possible so links to ordinary files remain excluded.
+        const stats = await cloudDiscoveryRead(
+          `cloud-root-stat:${full}`,
+          () => fsp.stat(full),
+          active.signal,
+        );
+        if (stats.isDirectory()) roots.push(full);
+      } catch {
+        // A provider can leave a directory link behind while temporarily
+        // unmounted. Keep that scope: scanRoot will report it unavailable and a
+        // complete scan of the other roots will not erase its saved rows.
+        if (entry.isSymbolicLink()) roots.push(full);
+      }
+    }
+    return {
+      roots: normalizeRoots(roots),
+      authoritative: !active.signal.aborted,
+    };
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", stop);
+  }
+}
+
+/** Root-only compatibility wrapper for the settings screen and tests. */
 export async function cloudStorageIndexRoots(
   cloudRoot = path.join(os.homedir(), "Library", "CloudStorage"),
 ): Promise<string[]> {
-  let entries;
-  try {
-    entries = await fsp.readdir(cloudRoot, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const roots: string[] = [];
-  for (const entry of entries) {
-    if (entry.name === ".locator") continue;
-    const full = path.join(cloudRoot, entry.name);
-    try {
-      // A mount that has gone away leaves the directory entry behind.
-      if ((await fsp.stat(full)).isDirectory()) roots.push(full);
-    } catch {
-      continue;
-    }
-  }
-  return normalizeRoots(roots);
+  return (await cloudStorageIndexRootResult(cloudRoot)).roots;
 }
 
 export type BuildOptions = {
@@ -102,6 +155,10 @@ export type BuildOptions = {
   roots?: string[];
   /** Injection point for tests; defaults to reading the saved settings. */
   loadSettings?: () => Promise<IndexSettings>;
+  /** Production loader that also says whether cleanup is safe. */
+  loadSettingsResult?: () => Promise<ParsedIndexSettings>;
+  /** Test seam for bounded provider discovery. */
+  discoverCloudRoots?: () => Promise<CloudStorageRootResult>;
   lookupFd?: (preference?: string) => FdLookup | Promise<FdLookup>;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
@@ -148,20 +205,37 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
 
       // Settings saves hold this same lock. Read only after acquisition so
       // complete-scan cleanup uses a configuration that cannot change mid-run.
-      const settings = options.loadSettings
-        ? await options.loadSettings()
-        : DEFAULT_SETTINGS;
-      const roots =
-        options.roots ??
-        configuredRoots(settings, await cloudStorageIndexRoots());
+      const loaded = options.loadSettingsResult
+        ? await options.loadSettingsResult()
+        : {
+            settings: options.loadSettings
+              ? await options.loadSettings()
+              : DEFAULT_SETTINGS,
+            authoritative: true,
+          };
+      const settings = loaded.settings;
+      const cloud = options.roots
+        ? { roots: [] as string[], authoritative: true }
+        : settings.includeDrive
+          ? await (options.discoverCloudRoots
+              ? options.discoverCloudRoots()
+              : cloudStorageIndexRootResult(undefined, {
+                  signal: options.signal,
+                }))
+          : { roots: [] as string[], authoritative: true };
+      const roots = options.roots ?? configuredRoots(settings, cloud.roots);
+      const cleanupAuthoritative = loaded.authoritative && cloud.authoritative;
       if (roots.length === 0)
         return {
           kind: "no-roots",
-          message: settings.includeDrive
-            ? "No cloud folders were found under ~/Library/CloudStorage. " +
-              "Open your cloud provider and let it mount, or add a folder in Search Index Settings."
-            : "Nothing is set to be indexed. Add a folder in Search Index Settings, " +
-              "or turn Include Cloud Storage back on there.",
+          message:
+            settings.includeDrive && !cloud.authoritative
+              ? "Cloud folders could not be read. Open your cloud provider and retry; saved index results were kept."
+              : settings.includeDrive
+                ? "No cloud folders were found under ~/Library/CloudStorage. " +
+                  "Open your cloud provider and let it mount, or add a folder in Search Index Settings."
+                : "Nothing is set to be indexed. Add a folder in Search Index Settings, " +
+                  "or turn Include Cloud Storage back on there.",
         };
 
       assertOwned();
@@ -194,6 +268,10 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           showHidden: options.showHidden ?? settings.includeHidden,
           useIgnoreFiles: options.useIgnoreFiles ?? settings.useIgnoreFiles,
           patterns: options.patterns ?? settings.patterns,
+          allowRootCleanup: cleanupAuthoritative,
+          protectedRoots: cleanupAuthoritative
+            ? []
+            : readIndexRoots(opened.db).map((entry) => entry.root),
           onProgress: options.onProgress,
           spawnFd: options.spawnFd,
           assertOwned,
@@ -212,7 +290,12 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
            * yield once first, or the last progress message sits there looking
            * stalled.
            */
-          options.onFinishing?.();
+          // UI feedback must never be able to skip the integrity repair below.
+          try {
+            options.onFinishing?.();
+          } catch {
+            /* The index is more important than optional progress feedback. */
+          }
           await new Promise((resolve) => setTimeout(resolve, 0));
           assertOwned();
           const ftsStarted = performance.now();

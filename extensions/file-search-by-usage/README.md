@@ -36,7 +36,7 @@ To skip `~/Library` in the home scan while keeping cloud files, add `**/Library/
 
 Changes take effect on the next rebuild. Settings edits are saved one at a time; if a save, rebuild, or data deletion is active, wait and retry. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
 
-You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries; an incomplete or unreachable scope keeps its previously indexed paths.
+You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
 
 Search Index Settings shows the last scan's local start and end times and total duration. An unrecorded end means the scan is still running or was interrupted. Older indexes show “Not recorded” until the next rebuild.
 
@@ -114,7 +114,7 @@ The status line shows the location, the count, and progress: yellow while waitin
 
 The extension sends no analytics, filenames, or usage history anywhere. If fd is not installed, the first rebuild downloads the pinned executable from fd's official GitHub release; that request contains none of your search or file data. Its index stores names, paths, sizes, and dates, not file contents. Everything stays in Raycast's storage on your Mac. Reading a cloud folder can still make the provider fetch metadata or content.
 
-**Clear All Rankings…** clears recorded usage and nothing else. **Delete All Data and Cache…**, also a standalone command, clears usage, pins, saved searches, remembered pairings, index settings, indexes, and old caches. Each asks for confirmation and leaves your files alone. Your type and sort choices and the extension preferences survive deletion.
+**Clear All Rankings…** clears recorded usage and nothing else. **Delete All Data and Cache…**, also a standalone command, clears usage, pins, saved searches, remembered pairings, index settings, indexes, the downloaded `fd` copy, and old caches. Each asks for confirmation and leaves your files alone. Your type and sort choices and the extension preferences survive deletion. A later rebuild downloads `fd` again if no system copy is available.
 
 If indexing is running, deletion changes nothing and asks you to retry. If a deletion step fails, earlier steps may already have finished. **Move to Trash** is different: it moves the selected file or folder to the macOS Trash.
 

@@ -100,6 +100,7 @@ import {
 import { describeCaveat } from "../lib/status-line";
 import { stepSearchHistory } from "../lib/search-history";
 import { rebuildWithFeedback, searchIndexPath } from "../lib/index-rebuild";
+import { runWithBestEffortSideEffect } from "../lib/best-effort-action";
 
 /** Minimum lengths for global discovery and scoped search history. */
 const MIN_QUERY_GLOBAL = 3;
@@ -704,14 +705,20 @@ function BrowserView({
       onUse: (entry) => {
         void markVisited(entry.path).catch(() => {});
       },
-      onOpen: async (entry) => {
-        // Persist ranking signals before the command closes.
-        const generation = dataGeneration();
-        await markVisited(entry.path, generation);
-        await commitSearch(entry.path, generation);
-        await closeMainWindow();
-        await open(entry.path);
-      },
+      onOpen: (entry) =>
+        runWithBestEffortSideEffect(
+          async () => {
+            await closeMainWindow();
+            await open(entry.path);
+          },
+          async () => {
+            const generation = dataGeneration();
+            await Promise.allSettled([
+              markVisited(entry.path, generation),
+              commitSearch(entry.path, generation),
+            ]);
+          },
+        ),
       onDescend: (entry) => {
         void markVisited(entry.path).catch(() => {});
         void commitSearch(entry.path).catch(() => {});

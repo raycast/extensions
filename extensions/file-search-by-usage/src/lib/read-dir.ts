@@ -1,7 +1,9 @@
 import fs from "node:fs";
+import fsp from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { Entry } from "./types";
+import { createReadPool } from "./bounded-reads";
 
 /** Maximum entries returned for one directory listing. */
 export const MAX_ENTRIES = 3000;
@@ -263,5 +265,27 @@ export function canonicalPath(full: string): string {
     return fs.realpathSync(full);
   } catch {
     return full;
+  }
+}
+
+const canonicalRead = createReadPool(8);
+
+/** Resolve aliases without letting a stalled provider block the JS worker. */
+export async function canonicalPathAsync(
+  full: string,
+  budgetMs = 250,
+): Promise<string> {
+  const active = new AbortController();
+  const timer = setTimeout(() => active.abort(), budgetMs);
+  try {
+    return await canonicalRead(
+      `canonical:${full}`,
+      () => fsp.realpath(full),
+      active.signal,
+    );
+  } catch {
+    return full;
+  } finally {
+    clearTimeout(timer);
   }
 }

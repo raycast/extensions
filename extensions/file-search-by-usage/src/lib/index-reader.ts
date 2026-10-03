@@ -1,5 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import {
+  ftsSuspended,
   IndexRoot,
   IndexStats,
   openIndexForRead,
@@ -36,16 +39,40 @@ type Cached = {
 
 let cached: Cached | undefined;
 
+const interruptedFtsMessage =
+  "The previous index rebuild did not finish synchronizing search terms. Rebuild the search index.";
+
+function rebuildLockExists(file: string): boolean {
+  return fs.existsSync(
+    path.join(path.dirname(file), "google-drive-indexing.lock"),
+  );
+}
+
+function strandedFts(file: string, db: DatabaseSync): boolean {
+  return ftsSuspended(db) && !rebuildLockExists(file);
+}
+
 function open(file: string): Cached {
   const result = openIndexForRead(file);
-  if (result.kind === "opened") return { file, status: "ready", db: result.db };
+  if (result.kind === "opened") {
+    if (strandedFts(file, result.db)) {
+      result.db.close();
+      return { file, status: "failed", error: interruptedFtsMessage };
+    }
+    return { file, status: "ready", db: result.db };
+  }
   if (result.kind === "missing") return { file, status: "missing" };
   return { file, status: "failed", error: result.error };
 }
 
 function connection(file: string): Cached {
   // A separate command may create or repair the database after a failed open.
-  if (cached?.db && cached.file === file) return cached;
+  if (cached?.db && cached.file === file) {
+    if (!strandedFts(file, cached.db)) return cached;
+    closeIndexReader();
+    cached = { file, status: "failed", error: interruptedFtsMessage };
+    return cached;
+  }
   closeIndexReader();
   cached = open(file);
   return cached;

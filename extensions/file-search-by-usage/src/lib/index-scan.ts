@@ -5,6 +5,7 @@ import { StringDecoder } from "node:string_decoder";
 import type { DatabaseSync } from "node:sqlite";
 import { NOISE_SEGMENTS } from "./read-dir";
 import type { FileRow } from "./index-db";
+import { createReadPool } from "./bounded-reads";
 
 /**
  * Building the index with fd.
@@ -37,6 +38,9 @@ export const INDEX_EXCLUSIONS = [
 export const DEFAULT_STAT_CONCURRENCY = 16;
 /** Rows per transaction. Large enough to amortise fsync, small enough to bound memory. */
 export const DEFAULT_BATCH_ROWS = 5_000;
+
+/** Physical filesystem reads remain capped even after a caller times out. */
+const indexRead = createReadPool(32);
 
 export type ScanTimings = {
   /** fd traversal, decoding, exclusions, and scan orchestration. */
@@ -95,11 +99,25 @@ export type ScanProgress = {
   elapsedMs: number;
 };
 
+/** Compact progress text with a stable average after the first second. */
+export function describeScanProgress(
+  progress: Pick<ScanProgress, "indexed" | "elapsedMs">,
+): string {
+  const elapsed = `${Math.round(progress.elapsedMs / 1000)}s`;
+  const rate =
+    progress.indexed > 0 && progress.elapsedMs >= 1000
+      ? ` (${Math.round((progress.indexed * 1000) / progress.elapsedMs).toLocaleString()}/s)`
+      : "";
+  return `${progress.indexed.toLocaleString()} indexed${rate} · ${elapsed}`;
+}
+
 export type ScanOptions = {
   fd: string;
   roots: string[];
   db: DatabaseSync;
   signal?: AbortSignal;
+  /** Original caller signal when `signal` also carries the wall-clock limit. */
+  externalSignal?: AbortSignal;
   /** Wall-clock ceiling for the whole run. */
   budgetMs?: number;
   /** Hard ceiling on rows per root. */
@@ -109,6 +127,10 @@ export type ScanOptions = {
   useIgnoreFiles?: boolean;
   /** User exclusion globs, added to the built-in list. */
   patterns?: readonly string[];
+  /** Existing roots whose rows must survive non-authoritative configuration. */
+  protectedRoots?: readonly string[];
+  /** False when configuration or provider discovery used recovery fallbacks. */
+  allowRootCleanup?: boolean;
   onProgress?: (progress: ScanProgress) => void;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
@@ -155,11 +177,18 @@ function excludePath(root: string, target: string): string {
  */
 export async function resolveRoots(
   roots: readonly string[],
+  signal?: AbortSignal,
 ): Promise<string[]> {
   const resolved: string[] = [];
   for (const root of roots) {
     try {
-      resolved.push(await fsp.realpath(root));
+      resolved.push(
+        await indexRead(
+          `index-real:${root}`,
+          () => fsp.realpath(root),
+          signal ?? new AbortController().signal,
+        ),
+      );
     } catch {
       // Keep it: scanRoot reports an unavailable root rather than dropping it.
       resolved.push(path.resolve(root));
@@ -191,10 +220,15 @@ export async function resolveRoots(
 export async function redundantLinks(
   root: string,
   roots: readonly string[],
+  signal?: AbortSignal,
 ): Promise<string[]> {
   let entries;
   try {
-    entries = await fsp.readdir(root, { withFileTypes: true });
+    entries = await indexRead(
+      `index-list:${root}`,
+      () => fsp.readdir(root, { withFileTypes: true }),
+      signal ?? new AbortController().signal,
+    );
   } catch {
     return [];
   }
@@ -204,7 +238,12 @@ export async function redundantLinks(
     if (!entry.isSymbolicLink()) continue;
     let target: string;
     try {
-      target = await fsp.realpath(path.join(root, entry.name));
+      const full = path.join(root, entry.name);
+      target = await indexRead(
+        `index-real:${full}`,
+        () => fsp.realpath(full),
+        signal ?? new AbortController().signal,
+      );
     } catch {
       // A broken link costs nothing to walk; leave it to the scan.
       continue;
@@ -307,7 +346,24 @@ export async function* spawnFdDefault(
       child.once("close", (code) => resolve({ ok: code === 0, code }));
     },
   );
-  const stop = () => child.kill("SIGKILL");
+  const stop = () => {
+    child.kill("SIGKILL");
+    child.stdout.destroy();
+    child.stderr.destroy();
+  };
+  const waitForExit = async (limitMs = 1000) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        finished.then(() => true),
+        new Promise<boolean>((resolve) => {
+          timer = setTimeout(() => resolve(false), limitMs);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  };
   signal?.addEventListener("abort", stop, { once: true });
   try {
     if (signal?.aborted) stop();
@@ -321,10 +377,22 @@ export async function* spawnFdDefault(
     // treating absence as evidence that saved paths have been deleted.
     if ((!result.ok || stderr.trim()) && !signal?.aborted)
       throw new Error(stderr.trim() || `fd exited with code ${result.code}`);
+  } catch (error) {
+    // Destroying stdout is what wakes a blocked async iterator after
+    // cancellation. Node may surface that wake-up as ERR_STREAM_PREMATURE_CLOSE;
+    // cancellation is still an expected stop, not an indexing failure.
+    if (signal?.aborted) return;
+    throw error;
   } finally {
     signal?.removeEventListener("abort", stop);
     if (child.exitCode === null && child.signalCode === null) stop();
-    await finished;
+    if (!(await waitForExit())) {
+      // A process blocked in an uninterruptible provider call may not reap even
+      // after SIGKILL. Release the rebuild lock instead of waiting forever.
+      child.stdout.destroy();
+      child.stderr.destroy();
+      child.unref();
+    }
   }
 }
 
@@ -338,7 +406,11 @@ type Observed = { path: string; isDir: boolean };
  * `path` keeps the visible route to it. A broken link keeps its row with empty
  * metadata so it stays findable rather than silently disappearing.
  */
-async function describe(entry: Observed, root: string): Promise<FileRow> {
+async function describe(
+  entry: Observed,
+  root: string,
+  signal: AbortSignal,
+): Promise<FileRow> {
   const base: FileRow = {
     path: entry.path,
     name: path.basename(entry.path),
@@ -353,7 +425,11 @@ async function describe(entry: Observed, root: string): Promise<FileRow> {
   };
 
   try {
-    const link = await fsp.lstat(entry.path);
+    const link = await indexRead(
+      `index-lstat:${entry.path}`,
+      () => fsp.lstat(entry.path),
+      signal,
+    );
     if (!link.isSymbolicLink())
       return {
         ...base,
@@ -365,12 +441,21 @@ async function describe(entry: Observed, root: string): Promise<FileRow> {
 
     let storage: string | null = null;
     try {
-      storage = await fsp.realpath(entry.path);
+      storage = await indexRead(
+        `index-real:${entry.path}`,
+        () => fsp.realpath(entry.path),
+        signal,
+      );
     } catch {
+      if (signal.aborted) throw new Error("Index metadata read cancelled");
       /* A dangling link has no target; the visible entry is still useful. */
     }
     try {
-      const target = await fsp.stat(entry.path);
+      const target = await indexRead(
+        `index-stat:${entry.path}`,
+        () => fsp.stat(entry.path),
+        signal,
+      );
       return {
         ...base,
         is_symlink: 1,
@@ -381,6 +466,7 @@ async function describe(entry: Observed, root: string): Promise<FileRow> {
         storage_path: storage === entry.path ? null : storage,
       };
     } catch {
+      if (signal.aborted) throw new Error("Index metadata read cancelled");
       return {
         ...base,
         is_symlink: 1,
@@ -390,6 +476,7 @@ async function describe(entry: Observed, root: string): Promise<FileRow> {
       };
     }
   } catch {
+    if (signal.aborted) throw new Error("Index metadata read cancelled");
     // Gone between fd listing it and this read, or unreadable. Index the name.
     return base;
   }
@@ -400,6 +487,7 @@ async function describeAll(
   entries: Observed[],
   root: string,
   concurrency: number,
+  signal: AbortSignal,
 ): Promise<FileRow[]> {
   const rows: FileRow[] = [];
   let next = 0;
@@ -407,9 +495,10 @@ async function describeAll(
     { length: Math.min(concurrency, entries.length) },
     async () => {
       for (;;) {
+        if (signal.aborted) return;
         const index = next++;
         if (index >= entries.length) return;
-        rows.push(await describe(entries[index], root));
+        rows.push(await describe(entries[index], root, signal));
       }
     },
   );
@@ -510,6 +599,15 @@ export async function scanRoot(
   let indexed = 0;
   let stopped: ScanStop | undefined;
   let error: string | undefined;
+  const callerSignal = options.externalSignal ?? options.signal;
+  // Cover root validation and metadata as well as the fd subprocess.
+  const timeLimit = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, timeLimit.signal])
+    : timeLimit.signal;
+  const timer = Number.isFinite(deadline)
+    ? setTimeout(() => timeLimit.abort(), Math.max(0, deadline - Date.now()))
+    : undefined;
 
   const commit = (rows: FileRow[]) => {
     if (rows.length === 0) return;
@@ -538,7 +636,7 @@ export async function scanRoot(
     if (pending.length === 0) return;
     const batch = pending.splice(0, pending.length);
     const startedMetadata = performance.now();
-    const rows = await describeAll(batch, root, statConcurrency);
+    const rows = await describeAll(batch, root, statConcurrency, signal);
     metadataMs += performance.now() - startedMetadata;
     commit(rows);
     onProgress?.({
@@ -551,10 +649,25 @@ export async function scanRoot(
 
   try {
     // Confirm the root is still there; a drive can unmount between runs.
-    const stats = await fsp.stat(root);
+    const stats = await indexRead(
+      `index-stat:${root}`,
+      () => fsp.stat(root),
+      signal,
+    );
     if (!stats.isDirectory()) throw new Error("not a directory");
   } catch {
+    clearTimeout(timer);
     const timing = finishTimings();
+    if (signal.aborted)
+      return {
+        root,
+        scanned: 0,
+        indexed: 0,
+        elapsedMs: timing.elapsedMs,
+        timings: timing.timings,
+        complete: false,
+        stopped: callerSignal?.aborted ? "cancelled" : "time-limit",
+      };
     return {
       root,
       scanned: 0,
@@ -582,15 +695,6 @@ export async function scanRoot(
     pending.push({ path: root, isDir: true });
     scanned++;
   }
-  // A quiet or stalled fd process must not outlive the budget merely because
-  // there is no next chunk at which to check the clock.
-  const timeLimit = new AbortController();
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, timeLimit.signal])
-    : timeLimit.signal;
-  const timer = Number.isFinite(deadline)
-    ? setTimeout(() => timeLimit.abort(), Math.max(0, deadline - Date.now()))
-    : undefined;
   try {
     const source =
       options.spawnFd?.(fdArgs, signal) ?? spawnFdDefault(fd, fdArgs, signal);
@@ -621,7 +725,7 @@ export async function scanRoot(
         if (pending.length >= batchRows) {
           await flush();
           if (signal?.aborted) {
-            stopped = "cancelled";
+            stopped = callerSignal?.aborted ? "cancelled" : "time-limit";
             break outer;
           }
           if (Date.now() > deadline) {
@@ -657,10 +761,14 @@ export async function scanRoot(
     } catch {
       /* The first failure is the one worth reporting. */
     }
-    error =
-      scanError instanceof Error
-        ? scanError.message
-        : "This location could not be read.";
+    // Cancellation and the wall-clock limit are normal incomplete outcomes,
+    // not filesystem failures. Recording both would hide the useful stop
+    // reason behind a generic "Read cancelled" message.
+    if (!signal.aborted)
+      error =
+        scanError instanceof Error
+          ? scanError.message
+          : "This location could not be read.";
   } finally {
     clearTimeout(timer);
   }
@@ -668,7 +776,7 @@ export async function scanRoot(
   // Cancellation can arrive during the final stdout read or metadata flush,
   // without another chunk to trigger the checks inside the loop.
   if (signal.aborted)
-    stopped = options.signal?.aborted ? "cancelled" : "time-limit";
+    stopped = callerSignal?.aborted ? "cancelled" : "time-limit";
   else if (stopped === undefined && Date.now() > deadline)
     stopped = "time-limit";
   const complete = stopped === undefined && error === undefined;
@@ -761,7 +869,11 @@ function forgetUnconfiguredRoots(
   assertOwned?: () => void,
 ): string[] {
   const known = (
-    db.prepare("SELECT DISTINCT root FROM files").all() as { root: string }[]
+    db
+      .prepare(
+        "SELECT root FROM index_roots UNION SELECT DISTINCT root FROM files",
+      )
+      .all() as { root: string }[]
   ).map((row) => row.root);
   const wanted = new Set(configured);
   const gone = known.filter((root) => !wanted.has(root));
@@ -790,100 +902,123 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
   const timingStarted = performance.now();
   const budget = options.budgetMs ?? 900_000;
   const deadline = startedAt + budget;
-  const roots = await resolveRoots(options.roots);
-  const outcomes: RootOutcome[] = [];
-
-  /*
-   * Progress is reported for the run, not for the root being walked.
-   *
-   * `scanRoot` counts from zero and times from its own start, so passing its
-   * numbers straight through made a multi-root scan count up, drop back to
-   * near zero at each root, and finish by reporting the last and smallest
-   * root: 4,603 indexed and 0s for a run that did 437,693 in 13s.
-   */
-  let doneScanned = 0;
-  let doneIndexed = 0;
-  const report = options.onProgress;
-  const aggregated: ScanOptions = report
-    ? {
-        ...options,
-        roots,
-        onProgress: (progress) =>
-          report({
-            root: progress.root,
-            scanned: doneScanned + progress.scanned,
-            indexed: doneIndexed + progress.indexed,
-            elapsedMs: Date.now() - startedAt,
-          }),
-      }
-    : { ...options, roots };
-
-  for (const root of roots) {
-    if (options.signal?.aborted || Date.now() > deadline) {
-      outcomes.push({
-        root,
-        scanned: 0,
-        indexed: 0,
-        elapsedMs: 0,
-        timings: { enumerationMs: 0, metadataMs: 0, databaseMs: 0 },
-        complete: false,
-        stopped: options.signal?.aborted ? "cancelled" : "time-limit",
-      });
-      continue;
-    }
-    const outcome = await scanRoot(root, aggregated, deadline, [
-      ...(await redundantLinks(root, roots)),
-      ...nestedRoots(root, roots).map((child) => excludePath(root, child)),
+  const timeLimit = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, timeLimit.signal])
+    : timeLimit.signal;
+  const callerSignal = options.signal ?? new AbortController().signal;
+  const timer = Number.isFinite(deadline)
+    ? setTimeout(() => timeLimit.abort(), Math.max(0, deadline - Date.now()))
+    : undefined;
+  try {
+    const roots = await resolveRoots(options.roots, signal);
+    const ownershipRoots = normalizeRoots([
+      ...roots,
+      ...(options.protectedRoots ?? []),
     ]);
-    doneScanned += outcome.scanned;
-    doneIndexed += outcome.indexed;
-    outcomes.push(outcome);
-  }
+    const outcomes: RootOutcome[] = [];
 
-  const complete =
-    roots.length > 0 &&
-    !options.signal?.aborted &&
-    outcomes.every((o) => o.complete);
-  let databaseMs = outcomes.reduce(
-    (sum, outcome) => sum + outcome.timings.databaseMs,
-    0,
-  );
-  let forgotten: string[] = [];
-  if (complete) {
-    const forgetStarted = performance.now();
-    forgotten = forgetUnconfiguredRoots(options.db, roots, options.assertOwned);
-    databaseMs += performance.now() - forgetStarted;
-  }
+    /*
+     * Progress is reported for the run, not for the root being walked.
+     *
+     * `scanRoot` counts from zero and times from its own start, so passing its
+     * numbers straight through made a multi-root scan count up, drop back to
+     * near zero at each root, and finish by reporting the last and smallest
+     * root: 4,603 indexed and 0s for a run that did 437,693 in 13s.
+     */
+    let doneScanned = 0;
+    let doneIndexed = 0;
+    const report = options.onProgress;
+    const aggregated: ScanOptions = report
+      ? {
+          ...options,
+          roots: ownershipRoots,
+          signal,
+          externalSignal: callerSignal,
+          onProgress: (progress) =>
+            report({
+              root: progress.root,
+              scanned: doneScanned + progress.scanned,
+              indexed: doneIndexed + progress.indexed,
+              elapsedMs: Date.now() - startedAt,
+            }),
+        }
+      : {
+          ...options,
+          roots: ownershipRoots,
+          signal,
+          externalSignal: callerSignal,
+        };
 
-  const elapsedMs = performance.now() - timingStarted;
-  const metadataMs = outcomes.reduce(
-    (sum, outcome) => sum + outcome.timings.metadataMs,
-    0,
-  );
-  return {
-    roots: outcomes,
-    scanned: outcomes.reduce((sum, outcome) => sum + outcome.scanned, 0),
-    indexed: outcomes.reduce((sum, outcome) => sum + outcome.indexed, 0),
-    elapsedMs,
-    timings: {
-      enumerationMs: Math.max(0, elapsedMs - metadataMs - databaseMs),
-      metadataMs,
-      databaseMs,
-      ftsMs: 0,
-    },
-    complete,
-    forgotten,
-  };
+    for (const root of roots) {
+      if (signal.aborted || Date.now() > deadline) {
+        outcomes.push({
+          root,
+          scanned: 0,
+          indexed: 0,
+          elapsedMs: 0,
+          timings: { enumerationMs: 0, metadataMs: 0, databaseMs: 0 },
+          complete: false,
+          stopped: options.signal?.aborted ? "cancelled" : "time-limit",
+        });
+        continue;
+      }
+      const outcome = await scanRoot(root, aggregated, deadline, [
+        ...(await redundantLinks(root, ownershipRoots, signal)),
+        ...nestedRoots(root, ownershipRoots).map((child) =>
+          excludePath(root, child),
+        ),
+      ]);
+      doneScanned += outcome.scanned;
+      doneIndexed += outcome.indexed;
+      outcomes.push(outcome);
+    }
+
+    const complete =
+      roots.length > 0 && !signal.aborted && outcomes.every((o) => o.complete);
+    let databaseMs = outcomes.reduce(
+      (sum, outcome) => sum + outcome.timings.databaseMs,
+      0,
+    );
+    let forgotten: string[] = [];
+    if (complete && options.allowRootCleanup !== false) {
+      const forgetStarted = performance.now();
+      forgotten = forgetUnconfiguredRoots(
+        options.db,
+        roots,
+        options.assertOwned,
+      );
+      databaseMs += performance.now() - forgetStarted;
+    }
+
+    const elapsedMs = performance.now() - timingStarted;
+    const metadataMs = outcomes.reduce(
+      (sum, outcome) => sum + outcome.timings.metadataMs,
+      0,
+    );
+    return {
+      roots: outcomes,
+      scanned: outcomes.reduce((sum, outcome) => sum + outcome.scanned, 0),
+      indexed: outcomes.reduce((sum, outcome) => sum + outcome.indexed, 0),
+      elapsedMs,
+      timings: {
+        enumerationMs: Math.max(0, elapsedMs - metadataMs - databaseMs),
+        metadataMs,
+        databaseMs,
+        ftsMs: 0,
+      },
+      complete,
+      forgotten,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-/** Counts and elapsed time, with no invented percentage. */
+/** Indexed count and elapsed time, with no invented percentage. */
 export function describeScan(report: ScanReport): string {
   const seconds = Math.max(1, Math.round(report.elapsedMs / 1000));
-  const parts = [
-    `${report.indexed.toLocaleString()} indexed`,
-    `${report.scanned.toLocaleString()} seen`,
-    `${seconds}s`,
-  ];
+  const parts = [`${report.indexed.toLocaleString()} indexed`, `${seconds}s`];
   const notes = report.roots
     .map((root) =>
       // An empty error message must still fall through to the stop, as before.

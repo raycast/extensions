@@ -8,7 +8,8 @@ import { indexDatabasePath } from "./index-db";
 import { BuildOptions, BuildOutcome, rebuildIndex } from "./index-build";
 import { ensureFd, FdDownloadStage } from "./fd-download";
 import { withIndexingLock } from "./indexing-lock";
-import { loadIndexSettings } from "./index-settings-store";
+import { loadIndexSettingsForRebuild } from "./index-settings-store";
+import { describeScanProgress } from "./index-scan";
 
 /**
  * Raycast wiring for a rebuild.
@@ -38,7 +39,7 @@ export async function rebuildSearchIndex(
   const { onFdDownload, lookupFd, ...buildOptions } = options;
   return rebuildIndex({
     fdPreference: getPreferenceValues<Preferences>().fdPath,
-    loadSettings: loadIndexSettings,
+    loadSettingsResult: loadIndexSettingsForRebuild,
     ...buildOptions,
     file: options.file ?? searchIndexPath(),
     withLock: options.withLock ?? ((work) => withIndexingLock(work)),
@@ -73,9 +74,9 @@ export async function rebuildWithFeedback(): Promise<void> {
       toast.title = "Building search index…";
       toast.message = "Writing the search index…";
     },
-    onProgress: ({ indexed, scanned, elapsedMs }) => {
+    onProgress: (progress) => {
       toast.title = "Building search index…";
-      toast.message = `${indexed.toLocaleString()} indexed · ${scanned.toLocaleString()} seen · ${Math.round(elapsedMs / 1000)}s`;
+      toast.message = describeScanProgress(progress);
     },
   });
   const complete = outcome.kind === "done" && outcome.report.complete;

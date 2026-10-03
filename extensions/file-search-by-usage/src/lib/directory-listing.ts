@@ -8,7 +8,41 @@ import { createReadPool } from "./bounded-reads";
 import { createWorkQueue } from "./work-queue";
 import { readBoundedDirectory } from "./bounded-directory";
 
-const directoryRead = createReadPool();
+/*
+ * A cancelled filesystem promise cannot itself be cancelled, so its pool slot
+ * remains occupied until the provider returns. Keep cloud-backed reads in
+ * separate bounded pools: a stalled provider may exhaust its own pool, but it
+ * cannot stop an ordinary local folder or another provider from being listed.
+ */
+const localDirectoryRead = createReadPool();
+const cloudDirectoryReads = new Map<
+  string,
+  ReturnType<typeof createReadPool>
+>();
+
+function cloudProviderKey(dir: string): string | undefined {
+  const normalized = path.resolve(dir);
+  for (const folder of ["CloudStorage", "Mobile Documents"]) {
+    const marker = `${path.sep}Library${path.sep}${folder}`;
+    const at = normalized.indexOf(marker);
+    if (at === -1) continue;
+    const rest = normalized.slice(at + marker.length + 1);
+    const provider = rest.split(path.sep)[0] || folder;
+    return `${folder}:${provider}`;
+  }
+  return undefined;
+}
+
+function directoryReadFor(dir: string) {
+  const provider = cloudProviderKey(dir);
+  if (provider === undefined) return localDirectoryRead;
+  let read = cloudDirectoryReads.get(provider);
+  if (!read) {
+    read = createReadPool();
+    cloudDirectoryReads.set(provider, read);
+  }
+  return read;
+}
 
 export async function statEntryAsync(
   full: string,
@@ -76,6 +110,7 @@ export async function readDirectoryAsync(
 ): Promise<ReadResult> {
   const caller = signal ?? new AbortController().signal;
   if (caller.aborted) return { entries: [], truncated: 0 };
+  const directoryRead = directoryReadFor(dir);
   // A deadline of its own, so one stalled entry cannot hold up the listing.
   const bounded = new AbortController();
   const stopForCaller = () => bounded.abort();
@@ -85,108 +120,111 @@ export async function readDirectoryAsync(
     options.budgetMs ?? LISTING_BUDGET_MS,
   );
   const active = bounded.signal;
-  let dirents: fs.Dirent[];
-  let namesTruncated = false;
   try {
-    const listing = await directoryRead(
-      `list:${dir}:${showHidden}`,
-      () => readBoundedDirectory(dir, MAX_ENTRIES, showHidden),
-      active,
-    );
-    dirents = listing.entries;
-    namesTruncated = listing.truncated;
-  } catch (error) {
-    return {
-      entries: [],
-      truncated: 0,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-  const entries: Entry[] = [];
-  if (active.aborted) return { entries: [], truncated: 0 };
-  const storageDir = await directoryRead(
-    `real:${dir}`,
-    () => fsp.realpath(dir),
-    active,
-  ).catch(() => dir);
-  const completed: (Entry | undefined)[] = [];
-  const queue = createWorkQueue<{ dirent: fs.Dirent; index: number }>(
-    async ([{ dirent, index }]) => {
-      const full = path.join(dir, dirent.name);
-      const isSymlink = dirent.isSymbolicLink();
-      const entry: Entry = {
-        name: dirent.name,
-        path: full,
-        storagePath:
-          storageDir === dir ? undefined : path.join(storageDir, dirent.name),
-        isSymlink,
-        isDirectory: dirent.isDirectory(),
-        size: 0,
-        mtimeMs: 0,
-        birthtimeMs: 0,
-        dev: undefined,
-        ino: undefined,
+    let dirents: fs.Dirent[];
+    let namesTruncated = false;
+    try {
+      const listing = await directoryRead(
+        `list:${dir}:${showHidden}`,
+        () => readBoundedDirectory(dir, MAX_ENTRIES, showHidden),
+        active,
+      );
+      dirents = listing.entries;
+      namesTruncated = listing.truncated;
+    } catch (error) {
+      return {
+        entries: [],
+        truncated: 0,
+        error: error instanceof Error ? error.message : String(error),
       };
-      try {
-        const stats = await directoryRead(
-          `stat:${full}`,
-          () => fsp.stat(full),
-          active,
-        );
-        Object.assign(entry, {
-          isDirectory: stats.isDirectory(),
-          size: stats.size,
-          mtimeMs: stats.mtimeMs,
-          birthtimeMs: stats.birthtimeMs,
-          dev: stats.dev,
-          ino: stats.ino,
-        });
-        if (isSymlink && !active.aborted)
-          entry.storagePath = await directoryRead(
-            `real:${full}`,
-            () => fsp.realpath(full),
-            active,
-          );
-      } catch {
-        // Retain broken links and unreadable entries, as in the synchronous reader.
+    }
+    const entries: Entry[] = [];
+    if (active.aborted) return { entries: [], truncated: 0 };
+    const storageDir = await directoryRead(
+      `real:${dir}`,
+      () => fsp.realpath(dir),
+      active,
+    ).catch(() => dir);
+    const completed: (Entry | undefined)[] = [];
+    const queue = createWorkQueue<{ dirent: fs.Dirent; index: number }>(
+      async ([{ dirent, index }]) => {
+        const full = path.join(dir, dirent.name);
+        const isSymlink = dirent.isSymbolicLink();
+        const entry: Entry = {
+          name: dirent.name,
+          path: full,
+          storagePath:
+            storageDir === dir ? undefined : path.join(storageDir, dirent.name),
+          isSymlink,
+          isDirectory: dirent.isDirectory(),
+          size: 0,
+          mtimeMs: 0,
+          birthtimeMs: 0,
+          dev: undefined,
+          ino: undefined,
+        };
         try {
-          if (active.aborted) return;
           const stats = await directoryRead(
-            `lstat:${full}`,
-            () => fsp.lstat(full),
+            `stat:${full}`,
+            () => fsp.stat(full),
             active,
           );
           Object.assign(entry, {
+            isDirectory: stats.isDirectory(),
             size: stats.size,
             mtimeMs: stats.mtimeMs,
             birthtimeMs: stats.birthtimeMs,
+            dev: stats.dev,
+            ino: stats.ino,
           });
+          if (isSymlink && !active.aborted)
+            entry.storagePath = await directoryRead(
+              `real:${full}`,
+              () => fsp.realpath(full),
+              active,
+            );
         } catch {
-          /* Keep the directory entry without metadata. */
+          // Retain broken links and unreadable entries, as in the synchronous reader.
+          try {
+            if (active.aborted) return;
+            const stats = await directoryRead(
+              `lstat:${full}`,
+              () => fsp.lstat(full),
+              active,
+            );
+            Object.assign(entry, {
+              size: stats.size,
+              mtimeMs: stats.mtimeMs,
+              birthtimeMs: stats.birthtimeMs,
+            });
+          } catch {
+            /* Keep the directory entry without metadata. */
+          }
         }
-      }
 
-      if (!active.aborted) completed[index] = entry;
-    },
-    active,
-    { concurrency: 8 },
-  );
-  try {
-    await queue.push(dirents.map((dirent, index) => ({ dirent, index })));
-    await queue.drain();
-    entries.push(
-      ...completed.filter((entry): entry is Entry => entry !== undefined),
+        if (!active.aborted) completed[index] = entry;
+      },
+      active,
+      { concurrency: 8 },
     );
-    const unread = dirents.length - entries.length;
-    return {
-      entries,
-      // The caller shows one notice for omissions; a lower bound is enough.
-      truncated: (namesTruncated ? 1 : 0) + Math.max(0, unread),
-    };
+    try {
+      await queue.push(dirents.map((dirent, index) => ({ dirent, index })));
+      await queue.drain();
+      entries.push(
+        ...completed.filter((entry): entry is Entry => entry !== undefined),
+      );
+      const unread = dirents.length - entries.length;
+      return {
+        entries,
+        // The caller shows one notice for omissions; a lower bound is enough.
+        truncated: (namesTruncated ? 1 : 0) + Math.max(0, unread),
+      };
+    } finally {
+      queue.dispose();
+    }
   } finally {
     clearTimeout(deadline);
     caller.removeEventListener("abort", stopForCaller);
-    queue.dispose();
   }
 }
 

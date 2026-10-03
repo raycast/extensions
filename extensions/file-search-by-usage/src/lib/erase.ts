@@ -1,5 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
 import { clearLegacyCaches } from "./discovered";
+import { deletePortableFd } from "./fd-download";
 import { formatSize } from "./format";
 import { clearUsageCache } from "./usage-cache";
 import { deleteIndexDatabase } from "./index-db";
@@ -54,7 +55,7 @@ export function describeErased(erased: Erased): string {
     count(erased.abbreviations, "learned shortcut", "learned shortcuts"),
   ].join(", ");
   return erased.cacheBytes > 0
-    ? `${counts}, and ${formatSize(erased.cacheBytes)} of index`
+    ? `${counts}, and ${formatSize(erased.cacheBytes)} of cached data`
     : counts;
 }
 
@@ -82,7 +83,9 @@ export async function eraseEverything(): Promise<Erased | undefined> {
       // would leave the next query reading a database that is no longer there.
       closeIndexReader();
       erased.cacheBytes =
-        clearLegacyCaches() + deleteIndexDatabase(searchIndexPath());
+        clearLegacyCaches() +
+        deleteIndexDatabase(searchIndexPath()) +
+        deletePortableFd(environment.supportPath);
       clearUsageCache();
 
       return erased;

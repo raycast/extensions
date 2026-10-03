@@ -58,6 +58,11 @@ const SELECTED =
 
 type Binding = Record<string, string | number>;
 
+/** Escape user text before placing it inside a SQLite LIKE pattern. */
+function escapeLikeLiteral(value: string): string {
+  return value.replace(/[!%_]/g, "!$&");
+}
+
 /**
  * Build the filter clauses shared by both query shapes.
  *
@@ -92,10 +97,11 @@ function filterClauses(parsed: ParsedQuery, showHidden: boolean) {
 
   if (parsed.extensions.length > 0) {
     // SQLite LIKE is ASCII case-insensitive, which matches the documented
-    // case-insensitive extension rule. Suffix form supports .tar.gz.
+    // case-insensitive extension rule. Suffix form supports .tar.gz. Escape
+    // LIKE's wildcard characters so this prefilter agrees with matchPath.
     const parts = parsed.extensions.map((extension, index) => {
-      bind[`ext${index}`] = `%.${extension}`;
-      return `f.name LIKE :ext${index}`;
+      bind[`ext${index}`] = `%.${escapeLikeLiteral(extension)}`;
+      return `f.name LIKE :ext${index} ESCAPE '!'`;
     });
     clauses.push(`(${parts.join(" OR ")})`);
   }
