@@ -71,6 +71,10 @@ its own time limit. The original completed session remains in history.
 
 ## Screenshots
 
+Start a timer by entering the task name and duration directly in Raycast.
+
+![Start a task with name and duration](media/start-task.png)
+
 The menu-bar timer shows the remaining time. Click it to pause, resume, or end
 the task.
 
@@ -80,4 +84,4 @@ the task.
 
 ![Session details](media/session-details.png)
 
-![Completion notification](media/completion.png)
+![Crimson Glass completion notification](media/completion-crimson-glass.png)
