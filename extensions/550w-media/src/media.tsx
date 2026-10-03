@@ -154,7 +154,7 @@ function TaskResult({
               title={cn ? "任务 ID" : "Task ID"}
               text={summary.taskId}
             />
-          )}{" "}
+          )}
           {summary.failure && (
             <Detail.Metadata.Label
               title={cn ? "失败说明" : "Failure Details"}
@@ -170,13 +170,13 @@ function TaskResult({
               title={cn ? "打开结果" : "Open Result"}
               url={summary.url}
             />
-          )}{" "}
+          )}
           {(query || operation) && (
             <Action
               title={cn ? "查询任务状态" : "Check Task Status"}
               onAction={refresh}
             />
-          )}{" "}
+          )}
           {summary.taskId && (
             <Action.CopyToClipboard
               title={cn ? "复制任务 ID" : "Copy Task ID"}
