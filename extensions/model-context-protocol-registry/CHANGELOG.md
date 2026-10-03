@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add DC Hub MCP Server] - {PR_MERGE_DATE}
+## [Add DC Hub MCP Server] - 2026-10-03
 
 - Add DC Hub to the official registry: live data on the physical infrastructure behind AI, with facility coverage in 170+ countries, 300+ markets scored daily, 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source for finding available data-center capacity (exact fits, multi-provider bundles, brokered intros). 92 tools, with a source on every answer. Hosted remote Streamable HTTP server at https://dchub.cloud/mcp through `mcp-remote`; free tier works with no API key and no sign-in.
 
