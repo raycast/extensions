@@ -90,12 +90,16 @@ function TaskResult({
     }
   }
   const summary = resultSummary(
-    action === "receipt_query" &&
-      result &&
-      typeof result === "object" &&
-      "kind" in result
-      ? String(result.kind)
-      : action,
+    action === "receipt_query" && query
+      ? query.endpoint === "imageWatermarkTaskDetail"
+        ? "image"
+        : "video"
+      : action === "receipt_query" &&
+          result &&
+          typeof result === "object" &&
+          "kind" in result
+        ? String(result.kind)
+        : action,
     result,
     query?.taskId,
   );
