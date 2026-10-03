@@ -1,6 +1,6 @@
 import { Action, Tool, getPreferenceValues } from "@raycast/api";
 import Process from "../models/Process";
-import { KillSignal, kill, killall, resolveKillSignal, waitForExit } from "../utilities/killProcess";
+import { KillSignal, getPidsByName, kill, killall, resolveKillSignal, waitForExit } from "../utilities/killProcess";
 import { isWindows } from "../utilities/platform";
 
 type Input = {
@@ -37,8 +37,13 @@ export default async function tool({ pid, target, signal }: Input) {
         : KillSignal.TERM;
   if (target === "all") {
     if (process.name === undefined) return `Process ${pid} has no name to use for Kill All.`;
+    const matchingPids = [...new Set([pid, ...(await getPidsByName(process.name))])];
     await killall(process.name, killSignal);
-    return `Sent a termination request to all processes named "${process.name}".`;
+    const stillRunning = await waitForExit(matchingPids);
+    if (stillRunning.length > 0) {
+      return `Sent a termination request to all processes named "${process.name}", but process ${stillRunning.join(", ")} is still running.`;
+    }
+    return `Killed processes ${matchingPids.join(", ")} named "${process.name}".`;
   }
 
   if (target === "parent" && (process.parentPid === undefined || process.parentPid <= (isWindows ? 4 : 1))) {

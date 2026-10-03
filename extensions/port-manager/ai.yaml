@@ -58,13 +58,26 @@ evals:
   - input: "@port-manager Kill all processes with the same name as the service on port 3000"
     mocks:
       list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
-      kill-open-port-process: 'Sent a termination request to all processes named "node".'
+      kill-open-port-process: 'Killed processes 1234, 1235 named "node".'
     expected:
       - callsTool:
           name: kill-open-port-process
           arguments:
             pid: 1234
             target: all
+    usedAsExample: false
+  - input: "@port-manager Kill all processes with the same name as the service on port 3000 and tell me if any are still running"
+    mocks:
+      list-open-ports: '[{"pid":1234,"name":"node","ports":[{"port":3000,"host":"127.0.0.1","exposure":"loopback"}]}]'
+      kill-open-port-process: 'Sent a termination request to all processes named "node", but process 1235 is still running.'
+    expected:
+      - callsTool:
+          name: kill-open-port-process
+          arguments:
+            pid: 1234
+            target: all
+      - includes: "1235"
+      - includes: "still running"
     usedAsExample: false
   - input: "@port-manager Kill the parent of the service listening on port 3000"
     mocks:
