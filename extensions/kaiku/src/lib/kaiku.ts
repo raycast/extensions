@@ -1,3 +1,4 @@
+import { StringDecoder } from "string_decoder";
 import { Toast, getApplications, open, showHUD, showToast } from "@raycast/api";
 import { spawn } from "child_process";
 import { existsSync } from "fs";
@@ -55,6 +56,8 @@ export async function callTools(calls: { name: string; arguments: Record<string,
   return new Promise((resolve, reject) => {
     const child = spawn(server, [], { stdio: ["pipe", "pipe", "ignore"] });
     const pending = new Map<number, (r: JsonRpcResponse) => void>();
+    // Decodes across chunks, so a character split between two reads stays intact.
+    const decoder = new StringDecoder("utf8");
     let buffer = "";
     let finished = false;
 
@@ -69,7 +72,7 @@ export async function callTools(calls: { name: string; arguments: Record<string,
     child.on("error", (e) => finish(e));
     child.on("exit", () => finish(new Error("kaiku-mcp stopped unexpectedly")));
     child.stdout.on("data", (chunk: Buffer) => {
-      buffer += chunk.toString("utf8");
+      buffer += decoder.write(chunk);
       let i: number;
       while ((i = buffer.indexOf("\n")) >= 0) {
         const line = buffer.slice(0, i).trim();

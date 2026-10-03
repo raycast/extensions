@@ -25,17 +25,16 @@ export async function searchCalls(query: string): Promise<CallResults> {
     const [list] = await callTools([{ name: "list_calls", arguments: { limit: 100 } }]);
     return { calls: (JSON.parse(list) as CallPage).calls, snippets: {} };
   }
-  const [byName, byText, all] = await callTools([
+  const [byName, byText] = await callTools([
     { name: "list_calls", arguments: { query: text, limit: 100 } },
     { name: "search_transcripts", arguments: { query: text, limit: 100 } },
-    { name: "list_calls", arguments: { limit: 500 } },
   ]);
   const named = (JSON.parse(byName) as CallPage).calls;
   const matches = (JSON.parse(byText) as SearchResult).matches;
   const snippets: Record<string, string> = {};
   for (const m of matches) snippets[m.id] ??= `[${m.time}] ${m.speaker}: ${m.snippet}`;
 
-  const known = new Map((JSON.parse(all) as CallPage).calls.map((c) => [c.id, c]));
+  const known = await allCalls();
   const calls = [...named];
   const seen = new Set(named.map((c) => c.id));
   for (const id of Object.keys(snippets)) {
@@ -47,6 +46,17 @@ export async function searchCalls(query: string): Promise<CallResults> {
   }
   calls.sort((a, b) => b.date.localeCompare(a.date));
   return { calls, snippets };
+}
+
+/** Every call, page by page, so transcript matches on older calls are found too. */
+async function allCalls(): Promise<Map<string, Call>> {
+  const known = new Map<string, Call>();
+  for (let offset = 0; ; offset += 500) {
+    const [page] = await callTools([{ name: "list_calls", arguments: { limit: 500, offset } }]);
+    const { total, calls } = JSON.parse(page) as CallPage;
+    for (const c of calls) known.set(c.id, c);
+    if (calls.length === 0 || offset + calls.length >= total) return known;
+  }
 }
 
 /** The body of a tool reply, after the header lines that precede the first blank line. */

@@ -35,14 +35,15 @@ export default function Command() {
   const calls = data?.calls ?? [];
   const call = calls.find((c) => c.id === selected);
 
+  // Tagged with the call it belongs to, so a reply for a previous selection is never shown.
   const preview = usePromise(
-    async (id: string | undefined, hasSummary: boolean | undefined) => {
-      if (!id) return "";
-      if (hasSummary) return await readSummary(id);
-      const t = await readTranscript(id, 3000);
-      return t;
+    async (id: string | undefined, hasSummary: boolean | undefined, hasTranscript: boolean | undefined) => {
+      if (!id) return { id: "", text: "" };
+      if (hasSummary) return { id, text: await readSummary(id) };
+      if (!hasTranscript) return { id, text: "" };
+      return { id, text: await readTranscript(id, 3000) };
     },
-    [call?.id, call?.hasSummary],
+    [call?.id, call?.hasSummary, call?.hasTranscript],
   );
 
   function markdown(c: Call): string {
@@ -50,7 +51,8 @@ export default function Command() {
     const parts: string[] = [];
     if (snippet) parts.push(`> ${snippet}`);
     if (c.id === call?.id) {
-      if (preview.data) parts.push(preview.data);
+      const text = preview.data?.id === c.id ? preview.data.text : "";
+      if (text) parts.push(text);
       else if (!c.hasTranscript) parts.push("No transcript yet.");
     }
     return parts.join("\n\n");
