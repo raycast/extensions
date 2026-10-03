@@ -1,6 +1,6 @@
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import type { Conversation, FormValues, Message } from "../types";
 import { streamAIResponse } from "../services/ai";
 import { ConversationDetailView } from "./ConversationDetailView";
@@ -21,6 +21,8 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { push, pop } = useNavigation();
+  const isMounted = useRef(true);
+  useEffect(() => () => void (isMounted.current = false), []);
 
   const generateResponse = useCallback(
     async (question: string, selectedModel?: string) => {
@@ -45,6 +47,8 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
         toast.style = Toast.Style.Success;
         toast.title = "Response completed";
 
+        // The user may have navigated away while the answer streamed; don't hijack their view.
+        if (!isMounted.current) return;
         pop();
         await new Promise((resolve) => setTimeout(resolve, NAVIGATION_DELAY));
         push(<ConversationDetailView conversation={newConversation} updateConversation={updateConversation} />);

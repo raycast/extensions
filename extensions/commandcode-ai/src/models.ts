@@ -63,16 +63,22 @@ export async function fetchCatalog(): Promise<Catalog> {
   }
   if (cached?.version === version) return cached;
 
-  const res = await fetch(`https://cdn.jsdelivr.net/npm/command-code@${version}/dist/cli.mjs`, {
-    signal: AbortSignal.timeout(60_000),
-  });
-  if (!res.ok) throw new Error(`Could not download the CommandCode model catalog (HTTP ${res.status}).`);
-  const models = parseCatalog(await res.text());
-  // ponytail: scrapes the minified CLI bundle; switch to a real endpoint if CommandCode ever ships one.
-  if (models.length === 0) throw new Error(`Could not read the model catalog from command-code@${version}.`);
-  const catalog = { version, models };
-  cache.set("catalog", JSON.stringify(catalog));
-  return catalog;
+  try {
+    const res = await fetch(`https://cdn.jsdelivr.net/npm/command-code@${version}/dist/cli.mjs`, {
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!res.ok) throw new Error(`Could not download the CommandCode model catalog (HTTP ${res.status}).`);
+    const models = parseCatalog(await res.text());
+    // ponytail: scrapes the minified CLI bundle; switch to a real endpoint if CommandCode ever ships one.
+    if (models.length === 0) throw new Error(`Could not read the model catalog from command-code@${version}.`);
+    const catalog = { version, models };
+    cache.set("catalog", JSON.stringify(catalog));
+    return catalog;
+  } catch (error) {
+    // A stale list beats an empty picker; the next refresh retries the new version.
+    if (cached) return cached;
+    throw error;
+  }
 }
 
 export function parseCatalog(bundle: string): CatalogModel[] {

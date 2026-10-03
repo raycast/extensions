@@ -85,11 +85,12 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
       setUserQuestion(question);
       setStreamingText("");
       setIsGenerating(true);
+      setSelectedMessageIndex(localMessages.length);
       setViewMode("list");
 
       await generateResponse(question, values.model);
     },
-    [generateResponse],
+    [generateResponse, localMessages.length],
   );
 
   const qaPairs = useMemo(() => {

@@ -11,8 +11,11 @@ export function useConversations() {
   // Source of truth for writes: setState updaters aren't guaranteed to run before we persist.
   const current = useRef<Conversation[]>([]);
 
+  const writes = useRef<Promise<void>>(Promise.resolve());
+
   useEffect(() => {
-    loadConversations();
+    // Writes chain on this, so nothing is saved until the stored list has been read.
+    writes.current = loadConversations();
   }, []);
 
   async function loadConversations() {
@@ -28,8 +31,6 @@ export function useConversations() {
       setIsLoading(false);
     }
   }
-
-  const writes = useRef<Promise<void>>(Promise.resolve());
 
   // Serialize writes, and derive each one from the last *saved* list, so concurrent updates
   // can't drop each other. Memory only changes once LocalStorage accepts the write; errors reach the caller.
