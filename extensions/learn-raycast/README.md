@@ -13,7 +13,7 @@ Each capture adds a pending resource to the workspace's `resources.json`. Run th
 
 ## Set Up the Learn CLI
 
-The npm package is prepared as `@humanive/learn-cli`; its first publication is pending. Once published, install it with Node.js 24:
+Install `@humanive/learn-cli` with Node.js 24:
 
 ```bash
 npm install -g @humanive/learn-cli
@@ -24,7 +24,7 @@ command -v learn
 
 Use the path from `command -v learn` in the **Learn Executable** preference, or keep the default `learn` if it is on Raycast's PATH. Do not install the unrelated unscoped packages `learn` or `learn-cli`.
 
-Until publication, use a Learn checkout that includes the Raycast CLI integration; an older checkout without `list --json` cannot be used with this extension. Install Git, Node.js 24, and pnpm 12.6.0, then clone Learn and build its CLI:
+For development, you can also build the CLI from a Learn checkout that includes the Raycast integration. Install Git, Node.js 24, and pnpm 12.6.0, then clone Learn and build its CLI:
 
 ```bash
 git clone https://github.com/Humanive/Learn.git
@@ -66,7 +66,7 @@ Only HTTP and HTTPS pages can be saved. Browser settings pages, new-tab pages, a
 An existing URL is reported as **Already saved**. New captures remain pending until you ingest them:
 
 ```bash
-node /absolute/path/to/Learn/apps/cli/dist/cli.js ingest --workspace browser-agents
+learn ingest --workspace browser-agents
 ```
 
 ### Choose Learn Workspace
