@@ -9,9 +9,17 @@ interface ProjectListItemProps {
   viewMode: ViewMode;
   onToggleViewMode: () => void;
   onRefresh?: () => void;
+  onRenamed?: (newPath: string) => void;
 }
 
-export function ProjectListItem({ file, thumbnailPath, viewMode, onToggleViewMode, onRefresh }: ProjectListItemProps) {
+export function ProjectListItem({
+  file,
+  thumbnailPath,
+  viewMode,
+  onToggleViewMode,
+  onRefresh,
+  onRenamed,
+}: ProjectListItemProps) {
   const relativeDate = formatRelativeDate(file.lastOpenedDate || file.lastModifiedDate);
 
   const previewMarkdown = thumbnailPath
@@ -26,7 +34,7 @@ export function ProjectListItem({ file, thumbnailPath, viewMode, onToggleViewMod
       subtitle={file.directoryName}
       accessories={[{ text: file.formattedSize }, { text: relativeDate }]}
       quickLook={{
-        path: thumbnailPath || file.path,
+        path: file.path,
         name: file.name,
       }}
       detail={
@@ -74,6 +82,7 @@ export function ProjectListItem({ file, thumbnailPath, viewMode, onToggleViewMod
           viewMode={viewMode}
           onToggleViewMode={onToggleViewMode}
           onRefresh={onRefresh}
+          onRenamed={onRenamed}
         />
       }
     />

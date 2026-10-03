@@ -10,6 +10,16 @@ import { createPhotoshopFile, runMdfind } from "../utils/spotlight";
 
 const execFileAsync = promisify(execFile);
 
+function decodeXmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'");
+}
+
 async function getRunningPhotoshopRecents(): Promise<string[]> {
   const appName = await getRunningPhotoshopName();
   if (!appName) return [];
@@ -39,7 +49,7 @@ async function getMediaBrowserRecents(): Promise<string[]> {
     let match: RegExpExecArray | null;
 
     while ((match = regex.exec(stdout)) !== null) {
-      const candidatePath = match[1].trim();
+      const candidatePath = decodeXmlEntities(match[1].trim());
       if (candidatePath && fs.existsSync(candidatePath)) {
         paths.push(candidatePath);
       }
@@ -68,22 +78,27 @@ async function getMachinePrefsRecents(): Promise<string[]> {
       if (fs.existsSync(machinePrefsFile)) {
         try {
           const buffer = await fs.promises.readFile(machinePrefsFile);
-          const text = buffer.toString("utf8", 0, Math.min(buffer.length, 2 * 1024 * 1024));
-          const matches = text.match(/\/Users\/[^\s"']+\.(psd|psb|psdt|pdd)/gi);
+          const text = buffer.toString("utf8", 0, Math.min(buffer.length, 4 * 1024 * 1024));
+          const matches = text.match(/\/Users\/[^\r\n"':<>|*?]+\.(?:psd|psb|psdt|pdd)/gi);
           if (matches) {
             for (const matchedPath of matches) {
-              if (fs.existsSync(matchedPath)) {
-                paths.push(matchedPath);
+              const cleaned = matchedPath
+                .split("")
+                .filter((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) !== 127)
+                .join("")
+                .trim();
+              if (cleaned && fs.existsSync(cleaned)) {
+                paths.push(cleaned);
               }
             }
           }
-        } catch (error) {
-          void error;
+        } catch {
+          // Ignore parse errors on corrupted prefs
         }
       }
     }
-  } catch (error) {
-    void error;
+  } catch {
+    // Ignore reading error
   }
 
   return paths;
@@ -110,7 +125,7 @@ async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => P
   return results;
 }
 
-export async function getRecentPhotoshopProjects(maxCount = 60): Promise<PhotoshopFile[]> {
+export async function getRecentPhotoshopProjects(maxCount = 80): Promise<PhotoshopFile[]> {
   const seenPaths = new Set<string>();
   const orderedPaths: string[] = [];
 

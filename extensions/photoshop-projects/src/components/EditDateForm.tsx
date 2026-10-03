@@ -42,7 +42,7 @@ export function EditDateForm({ file, onUpdated }: EditDateFormProps) {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to update date";
-      toast.message = String(error);
+      toast.message = error instanceof Error ? error.message : String(error);
     } finally {
       setIsSubmitting(false);
     }

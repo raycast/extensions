@@ -22,16 +22,36 @@ export function getThumbnailCacheDirectory(): string {
   return cacheDir;
 }
 
-function getCacheKey(filePath: string, mtimeMs: number): string {
-  return crypto.createHash("md5").update(`${filePath}:${mtimeMs}`).digest("hex");
+function getPathHash(filePath: string): string {
+  return crypto.createHash("md5").update(filePath).digest("hex").slice(0, 16);
+}
+
+function getThumbnailFileName(filePath: string, mtimeMs: number): string {
+  const pathHash = getPathHash(filePath);
+  return `${pathHash}_${Math.floor(mtimeMs)}.png`;
+}
+
+async function cleanOldThumbnailsForFile(filePath: string, currentFileName: string): Promise<void> {
+  try {
+    const cacheDir = getThumbnailCacheDirectory();
+    const prefix = `${getPathHash(filePath)}_`;
+    const entries = await fs.promises.readdir(cacheDir);
+    for (const entry of entries) {
+      if (entry.startsWith(prefix) && entry !== currentFileName && entry.endsWith(".png")) {
+        await fs.promises.unlink(path.join(cacheDir, entry)).catch(() => {});
+      }
+    }
+  } catch {
+    // Ignore cache cleanup errors
+  }
 }
 
 export function getCachedThumbnailPath(filePath: string): string | null {
   try {
     if (!fs.existsSync(filePath)) return null;
     const stats = fs.statSync(filePath);
-    const cacheKey = getCacheKey(filePath, stats.mtimeMs);
-    const cachedPath = path.join(getThumbnailCacheDirectory(), `${cacheKey}.png`);
+    const fileName = getThumbnailFileName(filePath, stats.mtimeMs);
+    const cachedPath = path.join(getThumbnailCacheDirectory(), fileName);
     return fs.existsSync(cachedPath) ? cachedPath : null;
   } catch {
     return null;
@@ -50,8 +70,8 @@ export async function getOrGenerateThumbnail(filePath: string): Promise<string |
       if (!fs.existsSync(filePath)) return null;
       const stats = await fs.promises.stat(filePath);
       const cacheDir = getThumbnailCacheDirectory();
-      const cacheKey = getCacheKey(filePath, stats.mtimeMs);
-      const finalThumbnailPath = path.join(cacheDir, `${cacheKey}.png`);
+      const fileName = getThumbnailFileName(filePath, stats.mtimeMs);
+      const finalThumbnailPath = path.join(cacheDir, fileName);
 
       if (fs.existsSync(finalThumbnailPath)) {
         return finalThumbnailPath;
@@ -67,6 +87,7 @@ export async function getOrGenerateThumbnail(filePath: string): Promise<string |
         const expectedGeneratedFile = path.join(tempDir, `${baseName}.png`);
 
         if (fs.existsSync(expectedGeneratedFile)) {
+          await cleanOldThumbnailsForFile(filePath, fileName);
           await fs.promises.rename(expectedGeneratedFile, finalThumbnailPath);
           return finalThumbnailPath;
         }
@@ -74,6 +95,7 @@ export async function getOrGenerateThumbnail(filePath: string): Promise<string |
         const generatedFiles = await fs.promises.readdir(tempDir);
         const pngCandidate = generatedFiles.find((f) => f.endsWith(".png"));
         if (pngCandidate) {
+          await cleanOldThumbnailsForFile(filePath, fileName);
           await fs.promises.rename(path.join(tempDir, pngCandidate), finalThumbnailPath);
           return finalThumbnailPath;
         }

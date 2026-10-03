@@ -1,4 +1,5 @@
 import { Grid, List, LocalStorage } from "@raycast/api";
+import path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyView } from "./components/EmptyView";
 import { ProjectGridItem } from "./components/ProjectGridItem";
@@ -9,6 +10,7 @@ import { useViewMode } from "./hooks/useViewMode";
 import { getRecentPhotoshopProjects } from "./services/recents";
 import { sortPhotoshopFiles } from "./services/search";
 import { PhotoshopFile, SortOption } from "./types";
+import { createPhotoshopFile } from "./utils/spotlight";
 
 const RECENT_SORT_STORAGE_KEY = "photoshop_recent_sort_by";
 
@@ -28,8 +30,8 @@ export default function RecentProjectsCommand() {
         if (saved) {
           setSortBy(saved as SortOption);
         }
-      } catch (error) {
-        void error;
+      } catch {
+        // Fallback to recent
       }
     }
     loadSavedSort();
@@ -56,6 +58,29 @@ export default function RecentProjectsCommand() {
     loadRecents();
   }, []);
 
+  const handleRenamed = async (oldPath: string, newPath: string) => {
+    const updatedFile = await createPhotoshopFile(newPath);
+    setFiles((prev) => {
+      const normalizedOld = path.resolve(oldPath);
+      return prev.map((f) => {
+        if (path.resolve(f.path) === normalizedOld) {
+          return (
+            updatedFile ?? {
+              ...f,
+              id: newPath,
+              path: newPath,
+              name: path.basename(newPath),
+              title: path.basename(newPath, path.extname(newPath)),
+              directory: path.dirname(newPath),
+              directoryName: path.basename(path.dirname(newPath)),
+            }
+          );
+        }
+        return f;
+      });
+    });
+  };
+
   const sortedFiles = useMemo(() => {
     let filtered = files;
     if (searchText.trim().length > 0) {
@@ -63,6 +88,7 @@ export default function RecentProjectsCommand() {
       filtered = files.filter(
         (f) =>
           f.name.toLowerCase().includes(term) ||
+          f.directory.toLowerCase().includes(term) ||
           f.directoryName.toLowerCase().includes(term) ||
           (f.layers && f.layers.some((l) => l.toLowerCase().includes(term))),
       );
@@ -104,6 +130,7 @@ export default function RecentProjectsCommand() {
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
             onRefresh={loadRecents}
+            onRenamed={(newPath) => handleRenamed(file.path, newPath)}
           />
         ))}
       </Grid>
@@ -131,6 +158,7 @@ export default function RecentProjectsCommand() {
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           onRefresh={loadRecents}
+          onRenamed={(newPath) => handleRenamed(file.path, newPath)}
         />
       ))}
     </List>
