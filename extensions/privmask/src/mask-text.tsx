@@ -343,8 +343,10 @@ export default function Command() {
     );
   }
 
+  // Loading for exactly as long as copying is held back, so the bar is what
+  // tells the user the list and preview are not yet their latest choice.
   return (
-    <List isLoading={input === null || waitingForModel} isShowingDetail searchBarPlaceholder="Filter what was found">
+    <List isLoading={input === null || !ready} isShowingDetail searchBarPlaceholder="Filter what was found">
       {notices.length > 0 && (
         <List.Section title="Worth knowing">
           {notices.map((notice, index) => (
