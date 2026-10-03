@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// @page-scanner/cli 0.3.2, Apache-2.0, bundled by scripts/vendor-cli.mjs.
+// @page-scanner/cli 0.3.5, Apache-2.0, bundled by scripts/vendor-cli.mjs.
 import { createRequire as __psCreateRequire } from 'node:module';
 import { fileURLToPath as __psFileURLToPath } from 'node:url';
 import { dirname as __psDirname } from 'node:path';
@@ -81,7 +81,7 @@ var init_errors = __esm({
   "node_modules/@page-scanner/cli/dist/errors.js"() {
     PAIR_COMMAND = "npx @page-scanner/cli pair";
     INSTALL_COMMAND = "npx @page-scanner/cli install";
-    CONNECT_HINT = `If Page Scanner is not set up on this computer yet, run \`${INSTALL_COMMAND}\`. Then open the extension's settings, Local agents, and press Connect.`;
+    CONNECT_HINT = `If Page Scanner is not set up on this computer yet, run \`${INSTALL_COMMAND}\`. Then open the extension's settings, Local Agents, and press Connect.`;
     PageScannerError = class extends Error {
       code;
       /** A second line of help, printed under the message. */
@@ -97,6 +97,22 @@ var init_errors = __esm({
 });
 
 // node_modules/@page-scanner/cli/dist/protocol.js
+function isPageTable(value) {
+  return isRecord(value) && typeof value.header === "boolean" && Array.isArray(value.rows) && value.rows.every((row) => Array.isArray(row) && row.every((cell) => typeof cell === "string")) && isRecord(value.box) && ["x", "y", "width", "height"].every((key) => isFiniteNumber(value.box[key]));
+}
+function isPageSlice(value) {
+  return isRecord(value) && ["y", "height", "widthPx", "heightPx"].every((key) => isFiniteNumber(value[key])) && typeof value.bytesBase64 === "string";
+}
+function isAccessibilityReport(value) {
+  if (!isRecord(value) || typeof value.engine !== "string" || !Array.isArray(value.rules) || !Array.isArray(value.nodes) || !["passed", "omitted", "ms"].every((key) => isFiniteNumber(value[key]))) {
+    return false;
+  }
+  const rules = value.rules;
+  return rules.every((rule) => isRecord(rule) && typeof rule.id === "string" && IMPACTS.includes(rule.impact) && typeof rule.help === "string" && typeof rule.helpUrl === "string" && Array.isArray(rule.wcag) && rule.wcag.every((tag) => typeof tag === "string")) && value.nodes.every((node) => isRecord(node) && Number.isInteger(node.rule) && node.rule >= 0 && node.rule < rules.length && typeof node.target === "string" && typeof node.summary === "string" && (node.box === null || isRecord(node.box) && ["x", "y", "width", "height"].every((key) => isFiniteNumber(node.box[key]))));
+}
+function isPagePicture(value) {
+  return isRecord(value) && (value.kind === "image" || value.kind === "canvas") && ["x", "y", "width", "height"].every((key) => isFiniteNumber(value[key])) && typeof value.bytesBase64 === "string";
+}
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -128,13 +144,19 @@ function isTabsResponse(value) {
   return isRecord(value) && value.type === "tabs" && isRequestId(value.id) && Array.isArray(value.windows) && value.windows.every(isWindowSummary) && Array.isArray(value.tabs) && value.tabs.every(isTabSummary);
 }
 function isStructuredPage(value) {
-  return isRecord(value) && typeof value.markdown === "string" && typeof value.title === "string" && typeof value.url === "string" && isFiniteNumber(value.capturedAt) && (value.language === null || typeof value.language === "string") && Array.isArray(value.headings) && value.headings.every((heading) => isRecord(heading) && isFiniteNumber(heading.level) && typeof heading.text === "string");
+  return isRecord(value) && typeof value.markdown === "string" && typeof value.title === "string" && typeof value.url === "string" && isFiniteNumber(value.capturedAt) && (value.language === null || typeof value.language === "string") && Array.isArray(value.headings) && value.headings.every((heading) => isRecord(heading) && isFiniteNumber(heading.level) && typeof heading.text === "string" && (heading.offset === void 0 || isFiniteNumber(heading.offset)) && (heading.chars === void 0 || isFiniteNumber(heading.chars))) && (value.scope === void 0 || TEXT_SCOPES.includes(value.scope)) && (value.cut === void 0 || isRecord(value.cut) && isFiniteNumber(value.cut.chars) && isFiniteNumber(value.cut.blocks)) && (value.redacted === void 0 || isRecord(value.redacted) && isFiniteNumber(value.redacted.count) && isRecord(value.redacted.kinds) && Object.values(value.redacted.kinds).every(isFiniteNumber));
 }
 function isCleanupReport(value) {
   return isRecord(value) && CLEANUP_KINDS.every((kind) => typeof value[kind] === "number" && Number.isInteger(value[kind]) && value[kind] >= 0);
 }
+function isPageCitation(value) {
+  return isRecord(value) && CITATION_KINDS.includes(value.kind) && Array.isArray(value.from) && value.from.every((source2) => CITATION_SOURCES.includes(source2)) && (value.authors === void 0 || Array.isArray(value.authors) && value.authors.every((name) => typeof name === "string")) && CITATION_TEXT_FIELDS.every((field) => value[field] === void 0 || typeof value[field] === "string");
+}
 function isScanResultResponse(value) {
-  return isRecord(value) && value.type === "scan-result" && isRequestId(value.id) && isFiniteNumber(value.width) && isFiniteNumber(value.height) && (value.mode === "vector" || value.mode === "raster") && isNonEmptyString(value.fileName) && typeof value.bytesBase64 === "string" && (value.truncated === void 0 || isTruncationReport(value.truncated)) && (value.structured === void 0 || isStructuredPage(value.structured)) && (value.hidden === void 0 || isCleanupReport(value.hidden));
+  return isRecord(value) && value.type === "scan-result" && isRequestId(value.id) && isFiniteNumber(value.width) && isFiniteNumber(value.height) && (value.mode === "vector" || value.mode === "raster") && isNonEmptyString(value.fileName) && typeof value.bytesBase64 === "string" && (value.truncated === void 0 || isTruncationReport(value.truncated)) && (value.structured === void 0 || isStructuredPage(value.structured)) && (value.hidden === void 0 || isCleanupReport(value.hidden)) && (value.citation === void 0 || isPageCitation(value.citation)) && (value.translated === void 0 || isPageTranslation(value.translated)) && (value.slices === void 0 || Array.isArray(value.slices) && value.slices.every(isPageSlice)) && (value.slicesCut === void 0 || typeof value.slicesCut === "boolean") && (value.pictures === void 0 || Array.isArray(value.pictures) && value.pictures.every(isPagePicture)) && (value.highlighted === void 0 || Array.isArray(value.highlighted) && value.highlighted.every((item) => isRecord(item) && typeof item.quote === "string" && typeof item.found === "boolean")) && (value.accessibility === void 0 || isRecord(value.accessibility) && isAccessibilityReport(value.accessibility.report) && typeof value.accessibility.pdfBase64 === "string") && (value.tables === void 0 || Array.isArray(value.tables) && value.tables.every(isPageTable));
+}
+function isPageTranslation(value) {
+  return isRecord(value) && TRANSLATORS.includes(value.by);
 }
 function isCountMap(value) {
   return isRecord(value) && Object.values(value).every((count) => typeof count === "number" && Number.isInteger(count));
@@ -189,18 +211,47 @@ function helloAck() {
 function helloReject(message) {
   return { type: "hello-error", message };
 }
-var BRIDGE_PROTOCOL_VERSION, EXPORT_FORMAT_IDS, STRUCTURED_MODES, PAGE_SIZE_IDS, DEFAULT_PAGE_SIZE, VIDEO_HANDLINGS, COLOR_SCHEME_PREFERENCES, CAPTURE_WIDTHS, CLEANUP_KINDS, MAX_DESIGN_LINKS, DESIGN_COMPONENT_STYLE_KEYS, MAX_COMPONENT_CANDIDATES, NATIVE_HOST_NAME, NATIVE_TO_HOST_CHUNK_CHARS, NATIVE_FROM_HOST_CHUNK_CHARS;
+var BRIDGE_PROTOCOL_VERSION, EXPORT_FORMAT_IDS, STRUCTURED_MODES, TEXT_SCOPES, TEXT_LINKS, TEXT_PICTURES, MIN_TEXT_CHARS, MAX_TEXT_CHARS, PAGE_SIZE_IDS, DEFAULT_PAGE_SIZE, VIDEO_HANDLINGS, COLOR_SCHEME_PREFERENCES, CAPTURE_WIDTHS, CLEANUP_KINDS, CITATION_KINDS, CITATION_SOURCES, MAX_HIGHLIGHTS, MAX_HIGHLIGHT_CHARS, MIN_SLICE_SIDE, MAX_SLICE_SIDE, DEFAULT_SLICE_SIDE, IMPACTS, MAX_DESIGN_LINKS, DESIGN_COMPONENT_STYLE_KEYS, MAX_COMPONENT_CANDIDATES, CITATION_TEXT_FIELDS, TRANSLATORS, NATIVE_HOST_NAME, NATIVE_TO_HOST_CHUNK_CHARS, NATIVE_FROM_HOST_CHUNK_CHARS;
 var init_protocol = __esm({
   "node_modules/@page-scanner/cli/dist/protocol.js"() {
     BRIDGE_PROTOCOL_VERSION = 1;
     EXPORT_FORMAT_IDS = ["pdf", "png", "jpeg"];
     STRUCTURED_MODES = ["alongside", "only"];
-    PAGE_SIZE_IDS = ["auto", "a4", "letter"];
+    TEXT_SCOPES = ["page", "main"];
+    TEXT_LINKS = ["inline", "references", "text"];
+    TEXT_PICTURES = ["omit", "alt"];
+    MIN_TEXT_CHARS = 200;
+    MAX_TEXT_CHARS = 1e7;
+    PAGE_SIZE_IDS = ["auto", "a4", "letter", "phone"];
     DEFAULT_PAGE_SIZE = "a4";
     VIDEO_HANDLINGS = ["frame", "blank"];
     COLOR_SCHEME_PREFERENCES = ["auto", "light", "dark"];
-    CAPTURE_WIDTHS = ["window", "a4", "letter"];
+    CAPTURE_WIDTHS = ["window", "a4", "letter", "phone"];
     CLEANUP_KINDS = ["ads", "consent", "chat", "overlays"];
+    CITATION_KINDS = [
+      "journal",
+      "conference",
+      "thesis",
+      "report",
+      "book",
+      "news",
+      "blog",
+      "webpage"
+    ];
+    CITATION_SOURCES = [
+      "highwire",
+      "prism",
+      "json-ld",
+      "dublin-core",
+      "opengraph",
+      "canonical"
+    ];
+    MAX_HIGHLIGHTS = 200;
+    MAX_HIGHLIGHT_CHARS = 2e3;
+    MIN_SLICE_SIDE = 256;
+    MAX_SLICE_SIDE = 4096;
+    DEFAULT_SLICE_SIDE = 1568;
+    IMPACTS = ["critical", "serious", "moderate", "minor", null];
     MAX_DESIGN_LINKS = 500;
     DESIGN_COMPONENT_STYLE_KEYS = [
       "background",
@@ -216,6 +267,22 @@ var init_protocol = __esm({
       "shadow"
     ];
     MAX_COMPONENT_CANDIDATES = 2e3;
+    CITATION_TEXT_FIELDS = [
+      "title",
+      "published",
+      "modified",
+      "container",
+      "publisher",
+      "volume",
+      "issue",
+      "pages",
+      "doi",
+      "isbn",
+      "issn",
+      "canonical",
+      "language"
+    ];
+    TRANSLATORS = ["chrome", "edge"];
     NATIVE_HOST_NAME = "app.pagescanner.bridge";
     NATIVE_TO_HOST_CHUNK_CHARS = 8 * 1024 * 1024;
     NATIVE_FROM_HOST_CHUNK_CHARS = 128 * 1024;
@@ -284,7 +351,7 @@ function cliBuild() {
 var CLI_VERSION, build;
 var init_version = __esm({
   "node_modules/@page-scanner/cli/dist/version.js"() {
-    CLI_VERSION = "0.3.2";
+    CLI_VERSION = "0.3.5";
   }
 });
 
@@ -4099,7 +4166,7 @@ var init_server = __esm({
       }
       /** Resolves with the port actually bound, which matters when 0 was asked for. */
       start() {
-        return new Promise((resolve5, reject) => {
+        return new Promise((resolve6, reject) => {
           const wss = new import_websocket_server.default({ host: "127.0.0.1", port: this.port });
           this.wss = wss;
           const onError = (error) => reject(error);
@@ -4111,7 +4178,7 @@ var init_server = __esm({
             const bound = typeof address === "object" && address !== null ? address.port : this.port;
             this.port = bound;
             this.log(`bridge listening on 127.0.0.1:${bound}`);
-            resolve5(bound);
+            resolve6(bound);
           });
           wss.on("connection", (socket, request) => this.accept(socket, request));
         });
@@ -4170,6 +4237,7 @@ var init_server = __esm({
               features: frame.features ?? [],
               since: this.now(),
               pending: /* @__PURE__ */ new Map(),
+              busyTabs: /* @__PURE__ */ new Map(),
               nextId: 0
             };
             this.browsers.set(frame.browserId, entry);
@@ -4180,9 +4248,14 @@ var init_server = __esm({
           }
           if (!entry || isPingFrame(frame))
             return;
+          const freed = this.freeTab(entry, frame.id);
           const waiting = entry.pending.get(frame.id);
-          if (!waiting)
+          if (!waiting) {
+            if (freed !== void 0) {
+              this.log(`the browser finished with tab ${freed} after its caller gave up`);
+            }
             return;
+          }
           clearTimeout(waiting.timer);
           entry.pending.delete(frame.id);
           if (frame.type === "error") {
@@ -4204,6 +4277,16 @@ var init_server = __esm({
           }
         });
         socket.on("error", () => socket.close());
+      }
+      /** Forgets the tab the request `id` was scanning, if any, and says which it was. */
+      freeTab(entry, id) {
+        for (const [tabId, busy] of entry.busyTabs) {
+          if (busy.id !== id)
+            continue;
+          entry.busyTabs.delete(tabId);
+          return tabId;
+        }
+        return void 0;
       }
       rejectPending(entry, message) {
         for (const [id, waiting] of entry.pending) {
@@ -4272,7 +4355,7 @@ var init_server = __esm({
           if (timeoutMs <= 0)
             return Promise.reject(error);
         }
-        return new Promise((resolve5, reject) => {
+        return new Promise((resolve6, reject) => {
           const settle = (fn) => {
             clearTimeout(timer);
             this.off("browser-connected", onConnected);
@@ -4281,7 +4364,7 @@ var init_server = __esm({
           const onConnected = () => {
             try {
               const id = this.resolveBrowser(browserId);
-              settle(() => resolve5(id));
+              settle(() => resolve6(id));
             } catch {
             }
           };
@@ -4296,19 +4379,30 @@ var init_server = __esm({
         if (!entry) {
           throw new PageScannerError("BROWSER_GONE", `Browser ${browserId} is no longer connected.`);
         }
+        const tabId = payload.type === "scan" || payload.type === "extract-design" ? payload.tabId : void 0;
+        if (tabId !== void 0) {
+          const busy = entry.busyTabs.get(tabId);
+          if (busy) {
+            const seconds = Math.round((this.now() - busy.since) / 1e3);
+            throw new PageScannerError("SCAN_FAILED", `A capture of tab ${tabId} is still running in the browser (started ${seconds}s ago).`, "Wait for it to finish before scanning that tab again: the browser lets one capture drive a tab at a time, and a caller that stopped waiting does not stop the capture.");
+          }
+        }
         entry.nextId += 1;
         const id = `req-${entry.nextId}`;
-        return new Promise((resolve5, reject) => {
+        if (tabId !== void 0)
+          entry.busyTabs.set(tabId, { id, since: this.now() });
+        return new Promise((resolve6, reject) => {
           const timer = setTimeout(() => {
             entry.pending.delete(id);
-            reject(new PageScannerError("TIMEOUT", `The browser did not answer in ${Math.round(timeoutMs / 1e3)}s.`));
+            reject(new PageScannerError("TIMEOUT", `The browser did not answer in ${Math.round(timeoutMs / 1e3)}s.`, payload.type === "scan" ? "The capture may still be running in the browser, which goes on until it finishes; its tab can be scanned again after that. A long page may need a longer timeout." : void 0));
           }, timeoutMs);
-          entry.pending.set(id, { resolve: resolve5, reject, timer });
+          entry.pending.set(id, { resolve: resolve6, reject, timer });
           try {
             entry.socket.send(JSON.stringify({ ...payload, id }));
           } catch (error) {
             clearTimeout(timer);
             entry.pending.delete(id);
+            this.freeTab(entry, id);
             reject(new PageScannerError("BROWSER_GONE", error instanceof Error ? error.message : String(error)));
           }
         });
@@ -4321,6 +4415,22 @@ var init_server = __esm({
         return answer;
       }
       async scan(browserId, request, timeoutMs = this.requestTimeoutMs) {
+        if (request.text)
+          this.requireFeature(browserId, "text-options", "shape the page\u2019s text");
+        if (request.text?.redact) {
+          this.requireFeature(browserId, "text-redaction", "redact the page\u2019s text");
+        }
+        if (request.slices !== void 0 || request.pictures) {
+          this.requireFeature(browserId, "page-images", "cut the page into pictures");
+        }
+        if (request.highlight?.length) {
+          this.requireFeature(browserId, "quote-highlights", "highlight quoted passages");
+        }
+        if (request.accessibility) {
+          this.requireFeature(browserId, "accessibility", "check the page\u2019s accessibility");
+        }
+        if (request.tables)
+          this.requireFeature(browserId, "tables", "send the page\u2019s tables");
         const answer = await this.request(browserId, { type: "scan", ...request }, timeoutMs);
         if (answer.type !== "scan-result") {
           throw new PageScannerError("SCAN_FAILED", "The browser answered a scan with a tab list.");
@@ -4371,7 +4481,7 @@ var init_server = __esm({
         this.wss = null;
         if (!wss)
           return;
-        await new Promise((resolve5) => wss.close(() => resolve5()));
+        await new Promise((resolve6) => wss.close(() => resolve6()));
       }
     };
   }
@@ -4379,14 +4489,65 @@ var init_server = __esm({
 
 // node_modules/@page-scanner/cli/dist/daemon/rpc-server.js
 import { createServer } from "node:http";
+function highlights(value) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_HIGHLIGHTS || !value.every((quote2) => typeof quote2 === "string" && quote2.trim() !== "" && quote2.length <= MAX_HIGHLIGHT_CHARS)) {
+    throw new PageScannerError("BAD_REQUEST", `highlight must be a list of 1 to ${MAX_HIGHLIGHTS} passages, each up to ${MAX_HIGHLIGHT_CHARS} characters.`);
+  }
+  return value;
+}
+function sliceSide(value) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < MIN_SLICE_SIDE || value > MAX_SLICE_SIDE) {
+    throw new PageScannerError("BAD_REQUEST", `slices must be a whole number of pixels from ${MIN_SLICE_SIDE} to ${MAX_SLICE_SIDE}.`);
+  }
+  return value;
+}
 function cleanupKinds(value) {
   if (!Array.isArray(value) || !value.every((kind) => CLEANUP_KINDS.includes(kind))) {
     throw new PageScannerError("BAD_REQUEST", `hide must be a list of ${CLEANUP_KINDS.join(", ")}.`);
   }
   return CLEANUP_KINDS.filter((kind) => value.includes(kind));
 }
+function textOptions(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new PageScannerError("BAD_REQUEST", "text must be an object.");
+  }
+  const unknown = Object.keys(value).filter((key) => !["scope", "maxChars", "links", "pictures", "redact"].includes(key));
+  if (unknown.length > 0) {
+    throw new PageScannerError("BAD_REQUEST", `text has ${unknown.length === 1 ? "a part" : "parts"} this daemon does not know: ${unknown.join(", ")}.`);
+  }
+  const { scope, maxChars, links, pictures, redact } = value;
+  if (redact !== void 0 && typeof redact !== "boolean") {
+    throw new PageScannerError("BAD_REQUEST", "text.redact must be true or false.");
+  }
+  const pick = (name, given, allowed) => {
+    if (given === void 0)
+      return void 0;
+    if (!allowed.includes(given)) {
+      throw new PageScannerError("BAD_REQUEST", `text.${name} must be one of ${allowed.join(", ")}.`);
+    }
+    return given;
+  };
+  if (maxChars !== void 0 && (typeof maxChars !== "number" || !Number.isInteger(maxChars) || maxChars < MIN_TEXT_CHARS || maxChars > MAX_TEXT_CHARS)) {
+    throw new PageScannerError("BAD_REQUEST", `text.maxChars must be a whole number from ${MIN_TEXT_CHARS} to ${MAX_TEXT_CHARS}.`);
+  }
+  const options = {};
+  const chosenScope = pick("scope", scope, TEXT_SCOPES);
+  const chosenLinks = pick("links", links, TEXT_LINKS);
+  const chosenPictures = pick("pictures", pictures, TEXT_PICTURES);
+  if (chosenScope)
+    options.scope = chosenScope;
+  if (maxChars !== void 0)
+    options.maxChars = maxChars;
+  if (chosenLinks)
+    options.links = chosenLinks;
+  if (chosenPictures)
+    options.pictures = chosenPictures;
+  if (redact === true)
+    options.redact = true;
+  return options;
+}
 function readBody(request) {
-  return new Promise((resolve5, reject) => {
+  return new Promise((resolve6, reject) => {
     let size = 0;
     const chunks = [];
     request.on("data", (chunk2) => {
@@ -4398,7 +4559,7 @@ function readBody(request) {
       }
       chunks.push(chunk2);
     });
-    request.on("end", () => resolve5(Buffer.concat(chunks).toString("utf8")));
+    request.on("end", () => resolve6(Buffer.concat(chunks).toString("utf8")));
     request.on("error", reject);
   });
 }
@@ -4517,7 +4678,13 @@ async function dispatch(method, params, options) {
         ...params.structured !== void 0 ? {
           structured: oneOf(params, "structured", STRUCTURED_MODES, "alongside")
         } : {},
-        ...params.hide !== void 0 ? { hide: cleanupKinds(params.hide) } : {}
+        ...params.hide !== void 0 ? { hide: cleanupKinds(params.hide) } : {},
+        ...params.text !== void 0 ? { text: textOptions(params.text) } : {},
+        ...params.slices !== void 0 ? { slices: sliceSide(params.slices) } : {},
+        ...params.pictures === true ? { pictures: true } : {},
+        ...params.highlight !== void 0 ? { highlight: highlights(params.highlight) } : {},
+        ...params.accessibility === true ? { accessibility: true } : {},
+        ...params.tables === true ? { tables: true } : {}
       }, timeoutFrom({ timeoutMs: params.scanTimeoutMs }, 12e4));
       return {
         browserId: resolved,
@@ -4528,7 +4695,15 @@ async function dispatch(method, params, options) {
         truncated: answer.truncated ?? null,
         bytesBase64: answer.bytesBase64,
         ...answer.structured ? { structured: answer.structured } : {},
-        ...answer.hidden ? { hidden: answer.hidden } : {}
+        ...answer.hidden ? { hidden: answer.hidden } : {},
+        ...answer.citation ? { citation: answer.citation } : {},
+        ...answer.translated ? { translated: answer.translated } : {},
+        ...answer.slices ? { slices: answer.slices } : {},
+        ...answer.slicesCut ? { slicesCut: true } : {},
+        ...answer.pictures ? { pictures: answer.pictures } : {},
+        ...answer.highlighted ? { highlighted: answer.highlighted } : {},
+        ...answer.accessibility ? { accessibility: answer.accessibility } : {},
+        ...answer.tables ? { tables: answer.tables } : {}
       };
     }
     case "extractDesign": {
@@ -4579,14 +4754,14 @@ function startRpcServer(options) {
   });
   server.requestTimeout = 0;
   server.headersTimeout = 0;
-  return new Promise((resolve5, reject) => {
+  return new Promise((resolve6, reject) => {
     const onError = (error) => reject(error);
     server.once("error", onError);
     server.listen(options.port ?? 0, "127.0.0.1", () => {
       server.off("error", onError);
       const address = server.address();
       const port = typeof address === "object" && address !== null ? address.port : 0;
-      resolve5({
+      resolve6({
         port,
         close: () => new Promise((done) => {
           server.closeAllConnections();
@@ -4697,8 +4872,8 @@ async function runDaemon(options = {}) {
   let stopping = false;
   let finish = () => {
   };
-  const stopped = new Promise((resolve5) => {
-    finish = resolve5;
+  const stopped = new Promise((resolve6) => {
+    finish = resolve6;
   });
   let rpc = null;
   let idleTimer = null;
@@ -5060,6 +5235,7 @@ var COMMANDS = [
   "scan",
   "diff",
   "verify",
+  "check",
   "design",
   "serve",
   "stop",
@@ -5084,16 +5260,26 @@ Usage:
   page-scanner tabs     [--browser <id|label>] [--wait <s>=${TABS_WAIT_SECONDS}] [--json]
   page-scanner scan     (--url <u>... | --urls <file|-> | --tab <id>)
                         [--window <id>] [--name <template>]
-                        [--markdown beside|only] [--hide <kinds>|all|none]
+                        [--markdown beside|only] [--main-content]
+                        [--max-chars <n>] [--links inline|references|text]
+                        [--pictures omit|alt] [--redact]
+                        [--hide <kinds>|all|none]
+                        [--slices] [--slice-side <px>=${DEFAULT_SLICE_SIDE}]
+                        [--picture-files] [--accessibility] [--tables]
+                        [--highlight <quote>]... [--highlight-from <file|->]
                         [--browser <id|label>] [--format pdf|png|jpeg=pdf]
-                        [--page-size auto|a4|letter=a4] [--quality <0-1>]
+                        [--page-size auto|a4|letter|phone=a4] [--quality <0-1>]
                         [--video frame|blank] [--scheme auto|light|dark]
-                        [--page-width window|a4|letter] [--open-editor]
-                        [--out <file|dir>] [--wait <s>=${SCAN_WAIT_SECONDS}]
+                        [--page-width window|a4|letter|phone] [--open-editor]
+                        [--out <file|dir>] [--keep-existing]
+                        [--wait <s>=${SCAN_WAIT_SECONDS}]
                         [--timeout <s>=${SCAN_TIMEOUT_SECONDS}]
                         [--json]
-  page-scanner diff     <old> <new> [--out <file>] [--json]
+  page-scanner diff     <old> <new> [--section <heading>] [--out <file>]
+                        [--json]
   page-scanner verify   <file> [--record <file.integrity.json>] [--json]
+  page-scanner check    <file.md> [<quote>...] [--from <file|->] [--loose]
+                        [--json]
   page-scanner design   (--url <u>... | --urls <file|-> | --tab <id> |
                          --crawl <u> [--max-pages <n>=10] [--depth <n>=2])
                         [--components] [--window <id>] [--out <dir>]
@@ -5114,6 +5300,7 @@ Commands:
   scan      Capture a page, or a list of them, and write each to a file.
   diff      Say what changed between two captures of a page.
   verify    Check a file against the integrity record exported beside it.
+  check     Say whether quotes and values occur in a capture's Markdown.
   design    Read a site's design tokens from one page or several, with an
             audit and a contrast check.
   serve     Run the bridge in this terminal, or start it in the background.
@@ -5136,7 +5323,9 @@ prints every page light unless it is told otherwise.
 --page-width lays the page out at the width of a sheet before capturing it,
 the way a narrow window would, so the PDF prints at 1:1 instead of being
 scaled down. A 1280 px window on A4 is scaled to 55 %, which puts 16 px
-body text at 6.5 pt; --page-width a4 puts it at 12.
+body text at 6.5 pt; --page-width a4 puts it at 12. --page-width phone lays
+it out 390 px wide, as a phone shows it, and --page-size phone cuts a PDF
+into phone screens, 390 x 844 px, with no margin.
 
 --url can be given more than once, and --urls reads a file of addresses,
 one to a line (# starts a comment, - reads standard input). A list is
@@ -5153,14 +5342,53 @@ file takes the browser's name, with -2, -3 when two pages share one.
 list of ads, consent, chat and overlays, or all, or none. Without it the
 extension's own settings decide. The --json result counts what was hidden.
 
+--slices writes the capture as PNG slices for a vision model, top to
+bottom, into a folder beside the file (page.pdf gives page.slices/), each
+at most --slice-side pixels on a side (${DEFAULT_SLICE_SIDE}, the size past which Claude
+shrinks a picture) and repeating the last lines of the one before, so a
+line on a seam is whole in one. --picture-files writes the page's pictures
+and canvases, cut from the capture where they were drawn, into
+page.pictures/. The --json result lists each file and where it was.
+
+--accessibility checks the page against WCAG 2.0, 2.1 and 2.2, levels A
+and AA, with axe-core, and writes page.accessibility.pdf, the capture with
+each failing element boxed and numbered and the rules listed after it, and
+page.accessibility.json, every rule and element with its box on the page.
+An automated check finds some of what fails WCAG, not all of it.
+
+--tables writes the page's tables as JSON beside the file, page.tables.json:
+each with its rows of cell text, every row as wide as the widest, whether
+the first row is the page's header, and its box on the page. A <table>,
+an ARIA table (role="table" or "grid") and a CSS grid drawn as one all
+count. With --markdown they cover what the text covers, --main-content and
+--redact included.
+
+--highlight marks a passage quoted from the page where the page has it as
+written, the way check finds it, and a PDF lists every one under a
+"Quoted passages" bookmark. Give it once a passage, or --highlight-from
+a file of them, one a line or a JSON array (- reads standard input). The
+--json result says which were found as "highlighted"; one not found is
+said on stderr and not marked.
+
 --markdown writes the page's text as Markdown: beside puts a .md next to
 the file, only writes the .md alone. The headings, title and language come
-back in --json as "page".
+back in --json as "page", each heading with where its section starts and
+how long it is. For an agent's context: --main-content writes only the main
+content the extension found (the whole page when it found none), --max-chars
+keeps whole blocks up to that many characters and reports what it cut,
+--links references lists each address once at the end (text drops them),
+and --pictures alt leaves a placeholder with each picture's alt text.
+--redact replaces every email address, phone number, card, IBAN, ID or tax
+number, IP address, key and token Sensitive Text's rules find, and the
+user's own patterns, with a numbered placeholder (\u27E6EMAIL 1\u27E7) before the
+text leaves the browser. The PDF or picture beside it is not redacted.
 
 diff compares two Markdown files (from --markdown) a passage at a time,
 printing what diff -u prints, or two PNGs pixel by pixel, writing the newer
 one with the changed regions outlined (--out, or <new>.diff.png). A PDF is
-compared by the .md beside it. It exits 0 when nothing changed and 1 when
+compared by the .md beside it. --section "Pricing" (or "Pricing > Pro")
+compares only the section under that heading, so the banners and rails
+around it do not count. It exits 0 when nothing changed and 1 when
 something did, the way diff does.
 
 verify checks a file's SHA-256 against the record the extension wrote
@@ -5168,6 +5396,14 @@ beside it (<file>.integrity.json unless --record names another) and, when
 the record is signed, the signature. It exits 0 when both hold and 1 when
 either does not. It says nothing about the time, which is the capturing
 computer's clock.
+
+check looks for each quote in a capture's Markdown as written, with the
+Markdown's own markup undone and line wrapping ignored, and prints the
+line and the section it is under, or where a missing one parts from the
+capture. Quotes come after the file, or from --from, one a line or a JSON
+array (- for standard input). A match only once curly quotes, dashes and
+case are folded is reported apart, and --loose accepts it. It exits 0 when
+every quote is there and 1 when one is not.
 
 --browser takes a browserId or a label, matched without regard to case, and
 is needed only when more than one browser is connected. --wait 0 means do
@@ -5446,8 +5682,21 @@ function parseScan(argv) {
       url: { type: "string", multiple: true },
       urls: { type: "string" },
       name: { type: "string" },
+      "keep-existing": { type: "boolean" },
       markdown: { type: "string" },
+      "main-content": { type: "boolean" },
+      "max-chars": { type: "string" },
+      links: { type: "string" },
+      pictures: { type: "string" },
+      redact: { type: "boolean" },
       hide: { type: "string" },
+      slices: { type: "boolean" },
+      "slice-side": { type: "string" },
+      "picture-files": { type: "boolean" },
+      accessibility: { type: "boolean" },
+      tables: { type: "boolean" },
+      highlight: { type: "string", multiple: true },
+      "highlight-from": { type: "string" },
       tab: { type: "string" },
       window: { type: "string" },
       browser: { type: "string" },
@@ -5478,11 +5727,36 @@ function parseScan(argv) {
   if (batch && values["open-editor"] === true) {
     throw badRequest("--open-editor opens a tab for each page, so it is not for a list.");
   }
+  if (batch && (values.highlight !== void 0 || values["highlight-from"] !== void 0)) {
+    throw badRequest("--highlight marks passages quoted from one page, so it is not for a list.", "Scan the page the passages came from with --url or --tab.");
+  }
+  const text = {
+    ...values["main-content"] === true ? { scope: "main" } : {},
+    ...values["max-chars"] !== void 0 ? {
+      maxChars: requireNumber("--max-chars", values["max-chars"], `a whole number from ${MIN_TEXT_CHARS} to ${MAX_TEXT_CHARS}`, (n) => Number.isInteger(n) && n >= MIN_TEXT_CHARS && n <= MAX_TEXT_CHARS)
+    } : {},
+    ...values.links !== void 0 ? { links: requireEnum("--links", values.links, TEXT_LINKS) } : {},
+    ...values.pictures !== void 0 ? { pictures: requireEnum("--pictures", values.pictures, TEXT_PICTURES) } : {},
+    ...values.redact === true ? { redact: true } : {}
+  };
+  const shaped = Object.keys(text).length > 0;
+  if (shaped && values.markdown === void 0) {
+    throw badRequest("--main-content, --max-chars, --links, --pictures and --redact shape the Markdown, and none was asked for.", "Add --markdown beside or --markdown only.");
+  }
   return {
     command: "scan",
     ...batch ? { urls, ...urlsFile !== void 0 ? { urlsFile } : {} } : { url: urls[0] },
+    ...shaped ? { text } : {},
     name: optionalText("--name", values.name),
     ...values.hide !== void 0 ? { hide: requireHide(values.hide) } : {},
+    ...values.slices === true || values["slice-side"] !== void 0 ? {
+      slices: values["slice-side"] === void 0 ? DEFAULT_SLICE_SIDE : requireNumber("--slice-side", values["slice-side"], `a whole number of pixels from ${MIN_SLICE_SIDE} to ${MAX_SLICE_SIDE}`, (n) => Number.isInteger(n) && n >= MIN_SLICE_SIDE && n <= MAX_SLICE_SIDE)
+    } : {},
+    ...values["picture-files"] === true ? { pictureFiles: true } : {},
+    ...values.accessibility === true ? { accessibility: true } : {},
+    ...values.tables === true ? { tables: true } : {},
+    ...values.highlight !== void 0 ? { highlight: values.highlight.map((quote2) => requireText("--highlight", quote2)) } : {},
+    ...values["highlight-from"] !== void 0 ? { highlightFrom: requireText("--highlight-from", values["highlight-from"]) } : {},
     markdown: values.markdown === void 0 ? void 0 : requireEnum("--markdown", values.markdown, ["beside", "only"]),
     tabId: optionalInteger("--tab", values.tab),
     windowId: optionalInteger("--window", values.window),
@@ -5495,6 +5769,7 @@ function parseScan(argv) {
     captureWidth: values["page-width"] === void 0 ? void 0 : requireEnum("--page-width", values["page-width"], CAPTURE_WIDTHS),
     openEditor: values["open-editor"] === true,
     out: optionalText("--out", values.out),
+    keepExisting: values["keep-existing"] === true,
     waitSeconds: values.wait === void 0 ? SCAN_WAIT_SECONDS : requireSeconds("--wait", values.wait),
     timeoutSeconds: values.timeout === void 0 ? SCAN_TIMEOUT_SECONDS : requireSeconds("--timeout", values.timeout),
     json: values.json === true
@@ -5508,6 +5783,7 @@ function parseDiff(argv) {
     options: {
       help: { type: "boolean", short: "h" },
       out: { type: "string" },
+      section: { type: "string" },
       json: { type: "boolean" }
     }
   }));
@@ -5522,6 +5798,7 @@ function parseDiff(argv) {
     old: requireText("<old>", older),
     new: requireText("<new>", newer),
     out: optionalText("--out", values.out),
+    section: optionalText("--section", values.section),
     json: values.json === true
   };
 }
@@ -5546,6 +5823,36 @@ function parseVerify(argv) {
     command: "verify",
     file: requireText("<file>", file),
     record: optionalText("--record", values.record),
+    json: values.json === true
+  };
+}
+function parseCheck(argv) {
+  const { values, positionals } = readOptions(() => parseNodeArgs({
+    args: argv,
+    strict: true,
+    allowPositionals: true,
+    options: {
+      help: { type: "boolean", short: "h" },
+      from: { type: "string" },
+      loose: { type: "boolean" },
+      json: { type: "boolean" }
+    }
+  }));
+  if (wantsHelp(values))
+    return { command: "help" };
+  const [file, ...quotes] = positionals;
+  if (file === void 0) {
+    throw badRequest("check takes the capture\u2019s Markdown file, then the quotes to look for.", 'For example: page-scanner check pricing.md "Pro is $10 a month"');
+  }
+  if (quotes.length === 0 && values.from === void 0) {
+    throw badRequest("check has nothing to look for: give quotes after the file, or --from.", "For example: page-scanner check pricing.md --from quotes.txt");
+  }
+  return {
+    command: "check",
+    file: requireText("<file.md>", file),
+    quotes,
+    from: optionalText("--from", values.from),
+    loose: values.loose === true,
     json: values.json === true
   };
 }
@@ -5620,6 +5927,8 @@ function parseArgs(argv) {
       return parseDiff(rest);
     case "verify":
       return parseVerify(rest);
+    case "check":
+      return parseCheck(rest);
     case "design":
       return parseDesign(rest);
     case "serve":
@@ -5634,15 +5943,15 @@ function parseArgs(argv) {
 }
 
 // node_modules/@page-scanner/cli/dist/cli/commands.js
-import { accessSync as accessSync2, constants as constants2, readFileSync as readFileSync7 } from "node:fs";
-import { isAbsolute as isAbsolute2, resolve as resolve4 } from "node:path";
+import { accessSync as accessSync2, constants as constants2, readFileSync as readFileSync8 } from "node:fs";
+import { dirname as dirname5, isAbsolute as isAbsolute2, resolve as resolve5 } from "node:path";
 
 // node_modules/@page-scanner/cli/dist/api.js
 init_config();
 init_errors();
 
 // node_modules/@page-scanner/cli/dist/output.js
-import { accessSync, constants, mkdirSync as mkdirSync2, statSync, writeFileSync as writeFileSync2 } from "node:fs";
+import { accessSync, constants, existsSync as existsSync2, mkdirSync as mkdirSync2, statSync, writeFileSync as writeFileSync2 } from "node:fs";
 import { homedir as homedir2 } from "node:os";
 import { basename, dirname as dirname2, join as join3, parse, resolve } from "node:path";
 
@@ -5683,6 +5992,16 @@ function resolveOutputPath(outputPath, suggestedName, cwd = process.cwd()) {
     return resolve(cwd, suggestedName);
   const target = resolve(cwd, outputPath);
   return outputNamesAFile(outputPath, cwd) ? target : join3(target, suggestedName);
+}
+function availablePath(path, exists = existsSync2) {
+  if (!exists(path))
+    return path;
+  const { dir, name, ext } = parse(path);
+  for (let copy = 2; ; copy++) {
+    const candidate = join3(dir, `${name}-${copy}${ext}`);
+    if (!exists(candidate))
+      return candidate;
+  }
 }
 function outputNamesAFile(outputPath, cwd = process.cwd()) {
   const target = resolve(cwd, outputPath);
@@ -5792,7 +6111,7 @@ init_state();
 var DAEMON_START_TIMEOUT_MS = 5e3;
 var POLL_INTERVAL_MS = 100;
 var SERVE_COMMAND = "npx @page-scanner/cli serve";
-var realSleep = (ms) => new Promise((resolve5) => setTimeout(resolve5, ms));
+var realSleep = (ms) => new Promise((resolve6) => setTimeout(resolve6, ms));
 function clientFor(state) {
   return {
     state,
@@ -5865,11 +6184,11 @@ async function startDaemonInProcess() {
     } catch {
     }
   };
-  await new Promise((resolve5, reject) => {
-    runDaemon2({ log, handleSignals: false, onListening: () => resolve5() }).then(
+  await new Promise((resolve6, reject) => {
+    runDaemon2({ log, handleSignals: false, onListening: () => resolve6() }).then(
       // Returning without listening means another daemon is registered; the
       // wait that follows finds it.
-      () => resolve5(),
+      () => resolve6(),
       reject
     );
   });
@@ -7219,14 +7538,14 @@ function componentsMarkdown(source2, components) {
   for (const component2 of components) {
     lines.push(`## ${component2.name}`, "", `${component2.instances} ${component2.instances === 1 ? "instance" : "instances"} on ${component2.pages.join(", ")}. \`${component2.tag}\`${component2.role ? ` role \`${component2.role}\`` : ""}${component2.skeleton ? ` holding \`${component2.skeleton}\`` : ""}${component2.classes ? `, classes \`${component2.classes}\`` : ""}.`, "", "| Variant | Uses | Look | Hover | Focus |", "| --- | --- | --- | --- | --- |");
     component2.variants.forEach((variant, index) => {
-      const cells = [
+      const cells2 = [
         `${index + 1}${variant.label ? ` "${variant.label.replace(/\|/g, "/")}"` : ""}${variant.disabled ? `, ${variant.disabled} disabled` : ""}`,
         String(variant.instances),
         describeLook(variant.style),
         variant.hover ? describeLook(variant.hover) : "",
         variant.focus ? describeLook(variant.focus) : ""
       ];
-      lines.push(`| ${cells.join(" | ")} |`);
+      lines.push(`| ${cells2.join(" | ")} |`);
     });
     lines.push("");
   }
@@ -7263,7 +7582,7 @@ init_config();
 init_errors();
 init_protocol();
 import { spawnSync } from "node:child_process";
-import { chmodSync as chmodSync3, copyFileSync, existsSync as existsSync2, mkdirSync as mkdirSync4, readdirSync, readFileSync as readFileSync4, rmSync as rmSync2, writeFileSync as writeFileSync4 } from "node:fs";
+import { chmodSync as chmodSync3, copyFileSync, existsSync as existsSync3, mkdirSync as mkdirSync4, readdirSync, readFileSync as readFileSync4, rmSync as rmSync2, writeFileSync as writeFileSync4 } from "node:fs";
 import { homedir as homedir3 } from "node:os";
 import { dirname as dirname3, isAbsolute, join as join5, win32 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -7348,7 +7667,7 @@ function hostCopyPath(source2) {
 function installedHostPath() {
   for (const name of ["host.mjs", "host.mts"]) {
     const path = join5(nativeHostDir(), name);
-    if (existsSync2(path))
+    if (existsSync3(path))
       return path;
   }
   return null;
@@ -7359,7 +7678,7 @@ function windowsManifestPath() {
 function packagedHostPath() {
   const here = dirname3(fileURLToPath2(import.meta.url));
   const candidates = ["host.js", join5("native", "host.js"), "host.ts"].map((name) => join5(here, name));
-  return candidates.find((candidate) => existsSync2(candidate)) ?? candidates[0];
+  return candidates.find((candidate) => existsSync3(candidate)) ?? candidates[0];
 }
 function hostManifest(path, extensionIds) {
   return {
@@ -7416,7 +7735,7 @@ function isPageScannerBuild(dir) {
 }
 function profilesOf(dataDir) {
   try {
-    return readdirSync(dataDir, { withFileTypes: true }).filter((entry) => entry.isDirectory() && existsSync2(join5(dataDir, entry.name, "Secure Preferences"))).map((entry) => entry.name).sort();
+    return readdirSync(dataDir, { withFileTypes: true }).filter((entry) => entry.isDirectory() && existsSync3(join5(dataDir, entry.name, "Secure Preferences"))).map((entry) => entry.name).sort();
   } catch {
     return [];
   }
@@ -7466,7 +7785,7 @@ function installNativeHost(options = {}) {
   const platform = options.platform ?? currentPlatform();
   const extensionIds = checkIds(options.extensionIds ?? []);
   const source2 = options.hostSource ?? packagedHostPath();
-  if (!existsSync2(source2)) {
+  if (!existsSync3(source2)) {
     throw new PageScannerError("BAD_REQUEST", `This copy of page-scanner has no native host to install (${source2}).`, "Run `npx @page-scanner/cli install`, which fetches one that does.");
   }
   ensureConfig();
@@ -7484,7 +7803,7 @@ function installNativeHost(options = {}) {
   }), { mode: 448 });
   if (platform.os !== "win32")
     chmodSync3(wrapper, 448);
-  const targets = targetsFor(platform, options.browserDirs ?? [], options.exists ?? existsSync2);
+  const targets = targetsFor(platform, options.browserDirs ?? [], options.exists ?? existsSync3);
   const found = targets.flatMap(findUnpackedCopies);
   const allowed = [.../* @__PURE__ */ new Set([...extensionIds, ...found.map((copy) => copy.id)])];
   const manifest = `${JSON.stringify(hostManifest(wrapper, allowed), null, 2)}
@@ -7544,12 +7863,12 @@ function uninstallNativeHost(options = {}) {
       continue;
     }
     const path = join5(target.manifestDir ?? join5(target.dataDir, "NativeMessagingHosts"), `${NATIVE_HOST_NAME}.json`);
-    if (existsSync2(path)) {
+    if (existsSync3(path)) {
       rmSync2(path, { force: true });
       removed.push(path);
     }
   }
-  if (existsSync2(nativeHostDir())) {
+  if (existsSync3(nativeHostDir())) {
     rmSync2(nativeHostDir(), { recursive: true, force: true });
     removed.push(nativeHostDir());
   }
@@ -7557,7 +7876,7 @@ function uninstallNativeHost(options = {}) {
 }
 function nativeHostReport(platform = currentPlatform()) {
   const wrapper = wrapperPath(platform.os);
-  const browsers = knownBrowsers(platform).filter((browser) => browser.manifestDir !== void 0 && existsSync2(browser.dataDir)).map((browser) => {
+  const browsers = knownBrowsers(platform).filter((browser) => browser.manifestDir !== void 0 && existsSync3(browser.dataDir)).map((browser) => {
     const manifestPath = join5(browser.manifestDir ?? "", `${NATIVE_HOST_NAME}.json`);
     let installed = false;
     let allowsStore = false;
@@ -7576,10 +7895,10 @@ function nativeHostReport(platform = currentPlatform()) {
   } catch {
   }
   return {
-    hostInstalled: existsSync2(wrapper) && installedHostPath() !== null,
+    hostInstalled: existsSync3(wrapper) && installedHostPath() !== null,
     wrapperPath: wrapper,
     node,
-    nodeFound: node !== null && existsSync2(node),
+    nodeFound: node !== null && existsSync3(node),
     browsers
   };
 }
@@ -7595,7 +7914,7 @@ function wrapperNode(script, os) {
 function requirePairing() {
   const config = readConfig();
   if (!config.token) {
-    throw new PageScannerError("NOT_PAIRED", "Page Scanner is not set up on this machine.", `Run \`${INSTALL_COMMAND}\`, then press Connect in the extension's settings, Local agents.`);
+    throw new PageScannerError("NOT_PAIRED", "Page Scanner is not set up on this machine.", `Run \`${INSTALL_COMMAND}\`, then press Connect in the extension's settings, Local Agents.`);
   }
   return config;
 }
@@ -7637,6 +7956,11 @@ async function listTabs(options = {}) {
     timeoutMs: waitMs
   }, waitMs + 3e4);
 }
+function checkText(options) {
+  if (options.text !== void 0 && options.markdown === void 0) {
+    throw new PageScannerError("BAD_REQUEST", "The text options shape the page\u2019s Markdown, and none was asked for.", "Add markdown (--markdown beside or only), or leave the text options out.");
+  }
+}
 function checkOutput(options, files) {
   if (options.name !== void 0)
     checkNameTemplate(options.name);
@@ -7651,6 +7975,12 @@ function checkOutput(options, files) {
 }
 function deliver(answer, target, options) {
   const mode = options.markdown;
+  if (options.highlight?.length && !answer.highlighted) {
+    throw new PageScannerError("SCAN_FAILED", "This version of Page Scanner in Chrome does not highlight quoted passages.", "Update the extension (chrome://extensions, then Update), and scan again.");
+  }
+  if (options.tables !== void 0 && !answer.tables) {
+    throw new PageScannerError("SCAN_FAILED", "This version of Page Scanner in Chrome does not send the page\u2019s tables.", "Update the extension (chrome://extensions, then Update), and scan again.");
+  }
   if (mode !== void 0 && !answer.structured) {
     throw new PageScannerError("SCAN_FAILED", "This version of Page Scanner in Chrome does not send the page\u2019s text.", "Update the extension (chrome://extensions, then Update), and scan again.");
   }
@@ -7660,7 +7990,10 @@ function deliver(answer, target, options) {
     url: text.url,
     capturedAt: new Date(text.capturedAt).toISOString(),
     language: text.language,
-    headings: text.headings
+    headings: text.headings,
+    ...text.scope ? { scope: text.scope } : {},
+    ...text.cut ? { cut: text.cut } : {},
+    ...text.redacted ? { redacted: text.redacted } : {}
   };
   if (mode === "only" && text && page) {
     writeTextFile(target, text.markdown);
@@ -7684,8 +8017,101 @@ function deliver(answer, target, options) {
     browserId: answer.browserId,
     fileName: answer.fileName,
     ...page ? { page } : {},
-    ...answer.hidden ? { hidden: answer.hidden } : {}
+    ...answer.hidden ? { hidden: answer.hidden } : {},
+    ...answer.citation ? { citation: answer.citation } : {},
+    ...answer.translated ? { translated: answer.translated } : {},
+    ...imagesOf(answer, target, options),
+    ...answer.highlighted ? { highlighted: answer.highlighted } : {},
+    ...options.accessibility ? { accessibility: accessibilityOf(answer, target) } : {},
+    ...options.tables && answer.tables ? { tables: tablesOf(answer.tables, target, options.tables) } : {}
   };
+}
+function tablesOf(tables, target, mode) {
+  const sizes = tables.map((table2) => ({
+    rows: table2.rows.length,
+    columns: table2.rows[0]?.length ?? 0
+  }));
+  if (mode === "inline")
+    return { sizes, tables };
+  const path = withExtension(target, "tables.json");
+  writeTextFile(path, `${JSON.stringify({ tables }, null, 2)}
+`);
+  return { path, sizes };
+}
+function accessibilityOf(answer, target) {
+  const check = answer.accessibility;
+  if (!check)
+    return null;
+  const pdfPath = withExtension(target, "accessibility.pdf");
+  const reportPath = withExtension(target, "accessibility.json");
+  writeScanFile(pdfPath, check.pdfBase64);
+  writeTextFile(reportPath, `${JSON.stringify(check.report, null, 2)}
+`);
+  const { report } = check;
+  const byImpact = {
+    critical: 0,
+    serious: 0,
+    moderate: 0,
+    minor: 0
+  };
+  const counts = report.rules.map(() => 0);
+  for (const node of report.nodes)
+    counts[node.rule] = (counts[node.rule] ?? 0) + 1;
+  report.rules.forEach((rule, index) => {
+    if (rule.impact)
+      byImpact[rule.impact] += counts[index] ?? 0;
+  });
+  return {
+    pdfPath,
+    reportPath,
+    engine: report.engine,
+    elements: report.nodes.length + report.omitted,
+    passed: report.passed,
+    byImpact,
+    rules: report.rules.map((rule, index) => ({ ...rule, elements: counts[index] ?? 0 }))
+  };
+}
+function imagesFolder(target, kind) {
+  return withExtension(target, kind);
+}
+function imagesOf(answer, target, options) {
+  if (options.slices !== void 0 && !answer.slices || options.pictureFiles && !answer.pictures) {
+    throw new PageScannerError("SCAN_FAILED", "This version of Page Scanner in Chrome does not send the page as pictures.", "Update the extension (chrome://extensions, then Update), and scan again.");
+  }
+  const numbered = (index, count) => String(index + 1).padStart(Math.max(2, String(count).length), "0");
+  const out = {};
+  if (options.slices !== void 0 && answer.slices) {
+    const folder = imagesFolder(target, "slices");
+    out.slices = answer.slices.map((slice, index, all) => {
+      const path = pathJoin(folder, `slice-${numbered(index, all.length)}.png`);
+      writeScanFile(path, slice.bytesBase64);
+      return {
+        path,
+        y: slice.y,
+        height: slice.height,
+        widthPx: slice.widthPx,
+        heightPx: slice.heightPx
+      };
+    });
+    if (answer.slicesCut)
+      out.slicesCut = true;
+  }
+  if (options.pictureFiles && answer.pictures) {
+    const folder = imagesFolder(target, "pictures");
+    out.pictures = answer.pictures.map((picture, index, all) => {
+      const path = pathJoin(folder, `${picture.kind}-${numbered(index, all.length)}.png`);
+      writeScanFile(path, picture.bytesBase64);
+      return {
+        path,
+        kind: picture.kind,
+        x: picture.x,
+        y: picture.y,
+        width: picture.width,
+        height: picture.height
+      };
+    });
+  }
+  return out;
 }
 async function scan(options) {
   requirePairing();
@@ -7693,16 +8119,27 @@ async function scan(options) {
     throw new PageScannerError("BAD_REQUEST", "Give exactly one of url and tabId.");
   }
   checkOutput(options, 1);
+  checkText(options);
   const answer = await requestScan(options);
   const name = options.name === void 0 ? answer.fileName : fillNameTemplate(options.name, {
     index: 1,
     count: 1,
-    url: options.url ?? "",
+    url: options.url ?? (options.name.includes("{host}") ? await scannedTabUrl(options, answer) : ""),
     suggested: answer.fileName,
     startedAt: /* @__PURE__ */ new Date()
   });
-  const target = resolveOutputPath(options.out, name, options.cwd);
-  return deliver(answer, target, options);
+  const resolved = resolveOutputPath(options.out, name, options.cwd);
+  return deliver(answer, options.keepExisting ? availablePath(resolved) : resolved, options);
+}
+async function scannedTabUrl(options, answer) {
+  if (answer.structured?.url)
+    return answer.structured.url;
+  try {
+    const tabs = await listTabs({ ...options, browser: answer.browserId, waitSeconds: 5 });
+    return tabs.tabs.find((tab) => tab.tabId === options.tabId)?.url ?? "";
+  } catch {
+    return "";
+  }
 }
 async function scanMany(urls, options = {}) {
   requirePairing();
@@ -7722,7 +8159,8 @@ async function scanMany(urls, options = {}) {
         suggested: answer.fileName,
         startedAt
       }), taken);
-      const target = resolveOutputPath(options.out, name, options.cwd);
+      const resolved = resolveOutputPath(options.out, name, options.cwd);
+      const target = options.keepExisting ? availablePath(resolved) : resolved;
       item = { url, ok: true, ...deliver(answer, target, scanOptions) };
       result.written += 1;
     } catch (thrown) {
@@ -7751,6 +8189,7 @@ function checkBatch(urls, options) {
     throw new PageScannerError("BAD_REQUEST", `The list has ${urls.length} addresses; one run takes up to ${MAX_BATCH_URLS}.`);
   }
   checkOutput(options, urls.length);
+  checkText(options);
 }
 async function requestScan(options) {
   const waitMs = Math.round((options.waitSeconds ?? 30) * 1e3);
@@ -7770,6 +8209,12 @@ async function requestScan(options) {
     ...options.openEditor !== void 0 ? { openEditor: options.openEditor } : {},
     ...options.markdown !== void 0 ? { structured: options.markdown === "only" ? "only" : "alongside" } : {},
     ...options.hide !== void 0 ? { hide: options.hide } : {},
+    ...options.text !== void 0 ? { text: options.text } : {},
+    ...options.slices !== void 0 ? { slices: options.slices } : {},
+    ...options.pictureFiles ? { pictures: true } : {},
+    ...options.highlight?.length ? { highlight: options.highlight } : {},
+    ...options.accessibility ? { accessibility: true } : {},
+    ...options.tables !== void 0 ? { tables: true } : {},
     timeoutMs: waitMs,
     scanTimeoutMs: scanMs
   }, waitMs + scanMs);
@@ -8011,8 +8456,8 @@ init_errors();
 
 // node_modules/@page-scanner/cli/dist/diff/index.js
 init_errors();
-import { existsSync as existsSync3, mkdirSync as mkdirSync5, readFileSync as readFileSync5, writeFileSync as writeFileSync5 } from "node:fs";
-import { basename as basename2, dirname as dirname4, extname as extname2, resolve as resolve2 } from "node:path";
+import { existsSync as existsSync4, mkdirSync as mkdirSync5, readFileSync as readFileSync6, writeFileSync as writeFileSync5 } from "node:fs";
+import { basename as basename2, dirname as dirname4, extname as extname2, resolve as resolve3 } from "node:path";
 
 // node_modules/@page-scanner/cli/dist/diff/image.js
 var CELL = 8;
@@ -8059,21 +8504,21 @@ function diffImages(before, after) {
   const { width, height } = after;
   const columns = Math.ceil(width / CELL);
   const rows = Math.ceil(height / CELL);
-  const cells = new Uint8Array(columns * rows);
+  const cells2 = new Uint8Array(columns * rows);
   let changedPixels = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const inside = x < before.width && y < before.height;
       if (!inside || differs(after.data, (y * width + x) * 4, before.data, (y * before.width + x) * 4)) {
         changedPixels++;
-        cells[Math.floor(y / CELL) * columns + Math.floor(x / CELL)] = 1;
+        cells2[Math.floor(y / CELL) * columns + Math.floor(x / CELL)] = 1;
       }
     }
   }
   const regions = [];
-  const seen = new Uint8Array(cells.length);
-  for (let start = 0; start < cells.length; start++) {
-    if (!cells[start] || seen[start])
+  const seen = new Uint8Array(cells2.length);
+  for (let start = 0; start < cells2.length; start++) {
+    if (!cells2[start] || seen[start])
       continue;
     let [left, top, right, bottom] = [columns, rows, 0, 0];
     const queue = [start];
@@ -8093,7 +8538,7 @@ function diffImages(before, after) {
           if (nx < 0 || ny < 0 || nx >= columns || ny >= rows)
             continue;
           const next = ny * columns + nx;
-          if (cells[next] && !seen[next]) {
+          if (cells2[next] && !seen[next]) {
             seen[next] = 1;
             queue.push(next);
           }
@@ -8301,6 +8746,461 @@ function encodePng(image) {
   ]);
 }
 
+// node_modules/@page-scanner/cli/dist/check.js
+init_errors();
+import { readFileSync as readFileSync5 } from "node:fs";
+import { resolve as resolve2 } from "node:path";
+var CHECK_MAX_QUOTES = 200;
+var CHECK_MAX_QUOTE_CHARS = 2e3;
+var MAX_OCCURRENCES = 5;
+var MIN_NEAR_CHARS = 8;
+var FRONT_MATTER = "front matter";
+var BLOCK = "\n";
+function project(markdown) {
+  const source2 = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const out = [];
+  const lines = [];
+  const headings2 = [];
+  const path = [];
+  const emit = (char, line2) => {
+    out.push(char);
+    lines.push(line2);
+  };
+  const block = (line2) => {
+    if (out.length > 0 && out.at(-1) !== BLOCK)
+      emit(BLOCK, line2);
+  };
+  const space = (line2) => {
+    if (out.length > 0 && out.at(-1) !== BLOCK && out.at(-1) !== " ")
+      emit(" ", line2);
+  };
+  const text = (value, line2) => {
+    for (const char of value.normalize("NFC"))
+      emit(char, line2);
+  };
+  let index = 0;
+  let frontMatterEnd = 0;
+  if (source2[0] === "---") {
+    const close = source2.indexOf("---", 1);
+    if (close > 0) {
+      for (let at = 1; at < close; at++) {
+        const raw = source2[at];
+        const item = /^\s*-\s+(.*)$/.exec(raw);
+        const field = /^[\w-]+:\s*(.*)$/.exec(raw);
+        const value = item ? item[1] : field ? field[1] : "";
+        if (!value)
+          continue;
+        block(at + 1);
+        text(unquote(value), at + 1);
+      }
+      block(close + 1);
+      index = close + 1;
+      frontMatterEnd = close + 1;
+    }
+  }
+  let fence = null;
+  for (; index < source2.length; index++) {
+    const raw = source2[index];
+    const line2 = index + 1;
+    if (fence !== null) {
+      if (raw.trimStart().startsWith(fence) && raw.trim().replace(/[`~]/g, "") === "") {
+        fence = null;
+        block(line2);
+      } else {
+        space(line2);
+        text(raw, line2);
+      }
+      continue;
+    }
+    const opening = /^\s*(`{3,}|~{3,})/.exec(raw);
+    if (opening) {
+      fence = opening[1];
+      block(line2);
+      continue;
+    }
+    if (raw.trim() === "") {
+      block(line2);
+      continue;
+    }
+    const heading = /^(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/.exec(raw);
+    if (heading) {
+      const level = heading[1].length;
+      const words = inline(heading[2]);
+      path.length = level - 1;
+      path[level - 1] = words;
+      headings2.push({ line: line2, path: path.filter(Boolean).join(" \u203A ") });
+      block(line2);
+      text(words, line2);
+      block(line2);
+      continue;
+    }
+    if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(raw) || /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(raw) || /^\s*\[[^\]]+\]:\s+\S/.test(raw)) {
+      block(line2);
+      continue;
+    }
+    if (raw.trimStart().startsWith("|")) {
+      block(line2);
+      for (const cell of cells(raw)) {
+        text(inline(cell), line2);
+        block(line2);
+      }
+      continue;
+    }
+    if (/^\s*(>\s?)*\s*(?:[-*+]|\d+[.)])\s+\S/.test(raw))
+      block(line2);
+    const body = raw.replace(/^\s*(>\s?)*\s*(?:[-*+]|\d+[.)])?\s+(?=\S)|^\s*(>\s?)+/, "");
+    space(line2);
+    text(inline(body.replace(/\s+$/, "")), line2);
+  }
+  const folded = [];
+  const foldedLines = [];
+  for (let at = 0; at < out.length; at++) {
+    const char = /\s/.test(out[at]) && out[at] !== BLOCK ? " " : out[at];
+    const last = folded.at(-1);
+    if (char === " " && (last === void 0 || last === " " || last === BLOCK))
+      continue;
+    if (char === BLOCK && last === " ") {
+      folded.pop();
+      foldedLines.pop();
+    }
+    if (char === BLOCK && (last === void 0 || last === BLOCK))
+      continue;
+    folded.push(char);
+    foldedLines.push(lines[at]);
+  }
+  return { text: folded.join(""), lines: foldedLines, headings: headings2, frontMatterEnd };
+}
+function unquote(value) {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith('"'))
+    return trimmed;
+  try {
+    return String(JSON.parse(trimmed));
+  } catch {
+    return trimmed;
+  }
+}
+function cells(row) {
+  const inner = row.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "");
+  const found = [];
+  let current = "";
+  for (let at = 0; at < inner.length; at++) {
+    const char = inner[at];
+    if (char === "\\" && at + 1 < inner.length) {
+      current += char + inner[at + 1];
+      at++;
+    } else if (char === "|") {
+      found.push(current);
+      current = "";
+    } else
+      current += char;
+  }
+  found.push(current);
+  return found;
+}
+var ESCAPABLE = /[!-/:-@[-`{-~]/;
+function inline(value) {
+  let out = "";
+  for (let at = 0; at < value.length; at++) {
+    const char = value[at];
+    if (char === "\\" && at + 1 < value.length && ESCAPABLE.test(value[at + 1])) {
+      out += value[at + 1];
+      at++;
+      continue;
+    }
+    if (char === "`") {
+      let run = 1;
+      while (value[at + run] === "`")
+        run++;
+      const fence = "`".repeat(run);
+      const close = findRun(value, fence, at + run);
+      if (close > 0) {
+        let code2 = value.slice(at + run, close);
+        if (code2.length > 1 && code2.startsWith(" ") && code2.endsWith(" ") && code2.trim()) {
+          code2 = code2.slice(1, -1);
+        }
+        out += code2;
+        at = close + run - 1;
+        continue;
+      }
+      out += fence;
+      at += run - 1;
+      continue;
+    }
+    if (char === "]") {
+      const rest = value.slice(at + 1);
+      const address = /^\((?:<[^>]*>|(?:[^()\s\\]|\\.|\([^()]*\))*)(?:\s+"[^"]*")?\)/.exec(rest);
+      const reference = /^\[[^\]]*\]/.exec(rest);
+      const skip = address?.[0].length ?? reference?.[0].length ?? 0;
+      at += skip;
+      continue;
+    }
+    if ("*_[<>|".includes(char))
+      continue;
+    out += char;
+  }
+  return out;
+}
+function findRun(value, fence, from) {
+  for (let at = value.indexOf(fence, from); at >= 0; at = value.indexOf(fence, at + 1)) {
+    if (value[at - 1] !== "`" && value[at + fence.length] !== "`")
+      return at;
+  }
+  return -1;
+}
+function foldSpace(value) {
+  return value.normalize("NFC").replace(/\s+/g, " ").trim();
+}
+function loosen(value) {
+  let text = "";
+  const from = [];
+  for (let at = 0; at < value.length; at++) {
+    const folded = foldChar(value[at]);
+    for (const char of folded) {
+      text += char;
+      from.push(at);
+    }
+  }
+  return { text, from };
+}
+function foldChar(char) {
+  if ("\u2018\u2019\u201A\u201B\u2032`\xB4".includes(char))
+    return "'";
+  if ("\u201C\u201D\u201E\u201F\u2033\xAB\xBB".includes(char))
+    return '"';
+  if ("\u2010\u2011\u2012\u2013\u2014\u2015\u2212".includes(char))
+    return "-";
+  if (char === "\u2026")
+    return "...";
+  const compat = char.normalize("NFKC");
+  const lower = compat.toLowerCase();
+  return lower;
+}
+var WORDISH = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}\p{Nd}]/u;
+function occurrences(hay, needle) {
+  const found = [];
+  if (!needle)
+    return found;
+  const first = needle[0];
+  const last = needle.at(-1);
+  for (let at = hay.indexOf(needle); at >= 0; at = hay.indexOf(needle, at + 1)) {
+    const before = hay[at - 1];
+    const after = hay[at + needle.length];
+    if (before !== void 0 && WORDISH.test(first) && WORDISH.test(before))
+      continue;
+    if (after !== void 0 && WORDISH.test(last) && WORDISH.test(after))
+      continue;
+    found.push(at);
+  }
+  return found;
+}
+function sectionOf(projection, line2) {
+  if (line2 <= projection.frontMatterEnd)
+    return FRONT_MATTER;
+  let section = "";
+  for (const heading of projection.headings) {
+    if (heading.line > line2)
+      break;
+    section = heading.path;
+  }
+  return section;
+}
+function stretch(value, at, chars) {
+  const end = value.indexOf(BLOCK, at);
+  const stop = Math.min(end < 0 ? value.length : end, at + chars);
+  return value.slice(at, stop);
+}
+function checkQuotes(markdown, quotes, options = {}) {
+  const projection = project(markdown);
+  const loose = loosen(projection.text);
+  const place = (textIndex) => {
+    const line2 = projection.lines[textIndex] ?? 1;
+    return { line: line2, section: sectionOf(projection, line2) };
+  };
+  const checks = quotes.map((raw) => {
+    const quote2 = foldSpace(raw);
+    const exact = occurrences(projection.text, quote2);
+    if (exact.length > 0) {
+      return {
+        quote: raw,
+        found: true,
+        match: "exact",
+        count: exact.length,
+        occurrences: exact.slice(0, MAX_OCCURRENCES).map(place)
+      };
+    }
+    const folded = loosen(quote2).text;
+    const loosely = occurrences(loose.text, folded).map((at) => loose.from[at]);
+    if (loosely.length > 0) {
+      return {
+        quote: raw,
+        found: options.loose === true,
+        match: "loose",
+        count: loosely.length,
+        occurrences: loosely.slice(0, MAX_OCCURRENCES).map(place)
+      };
+    }
+    return {
+      quote: raw,
+      found: false,
+      match: "none",
+      count: 0,
+      occurrences: [],
+      ...nearest(quote2)
+    };
+  });
+  function nearest(quote2) {
+    let low = 0;
+    let high = quote2.length;
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2);
+      if (projection.text.includes(quote2.slice(0, mid)))
+        low = mid;
+      else
+        high = mid - 1;
+    }
+    if (low < Math.min(MIN_NEAR_CHARS, quote2.length))
+      return {};
+    const agreed = quote2.slice(0, low);
+    const at = projection.text.indexOf(agreed);
+    if (low === quote2.length) {
+      const from = Math.max(projection.text.lastIndexOf(BLOCK, at) + 1, at - 12);
+      return {
+        near: {
+          ...place(at),
+          agreed,
+          capture: stretch(projection.text, from, at - from + low + 12),
+          quote: "",
+          inside: true
+        }
+      };
+    }
+    return {
+      near: {
+        ...place(at),
+        agreed,
+        capture: stretch(projection.text, at + low, 40),
+        quote: quote2.slice(low, low + 40)
+      }
+    };
+  }
+  const found = checks.filter((check) => check.found).length;
+  return {
+    checked: checks.length,
+    found,
+    missing: checks.length - found,
+    allFound: found === checks.length,
+    quotes: checks
+  };
+}
+function checkQuoteList(quotes) {
+  if (quotes.length === 0) {
+    throw new PageScannerError("BAD_REQUEST", "There is nothing to check: give at least one quote.", 'For example: page-scanner check pricing.md "Pro is $10 a month"');
+  }
+  if (quotes.length > CHECK_MAX_QUOTES) {
+    throw new PageScannerError("BAD_REQUEST", `${quotes.length} quotes is more than one check takes (${CHECK_MAX_QUOTES}).`, "Split them over several checks.");
+  }
+  for (const quote2 of quotes) {
+    if (!foldSpace(quote2)) {
+      throw new PageScannerError("BAD_REQUEST", "A quote is empty.", "Leave out the empty one.");
+    }
+    if (quote2.length > CHECK_MAX_QUOTE_CHARS) {
+      throw new PageScannerError("BAD_REQUEST", `A quote is longer than ${CHECK_MAX_QUOTE_CHARS} characters.`, "Check a shorter passage, or several.");
+    }
+  }
+}
+function checkQuotesInFile(path, quotes, options = {}) {
+  checkQuoteList(quotes);
+  const full = resolve2(options.cwd ?? process.cwd(), path);
+  let markdown;
+  try {
+    markdown = readFileSync5(full, "utf8");
+  } catch {
+    throw new PageScannerError("BAD_REQUEST", `There is no Markdown file to read at ${full}.`, "Scan with --markdown beside (or only) and check the .md it writes.");
+  }
+  return { path: full, ...checkQuotes(markdown, quotes, options) };
+}
+
+// node_modules/@page-scanner/cli/dist/diff/section.js
+var HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
+var FENCE = /^ {0,3}(`{3,}|~{3,})/;
+function foldHeading(text) {
+  return inline(text).normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+}
+function sectionPath(wanted) {
+  return wanted.split(/\s*(?:›|>)\s*/).map(foldHeading).filter((part) => part.length > 0);
+}
+function headings(lines) {
+  const found = [];
+  let start = 0;
+  if (lines[0] === "---") {
+    const end = lines.indexOf("---", 1);
+    if (end > 0)
+      start = end + 1;
+  }
+  let fence = null;
+  for (let index = start; index < lines.length; index += 1) {
+    const line2 = lines[index];
+    const opened = FENCE.exec(line2)?.[1];
+    if (fence !== null) {
+      if (opened && opened[0] === fence[0] && opened.length >= fence.length)
+        fence = null;
+      continue;
+    }
+    if (opened) {
+      fence = opened;
+      continue;
+    }
+    const match = HEADING.exec(line2);
+    if (match)
+      found.push({ level: match[1].length, text: match[2] ?? "", index });
+  }
+  return found;
+}
+function headingPaths(markdown) {
+  const stack = [];
+  return headings(markdown.replace(/\r\n?/g, "\n").split("\n")).map((heading) => {
+    while (stack.length > 0 && stack.at(-1).level >= heading.level)
+      stack.pop();
+    stack.push(heading);
+    return stack.map((entry) => inline(entry.text).trim()).join(" \u203A ");
+  });
+}
+function findSection(markdown, wanted) {
+  const path = sectionPath(wanted);
+  if (path.length === 0)
+    return null;
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const all = headings(lines);
+  const stack = [];
+  for (let at = 0; at < all.length; at += 1) {
+    const heading = all[at];
+    while (stack.length > 0 && stack.at(-1).level >= heading.level)
+      stack.pop();
+    stack.push(heading);
+    const folded = stack.map((entry) => foldHeading(entry.text));
+    let from = folded.length - 1;
+    let matched = folded[from] === path.at(-1);
+    for (let part = path.length - 2; matched && part >= 0; part -= 1) {
+      from = folded.lastIndexOf(path[part], from - 1);
+      matched = from >= 0;
+    }
+    if (!matched)
+      continue;
+    const next = all.slice(at + 1).find((later) => later.level <= heading.level);
+    const end = next ? next.index : lines.length;
+    let last = end;
+    while (last > heading.index + 1 && lines[last - 1].trim() === "")
+      last -= 1;
+    return {
+      text: lines.slice(heading.index, last).join("\n"),
+      line: heading.index + 1,
+      heading: stack.map((entry) => inline(entry.text).trim()).join(" \u203A ")
+    };
+  }
+  return null;
+}
+
 // node_modules/@page-scanner/cli/dist/diff/text.js
 var MAX_EDIT_DISTANCE = 2e3;
 var CONTEXT_LINES = 3;
@@ -8479,7 +9379,7 @@ function sideOf(path) {
     return { path, kind: "visual" };
   if (extension2 === ".pdf") {
     const beside = withExtension(path, "md");
-    if (existsSync3(beside))
+    if (existsSync4(beside))
       return { path: beside, kind: "text" };
     throw badRequest2(`${basename2(path)} is a PDF, and there is no ${basename2(beside)} beside it to compare.`, "Scan with `--markdown beside` so each PDF has its text next to it, and diff those.");
   }
@@ -8490,7 +9390,7 @@ function sideOf(path) {
 }
 function read(path) {
   try {
-    return readFileSync5(path);
+    return readFileSync6(path);
   } catch (error) {
     throw badRequest2(`Could not read ${path}: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -8501,17 +9401,46 @@ function textSide(path, text) {
 }
 function diffCaptures(oldPath, newPath, options = {}) {
   const cwd = options.cwd ?? process.cwd();
-  const before = sideOf(resolve2(cwd, oldPath));
-  const after = sideOf(resolve2(cwd, newPath));
+  const before = sideOf(resolve3(cwd, oldPath));
+  const after = sideOf(resolve3(cwd, newPath));
   if (before.kind !== after.kind) {
     throw badRequest2("The two captures are of different kinds: one is text and the other a picture.", "Compare two Markdown files, or two PNGs.");
+  }
+  const wanted = options.section?.trim();
+  if (options.section !== void 0 && !wanted) {
+    throw badRequest2("--section needs the heading of the section to compare.");
+  }
+  if (wanted && before.kind !== "text") {
+    throw badRequest2("--section compares text, and these captures are pictures.", "Scan with `--markdown beside` and diff the Markdown files.");
   }
   if (before.kind === "text") {
     const oldText = read(before.path).toString("utf8");
     const newText = read(after.path).toString("utf8");
-    const diff2 = diffText(oldText, newText);
     const old = textSide(before.path, oldText);
     const next = textSide(after.path, newText);
+    let diff2 = diffText(oldText, newText);
+    let section;
+    if (wanted) {
+      const oldSection = findSection(oldText, wanted);
+      const newSection = findSection(newText, wanted);
+      if (!oldSection && !newSection) {
+        const names = [.../* @__PURE__ */ new Set([...headingPaths(newText), ...headingPaths(oldText)])];
+        throw badRequest2(`Neither capture has a section headed "${wanted}".`, names.length > 0 ? `Their headings: ${names.slice(0, 12).join("; ")}${names.length > 12 ? "; \u2026" : ""}` : "Neither has a heading at all.");
+      }
+      diff2 = diffText(oldSection?.text ?? "", newSection?.text ?? "");
+      const oldOffset = (oldSection?.line ?? 1) - 1;
+      const newOffset = (newSection?.line ?? 1) - 1;
+      diff2 = {
+        ...diff2,
+        hunks: diff2.hunks.map((hunk) => ({
+          ...hunk,
+          oldStart: hunk.oldStart + oldOffset,
+          newStart: hunk.newStart + newOffset
+        }))
+      };
+      const side = (found) => found ? { line: found.line, heading: found.heading } : null;
+      section = { wanted, old: side(oldSection), new: side(newSection) };
+    }
     return {
       kind: "text",
       changed: diff2.hunks.length > 0,
@@ -8521,7 +9450,8 @@ function diffCaptures(oldPath, newPath, options = {}) {
       added: diff2.added,
       removed: diff2.removed,
       hunks: diff2.hunks,
-      unified: formatUnified(diff2, before.path, after.path)
+      unified: formatUnified(diff2, before.path, after.path),
+      ...section ? { section } : {}
     };
   }
   let oldImage;
@@ -8538,7 +9468,7 @@ function diffCaptures(oldPath, newPath, options = {}) {
   const changed = diff.regions.length > 0;
   let path = null;
   if (changed) {
-    path = options.out ? resolve2(cwd, options.out) : withExtension(after.path, "diff.png");
+    path = options.out ? resolve3(cwd, options.out) : withExtension(after.path, "diff.png");
     mkdirSync5(dirname4(path), { recursive: true });
     writeFileSync5(path, encodePng(diff.outlined));
   }
@@ -8556,8 +9486,8 @@ function diffCaptures(oldPath, newPath, options = {}) {
 // node_modules/@page-scanner/cli/dist/verify.js
 init_errors();
 import { createHash, webcrypto } from "node:crypto";
-import { existsSync as existsSync4, readFileSync as readFileSync6 } from "node:fs";
-import { resolve as resolve3 } from "node:path";
+import { existsSync as existsSync5, readFileSync as readFileSync7 } from "node:fs";
+import { resolve as resolve4 } from "node:path";
 var RECORD_SUFFIX = ".integrity.json";
 var RECORD_FORMAT = "page-scanner-integrity/1";
 function canonicalJson(value) {
@@ -8575,7 +9505,7 @@ function badRequest3(message, hint) {
 function readRecord(path) {
   let parsed;
   try {
-    parsed = JSON.parse(readFileSync6(path, "utf8"));
+    parsed = JSON.parse(readFileSync7(path, "utf8"));
   } catch (error) {
     throw badRequest3(`Could not read the record ${path}: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -8611,15 +9541,15 @@ async function signatureHolds(record) {
 }
 async function verifyCapture(filePath, options = {}) {
   const cwd = options.cwd ?? process.cwd();
-  const file = resolve3(cwd, filePath);
-  const recordPath = resolve3(cwd, options.record ?? `${filePath}${RECORD_SUFFIX}`);
-  if (!existsSync4(recordPath)) {
+  const file = resolve4(cwd, filePath);
+  const recordPath = resolve4(cwd, options.record ?? `${filePath}${RECORD_SUFFIX}`);
+  if (!existsSync5(recordPath)) {
     throw badRequest3(`There is no record at ${recordPath}.`, "Name it with --record, or export with an integrity record beside the file.");
   }
   const record = readRecord(recordPath);
   let bytes;
   try {
-    bytes = readFileSync6(file);
+    bytes = readFileSync7(file);
   } catch (error) {
     throw badRequest3(`Could not read ${file}: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -8653,10 +9583,10 @@ function table(headers, rows) {
       width = Math.max(width, row[index]?.length ?? 0);
     widths[index] = width;
   }
-  const line2 = (cells) => {
+  const line2 = (cells2) => {
     const padded = [];
     for (let index = 0; index < columns; index += 1) {
-      const cell = cells[index] ?? "";
+      const cell = cells2[index] ?? "";
       padded.push(index === columns - 1 ? cell : cell.padEnd(widths[index] ?? 0));
     }
     return padded.join("  ").trimEnd();
@@ -8802,6 +9732,17 @@ function printPaths(io2, result) {
   const markdown = result.page?.markdownPath;
   if (markdown && markdown !== result.path)
     line(io2, markdown);
+  const folder = (paths) => dirname5(paths[0].path);
+  if (result.slices?.length)
+    line(io2, folder(result.slices));
+  if (result.pictures?.length)
+    line(io2, folder(result.pictures));
+  if (result.accessibility) {
+    line(io2, result.accessibility.pdfPath);
+    line(io2, result.accessibility.reportPath);
+  }
+  if (result.tables?.path)
+    line(io2, result.tables.path);
 }
 function notesFor(io2, result, format) {
   if (result.truncated)
@@ -8809,6 +9750,27 @@ function notesFor(io2, result, format) {
   const hidden = result.hidden && formatHidden(result.hidden);
   if (hidden)
     note(io2, hidden);
+  if (result.slices) {
+    note(io2, `${result.slices.length} ${result.slices.length === 1 ? "slice" : "slices"} of the page` + (result.slicesCut ? ", which goes on past the last one." : "."));
+  }
+  if (result.highlighted) {
+    const missed = result.highlighted.filter((passage) => !passage.found);
+    note(io2, `Highlighted ${result.highlighted.length - missed.length} of ${result.highlighted.length} quoted ${result.highlighted.length === 1 ? "passage" : "passages"}.` + (missed.length > 0 ? ` Not on the page as written: ${missed.map((passage) => JSON.stringify(passage.quote)).join(", ")}.` : ""));
+  }
+  if (result.pictures) {
+    note(io2, result.pictures.length === 0 ? "The page has no pictures large enough to cut out." : `${result.pictures.length} ${result.pictures.length === 1 ? "picture" : "pictures"} cut from the page.`);
+  }
+  if (result.tables) {
+    const { sizes } = result.tables;
+    note(io2, sizes.length === 0 ? "The page has no tables." : `${sizes.length} ${sizes.length === 1 ? "table" : "tables"}: ${sizes.map(({ rows, columns }) => `${rows} \xD7 ${columns}`).join(", ")} (rows \xD7 columns).`);
+  }
+  if (result.accessibility === null) {
+    note(io2, "The accessibility check could not run on this page, so it wrote nothing.");
+  } else if (result.accessibility) {
+    const check = result.accessibility;
+    const impacts = ["critical", "serious", "moderate", "minor"].filter((impact) => check.byImpact[impact] > 0).map((impact) => `${check.byImpact[impact]} ${impact}`);
+    note(io2, check.rules.length === 0 ? `Accessibility: no WCAG rule failed; ${check.passed} passed. An automated check finds some problems, not all.` : `Accessibility: ${check.rules.length} WCAG ${check.rules.length === 1 ? "rule" : "rules"} failed by ${check.elements} ${check.elements === 1 ? "element" : "elements"} (${impacts.join(", ")}).`);
+  }
   if (result.mode === "raster" && result.page?.markdownPath !== result.path) {
     note(io2, format === "pdf" ? "Chrome would not attach its debugger, so this was stitched from screenshots: the PDF's text is an image, not text." : "Chrome would not attach its debugger, so this was stitched from screenshots.");
   }
@@ -8850,7 +9812,7 @@ function batchUrls(parsed, io2) {
   if (parsed.urlsFile !== void 0) {
     let text;
     try {
-      text = parsed.urlsFile === "-" ? (io2.stdin ?? (() => readFileSync7(0, "utf8")))() : readFileSync7(resolve4(parsed.urlsFile), "utf8");
+      text = parsed.urlsFile === "-" ? (io2.stdin ?? (() => readFileSync8(0, "utf8")))() : readFileSync8(resolve5(parsed.urlsFile), "utf8");
     } catch (error) {
       throw new PageScannerError("BAD_REQUEST", `--urls could not read ${JSON.stringify(parsed.urlsFile)}: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -8900,6 +9862,15 @@ function reportDiff(io2, result, useJson) {
     if (result.sameAddress === false) {
       note(io2, `These are two different pages: ${result.old.source} and ${result.new.source}.`);
     }
+    if (result.section) {
+      const { wanted, old, new: next } = result.section;
+      if (!old)
+        note(io2, `The older capture has no section "${wanted}"; it is new.`);
+      else if (!next)
+        note(io2, `The newer capture has no section "${wanted}" any more.`);
+      else
+        note(io2, `Only the section ${next.heading} (line ${old.line}, then ${next.line}).`);
+    }
     if (!result.changed) {
       note(io2, "No change in the text.");
       return code2;
@@ -8916,6 +9887,58 @@ function reportDiff(io2, result, useJson) {
     line(io2, result.path);
   const percent = result.changedFraction * 100;
   note(io2, `${result.regions.length} ${result.regions.length === 1 ? "region" : "regions"} changed, ${percent < 0.1 ? "<0.1" : percent.toFixed(1)}% of the picture.` + (result.old.width !== result.new.width || result.old.height !== result.new.height ? ` The captures are ${result.old.width}x${result.old.height} and ${result.new.width}x${result.new.height} px.` : ""));
+  return code2;
+}
+function quotesFrom(from, io2, flag = "--from") {
+  let text;
+  try {
+    text = from === "-" ? (io2.stdin ?? (() => readFileSync8(0, "utf8")))() : readFileSync8(resolve5(from), "utf8");
+  } catch (error) {
+    throw new PageScannerError("BAD_REQUEST", `${flag} could not read ${JSON.stringify(from)}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const trimmed = text.trim();
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+        return parsed;
+      }
+    } catch {
+    }
+  }
+  return text.replace(/\r\n?/g, "\n").split("\n").filter((entry) => entry.trim() !== "");
+}
+function reportCheck(io2, result, useJson) {
+  const code2 = result.allFound ? 0 : 1;
+  if (useJson) {
+    json(io2, { ok: true, ...result });
+    return code2;
+  }
+  const where = (place) => `line ${place.line}${place.section ? `, ${place.section}` : ""}`;
+  const places = (occurrences2) => {
+    const seen = /* @__PURE__ */ new Map();
+    for (const place of occurrences2) {
+      const key = where(place);
+      seen.set(key, (seen.get(key) ?? 0) + 1);
+    }
+    return [...seen].map(([key, times]) => times > 1 ? `${key} (${times} times)` : key).join("; ");
+  };
+  for (const check of result.quotes) {
+    const quoted = JSON.stringify(check.quote.length > 60 ? `${check.quote.slice(0, 57)}...` : check.quote);
+    if (check.match === "exact") {
+      const more = check.count > check.occurrences.length ? ` and ${check.count - check.occurrences.length} more` : "";
+      line(io2, `found    ${quoted}: ${places(check.occurrences)}${more}`);
+    } else if (check.match === "loose") {
+      line(io2, `${check.found ? "found" : "loosely"}  ${quoted}: ${places(check.occurrences)}` + (check.found ? " (loosely)" : ", only with quotes, dashes or case folded (--loose takes it)"));
+    } else if (check.near?.inside) {
+      line(io2, `missing  ${quoted}: only inside a longer word or number, ${where(check.near)}: ` + JSON.stringify(check.near.capture));
+    } else if (check.near) {
+      line(io2, `missing  ${quoted}: ${where(check.near)} agrees up to ${JSON.stringify(`...${check.near.agreed.slice(-24)}`)}, then has ${JSON.stringify(check.near.capture)} where the quote has ${JSON.stringify(check.near.quote)}`);
+    } else {
+      line(io2, `missing  ${quoted}: not in the capture`);
+    }
+  }
+  note(io2, `${result.found} of ${result.checked} ${result.checked === 1 ? "quote" : "quotes"} found${result.path ? ` in ${result.path}` : ""}.`);
   return code2;
 }
 function reportVerify(io2, result, useJson) {
@@ -8936,8 +9959,13 @@ function reportVerify(io2, result, useJson) {
   }
   return code2;
 }
-function scanOptionsOf(parsed) {
+function scanOptionsOf(parsed, io2) {
+  const highlight = [
+    ...parsed.highlight ?? [],
+    ...parsed.highlightFrom !== void 0 && io2 ? quotesFrom(parsed.highlightFrom, io2, "--highlight-from") : []
+  ];
   return {
+    ...highlight.length > 0 ? { highlight } : {},
     ...parsed.windowId !== void 0 ? { windowId: parsed.windowId } : {},
     ...parsed.browser !== void 0 ? { browser: parsed.browser } : {},
     ...parsed.quality !== void 0 ? { quality: parsed.quality } : {},
@@ -8946,8 +9974,14 @@ function scanOptionsOf(parsed) {
     ...parsed.captureWidth !== void 0 ? { captureWidth: parsed.captureWidth } : {},
     ...parsed.out !== void 0 ? { out: parsed.out } : {},
     ...parsed.name !== void 0 ? { name: parsed.name } : {},
+    ...parsed.keepExisting ? { keepExisting: true } : {},
     ...parsed.markdown !== void 0 ? { markdown: parsed.markdown } : {},
+    ...parsed.text !== void 0 ? { text: parsed.text } : {},
     ...parsed.hide !== void 0 ? { hide: parsed.hide } : {},
+    ...parsed.slices !== void 0 ? { slices: parsed.slices } : {},
+    ...parsed.pictureFiles ? { pictureFiles: true } : {},
+    ...parsed.accessibility ? { accessibility: true } : {},
+    ...parsed.tables ? { tables: "beside" } : {},
     format: parsed.format,
     pageSize: parsed.pageSize,
     openEditor: parsed.openEditor,
@@ -9031,7 +10065,7 @@ async function runCommand(parsed, io2) {
           line(io2, `  Unpacked  ${copy.id} in ${copy.browser} (${copy.profile}), ${copy.path}`);
         }
         line(io2, "");
-        line(io2, "Now open Page Scanner's settings in Chrome, Local agents, and press Connect. Chrome asks once whether the extension may talk to the helper.");
+        line(io2, "Now open Page Scanner's settings in Chrome, Local Agents, and press Connect. Chrome asks once whether the extension may talk to the helper.");
         return 0;
       }
       case "uninstall": {
@@ -9054,7 +10088,7 @@ async function runCommand(parsed, io2) {
           json(io2, { ok: true, ...result });
         } else {
           line(io2, "");
-          line(io2, 'Paste these into Chrome: Page Scanner settings, "Local agents".');
+          line(io2, 'Paste these into Chrome: Page Scanner settings, "Local Agents".');
           line(io2, "");
           line(io2, `  Port   ${result.port}`);
           line(io2, `  Token  ${result.token}`);
@@ -9118,15 +10152,20 @@ async function runCommand(parsed, io2) {
         const result = await scan({
           ...parsed.url !== void 0 ? { url: parsed.url } : {},
           ...parsed.tabId !== void 0 ? { tabId: parsed.tabId } : {},
-          ...scanOptionsOf(parsed)
+          ...scanOptionsOf(parsed, io2)
         });
         reportScan(io2, result, parsed.format, parsed.json);
         return 0;
       }
       case "diff":
-        return reportDiff(io2, diffCaptures(parsed.old, parsed.new, parsed.out !== void 0 ? { out: parsed.out } : {}), parsed.json);
+        return reportDiff(io2, diffCaptures(parsed.old, parsed.new, {
+          ...parsed.out !== void 0 ? { out: parsed.out } : {},
+          ...parsed.section !== void 0 ? { section: parsed.section } : {}
+        }), parsed.json);
       case "verify":
         return reportVerify(io2, await verifyCapture(parsed.file, parsed.record !== void 0 ? { record: parsed.record } : {}), parsed.json);
+      case "check":
+        return reportCheck(io2, checkQuotesInFile(parsed.file, [...parsed.quotes, ...parsed.from !== void 0 ? quotesFrom(parsed.from, io2) : []], { loose: parsed.loose }), parsed.json);
       case "design": {
         const urls = batchUrls(parsed, io2);
         const several = urls.length > 1 || parsed.crawl !== void 0;

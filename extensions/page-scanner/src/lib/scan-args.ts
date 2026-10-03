@@ -37,7 +37,8 @@ export function scanArgs(
   target: { tabId: number; url: string; browserId: string; out: string },
 ): string[] {
   const args = ["scan", "--tab", String(target.tabId), "--browser", target.browserId];
-  args.push("--out", target.out);
+  // A scan never replaces an earlier one: the same site in the same minute takes `-2` (#472).
+  args.push("--out", target.out, "--keep-existing");
   const name = prefs.fileName?.trim();
   if (name) args.push("--name", name.replaceAll("{host}", hostOf(target.url)));
   args.push("--format", prefs.format ?? "pdf");
