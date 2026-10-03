@@ -1,5 +1,9 @@
 # Proton Mail Changelog
 
+## [Faster Actions] - {PR_MERGE_DATE}
+
+- Reuse a single connection to Bridge for the whole command instead of reconnecting for every action
+
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
 - "Delete" now moves emails to Trash ("Move to Trash"). In Trash and Drafts it becomes "Delete Permanently", with a confirmation
