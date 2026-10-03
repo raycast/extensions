@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// @page-scanner/cli 0.3.5, Apache-2.0, bundled by scripts/vendor-cli.mjs.
+// @page-scanner/cli 0.3.6, Apache-2.0, bundled by scripts/vendor-cli.mjs.
 import { createRequire as __psCreateRequire } from 'node:module';
 import { fileURLToPath as __psFileURLToPath } from 'node:url';
 import { dirname as __psDirname } from 'node:path';
@@ -351,7 +351,7 @@ function cliBuild() {
 var CLI_VERSION, build;
 var init_version = __esm({
   "node_modules/@page-scanner/cli/dist/version.js"() {
-    CLI_VERSION = "0.3.5";
+    CLI_VERSION = "0.3.6";
   }
 });
 
@@ -4127,7 +4127,7 @@ var init_tokens = __esm({
 
 // node_modules/@page-scanner/cli/dist/bridge/server.js
 import { EventEmitter } from "node:events";
-var DEFAULT_REQUEST_TIMEOUT_MS, HANDSHAKE_TIMEOUT_MS, CLOSE_REPLACED, CLOSE_BAD_TOKEN, CLOSE_BAD_PROTOCOL, CLOSE_BAD_ORIGIN, CLOSE_NO_HANDSHAKE, BridgeServer;
+var DEFAULT_REQUEST_TIMEOUT_MS, BUSY_TAB_LIMIT_MS, HANDSHAKE_TIMEOUT_MS, CLOSE_REPLACED, CLOSE_BAD_TOKEN, CLOSE_BAD_PROTOCOL, CLOSE_BAD_ORIGIN, CLOSE_NO_HANDSHAKE, BridgeServer;
 var init_server = __esm({
   "node_modules/@page-scanner/cli/dist/bridge/server.js"() {
     init_wrapper();
@@ -4135,6 +4135,7 @@ var init_server = __esm({
     init_protocol();
     init_tokens();
     DEFAULT_REQUEST_TIMEOUT_MS = 12e4;
+    BUSY_TAB_LIMIT_MS = 10 * 6e4;
     HANDSHAKE_TIMEOUT_MS = 1e4;
     CLOSE_REPLACED = 4e3;
     CLOSE_BAD_TOKEN = 4001;
@@ -4308,6 +4309,13 @@ var init_server = __esm({
       listBrowsers() {
         return [...this.browsers.values()].map((entry) => this.describe(entry));
       }
+      /** How many requests a caller is still waiting on, across every browser. */
+      waiting() {
+        let count = 0;
+        for (const entry of this.browsers.values())
+          count += entry.pending.size;
+        return count;
+      }
       /**
        * Picks the browser a request meant.
        *
@@ -4382,15 +4390,25 @@ var init_server = __esm({
         const tabId = payload.type === "scan" || payload.type === "extract-design" ? payload.tabId : void 0;
         if (tabId !== void 0) {
           const busy = entry.busyTabs.get(tabId);
+          const seconds = busy ? Math.round((this.now() - busy.since) / 1e3) : 0;
+          if (busy && this.now() < busy.until) {
+            throw new PageScannerError("SCAN_FAILED", `A capture of tab ${tabId} is still running in the browser (started ${seconds}s ago).`, `Wait for it to finish before scanning that tab again: the browser lets one capture drive a tab at a time, and a caller that stopped waiting does not stop the capture. If the browser never answers, the tab is released ${Math.round((busy.until - busy.since) / 6e4)} minutes after the capture started.`);
+          }
           if (busy) {
-            const seconds = Math.round((this.now() - busy.since) / 1e3);
-            throw new PageScannerError("SCAN_FAILED", `A capture of tab ${tabId} is still running in the browser (started ${seconds}s ago).`, "Wait for it to finish before scanning that tab again: the browser lets one capture drive a tab at a time, and a caller that stopped waiting does not stop the capture.");
+            this.log(`tab ${tabId} was busy for ${seconds}s with no answer, releasing it`);
+            entry.busyTabs.delete(tabId);
           }
         }
         entry.nextId += 1;
         const id = `req-${entry.nextId}`;
-        if (tabId !== void 0)
-          entry.busyTabs.set(tabId, { id, since: this.now() });
+        if (tabId !== void 0) {
+          const since = this.now();
+          entry.busyTabs.set(tabId, {
+            id,
+            since,
+            until: since + Math.max(timeoutMs, BUSY_TAB_LIMIT_MS)
+          });
+        }
         return new Promise((resolve6, reject) => {
           const timer = setTimeout(() => {
             entry.pending.delete(id);
@@ -4620,7 +4638,10 @@ async function dispatch(method, params, options) {
         ...cliBuild() !== void 0 ? { build: cliBuild() } : {},
         pid: process.pid,
         bridgePort: bridge.port,
-        browsers: bridge.listBrowsers().length
+        browsers: bridge.listBrowsers().length,
+        // Requests a caller is waiting on. A client of another version waits for 0 rather
+        // than replace this daemon in the middle of someone else's capture.
+        busy: bridge.waiting()
       };
     case "listBrowsers":
       return { browsers: bridge.listBrowsers() };
@@ -4742,8 +4763,10 @@ async function dispatch(method, params, options) {
       const answer = await bridge.designCatalog(resolved, { title, sections: params.sections }, timeoutFrom({ timeoutMs: params.scanTimeoutMs }, 12e4));
       return { browserId: resolved, bytesBase64: answer.bytesBase64 };
     }
-    case "shutdown":
-      return { ok: true };
+    case "shutdown": {
+      const draining = params.force === true ? 0 : bridge.waiting();
+      return draining > 0 ? { ok: true, draining } : { ok: true };
+    }
     default:
       throw new PageScannerError("BAD_REQUEST", `Unknown method ${JSON.stringify(method)}.`);
   }
@@ -4791,6 +4814,7 @@ async function handle(request, response, options, server) {
   }
   options.onActivity?.();
   let method = "";
+  let force = false;
   try {
     const raw = await readBody(request);
     const body = asRecord(JSON.parse(raw || "{}"));
@@ -4798,6 +4822,7 @@ async function handle(request, response, options, server) {
       throw new PageScannerError("BAD_REQUEST", "method is required.");
     }
     method = body.method;
+    force = asRecord(body.params).force === true;
     const result = await dispatch(method, asRecord(body.params), options);
     send(response, 200, { ok: true, result });
   } catch (error) {
@@ -4812,8 +4837,9 @@ async function handle(request, response, options, server) {
     });
   }
   if (method === "shutdown") {
-    server.closeIdleConnections();
-    options.onShutdown();
+    if (force || options.bridge.waiting() === 0)
+      server.closeIdleConnections();
+    options.onShutdown({ drain: !force });
   }
 }
 var MAX_BODY_BYTES;
@@ -4877,9 +4903,12 @@ async function runDaemon(options = {}) {
   });
   let rpc = null;
   let idleTimer = null;
+  let drainTimer = null;
   const shutdown = async () => {
     if (idleTimer)
       clearInterval(idleTimer);
+    if (drainTimer)
+      clearInterval(drainTimer);
     if (handleSignals) {
       process.off("SIGINT", stop);
       process.off("SIGTERM", stop);
@@ -4897,10 +4926,23 @@ async function runDaemon(options = {}) {
     stopping = true;
     void shutdown();
   };
+  const drainThenStop = () => {
+    if (stopping || drainTimer)
+      return;
+    if (bridge.waiting() === 0) {
+      stop();
+      return;
+    }
+    log(`asked to stop with ${bridge.waiting()} capture(s) running, stopping once they end.`);
+    drainTimer = setInterval(() => {
+      if (bridge.waiting() === 0)
+        stop();
+    }, DRAIN_CHECK_INTERVAL_MS);
+  };
   rpc = await startRpcServer({
     bridge,
     secret,
-    onShutdown: stop,
+    onShutdown: ({ drain }) => drain ? drainThenStop() : stop(),
     onActivity: () => {
       lastActivity = Date.now();
     }
@@ -4933,7 +4975,7 @@ async function runDaemon(options = {}) {
   }
   await stopped;
 }
-var DEFAULT_IDLE_MINUTES, IDLE_CHECK_INTERVAL_MS;
+var DEFAULT_IDLE_MINUTES, IDLE_CHECK_INTERVAL_MS, DRAIN_CHECK_INTERVAL_MS;
 var init_run = __esm({
   "node_modules/@page-scanner/cli/dist/daemon/run.js"() {
     init_config();
@@ -4944,6 +4986,7 @@ var init_run = __esm({
     init_state();
     DEFAULT_IDLE_MINUTES = 15;
     IDLE_CHECK_INTERVAL_MS = 3e4;
+    DRAIN_CHECK_INTERVAL_MS = 250;
   }
 });
 
@@ -6110,7 +6153,10 @@ import { appendFileSync, openSync } from "node:fs";
 init_state();
 var DAEMON_START_TIMEOUT_MS = 5e3;
 var POLL_INTERVAL_MS = 100;
+var DAEMON_DRAIN_TIMEOUT_MS = 12e4;
+var DRAIN_POLL_INTERVAL_MS = 1e3;
 var SERVE_COMMAND = "npx @page-scanner/cli serve";
+var STOP_COMMAND = "npx @page-scanner/cli stop";
 var realSleep = (ms) => new Promise((resolve6) => setTimeout(resolve6, ms));
 function clientFor(state) {
   return {
@@ -6149,6 +6195,18 @@ async function healthy(state) {
   } catch {
     return null;
   }
+}
+async function untilIdle(state, health, deadlineMs, sleep, idle = (h) => !(h.busy && h.busy > 0)) {
+  for (let waited = 0; health && !idle(health); waited += DRAIN_POLL_INTERVAL_MS) {
+    if (waited >= deadlineMs)
+      return health;
+    await sleep(DRAIN_POLL_INTERVAL_MS);
+    health = await healthy(state);
+  }
+  return health;
+}
+function busyDaemon(health) {
+  return new PageScannerError("DAEMON_FAILED", `The page-scanner daemon running is version ${health.version}, this is ${CLI_VERSION}, and it is still in the middle of a capture.`, `Run this again once that capture ends, or stop it with \`${STOP_COMMAND}\`. Two versions of page-scanner on one machine (a global install and the one an app or an MCP server runs) take turns with one daemon.`);
 }
 function spawnDaemon(self = selfCommand()) {
   const { command: command2, args } = self;
@@ -6197,17 +6255,30 @@ async function connectDaemon(options = {}) {
   const sleep = options.sleep ?? realSleep;
   const start = options.startDaemon ?? (canSpawnSelf() ? () => spawnDaemon() : startDaemonInProcess);
   const deadlineMs = options.startTimeoutMs ?? DAEMON_START_TIMEOUT_MS;
+  const drainMs = options.drainTimeoutMs ?? DAEMON_DRAIN_TIMEOUT_MS;
   const build2 = "build" in options ? options.build : cliBuild();
   const existing = readDaemonState();
   if (existing) {
-    const health = await healthy(existing);
+    let health = await healthy(existing);
     const sameBuild = build2 === void 0 || health?.build === build2;
     if (health && health.version === CLI_VERSION && sameBuild)
       return clientFor(existing);
     if (health) {
+      health = await untilIdle(existing, health, drainMs, sleep);
+      if (health?.busy)
+        throw busyDaemon(health);
+    }
+    if (health) {
+      let draining = 0;
       try {
-        await clientFor(existing).call("shutdown", {}, 2e3);
+        const answer = await clientFor(existing).call("shutdown", {}, 2e3);
+        draining = answer.draining ?? 0;
       } catch {
+      }
+      if (draining > 0) {
+        const last = await untilIdle(existing, health, drainMs, sleep, () => false);
+        if (last)
+          throw busyDaemon(last);
       }
       await sleep(POLL_INTERVAL_MS);
     }
@@ -6235,7 +6306,7 @@ async function stopDaemon() {
     return false;
   }
   try {
-    await clientFor(state).call("shutdown", {}, 2e3);
+    await clientFor(state).call("shutdown", { force: true }, 2e3);
     return true;
   } catch (error) {
     if (!processAlive(state.pid)) {
