@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { assetPath, isWindows, powershell, socketPath } from "../platform";
-import { BlipTimeoutError, BlipUnavailableError } from "./errors";
+import { BlipUnavailableError } from "./errors";
 
 /**
  * Where to connect to reach Blip's core.
@@ -73,8 +73,10 @@ function start(): Bridge {
       reject(error);
     };
 
+    // Not a BlipTimeoutError: callers treat that as a quiet long poll and would retry
+    // forever without ever showing the unavailable screen.
     const timer = setTimeout(
-      () => fail(new BlipTimeoutError("The Blip bridge did not start in time")),
+      () => fail(new BlipUnavailableError("The Blip bridge did not start in time")),
       START_TIMEOUT_MS,
     );
 
