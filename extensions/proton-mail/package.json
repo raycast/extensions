@@ -107,6 +107,15 @@
       ]
     },
     {
+      "name": "loadRemoteImages",
+      "title": "Remote Images",
+      "label": "Load remote images",
+      "description": "Show images hosted by the sender in the expanded email view. Senders can use remote images to track when you open an email.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "composeFormat",
       "title": "Compose Format",
       "description": "Format for composing emails",
@@ -132,7 +141,8 @@
     "imapflow": "^1.0.171",
     "mailparser": "^3.9.31",
     "marked": "^17.0.1",
-    "nodemailer": "^10.0.12"
+    "nodemailer": "^10.0.12",
+    "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -140,6 +150,7 @@
     "@types/mailparser": "^3.4.5",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
