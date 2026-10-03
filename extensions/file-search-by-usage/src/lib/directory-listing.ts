@@ -4,9 +4,9 @@ import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { MAX_ENTRIES, ReadResult } from "./read-dir";
 import { Entry } from "./types";
-import { createReadPool } from "./bounded-reads";
 import { createWorkQueue } from "./work-queue";
 import { readBoundedDirectory } from "./bounded-directory";
+import { createProviderReadPoolSelector } from "./provider-read-pools";
 
 /*
  * A cancelled filesystem promise cannot itself be cancelled, so its pool slot
@@ -14,35 +14,7 @@ import { readBoundedDirectory } from "./bounded-directory";
  * separate bounded pools: a stalled provider may exhaust its own pool, but it
  * cannot stop an ordinary local folder or another provider from being listed.
  */
-const localDirectoryRead = createReadPool();
-const cloudDirectoryReads = new Map<
-  string,
-  ReturnType<typeof createReadPool>
->();
-
-function cloudProviderKey(dir: string): string | undefined {
-  const normalized = path.resolve(dir);
-  for (const folder of ["CloudStorage", "Mobile Documents"]) {
-    const marker = `${path.sep}Library${path.sep}${folder}`;
-    const at = normalized.indexOf(marker);
-    if (at === -1) continue;
-    const rest = normalized.slice(at + marker.length + 1);
-    const provider = rest.split(path.sep)[0] || folder;
-    return `${folder}:${provider}`;
-  }
-  return undefined;
-}
-
-function directoryReadFor(dir: string) {
-  const provider = cloudProviderKey(dir);
-  if (provider === undefined) return localDirectoryRead;
-  let read = cloudDirectoryReads.get(provider);
-  if (!read) {
-    read = createReadPool();
-    cloudDirectoryReads.set(provider, read);
-  }
-  return read;
-}
+const directoryReadFor = createProviderReadPoolSelector();
 
 export async function statEntryAsync(
   full: string,

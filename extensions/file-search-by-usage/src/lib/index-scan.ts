@@ -5,7 +5,7 @@ import { StringDecoder } from "node:string_decoder";
 import type { DatabaseSync } from "node:sqlite";
 import { NOISE_SEGMENTS } from "./read-dir";
 import type { FileRow } from "./index-db";
-import { createReadPool } from "./bounded-reads";
+import { createProviderReadPoolSelector } from "./provider-read-pools";
 
 /**
  * Building the index with fd.
@@ -39,8 +39,8 @@ export const DEFAULT_STAT_CONCURRENCY = 16;
 /** Rows per transaction. Large enough to amortise fsync, small enough to bound memory. */
 export const DEFAULT_BATCH_ROWS = 5_000;
 
-/** Physical filesystem reads remain capped even after a caller times out. */
-const indexRead = createReadPool(32);
+/** Stalled cloud reads stay bounded without consuming slots needed by local roots. */
+const indexReadFor = createProviderReadPoolSelector(32);
 
 export type ScanTimings = {
   /** fd traversal, decoding, exclusions, and scan orchestration. */
@@ -183,7 +183,7 @@ export async function resolveRoots(
   for (const root of roots) {
     try {
       resolved.push(
-        await indexRead(
+        await indexReadFor(root)(
           `index-real:${root}`,
           () => fsp.realpath(root),
           signal ?? new AbortController().signal,
@@ -224,7 +224,7 @@ export async function redundantLinks(
 ): Promise<string[]> {
   let entries;
   try {
-    entries = await indexRead(
+    entries = await indexReadFor(root)(
       `index-list:${root}`,
       () => fsp.readdir(root, { withFileTypes: true }),
       signal ?? new AbortController().signal,
@@ -239,7 +239,7 @@ export async function redundantLinks(
     let target: string;
     try {
       const full = path.join(root, entry.name);
-      target = await indexRead(
+      target = await indexReadFor(full)(
         `index-real:${full}`,
         () => fsp.realpath(full),
         signal ?? new AbortController().signal,
@@ -425,7 +425,7 @@ async function describe(
   };
 
   try {
-    const link = await indexRead(
+    const link = await indexReadFor(entry.path)(
       `index-lstat:${entry.path}`,
       () => fsp.lstat(entry.path),
       signal,
@@ -441,7 +441,7 @@ async function describe(
 
     let storage: string | null = null;
     try {
-      storage = await indexRead(
+      storage = await indexReadFor(entry.path)(
         `index-real:${entry.path}`,
         () => fsp.realpath(entry.path),
         signal,
@@ -451,7 +451,7 @@ async function describe(
       /* A dangling link has no target; the visible entry is still useful. */
     }
     try {
-      const target = await indexRead(
+      const target = await indexReadFor(entry.path)(
         `index-stat:${entry.path}`,
         () => fsp.stat(entry.path),
         signal,
@@ -498,7 +498,12 @@ async function describeAll(
         if (signal.aborted) return;
         const index = next++;
         if (index >= entries.length) return;
-        rows.push(await describe(entries[index], root, signal));
+        try {
+          rows.push(await describe(entries[index], root, signal));
+        } catch (error) {
+          if (signal.aborted) return;
+          throw error;
+        }
       }
     },
   );
@@ -535,6 +540,13 @@ function rollback(db: DatabaseSync): void {
     /* Already rolled back. */
   }
 }
+
+const INSERT_OBSERVED = `
+INSERT OR IGNORE INTO files
+  (path, name, parent, root, is_dir, is_symlink, size, mtime_ms, birthtime_ms, storage_path, scan_id)
+VALUES
+  (:path, :name, :parent, :root, :is_dir, 0, 0, 0, 0, NULL, :scan_id)
+`;
 
 /** Monotonic scan identifier; stale removal compares against it. */
 export function nextScanId(db: DatabaseSync): number {
@@ -593,6 +605,7 @@ export async function scanRoot(
   let databaseStarted = performance.now();
   const scanId = nextScanId(db);
   const upsert = db.prepare(UPSERT);
+  const insertObserved = db.prepare(INSERT_OBSERVED);
   databaseMs += performance.now() - databaseStarted;
 
   let scanned = 0;
@@ -631,14 +644,58 @@ export async function scanRoot(
     }
   };
 
+  /**
+   * Preserve fd's evidence that a path exists when metadata cannot finish.
+   * INSERT OR IGNORE keeps richer metadata from an earlier scan intact.
+   */
+  const commitObserved = (entries: Observed[], credited = entries.length) => {
+    if (entries.length === 0) return;
+    const startedWrite = performance.now();
+    assertOwned?.();
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const entry of entries)
+        insertObserved.run({
+          path: entry.path,
+          name: path.basename(entry.path),
+          parent: path.dirname(entry.path),
+          root,
+          is_dir: entry.isDir ? 1 : 0,
+          scan_id: scanId,
+        });
+      db.exec("COMMIT");
+      indexed += credited;
+    } catch (writeError) {
+      rollback(db);
+      throw writeError;
+    } finally {
+      databaseMs += performance.now() - startedWrite;
+    }
+  };
+
   const pending: Observed[] = [];
   const flush = async () => {
     if (pending.length === 0) return;
     const batch = pending.splice(0, pending.length);
     const startedMetadata = performance.now();
-    const rows = await describeAll(batch, root, statConcurrency, signal);
-    metadataMs += performance.now() - startedMetadata;
-    commit(rows);
+    let rows: FileRow[] | undefined;
+    try {
+      rows = await describeAll(batch, root, statConcurrency, signal);
+    } catch (metadataError) {
+      if (!signal.aborted) throw metadataError;
+    } finally {
+      metadataMs += performance.now() - startedMetadata;
+    }
+    if (rows === undefined) {
+      commitObserved(batch);
+    } else {
+      commit(rows);
+      // Workers that noticed cancellation before starting return without a
+      // row. Save every path that fd already found, but do not replace full
+      // metadata for rows committed above or retained from an earlier scan.
+      if (signal.aborted && rows.length < batch.length)
+        commitObserved(batch, batch.length - rows.length);
+    }
     onProgress?.({
       root,
       scanned,
@@ -649,7 +706,7 @@ export async function scanRoot(
 
   try {
     // Confirm the root is still there; a drive can unmount between runs.
-    const stats = await indexRead(
+    const stats = await indexReadFor(root)(
       `index-stat:${root}`,
       () => fsp.stat(root),
       signal,

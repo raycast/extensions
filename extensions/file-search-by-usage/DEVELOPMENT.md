@@ -56,6 +56,7 @@ src/lib/bounded-directory.ts  opendir read that stops one entry past its limit
 src/lib/directory-listing.ts  asynchronous metadata reads, watching, and polling
 src/lib/shared-cloud-folders.ts  bounded Google Drive shortcut-target discovery
 src/lib/bounded-reads.ts    physical read limits and removable cancelled waiters
+src/lib/provider-read-pools.ts  separate local and per-provider read pools
 src/lib/recent-validation.ts  shared bounded pool for recent-result metadata
 src/lib/work-queue.ts       independent workers and cancellation-aware backpressure
 src/lib/name-order.ts       shared numeric filename collation
@@ -137,7 +138,7 @@ fd --absolute-path --print0 --follow --show-errors --no-ignore --hidden
 
 `--hidden` follows the hidden-files setting. `--no-ignore` is replaced by `--no-require-git` when ignore files are respected. The user's patterns are appended as further `--exclude` values.
 
-Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. The physical-read pool stays bounded if a provider ignores cancellation, while the rebuild deadline lets the indexing lock move on. File contents are never read.
+Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. Physical reads use separate bounded pools for local storage and each cloud provider. If a provider ignores cancellation, its stalled operations retain only that provider's slots while the rebuild deadline releases the indexing lock; later local scans and other providers remain usable. File contents are never read.
 
 fd canonicalises the root it is given, so `/var/x` comes back as `/private/var/x`. `resolveRoots` realpaths the configured roots before the scan, which keeps exact-path lookups working and stops one root appearing under two spellings. `normalizeRoots` removes exact duplicates and orders nested scopes before parents; it does not discard explicit child scopes. Parent walks receive anchored, glob-escaped exclusions for each child scope, and parent-level symlink aliases yield to an independently configured target. A nested root gets its own directory row because fd does not emit the search root.
 
@@ -147,7 +148,7 @@ Exclusions match traversed paths rather than resolved symlink targets. For examp
 
 Stale cleanup covers the completed scope's path range as well as its recorded owner, excluding every configured child scope. This removes obsolete rows inherited from an older parent-only index, while a failed or partial child scan keeps its saved paths even if its parent completes. Removing a child scope lets a completed parent scan apply its exclusions again. Cleanup never treats a mere path-prefix match as containment.
 
-Rows are written in `BEGIN IMMEDIATE` transactions of 5,000. Each scan takes a new `scan_id`. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
+Rows are written in `BEGIN IMMEDIATE` transactions of 5,000. Each scan takes a new `scan_id`. If the deadline expires during metadata collection, every path already emitted by fd is inserted with its known name and type; completed metadata is retained, and an older rich row is never replaced by the fallback. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
 
 ### Configurable scope
 
@@ -350,7 +351,7 @@ A Drive shortcut and its resolved target have different paths but the same devic
 
 At scan time, root-level aliases yield to explicitly configured target scopes. An alias to an ancestor of a separate scope keeps its unrelated contents but excludes the child scope's projected alias path, avoiding duplicate traversal.
 
-`Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups prefer that path, while the row still displays and opens the familiar shortcut path. Action-time canonicalization is asynchronous and falls back to the visible path after 250 ms so a stalled cloud provider cannot freeze Open, Copy, or Pin. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
+`Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups prefer that path, while the row still displays and opens the familiar shortcut path. Actions pass this known storage identity directly. When a caller still needs action-time canonicalization, it is asynchronous and falls back to the visible path after 250 ms so a stalled cloud provider cannot freeze Open, Copy, or Pin. If a later action resolves successfully, visit and learned-query counts migrate from the fallback alias, and pin toggling removes either identity, so the keys cannot remain split. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
 
 ## Caches and storage
 

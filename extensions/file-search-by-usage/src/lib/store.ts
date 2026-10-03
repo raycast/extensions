@@ -14,6 +14,27 @@ const KEY = "visits";
 
 const EMPTY: VisitLog = { tick: 0, items: {} };
 
+/** Move a previously saved visible alias onto its now-known storage key. */
+function mergeVisitAlias(
+  log: VisitLog,
+  visiblePath: string,
+  storagePath: string,
+): VisitLog {
+  if (visiblePath === storagePath || log.items[visiblePath] === undefined)
+    return log;
+  const visible = log.items[visiblePath];
+  const canonical = log.items[storagePath];
+  const items = { ...log.items };
+  delete items[visiblePath];
+  items[storagePath] = {
+    count: visible.count + (canonical?.count ?? 0),
+    lastVisit: Math.max(visible.lastVisit, canonical?.lastVisit ?? 0),
+    ems: emsScore(visible, log.tick) + emsScore(canonical, log.tick),
+    tick: log.tick,
+  };
+  return { tick: log.tick, items };
+}
+
 /** Loads the event-clock usage log used for ranking. */
 export async function loadVisitLog(): Promise<VisitLog> {
   const raw = await LocalStorage.getItem<string>(KEY);
@@ -36,11 +57,12 @@ async function save(log: VisitLog, assertCurrent: () => void): Promise<void> {
 export async function recordVisit(
   path: string,
   generation = dataGeneration(),
+  knownTarget?: string,
 ): Promise<VisitLog> {
-  const target = await canonicalPathAsync(path);
+  const target = knownTarget ?? (await canonicalPathAsync(path));
   return withStorageLock(async (assertCurrent) => {
-    const loaded = await loadVisitLog();
-    // Canonical paths merge aliases when the provider resolves promptly.
+    const loaded = mergeVisitAlias(await loadVisitLog(), path, target);
+    // A later successful resolve also migrates an earlier timeout fallback.
     const updated = recordEms(loaded, target, Date.now());
 
     const { log } = pruneVisits(updated);
@@ -49,9 +71,12 @@ export async function recordVisit(
   }, generation);
 }
 
-export async function resetVisit(path: string): Promise<VisitLog> {
+export async function resetVisit(
+  path: string,
+  knownTarget?: string,
+): Promise<VisitLog> {
   const generation = dataGeneration();
-  const target = await canonicalPathAsync(path);
+  const target = knownTarget ?? (await canonicalPathAsync(path));
   return withStorageLock(async (assertCurrent) => {
     const log = await loadVisitLog();
     const items = { ...log.items };
@@ -92,13 +117,22 @@ export async function recordAbbreviation(
   normalizedQuery: string,
   target: string,
   generation = dataGeneration(),
+  knownTarget?: string,
 ): Promise<Abbreviations> {
   if (normalizedQuery.trim() === "") return loadAbbreviations();
-  const resolvedTarget = await canonicalPathAsync(target);
+  const resolvedTarget = knownTarget ?? (await canonicalPathAsync(target));
   return withStorageLock(async (assertCurrent) => {
+    const existing = await loadAbbreviations();
+    const normalized = normalizedQuery.trim().toLowerCase();
+    const aliases = { ...(existing[normalized] ?? {}) };
+    if (target !== resolvedTarget && aliases[target] !== undefined) {
+      aliases[resolvedTarget] =
+        (aliases[resolvedTarget] ?? 0) + aliases[target];
+      delete aliases[target];
+    }
     const next = mergeAbbreviation(
-      await loadAbbreviations(),
-      normalizedQuery.trim().toLowerCase(),
+      { ...existing, [normalized]: aliases },
+      normalized,
       resolvedTarget,
     );
     assertCurrent();
@@ -123,14 +157,17 @@ export async function loadPins(): Promise<string[]> {
   }
 }
 
-export async function togglePin(rawTarget: string): Promise<string[]> {
+export async function togglePin(
+  rawTarget: string,
+  knownTarget?: string,
+): Promise<string[]> {
   const generation = dataGeneration();
-  const target = await canonicalPathAsync(rawTarget);
+  const target = knownTarget ?? (await canonicalPathAsync(rawTarget));
   return withStorageLock(async (assertCurrent) => {
     const pins = await loadPins();
-    const next = pins.includes(target)
-      ? pins.filter((p) => p !== target)
-      : [...pins, target];
+    const wasPinned = pins.includes(target) || pins.includes(rawTarget);
+    const withoutAliases = pins.filter((p) => p !== target && p !== rawTarget);
+    const next = wasPinned ? withoutAliases : [...withoutAliases, target];
     assertCurrent();
     await LocalStorage.setItem(PINS_KEY, JSON.stringify(next));
     return next;

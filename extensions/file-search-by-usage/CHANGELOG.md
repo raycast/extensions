@@ -34,6 +34,9 @@
 - Add Return to Start (`⌘⇧H`) in Actions to clear the query and folder without leaving the command or growing the screen stack.
 - Query the index at three characters and say how many more are needed below that; keep memory results available at any length.
 - Keep healthy folder reads moving past stalled files; collection does not depend on scrolling.
+- Isolate indexing reads by cloud provider so stalled mounts cannot block later local rebuilds.
+- Keep paths discovered by `fd` searchable when their metadata reads time out.
+- Keep pin, visit, and learned-query keys unified when alias resolution times out and later succeeds.
 - Coordinate deletion with pending history and cache writes; bound cached-path metadata reads and retain cached results when metadata stalls.
 - Navigate folders with `⌥⌘↓` and `⌥⌘↑`, or type an absolute or home-relative path.
 - Use native navigation with a lightweight root and one active search route, without saved folder history; release each previous result view.

@@ -845,6 +845,19 @@ async function visitWriteChecks(
     "a visit through a symlinked alias merges into the canonical path",
   );
 
+  const timeoutAlias = storeAt(path.join(root, "visits", "timeout-alias"));
+  timeoutAlias.storage.set(
+    "visits",
+    JSON.stringify({ tick: 1, items: { [aliasPath]: seedVisit(1, 0) } }),
+  );
+  const migrated = await timeoutAlias.store.recordVisit(aliasPath);
+  assert(
+    migrated.items[opened]?.count === 2 &&
+      migrated.items[aliasPath] === undefined &&
+      Object.keys(migrated.items).length === 1,
+    "a successful resolve merges an earlier timeout alias into usage history",
+  );
+
   const generationTest = storeAt(path.join(root, "visits", "generation"));
   const generation = generationTest.access.dataGeneration();
   generationTest.access.invalidateData();
@@ -1145,6 +1158,21 @@ async function rankingWriteChecks(
       Object.keys(reinforced.gdoc ?? {}).length === 1,
     "learning the same pairing again reinforces the single entry",
   );
+  const timeoutAbbreviation = storeAt(
+    path.join(root, "ranking", "abbrev-timeout-alias"),
+  );
+  timeoutAbbreviation.storage.set(
+    "abbreviations",
+    JSON.stringify({ gdoc: { [aliasPath]: 2 } }),
+  );
+  const migratedAbbreviation =
+    await timeoutAbbreviation.store.recordAbbreviation("gdoc", aliasPath);
+  assert(
+    migratedAbbreviation.gdoc?.[opened] === 3 &&
+      migratedAbbreviation.gdoc?.[aliasPath] === undefined &&
+      Object.keys(migratedAbbreviation.gdoc ?? {}).length === 1,
+    "a successful resolve merges an earlier abbreviation timeout alias",
+  );
   const secondTarget = await abbreviations.store.recordAbbreviation(
     "gdoc",
     otherPath,
@@ -1220,6 +1248,12 @@ async function rankingWriteChecks(
     {
       label: "toggling an alias of a pinned path unpins the canonical entry",
       stored: JSON.stringify([opened]),
+      target: aliasPath,
+      next: [],
+    },
+    {
+      label: "toggling an alias fallback unpins it after canonical resolution",
+      stored: JSON.stringify([aliasPath]),
       target: aliasPath,
       next: [],
     },

@@ -1021,8 +1021,10 @@ export async function indexChecks(assert: Assert) {
   // The same deadline covers metadata reads after fd has enumerated a path.
   const metadataDir = tempDir("metadata-deadline");
   const metadataRoot = path.join(metadataDir, "root");
+  const readyPath = path.join(metadataRoot, "ready.txt");
   const stalledPath = path.join(metadataRoot, "stalled.txt");
   fs.mkdirSync(metadataRoot);
+  fs.writeFileSync(readyPath, "ready");
   fs.writeFileSync(stalledPath, "x");
   const metadataDb = openWritable(metadataDir);
   const originalLstat = fsp.lstat;
@@ -1038,8 +1040,8 @@ export async function indexChecks(assert: Assert) {
         fd: "/unused",
         roots: [metadataRoot],
         db: metadataDb,
-        tuning: { batchRows: 1 },
-        spawnFd: () => fdOutput([stalledPath]),
+        tuning: { batchRows: 2 },
+        spawnFd: () => fdOutput([readyPath, stalledPath]),
       },
       Date.now() + 40,
     );
@@ -1049,10 +1051,94 @@ export async function indexChecks(assert: Assert) {
         bounded.stopped === "time-limit",
       "stalled metadata cannot hold the rebuild lock past its deadline",
     );
+    assert(
+      rowPaths(metadataDb).includes(stalledPath),
+      "a metadata timeout keeps the path already discovered by fd",
+    );
+    const readyRow = metadataDb
+      .prepare("SELECT size FROM files WHERE path = ?")
+      .get(readyPath) as { size: number };
+    assert(
+      readyRow.size === 5,
+      "completed metadata in a timed-out batch remains intact",
+    );
   } finally {
     fsp.lstat = originalLstat;
     metadataDb.close();
     fs.rmSync(metadataDir, { recursive: true, force: true });
+  }
+
+  /*
+   * Timed-out metadata promises keep their physical slots. Saturating one
+   * cloud provider across rebuilds must not stop a healthy local scan.
+   */
+  const isolationDir = tempDir("index-provider-isolation");
+  const stalledCloudRoot = path.join(
+    isolationDir,
+    "Library",
+    "CloudStorage",
+    "StalledProvider",
+  );
+  const healthyLocalRoot = path.join(isolationDir, "Documents");
+  fs.mkdirSync(stalledCloudRoot, { recursive: true });
+  fs.mkdirSync(healthyLocalRoot, { recursive: true });
+  const stalledCloudPaths = Array.from({ length: 16 }, (_, index) => {
+    const full = path.join(stalledCloudRoot, `cloud-${index}.txt`);
+    fs.writeFileSync(full, "cloud");
+    return full;
+  });
+  const healthyLocalPath = path.join(healthyLocalRoot, "local.txt");
+  fs.writeFileSync(healthyLocalPath, "local");
+  const isolationDb = openWritable(isolationDir);
+  let releaseCloud = () => {};
+  const blockedCloud = new Promise<void>((resolve) => {
+    releaseCloud = resolve;
+  });
+  try {
+    fsp.lstat = (async (full, ...args: unknown[]) => {
+      if (String(full).startsWith(stalledCloudRoot + path.sep))
+        await blockedCloud;
+      return Reflect.apply(originalLstat, fsp, [full, ...args]);
+    }) as typeof fsp.lstat;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const cloud = await scanRoot(
+        stalledCloudRoot,
+        {
+          fd: "/unused",
+          roots: [stalledCloudRoot],
+          db: isolationDb,
+          tuning: { batchRows: stalledCloudPaths.length },
+          spawnFd: () => fdOutput(stalledCloudPaths),
+        },
+        Date.now() + 40,
+      );
+      assert(
+        !cloud.complete && cloud.stopped === "time-limit",
+        `stalled cloud metadata times out on attempt ${attempt + 1}`,
+      );
+    }
+
+    const local = await scanRoot(
+      healthyLocalRoot,
+      {
+        fd: "/unused",
+        roots: [healthyLocalRoot],
+        db: isolationDb,
+        tuning: { batchRows: 1 },
+        spawnFd: () => fdOutput([healthyLocalPath]),
+      },
+      Date.now() + 500,
+    );
+    assert(
+      local.complete && local.indexed === 1,
+      "stalled cloud rebuilds cannot consume slots needed by a healthy local root",
+    );
+  } finally {
+    releaseCloud();
+    fsp.lstat = originalLstat;
+    isolationDb.close();
+    fs.rmSync(isolationDir, { recursive: true, force: true });
   }
 
   // A root that is gone leaves its saved coverage alone.

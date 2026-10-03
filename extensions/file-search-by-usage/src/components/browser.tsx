@@ -667,8 +667,12 @@ function BrowserView({
   ]);
 
   const markVisited = useCallback(
-    async (target: string, generation = dataGeneration()) => {
-      const visits = await recordVisit(target, generation);
+    async (
+      target: string,
+      generation = dataGeneration(),
+      knownTarget?: string,
+    ) => {
+      const visits = await recordVisit(target, generation, knownTarget);
       if (generation === dataGeneration()) setVisitLog(visits);
     },
     [],
@@ -703,7 +707,11 @@ function BrowserView({
       onReturnToStart:
         dir !== undefined || searchText !== "" ? returnToStart : undefined,
       onUse: (entry) => {
-        void markVisited(entry.path).catch(() => {});
+        void markVisited(
+          entry.path,
+          dataGeneration(),
+          entryStoragePath(entry),
+        ).catch(() => {});
       },
       onOpen: (entry) =>
         runWithBestEffortSideEffect(
@@ -714,13 +722,17 @@ function BrowserView({
           async () => {
             const generation = dataGeneration();
             await Promise.allSettled([
-              markVisited(entry.path, generation),
+              markVisited(entry.path, generation, entryStoragePath(entry)),
               commitSearch(entry.path, generation),
             ]);
           },
         ),
       onDescend: (entry) => {
-        void markVisited(entry.path).catch(() => {});
+        void markVisited(
+          entry.path,
+          dataGeneration(),
+          entryStoragePath(entry),
+        ).catch(() => {});
         void commitSearch(entry.path).catch(() => {});
         navigate(entry.path);
       },
@@ -760,13 +772,19 @@ function BrowserView({
           setQueryProgrammatically(step.query);
         }
       },
-      onTogglePin: async (entry) => setPins(await togglePin(entry.path)),
+      onTogglePin: async (entry) =>
+        setPins(await togglePin(entry.path, entryStoragePath(entry))),
       onLearn:
         query === ""
           ? undefined
           : async (entry) => {
               setAbbreviations(
-                await recordAbbreviation(parsed.normalized, entry.path),
+                await recordAbbreviation(
+                  parsed.normalized,
+                  entry.path,
+                  dataGeneration(),
+                  entryStoragePath(entry),
+                ),
               );
               await showToast({
                 style: Toast.Style.Success,
@@ -787,7 +805,7 @@ function BrowserView({
       onToggleDetail: () => setShowingDetail((v) => !v),
       onRefresh: () => setReloadKey((k) => k + 1),
       onResetRanking: async (entry) =>
-        setVisitLog(await resetVisit(entry.path)),
+        setVisitLog(await resetVisit(entry.path, entryStoragePath(entry))),
       onClearAllRankings: async () => {
         const confirmed = await confirmAlert({
           title: "Clear all usage history?",
