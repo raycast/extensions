@@ -13,7 +13,7 @@ The command changes the macOS modifier lock directly. It does not simulate press
 
 ## Native helper
 
-A small universal helper calls Apple's IOKit `IOHIDGetModifierLockState` and `IOHIDSetModifierLockState` APIs. It reads the current state, changes it, and verifies the new state before reporting success. It does not record keystrokes, access the network, or alter keyboard mappings.
+A small universal helper calls Apple's IOKit `IOHIDGetModifierLockState` and `IOHIDSetModifierLockState` APIs. It reads the current state, changes it, and verifies the new state before reporting success. Concurrent helper processes for the same user are serialized with a file lock, so overlapping commands do not lose toggles. The lock is automatically released when the process exits. It does not record keystrokes, access the network, or alter keyboard mappings.
 
 The complete source is in [`native/caps-lock.c`](native/caps-lock.c). Rebuild the bundled `assets/caps-lock` with Apple's Command Line Tools:
 
@@ -22,3 +22,5 @@ npm run build:native
 ```
 
 [`native/build.sh`](native/build.sh) compiles the same C source for arm64 and x86_64 with a macOS 12 deployment target, combines the results with `lipo`, and applies an ad-hoc signature. The helper links only to system libraries and IOKit. Command Line Tools are required only for rebuilding, not for users running the command.
+
+`npm run build` rebuilds the native helper before bundling the extension, so the packaged binary matches the checked-in C source. Run `npm test` on macOS to test concurrent helper processes against a simulated keyboard and command notifications against a mocked Raycast API; these tests do not change the real Caps Lock state.
