@@ -85,6 +85,25 @@ function fixture(region = "global", initial) {
     storage,
   };
 }
+test("disconnect always clears native tokens when client registration is missing or unreadable", async () => {
+  for (const unreadable of [false, true]) {
+    const f = fixture("global", {
+      accessToken: "live",
+      refreshToken: "refresh",
+      isExpired: () => false,
+    });
+    if (unreadable)
+      f.storage.getItem = async () => {
+        throw Error("private storage error");
+      };
+    await assert.rejects(
+      f.session.disconnect(),
+      /remote revocation not confirmed/,
+    );
+    assert.equal(await f.client.getTokens(), undefined);
+    assert.equal(f.calls.length, 0);
+  }
+});
 test("native PKCE, DCR and secure token storage isolate regional resources", async () => {
   for (const region of ["global", "cn"]) {
     const f = fixture(region);

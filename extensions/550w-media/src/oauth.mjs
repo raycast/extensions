@@ -200,10 +200,11 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
     },
     async disconnect() {
       if (flight) await flight.catch(() => {});
-      const tokens = await client.getTokens(),
-        clientId = await storage.getItem(key);
       let failed = false;
       try {
+        const tokens = await client.getTokens(),
+          clientId = await storage.getItem(key);
+        if (tokens && !clientId) failed = true;
         if (tokens && clientId)
           await json("/oauth2/revoke", {
             method: "POST",

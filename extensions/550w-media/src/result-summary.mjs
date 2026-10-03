@@ -16,7 +16,7 @@ export function resultSummary(action, result, fallbackId = "") {
       : data.resultUrl;
   if (
     accepted &&
-    (action === "share" || status === "success") &&
+    (status === "success" || (action === "share" && !data.status)) &&
     typeof candidate === "string"
   ) {
     try {
@@ -25,7 +25,8 @@ export function resultSummary(action, result, fallbackId = "") {
       /* Invalid result links are never actionable. */
     }
   }
-  if (action === "share" && accepted) status = url ? "success" : "unknown";
+  if (action === "share" && accepted && !data.status)
+    status = url ? "success" : "unknown";
   return {
     status,
     taskId: typeof taskId === "string" && taskId.trim() ? taskId : undefined,

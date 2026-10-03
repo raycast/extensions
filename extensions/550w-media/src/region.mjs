@@ -1,3 +1,4 @@
+// Default source is the English Store candidate. Regional builds replace this file.
 /** @type {string} */
 export const region = "global";
 export const links = {

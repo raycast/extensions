@@ -17,7 +17,7 @@ import path from "node:path";
 import { token, rectangle, publicUrl } from "./generated/api.mjs";
 import { request } from "./transport.mjs";
 import { createSession, oauthDiagnostic } from "./oauth.mjs";
-import { taskQuery } from "./task-query.mjs";
+import { taskQuery, refreshTaskResult } from "./task-query.mjs";
 import { resultSummary } from "./result-summary.mjs";
 import { videoRegion } from "./video-region.mjs";
 import { region, links } from "./region.mjs";
@@ -51,7 +51,7 @@ type Auth = {
 };
 function TaskResult({
   initial,
-  query,
+  query: initialQuery,
   auth,
   cn,
   home,
@@ -67,6 +67,7 @@ function TaskResult({
   operation?: string;
 }) {
   const [result, setResult] = useState(initial),
+    [query, setQuery] = useState(initialQuery),
     [loading, setLoading] = useState(false);
   const pending = useRef(false);
   async function refresh() {
@@ -74,11 +75,15 @@ function TaskResult({
     pending.current = true;
     setLoading(true);
     try {
-      setResult(
-        await (query
-          ? request(query.endpoint, auth, { taskId: query.taskId })
-          : request("receipt", auth, { operationId: operation })),
+      const next = await refreshTaskResult(
+        action,
+        query,
+        operation,
+        auth,
+        request,
       );
+      setResult(next.result);
+      setQuery(next.query);
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -279,7 +284,12 @@ export default function Command() {
               throw new Error(cn ? "文件读取不完整" : "Incomplete file");
             offset += read.bytesRead;
           }
-          if ((await handle.stat()).size !== metadata.size)
+          const after = await handle.stat();
+          if (
+            after.size !== metadata.size ||
+            after.mtimeMs !== metadata.mtimeMs ||
+            after.ctimeMs !== metadata.ctimeMs
+          )
             throw new Error(
               cn ? "读取期间文件发生变化" : "File changed during upload",
             );
