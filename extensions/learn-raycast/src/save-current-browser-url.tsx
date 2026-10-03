@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import {
   captureBrowserUrl,
-  CAPTURE_WORKSPACE_KEY,
   getSavedCaptureWorkspace,
   type BrowserCaptureRequest,
   type CaptureResult,
@@ -79,7 +78,6 @@ export default async function SaveCurrentBrowserUrl({
       ...request,
       runLearn: (args) => runLearn(args, executable),
     });
-    await LocalStorage.setItem(CAPTURE_WORKSPACE_KEY, request.workspace);
     await showResult(result, request);
   } catch (error) {
     await showToast({

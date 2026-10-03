@@ -41,10 +41,17 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
   );
   const launching = useRef(false);
 
-  async function save(tab: BrowserTab, workspace: string) {
+  async function save(
+    tab: BrowserTab,
+    workspace: string,
+    rememberWorkspace = false,
+  ) {
     if (launching.current) return;
     launching.current = true;
     try {
+      if (rememberWorkspace) {
+        await LocalStorage.setItem(CAPTURE_WORKSPACE_KEY, workspace);
+      }
       await launchCommand({
         name: "save-current-browser-url",
         type: LaunchType.UserInitiated,
@@ -98,7 +105,7 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
             <ActionPanel>
               <Action
                 title="Save to Workspace"
-                onAction={() => save(selectedTab, workspace)}
+                onAction={() => save(selectedTab, workspace, true)}
               />
             </ActionPanel>
           }

@@ -80,18 +80,49 @@ describe("Save Current Browser URL", () => {
     finishSave({ stdout: "", stderr: "", code: 0 });
     await capture;
 
-    expect(mocks.setItem).toHaveBeenCalledWith(
-      "learn.capture.workspace",
-      "papers",
-    );
-    expect(mocks.setItem.mock.invocationCallOrder[0]).toBeLessThan(
-      mocks.showHUD.mock.invocationCallOrder[0],
-    );
+    expect(mocks.setItem).not.toHaveBeenCalled();
     expect(mocks.showHUD).toHaveBeenCalledWith(
       "Saved “Article title” to papers",
     );
     expect(mocks.showToast).not.toHaveBeenCalled();
   });
+
+  it.each([false, true])(
+    "preserves a newer workspace choice when an older capture finishes (picker: %s)",
+    async (fromPicker) => {
+      let workspace = "papers";
+      mocks.getItem.mockImplementation(async () => workspace);
+      mocks.setItem.mockImplementation(async (_key, value) => {
+        workspace = value;
+      });
+      let finishSave!: (result: LearnCommandResult) => void;
+      mocks.runLearn.mockReturnValueOnce(
+        new Promise<LearnCommandResult>((resolve) => {
+          finishSave = resolve;
+        }),
+      );
+
+      const capture = SaveCurrentBrowserUrl({
+        ...launchProps,
+        ...(fromPicker
+          ? { launchContext: { capture: { ...tab, workspace: "papers" } } }
+          : {}),
+      });
+      await vi.waitFor(() => expect(mocks.runLearn).toHaveBeenCalledOnce());
+
+      await mocks.setItem("learn.capture.workspace", "browser-agents");
+      finishSave({ stdout: "", stderr: "", code: 0 });
+      await capture;
+
+      expect(workspace).toBe("browser-agents");
+      expect(mocks.setItem).toHaveBeenCalledOnce();
+      await SaveCurrentBrowserUrl(launchProps);
+      expect(mocks.runLearn).toHaveBeenLastCalledWith(
+        ["add", tab.url, "--workspace", "browser-agents", "--title", tab.title],
+        "/opt/homebrew/bin/learn",
+      );
+    },
+  );
 
   it("opens the picker on first capture without saving or remembering a workspace", async () => {
     mocks.getItem.mockResolvedValue(undefined);
@@ -157,7 +188,7 @@ describe("Save Current Browser URL", () => {
     );
   });
 
-  it("reports an existing URL and remembers its workspace without a success HUD", async () => {
+  it("reports an existing URL without changing the workspace or showing a success HUD", async () => {
     mocks.runLearn.mockResolvedValue({
       stdout: "",
       stderr: `Resource "${tab.url}" already exists`,
@@ -171,10 +202,7 @@ describe("Save Current Browser URL", () => {
       title: "Already saved",
       message: "This URL is already in papers",
     });
-    expect(mocks.setItem).toHaveBeenCalledWith(
-      "learn.capture.workspace",
-      "papers",
-    );
+    expect(mocks.setItem).not.toHaveBeenCalled();
     expect(mocks.showHUD).not.toHaveBeenCalled();
   });
 
