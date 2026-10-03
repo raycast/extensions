@@ -4,6 +4,10 @@
 
 - Add Desearch to the official registry: AI search, X search and web search for AI agents, plus page extraction and X data tools. Local stdio server `desearch-mcp-server` (MIT) through `npx` with 15 tools; bring your own Desearch API key from console.desearch.ai/api-keys, set as `DESEARCH_API_KEY`.
 
+## [Add DC Hub MCP Server] - 2026-10-03
+
+- Add DC Hub to the official registry: live data on the physical infrastructure behind AI, with facility coverage in 170+ countries, 300+ markets scored daily, 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source for finding available data-center capacity (exact fits, multi-provider bundles, brokered intros). 92 tools, with a source on every answer. Hosted remote Streamable HTTP server at https://dchub.cloud/mcp through `mcp-remote`; free tier works with no API key and no sign-in.
+
 ## [Add Weio site check MCP Server] - 2026-10-03
 
 - Add Weio site check to the official registry: read-only website facts for AI agents. Check whether a domain and its www version load securely or show a browser privacy warning and why, with the certificate expiry date; read what a homepage publishes (title and description, language, CMS or site builder, mobile viewport tag, role contact emails, phone numbers, social links, contact page); and list businesses from a small dated scan index. Raycast connects directly to the remote Streamable HTTP server at https://weio.ai/mcp, with no sign-in; 10 free calls a day without a key, more with a paid Weio API key.

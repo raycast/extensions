@@ -214,6 +214,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "dc-hub",
+    title: "DC Hub",
+    description:
+      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 92 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+    icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
+    homepage: "https://dchub.cloud/connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://dchub.cloud/mcp"],
+    },
+    remoteUrl: "https://dchub.cloud/mcp",
+  },
+  {
     name: "git",
     title: "Git",
     description:
