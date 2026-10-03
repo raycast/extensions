@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Dependency Updates] - {PR_MERGE_DATE}
+## [Dependency Updates] - 2026-10-03
 
 - Update utilities and extension dependencies while retaining Raycast API v1 compatibility
 
