@@ -76,22 +76,29 @@ export default function DownloadModel() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    const generation = searchGenRef.current;
     (async () => {
       if (!isOmlxInstalled()) {
         setViewState("not-installed");
         return;
       }
       const running = await isServerRunning();
-      if (!running) {
-        setViewState("offline");
-        return;
+      if (!active) return;
+      if (generation === searchGenRef.current) {
+        setViewState(running ? "idle" : "offline");
       }
-      setViewState("idle");
+      if (!running) return;
       notifyIfUpdateAvailable();
       fetchRecommendedModels()
-        .then(setRecommended)
+        .then((models) => {
+          if (active) setRecommended(models);
+        })
         .catch(() => {});
     })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const doSearch = useCallback((text: string, src: Source, mlx: boolean) => {
@@ -119,6 +126,7 @@ export default function DownloadModel() {
           title: "Search failed",
           message: error instanceof Error ? error.message : "Unknown error",
         });
+        if (generation !== searchGenRef.current) return;
         setViewState("ready");
       }
     }, 300);
@@ -137,11 +145,7 @@ export default function DownloadModel() {
       const src = newSource as Source;
       setSource(src);
       setResults([]);
-      if (queryRef.current.trim()) {
-        doSearch(queryRef.current, src, mlxOnly);
-      } else {
-        setViewState("idle");
-      }
+      doSearch(queryRef.current, src, mlxOnly);
     },
     [mlxOnly, doSearch],
   );
@@ -149,9 +153,7 @@ export default function DownloadModel() {
   const toggleMlxOnly = useCallback(() => {
     const next = !mlxOnly;
     setMlxOnly(next);
-    if (queryRef.current.trim()) {
-      doSearch(queryRef.current, source, next);
-    }
+    doSearch(queryRef.current, source, next);
   }, [mlxOnly, source, doSearch]);
 
   const config = SOURCE_CONFIG[source];

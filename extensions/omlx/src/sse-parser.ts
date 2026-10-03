@@ -34,11 +34,14 @@ export function createSseParser() {
   const drainToolCalls = (): SsePart[] => {
     const parts: SsePart[] = [];
     for (const tc of toolCalls.values()) {
-      let input: unknown = {};
+      if (!tc.id || !tc.name) {
+        throw new Error("Incomplete tool call received from oMLX");
+      }
+      let input: unknown;
       try {
         input = JSON.parse(tc.arguments);
       } catch {
-        /* keep empty input for malformed arguments */
+        throw new Error("Invalid tool call arguments received from oMLX");
       }
       parts.push({
         type: "tool-call",
@@ -56,47 +59,48 @@ export function createSseParser() {
       done = true;
       return drainToolCalls();
     }
+    let parsed;
     try {
-      const parsed = JSON.parse(data);
-      if (parsed.model === "keepalive") return [];
-      const delta = parsed.choices?.[0]?.delta;
-      const finishReason = parsed.choices?.[0]?.finish_reason;
+      parsed = JSON.parse(data);
+    } catch {
+      // Ignore malformed data events, but never swallow tool-input errors.
+      return [];
+    }
+    if (parsed?.model === "keepalive") return [];
+    const delta = parsed?.choices?.[0]?.delta;
+    const finishReason = parsed?.choices?.[0]?.finish_reason;
 
-      const parts: SsePart[] = [];
-      if (delta?.reasoning_content) {
-        parts.push({
-          type: "reasoning-delta",
-          textDelta: delta.reasoning_content,
-        });
-      }
-      if (delta?.content) {
-        parts.push({ type: "text-delta", textDelta: delta.content });
-      }
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls) {
-          const idx = tc.index ?? 0;
-          if (tc.id) {
-            toolCalls.set(idx, {
-              id: tc.id,
-              name: tc.function?.name ?? "",
-              arguments: tc.function?.arguments ?? "",
-            });
-          } else {
-            const existing = toolCalls.get(idx);
-            if (existing && tc.function?.arguments) {
-              existing.arguments += tc.function.arguments;
-            }
+    const parts: SsePart[] = [];
+    if (delta?.reasoning_content) {
+      parts.push({
+        type: "reasoning-delta",
+        textDelta: delta.reasoning_content,
+      });
+    }
+    if (delta?.content) {
+      parts.push({ type: "text-delta", textDelta: delta.content });
+    }
+    if (delta?.tool_calls) {
+      for (const tc of delta.tool_calls) {
+        const idx = tc.index ?? 0;
+        if (tc.id) {
+          toolCalls.set(idx, {
+            id: tc.id,
+            name: tc.function?.name ?? "",
+            arguments: tc.function?.arguments ?? "",
+          });
+        } else {
+          const existing = toolCalls.get(idx);
+          if (existing && tc.function?.arguments) {
+            existing.arguments += tc.function.arguments;
           }
         }
       }
-      if (finishReason === "tool_calls") {
-        parts.push(...drainToolCalls());
-      }
-      return parts;
-    } catch {
-      // skip malformed chunks
-      return [];
     }
+    if (finishReason === "tool_calls") {
+      parts.push(...drainToolCalls());
+    }
+    return parts;
   };
 
   const processLine = (line: string): SsePart[] => {

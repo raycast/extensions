@@ -472,6 +472,18 @@ export async function fetchMsTasks(): Promise<HfTask[]> {
   });
   if (!response.ok) {
     const text = await response.text();
+    if (response.status === 503) {
+      try {
+        // Only this documented optional-backend response means no tasks.
+        if (
+          JSON.parse(text).detail === "ModelScope downloader not initialized"
+        ) {
+          return [];
+        }
+      } catch {
+        // Other server responses must remain visible as failures.
+      }
+    }
     throw new Error(`Failed to fetch ModelScope tasks: ${text.slice(0, 200)}`);
   }
   const data = (await response.json()) as { tasks: HfTask[] };
@@ -528,7 +540,7 @@ export interface TrackedDownload extends HfTask {
 export async function fetchDownloads(): Promise<TrackedDownload[]> {
   const [hfTasks, msTasks] = await Promise.all([
     fetchHfTasks(),
-    fetchMsTasks().catch(() => [] as HfTask[]),
+    fetchMsTasks(),
   ]);
   return [
     ...hfTasks.map((t) => ({ ...t, source: "huggingface" as const })),
@@ -553,27 +565,21 @@ export async function fetchLogs(): Promise<OmlxLogs> {
   return response.json() as Promise<OmlxLogs>;
 }
 
-let updateCheckResult: UpdateCheckResponse | null = null;
-let updateCheckDone = false;
+let updateCheckPromise: Promise<UpdateCheckResponse | null> | null = null;
 // Passive update toasts are shown at most once per command runtime;
 // otherwise the 1s download polling would resurface it constantly.
 let updateToastShown = false;
 
 export async function checkUpdateOnce(): Promise<UpdateCheckResponse | null> {
-  if (updateCheckDone) return updateCheckResult;
-  updateCheckDone = true;
-  try {
-    updateCheckResult = await checkForUpdate();
-    return updateCheckResult;
-  } catch {
-    return null;
-  }
+  // Share an in-flight check as well as its result with every caller.
+  updateCheckPromise ??= checkForUpdate().catch(() => null);
+  return updateCheckPromise;
 }
 
 export async function notifyIfUpdateAvailable(): Promise<void> {
   if (updateToastShown) return;
   const result = await checkUpdateOnce();
-  if (!result?.update_available) return;
+  if (!result?.update_available || updateToastShown) return;
   updateToastShown = true;
   const version = result.latest_version ?? "newer version";
   await showToast({

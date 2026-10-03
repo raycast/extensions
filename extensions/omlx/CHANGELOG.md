@@ -3,8 +3,8 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Download Model: search and download from HuggingFace and ModelScope
-- Manage Downloads: track progress, cancel, retry, remove downloads
-- Check for Updates: dedicated command + passive toast notification
+- Manage Downloads: track HuggingFace and ModelScope progress, cancel, retry, remove downloads
+- Check for Updates: dedicated command + one passive toast notification per command session
 - Session vs All-Time stats with dropdown toggle
 - Per-model stats (push from Serving Stats and Manage Models)
 - Favorite/unfavorite models with star indicator
@@ -17,7 +17,7 @@
 - MLX-only filter toggle for HuggingFace search
 - ModelScope as alternative model source
 - Consistent action ordering across all commands
-- AI Model Provider: use oMLX models natively in AI Chat, Quick AI, and AI Commands
+- AI Model Provider: use oMLX models natively in AI Chat, Quick AI, and AI Commands, including streamed tool calls and final response data
 - Manage Models: load, eject, pin, and delete models
 - Serving Stats: speed, cache efficiency, memory, and active model monitoring
 - Start/Stop Server: control the oMLX server from Raycast

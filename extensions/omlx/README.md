@@ -30,7 +30,7 @@ Search HuggingFace and ModelScope for models to download. Filter to MLX-only mod
 
 ### Manage Downloads
 
-Track download progress with live updates. Cancel, retry, or remove downloads.
+Track HuggingFace and ModelScope download progress with live updates. Cancel, retry, or remove downloads; ModelScope tasks are labeled by source.
 
 ### Serving Stats
 
@@ -47,3 +47,7 @@ Start, stop, or restart the oMLX server.
 ### Open Web Dashboard
 
 Open the oMLX web dashboard in your browser.
+
+## Development
+
+Install dependencies with `npm ci`, then run `npm run dev` to load the extension in Raycast. Run `npm test` for mocked streaming, search-race, update-notification, and download-routing regressions; these tests do not require a running oMLX server. Validate changes with `npx tsc --noEmit`, `npm run lint`, and `npm run build`. Run `npx ray evals` separately for conversational tool behavior.

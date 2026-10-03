@@ -1,8 +1,23 @@
 // Regression tests for the SSE parser behind streamCompletion.
-// Run with: npm test  (uses Node's built-in type stripping, no extra deps)
+// Run with: npm test (uses the existing TypeScript dev dependency).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSseParser } from "../src/sse-parser.ts";
+import { readFile } from "node:fs/promises";
+import ts from "typescript";
+
+const source = await readFile(
+  new URL("../src/sse-parser.ts", import.meta.url),
+  "utf8",
+);
+const code = ts.transpileModule(source, {
+  compilerOptions: {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ESNext,
+  },
+}).outputText;
+const { createSseParser } = await import(
+  `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`
+);
 
 const enc = new TextEncoder();
 
@@ -113,14 +128,38 @@ test("tool call arguments fragmented across data events accumulate", () => {
   ]);
 });
 
-test("invalid fragmented arguments yield empty input instead of throwing", () => {
-  const parts = run([
-    toolCallDelta(0, "call_1", "noop", '{"trunc'),
-    DONE,
+for (const terminal of ["done", "finish", "eof"]) {
+  test(`invalid tool arguments fail without fabricating input at ${terminal}`, () => {
+    const parser = createSseParser();
+    assert.deepEqual(
+      parser.feed(toolCallDelta(0, "call_1", "noop", '{"trunc')),
+      [],
+    );
+    assert.throws(
+      () =>
+        terminal === "done"
+          ? parser.feed(DONE)
+          : terminal === "finish"
+            ? parser.feed(finishEvent("tool_calls"))
+            : parser.flush(),
+      /Invalid tool call arguments/,
+    );
+  });
+}
+
+test("final tool event without a newline is emitted exactly once at EOF", () => {
+  const bytes = toolCallDelta(0, "call_1", "noop", '{"value":1}');
+  const parser = createSseParser();
+  assert.deepEqual(parser.feed(bytes.subarray(0, bytes.length - 2)), []);
+  assert.deepEqual(parser.flush(), [
+    {
+      type: "tool-call",
+      toolCallId: "call_1",
+      toolName: "noop",
+      input: { value: 1 },
+    },
   ]);
-  assert.deepEqual(parts, [
-    { type: "tool-call", toolCallId: "call_1", toolName: "noop", input: {} },
-  ]);
+  assert.deepEqual(parser.flush(), []);
 });
 
 test("multiple tool calls are emitted in arrival order", () => {
@@ -129,7 +168,10 @@ test("multiple tool calls are emitted in arrival order", () => {
     toolCallDelta(0, "call_a", "tool_a", "{}"),
     DONE,
   ]);
-  assert.deepEqual(parts.map((p) => p.toolCallId), ["call_b", "call_a"]);
+  assert.deepEqual(
+    parts.map((p) => p.toolCallId),
+    ["call_b", "call_a"],
+  );
 });
 
 test("tool calls are emitted exactly once when both finish_reason and [DONE] appear", () => {
@@ -187,11 +229,7 @@ test("keepalive events are skipped", () => {
 });
 
 test("malformed JSON data events are skipped without throwing", () => {
-  const parts = run([
-    enc.encode("data: {not json\n\n"),
-    textDelta("ok"),
-    DONE,
-  ]);
+  const parts = run([enc.encode("data: {not json\n\n"), textDelta("ok"), DONE]);
   assert.deepEqual(parts, [{ type: "text-delta", textDelta: "ok" }]);
 });
 
