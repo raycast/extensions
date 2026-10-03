@@ -50,6 +50,8 @@ export default function Command() {
       setItemCounts((previous) => new Map([...[...previous].filter(([shareId]) => failed.has(shareId)), ...counted]));
       await Promise.all([setCachedVaults(freshVaults), failed.size === 0 ? setCachedItems(items, true) : undefined]);
     } catch (err: unknown) {
+      // The counts of an ended session must not show up again.
+      if (err instanceof PassCliError && err.type === "not_authenticated") setItemCounts(new Map());
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
