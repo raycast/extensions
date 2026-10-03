@@ -22,20 +22,33 @@ export function useSearchHistoryRecording(state: {
   setAbbreviations: Dispatch<
     SetStateAction<Record<string, Record<string, number>>>
   >;
-}): (target?: string, storageGeneration?: string) => Promise<void> {
+}): (
+  target?: string,
+  storageGeneration?: string,
+  knownTarget?: string,
+) => Promise<void> {
   const { query, minQuery, pathQuery, normalizedQuery } = state;
   const { setHistory, setAbbreviations } = state;
 
   /** Records a query and optionally learns its selected target. */
   const commitSearch = useCallback(
-    async (target?: string, storageGeneration = dataGeneration()) => {
+    async (
+      target?: string,
+      storageGeneration = dataGeneration(),
+      knownTarget?: string,
+    ) => {
       if (query === "") return;
       const history = await recordSearch(query, storageGeneration);
       if (storageGeneration !== dataGeneration()) return;
       setHistory(history);
       if (target !== undefined) {
         setAbbreviations(
-          await recordAbbreviation(normalizedQuery, target, storageGeneration),
+          await recordAbbreviation(
+            normalizedQuery,
+            target,
+            storageGeneration,
+            knownTarget,
+          ),
         );
       }
     },

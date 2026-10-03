@@ -59,7 +59,11 @@ import {
 import { visitScore } from "../lib/score";
 import { hiddenOnly, parseQuery, TypeFilter } from "../lib/query";
 import { Row, RowHandlers } from "./row";
-import { entryStoragePath, rowIdForEntry } from "../lib/entry-identity";
+import {
+  currentEntryStoragePath,
+  entryStoragePath,
+  rowIdForEntry,
+} from "../lib/entry-identity";
 import { compactScopeLabel, relativeTime } from "../lib/format";
 import { columnWidths } from "../lib/accessory-columns";
 import { rankSources as rankCandidates } from "../lib/rank-sources";
@@ -707,11 +711,12 @@ function BrowserView({
       onReturnToStart:
         dir !== undefined || searchText !== "" ? returnToStart : undefined,
       onUse: (entry) => {
-        void markVisited(
-          entry.path,
-          dataGeneration(),
-          entryStoragePath(entry),
-        ).catch(() => {});
+        const generation = dataGeneration();
+        void currentEntryStoragePath(entry)
+          .then((storagePath) =>
+            markVisited(entry.path, generation, storagePath),
+          )
+          .catch(() => {});
       },
       onOpen: (entry) =>
         runWithBestEffortSideEffect(
@@ -721,19 +726,23 @@ function BrowserView({
           },
           async () => {
             const generation = dataGeneration();
+            const storagePath = await currentEntryStoragePath(entry);
             await Promise.allSettled([
-              markVisited(entry.path, generation, entryStoragePath(entry)),
-              commitSearch(entry.path, generation),
+              markVisited(entry.path, generation, storagePath),
+              commitSearch(entry.path, generation, storagePath),
             ]);
           },
         ),
       onDescend: (entry) => {
-        void markVisited(
-          entry.path,
-          dataGeneration(),
-          entryStoragePath(entry),
-        ).catch(() => {});
-        void commitSearch(entry.path).catch(() => {});
+        const generation = dataGeneration();
+        void currentEntryStoragePath(entry)
+          .then((storagePath) =>
+            Promise.allSettled([
+              markVisited(entry.path, generation, storagePath),
+              commitSearch(entry.path, generation, storagePath),
+            ]),
+          )
+          .catch(() => {});
         navigate(entry.path);
       },
       onUp:
@@ -773,7 +782,9 @@ function BrowserView({
         }
       },
       onTogglePin: async (entry) =>
-        setPins(await togglePin(entry.path, entryStoragePath(entry))),
+        setPins(
+          await togglePin(entry.path, await currentEntryStoragePath(entry)),
+        ),
       onLearn:
         query === ""
           ? undefined
@@ -783,7 +794,7 @@ function BrowserView({
                   parsed.normalized,
                   entry.path,
                   dataGeneration(),
-                  entryStoragePath(entry),
+                  await currentEntryStoragePath(entry),
                 ),
               );
               await showToast({
@@ -805,7 +816,9 @@ function BrowserView({
       onToggleDetail: () => setShowingDetail((v) => !v),
       onRefresh: () => setReloadKey((k) => k + 1),
       onResetRanking: async (entry) =>
-        setVisitLog(await resetVisit(entry.path, entryStoragePath(entry))),
+        setVisitLog(
+          await resetVisit(entry.path, await currentEntryStoragePath(entry)),
+        ),
       onClearAllRankings: async () => {
         const confirmed = await confirmAlert({
           title: "Clear all usage history?",

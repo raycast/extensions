@@ -14,6 +14,7 @@ import {
 import { readUsageMetaResult } from "../src/lib/spotlight";
 import { spawnFdDefault } from "../src/lib/index-scan";
 import { deriveProgress } from "../src/lib/progress";
+import { currentEntryStoragePath } from "../src/lib/entry-identity";
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -85,6 +86,29 @@ export async function performanceChecks(
         (entry) => entry.path === throughParent,
       )?.storagePath === realFile,
       "asynchronous listings preserve canonical storage identity beneath aliased parents",
+    );
+    const firstTarget = path.join(root, "first-target.txt");
+    const secondTarget = path.join(root, "second-target.txt");
+    const retargetedLink = path.join(root, "retargeted-link");
+    fs.writeFileSync(firstTarget, "first");
+    fs.writeFileSync(secondTarget, "second");
+    fs.symlinkSync(firstTarget, retargetedLink);
+    const staleEntry: Entry = {
+      name: "retargeted-link",
+      path: retargetedLink,
+      storagePath: fs.realpathSync(retargetedLink),
+      isDirectory: false,
+      isSymlink: true,
+      size: 0,
+      mtimeMs: 0,
+      birthtimeMs: 0,
+    };
+    fs.unlinkSync(retargetedLink);
+    fs.symlinkSync(secondTarget, retargetedLink);
+    assert(
+      (await currentEntryStoragePath(staleEntry)) ===
+        fs.realpathSync(secondTarget),
+      "interactive actions resolve a retargeted symlink instead of using its indexed storage path",
     );
     const stats = fs.statSync(file);
     const originalStat = fs.statSync;

@@ -1182,6 +1182,31 @@ async function rankingWriteChecks(
     "a second target for one query is learned alongside the first",
   );
 
+  const sharedActionKey = storeAt(
+    path.join(root, "ranking", "shared-action-key"),
+  );
+  const actionGeneration = sharedActionKey.access.dataGeneration();
+  const actionVisits = await sharedActionKey.store.recordVisit(
+    aliasPath,
+    actionGeneration,
+    other,
+  );
+  const actionAbbreviations = await sharedActionKey.store.recordAbbreviation(
+    "gdoc",
+    aliasPath,
+    actionGeneration,
+    other,
+  );
+  assert(
+    actionVisits.items[other]?.count === 1 &&
+      actionVisits.items[opened] === undefined &&
+      actionVisits.items[aliasPath] === undefined &&
+      actionAbbreviations.gdoc?.[other] === 1 &&
+      actionAbbreviations.gdoc?.[opened] === undefined &&
+      actionAbbreviations.gdoc?.[aliasPath] === undefined,
+    "one action-time storage key is shared by usage and learned searches",
+  );
+
   const untouched = abbreviations.storage.get("abbreviations");
   // Rewriting the same value is still a write, so watch the keys, not the value.
   const writes: string[] = [];
