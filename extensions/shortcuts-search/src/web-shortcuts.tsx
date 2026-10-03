@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useApps } from "./load/apps-provider";
 import { useAppShortcuts } from "./load/app-shortcuts-provider";
 import { ShortcutsList } from "./view/shortcuts-list";
-import { getFrontmostHostname } from "./engine/frontmost-hostname-fetcher";
+import { getFrontmostBrowserTarget } from "./engine/frontmost-hostname-fetcher";
 import { matchesHostname } from "./engine/hostname-matcher";
 import { exitWithMessage } from "./view/exit-action";
 
@@ -11,14 +11,16 @@ export default function WebShortcuts() {
   const [slug, setSlug] = useState<string | undefined>();
 
   const { isLoading: appsLoading, data: apps } = useApps();
-  const { isLoading: shortcutsLoading, data: application } = useAppShortcuts(slug);
+  const { isLoading: shortcutsLoading, data: application, favorites, toggleFavorite } = useAppShortcuts(slug);
 
   // Get the frontmost hostname
-  const { isLoading: hostnameLoading, data: hostname } = usePromise(getFrontmostHostname, [], {
+  const { isLoading: hostnameLoading, data: target } = usePromise(getFrontmostBrowserTarget, [], {
     failureToastOptions: {
       title: "Failed to get current web page",
     },
   });
+
+  const hostname = target?.kind === "browser" ? target.hostname : null;
 
   // Find matching app by hostname
   useEffect(() => {
@@ -38,5 +40,13 @@ export default function WebShortcuts() {
     setSlug(foundApp.slug);
   }, [appsLoading, hostname, slug, hostnameLoading, apps]);
 
-  return <ShortcutsList application={application} isLoading={hostnameLoading || appsLoading || shortcutsLoading} />;
+  return (
+    <ShortcutsList
+      application={application}
+      executionTarget={target ?? undefined}
+      favorites={favorites}
+      isLoading={hostnameLoading || appsLoading || shortcutsLoading}
+      onToggleFavorite={toggleFavorite}
+    />
+  );
 }
