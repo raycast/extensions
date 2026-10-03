@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Desearch MCP Server] - {PR_MERGE_DATE}
+## [Add Desearch MCP Server] - 2026-10-03
 
 - Add Desearch to the official registry: AI search, X search and web search for AI agents, plus page extraction and X data tools. Local stdio server `desearch-mcp-server` (MIT) through `npx` with 15 tools; bring your own Desearch API key from console.desearch.ai/api-keys, set as `DESEARCH_API_KEY`.
 
