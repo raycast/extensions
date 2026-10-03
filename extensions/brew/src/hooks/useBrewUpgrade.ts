@@ -142,7 +142,7 @@ export function useBrewUpgrade(): BrewUpgrade {
         });
 
         if (summary.canceled) {
-          await toast.hide();
+          toast.hide();
           await showToast({
             style: Toast.Style.Failure,
             title: "Upgrade Canceled",
@@ -150,7 +150,7 @@ export function useBrewUpgrade(): BrewUpgrade {
           });
         } else if (summary.failed.length > 0) {
           // Keep the window open so the failed packages remain visible
-          await toast.hide();
+          toast.hide();
           const failedNames = summary.failed.map((pkg) => pkg.name).join(", ");
           await showToast({
             style: Toast.Style.Failure,
@@ -168,7 +168,7 @@ export function useBrewUpgrade(): BrewUpgrade {
         }
       } catch (err) {
         const error = ensureError(err);
-        await toast.hide();
+        toast.hide();
 
         if (error.name === "AbortError") {
           actionsLogger.log("Upgrade canceled by user");

@@ -32,11 +32,8 @@ export interface ActionToastHandle {
   showSuccessHUD: (message: string) => Promise<void>;
   /** Show failure HUD (persists after Raycast closes) */
   showFailureHUD: (message: string) => Promise<void>;
-  /**
-   * Hide the toast. Resolves once a recent progress update has had time to
-   * land, so a caller that shows its own toast next must await it.
-   */
-  hide: () => Promise<void>;
+  /** Hide the toast */
+  hide: () => void;
 }
 
 /**
@@ -49,17 +46,15 @@ export interface ActionToastHandle {
  * visible toast outright, so it needs no `hide()` first — and adding one would
  * open an `await` gap in which another writer could claim the slot.
  */
-async function settle(style: Toast.Style, title: string, hudMessage: string): Promise<void> {
+async function settle(toast: Toast, style: Toast.Style, title: string, hudMessage: string): Promise<void> {
   if (preferences.closeAfterAction) {
-    // Close window and show HUD. The handle dismissed the toast before waiting.
+    // Close window and show HUD. Dismissal is best-effort: it must not gate the HUD.
+    toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
     await showHUD(hudMessage);
   } else {
     await showToast({ style, title });
   }
 }
-
-/** How long a progress update gets to reach Raycast before the final toast replaces it. */
-const UPDATE_SETTLE_MS = 250;
 
 /**
  * Show an animated toast with optional cancel action.
@@ -72,9 +67,6 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     message: actionOptions.message,
   };
 
-  let settled = false;
-  let hidden = false;
-  let lastUpdateAt: number | undefined;
   let controller: AbortController | undefined;
 
   if (actionOptions.cancelable) {
@@ -82,12 +74,6 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
     options.primaryAction = {
       title: "Cancel",
       onAction: () => {
-        // Finished work stays on screen for the settle gap with Cancel still
-        // showing: aborting it would do nothing, and the id-less hide could
-        // dismiss the result toast that replaces it.
-        if (settled) return;
-        settled = true; // a progress update after this would bring the toast back
-        hidden = true;
         controller?.abort();
         toast.hide();
       },
@@ -97,53 +83,22 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
   const toast = new Toast(options);
   toast.show();
 
-  // Each property change sends Raycast an `updateToast` carrying this toast's
-  // full options (Animated, its title, Cancel) and no id, which Raycast applies
-  // to whatever toast is on screen when it gets there. Sent in the same tick as
-  // the final toast, it can land on top of it: a finished install read
-  // "Installing … / Operation completed successfully" with a live Cancel button.
-  // So nothing is sent once the toast is settling, and the final toast waits
-  // until the last update has had UPDATE_SETTLE_MS to land.
-  const mutate = (apply: () => void) => {
-    if (settled) return;
-    apply();
-    lastUpdateAt = performance.now();
-  };
-  const quiesce = async () => {
-    settled = true;
-    if (lastUpdateAt === undefined) return;
-    const wait = UPDATE_SETTLE_MS - (performance.now() - lastUpdateAt);
-    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-  };
-  // Hide at once, never after the gap: an id-less hide sent late closes
-  // whatever is on screen by then.
-  const hideNow = () => {
-    if (hidden) return;
-    hidden = true;
-    toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
-  };
-  const finish = async (style: Toast.Style, title: string, hudMessage: string) => {
-    // With Close After Action the toast is dismissed, not replaced, so the
-    // dismissal goes out now. It must not gate the HUD.
-    if (preferences.closeAfterAction) hideNow();
-    await quiesce();
-    await settle(style, title, hudMessage);
-  };
-
   return {
     abort: controller,
-    updateMessage: (message: string) => mutate(() => (toast.message = message)),
-    updateTitle: (title: string) => mutate(() => (toast.title = title)),
-    showSuccessHUD: (message: string) => finish(Toast.Style.Success, message, `✅ ${message}`),
-    showFailureHUD: (message: string) => finish(Toast.Style.Failure, message, `❌ ${message}`),
-    // The hide goes out at once: it carries no id, so sent after the gap it
-    // would close whatever is on screen by then (a failure toast, another
-    // action's progress). Only the promise waits, so a caller that shows a
-    // toast of its own next is still clear of a late update. Not sent twice
-    // after the toast's own Cancel already hid it.
-    hide: async () => {
-      hideNow();
-      await quiesce();
+    updateMessage: (message: string) => {
+      toast.message = message;
+    },
+    updateTitle: (title: string) => {
+      toast.title = title;
+    },
+    showSuccessHUD: async (message: string) => {
+      await settle(toast, Toast.Style.Success, message, `✅ ${message}`);
+    },
+    showFailureHUD: async (message: string) => {
+      await settle(toast, Toast.Style.Failure, message, `❌ ${message}`);
+    },
+    hide: () => {
+      toast.hide();
     },
   };
 }

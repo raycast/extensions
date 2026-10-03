@@ -203,17 +203,13 @@ restated as a per-package verdict.
   that must not ship has to live outside the extension root. A `HANDOFF.md`
   excluded via `.git/info/exclude` shipped to the public monorepo this way.
 - **Toast handles act on whichever toast is visible.** `hide()` and the update
-  helpers carry no toast id, so hiding "ours" can dismiss someone else's. Settle
-  an animated toast by _replacing_ it with `showToast`, not by mutating it. See
-  the comment above `settle` in `src/utils/toast.ts`. Replacing is not enough
-  on its own: every property change sends the toast's full options, so an
-  update sent in the same tick as the replacement can land on top of it. A
+  helpers carry no toast id, so hiding "ours" can dismiss someone else's.
+  `settle` in `src/utils/toast.ts` currently finishes an animated toast by
+  _replacing_ it with `showToast`, and that has a known problem: a progress
+  update sent in the same tick can land on top of the replacement, so a
   finished install read "Installing … / Operation completed successfully" with
-  a live Cancel button. `showActionToast` drops updates once it is settling and
-  holds the final toast until the last update is `UPDATE_SETTLE_MS` old;
-  `hide()` sends at once and only its promise waits the same gap (a hide sent
-  late closes whatever is on screen by then), and Cancel does nothing once
-  settling has begun.
+  a live Cancel button. The plan is to finish in place again, Raycast's usual
+  pattern; see "Finish action toasts in place again" in `TODO.md`.
 - **`execBrewWithProgress` checks `cancel.aborted` before it spawns.** Its
   abort listener is attached after an `await`, and an abort that fired during
   that await is already spent — so brew started although the user had pressed

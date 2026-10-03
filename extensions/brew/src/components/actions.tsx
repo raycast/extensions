@@ -435,12 +435,9 @@ async function installFromTap(target: TapTarget & { package: string }, name: str
       actionsLogger.log("Trusted package for install", { package: brewIdentifier(item) });
     }
   } catch (err) {
-    // Await the hide: a late "Finding …" update would land on the next toast.
-    await handle.hide();
     await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));
     return false;
   }
-  await handle.hide();
   if (!item) {
     await showBrewFailureToast(
       `${target.tap} has no package named ${name}`,
@@ -803,7 +800,7 @@ async function linkCask(cask: Cask, action: CaskLinkVerb): Promise<boolean> {
   // returns false without showing anything — so hide it here rather than leave
   // a spinner claiming work is still happening. The modal in between means
   // there is no race with the toasts confirmAndRun shows after a confirm.
-  void handle.hide();
+  handle.hide();
   // The display form, not brewExecutable(): confirmAndRun resolves `brew` off
   // the configured install. Not listed in the sheet — the preview prose says it.
   return await confirmAndRun([`brew ${action} --cask ${brewIdentifier(cask)}`], {
