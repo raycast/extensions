@@ -12,6 +12,7 @@
 - The expanded view shows the subject, sender, recipients and date above the email instead of in a narrow sidebar that cut them off
 - Fix out-of-memory crashes on emails with inline images, which were embedded in the HTML as base64
 - Email bodies are no longer cached to disk
+- Opening an email only downloads its text and HTML parts instead of the whole message with attachments
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
