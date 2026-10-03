@@ -1,15 +1,23 @@
 # Rake
 
 Search and run Rake tasks from Raycast on macOS.
-The extension lists the tasks returned by `rake -T` in your home directory and provides a form for tasks that accept arguments.
+The extension lists the tasks returned by `rake -T` in your configured directory (your home directory by default) and provides a form for tasks that accept arguments.
 
 [日本語](README.ja.md)
 
 ## Requirements and Setup
 
 - Raycast for macOS.
-- Ruby and Rake available in the `PATH` inherited by Raycast.
-- Tasks listed by `rake -T` when run from your home directory.
+- Ruby and Rake installed on your Mac.
+- Tasks listed by `rake -T` when run from your configured directory.
+
+Use **Open Extension Preferences** in the command's action panel to configure:
+
+- **Rake Executable**: the path to your Rake executable or version-manager shim, such as `~/.rbenv/shims/rake`. Leave empty to use `rake` from Raycast's `PATH`.
+- **Rake Directory**: the directory used for both task discovery and execution. Defaults to your home directory (`~`). Select a project directory to use its Rakefile and Ruby version-manager configuration.
+
+Paths starting with `~/` are expanded to your home directory.
+Enter the executable path without shell quotes or command-line arguments, even if it contains spaces.
 
 For example, add a task with a description to `~/Rakefile`:
 
@@ -27,9 +35,10 @@ cd ~
 rake -T
 ```
 
-The extension invokes `rake` directly without starting a shell or loading shell configuration files.
-If Ruby or Rake is available only through shell initialization, such as a Ruby version manager, the extension may not find it even if it works in your terminal.
-Ensure that Raycast's `PATH` includes the executable directories required by your Ruby installation.
+The extension invokes the configured executable directly without starting a shell or loading shell configuration files.
+If you use rbenv, rvm, asdf, or mise, set **Rake Executable** to the appropriate shim or wrapper instead of relying on Raycast's `PATH`.
+You can use `command -v rake` in your terminal to locate it.
+The executable must work without shell initialization; if it depends on other commands being on `PATH`, use a wrapper that sets up the required environment.
 
 ## Usage
 
@@ -41,12 +50,12 @@ A toast shows progress and whether the task succeeded or failed.
 On success, the toast displays standard output, falling back to standard error or `Done` if no output is available.
 For long output, only the final portion is retained for the toast, with an omission notice; output volume does not stop the task.
 
-Use **Reload Tasks** or `⌘R` from a task's action panel after changing your tasks.
-If the task list is empty, reopen the command to reload it.
+Use **Reload Tasks** or `⌘R` after changing your tasks.
+Reload and **Open Extension Preferences** are also available when the task list is empty or loading fails.
+If the toast says `rake not found`, set **Rake Executable** in preferences and reload.
 
 ## Limitations
 
-- All tasks run from your home directory. Selecting a project directory is not supported.
 - Only tasks included in `rake -T` are listed. Add `desc` to tasks that should appear.
 - Argument values containing commas are not supported because arguments are passed in Rake's comma-separated task syntax.
 - Tasks run in the background with captured output. Interactive terminal input is not supported.

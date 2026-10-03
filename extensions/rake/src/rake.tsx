@@ -1,13 +1,19 @@
-import { Action, ActionPanel, Form, Keyboard, List, Toast, showToast } from "@raycast/api";
-import { homedir } from "node:os";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Keyboard,
+  List,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { parseRakeTaskLine, runProcess, type RakeTask } from "./rake-utils";
+import { parseRakeTaskLine, runRake, type RakeTask } from "./rake-utils";
 
 async function rake(args: string[], onStdoutLine?: (line: string) => void) {
-  return runProcess("rake", args, {
-    cwd: homedir(),
-    onStdoutLine,
-  });
+  return runRake(args, getPreferenceValues<Preferences>(), onStdoutLine);
 }
 
 async function runTask(invocation: string) {
@@ -25,7 +31,7 @@ async function runTask(invocation: string) {
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = `rake ${invocation} failed`;
-    toast.message = String(error);
+    toast.message = error instanceof Error ? error.message : String(error);
   }
 }
 
@@ -73,10 +79,11 @@ export default function Command() {
 
       setTasks(tasks);
     } catch (error) {
+      setTasks([]);
       await showToast({
         style: Toast.Style.Failure,
         title: "rake -T failed",
-        message: String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -85,6 +92,22 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search rake tasks...">
+      <List.EmptyView
+        title={isLoading ? "Loading Tasks..." : tasks.length > 0 ? "No Matching Tasks" : "No Rake Tasks"}
+        description={
+          isLoading
+            ? "Reading tasks from Rake Directory..."
+            : tasks.length > 0
+              ? "Try another search."
+              : "Check Rake Executable and Rake Directory in preferences, then reload tasks."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Reload Tasks" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={loadTasks} />
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
       {tasks.map((task) => (
         <List.Item
           key={`${task.name}[${task.args.join(",")}]`}
@@ -100,6 +123,7 @@ export default function Command() {
               )}
 
               <Action title="Reload Tasks" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={loadTasks} />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />

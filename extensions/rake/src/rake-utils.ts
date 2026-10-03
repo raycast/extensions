@@ -1,4 +1,7 @@
 import { spawn } from "node:child_process";
+import { stat } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { createInterface } from "node:readline";
 
 export type RakeTask = {
@@ -6,6 +9,43 @@ export type RakeTask = {
   args: string[];
   description: string;
 };
+
+type RakePreferences = {
+  rakePath?: string;
+  directory?: string;
+};
+
+function expandHomePath(path: string) {
+  if (path === "~") return homedir();
+  return path.startsWith("~/") ? join(homedir(), path.slice(2)) : path;
+}
+
+export function resolveRakePreferences(preferences: RakePreferences) {
+  return {
+    command: expandHomePath(preferences.rakePath?.trim() || "rake"),
+    cwd: expandHomePath(preferences.directory || "~"),
+  };
+}
+
+export async function runRake(args: string[], preferences: RakePreferences, onStdoutLine?: (line: string) => void) {
+  const { command, cwd } = resolveRakePreferences(preferences);
+  // spawn also reports ENOENT for a missing cwd. Check it before diagnosing the executable.
+  const directory = await stat(cwd).catch((error: unknown) => {
+    throw new Error(`Cannot access Rake Directory: ${cwd}. Set Rake Directory in preferences.`, { cause: error });
+  });
+  if (!directory.isDirectory()) {
+    throw new Error(`Rake Directory is not a directory: ${cwd}. Set Rake Directory in preferences.`);
+  }
+
+  try {
+    return await runProcess(command, args, { cwd, onStdoutLine });
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      throw new Error("rake not found — set Rake Executable in preferences.", { cause: error });
+    }
+    throw error;
+  }
+}
 
 export function parseRakeTaskLine(line: string): RakeTask | null {
   const match = line.match(/^rake\s+(.+?)(?:\[([^\]]*)\])?(?:\s+#\s*(.*))?$/);

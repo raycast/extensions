@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rake",
   "title": "Rake",
-  "description": "Search and run Rake tasks from your home directory, with support for task arguments.",
+  "description": "Search and run Rake tasks from a configurable directory, with support for task arguments.",
   "icon": "icon.png",
   "author": "kdmsnr",
   "platforms": [
@@ -12,11 +12,29 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "rakePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Rake Executable",
+      "description": "Path to the rake executable, e.g. ~/.rbenv/shims/rake. Leave empty to use rake from PATH.",
+      "placeholder": "rake"
+    },
+    {
+      "name": "directory",
+      "type": "directory",
+      "required": false,
+      "title": "Rake Directory",
+      "description": "Directory used to discover and run Rake tasks. Defaults to your home directory.",
+      "default": "~"
+    }
+  ],
   "commands": [
     {
       "name": "rake",
       "title": "Run Rake Task",
-      "description": "Search Rake tasks in your home directory and run them with optional arguments.",
+      "description": "Search Rake tasks in your configured directory and run them with optional arguments.",
       "mode": "view"
     }
   ],
