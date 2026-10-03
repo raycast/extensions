@@ -71,6 +71,11 @@ its own time limit. The original completed session remains in history.
 
 ## Screenshots
 
+The menu-bar timer shows the remaining time. Click it to pause, resume, or end
+the task.
+
+![Menu-bar timer and task controls](media/menu-bar.png)
+
 ![Task history](media/task-history.png)
 
 ![Session details](media/session-details.png)
