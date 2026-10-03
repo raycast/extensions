@@ -103,15 +103,6 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              <Action
-                title="Check Again"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={() => {
-                  setAuthState("loading");
-                  void verifyAuth();
-                }}
-              />
               {process.platform === "darwin" && (
                 <Action
                   title="Open Terminal Login (Fallback)"
@@ -125,6 +116,15 @@ export default function Command() {
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
                 shortcut={platformShortcut(["cmd"], "d")}
+              />
+              <Action
+                title="Check Again"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={() => {
+                  setAuthState("loading");
+                  void verifyAuth();
+                }}
               />
             </ActionPanel>
           }

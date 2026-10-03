@@ -46,12 +46,6 @@ export function NotLoggedInView({ onLogin, onCheckAgain }: NotLoggedInViewProps)
         actions={
           <ActionPanel>
             <Action title="Login with Browser" icon={Icon.Globe} onAction={onLogin} />
-            <Action
-              title="Check Again"
-              icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={onCheckAgain}
-            />
             {process.platform === "darwin" && (
               <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
             )}
@@ -60,6 +54,12 @@ export function NotLoggedInView({ onLogin, onCheckAgain }: NotLoggedInViewProps)
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
               shortcut={platformShortcut(["cmd"], "d")}
+            />
+            <Action
+              title="Check Again"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={onCheckAgain}
             />
           </ActionPanel>
         }
