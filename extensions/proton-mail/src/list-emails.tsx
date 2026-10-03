@@ -120,6 +120,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
 
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");
   const [filter, setFilter] = useState<EmailFilter>(initialFilter || "all");
+  const [searchText, setSearchText] = useState("");
   const [selectedEmailUid, setSelectedEmailUid] = useState<number | null>(null);
   const [loadedEmails, setLoadedEmails] = useState<Email[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -143,22 +144,22 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     error: emailsError,
     revalidate: revalidateEmails,
   } = useCachedPromise(
-    async (folder: string, emailFilter: EmailFilter) => {
+    async (folder: string, emailFilter: EmailFilter, query: string) => {
       const filterParam = emailFilter === "all" ? undefined : emailFilter;
-      return await fetchEmails(folder, pageSize, filterParam as "unread" | "read" | "attachment" | undefined);
+      return await fetchEmails(folder, pageSize, filterParam as "unread" | "read" | "attachment" | undefined, 0, query);
     },
-    [selectedFolder, filter],
+    [selectedFolder, filter, searchText],
     {
       keepPreviousData: true,
     },
   );
 
-  // Reset pagination when folder or filter changes
+  // Reset pagination when folder, filter or search changes
   useEffect(() => {
     setCurrentPage(1);
     setHasMore(true);
     setLoadedEmails([]);
-  }, [selectedFolder, filter]);
+  }, [selectedFolder, filter, searchText]);
 
   // Update loaded emails when initial fetch completes
   useEffect(() => {
@@ -180,6 +181,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         pageSize,
         filterParam as "unread" | "read" | "attachment" | undefined,
         offset,
+        searchText,
       );
 
       if (moreEmails.length < pageSize) {
@@ -193,7 +195,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder]);
+  }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder, searchText]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -229,7 +231,11 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     <List
       isLoading={isLoading}
       isShowingDetail={selectedEmailUid !== null}
-      searchBarPlaceholder="Search emails..."
+      searchBarPlaceholder="Search by subject or sender..."
+      // Search the whole folder on the server instead of fuzzy-matching the loaded page
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      throttle
       searchBarAccessory={
         <FilterDropdowns
           folders={folders || []}
@@ -268,7 +274,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         <List.EmptyView
           icon={Icon.Envelope}
           title="No Emails"
-          description={`No emails found in ${selectedFolder}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
+          description={`No emails found in ${selectedFolder}${filter !== "all" ? ` with filter "${filter}"` : ""}${searchText.trim() ? ` matching "${searchText.trim()}"` : ""}`}
         />
       )}
     </List>
