@@ -1,6 +1,6 @@
 # betterstack-utils Changelog
 
-## [Bugfixes, Monitors and status pages] - {PR_MERGE_DATE}
+## [Bugfixes, Monitors and status pages] - 2026-10-03
 
 - Fixed incident creation failing with a `422 Unprocessable Entity` error for API tokens with access to multiple
   teams by sending the **Team Id** preference along with the request.
