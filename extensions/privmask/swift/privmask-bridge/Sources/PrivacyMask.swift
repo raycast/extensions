@@ -282,6 +282,8 @@ struct Replacement: Encodable {
   let original: String
   let placeholder: String
   let kind: String
+  let location: Int
+  let length: Int
 }
 
 struct MaskResponse: Encodable {
@@ -296,7 +298,13 @@ struct MaskResponse: Encodable {
   return MaskResponse(
     text: result.text,
     replacements: result.replacements.map {
-      Replacement(original: $0.original, placeholder: $0.placeholder, kind: $0.kind.rawValue)
+      Replacement(
+        original: $0.original,
+        placeholder: $0.placeholder,
+        kind: $0.kind.rawValue,
+        location: $0.range.location,
+        length: $0.range.length
+      )
     }
   )
 }
