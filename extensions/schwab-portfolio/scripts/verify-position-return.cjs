@@ -112,6 +112,8 @@ for (const [name, overrides, basis, profit, percent] of cases) {
     }).default;
     const result = await tool();
     const ai = result.accounts[0].positions[0];
+    // AI quantities retain their existing positive-count convention for short holdings.
+    if (name === "short gain") assert.equal(ai.quantity, 10);
     assert.equal(ai.unrealizedProfitLoss, profit);
     assert.equal(ai.unrealizedProfitLoss, ui.unrealizedPL);
     assert.equal(ai.symbol, "TEST");
