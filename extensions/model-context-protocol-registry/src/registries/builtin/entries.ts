@@ -172,6 +172,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "clipwright",
+    title: "Clipwright",
+    description:
+      "Make UGC-style video ads without filming: tell your assistant what to say and get a vertical clip of a realistic actor saying it, ready for TikTok, Reels or Shorts. It also makes faceless videos from a script or a short brief, and shows the price before anything renders. Local stdio server through `npx`; needs a Clipwright API key.",
+    icon: "https://clipwright.io/brand/clipwright-400.png",
+    homepage: "https://github.com/seocombat/clipwright-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "-p", "@clipwright/mcp-server", "clipwright-mcp"],
+      env: {
+        CLIPWRIGHT_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "codex-reset",
     title: "Codex Reset",
     description:

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Clipwright MCP Server] - {PR_MERGE_DATE}
+
+- Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
+
 ## [Add DC Hub MCP Server] - 2026-10-03
 
 - Add DC Hub to the official registry: live data on the physical infrastructure behind AI, with facility coverage in 170+ countries, 300+ markets scored daily, 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source for finding available data-center capacity (exact fits, multi-provider bundles, brokered intros). 92 tools, with a source on every answer. Hosted remote Streamable HTTP server at https://dchub.cloud/mcp through `mcp-remote`; free tier works with no API key and no sign-in.
