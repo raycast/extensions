@@ -91,8 +91,23 @@ async function getMachinePrefsRecents(): Promise<string[]> {
 
 async function getSpotlightRecents(limit = 40): Promise<string[]> {
   const query =
-    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c) && kMDItemLastUsedDate != null";
+    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c || kMDItemFSName == '*.psdt'c || kMDItemFSName == '*.pdd'c) && kMDItemLastUsedDate != null";
   return runMdfind(query, undefined, limit);
+}
+
+async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let index = 0;
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const currentIndex = index++;
+      results[currentIndex] = await fn(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
 }
 
 export async function getRecentPhotoshopProjects(maxCount = 60): Promise<PhotoshopFile[]> {
@@ -122,7 +137,7 @@ export async function getRecentPhotoshopProjects(maxCount = 60): Promise<Photosh
   for (const p of spotlightRecents) addPath(p);
 
   const slice = orderedPaths.slice(0, maxCount);
-  const hydrated = await Promise.all(slice.map((p) => createPhotoshopFile(p)));
+  const hydrated = await mapConcurrent(slice, 8, (p) => createPhotoshopFile(p));
 
   return hydrated.filter((f): f is PhotoshopFile => f !== null);
 }

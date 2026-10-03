@@ -33,9 +33,10 @@ export function RenameForm({ file, onRenamed }: RenameFormProps) {
 
     try {
       const newPath = await renamePhotoshopFile(file.path, trimmed);
+      const renamedFilename = newPath.split(/[\\/]/).pop() ?? newPath;
       toast.style = Toast.Style.Success;
       toast.title = "Document renamed";
-      toast.message = `${trimmed}.${file.extension}`;
+      toast.message = renamedFilename;
       if (onRenamed) onRenamed(newPath);
       pop();
     } catch (error) {

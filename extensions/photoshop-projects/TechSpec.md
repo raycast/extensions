@@ -30,7 +30,6 @@ The **Photoshop Projects** Raycast extension is built using TypeScript, React 19
 │ │                    PhotoshopAutomationEngine                       │ │
 │ │ • ExtendScript Cache Purge (All Caches, Clipboard, History)        │ │
 │ │ • Disk Scratch & Caches Cleanup                                    │ │
-│ │ • New Window / Document Creation                                   │ │
 │ └────────────────────────────────────────────────────────────────────┘ │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
@@ -86,9 +85,6 @@ The **Photoshop Projects** Raycast extension is built using TypeScript, React 19
   - ExtendScript: `app.purge(PurgeTarget.ALLCACHES)` via AppleScript.
   - Disk: Scans and cleans `~/Library/Caches/com.adobe.Photoshop` and temporary scratch files.
   - Calculates freed space in MB and notifies via Raycast Toast.
-- **New Window / Document**:
-  - Brings Photoshop to foreground via AppleScript.
-  - Simulates native `Cmd+N` or calls `app.documents.add()` to trigger the native new document flow.
 
 ### 5. `Preferences & Storage` (`src/types/preferences.ts`)
 - Storage key: `photoshop_view_mode` (`"grid" | "list"`).

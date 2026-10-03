@@ -86,11 +86,3 @@ This document specifies the interaction flows, navigation patterns, and keyboard
    - In-memory cache purge via Photoshop ExtendScript (`PurgeTarget.ALLCACHES`).
    - Disk cleanup of temporary scratch files and WebKit/HTTP caches in `~/Library/Caches/com.adobe.Photoshop`.
 4. Toast completes with success style: `"Photoshop cache cleared (freed 45.2 MB)"`.
-
----
-
-### Journey 5: Creating a New Photoshop Document (`new-window`)
-1. User triggers `New Photoshop Document` command (or hits `⌥⌘N` from Action Panel).
-2. The extension activates Adobe Photoshop.
-3. Spawns the native New Document dialog or creates an untitled project canvas ready for immediate editing.
-4. Toast confirms: `"Photoshop document created"`.

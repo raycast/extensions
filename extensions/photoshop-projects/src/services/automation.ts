@@ -50,9 +50,9 @@ export async function clearPhotoshopCaches(): Promise<CacheClearResult> {
 
   const runningApp = await getRunningPhotoshopName();
   if (runningApp) {
-    const purgeScript = `tell application "${runningApp}" to do javascript "try { app.purge(PurgeTarget.ALLCACHES); } catch(e) {}"`;
-    await runAppleScript(purgeScript, 4000);
-    purgedMemory = true;
+    const purgeScript = `tell application "${runningApp}" to do javascript "try { app.purge(PurgeTarget.ALLCACHES); 'purged'; } catch(e) { ''; }"`;
+    const purgeResult = await runAppleScript(purgeScript, 4000);
+    purgedMemory = purgeResult.trim() === "purged";
   }
 
   const diskCacheDir = path.join(os.homedir(), "Library/Caches/com.adobe.Photoshop");

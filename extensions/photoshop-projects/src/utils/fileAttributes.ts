@@ -69,32 +69,40 @@ export async function renamePhotoshopFile(filePath: string, newTitle: string): P
   return targetPath;
 }
 
+function escapeAppleScriptPath(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export async function openInNewFinderWindow(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
+  const safeDir = escapeAppleScriptPath(dir);
+  const safeFile = escapeAppleScriptPath(filePath);
   const script = `
 tell application "Finder"
   activate
-  set targetFolder to (POSIX file "${dir}" as alias)
+  set targetFolder to (POSIX file "${safeDir}" as alias)
   set newWin to make new Finder window to targetFolder
-  select (POSIX file "${filePath}")
+  select (POSIX file "${safeFile}")
 end tell`;
   await runAppleScript(script, 4000);
 }
 
 export async function openInNewFinderTab(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
+  const safeDir = escapeAppleScriptPath(dir);
+  const safeFile = escapeAppleScriptPath(filePath);
   const script = `
 tell application "Finder"
   activate
   if (count of windows) > 0 then
     tell application "System Events" to tell process "Finder" to keystroke "t" using command down
     delay 0.1
-    set target of front Finder window to (POSIX file "${dir}" as alias)
-    select (POSIX file "${filePath}")
+    set target of front Finder window to (POSIX file "${safeDir}" as alias)
+    select (POSIX file "${safeFile}")
   else
-    set targetFolder to (POSIX file "${dir}" as alias)
+    set targetFolder to (POSIX file "${safeDir}" as alias)
     set newWin to make new Finder window to targetFolder
-    select (POSIX file "${filePath}")
+    select (POSIX file "${safeFile}")
   end if
 end tell`;
   await runAppleScript(script, 4000);

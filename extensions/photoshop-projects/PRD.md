@@ -54,20 +54,19 @@
   - Cleans temporary disk caches in `~/Library/Caches/com.adobe.Photoshop` and orphaned scratch files.
   - Reports freed disk space and status via Raycast Toast.
 
-### 5. Command: New Photoshop Window (`new-window`)
-- **Mode**: No-view.
-- **Functionality**: Launches/activates Adobe Photoshop and triggers the New Document creation window or standard preset.
-
-### 6. Universal Action Panel Actions
+### 5. Universal Action Panel Actions
 Available on every item across both Recent and Search commands:
 - **Open in Photoshop** (`↵`)
 - **Quick Look Rendered Preview** (`⌘Y`)
 - **Reveal in Finder** (`⌘↵`)
+- **Open in New Finder Window** (`⇧⌘↵`)
+- **Open in New Finder Tab** (`⌥⇧T`)
+- **Edit Date Attributes** (`⌥⌘D`)
+- **Rename Document** (`⌥⌘R`)
 - **Toggle View Mode (Grid ⟷ List)** (`⌘V`)
 - **Copy File Path** (`⌥⌘C`)
 - **Copy File** (`⌘C`)
 - **Clear Photoshop Cache** (`⌥⌘K`)
-- **Create New Document** (`⌥⌘N`)
 - **Open with Application...**
 - **Move to Trash** (`⌫`)
 

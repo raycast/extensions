@@ -9,15 +9,15 @@
 - [x] Created living planning documents (`PRD.md`, `TechSpec.md`, `AppFlow.md`, `Schema.md`, `ImplementationPlan.md`, `Rules.md`, `Tracker.md`, `Design.md`). (2026-10-03)
 
 ### Phase 2: Manifest & Core Engine Implementation
-- [x] Configured `package.json` with 4 commands: `recent`, `search-projects`, `clear-cache`, `new-window`. (2026-10-03)
+- [x] Configured `package.json` with 3 commands: `recent`, `search-projects`, `clear-cache`. (2026-10-03)
 - [x] Formatted and verified 512x512 extension icon. (2026-10-03)
 - [x] Implemented `ThumbnailService` with disk caching and fast QuickLook extraction. (2026-10-03)
 - [x] Implemented `PhotoshopRecentsEngine` with MRU plist/psp parsing and AppleScript fallback. (2026-10-03)
 - [x] Implemented `SpotlightSearchEngine` with `mdfind` and `mdls` attribute parser. (2026-10-03)
-- [x] Implemented `PhotoshopAutomationEngine` for cache purge and new document creation. (2026-10-03)
+- [x] Implemented `PhotoshopAutomationEngine` for cache purge. (2026-10-03)
 
 ### Phase 3: UI Layer
-- [x] Created `PhotoshopActionPanel` with shortcuts (`↵`, `⌘Y`, `⌘V`, `⌘↵`, `⌥⌘K`, `⌥⌘N`, `⌘R`, `⌥⌘C`, `⌘C`). (2026-10-03)
+- [x] Created `PhotoshopActionPanel` with shortcuts (`↵`, `⌘Y`, `⌘V`, `⌘↵`, `⌥⌘K`, `⌘R`, `⌥⌘C`, `⌘C`). (2026-10-03)
 - [x] Created `ProjectGridItem` for visual thumbnail card layout. (2026-10-03)
 - [x] Created `ProjectListItem` with side-panel detail inspector. (2026-10-03)
 - [x] Implemented view mode toggle with `LocalStorage` persistence. (2026-10-03)
@@ -26,7 +26,6 @@
 - [x] Implemented `src/recent.tsx`. (2026-10-03)
 - [x] Implemented `src/search-projects.tsx`. (2026-10-03)
 - [x] Implemented `src/clear-cache.ts`. (2026-10-03)
-- [x] Implemented `src/new-window.ts`. (2026-10-03)
 
 ### Phase 5: Verification & Release
 - [x] Ran `ray lint` and confirmed 0 errors and 0 warnings. (2026-10-03)

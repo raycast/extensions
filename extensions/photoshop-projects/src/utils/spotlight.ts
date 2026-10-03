@@ -83,10 +83,15 @@ export async function getFileMetadata(filePath: string): Promise<RawMetadata> {
     const colorMatch = stdout.match(/kMDItemColorSpace\s*=\s*"([^"]+)"/);
     if (colorMatch) metadata.colorSpace = colorMatch[1];
 
-    const lastUsedMatch = stdout.match(/kMDItemLastUsedDate\s*=\s*([0-9-]+\s+[0-9:]+\s+\+[0-9]+)/);
+    const lastUsedMatch = stdout.match(
+      /kMDItemLastUsedDate\s*=\s*([0-9-]+)\s+([0-9:]+)\s+([+-]\d{2})(\d{2})/,
+    );
     if (lastUsedMatch) {
-      const parsedDate = new Date(lastUsedMatch[1]);
-      if (!isNaN(parsedDate.getTime())) metadata.lastUsedDate = parsedDate;
+      const [, datePart, timePart, tzHours, tzMinutes] = lastUsedMatch;
+      const parsedDate = new Date(`${datePart}T${timePart}${tzHours}:${tzMinutes}`);
+      if (!isNaN(parsedDate.getTime())) {
+        metadata.lastUsedDate = parsedDate;
+      }
     }
 
     const layerBlock = stdout.match(/kMDItemLayerNames\s*=\s*\(([\s\S]*?)\)/);
