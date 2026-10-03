@@ -7,6 +7,8 @@
 - Images are sized to fit the detail view, small icons are skipped
 - Add a "Remote Images" preference (off by default) so opening an email no longer loads tracking images
 - Add "Open Original in Browser" action to view the full HTML email
+- Fix out-of-memory crashes on emails with inline images, which were embedded in the HTML as base64
+- Email bodies are no longer cached to disk
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 

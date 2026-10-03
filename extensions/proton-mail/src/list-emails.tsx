@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -20,7 +20,7 @@ import {
   Detail,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import {
   listFolders,
   fetchEmails,
@@ -400,9 +400,9 @@ function escapeHtml(text: string): string {
 }
 
 // Raycast can only render Markdown, so hand the original HTML to the browser for full fidelity
-async function openOriginalInBrowser(folder: string, email: Email, html?: string) {
+async function openOriginalInBrowser(folder: string, email: Email) {
   try {
-    const content = html ?? (await fetchEmailBody(folder, email.uid)).html;
+    const { html: content } = await fetchEmailBody(folder, email.uid, { inlineImages: true });
     if (!content) {
       showToast({ style: Toast.Style.Failure, title: "No HTML version", message: "This email is plain text only" });
       return;
@@ -470,7 +470,8 @@ interface EmailDetailProps {
 }
 
 function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
-  const { data: body, isLoading } = useCachedPromise(
+  // Bodies stay in memory only: persisting them would write decrypted emails to disk
+  const { data: body, isLoading } = usePromise(
     async (f: string, uid: number) => {
       return await fetchEmailBody(f, uid);
     },
@@ -483,6 +484,8 @@ function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
 
   // Build markdown with just the email body (metadata is shown below)
   // Skip images in list/detail view (includeImages=false) - they show in expanded view
+  const bodyMarkdown = useMemo(() => body && emailBodyToMarkdown(body, { images: false }), [body]);
+
   let markdown = "";
 
   if (isLoading) {
@@ -490,7 +493,7 @@ function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
   } else if (demoMode) {
     markdown = DEMO_BODY;
   } else {
-    markdown = (body && emailBodyToMarkdown(body, { images: false })) || email.preview || "*No content available*";
+    markdown = bodyMarkdown || email.preview || "*No content available*";
   }
 
   return (
@@ -534,7 +537,8 @@ function ExpandedEmailView({
   const { push } = useNavigation();
   const { loadRemoteImages } = getPreferenceValues<Preferences>();
   const [demoMode, setDemoMode] = useState(initialDemoMode || false);
-  const { data: body, isLoading } = useCachedPromise(
+  // Bodies stay in memory only: persisting them would write decrypted emails to disk
+  const { data: body, isLoading } = usePromise(
     async (f: string, uid: number) => {
       return await fetchEmailBody(f, uid);
     },
@@ -549,6 +553,11 @@ function ExpandedEmailView({
   const fromAddress = email.from[0]?.address || "";
   const isUnread = !hasFlag(email.flags, "\\Seen");
 
+  const bodyMarkdown = useMemo(
+    () => body && emailBodyToMarkdown(body, { images: loadRemoteImages }),
+    [body, loadRemoteImages],
+  );
+
   let markdown = "";
 
   if (isLoading) {
@@ -556,14 +565,11 @@ function ExpandedEmailView({
   } else if (demoMode) {
     markdown = DEMO_BODY;
   } else {
-    markdown =
-      (body && emailBodyToMarkdown(body, { images: loadRemoteImages })) || email.preview || "*No content available*";
+    markdown = bodyMarkdown || email.preview || "*No content available*";
   }
 
   const getEmailBodyForCompose = async (): Promise<string> => {
-    if (body?.text) return body.text;
-    if (body?.html) return body.html.replace(/<[^>]*>/g, "");
-    return email.preview || "";
+    return body?.text || body?.html || email.preview || "";
   };
 
   const openComposeForm = async (mode: ComposeMode) => {
@@ -681,7 +687,7 @@ function ExpandedEmailView({
               <Action
                 title="Open Original in Browser"
                 icon={Icon.Window}
-                onAction={() => openOriginalInBrowser(folder, email, body.html)}
+                onAction={() => openOriginalInBrowser(folder, email)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
             )}
@@ -792,7 +798,7 @@ function EmailActions({
   const getEmailBodyForCompose = async (): Promise<string> => {
     try {
       const body = await fetchEmailBody(folder, email.uid);
-      return body.text || body.html?.replace(/<[^>]*>/g, "") || email.preview || "";
+      return body.text || body.html || email.preview || "";
     } catch {
       return email.preview || "";
     }
