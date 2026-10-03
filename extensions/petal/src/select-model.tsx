@@ -4,6 +4,7 @@ import {
   DEFAULT_MODEL_ID,
   checkPetalInstallation,
   getModelsDirectoryPath,
+  includingSelectedModel,
   loadPetalModels,
   openPetalDeepLink,
   readDefaultString,
@@ -14,8 +15,8 @@ export default function Command() {
   const modelsDirectory = getModelsDirectoryPath();
 
   const { data, isLoading, revalidate } = useCachedPromise(async () => {
-    const id = await readDefaultString("selected_model_id");
-    return { selectedModelID: id || DEFAULT_MODEL_ID, models: loadPetalModels() };
+    const selectedModelID = (await readDefaultString("selected_model_id")) || DEFAULT_MODEL_ID;
+    return { selectedModelID, models: includingSelectedModel(loadPetalModels(), selectedModelID) };
   }, []);
   const selectedModelID = data?.selectedModelID;
   const models = data?.models ?? [];

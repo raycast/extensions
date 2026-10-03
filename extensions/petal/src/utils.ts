@@ -2,7 +2,7 @@ import { getApplications, getPreferenceValues, open, showToast, Toast } from "@r
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve, sep } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { PetalModel, PetalModelCatalogEntry } from "./types";
 
@@ -127,11 +127,9 @@ export function modelIconForModelID(modelID: string) {
   return "petal-icon.png";
 }
 
-export function getModelCatalogPath(historyDirectory = getHistoryDirectoryPath()) {
-  return join(dirname(historyDirectory), "model-catalog.json");
-}
+export const MODEL_CATALOG_PATH = join(homedir(), "Documents", "petal", "model-catalog.json");
 
-export function loadPetalModels(catalogPath = getModelCatalogPath()): PetalModel[] {
+export function loadPetalModels(catalogPath = MODEL_CATALOG_PATH): PetalModel[] {
   if (!existsSync(catalogPath)) return PETAL_MODELS;
   try {
     const entries: unknown = JSON.parse(readFileSync(catalogPath, "utf8"));
@@ -151,6 +149,18 @@ export function loadPetalModels(catalogPath = getModelCatalogPath()): PetalModel
   } catch {
     return PETAL_MODELS;
   }
+}
+
+export function includingSelectedModel(models: PetalModel[], selectedModelID: string): PetalModel[] {
+  if (models.some((model) => model.id === selectedModelID)) return models;
+  const missing: PetalModel = {
+    id: selectedModelID,
+    name: selectedModelID,
+    summary: "Petal no longer offers this model. Choose another model to keep dictating.",
+    provider: "No longer available",
+    icon: modelIconForModelID(selectedModelID),
+  };
+  return [missing, ...models];
 }
 
 function isCatalogEntry(value: unknown): value is PetalModelCatalogEntry {

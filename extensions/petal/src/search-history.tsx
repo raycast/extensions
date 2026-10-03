@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, openCommandPreferences, showToast } from "@raycast/api";
+import { useState } from "react";
 import { useHistoryRecords } from "./hooks";
 import { getHistoryDirectoryPath, modelIconForModelID } from "./utils";
 
@@ -22,6 +23,7 @@ function truncate(value: string, max = 120) {
 export default function Command() {
   const historyDirectory = getHistoryDirectoryPath();
   const { records, isLoading, error, revalidate } = useHistoryRecords();
+  const [searchText, setSearchText] = useState("");
 
   if (error) {
     return (
@@ -46,7 +48,9 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Search transcriptions"
-      selectedItemId={records[0]?.entry.id}
+      filtering
+      onSearchTextChange={setSearchText}
+      selectedItemId={searchText ? undefined : records[0]?.entry.id}
     >
       {!isLoading && records.length === 0 && (
         <List.EmptyView
