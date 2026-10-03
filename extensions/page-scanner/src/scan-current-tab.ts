@@ -8,21 +8,12 @@
  */
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
-import {
-  Clipboard,
-  getPreferenceValues,
-  launchCommand,
-  LaunchType,
-  open,
-  showHUD,
-  showInFinder,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, getPreferenceValues, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { isSetupMissing, runCli, type CliResult, type ScanAnswer, type StatusAnswer, type TabsAnswer } from "./lib/cli";
 import { frontTabUrl } from "./lib/front-tab";
 import { installHelper } from "./lib/helper";
 import { helperState } from "./lib/helper-state";
+import { openCommand } from "./lib/open-command";
 import { pickTab } from "./lib/pick-tab";
 import { scanArgs } from "./lib/scan-args";
 
@@ -34,8 +25,8 @@ const REPAIR_WAIT_SECONDS = 35;
 const SCAN_TIMEOUT_MS = 10 * 60_000;
 
 const setUpAction = {
-  title: "Set up Page Scanner",
-  onAction: () => launchCommand({ name: "set-up", type: LaunchType.UserInitiated }),
+  title: "Set Up Page Scanner",
+  onAction: () => void openCommand("set-up", "Could not open Set Up Page Scanner"),
 };
 
 export default async function scanCurrentTab(): Promise<void> {
@@ -160,7 +151,7 @@ function notConnected(): Toast.Options {
   return {
     title: "No browser is connected",
     message:
-      "Keep the browser open. If it still does not connect, open Page Scanner's settings, Local agents, and press Connect.",
+      "Keep the browser open. If it still does not connect, open Page Scanner's settings, Local Agents, and press Connect.",
     primaryAction: setUpAction,
   };
 }

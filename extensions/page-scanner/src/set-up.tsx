@@ -1,5 +1,5 @@
 /**
- * Set up Page Scanner: the two steps between a fresh install and a first scan, each shown as
+ * Set Up Page Scanner: the two steps between a fresh install and a first scan, each shown as
  * done or not, and checked again every few seconds until both are.
  *
  * 1. The helper, which Raycast installs when asked (the one step it can take for the user).
@@ -10,9 +10,11 @@
  * a browser only shows up once it connects, so the store link sits in step 2.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { runCli, type BrowsersAnswer, type StatusAnswer } from "./lib/cli";
 import { installHelper } from "./lib/helper";
+import { openCommand } from "./lib/open-command";
 import { helperState } from "./lib/helper-state";
 import { setUpMarkdown, STORE_URL, type Progress } from "./lib/set-up-markdown";
 
@@ -72,9 +74,7 @@ export default function SetUp() {
       toast.message = `It runs on ${result.answer.node}.`;
       await refresh();
     } catch (reason) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not install the helper";
-      toast.message = reason instanceof Error ? reason.message : String(reason);
+      await showFailureToast(reason, { title: "Could not install the helper" });
     } finally {
       setInstalling(false);
     }
@@ -91,7 +91,7 @@ export default function SetUp() {
             <Action
               title="Scan Current Tab"
               icon={Icon.Document}
-              onAction={() => launchCommand({ name: "scan-current-tab", type: LaunchType.UserInitiated })}
+              onAction={() => openCommand("scan-current-tab", "Could not open Scan Current Tab")}
             />
           ) : null}
           {needsHelper ? (
