@@ -1,4 +1,4 @@
-## [Fix target ids] - {PR_MERGE_DATE}
+## [Fix target ids] - 2026-10-04
 
 - Target ids are generated from the title and no longer editable
 - The id is shown read-only as `Raycast: focus-<id>`
