@@ -59,7 +59,6 @@ export default function CurrentlyPlayingMenuBarCommand() {
       })
     : "";
 
-  const DROPDOWN_MAX = 40;
   const fullTitle = currentTrack
     ? formatTitle({
         name: currentTrack.name,
@@ -69,42 +68,23 @@ export default function CurrentlyPlayingMenuBarCommand() {
         cleanupTitle,
       })
     : "";
-  const needsScroll = fullTitle.length > DROPDOWN_MAX;
-  const SEPARATOR = "   ·   ";
-  const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
 
-  const [scrollOffset, setScrollOffset] = useState(0);
-
-  useEffect(() => {
-    setScrollOffset(0);
-  }, [currentTrack?.id]);
-
-  useEffect(() => {
-    if (!needsScroll) return;
-
-    const interval = setInterval(() => {
-      setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [needsScroll, paddedTitle.length]);
-
-  const dropdownTitle = needsScroll
-    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
-    : fullTitle;
+  const trackKey = currentTrack
+    ? `${currentTrack.id || ""}:${currentTrack.artist || ""}:${currentTrack.name || ""}`
+    : "";
 
   const cachedArtwork = currentTrack ? getCachedTrackArtwork(currentTrack) : null;
-  const [artwork, setArtwork] = useState<string | null>(cachedArtwork);
+  const [artworkState, setArtworkState] = useState<{ trackKey: string; url: string | null } | null>(null);
 
   useEffect(() => {
-    if (!currentTrack) {
-      setArtwork(null);
+    if (!currentTrack || !trackKey) {
+      setArtworkState(null);
       return;
     }
 
     const syncArt = getCachedTrackArtwork(currentTrack);
     if (syncArt) {
-      setArtwork(syncArt);
+      setArtworkState({ trackKey, url: syncArt });
     }
 
     let isMounted = true;
@@ -114,15 +94,15 @@ export default function CurrentlyPlayingMenuBarCommand() {
       artist: currentTrack.artist,
       album: currentTrack.album,
     }).then((art) => {
-      if (isMounted && art) {
-        setArtwork(art);
+      if (isMounted) {
+        setArtworkState({ trackKey, url: art });
       }
     });
 
     return () => {
       isMounted = false;
     };
-  }, [currentTrack?.id, currentTrack?.name, currentTrack?.artist]);
+  }, [trackKey]);
 
   if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -132,23 +112,19 @@ export default function CurrentlyPlayingMenuBarCommand() {
     return <NothingPlaying isLoading={isLoading} />;
   }
 
-  const activeArtwork = cachedArtwork || artwork;
+  const activeArtwork = (artworkState?.trackKey === trackKey ? artworkState.url : null) ?? cachedArtwork;
   const showCover = iconType !== "music-icon";
   const menuBarIcon =
-    showCover && activeArtwork
-      ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle }
-      : "icon.png";
+    showCover && activeArtwork ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle } : "icon.png";
 
-  const dropdownIcon = activeArtwork
-    ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle }
-    : "icon.png";
+  const dropdownIcon = activeArtwork ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle } : "icon.png";
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={dropdownIcon}
-          title={dropdownTitle}
+          title={fullTitle}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
         />

@@ -324,11 +324,36 @@ export const getMenuBarSnapshot = (): TE.TaskEither<Error, MenuBarSnapshot> =>
                 set t to (get current track)
                 set trackId to (id of t) as text
                 set trackName to name of t
-                set trackArtist to artist of t
-                set trackAlbum to album of t
-                set trackDuration to (duration of t) as text
-                set trackRating to (rating of t) as text
-                set trackFavorited to (${favoriteProperty} of t) as text
+
+                try
+                  set trackArtist to artist of t
+                on error
+                  set trackArtist to ""
+                end try
+
+                try
+                  set trackAlbum to album of t
+                on error
+                  set trackAlbum to ""
+                end try
+
+                try
+                  set trackDuration to (duration of t) as text
+                on error
+                  set trackDuration to "0"
+                end try
+
+                try
+                  set trackRating to (rating of t) as text
+                on error
+                  set trackRating to "0"
+                end try
+
+                try
+                  set trackFavorited to (${favoriteProperty} of t) as text
+                on error
+                  set trackFavorited to "false"
+                end try
 
                 return ${getMenuBarTrackQueryString}
               on error
