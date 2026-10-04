@@ -513,7 +513,7 @@ describe("Send Message", () => {
     await waitFor(() =>
       expect(screen.getByTestId("empty-view")).toHaveAttribute(
         "data-description",
-        "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+        "Nothing found or matched in the records this extension could page through. The relay may have more, so the list may be incomplete.",
       ),
     );
   });
@@ -531,7 +531,7 @@ describe("Send Message", () => {
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "No matches"));
     expect(screen.getByTestId("empty-view")).toHaveAttribute(
       "data-description",
-      "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+      "Nothing found or matched in the records this extension could page through. The relay may have more, so the list may be incomplete.",
     );
   });
 

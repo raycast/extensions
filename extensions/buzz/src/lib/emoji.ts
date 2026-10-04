@@ -132,6 +132,20 @@ export const EMOJI: EmojiEntry[] = [
 ];
 
 /**
+ * A readable name for an emoji, for places that need words rather than the
+ * glyph: a preset saved with an emoji and no text still needs a row title and
+ * something to name in its delete prompt. Curated entries read as their
+ * shortcode (`:spiral_calendar:` -> "Spiral calendar"); anything else falls
+ * back to the character itself rather than to an empty string.
+ */
+export function emojiLabel(char: string): string {
+  const entry = EMOJI.find((e) => e.char === char);
+  if (!entry) return char;
+  const words = entry.shortcode.replaceAll(":", "").replaceAll("_", " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
  * Every term the picker should match for one entry.
  *
  * The shortcode's own name has to be in here explicitly. It is visible in the

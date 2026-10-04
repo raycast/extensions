@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { EMOJI, emojiSearchTerms, searchEmoji } from "./emoji";
+import { EMOJI, emojiSearchTerms, searchEmoji, emojiLabel } from "./emoji";
 
 describe("EMOJI dataset", () => {
   it("is a non-trivial curated list", () => {
@@ -126,5 +126,16 @@ describe("searchEmoji", () => {
     // "holiday" is a keyword on exactly these five entries, so they all score
     // 4 (an exact term match) and the tie has to fall back to dataset order.
     expect(shortcodes("holiday")).toEqual([":beach_with_umbrella:", ":palm_tree:", ":camping:", ":ski:", ":ocean:"]);
+  });
+});
+
+describe("emojiLabel", () => {
+  it("names a curated emoji by its shortcode, readable", () => {
+    expect(emojiLabel("\u{1F4CC}")).toBe("Pushpin");
+    expect(emojiLabel("\u{1F5D3}")).toBe("Spiral calendar");
+  });
+
+  it("falls back to the character for an emoji outside the curated list", () => {
+    expect(emojiLabel("\u{1F9EA}")).toBe("\u{1F9EA}");
   });
 });

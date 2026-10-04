@@ -87,6 +87,14 @@ describe("Search Messages", () => {
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "Search Buzz messages"));
   });
 
+  it("sends the trimmed query, so a stray space does not change what the relay searches for", async () => {
+    const client = fakeClient();
+    mocks.getClient.mockReturnValue(client);
+    render(<Command />);
+    type("  hello  ");
+    await waitFor(() => expect(client.searchMessages).toHaveBeenCalledWith("hello"));
+  });
+
   it("searches the relay for what was typed", async () => {
     const client = fakeClient();
     mocks.getClient.mockReturnValue(client);

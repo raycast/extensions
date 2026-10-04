@@ -16,6 +16,16 @@ import { errorMessage } from "./lib/errors";
 import { ErrorView } from "./components/error-view";
 import { StatusForm } from "./components/status-form";
 import { listPresets, createPreset, updatePreset, deletePreset, StatusPreset } from "./lib/presets";
+import { emojiLabel } from "./lib/emoji";
+
+/**
+ * What a preset is called in its row and its delete prompt. The form accepts
+ * an emoji with no text, so `text` can be empty; such a preset is named by its
+ * emoji rather than shown as a blank row.
+ */
+function presetLabel(preset: StatusPreset): string {
+  return preset.text || emojiLabel(preset.emoji);
+}
 
 export default function Command() {
   const { pop } = useNavigation();
@@ -76,10 +86,10 @@ export default function Command() {
 
   // Presets are user-typed data with no undo and the seeded flag guarantees a
   // deleted preset never comes back, so this confirms before removing one.
-  async function confirmRemovePreset(id: string, text: string): Promise<void> {
+  async function confirmRemovePreset(id: string, label: string): Promise<void> {
     const confirmed = await confirmAlert({
       title: "Delete Preset",
-      message: `Delete "${text}"? This cannot be undone.`,
+      message: `Delete "${label}"? This cannot be undone.`,
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
@@ -179,7 +189,7 @@ export default function Command() {
         {(data?.presets ?? []).map((preset: StatusPreset) => (
           <List.Item
             key={preset.id}
-            title={preset.text}
+            title={presetLabel(preset)}
             icon={preset.emoji || undefined}
             actions={
               <ActionPanel>
@@ -215,7 +225,7 @@ export default function Command() {
                   icon={Icon.Trash}
                   shortcut={{ macOS: { modifiers: ["ctrl"], key: "x" }, Windows: { modifiers: ["ctrl"], key: "x" } }}
                   style={Action.Style.Destructive}
-                  onAction={() => confirmRemovePreset(preset.id, preset.text)}
+                  onAction={() => confirmRemovePreset(preset.id, presetLabel(preset))}
                 />
                 {createPresetAction}
                 {customStatusAction}

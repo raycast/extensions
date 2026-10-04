@@ -7,7 +7,7 @@ describe("incomplete-list copy", () => {
     expect(incompleteToast("Channel")).toEqual({
       style: Toast.Style.Failure,
       title: "Channel list may be incomplete",
-      message: "The relay has more channel and conversation records than this extension pages through.",
+      message: "The relay may have more channel and conversation records than this extension could page through.",
     });
     expect(incompleteToast("Conversation").title).toBe("Conversation list may be incomplete");
   });

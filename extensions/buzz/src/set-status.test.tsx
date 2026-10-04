@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({ getClient: vi.fn() }));
 vi.mock("./lib/preferences", () => ({ getClient: mocks.getClient }));
 
 import Command from "./set-status";
-import { listPresets } from "./lib/presets";
+import { createPreset, listPresets } from "./lib/presets";
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -228,6 +228,25 @@ describe("Set Status list", () => {
           message: expect.stringContaining(seeded[0].text),
           primaryAction: expect.objectContaining({ style: Alert.ActionStyle.Destructive }),
         }),
+      ),
+    );
+  });
+
+  it("titles an emoji-only preset by the emoji's name, in the row and the delete confirmation", async () => {
+    // The form accepts an emoji with no text, so a preset can have an empty
+    // text; neither its row nor its delete prompt may then read as blank.
+    await listPresets();
+    await createPreset({ emoji: "\u{1F4CC}", text: "" });
+    mocks.getClient.mockReturnValue(fakeClient());
+    render(<Command />);
+    const rendered = await items();
+    expect(rendered[rendered.length - 1]).toHaveAttribute("data-title", "Pushpin");
+
+    const deletes = screen.getAllByTestId("action").filter((b) => b.dataset.title === "Delete Preset");
+    fireEvent.click(deletes[deletes.length - 1]);
+    await waitFor(() =>
+      expect(confirmAlert).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Delete "Pushpin"? This cannot be undone.' }),
       ),
     );
   });

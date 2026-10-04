@@ -161,7 +161,7 @@ describe("Search Channels", () => {
     expect(showToast).toHaveBeenCalledWith({
       style: Toast.Style.Failure,
       title: "Channel list may be incomplete",
-      message: "The relay has more channel and conversation records than this extension pages through.",
+      message: "The relay may have more channel and conversation records than this extension could page through.",
     });
   });
 
@@ -180,7 +180,7 @@ describe("Search Channels", () => {
     await waitFor(() =>
       expect(screen.getByTestId("empty-view")).toHaveAttribute(
         "data-description",
-        "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+        "Nothing found or matched in the records this extension could page through. The relay may have more, so the list may be incomplete.",
       ),
     );
   });
