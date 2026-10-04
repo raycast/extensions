@@ -35,6 +35,9 @@ describe("buildCraftApiUrl", () => {
 
   it("keeps a query given inside the path", () => {
     expect(buildCraftApiUrl(apiUrl, "/blocks?id=1").href).toBe("https://connect.craft.do/links/ID/api/v1/blocks?id=1");
+    expect(buildCraftApiUrl(apiUrl, "/documents?location=trash", "").href).toBe(
+      "https://connect.craft.do/links/ID/api/v1/documents",
+    );
   });
 
   it("keeps # inside the query", () => {
