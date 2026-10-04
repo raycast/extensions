@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { ActivityListItem } from "./ActivityListItem";
 import { fetchUser } from "../../user/api";
-import { User } from "../../user/types";
 import { fetchActivities } from "../api";
 import { Activity } from "../types";
 import { ActivityStart } from "./ActivityStart";
@@ -12,50 +11,34 @@ export enum Actions {
   delete,
 }
 
+// Loads the activities of the current user: today, or the last 7 days when filtered by project.
+const loadActivities = async (projectID: number | null, lookbackDays: number): Promise<Activity[]> => {
+  const user = await fetchUser();
+  return fetchActivities(projectID, lookbackDays, user.id);
+};
+
 export const ActivityList = ({ projectID = null }: { projectID?: number | null }) => {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [user, setUser] = useState<User>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const lookbackDays = projectID ? 7 : 0;
+  // Activities come from the cache first, then from the API.
+  const {
+    data: activities = [],
+    isLoading,
+    mutate,
+  } = useCachedPromise(loadActivities, [projectID, lookbackDays], { keepPreviousData: true });
 
-  const refreshUser = async () => {
-    const user = await fetchUser();
-    setUser(user);
-    return user;
-  };
-
-  const refreshItems = async (user: User) => {
-    setIsLoading(true);
-    setActivities(await fetchActivities(projectID, lookbackDays, user.id));
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    refreshUser().then((user) => refreshItems(user));
-  }, []);
-
+  // Called after an activity was changed or deleted through the API: show the change at once, then reload.
   function modifyActivity(index: number, newValue: Activity, action: Actions): void {
-    switch (action) {
-      case Actions.update:
-        updateActivity(index, newValue);
-        break;
-      case Actions.delete:
-        deleteActivity(index);
-        break;
-    }
-    refreshUser().then((user) => refreshItems(user));
-  }
-
-  function updateActivity(index: number, newValue: Activity): void {
-    const updatedActivities = [...activities];
-    updatedActivities[index] = newValue;
-    setActivities(updatedActivities);
-  }
-
-  function deleteActivity(index: number): void {
-    const updatedActivities = [...activities];
-    updatedActivities.splice(index, 1);
-    setActivities(updatedActivities);
+    mutate(Promise.resolve(), {
+      optimisticUpdate: (current) => {
+        const updated = [...(current ?? [])];
+        if (action === Actions.update) {
+          updated[index] = newValue;
+        } else {
+          updated.splice(index, 1);
+        }
+        return updated;
+      },
+    });
   }
 
   return (
