@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fantasy-premier-league",
+  "title": "FPL Fantasy Premier League",
+  "description": "Your FPL team, gameweek history, fixtures, player stats, price changes and mini-leagues",
+  "icon": "extension-icon.png",
+  "author": "vicjor",
+  "categories": [
+    "Fun",
+    "Data"
+  ],
+  "keywords": [
+    "fpl",
+    "fantasy football",
+    "premier league",
+    "football",
+    "soccer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-team",
+      "title": "My Team",
+      "icon": "my-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Your squad with live points, captain, bench, value and rank, as a list or on the pitch",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "price-changes",
+      "title": "Price Changes",
+      "icon": "price-changes.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Projected price rises and falls, and tonight's likely movers",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "players",
+      "title": "Search Players",
+      "icon": "players.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Search all players with price, form, ownership and upcoming fixtures",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "fixtures",
+      "title": "Fixtures",
+      "icon": "fixtures.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Fixtures and results by gameweek with difficulty ratings",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Gameweek History",
+      "icon": "history.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Points, rank, transfers and chips for every gameweek this season",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "leagues",
+      "title": "Mini-Leagues",
+      "icon": "leagues.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Standings in your classic mini-leagues",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Live Points in Menu Bar",
+      "icon": "my-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Your live gameweek points in the menu bar, with every player, your rank and the next deadline",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "open-team",
+      "title": "Open My Team",
+      "icon": "open-team.png",
+      "subtitle": "Fantasy Premier League",
+      "description": "Open your team on the FPL website",
+      "keywords": [
+        "fpl"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "teamId",
+      "title": "Team ID",
+      "description": "Found in the URL of your Points page: fantasy.premierleague.com/entry/<Team ID>/event/…",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "1234567"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
