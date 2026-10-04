@@ -25,10 +25,12 @@ export function AddResourceForm({
   executable,
   workspace: initialWorkspace,
   onAdded,
+  onWorkspaceCreated,
 }: {
   executable: string;
   workspace?: string;
   onAdded?: () => Promise<void>;
+  onWorkspaceCreated?: () => Promise<unknown>;
 }) {
   const { push, pop } = useNavigation();
   const [workspace, setWorkspace] = useState(initialWorkspace || "");
@@ -64,6 +66,7 @@ export function AddResourceForm({
         executable={executable}
         onCreated={async (name) => {
           await revalidate();
+          await onWorkspaceCreated?.();
           setWorkspace(name);
           pop();
         }}

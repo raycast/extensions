@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { WorkspaceResourceList } from "./browse-resources.js";
+import BrowseResources, { WorkspaceResourceList } from "./browse-resources.js";
 import { AddResourceForm } from "./add-resource.js";
 import { EditTagsForm } from "./resource-forms.js";
 
@@ -86,6 +86,9 @@ type Element = {
     actions?: Element;
     onAction?: () => Promise<void>;
     onSubmit?: (values: Record<string, string>) => Promise<void>;
+    onCreated?: (workspace: string) => Promise<void>;
+    onCaptureChanged?: () => Promise<void>;
+    onWorkspaceCreated?: () => Promise<void>;
   };
 };
 function action(root: unknown, title: string): Element {
@@ -126,6 +129,87 @@ function list() {
     executable: "/bin/learn",
   });
 }
+
+describe("capture destination badge refresh", () => {
+  function browse() {
+    const refreshDestination = vi.fn().mockResolvedValue(undefined);
+    mocks.usePromise
+      .mockReturnValueOnce({
+        data: ["papers", "notes"],
+        revalidate: mocks.revalidate,
+      })
+      .mockReturnValueOnce({ data: "papers", revalidate: refreshDestination });
+    return { view: BrowseResources(), refreshDestination };
+  }
+
+  it("propagates destination refresh to resource lists and runs it after storage succeeds", async () => {
+    const { view, refreshDestination } = browse();
+    await action(view, "Browse Resources").props.onAction!();
+    const child = mocks.push.mock.calls[0][0] as Element;
+    const resources = WorkspaceResourceList({
+      workspace: "notes",
+      executable: "learn",
+      onCaptureChanged: child.props.onCaptureChanged,
+    });
+    await action(resources, "Use for Browser Capture").props.onAction!();
+    expect(mocks.setItem).toHaveBeenCalledWith(
+      "learn.capture.workspace",
+      "notes",
+    );
+    expect(refreshDestination).toHaveBeenCalledOnce();
+    expect(mocks.setItem.mock.invocationCallOrder[0]).toBeLessThan(
+      refreshDestination.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("does not refresh the displayed destination when storage fails", async () => {
+    const refreshDestination = vi.fn();
+    mocks.setItem.mockRejectedValueOnce(new Error("Storage unavailable"));
+    const resources = WorkspaceResourceList({
+      workspace: "papers",
+      executable: "learn",
+      onCaptureChanged: refreshDestination,
+    });
+    await action(resources, "Use for Browser Capture").props.onAction!();
+    expect(refreshDestination).not.toHaveBeenCalled();
+  });
+
+  it("refreshes the badge after creating a workspace and retains refresh in its resource list", async () => {
+    const { view, refreshDestination } = browse();
+    await action(view, "Create Workspace").props.onAction!();
+    const form = mocks.push.mock.calls[0][0] as Element;
+    await form.props.onCreated!("new-topic");
+    expect(refreshDestination).toHaveBeenCalledOnce();
+    expect(mocks.revalidate).toHaveBeenCalledOnce();
+    const resources = mocks.push.mock.calls[1][0] as Element;
+    expect(resources.props.onCaptureChanged).toBe(refreshDestination);
+  });
+
+  it("refreshes both workspace names and the destination on manual reload", async () => {
+    const { view, refreshDestination } = browse();
+    await action(view, "Reload Workspaces").props.onAction!();
+    expect(mocks.revalidate).toHaveBeenCalledOnce();
+    expect(refreshDestination).toHaveBeenCalledOnce();
+  });
+
+  it("propagates refresh through workspace creation inside the add form", async () => {
+    mocks.usePromise.mockReturnValue({
+      data: ["papers"],
+      revalidate: mocks.revalidate,
+    });
+    const refreshDestination = vi.fn().mockResolvedValue(undefined);
+    const form = AddResourceForm({
+      workspace: "papers",
+      executable: "learn",
+      onWorkspaceCreated: refreshDestination,
+    });
+    await action(form, "Create Workspace").props.onAction!();
+    const creation = mocks.push.mock.calls[0][0] as Element;
+    await creation.props.onCreated!("notes");
+    expect(refreshDestination).toHaveBeenCalledOnce();
+    expect(mocks.pop).toHaveBeenCalledOnce();
+  });
+});
 
 describe("resource actions", () => {
   it("does not mutate when removal is cancelled", async () => {

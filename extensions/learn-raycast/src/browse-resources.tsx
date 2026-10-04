@@ -52,22 +52,27 @@ export default function BrowseResources() {
   } = usePromise(listLearnWorkspaces, [executable], {
     onError: () => undefined,
   });
-  const { data: selected } = usePromise(
+  const { data: selected, revalidate: refreshCaptureDestination } = usePromise(
     () => LocalStorage.getItem<string>(CAPTURE_WORKSPACE_KEY),
     [],
   );
+
+  async function refreshWorkspaces() {
+    await Promise.all([revalidate(), refreshCaptureDestination()]);
+  }
 
   function createWorkspace() {
     push(
       <CreateWorkspaceForm
         executable={executable}
         onCreated={async (workspace) => {
-          await revalidate();
+          await refreshWorkspaces();
           pop();
           push(
             <WorkspaceResourceList
               workspace={workspace}
               executable={executable}
+              onCaptureChanged={refreshCaptureDestination}
             />,
           );
         }}
@@ -97,7 +102,7 @@ export default function BrowseResources() {
         actions={
           <ActionPanel>
             {error ? (
-              <Action title="Reload Workspaces" onAction={revalidate} />
+              <Action title="Reload Workspaces" onAction={refreshWorkspaces} />
             ) : (
               createAction
             )}
@@ -122,6 +127,7 @@ export default function BrowseResources() {
                     <WorkspaceResourceList
                       workspace={workspace}
                       executable={executable}
+                      onCaptureChanged={refreshCaptureDestination}
                     />,
                   )
                 }
@@ -134,12 +140,14 @@ export default function BrowseResources() {
                     <AddResourceForm
                       executable={executable}
                       workspace={workspace}
+                      onWorkspaceCreated={refreshCaptureDestination}
                       onAdded={async () => {
                         pop();
                         push(
                           <WorkspaceResourceList
                             workspace={workspace}
                             executable={executable}
+                            onCaptureChanged={refreshCaptureDestination}
                           />,
                         );
                       }}
@@ -151,7 +159,7 @@ export default function BrowseResources() {
               <Action
                 title="Reload Workspaces"
                 icon={Icon.ArrowClockwise}
-                onAction={revalidate}
+                onAction={refreshWorkspaces}
               />
             </ActionPanel>
           }
@@ -177,9 +185,11 @@ const TYPE_ICONS = {
 export function WorkspaceResourceList({
   workspace,
   executable,
+  onCaptureChanged,
 }: {
   workspace: string;
   executable: string;
+  onCaptureChanged?: () => Promise<unknown>;
 }) {
   const { push, pop } = useNavigation();
   const [query, setQuery] = useState("");
@@ -210,6 +220,7 @@ export function WorkspaceResourceList({
       <AddResourceForm
         executable={executable}
         workspace={workspace}
+        onWorkspaceCreated={onCaptureChanged}
         onAdded={refreshAndPop}
       />,
     );
@@ -320,6 +331,7 @@ export function WorkspaceResourceList({
           onAction={() =>
             notify(async () => {
               await LocalStorage.setItem(CAPTURE_WORKSPACE_KEY, workspace);
+              await onCaptureChanged?.();
               await showToast({
                 style: Toast.Style.Success,
                 title: `Using ${workspace} for capture`,
