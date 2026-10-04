@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
@@ -8,8 +8,9 @@ import * as music from "./util/scripts";
 import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
+import { getCachedTrackArtwork, getTrackArtwork } from "./util/artwork";
 
-const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
+const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle, iconType } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
@@ -29,6 +30,7 @@ export default function CurrentlyPlayingMenuBarCommand() {
     isLoading,
     data: snapshot,
     mutate,
+    revalidate,
   } = useCachedPromise(
     () =>
       pipe(
@@ -91,6 +93,37 @@ export default function CurrentlyPlayingMenuBarCommand() {
     ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
     : fullTitle;
 
+  const cachedArtwork = currentTrack ? getCachedTrackArtwork(currentTrack) : null;
+  const [artwork, setArtwork] = useState<string | null>(cachedArtwork);
+
+  useEffect(() => {
+    if (!currentTrack) {
+      setArtwork(null);
+      return;
+    }
+
+    const syncArt = getCachedTrackArtwork(currentTrack);
+    if (syncArt) {
+      setArtwork(syncArt);
+    }
+
+    let isMounted = true;
+    getTrackArtwork({
+      id: currentTrack.id,
+      name: currentTrack.name,
+      artist: currentTrack.artist,
+      album: currentTrack.album,
+    }).then((art) => {
+      if (isMounted && art) {
+        setArtwork(art);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentTrack?.id, currentTrack?.name, currentTrack?.artist]);
+
   if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
   }
@@ -99,11 +132,22 @@ export default function CurrentlyPlayingMenuBarCommand() {
     return <NothingPlaying isLoading={isLoading} />;
   }
 
+  const activeArtwork = cachedArtwork || artwork;
+  const showCover = iconType !== "music-icon";
+  const menuBarIcon =
+    showCover && activeArtwork
+      ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle }
+      : "icon.png";
+
+  const dropdownIcon = activeArtwork
+    ? { source: activeArtwork, mask: Image.Mask.RoundedRectangle }
+    : "icon.png";
+
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon="icon.png"
+          icon={dropdownIcon}
           title={dropdownTitle}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
@@ -142,12 +186,18 @@ export default function CurrentlyPlayingMenuBarCommand() {
       <MenuBarExtra.Item
         icon={Icon.Forward}
         title="Next"
-        onAction={() => mutate(toMutationPromise(music.player.next, "Failed to skip track", "Track skipped"))}
+        onAction={async () => {
+          await mutate(toMutationPromise(music.player.next, "Failed to skip track", "Track skipped"));
+          revalidate();
+        }}
       />
       <MenuBarExtra.Item
         icon={Icon.Rewind}
         title="Previous"
-        onAction={() => mutate(toMutationPromise(music.player.previous, "Failed to rewind track", "Track rewinded"))}
+        onAction={async () => {
+          await mutate(toMutationPromise(music.player.previous, "Failed to rewind track", "Track rewinded"));
+          revalidate();
+        }}
       />
       <MenuBarExtra.Item
         icon={isFavorited ? Icon.StarDisabled : Icon.Star}

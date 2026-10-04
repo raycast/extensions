@@ -1,5 +1,11 @@
 # Apple Music Changelog
 
+## [Album Artwork in Menu Bar] - 2026-10-04
+
+- Added option to display current track's album artwork as the Menu Bar icon.
+- Added "Menu Bar Icon" preference (`iconType`) allowing users to choose between the default Music icon and Cover Artwork.
+- Artwork is automatically fetched via iTunes Search API with local AppleScript extraction fallback, and cached for performance.
+
 ## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.

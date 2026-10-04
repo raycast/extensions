@@ -302,6 +302,24 @@
       "interval": "10s",
       "preferences": [
         {
+          "name": "iconType",
+          "title": "Menu Bar Icon",
+          "description": "Choose between the cover artwork of the current track, or the default Music icon.",
+          "type": "dropdown",
+          "default": "cover-image",
+          "data": [
+            {
+              "title": "Cover Artwork",
+              "value": "cover-image"
+            },
+            {
+              "title": "Music Icon",
+              "value": "music-icon"
+            }
+          ],
+          "required": false
+        },
+        {
           "name": "hideIconWhenIdle",
           "description": "If enabled, the icon in the Menu Bar will be hidden when Music is not running or when nothing is playing",
           "type": "checkbox",
