@@ -74,10 +74,22 @@ function LeagueItem({ league, entryId }: { league: ClassicLeagueSummary; entryId
 }
 
 function Standings({ leagueId, leagueName, entryId }: { leagueId: number; leagueName: string; entryId: number }) {
-  const { data, isLoading } = useCachedPromise(fetchLeagueStandings, [leagueId]);
-  const rows = data?.standings.results ?? [];
+  // FPL pages standings 50 at a time; Raycast loads the next page as the list scrolls.
+  const { data, isLoading, pagination } = useCachedPromise(
+    (id: number) => async (options: { page: number }) => {
+      const { standings } = await fetchLeagueStandings(id, options.page + 1);
+      return { data: standings.results, hasMore: standings.has_next };
+    },
+    [leagueId],
+  );
+  const rows = data ?? [];
   return (
-    <List isLoading={isLoading} navigationTitle={leagueName} searchBarPlaceholder="Filter managers">
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      navigationTitle={leagueName}
+      searchBarPlaceholder="Filter managers"
+    >
       {rows.map((row) => {
         const isMe = row.entry === entryId;
         const move = formatRankMove(row.rank, row.last_rank);
@@ -119,18 +131,6 @@ function Standings({ leagueId, leagueName, entryId }: { leagueId: number; league
           />
         );
       })}
-      {data?.standings.has_next && (
-        <List.Item
-          icon={Icon.Ellipsis}
-          title="Showing the first 50 teams"
-          accessories={[{ icon: Icon.Link, tooltip: "Opens on the FPL website" }]}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Full Standings on FPL" url={leagueUrl(leagueId)} />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

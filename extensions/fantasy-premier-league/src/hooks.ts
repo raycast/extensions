@@ -46,10 +46,7 @@ export function useEntryHistory(entryId: number) {
 
 /** Picks for a given gameweek; falls back to the entry's current event when none is given. */
 export function usePicks(entryId: number | undefined, event: number | undefined) {
-  return useCachedPromise(fetchPicks, [entryId ?? 0, event ?? 0], {
-    execute: entryId != null && event != null,
-    keepPreviousData: true,
-  });
+  return useCachedPromise(fetchPicks, [entryId ?? 0, event ?? 0], { execute: entryId != null && event != null });
 }
 
 /** The set of player IDs in the user's squad for the current gameweek. */
@@ -67,10 +64,10 @@ export function useTeam(entryId: number, initialEvent?: number) {
   const [selected, setSelected] = useState<number | undefined>(initialEvent);
   const event = selected ?? entry?.current_event ?? undefined;
   const { data: picks, isLoading: loadingPicks } = usePicks(entryId, event);
-  const { data: live } = useCachedPromise(fetchLive, [event ?? 0], { execute: event != null, keepPreviousData: true });
-  const { data: fixtures } = useCachedPromise(fetchFixtures, [event ?? 0], {
+  // No keepPreviousData: switching gameweek must never show the previous week's picks, points or fixtures.
+  const { data: live, isLoading: loadingLive } = useCachedPromise(fetchLive, [event ?? 0], { execute: event != null });
+  const { data: fixtures, isLoading: loadingFixtures } = useCachedPromise(fetchFixtures, [event ?? 0], {
     execute: event != null,
-    keepPreviousData: true,
   });
 
   const bonus = useMemo(() => provisionalBonus(fixtures ?? []), [fixtures]);
@@ -93,6 +90,6 @@ export function useTeam(entryId: number, initialEvent?: number) {
     bonus,
     autoSubsIn,
     autoSubsOut,
-    isLoading: loadingBootstrap || loadingEntry || loadingPicks,
+    isLoading: loadingBootstrap || loadingEntry || loadingPicks || loadingLive || loadingFixtures,
   };
 }

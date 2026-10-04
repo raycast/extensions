@@ -15,10 +15,7 @@ export default function Command() {
   const playing = index?.currentEvent && !index.currentEvent.finished ? index.currentEvent : undefined;
   const defaultEvent = playing?.id ?? index?.nextEvent?.id ?? index?.currentEvent?.id;
   const event = selected ?? defaultEvent;
-  const { data: fixtures, isLoading } = useCachedPromise(fetchFixtures, [event ?? 0], {
-    execute: event != null,
-    keepPreviousData: true,
-  });
+  const { data: fixtures, isLoading } = useCachedPromise(fetchFixtures, [event ?? 0], { execute: event != null });
 
   const eventInfo = index?.events.find((e) => e.id === event);
   const lastEvent = index?.events.at(-1)?.id ?? 38;

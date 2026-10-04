@@ -15,7 +15,7 @@ export function provisionalBonus(fixtures: Fixture[]): Map<number, number> {
     const bps = stat("bps");
     if (!bps) continue;
 
-    const ranked = [...bps.h, ...bps.a].sort((a, b) => b.value - a.value).slice(0, 5);
+    const ranked = [...bps.h, ...bps.a].sort((a, b) => b.value - a.value);
     const awards = [3, 2, 1];
     let i = 0;
     while (i < ranked.length && awards.length) {

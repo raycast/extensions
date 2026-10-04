@@ -35,18 +35,23 @@ function LiveTeam({ entryId }: { entryId: number }) {
   const hasKickedOff = (teamId: number) =>
     fixtures.some((f) => (f.team_h === teamId || f.team_a === teamId) && (f.started || f.finished));
 
-  /** Live points for a pick, or undefined until the player's fixture has kicked off. */
+  /** Live points for a pick before its multiplier, or undefined until the player's fixture has kicked off. */
   const scored = (pick: Pick): number | undefined => {
     const player = index?.players.get(pick.element);
     const stats = livePoints.get(pick.element);
     if (!player || !stats || !hasKickedOff(player.team)) return undefined;
-    return (stats.total_points + (bonus.get(pick.element) ?? 0)) * pick.multiplier;
+    return stats.total_points + (bonus.get(pick.element) ?? 0);
   };
 
   // Multiplier is 0 for the bench unless Bench Boost is active, so summing every pick is correct.
   const liveTotal = picks
-    ? picks.picks.reduce((sum, p) => sum + (scored(p) ?? 0), 0) - (history?.event_transfers_cost ?? 0)
+    ? picks.picks.reduce((sum, p) => sum + (scored(p) ?? 0) * p.multiplier, 0) - (history?.event_transfers_cost ?? 0)
     : undefined;
+  /** Points shown on a row: captain doubled, bench players at face value like My Team. */
+  const shown = (pick: Pick) => {
+    const points = scored(pick);
+    return points == null ? undefined : points * (pick.multiplier || 1);
+  };
   const anyLive = picks?.picks.some((p) => scored(p) != null) ?? false;
   const points = anyLive ? liveTotal : history?.points;
 
@@ -94,12 +99,12 @@ function LiveTeam({ entryId }: { entryId: number }) {
         <>
           <MenuBarExtra.Section title="Starting XI">
             {starters.map((pick) => (
-              <PickItem key={pick.element} pick={pick} points={scored(pick)} index={index} onAction={openTeam} />
+              <PickItem key={pick.element} pick={pick} points={shown(pick)} index={index} onAction={openTeam} />
             ))}
           </MenuBarExtra.Section>
           <MenuBarExtra.Section title="Bench">
             {bench.map((pick) => (
-              <PickItem key={pick.element} pick={pick} points={scored(pick)} index={index} onAction={openTeam} />
+              <PickItem key={pick.element} pick={pick} points={shown(pick)} index={index} onAction={openTeam} />
             ))}
           </MenuBarExtra.Section>
         </>
