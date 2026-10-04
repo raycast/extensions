@@ -29,6 +29,7 @@ import {
   openIndexForWrite,
   suspendFtsSync,
   readIndexRoots,
+  readCloudIndexRoots,
   readIndexStats,
   writeLastDuration,
   writeScanStarted,
@@ -1269,6 +1270,19 @@ export async function indexChecks(assert: Assert) {
     (await resolveRoots([path.join(linkDir, "absent")]))[0] ===
       path.join(linkDir, "absent"),
     "an unresolvable root is kept so the scan can report it unavailable",
+  );
+  const provenanceFailure = new Error("Cannot save scope provenance");
+  let resolutionFailure: unknown;
+  try {
+    await resolveRoots([realTarget], undefined, () => {
+      throw provenanceFailure;
+    });
+  } catch (error) {
+    resolutionFailure = error;
+  }
+  assert(
+    resolutionFailure === provenanceFailure,
+    "root provenance write failures propagate instead of permitting untracked scans",
   );
   fs.rmSync(linkDir, { recursive: true, force: true });
 
@@ -2823,6 +2837,99 @@ export async function indexChecks(assert: Assert) {
   );
   closeIndexReader();
   fs.rmSync(absentProviderDir, { recursive: true, force: true });
+
+  // Saved roots use canonical paths, including providers mounted through links.
+  for (const providerLink of [false, true]) {
+    const fixture = tempDir("cloud-root-alias");
+    const home = path.join(fixture, "home");
+    const realCloud = path.join(home, "Library", "CloudStorage");
+    const cloudAlias = path.join(fixture, "cloud-alias");
+    const target = providerLink
+      ? path.join(home, "mounted-provider")
+      : path.join(realCloud, "ExampleProvider");
+    const visibleProvider = path.join(realCloud, "ExampleProvider");
+    const removedLocal = path.join(fixture, "removed-local");
+    const file = path.join(fixture, "index.sqlite");
+    for (const folder of [realCloud, target, removedLocal])
+      fs.mkdirSync(folder, { recursive: true });
+    fs.symlinkSync(realCloud, cloudAlias, "dir");
+    if (providerLink) fs.symlinkSync(target, visibleProvider, "dir");
+    const build = (includeDrive: boolean, initial = false) =>
+      rebuildIndex({
+        file,
+        withLock: pass,
+        lookupFd: foundFdStub,
+        cloudRoot: cloudAlias,
+        // Seed a legacy direct-provider index without provenance records.
+        ...(initial && !providerLink
+          ? { roots: [home, target, removedLocal] }
+          : {}),
+        loadSettings: async () => ({
+          ...DEFAULT_SETTINGS,
+          scopes: initial ? [home, removedLocal] : [home],
+          includeDrive,
+        }),
+        spawnFd: (args) =>
+          fdOutput([
+            path.join(
+              args.at(-1)!,
+              args.at(-1) === target ? "saved-cloud.txt" : "local-note.txt",
+            ),
+          ]),
+      });
+    const seeded = await build(true, true);
+    assert(
+      seeded.kind === "done" &&
+        seeded.report.complete &&
+        searchIndex(file, parseQuery("saved-cloud")).entries.some(
+          (entry) => entry.path === path.join(target, "saved-cloud.txt"),
+        ),
+      `alias fixture indexes the canonical cloud target (provider link: ${providerLink})`,
+    );
+    // Preserve provenance even when row batches outlive their scan bookkeeping.
+    const writer = openIndexForWrite(file);
+    if (writer.kind !== "opened") throw new Error("alias fixture unavailable");
+    if (providerLink)
+      assert(
+        readCloudIndexRoots(writer.db).includes(target),
+        "automatic provider provenance stores the same canonical root as indexed rows",
+      );
+    writer.db.prepare("DELETE FROM index_roots WHERE root = ?").run(target);
+    writer.db.close();
+    if (providerLink) fs.unlinkSync(visibleProvider);
+    fs.renameSync(target, path.join(fixture, "offline-provider"));
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const kept = await build(true);
+      assert(
+        kept.kind === "done" &&
+          kept.report.complete &&
+          searchIndex(file, parseQuery("saved-cloud")).entries.length === 1 &&
+          !kept.report.forgotten.includes(target),
+        `missing canonical cloud root survives rebuild ${attempt + 1} (provider link: ${providerLink})`,
+      );
+      if (attempt === 0)
+        assert(
+          kept.kind === "done" && kept.report.forgotten.includes(removedLocal),
+          "protecting symlinked providers does not retain unrelated removed scopes",
+        );
+    }
+    const disabled = await build(false);
+    assert(
+      disabled.kind === "done" &&
+        disabled.report.complete &&
+        searchIndex(file, parseQuery("saved-cloud")).entries.length === 0,
+      `disabling cloud inclusion removes missing canonical coverage (provider link: ${providerLink})`,
+    );
+    const disabledReader = openIndexForRead(file);
+    assert(
+      disabledReader.kind === "opened" &&
+        readCloudIndexRoots(disabledReader.db).length === 0,
+      "completed cloud-off cleanup also retires saved automatic-scope provenance",
+    );
+    if (disabledReader.kind === "opened") disabledReader.db.close();
+    closeIndexReader();
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
 
   // An auto-detected provider that goes offline remains a configured root. Its
   // failed scan makes absence non-authoritative, so the previous rows survive.

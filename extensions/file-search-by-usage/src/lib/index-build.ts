@@ -5,6 +5,9 @@ import { findFd, describeFdLookup, FdLookup } from "./fd";
 import {
   openIndexForWrite,
   readKnownIndexRoots,
+  readCloudIndexRoots,
+  rememberCloudIndexRoot,
+  forgetCloudIndexRoots,
   resumeFtsSync,
   suspendFtsSync,
   writeScanStarted,
@@ -63,6 +66,8 @@ export type BuildOutcome =
  */
 export type CloudStorageRootResult = {
   roots: string[];
+  /** Canonical parent for comparing older saved direct-provider roots. */
+  resolvedRoot?: string;
   /** False when provider discovery failed, timed out, or stopped early. */
   authoritative: boolean;
 };
@@ -81,7 +86,13 @@ export async function cloudStorageIndexRootResult(
   const timer = setTimeout(stop, options.budgetMs ?? CLOUD_DISCOVERY_BUDGET_MS);
   try {
     let entries;
+    let resolvedRoot: string;
     try {
+      resolvedRoot = await cloudDiscoveryRead(
+        `cloud-root-real:${cloudRoot}`,
+        () => fsp.realpath(cloudRoot),
+        active.signal,
+      );
       entries = await cloudDiscoveryRead(
         `cloud-roots:${cloudRoot}`,
         () => fsp.readdir(cloudRoot, { withFileTypes: true }),
@@ -117,6 +128,7 @@ export async function cloudStorageIndexRootResult(
     }
     return {
       roots: normalizeRoots(roots),
+      resolvedRoot,
       authoritative: !active.signal.aborted,
     };
   } finally {
@@ -219,7 +231,7 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
       const cloudRoot = path.resolve(
         options.cloudRoot ?? path.join(os.homedir(), "Library", "CloudStorage"),
       );
-      const cloud = options.roots
+      const cloud: CloudStorageRootResult = options.roots
         ? { roots: [] as string[], authoritative: true }
         : settings.includeDrive
           ? await (options.discoverCloudRoots
@@ -265,13 +277,27 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
         suspendFtsSync(opened.db);
         const knownRoots = readKnownIndexRoots(opened.db);
         const protectedRoots = cleanupAuthoritative ? [] : [...knownRoots];
-        if (options.roots === undefined && settings.includeDrive) {
+        const automaticCloud =
+          options.roots === undefined && settings.includeDrive;
+        const cloudSources = new Set(normalizeRoots(cloud.roots));
+        if (automaticCloud) {
           // A successful directory listing can omit an unmounted account.
           // Keeping cloud indexing enabled still includes those saved providers;
           // only disabling it can authorize removing their scopes altogether.
-          protectedRoots.push(
-            ...knownRoots.filter((root) => path.dirname(root) === cloudRoot),
-          );
+          const savedCloud = new Set(readCloudIndexRoots(opened.db));
+          for (const root of knownRoots) {
+            const parent = path.dirname(root);
+            if (
+              savedCloud.has(root) ||
+              parent === cloudRoot ||
+              parent === cloud.resolvedRoot
+            ) {
+              protectedRoots.push(root);
+              // Backfill direct-provider provenance for pre-existing indexes.
+              assertOwned();
+              rememberCloudIndexRoot(opened.db, root);
+            }
+          }
         }
         report = await scanRoots({
           fd: lookup.path,
@@ -286,11 +312,27 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           allowRootCleanup: cleanupAuthoritative,
           allowStaleCleanup: loaded.authoritative,
           protectedRoots,
+          onRootResolved: automaticCloud
+            ? (source, root) => {
+                if (!cloudSources.has(path.resolve(source))) return;
+                assertOwned();
+                rememberCloudIndexRoot(opened.db, root);
+              }
+            : undefined,
           onProgress: options.onProgress,
           spawnFd: options.spawnFd,
           assertOwned,
           tuning: options.tuning,
         });
+        if (
+          options.roots === undefined &&
+          !settings.includeDrive &&
+          cleanupAuthoritative &&
+          report.complete
+        ) {
+          assertOwned();
+          forgetCloudIndexRoots(opened.db);
+        }
         return {
           kind: "done" as const,
           report,

@@ -133,6 +133,8 @@ export type ScanOptions = {
   allowRootCleanup?: boolean;
   /** False when recovery settings cannot prove unseen paths were removed. */
   allowStaleCleanup?: boolean;
+  /** Runs before scanning; use the same canonical identity as the row owner. */
+  onRootResolved?: (source: string, root: string) => void;
   onProgress?: (progress: ScanProgress) => void;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
@@ -180,21 +182,24 @@ function excludePath(root: string, target: string): string {
 export async function resolveRoots(
   roots: readonly string[],
   signal?: AbortSignal,
+  onResolved?: (source: string, root: string) => void,
 ): Promise<string[]> {
   const resolved: string[] = [];
   for (const root of roots) {
+    let canonical: string;
     try {
-      resolved.push(
-        await indexReadFor(root)(
-          `index-real:${root}`,
-          () => fsp.realpath(root),
-          signal ?? new AbortController().signal,
-        ),
+      canonical = await indexReadFor(root)(
+        `index-real:${root}`,
+        () => fsp.realpath(root),
+        signal ?? new AbortController().signal,
       );
     } catch {
       // Keep it: scanRoot reports an unavailable root rather than dropping it.
-      resolved.push(path.resolve(root));
+      canonical = path.resolve(root);
     }
+    // Persistence failures must stop the rebuild, not become resolution fallbacks.
+    onResolved?.(root, canonical);
+    resolved.push(canonical);
   }
   return normalizeRoots(resolved);
 }
@@ -995,7 +1000,11 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
     ? setTimeout(() => timeLimit.abort(), Math.max(0, deadline - Date.now()))
     : undefined;
   try {
-    const roots = await resolveRoots(options.roots, signal);
+    const roots = await resolveRoots(
+      options.roots,
+      signal,
+      options.onRootResolved,
+    );
     const ownershipRoots = normalizeRoots([
       ...roots,
       ...(options.protectedRoots ?? []),

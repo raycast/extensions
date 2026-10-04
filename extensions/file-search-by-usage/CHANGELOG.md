@@ -56,6 +56,7 @@
 - Keep valid usage metadata when one item cannot be read, and report the result as partial.
 - Preserve saved paths when settings are malformed or incomplete, including paths within scopes that still appear in the recovery settings.
 - Keep saved CloudStorage provider scopes when they disappear from discovery while cloud inclusion remains enabled; continue removing unrelated scopes that the user removed.
+- Remember resolved automatic provider roots so disappearing provider symlinks retain their saved results, including targets outside CloudStorage.
 - Preserve descendants of a previously indexed directory shortcut while its target is unavailable, including across repeated rebuilds.
 - Keep the previous index when the drive is offline or unmounted. Partial scans merge what they find. A root removes stale paths only after an error-free scan with authoritative settings.
 - Prevent overlapping manual indexing runs from replacing each other's results.
