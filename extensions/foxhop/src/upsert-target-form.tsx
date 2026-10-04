@@ -3,21 +3,24 @@ import { upsertTarget, Target } from "./foxhop";
 
 type Props = {
   target?: Target;
+  prefill?: Pick<Target, "title" | "url"> & Partial<Pick<Target, "match">>;
   onSave: () => void;
 };
 
 type FormValues = {
   url: string;
   title: string;
-  name: string;
   match: string;
   strategy: string;
   pick: string;
 };
 
-export const UpsertTargetForm = ({ target, onSave }: Props) => {
+export const UpsertTargetForm = ({ target, prefill, onSave }: Props) => {
+  const isEdit = Boolean(target && target.name);
+  const source = isEdit ? target : prefill;
   const handleSubmit = async (values: FormValues) => {
-    if (!values.url.trim() && !values.match.trim()) {
+    const match = isEdit ? (target?.match ?? "") : (values.match ?? "");
+    if (!values.url.trim() && !match.trim()) {
       await showToast({
         style: Toast.Style.Failure,
         title: "A URL or Match is required",
@@ -27,9 +30,9 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
     try {
       await upsertTarget({
         url: values.url.trim() || undefined,
-        name: values.name || undefined,
+        name: isEdit ? target?.name : undefined,
         title: values.title || undefined,
-        match: values.match || undefined,
+        match: isEdit ? target?.match : values.match || undefined,
         strategy: values.strategy || undefined,
         pick: values.pick || undefined,
       });
@@ -55,25 +58,33 @@ export const UpsertTargetForm = ({ target, onSave }: Props) => {
       <Form.TextField
         id="url"
         title="URL"
-        defaultValue={target?.url ?? ""}
+        defaultValue={source?.url ?? ""}
         placeholder="https://gemini.google.com"
-        info="The page to open if no matching tab is found. Name, match, and title are derived from it."
+        info="The page to open if no matching tab is found. Match and title are derived from it."
       />
       <Form.TextField
         id="title"
         title="Title"
-        defaultValue={target?.title ?? ""}
+        defaultValue={source?.title ?? ""}
         placeholder="Derived from the URL (e.g. Gemini)"
       />
+      {isEdit && target ? (
+        <Form.Description title="ID" text={`Raycast: focus-${target.name}`} />
+      ) : (
+        <Form.Description title="ID" text="Generated from the title when saved and never changes afterwards." />
+      )}
       <Form.Separator />
       <Form.Description title="Advanced" text="Optional overrides — leave blank to derive from the URL." />
-      <Form.TextField id="name" title="Name" defaultValue={target?.name ?? ""} placeholder="Derived (e.g. gemini)" />
-      <Form.TextField
-        id="match"
-        title="Match"
-        defaultValue={target?.match ?? ""}
-        placeholder="Derived (the URL hostname)"
-      />
+      {isEdit && target ? (
+        <Form.Description title="Match" text={target.match} />
+      ) : (
+        <Form.TextField
+          id="match"
+          title="Match"
+          defaultValue={source?.match ?? ""}
+          placeholder="Derived (the URL hostname)"
+        />
+      )}
       <Form.Dropdown id="strategy" title="Strategy" defaultValue={target?.strategy ?? "hostname"}>
         <Form.Dropdown.Item value="hostname" title="Hostname" />
         <Form.Dropdown.Item value="prefix" title="Prefix" />

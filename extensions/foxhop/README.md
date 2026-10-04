@@ -24,8 +24,8 @@ Per-target actions:
 
 - **Focus Tab** (`↵`) — focus the matching tab
 - **Favourite / Unfavourite** (`⌘F`) — pin a target to the top of the list
-- **Edit Target** (`⌘E`) — edit it (URL-first; name, match, and title derive from the URL)
-- **Add Target** (`⌘N`) — add a new target (just paste a URL)
+- **Edit Target** (`⌘E`) — edit it (URL-first; match and title derive from the URL; the id is generated from the title and read-only)
+- **Add Target** (`⌘N`) — add a new target (just paste a URL; the id is generated from the title when saved)
 - **Add from Open Tab** — pick a currently open Firefox tab and prefill the form
 - **Delete Target** (`⌃X`) — remove a target
 - **Generate Hotkey Scripts** — run `foxhop sync` to write Raycast script commands
