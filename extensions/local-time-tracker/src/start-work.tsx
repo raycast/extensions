@@ -131,7 +131,7 @@ export default function StartWorkCommand() {
   if (activeProjects.length === 0) {
     return (
       <Detail
-        markdown="# No Projects Yet\n\nAdd an active project before starting a timer."
+        markdown={"# No Projects Yet\n\nAdd an active project before starting a timer."}
         actions={
           <ActionPanel>
             <Action

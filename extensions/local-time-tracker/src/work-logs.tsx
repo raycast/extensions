@@ -269,7 +269,7 @@ function WorkLogForm({
   }
 
   if (selectableProjects.length === 0) {
-    return <Detail markdown="# No Active Projects\n\nAdd or enable a project before creating a work log." />;
+    return <Detail markdown={"# No Active Projects\n\nAdd or enable a project before creating a work log."} />;
   }
 
   return (
