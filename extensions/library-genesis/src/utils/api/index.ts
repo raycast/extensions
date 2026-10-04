@@ -1,10 +1,10 @@
 import { load } from "cheerio";
-import fetch from "node-fetch";
 
 import type { BookEntry } from "@/types";
 import { SearchType } from "@/types";
 
 import { getMirror } from "./mirrors";
+import { fetchLibgenPage, fetchLibgenSearchPage } from "./request";
 
 export const getLibgenSearchResults = async (
   searchContent: string,
@@ -62,26 +62,17 @@ export const getLibgenSearchResults = async (
   else if (searchType === SearchType.NonFiction) topics.nonfiction.forEach((topic) => params.append("topics[]", topic));
   else [...topics.fiction, ...topics.nonfiction].forEach((topic) => params.append("topics[]", topic));
 
-  const queryUrl = libgenUrl + "/index.php?" + params.toString();
+  const queryUrl = new URL("index.php", `${libgenUrl.replace(/\/+$/, "")}/`);
+  queryUrl.search = params.toString();
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 
-  try {
-    const response = await fetch(queryUrl, {
-      signal: abortSignal,
-    });
-    const data = await response.text();
-
-    return parse(data, libgenUrl);
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
+  const data = await fetchLibgenSearchPage(queryUrl.toString(), abortSignal);
+  return parse(data, libgenUrl);
 };
 
 export const getUrlFromDownloadPage = async (downloadUrl: string): Promise<string | undefined> => {
-  const response = await fetch(downloadUrl);
-  const data = await response.text();
+  const data = await fetchLibgenPage(downloadUrl);
 
   const $ = load(data);
   const pathname = $("#main").find("a").first().attr("href");

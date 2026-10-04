@@ -11,7 +11,7 @@ import { isEmpty } from "@/utils/common";
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");
   const [searchType, setSearchType] = useState<SearchType>(SearchType.NonFiction);
-  const { books, loading } = searchBooksOnLibgen(searchContent, searchType);
+  const { books, loading, error } = searchBooksOnLibgen(searchContent, searchType);
 
   const copyFromClipboard = useCallback(async () => {
     // Get the clipboard content
@@ -30,6 +30,9 @@ export default function Command() {
   const emptyViewTitle = () => {
     if (loading) {
       return "Loading...";
+    }
+    if (error) {
+      return "Search Failed";
     }
     if (books.length === 0 && !isEmpty(searchContent)) {
       return "No Results";
@@ -53,7 +56,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <EmptyView title={emptyViewTitle()}></EmptyView>
+      <EmptyView title={emptyViewTitle()} description={error}></EmptyView>
       {books.map((book, index) => (
         <BookItem key={index} book={book}></BookItem>
       ))}

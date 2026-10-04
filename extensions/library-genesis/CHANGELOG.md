@@ -1,5 +1,13 @@
 # Library Genesis Changelog
 
+## [Fix Search Requests and Mirror Checks] - 2026-10-04
+
+- Use an extension-specific user agent so mirrors return search results instead of placeholder pages.
+- Validate actual search responses when testing and choosing mirrors.
+- Include current and historical mirror aliases, validating availability on the user's network.
+- Select the first validated mirror without waiting for unreachable candidates.
+- Show search errors for unavailable mirrors and ignore cancelled searches.
+
 ## [Fix Download] - 2025-11-13
 
 - fix: allow downloading files again changing url structure
@@ -48,7 +56,6 @@
 ## [Feature Updates] - 2022-07-21
 
 - Supported downloading to a default directory
-
   - Users can download books always to a default directory.
   - If users prefer so, they can still manually pick directory by hand.
 

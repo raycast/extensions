@@ -26,11 +26,12 @@ const useFastestMirror = () => {
     (async () => {
       const fastestMirror = await LocalStorage.getItem<string>("fastest-mirror");
       const lastUpdate = await LocalStorage.getItem<number>("last-update");
+      if (abortController.signal.aborted) return;
       const now = Date.now();
 
       if (!fastestMirror || !lastUpdate || now - lastUpdate > 3600000) {
         const fastest = await mirror(abortController.signal);
-        if (fastest) {
+        if (fastest && !abortController.signal.aborted) {
           setFastestMirrorState({
             fastestMirror: fastest,
             lastUpdate: Date.now(),
