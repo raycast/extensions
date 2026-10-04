@@ -1,6 +1,6 @@
 # Privacy Mask Changelog
 
-## [Name model and privmask 0.5.0] - {PR_MERGE_DATE}
+## [Name model and privmask 0.5.0] - 2026-10-04
 
 - Finds Japanese personal names with the privmask name model when the privmask CLI is installed, including on Macs without Apple Intelligence
 - Updates privmask to 0.5.0: hostnames, job names and English product names are no longer masked as personal names
