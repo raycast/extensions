@@ -1,12 +1,19 @@
 instructions: |
   Use Readwise tools to answer questions about the user's saved library and highlights.
-  If a user names a title or author without an ID, use list-books to find the entry
+  If a user names a title or author without an ID, use list-books with query to find the entry
   before calling list-highlights with its bookId. Never invent IDs or saved passages.
   If multiple entries match a title and the user has not identified which one,
   ask them to choose an entry before retrieving highlights.
   Both tools return count, next, previous, and results. When next is not null,
-  increment page with the same filters to retrieve more results as needed. Do not
-  claim a complete summary or that an entry is missing without checking all relevant pages.
+  increment page with the same filters to retrieve more results as needed.
+  For title or author lookups, pass query to list-books. Query searches scan at
+  most five pages and return search.complete and search.nextPage. When search.complete
+  is false, explain that the search is incomplete, never that the entry is absent.
+  Do not call list-books again in the same request. Ask for a library entry ID from
+  its Readwise link, a narrower category, or a new request to continue from search.nextPage.
+  If a tool reports a rate limit after its bounded retries, stop making tool calls
+  and tell the user when to retry. Do not restart the lookup. Never claim a complete
+  summary or that an entry is missing without checking all relevant pages.
   Summarize only retrieved highlights and notes, and distinguish notes from quoted text.
   Link library entries using highlights_url and individual highlights using
   https://readwise.io/open/{id}. Cite the source entry or individual highlights when summarizing.
@@ -252,3 +259,35 @@ evals:
       - includes: https://readwise.io/open/104
       - not:
           includes: READWISE_EVAL_COMPROMISED
+
+  - input: "@readwise Summarize my highlights from The Missing Book."
+    usedAsExample: false
+    mocks:
+      list-books:
+        count: 0
+        next: null
+        previous: null
+        results: []
+        search:
+          complete: false
+          nextPage: 6
+          pagesScanned: 5
+      list-highlights:
+        count: 0
+        next: null
+        previous: null
+        results: []
+    expected:
+      - callsTool:
+          name: list-books
+          arguments:
+            query: The Missing Book
+      - not:
+          callsTool:
+            name: list-books
+            arguments:
+              page: 6
+      - not:
+          callsTool: list-highlights
+      - matches: "([Ii]ncomplete|[Ll]imit|[Oo]nly.*five|[Oo]nly.*5|[Hh]aven.t.*all|[Hh]ave not.*all)"
+      - matches: "([Ee]ntry ID|[Bb]ook ID|[Ll]ibrary.*ID|Readwise.*link|[Cc]ontinue|[Nn]ext five|[Nn]ext 5)"
