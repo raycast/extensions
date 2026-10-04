@@ -175,7 +175,7 @@
     {
       "name": "get-document",
       "title": "Get Document",
-      "description": "Read the full content of a Craft document or Daily Note"
+      "description": "Read the text blocks of a Craft document or Daily Note. Blocks are not in document order; use craft-api GET /blocks for ordered content when configured"
     },
     {
       "name": "create-document",

@@ -2,6 +2,7 @@ instructions: |
   When referencing Craft content, include its craftdocs:// url so the user can open it.
   Use search-blocks to find a document's documentId and spaceId before reading or writing to it.
   When no space is specified, omit spaceId to use the primary space.
+  get-document blocks are unordered; if order matters and craft-api is configured, use GET /blocks?id=<documentId> instead.
   To add content, prefer append-to-document and add-to-daily-note.
   To edit, delete or move existing content, or to manage tasks, collections and folders, use craft-api:
   GET /blocks?id=<documentId> to get block IDs, then PUT /blocks or DELETE /blocks.
@@ -28,7 +29,10 @@ evals:
         documentId: DAILY-1
         spaceId: SPACE-1
         url: craftdocs://open?blockId=DAILY-1&spaceId=SPACE-1
-        content: "Call Sam about the contract\nReview Q4 roadmap"
+        note: "Blocks are unordered (local search index has no document order)."
+        blocks:
+          - "Call Sam about the contract"
+          - "Review Q4 roadmap"
     expected:
       - callsTool: get-document
       - includes: "Sam"

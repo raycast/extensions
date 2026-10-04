@@ -33,6 +33,16 @@ describe("buildCraftApiUrl", () => {
     );
   });
 
+  it("keeps # inside the query", () => {
+    expect(buildCraftApiUrl(apiUrl, "/blocks/search", "blockId=1&pattern=#tag").href).toBe(
+      "https://connect.craft.do/links/ID/api/v1/blocks/search?blockId=1&pattern=%23tag",
+    );
+  });
+
+  it("refuses non-HTTPS API URLs", () => {
+    expect(() => buildCraftApiUrl("http://connect.craft.do/links/ID/api/v1", "/blocks")).toThrow();
+  });
+
   it("refuses paths that escape the API root", () => {
     for (const path of ["x", "/../../other", "/%2e%2e/%2e%2e/other", "@evil.com"]) {
       expect(() => buildCraftApiUrl(apiUrl, path)).toThrow();

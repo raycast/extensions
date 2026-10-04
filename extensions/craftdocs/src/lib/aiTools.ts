@@ -131,10 +131,17 @@ export const waitForDailyNote = async (
   return null;
 };
 
-/** Builds a Craft API URL, refusing paths that escape the configured API so the key never leaks elsewhere. */
+/** Builds a Craft API URL, refusing non-HTTPS URLs and paths that escape the configured API so the key never leaks elsewhere. */
 export const buildCraftApiUrl = (apiUrl: string, path: string, query?: string) => {
   const base = new URL(apiUrl.replace(/\/+$/, ""));
-  const url = new URL(`${base.href}${path}${query ? `?${query}` : ""}`);
+
+  if (base.protocol !== "https:") {
+    throw new Error("The Craft API URL must start with https://.");
+  }
+
+  const url = new URL(`${base.href}${path}`);
+  // The search setter percent-encodes "#", so values like RE2 patterns aren't cut off as a fragment.
+  url.search = query ?? "";
 
   if (!path.startsWith("/") || url.origin !== base.origin || !url.pathname.startsWith(`${base.pathname}/`)) {
     throw new Error(`Invalid path "${path}".`);

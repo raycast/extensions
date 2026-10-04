@@ -17,7 +17,11 @@ FROM BlockSearch
 WHERE documentId = ? OR id = ?
 `;
 
-/** Read the full text content of a Craft document or Daily Note. */
+/**
+ * Read the text blocks of a Craft document or Daily Note from Craft's local search index.
+ * The index has no block order, so blocks are NOT in reading order; don't infer sequence from them.
+ * If the Craft API is configured, use craft-api GET /blocks?id=<documentId> for ordered content.
+ */
 export default async function (input: Input) {
   return withCraftDatabases(({ config, databases }) => {
     const spaceId = resolveSpaceId(config, input.spaceId);
@@ -41,11 +45,8 @@ export default async function (input: Input) {
       documentId,
       spaceId,
       url: buildOpenBlockUrl(documentId, spaceId),
-      // ponytail: search index has no block order, so blocks may come back out of document order.
-      content: blocks
-        .filter((block) => block.entityType !== "document")
-        .map((block) => block.content)
-        .join("\n"),
+      note: "Blocks are unordered (local search index has no document order).",
+      blocks: blocks.filter((block) => block.entityType !== "document").map((block) => block.content),
     };
   });
 }

@@ -30,15 +30,18 @@ export default async function (input: Input) {
     throw new Error(`Unknown Craft space "${input.spaceId}". Use list-spaces to get valid space IDs.`);
   }
 
+  const shouldToggle = input.enabled !== undefined && input.enabled !== space.isEnabled;
+
+  // Validate before saving anything so a rejected toggle doesn't leave a half-applied rename.
+  if (shouldToggle && !canToggleSpaceEnabled({ space, currentlyEnabled: space.isEnabled })) {
+    throw new Error("The primary space cannot be disabled.");
+  }
+
   if (input.name !== undefined) {
     snapshot = updateSpaceCustomName(snapshot, space.spaceID, input.name.trim() || null);
   }
 
-  if (input.enabled !== undefined && input.enabled !== space.isEnabled) {
-    if (!canToggleSpaceEnabled({ space, currentlyEnabled: space.isEnabled })) {
-      throw new Error("The primary space cannot be disabled.");
-    }
-
+  if (shouldToggle) {
     snapshot = toggleSpaceEnabled(snapshot, space.spaceID);
   }
 

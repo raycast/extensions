@@ -24,6 +24,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   info: [
     { name: "Content", value: input.content },
     { name: "Date", value: input.date ?? "today" },
+    {
+      name: "Note",
+      value:
+        "If the Daily Note doesn't exist yet, Craft opens to create it. If it isn't indexed in time, the content is copied to your clipboard instead.",
+    },
   ],
 });
 
