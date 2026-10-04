@@ -1,5 +1,10 @@
 # RAM Prices Changelog
 
+## [Add Ask AI Support] - {PR_MERGE_DATE}
+
+- Added Ask RAM Prices support for questions about DDR4 and DDR5 market prices and trends.
+- Added AI instructions and YAML evals for pricing, comparisons, and unavailable data.
+
 ## [Initial Version] - 2026-04-01
 
 ### Added
