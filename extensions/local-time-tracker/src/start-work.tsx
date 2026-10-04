@@ -162,7 +162,8 @@ export default function StartWorkCommand() {
 
     setIsSubmitting(true);
     try {
-      await startTimer(project.id, description);
+      const startedTimer = await startTimer(project.id, description);
+      setActiveTimer(startedTimer);
       await showHUD(`Started: ${project.name}`);
     } catch (error) {
       if (error instanceof ActiveTimerExistsError) {

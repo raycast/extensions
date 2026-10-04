@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { getLegacyProjectCategories } from "./project-categories";
 import { copyMissingLegacyWorkLogs } from "./storage-migration";
 import type { ActiveTimer, Project, ProjectCategory, WorkLog } from "./types";
 
@@ -47,7 +48,10 @@ export async function saveProjects(projects: Project[]): Promise<void> {
 export async function getProjectCategories(): Promise<ProjectCategory[]> {
   await initializeStorage();
   const rawValue = await LocalStorage.getItem<string>(STORAGE_KEYS.projectCategories);
-  if (rawValue === undefined) return [];
+  if (rawValue === undefined) {
+    const projects = await getProjects();
+    return getLegacyProjectCategories(projects);
+  }
   return readArray(STORAGE_KEYS.projectCategories, isProjectCategory, "project categories");
 }
 
@@ -179,7 +183,7 @@ function isWorkLog(value: unknown): value is WorkLog {
     typeof value.description === "string" &&
     isIsoDate(value.startedAt) &&
     isIsoDate(value.endedAt) &&
-    new Date(value.endedAt).getTime() > new Date(value.startedAt).getTime() &&
+    new Date(value.endedAt).getTime() >= new Date(value.startedAt).getTime() &&
     isIsoDate(value.createdAt) &&
     isIsoDate(value.updatedAt)
   );

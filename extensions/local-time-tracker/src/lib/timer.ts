@@ -1,5 +1,5 @@
 import { LaunchType, launchCommand } from "@raycast/api";
-import { getDurationSeconds } from "./duration";
+import { getDurationSeconds, getSafeStopTime } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
 
@@ -55,7 +55,9 @@ export async function stopTimer(): Promise<StopTimerResult> {
     };
   }
 
-  const stoppedAt = new Date().toISOString();
+  // A system clock rollback must not leave the active timer impossible to stop.
+  // Clamp the end time to the start time and record a zero-length work log.
+  const stoppedAt = getSafeStopTime(activeTimer.startedAt, new Date());
   const durationSeconds = getDurationSeconds(activeTimer.startedAt, stoppedAt);
   const workLog: WorkLog = {
     id: activeTimer.id,
