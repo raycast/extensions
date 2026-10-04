@@ -1,0 +1,824 @@
+[
+  {
+    "title": "Ask disabled people early",
+    "fact": "Accessibility reports and usability feedback reveal barriers that guidelines and automated checks can miss.",
+    "action": "Invite a disabled user or contributor into one design or testing conversation.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#partner-with-people-with-disabilities"
+  },
+  {
+    "title": "Publish an accessibility promise",
+    "fact": "A short accessibility statement tells users what you support, what limits exist, and how to report barriers.",
+    "action": "Add an ACCESSIBILITY.md file and link it from your README.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#start-with-an-accessibility-statement"
+  },
+  {
+    "title": "Give accessibility reports their own path",
+    "fact": "A dedicated label and template can collect assistive technology, environment, severity, and reproduction details.",
+    "action": "Create an accessibility issue template with fields for the user's tools, expected behavior, and actual behavior.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#reporting-accessibility-bugs"
+  },
+  {
+    "title": "Build readable documentation",
+    "fact": "Logical headings, descriptive links, plain language, and real lists make documentation easier to navigate with assistive technology.",
+    "action": "Scan one document for skipped headings, vague link text, and manually typed lists.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#structure-and-semantics"
+  },
+  {
+    "title": "Describe non-text content",
+    "fact": "Images, diagrams, and videos need text alternatives, captions, or transcripts so their information is not locked to one format.",
+    "action": "Add useful alt text to one image and a transcript or captions to your most-watched video.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#images-diagrams-and-videos"
+  },
+  {
+    "title": "Make keyboard use a requirement",
+    "fact": "Interactive controls should be reachable by keyboard, show focus clearly, and follow a logical tab order.",
+    "action": "Complete your main user flow without a mouse and record the first place where focus gets lost.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#keyboard-support"
+  },
+  {
+    "title": "Prefer native controls",
+    "fact": "Native HTML controls provide keyboard behavior, focus handling, and screen reader semantics that custom controls must recreate.",
+    "action": "Replace one custom button, input, or menu with its native equivalent if the native control fits.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#semantics-first"
+  },
+  {
+    "title": "Do not make color do all the work",
+    "fact": "Color should not be the only signal for status or errors, and text and controls need adequate contrast.",
+    "action": "Find one color-only status indicator and add a text label, icon, or other redundant signal.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#color-and-contrast"
+  },
+  {
+    "title": "Give CLI users usable output",
+    "fact": "Clear help, machine-readable output, text labels, and standard exit codes make command-line tools easier to use and script.",
+    "action": "Add a concrete example to --help and a --json or equivalent output mode to one command.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#cli-tools"
+  },
+  {
+    "title": "Test accessibility in two ways",
+    "fact": "Automated checks catch common regressions, while keyboard and screen reader passes expose problems automation cannot judge.",
+    "action": "Add an accessibility smoke test to your release checklist and run it with keyboard-only navigation.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#test-accessibility-continuously"
+  },
+  {
+    "title": "Make accessibility part of done",
+    "fact": "Accessibility is easier to maintain when feature and bug-fix acceptance criteria include it before implementation starts.",
+    "action": "Add keyboard, focus, labels, and reduced-motion checks to your UI pull request checklist.",
+    "source": "https://opensource.guide/accessibility-best-practices-for-your-project/#define-done"
+  },
+  {
+    "title": "Require MFA for privileged access",
+    "fact": "Multi-factor authentication adds a second barrier when an attacker gets a privileged contributor's password.",
+    "action": "List administrators and maintainers, then verify that every privileged account has MFA enabled.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#ensure-all-privileged-contributors-have-enabled-multi-factor-authentication-mfa"
+  },
+  {
+    "title": "Scan code before it ships",
+    "fact": "Static analysis can find security flaws before runtime and can run in builds or code review.",
+    "action": "Choose a SAST tool for your languages and run it on every pull request, starting with a small rule set.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#secure-your-code-as-part-of-your-development-workflow"
+  },
+  {
+    "title": "Keep secrets out of commits",
+    "fact": "Secret scanning can catch exposed API keys, tokens, and passwords before or after they reach a remote repository.",
+    "action": "Enable secret scanning or a pre-push check, and rehearse how you will revoke a leaked credential.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#dont-share-your-secrets"
+  },
+  {
+    "title": "Automate dependency updates",
+    "fact": "Software composition tools can match dependencies to known vulnerabilities and open updates for safer versions.",
+    "action": "Enable Dependabot, Renovate, or an equivalent tool and reserve time to review its pull requests.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#check-and-update-your-dependencies"
+  },
+  {
+    "title": "Inventory license risk",
+    "fact": "An SBOM and automated license checks show which components and license terms enter your software supply chain.",
+    "action": "Generate an SBOM for one release and flag dependencies whose licenses need a legal review.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#understand-and-manage-open-source-license-risks"
+  },
+  {
+    "title": "Protect important branches",
+    "fact": "Branch protection can require review and passing status checks before changes reach a main branch.",
+    "action": "Require review and successful CI before merging to your default branch.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#avoid-unwanted-changes-with-protected-branches"
+  },
+  {
+    "title": "Publish a private security route",
+    "fact": "A SECURITY.md file and private reporting channel reduce the chance that a vulnerability is disclosed before it can be fixed.",
+    "action": "Add SECURITY.md with a reporting address, expected response time, and disclosure guidance.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#security-policy"
+  },
+  {
+    "title": "Write down your threat model",
+    "fact": "A lightweight threat model tells users and researchers what the project trusts, protects, and considers in scope.",
+    "action": "Document your assets, trust boundaries, likely misuse, and out-of-scope reports beside your security policy.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#define-your-threat-model-to-help-users-and-researchers-understand-scope"
+  },
+  {
+    "title": "Prepare an incident checklist",
+    "fact": "A small response plan clarifies who triages reports, evaluates severity, coordinates a fix, and notifies affected users.",
+    "action": "Write a four-step incident checklist and link it from SECURITY.md.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#prepare-a-lightweight-incident-response-process"
+  },
+  {
+    "title": "Make security a shared job",
+    "fact": "Clear roles, least-privilege access, education, and upstream coordination keep security from depending on one person.",
+    "action": "Assign owners for vulnerability reports, dependency updates, and security patches, then review access.",
+    "source": "https://opensource.guide/security-best-practices-for-your-project/#treat-security-as-a-team-effort"
+  },
+  {
+    "title": "Know what energizes your maintenance",
+    "fact": "Naming the parts of open source work that energize you helps you prioritize work you can sustain.",
+    "action": "Write down two maintenance tasks that give you energy and protect time for one of them this week.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#identify-your-motivations-for-working-in-open-source"
+  },
+  {
+    "title": "Name your sources of stress",
+    "fact": "Low feedback, too many commitments, isolation, scarce resources, and conflicting demands can all push maintainers out of balance.",
+    "action": "Mark the biggest current stressor and choose one boundary or support request that addresses it.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#reflect-on-what-causes-you-to-get-out-of-balance-and-stressed-out"
+  },
+  {
+    "title": "Check whether your pace is sustainable",
+    "fact": "A pace that works for a week may not work for ten weeks, ten months, or ten years.",
+    "action": "Use a burnout checklist or your own weekly notes to spot one pattern that needs changing.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#watch-out-for-signs-of-burnout"
+  },
+  {
+    "title": "Delegate before you disappear",
+    "fact": "More contributors and more than one project contact make it possible to take a break without abandoning users.",
+    "action": "Ask one trusted contributor to own a small area and document how they can make decisions there.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community"
+  },
+  {
+    "title": "Find maintainer peers",
+    "fact": "Other maintainers can provide practical support, perspective, and ideas for handling recurring project pressure.",
+    "action": "Join one maintainer group or schedule a candid conversation with someone who runs a similar project.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community"
+  },
+  {
+    "title": "Treat funding as a support tool",
+    "fact": "Sponsorships, grants, and other funding can buy back time for maintainers who cannot afford to volunteer it.",
+    "action": "Add a funding option to your project or research one program whose requirements match your work.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community"
+  },
+  {
+    "title": "Automate the boring work",
+    "fact": "Automation can remove routine tasks and leave maintainers more time for judgment, support, and creative work.",
+    "action": "Automate one repetitive check or notification with a script, bot, or CI job.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community"
+  },
+  {
+    "title": "Put rest on the calendar",
+    "fact": "Regular breaks and explicit availability boundaries help maintainers keep contributing without turning a project into constant work.",
+    "action": "Choose a no-maintenance block this week and tell the community when you will be unavailable.",
+    "source": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community"
+  },
+  {
+    "title": "Code is not the only contribution",
+    "fact": "Documentation, design, events, triage, moderation, and mentoring can fill gaps that code alone does not address.",
+    "action": "Pick one non-code task in a project you use and make a small contribution.",
+    "source": "https://opensource.guide/how-to-contribute/#you-dont-have-to-contribute-code"
+  },
+  {
+    "title": "Contribute from your strengths",
+    "fact": "Open source projects need writers, designers, organizers, reviewers, and helpers as well as programmers.",
+    "action": "Search a project's issues for a task matching a skill you already have.",
+    "source": "https://opensource.guide/how-to-contribute/#what-it-means-to-contribute"
+  },
+  {
+    "title": "Documentation is real project work",
+    "fact": "Examples, tutorials, translations, and clearer existing docs can help users and reduce repeated support questions.",
+    "action": "Improve one confusing paragraph or add a small example to a project you use.",
+    "source": "https://opensource.guide/how-to-contribute/#do-you-like-to-write"
+  },
+  {
+    "title": "Read the project's map",
+    "fact": "Roles, repository files, issue trackers, pull requests, and discussion channels reveal how a project actually works.",
+    "action": "Find the README, LICENSE, contribution guide, code of conduct, and main discussion channel before proposing work.",
+    "source": "https://opensource.guide/how-to-contribute/#anatomy-of-an-open-source-project"
+  },
+  {
+    "title": "Use the contribute page",
+    "fact": "On GitHub, adding /contribute to a repository URL surfaces issues that are intended as beginner-friendly starting points.",
+    "action": "Open the /contribute page for a project you use and shortlist one small issue.",
+    "source": "https://opensource.guide/how-to-contribute/#finding-a-project-to-contribute-to"
+  },
+  {
+    "title": "Check a project before investing",
+    "fact": "Recent activity, open issues, pull requests, and respectful responses are clues that a project can receive your work.",
+    "action": "Review a project's recent commits and a few issue or pull request discussions before starting.",
+    "source": "https://opensource.guide/how-to-contribute/#a-checklist-before-you-contribute"
+  },
+  {
+    "title": "Give every request context",
+    "fact": "A useful issue or question explains what you tried, what happened, and why the proposed change would help the project.",
+    "action": "Rewrite your next issue to include a minimal reproduction and the result you expected.",
+    "source": "https://opensource.guide/how-to-contribute/#communicating-effectively"
+  },
+  {
+    "title": "Search before you ask",
+    "fact": "A quick pass through docs, open and closed issues, and project discussions often answers a question or reveals existing context.",
+    "action": "Search the repository and web for your idea before opening a new issue.",
+    "source": "https://opensource.guide/how-to-contribute/#gathering-context"
+  },
+  {
+    "title": "Keep contribution requests short",
+    "fact": "Concise requests are easier for busy maintainers to understand and review.",
+    "action": "Put the problem, proposed change, and next step in the first few sentences of your request.",
+    "source": "https://opensource.guide/how-to-contribute/#communicating-effectively"
+  },
+  {
+    "title": "Keep ordinary project talk public",
+    "fact": "Public discussions let future contributors learn from the exchange and keep maintainers from answering the same question privately.",
+    "action": "Move your next non-sensitive support question to the project's issue tracker or discussion channel.",
+    "source": "https://opensource.guide/how-to-contribute/#communicating-effectively"
+  },
+  {
+    "title": "Claim an issue before working",
+    "fact": "A short comment can prevent duplicate work and tells maintainers who is exploring a solution.",
+    "action": "Comment on an issue with your intended approach before you start a non-trivial fix.",
+    "source": "https://opensource.guide/how-to-contribute/#opening-an-issue"
+  },
+  {
+    "title": "Open a draft early",
+    "fact": "An early draft pull request lets maintainers react to direction and scope before you spend weeks polishing the wrong change.",
+    "action": "Open a draft pull request when you have a rough path and list the questions you want reviewed.",
+    "source": "https://opensource.guide/how-to-contribute/#opening-a-pull-request"
+  },
+  {
+    "title": "Test and follow local style",
+    "fact": "Passing tests and matching project conventions reduce the review work required to merge a contribution.",
+    "action": "Run the documented test command and compare your changes with the project's formatting and review norms.",
+    "source": "https://opensource.guide/how-to-contribute/#opening-a-pull-request"
+  },
+  {
+    "title": "Follow up once, in public",
+    "fact": "If a contribution has had no response for more than a week, a polite reminder in the same thread is reasonable.",
+    "action": "Post one concise public follow-up, then choose another project or task if nobody responds.",
+    "source": "https://opensource.guide/how-to-contribute/#-you-dont-get-a-response"
+  },
+  {
+    "title": "Respond to requested changes",
+    "fact": "Review comments are part of collaboration, so contributors should either make the changes or tell the maintainer they are stepping away.",
+    "action": "Reply to every requested change with an update, a question, or a clear handoff.",
+    "source": "https://opensource.guide/how-to-contribute/#-someone-requests-changes-to-your-contribution"
+  },
+  {
+    "title": "A rejection can become a fork",
+    "fact": "Maintainers may decline a contribution for scope or design reasons, and a fork gives you room to pursue a different direction.",
+    "action": "Ask for specific feedback, thank the reviewer, and fork only if the difference still matters to you.",
+    "source": "https://opensource.guide/how-to-contribute/#-your-contribution-doesnt-get-accepted"
+  },
+  {
+    "title": "Define open source in your own words",
+    "fact": "An open source license gives people permission to use, study, modify, and distribute a project.",
+    "action": "Read your project's license and write one sentence explaining what it permits users to do.",
+    "source": "https://opensource.guide/starting-a-project/#what-does-open-source-mean"
+  },
+  {
+    "title": "Free is not the same as free of charge",
+    "fact": "In open source, free and libre describe user freedoms; price is a separate choice.",
+    "action": "Use your README and pricing page to state both the license freedoms and any paid services clearly.",
+    "source": "https://opensource.guide/starting-a-project/#does-open-source-mean-free-of-charge"
+  },
+  {
+    "title": "Write down why you are opening the project",
+    "fact": "Clear goals help a maintainer decide what to accept, what to decline, and where help is needed.",
+    "action": "Add a short goals or vision section to your README before announcing the project.",
+    "source": "https://opensource.guide/starting-a-project/#setting-your-goals"
+  },
+  {
+    "title": "Budget the work beyond code",
+    "fact": "Issues, reviews, documentation, and project promotion continue after launch and need an owner and time.",
+    "action": "Name who will handle maintenance after launch and reserve a weekly amount of time for it.",
+    "source": "https://opensource.guide/starting-a-project/#setting-your-goals"
+  },
+  {
+    "title": "Launch when feedback is welcome",
+    "fact": "There is no required project stage for going open; the useful threshold is being ready for others to inspect and discuss it.",
+    "action": "Choose a small public milestone and state what kind of feedback you want when you publish it.",
+    "source": "https://opensource.guide/starting-a-project/#launching-your-own-open-source-project"
+  },
+  {
+    "title": "Ship the four project basics",
+    "fact": "A license, README, contribution guide, and code of conduct set expectations for users and contributors.",
+    "action": "Put LICENSE, README, CONTRIBUTING, and CODE_OF_CONDUCT files in your repository root.",
+    "source": "https://opensource.guide/starting-a-project/#launching-your-own-open-source-project"
+  },
+  {
+    "title": "Choose a standard license",
+    "fact": "An established license protects reuse and is easier for users to understand than custom terms.",
+    "action": "Compare MIT, Apache-2.0, GPLv3, and other options at choosealicense.com before publishing.",
+    "source": "https://opensource.guide/starting-a-project/#choosing-a-license"
+  },
+  {
+    "title": "Make the README answer four questions",
+    "fact": "A useful README explains what the project does, why it matters, how to start, and where to get help.",
+    "action": "Ask a new reader to find all four answers without opening another file, then fix the first gap.",
+    "source": "https://opensource.guide/starting-a-project/#writing-a-readme"
+  },
+  {
+    "title": "Put the contribution path in writing",
+    "fact": "Contributing guidelines can explain bug reports, feature requests, setup, tests, and the kinds of help you want.",
+    "action": "Create CONTRIBUTING.md with one tested setup path and one example of a welcome contribution.",
+    "source": "https://opensource.guide/starting-a-project/#writing-your-contributing-guidelines"
+  },
+  {
+    "title": "Adopt a code of conduct early",
+    "fact": "A code of conduct defines who is covered, where it applies, how to report a violation, and what happens next.",
+    "action": "Add a CODE_OF_CONDUCT file and link it from your README and contribution guide.",
+    "source": "https://opensource.guide/starting-a-project/#establishing-a-code-of-conduct"
+  },
+  {
+    "title": "Choose a name that explains the project",
+    "fact": "A memorable name that hints at what a project does gives potential users useful context before they click.",
+    "action": "Ask someone unfamiliar with the project what they expect it to do from its name alone.",
+    "source": "https://opensource.guide/starting-a-project/#choosing-the-right-name"
+  },
+  {
+    "title": "Check names before you announce",
+    "fact": "Similar projects, unavailable handles, search results, and trademarks can create confusion or legal trouble later.",
+    "action": "Search your proposed name across its ecosystem, reserve the needed handles, and check the WIPO database.",
+    "source": "https://opensource.guide/starting-a-project/#avoiding-name-conflicts"
+  },
+  {
+    "title": "Let your writing set the tone",
+    "fact": "README text, issue replies, and code style teach people what kind of community your project expects.",
+    "action": "Rewrite one terse or exclusionary sentence in your docs with simple, welcoming language.",
+    "source": "https://opensource.guide/starting-a-project/#how-you-write-and-code-affects-your-brand-too"
+  },
+  {
+    "title": "State the problem before promoting",
+    "fact": "People become users or contributors when a project solves a problem for them, so its message should start there.",
+    "action": "Complete the sentence: this project helps X do Y, then use that sentence in your README opening.",
+    "source": "https://opensource.guide/finding-users/#figure-out-your-message"
+  },
+  {
+    "title": "Give the project one home",
+    "fact": "A single URL or namespace makes a project easier to remember, follow, and share.",
+    "action": "Choose one canonical project URL and link every profile, talk, and announcement to it.",
+    "source": "https://opensource.guide/finding-users/#help-people-find-and-follow-your-project"
+  },
+  {
+    "title": "Show the project in use",
+    "fact": "A simple website, tutorial, or example gives prospective users a route from discovery to trying the project.",
+    "action": "Publish one small example that shows the project's result, not just its installation command.",
+    "source": "https://opensource.guide/finding-users/#help-people-find-and-follow-your-project"
+  },
+  {
+    "title": "Find the right online audience",
+    "fact": "Targeted communities are more useful than broad promotion because they contain people who already have the problem you solve.",
+    "action": "Choose one relevant forum or project community and contribute a helpful answer before mentioning your project.",
+    "source": "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-online"
+  },
+  {
+    "title": "Help before you promote",
+    "fact": "Context and useful answers stand out better than posting the same project link everywhere.",
+    "action": "Answer one relevant question in full and mention your project only if it genuinely solves that person's problem.",
+    "source": "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-online"
+  },
+  {
+    "title": "Tailor a talk to its audience",
+    "fact": "Meetups and conferences work better when a talk explains the value and examples that matter to that particular audience.",
+    "action": "Pick one local or ecosystem event and rewrite your talk abstract around its attendees' needs.",
+    "source": "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-offline"
+  },
+  {
+    "title": "Build reputation by helping others",
+    "fact": "Thoughtful contributions to other projects give people context for your work and build trust over time.",
+    "action": "Make one useful contribution to a related project before asking its community to share yours.",
+    "source": "https://opensource.guide/finding-users/#build-a-reputation"
+  },
+  {
+    "title": "Reduce friction at every contributor step",
+    "fact": "A welcoming project helps people move from user to contributor by making each next step clear and achievable.",
+    "action": "Walk through your project as a new user and remove the first confusing step you encounter.",
+    "source": "https://opensource.guide/building-community/#make-people-feel-welcome"
+  },
+  {
+    "title": "Keep beginner work visible",
+    "fact": "Good first issue and documentation labels help casual contributors find work that matches their experience.",
+    "action": "Label one small issue with enough context that a newcomer can start without private coaching.",
+    "source": "https://opensource.guide/building-community/#make-people-feel-welcome"
+  },
+  {
+    "title": "Thank the first contact",
+    "fact": "A quick, positive response to a new issue or pull request can determine whether someone returns to the project.",
+    "action": "Reply to your newest contributor with thanks and one clear next step.",
+    "source": "https://opensource.guide/building-community/#make-people-feel-welcome"
+  },
+  {
+    "title": "Document decisions in public",
+    "fact": "Public roadmaps, meeting notes, review processes, and decision records let newcomers participate with the same context as regulars.",
+    "action": "Post the takeaway from your next maintainer meeting in an issue or discussion thread.",
+    "source": "https://opensource.guide/building-community/#document-everything"
+  },
+  {
+    "title": "Acknowledge requests quickly",
+    "fact": "Even when a full review must wait, an early acknowledgement tells contributors that their request entered the conversation.",
+    "action": "Set a reminder to acknowledge new issues and pull requests within the response time you publish.",
+    "source": "https://opensource.guide/building-community/#be-responsive"
+  },
+  {
+    "title": "Give the community a public room",
+    "fact": "A public issue tracker, forum, or chat archive helps people learn from one another and keeps support from filling a maintainer's inbox.",
+    "action": "Choose one primary public channel and redirect the next non-sensitive private support request there.",
+    "source": "https://opensource.guide/building-community/#give-your-community-a-place-to-congregate"
+  },
+  {
+    "title": "Keep sensitive reports private",
+    "fact": "Security issues and serious code of conduct violations need a private reporting route even when normal project talk is public.",
+    "action": "Test the private contact listed in SECURITY.md or your code of conduct before someone needs it.",
+    "source": "https://opensource.guide/building-community/#give-your-community-a-place-to-congregate"
+  },
+  {
+    "title": "Do not tolerate harmful behavior",
+    "fact": "Unchecked bullying and hostile debate can drive away helpful community members who never complain publicly.",
+    "action": "Name the behavior, point to the community rule, and act consistently when a discussion becomes harmful.",
+    "source": "https://opensource.guide/building-community/#dont-tolerate-bad-actors"
+  },
+  {
+    "title": "Meet casual contributors where they are",
+    "fact": "People who contribute occasionally need enough setup and context to make progress without learning the entire project first.",
+    "action": "Add a short newcomer section to CONTRIBUTING.md and link to a first, low-risk task.",
+    "source": "https://opensource.guide/building-community/#meet-contributors-where-theyre-at"
+  },
+  {
+    "title": "Share ownership deliberately",
+    "fact": "Credit, responsibility, and a path to leadership give contributors reasons to keep investing in a project.",
+    "action": "Add a CONTRIBUTORS file or invite a regular contributor to own a clearly bounded area.",
+    "source": "https://opensource.guide/building-community/#share-ownership-of-your-project"
+  },
+  {
+    "title": "Use an organization and backup admin",
+    "fact": "Shared account ownership protects a project from depending on one personal account or maintainer.",
+    "action": "Move a growing project to an organization and add a trusted backup administrator.",
+    "source": "https://opensource.guide/building-community/#share-ownership-of-your-project"
+  },
+  {
+    "title": "Facilitate conflict instead of joining it",
+    "fact": "A maintainer who sets a calm example and keeps people respectful can stop a difficult discussion from escalating.",
+    "action": "In the next heated thread, restate the issue neutrally and ask what information is still needed.",
+    "source": "https://opensource.guide/building-community/#set-the-bar-for-kindness"
+  },
+  {
+    "title": "Seek consensus before voting",
+    "fact": "A consensus-seeking process prioritizes hearing serious concerns before moving forward instead of reducing the discussion to a tally.",
+    "action": "Before a major vote, summarize each unresolved concern and ask what would address it.",
+    "source": "https://opensource.guide/building-community/#focus-on-the-journey-not-the-destination"
+  },
+  {
+    "title": "Turn arguments into next steps",
+    "fact": "A discussion is useful when it moves toward a decision; asking what happens next can pull a thread back from personal debate.",
+    "action": "Add a concrete next action and owner to the next stalled project discussion.",
+    "source": "https://opensource.guide/building-community/#keep-the-conversation-focused-on-action"
+  },
+  {
+    "title": "Choose a tiebreaker in advance",
+    "fact": "A documented tiebreaker gives a project a last resort when a respectful discussion cannot resolve a major disagreement.",
+    "action": "Add the decision owner and escalation process to GOVERNANCE.md before the next dispute.",
+    "source": "https://opensource.guide/building-community/#identify-a-community-tiebreaker"
+  },
+  {
+    "title": "Remember that maintenance is more than code",
+    "fact": "As a project grows, responding to users, reviewing changes, and organizing the community can take more time than writing code.",
+    "action": "List your recurring maintenance tasks and mark which ones need an owner or a documented process.",
+    "source": "https://opensource.guide/best-practices/#what-does-it-mean-to-be-a-maintainer"
+  },
+  {
+    "title": "Write down the project's vision",
+    "fact": "A public vision helps a maintainer filter requests and resist scope creep.",
+    "action": "Add a short vision and a list of out-of-scope requests to your README or VISION file.",
+    "source": "https://opensource.guide/best-practices/#write-down-your-projects-vision"
+  },
+  {
+    "title": "Publish realistic expectations",
+    "fact": "Response times, accepted contribution types, review rules, and available hours tell people what the maintainer can actually sustain.",
+    "action": "Add your expected response window and weekly availability to the contribution guide.",
+    "source": "https://opensource.guide/best-practices/#communicate-your-expectations"
+  },
+  {
+    "title": "Record private decisions publicly",
+    "fact": "Publishing notes from maintainer conversations gives new community members access to decisions that would otherwise become hidden history.",
+    "action": "Summarize the next private planning conversation in a public issue or decision record.",
+    "source": "https://opensource.guide/best-practices/#keep-communication-public"
+  },
+  {
+    "title": "Say no by pointing to scope",
+    "fact": "A documented project criterion makes a refusal about the work's fit instead of a judgment about the person proposing it.",
+    "action": "Link your vision when declining the next out-of-scope request and suggest a better place for it if one exists.",
+    "source": "https://opensource.guide/best-practices/#learning-to-say-no"
+  },
+  {
+    "title": "Close unwanted work kindly",
+    "fact": "Thanking a contributor, explaining the mismatch, and closing promptly is kinder than leaving an unwanted issue or pull request unanswered.",
+    "action": "Resolve one stale request with a brief explanation and a link to the relevant project rule.",
+    "source": "https://opensource.guide/best-practices/#keep-the-conversation-friendly"
+  },
+  {
+    "title": "Ask for context before the code",
+    "fact": "Issue and pull request templates can require enough information to prevent work that the project cannot accept.",
+    "action": "Add a template asking for motivation, scope, tests, and a link to any prior discussion.",
+    "source": "https://opensource.guide/best-practices/#be-proactive"
+  },
+  {
+    "title": "Turn repeated corrections into mentoring",
+    "fact": "An enthusiastic contributor who misses project expectations may need a smaller task, clearer explanation, or a mentor.",
+    "action": "Offer one well-scoped starter issue to a contributor whose first attempt needs more guidance.",
+    "source": "https://opensource.guide/best-practices/#embrace-mentorship"
+  },
+  {
+    "title": "Share the easy work",
+    "fact": "Delegating approachable issues and recognizing repeated contributions grows the set of people who can help maintain the project.",
+    "action": "Leave one non-critical, well-defined issue for a contributor instead of fixing it yourself.",
+    "source": "https://opensource.guide/best-practices/#share-the-workload"
+  },
+  {
+    "title": "Use extensions for different needs",
+    "fact": "A fork, plugin, API, or customization hook can serve a valid use case without forcing every project user into one vision.",
+    "action": "Identify one stable extension point that would let users solve needs outside your core scope.",
+    "source": "https://opensource.guide/best-practices/#let-others-build-the-solutions-they-need"
+  },
+  {
+    "title": "Let tests guard the merge",
+    "fact": "Required automated tests give contributors confidence and stop regressions before a change reaches the main branch.",
+    "action": "Run your test suite on every pull request and require its status check before merging.",
+    "source": "https://opensource.guide/best-practices/#require-tests-and-other-checks-to-improve-the-quality-of-your-code"
+  },
+  {
+    "title": "Automate routine maintenance",
+    "fact": "Release tools, dependency updates, issue templates, and stale-request handling can remove repetitive maintainer work.",
+    "action": "Automate one recurring task, then document the escape hatch for unusual cases.",
+    "source": "https://opensource.guide/best-practices/#use-tools-to-automate-basic-maintenance-tasks"
+  },
+  {
+    "title": "Pause before burnout decides",
+    "fact": "A planned break is healthier than waiting until a backlog and dread force an abrupt stop.",
+    "action": "Set a maintenance pause, announce the dates, and point users to the best available support.",
+    "source": "https://opensource.guide/best-practices/#its-okay-to-hit-pause"
+  },
+  {
+    "title": "Recognize broad forms of leadership",
+    "fact": "Maintainers and contributors can earn leadership roles through documentation, triage, events, or community work as well as code.",
+    "action": "Write down what your project means by contributor, maintainer, and committer.",
+    "source": "https://opensource.guide/leadership-and-governance/#what-are-examples-of-formal-roles-used-in-open-source-projects"
+  },
+  {
+    "title": "Make leadership visible",
+    "fact": "A team page, README section, or CONTRIBUTORS file tells the community who owns which responsibilities.",
+    "action": "Publish current project roles and one way to contact each responsibility area.",
+    "source": "https://opensource.guide/leadership-and-governance/#how-do-i-formalize-these-leadership-roles"
+  },
+  {
+    "title": "Document the path to leadership",
+    "fact": "A clear process for joining a core team or subcommittee makes leadership feel earned and open rather than private.",
+    "action": "Add criteria and a nomination or review process for maintainers to GOVERNANCE.md.",
+    "source": "https://opensource.guide/leadership-and-governance/#how-do-i-formalize-these-leadership-roles"
+  },
+  {
+    "title": "Grant access with guardrails",
+    "fact": "Commit access can build ownership, while protected branches limit the damage of an accidental or unreviewed change.",
+    "action": "Define when someone earns write access and keep review and CI requirements on important branches.",
+    "source": "https://opensource.guide/leadership-and-governance/#when-should-i-give-someone-commit-access"
+  },
+  {
+    "title": "Pick governance for your context",
+    "fact": "BDFL, merit-based, and liberal contribution models make different tradeoffs around authority, history, and consensus.",
+    "action": "Name your current decision model and one reason it fits the project's size and community.",
+    "source": "https://opensource.guide/leadership-and-governance/#what-are-some-of-the-common-governance-structures-for-open-source-projects"
+  },
+  {
+    "title": "Let governance grow with the community",
+    "fact": "Early expectations can be documented at launch, while more formal governance can follow once community dynamics are visible.",
+    "action": "Write down the decisions you already make and schedule a governance review after your next growth milestone.",
+    "source": "https://opensource.guide/leadership-and-governance/#do-i-need-governance-docs-when-i-launch-my-project"
+  },
+  {
+    "title": "Judge paid contributions on the work",
+    "fact": "Commercial use and paid developers are compatible with open source; contributions should be evaluated on their technical and community merits.",
+    "action": "Review a proposal against your published criteria without asking whether the contributor is paid.",
+    "source": "https://opensource.guide/leadership-and-governance/#what-happens-if-corporate-employees-start-submitting-contributions"
+  },
+  {
+    "title": "Do not form a legal entity by default",
+    "fact": "A project usually does not need a separate legal entity unless it handles money, and a fiscal sponsor can be an alternative for donations.",
+    "action": "Before incorporating, list the money, contracts, and liability needs that a legal entity would address.",
+    "source": "https://opensource.guide/leadership-and-governance/#do-i-need-a-legal-entity-to-support-my-project"
+  },
+  {
+    "title": "Volunteering is not the only model",
+    "fact": "Some people contribute for learning or community, while sustained maintenance may require paid time for others.",
+    "action": "Ask what work your project needs and whether the current unpaid arrangement excludes people who could do it.",
+    "source": "https://opensource.guide/getting-paid/#why-some-people-seek-financial-support"
+  },
+  {
+    "title": "Pitch open source work to your employer",
+    "fact": "An employer may support maintenance when it improves a product, recruiting, reputation, or the wider ecosystem it relies on.",
+    "action": "Write a one-page proposal connecting your open source work to a concrete employer benefit.",
+    "source": "https://opensource.guide/getting-paid/#funding-your-own-time"
+  },
+  {
+    "title": "Keep company and community interests clear",
+    "fact": "Company funding can support open source, but community decisions should not quietly become company-only decisions.",
+    "action": "Document who funds your work, who makes project decisions, and how outside contributors participate.",
+    "source": "https://opensource.guide/getting-paid/#funding-your-own-time"
+  },
+  {
+    "title": "Try more than one funding route",
+    "fact": "Sponsors, crowdfunding, bounties, grants, and employer support fit different kinds of projects and audiences.",
+    "action": "Compare two funding routes against your audience, time, and administrative capacity before choosing one.",
+    "source": "https://opensource.guide/getting-paid/#funding-your-own-time"
+  },
+  {
+    "title": "Budget project funding honestly",
+    "fact": "Project funding may pay contributors, hosting, or new features, so the request should name the work it will support.",
+    "action": "List the next three project costs and connect each one to a specific outcome.",
+    "source": "https://opensource.guide/getting-paid/#finding-funding-for-your-project"
+  },
+  {
+    "title": "Match sponsorship to an audience",
+    "fact": "Sponsorship tends to work best when a project already has a visible audience or a strong reputation.",
+    "action": "Gather usage stories and a clear sponsorship ask before contacting potential backers.",
+    "source": "https://opensource.guide/getting-paid/#raise-money-for-your-work-through-crowdfunding-campaigns-or-sponsorships"
+  },
+  {
+    "title": "Consider paid services around open source",
+    "fact": "Support, hosted offerings, and additional features can fund a project while the core software remains open source.",
+    "action": "Identify one service users already request and test whether a paid version could support maintenance.",
+    "source": "https://opensource.guide/getting-paid/#create-a-revenue-stream"
+  },
+  {
+    "title": "Write grants around outcomes",
+    "fact": "Grants can support individuals or projects, but each funder has its own eligibility and reporting requirements.",
+    "action": "Find one relevant grant and write down its eligibility, deadline, deliverables, and reporting obligations.",
+    "source": "https://opensource.guide/getting-paid/#apply-for-grant-funding"
+  },
+  {
+    "title": "Prove the project matters",
+    "fact": "A funding case is stronger when it combines impact, adoption evidence, value to the funder, and a specific use of funds.",
+    "action": "Collect one metric, one user story, and one concrete milestone for your next funding request.",
+    "source": "https://opensource.guide/getting-paid/#building-a-case-for-financial-support"
+  },
+  {
+    "title": "Explain how money will arrive",
+    "fact": "Funders may require a nonprofit, fiscal sponsor, or individual contractor, so receiving funds is part of the proposal.",
+    "action": "Confirm the recipient and payment requirements before promising a funded project milestone.",
+    "source": "https://opensource.guide/getting-paid/#how-youll-receive-the-funds"
+  },
+  {
+    "title": "Use a code of conduct to set expectations",
+    "fact": "A code of conduct defines behavior standards and gives maintainers a basis for addressing harmful interactions.",
+    "action": "Choose a code of conduct and make its scope visible to every project participant.",
+    "source": "https://opensource.guide/code-of-conduct/#why-do-i-need-a-code-of-conduct"
+  },
+  {
+    "title": "Define where the code applies",
+    "fact": "A useful code of conduct says which spaces and activities it covers, who it covers, and how violations are reported.",
+    "action": "List your repository, chat, events, and sponsor spaces in the scope section of the policy.",
+    "source": "https://opensource.guide/code-of-conduct/#establishing-a-code-of-conduct"
+  },
+  {
+    "title": "Use prior art for conduct rules",
+    "fact": "Established texts such as the Contributor Covenant can save a project from inventing unclear behavioral rules from scratch.",
+    "action": "Adopt a recognized code, adapt only what you understand, and link it from README and CONTRIBUTING.md.",
+    "source": "https://opensource.guide/code-of-conduct/#establishing-a-code-of-conduct"
+  },
+  {
+    "title": "Plan enforcement before the incident",
+    "fact": "A private reporting route, named recipients, and an alternate contact show that the policy can be acted on fairly.",
+    "action": "Test a report to the listed contact and add a fallback for reports involving that person.",
+    "source": "https://opensource.guide/code-of-conduct/#deciding-how-youll-enforce-your-code-of-conduct"
+  },
+  {
+    "title": "Investigate reports with context",
+    "fact": "Review the report seriously and gather surrounding conversations and perspectives before deciding what happened.",
+    "action": "Create a private incident checklist that separates evidence gathering from the final response.",
+    "source": "https://opensource.guide/code-of-conduct/#gather-information-about-the-situation"
+  },
+  {
+    "title": "Protect the person who reports",
+    "fact": "The maintainer, not the reporter, should handle direct contact with the person accused unless the reporter asks for another arrangement.",
+    "action": "Write down who will communicate with the accused and how reporter consent and confidentiality are handled.",
+    "source": "https://opensource.guide/code-of-conduct/#take-appropriate-action"
+  },
+  {
+    "title": "Apply standards consistently",
+    "fact": "Maintainers owe each report a fair review and should address harmful behavior even when it falls just outside the written policy.",
+    "action": "After resolving a report, note whether the policy needs a clearer example or rule.",
+    "source": "https://opensource.guide/code-of-conduct/#your-responsibilities-as-a-maintainer"
+  },
+  {
+    "title": "Measure what serves your goal",
+    "fact": "Metrics help with decisions, but popularity is not automatically the right measure for every open source project.",
+    "action": "Write the decision a metric should inform before adding another dashboard or counter.",
+    "source": "https://opensource.guide/metrics/#why-measure-anything"
+  },
+  {
+    "title": "Track how people discover the project",
+    "fact": "Page views, unique visitors, referrers, and popular pages show whether people can find the project and what catches their attention.",
+    "action": "Review your project's traffic sources and record one channel worth investing in.",
+    "source": "https://opensource.guide/metrics/#discovery"
+  },
+  {
+    "title": "Treat downloads as a baseline",
+    "fact": "Package downloads and clone counts can show change over time, but they do not necessarily equal installs or active use.",
+    "action": "Choose one usage measure, document what it counts, and avoid presenting it as a user total.",
+    "source": "https://opensource.guide/metrics/#usage"
+  },
+  {
+    "title": "Compare discovery with usage",
+    "fact": "High traffic with low use may mean the project is hard to adopt or is reaching the wrong audience.",
+    "action": "Compare a discovery channel with its activation step and ask one new user where they stopped.",
+    "source": "https://opensource.guide/metrics/#usage"
+  },
+  {
+    "title": "Watch contributor retention",
+    "fact": "New, casual, and repeat contributors reveal whether a project is gaining people who return, not only people who try it once.",
+    "action": "Track first-time and repeat contributors separately for the next release cycle.",
+    "source": "https://opensource.guide/metrics/#retention"
+  },
+  {
+    "title": "Use backlog size as a signal",
+    "fact": "Open issue and pull request counts can reveal when triage or review volume is exceeding maintainer capacity.",
+    "action": "Set a monthly backlog review and identify the oldest item that needs a decision.",
+    "source": "https://opensource.guide/metrics/#retention"
+  },
+  {
+    "title": "Measure response time",
+    "fact": "A quick acknowledgement can keep a contributor engaged even when a full review will take longer.",
+    "action": "Record the time to first response for issues and pull requests during one month.",
+    "source": "https://opensource.guide/metrics/#maintainer-activity"
+  },
+  {
+    "title": "Choose community health measures",
+    "fact": "The useful metric is the one that focuses attention on behavior your project wants to encourage, not the one with the biggest number.",
+    "action": "Remove one metric nobody uses to make a decision and replace it with a question the team needs answered.",
+    "source": "https://opensource.guide/metrics/#use--to-learn-about-people"
+  },
+  {
+    "title": "Copyright starts with the author",
+    "fact": "Creative work is normally protected by default, so others need an explicit license to use, copy, modify, or distribute it.",
+    "action": "Add a clear license before inviting others to reuse or contribute to your project.",
+    "source": "https://opensource.guide/legal/#why-do-people-care-so-much-about-the-legal-side-of-open-source"
+  },
+  {
+    "title": "Public does not mean open source",
+    "fact": "A public GitHub repository can be viewed and forked under GitHub's terms, but it does not grant broad reuse permissions by itself.",
+    "action": "Check that your public repository includes the intended license file and copyright information.",
+    "source": "https://opensource.guide/legal/#are-public-github-projects-open-source"
+  },
+  {
+    "title": "Prefer a known license",
+    "fact": "Standard licenses give users a shared set of permissions and conditions that are easier to understand than custom terms.",
+    "action": "Use choosealicense.com to compare standard options instead of writing a new license from scratch.",
+    "source": "https://opensource.guide/legal/#just-give-me-the-tldr-on-what-i-need-to-protect-my-project"
+  },
+  {
+    "title": "Check dependency compatibility",
+    "fact": "Your project's license must account for the conditions attached to the libraries and other code it distributes.",
+    "action": "Make a list of direct dependencies and record each license before choosing your project's license.",
+    "source": "https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project"
+  },
+  {
+    "title": "Separate copyleft from source available",
+    "fact": "Copyleft licenses have sharing conditions, while source-available licenses can add business restrictions and may not meet the open source definition.",
+    "action": "Flag GPL, AGPL, MPL, LGPL, BSL, and SSPL dependencies for a deliberate compatibility review.",
+    "source": "https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project"
+  },
+  {
+    "title": "License non-code assets too",
+    "fact": "Images, icons, videos, fonts, data, and other bundled materials can carry different license terms from the source code.",
+    "action": "Add a third-party notices inventory for non-code assets in your next release.",
+    "source": "https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project"
+  },
+  {
+    "title": "Treat relicensing as governance",
+    "fact": "Changing a license can affect compatibility, contributors, users, and the project's future direction, so it needs clear consultation.",
+    "action": "Open a public discussion and consult qualified legal counsel before planning a license change.",
+    "source": "https://opensource.guide/legal/#what-if-i-want-to-change-the-license-of-my-project"
+  },
+  {
+    "title": "Find every copyright holder",
+    "fact": "A license change may require agreement from contributors or their employers, and a commit history is only a starting point for finding them.",
+    "action": "Map contributors and employer ownership before asking for consent to relicense an established project.",
+    "source": "https://opensource.guide/legal/#what-if-i-want-to-change-the-license-of-my-project"
+  },
+  {
+    "title": "Do not add a CLA by reflex",
+    "fact": "An open source license often supplies the inbound and outbound permissions a project needs, while an extra agreement adds administration.",
+    "action": "Write down the exact legal need a contributor agreement solves before requiring one.",
+    "source": "https://opensource.guide/legal/#does-my-project-need-an-additional-contributor-agreement"
+  },
+  {
+    "title": "Audit third-party material",
+    "fact": "Company projects need to account for third-party code, trade secrets, patents, trademarks, privacy, and dependency license conditions.",
+    "action": "Ask legal and engineering to review third-party notices, secrets, names, data collection, and patent timing before release.",
+    "source": "https://opensource.guide/legal/#what-does-my-companys-legal-team-need-to-know"
+  },
+  {
+    "title": "Keep a licensing record",
+    "fact": "A current record of licenses for components, subcomponents, and dependencies makes compliance work easier to repeat.",
+    "action": "Store dependency versions, licenses, notices, and SBOM output with each release record.",
+    "source": "https://opensource.guide/legal/#what-does-my-companys-legal-team-need-to-know"
+  }
+]

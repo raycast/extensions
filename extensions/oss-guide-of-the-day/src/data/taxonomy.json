@@ -1,0 +1,949 @@
+{
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#partner-with-people-with-disabilities": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Partner with people with disabilities"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#put-it-into-practice": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Partner with people with disabilities",
+    "topic": "Put it into practice"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#accessibility-benefits-everyone": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Partner with people with disabilities",
+    "topic": "Accessibility benefits everyone"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#start-with-an-accessibility-statement": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#goals": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement",
+    "topic": "Goals"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#contributor-requirements": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement",
+    "topic": "Contributor requirements"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#supported-environments": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement",
+    "topic": "Supported environments"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#reporting-accessibility-bugs": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement",
+    "topic": "Reporting accessibility bugs"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#why-separate-accessibility-from-your-general-issue-process": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with an accessibility statement",
+    "topic": "Why separate accessibility from your general issue process?"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#make-docs-accessible-by-default": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make docs accessible by default"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#structure-and-semantics": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make docs accessible by default",
+    "topic": "Structure and semantics"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#images-diagrams-and-videos": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make docs accessible by default",
+    "topic": "Images, diagrams and videos"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#tables": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make docs accessible by default",
+    "topic": "Tables"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#code-blocks": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make docs accessible by default",
+    "topic": "Code blocks"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#design-accessible-interfaces": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#keyboard-support": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Keyboard support"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#semantics-first": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Semantics first"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#names-labels-instructions": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Names, labels, instructions"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#color-and-contrast": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Color and contrast"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#motion-and-animation": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Motion and animation"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#dynamic-content": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Dynamic content"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#dependencies-and-patterns": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Dependencies and patterns"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#mobile-considerations": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Design accessible interfaces",
+    "topic": "Mobile considerations"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#make-tools-accessible": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make tools accessible"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#cli-tools": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make tools accessible",
+    "topic": "CLI Tools"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#terminals-logs-and-dashboards": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Make tools accessible",
+    "topic": "Terminals, logs, and dashboards"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#build-accessibility-into-contribution-workflows": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#add-issue-labels-and-template": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows",
+    "topic": "Add issue labels and template"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#add-an-accessibility-checklist-to-pull-requests-prs": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows",
+    "topic": "Add an accessibility checklist to pull requests (PRs)"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#define-done": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows",
+    "topic": "Define “done”"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#leverage-github-copilot": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows",
+    "topic": "Leverage GitHub Copilot"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#handle-accessibility-reported-issues-respectfully-and-effectively": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Build accessibility into contribution workflows",
+    "topic": "Handle accessibility reported issues respectfully and effectively"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#test-accessibility-continuously": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Test accessibility continuously"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#automated-checks-good-at-catching-regressions": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Test accessibility continuously",
+    "topic": "Automated checks (good at catching regressions)"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#manual-testing-required-for-real-confidence": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Test accessibility continuously",
+    "topic": "Manual testing (required for real confidence)"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#start-with-small-wins-this-week": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with small wins this week"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#you-dont-have-to-do-everything-at-once-start-with-a-few-quick-improvements": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with small wins this week",
+    "topic": "You don’t have to do everything at once, start with a few quick improvements."
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#suggested-file-additions-to-help-formalize-your-accessibility-commitment": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Start with small wins this week",
+    "topic": "Suggested file additions to help formalize your accessibility commitment."
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#conclusion-a-few-steps-for-you-a-huge-improvement-for-your-users": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Conclusion: A few steps for you, a huge improvement for your users"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#contributors": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Contributors"
+  },
+  "https://opensource.guide/accessibility-best-practices-for-your-project/#many-thanks-to-all-the-maintainers-who-shared-their-experiences-and-tips-with-us-for-this-guide": {
+    "guide": "Accessibility Best Practices for Your Project",
+    "section": "Contributors",
+    "topic": "Many thanks to all the maintainers who shared their experiences and tips with us for this guide!"
+  },
+  "https://opensource.guide/best-practices/#what-does-it-mean-to-be-a-maintainer": {
+    "guide": "Best Practices for Maintainers",
+    "section": "What does it mean to be a maintainer?"
+  },
+  "https://opensource.guide/best-practices/#documenting-your-processes": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Documenting your processes"
+  },
+  "https://opensource.guide/best-practices/#write-down-your-projects-vision": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Documenting your processes",
+    "topic": "Write down your project’s vision"
+  },
+  "https://opensource.guide/best-practices/#communicate-your-expectations": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Documenting your processes",
+    "topic": "Communicate your expectations"
+  },
+  "https://opensource.guide/best-practices/#keep-communication-public": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Documenting your processes",
+    "topic": "Keep communication public"
+  },
+  "https://opensource.guide/best-practices/#learning-to-say-no": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Learning to say no"
+  },
+  "https://opensource.guide/best-practices/#keep-the-conversation-friendly": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Learning to say no",
+    "topic": "Keep the conversation friendly"
+  },
+  "https://opensource.guide/best-practices/#be-proactive": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Learning to say no",
+    "topic": "Be proactive"
+  },
+  "https://opensource.guide/best-practices/#embrace-mentorship": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Learning to say no",
+    "topic": "Embrace mentorship"
+  },
+  "https://opensource.guide/best-practices/#leverage-your-community": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Leverage your community"
+  },
+  "https://opensource.guide/best-practices/#share-the-workload": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Leverage your community",
+    "topic": "Share the workload"
+  },
+  "https://opensource.guide/best-practices/#let-others-build-the-solutions-they-need": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Leverage your community",
+    "topic": "Let others build the solutions they need"
+  },
+  "https://opensource.guide/best-practices/#bring-in-the-robots": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Bring in the robots"
+  },
+  "https://opensource.guide/best-practices/#require-tests-and-other-checks-to-improve-the-quality-of-your-code": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Bring in the robots",
+    "topic": "Require tests and other checks to improve the quality of your code"
+  },
+  "https://opensource.guide/best-practices/#use-tools-to-automate-basic-maintenance-tasks": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Bring in the robots",
+    "topic": "Use tools to automate basic maintenance tasks"
+  },
+  "https://opensource.guide/best-practices/#its-okay-to-hit-pause": {
+    "guide": "Best Practices for Maintainers",
+    "section": "It’s okay to hit pause"
+  },
+  "https://opensource.guide/best-practices/#take-care-of-yourself-first": {
+    "guide": "Best Practices for Maintainers",
+    "section": "Take care of yourself first!"
+  },
+  "https://opensource.guide/building-community/#setting-your-project-up-for-success": {
+    "guide": "Building Welcoming Communities",
+    "section": "Setting your project up for success"
+  },
+  "https://opensource.guide/building-community/#make-people-feel-welcome": {
+    "guide": "Building Welcoming Communities",
+    "section": "Setting your project up for success",
+    "topic": "Make people feel welcome"
+  },
+  "https://opensource.guide/building-community/#document-everything": {
+    "guide": "Building Welcoming Communities",
+    "section": "Setting your project up for success",
+    "topic": "Document everything"
+  },
+  "https://opensource.guide/building-community/#be-responsive": {
+    "guide": "Building Welcoming Communities",
+    "section": "Setting your project up for success",
+    "topic": "Be responsive"
+  },
+  "https://opensource.guide/building-community/#give-your-community-a-place-to-congregate": {
+    "guide": "Building Welcoming Communities",
+    "section": "Setting your project up for success",
+    "topic": "Give your community a place to congregate"
+  },
+  "https://opensource.guide/building-community/#growing-your-community": {
+    "guide": "Building Welcoming Communities",
+    "section": "Growing your community"
+  },
+  "https://opensource.guide/building-community/#dont-tolerate-bad-actors": {
+    "guide": "Building Welcoming Communities",
+    "section": "Growing your community",
+    "topic": "Don’t tolerate bad actors"
+  },
+  "https://opensource.guide/building-community/#meet-contributors-where-theyre-at": {
+    "guide": "Building Welcoming Communities",
+    "section": "Growing your community",
+    "topic": "Meet contributors where they’re at"
+  },
+  "https://opensource.guide/building-community/#share-ownership-of-your-project": {
+    "guide": "Building Welcoming Communities",
+    "section": "Growing your community",
+    "topic": "Share ownership of your project"
+  },
+  "https://opensource.guide/building-community/#resolving-conflicts": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts"
+  },
+  "https://opensource.guide/building-community/#set-the-bar-for-kindness": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Set the bar for kindness"
+  },
+  "https://opensource.guide/building-community/#treat-your-readme-as-a-constitution": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Treat your README as a constitution"
+  },
+  "https://opensource.guide/building-community/#focus-on-the-journey-not-the-destination": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Focus on the journey, not the destination"
+  },
+  "https://opensource.guide/building-community/#keep-the-conversation-focused-on-action": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Keep the conversation focused on action"
+  },
+  "https://opensource.guide/building-community/#pick-your-battles-wisely": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Pick your battles wisely"
+  },
+  "https://opensource.guide/building-community/#identify-a-community-tiebreaker": {
+    "guide": "Building Welcoming Communities",
+    "section": "Resolving conflicts",
+    "topic": "Identify a community tiebreaker"
+  },
+  "https://opensource.guide/building-community/#community-is-the-️-of-open-source": {
+    "guide": "Building Welcoming Communities",
+    "section": "Community is the ❤️ of open source"
+  },
+  "https://opensource.guide/code-of-conduct/#why-do-i-need-a-code-of-conduct": {
+    "guide": "Your Code of Conduct",
+    "section": "Why do I need a code of conduct?"
+  },
+  "https://opensource.guide/code-of-conduct/#establishing-a-code-of-conduct": {
+    "guide": "Your Code of Conduct",
+    "section": "Establishing a code of conduct"
+  },
+  "https://opensource.guide/code-of-conduct/#deciding-how-youll-enforce-your-code-of-conduct": {
+    "guide": "Your Code of Conduct",
+    "section": "Deciding how you’ll enforce your code of conduct"
+  },
+  "https://opensource.guide/code-of-conduct/#enforcing-your-code-of-conduct": {
+    "guide": "Your Code of Conduct",
+    "section": "Enforcing your code of conduct"
+  },
+  "https://opensource.guide/code-of-conduct/#gather-information-about-the-situation": {
+    "guide": "Your Code of Conduct",
+    "section": "Enforcing your code of conduct",
+    "topic": "Gather information about the situation"
+  },
+  "https://opensource.guide/code-of-conduct/#take-appropriate-action": {
+    "guide": "Your Code of Conduct",
+    "section": "Enforcing your code of conduct",
+    "topic": "Take appropriate action"
+  },
+  "https://opensource.guide/code-of-conduct/#your-responsibilities-as-a-maintainer": {
+    "guide": "Your Code of Conduct",
+    "section": "Your responsibilities as a maintainer"
+  },
+  "https://opensource.guide/code-of-conduct/#encourage-the-behavior-you-want-to-see-in-the-world-": {
+    "guide": "Your Code of Conduct",
+    "section": "Encourage the behavior you want to see in the world 🌎"
+  },
+  "https://opensource.guide/finding-users/#spreading-the-word": {
+    "guide": "Finding Users for Your Project",
+    "section": "Spreading the word"
+  },
+  "https://opensource.guide/finding-users/#figure-out-your-message": {
+    "guide": "Finding Users for Your Project",
+    "section": "Figure out your message"
+  },
+  "https://opensource.guide/finding-users/#help-people-find-and-follow-your-project": {
+    "guide": "Finding Users for Your Project",
+    "section": "Help people find and follow your project"
+  },
+  "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-online": {
+    "guide": "Finding Users for Your Project",
+    "section": "Go where your project’s audience is (online)"
+  },
+  "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-offline": {
+    "guide": "Finding Users for Your Project",
+    "section": "Go where your project’s audience is (offline)"
+  },
+  "https://opensource.guide/finding-users/#build-a-reputation": {
+    "guide": "Finding Users for Your Project",
+    "section": "Build a reputation"
+  },
+  "https://opensource.guide/finding-users/#keep-at-it": {
+    "guide": "Finding Users for Your Project",
+    "section": "Keep at it!"
+  },
+  "https://opensource.guide/getting-paid/#why-some-people-seek-financial-support": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Why some people seek financial support"
+  },
+  "https://opensource.guide/getting-paid/#funding-your-own-time": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Funding your own time"
+  },
+  "https://opensource.guide/getting-paid/#finding-funding-for-your-project": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Finding funding for your project"
+  },
+  "https://opensource.guide/getting-paid/#raise-money-for-your-work-through-crowdfunding-campaigns-or-sponsorships": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Finding funding for your project",
+    "topic": "Raise money for your work through crowdfunding campaigns or sponsorships"
+  },
+  "https://opensource.guide/getting-paid/#create-a-revenue-stream": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Finding funding for your project",
+    "topic": "Create a revenue stream"
+  },
+  "https://opensource.guide/getting-paid/#apply-for-grant-funding": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Finding funding for your project",
+    "topic": "Apply for grant funding"
+  },
+  "https://opensource.guide/getting-paid/#building-a-case-for-financial-support": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support"
+  },
+  "https://opensource.guide/getting-paid/#impact": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support",
+    "topic": "Impact"
+  },
+  "https://opensource.guide/getting-paid/#traction": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support",
+    "topic": "Traction"
+  },
+  "https://opensource.guide/getting-paid/#value-to-funder": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support",
+    "topic": "Value to funder"
+  },
+  "https://opensource.guide/getting-paid/#use-of-funds": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support",
+    "topic": "Use of funds"
+  },
+  "https://opensource.guide/getting-paid/#how-youll-receive-the-funds": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Building a case for financial support",
+    "topic": "How you’ll receive the funds"
+  },
+  "https://opensource.guide/getting-paid/#experiment-and-dont-give-up": {
+    "guide": "Getting Paid for Open Source Work",
+    "section": "Experiment and don’t give up"
+  },
+  "https://opensource.guide/how-to-contribute/#why-contribute-to-open-source": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?"
+  },
+  "https://opensource.guide/how-to-contribute/#improve-software-you-rely-on": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Improve software you rely on"
+  },
+  "https://opensource.guide/how-to-contribute/#improve-existing-skills": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Improve existing skills"
+  },
+  "https://opensource.guide/how-to-contribute/#meet-people-who-are-interested-in-similar-things": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Meet people who are interested in similar things"
+  },
+  "https://opensource.guide/how-to-contribute/#find-mentors-and-teach-others": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Find mentors and teach others"
+  },
+  "https://opensource.guide/how-to-contribute/#build-public-artifacts-that-help-you-grow-a-reputation-and-a-career": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Build public artifacts that help you grow a reputation (and a career)"
+  },
+  "https://opensource.guide/how-to-contribute/#learn-people-skills": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "Learn people skills"
+  },
+  "https://opensource.guide/how-to-contribute/#its-empowering-to-make-changes-even-small-ones": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Why contribute to open source?",
+    "topic": "It’s empowering to make changes, even small ones"
+  },
+  "https://opensource.guide/how-to-contribute/#what-it-means-to-contribute": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute"
+  },
+  "https://opensource.guide/how-to-contribute/#you-dont-have-to-contribute-code": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "You don’t have to contribute code"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-planning-events": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like planning events?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-to-design": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like to design?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-to-write": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like to write?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-organizing": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like organizing?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-to-code": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like to code?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-helping-people": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like helping people?"
+  },
+  "https://opensource.guide/how-to-contribute/#do-you-like-helping-others-code": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "Do you like helping others code?"
+  },
+  "https://opensource.guide/how-to-contribute/#you-dont-just-have-to-work-on-software-projects": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What it means to contribute",
+    "topic": "You don’t just have to work on software projects!"
+  },
+  "https://opensource.guide/how-to-contribute/#orienting-yourself-to-a-new-project": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Orienting yourself to a new project"
+  },
+  "https://opensource.guide/how-to-contribute/#anatomy-of-an-open-source-project": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Orienting yourself to a new project",
+    "topic": "Anatomy of an open source project"
+  },
+  "https://opensource.guide/how-to-contribute/#finding-a-project-to-contribute-to": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Finding a project to contribute to"
+  },
+  "https://opensource.guide/how-to-contribute/#a-checklist-before-you-contribute": {
+    "guide": "How to Contribute to Open Source",
+    "section": "Finding a project to contribute to",
+    "topic": "A checklist before you contribute"
+  },
+  "https://opensource.guide/how-to-contribute/#how-to-submit-a-contribution": {
+    "guide": "How to Contribute to Open Source",
+    "section": "How to submit a contribution"
+  },
+  "https://opensource.guide/how-to-contribute/#communicating-effectively": {
+    "guide": "How to Contribute to Open Source",
+    "section": "How to submit a contribution",
+    "topic": "Communicating effectively"
+  },
+  "https://opensource.guide/how-to-contribute/#gathering-context": {
+    "guide": "How to Contribute to Open Source",
+    "section": "How to submit a contribution",
+    "topic": "Gathering context"
+  },
+  "https://opensource.guide/how-to-contribute/#opening-an-issue": {
+    "guide": "How to Contribute to Open Source",
+    "section": "How to submit a contribution",
+    "topic": "Opening an issue"
+  },
+  "https://opensource.guide/how-to-contribute/#opening-a-pull-request": {
+    "guide": "How to Contribute to Open Source",
+    "section": "How to submit a contribution",
+    "topic": "Opening a pull request"
+  },
+  "https://opensource.guide/how-to-contribute/#what-happens-after-you-submit-your-contribution": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What happens after you submit your contribution"
+  },
+  "https://opensource.guide/how-to-contribute/#-you-dont-get-a-response": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What happens after you submit your contribution",
+    "topic": "😭 You don’t get a response"
+  },
+  "https://opensource.guide/how-to-contribute/#-someone-requests-changes-to-your-contribution": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What happens after you submit your contribution",
+    "topic": "🚧 Someone requests changes to your contribution"
+  },
+  "https://opensource.guide/how-to-contribute/#-your-contribution-doesnt-get-accepted": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What happens after you submit your contribution",
+    "topic": "👎 Your contribution doesn’t get accepted"
+  },
+  "https://opensource.guide/how-to-contribute/#-your-contribution-gets-accepted": {
+    "guide": "How to Contribute to Open Source",
+    "section": "What happens after you submit your contribution",
+    "topic": "🎉 Your contribution gets accepted"
+  },
+  "https://opensource.guide/how-to-contribute/#you-did-it-": {
+    "guide": "How to Contribute to Open Source",
+    "section": "You did it! 🎉"
+  },
+  "https://opensource.guide/leadership-and-governance/#understanding-governance-for-your-growing-project": {
+    "guide": "Leadership and Governance",
+    "section": "Understanding governance for your growing project"
+  },
+  "https://opensource.guide/leadership-and-governance/#what-are-examples-of-formal-roles-used-in-open-source-projects": {
+    "guide": "Leadership and Governance",
+    "section": "What are examples of formal roles used in open source projects?"
+  },
+  "https://opensource.guide/leadership-and-governance/#how-do-i-formalize-these-leadership-roles": {
+    "guide": "Leadership and Governance",
+    "section": "How do I formalize these leadership roles?"
+  },
+  "https://opensource.guide/leadership-and-governance/#when-should-i-give-someone-commit-access": {
+    "guide": "Leadership and Governance",
+    "section": "When should I give someone commit access?"
+  },
+  "https://opensource.guide/leadership-and-governance/#what-are-some-of-the-common-governance-structures-for-open-source-projects": {
+    "guide": "Leadership and Governance",
+    "section": "What are some of the common governance structures for open source projects?"
+  },
+  "https://opensource.guide/leadership-and-governance/#do-i-need-governance-docs-when-i-launch-my-project": {
+    "guide": "Leadership and Governance",
+    "section": "Do I need governance docs when I launch my project?"
+  },
+  "https://opensource.guide/leadership-and-governance/#what-happens-if-corporate-employees-start-submitting-contributions": {
+    "guide": "Leadership and Governance",
+    "section": "What happens if corporate employees start submitting contributions?"
+  },
+  "https://opensource.guide/leadership-and-governance/#do-i-need-a-legal-entity-to-support-my-project": {
+    "guide": "Leadership and Governance",
+    "section": "Do I need a legal entity to support my project?"
+  },
+  "https://opensource.guide/legal/#understanding-the-legal-implications-of-open-source": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Understanding the legal implications of open source"
+  },
+  "https://opensource.guide/legal/#why-do-people-care-so-much-about-the-legal-side-of-open-source": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Why do people care so much about the legal side of open source?"
+  },
+  "https://opensource.guide/legal/#are-public-github-projects-open-source": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Are public GitHub projects open source?"
+  },
+  "https://opensource.guide/legal/#just-give-me-the-tldr-on-what-i-need-to-protect-my-project": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Just give me the TL;DR on what I need to protect my project."
+  },
+  "https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Which open source license is appropriate for my project?"
+  },
+  "https://opensource.guide/legal/#what-if-i-want-to-change-the-license-of-my-project": {
+    "guide": "The Legal Side of Open Source",
+    "section": "What if I want to change the license of my project?"
+  },
+  "https://opensource.guide/legal/#does-my-project-need-an-additional-contributor-agreement": {
+    "guide": "The Legal Side of Open Source",
+    "section": "Does my project need an additional contributor agreement?"
+  },
+  "https://opensource.guide/legal/#what-does-my-companys-legal-team-need-to-know": {
+    "guide": "The Legal Side of Open Source",
+    "section": "What does my company’s legal team need to know?"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#tips-for-self-care-and-avoiding-burnout-as-a-maintainer": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Tips for Self-Care and Avoiding Burnout as a Maintainer:"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#identify-your-motivations-for-working-in-open-source": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Tips for Self-Care and Avoiding Burnout as a Maintainer:",
+    "topic": "Identify your motivations for working in open source"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#reflect-on-what-causes-you-to-get-out-of-balance-and-stressed-out": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Tips for Self-Care and Avoiding Burnout as a Maintainer:",
+    "topic": "Reflect on what causes you to get out of balance and stressed out"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#watch-out-for-signs-of-burnout": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Tips for Self-Care and Avoiding Burnout as a Maintainer:",
+    "topic": "Watch out for signs of burnout"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Tips for Self-Care and Avoiding Burnout as a Maintainer:",
+    "topic": "What would you need to continue sustaining yourself and your community?"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#additional-resources": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Additional Resources"
+  },
+  "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#contributors": {
+    "guide": "Maintaining Balance for Open Source Maintainers",
+    "section": "Contributors"
+  },
+  "https://opensource.guide/metrics/#why-measure-anything": {
+    "guide": "Open Source Metrics",
+    "section": "Why measure anything?"
+  },
+  "https://opensource.guide/metrics/#discovery": {
+    "guide": "Open Source Metrics",
+    "section": "Discovery"
+  },
+  "https://opensource.guide/metrics/#usage": {
+    "guide": "Open Source Metrics",
+    "section": "Usage"
+  },
+  "https://opensource.guide/metrics/#retention": {
+    "guide": "Open Source Metrics",
+    "section": "Retention"
+  },
+  "https://opensource.guide/metrics/#maintainer-activity": {
+    "guide": "Open Source Metrics",
+    "section": "Maintainer activity"
+  },
+  "https://opensource.guide/metrics/#use--to-learn-about-people": {
+    "guide": "Open Source Metrics",
+    "section": "Use 📊 to learn about people"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#ensure-all-privileged-contributors-have-enabled-multi-factor-authentication-mfa": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Ensure all privileged contributors have enabled Multi-Factor Authentication (MFA)"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#a-malicious-actor-who-manages-to-impersonate-a-privileged-contributor-to-your-project-will-cause-catastrophic-damages": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Ensure all privileged contributors have enabled Multi-Factor Authentication (MFA)",
+    "topic": "A malicious actor who manages to impersonate a privileged contributor to your project will cause catastrophic damages."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#secure-your-code-as-part-of-your-development-workflow": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Secure your code as part of your development workflow"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#security-vulnerabilities-in-your-code-are-cheaper-to-fix-when-detected-early-in-the-process-than-later-when-they-are-used-in-production": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Secure your code as part of your development workflow",
+    "topic": "Security vulnerabilities in your code are cheaper to fix when detected early in the process than later, when they are used in production."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#dont-share-your-secrets": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Don’t share your secrets"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#sensitive-data-such-as-api-keys-tokens-and-passwords-can-sometimes-accidentally-get-committed-to-your-repository": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Don’t share your secrets",
+    "topic": "Sensitive data, such as API keys, tokens, and passwords, can sometimes accidentally get committed to your repository."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#check-and-update-your-dependencies": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Check and update your dependencies"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#dependencies-in-your-project-can-have-vulnerabilities-that-compromise-the-security-of-your-project-manually-keeping-dependencies-up-to-date-can-be-a-time-consuming-task": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Check and update your dependencies",
+    "topic": "Dependencies in your project can have vulnerabilities that compromise the security of your project. Manually keeping dependencies up to date can be a time-consuming task."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#understand-and-manage-open-source-license-risks": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Understand and manage open source license risks"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#open-source-licenses-come-with-terms-and-ignoring-them-can-lead-to-legal-and-reputational-risks": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Understand and manage open source license risks",
+    "topic": "Open source licenses come with terms and ignoring them can lead to legal and reputational risks."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#avoid-unwanted-changes-with-protected-branches": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Avoid unwanted changes with protected branches"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#unrestricted-access-to-your-main-branches-can-lead-to-accidental-or-malicious-changes-that-may-introduce-vulnerabilities-or-disrupt-the-stability-of-your-project": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Avoid unwanted changes with protected branches",
+    "topic": "Unrestricted access to your main branches can lead to accidental or malicious changes that may introduce vulnerabilities or disrupt the stability of your project."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#make-it-easy-and-safe-to-report-security-issues": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Make it easy (and safe) to report security issues"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#its-a-good-practice-to-make-it-easy-for-your-users-to-report-bugs-but-the-big-question-is-when-this-bug-has-a-security-impact-how-can-they-safely-report-them-to-you-without-putting-a-target-on-you-for-malicious-hackers": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Make it easy (and safe) to report security issues",
+    "topic": "It’s a good practice to make it easy for your users to report bugs, but the big question is: when this bug has a security impact, how can they safely report them to you without putting a target on you for malicious hackers?"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#security-policy": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Make it easy (and safe) to report security issues",
+    "topic": "Security Policy"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#private-vulnerability-reporting": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Make it easy (and safe) to report security issues",
+    "topic": "Private Vulnerability Reporting"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#define-your-threat-model-to-help-users-and-researchers-understand-scope": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Make it easy (and safe) to report security issues",
+    "topic": "Define your threat model to help users and researchers understand scope"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#prepare-a-lightweight-incident-response-process": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Prepare a lightweight incident response process"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#having-a-basic-incident-response-plan-helps-you-stay-calm-and-act-efficiently-ensuring-the-safety-of-your-users-and-consumers": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Prepare a lightweight incident response process",
+    "topic": "Having a basic incident response plan helps you stay calm and act efficiently, ensuring the safety of your users and consumers."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#treat-security-as-a-team-effort": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Treat security as a team effort"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#security-isnt-a-solo-responsibility-it-works-best-when-shared-across-your-projects-community": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Treat security as a team effort",
+    "topic": "Security isn’t a solo responsibility. It works best when shared across your project’s community."
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#conclusion-a-few-steps-for-you-a-huge-improvement-for-your-users": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Conclusion: A few steps for you, a huge improvement for your users"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#contributors": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Contributors"
+  },
+  "https://opensource.guide/security-best-practices-for-your-project/#many-thanks-to-all-the-maintainers-who-shared-their-experiences-and-tips-with-us-for-this-guide": {
+    "guide": "Security Best Practices for your Project",
+    "section": "Contributors",
+    "topic": "Many thanks to all the maintainers who shared their experiences and tips with us for this guide!"
+  },
+  "https://opensource.guide/starting-a-project/#the-what-and-why-of-open-source": {
+    "guide": "Starting an Open Source Project",
+    "section": "The “what” and “why” of open source"
+  },
+  "https://opensource.guide/starting-a-project/#what-does-open-source-mean": {
+    "guide": "Starting an Open Source Project",
+    "section": "The “what” and “why” of open source",
+    "topic": "What does “open source” mean?"
+  },
+  "https://opensource.guide/starting-a-project/#why-do-people-open-source-their-work": {
+    "guide": "Starting an Open Source Project",
+    "section": "The “what” and “why” of open source",
+    "topic": "Why do people open source their work?"
+  },
+  "https://opensource.guide/starting-a-project/#does-open-source-mean-free-of-charge": {
+    "guide": "Starting an Open Source Project",
+    "section": "The “what” and “why” of open source",
+    "topic": "Does open source mean “free of charge”?"
+  },
+  "https://opensource.guide/starting-a-project/#should-i-launch-my-own-open-source-project": {
+    "guide": "Starting an Open Source Project",
+    "section": "Should I launch my own open source project?"
+  },
+  "https://opensource.guide/starting-a-project/#setting-your-goals": {
+    "guide": "Starting an Open Source Project",
+    "section": "Should I launch my own open source project?",
+    "topic": "Setting your goals"
+  },
+  "https://opensource.guide/starting-a-project/#contributing-to-other-projects": {
+    "guide": "Starting an Open Source Project",
+    "section": "Should I launch my own open source project?",
+    "topic": "Contributing to other projects"
+  },
+  "https://opensource.guide/starting-a-project/#launching-your-own-open-source-project": {
+    "guide": "Starting an Open Source Project",
+    "section": "Launching your own open source project"
+  },
+  "https://opensource.guide/starting-a-project/#choosing-a-license": {
+    "guide": "Starting an Open Source Project",
+    "section": "Launching your own open source project",
+    "topic": "Choosing a license"
+  },
+  "https://opensource.guide/starting-a-project/#writing-a-readme": {
+    "guide": "Starting an Open Source Project",
+    "section": "Launching your own open source project",
+    "topic": "Writing a README"
+  },
+  "https://opensource.guide/starting-a-project/#writing-your-contributing-guidelines": {
+    "guide": "Starting an Open Source Project",
+    "section": "Launching your own open source project",
+    "topic": "Writing your contributing guidelines"
+  },
+  "https://opensource.guide/starting-a-project/#establishing-a-code-of-conduct": {
+    "guide": "Starting an Open Source Project",
+    "section": "Launching your own open source project",
+    "topic": "Establishing a code of conduct"
+  },
+  "https://opensource.guide/starting-a-project/#naming-and-branding-your-project": {
+    "guide": "Starting an Open Source Project",
+    "section": "Naming and branding your project"
+  },
+  "https://opensource.guide/starting-a-project/#choosing-the-right-name": {
+    "guide": "Starting an Open Source Project",
+    "section": "Naming and branding your project",
+    "topic": "Choosing the right name"
+  },
+  "https://opensource.guide/starting-a-project/#avoiding-name-conflicts": {
+    "guide": "Starting an Open Source Project",
+    "section": "Naming and branding your project",
+    "topic": "Avoiding name conflicts"
+  },
+  "https://opensource.guide/starting-a-project/#how-you-write-and-code-affects-your-brand-too": {
+    "guide": "Starting an Open Source Project",
+    "section": "Naming and branding your project",
+    "topic": "How you write (and code) affects your brand, too!"
+  },
+  "https://opensource.guide/starting-a-project/#your-pre-launch-checklist": {
+    "guide": "Starting an Open Source Project",
+    "section": "Your pre-launch checklist"
+  },
+  "https://opensource.guide/starting-a-project/#you-did-it": {
+    "guide": "Starting an Open Source Project",
+    "section": "You did it!"
+  }
+}
