@@ -51,6 +51,7 @@ import {
   migrateStoredUnconfirmedCreationKeys,
   parseStoredUnconfirmedCreationRecords,
   partitionUnconfirmedCreationRecords,
+  removeSuccessfulUnconfirmedCreationMatches,
   serializeUnconfirmedCreationRecords,
   type UnconfirmedCreationRecord,
 } from "./lib/creation-outcome-guard";
@@ -538,19 +539,24 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       submissions.map((submission) => ({
         creationOutcomeKey: submission.creationOutcomeKey,
         retryItemKey: submission.retryItemKey,
+        allowRelaxedConsumption: submission.item.fromRetrySnapshot === true,
       })),
     );
     const matchingUnconfirmedRecords = unconfirmedRecordPartition.matching;
-    const remainingUnconfirmedRecords = unconfirmedRecordPartition.remaining;
 
     if (matchingUnconfirmedRecords.length > 0) {
       const matchingItemCount = matchingUnconfirmedRecords.length;
+      const hasTrackedEditedRetry = unconfirmedRecordPartition.matches.some(
+        (match) => match.kind === "relaxed" && match.consumeOnSuccess,
+      );
       const shouldRetry = await confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Previous creation outcome is unknown",
-        message: `${matchingItemCount} previous item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
+        message: `${matchingItemCount} previous item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.${
+          hasTrackedEditedRetry ? " Continue only if this is the edited retry of the item you checked." : ""
+        }`,
         primaryAction: {
-          title: "Retry After Checking",
+          title: hasTrackedEditedRetry ? "Retry Checked Item" : "Retry After Checking",
           style: Alert.ActionStyle.Default,
         },
         dismissAction: {
@@ -561,8 +567,6 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       if (!shouldRetry) {
         return;
       }
-      setUnconfirmedCreationRecords(remainingUnconfirmedRecords);
-      await persistUnconfirmedCreationRecords(remainingUnconfirmedRecords);
     }
 
     setIsSubmitting(true);
@@ -570,16 +574,21 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       const failures: CreationAttemptOutcome[] = [];
       const unknownOutcomes: CreationAttemptOutcome[] = [];
       const retryableOutcomes: CreationAttemptOutcome[] = [];
+      const successfulSubmissionIndexes = new Set<number>();
       let successCount = 0;
       let lastCreatedCalendarStart: Date | undefined;
 
-      for (const { item, parsed, recurrence, creationOutcomeKey, retryItemKey } of submissions) {
+      for (const [
+        submissionIndex,
+        { item, parsed, recurrence, creationOutcomeKey, retryItemKey },
+      ] of submissions.entries()) {
         try {
           if (values.targetType === "reminder") {
             await createAppleReminder(parsed, {
               preferredReminderCalendarIdentifier: values.reminderListId,
             });
             successCount += 1;
+            successfulSubmissionIndexes.add(submissionIndex);
             continue;
           }
 
@@ -588,6 +597,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
             recurrence,
           });
           successCount += 1;
+          successfulSubmissionIndexes.add(submissionIndex);
           lastCreatedCalendarStart = parsed.start;
           void result;
         } catch (error) {
@@ -606,6 +616,13 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           }
         }
       }
+
+      const remainingUnconfirmedRecords = removeSuccessfulUnconfirmedCreationMatches(
+        unconfirmedCreationRecords,
+        unconfirmedRecordPartition.matches,
+        successfulSubmissionIndexes,
+      );
+      const didResolveUnconfirmedRecords = remainingUnconfirmedRecords.length !== unconfirmedCreationRecords.length;
 
       let openCalendarFailedMessage: string | undefined;
       if (
@@ -645,6 +662,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           }`,
         });
         return;
+      }
+
+      if (didResolveUnconfirmedRecords) {
+        setUnconfirmedCreationRecords(remainingUnconfirmedRecords);
+        await persistUnconfirmedCreationRecords(remainingUnconfirmedRecords);
       }
 
       if (successCount === 0) {

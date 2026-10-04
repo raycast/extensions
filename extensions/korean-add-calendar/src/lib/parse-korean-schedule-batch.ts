@@ -4,6 +4,7 @@ export interface ParsedBatchItem {
   input: string;
   value: ParsedSchedule;
   inheritedDate: boolean;
+  fromRetrySnapshot?: boolean;
 }
 
 export interface ParsedBatchError {
@@ -136,6 +137,7 @@ export function parseKoreanScheduleBatchWithRetrySnapshot(
       return {
         ...snapshotItem,
         input: item.input,
+        fromRetrySnapshot: true,
         value: {
           ...snapshotItem.value,
           source: item.input,

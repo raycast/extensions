@@ -9,6 +9,7 @@ import {
   migrateStoredUnconfirmedCreationKeys,
   parseStoredUnconfirmedCreationRecords,
   partitionUnconfirmedCreationRecords,
+  removeSuccessfulUnconfirmedCreationMatches,
   serializeUnconfirmedCreationRecords,
   UNKNOWN_CREATION_OUTCOME_KEY,
 } from "../src/lib/creation-outcome-guard";
@@ -109,6 +110,7 @@ describe("unconfirmed creation records", () => {
     expect(laterCreationKey).not.toBe(originalCreationKey);
     expect(buildRetryItemKey("calendar", laterParsed)).toBe(buildRetryItemKey("calendar", originalParsed));
     expect(partition.matching.map((item) => item.id)).toEqual([record.id]);
+    expect(partition.matches[0]).toMatchObject({ kind: "relaxed", consumeOnSuccess: false });
     expect(partition.remaining).toEqual([record]);
   });
 
@@ -180,7 +182,41 @@ describe("unconfirmed creation records", () => {
     expect(editedKey).not.toBe(originalKey);
     expect(editedRetryItemKey).toBe(retryItemKey);
     expect(partition.matching.map((item) => item.id)).toEqual([record.id]);
+    expect(partition.matches[0]).toMatchObject({ kind: "relaxed", consumeOnSuccess: false });
     expect(partition.remaining).toEqual([record]);
+  });
+
+  it("consumes a tracked edited retry only after it is eligible to succeed", () => {
+    const originalKey = buildCreationOutcomeKey({
+      targetType: "calendar",
+      parsed,
+      recurrence: { frequency: "daily", end: { type: "count", count: 10 } },
+    });
+    const retryItemKey = buildRetryItemKey("calendar", parsed);
+    const record = createUnconfirmedCreationRecord(originalKey, retryItemKey);
+    const editedParsed = { ...parsed, location: "Meeting Room B" };
+
+    const partition = partitionUnconfirmedCreationRecords([record], [
+      {
+        creationOutcomeKey: buildCreationOutcomeKey({
+          targetType: "calendar",
+          parsed: editedParsed,
+          recurrence: { frequency: "daily", end: { type: "count", count: 5 } },
+        }),
+        retryItemKey: buildRetryItemKey("calendar", editedParsed),
+        allowRelaxedConsumption: true,
+      },
+    ]);
+
+    expect(partition.matches[0]).toMatchObject({
+      candidateIndex: 0,
+      record,
+      kind: "relaxed",
+      consumeOnSuccess: true,
+    });
+    expect(partition.remaining).toEqual([]);
+    expect(removeSuccessfulUnconfirmedCreationMatches([record], partition.matches, new Set())).toEqual([record]);
+    expect(removeSuccessfulUnconfirmedCreationMatches([record], partition.matches, new Set([0]))).toEqual([]);
   });
 
   it("does not let a different item clear the original warning through a shared retry key", () => {
@@ -209,7 +245,11 @@ describe("unconfirmed creation records", () => {
     expect(otherCandidate.creationOutcomeKey).not.toBe(originalKey);
     expect(otherCandidate.retryItemKey).toBe(retryItemKey);
     expect(otherPartition.matching).toEqual([record]);
+    expect(otherPartition.matches[0]).toMatchObject({ kind: "relaxed", consumeOnSuccess: false });
     expect(otherPartition.remaining).toEqual([record]);
+    expect(removeSuccessfulUnconfirmedCreationMatches([record], otherPartition.matches, new Set([0]))).toEqual([
+      record,
+    ]);
     expect(originalPartition.matching).toEqual([record]);
     expect(originalPartition.remaining).toEqual([]);
   });
@@ -231,7 +271,7 @@ describe("unconfirmed creation records", () => {
           },
         ],
       ),
-    ).toEqual({ matching: [], remaining: [record] });
+    ).toEqual({ matches: [], matching: [], remaining: [record] });
     expect(
       partitionUnconfirmedCreationRecords(
         [record],
@@ -242,7 +282,7 @@ describe("unconfirmed creation records", () => {
           },
         ],
       ),
-    ).toEqual({ matching: [], remaining: [record] });
+    ).toEqual({ matches: [], matching: [], remaining: [record] });
   });
 
   it("keeps identical unknown batch operations as separate records", () => {
@@ -274,6 +314,7 @@ describe("unconfirmed creation records", () => {
     );
 
     expect(partition.matching.map((item) => item.id)).toEqual([second.id]);
+    expect(partition.matches[0]).toMatchObject({ kind: "exact", consumeOnSuccess: true });
     expect(partition.remaining.map((item) => item.id)).toEqual([first.id]);
   });
 
@@ -290,6 +331,7 @@ describe("unconfirmed creation records", () => {
     );
 
     expect(partition.matching).toEqual([record]);
+    expect(partition.matches[0]).toMatchObject({ candidateIndex: 1, kind: "exact", consumeOnSuccess: true });
     expect(partition.remaining).toEqual([]);
   });
 

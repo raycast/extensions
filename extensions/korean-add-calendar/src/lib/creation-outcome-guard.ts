@@ -28,6 +28,14 @@ export type UnconfirmedCreationRecord = ExactUnconfirmedCreationRecord | Fallbac
 export interface CreationOutcomeCandidate {
   creationOutcomeKey: string;
   retryItemKey: string;
+  allowRelaxedConsumption?: boolean;
+}
+
+export interface UnconfirmedCreationMatch {
+  candidateIndex: number;
+  record: UnconfirmedCreationRecord;
+  kind: "exact" | "relaxed" | "fallback";
+  consumeOnSuccess: boolean;
 }
 
 export function buildCreationOutcomeKey({
@@ -120,17 +128,22 @@ export function createUnknownUnconfirmedCreationRecord(source: string): Unconfir
 export function partitionUnconfirmedCreationRecords(
   records: UnconfirmedCreationRecord[],
   candidates: CreationOutcomeCandidate[],
-): { matching: UnconfirmedCreationRecord[]; remaining: UnconfirmedCreationRecord[] } {
+): {
+  matches: UnconfirmedCreationMatch[];
+  matching: UnconfirmedCreationRecord[];
+  remaining: UnconfirmedCreationRecord[];
+} {
   const available = records.map(() => true);
   const consumed = records.map(() => false);
-  const matchingByCandidate: Array<UnconfirmedCreationRecord | undefined> = candidates.map(() => undefined);
+  const matchesByCandidate: Array<UnconfirmedCreationMatch | undefined> = candidates.map(() => undefined);
 
   const matchPass = (
     predicate: (record: UnconfirmedCreationRecord, candidate: CreationOutcomeCandidate) => boolean,
-    shouldConsume: boolean,
+    kind: UnconfirmedCreationMatch["kind"],
+    shouldConsume: boolean | ((candidate: CreationOutcomeCandidate) => boolean),
   ) => {
     for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex += 1) {
-      if (matchingByCandidate[candidateIndex]) {
+      if (matchesByCandidate[candidateIndex]) {
         continue;
       }
       const candidate = candidates[candidateIndex];
@@ -138,28 +151,62 @@ export function partitionUnconfirmedCreationRecords(
       if (matchedIndex < 0) {
         continue;
       }
+      const consumeOnSuccess = typeof shouldConsume === "function" ? shouldConsume(candidate) : shouldConsume;
       available[matchedIndex] = false;
-      consumed[matchedIndex] = shouldConsume;
-      matchingByCandidate[candidateIndex] = records[matchedIndex];
+      consumed[matchedIndex] = consumeOnSuccess;
+      matchesByCandidate[candidateIndex] = {
+        candidateIndex,
+        record: records[matchedIndex],
+        kind,
+        consumeOnSuccess,
+      };
     }
   };
 
-  matchPass((record, candidate) => {
-    return !record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
-  }, true);
-  matchPass((record, candidate) => {
-    return record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
-  }, true);
+  matchPass(
+    (record, candidate) => {
+      return !record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
+    },
+    "exact",
+    true,
+  );
+  matchPass(
+    (record, candidate) => {
+      return record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
+    },
+    "fallback",
+    true,
+  );
   // A relaxed match may be a different item with edited location or recurrence settings.
-  matchPass((record, candidate) => {
-    return !record.matchAny && record.retryItemKey === candidate.retryItemKey;
-  }, false);
-  matchPass((record) => record.matchAny, true);
+  matchPass(
+    (record, candidate) => {
+      return !record.matchAny && record.retryItemKey === candidate.retryItemKey;
+    },
+    "relaxed",
+    (candidate) => candidate.allowRelaxedConsumption === true,
+  );
+  matchPass((record) => record.matchAny, "fallback", true);
+
+  const matches = matchesByCandidate.filter((match): match is UnconfirmedCreationMatch => match !== undefined);
 
   return {
-    matching: matchingByCandidate.filter((record): record is UnconfirmedCreationRecord => record !== undefined),
+    matches,
+    matching: matches.map((match) => match.record),
     remaining: records.filter((_, index) => !consumed[index]),
   };
+}
+
+export function removeSuccessfulUnconfirmedCreationMatches(
+  records: UnconfirmedCreationRecord[],
+  matches: UnconfirmedCreationMatch[],
+  successfulCandidateIndexes: ReadonlySet<number>,
+): UnconfirmedCreationRecord[] {
+  const resolvedRecordIds = new Set(
+    matches
+      .filter((match) => match.consumeOnSuccess && successfulCandidateIndexes.has(match.candidateIndex))
+      .map((match) => match.record.id),
+  );
+  return records.filter((record) => !resolvedRecordIds.has(record.id));
 }
 
 export function mergeUnconfirmedCreationRecords(records: UnconfirmedCreationRecord[]): UnconfirmedCreationRecord[] {

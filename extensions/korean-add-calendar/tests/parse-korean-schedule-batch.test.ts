@@ -225,6 +225,8 @@ describe("parseKoreanScheduleBatch", () => {
 
     expect(reparsed.items[0]?.value.start).toEqual(initial.items[0]?.value.start);
     expect(reparsed.items[0]?.value.recurrence).toEqual({ frequency: "daily" });
+    expect(reparsed.items[0]?.fromRetrySnapshot).toBe(true);
     expect(reparsed.items[1]?.value.title).toBe("고객 통화");
+    expect(reparsed.items[1]?.fromRetrySnapshot).toBeUndefined();
   });
 });
