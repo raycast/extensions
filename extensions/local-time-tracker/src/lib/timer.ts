@@ -1,5 +1,5 @@
 import { LaunchType, launchCommand } from "@raycast/api";
-import { getDurationSeconds, getSafeStopTime } from "./duration";
+import { getDurationSeconds, isClockBeforeStart } from "./duration";
 import { clearActiveTimerIfMatches, getActiveTimer, getWorkLogs, saveActiveTimer, upsertWorkLog } from "./storage";
 import type { ActiveTimer, WorkLog } from "./types";
 
@@ -34,7 +34,9 @@ export async function startTimer(projectId: string, description: string): Promis
 }
 
 export type StopTimerResult =
-  { status: "none" } | { status: "stopped" | "recovered"; workLog: WorkLog; durationSeconds: number };
+  | { status: "none" }
+  | { status: "clock-rollback" }
+  | { status: "stopped" | "recovered"; workLog: WorkLog; durationSeconds: number };
 
 export async function stopTimer(): Promise<StopTimerResult> {
   const activeTimer = await getActiveTimer();
@@ -55,9 +57,13 @@ export async function stopTimer(): Promise<StopTimerResult> {
     };
   }
 
-  // A system clock rollback must not leave the active timer impossible to stop.
-  // Clamp the end time to the start time and record a zero-length work log.
-  const stoppedAt = getSafeStopTime(activeTimer.startedAt, new Date());
+  const now = new Date();
+  if (isClockBeforeStart(activeTimer.startedAt, now)) {
+    // Keep the timer so a clock rollback cannot erase already tracked work.
+    return { status: "clock-rollback" };
+  }
+
+  const stoppedAt = now.toISOString();
   const durationSeconds = getDurationSeconds(activeTimer.startedAt, stoppedAt);
   const workLog: WorkLog = {
     id: activeTimer.id,

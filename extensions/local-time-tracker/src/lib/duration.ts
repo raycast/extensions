@@ -9,10 +9,8 @@ export function getDurationSeconds(startedAt: string | Date, endedAt: string | D
   return Math.floor((endMs - startMs) / 1000);
 }
 
-export function getSafeStopTime(startedAt: string, stoppedAt: Date): string {
-  const startedAtMs = toMilliseconds(startedAt);
-  const stoppedAtMs = toMilliseconds(stoppedAt);
-  return new Date(Math.max(startedAtMs, stoppedAtMs)).toISOString();
+export function isClockBeforeStart(startedAt: string, now: Date): boolean {
+  return toMilliseconds(now) < toMilliseconds(startedAt);
 }
 
 export function formatDuration(seconds: number): string {

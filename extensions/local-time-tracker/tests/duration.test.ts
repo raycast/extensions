@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatDuration, getDurationSeconds, getSafeStopTime } from "../src/lib/duration";
+import { formatDuration, getDurationSeconds, isClockBeforeStart } from "../src/lib/duration";
 
 test("calculates duration from timestamps", () => {
   assert.equal(getDurationSeconds("2026-09-23T00:00:00.000Z", "2026-09-23T01:03:00.000Z"), 3780);
@@ -17,17 +17,13 @@ test("rejects negative duration", () => {
   assert.throws(() => getDurationSeconds("2026-09-23T02:00:00.000Z", "2026-09-23T01:00:00.000Z"));
 });
 
-test("clamps a stop time to the timer start after a clock rollback", () => {
-  const startedAt = "2026-09-23T02:00:00.000Z";
-  const stoppedAt = getSafeStopTime(startedAt, new Date("2026-09-23T01:00:00.000Z"));
-
-  assert.equal(stoppedAt, startedAt);
-  assert.equal(getDurationSeconds(startedAt, stoppedAt), 0);
+test("detects a clock rollback before the timer start", () => {
+  assert.equal(isClockBeforeStart("2026-09-23T02:00:00.000Z", new Date("2026-09-23T01:00:00.000Z")), true);
 });
 
-test("keeps the current stop time when the clock has not moved backward", () => {
-  assert.equal(
-    getSafeStopTime("2026-09-23T01:00:00.000Z", new Date("2026-09-23T02:00:00.000Z")),
-    "2026-09-23T02:00:00.000Z",
-  );
+test("allows stopping when now equals or follows the timer start", () => {
+  const startedAt = "2026-09-23T01:00:00.000Z";
+
+  assert.equal(isClockBeforeStart(startedAt, new Date("2026-09-23T02:00:00.000Z")), false);
+  assert.equal(isClockBeforeStart(startedAt, new Date(startedAt)), false);
 });

@@ -83,15 +83,17 @@ export default function StartWorkCommand() {
   if (activeTimer) {
     const project = findProject(projects, activeTimer.projectId);
     let elapsed = "-";
+    let clockRolledBack = false;
     try {
       elapsed = formatDuration(getDurationSeconds(activeTimer.startedAt, new Date()));
     } catch {
-      // The metadata below still exposes the invalid start time for recovery.
+      clockRolledBack = true;
+      elapsed = "Clock changed";
     }
 
     return (
       <Detail
-        markdown={`# Timer Already Running\n\n**${project?.name ?? "Unknown Project"}**${activeTimer.description ? `\n\n${activeTimer.description}` : ""}`}
+        markdown={`# Timer Already Running\n\n**${project?.name ?? "Unknown Project"}**${activeTimer.description ? `\n\n${activeTimer.description}` : ""}${clockRolledBack ? "\n\nThe system clock is earlier than this timer's start. The timer is preserved; correct the clock before stopping it." : ""}`}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Elapsed" text={elapsed} />
@@ -108,10 +110,17 @@ export default function StartWorkCommand() {
                   const result = await stopTimer();
                   if (result.status === "none") {
                     await showHUD("No active timer");
+                    setActiveTimer(null);
+                  } else if (result.status === "clock-rollback") {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Clock changed",
+                      message: "The timer is still running. Correct your Mac clock, then stop it again.",
+                    });
                   } else {
                     await showHUD(`Stopped: ${formatDuration(result.durationSeconds)}`);
+                    setActiveTimer(null);
                   }
-                  setActiveTimer(null);
                 } catch (error) {
                   await showFailure("Failed to stop timer", error);
                 }

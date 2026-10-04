@@ -1,4 +1,4 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, showHUD } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, Toast, launchCommand, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
@@ -33,7 +33,7 @@ export default function MenuBarCommand() {
     try {
       elapsed = formatDuration(getDurationSeconds(activeTimer.startedAt, new Date()));
     } catch {
-      elapsed = "Invalid";
+      elapsed = "Clock changed";
     }
   }
 
@@ -42,10 +42,17 @@ export default function MenuBarCommand() {
       const result = await stopTimer();
       if (result.status === "none") {
         await showHUD("No active timer");
+        setActiveTimer(null);
+      } else if (result.status === "clock-rollback") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Clock changed",
+          message: "The timer is still running. Correct your Mac clock, then stop it again.",
+        });
       } else {
         await showHUD(`Stopped: ${formatDuration(result.durationSeconds)}`);
+        setActiveTimer(null);
       }
-      setActiveTimer(null);
     } catch (error) {
       await showFailure("Failed to stop timer", error);
     }
