@@ -76,6 +76,24 @@ interface CreationAttemptOutcome {
   retryItemKey: string;
 }
 
+function buildRetrySnapshotForOutcomes(
+  outcomes: CreationAttemptOutcome[],
+  records: UnconfirmedCreationRecord[],
+  updatedRecordIds?: ReadonlyMap<number, string>,
+): BatchRetrySnapshot {
+  const activeRecordIds = new Set(records.map((record) => record.id));
+  return buildBatchRetrySnapshot(
+    outcomes.map((outcome) => {
+      const unconfirmedRecordId = updatedRecordIds?.get(outcome.submissionIndex) ?? outcome.item.unconfirmedRecordId;
+      return {
+        ...outcome.item,
+        unconfirmedRecordId:
+          unconfirmedRecordId && activeRecordIds.has(unconfirmedRecordId) ? unconfirmedRecordId : undefined,
+      };
+    }),
+  );
+}
+
 const CALENDAR_ID_STORAGE_KEY = "selectedCalendarId";
 const REMINDER_LIST_ID_STORAGE_KEY = "selectedReminderListId";
 const TARGET_TYPE_STORAGE_KEY = "selectedSubmitTarget";
@@ -539,7 +557,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       submissions.map((submission) => ({
         creationOutcomeKey: submission.creationOutcomeKey,
         retryItemKey: submission.retryItemKey,
-        allowRelaxedConsumption: submission.item.fromRetrySnapshot === true,
+        unconfirmedRecordId: submission.item.unconfirmedRecordId,
       })),
     );
     const matchingUnconfirmedRecords = unconfirmedRecordPartition.matching;
@@ -640,16 +658,20 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       }
 
       if (unknownOutcomes.length > 0) {
-        const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
-        setRetrySnapshot(nextRetrySnapshot);
-        setSentence(nextRetrySnapshot.sentence);
-        const nextUnconfirmedRecords = mergeUnknownUnconfirmedCreationRecords(
+        const unknownMerge = mergeUnknownUnconfirmedCreationRecords(
           remainingUnconfirmedRecords,
           unconfirmedRecordPartition.matches,
           unknownOutcomes,
         );
-        setUnconfirmedCreationRecords(nextUnconfirmedRecords);
-        await persistUnconfirmedCreationRecords(nextUnconfirmedRecords);
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(
+          retryableOutcomes,
+          unknownMerge.records,
+          unknownMerge.recordIdsBySubmissionIndex,
+        );
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
+        setUnconfirmedCreationRecords(unknownMerge.records);
+        await persistUnconfirmedCreationRecords(unknownMerge.records);
         await showToast({
           style: Toast.Style.Failure,
           title:
@@ -669,7 +691,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       }
 
       if (successCount === 0) {
-        const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(retryableOutcomes, remainingUnconfirmedRecords);
         setRetrySnapshot(nextRetrySnapshot);
         setSentence(nextRetrySnapshot.sentence);
         await showToast({
@@ -686,7 +708,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           title: `Partial success (${successCount} succeeded, ${failures.length} failed)`,
           message: failures[0].message,
         });
-        const nextRetrySnapshot = buildBatchRetrySnapshot(failures.map((failure) => failure.item));
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(failures, remainingUnconfirmedRecords);
         setRetrySnapshot(nextRetrySnapshot);
         setSentence(nextRetrySnapshot.sentence);
       } else {

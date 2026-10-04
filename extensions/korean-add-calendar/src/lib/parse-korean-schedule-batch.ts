@@ -4,7 +4,7 @@ export interface ParsedBatchItem {
   input: string;
   value: ParsedSchedule;
   inheritedDate: boolean;
-  fromRetrySnapshot?: boolean;
+  unconfirmedRecordId?: string;
 }
 
 export interface ParsedBatchError {
@@ -137,7 +137,6 @@ export function parseKoreanScheduleBatchWithRetrySnapshot(
       return {
         ...snapshotItem,
         input: item.input,
-        fromRetrySnapshot: true,
         value: {
           ...snapshotItem.value,
           source: item.input,
@@ -232,6 +231,7 @@ export function buildBatchRetrySnapshot(items: ParsedBatchItem[]): BatchRetrySna
         source: input,
       },
       inheritedDate: false,
+      unconfirmedRecordId: item.unconfirmedRecordId,
     };
   });
 

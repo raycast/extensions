@@ -28,7 +28,7 @@ export type UnconfirmedCreationRecord = ExactUnconfirmedCreationRecord | Fallbac
 export interface CreationOutcomeCandidate {
   creationOutcomeKey: string;
   retryItemKey: string;
-  allowRelaxedConsumption?: boolean;
+  unconfirmedRecordId?: string;
 }
 
 export interface UnconfirmedCreationMatch {
@@ -40,6 +40,11 @@ export interface UnconfirmedCreationMatch {
 
 interface UnknownCreationCandidate extends CreationOutcomeCandidate {
   submissionIndex: number;
+}
+
+export interface UnknownUnconfirmedCreationMerge {
+  records: UnconfirmedCreationRecord[];
+  recordIdsBySubmissionIndex: ReadonlyMap<number, string>;
 }
 
 export function buildCreationOutcomeKey({
@@ -169,6 +174,17 @@ export function partitionUnconfirmedCreationRecords(
 
   matchPass(
     (record, candidate) => {
+      return (
+        !record.matchAny &&
+        candidate.unconfirmedRecordId === record.id &&
+        record.creationOutcomeKey === candidate.creationOutcomeKey
+      );
+    },
+    "exact",
+    true,
+  );
+  matchPass(
+    (record, candidate) => {
       return !record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
     },
     "exact",
@@ -181,13 +197,24 @@ export function partitionUnconfirmedCreationRecords(
     "fallback",
     true,
   );
-  // A relaxed match may be a different item with edited location or recurrence settings.
+  matchPass(
+    (record, candidate) => {
+      return (
+        !record.matchAny &&
+        candidate.unconfirmedRecordId === record.id &&
+        record.retryItemKey === candidate.retryItemKey
+      );
+    },
+    "relaxed",
+    true,
+  );
+  // An untracked relaxed match warns about a possible duplicate but cannot resolve the record.
   matchPass(
     (record, candidate) => {
       return !record.matchAny && record.retryItemKey === candidate.retryItemKey;
     },
     "relaxed",
-    (candidate) => candidate.allowRelaxedConsumption === true,
+    false,
   );
   matchPass((record) => record.matchAny, "fallback", true);
 
@@ -225,23 +252,30 @@ export function mergeUnknownUnconfirmedCreationRecords(
   records: UnconfirmedCreationRecord[],
   matches: UnconfirmedCreationMatch[],
   unknownCandidates: UnknownCreationCandidate[],
-): UnconfirmedCreationRecord[] {
+): UnknownUnconfirmedCreationMerge {
   const matchesByCandidateIndex = new Map(matches.map((match) => [match.candidateIndex, match]));
+  const recordIdsBySubmissionIndex = new Map<number, string>();
   const unknownRecords = unknownCandidates.map((candidate) => {
     const match = matchesByCandidateIndex.get(candidate.submissionIndex);
-    if (!match?.consumeOnSuccess) {
-      return createUnconfirmedCreationRecord(candidate.creationOutcomeKey, candidate.retryItemKey);
-    }
-
-    return {
-      id: match.record.id,
-      creationOutcomeKey: candidate.creationOutcomeKey,
-      retryItemKey: candidate.retryItemKey,
-      matchAny: false as const,
-    };
+    const canRetargetMatch =
+      match?.consumeOnSuccess === true &&
+      (!match.record.matchAny || match.record.creationOutcomeKey === candidate.creationOutcomeKey);
+    const record = canRetargetMatch
+      ? {
+          id: match.record.id,
+          creationOutcomeKey: candidate.creationOutcomeKey,
+          retryItemKey: candidate.retryItemKey,
+          matchAny: false as const,
+        }
+      : createUnconfirmedCreationRecord(candidate.creationOutcomeKey, candidate.retryItemKey);
+    recordIdsBySubmissionIndex.set(candidate.submissionIndex, record.id);
+    return record;
   });
 
-  return mergeUnconfirmedCreationRecords([...records, ...unknownRecords]);
+  return {
+    records: mergeUnconfirmedCreationRecords([...records, ...unknownRecords]),
+    recordIdsBySubmissionIndex,
+  };
 }
 
 export function mergeLoadedUnconfirmedCreationRecords(

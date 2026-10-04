@@ -193,6 +193,26 @@ describe("parseKoreanScheduleBatch", () => {
     expect(snapshot.sentence).toContain("2026년 2월 19일 17:00부터 18:00까지 통화");
   });
 
+  it("preserves warning provenance only for the tagged retry item", () => {
+    const initial = parseKoreanScheduleBatch("내일 오후 3시 회의, 모레 오후 5시 통화", { now: baseNow });
+    const first = initial.items[0];
+    const second = initial.items[1];
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    if (!first || !second) {
+      throw new Error("Expected two parsed items");
+    }
+
+    const unconfirmedRecordId = "a".repeat(64);
+    const snapshot = buildBatchRetrySnapshot([{ ...first, unconfirmedRecordId }, second]);
+    const reparsed = parseKoreanScheduleBatchWithRetrySnapshot(snapshot.sentence, snapshot, {
+      now: new Date(2026, 1, 18, 0, 1, 0, 0),
+    });
+
+    expect(reparsed.items[0]?.unconfirmedRecordId).toBe(unconfirmedRecordId);
+    expect(reparsed.items[1]?.unconfirmedRecordId).toBeUndefined();
+  });
+
   it("preserves deadline intent and location in a retry input", () => {
     const initial = parseKoreanScheduleBatch("3일 안에 보고서 제출 장소: 사무실", { now: baseNow });
     const failedItem = initial.items[0];
@@ -225,8 +245,6 @@ describe("parseKoreanScheduleBatch", () => {
 
     expect(reparsed.items[0]?.value.start).toEqual(initial.items[0]?.value.start);
     expect(reparsed.items[0]?.value.recurrence).toEqual({ frequency: "daily" });
-    expect(reparsed.items[0]?.fromRetrySnapshot).toBe(true);
     expect(reparsed.items[1]?.value.title).toBe("고객 통화");
-    expect(reparsed.items[1]?.fromRetrySnapshot).toBeUndefined();
   });
 });
