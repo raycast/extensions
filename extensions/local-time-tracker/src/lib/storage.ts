@@ -15,11 +15,6 @@ const WORK_LOG_KEY_PREFIX = "workLog:";
 
 export const SCHEMA_VERSION = 1;
 
-const DEFAULT_PROJECT_CATEGORIES: ProjectCategory[] = [
-  { id: "client", name: "Client", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
-  { id: "internal", name: "Internal", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
-];
-
 export class StorageDataError extends Error {
   constructor(message: string) {
     super(message);
@@ -52,7 +47,7 @@ export async function saveProjects(projects: Project[]): Promise<void> {
 export async function getProjectCategories(): Promise<ProjectCategory[]> {
   await initializeStorage();
   const rawValue = await LocalStorage.getItem<string>(STORAGE_KEYS.projectCategories);
-  if (rawValue === undefined) return DEFAULT_PROJECT_CATEGORIES.map((category) => ({ ...category }));
+  if (rawValue === undefined) return [];
   return readArray(STORAGE_KEYS.projectCategories, isProjectCategory, "project categories");
 }
 
