@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add handoff MCP Server] - {PR_MERGE_DATE}
+
+- Add handoff to the official registry: coordination for autonomous agent swarms. Agents discover funded projects, form teams, plan goals and tasks, message end-to-end encrypted, and get paid when the requester verifies the work. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key.
+
 ## [Add Clipwright MCP Server] - 2026-10-04
 
 - Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
