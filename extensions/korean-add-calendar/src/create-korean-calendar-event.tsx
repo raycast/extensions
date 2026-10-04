@@ -37,15 +37,21 @@ import {
   firstBatchParseResult,
   MAX_BATCH_ITEMS,
   parseKoreanScheduleBatchWithRetrySnapshot,
-  ParsedBatchError,
   ParsedBatchItem,
 } from "./lib/parse-korean-schedule-batch";
 import { ParsedRecurrence, ParsedSchedule } from "./lib/parse-korean-schedule";
 import {
   buildCreationOutcomeKey,
-  partitionUnconfirmedCreationKeys,
-  parseStoredUnconfirmedCreationKeys,
-  UNKNOWN_CREATION_OUTCOME_KEY,
+  buildRetryItemKey,
+  createUnconfirmedCreationRecord,
+  createUnknownUnconfirmedCreationRecord,
+  mergeLoadedUnconfirmedCreationRecords,
+  mergeUnconfirmedCreationRecords,
+  migrateStoredUnconfirmedCreationKeys,
+  parseStoredUnconfirmedCreationRecords,
+  partitionUnconfirmedCreationRecords,
+  serializeUnconfirmedCreationRecords,
+  type UnconfirmedCreationRecord,
 } from "./lib/creation-outcome-guard";
 
 type SubmitTarget = "calendar" | "reminder";
@@ -61,13 +67,22 @@ interface FormValues {
   recurrenceUntil?: Date | null;
 }
 
+interface CreationAttemptOutcome {
+  item: ParsedBatchItem;
+  message: string;
+  creationOutcomeKey: string;
+  retryItemKey: string;
+}
+
 const CALENDAR_ID_STORAGE_KEY = "selectedCalendarId";
 const REMINDER_LIST_ID_STORAGE_KEY = "selectedReminderListId";
 const TARGET_TYPE_STORAGE_KEY = "selectedSubmitTarget";
 const RECURRENCE_END_TYPE_STORAGE_KEY = "recurrenceEndType";
 const RECURRENCE_COUNT_STORAGE_KEY = "recurrenceCount";
 const RECURRENCE_UNTIL_STORAGE_KEY = "recurrenceUntilIso";
-const UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeys";
+const UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY = "unconfirmedCreationRecordsV1";
+const V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeysV2";
+const LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeys";
 const KOREAN_INPUT_EXAMPLE = "다음주 화요일 오후 3시 반에 강남에서 팀 미팅";
 
 function persistPreference(key: string, value?: string): void {
@@ -81,12 +96,14 @@ function persistPreference(key: string, value?: string): void {
   );
 }
 
-async function persistUnconfirmedCreationKeys(keys: string[]): Promise<void> {
-  const operation = keys.length
-    ? LocalStorage.setItem(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY, JSON.stringify(keys))
-    : LocalStorage.removeItem(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+async function persistUnconfirmedCreationRecords(records: UnconfirmedCreationRecord[]): Promise<void> {
+  const operation = records.length
+    ? LocalStorage.setItem(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY, serializeUnconfirmedCreationRecords(records))
+    : LocalStorage.removeItem(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY);
   try {
     await operation;
+    await LocalStorage.removeItem(V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+    await LocalStorage.removeItem(LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -119,7 +136,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
   const [recurrenceCount, setRecurrenceCount] = useState("10");
   const [recurrenceUntil, setRecurrenceUntil] = useState<Date | null>(defaultRecurrenceUntil());
   const [retrySnapshot, setRetrySnapshot] = useState<BatchRetrySnapshot | undefined>();
-  const [unconfirmedCreationKeys, setUnconfirmedCreationKeys] = useState<string[]>([]);
+  const [unconfirmedCreationRecords, setUnconfirmedCreationRecords] = useState<UnconfirmedCreationRecord[]>([]);
   const submissionInProgress = useRef(false);
 
   const parsedBatch = useMemo(() => {
@@ -299,12 +316,25 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
     }
   }, []);
 
-  const loadUnconfirmedCreationKeys = useCallback(async () => {
+  const loadUnconfirmedCreationRecords = useCallback(async () => {
     try {
-      const cachedValue = await LocalStorage.getItem<string>(UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
-      setUnconfirmedCreationKeys(parseStoredUnconfirmedCreationKeys(cachedValue));
+      const [cachedValue, v2Value, legacyValue] = await Promise.all([
+        LocalStorage.getItem<string>(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY),
+        LocalStorage.getItem<string>(V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY),
+        LocalStorage.getItem<string>(LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY),
+      ]);
+      const currentRecords = parseStoredUnconfirmedCreationRecords(cachedValue);
+      const migratedRecords = [
+        ...migrateStoredUnconfirmedCreationKeys(v2Value, "v2"),
+        ...migrateStoredUnconfirmedCreationKeys(legacyValue, "legacy"),
+      ];
+      const records = mergeLoadedUnconfirmedCreationRecords(currentRecords, migratedRecords);
+      setUnconfirmedCreationRecords(records);
+      if (v2Value !== undefined || legacyValue !== undefined) {
+        await persistUnconfirmedCreationRecords(records);
+      }
     } catch (error) {
-      setUnconfirmedCreationKeys([UNKNOWN_CREATION_OUTCOME_KEY]);
+      setUnconfirmedCreationRecords([createUnknownUnconfirmedCreationRecord("storage-read-error")]);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not verify the previous creation outcome",
@@ -319,7 +349,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
     let isActive = true;
     void (async () => {
       try {
-        await loadUnconfirmedCreationKeys();
+        await loadUnconfirmedCreationRecords();
         await loadPreferences();
       } catch (error) {
         await showToast({
@@ -337,7 +367,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
     return () => {
       isActive = false;
     };
-  }, [loadPreferences, loadUnconfirmedCreationKeys]);
+  }, [loadPreferences, loadUnconfirmedCreationRecords]);
 
   useEffect(() => {
     if (!hasLoadedPreferences) {
@@ -498,23 +528,26 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       creationOutcomeKey: buildCreationOutcomeKey({
         targetType: values.targetType,
         parsed: prepared.parsed,
+        recurrence: prepared.recurrence,
       }),
+      retryItemKey: buildRetryItemKey(values.targetType, prepared.parsed),
     }));
-    const unconfirmedKeyPartition = partitionUnconfirmedCreationKeys(
-      unconfirmedCreationKeys,
-      submissions.map((submission) => submission.creationOutcomeKey),
+    const unconfirmedRecordPartition = partitionUnconfirmedCreationRecords(
+      unconfirmedCreationRecords,
+      submissions.map((submission) => ({
+        creationOutcomeKey: submission.creationOutcomeKey,
+        retryItemKey: submission.retryItemKey,
+      })),
     );
-    const matchingUnconfirmedKeys = unconfirmedKeyPartition.matching;
-    const remainingUnconfirmedKeys = unconfirmedKeyPartition.remaining;
+    const matchingUnconfirmedRecords = unconfirmedRecordPartition.matching;
+    const remainingUnconfirmedRecords = unconfirmedRecordPartition.remaining;
 
-    if (matchingUnconfirmedKeys.length > 0) {
-      const matchingItemCount = matchingUnconfirmedKeys.includes(UNKNOWN_CREATION_OUTCOME_KEY)
-        ? 1
-        : matchingUnconfirmedKeys.length;
+    if (matchingUnconfirmedRecords.length > 0) {
+      const matchingItemCount = matchingUnconfirmedRecords.length;
       const shouldRetry = await confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Previous creation outcome is unknown",
-        message: `${matchingItemCount} matching item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
+        message: `${matchingItemCount} previous item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.`,
         primaryAction: {
           title: "Retry After Checking",
           style: Alert.ActionStyle.Default,
@@ -527,19 +560,19 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       if (!shouldRetry) {
         return;
       }
-      setUnconfirmedCreationKeys(remainingUnconfirmedKeys);
-      await persistUnconfirmedCreationKeys(remainingUnconfirmedKeys);
+      setUnconfirmedCreationRecords(remainingUnconfirmedRecords);
+      await persistUnconfirmedCreationRecords(remainingUnconfirmedRecords);
     }
 
     setIsSubmitting(true);
     try {
-      const failures: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
-      const unknownOutcomes: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
-      const retryableOutcomes: Array<{ item: ParsedBatchItem; message: string; creationOutcomeKey: string }> = [];
+      const failures: CreationAttemptOutcome[] = [];
+      const unknownOutcomes: CreationAttemptOutcome[] = [];
+      const retryableOutcomes: CreationAttemptOutcome[] = [];
       let successCount = 0;
       let lastCreatedCalendarStart: Date | undefined;
 
-      for (const { item, parsed, recurrence, creationOutcomeKey } of submissions) {
+      for (const { item, parsed, recurrence, creationOutcomeKey, retryItemKey } of submissions) {
         try {
           if (values.targetType === "reminder") {
             await createAppleReminder(parsed, {
@@ -561,6 +594,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           const outcome = {
             item,
             creationOutcomeKey,
+            retryItemKey,
             message: `${prefix}${error instanceof Error ? error.message : String(error)}`,
           };
           retryableOutcomes.push(outcome);
@@ -590,11 +624,15 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
         setRetrySnapshot(nextRetrySnapshot);
         setSentence(nextRetrySnapshot.sentence);
-        const nextUnconfirmedKeys = [
-          ...new Set([...remainingUnconfirmedKeys, ...unknownOutcomes.map((outcome) => outcome.creationOutcomeKey)]),
-        ];
-        setUnconfirmedCreationKeys(nextUnconfirmedKeys);
-        await persistUnconfirmedCreationKeys(nextUnconfirmedKeys);
+        const newUnconfirmedRecords = unknownOutcomes.map((outcome) =>
+          createUnconfirmedCreationRecord(outcome.creationOutcomeKey, outcome.retryItemKey),
+        );
+        const nextUnconfirmedRecords = mergeUnconfirmedCreationRecords([
+          ...remainingUnconfirmedRecords,
+          ...newUnconfirmedRecords,
+        ]);
+        setUnconfirmedCreationRecords(nextUnconfirmedRecords);
+        await persistUnconfirmedCreationRecords(nextUnconfirmedRecords);
         await showToast({
           style: Toast.Style.Failure,
           title:
@@ -668,6 +706,40 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
   const parsedCount = parsedBatch.items.length;
   const isRecurringPreview = hasRecurringItems;
   const shouldShowRecurrenceOptions = targetType === "calendar" && isRecurringPreview;
+  const sentenceError = buildSentenceError({
+    sentence,
+    parsedBatch,
+    parseResult,
+    batchIntent,
+  });
+  const targetTypeError =
+    targetType === "reminder" && isRecurringPreview ? "Recurring schedules require Apple Calendar." : undefined;
+  const calendarSelectionError =
+    targetType === "calendar" && hasLoadedCalendars && !isLoadingCalendars
+      ? (calendarLoadError ??
+        (!calendarId
+          ? calendars.length > 0
+            ? "Select a calendar."
+            : "No writable calendars are available."
+          : undefined))
+      : undefined;
+  const reminderSelectionError =
+    targetType === "reminder" && hasLoadedReminderLists && !isLoadingReminderLists
+      ? (reminderLoadError ??
+        (!reminderListId
+          ? reminderLists.length > 0
+            ? "Select a reminder list."
+            : "No writable reminder lists are available."
+          : undefined))
+      : undefined;
+  const recurrenceValidationResult = shouldShowRecurrenceOptions
+    ? prepareCalendarBatchForSubmit(parsedBatch.items, {
+        recurrenceEndType,
+        recurrenceCount,
+        recurrenceUntil,
+      })
+    : undefined;
+  const recurrenceError = recurrenceValidationResult instanceof Error ? recurrenceValidationResult.message : undefined;
 
   const handleSentenceChange = useCallback((value: string) => {
     setSentence(value);
@@ -723,18 +795,16 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         placeholder={`e.g. ${KOREAN_INPUT_EXAMPLE}`}
         info={`Parses Korean natural language, up to ${MAX_BATCH_ITEMS} items per submission`}
         value={sentence}
+        error={sentenceError}
         onChange={handleSentenceChange}
       />
 
-      <Form.Description title="Parsing Status" text={parseStatusText} />
-      {parsedPreview && (
+      {!sentenceError && <Form.Description title="Parsing Status" text={parseStatusText} />}
+      {parsedPreview && !parsedBatch.isBatch && (
         <Form.Description title="Parsing Summary" text={formatPreviewSummary(parsedPreview, previewLocation)} />
       )}
       {parsedBatch.isBatch && parsedBatch.items.length > 0 && (
-        <Form.Description title="Batch Preview" text={formatBatchPreview(parsedBatch.items)} />
-      )}
-      {parsedBatch.errors.length > 0 && (
-        <Form.Description title="Parsing Errors" text={formatBatchErrors(parsedBatch.errors)} />
+        <Form.Description title="Batch Preview" text={formatBatchPreview(parsedBatch.items, manualLocation)} />
       )}
       {recommendedTargetType && (
         <Form.Description
@@ -756,7 +826,13 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         onChange={setLocation}
       />
 
-      <Form.Dropdown id="targetType" title="Creation Target" value={targetType} onChange={handleTargetTypeChange}>
+      <Form.Dropdown
+        id="targetType"
+        title="Creation Target"
+        value={targetType}
+        error={targetTypeError}
+        onChange={handleTargetTypeChange}
+      >
         <Form.Dropdown.Item value="calendar" title="Apple Calendar Event" />
         <Form.Dropdown.Item value="reminder" title="Reminder Item" />
       </Form.Dropdown>
@@ -767,6 +843,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           title="Calendar"
           info="Select the calendar where events will be created"
           value={calendarId}
+          error={calendarSelectionError}
           onChange={handleCalendarChange}
         >
           {isLoadingCalendars ? (
@@ -793,6 +870,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
           title="Reminder List"
           info="Select the list where reminders will be created"
           value={reminderListId}
+          error={reminderSelectionError}
           onChange={handleReminderListChange}
         >
           {isLoadingReminderLists ? (
@@ -815,14 +893,10 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         </Form.Dropdown>
       )}
 
-      {isRecurringPreview && (
+      {isRecurringPreview && targetType === "calendar" && (
         <Form.Description
           title="Recurrence Detected"
-          text={
-            targetType === "calendar"
-              ? "Recurring schedules are created in Apple Calendar. Choose an occurrence count or end date."
-              : "Recurring schedules can currently be created only as Apple Calendar events."
-          }
+          text="Recurring schedules are created in Apple Calendar. Choose an occurrence count or end date."
         />
       )}
 
@@ -844,6 +918,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
               title="Occurrence Count"
               info={`Between 1 and ${MAX_RECURRENCE_COUNT}`}
               value={recurrenceCount}
+              error={recurrenceEndType === "count" ? recurrenceError : undefined}
               onChange={handleRecurrenceCountChange}
             />
           ) : (
@@ -855,16 +930,49 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
               min={recurrenceDateWindow?.min}
               max={recurrenceDateWindow?.max}
               value={recurrenceUntil}
+              error={recurrenceEndType === "until" ? recurrenceError : undefined}
               onChange={handleRecurrenceUntilChange}
             />
           )}
         </>
       )}
-
-      {calendarLoadError && <Form.Description title="Calendar Error" text={calendarLoadError} />}
-      {reminderLoadError && <Form.Description title="Reminder Error" text={reminderLoadError} />}
     </Form>
   );
+}
+
+function buildSentenceError({
+  sentence,
+  parsedBatch,
+  parseResult,
+  batchIntent,
+}: {
+  sentence: string;
+  parsedBatch: ReturnType<typeof parseKoreanScheduleBatchWithRetrySnapshot>;
+  parseResult: ReturnType<typeof firstBatchParseResult>;
+  batchIntent: ReturnType<typeof summarizeBatchIntent>;
+}): string | undefined {
+  if (!sentence.trim()) {
+    return undefined;
+  }
+
+  if (parsedBatch.tooManyItems) {
+    return `You can create up to ${MAX_BATCH_ITEMS} items at once.`;
+  }
+
+  if (parsedBatch.errors.length > 0) {
+    const firstError = parsedBatch.errors[0]?.error ?? "Could not recognize the schedule sentence.";
+    return parsedBatch.errors.length > 1 ? `${firstError} (${parsedBatch.errors.length} clauses failed)` : firstError;
+  }
+
+  if (batchIntent === "mixed") {
+    return "Calendar events and Reminder items must be submitted separately.";
+  }
+
+  if (parsedBatch.items.length === 0) {
+    return parseResult && !parseResult.ok ? parseResult.error : "Could not recognize the schedule sentence.";
+  }
+
+  return undefined;
 }
 
 function buildParseStatusText({
@@ -914,18 +1022,15 @@ function summarizeBatchIntent(items: ParsedBatchItem[]): ParsedSchedule["intent"
   return intents.values().next().value;
 }
 
-function formatBatchPreview(items: ParsedBatchItem[]): string {
+function formatBatchPreview(items: ParsedBatchItem[], manualLocation?: string): string {
   return items
     .map((item, index) => {
+      const location = manualLocation || item.value.location || "(none)";
       const recurrence = item.value.recurrence ? ` / Recurrence: ${formatRecurrence(item.value.recurrence)}` : "";
       const inherited = item.inheritedDate ? " (inherited date)" : "";
-      return `${index + 1}. ${item.value.title} - ${formatDate(item.value.start, item.value.allDay)}${recurrence}${inherited}`;
+      return `${index + 1}. ${item.value.title} - ${formatDate(item.value.start, item.value.allDay)} / Location: ${location}${recurrence}${inherited}`;
     })
     .join(" | ");
-}
-
-function formatBatchErrors(errors: ParsedBatchError[]): string {
-  return errors.map((error, index) => `${index + 1}. [${error.input}] ${error.error}`).join(" | ");
 }
 
 function formatPreviewSummary(parsedPreview: ParsedSchedule, location: string | undefined): string {

@@ -54,6 +54,28 @@ describe("parseKoreanScheduleBatch", () => {
     expect(result.items[1]?.value.location).toBe("B회의실");
   });
 
+  it("keeps a trailing location on the second inherited-date clause", () => {
+    const result = parseKoreanScheduleBatch("내일 오후 3시 회의 그리고 오후 5시 코드리뷰 회의실에서", {
+      now: baseNow,
+    });
+
+    expect(result.items).toHaveLength(2);
+    expect(result.errors).toHaveLength(0);
+    expect(result.items[0]?.value).toMatchObject({ title: "회의", location: undefined });
+    expect(result.items[1]?.value).toMatchObject({ title: "코드리뷰", location: "회의실" });
+  });
+
+  it("keeps a leading location on the first clause instead of leaking it to the next item", () => {
+    const result = parseKoreanScheduleBatch("내일 회의실에서 오후 3시 회의 그리고 오후 5시 코드리뷰", {
+      now: baseNow,
+    });
+
+    expect(result.items).toHaveLength(2);
+    expect(result.errors).toHaveLength(0);
+    expect(result.items[0]?.value).toMatchObject({ title: "회의", location: "회의실" });
+    expect(result.items[1]?.value).toMatchObject({ title: "코드리뷰", location: undefined });
+  });
+
   it("does not split by conjunction when next clause is not a date/time cue", () => {
     const result = parseKoreanScheduleBatch("내일 오후 3시 기획 그리고 디자인 리뷰", { now: baseNow });
     expect(result.items).toHaveLength(1);

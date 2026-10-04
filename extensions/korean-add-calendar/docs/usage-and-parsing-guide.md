@@ -120,7 +120,8 @@ Final location priority:
 2. Explicit markers: `장소:`, `장소=`, `장소는`
 3. A trailing location: `내일 오후 5시 코드리뷰 회의실에서`
 4. A leading location: `회의실에서 내일 오후 3시 회의`
-5. The existing in-sentence `...에서` fallback
+5. A location between date and time: `내일 회의실에서 오후 3시 회의`
+6. The existing in-sentence `...에서` fallback
 
 Use an explicit marker for multi-word or punctuated locations:
 

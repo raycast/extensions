@@ -60,6 +60,10 @@ const DEADLINE_KEYWORD_ONLY_SET = new Set(["마감", "기한", "데드라인"]);
 const EXPLICIT_LOCATION_PATTERN = /(?:^|[\s,;])장소\s*(?:는|:|=)\s*(.+)$/u;
 const TRAILING_LOCATION_AT_END_PATTERN = /^(.+?)\s+([^\s]+)에서$/u;
 const LEADING_LOCATION_PATTERN = /^(.+?)에서\s+(.+)$/u;
+const TIME_CUE_AT_START_PATTERN =
+  /^(?:(?:새벽|아침|점심|오전|오후|저녁|밤)\s*)?(?:[0-9]{1,2}시|[0-9]{1,2}:[0-9]{1,2})(?:\s|$)/u;
+const RECURRENCE_DATE_PREFIX_PATTERN =
+  /^(?:매\s*일|매\s*주(?:\s*[월화수목금토일](?:요일|욜)?)?|매\s*월\s*[0-9]{1,2}일)$/u;
 const LOCATION_SURROUNDING_QUOTES_PATTERN = /^["'“”‘’]+|["'“”‘’]+$/gu;
 const LOCATION_TRAILING_PUNCTUATION_PATTERN = /[.,!?;:。！？、]+$/gu;
 const TOKEN_SPACING_NORMALIZERS: Array<[RegExp, string]> = [
@@ -86,9 +90,13 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   const explicitLocationExtraction = extractExplicitLocation(sourceString);
   const trailingLocationExtraction = extractTrailingLocationAtSentenceEnd(explicitLocationExtraction.text);
   const leadingLocationExtraction = extractLeadingLocationAtSentenceStart(trailingLocationExtraction.text);
-  const scheduleString = normalizeTokenSpacing(leadingLocationExtraction.text);
+  const interleavedLocationExtraction = extractLocationBetweenDateAndTime(leadingLocationExtraction.text);
+  const scheduleString = normalizeTokenSpacing(interleavedLocationExtraction.text);
   const explicitLocation =
-    explicitLocationExtraction.location ?? trailingLocationExtraction.location ?? leadingLocationExtraction.location;
+    explicitLocationExtraction.location ??
+    trailingLocationExtraction.location ??
+    leadingLocationExtraction.location ??
+    interleavedLocationExtraction.location;
   const now = options.now ? new Date(options.now) : new Date();
   const today = startOfDay(now);
   const durationMinutes = options.defaultDurationMinutes ?? 60;
@@ -532,6 +540,55 @@ function extractLeadingLocationAtSentenceStart(text: string): { text: string; lo
     text: normalizedScheduleText,
     location: normalizedLocation,
   };
+}
+
+function extractLocationBetweenDateAndTime(text: string): { text: string; location?: string } {
+  const trimmed = text.trim();
+  let markerIndex = trimmed.indexOf("에서");
+
+  while (markerIndex >= 0) {
+    const beforeMarker = trimmed.slice(0, markerIndex).trim();
+    const afterMarker = trimmed.slice(markerIndex + "에서".length).trim();
+
+    if (TIME_CUE_AT_START_PATTERN.test(afterMarker)) {
+      const separators = [...beforeMarker.matchAll(/\s+/gu)];
+      for (const separator of separators.reverse()) {
+        const separatorIndex = separator.index;
+        if (separatorIndex === undefined) {
+          continue;
+        }
+
+        const datePrefix = beforeMarker.slice(0, separatorIndex).trim();
+        const location = sanitizeLocation(beforeMarker.slice(separatorIndex + separator[0].length));
+        if (location && isStandaloneDatePrefix(datePrefix)) {
+          return {
+            text: `${datePrefix} ${afterMarker}`,
+            location,
+          };
+        }
+      }
+    }
+
+    markerIndex = trimmed.indexOf("에서", markerIndex + "에서".length);
+  }
+
+  return { text };
+}
+
+function isStandaloneDatePrefix(text: string): boolean {
+  const normalized = normalizeTokenSpacing(text);
+  if (RECURRENCE_DATE_PREFIX_PATTERN.test(normalized)) {
+    return true;
+  }
+
+  const match = normalized.match(MATCHER);
+  return Boolean(
+    match &&
+    match[0].trim() === normalized &&
+    match[9] === undefined &&
+    match[11] === undefined &&
+    match[13] === undefined,
+  );
 }
 
 function startsWithScheduleExpression(text: string): boolean {

@@ -19,7 +19,9 @@
 - Keep only failed or unconfirmed clauses in the input after partial EventKit results
 - Validate recurrence settings for the full batch before creating any item
 - Require confirmation before retrying a creation whose native helper timed out
-- Update to Raycast API 2.5.3
+- Show parse, destination, and recurrence errors with native Form validation
+- Show parsed locations for each item in the batch preview
+- Update to Raycast API 2.6.1
 - Use US English for all user-facing interface and error copy
 
 ### Fixed
@@ -41,6 +43,7 @@
 - Keep unresolved creation warnings tied to affected items across command launches
 - Keep unchanged recurring retry clauses anchored when another clause is edited
 - Prevent overlapping form submissions from creating duplicate items
+- Parse locations between date and time expressions such as `내일 회의실에서 오후 3시 회의`
 
 ## [Initial Version] - 2026-03-16
 

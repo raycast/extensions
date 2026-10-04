@@ -631,6 +631,27 @@ describe("parseKoreanSchedule", () => {
     expect(result.value.location).toBe("회의실");
     expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 15, minute: 0 });
   });
+
+  it("parses a location between the date and time expressions", () => {
+    const result = parseKoreanSchedule("내일 회의실에서 오후 3시 회의", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("회의");
+    expect(result.value.location).toBe("회의실");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 15, minute: 0 });
+  });
+
+  it("keeps the weekday out of a recurring location before the time expression", () => {
+    const result = parseKoreanSchedule("매주 화요일 회의실에서 오후 4시 코드리뷰", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("코드리뷰");
+    expect(result.value.location).toBe("회의실");
+    expect(result.value.recurrence).toEqual({ frequency: "weekly", weekday: 2 });
+    expect(result.value.start.getHours()).toBe(16);
+  });
 });
 
 function expectDate(

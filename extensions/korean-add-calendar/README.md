@@ -22,6 +22,7 @@ See the [usage and parsing guide](docs/usage-and-parsing-guide.md) for the compl
 매주 화요일 오후 4시 코드리뷰
 내일 오후 3시 회의, 모레 오후 5시 통화
 내일 오후 3시 회의 장소: B1 대회의실
+내일 회의실에서 오후 3시 회의
 ```
 
 ## Supported Behavior
@@ -33,7 +34,7 @@ See the [usage and parsing guide](docs/usage-and-parsing-guide.md) for the compl
 - Daily, weekly, and monthly recurring Calendar events
 - Up to three items in one compound sentence
 - Explicit locations using `장소:`, `장소=`, or `장소는`
-- Leading and trailing `...에서` location forms
+- Leading, trailing, and date-before-time `...에서` location forms
 - Automatic Calendar or Reminder recommendation based on parsed intent
 - Persistent target, Calendar, Reminder list, and recurrence preferences
 - Optional command argument and, when configured, Raycast fallback text that prefill the review form
