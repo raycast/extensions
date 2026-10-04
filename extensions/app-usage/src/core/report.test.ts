@@ -415,6 +415,21 @@ describe("coverageSummary", () => {
     assert.equal(coverageSummary(buildReport([]), true), "Nothing tracked yet");
   });
 
+  it("reports an idle-only range as tracked, not empty", () => {
+    const idle = new Array<number>(24).fill(0);
+    idle[0] = 1500;
+    const single = buildReport([{ date: "2026-09-14", file: { v: 1, date: "2026-09-14", apps: {}, idle } }]);
+    assert.equal(coverageSummary(single), "Tracked 25m, all of it idle");
+    assert.equal(coverageSummary(single, true), "25m idle");
+
+    const span = buildReport([
+      { date: "2026-09-13", file: null },
+      { date: "2026-09-14", file: { v: 1, date: "2026-09-14", apps: {}, idle } },
+    ]);
+    assert.equal(coverageSummary(span), "Tracked 25m, all of it idle, on 1 of 2 days");
+    assert.equal(coverageSummary(span, true), "25m idle · 1/2 days");
+  });
+
   it("drops the prose in compact form, for the narrow column", () => {
     const single = buildReport([day("2026-09-14", { "com.a": { name: "A", at: [[9, 3600]] } })]);
     assert.equal(coverageSummary(single, true), "1h · 1 app");

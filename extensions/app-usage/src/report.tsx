@@ -110,6 +110,8 @@ export default function UsageReport() {
   const loaded: Loaded = data ?? { report: EMPTY_REPORT, baseline: null };
   const { report } = loaded;
   const hasRows = report.rows.length > 0;
+  // Idle with no app time is still a tracked range, not an empty one.
+  const idleOnly = !hasRows && report.idleSeconds > 0;
   // The detail panel halves the list column, which is too narrow for the full
   // coverage sentence: it wraps and runs into the first row.
   const detailOpen = showingDetail && hasRows;
@@ -131,9 +133,13 @@ export default function UsageReport() {
     >
       {!hasRows && !isLoading ? (
         <List.EmptyView
-          icon={Icon.Clock}
-          title="Nothing recorded yet"
-          description="App Usage samples the focused app once a minute while Raycast is running. Check back in a few minutes."
+          icon={idleOnly ? Icon.Moon : Icon.Clock}
+          title={idleOnly ? "Only idle time recorded" : "Nothing recorded yet"}
+          description={
+            idleOnly
+              ? `${coverageSummary(report)}. Apps appear here once one is in use.`
+              : "App Usage samples the focused app once a minute while Raycast is running. Check back in a few minutes."
+          }
           actions={
             <ActionPanel>
               <ClearDataAction onCleared={revalidate} />

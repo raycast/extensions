@@ -323,10 +323,19 @@ export function rangeTitle(range: RangeId): string {
  */
 export function coverageSummary(report: Report, compact = false): string {
   const appCount = report.rows.length;
-  if (appCount === 0) return "Nothing tracked yet";
+  const isSpan = report.dates.length > 1;
+
+  if (appCount === 0) {
+    // Walking away still leaves idle time behind. That range was tracked, it just
+    // has no app to show, and calling it untracked would contradict Daily Usage.
+    if (report.idleSeconds <= 0) return "Nothing tracked yet";
+    const idle = formatDuration(report.idleSeconds);
+    if (compact) return isSpan ? `${idle} idle · ${report.daysWithData}/${report.dates.length} days` : `${idle} idle`;
+    if (!isSpan) return `Tracked ${idle}, all of it idle`;
+    return `Tracked ${idle}, all of it idle, on ${report.daysWithData} of ${report.dates.length} days`;
+  }
 
   const total = formatDuration(report.totalSeconds);
-  const isSpan = report.dates.length > 1;
 
   if (compact) {
     const apps = `${appCount} ${appCount === 1 ? "app" : "apps"}`;
