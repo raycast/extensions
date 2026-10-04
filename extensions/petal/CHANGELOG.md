@@ -1,6 +1,6 @@
 # Petal Changelog
 
-## [Latest History First and Live Model List] - {PR_MERGE_DATE}
+## [Latest History First and Live Model List] - 2026-10-04
 
 - `Search History` now selects the newest transcription each time it opens
 - `Switch Model` reads the model list from Petal, so new models and download status show up without an extension update
