@@ -3,7 +3,7 @@
 - Target ids are generated from the title and no longer editable
 - The id is shown read-only as `Raycast: focus-<id>`
 - Adding never overwrites a different target, and re-adding a saved site updates it
-- Edit Target can change Match again and gains a Navigate checkbox (needs a foxhop CLI that has `foxhop edit`)
+- Edit Target can change Match again and gains a Navigate checkbox (requires foxhop CLI 2.0.0 or later)
 
 ## [Initial Version] - 2026-06-25
 

@@ -4,10 +4,10 @@ Focus a specific Firefox tab from anywhere on macOS — manage your saved tab ta
 
 ## Requirements
 
-- **foxhop CLI** must be installed. Install via npm:
+- **foxhop CLI 2.0.0 or later** must be installed. Install via npm:
 
   ```bash
-  npm install -g @kud/foxhop-cli
+  npm install -g @kud/foxhop-cli@^2.0.0
   ```
 
   Or configure the full path to the binary in extension preferences if it is not on your PATH.
