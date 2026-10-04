@@ -20,6 +20,7 @@ import { learnedPackages, packageForTarget } from "./lib/link-command";
 import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
+import { fetchSiteName } from "./lib/fetch-site-name";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
 import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
@@ -141,9 +142,41 @@ const Command = () => {
 
   // Deriving a package from the domain gets the product and the casing wrong often enough to be
   // a nuisance — atlassian.net is Jira, npmjs.com is npm, my.pcloud.com is pCloud. The collection
-  // already holds the right answer for every service it has seen, so it is asked first.
+  // already holds the right answer for every service it has seen, so it is asked first. Next comes
+  // the site's own name, read off the page; the domain-derived brand is the last resort.
   const learned = learnedPackages(discovered?.commands ?? []);
-  const suggestedPackage = packageForTarget(target, learned) ?? brandFor(target);
+
+  // The site's own name, fetched once typing pauses. Skipped for anything that is not a web URL —
+  // a folder has no page to read. Debounced so a keystroke is not a request. Never written into
+  // the field: an empty Package falls back to the suggestion, so what is typed stays the person's.
+  const [siteName, setSiteName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const trimmed = target.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+      setSiteName(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      fetchSiteName(trimmed).then(
+        (name) => {
+          if (!cancelled) setSiteName(name);
+        },
+        () => {
+          if (!cancelled) setSiteName(undefined);
+        },
+      );
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [target]);
+
+  const suggestedPackage = packageForTarget(target, learned) ?? siteName ?? brandFor(target);
 
   // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
   // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
@@ -159,7 +192,7 @@ const Command = () => {
    */
   const titleSuggestion = suggestTitle({
     target,
-    brand: packageForTarget(target.trim(), learned) ?? brandFor(target.trim()),
+    brand: packageForTarget(target.trim(), learned) ?? siteName ?? brandFor(target.trim()),
     desktopApplication: desktopApplication || undefined,
   });
 

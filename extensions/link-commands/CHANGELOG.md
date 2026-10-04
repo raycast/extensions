@@ -1,5 +1,11 @@
 # Link Commands Changelog
 
+## [Readable brand suggestion] - {PR_MERGE_DATE}
+
+### Fixed
+
+- The **Package** suggestion on the create form now uses the site's own name where the page states one — `https://sendtestemail.com/` suggests `SendTestEmail` rather than the bare domain label — falling back to the capitalised domain when the page cannot be read. File names and icon folders still use the lowercase form, so only the displayed subtitle changes and nothing already created moves.
+
 ## [Raycast 2 Deeplink Fix] - 2026-10-01
 
 ### Fixed
