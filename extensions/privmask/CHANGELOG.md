@@ -1,5 +1,14 @@
 # Privacy Mask Changelog
 
+## [Name model and privmask 0.5.0] - 2026-10-04
+
+- Finds Japanese personal names with the privmask name model when the privmask CLI is installed, including on Macs without Apple Intelligence
+- Updates privmask to 0.5.0: hostnames, job names and English product names are no longer masked as personal names
+- Masks later mentions of a person already found, and names whose family name the surname list leaves out
+- Retries log lines the on-device model refuses as an unsupported language
+- Highlights where the selected finding is in the preview
+- Leaves out findings inside a longer one, which only the longer one replaces
+
 ## [Initial Version] - 2026-10-01
 
 - Masks personal information in the selected text or the clipboard, entirely on device
