@@ -12,10 +12,17 @@ import {
   type ToolCallPart,
   type ToolResultPart,
 } from "ai";
-import { getModels, getPreferences, isGlm5 } from "./lib/catalog";
+import {
+  getModels as discoverModels,
+  getPreferences,
+  isGlm5,
+} from "./lib/catalog";
 import { log } from "./lib/log";
 
-export { getModels };
+// Provider entry point. The annotation keeps Raycast's zero-arg AI.GetModels
+// contract compile-time checked even though discovery itself accepts options
+// (bypassCache) for the explicit refresh commands.
+export const getModels: AI.GetModels = discoverModels;
 
 const providerCache = new Map<
   string,

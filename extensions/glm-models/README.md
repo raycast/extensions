@@ -34,14 +34,16 @@ Running `npm run dev` registers the extension locally in Raycast (it appears at 
 
 The first time Raycast needs the extension's settings, it shows a setup form asking for every required preference together — **API Key** and **Platform** — with a help page (from `help.md`) beside the form. Pick the platform that matches where your key was created; the two platforms' keys are not interchangeable.
 
+> **Picked "Custom base URL"?** The setup form only collects the *required* preferences, so it never asks for the URL itself. After the form, set **Custom Base URL** in **Raycast Settings → Extensions → GLM Models** to your HTTPS OpenAI-compatible endpoint (e.g. `https://open.bigmodel.cn/api/paas/v4`), then run **Refresh Models**. Check Setup can validate a URL typed into it, but nothing typed there is ever saved.
+
 | Preference | What to enter |
 | --- | --- |
 | API Key | Your Z.ai or BigModel key |
 | Platform | `Z.ai (pay-as-you-go)` or `BigModel (pay-as-you-go)` — must match where the key came from. Pay-as-you-go keys only: GLM Coding Plan / Team Plan keys are not supported |
-| Custom Base URL | Only if you picked *Custom* (any HTTPS OpenAI-compatible endpoint) |
+| Custom Base URL | Only if you picked *Custom* (any HTTPS OpenAI-compatible endpoint) — not part of the setup form; set it in the extension settings |
 | Extra Models | Optional comma-separated model IDs to force-include in the picker |
 
-After the setup form, validate everything with the **Check Setup** command: it calls the live API with your saved key and platform and tells you exactly what's wrong if they don't match (401 → key/platform mismatch), the endpoint is unreachable, or all good (N models discovered). It can also test a different key/platform combination before you commit it to preferences — a combination that differs from the saved one is reported as *validated, but not applied*, since extensions cannot change their own preferences — and its *Open Platform Console* action deep-links to the selected platform's API-keys page (z.ai or open.bigmodel.cn). Validating the saved combination also refreshes Raycast's model list.
+After the setup form, validate everything with the **Check Setup** command: it calls the live API with your saved key and platform and tells you exactly what's wrong if they don't match (401 → key/platform mismatch), the endpoint is unreachable, or all good (N models discovered, listed below the result). It can also test a different key/platform combination before you commit it to preferences — a combination that differs from the saved one is reported as *validated, but not applied*, since extensions cannot change their own preferences — and its *Open Platform Console* action deep-links to the selected platform's API-keys page (z.ai or open.bigmodel.cn). Validating the saved combination also refreshes Raycast's model list.
 
 Then opt in to extension models (one-time):
 
@@ -53,9 +55,11 @@ While developing, keep `npm run dev` running for hot reload. Press `⌃C` to sto
 
 The **Refresh Models** command validates the saved key + platform and re-runs model discovery in one step, reporting the outcome (e.g. "Z.ai (pay-as-you-go): 18 models available") — the one-step way to pick up a platform change from the settings (Raycast also refreshes automatically in the background, but it doesn't notify extensions when preferences change).
 
+The **Show Models** command lists everything the extension provides to Raycast's model picker in a master-detail view: the searchable model list on the left, and the selected model's full metadata on the right — display title, model ID, context window, vision/reasoning/tools capabilities, whether it comes from the Extra Models preference, and where the list came from (the platform's live `/models` endpoint, or the models.dev / curated fallback when that is unreachable). Run it after changing preferences to see exactly what Raycast will receive.
+
 ## How model discovery works
 
-- The extension first calls `GET {baseURL}/models` with your key to get the models your account can actually use (handles platform differences and new releases automatically).
+- The extension first calls `GET {baseURL}/models` with your key to get the models your account can actually use (handles platform differences and new releases automatically). The result is cached for 60 seconds in memory and mirrored to disk, so Raycast's frequent background polling doesn't re-fetch the endpoint.
 - Each ID is enriched with metadata (title, context window, vision/tools/reasoning capabilities) from the [models.dev](https://models.dev) community catalog, cached for 24h — BigModel reuses the Z.ai catalog since both platforms serve the same model IDs.
 - IDs models.dev doesn't know get conservative defaults, so brand-new GLM models still show up and work.
 - If the `/models` call fails, the models.dev model list is used instead; if that is unreachable too (e.g. first run offline), a small curated fallback keeps the picker populated: GLM-5.3, GLM-5.2, GLM-5.3-Flash, GLM-4.7, GLM-4.6, GLM-4.5-Flash.
@@ -69,6 +73,7 @@ Notes:
 ## Troubleshooting
 
 - **Run "Check Setup" first** — it validates your saved key and platform against the live API and classifies the failure (key/platform mismatch, network, endpoint unavailable).
+- **Picked "Custom base URL" during setup and no models appear** — Raycast's first-run setup form only collects the required preferences (API Key, Platform), so the URL is still unset. Set **Custom Base URL** in the extension settings, then run **Refresh Models**. Check Setup only validates — a URL typed there is never saved.
 - **Changed Platform but the model picker is stale** — Raycast doesn't notify extensions when preferences change. Run **Refresh Models** to validate and refresh in one step. Note that **Check Setup** only validates: after testing a different platform or key, save it in the extension settings for it to take effect.
 - **`AI_DownloadError: Cannot find module 'undici'` when attaching an image** — this happened in early versions of this extension: image attachments were converted to `data:` URLs, which the AI SDK tries to fetch, and that path requires the `undici` npm package which Raycast's runtime doesn't provide. Fixed by passing image bytes directly; if you see it again, run `npm run dev` so you're on the latest build.
 - **No GLM models in the picker** — check the `npm run dev` console: it logs either `glm-models: discovered N model ids via …/models` (dynamic discovery worked) or `glm-models: /models lookup failed …` followed by which fallback list was used (models.dev or the curated catalog). Also confirm you toggled the extension on in Raycast Settings → AI.
@@ -88,8 +93,10 @@ This repo is currently a personal extension. If you want to publish it:
 ```
 src/models.ts           AI model provider entry point: getModels + streamCompletion
 src/lib/catalog.ts      Curated model metadata, /models discovery, preferences
+src/lib/format.ts       Shared model display formatting (context window, capabilities)
 src/check-setup.tsx     Command: validate key + platform against the live API
 src/refresh-models.ts   Command: manually refresh the model list
+src/show-models.tsx     Command: browse the models provided to Raycast
 ```
 
 - `npm run dev` — run in development mode with hot reload

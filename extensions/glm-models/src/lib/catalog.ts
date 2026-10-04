@@ -198,6 +198,7 @@ async function readCachedMetadata(
  */
 export async function loadModelMetadata(
   platform: string,
+  options?: { bypassCache?: boolean },
 ): Promise<Record<string, ModelMetadata>> {
   // Own-property lookup — plain indexing would surface inherited members for
   // preference values like "constructor".
@@ -205,6 +206,11 @@ export async function loadModelMetadata(
     ? MODELS_DEV_SLUG[platform as Exclude<Platform, "custom">]
     : undefined;
   if (!slug) return {};
+  // An explicit refresh skips every cache gate — memory, LocalStorage TTL and
+  // the failure backoff — so a just-released model gets real metadata right
+  // away; fetchMetadataForSlug still falls back to the stale cache when
+  // models.dev is unreachable.
+  if (options?.bypassCache) return fetchMetadataForSlug(slug);
   const memory = metadataMemoryCache[slug];
   if (memory && Date.now() - memory.fetchedAt < METADATA_TTL_MS) {
     return memory.metadata;
@@ -433,15 +439,78 @@ export type ModelsProbe =
     };
 
 // Raycast polls getModels every few seconds (AI surfaces refresh on their own
-// schedule), so a successful /models probe is cached briefly in memory:
-// successes for 60s, overlapping callers deduped onto one fetch. The cache and
-// the in-flight map are keyed by the credential pair, so a typed-different key
-// in Check Setup always probes live and can never receive a background probe's
-// result; failures are never cached. Explicit refreshes bypass the cache.
+// schedule), so a successful /models probe is cached briefly: successes for
+// 60s, overlapping callers deduped onto one fetch. The caches are keyed by a
+// fingerprint of the credential pair, so a typed-different key in Check Setup
+// always probes live and can never receive a background probe's result;
+// failures are never cached. Explicit refreshes bypass every cache layer.
+// Because Raycast may re-instantiate the extension between polls (dev
+// reloads, per-surface scheduling) — resetting module state — the last
+// successful probe is mirrored to LocalStorage, keyed by that fingerprint
+// and never storing the API key itself.
 const MODELS_PROBE_CACHE_TTL_MS = 60_000;
+const PROBE_LS_KEY = "models-probe-cache";
 let modelsProbeCache:
   { key: string; fetchedAt: number; probe: ModelsProbe } | undefined;
 const modelsProbeInFlight: Record<string, Promise<ModelsProbe>> = {};
+
+function credentialFingerprint(value: string): string {
+  // djb2 — enough to tell key/base-URL combinations apart without ever
+  // persisting the key material itself.
+  let hash = 5381;
+  for (let i = 0; i < value.length; i++) {
+    hash = ((hash << 5) + hash + value.charCodeAt(i)) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+async function readPersistedProbe(
+  fingerprint: string,
+): Promise<{ fetchedAt: number; probe: ModelsProbe } | undefined> {
+  try {
+    const raw = await LocalStorage.getItem<string>(PROBE_LS_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as {
+      fingerprint?: unknown;
+      fetchedAt?: unknown;
+      ids?: unknown;
+    } | null;
+    if (
+      !parsed ||
+      parsed.fingerprint !== fingerprint ||
+      typeof parsed.fetchedAt !== "number" ||
+      !Array.isArray(parsed.ids) ||
+      Date.now() - parsed.fetchedAt >= MODELS_PROBE_CACHE_TTL_MS
+    ) {
+      return undefined;
+    }
+    const ids = parsed.ids.filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
+    if (ids.length === 0) return undefined;
+    return { fetchedAt: parsed.fetchedAt, probe: { ok: true, ids } };
+  } catch {
+    return undefined;
+  }
+}
+
+async function persistProbe(
+  fingerprint: string,
+  probe: Extract<ModelsProbe, { ok: true }>,
+): Promise<void> {
+  try {
+    await LocalStorage.setItem(
+      PROBE_LS_KEY,
+      JSON.stringify({
+        fingerprint,
+        fetchedAt: Date.now(),
+        ids: probe.ids,
+      }),
+    );
+  } catch {
+    // Best-effort — the in-memory cache still covers the current session.
+  }
+}
 
 /** Probes GET {base}/models and classifies the outcome so failures can be explained to the user. */
 export async function probeModelsEndpoint(
@@ -457,6 +526,7 @@ export async function probeModelsEndpoint(
     };
   }
   const cacheKey = `${baseURL}|${apiKey}`;
+  const fingerprint = credentialFingerprint(cacheKey);
   if (
     !options?.bypassCache &&
     modelsProbeCache &&
@@ -465,12 +535,27 @@ export async function probeModelsEndpoint(
   ) {
     return modelsProbeCache.probe;
   }
+  if (!options?.bypassCache) {
+    const persisted = await readPersistedProbe(fingerprint);
+    if (persisted) {
+      // Rehydrate the in-memory cache so later polls skip the LocalStorage
+      // round-trip until the entry expires.
+      modelsProbeCache = {
+        key: cacheKey,
+        fetchedAt: persisted.fetchedAt,
+        probe: persisted.probe,
+      };
+      return persisted.probe;
+    }
+  }
   const inFlight = modelsProbeInFlight[cacheKey];
   if (inFlight) return inFlight;
   const probe = probeModelsLive(baseURL, apiKey, cacheKey);
   modelsProbeInFlight[cacheKey] = probe;
   try {
-    return await probe;
+    const result = await probe;
+    if (result.ok) await persistProbe(fingerprint, result);
+    return result;
   } finally {
     delete modelsProbeInFlight[cacheKey];
   }
@@ -541,7 +626,7 @@ async function probeModelsLive(
   }
 }
 
-function parseExtraModels(extra: string | undefined): string[] {
+export function parseExtraModels(extra: string | undefined): string[] {
   return (extra ?? "")
     .split(",")
     .map((id) => id.trim())
@@ -549,16 +634,24 @@ function parseExtraModels(extra: string | undefined): string[] {
 }
 
 // Signature of the last logged discovery — change-only logging keeps the dev
-// console readable while Raycast polls.
+// console readable while Raycast polls. Because module state may not survive
+// between polls, the signature is also mirrored to LocalStorage and checked
+// against it before logging (see probeModelsEndpoint).
+const DISCOVERY_SIGNATURE_LS_KEY = "models-discovery-signature";
 let lastDiscoverySignature: string | undefined;
 
-export const getModels: AI.GetModels = async () => {
+export const getModels = async (options?: {
+  bypassCache?: boolean;
+}): Promise<AI.RegisteredModel[]> => {
   const { apiKey, baseURL, platform, extraModels } = getPreferences();
   // Independent lookups — run them concurrently so worst-case discovery
-  // latency isn't the sum of both timeouts.
+  // latency isn't the sum of both timeouts. Raycast's own polls call this
+  // with no options (everything cached); explicit refreshes pass
+  // bypassCache, which busts both the /models probe cache and the models.dev
+  // metadata cache.
   const [metadata, probe] = await Promise.all([
-    loadModelMetadata(platform),
-    probeModelsEndpoint(baseURL, apiKey),
+    loadModelMetadata(platform, options),
+    probeModelsEndpoint(baseURL, apiKey, options),
   ]);
 
   // The curated fallback is GLM/Z.ai-specific — a Custom endpoint may serve an
@@ -569,11 +662,28 @@ export const getModels: AI.GetModels = async () => {
   let dynamicIds: string[];
   if (probe.ok) {
     // Raycast polls discovery every few seconds — emit the breadcrumb only
-    // when the id set actually changes.
+    // when the id set actually changes, judged against a signature that
+    // survives module re-instantiation so a reset instance doesn't re-log
+    // the same line on every poll.
     const signature = [...probe.ids].sort().join("\n");
     if (signature !== lastDiscoverySignature) {
-      log(`discovered ${probe.ids.length} model ids via ${baseURL}/models`);
       lastDiscoverySignature = signature;
+      let persistedSignature: string | undefined;
+      try {
+        persistedSignature =
+          (await LocalStorage.getItem<string>(DISCOVERY_SIGNATURE_LS_KEY)) ??
+          undefined;
+      } catch {
+        // Dev-diagnostic nicety only — a failed read can log one extra line.
+      }
+      if (signature !== persistedSignature) {
+        log(`discovered ${probe.ids.length} model ids via ${baseURL}/models`);
+        try {
+          await LocalStorage.setItem(DISCOVERY_SIGNATURE_LS_KEY, signature);
+        } catch {
+          // As above — non-fatal.
+        }
+      }
     }
     dynamicIds = probe.ids;
   } else {
