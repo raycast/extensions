@@ -1,3 +1,7 @@
+## [New icon] - {PR_MERGE_DATE}
+
+- New extension icon
+
 ## [Fix target ids] - 2026-10-04
 
 - Target ids are generated from the title and no longer editable
