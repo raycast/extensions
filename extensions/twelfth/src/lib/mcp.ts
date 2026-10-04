@@ -1,4 +1,4 @@
-import { AuthError, apiKey, authorize, forceRefresh, NotSignedInError, signOut, storedToken } from "./auth";
+import { AuthError, apiKey, authorize, forceRefresh, NotSignedInError, reconnect, storedToken } from "./auth";
 import { MCP_URL } from "./config";
 import { sseReply } from "./sse";
 
@@ -29,18 +29,22 @@ export async function callTool<T>(name: string, args: Record<string, unknown> = 
 
   let { response, id } = await post(token, name, args);
   if (response.status === 401 && !apiKey()) {
-    // A refused access token may only be stale: one refresh before giving up.
-    const refreshed = await forceRefresh();
-    if (refreshed) ({ response, id } = await post(refreshed, name, args));
+    // Another request may already have refreshed or reconnected while this
+    // one was in flight; use its token. Otherwise the refused token may only
+    // be stale: one refresh before giving up. A refresh that fails for a
+    // passing reason (timeout, 5xx) throws here and keeps the session.
+    const current = await storedToken();
+    const next = current && current !== token ? current : await forceRefresh();
+    if (next && next !== token) ({ response, id } = await post(next, name, args));
   }
   if (response.status === 401) {
     if (apiKey())
       throw new AuthError("Twelfth rejected the workspace API key. Check it in the extension's preferences.");
-    // The connection was ended in Settings → AI & agents. Forget it; a person
-    // at the keyboard is asked to sign in again, a background caller is told.
-    await signOut();
+    // The connection was ended in Settings → AI & agents. A person at the
+    // keyboard signs in again (one window, however many requests failed); a
+    // background caller is told.
     if (interactive) {
-      await authorize();
+      await reconnect();
       return callTool<T>(name, args, { interactive: false });
     }
     throw new NotSignedInError("Your Twelfth connection has ended. Sign in again.");

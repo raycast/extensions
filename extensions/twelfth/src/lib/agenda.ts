@@ -15,7 +15,7 @@ export const BUCKET_TITLES: Record<Bucket, string> = {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** The workspace's timezone if Intl accepts it, else the machine's own: an empty or unknown zone would throw. */
-function validZone(timeZone?: string | null): string | undefined {
+export function validZone(timeZone?: string | null): string | undefined {
   if (!timeZone) return undefined;
   try {
     new Intl.DateTimeFormat("en-CA", { timeZone });

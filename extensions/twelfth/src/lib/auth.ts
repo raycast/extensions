@@ -11,6 +11,7 @@ const client = new OAuth.PKCEClient({
 
 const CLIENT_ID_KEY = "oauth.clientId";
 const EMAIL_KEY = "oauth.email";
+const EPOCH_KEY = "oauth.epoch";
 
 /** Twelfth won't accept this install's credential. Cached data from before it is no longer this person's to show. */
 export class AuthError extends Error {}
@@ -58,19 +59,56 @@ async function clientId(): Promise<string> {
 
 type TokenResponse = OAuth.TokenResponse & { id_token?: string; error?: string; error_description?: string };
 
+/** The token endpoint's answers that mean the grant itself is gone, as opposed to a failed request. */
+const DEAD_GRANT = new Set(["invalid_grant", "invalid_client", "unauthorized_client"]);
+
+class TokenError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+  }
+  /** True when signing in again is the only way forward; false for an outage worth riding out. */
+  get dead() {
+    return this.code !== undefined && DEAD_GRANT.has(this.code);
+  }
+}
+
 async function tokenRequest(params: Record<string, string>): Promise<TokenResponse> {
-  const response = await fetch(OAUTH.token, {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ ...params, resource: OAUTH.resource }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(OAUTH.token, {
+      method: "POST",
+      signal: AbortSignal.timeout(15_000),
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ ...params, resource: OAUTH.resource }),
+    });
+  } catch {
+    throw new TokenError("Couldn't reach Twelfth to renew your sign-in. Try again shortly.");
+  }
   const body = (await response.json().catch(() => ({}))) as TokenResponse;
   if (!response.ok || !body.access_token) {
-    const error = new Error(body.error_description ?? body.error ?? `Twelfth sign-in failed (${response.status})`);
-    (error as Error & { code?: string }).code = body.error;
-    throw error;
+    throw new TokenError(
+      body.error_description ?? body.error ?? `Twelfth sign-in failed (${response.status})`,
+      body.error,
+    );
   }
   return body;
+}
+
+/**
+ * Bumped whenever the OAuth connection changes (sign-in, sign-out, a dead
+ * grant). Readers that started under an older connection must not write what
+ * they read into a cache the new connection will use.
+ */
+export async function connectionEpoch(): Promise<number> {
+  return (await LocalStorage.getItem<number>(EPOCH_KEY)) ?? 0;
+}
+
+async function bumpConnection() {
+  await LocalStorage.setItem(EPOCH_KEY, (await connectionEpoch()) + 1);
+  await LocalStorage.removeItem(CONTEXT_CACHE_KEY);
 }
 
 /** The signed-in person's email, from the ID token, so "mine" can be told apart. */
@@ -111,9 +149,13 @@ let refreshing: Promise<string | undefined> | undefined;
  */
 export async function forceRefresh(): Promise<string | undefined> {
   if (apiKey()) return undefined;
-  refreshing ??= readOrRefresh(true).finally(() => (refreshing = undefined));
-  return refreshing;
+  // Its own shared promise: joining an ordinary refresh in flight could hand
+  // back the very token the server just refused.
+  forcing ??= readOrRefresh(true).finally(() => (forcing = undefined));
+  return forcing;
 }
+
+let forcing: Promise<string | undefined> | undefined;
 
 async function readOrRefresh(force = false): Promise<string | undefined> {
   const tokens = await client.getTokens();
@@ -128,16 +170,44 @@ async function readOrRefresh(force = false): Promise<string | undefined> {
     });
     await client.setTokens({ ...refreshed, refresh_token: refreshed.refresh_token ?? tokens.refreshToken });
     return refreshed.access_token;
-  } catch {
-    // A refresh token that no longer works (revoked in Settings → AI & agents,
-    // or rotated out) means signing in again.
+  } catch (error) {
+    // Only a dead grant (revoked in Settings → AI & agents, or rotated out)
+    // means signing in again. A timeout or a 5xx keeps the tokens: the refresh
+    // token is likely still good, and the next attempt will use it.
+    if (!(error instanceof TokenError && error.dead)) throw error;
     await client.removeTokens();
+    await bumpConnection();
     return undefined;
   }
 }
 
-/** A token, signing in through the browser when there is none. */
-export async function authorize(): Promise<string> {
+/**
+ * A token, signing in through the browser when there is none. Shared between
+ * concurrent callers: a command reads several tools at once, and each must not
+ * open its own sign-in window.
+ */
+export function authorize(): Promise<string> {
+  authorizing ??= signIn().finally(() => (authorizing = undefined));
+  return authorizing;
+}
+
+let authorizing: Promise<string> | undefined;
+
+/**
+ * Twelfth ended the connection: forget it and sign in again, once, however
+ * many requests found out at the same moment.
+ */
+export function reconnect(): Promise<string> {
+  reconnecting ??= (async () => {
+    await signOut();
+    return authorize();
+  })().finally(() => (reconnecting = undefined));
+  return reconnecting;
+}
+
+let reconnecting: Promise<string> | undefined;
+
+async function signIn(): Promise<string> {
   const existing = await storedToken();
   if (existing) return existing;
 
@@ -160,11 +230,11 @@ export async function authorize(): Promise<string> {
     await client.setTokens(tokens);
     await rememberEmail(tokens.id_token);
     // The new connection may be to another workspace.
-    await LocalStorage.removeItem(CONTEXT_CACHE_KEY);
+    await bumpConnection();
     return tokens.access_token;
   } catch (error) {
     // The registration was removed server-side: register afresh next time.
-    if ((error as { code?: string }).code === "invalid_client") await LocalStorage.removeItem(CLIENT_ID_KEY);
+    if (error instanceof TokenError && error.code === "invalid_client") await LocalStorage.removeItem(CLIENT_ID_KEY);
     throw error;
   }
 }
@@ -173,5 +243,5 @@ export async function authorize(): Promise<string> {
 export async function signOut() {
   await client.removeTokens();
   await LocalStorage.removeItem(EMAIL_KEY);
-  await LocalStorage.removeItem(CONTEXT_CACHE_KEY);
+  await bumpConnection();
 }

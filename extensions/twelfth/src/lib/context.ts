@@ -6,7 +6,7 @@
 // refreshes every 15 minutes, and a fresh sign-in (possibly to another
 // workspace) clears the cache.
 import { LocalStorage } from "@raycast/api";
-import { apiKey } from "./auth";
+import { apiKey, connectionEpoch } from "./auth";
 import { CONTEXT_CACHE_KEY } from "./config";
 import { callTool } from "./mcp";
 import { type Workspace, getWorkspace } from "./twelfth";
@@ -14,7 +14,8 @@ import { type Workspace, getWorkspace } from "./twelfth";
 export type WorkspaceContext = {
   workspace: Workspace | null;
   timeZone: string | undefined;
-  currency: string;
+  /** Unset in the app means unknown: prices then show without a symbol rather than a guessed one. */
+  currency: string | undefined;
   firstDayOfWeek: "monday" | "sunday";
   nameFormat: "full_name" | "first_name";
 };
@@ -22,8 +23,10 @@ export type WorkspaceContext = {
 const TTL_MS = 6 * 60 * 60 * 1000;
 
 export async function workspaceContext(options: { interactive?: boolean } = {}): Promise<WorkspaceContext> {
-  // A changed workspace key in preferences may point at another workspace.
-  const credential = apiKey()?.slice(-8) ?? "oauth";
+  // A changed workspace key in preferences, or a new OAuth connection, may
+  // point at another workspace: both are part of the cache's identity.
+  const epoch = await connectionEpoch();
+  const credential = `${apiKey()?.slice(-8) ?? "oauth"}:${epoch}`;
   const cached = await LocalStorage.getItem<string>(CONTEXT_CACHE_KEY);
   if (cached) {
     try {
@@ -36,12 +39,16 @@ export async function workspaceContext(options: { interactive?: boolean } = {}):
   const [workspace, personal] = await Promise.all([getWorkspace(options), personalPreferences(options)]);
   const context: WorkspaceContext = {
     workspace,
-    timeZone: workspace?.timezone ?? undefined,
-    currency: workspace?.currencyCode ?? "AUD",
+    timeZone: workspace?.timezone || undefined,
+    currency: workspace?.currencyCode?.trim().toUpperCase() || undefined,
     firstDayOfWeek: personal.first_day_of_week === "sunday" ? "sunday" : "monday",
     nameFormat: personal.display_name_format === "first_name" ? "first_name" : "full_name",
   };
-  await LocalStorage.setItem(CONTEXT_CACHE_KEY, JSON.stringify({ at: Date.now(), credential, context }));
+  // A read that started before a sign-out or a new connection must not land
+  // in the cache the new connection reads.
+  if ((await connectionEpoch()) === epoch) {
+    await LocalStorage.setItem(CONTEXT_CACHE_KEY, JSON.stringify({ at: Date.now(), credential, context }));
+  }
   return context;
 }
 

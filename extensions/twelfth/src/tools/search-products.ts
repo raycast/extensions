@@ -27,8 +27,8 @@ async function tool(input: Input) {
     workspaceContext(),
   ]);
   return {
-    // Prices below are in this currency.
-    currency: context.currency,
+    // Prices below are in this currency. Null means the workspace has none set: don't assume dollars.
+    currency: context.currency ?? null,
     totalMatching: page.totalMatching,
     products: page.products.map((product) => ({
       sku: product.sku,

@@ -3,7 +3,8 @@ import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/util
 import { useState } from "react";
 import { authorize } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
-import { workspaceContext } from "./lib/context";
+import { validZone } from "./lib/agenda";
+import { type WorkspaceContext, workspaceContext } from "./lib/context";
 import { money } from "./lib/format";
 import { PRODUCT_SORTS, type Figure, type Product, type ProductSort, listProducts } from "./lib/twelfth";
 
@@ -23,9 +24,9 @@ function SearchProducts() {
     [searchText, sort],
     { keepPreviousData: true },
   );
-  // Prices are in the workspace's currency, not dollars by default.
-  const { data: context } = useCachedPromise(() => workspaceContext());
-  const currency = context?.currency;
+  // Prices are in the workspace's currency, not dollars by default. Without the
+  // context the products still list, with bare amounts: no toast for it.
+  const { data: context } = useCachedPromise(() => workspaceContext(), [], { onError: () => undefined });
 
   return (
     <List
@@ -60,7 +61,7 @@ function SearchProducts() {
               : { source: Icon.Dot, tintColor: Color.SecondaryText }
           }
           accessories={showingDetail ? [] : rowAccessories(product)}
-          detail={<ProductDetail product={product} currency={currency} />}
+          detail={<ProductDetail product={product} context={context} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open in Twelfth" url={productUrl(product)} />
@@ -113,7 +114,7 @@ function rowAccessories(product: Product): List.Item.Accessory[] {
   ];
 }
 
-function ProductDetail({ product, currency }: { product: Product; currency: string | undefined }) {
+function ProductDetail({ product, context }: { product: Product; context: WorkspaceContext | undefined }) {
   const { position } = product;
   const Label = List.Item.Detail.Metadata.Label;
   return (
@@ -144,13 +145,20 @@ function ProductDetail({ product, currency }: { product: Product; currency: stri
           <Label title="Units, last 4 weeks" text={number(position.unitsL4w)} />
           <Label title="Units, last year" text={number(position.unitsL1y)} />
           <Label title="Days since sold" text={number(position.daysSinceSold)} />
-          <Label title="Price" text={money(position.price, currency)} />
+          <Label title="Price" text={money(position.price, context?.currency)} />
           <Label title="GP%" text={position.gpPct === null ? "—" : `${position.gpPct.toFixed(1)}%`} />
-          {position.asOf ? <Label title="As of" text={new Date(position.asOf).toLocaleDateString("en-AU")} /> : null}
+          {position.asOf ? <Label title="As of" text={asOfDate(position.asOf, context?.timeZone)} /> : null}
         </List.Item.Detail.Metadata>
       }
     />
   );
+}
+
+/** The data date as a calendar day in the workspace, not on this machine's clock. */
+function asOfDate(asOf: string, timeZone: string | undefined) {
+  const at = new Date(asOf);
+  if (Number.isNaN(at.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeZone: validZone(timeZone) }).format(at);
 }
 
 /** Unmeasured figures are null, never zero, and show as a dash. */
