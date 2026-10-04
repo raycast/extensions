@@ -1,11 +1,11 @@
-import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
+import { Detail, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { Conversation, FormValues, Message } from "../types";
 import { streamAIResponse } from "../services/ai";
 import { ConversationDetailView } from "./ConversationDetailView";
 import { QuestionForm } from "./QuestionForm";
-import { STREAMING_CURSOR, NAVIGATION_DELAY } from "../constants";
+import { STREAMING_CURSOR } from "../constants";
 
 interface AskQuestionViewProps {
   initialQuestion?: string;
@@ -20,14 +20,7 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
   const [userQuestion, setUserQuestion] = useState("");
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const { push, pop } = useNavigation();
-  const isMounted = useRef(false);
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const [conversation, setConversation] = useState<Conversation>();
 
   const generateResponse = useCallback(
     async (question: string, selectedModel?: string) => {
@@ -51,12 +44,8 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
         setIsGenerating(false);
         toast.style = Toast.Style.Success;
         toast.title = "Response completed";
-
-        // The user may have navigated away while the answer streamed; don't hijack their view.
-        if (!isMounted.current) return;
-        pop();
-        await new Promise((resolve) => setTimeout(resolve, NAVIGATION_DELAY));
-        push(<ConversationDetailView conversation={newConversation} updateConversation={updateConversation} />);
+        // Swap to the chat in place rather than pop/push, so a user who already left isn't navigated.
+        setConversation(newConversation);
       } catch (error) {
         console.error("Error:", error);
         setIsGenerating(false);
@@ -66,7 +55,7 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
         setViewState("form");
       }
     },
-    [addConversation, updateConversation, pop, push],
+    [addConversation],
   );
 
   const handleSubmit = useCallback(
@@ -92,6 +81,10 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
     () => `# ${userQuestion}\n\n${streamingText}${isGenerating ? STREAMING_CURSOR : ""}`,
     [userQuestion, streamingText, isGenerating],
   );
+
+  if (conversation) {
+    return <ConversationDetailView conversation={conversation} updateConversation={updateConversation} />;
+  }
 
   if (viewState === "form") {
     return (
