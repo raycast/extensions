@@ -1,6 +1,6 @@
 # Readwise Changelog
 
-## [Add Ask Readwise and update dependencies] - {PR_MERGE_DATE}
+## [Add Ask Readwise and update dependencies] - 2026-10-04
 
 - Add Ask Readwise to browse library entries and summarize saved highlights and notes with Raycast AI.
 - Add AI tools for paginated library and highlight retrieval, with category, library entry, and highlight date filters.
