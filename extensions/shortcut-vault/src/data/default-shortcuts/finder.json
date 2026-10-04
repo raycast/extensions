@@ -1,0 +1,175 @@
+{
+  "ownerName": "Finder",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/en-us/102650",
+  "shortcuts": [
+    {
+      "id": "new-finder-window",
+      "commandName": "New Finder Window",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-folder",
+      "commandName": "New Folder",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-smart-folder",
+      "commandName": "New Smart Folder",
+      "modifiers": ["command", "option"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "open-selected-item",
+      "commandName": "Open Selected Item",
+      "modifiers": ["command"],
+      "key": "O",
+      "scope": "app"
+    },
+    {
+      "id": "get-info",
+      "commandName": "Get Info",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "show-inspector",
+      "commandName": "Show Inspector",
+      "modifiers": ["command", "option"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate",
+      "commandName": "Duplicate Selected Item",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "make-alias",
+      "commandName": "Make Alias",
+      "modifiers": ["command", "control"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "move-to-trash",
+      "commandName": "Move to Trash",
+      "modifiers": ["command"],
+      "key": "Delete",
+      "scope": "app"
+    },
+    {
+      "id": "empty-trash",
+      "commandName": "Empty Trash",
+      "modifiers": ["command", "shift"],
+      "key": "Delete",
+      "scope": "app"
+    },
+    {
+      "id": "find",
+      "commandName": "Find in Finder",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "show-view-options",
+      "commandName": "Show View Options",
+      "modifiers": ["command"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "connect-to-server",
+      "commandName": "Connect to Server",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "go-to-folder",
+      "commandName": "Go to Folder",
+      "modifiers": ["command", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "show-original",
+      "commandName": "Show Original",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "add-to-sidebar",
+      "commandName": "Add to Sidebar",
+      "modifiers": ["command", "control"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "hide-sidebar",
+      "commandName": "Hide or Show Sidebar",
+      "modifiers": ["command", "option"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "show-preview",
+      "commandName": "Show or Hide Preview",
+      "modifiers": ["command", "shift"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "show-path-bar",
+      "commandName": "Show or Hide Path Bar",
+      "modifiers": ["command", "option"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "show-status-bar",
+      "commandName": "Show or Hide Status Bar",
+      "modifiers": ["command"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "icon-view",
+      "commandName": "View as Icons",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "list-view",
+      "commandName": "View as List",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "column-view",
+      "commandName": "View as Columns",
+      "modifiers": ["command"],
+      "key": "3",
+      "scope": "app"
+    },
+    {
+      "id": "gallery-view",
+      "commandName": "View as Gallery",
+      "modifiers": ["command"],
+      "key": "4",
+      "scope": "app"
+    }
+  ]
+}

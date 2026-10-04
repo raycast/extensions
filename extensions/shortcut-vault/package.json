@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shortcut-vault",
+  "title": "Shortcut Vault",
+  "description": "Search, save, import, export, and manage keyboard shortcuts locally.",
+  "icon": "icon.png",
+  "author": "syed_hyder",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-shortcuts",
+      "title": "Search Shortcuts",
+      "description": "Search default and custom shortcuts.",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "add-shortcut",
+      "title": "Add Shortcut",
+      "description": "Save a custom shortcut.",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "export-shortcuts",
+      "title": "Export Shortcuts",
+      "description": "Export custom shortcuts as JSON.",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "import-shortcuts",
+      "title": "Import Shortcuts",
+      "description": "Import custom shortcuts from JSON.",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "scripts": {
+    "validate-data": "node scripts/validate-default-shortcuts.mjs",
+    "generate-data": "npm run validate-data && node scripts/generate-default-shortcuts.mjs && prettier --write src/data/generated-default-shortcuts.ts",
+    "build": "npm run generate-data && ray build -e dist",
+    "dev": "npm run generate-data && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "npm run generate-data && tsc --noEmit",
+    "test": "tsc -p tsconfig.test.json && node .tmp/test-build/scripts/test-import-export-format.js && node .tmp/test-build/scripts/test-shortcut-search.js && node .tmp/test-build/scripts/test-serial-task-queue.js && node .tmp/test-build/scripts/test-storage-mutex.js",
+    "publish": "npx @raycast/api@latest publish",
+    "verify": "npm run validate-data && npm run typecheck && npm run test && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.10",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}

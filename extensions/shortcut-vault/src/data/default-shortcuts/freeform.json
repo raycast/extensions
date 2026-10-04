@@ -1,0 +1,217 @@
+{
+  "ownerName": "Freeform",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/freeform/keyboard-shortcuts-and-gestures-frfm46c25187e/mac",
+  "shortcuts": [
+    {
+      "id": "new-board",
+      "commandName": "Create New Board",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate-board",
+      "commandName": "Create Copy of Board",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-sidebar",
+      "commandName": "Show or Hide Sidebar",
+      "modifiers": ["control", "command"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "icon-view",
+      "commandName": "Show Boards as Icons",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "list-view",
+      "commandName": "Show Boards in List",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "search-boards",
+      "commandName": "Search Boards",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "move-between-items",
+      "commandName": "Move Between Items on Board",
+      "modifiers": [],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate-right",
+      "commandName": "Duplicate Selected Object to the Right",
+      "modifiers": ["option"],
+      "key": "Right",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate-left",
+      "commandName": "Duplicate Selected Object to the Left",
+      "modifiers": ["option"],
+      "key": "Left",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate-above",
+      "commandName": "Duplicate Selected Object Above",
+      "modifiers": ["option"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "duplicate-below",
+      "commandName": "Duplicate Selected Object Below",
+      "modifiers": ["option"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-in",
+      "commandName": "Zoom In",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-out",
+      "commandName": "Zoom Out",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "print-board",
+      "commandName": "Print Board",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "delete-board",
+      "commandName": "Delete Board",
+      "modifiers": [],
+      "key": "Delete",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Freeform Window",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "show-colors",
+      "commandName": "Show Colors Window",
+      "modifiers": ["command", "shift"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "bold",
+      "commandName": "Apply Bold Format",
+      "modifiers": ["command"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "italic",
+      "commandName": "Apply Italic Format",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "underline",
+      "commandName": "Apply Underline Format",
+      "modifiers": ["command"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "increase-font",
+      "commandName": "Increase Font Size",
+      "modifiers": ["command", "option"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "decrease-font",
+      "commandName": "Decrease Font Size",
+      "modifiers": ["command", "option"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "bring-forward",
+      "commandName": "Move Item in Front of One Item",
+      "modifiers": ["command", "option", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "bring-to-front",
+      "commandName": "Move Item in Front of All Items",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "send-backward",
+      "commandName": "Move Item Behind One Item",
+      "modifiers": ["command", "option", "shift"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "send-to-back",
+      "commandName": "Move Item Behind All Items",
+      "modifiers": ["command", "shift"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "group-items",
+      "commandName": "Group Selected Items",
+      "modifiers": ["command", "option"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "ungroup-items",
+      "commandName": "Ungroup Selected Items",
+      "modifiers": ["command", "option", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "lock-items",
+      "commandName": "Lock Items",
+      "modifiers": ["command"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "unlock-items",
+      "commandName": "Unlock Selection",
+      "modifiers": ["command", "option"],
+      "key": "L",
+      "scope": "app"
+    }
+  ]
+}
