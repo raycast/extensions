@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Raycast 1.x support] - {PR_MERGE_DATE}
+## [Raycast 1.x support] - 2026-10-04
 
 - Restore compatibility with Raycast 1.x
 
