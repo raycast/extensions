@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
+import { showToast, Toast } from "@raycast/api";
 import type { Channel } from "./lib/types";
 
 const mocks = vi.hoisted(() => ({ getClient: vi.fn() }));
@@ -21,9 +22,14 @@ const CHANNELS: Channel[] = [
   { id: "uuid-2", name: "random", about: undefined },
 ];
 
+/** A complete listing, the shape listChannels and listDirectMessages resolve to. */
+function listing<T>(items: T[], complete = true) {
+  return { items, complete };
+}
+
 function fakeClient(overrides: Record<string, unknown> = {}) {
   return {
-    listChannels: vi.fn(async () => CHANNELS),
+    listChannels: vi.fn(async () => listing(CHANNELS)),
     getMessages: vi.fn(async () => ({ messages: [], fetchedCount: 0 })),
     ...overrides,
   };
@@ -47,14 +53,16 @@ describe("Search Channels", () => {
   });
 
   it("falls back to the channel id when a channel has no name", async () => {
-    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => [{ id: "uuid-3", name: "" }]) }));
+    mocks.getClient.mockReturnValue(
+      fakeClient({ listChannels: vi.fn(async () => listing([{ id: "uuid-3", name: "" }])) }),
+    );
     render(<Command />);
     const rendered = await items();
     expect(rendered[0]).toHaveAttribute("data-title", "uuid-3");
   });
 
   it("shows the empty view when the relay has no channels", async () => {
-    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => []) }));
+    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => listing([])) }));
     render(<Command />);
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "No channels to show"));
   });
@@ -64,7 +72,7 @@ describe("Search Channels", () => {
     // command never sees the query. Adding one to tell "no channels" apart from
     // "nothing matched" would silently turn that filtering off, so the copy has
     // to be true in both states instead.
-    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => []) }));
+    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => listing([])) }));
     render(<Command />);
     const emptyView = await waitFor(() => screen.getByTestId("empty-view"));
     expect(screen.getByTestId("list")).toHaveAttribute("data-native-filtering", "true");
@@ -138,5 +146,42 @@ describe("Search Channels", () => {
     // The channel link carries a sentinel message id: safe to open, but it
     // would paste into Buzz as a link to a message that does not exist.
     expect(screen.getAllByTestId("action").map((b) => b.dataset.title)).not.toContain("Copy Link");
+  });
+
+  function sectionSubtitle(title: string) {
+    return screen.getAllByTestId("list-section").find((s) => s.dataset.title === title)?.dataset.subtitle;
+  }
+
+  it("flags an incomplete channel list with a subtitle and a toast", async () => {
+    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => listing(CHANNELS, false)) }));
+    render(<Command />);
+    await items();
+
+    expect(sectionSubtitle("Channels")).toBe("May be incomplete");
+    expect(showToast).toHaveBeenCalledWith({
+      style: Toast.Style.Failure,
+      title: "Channel list may be incomplete",
+      message: "The relay has more channel and conversation records than this extension pages through.",
+    });
+  });
+
+  it("does not flag a complete channel list", async () => {
+    mocks.getClient.mockReturnValue(fakeClient());
+    render(<Command />);
+    await items();
+
+    expect(sectionSubtitle("Channels")).toBeUndefined();
+    expect(showToast).not.toHaveBeenCalled();
+  });
+
+  it("does not claim the relay is bare when an empty list is incomplete", async () => {
+    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => listing([], false)) }));
+    render(<Command />);
+    await waitFor(() =>
+      expect(screen.getByTestId("empty-view")).toHaveAttribute(
+        "data-description",
+        "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+      ),
+    );
   });
 });

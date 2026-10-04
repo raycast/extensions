@@ -4,18 +4,19 @@ import { normalizeRelayUrl } from "./relay-url";
 import { getThreadReference, isThreadReply } from "./threading";
 import { parseOpenedChannelId } from "./dm-response";
 import { newestPerAuthor, profileName, shortenPubkey } from "./directory";
-import type { Channel, DirectMessage, Filter, Message, NostrEvent, UserStatus } from "./types";
+import type { Channel, DirectMessage, Filter, Listing, Message, NostrEvent, UserStatus } from "./types";
 
 /** Fetch multiple of the requested limit, since replies are filtered out after the query. */
 const OVER_FETCH = 4;
 /** The relay's documented maximum results per filter. */
 const RELAY_MAX_RESULTS = 500;
 /**
- * How many pages `queryAll` will walk before giving up, bounding both the work
- * and a relay that ignores `until`. 10 pages covers 5000 kind:39000 events,
- * far beyond any workspace this extension is likely to meet.
+ * How many pages `queryAll` will walk before stopping. It exists to bound a
+ * misbehaving relay, not to describe workspace size: 40 pages is 20,000
+ * kind:39000 events, and a walk that hits it reports itself incomplete rather
+ * than presenting what it has as the whole list.
  */
-const MAX_PAGES = 10;
+const MAX_PAGES = 40;
 
 export class RelayError extends Error {
   constructor(message: string) {
@@ -205,48 +206,50 @@ export class BuzzClient {
   }
 
   /**
-   * Every event matching a filter, paging past the relay's per-query ceiling.
+   * Every event matching a filter, paging past the relay's per-query ceiling,
+   * plus whether the walk reached the end.
    *
    * This exists because channels and DM conversations are both kind 39000 and
    * are told apart only by a `t` tag, which a Nostr filter cannot express as an
    * exclusion. A single capped query would hand back an arbitrary 500 of the
-   * combined set and each caller would then filter that truncated slice, so a
-   * workspace with more than 500 of them would silently lose channels from
-   * Search Channels and conversations from Send Message, with no way for the
-   * caller to tell a short list from a complete one.
+   * combined set and each caller would then filter that truncated slice.
    *
-   * Paging walks backwards with `until` set to the oldest `created_at` seen,
-   * inclusive rather than one second earlier, so a run of events sharing a
-   * timestamp cannot fall through the gap between pages. The overlap that
-   * causes is absorbed by deduplicating on event id. `MAX_PAGES` bounds the
-   * walk, and a page that contributes nothing new ends it early, so a relay
-   * that ignores `until` cannot spin here.
+   * Paging uses Buzz's composite cursor, the same one Buzz desktop uses
+   * (`advance_directory_cursor`): after a full page, the next request carries
+   * `until` and `before_id` from the page's last event, and the relay resumes
+   * strictly after it in `(created_at DESC, id ASC)` order. A timestamp alone
+   * cannot do that: a full page sharing one second would come back again.
+   *
+   * Deduplication by event id across pages stays for relays older than the
+   * cursor, which ignore `before_id` and treat `until` as inclusive. On such a
+   * relay a full page that adds nothing new ends the walk, and so does
+   * `MAX_PAGES`; both report `complete: false` so a caller never presents a
+   * partial list as the whole one.
    */
-  private async queryAll(filter: Filter): Promise<NostrEvent[]> {
+  private async queryAll(filter: Filter): Promise<{ events: NostrEvent[]; complete: boolean }> {
     const seen = new Set<string>();
     const all: NostrEvent[] = [];
-    let until: number | undefined;
+    let cursor: { until: number; before_id: string } | undefined;
 
     for (let page = 0; page < MAX_PAGES; page++) {
-      const paged: Filter = { ...filter, limit: RELAY_MAX_RESULTS };
-      if (until !== undefined) paged.until = until;
-      const events = await this.query([paged]);
+      const events = await this.query([{ ...filter, limit: RELAY_MAX_RESULTS, ...cursor }]);
 
-      // Only the deliberate overlap between pages is deduplicated. What a
-      // single page contains is the relay's own answer and is passed through
-      // untouched, so a one-page result is exactly what `query` returned.
+      // Only overlap between pages is deduplicated. What a single page
+      // contains is the relay's own answer and is passed through untouched.
       const fresh = page === 0 ? events : events.filter((event) => !seen.has(event.id));
       all.push(...fresh);
       for (const event of events) seen.add(event.id);
 
       // A short page means the relay had nothing more to give.
-      if (events.length < RELAY_MAX_RESULTS) break;
+      if (events.length < RELAY_MAX_RESULTS) return { events: all, complete: true };
       // A full page carrying nothing new means paging cannot make progress.
-      if (fresh.length === 0) break;
-      until = Math.min(...events.map((event) => event.created_at));
+      if (fresh.length === 0) return { events: all, complete: false };
+      // The relay's own order, not a re-sort: the keyset resumes after this event.
+      const last = events[events.length - 1];
+      cursor = { until: last.created_at, before_id: last.id };
     }
 
-    return all;
+    return { events: all, complete: false };
   }
 
   async publish(event: NostrEvent): Promise<{ accepted: boolean; message: string }> {
@@ -257,16 +260,17 @@ export class BuzzClient {
     return { accepted: data.accepted ?? false, message: data.message ?? "" };
   }
 
-  async listChannels(): Promise<Channel[]> {
-    const events = await this.queryAll({ kinds: [39000] });
+  async listChannels(): Promise<Listing<Channel>> {
+    const { events, complete } = await this.queryAll({ kinds: [39000] });
     // DM conversations are 39000 events too (tagged ["t","dm"]); they are
     // surfaced by listDirectMessages instead, not the regular channel list.
     // A channel with no `d` tag has no usable identifier: it would collide with
     // other such channels as a list key and query messages with an empty h tag.
-    return events
+    const items = events
       .filter((event) => !isDmChannel(event))
       .map(toChannel)
       .filter((channel) => channel.id !== "");
+    return { items, complete };
   }
 
   /**
@@ -415,8 +419,8 @@ export class BuzzClient {
    * where `{kinds:[39000]}` returned 5 events and `{kinds:[39000],"#p":[me]}`
    * returned exactly the 3 containing our pubkey, so the filter is applied
    * rather than ignored. Narrowing matters because the alternative is walking
-   * the whole shared kind:39000 space, which `queryAll` can only page through
-   * up to `MAX_PAGES` before it starts silently dropping conversations.
+   * the whole shared kind:39000 space, which is far larger and can exhaust
+   * `queryAll`'s page cap.
    *
    * Buzz is self-hostable, so a relay on the other end may be older than the
    * one probed. Two guards cover that, in the two directions it can fail:
@@ -425,10 +429,11 @@ export class BuzzClient {
    * SUPPORT them returns nothing, which would silently empty the list, so an
    * empty answer retries unfiltered rather than being believed.
    */
-  async listDirectMessages(): Promise<DirectMessage[]> {
+  async listDirectMessages(): Promise<Listing<DirectMessage>> {
     const me = getPublicKeyHex(this.secretKey);
     const narrowed = await this.queryAll({ kinds: [39000], "#p": [me], "#t": ["dm"] });
-    const events = narrowed.length > 0 ? narrowed : await this.queryAll({ kinds: [39000] });
+    // `complete` comes from whichever walk supplied the events.
+    const { events, complete } = narrowed.events.length > 0 ? narrowed : await this.queryAll({ kinds: [39000] });
 
     const conversations = events
       .filter((event) => isDmChannel(event) && hasParticipant(event, me))
@@ -457,10 +462,13 @@ export class BuzzClient {
     const others = [...new Set(deduped.flatMap((c) => c.participants))];
     const names = await this.lookupProfiles(others);
 
-    return deduped.map((conversation) => ({
-      ...conversation,
-      name: conversation.participants.map((pk) => names.get(pk) ?? shortenPubkey(pk)).join(", ") || "Direct message",
-    }));
+    return {
+      items: deduped.map((conversation) => ({
+        ...conversation,
+        name: conversation.participants.map((pk) => names.get(pk) ?? shortenPubkey(pk)).join(", ") || "Direct message",
+      })),
+      complete,
+    };
   }
 
   /**

@@ -307,6 +307,117 @@ describe("BuzzClient paging over the shared kind:39000 space", () => {
     );
   }
 
+  /**
+   * A relay that answers the way Buzz's HTTP bridge does: newest first with
+   * ties broken by ascending id, `until` inclusive on its own, and the keyset
+   * `created_at < until OR (created_at = until AND id > before_id)` once
+   * `before_id` is present (upstream crates/buzz-db/src/event.rs).
+   * `honoursBeforeId: false` models a build older than relay-v0.1.1, whose
+   * filter parser drops the unknown field.
+   */
+  function keysetRelay(client: BuzzClient, events: NostrEvent[], { honoursBeforeId = true } = {}) {
+    const ordered = [...events].sort((a, b) => b.created_at - a.created_at || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    return vi.spyOn(client, "query").mockImplementation(async ([filter]) =>
+      ordered
+        .filter((e) => filter.kinds === undefined || filter.kinds.includes(e.kind))
+        .filter((e) =>
+          Object.entries(filter)
+            .filter(([key]) => key.startsWith("#"))
+            .every(([key, values]) => e.tags.some((t) => t[0] === key.slice(1) && (values as string[]).includes(t[1]))),
+        )
+        .filter((e) => {
+          if (filter.until === undefined) return true;
+          if (honoursBeforeId && filter.before_id !== undefined) {
+            return e.created_at < filter.until || (e.created_at === filter.until && e.id > filter.before_id);
+          }
+          return e.created_at <= filter.until;
+        })
+        .slice(0, filter.limit),
+    );
+  }
+
+  /** `count` channel events that all share one created_at, ids sorting in order. */
+  function sameSecond(count: number, createdAt = 5000, extraTags: string[][] = []): NostrEvent[] {
+    return Array.from({ length: count }, (_, i) => {
+      const n = String(i).padStart(5, "0");
+      return ev({ id: `s${n}`, kind: 39000, created_at: createdAt, tags: [["d", `same-${n}`], ...extraTags] });
+    });
+  }
+
+  it("finds an old channel behind 5,000 newer conversations (reviewer's repro)", async () => {
+    const dms = Array.from({ length: 5000 }, (_, i) =>
+      ev({
+        id: `dm${String(i).padStart(5, "0")}`,
+        kind: 39000,
+        created_at: 20000 - Math.floor(i / 1000),
+        tags: [
+          ["d", `dm-${i}`],
+          ["t", "dm"],
+          ["p", "aa".repeat(32)],
+        ],
+      }),
+    );
+    const channel = ev({
+      id: "old",
+      kind: 39000,
+      created_at: 1,
+      tags: [
+        ["d", "chan-old"],
+        ["name", "general"],
+      ],
+    });
+    const client = new BuzzClient("https://relay.test", SK);
+    keysetRelay(client, [...dms, channel]);
+
+    const { items, complete } = await client.listChannels();
+
+    expect(items.map((c) => c.id)).toEqual(["chan-old"]);
+    expect(complete).toBe(true);
+  });
+
+  it("keeps paging through a full page that shares one timestamp", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    keysetRelay(client, sameSecond(1000));
+
+    const { items, complete } = await client.listChannels();
+
+    expect(items).toHaveLength(1000);
+    expect(new Set(items.map((c) => c.id)).size).toBe(1000);
+    expect(complete).toBe(true);
+  });
+
+  it("resumes from the last event of the page with until and before_id together", async () => {
+    const events = Array.from({ length: 600 }, (_, i) =>
+      ev({ id: `e${String(i).padStart(5, "0")}`, kind: 39000, created_at: 9000 - i, tags: [["d", `c${i}`]] }),
+    );
+    const client = new BuzzClient("https://relay.test", SK);
+    const q = keysetRelay(client, events);
+
+    await client.listChannels();
+
+    expect(q.mock.calls[0][0]).toEqual([{ kinds: [39000], limit: 500 }]);
+    expect(q.mock.calls[1][0]).toEqual([{ kinds: [39000], limit: 500, until: 8501, before_id: "e00499" }]);
+    expect(q).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports incomplete when a relay ignoring before_id repeats a full page", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    const q = keysetRelay(client, sameSecond(1000), { honoursBeforeId: false });
+
+    const { items, complete } = await client.listChannels();
+
+    expect(items).toHaveLength(500);
+    expect(complete).toBe(false);
+    expect(q).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports complete when the last page is short", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    keysetRelay(client, sameSecond(10));
+
+    expect((await client.listChannels()).complete).toBe(true);
+  });
+
   it("keeps paging while the relay returns a full page, so nothing is lost past 500", async () => {
     // Channels and conversations share kind 39000, so a single capped query
     // would hand back an arbitrary 500 of the combined set and each caller
@@ -318,25 +429,12 @@ describe("BuzzClient paging over the shared kind:39000 space", () => {
       .mockResolvedValueOnce(page(500, 8000))
       .mockResolvedValueOnce([ev({ id: "tail", kind: 39000, tags: [["d", "chan-tail"]] })]);
 
-    const channels = await client.listChannels();
+    const channels = (await client.listChannels()).items;
 
     expect(channels).toHaveLength(1001);
     expect(channels[0].id).toBe("chan-0");
     expect(channels[channels.length - 1].id).toBe("chan-tail");
     expect(q).toHaveBeenCalledTimes(3);
-  });
-
-  it("walks backwards with until set to the oldest event seen, inclusive", async () => {
-    const client = new BuzzClient("https://relay.test", SK);
-    const q = vi.spyOn(client, "query").mockResolvedValueOnce(page(0, 9000)).mockResolvedValueOnce([]);
-
-    await client.listChannels();
-
-    // First page carries no cursor; the second resumes at the oldest timestamp
-    // of the first (9000 - 499), inclusive so a run of events sharing a
-    // timestamp cannot fall through the gap between pages.
-    expect(q.mock.calls[0][0]).toEqual([{ kinds: [39000], limit: 500 }]);
-    expect(q.mock.calls[1][0]).toEqual([{ kinds: [39000], limit: 500, until: 8501 }]);
   });
 
   it("deduplicates the overlap the inclusive cursor causes", async () => {
@@ -348,7 +446,7 @@ describe("BuzzClient paging over the shared kind:39000 space", () => {
     // The second page is full too, so paging correctly asks for a third.
     vi.spyOn(client, "query").mockResolvedValueOnce(first).mockResolvedValueOnce(second).mockResolvedValueOnce([]);
 
-    const channels = await client.listChannels();
+    const channels = (await client.listChannels()).items;
     const ids = channels.map((c) => c.id);
 
     expect(new Set(ids).size).toBe(ids.length);
@@ -360,25 +458,27 @@ describe("BuzzClient paging over the shared kind:39000 space", () => {
     const repeated = page(0, 9000);
     const q = vi.spyOn(client, "query").mockResolvedValue(repeated);
 
-    const channels = await client.listChannels();
+    const { items, complete } = await client.listChannels();
 
-    expect(channels).toHaveLength(500);
+    expect(items).toHaveLength(500);
+    expect(complete).toBe(false);
     expect(q).toHaveBeenCalledTimes(2);
   });
 
-  it("stops at the page cap rather than walking a relay forever", async () => {
+  it("stops at the page cap and reports the list as incomplete", async () => {
     const client = new BuzzClient("https://relay.test", SK);
     let n = 0;
     const q = vi.spyOn(client, "query").mockImplementation(async () => {
-      const events = page(n * 500, 9000 - n * 500);
+      const events = page(n * 500, 90000 - n * 500);
       n++;
       return events;
     });
 
-    const channels = await client.listChannels();
+    const { items, complete } = await client.listChannels();
 
-    expect(q).toHaveBeenCalledTimes(10);
-    expect(channels).toHaveLength(5000);
+    expect(q).toHaveBeenCalledTimes(40);
+    expect(items).toHaveLength(20000);
+    expect(complete).toBe(false);
   });
 
   it("pages the conversation list too, since it reads the same shared space", async () => {
@@ -390,7 +490,7 @@ describe("BuzzClient paging over the shared kind:39000 space", () => {
       .mockResolvedValueOnce([dmEvent("chan-dm", [me, "aa".repeat(32)])])
       .mockResolvedValueOnce([]);
 
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
 
     // Two paging calls over kind 39000, then the profile lookup for the name.
     expect(q).toHaveBeenCalledTimes(3);
@@ -411,7 +511,7 @@ describe("BuzzClient.listChannels", () => {
         ],
       }),
     ]);
-    const channels = await client.listChannels();
+    const channels = (await client.listChannels()).items;
     expect(qSpy).toHaveBeenCalledWith([{ kinds: [39000], limit: 500 }]);
     expect(channels).toEqual([{ id: "uuid-1", name: "general", about: "the main room" }]);
   });
@@ -428,7 +528,7 @@ describe("BuzzClient.listChannels", () => {
   it("keeps an identified channel that carries no name or about tag", async () => {
     const client = new BuzzClient("https://relay.test", SK);
     vi.spyOn(client, "query").mockResolvedValue([ev({ kind: 39000, tags: [["d", "uuid-9"]] })]);
-    expect(await client.listChannels()).toEqual([{ id: "uuid-9", name: "", about: undefined }]);
+    expect((await client.listChannels()).items).toEqual([{ id: "uuid-9", name: "", about: undefined }]);
   });
 
   it("drops channels with no d tag, which have no usable identifier", async () => {
@@ -444,7 +544,7 @@ describe("BuzzClient.listChannels", () => {
       }),
       ev({ kind: 39000, tags: [["name", "also-no-identifier"]] }),
     ]);
-    const channels = await client.listChannels();
+    const channels = (await client.listChannels()).items;
     expect(channels).toEqual([{ id: "uuid-1", name: "general", about: undefined }]);
   });
 
@@ -467,7 +567,7 @@ describe("BuzzClient.listChannels", () => {
         ],
       }),
     ]);
-    const channels = await client.listChannels();
+    const channels = (await client.listChannels()).items;
     expect(channels.map((c) => c.id)).toEqual(["normal-channel"]);
   });
 
@@ -486,7 +586,7 @@ describe("BuzzClient.listChannels", () => {
         ],
       }),
     ]);
-    expect((await client.listChannels()).map((c) => c.id)).toEqual(["topical-channel"]);
+    expect((await client.listChannels()).items.map((c) => c.id)).toEqual(["topical-channel"]);
   });
 
   it("reads the real d tag past a valueless one", async () => {
@@ -496,7 +596,7 @@ describe("BuzzClient.listChannels", () => {
     vi.spyOn(client, "query").mockResolvedValue([
       ev({ kind: 39000, tags: [["d"], ["d", "real-id"], ["name", "General"]] }),
     ]);
-    expect(await client.listChannels()).toEqual([{ id: "real-id", name: "General", about: undefined }]);
+    expect((await client.listChannels()).items).toEqual([{ id: "real-id", name: "General", about: undefined }]);
   });
 
   it("ignores a tag the relay sent as a bare string", async () => {
@@ -506,7 +606,7 @@ describe("BuzzClient.listChannels", () => {
     vi.spyOn(client, "query").mockResolvedValue([
       ev({ kind: 39000, tags: [stringTag("dinner"), ["d", "real-id"], ["name", "General"]] }),
     ]);
-    expect(await client.listChannels()).toEqual([{ id: "real-id", name: "General", about: undefined }]);
+    expect((await client.listChannels()).items).toEqual([{ id: "real-id", name: "General", about: undefined }]);
   });
 });
 
@@ -1176,21 +1276,61 @@ describe("lookupProfiles", () => {
 });
 
 describe("listDirectMessages", () => {
+  it("reports incomplete when the narrowed query could not be walked to the end", async () => {
+    const me = ownPubkey();
+    const client = new BuzzClient("https://relay.test", SK);
+    const tied = Array.from({ length: 1000 }, (_, i) => ({
+      ...dmEvent(`chan-t${String(i).padStart(5, "0")}`, [me]),
+      created_at: 5000,
+    }));
+    // An old relay: honours #p/#t but ignores before_id, so the tie repeats.
+    vi.spyOn(client, "query").mockImplementation(async ([filter]) => {
+      if (filter.kinds?.[0] === 0) return [];
+      return [...tied].sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, filter.limit);
+    });
+
+    const { items, complete } = await client.listDirectMessages();
+
+    expect(items).toHaveLength(500);
+    expect(complete).toBe(false);
+  });
+
+  it("takes complete from the unfiltered retry when the narrowed query came back empty", async () => {
+    const me = ownPubkey();
+    const client = new BuzzClient("https://relay.test", SK);
+    const tied = Array.from({ length: 1000 }, (_, i) => ({
+      ...dmEvent(`chan-u${String(i).padStart(5, "0")}`, [me]),
+      created_at: 5000,
+    }));
+    // A relay without tag-filter support answers the narrowed query with
+    // nothing, then repeats a full page on the unfiltered walk.
+    vi.spyOn(client, "query").mockImplementation(async ([filter]) => {
+      if (filter.kinds?.[0] === 0 || filter["#p"] !== undefined) return [];
+      return [...tied].sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, filter.limit);
+    });
+
+    const { items, complete } = await client.listDirectMessages();
+
+    expect(items).toHaveLength(500);
+    expect(complete).toBe(false);
+  });
+
   it("lists conversations, naming them by the other participants", async () => {
     const me = ownPubkey();
     const { client } = clientWithResponses([
       [dmEvent("chan-1", [me, "aa".repeat(32)])],
       [profileEvent("aa".repeat(32), '{"display_name":"Ada"}')],
     ]);
-    const dms = await client.listDirectMessages();
-
-    expect(dms).toEqual([{ channelId: "chan-1", participants: ["aa".repeat(32)], name: "Ada" }]);
+    expect(await client.listDirectMessages()).toEqual({
+      items: [{ channelId: "chan-1", participants: ["aa".repeat(32)], name: "Ada" }],
+      complete: true,
+    });
   });
 
   it("falls back to a shortened pubkey when a participant has no profile", async () => {
     const me = ownPubkey();
     const { client } = clientWithResponses([[dmEvent("chan-2", [me, "ab".repeat(32)])], []]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms[0].name).toBe("abababab");
   });
 
@@ -1200,7 +1340,7 @@ describe("listDirectMessages", () => {
       [dmEvent("chan-3", [me, "aa".repeat(32), "bb".repeat(32)])],
       [profileEvent("aa".repeat(32), '{"name":"Ada"}'), profileEvent("bb".repeat(32), '{"name":"Bo"}')],
     ]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms[0].name).toBe("Ada, Bo");
     expect(dms[0].participants).toEqual(["aa".repeat(32), "bb".repeat(32)]);
   });
@@ -1208,7 +1348,7 @@ describe("listDirectMessages", () => {
   it("names a conversation with nobody else 'Direct message'", async () => {
     const me = ownPubkey();
     const { client } = clientWithResponses([[dmEvent("chan-4", [me])]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms[0]).toEqual({ channelId: "chan-4", participants: [], name: "Direct message" });
   });
 
@@ -1226,7 +1366,7 @@ describe("listDirectMessages", () => {
         dmEvent("chan-6", [me]),
       ],
     ]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms.map((d) => d.channelId)).toEqual(["chan-6"]);
   });
 
@@ -1244,7 +1384,7 @@ describe("listDirectMessages", () => {
     // Two empty answers: the narrowed query, then the unfiltered retry it
     // falls back to. Neither yields a participant, so no kind:0 query follows.
     const { client, calls } = clientWithResponses([[], []]);
-    expect(await client.listDirectMessages()).toEqual([]);
+    expect((await client.listDirectMessages()).items).toEqual([]);
     expect(calls.map((call) => (call.body as Filter[])[0].kinds)).toEqual([[39000], [39000]]);
   });
 
@@ -1255,7 +1395,7 @@ describe("listDirectMessages", () => {
       tags: [["d", "chan-9"], ["t", "dm"], ["p", me], ["p"], ["p", "aa".repeat(32)]],
     };
     const { client } = clientWithResponses([[malformed], [profileEvent("aa".repeat(32), '{"name":"Ada"}')]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms).toEqual([{ channelId: "chan-9", participants: ["aa".repeat(32)], name: "Ada" }]);
   });
 
@@ -1265,7 +1405,7 @@ describe("listDirectMessages", () => {
       [dmEvent("chan-10", [me, "aa".repeat(32)]), dmEvent("chan-10", [me, "bb".repeat(32)])],
       [profileEvent("aa".repeat(32), '{"name":"Ada"}')],
     ]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms.map((d) => d.channelId)).toEqual(["chan-10"]);
     expect(dms[0].participants).toEqual(["aa".repeat(32)]);
   });
@@ -1279,7 +1419,7 @@ describe("listDirectMessages", () => {
     const ours = dmEvent("chan-ours", [me, "aa".repeat(32)]);
     const notOurs = dmEvent("chan-11", ["aa".repeat(32), "bb".repeat(32)]);
     const { client } = clientWithResponses([[ours, notOurs], []]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms.map((dm) => dm.channelId)).toEqual(["chan-ours"]);
   });
 
@@ -1299,7 +1439,7 @@ describe("listDirectMessages", () => {
       sig: "s",
     };
     const { client } = clientWithResponses([[normalChannel]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms).toEqual([]);
   });
 
@@ -1319,7 +1459,7 @@ describe("listDirectMessages", () => {
       ],
     };
     const { client } = clientWithResponses([[topical, dmEvent("chan-real", [me])]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms.map((d) => d.channelId)).toEqual(["chan-real"]);
   });
 
@@ -1330,7 +1470,7 @@ describe("listDirectMessages", () => {
       tags: [["d"], ["d", "chan-14"], ["t", "dm"], ["p", me], ["p", "aa".repeat(32)]],
     };
     const { client } = clientWithResponses([[shadowed], [profileEvent("aa".repeat(32), '{"name":"Ada"}')]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     // A valueless `d` shadowing the real one empties the channel id, which
     // drops the whole conversation from the list.
     expect(dms).toEqual([{ channelId: "chan-14", participants: ["aa".repeat(32)], name: "Ada" }]);
@@ -1345,7 +1485,7 @@ describe("listDirectMessages", () => {
       tags: [stringTag("private"), ["d", "chan-15"], ["t", "dm"], ["p", me], ["p", "aa".repeat(32)]],
     };
     const { client } = clientWithResponses([[withStringTag], [profileEvent("aa".repeat(32), '{"name":"Ada"}')]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms).toEqual([{ channelId: "chan-15", participants: ["aa".repeat(32)], name: "Ada" }]);
   });
 
@@ -1370,7 +1510,7 @@ describe("listDirectMessages", () => {
       sig: "s",
     };
     const { client } = clientWithResponses([[withValuelessTags], [profileEvent("aa".repeat(32), '{"name":"Ada"}')]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(dms).toEqual([{ channelId: "chan-13", participants: ["aa".repeat(32)], name: "Ada" }]);
   });
 
@@ -1386,7 +1526,7 @@ describe("listDirectMessages", () => {
     // A relay that does not support the tag filters answers the narrowed query
     // with nothing rather than an error, which would silently empty the list.
     const { client, calls } = clientWithResponses([[], [dmEvent("chan-fallback", [me])]]);
-    const dms = await client.listDirectMessages();
+    const dms = (await client.listDirectMessages()).items;
     expect(calls[1].body).toEqual([{ kinds: [39000], limit: 500 }]);
     expect(dms.map((dm) => dm.channelId)).toEqual(["chan-fallback"]);
   });

@@ -6,7 +6,8 @@ import { searchPeople } from "./lib/directory";
 import { errorMessage } from "./lib/errors";
 import { ErrorView } from "./components/error-view";
 import { ComposeMessage } from "./components/compose-message";
-import type { DirectMessage, Person } from "./lib/types";
+import { INCOMPLETE_EMPTY_DESCRIPTION, INCOMPLETE_SUBTITLE, incompleteToast } from "./lib/incomplete";
+import type { DirectMessage, Listing, Person } from "./lib/types";
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -25,18 +26,40 @@ export default function Command() {
     // channel shipped long before DMs existed and must not stop working because
     // a DM query failed, so that one degrades to an empty section plus a toast.
     // Set Status draws the same line around its own status fetch.
+    // The failure is recorded here and toasted after Promise.all, because
+    // Raycast shows one toast at a time and the incomplete toasts below would
+    // otherwise replace it, leaving no Direct Messages section and no reason.
+    let conversationsError: unknown;
+    let conversationsFailed = false;
     const [channels, conversations] = await Promise.all([
       client.listChannels(),
-      client.listDirectMessages().catch(async (e: unknown) => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Could not load conversations",
-          message: errorMessage(e),
-        });
-        return [] as DirectMessage[];
+      client.listDirectMessages().catch((e: unknown): Listing<DirectMessage> => {
+        conversationsFailed = true;
+        conversationsError = e;
+        // Not a partial list but no list at all, and the toast below says so;
+        // flagging it incomplete too would stack a second warning.
+        return { items: [], complete: true };
       }),
     ]);
-    return { client, channels, conversations };
+    if (conversationsFailed) {
+      // Incomplete sections still carry their lasting subtitle, so the failure
+      // takes the one toast slot.
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not load conversations",
+        message: errorMessage(conversationsError),
+      });
+    } else {
+      if (!channels.complete) await showToast(incompleteToast("Channel"));
+      if (!conversations.complete) await showToast(incompleteToast("Conversation"));
+    }
+    return {
+      client,
+      channels: channels.items,
+      conversations: conversations.items,
+      channelsComplete: channels.complete,
+      conversationsComplete: conversations.complete,
+    };
   });
 
   const hasQuery = query.trim() !== "";
@@ -83,13 +106,27 @@ export default function Command() {
           query, so it can tell them apart and must, rather than telling someone
           who just searched that the relay is bare. */}
       {hasQuery ? (
-        <List.EmptyView title="No matches" description="No channel, conversation or person matches this search" />
+        <List.EmptyView
+          title="No matches"
+          description={
+            data && !(data.channelsComplete && data.conversationsComplete)
+              ? INCOMPLETE_EMPTY_DESCRIPTION
+              : "No channel, conversation or person matches this search"
+          }
+        />
       ) : (
-        <List.EmptyView title="Nothing to write to" description="No channels or conversations on this relay" />
+        <List.EmptyView
+          title="Nothing to write to"
+          description={
+            data && !(data.channelsComplete && data.conversationsComplete)
+              ? INCOMPLETE_EMPTY_DESCRIPTION
+              : "No channels or conversations on this relay"
+          }
+        />
       )}
 
       {data && (
-        <List.Section title="Channels">
+        <List.Section title="Channels" subtitle={data.channelsComplete ? undefined : INCOMPLETE_SUBTITLE}>
           {data.channels.map((channel) => (
             <List.Item
               key={channel.id}
@@ -118,7 +155,7 @@ export default function Command() {
       )}
 
       {data && (
-        <List.Section title="Direct Messages">
+        <List.Section title="Direct Messages" subtitle={data.conversationsComplete ? undefined : INCOMPLETE_SUBTITLE}>
           {data.conversations.map((conversation) => (
             <List.Item
               key={conversation.channelId}

@@ -1,20 +1,26 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getClient } from "./lib/preferences";
 import { ErrorView } from "./components/error-view";
 import { ChannelMessages } from "./components/channel-messages";
 import { buildChannelLink } from "./lib/buzz-link";
+import { INCOMPLETE_EMPTY_DESCRIPTION, INCOMPLETE_SUBTITLE, incompleteToast } from "./lib/incomplete";
 
 export default function Command() {
   const { isLoading, data, error } = usePromise(async () => {
     const client = getClient();
-    const channels = await client.listChannels();
-    return { client, channels };
+    const { items: channels, complete } = await client.listChannels();
+    // The walk stopped before the relay ran out (see BuzzClient.queryAll), so
+    // say so rather than present a partial list as the whole one.
+    if (!complete) await showToast(incompleteToast("Channel"));
+    return { client, channels, complete };
   });
 
   if (error) {
     return <ErrorView error={error} />;
   }
+
+  const incomplete = data?.complete === false;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter channels">
@@ -25,30 +31,35 @@ export default function Command() {
           claiming the relay has no channels when it may have plenty. */}
       <List.EmptyView
         title="No channels to show"
-        description="This relay has no channels, or none match the current filter."
+        description={
+          incomplete ? INCOMPLETE_EMPTY_DESCRIPTION : "This relay has no channels, or none match the current filter."
+        }
       />
-      {/* Guarded once, on `data` itself, rather than per row: inside the map
-          `data` is necessarily present, so `data.client` needs no second hop. */}
-      {data &&
-        data.channels.map((channel) => (
-          <List.Item
-            key={channel.id}
-            title={channel.name || channel.id}
-            subtitle={channel.about}
-            actions={
-              <ActionPanel>
-                {/* channel.id has no native buzz://channel link; buildChannelLink anchors it
+      {/* A section only so an incomplete walk has a lasting place to say so. */}
+      <List.Section title="Channels" subtitle={incomplete ? INCOMPLETE_SUBTITLE : undefined}>
+        {/* Guarded once, on `data` itself, rather than per row: inside the map
+            `data` is necessarily present, so `data.client` needs no second hop. */}
+        {data &&
+          data.channels.map((channel) => (
+            <List.Item
+              key={channel.id}
+              title={channel.name || channel.id}
+              subtitle={channel.about}
+              actions={
+                <ActionPanel>
+                  {/* channel.id has no native buzz://channel link; buildChannelLink anchors it
                     to a message that cannot exist, and Buzz falls back to opening the channel. */}
-                <Action.Open title="Open in Buzz" target={buildChannelLink(channel.id)} icon={Icon.AppWindow} />
-                <Action.Push
-                  title="Show Messages"
-                  target={<ChannelMessages client={data.client} channel={channel} />}
-                />
-                <Action.CopyToClipboard title="Copy Channel ID" content={channel.id} />
-              </ActionPanel>
-            }
-          />
-        ))}
+                  <Action.Open title="Open in Buzz" target={buildChannelLink(channel.id)} icon={Icon.AppWindow} />
+                  <Action.Push
+                    title="Show Messages"
+                    target={<ChannelMessages client={data.client} channel={channel} />}
+                  />
+                  <Action.CopyToClipboard title="Copy Channel ID" content={channel.id} />
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List.Section>
     </List>
   );
 }

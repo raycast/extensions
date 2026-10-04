@@ -22,8 +22,8 @@ async function main() {
     const client = new BuzzClient(relayUrl, secretKey);
 
     console.log("Listing channels...");
-    const channels = await client.listChannels();
-    console.log(`Found ${channels.length} channel(s)`);
+    const { items: channels, complete: channelsComplete } = await client.listChannels();
+    console.log(`Found ${channels.length} channel(s)${channelsComplete ? "" : " (list may be incomplete)"}`);
 
     if (channels.length === 0) {
       console.log("No channels available; skipping send/read test (auth verified)");
@@ -99,12 +99,14 @@ async function main() {
       }
       console.log("PASS: opening the same DM twice is idempotent");
 
-      const conversations = await client.listDirectMessages();
+      const { items: conversations, complete: conversationsComplete } = await client.listDirectMessages();
       if (!conversations.some((c) => c.channelId === channelId)) {
         console.log(`FAIL: listDirectMessages did not include the just-opened ${channelId}`);
         process.exit(1);
       }
-      console.log(`PASS: listDirectMessages includes it, ${conversations.length} conversation(s) total`);
+      console.log(
+        `PASS: listDirectMessages includes it, ${conversations.length} conversation(s) total${conversationsComplete ? "" : " (list may be incomplete)"}`,
+      );
     } else {
       console.log("Skipping the DM check: set BUZZ_SMOKE_DM_PUBKEY to run it");
     }

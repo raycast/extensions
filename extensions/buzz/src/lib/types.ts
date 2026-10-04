@@ -23,6 +23,11 @@ export type Filter = {
   until?: number;
   limit?: number;
   search?: string;
+  /**
+   * Buzz's keyset cursor extension, sent only together with `until`: the relay
+   * resumes after `(until, before_id)` in `(created_at DESC, id ASC)` order.
+   */
+  before_id?: string;
 } & { [tag: `#${string}`]: string[] | undefined };
 
 export interface Channel {
@@ -65,4 +70,14 @@ export interface DirectMessage {
   participants: string[];
   /** Resolved participant names, joined, for the list row. */
   name: string;
+}
+
+/**
+ * A list read by walking the relay, with whether the walk reached the end.
+ * `complete: false` means the walk stopped early (its page cap, or a relay that
+ * could not advance), so the items are a prefix, not the whole list.
+ */
+export interface Listing<T> {
+  items: T[];
+  complete: boolean;
 }

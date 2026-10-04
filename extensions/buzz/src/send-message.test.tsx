@@ -38,10 +38,15 @@ const DMS: DirectMessage[] = [{ channelId: "dm-1", participants: ["aa".repeat(32
 
 const PEOPLE: Person[] = [{ pubkey: "bb".repeat(32), name: "Bo" }];
 
+/** A complete listing, the shape listChannels and listDirectMessages resolve to. */
+function listing<T>(items: T[], complete = true) {
+  return { items, complete };
+}
+
 function fakeClient(overrides: Record<string, unknown> = {}) {
   return {
-    listChannels: vi.fn(async () => CHANNELS),
-    listDirectMessages: vi.fn(async () => DMS),
+    listChannels: vi.fn(async () => listing(CHANNELS)),
+    listDirectMessages: vi.fn(async () => listing(DMS)),
     openDirectMessage: vi.fn(async () => "opened-chan"),
     sendMessage: vi.fn(async () => undefined),
     ...overrides,
@@ -91,7 +96,9 @@ describe("Send Message", () => {
   });
 
   it("labels a nameless channel with its id", async () => {
-    mocks.getClient.mockReturnValue(fakeClient({ listChannels: vi.fn(async () => [{ id: "chan-9", name: "" }]) }));
+    mocks.getClient.mockReturnValue(
+      fakeClient({ listChannels: vi.fn(async () => listing([{ id: "chan-9", name: "" }])) }),
+    );
     render(<Command />);
     await waitFor(() => expect(rowTitled("chan-9")).toBeTruthy());
   });
@@ -411,7 +418,7 @@ describe("Send Message", () => {
 
   it("shows an empty state when there is nothing to write to", async () => {
     mocks.getClient.mockReturnValue(
-      fakeClient({ listChannels: vi.fn(async () => []), listDirectMessages: vi.fn(async () => []) }),
+      fakeClient({ listChannels: vi.fn(async () => listing([])), listDirectMessages: vi.fn(async () => listing([])) }),
     );
     render(<Command />);
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "Nothing to write to"));
@@ -425,7 +432,7 @@ describe("Send Message", () => {
     // The relay loaded fine; the query simply matched nothing. Telling the user
     // there is nothing on the relay would be a different, wrong diagnosis.
     mocks.getClient.mockReturnValue(
-      fakeClient({ listChannels: vi.fn(async () => []), listDirectMessages: vi.fn(async () => []) }),
+      fakeClient({ listChannels: vi.fn(async () => listing([])), listDirectMessages: vi.fn(async () => listing([])) }),
     );
     render(<Command />);
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "Nothing to write to"));
@@ -438,7 +445,7 @@ describe("Send Message", () => {
 
   it("goes back to the relay-is-empty copy when the query is cleared", async () => {
     mocks.getClient.mockReturnValue(
-      fakeClient({ listChannels: vi.fn(async () => []), listDirectMessages: vi.fn(async () => []) }),
+      fakeClient({ listChannels: vi.fn(async () => listing([])), listDirectMessages: vi.fn(async () => listing([])) }),
     );
     render(<Command />);
     search("nothing matches this");
@@ -447,5 +454,105 @@ describe("Send Message", () => {
     search("");
 
     await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "Nothing to write to"));
+  });
+
+  function sectionSubtitle(title: string) {
+    return screen.getAllByTestId("list-section").find((s) => s.dataset.title === title)?.dataset.subtitle;
+  }
+
+  it("flags each incomplete section with its own subtitle and toast", async () => {
+    mocks.getClient.mockReturnValue(
+      fakeClient({
+        listChannels: vi.fn(async () => listing(CHANNELS, false)),
+        listDirectMessages: vi.fn(async () => listing(DMS, false)),
+      }),
+    );
+    render(<Command />);
+    await loaded();
+
+    expect(sectionSubtitle("Channels")).toBe("May be incomplete");
+    expect(sectionSubtitle("Direct Messages")).toBe("May be incomplete");
+    expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Channel list may be incomplete" }));
+    expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Conversation list may be incomplete" }));
+  });
+
+  it("flags only the section that is incomplete", async () => {
+    mocks.getClient.mockReturnValue(fakeClient({ listDirectMessages: vi.fn(async () => listing(DMS, false)) }));
+    render(<Command />);
+    await loaded();
+
+    expect(sectionSubtitle("Channels")).toBeUndefined();
+    expect(sectionSubtitle("Direct Messages")).toBe("May be incomplete");
+    expect(showToast).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not add an incomplete warning on top of a failed conversation fetch", async () => {
+    mocks.getClient.mockReturnValue(
+      fakeClient({
+        listDirectMessages: vi.fn(async () => {
+          throw new Error("Relay rejected the request: not allowed");
+        }),
+      }),
+    );
+    render(<Command />);
+    await loaded();
+
+    expect(showToast).toHaveBeenCalledTimes(1);
+    expect(showToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Could not load conversations" }));
+    expect(sectionSubtitle("Direct Messages")).toBeUndefined();
+  });
+
+  it("does not claim the relay is bare when an empty list is incomplete", async () => {
+    mocks.getClient.mockReturnValue(
+      fakeClient({
+        listChannels: vi.fn(async () => listing([], false)),
+        listDirectMessages: vi.fn(async () => listing([])),
+      }),
+    );
+    render(<Command />);
+    await waitFor(() =>
+      expect(screen.getByTestId("empty-view")).toHaveAttribute(
+        "data-description",
+        "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+      ),
+    );
+  });
+  it("says the list may be incomplete when a search matches nothing in an incomplete list", async () => {
+    mocks.getClient.mockReturnValue(
+      fakeClient({
+        listChannels: vi.fn(async () => listing([], false)),
+        listDirectMessages: vi.fn(async () => listing([])),
+      }),
+    );
+    render(<Command />);
+    await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "Nothing to write to"));
+    search("zzz");
+
+    await waitFor(() => expect(screen.getByTestId("empty-view")).toHaveAttribute("data-title", "No matches"));
+    expect(screen.getByTestId("empty-view")).toHaveAttribute(
+      "data-description",
+      "Nothing found or matched in the records this extension could page through. The relay has more, so the list may be incomplete.",
+    );
+  });
+
+  it("keeps the conversation failure toast when the channel list is also incomplete", async () => {
+    mocks.getClient.mockReturnValue(
+      fakeClient({
+        listChannels: vi.fn(async () => listing(CHANNELS, false)),
+        listDirectMessages: vi.fn(async () => {
+          throw new Error("Relay rejected the request: not allowed");
+        }),
+      }),
+    );
+    render(<Command />);
+    await loaded();
+
+    expect(showToast).toHaveBeenCalledTimes(1);
+    expect(showToast).toHaveBeenCalledWith({
+      style: Toast.Style.Failure,
+      title: "Could not load conversations",
+      message: "Relay rejected the request: not allowed",
+    });
+    expect(sectionSubtitle("Channels")).toBe("May be incomplete");
   });
 });

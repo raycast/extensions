@@ -16,24 +16,28 @@
     {
       "name": "search-channels",
       "title": "Search Channels",
+      "subtitle": "Buzz",
       "description": "List and open Buzz channels",
       "mode": "view"
     },
     {
       "name": "search-messages",
       "title": "Search Messages",
+      "subtitle": "Buzz",
       "description": "Full-text search across Buzz channel messages",
       "mode": "view"
     },
     {
       "name": "send-message",
       "title": "Send Message",
+      "subtitle": "Buzz",
       "description": "Post a message to a Buzz channel, conversation, or person",
       "mode": "view"
     },
     {
       "name": "set-status",
       "title": "Set Status",
+      "subtitle": "Buzz",
       "description": "View your current status and apply, create, edit or delete reusable status presets, or set a custom status",
       "mode": "view"
     }

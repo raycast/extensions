@@ -11,3 +11,5 @@
   by name, then compose. All three lead to the same composer.
 - Set Status: NIP-38 status with reusable presets and an emoji picker.
 - Requests are signed locally with NIP-98; the private key never leaves the machine.
+- Channel and conversation lists page through the relay with a stable cursor, and say so when a
+  list may be incomplete instead of presenting it as complete.

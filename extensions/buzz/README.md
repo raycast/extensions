@@ -69,6 +69,8 @@ The following require an authenticated WebSocket connection (NIP-42) and are not
 - Presence, which the relay accepts only over WebSocket
 - A live or menu bar feed, and unread tracking
 
+Channel and conversation lists are read by paging through the relay, up to 20,000 records. If the relay holds more than that, or is an older one that cannot page past a full page of records sharing one timestamp, the list is marked "May be incomplete" rather than presented as complete.
+
 ## Getting Started
 
 ### Raycast Store

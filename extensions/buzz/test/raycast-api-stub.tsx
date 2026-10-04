@@ -187,7 +187,7 @@ function ListEmptyView(props: { title?: string; description?: string; actions?: 
   );
 }
 
-function ListSection(props: { title?: string; children?: ReactNode }) {
+function ListSection(props: { title?: string; subtitle?: string; children?: ReactNode }) {
   return (
     <div data-testid="list-section" data-title={props.title}>
       {props.children}
@@ -207,6 +207,7 @@ export function List(props: {
 }) {
   const items: ReactNode[] = [];
   const emptyViews: ReactNode[] = [];
+  const sections: ReactNode[] = [];
 
   // Recurses one level into `List.Section`, tagging each collected child with
   // its enclosing section's title (as a `section` prop `ListItem`/`ListEmptyView`
@@ -218,7 +219,15 @@ export function List(props: {
       if (child.type === ListEmptyView) {
         emptyViews.push(section ? cloneElement(child, { section } as Record<string, unknown>) : child);
       } else if (child.type === ListSection) {
-        const sectionProps = child.props as { children?: ReactNode; title?: string };
+        const sectionProps = child.props as { children?: ReactNode; title?: string; subtitle?: string };
+        sections.push(
+          <div
+            key={sections.length}
+            data-testid="list-section"
+            data-title={sectionProps.title}
+            data-subtitle={sectionProps.subtitle}
+          />,
+        );
         collect(sectionProps.children, sectionProps.title);
       } else {
         items.push(section ? cloneElement(child, { section } as Record<string, unknown>) : child);
@@ -256,6 +265,7 @@ export function List(props: {
       />
       {/* Raycast hides the empty view as soon as there is at least one item. */}
       {items.length > 0 ? items : emptyViews}
+      <div data-testid="list-sections">{sections}</div>
       {/* The List's own ActionPanel: Raycast's fallback when no item is
           selected, including when its native filtering has hidden every row. */}
       {props.actions === undefined ? null : <div data-testid="list-actions">{props.actions}</div>}
