@@ -1,11 +1,13 @@
 import type { Action } from "./twelfth";
 
-export type Bucket = "overdue" | "today" | "week" | "later" | "undated";
+export type Bucket = "overdue" | "today" | "week" | "next" | "later" | "undated";
+export type WeekStart = "monday" | "sunday";
 
 export const BUCKET_TITLES: Record<Bucket, string> = {
   overdue: "Overdue",
   today: "Due Today",
   week: "This Week",
+  next: "Next Week",
   later: "Later",
   undated: "No Due Date",
 };
@@ -35,18 +37,36 @@ export function daysUntil(dueAt: string, timeZone?: string | null, now = new Dat
   return Math.round((due - today) / DAY_MS);
 }
 
-export function bucketOf(action: Action, timeZone?: string | null, now = new Date()): Bucket {
+/** Days from today to the last day of this calendar week, by the person's week start in the app. */
+export function daysLeftInWeek(timeZone?: string | null, now = new Date(), weekStart: WeekStart = "monday"): number {
+  const weekday = new Date(`${localDate(now, timeZone)}T00:00:00Z`).getUTCDay(); // 0 = Sunday
+  return weekStart === "monday" ? (7 - weekday) % 7 : 6 - weekday;
+}
+
+export function bucketOf(
+  action: Action,
+  timeZone?: string | null,
+  now = new Date(),
+  weekStart: WeekStart = "monday",
+): Bucket {
   if (!action.dueAt) return "undated";
   const days = daysUntil(action.dueAt, timeZone, now);
   if (days < 0) return "overdue";
   if (days === 0) return "today";
-  if (days <= 7) return "week";
+  const left = daysLeftInWeek(timeZone, now, weekStart);
+  if (days <= left) return "week";
+  if (days <= left + 7) return "next";
   return "later";
 }
 
-export function groupActions(actions: Action[], timeZone?: string | null, now = new Date()) {
-  const groups: Record<Bucket, Action[]> = { overdue: [], today: [], week: [], later: [], undated: [] };
-  for (const action of actions) groups[bucketOf(action, timeZone, now)].push(action);
+export function groupActions(
+  actions: Action[],
+  timeZone?: string | null,
+  now = new Date(),
+  weekStart: WeekStart = "monday",
+) {
+  const groups: Record<Bucket, Action[]> = { overdue: [], today: [], week: [], next: [], later: [], undated: [] };
+  for (const action of actions) groups[bucketOf(action, timeZone, now, weekStart)].push(action);
   return groups;
 }
 

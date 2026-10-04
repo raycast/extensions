@@ -1,5 +1,5 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
-import { OAUTH } from "./config";
+import { CONTEXT_CACHE_KEY, OAUTH } from "./config";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -12,7 +12,11 @@ const client = new OAuth.PKCEClient({
 const CLIENT_ID_KEY = "oauth.clientId";
 const EMAIL_KEY = "oauth.email";
 
-export class NotSignedInError extends Error {
+/** Twelfth won't accept this install's credential. Cached data from before it is no longer this person's to show. */
+export class AuthError extends Error {}
+
+/** No usable OAuth session: never signed in, or the connection was ended in Twelfth. */
+export class NotSignedInError extends AuthError {
   constructor(message = "Not connected to Twelfth") {
     super(message);
   }
@@ -101,10 +105,20 @@ export async function storedToken(): Promise<string | undefined> {
 
 let refreshing: Promise<string | undefined> | undefined;
 
-async function readOrRefresh(): Promise<string | undefined> {
+/**
+ * Refresh even though the stored token hasn't expired: the server refused it
+ * (keys rotated, clock skew), and the refresh token may still be good.
+ */
+export async function forceRefresh(): Promise<string | undefined> {
+  if (apiKey()) return undefined;
+  refreshing ??= readOrRefresh(true).finally(() => (refreshing = undefined));
+  return refreshing;
+}
+
+async function readOrRefresh(force = false): Promise<string | undefined> {
   const tokens = await client.getTokens();
   if (!tokens?.accessToken) return undefined;
-  if (!tokens.isExpired()) return tokens.accessToken;
+  if (!force && !tokens.isExpired()) return tokens.accessToken;
   if (!tokens.refreshToken) return undefined;
   try {
     const refreshed = await tokenRequest({
@@ -145,6 +159,8 @@ export async function authorize(): Promise<string> {
     });
     await client.setTokens(tokens);
     await rememberEmail(tokens.id_token);
+    // The new connection may be to another workspace.
+    await LocalStorage.removeItem(CONTEXT_CACHE_KEY);
     return tokens.access_token;
   } catch (error) {
     // The registration was removed server-side: register afresh next time.
@@ -157,4 +173,5 @@ export async function authorize(): Promise<string> {
 export async function signOut() {
   await client.removeTokens();
   await LocalStorage.removeItem(EMAIL_KEY);
+  await LocalStorage.removeItem(CONTEXT_CACHE_KEY);
 }

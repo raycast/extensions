@@ -1,6 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "../lib/auth";
 import { appUrl } from "../lib/config";
+import { workspaceContext } from "../lib/context";
 import { type ProductSort, listProducts } from "../lib/twelfth";
 
 type Input = {
@@ -21,12 +22,13 @@ type Input = {
 
 async function tool(input: Input) {
   const limit = Math.min(Math.max(Math.round(input.limit ?? 15), 1), 50);
-  const page = await listProducts({
-    query: input.query,
-    sort: input.sort ?? (input.query ? "name" : "findings"),
-    limit,
-  });
+  const [page, context] = await Promise.all([
+    listProducts({ query: input.query, sort: input.sort ?? (input.query ? "name" : "findings"), limit }),
+    workspaceContext(),
+  ]);
   return {
+    // Prices below are in this currency.
+    currency: context.currency,
     totalMatching: page.totalMatching,
     products: page.products.map((product) => ({
       sku: product.sku,

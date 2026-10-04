@@ -1,9 +1,19 @@
-import { Color, Icon, Keyboard, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
+import {
+  Color,
+  Icon,
+  Keyboard,
+  LaunchType,
+  MenuBarExtra,
+  launchCommand,
+  open,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { dueLabel, groupActions, isMine } from "./lib/agenda";
-import { NotSignedInError, signedInEmail } from "./lib/auth";
+import { AuthError, NotSignedInError, signedInEmail } from "./lib/auth";
 import { appUrl } from "./lib/config";
-import { type Action, getWorkspace, listOpenActions } from "./lib/twelfth";
+import { workspaceContext } from "./lib/context";
+import { type Action, listOpenActions } from "./lib/twelfth";
 
 const SHOWN_PER_SECTION = 8;
 
@@ -12,22 +22,25 @@ export default function MenuBar() {
   // stored token and offers to connect when there is none.
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
-      const [workspace, actions, email] = await Promise.all([
-        getWorkspace({ interactive: false }),
+      const [context, actions, email] = await Promise.all([
+        workspaceContext({ interactive: false }),
         listOpenActions({ interactive: false }),
         signedInEmail(),
       ]);
-      return { workspace, actions: actions.filter((action) => isMine(action, email)) };
+      return { context, actions: actions.filter((action) => isMine(action, email)) };
     },
     [],
     // A background refresh has nowhere to show a toast; the failure is shown as a menu item instead.
     { keepPreviousData: true, onError: () => undefined },
   );
 
+  // A refused credential means the cached actions are no longer this person's
+  // to show: drop them rather than keep a stale count in the menu bar.
   const signedOut = error instanceof NotSignedInError;
-  const timeZone = data?.workspace?.timezone;
-  // Once the connection is gone, the cached tasks belong to a session that no longer exists.
-  const groups = groupActions(signedOut ? [] : (data?.actions ?? []), timeZone);
+  const keyRejected = error instanceof AuthError && !signedOut;
+  const shown = error instanceof AuthError ? undefined : data;
+  const timeZone = shown?.context.timeZone;
+  const groups = groupActions(shown?.actions ?? [], timeZone, new Date(), shown?.context.firstDayOfWeek);
   const dueNow = groups.overdue.length + groups.today.length;
   const openToday = () => launchCommand({ name: "today", type: LaunchType.UserInitiated });
 
@@ -36,11 +49,18 @@ export default function MenuBar() {
       isLoading={isLoading}
       icon={{ source: "menu-bar-icon.png", tintColor: groups.overdue.length ? Color.Red : Color.PrimaryText }}
       title={dueNow ? String(dueNow) : undefined}
-      tooltip={signedOut ? "Twelfth: not connected" : `Twelfth: ${dueNow} to do today`}
+      tooltip={error instanceof AuthError ? "Twelfth: not connected" : `Twelfth: ${dueNow} to do today`}
     >
       {signedOut ? (
         <MenuBarExtra.Item title="Connect Twelfth…" icon={Icon.Plug} onAction={openToday} />
-      ) : error && !data ? (
+      ) : keyRejected ? (
+        <MenuBarExtra.Item
+          title="Check your Twelfth API key"
+          subtitle={error.message}
+          icon={Icon.Key}
+          onAction={openExtensionPreferences}
+        />
+      ) : error && !shown ? (
         <MenuBarExtra.Item
           title="Couldn't reach Twelfth"
           subtitle={error.message}

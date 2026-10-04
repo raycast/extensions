@@ -20,6 +20,9 @@ export const OAUTH = {
   redirectUri: "https://raycast.com/redirect?packageName=Extension",
 };
 
+/** LocalStorage key for the cached workspace context (lib/context.ts); cleared on every sign-in and sign-out. */
+export const CONTEXT_CACHE_KEY = "workspace.context";
+
 export function appUrl(path: string): string {
   return new URL(path, WEB_ORIGIN).toString();
 }

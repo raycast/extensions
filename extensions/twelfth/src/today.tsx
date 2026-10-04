@@ -3,12 +3,15 @@ import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/util
 import { BUCKET_TITLES, type Bucket, dueLabel, groupActions, isMine } from "./lib/agenda";
 import { authorize, signedInEmail } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
-import { type Action as TwelfthAction, getWorkspace, listOpenActions } from "./lib/twelfth";
+import { workspaceContext } from "./lib/context";
+import { personName } from "./lib/format";
+import { type Action as TwelfthAction, listOpenActions } from "./lib/twelfth";
 
 const BUCKET_COLORS: Record<Bucket, Color.ColorLike> = {
   overdue: Color.Red,
   today: Color.Orange,
   week: Color.Blue,
+  next: Color.Purple,
   later: Color.SecondaryText,
   undated: Color.SecondaryText,
 };
@@ -17,16 +20,21 @@ type Filter = "mine" | "all";
 
 function Today() {
   const { data, isLoading, revalidate } = useCachedPromise(async () => {
-    const [workspace, actions, email] = await Promise.all([getWorkspace(), listOpenActions(), signedInEmail()]);
-    return { workspace, actions, email };
+    const [context, actions, email] = await Promise.all([workspaceContext(), listOpenActions(), signedInEmail()]);
+    // Names as the person chose to see them in the app (full or first).
+    const named = actions.map((action) => ({
+      ...action,
+      assigneeName: personName(action.assigneeName, context.nameFormat) ?? null,
+    }));
+    return { context, actions: named, email };
   });
   const [filter, setFilter] = useCachedState<Filter>("today.filter", "mine");
   const [showingDetail, setShowingDetail] = useCachedState("today.detail", false);
 
-  const timeZone = data?.workspace?.timezone;
+  const timeZone = data?.context.timeZone;
   const email = data?.email;
   const visible = (data?.actions ?? []).filter((action) => filter === "all" || isMine(action, email));
-  const groups = groupActions(visible, timeZone);
+  const groups = groupActions(visible, timeZone, new Date(), data?.context.firstDayOfWeek);
   const now = new Date();
   const dueNow = groups.overdue.length + groups.today.length;
 
@@ -34,7 +42,7 @@ function Today() {
     <List
       isLoading={isLoading}
       isShowingDetail={showingDetail && visible.length > 0}
-      navigationTitle={data?.workspace ? `Today · ${data.workspace.name}` : "Today"}
+      navigationTitle={data?.context.workspace ? `Today · ${data.context.workspace.name}` : "Today"}
       searchBarPlaceholder={dueNow ? `${dueNow} to do today. Filter actions…` : "Filter actions…"}
       searchBarAccessory={
         email ? (

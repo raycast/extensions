@@ -3,6 +3,8 @@ import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/util
 import { useState } from "react";
 import { authorize } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
+import { workspaceContext } from "./lib/context";
+import { money } from "./lib/format";
 import { PRODUCT_SORTS, type Figure, type Product, type ProductSort, listProducts } from "./lib/twelfth";
 
 const PAGE_SIZE = 50;
@@ -21,6 +23,9 @@ function SearchProducts() {
     [searchText, sort],
     { keepPreviousData: true },
   );
+  // Prices are in the workspace's currency, not dollars by default.
+  const { data: context } = useCachedPromise(() => workspaceContext());
+  const currency = context?.currency;
 
   return (
     <List
@@ -55,7 +60,7 @@ function SearchProducts() {
               : { source: Icon.Dot, tintColor: Color.SecondaryText }
           }
           accessories={showingDetail ? [] : rowAccessories(product)}
-          detail={<ProductDetail product={product} />}
+          detail={<ProductDetail product={product} currency={currency} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open in Twelfth" url={productUrl(product)} />
@@ -108,7 +113,7 @@ function rowAccessories(product: Product): List.Item.Accessory[] {
   ];
 }
 
-function ProductDetail({ product }: { product: Product }) {
+function ProductDetail({ product, currency }: { product: Product; currency: string | undefined }) {
   const { position } = product;
   const Label = List.Item.Detail.Metadata.Label;
   return (
@@ -139,7 +144,7 @@ function ProductDetail({ product }: { product: Product }) {
           <Label title="Units, last 4 weeks" text={number(position.unitsL4w)} />
           <Label title="Units, last year" text={number(position.unitsL1y)} />
           <Label title="Days since sold" text={number(position.daysSinceSold)} />
-          <Label title="Price" text={position.price === null ? "—" : `$${position.price.toFixed(2)}`} />
+          <Label title="Price" text={money(position.price, currency)} />
           <Label title="GP%" text={position.gpPct === null ? "—" : `${position.gpPct.toFixed(1)}%`} />
           {position.asOf ? <Label title="As of" text={new Date(position.asOf).toLocaleDateString("en-AU")} /> : null}
         </List.Item.Detail.Metadata>
