@@ -61,7 +61,7 @@ const EXPLICIT_LOCATION_PATTERN = /(?:^|[\s,;])장소\s*(?:는|:|=)\s*(.+)$/u;
 const TRAILING_LOCATION_AT_END_PATTERN = /^(.+?)\s+([^\s]+)에서$/u;
 const LEADING_LOCATION_PATTERN = /^(.+?)에서\s+(.+)$/u;
 const TIME_CUE_AT_START_PATTERN =
-  /^(?:(?:새벽|아침|점심|오전|오후|저녁|밤)\s*)?(?:[0-9]{1,2}시|[0-9]{1,2}:[0-9]{1,2})(?:\s|$)/u;
+  /^(?:(?:새벽|아침|점심|오전|오후|저녁|밤)\s*)?(?:[0-9]{1,2}시|[0-9]{1,2}:[0-9]{1,2})(?:\s*(?:[0-9]{1,2}분|반))?(?:\s|$)/u;
 const RECURRENCE_DATE_PREFIX_PATTERN =
   /^(?:매\s*일|매\s*주(?:\s*[월화수목금토일](?:요일|욜)?)?|매\s*월\s*[0-9]{1,2}일)$/u;
 const LOCATION_SURROUNDING_QUOTES_PATTERN = /^["'“”‘’]+|["'“”‘’]+$/gu;

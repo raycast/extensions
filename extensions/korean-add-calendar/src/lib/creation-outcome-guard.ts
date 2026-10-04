@@ -7,7 +7,8 @@ export type CreationTarget = "calendar" | "reminder";
 
 export const UNKNOWN_CREATION_OUTCOME_KEY = "__unknown_creation_outcome__";
 const CREATION_OUTCOME_KEY_PATTERN = /^[a-f0-9]{64}$/u;
-const UNCONFIRMED_CREATION_STORAGE_VERSION = 1;
+const UNCONFIRMED_CREATION_STORAGE_VERSION = 2;
+const LEGACY_UNCONFIRMED_CREATION_STORAGE_VERSION = 1;
 
 interface ExactUnconfirmedCreationRecord {
   id: string;
@@ -72,17 +73,31 @@ export function buildRetryItemKey(targetType: CreationTarget, parsed: ParsedSche
   const common = {
     targetType,
     title: parsed.title.trim(),
-    startEpochMs: parsed.start.getTime(),
     allDay: parsed.allDay,
+  };
+
+  if (parsed.recurrence) {
+    return hashCreationIdentity({
+      ...common,
+      recurrence: buildRetryRecurrenceIdentity(parsed),
+      startTime: buildTimeOfDayIdentity(parsed.start),
+      endTime: buildTimeOfDayIdentity(parsed.end),
+      endDayOffset: localCalendarDayOffset(parsed.start, parsed.end),
+    });
+  }
+
+  const datedCommon = {
+    ...common,
+    startEpochMs: parsed.start.getTime(),
   };
 
   return hashCreationIdentity(
     targetType === "calendar"
       ? {
-          ...common,
+          ...datedCommon,
           endEpochMs: parsed.end.getTime(),
         }
-      : common,
+      : datedCommon,
   );
 }
 
@@ -184,11 +199,7 @@ export function parseStoredUnconfirmedCreationRecords(value: unknown): Unconfirm
 
   try {
     const parsed = JSON.parse(value) as unknown;
-    if (
-      !isObject(parsed) ||
-      parsed.version !== UNCONFIRMED_CREATION_STORAGE_VERSION ||
-      !Array.isArray(parsed.records)
-    ) {
+    if (!isObject(parsed) || !Array.isArray(parsed.records)) {
       return [createUnknownUnconfirmedCreationRecord("invalid-record-storage-schema")];
     }
     if (!parsed.records.every(isUnconfirmedCreationRecord)) {
@@ -198,7 +209,13 @@ export function parseStoredUnconfirmedCreationRecords(value: unknown): Unconfirm
     if (ids.size !== parsed.records.length) {
       return [createUnknownUnconfirmedCreationRecord("duplicate-record-id")];
     }
-    return parsed.records;
+    if (parsed.version === UNCONFIRMED_CREATION_STORAGE_VERSION) {
+      return parsed.records;
+    }
+    if (parsed.version === LEGACY_UNCONFIRMED_CREATION_STORAGE_VERSION) {
+      return parsed.records.map((record) => createFallbackRecord(record.creationOutcomeKey, `record-v1:${record.id}`));
+    }
+    return [createUnknownUnconfirmedCreationRecord("unsupported-record-storage-version")];
   } catch {
     return [createUnknownUnconfirmedCreationRecord("invalid-record-storage-json")];
   }
@@ -277,6 +294,44 @@ function isUnconfirmedCreationRecord(value: unknown): value is UnconfirmedCreati
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function buildRetryRecurrenceIdentity(parsed: ParsedSchedule): object {
+  const recurrence = parsed.recurrence;
+  if (!recurrence) {
+    return {};
+  }
+
+  let weekday: number | "implicit" | null = null;
+  if (recurrence.frequency === "weekly") {
+    const weeklySourceMatch = parsed.source.match(/(?:^|\s)매\s*주(?:\s*([월화수목금토일](?:요일|욜)?))?\s+/u);
+    weekday = weeklySourceMatch
+      ? weeklySourceMatch[1]
+        ? (recurrence.weekday ?? null)
+        : "implicit"
+      : (recurrence.weekday ?? null);
+  }
+
+  return {
+    frequency: recurrence.frequency,
+    weekday,
+    dayOfMonth: recurrence.dayOfMonth ?? null,
+  };
+}
+
+function buildTimeOfDayIdentity(date: Date): object {
+  return {
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds(),
+    millisecond: date.getMilliseconds(),
+  };
+}
+
+function localCalendarDayOffset(start: Date, end: Date): number {
+  const startDay = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDay = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  return Math.round((endDay - startDay) / (24 * 60 * 60 * 1000));
 }
 
 function hashCreationIdentity(identity: object): string {

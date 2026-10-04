@@ -145,6 +145,14 @@ describe("parseKoreanScheduleBatch", () => {
     },
   );
 
+  it("splits a later standalone-day deadline", () => {
+    const result = parseKoreanScheduleBatch("내일 오후 3시 회의, 15일까지 제출", { now: baseNow });
+
+    expect(result.items).toHaveLength(2);
+    expect(result.errors).toHaveLength(0);
+    expect(result.items[1]?.value).toMatchObject({ title: "제출", intent: "deadline", allDay: true });
+  });
+
   it("retains distinct intents so mixed batches can be rejected before submission", () => {
     const result = parseKoreanScheduleBatch("내일 오후 3시 회의, 3일 안에 보고서 제출", { now: baseNow });
     expect(result.items).toHaveLength(2);

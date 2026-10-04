@@ -71,6 +71,87 @@ describe("buildCreationOutcomeKey", () => {
 });
 
 describe("unconfirmed creation records", () => {
+  it("matches a recurring retry after its resolved occurrence moves", () => {
+    const recurrence = { frequency: "daily" as const, end: { type: "count" as const, count: 10 } };
+    const originalParsed: ParsedSchedule = {
+      ...parsed,
+      source: "매일 오후 3시 Team meeting",
+      recurrence: { frequency: "daily" },
+    };
+    const laterParsed: ParsedSchedule = {
+      ...originalParsed,
+      start: new Date(2026, 1, 19, 15, 0),
+      end: new Date(2026, 1, 19, 16, 0),
+    };
+    const originalCreationKey = buildCreationOutcomeKey({
+      targetType: "calendar",
+      parsed: originalParsed,
+      recurrence,
+    });
+    const laterCreationKey = buildCreationOutcomeKey({
+      targetType: "calendar",
+      parsed: laterParsed,
+      recurrence,
+    });
+    const record = createUnconfirmedCreationRecord(
+      originalCreationKey,
+      buildRetryItemKey("calendar", originalParsed),
+    );
+    const reloaded = parseStoredUnconfirmedCreationRecords(serializeUnconfirmedCreationRecords([record]));
+
+    const partition = partitionUnconfirmedCreationRecords(reloaded, [
+      {
+        creationOutcomeKey: laterCreationKey,
+        retryItemKey: buildRetryItemKey("calendar", laterParsed),
+      },
+    ]);
+
+    expect(laterCreationKey).not.toBe(originalCreationKey);
+    expect(buildRetryItemKey("calendar", laterParsed)).toBe(buildRetryItemKey("calendar", originalParsed));
+    expect(partition.matching.map((item) => item.id)).toEqual([record.id]);
+    expect(partition.remaining).toEqual([]);
+  });
+
+  it("keeps non-recurring retries on different dates distinct", () => {
+    const nextDay = {
+      ...parsed,
+      start: new Date(2026, 1, 19, 15, 0),
+      end: new Date(2026, 1, 19, 16, 0),
+    };
+
+    expect(buildRetryItemKey("calendar", nextDay)).not.toBe(buildRetryItemKey("calendar", parsed));
+  });
+
+  it("keeps explicit recurrence patterns distinct and implicit weekly retries stable", () => {
+    const implicitTuesday: ParsedSchedule = {
+      ...parsed,
+      source: "매주 오후 3시 Team meeting",
+      recurrence: { frequency: "weekly", weekday: 2 },
+    };
+    const implicitWednesday: ParsedSchedule = {
+      ...implicitTuesday,
+      start: new Date(2026, 1, 19, 15, 0),
+      end: new Date(2026, 1, 19, 16, 0),
+      recurrence: { frequency: "weekly", weekday: 3 },
+    };
+    const explicitTuesday = {
+      ...implicitTuesday,
+      source: "매주 화요일 오후 3시 Team meeting",
+    };
+    const explicitWednesday = {
+      ...implicitWednesday,
+      source: "매주 수요일 오후 3시 Team meeting",
+    };
+
+    expect(buildRetryItemKey("calendar", implicitWednesday)).toBe(buildRetryItemKey("calendar", implicitTuesday));
+    expect(buildRetryItemKey("calendar", explicitWednesday)).not.toBe(
+      buildRetryItemKey("calendar", explicitTuesday),
+    );
+    expect(buildRetryItemKey("calendar", explicitTuesday)).not.toBe(
+      buildRetryItemKey("calendar", { ...explicitTuesday, recurrence: { frequency: "daily" } }),
+    );
+  });
+
   it("keeps an option-edited retry bound after storage reload", () => {
     const editedParsed = {
       ...parsed,
@@ -195,7 +276,7 @@ describe("unconfirmed creation storage", () => {
     expect(parseStoredUnconfirmedCreationRecords(value)).toEqual([]);
   });
 
-  it.each(["invalid", "{}", '{"version":2,"records":[]}', '{"version":1,"records":[{}]}'])(
+  it.each(["invalid", "{}", '{"version":3,"records":[]}', '{"version":1,"records":[{}]}'])(
     "fails closed for malformed storage: %s",
     (value) => {
       const records = parseStoredUnconfirmedCreationRecords(value);
@@ -215,6 +296,22 @@ describe("unconfirmed creation storage", () => {
 
     expect(records).toHaveLength(1);
     expect(records[0]?.creationOutcomeKey).toBe(UNKNOWN_CREATION_OUTCOME_KEY);
+  });
+
+  it("migrates version 1 records without collapsing separate warnings", () => {
+    const first = createUnconfirmedCreationRecord("a".repeat(64), "c".repeat(64));
+    const second = createUnconfirmedCreationRecord("b".repeat(64), "d".repeat(64));
+    const stored = JSON.stringify({ version: 1, records: [first, second] });
+
+    const records = parseStoredUnconfirmedCreationRecords(stored);
+    const partition = partitionUnconfirmedCreationRecords(records, [
+      { creationOutcomeKey: "e".repeat(64), retryItemKey: "f".repeat(64) },
+    ]);
+
+    expect(records).toHaveLength(2);
+    expect(records.every((record) => record.matchAny)).toBe(true);
+    expect(partition.matching).toHaveLength(1);
+    expect(partition.remaining).toHaveLength(1);
   });
 });
 
