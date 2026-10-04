@@ -1,9 +1,15 @@
 import fs from "node:fs";
+import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { compareNames } from "../src/lib/name-order";
-import { MAX_ENTRIES, readDirectory, statEntry } from "../src/lib/read-dir";
+import {
+  canonicalPathAsync,
+  MAX_ENTRIES,
+  readDirectory,
+  statEntry,
+} from "../src/lib/read-dir";
 import { Entry } from "../src/lib/types";
 import {
   DirectorySnapshot,
@@ -110,6 +116,59 @@ export async function performanceChecks(
         fs.realpathSync(secondTarget),
       "interactive actions resolve a retargeted symlink instead of using its indexed storage path",
     );
+    const originalRealpath = fsp.realpath;
+    const stalledProvider = path.join(
+      root,
+      "Library",
+      "CloudStorage",
+      "GoogleDrive-canonical-stalled",
+    );
+    const otherProvider = path.join(
+      root,
+      "Library",
+      "CloudStorage",
+      "OneDrive-canonical-ready",
+      "alias",
+    );
+    const canonicalReleases: (() => void)[] = [];
+    let canonicalReads = 0;
+    fsp.realpath = ((full, ...args: unknown[]) => {
+      if (String(full).startsWith(stalledProvider + path.sep)) {
+        canonicalReads++;
+        return new Promise<string>((resolve) => {
+          canonicalReleases.push(() => resolve(String(full)));
+        });
+      }
+      if (full === otherProvider) return Promise.resolve(realFile);
+      return Reflect.apply(originalRealpath, fsp, [full, ...args]);
+    }) as typeof fsp.realpath;
+    try {
+      const stalledPaths = Array.from({ length: 8 }, (_, i) =>
+        path.join(stalledProvider, `alias-${i}`),
+      );
+      await Promise.all(
+        stalledPaths.map((full) => canonicalPathAsync(full, 20)),
+      );
+      const resolved = await Promise.all([
+        canonicalPathAsync(throughParent, 100),
+        canonicalPathAsync(otherProvider, 100),
+      ]);
+      assert(
+        resolved.every((full) => full === realFile),
+        "stalled cloud alias resolutions cannot block local or other-provider identities",
+      );
+      await Promise.all(
+        stalledPaths.map((full) => canonicalPathAsync(full, 20)),
+      );
+      assert(
+        canonicalReads === 8,
+        "alias-resolution retries keep sharing the original bounded physical reads",
+      );
+    } finally {
+      fsp.realpath = originalRealpath;
+      canonicalReleases.forEach((release) => release());
+      await pause(0);
+    }
     const stats = fs.statSync(file);
     const originalStat = fs.statSync;
     let redundantStats = 0;
@@ -272,6 +331,36 @@ export async function performanceChecks(
           recovered.entries.length === 1,
       ),
       "polling recovers when filesystem watching could not be started",
+    );
+    const entriesBeforeFailure = recovered?.entries;
+    const originalOpendir = fsp.opendir;
+    fsp.opendir = ((full, ...args: unknown[]) =>
+      full === initiallyMissing
+        ? Promise.reject(
+            Object.assign(new Error("Synthetic provider failure"), {
+              code: "EIO",
+            }),
+          )
+        : Reflect.apply(originalOpendir, fsp, [
+            full,
+            ...args,
+          ])) as typeof fsp.opendir;
+    try {
+      assert(
+        (await until(() => recovered?.error !== undefined)) &&
+          recovered?.entries === entriesBeforeFailure &&
+          recovered?.pending === false,
+        "a failed background refresh retains the last finished rows and surfaces the error",
+      );
+    } finally {
+      fsp.opendir = originalOpendir;
+    }
+    fs.unlinkSync(path.join(initiallyMissing, "baz.txt"));
+    assert(
+      await until(
+        () => recovered?.error === undefined && recovered?.entries.length === 0,
+      ),
+      "a successful empty refresh clears retained rows and the previous error",
     );
 
     const large = path.join(root, "large");

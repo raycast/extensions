@@ -157,11 +157,11 @@ function validStoredList(value: unknown, max: number): value is string[] {
  * Defaults keep the command usable after malformed storage, but a fallback is
  * not evidence that a previously configured scope was intentionally removed.
  */
-export function parseSettingsResult(
-  raw: string | undefined,
-): ParsedIndexSettings {
+export function parseSettingsResult(raw: unknown): ParsedIndexSettings {
   if (raw === undefined)
     return { settings: { ...DEFAULT_SETTINGS }, authoritative: true };
+  if (typeof raw !== "string")
+    return { settings: { ...DEFAULT_SETTINGS }, authoritative: false };
   let value: unknown;
   try {
     value = JSON.parse(raw);

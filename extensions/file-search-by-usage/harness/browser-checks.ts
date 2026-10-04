@@ -6,6 +6,7 @@ import * as queryTools from "../src/lib/query";
 import { stepSearchHistory } from "../src/lib/search-history";
 import { rankSources } from "../src/lib/rank-sources";
 import { Entry } from "../src/lib/types";
+import { EntryStorageUpdate } from "../src/lib/entry-identity";
 import { createRecentValidator } from "../src/lib/recent-validation";
 import * as searchLimits from "../src/lib/search-limits";
 import { sortChecks } from "./sort-checks";
@@ -13,6 +14,7 @@ import { folderSelectionChecks } from "./folder-selection-checks";
 import { navigationMemoryChecks } from "./navigation-memory-checks";
 import { navigationStackChecks } from "./navigation-stack-checks";
 import { listRenderChecks } from "./list-render-checks";
+import { actionStorageChecks } from "./action-storage-checks";
 import { displayRows } from "../src/lib/display-rows";
 import { folderUsageChecks } from "./folder-usage-checks";
 import { deriveProgress, rowsCanChange } from "../src/lib/progress";
@@ -23,6 +25,7 @@ import { act, create, ReactTestRenderer } from "react-test-renderer";
 export async function browserChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
+  await actionStorageChecks(assert);
   await sortChecks(assert);
   await folderUsageChecks(assert);
   await folderSelectionChecks(assert);
@@ -922,6 +925,7 @@ export async function browserChecks(
     tick: 0,
     sortMode: "usage",
     showHidden: false,
+    actionStoragePaths: new Map<string, EntryStorageUpdate>(),
   };
   const rank = new Function(
     ...Object.keys(rankDependencies),

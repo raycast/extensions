@@ -858,6 +858,44 @@ async function visitWriteChecks(
     "a successful resolve merges an earlier timeout alias into usage history",
   );
 
+  const damaged = storeAt(path.join(root, "visits", "damaged-entry"));
+  damaged.storage.set(
+    "visits",
+    JSON.stringify({
+      tick: 7,
+      items: {
+        [opened]: seedVisit(3, 7, 3),
+        [aliasPath]: null,
+        [other]: seedVisit(2, 7, 2),
+        "/invalid-record": "invalid",
+      },
+    }),
+  );
+  const repaired = await damaged.store.recordVisit(aliasPath);
+  assert(
+    repaired.items[opened]?.count === 4 &&
+      repaired.items[other]?.count === 2 &&
+      Object.keys(repaired.items).length === 2,
+    "a broken visit entry does not prevent recording or discard healthy history",
+  );
+  damaged.storage.set(
+    "visits",
+    JSON.stringify({
+      tick: 7,
+      items: {
+        [opened]: { count: "9", lastVisit: null, ems: 3, tick: 7 },
+        [other]: seedVisit(2, 7, 2),
+      },
+    }),
+  );
+  const repairedCount = await damaged.store.recordVisit(openedPath);
+  assert(
+    repairedCount.items[opened]?.count === 1 &&
+      repairedCount.items[opened]?.ems === 4 &&
+      repairedCount.items[other]?.count === 2,
+    "an invalid stored count cannot concatenate into the next count or destroy valid scores",
+  );
+
   const generationTest = storeAt(path.join(root, "visits", "generation"));
   const generation = generationTest.access.dataGeneration();
   generationTest.access.invalidateData();
@@ -1090,6 +1128,23 @@ async function visitWriteChecks(
     "a reset suspended across a data reset cannot save its old log",
   );
 
+  const delayedReset = storeAt(
+    path.join(root, "visits", "reset-resolve-stale"),
+  );
+  const resetGeneration = delayedReset.access.dataGeneration();
+  delayedReset.access.invalidateData();
+  delayedReset.storage.set("visits", seeded);
+  const delayedResetRejected = await delayedReset.store
+    .resetVisit(openedPath, opened, resetGeneration)
+    .then(
+      () => false,
+      (error) => error instanceof delayedReset.access.DataResetError,
+    );
+  assert(
+    delayedResetRejected && delayedReset.storage.get("visits") === seeded,
+    "a reset action resolving its path across deletion cannot erase newer usage",
+  );
+
   const clear = storeAt(path.join(root, "visits", "clear"));
   clear.storage.set("visits", seeded);
   clear.storage.set("pins", JSON.stringify([opened]));
@@ -1180,6 +1235,41 @@ async function rankingWriteChecks(
   assert(
     secondTarget.gdoc?.[opened] === 2 && secondTarget.gdoc?.[other] === 1,
     "a second target for one query is learned alongside the first",
+  );
+
+  const specialQuery = storeAt(path.join(root, "ranking", "special-query"));
+  await specialQuery.store.recordAbbreviation("__proto__", openedPath);
+  const specialLearned = await specialQuery.store.recordAbbreviation(
+    "__proto__",
+    openedPath,
+  );
+  assert(
+    Object.hasOwn(specialLearned, "__proto__") &&
+      specialLearned["__proto__"]?.[opened] === 2 &&
+      JSON.parse(specialQuery.storage.get("abbreviations") ?? "{}")[
+        "__proto__"
+      ]?.[opened] === 2,
+    "a learned query named __proto__ is saved and reinforced like any other query",
+  );
+
+  const damaged = storeAt(path.join(root, "ranking", "damaged-abbreviation"));
+  damaged.storage.set(
+    "abbreviations",
+    JSON.stringify({
+      gdoc: { [opened]: 2, [aliasPath]: "9", "/bad-count": null },
+      retained: { [other]: 4 },
+      broken: null,
+      text: "invalid",
+      list: [opened],
+    }),
+  );
+  const repaired = await damaged.store.recordAbbreviation("gdoc", aliasPath);
+  assert(
+    repaired.gdoc?.[opened] === 3 &&
+      Object.keys(repaired.gdoc).length === 1 &&
+      repaired.retained?.[other] === 4 &&
+      Object.keys(repaired).length === 2,
+    "broken learned targets are skipped while healthy queries and counts survive",
   );
 
   const sharedActionKey = storeAt(
@@ -1350,6 +1440,21 @@ async function rankingWriteChecks(
     "a pin toggle suspended across a data reset cannot save its old list",
   );
 
+  const delayedPin = storeAt(path.join(root, "ranking", "pin-resolve-stale"));
+  const pinGeneration = delayedPin.access.dataGeneration();
+  delayedPin.access.invalidateData();
+  delayedPin.storage.set("pins", pinned);
+  const delayedPinRejected = await delayedPin.store
+    .togglePin(openedPath, opened, pinGeneration)
+    .then(
+      () => false,
+      (error) => error instanceof delayedPin.access.DataResetError,
+    );
+  assert(
+    delayedPinRejected && delayedPin.storage.get("pins") === pinned,
+    "a pin action resolving its path across deletion cannot repopulate reset data",
+  );
+
   const capped = Array.from({ length: 30 }, (_, i) => `query-${i}`);
   const searchCases: {
     label: string;
@@ -1414,6 +1519,39 @@ async function rankingWriteChecks(
         (!item.writes ||
           searches.storage.get("searches") === JSON.stringify(item.next)),
       item.label,
+    );
+  }
+
+  const failedRead = storeAt(path.join(root, "ranking", "failed-read"));
+  failedRead.storage.set("visits", JSON.stringify({ tick: 1, items: {} }));
+  failedRead.storage.set(
+    "abbreviations",
+    JSON.stringify({ q: { [other]: 2 } }),
+  );
+  failedRead.storage.set("pins", JSON.stringify([other]));
+  failedRead.storage.set("searches", JSON.stringify(["retained"]));
+  const beforeFailure = JSON.stringify([...failedRead.storage]);
+  let failedReadWrites = 0;
+  failedRead.writing.before = async () => {
+    failedReadWrites++;
+  };
+  const readError = new Error("Storage unavailable");
+  failedRead.reading.before = async () => {
+    throw readError;
+  };
+  for (const attempt of [
+    () => failedRead.store.recordVisit(openedPath),
+    () => failedRead.store.resetVisit(openedPath),
+    () => failedRead.store.recordAbbreviation("q", openedPath),
+    () => failedRead.store.togglePin(openedPath),
+    () => failedRead.store.recordSearch("new"),
+  ]) {
+    const failure = await attempt().catch((error: unknown) => error);
+    assert(
+      failure === readError &&
+        failedReadWrites === 0 &&
+        JSON.stringify([...failedRead.storage]) === beforeFailure,
+      "a failed history read never becomes an empty replacement write",
     );
   }
 }
@@ -1524,6 +1662,21 @@ async function indexSettingsStoreChecks(
 
     assert(same(loaded, item.expected), item.label);
   }
+
+  for (const raw of [42, false, null]) {
+    test.storage.set(SETTINGS_KEY, raw as unknown as string);
+    const rebuilt = await test.settings.loadIndexSettingsForRebuild();
+    assert(
+      !rebuilt.authoritative && same(rebuilt.settings, DEFAULT_SETTINGS),
+      `a non-string settings value (${JSON.stringify(raw)}) cannot authorize index cleanup`,
+    );
+  }
+  test.storage.delete(SETTINGS_KEY);
+  const missing = await test.settings.loadIndexSettingsForRebuild();
+  assert(
+    missing.authoritative && same(missing.settings, DEFAULT_SETTINGS),
+    "genuinely absent settings retain authoritative first-run defaults",
+  );
 
   test.storage.set(SETTINGS_KEY, serializeSettings(custom));
   test.reading.before = async (key: string) => {

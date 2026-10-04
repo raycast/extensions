@@ -460,7 +460,10 @@ export async function indexChecks(assert: Assert) {
   );
   assert(
     !parseSettingsResult("not json").authoritative &&
-      !parseSettingsResult("null").authoritative,
+      !parseSettingsResult("null").authoritative &&
+      !parseSettingsResult(42).authoritative &&
+      !parseSettingsResult(false).authoritative &&
+      !parseSettingsResult(null).authoritative,
     "recovery defaults from corrupt storage cannot authorize scope cleanup",
   );
   assert(
@@ -1987,7 +1990,36 @@ export async function indexChecks(assert: Assert) {
         1,
     "recovery settings preserve prior nested scope coverage during a parent scan",
   );
+  assert(
+    fallbackRead.kind === "opened" &&
+      queryIndex(fallbackRead.db, parseQuery("parent-doc")).entries.length ===
+        1,
+    "recovery settings cannot prune unseen paths within a scope that is still configured",
+  );
   if (fallbackRead.kind === "opened") fallbackRead.db.close();
+  closeIndexReader();
+  const authoritativeFallback = await rebuildIndex({
+    file: fallbackFile,
+    withLock: pass,
+    loadSettingsResult: async () => ({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        scopes: [fallbackParent],
+        includeDrive: false,
+      },
+      authoritative: true,
+    }),
+    lookupFd: foundFdStub,
+    spawnFd: () => fdOutput([path.join(fallbackParent, "parent-new.txt")]),
+  });
+  assert(
+    authoritativeFallback.kind === "done" &&
+      authoritativeFallback.report.complete &&
+      searchIndex(fallbackFile, parseQuery("parent-doc")).entries.length ===
+        0 &&
+      searchIndex(fallbackFile, parseQuery("custom-doc")).entries.length === 0,
+    "authoritative settings still remove excluded paths and removed nested scopes",
+  );
   closeIndexReader();
   fs.rmSync(fallbackDir, { recursive: true, force: true });
 
@@ -2703,6 +2735,95 @@ export async function indexChecks(assert: Assert) {
   closeIndexReader();
   fs.rmSync(discoveryDir, { recursive: true, force: true });
 
+  // An unavailable provider can disappear entirely from a successful listing.
+  // The cloud toggle still includes its saved scope, even during a home scan.
+  const absentProviderDir = tempDir("absent-provider");
+  const absentProviderFile = path.join(absentProviderDir, "index.sqlite");
+  const absentProviderHome = path.join(absentProviderDir, "home");
+  const absentProviderCloud = path.join(
+    absentProviderHome,
+    "Library",
+    "CloudStorage",
+  );
+  const absentProviders = ["ProviderA", "ProviderB"].map((name) =>
+    path.join(absentProviderCloud, name),
+  );
+  const removedLocalRoot = path.join(absentProviderDir, "removed-local");
+  for (const root of [...absentProviders, removedLocalRoot])
+    fs.mkdirSync(root, { recursive: true });
+  await rebuildIndex({
+    file: absentProviderFile,
+    withLock: pass,
+    lookupFd: foundFdStub,
+    roots: [absentProviderHome, ...absentProviders, removedLocalRoot],
+    spawnFd: (args) =>
+      fdOutput([
+        path.join(args.at(-1)!, `${path.basename(args.at(-1)!)}-doc.txt`),
+      ]),
+  });
+  const interruptedProviderWriter = openIndexForWrite(absentProviderFile);
+  if (interruptedProviderWriter.kind !== "opened")
+    throw new Error("could not open provider fixture");
+  // Simulate a prior scan interrupted after its batch but before bookkeeping.
+  interruptedProviderWriter.db
+    .prepare("DELETE FROM index_roots WHERE root = ?")
+    .run(absentProviders[1]);
+  interruptedProviderWriter.db.close();
+  for (const root of absentProviders)
+    fs.renameSync(root, path.join(absentProviderDir, path.basename(root)));
+  const absentProviderBuild = (includeDrive: boolean) =>
+    rebuildIndex({
+      file: absentProviderFile,
+      withLock: pass,
+      lookupFd: foundFdStub,
+      cloudRoot: absentProviderCloud,
+      loadSettings: async () => ({
+        ...DEFAULT_SETTINGS,
+        scopes: [absentProviderHome],
+        includeDrive,
+      }),
+      spawnFd: () => fdOutput([path.join(absentProviderHome, "local-new.txt")]),
+    });
+  const retainedProviders = await absentProviderBuild(true);
+  assert(
+    retainedProviders.kind === "done" &&
+      retainedProviders.report.complete &&
+      absentProviders.every((root) =>
+        searchIndex(
+          absentProviderFile,
+          parseQuery(`${path.basename(root)}-doc`),
+        ).entries.some(
+          (entry) =>
+            entry.path === path.join(root, `${path.basename(root)}-doc.txt`),
+        ),
+      ),
+    "successful empty discovery preserves saved cloud providers, including batches without root records",
+  );
+  assert(
+    retainedProviders.kind === "done" &&
+      retainedProviders.report.forgotten.includes(removedLocalRoot) &&
+      searchIndex(absentProviderFile, parseQuery("removed-local-doc")).entries
+        .length === 0 &&
+      searchIndex(absentProviderFile, parseQuery("local-new")).entries
+        .length === 1,
+    "preserving absent cloud providers still refreshes local paths and removes unrelated scopes",
+  );
+  const removedProviders = await absentProviderBuild(false);
+  assert(
+    removedProviders.kind === "done" &&
+      removedProviders.report.complete &&
+      absentProviders.every(
+        (root) =>
+          searchIndex(
+            absentProviderFile,
+            parseQuery(`${path.basename(root)}-doc`),
+          ).entries.length === 0,
+      ),
+    "turning cloud indexing off authorizes removing saved providers that disappeared",
+  );
+  closeIndexReader();
+  fs.rmSync(absentProviderDir, { recursive: true, force: true });
+
   // An auto-detected provider that goes offline remains a configured root. Its
   // failed scan makes absence non-authoritative, so the previous rows survive.
   fs.rmSync(linkedProvider, { recursive: true, force: true });
@@ -2822,6 +2943,64 @@ export async function indexChecks(assert: Assert) {
       }
     } finally {
       fs.rmSync(locatorDir, { recursive: true, force: true });
+    }
+    const offlineLinkDir = tempDir("offline-link");
+    const offlineLinkRoot = path.join(offlineLinkDir, "local");
+    const offlineLinkTarget = path.join(offlineLinkDir, "provider");
+    const offlineLink = path.join(offlineLinkRoot, "Shared Folder");
+    const offlineLinkFile = path.join(offlineLink, "saved-cloud-report.txt");
+    fs.mkdirSync(offlineLinkRoot);
+    fs.mkdirSync(offlineLinkTarget);
+    fs.writeFileSync(
+      path.join(offlineLinkTarget, "saved-cloud-report.txt"),
+      "saved",
+    );
+    fs.symlinkSync(offlineLinkTarget, offlineLink);
+    fs.symlinkSync(
+      path.join(offlineLinkDir, "missing-file.txt"),
+      path.join(offlineLinkRoot, "new-broken-link"),
+    );
+    const offlineLinkDb = openWritable(offlineLinkDir);
+    try {
+      const options = {
+        fd: realFd.path,
+        roots: [offlineLinkRoot],
+        db: offlineLinkDb,
+      };
+      const beforeOffline = await scanRoots(options);
+      assert(
+        beforeOffline.complete &&
+          rowPaths(offlineLinkDb).includes(offlineLinkFile),
+        "a readable directory link is indexed and a new broken link does not prevent completion",
+      );
+      fs.renameSync(offlineLinkTarget, `${offlineLinkTarget}-offline`);
+      fs.writeFileSync(path.join(offlineLinkRoot, "local-new.txt"), "new");
+      const whileOffline = await scanRoots(options);
+      assert(
+        !whileOffline.complete &&
+          rowPaths(offlineLinkDb).includes(offlineLinkFile) &&
+          rowPaths(offlineLinkDb).includes(
+            path.join(offlineLinkRoot, "local-new.txt"),
+          ),
+        "a linked folder going offline preserves saved descendants while local paths refresh",
+      );
+      const stillOffline = await scanRoots(options);
+      assert(
+        !stillOffline.complete &&
+          rowPaths(offlineLinkDb).includes(offlineLinkFile),
+        "repeated offline scans keep saved descendants even after the link metadata changed",
+      );
+      fs.renameSync(`${offlineLinkTarget}-offline`, offlineLinkTarget);
+      fs.unlinkSync(path.join(offlineLinkTarget, "saved-cloud-report.txt"));
+      const afterOnline = await scanRoots(options);
+      assert(
+        afterOnline.complete &&
+          !rowPaths(offlineLinkDb).includes(offlineLinkFile),
+        "a linked folder returning online restores authoritative stale-path cleanup",
+      );
+    } finally {
+      offlineLinkDb.close();
+      fs.rmSync(offlineLinkDir, { recursive: true, force: true });
     }
     const shortcutDir = tempDir("hidden-shortcut");
     const shortcutRoot = path.join(shortcutDir, "tree");

@@ -43,7 +43,7 @@ export type FileRow = {
 export type IndexRoot = {
   root: string;
   scannedAt: number;
-  /** True when the scan covered the whole root and stale rows were removed. */
+  /** True when the scan covered the whole root without errors or stopping. */
   complete: number;
   files: number;
   note: string | null;
@@ -246,6 +246,17 @@ export function readIndexRoots(db: DatabaseSync): IndexRoot[] {
       "SELECT root, scanned_at AS scannedAt, complete, files, note FROM index_roots ORDER BY root",
     )
     .all() as unknown as IndexRoot[];
+}
+
+/** Include batches left behind when a scan ended before root bookkeeping. */
+export function readKnownIndexRoots(db: DatabaseSync): string[] {
+  return (
+    db
+      .prepare(
+        "SELECT root FROM index_roots UNION SELECT DISTINCT root FROM files",
+      )
+      .all() as { root: string }[]
+  ).map((row) => row.root);
 }
 
 export function countIndexedFiles(db: DatabaseSync): number {

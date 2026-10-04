@@ -1,6 +1,10 @@
 import { rankSources, RankContext } from "../src/lib/rank-sources";
 import { parseQuery } from "../src/lib/query";
 import { Entry, SortMode } from "../src/lib/types";
+import {
+  entryStoragePath,
+  entryStorageSource,
+} from "../src/lib/entry-identity";
 
 export function rankSourcesChecks(
   assert: (ok: boolean, label: string) => void,
@@ -91,6 +95,89 @@ export function rankSourcesChecks(
   assert(
     rank([remembered], "report -d", { learned }).length === 0,
     "learned names still respect explicit type filters",
+  );
+
+  const staleShortcut = Object.freeze(
+    entry("/shortcuts/alias.txt", {
+      storagePath: "/old/report.txt",
+      dev: 1,
+      ino: 2,
+      useCount: 99,
+    }),
+  );
+  const refreshed = rank([staleShortcut], "remembered", {
+    actionStoragePaths: new Map([
+      [
+        staleShortcut.path,
+        { source: staleShortcut, storagePath: "/new/report.txt" },
+      ],
+    ]),
+    learned: new Set(["/new/report.txt"]),
+    visits: {
+      "/new/report.txt": { count: 1, ems: 1, tick: 0, lastVisit: now },
+    },
+  });
+  assert(
+    refreshed.length === 1 &&
+      entryStoragePath(refreshed[0].entry) === "/new/report.txt" &&
+      refreshed[0].entry.dev === undefined &&
+      refreshed[0].entry.ino === undefined &&
+      refreshed[0].entry.useCount === undefined &&
+      staleShortcut.storagePath === "/old/report.txt",
+    "a successful action resolve updates learned ranking and the row's pin key without retaining the old target's identity",
+  );
+  const actionUpdate = new Map([
+    [
+      staleShortcut.path,
+      { source: staleShortcut, storagePath: "/new/report.txt" },
+    ],
+  ]);
+  const freshShortcut = {
+    ...staleShortcut,
+    storagePath: "/latest/report.txt",
+  };
+  assert(
+    rank([freshShortcut], "", { actionStoragePaths: actionUpdate })[0].entry
+      .storagePath === freshShortcut.storagePath &&
+      rank([{ ...staleShortcut }], "", { actionStoragePaths: actionUpdate })[0]
+        .entry.storagePath === staleShortcut.storagePath,
+    "fresh source snapshots supersede older action updates, including a return to the original target",
+  );
+  assert(
+    rank([staleShortcut], "", {
+      actionStoragePaths: new Map([
+        [
+          staleShortcut.path,
+          {
+            source: entryStorageSource(refreshed[0].entry),
+            storagePath: "/latest/report.txt",
+          },
+        ],
+      ]),
+    })[0].entry.storagePath === "/latest/report.txt",
+    "repeated actions on a corrected row update the original source snapshot",
+  );
+  assert(
+    rank([original], "", {
+      actionStoragePaths: new Map([
+        [
+          original.path,
+          {
+            source: entryStorageSource(merged[0].entry),
+            storagePath: "/new/report.txt",
+          },
+        ],
+      ]),
+    })[0].entry.storagePath === "/new/report.txt",
+    "duplicate-source usage merges retain the row's original source for later action updates",
+  );
+  const correctedDuplicate = rank([staleShortcut, { ...staleShortcut }], "", {
+    actionStoragePaths: actionUpdate,
+  })[0].entry;
+  assert(
+    correctedDuplicate.storagePath === "/new/report.txt" &&
+      correctedDuplicate.useCount === undefined,
+    "a duplicate stale source cannot restore the previous target's usage on a corrected row",
   );
 
   const aliases = [

@@ -82,9 +82,10 @@ export function mergeAbbreviation(
   );
 
   // Reinsert the query so the cap evicts the least recently reinforced entry.
-  const next: Abbreviations = { ...all };
-  delete next[normalizedQuery];
-  next[normalizedQuery] = trimmed;
+  const remaining: Abbreviations = { ...all };
+  delete remaining[normalizedQuery];
+  // A computed own property also preserves queries such as "__proto__".
+  const next: Abbreviations = { ...remaining, [normalizedQuery]: trimmed };
 
   const keys = Object.keys(next);
   for (const stale of keys.slice(

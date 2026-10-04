@@ -42,14 +42,14 @@ export function useSearchHistoryRecording(state: {
       if (storageGeneration !== dataGeneration()) return;
       setHistory(history);
       if (target !== undefined) {
-        setAbbreviations(
-          await recordAbbreviation(
-            normalizedQuery,
-            target,
-            storageGeneration,
-            knownTarget,
-          ),
+        const abbreviations = await recordAbbreviation(
+          normalizedQuery,
+          target,
+          storageGeneration,
+          knownTarget,
         );
+        if (storageGeneration === dataGeneration())
+          setAbbreviations(abbreviations);
       }
     },
     [query, normalizedQuery, setHistory, setAbbreviations],

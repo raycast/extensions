@@ -1,6 +1,6 @@
 import { Entry } from "./types";
 import { readEntryMetadata } from "./directory-listing";
-import { createReadPool } from "./bounded-reads";
+import { createProviderReadPoolSelector } from "./provider-read-pools";
 import { matchPath, matchesStats, parseQuery, TypeFilter } from "./query";
 
 /**
@@ -20,7 +20,7 @@ export type RecentValidation = {
 
 /** Share physical reads across queries; only full cached rows can be fallbacks. */
 export function createRecentValidator(stat = readEntryMetadata) {
-  const read = createReadPool();
+  const readFor = createProviderReadPoolSelector();
   return async (
     candidates: CachedCandidate[],
     options: {
@@ -42,6 +42,22 @@ export function createRecentValidator(stat = readEntryMetadata) {
     const limit = options.limit ?? 60;
     const found = new Map<string, Entry>();
     const checked = new Set<string>();
+    // Each source needs its own workers as well as physical slots: otherwise
+    // the first eight stalled cloud paths stop later local candidates from
+    // even reaching their independent pool.
+    const sources = new Map<
+      ReturnType<typeof readFor>,
+      { candidates: CachedCandidate[]; cursor: number }
+    >();
+    for (const candidate of candidates) {
+      const read = readFor(candidate.path);
+      let source = sources.get(read);
+      if (!source) {
+        source = { candidates: [], cursor: 0 };
+        sources.set(read, source);
+      }
+      source.candidates.push(candidate);
+    }
     let cursor = 0;
     let partial = false;
     const matches = (entry: Entry) =>
@@ -67,13 +83,17 @@ export function createRecentValidator(stat = readEntryMetadata) {
       }
       return rows;
     };
-    const worker = async () => {
+    const worker = async (
+      read: ReturnType<typeof readFor>,
+      source: { candidates: CachedCandidate[]; cursor: number },
+    ) => {
       while (
         !active.signal.aborted &&
-        cursor < candidates.length &&
+        source.cursor < source.candidates.length &&
         found.size < limit
       ) {
-        const cached = candidates[cursor++];
+        const cached = source.candidates[source.cursor++];
+        cursor++;
         try {
           const entry = await read(
             cached.path,
@@ -96,7 +116,11 @@ export function createRecentValidator(stat = readEntryMetadata) {
     };
     try {
       await Promise.all(
-        Array.from({ length: Math.min(8, candidates.length) }, worker),
+        [...sources].flatMap(([read, source]) =>
+          Array.from({ length: Math.min(8, source.candidates.length) }, () =>
+            worker(read, source),
+          ),
+        ),
       );
       const cancelled = options.signal?.aborted;
       const limited =

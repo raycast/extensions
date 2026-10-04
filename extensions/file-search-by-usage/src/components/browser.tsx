@@ -62,6 +62,8 @@ import { Row, RowHandlers } from "./row";
 import {
   currentEntryStoragePath,
   entryStoragePath,
+  entryStorageSource,
+  EntryStorageUpdate,
   rowIdForEntry,
 } from "../lib/entry-identity";
 import { compactScopeLabel, relativeTime } from "../lib/format";
@@ -169,6 +171,9 @@ function BrowserView({
   const visits = visitLog.items;
   const tick = visitLog.tick;
   const [pins, setPins] = useState<string[]>([]);
+  const [actionStoragePaths, setActionStoragePaths] = useState<
+    ReadonlyMap<string, EntryStorageUpdate>
+  >(new Map());
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
@@ -592,6 +597,33 @@ function BrowserView({
   );
   const pathRows = pathListing.rows;
 
+  // Keep an acted-on row consistent with a freshly resolved symlink target.
+  // The database and directory snapshots may still describe the old target.
+  const resolveActionStoragePath = useCallback(async (entry: Entry) => {
+    const generation = dataGeneration();
+    const storagePath = await currentEntryStoragePath(entry);
+    if (
+      generation === dataGeneration() &&
+      storagePath !== entryStoragePath(entry)
+    ) {
+      setActionStoragePaths((previous) => {
+        const next = new Map(previous);
+        next.delete(entry.path);
+        next.set(entry.path, {
+          source: entryStorageSource(entry),
+          storagePath,
+        });
+        if (next.size > LIVE_RESULTS) next.delete(next.keys().next().value!);
+        return next;
+      });
+    }
+    return storagePath;
+  }, []);
+
+  useEffect(() => {
+    setActionStoragePaths(new Map());
+  }, [reloadKey]);
+
   const rankSources = useCallback(
     (sources: Entry[]) =>
       rankCandidates(sources, {
@@ -606,6 +638,7 @@ function BrowserView({
         canonicalDir,
         showHidden,
         sortMode,
+        actionStoragePaths,
       }),
     [
       learnedSet,
@@ -618,6 +651,7 @@ function BrowserView({
       canonicalDir,
       sortMode,
       showHidden,
+      actionStoragePaths,
     ],
   );
 
@@ -711,12 +745,11 @@ function BrowserView({
       onReturnToStart:
         dir !== undefined || searchText !== "" ? returnToStart : undefined,
       onUse: (entry) => {
-        const generation = dataGeneration();
-        void currentEntryStoragePath(entry)
-          .then((storagePath) =>
-            markVisited(entry.path, generation, storagePath),
-          )
-          .catch(() => {});
+        void (async () => {
+          const generation = dataGeneration();
+          const storagePath = await resolveActionStoragePath(entry);
+          await markVisited(entry.path, generation, storagePath);
+        })().catch(() => {});
       },
       onOpen: (entry) =>
         runWithBestEffortSideEffect(
@@ -726,7 +759,7 @@ function BrowserView({
           },
           async () => {
             const generation = dataGeneration();
-            const storagePath = await currentEntryStoragePath(entry);
+            const storagePath = await resolveActionStoragePath(entry);
             await Promise.allSettled([
               markVisited(entry.path, generation, storagePath),
               commitSearch(entry.path, generation, storagePath),
@@ -734,15 +767,16 @@ function BrowserView({
           },
         ),
       onDescend: (entry) => {
-        const generation = dataGeneration();
-        void currentEntryStoragePath(entry)
-          .then((storagePath) =>
-            Promise.allSettled([
-              markVisited(entry.path, generation, storagePath),
-              commitSearch(entry.path, generation, storagePath),
-            ]),
-          )
-          .catch(() => {});
+        // Even reading the storage generation can fail. Keep all optional
+        // persistence inside the caught task so navigation always proceeds.
+        void (async () => {
+          const generation = dataGeneration();
+          const storagePath = await resolveActionStoragePath(entry);
+          await Promise.allSettled([
+            markVisited(entry.path, generation, storagePath),
+            commitSearch(entry.path, generation, storagePath),
+          ]);
+        })().catch(() => {});
         navigate(entry.path);
       },
       onUp:
@@ -781,22 +815,26 @@ function BrowserView({
           setQueryProgrammatically(step.query);
         }
       },
-      onTogglePin: async (entry) =>
-        setPins(
-          await togglePin(entry.path, await currentEntryStoragePath(entry)),
-        ),
+      onTogglePin: async (entry) => {
+        const generation = dataGeneration();
+        const storagePath = await resolveActionStoragePath(entry);
+        const next = await togglePin(entry.path, storagePath, generation);
+        if (generation === dataGeneration()) setPins(next);
+      },
       onLearn:
         query === ""
           ? undefined
           : async (entry) => {
-              setAbbreviations(
-                await recordAbbreviation(
-                  parsed.normalized,
-                  entry.path,
-                  dataGeneration(),
-                  await currentEntryStoragePath(entry),
-                ),
+              const generation = dataGeneration();
+              const storagePath = await resolveActionStoragePath(entry);
+              const next = await recordAbbreviation(
+                parsed.normalized,
+                entry.path,
+                generation,
+                storagePath,
               );
+              if (generation !== dataGeneration()) return;
+              setAbbreviations(next);
               await showToast({
                 style: Toast.Style.Success,
                 title: `"${query}" will now find ${entry.name}`,
@@ -815,10 +853,12 @@ function BrowserView({
       },
       onToggleDetail: () => setShowingDetail((v) => !v),
       onRefresh: () => setReloadKey((k) => k + 1),
-      onResetRanking: async (entry) =>
-        setVisitLog(
-          await resetVisit(entry.path, await currentEntryStoragePath(entry)),
-        ),
+      onResetRanking: async (entry) => {
+        const generation = dataGeneration();
+        const storagePath = await resolveActionStoragePath(entry);
+        const next = await resetVisit(entry.path, storagePath, generation);
+        if (generation === dataGeneration()) setVisitLog(next);
+      },
       onClearAllRankings: async () => {
         const confirmed = await confirmAlert({
           title: "Clear all usage history?",
@@ -829,7 +869,11 @@ function BrowserView({
             style: Alert.ActionStyle.Destructive,
           },
         });
-        if (confirmed) setVisitLog(await clearVisits());
+        if (confirmed) {
+          const generation = dataGeneration();
+          const next = await clearVisits();
+          if (generation === dataGeneration()) setVisitLog(next);
+        }
       },
       onEraseEverything: async () => {
         const confirmed = await confirmAlert({
@@ -866,6 +910,7 @@ function BrowserView({
       parsed.normalized,
       markVisited,
       commitSearch,
+      resolveActionStoragePath,
       setQueryProgrammatically,
       navigate,
       onToggleHidden,

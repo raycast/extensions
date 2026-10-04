@@ -34,7 +34,7 @@ export async function loadIndexSettings(): Promise<IndexSettings> {
 /** Rebuilds also need to know whether settings may authorize root deletion. */
 export async function loadIndexSettingsForRebuild() {
   const raw = await LocalStorage.getItem<string>(SETTINGS_KEY);
-  return parseSettingsResult(typeof raw === "string" ? raw : undefined);
+  return parseSettingsResult(raw);
 }
 
 /**

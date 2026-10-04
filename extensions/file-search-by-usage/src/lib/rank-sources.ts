@@ -1,6 +1,11 @@
 import path from "node:path";
 import { Entry, SortMode, Visits } from "./types";
-import { entryStoragePath } from "./entry-identity";
+import {
+  applyEntryStorageUpdate,
+  entryStoragePath,
+  EntryStorageUpdate,
+  mergeEntryUsage,
+} from "./entry-identity";
 import { relativeDepth } from "./read-dir";
 import { ScoreParts, scoreEntry } from "./score";
 import { compareRankedEntries, RankedEntry } from "./result-order";
@@ -28,6 +33,8 @@ export type RankContext = {
   canonicalDir?: string;
   showHidden: boolean;
   sortMode: SortMode;
+  /** Recent action-time identities override an older indexed row snapshot. */
+  actionStoragePaths?: ReadonlyMap<string, EntryStorageUpdate>;
 };
 
 /** Pure ranking shared by every source: scope, matching, usage, then aliases. */
@@ -47,9 +54,14 @@ export function rankSources(
     canonicalDir,
     showHidden,
     sortMode,
+    actionStoragePaths,
   } = context;
   const byPath = new Map<string, Entry>();
-  for (const entry of sources) {
+  for (const source of sources) {
+    const entry = applyEntryStorageUpdate(
+      source,
+      actionStoragePaths?.get(source.path),
+    );
     // Explicit path-bar listings have already applied their visibility rules.
     if (!showHidden && !pathQuery && entry.name.startsWith(".")) continue;
     if (
@@ -59,16 +71,7 @@ export function rankSources(
     )
       continue;
     const previous = byPath.get(entry.path);
-    byPath.set(
-      entry.path,
-      previous
-        ? {
-            ...previous,
-            useCount: previous.useCount ?? entry.useCount,
-            lastUsedMs: previous.lastUsedMs ?? entry.lastUsedMs,
-          }
-        : entry,
-    );
+    byPath.set(entry.path, previous ? mergeEntryUsage(previous, entry) : entry);
   }
 
   const rows: Ranked[] = [];

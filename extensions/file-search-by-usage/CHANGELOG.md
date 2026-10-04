@@ -35,9 +35,15 @@
 - Query the index at three characters and say how many more are needed below that; keep memory results available at any length.
 - Keep healthy folder reads moving past stalled files; collection does not depend on scrolling.
 - Isolate indexing reads by cloud provider so stalled mounts cannot block later local rebuilds.
+- Isolate cached-result validation by provider so stalled cloud paths do not block local files or other providers.
+- Keep the previous folder listing when a refresh fails, and clear it when a successful refresh finds the folder empty.
 - Keep paths discovered by `fd` searchable when their metadata reads time out.
 - Keep pin, visit, and learned-query keys unified when alias resolution times out and later succeeds.
+- Refresh a shortcut's storage identity before recording an action; retain its saved identity on timeout and update ranking and pin state when its target changes.
 - Coordinate deletion with pending history and cache writes; bound cached-path metadata reads and retain cached results when metadata stalls.
+- Prevent delayed pin, ranking, and learned-query actions from restoring data or UI state after deletion.
+- Recover healthy usage records and learned pairings when individual stored entries are malformed.
+- Keep folder navigation and native file actions usable when optional ranking storage cannot be read or written.
 - Navigate folders with `⌥⌘↓` and `⌥⌘↑`, or type an absolute or home-relative path.
 - Use native navigation with a lightweight root and one active search route, without saved folder history; release each previous result view.
 - Return to the empty start screen with native Back; preserve typed queries when restarting search, including during development-mode effect replay.
@@ -48,7 +54,10 @@
 - Show whether results are complete, truncated, running on memory alone because no index has been built, or based on a location the last rebuild left incomplete.
 - Report unreadable folders, unreadable indexes, and usage-metadata failures without discarding existing results.
 - Keep valid usage metadata when one item cannot be read, and report the result as partial.
-- Keep the previous index when the drive is offline or unmounted. A scan that stops early merges what it found and never deletes. Only a scan that reached the end of a location replaces that location's coverage and removes names it no longer finds.
+- Preserve saved paths when settings are malformed or incomplete, including paths within scopes that still appear in the recovery settings.
+- Keep saved CloudStorage provider scopes when they disappear from discovery while cloud inclusion remains enabled; continue removing unrelated scopes that the user removed.
+- Preserve descendants of a previously indexed directory shortcut while its target is unavailable, including across repeated rebuilds.
+- Keep the previous index when the drive is offline or unmounted. Partial scans merge what they find. A root removes stale paths only after an error-free scan with authoritative settings.
 - Prevent overlapping manual indexing runs from replacing each other's results.
 - Prevent indexing from restoring data after deletion completes.
 - Refresh open folders asynchronously, keep search usable while the index is being rebuilt, and cancel obsolete queries and scans.

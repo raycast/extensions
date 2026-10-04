@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
 import type { DatabaseSync } from "node:sqlite";
 import { NOISE_SEGMENTS } from "./read-dir";
-import type { FileRow } from "./index-db";
+import { readKnownIndexRoots, type FileRow } from "./index-db";
 import { createProviderReadPoolSelector } from "./provider-read-pools";
 
 /**
@@ -85,7 +85,7 @@ export type RootOutcome = {
   indexed: number;
   elapsedMs: number;
   timings: Omit<ScanTimings, "ftsMs">;
-  /** True only when fd finished the whole root and stale rows were removed. */
+  /** True only when fd finished the whole root without errors or stopping. */
   complete: boolean;
   stopped?: ScanStop;
   /** Set when the root could not be read at all. */
@@ -127,10 +127,12 @@ export type ScanOptions = {
   useIgnoreFiles?: boolean;
   /** User exclusion globs, added to the built-in list. */
   patterns?: readonly string[];
-  /** Existing roots whose rows must survive non-authoritative configuration. */
+  /** Existing roots to retain even when discovery or recovery omitted them. */
   protectedRoots?: readonly string[];
   /** False when configuration or provider discovery used recovery fallbacks. */
   allowRootCleanup?: boolean;
+  /** False when recovery settings cannot prove unseen paths were removed. */
+  allowStaleCleanup?: boolean;
   onProgress?: (progress: ScanProgress) => void;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
@@ -410,6 +412,7 @@ async function describe(
   entry: Observed,
   root: string,
   signal: AbortSignal,
+  onUnavailableLink: (full: string) => void,
 ): Promise<FileRow> {
   const base: FileRow = {
     path: entry.path,
@@ -467,6 +470,7 @@ async function describe(
       };
     } catch {
       if (signal.aborted) throw new Error("Index metadata read cancelled");
+      onUnavailableLink(entry.path);
       return {
         ...base,
         is_symlink: 1,
@@ -488,6 +492,7 @@ async function describeAll(
   root: string,
   concurrency: number,
   signal: AbortSignal,
+  onUnavailableLink: (full: string) => void,
 ): Promise<FileRow[]> {
   const rows: FileRow[] = [];
   let next = 0;
@@ -499,7 +504,9 @@ async function describeAll(
         const index = next++;
         if (index >= entries.length) return;
         try {
-          rows.push(await describe(entries[index], root, signal));
+          rows.push(
+            await describe(entries[index], root, signal, onUnavailableLink),
+          );
         } catch (error) {
           if (signal.aborted) return;
           throw error;
@@ -606,12 +613,18 @@ export async function scanRoot(
   const scanId = nextScanId(db);
   const upsert = db.prepare(UPSERT);
   const insertObserved = db.prepare(INSERT_OBSERVED);
+  const previousLinkedFolder = db.prepare(
+    `SELECT 1 FROM files WHERE (path = ? AND is_dir = 1)
+      OR (path >= ? AND path < ?) LIMIT 1`,
+  );
   databaseMs += performance.now() - databaseStarted;
 
   let scanned = 0;
   let indexed = 0;
   let stopped: ScanStop | undefined;
   let error: string | undefined;
+  let unavailableLinkedFolder = false;
+  const unavailableLinks = new Set<string>();
   const callerSignal = options.externalSignal ?? options.signal;
   // Cover root validation and metadata as well as the fd subprocess.
   const timeLimit = new AbortController();
@@ -680,11 +693,29 @@ export async function scanRoot(
     const startedMetadata = performance.now();
     let rows: FileRow[] | undefined;
     try {
-      rows = await describeAll(batch, root, statConcurrency, signal);
+      rows = await describeAll(batch, root, statConcurrency, signal, (full) =>
+        unavailableLinks.add(full),
+      );
     } catch (metadataError) {
       if (!signal.aborted) throw metadataError;
     } finally {
       metadataMs += performance.now() - startedMetadata;
+    }
+    if (unavailableLinks.size > 0) {
+      // fd emits a dangling link without a traversal error. If this was a
+      // directory, its missing descendants can instead mean an offline mount.
+      // Check descendants too: a prior offline run may have lost the type hint.
+      // Query outside metadata recovery so database errors stop the scan.
+      const startedRead = performance.now();
+      try {
+        for (const full of unavailableLinks)
+          unavailableLinkedFolder ||=
+            previousLinkedFolder.get(full, full + path.sep, full + "0") !==
+            undefined;
+      } finally {
+        unavailableLinks.clear();
+        databaseMs += performance.now() - startedRead;
+      }
     }
     if (rows === undefined) {
       commitObserved(batch);
@@ -836,8 +867,10 @@ export async function scanRoot(
     stopped = callerSignal?.aborted ? "cancelled" : "time-limit";
   else if (stopped === undefined && Date.now() > deadline)
     stopped = "time-limit";
+  if (unavailableLinkedFolder && stopped === undefined && error === undefined)
+    error = "A linked folder is unavailable; saved paths were kept.";
   const complete = stopped === undefined && error === undefined;
-  if (complete) {
+  if (complete && options.allowStaleCleanup !== false) {
     // Only now is absence meaningful: fd walked the whole root.
     databaseStarted = performance.now();
     assertOwned?.();
@@ -925,13 +958,7 @@ function forgetUnconfiguredRoots(
   configured: string[],
   assertOwned?: () => void,
 ): string[] {
-  const known = (
-    db
-      .prepare(
-        "SELECT root FROM index_roots UNION SELECT DISTINCT root FROM files",
-      )
-      .all() as { root: string }[]
-  ).map((row) => row.root);
+  const known = readKnownIndexRoots(db);
   const wanted = new Set(configured);
   const gone = known.filter((root) => !wanted.has(root));
   if (gone.length === 0) return [];
@@ -1042,7 +1069,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       const forgetStarted = performance.now();
       forgotten = forgetUnconfiguredRoots(
         options.db,
-        roots,
+        ownershipRoots,
         options.assertOwned,
       );
       databaseMs += performance.now() - forgetStarted;

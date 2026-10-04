@@ -14,6 +14,7 @@ import {
 import { createWorkQueue } from "../src/lib/work-queue";
 import { readBoundedDirectory } from "../src/lib/bounded-directory";
 import { canonicalPathAsync } from "../src/lib/read-dir";
+import { currentEntryStoragePath } from "../src/lib/entry-identity";
 
 const turn = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -324,6 +325,21 @@ export async function liveSearchChecks(
     assert(
       resolved === stalledCanonical && Date.now() - started < 500,
       "stalled alias resolution falls back quickly instead of blocking an action",
+    );
+    const savedTarget = path.join(os.tmpdir(), "saved-cloud-target.txt");
+    const stalledEntry: Entry = {
+      name: "file.txt",
+      path: stalledCanonical,
+      storagePath: savedTarget,
+      isDirectory: false,
+      isSymlink: true,
+      size: 0,
+      mtimeMs: 0,
+      birthtimeMs: 0,
+    };
+    assert(
+      (await currentEntryStoragePath(stalledEntry, 25)) === savedTarget,
+      "a stalled action resolve retains the storage key used by the visible row",
     );
   } finally {
     fsp.realpath = originalRealpath;

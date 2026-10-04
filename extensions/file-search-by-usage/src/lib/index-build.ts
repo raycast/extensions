@@ -4,7 +4,7 @@ import path from "node:path";
 import { findFd, describeFdLookup, FdLookup } from "./fd";
 import {
   openIndexForWrite,
-  readIndexRoots,
+  readKnownIndexRoots,
   resumeFtsSync,
   suspendFtsSync,
   writeScanStarted,
@@ -159,6 +159,8 @@ export type BuildOptions = {
   loadSettingsResult?: () => Promise<ParsedIndexSettings>;
   /** Test seam for bounded provider discovery. */
   discoverCloudRoots?: () => Promise<CloudStorageRootResult>;
+  /** CloudStorage directory; overridable for synthetic discovery fixtures. */
+  cloudRoot?: string;
   lookupFd?: (preference?: string) => FdLookup | Promise<FdLookup>;
   /** Injection point for tests; defaults to spawning fd. */
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
@@ -214,12 +216,15 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
             authoritative: true,
           };
       const settings = loaded.settings;
+      const cloudRoot = path.resolve(
+        options.cloudRoot ?? path.join(os.homedir(), "Library", "CloudStorage"),
+      );
       const cloud = options.roots
         ? { roots: [] as string[], authoritative: true }
         : settings.includeDrive
           ? await (options.discoverCloudRoots
               ? options.discoverCloudRoots()
-              : cloudStorageIndexRootResult(undefined, {
+              : cloudStorageIndexRootResult(cloudRoot, {
                   signal: options.signal,
                 }))
           : { roots: [] as string[], authoritative: true };
@@ -258,6 +263,16 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
         assertOwned();
         writeScanStarted(opened.db, startedAt);
         suspendFtsSync(opened.db);
+        const knownRoots = readKnownIndexRoots(opened.db);
+        const protectedRoots = cleanupAuthoritative ? [] : [...knownRoots];
+        if (options.roots === undefined && settings.includeDrive) {
+          // A successful directory listing can omit an unmounted account.
+          // Keeping cloud indexing enabled still includes those saved providers;
+          // only disabling it can authorize removing their scopes altogether.
+          protectedRoots.push(
+            ...knownRoots.filter((root) => path.dirname(root) === cloudRoot),
+          );
+        }
         report = await scanRoots({
           fd: lookup.path,
           roots,
@@ -269,9 +284,8 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           useIgnoreFiles: options.useIgnoreFiles ?? settings.useIgnoreFiles,
           patterns: options.patterns ?? settings.patterns,
           allowRootCleanup: cleanupAuthoritative,
-          protectedRoots: cleanupAuthoritative
-            ? []
-            : readIndexRoots(opened.db).map((entry) => entry.root),
+          allowStaleCleanup: loaded.authoritative,
+          protectedRoots,
           onProgress: options.onProgress,
           spawnFd: options.spawnFd,
           assertOwned,

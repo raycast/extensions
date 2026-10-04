@@ -264,6 +264,52 @@ export async function cachedEntryChecks(
       active === 0,
       "releasing the stalled reads after the deadline leaves nothing running",
     );
+
+    const cloudRoot = path.join(root, "Library", "CloudStorage");
+    const stalledProvider = path.join(cloudRoot, "GoogleDrive-stalled");
+    const otherProvider = path.join(cloudRoot, "OneDrive-ready", "ready.txt");
+    const cloudReleases: (() => void)[] = [];
+    let stalledReads = 0;
+    const isolated = createRecentValidator(async (full) => {
+      if (full.startsWith(stalledProvider + path.sep)) {
+        stalledReads++;
+        return new Promise<Entry | undefined>((resolve) => {
+          cloudReleases.push(() => resolve(undefined));
+        });
+      }
+      return { ...candidate, path: full };
+    });
+    const stalledPaths = Array.from({ length: 12 }, (_, i) => ({
+      path: path.join(stalledProvider, `slow-${i}.txt`),
+    }));
+    try {
+      const mixed = await isolated(
+        [...stalledPaths, { path: document }, { path: otherProvider }],
+        { budgetMs: 20 },
+      );
+      assert(
+        mixed.partial &&
+          mixed.entries.some((entry) => entry.path === document) &&
+          mixed.entries.some((entry) => entry.path === otherProvider),
+        "stalled cloud candidates cannot hide later local or other-provider candidates",
+      );
+      const next = await isolated(
+        [{ path: document }, { path: otherProvider }],
+        { budgetMs: 20 },
+      );
+      assert(
+        !next.partial && next.entries.length === 2,
+        "stalled cached cloud reads cannot starve later local validation",
+      );
+      await isolated(stalledPaths, { budgetMs: 20 });
+      assert(
+        stalledReads === 8,
+        "provider isolation retains and shares the eight occupied slots across retries",
+      );
+    } finally {
+      cloudReleases.forEach((release) => release());
+      await new Promise((resolve) => setImmediate(resolve));
+    }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

@@ -4,6 +4,7 @@ import { VisitLog } from "./types";
 import { canonicalPathAsync } from "./read-dir";
 import {
   Abbreviations,
+  MAX_EMS,
   emsScore,
   mergeAbbreviation,
   pruneVisits,
@@ -13,6 +14,18 @@ import {
 const KEY = "visits";
 
 const EMPTY: VisitLog = { tick: 0, items: {} };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function nonnegativeNumber(value: unknown, fallback = 0): number {
+  return isFiniteNumber(value) && value >= 0 ? value : fallback;
+}
 
 /** Move a previously saved visible alias onto its now-known storage key. */
 function mergeVisitAlias(
@@ -40,8 +53,37 @@ export async function loadVisitLog(): Promise<VisitLog> {
   const raw = await LocalStorage.getItem<string>(KEY);
   if (!raw) return EMPTY;
   try {
-    const parsed = JSON.parse(raw) as VisitLog;
-    if (typeof parsed?.tick === "number" && parsed.items) return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      !isRecord(parsed) ||
+      !isFiniteNumber(parsed.tick) ||
+      parsed.tick < 0 ||
+      !isRecord(parsed.items)
+    )
+      return EMPTY;
+    const tick = parsed.tick;
+    // One damaged entry must not disable subsequent writes or discard the
+    // healthy entries. Keep the legacy count fallback for unavailable EMS.
+    const items = Object.fromEntries(
+      Object.entries(parsed.items).flatMap(([key, visit]) => {
+        if (!isRecord(visit)) return [];
+        const count = nonnegativeNumber(visit.count);
+        return [
+          [
+            key,
+            {
+              count,
+              lastVisit: nonnegativeNumber(visit.lastVisit),
+              ems: isFiniteNumber(visit.ems)
+                ? visit.ems
+                : Math.min(count, MAX_EMS),
+              tick: nonnegativeNumber(visit.tick, tick),
+            },
+          ],
+        ];
+      }),
+    );
+    return { tick, items };
   } catch {
     // Invalid storage starts with an empty log.
   }
@@ -74,8 +116,8 @@ export async function recordVisit(
 export async function resetVisit(
   path: string,
   knownTarget?: string,
+  generation = dataGeneration(),
 ): Promise<VisitLog> {
-  const generation = dataGeneration();
   const target = knownTarget ?? (await canonicalPathAsync(path));
   return withStorageLock(async (assertCurrent) => {
     const log = await loadVisitLog();
@@ -104,10 +146,18 @@ export async function loadAbbreviations(): Promise<Abbreviations> {
   const raw = await LocalStorage.getItem<string>(ABBREV_KEY);
   if (!raw) return {};
   try {
-    const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed !== null
-      ? (parsed as Abbreviations)
-      : {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed).flatMap(([query, targets]) => {
+        if (!isRecord(targets)) return [];
+        const valid = Object.entries(targets).filter(
+          (pair): pair is [string, number] =>
+            isFiniteNumber(pair[1]) && pair[1] > 0,
+        );
+        return valid.length === 0 ? [] : [[query, Object.fromEntries(valid)]];
+      }),
+    );
   } catch {
     return {};
   }
@@ -160,8 +210,8 @@ export async function loadPins(): Promise<string[]> {
 export async function togglePin(
   rawTarget: string,
   knownTarget?: string,
+  generation = dataGeneration(),
 ): Promise<string[]> {
-  const generation = dataGeneration();
   const target = knownTarget ?? (await canonicalPathAsync(rawTarget));
   return withStorageLock(async (assertCurrent) => {
     const pins = await loadPins();

@@ -3,7 +3,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { Entry } from "./types";
-import { createReadPool } from "./bounded-reads";
+import { createProviderReadPoolSelector } from "./provider-read-pools";
 
 /** Maximum entries returned for one directory listing. */
 export const MAX_ENTRIES = 3000;
@@ -268,23 +268,28 @@ export function canonicalPath(full: string): string {
   }
 }
 
-const canonicalRead = createReadPool(8);
+const canonicalReadFor = createProviderReadPoolSelector();
 
-/** Resolve aliases without letting a stalled provider block the JS worker. */
+/**
+ * Resolve aliases without letting a stalled provider block the JS worker.
+ * Callers with a previously known identity may supply it as the timeout/error
+ * fallback so an unavailable provider does not split stored keys.
+ */
 export async function canonicalPathAsync(
   full: string,
   budgetMs = 250,
+  fallback = full,
 ): Promise<string> {
   const active = new AbortController();
   const timer = setTimeout(() => active.abort(), budgetMs);
   try {
-    return await canonicalRead(
+    return await canonicalReadFor(full)(
       `canonical:${full}`,
       () => fsp.realpath(full),
       active.signal,
     );
   } catch {
-    return full;
+    return fallback;
   } finally {
     clearTimeout(timer);
   }

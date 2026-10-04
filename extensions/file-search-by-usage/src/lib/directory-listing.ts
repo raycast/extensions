@@ -244,6 +244,13 @@ export function observeDirectory(
           controller.signal,
         );
         if (controller.signal.aborted) return;
+        if (result.error) {
+          // A failed refresh says nothing about which previous rows still
+          // exist. Keep them visible with the error until a successful read
+          // can replace them, including a successful empty listing.
+          result.entries = snapshot.entries;
+          result.truncated = snapshot.truncated;
+        }
         if (isDeepStrictEqual(result.entries, snapshot.entries)) {
           result.entries = snapshot.entries;
         }
