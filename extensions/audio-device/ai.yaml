@@ -1,6 +1,7 @@
 instructions: |
   Use list-audio-devices before switching to a named device. Pass its exact ID to set-audio-device.
   Input devices are microphones. Output devices are speakers and headphones.
+  Use get-audio-volume to read the current input or output volume.
 evals:
   - input: "@audio-device Which output devices are available?"
     mocks:
@@ -46,3 +47,21 @@ evals:
           arguments:
             type: input
             volume: 40
+  - input: "@audio-device What is my speaker volume?"
+    mocks:
+      get-audio-volume: "MacBook Pro Speakers output volume is 65%."
+    expected:
+      - callsTool:
+          name: get-audio-volume
+          arguments:
+            type: output
+      - includes: "65%"
+  - input: "@audio-device What is my microphone volume?"
+    mocks:
+      get-audio-volume: "Built-in Microphone input volume is 40%."
+    expected:
+      - callsTool:
+          name: get-audio-volume
+          arguments:
+            type: input
+      - includes: "40%"

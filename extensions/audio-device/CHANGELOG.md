@@ -2,8 +2,7 @@
 
 ## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
 
-- Add Ask AI tools to list audio devices, switch the active input or output device, and set volume.
-- Add YAML evals for device listing, switching, and microphone volume requests.
+- Add Ask AI tools to list audio devices, switch the active input or output device, and get or set volume.
 
 ## [Fix] - 2026-09-30
 

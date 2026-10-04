@@ -230,6 +230,11 @@
       "description": "Switch the active input or output device using an ID from List Audio Devices."
     },
     {
+      "name": "get-audio-volume",
+      "title": "Get Audio Volume",
+      "description": "Get the current input or output device volume as a percentage from 0 to 100."
+    },
+    {
       "name": "set-audio-volume",
       "title": "Set Audio Volume",
       "description": "Set the current input or output device volume to a percentage from 0 to 100."
