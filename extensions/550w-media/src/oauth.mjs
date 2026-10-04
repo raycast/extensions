@@ -134,8 +134,9 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
     if (
       typeof data.access_token !== "string" ||
       !data.access_token ||
-      data.token_type?.toLowerCase() !== "bearer" ||
-      (data.resource && data.resource !== resource) ||
+      typeof data.token_type !== "string" ||
+      data.token_type.toLowerCase() !== "bearer" ||
+      ("resource" in data && data.resource !== resource) ||
       !Number.isFinite(data.expires_in) ||
       data.expires_in <= 0
     )

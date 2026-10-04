@@ -85,6 +85,34 @@ function fixture(region = "global", initial) {
     storage,
   };
 }
+test("explicit invalid resource metadata never replaces stored tokens", async () => {
+  for (const resource of [null, "", false, host + "/media-api/cn"]) {
+    let saved = false;
+    const f = fixture();
+    f.client.setTokens = async () => {
+      saved = true;
+    };
+    const session = createSession({
+      client: f.client,
+      storage: f.storage,
+      region: "global",
+      fetcher: async (url) =>
+        Response.json(
+          url.endsWith("/register")
+            ? { client_id: "public-client" }
+            : {
+                access_token: "access",
+                refresh_token: "refresh",
+                token_type: "Bearer",
+                expires_in: 3600,
+                resource,
+              },
+        ),
+    });
+    await assert.rejects(() => session.accessToken(true));
+    assert.equal(saved, false);
+  }
+});
 test("disconnect always clears native tokens when client registration is missing or unreadable", async () => {
   for (const unreadable of [false, true]) {
     const f = fixture("global", {
