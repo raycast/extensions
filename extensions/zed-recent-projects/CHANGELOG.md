@@ -1,5 +1,9 @@
 # Zed Recent Projects Changelog
 
+## [Dismiss Raycast During Project Launch] - {PR_MERGE_DATE}
+
+- Fix Search Recent Projects making Raycast appear unresponsive while waiting for Zed to launch. Raycast now dismisses immediately after selection, matching the Visual Studio Code extension's behavior.
+
 ## [Open in New Window Preference] - 2026-09-25
 
 - Add an "Open in New Window" preference to the "Open with Zed" and "Search Recent Projects" commands that opens items in a new Zed window.
