@@ -15,12 +15,17 @@ type TextReplacement = {
 
 const execAsync = promisify(exec);
 
+// The JSON dump of a large replacement set exceeds Node's default 1 MiB stdout buffer
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 async function getTextReplacements() {
   const dbPath = path.resolve(homedir(), "Library/KeyboardServices/TextReplacements.db");
   const query = "SELECT * FROM ZTEXTREPLACEMENTENTRY";
 
   try {
-    const { stdout } = await execAsync(`sqlite3 --json --readonly "${dbPath}" "${query}"`);
+    const { stdout } = await execAsync(`sqlite3 --json --readonly "${dbPath}" "${query}"`, {
+      maxBuffer: MAX_BUFFER,
+    });
     return JSON.parse(stdout) as TextReplacement[];
   } catch (error) {
     showFailureToast(error, { title: "Could not get text replacements" });
