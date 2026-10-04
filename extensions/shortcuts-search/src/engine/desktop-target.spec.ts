@@ -44,6 +44,24 @@ it("preserves macOS bundle targets without querying Windows apps", async () => {
   });
   expect(getApplications).not.toHaveBeenCalled();
 });
+it.each([
+  { path: "Applications", savedProcess: undefined },
+  { path: "Applications", savedProcess: "ExampleOld" },
+  { path: "C:\\Start Menu\\Example.lnk", savedProcess: undefined },
+  { path: "C:\\Start Menu\\Example.lnk", savedProcess: "ExampleOld" },
+])(
+  "ignores non-executable duplicates when resolving a unique executable by app ID: %j",
+  async ({ path, savedProcess }) => {
+    jest.mocked(getPlatform).mockReturnValue("windows");
+    jest.mocked(getApplications).mockResolvedValue([
+      { name: "Example", path, windowsAppId: "Vendor.Package!App" },
+      { name: "Example", path: "C:\\ExampleNew.exe", windowsAppId: "Vendor.Package!App" },
+    ]);
+    expect(
+      await getDesktopTarget({ ...app, windowsAppId: "Vendor.Package!App", windowsProcessName: savedProcess })
+    ).toEqual({ kind: "desktop", windowsProcessName: "ExampleNew" });
+  }
+);
 it("resolves the current executable by app ID when a saved process name is stale", async () => {
   jest.mocked(getPlatform).mockReturnValue("windows");
   jest.mocked(getApplications).mockResolvedValue([

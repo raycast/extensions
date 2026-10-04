@@ -9,10 +9,11 @@ export async function getDesktopTarget(app: Application): Promise<ExecutionTarge
   if (!app.windowsAppId && app.windowsProcessName)
     return { kind: "desktop", windowsProcessName: app.windowsProcessName };
   const installed = await getApplications();
-  const matches = installed.filter((native) =>
-    app.windowsAppId ? native.windowsAppId === app.windowsAppId : native.name.toLowerCase() === app.name.toLowerCase()
-  );
-  if (matches.length !== 1) return undefined;
-  const processName = windowsProcessName(matches[0]);
-  return processName ? { kind: "desktop", windowsProcessName: processName } : undefined;
+  const processNames = installed
+    .filter((native) =>
+      app.windowsAppId ? native.windowsAppId === app.windowsAppId : native.name.toLowerCase() === app.name.toLowerCase()
+    )
+    .map(windowsProcessName)
+    .filter((name) => name !== undefined);
+  return processNames.length === 1 ? { kind: "desktop", windowsProcessName: processNames[0] } : undefined;
 }

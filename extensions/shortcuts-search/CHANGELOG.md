@@ -11,6 +11,7 @@
 - Add application and shortcut favorite actions without separate personal-data commands
 - Sync custom Windows app IDs/process names and choose between matching shortcut collections
 - Prefer Windows app IDs over stale process names, exclude conflicting IDs, and offer matching macOS collections
+- Ignore non-executable Windows app-ID duplicates when resolving a unique executable
 - Copy the current Windows app ID or executable process name for custom app setup
 
 ## [Update] - 2025-12-25
