@@ -1,6 +1,6 @@
 # Shortcuts Search Changelog
 
-## [Windows Support and Account Shortcuts] - {PR_MERGE_DATE}
+## [Windows Support and Account Shortcuts] - 2026-10-04
 
 - Support Windows app detection, platform keymaps, and verified shortcut execution
 - Add Ctrl/Alt/Shift/Win and target-layout punctuation input with focus checks
