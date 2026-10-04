@@ -37,11 +37,23 @@ export default async function tool({ pid, target, signal }: Input) {
         : KillSignal.TERM;
   if (target === "all") {
     if (process.name === undefined) return `Process ${pid} has no name to use for Kill All.`;
-    const matchingPids = [...new Set([pid, ...(await getPidsByName(process.name))])];
+    let matchingPids = [pid];
+    let lookupFailed = false;
+    try {
+      matchingPids = [...new Set([pid, ...(await getPidsByName(process.name))])];
+    } catch {
+      lookupFailed = true;
+    }
     await killall(process.name, killSignal);
     const stillRunning = await waitForExit(matchingPids);
+    const verificationNote = lookupFailed
+      ? " Could not list all matching processes, so only the selected PID was checked. Other matching processes may still be running."
+      : "";
     if (stillRunning.length > 0) {
-      return `Sent a termination request to all processes named "${process.name}", but process ${stillRunning.join(", ")} is still running.`;
+      return `Sent a termination request to all processes named "${process.name}", but process ${stillRunning.join(", ")} is still running.${verificationNote}`;
+    }
+    if (lookupFailed) {
+      return `Sent a termination request to all processes named "${process.name}". Process ${pid} exited.${verificationNote}`;
     }
     return `Killed processes ${matchingPids.join(", ")} named "${process.name}".`;
   }
