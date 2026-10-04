@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Remove Tap fix] - {PR_MERGE_DATE}
+## [Remove Tap fix] - 2026-10-04
 
 - Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled
 - Fixed: after a Remove Tap that stopped partway, the list now shows what was removed, so trying again picks up where it stopped
