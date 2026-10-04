@@ -23,8 +23,23 @@
       "name": "add-thing",
       "title": "Add Thing",
       "subtitle": "Twos",
-      "description": "Add a to-do, note, or hyperlink to a list.",
+      "description": "Add a to-do, note, or hyperlink to Today or any list.",
       "mode": "view"
+    },
+    {
+      "name": "add-to-today",
+      "title": "Add to Today",
+      "subtitle": "Twos",
+      "description": "Quickly add a thing to today's list without opening a form.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Thing",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "search-things",
