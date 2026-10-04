@@ -1,0 +1,943 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-downloader",
+  "title": "The Downloader",
+  "description": "Download videos, audio, image galleries, Spotify music and webpages — and chat with AI about any video, post or article.",
+  "type": "module",
+  "icon": "icon.png",
+  "author": "Stheno",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "keywords": [
+    "video",
+    "downloader",
+    "youtube",
+    "spotify",
+    "music",
+    "yt-dlp",
+    "webpage",
+    "monolith",
+    "ai",
+    "chat",
+    "summarize",
+    "transcript"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download",
+      "subtitle": "The Downloader",
+      "description": "Download video, audio, galleries, webpages, or transcripts",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoLoadUrlFromSelectedText",
+          "title": "Auto Load URL from Selected Text",
+          "description": "When you open Download, fill in a link from the text selected in the frontmost app.",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "exactFormatSelection",
+          "title": "Exact Format Selection",
+          "description": "Adds an Exact Format field (every yt-dlp format and its size) to the Download form for videos.",
+          "type": "checkbox",
+          "label": "Enable",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "fast-download",
+      "title": "Fast Download",
+      "subtitle": "The Downloader",
+      "description": "Paste a URL and download it instantly using your saved defaults — no form.",
+      "mode": "no-view",
+      "keywords": [
+        "quick",
+        "instant",
+        "paste"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Download History",
+      "subtitle": "The Downloader",
+      "description": "Browse, open and re-download everything you've downloaded with The Downloader.",
+      "mode": "view",
+      "keywords": [
+        "recent",
+        "downloads",
+        "library"
+      ]
+    },
+    {
+      "name": "chat-link",
+      "title": "Chat About Link",
+      "subtitle": "The Downloader",
+      "description": "Paste a link — a video, a post or an article — and ask anything about it. Loads the details and the transcript, caption or article text, and answers with Raycast AI, Apple Intelligence or Ollama.",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "video",
+        "post",
+        "article",
+        "youtube",
+        "instagram",
+        "tiktok",
+        "summarize",
+        "transcript",
+        "ask"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Link",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "aiEngine",
+          "title": "AI Engine",
+          "description": "Which AI answers. Automatic: Raycast AI if you have Pro, then Apple Intelligence, then Ollama.",
+          "type": "dropdown",
+          "default": "auto",
+          "required": false,
+          "data": [
+            {
+              "title": "Automatic",
+              "value": "auto"
+            },
+            {
+              "title": "Raycast AI",
+              "value": "raycast"
+            },
+            {
+              "title": "Apple Intelligence (On-Device)",
+              "value": "apple"
+            },
+            {
+              "title": "Ollama (Local)",
+              "value": "ollama"
+            }
+          ]
+        },
+        {
+          "name": "raycastModel",
+          "title": "Raycast AI Model",
+          "description": "Model for Raycast AI answers. Default follows Raycast's own choice.",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Raycast Default",
+              "value": ""
+            },
+            {
+              "title": "Claude Sonnet 5",
+              "value": "anthropic-claude-sonnet-5"
+            },
+            {
+              "title": "Claude Haiku 4.5",
+              "value": "anthropic-claude-4-5-haiku"
+            },
+            {
+              "title": "GPT-5.6 Terra",
+              "value": "openai-gpt-5.6-terra"
+            },
+            {
+              "title": "GPT-5 mini",
+              "value": "openai-gpt-5-mini"
+            },
+            {
+              "title": "Gemini 3.8 Flash",
+              "value": "google-gemini-3.8-flash"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "google-gemini-3.1-pro"
+            }
+          ]
+        },
+        {
+          "name": "answerStyle",
+          "title": "Answer Style",
+          "description": "Short: a one-line TL;DR and a few bullets (faster on Apple and Ollama). Detailed: fuller answers.",
+          "type": "dropdown",
+          "default": "balanced",
+          "required": false,
+          "data": [
+            {
+              "title": "Balanced",
+              "value": "balanced"
+            },
+            {
+              "title": "Short (TL;DR First)",
+              "value": "short"
+            },
+            {
+              "title": "Detailed",
+              "value": "detailed"
+            }
+          ]
+        },
+        {
+          "name": "answerLanguage",
+          "title": "Answer Language",
+          "description": "Answers in this language, even for the English suggested questions. Default: the question's.",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Same as the Question",
+              "value": ""
+            },
+            {
+              "title": "English",
+              "value": "English"
+            },
+            {
+              "title": "Spanish",
+              "value": "Spanish"
+            },
+            {
+              "title": "German",
+              "value": "German"
+            },
+            {
+              "title": "French",
+              "value": "French"
+            },
+            {
+              "title": "Italian",
+              "value": "Italian"
+            },
+            {
+              "title": "Portuguese",
+              "value": "Portuguese"
+            },
+            {
+              "title": "Dutch",
+              "value": "Dutch"
+            },
+            {
+              "title": "Polish",
+              "value": "Polish"
+            },
+            {
+              "title": "Czech",
+              "value": "Czech"
+            },
+            {
+              "title": "Slovak",
+              "value": "Slovak"
+            },
+            {
+              "title": "Ukrainian",
+              "value": "Ukrainian"
+            },
+            {
+              "title": "Russian",
+              "value": "Russian"
+            },
+            {
+              "title": "Turkish",
+              "value": "Turkish"
+            },
+            {
+              "title": "Swedish",
+              "value": "Swedish"
+            },
+            {
+              "title": "Japanese",
+              "value": "Japanese"
+            },
+            {
+              "title": "Chinese",
+              "value": "Chinese"
+            },
+            {
+              "title": "Korean",
+              "value": "Korean"
+            },
+            {
+              "title": "Hindi",
+              "value": "Hindi"
+            },
+            {
+              "title": "Arabic",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "name": "customInstructions",
+          "title": "Custom Instructions",
+          "description": "Added to every answer, e.g. \"Explain like I'm new to the topic\". Up to 500 characters.",
+          "type": "textfield",
+          "default": "",
+          "required": false,
+          "placeholder": "e.g. Explain like I'm new to the topic"
+        },
+        {
+          "name": "chatImages",
+          "title": "Look at Images",
+          "description": "Let the AI look at a post's images (up to 4; slower). Only Apple Intelligence and Ollama vision can.",
+          "type": "dropdown",
+          "default": "ask",
+          "required": false,
+          "data": [
+            {
+              "title": "Ask Each Time",
+              "value": "ask"
+            },
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        },
+        {
+          "name": "transcriptLanguage",
+          "title": "Transcript Language",
+          "description": "Caption language code like `en` or `de`. Auto: the video's own language, then English.",
+          "type": "textfield",
+          "default": "auto",
+          "required": false
+        },
+        {
+          "name": "ollamaUrl",
+          "title": "Ollama URL",
+          "description": "Address of your Ollama server.",
+          "type": "textfield",
+          "default": "http://127.0.0.1:11434",
+          "required": false
+        },
+        {
+          "name": "ollamaModel",
+          "title": "Ollama Model",
+          "description": "Model name, e.g. `llama3.2` or `qwen3:8b`. Leave blank to use the first installed model.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "ollamaContext",
+          "title": "Ollama Context Size",
+          "description": "Ollama context size (num_ctx) in tokens; bigger fits more text but needs more memory. Default 8192.",
+          "type": "textfield",
+          "default": "8192",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "description": "Downloads a video from a given URL"
+    },
+    {
+      "name": "read-link",
+      "title": "Read Link",
+      "description": "Reads a link — a video's transcript with [m:ss] timestamps, a social post's caption, or a web article — together with its details and statistics. Use it to summarize, answer questions about, quote or take notes on what a link says; it already includes the details, so don't call get-link-info first"
+    },
+    {
+      "name": "get-link-info",
+      "title": "Get Link Info",
+      "description": "Gets only a link's details and statistics, without its text: title, author or channel, site, date, views, likes, comments, engagement rates, chapters, tags, description and a video's caption languages. Use it only for questions about how a link is doing or what it is, not for summaries or its content (use read-link for those)"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Folder",
+      "description": "Where downloads are saved.",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "When you open Download or Chat About Link, fill in a link you've copied.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Browser Extension Support",
+      "description": "Offer the current browser tab's link. Needs the Raycast browser extension.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "checkToolUpdates",
+      "title": "Check for Tool Updates",
+      "description": "Before a download, offer to update outdated tools (yt-dlp, gallery-dl, FFmpeg…).",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "videoMediaType",
+      "title": "Video: Media Type",
+      "description": "Default for video URLs: download the full video, or extract audio only.",
+      "type": "dropdown",
+      "default": "video",
+      "required": false,
+      "data": [
+        {
+          "title": "Video",
+          "value": "video"
+        },
+        {
+          "title": "Audio Only",
+          "value": "audio"
+        }
+      ]
+    },
+    {
+      "name": "videoQuality",
+      "title": "Video: Quality",
+      "description": "Default video resolution. Ignored when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "best",
+      "required": false,
+      "data": [
+        {
+          "title": "Best Available",
+          "value": "best"
+        },
+        {
+          "title": "1080p",
+          "value": "1080"
+        },
+        {
+          "title": "720p",
+          "value": "720"
+        },
+        {
+          "title": "480p",
+          "value": "480"
+        },
+        {
+          "title": "Smallest File",
+          "value": "smallest"
+        }
+      ]
+    },
+    {
+      "name": "videoContainer",
+      "title": "Video: Container",
+      "description": "Default container for downloaded video. Ignored when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "mp4",
+      "required": false,
+      "data": [
+        {
+          "title": "MP4",
+          "value": "mp4"
+        },
+        {
+          "title": "MKV",
+          "value": "mkv"
+        },
+        {
+          "title": "WebM",
+          "value": "webm"
+        }
+      ]
+    },
+    {
+      "name": "audioFormat",
+      "title": "Video: Audio Format",
+      "description": "Default audio format when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "mp3",
+      "required": false,
+      "data": [
+        {
+          "title": "MP3",
+          "value": "mp3"
+        },
+        {
+          "title": "M4A",
+          "value": "m4a"
+        },
+        {
+          "title": "Opus",
+          "value": "opus"
+        }
+      ]
+    },
+    {
+      "name": "cookiesFromBrowser",
+      "title": "Gallery: Cookies from Browser",
+      "description": "Use this browser's logins for Instagram, Reddit and other sites that need one (Download and Chat).",
+      "type": "dropdown",
+      "default": "",
+      "required": false,
+      "data": [
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Chromium",
+          "value": "chromium"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Brave",
+          "value": "brave"
+        },
+        {
+          "title": "Opera",
+          "value": "opera"
+        },
+        {
+          "title": "Vivaldi",
+          "value": "vivaldi"
+        },
+        {
+          "title": "LibreWolf",
+          "value": "librewolf"
+        },
+        {
+          "title": "Arc",
+          "value": "arc"
+        },
+        {
+          "title": "Zen",
+          "value": "zen"
+        },
+        {
+          "title": "Floorp",
+          "value": "floorp"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "cookiesFromBrowserCustom",
+      "title": "Gallery: Custom Browser Spec",
+      "description": "Only for Custom: a gallery-dl browser spec, e.g. `firefox:/path/to/profile` or `chromium:C:\\…\\Default`.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyAudioFormat",
+      "title": "Spotify: Audio Format",
+      "description": "Default audio format for Spotify downloads.",
+      "type": "dropdown",
+      "default": "mp3",
+      "required": false,
+      "data": [
+        {
+          "title": "MP3",
+          "value": "mp3"
+        },
+        {
+          "title": "M4A",
+          "value": "m4a"
+        },
+        {
+          "title": "Opus",
+          "value": "opus"
+        },
+        {
+          "title": "FLAC",
+          "value": "flac"
+        }
+      ]
+    },
+    {
+      "name": "spotifyClientId",
+      "title": "Spotify: Client ID",
+      "description": "Needed for reliable Spotify downloads (anonymous ones often fail). One-time setup: see SPOTIFY.md.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyClientSecret",
+      "title": "Spotify: Client Secret",
+      "description": "Spotify Developer app Client Secret. Pairs with Client ID above. Stored as a password.",
+      "type": "password",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyUserAuth",
+      "title": "Spotify: User Authentication",
+      "description": "For private playlists and your library: your browser opens once to authorize. Setup: SPOTIFY.md.",
+      "type": "checkbox",
+      "label": "Use browser OAuth for private content",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "webpageSaveMode",
+      "title": "Webpage: Save Mode",
+      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
+      "type": "dropdown",
+      "default": "complete",
+      "required": false,
+      "data": [
+        {
+          "title": "Complete",
+          "value": "complete"
+        },
+        {
+          "title": "Lightweight (no JavaScript)",
+          "value": "lightweight"
+        }
+      ]
+    },
+    {
+      "name": "networkIdleTimeoutSec",
+      "title": "Advanced: Network Idle Timeout",
+      "description": "Seconds a silent download may run before it's stopped as stuck. Default 120; raise for slow links.",
+      "type": "textfield",
+      "default": "120",
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Advanced: Force IPv4",
+      "description": "Only if downloads fail on a network with broken IPv6: make yt-dlp use IPv4.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Advanced: Homebrew Path",
+      "description": "macOS only. Leave empty unless Homebrew is in an unusual place (`which brew` shows it).",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "Advanced: yt-dlp Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which yt-dlp` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "Advanced: FFmpeg Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffmpeg` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffprobePath",
+      "title": "Advanced: FFprobe Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffprobe` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "denoPath",
+      "title": "Advanced: Deno Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which deno` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "galleryDlPath",
+      "title": "Advanced: gallery-dl Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which gallery-dl` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "spotDlPath",
+      "title": "Advanced: spotDL Path",
+      "description": "Leave empty to use the copy The Downloader downloads. Custom: `which spotdl` shows yours.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "monolithPath",
+      "title": "Advanced: Monolith Path",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which monolith` shows yours.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "Match the language of the user's message, not of the tool output: an English message gets an English reply, a German one German, a Czech one Czech. After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it. To summarize a link or answer anything about what it says, call read-link once — it returns the details too, so don't also call get-link-info. Call get-link-info only for how a link is doing (views, likes, comments) or basic facts about it. When answering from a video's transcript, show when things are said: the timestamp itself is the link text, like [4:05](https://www.youtube.com/watch?v=ID&t=245s), using the link format the tool output shows — never hide the link behind other words — and every point of a video summary gets its timestamp. For posts and articles there are no timestamps — name the source instead (\"the post's caption\", \"the article\"). Only state what the tool output supports.",
+    "skills": [
+      {
+        "name": "summarize-link",
+        "title": "Summarize Link"
+      },
+      {
+        "name": "study-notes",
+        "title": "Study Notes"
+      },
+      {
+        "name": "performance-check",
+        "title": "Performance Check"
+      }
+    ],
+    "evals": [
+      {
+        "input": "@the-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "download-video": {
+            "downloadedPath": "/Users/path/to/video.mp4",
+            "duration": 51,
+            "fileName": "video.mp4",
+            "title": "Raycast Focus: Enter Flow State"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "download-video"
+            }
+          },
+          {
+            "includes": "/Users/path/to/video.mp4"
+          },
+          {
+            "includes": "Raycast Focus: Enter Flow State"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "mocks": {
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s) — never other words."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+              },
+              "name": "read-link"
+            }
+          },
+          {
+            "includes": "2:31"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader how is this video doing? https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "get-link-info": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Statistics\n- Views: 48.2K\n- Likes: 1.1K\n- Comments: 64\n- Channel subscribers: 61K\n- Uploaded: Jan 16, 2024\n- Age: 987 days\n- Views per day: 49\n- Likes per 100 views: 2.28\n- Comments per 1,000 views: 1.33\n\n## Captions\n- Automatic captions: en-orig"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "get-link-info"
+            }
+          },
+          {
+            "includes": "48"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader summarize https://www.youtube.com/watch?v=ykaj0pS4A1A in 3 bullet points",
+        "mocks": {
+          "read-link": "# Raycast Focus: Enter Flow State\n\n## Facts\n- Channel: Raycast\n- URL: https://www.youtube.com/watch?v=ykaj0pS4A1A\n- Duration: 0:51\n\n## Transcript\n[0:00] Focus helps you block distracting apps and websites.\n[0:20] Start a session from Raycast and pick what to block.\n[0:40] Take breaks and review your sessions.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=ykaj0pS4A1A&t=245s) — never other words."
+        },
+        "expected": [
+          {
+            "callsTool": "read-link"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
+          },
+          {
+            "includes": "Focus"
+          },
+          {
+            "matches": "\\b\\d{1,2}:\\d{2}\\b"
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader was hat er über Elon Musk gesagt? https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "usedAsExample": false,
+        "mocks": {
+          "read-link": "# Nvidia Earnings Preview\n\n## Facts\n- Channel: CNBC Television\n- URL: https://www.youtube.com/watch?v=T_5zHExXN7o\n- Duration: 6:12\n\n## Transcript\n[0:00] Nvidia earnings are the Super Bowl of business...\n[2:31] Elon Musk said xAI will keep buying Nvidia chips for its Colossus cluster.\n\nWhen you point to a moment, make its time the link text, like [4:05](https://www.youtube.com/watch?v=T_5zHExXN7o&t=245s) — never other words."
+        },
+        "expected": [
+          {
+            "callsTool": "read-link"
+          },
+          {
+            "includes": "2:31"
+          },
+          {
+            "matches": "\\b([Dd]ass|[Hh]at|[Ww]ird|[Ss]agte|gesagt|werde)\\b"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader what is this post about? https://www.instagram.com/p/DdHyaYAifb6/",
+        "mocks": {
+          "read-link": "# Cementing their names in history.\n\n## Facts\n- Author: NASA (@nasa)\n- URL: https://www.instagram.com/p/DdHyaYAifb6/\n- Site: Instagram\n- Published: 2026-09-10\n- Co-authors: @nasakennedy, @nasaartemis\n\n## Statistics\n- Likes: 117.6K\n- Images: 4\n\n## Caption\nCementing their names in history.\n\nThe Artemis III crew is leaving their mark — literally. The astronauts recently signed their names on the hardware that will be inside their Orion spacecraft during their low Earth orbit mission, launching in 2027."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.instagram.com/p/DdHyaYAifb6/"
+              },
+              "name": "read-link"
+            }
+          },
+          {
+            "includes": "Artemis"
+          },
+          {
+            "matches": "[Ss]ign|[Nn]ames"
+          },
+          {
+            "not": {
+              "matches": "\\[\\d{1,2}:\\d{2}\\]"
+            }
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader summarize this article https://www.nasa.gov/news-release/nasa-awards-orbital-safety-analysis-support-services-contract/",
+        "mocks": {
+          "read-link": "# NASA Awards Orbital Safety Analysis Support Services Contract\n\n## Facts\n- Author: Rob Garner\n- URL: https://www.nasa.gov/news-release/nasa-awards-orbital-safety-analysis-support-services-contract/\n- Site: NASA\n- Reading time: 1 min\n\n## Article text\nNASA has awarded a contract to Omitron Inc. for the acquisition of orbital safety analysis services, which provide for critical protection of NASA's space assets.\n\nThis indefinite-delivery contract is valued at approximately $23.5 million over a five-year period of performance.\n\nThe work will take place at Omitron's location in Beltsville, Maryland, and at NASA's Goddard Space Flight Center in Greenbelt, Maryland."
+        },
+        "expected": [
+          {
+            "callsTool": "read-link"
+          },
+          {
+            "includes": "Omitron"
+          },
+          {
+            "not": {
+              "callsTool": "download-video"
+            }
+          },
+          {
+            "matches": "23\\.5"
+          },
+          {
+            "not": {
+              "matches": "\\[\\d{1,2}:\\d{2}\\]"
+            }
+          },
+          {
+            "matches": "\\b(the|The|is|and)\\b"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2",
+    "execa": "^9.6.1",
+    "linkedom": "^0.18.13",
+    "srt-parser-2": "^1.2.3",
+    "validator": "^13.15.35"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/validator": "^13.15.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
