@@ -1,6 +1,7 @@
 ## [New icon] - {PR_MERGE_DATE}
 
 - New extension icon
+- Added a banner image to the README
 
 ## [Fix target ids] - 2026-10-04
 
