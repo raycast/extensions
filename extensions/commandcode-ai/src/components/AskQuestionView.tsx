@@ -21,8 +21,13 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { push, pop } = useNavigation();
-  const isMounted = useRef(true);
-  useEffect(() => () => void (isMounted.current = false), []);
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const generateResponse = useCallback(
     async (question: string, selectedModel?: string) => {
