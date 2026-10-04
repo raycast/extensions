@@ -126,6 +126,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "chirpie",
+    title: "Chirpie",
+    description:
+      "The publishing connector for AI agents: post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, attach images and video, save drafts, read post analytics and answer comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; free plan available.",
+    icon: "https://chirpie.ai/images/brand/icon@2x.png",
+    homepage: "https://chirpie.ai/docs/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chirpie.ai/mcp"],
+    },
+  },
+  {
     name: "chroma",
     title: "Chroma",
     description:
