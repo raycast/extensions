@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { findHarborDrop, openHarborDrop } from "./lib/app";
+import { CommandScheduler } from "./lib/command-scheduler";
 import {
   AppVerificationSession,
   requireReady,
@@ -44,13 +45,11 @@ export default function Command() {
   const [accessError, setAccessError] = useState<string>();
   const [accessDeadline, setAccessDeadline] = useState<number>();
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const submitting = useRef(false);
+  const submitting = useRef<{ mount: number } | null>(null);
   const mounted = useRef(true);
   const lifetime = useRef<AbortController | null>(null);
   const lifecycleGeneration = useRef(0);
-  const refreshingAccess = useRef<{ mount: number; request: number } | null>(
-    null,
-  );
+  const scheduler = useRef(new CommandScheduler());
   const appVerification = useRef(new AppVerificationSession());
   const accessGeneration = useRef(0);
   const pendingGeneration = useRef(0);
@@ -85,16 +84,10 @@ export default function Command() {
       if (refreshingPending.current === owner) refreshingPending.current = null;
     }
   }, []);
-  const refreshAccess = useCallback(async (verify = false) => {
+  const performRefreshAccess = useCallback(async (verify: boolean) => {
     const mount = lifecycleGeneration.current;
-    if (
-      refreshingAccess.current?.mount === mount ||
-      (!verify && !appVerification.current.canPoll())
-    )
-      return;
+    if (!verify && !appVerification.current.canPoll()) return;
     const current = ++accessGeneration.current;
-    const owner = { mount, request: current };
-    refreshingAccess.current = owner;
     const signal = lifetime.current?.signal;
     if (verify) setCheckingAccess(true);
     try {
@@ -124,7 +117,6 @@ export default function Command() {
         setAccessError(safeMessage(value));
       }
     } finally {
-      if (refreshingAccess.current === owner) refreshingAccess.current = null;
       if (
         mounted.current &&
         mount === lifecycleGeneration.current &&
@@ -133,6 +125,21 @@ export default function Command() {
         setCheckingAccess(false);
     }
   }, []);
+  const refreshAccess = useCallback(
+    async (verify = false) => {
+      const mount = lifecycleGeneration.current;
+      try {
+        await scheduler.current.refresh(verify, () =>
+          performRefreshAccess(verify),
+        );
+      } catch (value) {
+        if (mounted.current && mount === lifecycleGeneration.current) {
+          setAccessError(safeMessage(value));
+        }
+      }
+    },
+    [performRefreshAccess],
+  );
   const handleVerificationFailure = useCallback((error: IntegrationError) => {
     appVerification.current.invalidate();
     accessGeneration.current += 1;
@@ -146,6 +153,9 @@ export default function Command() {
   useEffect(() => {
     const mount = ++lifecycleGeneration.current;
     const controller = new AbortController();
+    const operations = new CommandScheduler();
+    scheduler.current = operations;
+    setBusy(false);
     mounted.current = true;
     lifetime.current = controller;
     void refreshAccess(true);
@@ -158,6 +168,7 @@ export default function Command() {
     void refreshPending();
     return () => {
       controller.abort();
+      operations.dispose();
       clearInterval(timer);
       if (mount !== lifecycleGeneration.current) return;
       mounted.current = false;
@@ -165,8 +176,7 @@ export default function Command() {
       accessGeneration.current += 1;
       pendingGeneration.current += 1;
       appVerification.current.invalidate();
-      if (refreshingAccess.current?.mount === mount)
-        refreshingAccess.current = null;
+      if (submitting.current?.mount === mount) submitting.current = null;
       if (refreshingPending.current?.mount === mount)
         refreshingPending.current = null;
     };
@@ -185,6 +195,7 @@ export default function Command() {
     return () => clearTimeout(timer);
   }, [accessDeadline]);
   const accessReady =
+    !busy &&
     !checkingAccess &&
     appVerification.current.canPoll() &&
     !accessError &&
@@ -206,73 +217,85 @@ export default function Command() {
   }
   async function submit() {
     if (submitting.current) return;
-    submitting.current = true;
+    const owner = { mount: lifecycleGeneration.current };
+    const signal = lifetime.current?.signal;
+    const isCurrent = () =>
+      mounted.current &&
+      owner.mount === lifecycleGeneration.current &&
+      !signal?.aborted;
+    submitting.current = owner;
     setBusy(true);
     setError(undefined);
     try {
-      const existing = (
-        await loadTrackedRequests(lifetime.current?.signal)
-      ).find((item) => item.action === "reviewAddURL");
-      if (existing) {
-        if (mounted.current) {
-          pendingGeneration.current += 1;
-          setPending(existing);
-          showRequest(existing);
-        }
-        return;
-      }
-      accessGeneration.current += 1;
-      const app = await appVerification.current.verify(() =>
-        findHarborDrop(lifetime.current?.signal),
-      );
-      const request = makeRequest(await loadSharedState(), "reviewAddURL", {
-        url: validateURL(url),
-      });
-      const reference = pendingReference(request);
-      await savePending(reference);
-      if (mounted.current) {
-        pendingGeneration.current += 1;
-        setPending({ ...reference, status: "unconfirmed" });
-      }
-      try {
-        await submitRequest(request, app, { signal: lifetime.current?.signal });
-      } catch (value) {
-        if ((await forgetUnpublished(reference, value)) && mounted.current) {
-          pendingGeneration.current += 1;
-          setPending(undefined);
-        }
-        throw value;
-      }
-      if (mounted.current) setURL("");
-      try {
-        await openHarborDrop(
-          wakeURL(reference.requestID),
-          app,
-          lifetime.current?.signal,
-        );
-      } catch (value) {
-        if (mounted.current) {
-          if (isAppVerificationFailure(value)) {
-            handleVerificationFailure(value);
+      await scheduler.current.action(async () => {
+        if (!isCurrent()) return;
+        try {
+          const existing = (await loadTrackedRequests(signal)).find(
+            (item) => item.action === "reviewAddURL",
+          );
+          if (existing) {
+            if (isCurrent()) {
+              pendingGeneration.current += 1;
+              setPending(existing);
+              showRequest(existing);
+            }
+            return;
           }
-          await showFailure(value);
-        }
-      }
-      if (mounted.current) showRequest(reference);
-    } catch (value) {
-      if (mounted.current) {
-        setError(safeMessage(value));
-        if (isAppVerificationFailure(value)) handleVerificationFailure(value);
-        if (mustClearSharedState(value)) {
           accessGeneration.current += 1;
-          setCheckingAccess(false);
-          setAccessDeadline(undefined);
-          setAccessError(safeMessage(value));
+          const app = await appVerification.current.verify(() =>
+            findHarborDrop(signal),
+          );
+          const request = makeRequest(await loadSharedState(), "reviewAddURL", {
+            url: validateURL(url),
+          });
+          const reference = pendingReference(request);
+          await savePending(reference);
+          if (isCurrent()) {
+            pendingGeneration.current += 1;
+            setPending({ ...reference, status: "unconfirmed" });
+          }
+          try {
+            await submitRequest(request, app, { signal });
+          } catch (value) {
+            if ((await forgetUnpublished(reference, value)) && isCurrent()) {
+              pendingGeneration.current += 1;
+              setPending(undefined);
+            }
+            throw value;
+          }
+          if (isCurrent()) setURL("");
+          try {
+            await openHarborDrop(wakeURL(reference.requestID), app, signal);
+          } catch (value) {
+            if (isCurrent()) {
+              if (isAppVerificationFailure(value)) {
+                handleVerificationFailure(value);
+              }
+              await showFailure(value);
+            }
+          }
+          if (isCurrent()) showRequest(reference);
+        } catch (value) {
+          if (isCurrent()) {
+            setError(safeMessage(value));
+            if (isAppVerificationFailure(value))
+              handleVerificationFailure(value);
+            if (mustClearSharedState(value)) {
+              accessGeneration.current += 1;
+              setCheckingAccess(false);
+              setAccessDeadline(undefined);
+              setAccessError(safeMessage(value));
+            }
+          }
         }
-      }
+      });
+    } catch (value) {
+      if (isCurrent()) setError(safeMessage(value));
     } finally {
-      submitting.current = false;
-      if (mounted.current) setBusy(false);
+      if (submitting.current === owner) {
+        submitting.current = null;
+        if (isCurrent()) setBusy(false);
+      }
     }
   }
   async function readClipboard() {

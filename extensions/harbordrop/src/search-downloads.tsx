@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { findHarborDrop, openHarborDrop } from "./lib/app";
+import { CommandScheduler } from "./lib/command-scheduler";
 import {
   Action as BridgeAction,
   AppVerificationSession,
@@ -45,15 +46,16 @@ export default function Command() {
   const [state, setState] = useState<SharedState>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<TrackedRequest[]>([]);
   const mounted = useRef(true);
   const generation = useRef(0);
   const lifecycleGeneration = useRef(0);
-  const refreshing = useRef<{ mount: number; request: number } | null>(null);
+  const scheduler = useRef(new CommandScheduler());
   const reviewing = useRef(false);
   const lastSharedValue = useRef("");
   const lastPendingValue = useRef("");
-  const sending = useRef(false);
+  const sending = useRef<{ mount: number } | null>(null);
   const appVerification = useRef(new AppVerificationSession());
   const lifetime = useRef<AbortController | null>(null);
   const handleVerificationFailure = useCallback((error: IntegrationError) => {
@@ -67,17 +69,14 @@ export default function Command() {
     }
   }, []);
   const { push } = useNavigation();
-  const refresh = useCallback(async (showLoading = true) => {
+  const performRefresh = useCallback(async (showLoading: boolean) => {
     const mount = lifecycleGeneration.current;
     if (
-      refreshing.current?.mount === mount ||
       reviewing.current ||
       (!showLoading && !appVerification.current.canPoll())
     )
       return;
     const current = ++generation.current;
-    const owner = { mount, request: current };
-    refreshing.current = owner;
     const signal = lifetime.current?.signal;
     if (showLoading) setLoading(true);
     try {
@@ -144,7 +143,6 @@ export default function Command() {
         setError(safeMessage(value));
       }
     } finally {
-      if (refreshing.current === owner) refreshing.current = null;
       if (
         mounted.current &&
         mount === lifecycleGeneration.current &&
@@ -153,9 +151,27 @@ export default function Command() {
         setLoading(false);
     }
   }, []);
+  const refresh = useCallback(
+    async (showLoading = true) => {
+      const mount = lifecycleGeneration.current;
+      try {
+        await scheduler.current.refresh(showLoading, () =>
+          performRefresh(showLoading),
+        );
+      } catch (value) {
+        if (mounted.current && mount === lifecycleGeneration.current) {
+          setError(safeMessage(value));
+        }
+      }
+    },
+    [performRefresh],
+  );
   useEffect(() => {
     const mount = ++lifecycleGeneration.current;
     const controller = new AbortController();
+    const operations = new CommandScheduler();
+    scheduler.current = operations;
+    setBusy(false);
     mounted.current = true;
     lifetime.current = controller;
     void refresh();
@@ -164,13 +180,14 @@ export default function Command() {
     }, 2000);
     return () => {
       controller.abort();
+      operations.dispose();
       clearInterval(timer);
       if (mount !== lifecycleGeneration.current) return;
       mounted.current = false;
       lifecycleGeneration.current += 1;
       generation.current += 1;
       appVerification.current.invalidate();
-      if (refreshing.current?.mount === mount) refreshing.current = null;
+      if (sending.current?.mount === mount) sending.current = null;
     };
   }, [refresh]);
   useEffect(() => {
@@ -207,50 +224,66 @@ export default function Command() {
   }
   async function send(action: BridgeAction, task: DownloadTask) {
     if (sending.current) return;
-    sending.current = true;
+    const owner = { mount: lifecycleGeneration.current };
+    const signal = lifetime.current?.signal;
+    const isCurrent = () =>
+      mounted.current &&
+      owner.mount === lifecycleGeneration.current &&
+      !signal?.aborted;
+    sending.current = owner;
+    setBusy(true);
     try {
-      generation.current += 1;
-      const app = await appVerification.current.verify(() =>
-        findHarborDrop(lifetime.current?.signal),
-      );
-      const request = makeRequest(await loadSharedState(), action, { task });
-      const reference = pendingReference(request);
-      await savePending(reference);
-      try {
-        await submitRequest(request, app, { signal: lifetime.current?.signal });
-      } catch (value) {
-        await forgetUnpublished(reference, value);
-        throw value;
-      }
-      try {
-        await openHarborDrop(
-          wakeURL(reference.requestID),
-          app,
-          lifetime.current?.signal,
-        );
-      } catch (value) {
-        if (mounted.current) {
-          if (isAppVerificationFailure(value)) {
-            handleVerificationFailure(value);
+      await scheduler.current.action(async () => {
+        if (!isCurrent()) return;
+        try {
+          generation.current += 1;
+          const app = await appVerification.current.verify(() =>
+            findHarborDrop(signal),
+          );
+          const request = makeRequest(await loadSharedState(), action, {
+            task,
+          });
+          const reference = pendingReference(request);
+          await savePending(reference);
+          try {
+            await submitRequest(request, app, { signal });
+          } catch (value) {
+            await forgetUnpublished(reference, value);
+            throw value;
           }
-          await showFailure(value);
+          try {
+            await openHarborDrop(wakeURL(reference.requestID), app, signal);
+          } catch (value) {
+            if (isCurrent()) {
+              if (isAppVerificationFailure(value)) {
+                handleVerificationFailure(value);
+              }
+              await showFailure(value);
+            }
+          }
+          if (isCurrent()) showRequest(reference);
+        } catch (value) {
+          if (isCurrent()) {
+            generation.current += 1;
+            if (isAppVerificationFailure(value))
+              handleVerificationFailure(value);
+            setState((previous) => {
+              const visible = retainVisibleState(previous, value);
+              if (!visible) lastSharedValue.current = "";
+              return visible;
+            });
+            setError(safeMessage(value));
+            await showFailure(value);
+          }
         }
-      }
-      if (mounted.current) showRequest(reference);
+      });
     } catch (value) {
-      if (mounted.current) {
-        generation.current += 1;
-        if (isAppVerificationFailure(value)) handleVerificationFailure(value);
-        setState((previous) => {
-          const visible = retainVisibleState(previous, value);
-          if (!visible) lastSharedValue.current = "";
-          return visible;
-        });
-        setError(safeMessage(value));
-        await showFailure(value);
-      }
+      if (isCurrent()) await showFailure(value);
     } finally {
-      sending.current = false;
+      if (sending.current === owner) {
+        sending.current = null;
+        if (isCurrent()) setBusy(false);
+      }
     }
   }
   const generalActions = (
@@ -279,6 +312,7 @@ export default function Command() {
     const can = (action: BridgeAction) =>
       !issue &&
       !loading &&
+      !busy &&
       appVerification.current.canPoll() &&
       known &&
       visibleState?.snapshot.capabilities.includes(action) &&
@@ -319,7 +353,7 @@ export default function Command() {
   };
   return (
     <List
-      isLoading={loading}
+      isLoading={loading || busy}
       navigationTitle={
         visibleState
           ? `Downloads · ${activeCount} Downloading${issue ? " (Last Shared)" : ""}`
