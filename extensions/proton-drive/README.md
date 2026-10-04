@@ -65,7 +65,8 @@ Only `/my-files` is indexed; "Shared with me", Photos and the trash are not.
   session in the macOS Keychain.
 - Your Drive is end-to-end encrypted, but what the extension keeps locally is not: the search
   index and Raycast's folder cache contain file and folder **names** in clear, and files opened
-  from Raycast are kept decrypted for 24 hours. All of it is readable by your macOS user only;
+  from Raycast are kept decrypted for 24 hours. The last 20 CLI errors are kept in a local log
+  to diagnose failures. All of it is readable by your macOS user only;
   FileVault protects it at rest.
 - Downloaded files get the macOS quarantine attribute, so Gatekeeper checks apps and scripts
   from your Drive before they run, as it does for browser downloads.

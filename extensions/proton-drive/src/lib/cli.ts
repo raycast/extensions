@@ -1,7 +1,8 @@
-import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
+import { execFile, ExecFileException } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { homedir } from "node:os";
-import { getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { demoDownload, demoLink, demoList, demoUpload, isDemo } from "./demo";
 
 export const ROOT = "/my-files";
@@ -81,14 +82,19 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
     execFile(bin, args, { maxBuffer: 256 * 1024 * 1024, timeout }, (error, stdout, stderr) => {
       if (error) {
         const detail = (stderr || stdout || error.message).trim();
+        logFailure(args, error, detail);
         const loggedOut =
           /not (logged|signed) in|auth login|unauthori[sz]ed|no (active )?session|session (expired|not found)/i.test(
             detail,
           );
         reject(
           new CliError(
-            loggedOut ? "Not signed in to Proton Drive" : firstLine(detail) || "Proton Drive CLI failed",
-            loggedOut ? "Run `proton-drive auth login` in your terminal." : detail,
+            loggedOut ? "Not signed in to Proton Drive" : errorLine(detail) || "Proton Drive CLI failed",
+            loggedOut
+              ? "Run `proton-drive auth login` in your terminal."
+              : error.signal
+                ? `The CLI was stopped (${error.signal}).`
+                : errorLine(detail) || `Exit code ${error.code}`,
           ),
         );
         return;
@@ -98,8 +104,34 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
   });
 }
 
-function firstLine(text: string): string {
-  return text.split("\n").find((l) => l.trim() && !/^=+$/.test(l.trim())) ?? "";
+/**
+ * The CLI prints crashes as a "=====" banner, a source code frame and a stack trace.
+ * Keep the line that actually says what went wrong.
+ */
+function errorLine(text: string): string {
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !/^=+$/.test(l) && !/^\d+ \|/.test(l) && !/^\^+$/.test(l) && !/^at /.test(l));
+  return lines.find((l) => /error|failed|denied|EPERM|ENOENT|EACCES|timeout|refused/i.test(l)) ?? lines[0] ?? "";
+}
+
+/** Keeps the last CLI failures in full, locally, to diagnose intermittent crashes. */
+function logFailure(args: string[], error: ExecFileException, detail: string) {
+  try {
+    const file = join(environment.supportPath, "cli-errors.log");
+    mkdirSync(environment.supportPath, { recursive: true, mode: 0o700 });
+    const previous = existsSync(file) ? readFileSync(file, "utf8").split("\n---\n").slice(-19) : [];
+    const entry = [
+      new Date().toISOString(),
+      `command: ${args[0]} ${args[1] ?? ""}`,
+      `exit: ${error.code ?? "-"} signal: ${error.signal ?? "-"} killed: ${error.killed ?? false}`,
+      detail.slice(0, 4000),
+    ].join("\n");
+    writeFileSync(file, [...previous, entry].join("\n---\n"), { mode: 0o600 });
+  } catch {
+    // Diagnostics must never break the command itself.
+  }
 }
 
 /** Escape a node name so it can be used as a path segment (see `proton-drive fs list --help`). */
@@ -137,7 +169,12 @@ export function listFolderCached(path: string, mode: "demo" | "live"): Promise<D
 
 export async function listFolder(path: string): Promise<DriveNode[]> {
   if (isDemo()) return demoList(path);
-  const out = await run(["filesystem", "list", "--json", path]);
+  const args = ["filesystem", "list", "--json", path];
+  // Listing is read-only: retry once, the CLI occasionally crashes for no lasting reason.
+  const out = await run(args).catch((error) => {
+    if (error instanceof CliError && error.message === "Not signed in to Proton Drive") throw error;
+    return run(args);
+  });
   const raw = JSON.parse(out) as RawNode[];
   return raw.flatMap((r) => normalize(r, path) ?? []);
 }

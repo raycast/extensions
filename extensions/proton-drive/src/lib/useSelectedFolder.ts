@@ -24,6 +24,8 @@ export function useSelectedFolder(nodes: DriveNode[] | undefined) {
   const { data, isLoading } = useCachedPromise(listFolderCached, [settledPath ?? "", isDemo() ? "demo" : "live"], {
     execute: Boolean(settledPath) && settledPath === folderPath,
     keepPreviousData: false,
+    // Background prefetch for the preview: on failure the panel just stays empty, no alert.
+    onError: () => undefined,
   });
 
   const contents: FolderContents | undefined =
