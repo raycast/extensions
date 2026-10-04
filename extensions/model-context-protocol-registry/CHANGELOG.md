@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Clipwright MCP Server] - 2026-10-04
+
+- Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
+
 ## [Add Desearch MCP Server] - 2026-10-03
 
 - Add Desearch to the official registry: AI search, X search and web search for AI agents, plus page extraction and X data tools. Local stdio server `desearch-mcp-server` (MIT) through `npx` with 15 tools; bring your own Desearch API key from console.desearch.ai/api-keys, set as `DESEARCH_API_KEY`.
