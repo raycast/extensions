@@ -7,6 +7,9 @@ import { DatabaseSync } from "node:sqlite";
 import { transformSync } from "esbuild";
 import { between } from "./source-slice";
 import { scopeExceptionChecks } from "./scope-exception-checks";
+import { cloudLifecycleChecks } from "./cloud-lifecycle-checks";
+import { cloudReadIsolationChecks } from "./cloud-read-isolation-checks";
+import { cloudRootStateChecks } from "./cloud-root-state-checks";
 import { findFd, FD_DIRECTORIES } from "../src/lib/fd";
 import {
   ensureFd,
@@ -128,6 +131,9 @@ function rowPaths(db: DatabaseSync): string[] {
 
 export async function indexChecks(assert: Assert) {
   await scopeExceptionChecks(assert);
+  await cloudLifecycleChecks(assert);
+  await cloudReadIsolationChecks(assert);
+  await cloudRootStateChecks(assert);
   // Optional ranking persistence must never stand between the user and Open.
   let rejectRanking!: (reason: Error) => void;
   const ranking = new Promise<never>((_resolve, reject) => {
@@ -1572,9 +1578,10 @@ export async function indexChecks(assert: Assert) {
     }),
   });
   assert(
-    nothingConfigured.kind === "no-roots" &&
-      nothingConfigured.message.includes("Search Index Settings"),
-    "with nothing configured the user is pointed at the settings, not at Drive",
+    nothingConfigured.kind === "done" &&
+      nothingConfigured.report.complete &&
+      searchIndex(wiredFile, parseQuery("configured")).entries.length === 0,
+    "authoritative empty settings complete cleanup rather than retaining removed scopes",
   );
 
   // ------------------------------------------------------------- index stats

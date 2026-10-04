@@ -6,8 +6,6 @@ import {
   openIndexForWrite,
   readKnownIndexRoots,
   readCloudIndexRoots,
-  rememberCloudIndexRoot,
-  forgetCloudIndexRoots,
   resumeFtsSync,
   suspendFtsSync,
   writeScanStarted,
@@ -29,6 +27,10 @@ import {
 } from "./index-settings";
 import type { ParsedIndexSettings } from "./index-settings";
 import { createReadPool } from "./bounded-reads";
+import {
+  prepareCloudRootState,
+  forgetCloudRootState,
+} from "./cloud-root-state";
 
 /**
  * Rebuilding the index.
@@ -66,6 +68,8 @@ export type BuildOutcome =
  */
 export type CloudStorageRootResult = {
   roots: string[];
+  /** Existing entries positively identified as non-directories, not absent mounts. */
+  removedSources?: string[];
   /** Canonical parent for comparing older saved direct-provider roots. */
   resolvedRoot?: string;
   /** False when provider discovery failed, timed out, or stopped early. */
@@ -102,6 +106,7 @@ export async function cloudStorageIndexRootResult(
       return { roots: [], authoritative: false };
     }
     const roots: string[] = [];
+    const removedSources: string[] = [];
     for (const entry of entries) {
       if (active.signal.aborted)
         return { roots: normalizeRoots(roots), authoritative: false };
@@ -119,6 +124,7 @@ export async function cloudStorageIndexRootResult(
           active.signal,
         );
         if (stats.isDirectory()) roots.push(full);
+        else removedSources.push(full);
       } catch {
         // A provider can leave a directory link behind while temporarily
         // unmounted. Keep that scope: scanRoot will report it unavailable and a
@@ -128,6 +134,7 @@ export async function cloudStorageIndexRootResult(
     }
     return {
       roots: normalizeRoots(roots),
+      removedSources,
       resolvedRoot,
       authoritative: !active.signal.aborted,
     };
@@ -242,7 +249,11 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           : { roots: [] as string[], authoritative: true };
       const roots = options.roots ?? configuredRoots(settings, cloud.roots);
       const cleanupAuthoritative = loaded.authoritative && cloud.authoritative;
-      if (roots.length === 0)
+      const emptyConfiguredScope =
+        options.roots === undefined &&
+        cleanupAuthoritative &&
+        roots.length === 0;
+      if (roots.length === 0 && !emptyConfiguredScope)
         return {
           kind: "no-roots",
           message:
@@ -279,26 +290,6 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
         const protectedRoots = cleanupAuthoritative ? [] : [...knownRoots];
         const automaticCloud =
           options.roots === undefined && settings.includeDrive;
-        const cloudSources = new Set(normalizeRoots(cloud.roots));
-        if (automaticCloud) {
-          // A successful directory listing can omit an unmounted account.
-          // Keeping cloud indexing enabled still includes those saved providers;
-          // only disabling it can authorize removing their scopes altogether.
-          const savedCloud = new Set(readCloudIndexRoots(opened.db));
-          for (const root of knownRoots) {
-            const parent = path.dirname(root);
-            if (
-              savedCloud.has(root) ||
-              parent === cloudRoot ||
-              parent === cloud.resolvedRoot
-            ) {
-              protectedRoots.push(root);
-              // Backfill direct-provider provenance for pre-existing indexes.
-              assertOwned();
-              rememberCloudIndexRoot(opened.db, root);
-            }
-          }
-        }
         report = await scanRoots({
           fd: lookup.path,
           roots,
@@ -311,28 +302,34 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           patterns: options.patterns ?? settings.patterns,
           allowRootCleanup: cleanupAuthoritative,
           allowStaleCleanup: loaded.authoritative,
+          allowEmptyCleanup: emptyConfiguredScope,
           protectedRoots,
-          onRootResolved: automaticCloud
-            ? (source, root) => {
-                if (!cloudSources.has(path.resolve(source))) return;
-                assertOwned();
-                rememberCloudIndexRoot(opened.db, root);
-              }
-            : undefined,
+          cloudSources: [...cloud.roots, ...readCloudIndexRoots(opened.db)],
+          prepareRoots: (resolutions) => {
+            assertOwned();
+            if (automaticCloud)
+              return prepareCloudRootState(opened.db, {
+                cloudRoot,
+                canonicalCloudRoot: cloud.resolvedRoot,
+                knownRoots,
+                sources: cloud.roots,
+                removedSources: cloud.removedSources,
+                resolutions,
+                authoritative: cleanupAuthoritative,
+              });
+            return {
+              cloudRoots: readCloudIndexRoots(opened.db),
+              commitCleanup:
+                options.roots === undefined && cleanupAuthoritative
+                  ? () => forgetCloudRootState(opened.db)
+                  : undefined,
+            };
+          },
           onProgress: options.onProgress,
           spawnFd: options.spawnFd,
           assertOwned,
           tuning: options.tuning,
         });
-        if (
-          options.roots === undefined &&
-          !settings.includeDrive &&
-          cleanupAuthoritative &&
-          report.complete
-        ) {
-          assertOwned();
-          forgetCloudIndexRoots(opened.db);
-        }
         return {
           kind: "done" as const,
           report,

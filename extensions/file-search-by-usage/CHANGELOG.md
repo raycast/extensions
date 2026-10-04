@@ -34,7 +34,7 @@
 - Add Return to Start (`⌘⇧H`) in Actions to clear the query and folder without leaving the command or growing the screen stack.
 - Query the index at three characters and say how many more are needed below that; keep memory results available at any length.
 - Keep healthy folder reads moving past stalled files; collection does not depend on scrolling.
-- Isolate indexing reads by cloud provider so stalled mounts cannot block later local rebuilds.
+- Isolate indexing reads by cloud provider, including symlink targets outside CloudStorage and explicit scopes inside them, so stalled mounts cannot block later local rebuilds.
 - Isolate cached-result validation by provider so stalled cloud paths do not block local files or other providers.
 - Keep the previous folder listing when a refresh fails, and clear it when a successful refresh finds the folder empty.
 - Keep paths discovered by `fd` searchable when their metadata reads time out.
@@ -56,7 +56,10 @@
 - Keep valid usage metadata when one item cannot be read, and report the result as partial.
 - Preserve saved paths when settings are malformed or incomplete, including paths within scopes that still appear in the recovery settings.
 - Keep saved CloudStorage provider scopes when they disappear from discovery while cloud inclusion remains enabled; continue removing unrelated scopes that the user removed.
-- Remember resolved automatic provider roots so disappearing provider symlinks retain their saved results, including targets outside CloudStorage.
+- Track each automatic provider's current and pending targets. Retire superseded targets after a complete authoritative rebuild, while preserving partial results and roots shared with absent providers or explicit scopes.
+- Commit provider retirement, deferred stale-path removal, and coverage cleanup together so a failed cleanup can be retried safely.
+- Retire a provider proven to have become a file, and clean up an authoritative empty configuration without treating absent providers as removed.
+- Preserve legacy external provider targets whose original source cannot be established until cloud inclusion is disabled.
 - Preserve descendants of a previously indexed directory shortcut while its target is unavailable, including across repeated rebuilds.
 - Keep the previous index when the drive is offline or unmounted. Partial scans merge what they find. A root removes stale paths only after an error-free scan with authoritative settings.
 - Prevent overlapping manual indexing runs from replacing each other's results.

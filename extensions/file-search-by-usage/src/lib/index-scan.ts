@@ -5,7 +5,10 @@ import { StringDecoder } from "node:string_decoder";
 import type { DatabaseSync } from "node:sqlite";
 import { NOISE_SEGMENTS } from "./read-dir";
 import { readKnownIndexRoots, type FileRow } from "./index-db";
-import { createProviderReadPoolSelector } from "./provider-read-pools";
+import {
+  cloudProviderKey,
+  createProviderReadPoolSelector,
+} from "./provider-read-pools";
 
 /**
  * Building the index with fd.
@@ -79,6 +82,8 @@ const STOP_SUMMARIES: Record<ScanStop, string> = {
 
 export type RootOutcome = {
   root: string;
+  /** Batch generation used for deferred cleanup after replacement scopes finish. */
+  scanId?: number;
   /** Paths fd emitted. */
   scanned: number;
   /** Rows written to the database. */
@@ -129,6 +134,16 @@ export type ScanOptions = {
   patterns?: readonly string[];
   /** Existing roots to retain even when discovery or recovery omitted them. */
   protectedRoots?: readonly string[];
+  /** Preserve these paths during partial runs, without excluding their traversal. */
+  cleanupProtectedRoots?: readonly string[];
+  /** Explicit source identity for canonical cloud targets outside CloudStorage. */
+  readPoolKey?: string;
+  /** Visible automatic roots and known canonical providers need isolated resolution too. */
+  cloudSources?: readonly string[];
+  /** Plan ownership after resolving every scope, before writing any file batches. */
+  prepareRoots?: (roots: readonly RootResolution[]) => ScanRootPolicy;
+  /** Only an authoritative user-configured empty scope may delete all coverage. */
+  allowEmptyCleanup?: boolean;
   /** False when configuration or provider discovery used recovery fallbacks. */
   allowRootCleanup?: boolean;
   /** False when recovery settings cannot prove unseen paths were removed. */
@@ -140,6 +155,19 @@ export type ScanOptions = {
   spawnFd?: (args: string[], signal?: AbortSignal) => AsyncIterable<Buffer>;
   assertOwned?: () => void;
   tuning?: ScanTuning;
+};
+
+export type RootResolution = {
+  source: string;
+  root: string;
+  resolved: boolean;
+};
+export type ScanRootPolicy = {
+  protectedRoots?: readonly string[];
+  retiringRoots?: readonly string[];
+  cloudRoots?: readonly string[];
+  /** Called in the same transaction as final root cleanup. */
+  commitCleanup?: () => void;
 };
 
 /**
@@ -182,13 +210,22 @@ function excludePath(root: string, target: string): string {
 export async function resolveRoots(
   roots: readonly string[],
   signal?: AbortSignal,
-  onResolved?: (source: string, root: string) => void,
+  onResolved?: (source: string, root: string, resolved: boolean) => void,
+  cloudSources: readonly string[] = [],
 ): Promise<string[]> {
   const resolved: string[] = [];
+  let cloud = normalizeRoots(cloudSources);
   for (const root of roots) {
     let canonical: string;
+    let succeeded = true;
+    const cloudScope = cloud.find((scope) =>
+      containsPath(scope, path.resolve(root)),
+    );
     try {
-      canonical = await indexReadFor(root)(
+      canonical = await indexReadFor(
+        root,
+        cloudScope !== undefined ? `cloud:${cloudScope}` : undefined,
+      )(
         `index-real:${root}`,
         () => fsp.realpath(root),
         signal ?? new AbortController().signal,
@@ -196,9 +233,17 @@ export async function resolveRoots(
     } catch {
       // Keep it: scanRoot reports an unavailable root rather than dropping it.
       canonical = path.resolve(root);
+      succeeded = false;
     }
     // Persistence failures must stop the rebuild, not become resolution fallbacks.
-    onResolved?.(root, canonical);
+    onResolved?.(root, canonical, succeeded);
+    // Automatic sources are resolved first. Their target becomes a known cloud
+    // ancestor for explicit child scopes, including on the very first rebuild.
+    if (
+      succeeded &&
+      (cloudScope !== undefined || cloudProviderKey(root) !== undefined)
+    )
+      cloud = normalizeRoots([...cloud, canonical]);
     resolved.push(canonical);
   }
   return normalizeRoots(resolved);
@@ -228,10 +273,11 @@ export async function redundantLinks(
   root: string,
   roots: readonly string[],
   signal?: AbortSignal,
+  readPoolKey?: string,
 ): Promise<string[]> {
   let entries;
   try {
-    entries = await indexReadFor(root)(
+    entries = await indexReadFor(root, readPoolKey)(
       `index-list:${root}`,
       () => fsp.readdir(root, { withFileTypes: true }),
       signal ?? new AbortController().signal,
@@ -246,7 +292,7 @@ export async function redundantLinks(
     let target: string;
     try {
       const full = path.join(root, entry.name);
-      target = await indexReadFor(full)(
+      target = await indexReadFor(full, readPoolKey)(
         `index-real:${full}`,
         () => fsp.realpath(full),
         signal ?? new AbortController().signal,
@@ -418,6 +464,7 @@ async function describe(
   root: string,
   signal: AbortSignal,
   onUnavailableLink: (full: string) => void,
+  readPoolKey?: string,
 ): Promise<FileRow> {
   const base: FileRow = {
     path: entry.path,
@@ -433,7 +480,7 @@ async function describe(
   };
 
   try {
-    const link = await indexReadFor(entry.path)(
+    const link = await indexReadFor(entry.path, readPoolKey)(
       `index-lstat:${entry.path}`,
       () => fsp.lstat(entry.path),
       signal,
@@ -449,7 +496,7 @@ async function describe(
 
     let storage: string | null = null;
     try {
-      storage = await indexReadFor(entry.path)(
+      storage = await indexReadFor(entry.path, readPoolKey)(
         `index-real:${entry.path}`,
         () => fsp.realpath(entry.path),
         signal,
@@ -459,7 +506,7 @@ async function describe(
       /* A dangling link has no target; the visible entry is still useful. */
     }
     try {
-      const target = await indexReadFor(entry.path)(
+      const target = await indexReadFor(entry.path, readPoolKey)(
         `index-stat:${entry.path}`,
         () => fsp.stat(entry.path),
         signal,
@@ -498,6 +545,7 @@ async function describeAll(
   concurrency: number,
   signal: AbortSignal,
   onUnavailableLink: (full: string) => void,
+  readPoolKey?: string,
 ): Promise<FileRow[]> {
   const rows: FileRow[] = [];
   let next = 0;
@@ -510,7 +558,13 @@ async function describeAll(
         if (index >= entries.length) return;
         try {
           rows.push(
-            await describe(entries[index], root, signal, onUnavailableLink),
+            await describe(
+              entries[index],
+              root,
+              signal,
+              onUnavailableLink,
+              readPoolKey,
+            ),
           );
         } catch (error) {
           if (signal.aborted) return;
@@ -698,8 +752,13 @@ export async function scanRoot(
     const startedMetadata = performance.now();
     let rows: FileRow[] | undefined;
     try {
-      rows = await describeAll(batch, root, statConcurrency, signal, (full) =>
-        unavailableLinks.add(full),
+      rows = await describeAll(
+        batch,
+        root,
+        statConcurrency,
+        signal,
+        (full) => unavailableLinks.add(full),
+        options.readPoolKey,
       );
     } catch (metadataError) {
       if (!signal.aborted) throw metadataError;
@@ -742,7 +801,7 @@ export async function scanRoot(
 
   try {
     // Confirm the root is still there; a drive can unmount between runs.
-    const stats = await indexReadFor(root)(
+    const stats = await indexReadFor(root, options.readPoolKey)(
       `index-stat:${root}`,
       () => fsp.stat(root),
       signal,
@@ -881,18 +940,15 @@ export async function scanRoot(
     assertOwned?.();
     db.exec("BEGIN IMMEDIATE");
     try {
-      // Path-based cleanup also handles rows still owned by an older parent.
-      // Never use a successful parent scan to infer absence inside a child scope.
-      const subtree = "(path = ? OR (path >= ? AND path < ?))";
-      const bounds = (scope: string) => {
-        const prefix = scope.endsWith(path.sep) ? scope : scope + path.sep;
-        return [scope, prefix, prefix.slice(0, -1) + "0"];
-      };
-      const children = nestedRoots(root, options.roots);
-      db.prepare(
-        `DELETE FROM files WHERE scan_id != ? AND (root = ? OR ${subtree})` +
-          children.map(() => ` AND NOT ${subtree}`).join(""),
-      ).run(scanId, root, ...bounds(root), ...children.flatMap(bounds));
+      pruneStaleRows(
+        db,
+        root,
+        scanId,
+        normalizeRoots([
+          ...options.roots,
+          ...(options.cleanupProtectedRoots ?? []),
+        ]),
+      );
       db.exec("COMMIT");
     } catch (deleteError) {
       rollback(db);
@@ -925,6 +981,7 @@ export async function scanRoot(
 
   return {
     root,
+    scanId,
     scanned,
     indexed,
     elapsedMs: timing.elapsedMs,
@@ -947,6 +1004,25 @@ export type ScanReport = {
   forgotten: string[];
 };
 
+/** Caller owns the transaction; child scopes are authoritative independently. */
+function pruneStaleRows(
+  db: DatabaseSync,
+  root: string,
+  scanId: number,
+  roots: readonly string[],
+) {
+  const subtree = "(path = ? OR (path >= ? AND path < ?))";
+  const bounds = (scope: string) => {
+    const prefix = scope.endsWith(path.sep) ? scope : scope + path.sep;
+    return [scope, prefix, prefix.slice(0, -1) + "0"];
+  };
+  const children = nestedRoots(root, roots);
+  db.prepare(
+    `DELETE FROM files WHERE scan_id != ? AND (root = ? OR ${subtree})` +
+      children.map(() => ` AND NOT ${subtree}`).join(""),
+  ).run(scanId, root, ...bounds(root), ...children.flatMap(bounds));
+}
+
 /**
  * Drop roots that are no longer in scope.
  *
@@ -962,21 +1038,34 @@ function forgetUnconfiguredRoots(
   db: DatabaseSync,
   configured: string[],
   assertOwned?: () => void,
+  deferredCleanup: readonly RootOutcome[] = [],
+  commitCleanup?: () => void,
 ): string[] {
   const known = readKnownIndexRoots(db);
   const wanted = new Set(configured);
   const gone = known.filter((root) => !wanted.has(root));
-  if (gone.length === 0) return [];
+  if (gone.length === 0 && deferredCleanup.length === 0 && !commitCleanup)
+    return [];
 
   assertOwned?.();
   db.exec("BEGIN IMMEDIATE");
   try {
+    for (const outcome of deferredCleanup) {
+      if (outcome.complete && outcome.scanId !== undefined)
+        pruneStaleRows(db, outcome.root, outcome.scanId, configured);
+    }
     const files = db.prepare("DELETE FROM files WHERE root = ?");
     const roots = db.prepare("DELETE FROM index_roots WHERE root = ?");
     for (const root of gone) {
       files.run(root);
       roots.run(root);
     }
+    for (const outcome of deferredCleanup)
+      db.prepare(
+        "UPDATE index_roots SET files = (SELECT count(*) FROM files WHERE root = ?) WHERE root = ?",
+      ).run(outcome.root, outcome.root);
+    commitCleanup?.();
+    assertOwned?.();
     db.exec("COMMIT");
   } catch (error) {
     rollback(db);
@@ -1000,14 +1089,32 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
     ? setTimeout(() => timeLimit.abort(), Math.max(0, deadline - Date.now()))
     : undefined;
   try {
+    const resolutions: RootResolution[] = [];
     const roots = await resolveRoots(
       options.roots,
       signal,
-      options.onRootResolved,
+      (source, root, resolved) => {
+        resolutions.push({ source, root, resolved });
+        options.onRootResolved?.(source, root);
+      },
+      options.cloudSources,
     );
+    options.assertOwned?.();
+    const policy = options.prepareRoots?.(resolutions);
+    const cloudRoots = normalizeRoots([
+      ...(policy?.cloudRoots ?? []),
+      ...resolutions
+        .filter(
+          ({ source }) =>
+            cloudProviderKey(source) !== undefined ||
+            options.cloudSources?.includes(source),
+        )
+        .map(({ root }) => root),
+    ]);
     const ownershipRoots = normalizeRoots([
       ...roots,
       ...(options.protectedRoots ?? []),
+      ...(policy?.protectedRoots ?? []),
     ]);
     const outcomes: RootOutcome[] = [];
 
@@ -1026,6 +1133,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       ? {
           ...options,
           roots: ownershipRoots,
+          cleanupProtectedRoots: policy?.retiringRoots,
           signal,
           externalSignal: callerSignal,
           onProgress: (progress) =>
@@ -1039,6 +1147,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       : {
           ...options,
           roots: ownershipRoots,
+          cleanupProtectedRoots: policy?.retiringRoots,
           signal,
           externalSignal: callerSignal,
         };
@@ -1056,19 +1165,29 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
         });
         continue;
       }
-      const outcome = await scanRoot(root, aggregated, deadline, [
-        ...(await redundantLinks(root, ownershipRoots, signal)),
-        ...nestedRoots(root, ownershipRoots).map((child) =>
-          excludePath(root, child),
-        ),
-      ]);
+      const cloudScope = cloudRoots.find((scope) => containsPath(scope, root));
+      const readPoolKey =
+        cloudScope === undefined ? undefined : `cloud:${cloudScope}`;
+      const outcome = await scanRoot(
+        root,
+        { ...aggregated, readPoolKey },
+        deadline,
+        [
+          ...(await redundantLinks(root, ownershipRoots, signal, readPoolKey)),
+          ...nestedRoots(root, ownershipRoots).map((child) =>
+            excludePath(root, child),
+          ),
+        ],
+      );
       doneScanned += outcome.scanned;
       doneIndexed += outcome.indexed;
       outcomes.push(outcome);
     }
 
     const complete =
-      roots.length > 0 && !signal.aborted && outcomes.every((o) => o.complete);
+      (roots.length > 0 || options.allowEmptyCleanup === true) &&
+      !signal.aborted &&
+      outcomes.every((o) => o.complete);
     let databaseMs = outcomes.reduce(
       (sum, outcome) => sum + outcome.timings.databaseMs,
       0,
@@ -1080,6 +1199,10 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
         options.db,
         ownershipRoots,
         options.assertOwned,
+        policy?.retiringRoots?.length && options.allowStaleCleanup !== false
+          ? outcomes
+          : [],
+        policy?.commitCleanup,
       );
       databaseMs += performance.now() - forgetStarted;
     }

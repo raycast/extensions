@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { readCloudRootState } from "./cloud-root-state";
 
 /**
  * The on-disk search index.
@@ -261,23 +262,19 @@ export function readKnownIndexRoots(db: DatabaseSync): string[] {
 
 /** Canonical automatic scopes, retained even after a provider link disappears. */
 export function readCloudIndexRoots(db: DatabaseSync): string[] {
-  return (
+  const legacy = (
     db
       .prepare("SELECT value FROM index_meta WHERE key GLOB 'cloud-root:*'")
       .all() as { value: string }[]
   ).map((row) => row.value);
-}
-
-/** Save provenance before any batches can be committed under the resolved root. */
-export function rememberCloudIndexRoot(db: DatabaseSync, root: string): void {
-  db.prepare(
-    "INSERT OR REPLACE INTO index_meta (key, value) VALUES (?, ?)",
-  ).run(`cloud-root:${root}`, root);
-}
-
-/** Only a completed rebuild with cloud inclusion disabled retires provenance. */
-export function forgetCloudIndexRoots(db: DatabaseSync): void {
-  db.exec("DELETE FROM index_meta WHERE key GLOB 'cloud-root:*'");
+  const state = readCloudRootState(db);
+  return [
+    ...new Set([
+      ...legacy,
+      ...(state?.legacyRoots ?? []),
+      ...Object.values(state?.sources ?? {}).flatMap((source) => source.roots),
+    ]),
+  ];
 }
 
 export function countIndexedFiles(db: DatabaseSync): number {
