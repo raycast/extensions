@@ -10,7 +10,7 @@ Search tracked RAM and SSD products by name, brand or ASIN. Each row shows the c
 
 Press Enter on a product for its price history: the all-time low and high with the dates they were set, the 90-day average, how long it has been tracked, and the monthly prices. Products tracked for years show their recent months in full and then one line per earlier year, with that year's low, high and closing price. Months with no recorded price are omitted rather than filled in.
 
-Cmd+Enter opens the product on memradar.com. Cmd+D toggles a compact side pane in the list. The product list is downloaded once per session and searched locally, so typing makes no network requests.
+Cmd+Enter (Ctrl+Enter on Windows) opens the product on memradar.com. Cmd+D (Ctrl+D on Windows) toggles a compact side pane in the list. The product list is downloaded once per session and searched locally, so typing makes no network requests.
 
 ### Show Market Overview
 
@@ -42,7 +42,7 @@ npm run lint
 npm run preflight  # attribution and licensing checks, run against the live files
 ```
 
-Built against `@raycast/api` 1.x, macOS only.
+Built against `@raycast/api` 1.x, for macOS and Windows.
 
 ## License
 

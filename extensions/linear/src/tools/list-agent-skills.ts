@@ -1,12 +1,11 @@
 import { PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { client, collect, PageInput } from "./linearUtils";
+import { mapPage, serializeAgentSkill } from "./serializers";
+import { withLinear } from "./withLinear";
 
-export default withAccessToken(linear)(async (input: PageInput) => {
-  return collect(
+export default withLinear(async (input: PageInput) => {
+  const page = await collect(
     ({ first, after }) =>
       client().agentSkills({
         first,
@@ -15,4 +14,5 @@ export default withAccessToken(linear)(async (input: PageInput) => {
       }),
     input,
   );
+  return mapPage(page, serializeAgentSkill);
 });

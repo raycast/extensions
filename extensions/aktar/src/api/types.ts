@@ -7,6 +7,8 @@ export type Status = {
   apiVersion: number;
   defaultDestinationId: string | null;
   outputFormat: OutputFormat;
+  /** Missing before Aktar added watched folders. */
+  watching?: { paused: boolean; folders: number };
 };
 
 export type Destination = {
@@ -33,6 +35,11 @@ export type Upload = {
   /** When Aktar's lifecycle rule deletes the file. Null keeps it forever; missing before Aktar 0.5.0. */
   expiresAt?: string | null;
   formats: Record<OutputFormat, string>;
+  /**
+   * Only on an upload reply: true when nothing was uploaded because the same
+   * file was already in that destination, and Aktar reused its existing link.
+   */
+  reused?: boolean;
 };
 
 export type BucketFolder = {
@@ -59,4 +66,30 @@ export type BucketListing = {
 export type TemporaryLink = {
   url: string;
   expiresAt: string;
+};
+
+export type WatchedFolderStatus = "watching" | "paused" | "disabled" | "accessNeeded" | "notFound" | "error";
+
+export type WatchedFolder = {
+  id: string;
+  name: string;
+  path: string;
+  enabled: boolean;
+  status: WatchedFolderStatus;
+  /** Null uploads to the default destination. */
+  destinationID: string | null;
+  /** Files waiting for their write to finish. */
+  waiting: number;
+  uploading: number;
+  failed: number;
+  /** Files held until the user confirms a large batch in Aktar. */
+  awaitingConfirmation: number;
+  lastUploadAt: string | null;
+};
+
+export type WatchedFolders = {
+  paused: boolean;
+  /** An ISO-8601 date, or null when paused until resumed (or not paused). */
+  pausedUntil: string | null;
+  folders: WatchedFolder[];
 };

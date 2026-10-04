@@ -1,5 +1,6 @@
-import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useBrewDependencies } from "../hooks/useBrewDependencies";
+import { ensureTrusted } from "./trust";
 import {
   type BrewProgress,
   brewInstallWithProgress,
@@ -33,6 +34,13 @@ import {
   showActionToast,
   showBrewFailureToast,
   copyLogsAction,
+  actionsLogger,
+  brewFetchQualifiedPackage,
+  brewIsTapped,
+  brewPackageTrust,
+  brewTapCommand,
+  execBrew,
+  type TapTarget,
 } from "../utils";
 
 /**
@@ -355,9 +363,95 @@ export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => 
   );
 }
 
+/**
+ * Install a package from a third-party tap by its qualified name, pasted into
+ * Search: `abue-ammar/tinycast/tinycast`, or a whole install-page line.
+ *
+ * One confirmation covers the three things that happen, in the only order brew
+ * allows: add the tap (brew will not read an untapped one), learn from
+ * `brew info` whether the name is a formula or a cask (`brew trust` records
+ * any name it is handed, so the kind cannot be guessed), trust that one
+ * package, then install through the same path as every other install.
+ *
+ * A failure after the tap is added leaves the tap: it is untrusted, so brew
+ * will load nothing from it, and Manage Taps can remove it.
+ */
+export function InstallFromTapAction(props: {
+  target: TapTarget & { package: string };
+  onAction: (result: boolean) => void;
+}) {
+  const name = props.target.package.split("/").pop() ?? props.target.package;
+  return (
+    <Action
+      title={`Install ${name}`}
+      icon={Icon.Plus}
+      onAction={async () => props.onAction(await installFromTap(props.target, name))}
+    />
+  );
+}
+
+async function installFromTap(target: TapTarget & { package: string }, name: string): Promise<boolean> {
+  const user = target.tap.split("/")[0];
+  let tapped: boolean;
+  try {
+    tapped = await brewIsTapped(target.tap);
+  } catch (err) {
+    await showBrewFailureToast(`Could not look up ${target.tap}`, ensureError(err));
+    return false;
+  }
+
+  const confirmed = await confirmAlert({
+    title: `Install ${name}?`,
+    message: [
+      `From ${target.tap}, maintained by ${user}, not Homebrew.`,
+      tapped ? undefined : "Homebrew adds the tap first.",
+      `Only ${name} is trusted, not the rest of the tap.`,
+    ]
+      .filter(Boolean)
+      .join(" "),
+    primaryAction: { title: "Install", style: Alert.ActionStyle.Default },
+    dismissAction: { title: "Cancel" },
+  });
+  if (!confirmed) {
+    actionsLogger.log("Install from tap declined", { package: target.package });
+    return false;
+  }
+
+  // Up before the first await, so the tap clone never runs silently. The
+  // install that follows replaces it with its own progress toast.
+  const handle = showActionToast({ title: tapped ? `Finding ${name}` : `Adding ${target.tap}`, cancelable: false });
+  let item: Cask | Formula | undefined;
+  try {
+    if (!tapped) {
+      await execBrew(brewTapCommand("tap", target.tap, ...(target.url ? [target.url] : [])), { raw: true });
+      actionsLogger.log("Tapped for install", { tap: target.tap });
+      handle.updateTitle(`Finding ${name}`);
+    }
+    item = await brewFetchQualifiedPackage(target.package, target.cask);
+    if (item && (await brewPackageTrust(target.tap, brewIdentifier(item), isCask(item))) === "untrusted") {
+      await execBrew(brewTapCommand("trust", isCask(item) ? "--cask" : "--formula", brewIdentifier(item)), {
+        raw: true,
+      });
+      actionsLogger.log("Trusted package for install", { package: brewIdentifier(item) });
+    }
+  } catch (err) {
+    await showBrewFailureToast(`Failed to install ${name}`, ensureError(err));
+    return false;
+  }
+  if (!item) {
+    await showBrewFailureToast(
+      `${target.tap} has no package named ${name}`,
+      new Error(`brew info found no formula or cask called ${target.package}.`),
+    );
+    return false;
+  }
+  return install(item);
+}
+
 /// Utilties
 
 async function install(formula: Cask | Formula): Promise<boolean> {
+  if (!(await ensureTrusted(formula))) return false;
   const name = brewName(formula);
   const handle = showActionToast({
     title: `Installing ${name}`,
@@ -472,6 +566,8 @@ async function uninstall(
 const DECLINED = "declined" as const;
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLINED> {
+  // Declined trust is a skip, not a failure: nothing ran, and the row is intact.
+  if (!(await ensureTrusted(formula))) return DECLINED;
   const name = brewName(formula);
   const handle = showActionToast({
     title: `Upgrading ${name}`,

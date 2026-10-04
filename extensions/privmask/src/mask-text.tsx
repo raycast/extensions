@@ -24,6 +24,14 @@ type Finding = {
   length: number;
 };
 
+type Replacement = {
+  original: string;
+  placeholder: string;
+  kind: string;
+  location: number;
+  length: number;
+};
+
 type DetectResponse = {
   findings: Finding[];
   modelRan: boolean;
@@ -51,6 +59,7 @@ const SOURCE_LABELS: Record<string, string> = {
   dataDetector: "macOS data detector",
   nameTagger: "macOS name tagger",
   languageModel: "on-device model",
+  ner: "privmask name model",
 };
 
 // Confidence is the primary signal: red is structurally certain, yellow is a
@@ -72,9 +81,46 @@ async function readInput(): Promise<string> {
   return (await Clipboard.readText()) ?? "";
 }
 
+/** Whether the masker substituted exactly this finding. */
+function isReplacementOf(replacement: Replacement, finding: Finding) {
+  return (
+    replacement.location === finding.location &&
+    replacement.length === finding.length &&
+    replacement.kind === finding.kind
+  );
+}
+
 /** Keeps a path's underscores and brackets out of the markdown renderer. */
 function escapeMarkdown(value: string) {
-  return value.replace(/([\\`*_[\]])/g, "\\$1");
+  // As character references, not backslash escapes: Raycast reads `\[ … \]`
+  // and `\( … \)` as LaTeX, so escaping a bracket would start an equation.
+  return value.replace(/[!-/:-@[-`{-~]/g, (char) => `&#${char.charCodeAt(0)};`);
+}
+
+/**
+ * The text as markdown, with every occurrence of `highlight` picked out.
+ *
+ * Not a code block, which would keep the text's layout but cannot carry
+ * emphasis. The layout that matters is kept by hand instead: each line break,
+ * and runs of spaces, which markdown would otherwise collapse.
+ */
+function renderPreview(text: string, highlight?: string) {
+  const escape = (value: string) =>
+    escapeMarkdown(value).replace(/^ +| {2,}/g, (spaces) => "\u00a0".repeat(spaces.length));
+  // Inline code, not bold: CommonMark does not open `**` between a Japanese
+  // character and punctuation, which is where a placeholder sits. A placeholder
+  // never holds a backtick, but text left alone might: a code span holds any
+  // run of backticks shorter than its delimiter, padded with a space.
+  const longestRun = Math.max(0, ...(highlight?.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = "`".repeat(longestRun + 1);
+  const mark = longestRun > 0 ? `${fence} ${highlight} ${fence}` : `${fence}${highlight}${fence}`;
+  return (
+    text
+      .split("\n")
+      // A blank line holds a space, or markdown would merge it into the break.
+      .map((row) => (highlight ? row.split(highlight).map(escape).join(mark) : escape(row)) || "\u00a0")
+      .join("  \n")
+  );
 }
 
 /**
@@ -101,7 +147,7 @@ export default function Command() {
   // is offered only when that selection is the one on screen: a result from
   // before the model returned, or from before the last ⌘T, is missing exactly
   // what the user is trying to remove.
-  const [masked, setMasked] = useState<{ text: string; of: string } | null>(null);
+  const [masked, setMasked] = useState<{ text: string; of: string; replacements: Replacement[] } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
 
   useEffect(() => {
@@ -121,6 +167,8 @@ export default function Command() {
         text,
         dictionaryPath: preferences.dictionaryPath?.trim() || null,
         useModel: preferences.useModel,
+        useNameModel: preferences.useNameModel,
+        nameModelPath: preferences.nameModelPath?.trim() || null,
       };
 
       try {
@@ -166,8 +214,8 @@ export default function Command() {
     if (input === null) return;
 
     (async () => {
-      const result = (await maskText({ text: input, selected })) as { text: string };
-      if (!cancelled) setMasked({ text: result.text, of: selectionKey });
+      const result = (await maskText({ text: input, selected })) as { text: string; replacements: Replacement[] };
+      if (!cancelled) setMasked({ text: result.text, of: selectionKey, replacements: result.replacements });
     })().catch((error) => {
       if (!cancelled) setFailure(String(error));
     });
@@ -176,6 +224,26 @@ export default function Command() {
       cancelled = true;
     };
   }, [input, selected, selectionKey]);
+
+  // Of two overlapping findings, only the longer is substituted. One that lies
+  // inside another's replacement has already gone with it, so listing it would
+  // offer a choice that changes nothing, and say "left as it is" of text that
+  // is not. It is left out until the longer one is left alone. Containment,
+  // not overlap: the longer one, left alone, overlaps the shorter's
+  // replacement, and must stay listed so it can be masked again.
+  const shown = useMemo(() => {
+    const replacements = masked?.replacements ?? [];
+    return findings.filter(
+      (finding) =>
+        !replacements.some(
+          (replacement) =>
+            !isReplacementOf(replacement, finding) &&
+            replacement.location <= finding.location &&
+            finding.location + finding.length <= replacement.location + replacement.length,
+        ),
+    );
+  }, [findings, masked]);
+  const shownMasked = shown.filter((finding) => !deselected.has(finding.id)).length;
 
   function toggle(id: string) {
     setDeselected((current) => {
@@ -190,7 +258,18 @@ export default function Command() {
   }
 
   const notices = response?.notices ?? [];
-  const preview = "```\n" + (masked?.text || input || "") + "\n```";
+  const previewText = masked?.text || input || "";
+  /**
+   * Where a finding is in the preview: its own placeholder, which every
+   * occurrence of the same value shares, or the text itself while it is left
+   * alone. Matched by position, so a finding left alone is not pointed at
+   * another occurrence that was replaced.
+   */
+  const previewOf = (finding: Finding) =>
+    renderPreview(
+      previewText,
+      masked?.replacements.find((replacement) => isReplacementOf(replacement, finding))?.placeholder ?? finding.text,
+    );
   // Both halves have to be current: the scan, and the masking of what it found.
   const ready = !waitingForModel && masked?.of === selectionKey;
   const maskedText = masked?.text ?? "";
@@ -264,8 +343,10 @@ export default function Command() {
     );
   }
 
+  // Loading for exactly as long as copying is held back, so the bar is what
+  // tells the user the list and preview are not yet their latest choice.
   return (
-    <List isLoading={input === null || waitingForModel} isShowingDetail searchBarPlaceholder="Filter what was found">
+    <List isLoading={input === null || !ready} isShowingDetail searchBarPlaceholder="Filter what was found">
       {notices.length > 0 && (
         <List.Section title="Worth knowing">
           {notices.map((notice, index) => (
@@ -275,7 +356,7 @@ export default function Command() {
               title={notice}
               // A notice names a path or a count, and the list column is too
               // narrow to read one. The detail pane is where the sentence fits.
-              detail={<List.Item.Detail markdown={`${escapeMarkdown(notice)}\n\n${preview}`} />}
+              detail={<List.Item.Detail markdown={`${escapeMarkdown(notice)}\n\n${renderPreview(previewText)}`} />}
               actions={actions()}
             />
           ))}
@@ -284,9 +365,9 @@ export default function Command() {
 
       <List.Section
         title="Found in this text"
-        subtitle={findings.length > 0 ? `${selected.length} of ${findings.length} will be masked` : undefined}
+        subtitle={shown.length > 0 ? `${shownMasked} of ${shown.length} will be masked` : undefined}
       >
-        {findings.map((finding) => {
+        {shown.map((finding) => {
           const isMasked = !deselected.has(finding.id);
           return (
             <List.Item
@@ -300,7 +381,7 @@ export default function Command() {
               accessories={[{ tag: { value: finding.confidence, color: CONFIDENCE_COLOURS[finding.confidence] } }]}
               detail={
                 <List.Item.Detail
-                  markdown={preview}
+                  markdown={previewOf(finding)}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label title="Found" text={finding.text} />

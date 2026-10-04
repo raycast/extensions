@@ -660,6 +660,11 @@ export function getErrorMessage(error: unknown): string {
 
     // Check for ExecError-like objects
     const execError = error as { stderr?: string; stdout?: string };
+    // git's own complaint, buried under brew's echo of the clone command line.
+    const missingRepo = execError.stderr && /fatal: repository '([^']+?)\/?' not found/.exec(execError.stderr);
+    if (missingRepo) {
+      return `No repo found at ${missingRepo[1].replace(/^https:\/\//, "")}`;
+    }
     if (execError.stderr) {
       // Check for disabled package in raw stderr
       const disabledInfo = parseDisabledPackageMessage(execError.stderr);

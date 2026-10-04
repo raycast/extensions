@@ -1,9 +1,9 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { DetectedLangModel } from "@/core/detect/types";
-import type { LanguageDetectType } from "@/types/api";
-import { CancelledError, handleRequestError } from "@/utils/errors";
-import { createTimer } from "@/utils/logger";
+import type { DetectionObservation } from "@/core/detect/types";
+import type { LanguageDetectType } from "@/core/results/kinds";
+import { CancelledError, handleRequestError } from "@/shared/errors";
+import { createTimer } from "@/shared/logger";
 
 /**
  * Abstract base for language detection providers.
@@ -13,11 +13,10 @@ import { createTimer } from "@/utils/logger";
  * - `doDetect()` is implemented by each subclass with the actual detection logic
  */
 export interface DetectOptions {
-  confirmedConfidence?: number;
   signal?: AbortSignal;
 }
 
-export abstract class BaseDetectProvider<T = unknown> {
+export abstract class BaseDetectProvider {
   abstract type: LanguageDetectType;
 
   /** Indicates if this is a local offline detector (like Franc) vs a network API */
@@ -25,12 +24,12 @@ export abstract class BaseDetectProvider<T = unknown> {
 
   abstract isEnabled(): boolean;
 
-  public detect = async (text: string, options?: DetectOptions): Promise<DetectedLangModel<T>> => {
+  public detect = async (text: string, options?: DetectOptions): Promise<DetectionObservation> => {
     const timer = createTimer(this.type);
     try {
       const result = await this.doDetect(text, options);
-      const confidence = result.confirmed ? "confirmed" : "unconfirmed";
-      timer.done(`${result.youdaoLangCode} (${confidence})`);
+      const language = result.kind === "single" ? result.language : result.candidates[0]?.language;
+      timer.done(language ?? "unmapped");
       return result;
     } catch (error) {
       const requestError = handleRequestError(this.type, error, options?.signal);
@@ -41,5 +40,5 @@ export abstract class BaseDetectProvider<T = unknown> {
     }
   };
 
-  protected abstract doDetect(text: string, options?: DetectOptions): Promise<DetectedLangModel<T>>;
+  protected abstract doDetect(text: string, options?: DetectOptions): Promise<DetectionObservation>;
 }

@@ -31,7 +31,7 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
         const { assetType, symbol } = position.instrument;
         if (assetType !== "EQUITY" && assetType !== "ETF") continue;
 
-        const qty = position.longQuantity || position.shortQuantity || 0;
+        const qty = (position.longQuantity ?? 0) - (position.shortQuantity ?? 0);
         map.set(symbol, (map.get(symbol) ?? 0) + qty);
         pos.push(position);
       }
@@ -44,7 +44,7 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
     return { entries: sorted, totalCash: cash, positions: pos };
   }, [accounts]);
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error } = useCachedPromise(
     // timeframe must be a hook argument (not just closed over) so that
     // changing it triggers a refetch instead of reusing the cache.
     async (syms: SymbolEntry[], cash: number, timeframe: string) => {
@@ -59,17 +59,26 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
         ),
       );
 
+      if (histories.some((history) => !history.candles.length)) {
+        throw new Error("Some holdings have no price history for this period. A complete estimate is unavailable.");
+      }
+      // Begin only after every holding has a price; never backfill before listing.
+      const commonStart = Math.max(...histories.map((history) => Math.min(...history.candles.map((c) => c.datetime))));
       const allTimestamps = Array.from(
         new Set(histories.flatMap((history) => history.candles.map((candle) => candle.datetime))),
-      ).sort((a, b) => a - b);
+      )
+        .filter((timestamp) => timestamp >= commonStart)
+        .sort((a, b) => a - b);
 
       const alignedValues = histories.map(({ quantity, candles }) => {
         const sortedCandles = [...candles].sort((a, b) => a.datetime - b.datetime);
-        const closeByTimestamp = new Map(sortedCandles.map((candle) => [candle.datetime, candle.close]));
-        let carriedClose = sortedCandles[0]?.close ?? 0;
+        let cursor = 0;
+        let carriedClose = sortedCandles[0].close;
 
         return allTimestamps.map((timestamp) => {
-          carriedClose = closeByTimestamp.get(timestamp) ?? carriedClose;
+          while (cursor < sortedCandles.length && sortedCandles[cursor].datetime <= timestamp) {
+            carriedClose = sortedCandles[cursor++].close;
+          }
           return carriedClose * quantity;
         });
       });
@@ -85,16 +94,16 @@ export function usePortfolioHistory(accounts: Account[], timeframeValue: string)
     },
     [entries, totalCash, timeframeValue],
     {
-      keepPreviousData: true,
+      keepPreviousData: false,
       execute: entries.length > 0,
     },
   );
 
   // Attach positions to the result (not cached since they come from accounts)
   const result = useMemo(() => {
-    if (!data) return undefined;
+    if (!data || !entries.length) return undefined;
     return { ...data, positions };
-  }, [data, positions]);
+  }, [data, positions, entries.length]);
 
-  return { data: result, isLoading };
+  return { data: error ? undefined : result, isLoading, error };
 }

@@ -51,9 +51,9 @@
     },
     {
       "name": "up-next",
-      "title": "Up Next",
+      "title": "Continue Watching",
       "subtitle": "Trakt Manager",
-      "description": "Get the list of shows that are up next",
+      "description": "Continue watching shows and movies you have started, like Trakt's Continue Watching",
       "mode": "view"
     },
     {

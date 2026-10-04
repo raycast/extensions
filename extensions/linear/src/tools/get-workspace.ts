@@ -1,6 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client } from "./linearUtils";
-export default withAccessToken(linear)(async () => client().organization);
+import { serializeOrganization } from "./serializers";
+import { withLinear } from "./withLinear";
+export default withLinear(async () => serializeOrganization(await client().organization));

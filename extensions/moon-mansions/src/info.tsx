@@ -10,16 +10,18 @@ export default function Command() {
     1
   )}% illuminated (${m.trend.toLowerCase()}) · ${Math.round(m.age)} days old\n\n${
     m.voc.isVoc ? `🚫 ${vocEndLabel(m.voc)}` : `✅ Applying ${m.voc.nextAspect}`
-  }\n\nTropical: in ${m.zodiac} · Sidereal: in ${m.siderealZodiac} (Lahiri ${m.ayanamsa.toFixed(2)}°)\n\n**Mansion ${
-    m.mansion.num
-  } — ${m.mansion.name}**\n\n${m.mansion.theme}\n\n**Nakshatra ${m.nakshatra.n} — ${
-    m.nakshatra.name
-  }**\n\n${nakshatraTheme(m.nakshatra)} (${m.nakshatra.planet} · ${m.nakshatra.deity})\n\n**Xiu ${m.xiu.n} — ${
-    m.xiu.name
-  } ${m.xiu.zh} (approx)**\n\n${
+  }\n\nTropical: ${m.zodiac} ${m.deg} ${m.signMotion} · Sidereal: ${m.siderealZodiac} ${
+    m.siderealDeg
+  } (Lahiri ${m.ayanamsa.toFixed(2)}°)\n\n**Mansion ${m.mansion.num} — ${m.mansion.name}**\n\n${
+    m.mansion.theme
+  }\n\n**Nakshatra ${m.nakshatra.n} — ${m.nakshatra.name}**\n\n${nakshatraTheme(m.nakshatra)} (${
+    m.nakshatra.planet
+  } · ${m.nakshatra.deity})\n\n**Xiu ${m.xiu.n} — ${m.xiu.name} ${m.xiu.zh} (approx)**\n\n${
     m.xiu.theme
   }\n\n| Planet | Tropical | Sidereal (Lahiri) | Motion |\n| --- | --- | --- | --- |\n${rows}`;
-  const copyAll = `${m.phaseName} ${m.illumPct.toFixed(1)}% · Tropical ${m.zodiac} · Sidereal ${m.siderealZodiac} · ${
+  const copyAll = `${m.phaseName} ${m.illumPct.toFixed(1)}% · Tropical ${m.zodiac} ${m.deg} ${
+    m.signMotion
+  } · Sidereal ${m.siderealZodiac} ${m.siderealDeg} · ${
     m.voc.isVoc ? vocEndLabel(m.voc) : m.voc.nextAspect
   } · Mansion ${m.mansion.num} ${m.mansion.name} · Nakshatra ${m.nakshatra.name} · Xiu ${m.xiu.name}`;
 
@@ -65,7 +67,10 @@ export default function Command() {
           <Detail.Metadata.Label title="Ruled by" text={`${m.nakshatra.planet} · ${m.nakshatra.deity}`} />
           <Detail.Metadata.Label title="Theme" text={`💭 ${m.nakshatra.theme}`} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Chinese lodge" text={`🐉 ${m.xiu.n} · ${m.xiu.name} ${m.xiu.zh} (approx)`} />
+          <Detail.Metadata.Label
+            title="Chinese lodge"
+            text={`${m.xiu.emoji} ${m.xiu.n} · ${m.xiu.name} ${m.xiu.zh} · ${m.xiu.animal} (approx)`}
+          />
           <Detail.Metadata.Label title="Palace" text={m.xiu.group} />
           <Detail.Metadata.Label title="Theme" text={`💭 ${m.xiu.theme}`} />
           <Detail.Metadata.Separator />

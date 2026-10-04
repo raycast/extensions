@@ -1,9 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
-import { issueInput, IssueUpdateInput, serializeIssue, setIssueRelations, setIssueReleases } from "./issueUtils";
+import { issueInput, IssueUpdateInput, setIssueRelations, setIssueReleases } from "./issueUtils";
 import { applyPatch, client, ContentPatch, resolveIssue } from "./linearUtils";
+import { serializeIssue } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = {
   id?: string;
@@ -56,7 +54,7 @@ type Input = {
   removeRelatedTo?: string[];
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.description !== undefined && input.patch) throw new Error("Pass description or patch, not both.");
   const existing = input.id ? await resolveIssue(input.id) : undefined;
   if (!existing && (!input.title || !input.team))

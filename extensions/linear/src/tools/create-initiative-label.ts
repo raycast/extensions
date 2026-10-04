@@ -1,11 +1,9 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, resolveInitiativeLabel } from "./linearUtils";
+import { serializeLabel } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = { name: string; description?: string; color?: string; parent?: string; isGroup?: boolean };
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const parentId = input.parent ? (await resolveInitiativeLabel(input.parent)).id : undefined;
   const result = await client().createInitiativeLabel({
     name: input.name,
@@ -15,5 +13,7 @@ export default withAccessToken(linear)(async (input: Input) => {
     isGroup: input.isGroup ?? false,
   });
   if (!result.success) throw new Error("Failed to create initiative label.");
-  return result.initiativeLabel;
+  const label = await result.initiativeLabel;
+  if (!label) throw new Error("Failed to create initiative label.");
+  return serializeLabel(label);
 });

@@ -3,7 +3,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import type { BucketListing, Destination, Status, TemporaryLink, Upload } from "./types";
+import type { BucketListing, Destination, Status, TemporaryLink, Upload, WatchedFolder, WatchedFolders } from "./types";
 
 export const DEFAULT_PORT = 47913;
 const CONNECTION_KEY = "connection";
@@ -190,6 +190,8 @@ export async function deleteUpload(id: string) {
  * the file keeps its name inside that folder (numbered if it's taken).
  * `expires` (days) asks Aktar to auto-delete the file; it can't be combined
  * with a `prefix`, and 0 or undefined keeps it forever.
+ * `filename` renames the upload (it's what replaces {filename} and {ext} in
+ * the path template, and what history shows); it defaults to the file's name.
  */
 export async function uploadFile(
   filePath: string,
@@ -197,12 +199,13 @@ export async function uploadFile(
     destinationId?: string;
     prefix?: string;
     expires?: number;
+    filename?: string;
     onProgress?: (fraction: number) => void;
   } = {},
 ) {
-  const response = await request<{ upload: Upload }>("POST", "uploads", {
+  const response = await request<UploadReply>("POST", "uploads", {
     query: {
-      filename: path.basename(filePath),
+      filename: options.filename || path.basename(filePath),
       destinationId: options.destinationId,
       prefix: options.prefix,
       // Left out when keeping forever, so Aktar versions without auto-delete keep working.
@@ -210,14 +213,21 @@ export async function uploadFile(
     },
     file: { path: filePath, onProgress: options.onProgress },
   });
-  return response.upload;
+  return unwrapUpload(response);
 }
 
 export async function uploadClipboard(options: { destinationId?: string; expires?: number } = {}) {
-  const response = await request<{ upload: Upload }>("POST", "uploads/clipboard", {
+  const response = await request<UploadReply>("POST", "uploads/clipboard", {
     query: { destinationId: options.destinationId, expires: options.expires || undefined },
   });
-  return response.upload;
+  return unwrapUpload(response);
+}
+
+/** Aktar for Mac puts `reused` in the upload, Aktar for Windows next to it. */
+type UploadReply = { upload: Upload; reused?: boolean };
+
+function unwrapUpload(reply: UploadReply): Upload {
+  return { ...reply.upload, reused: reply.upload.reused === true || reply.reused === true };
 }
 
 function bucketRoute(destinationId: string, rest: string) {
@@ -246,4 +256,28 @@ export function createTemporaryLink(destinationId: string, key: string, expiresI
   return request<TemporaryLink>("POST", bucketRoute(destinationId, "links"), {
     json: { key, expiresIn: expiresInSeconds },
   });
+}
+
+// MARK: - Watched folders
+
+/** True when this Aktar predates watched folders and doesn't know the route. */
+export function isWatchedFoldersUnsupported(error: unknown) {
+  return error instanceof AktarError && error.kind === "request-failed" && error.status === 404;
+}
+
+export function listWatchedFolders() {
+  return request<WatchedFolders>("GET", "watched-folders");
+}
+
+/** Pauses every watched folder for `minutes`, or until resumed when it's left out. */
+export function pauseWatching(minutes?: number) {
+  return request<WatchedFolders>("POST", "watched-folders/pause", { json: { minutes: minutes ?? null } });
+}
+
+export function resumeWatching() {
+  return request<WatchedFolders>("POST", "watched-folders/resume");
+}
+
+export function setWatchedFolderEnabled(id: string, enabled: boolean) {
+  return request<WatchedFolder>("POST", `watched-folders/${encodeURIComponent(id)}`, { json: { enabled } });
 }
