@@ -26,7 +26,8 @@ export default function MenuBar() {
 
   const signedOut = error instanceof NotSignedInError;
   const timeZone = data?.workspace?.timezone;
-  const groups = groupActions(data?.actions ?? [], timeZone);
+  // Once the connection is gone, the cached tasks belong to a session that no longer exists.
+  const groups = groupActions(signedOut ? [] : (data?.actions ?? []), timeZone);
   const dueNow = groups.overdue.length + groups.today.length;
   const openToday = () => launchCommand({ name: "today", type: LaunchType.UserInitiated });
 

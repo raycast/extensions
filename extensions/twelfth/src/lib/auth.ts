@@ -13,8 +13,8 @@ const CLIENT_ID_KEY = "oauth.clientId";
 const EMAIL_KEY = "oauth.email";
 
 export class NotSignedInError extends Error {
-  constructor() {
-    super("Not connected to Twelfth");
+  constructor(message = "Not connected to Twelfth") {
+    super(message);
   }
 }
 

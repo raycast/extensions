@@ -36,10 +36,9 @@ export async function callTool<T>(
 
   if (response.status === 401) {
     // The connection was ended in Settings → AI & agents, or the key revoked.
-    if (!apiKey()) await signOut();
-    throw new Error(
-      apiKey() ? "Twelfth rejected the workspace API key" : "Your Twelfth connection has ended. Sign in again.",
-    );
+    if (apiKey()) throw new Error("Twelfth rejected the workspace API key");
+    await signOut();
+    throw new NotSignedInError("Your Twelfth connection has ended. Sign in again.");
   }
   if (response.status === 429) {
     throw new Error(

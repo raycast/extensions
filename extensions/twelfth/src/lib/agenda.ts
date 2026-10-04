@@ -12,13 +12,20 @@ export const BUCKET_TITLES: Record<Bucket, string> = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The workspace's timezone if Intl accepts it, else the machine's own: an empty or unknown zone would throw. */
+function validZone(timeZone?: string | null): string | undefined {
+  if (!timeZone) return undefined;
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone });
+    return timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
 /** A YYYY-MM-DD calendar date in the workspace's timezone, so "today" is the buyer's today. */
 export function localDate(at: Date, timeZone?: string | null): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", { timeZone: timeZone ?? undefined, dateStyle: "short" }).format(at);
-  } catch {
-    return new Intl.DateTimeFormat("en-CA", { dateStyle: "short" }).format(at);
-  }
+  return new Intl.DateTimeFormat("en-CA", { timeZone: validZone(timeZone), dateStyle: "short" }).format(at);
 }
 
 /** Whole calendar days from today to the action's due date: negative is overdue. */
@@ -50,12 +57,11 @@ export function dueLabel(action: Action, timeZone?: string | null, now = new Dat
   if (days === -1) return "Due yesterday";
   if (days === 0) return "Due today";
   if (days === 1) return "Due tomorrow";
+  const zone = validZone(timeZone);
   if (days <= 7) {
-    return new Intl.DateTimeFormat("en-AU", { weekday: "long", timeZone: timeZone ?? undefined }).format(
-      new Date(action.dueAt),
-    );
+    return new Intl.DateTimeFormat("en-AU", { weekday: "long", timeZone: zone }).format(new Date(action.dueAt));
   }
-  return new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", timeZone: timeZone ?? undefined }).format(
+  return new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", timeZone: zone }).format(
     new Date(action.dueAt),
   );
 }
