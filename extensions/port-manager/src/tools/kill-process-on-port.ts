@@ -2,6 +2,7 @@ import { Action, Tool, getPreferenceValues } from "@raycast/api";
 import Process from "../models/Process";
 import { KillSignal, kill, resolveKillSignal, waitForExit } from "../utilities/killProcess";
 import { CommandExitError } from "../utilities/runCommand";
+import { isWindows } from "../utilities/platform";
 
 type Input = {
   /** The TCP port number, from 1 to 65535. */
@@ -41,6 +42,9 @@ export default async function tool({ port }: Input) {
   await kill(uniquePids, killSignal);
   const stillRunning = await waitForExit(uniquePids);
   if (stillRunning.length > 0) {
+    if (isWindows) {
+      return `A termination request was sent to port ${port} with taskkill, but process ${stillRunning.join(", ")} is still running.`;
+    }
     return `${killSignal === KillSignal.KILL ? "SIGKILL" : "SIGTERM"} was sent to port ${port}, but process ${stillRunning.join(", ")} is still running.`;
   }
 
