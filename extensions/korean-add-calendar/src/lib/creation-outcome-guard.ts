@@ -226,14 +226,19 @@ export function mergeUnknownUnconfirmedCreationRecords(
   matches: UnconfirmedCreationMatch[],
   unknownCandidates: UnknownCreationCandidate[],
 ): UnconfirmedCreationRecord[] {
-  const matchesByCandidateIndex = new Map(
-    matches.filter((match) => match.consumeOnSuccess).map((match) => [match.candidateIndex, match.record]),
-  );
+  const matchesByCandidateIndex = new Map(matches.map((match) => [match.candidateIndex, match]));
   const unknownRecords = unknownCandidates.map((candidate) => {
-    return (
-      matchesByCandidateIndex.get(candidate.submissionIndex) ??
-      createUnconfirmedCreationRecord(candidate.creationOutcomeKey, candidate.retryItemKey)
-    );
+    const match = matchesByCandidateIndex.get(candidate.submissionIndex);
+    if (!match?.consumeOnSuccess) {
+      return createUnconfirmedCreationRecord(candidate.creationOutcomeKey, candidate.retryItemKey);
+    }
+
+    return {
+      id: match.record.id,
+      creationOutcomeKey: candidate.creationOutcomeKey,
+      retryItemKey: candidate.retryItemKey,
+      matchAny: false as const,
+    };
   });
 
   return mergeUnconfirmedCreationRecords([...records, ...unknownRecords]);

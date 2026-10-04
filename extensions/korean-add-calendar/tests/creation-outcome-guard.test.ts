@@ -352,6 +352,42 @@ describe("unconfirmed creation records", () => {
     ]);
   });
 
+  it("retargets a tracked edited warning to the item that times out", () => {
+    const retryItemKey = "c".repeat(64);
+    const existingRecord = createUnconfirmedCreationRecord("a".repeat(64), retryItemKey);
+    const editedCreationOutcomeKey = "b".repeat(64);
+    const editedRetryPartition = partitionUnconfirmedCreationRecords(
+      [existingRecord],
+      [{ creationOutcomeKey: editedCreationOutcomeKey, retryItemKey, allowRelaxedConsumption: true }],
+    );
+
+    const recordsAfterEditedTimeout = mergeUnknownUnconfirmedCreationRecords(
+      [existingRecord],
+      editedRetryPartition.matches,
+      [{ submissionIndex: 0, creationOutcomeKey: editedCreationOutcomeKey, retryItemKey }],
+    );
+    const freshRetryPartition = partitionUnconfirmedCreationRecords(
+      recordsAfterEditedTimeout,
+      [{ creationOutcomeKey: editedCreationOutcomeKey, retryItemKey }],
+    );
+
+    expect(editedRetryPartition.matches[0]).toMatchObject({ kind: "relaxed", consumeOnSuccess: true });
+    expect(recordsAfterEditedTimeout).toEqual([
+      {
+        ...existingRecord,
+        creationOutcomeKey: editedCreationOutcomeKey,
+      },
+    ]);
+    expect(freshRetryPartition.matches[0]).toMatchObject({ kind: "exact", consumeOnSuccess: true });
+    expect(
+      removeSuccessfulUnconfirmedCreationMatches(
+        recordsAfterEditedTimeout,
+        freshRetryPartition.matches,
+        new Set([0]),
+      ),
+    ).toEqual([]);
+  });
+
   it("creates separate warnings for identical items on their first unknown attempt", () => {
     const creationOutcomeKey = "a".repeat(64);
     const retryItemKey = "b".repeat(64);
