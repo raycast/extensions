@@ -1,5 +1,6 @@
 import { getInputDevices, getOutputDevices, setDefaultInputDevice, type IOType } from "../audio-device";
 import { setOutputAndSystemDevice } from "../device-actions";
+import { setGraceUntil } from "../device-preferences";
 
 type Input = {
   /** Whether to switch the microphone (input) or speakers/headphones (output). */
@@ -19,6 +20,8 @@ export default async function tool({ type, deviceId }: Input) {
   } else {
     await setOutputAndSystemDevice(deviceId);
   }
+
+  await setGraceUntil(type, Date.now() + 60_000);
 
   return `Active ${type} device set to ${device.name}.`;
 }

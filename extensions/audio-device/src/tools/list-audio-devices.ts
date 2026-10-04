@@ -15,12 +15,17 @@ type Input = {
 export default async function tool({ type }: Input) {
   const [devices, current] = await Promise.all([
     type === "input" ? getInputDevices() : getOutputDevices(),
-    type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice(),
+    (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice()).catch((error: unknown) => {
+      if (error instanceof Error && error.message === `No default ${type} device found`) {
+        return undefined;
+      }
+      throw error;
+    }),
   ]);
 
   return devices.map((device) => ({
     id: String(device.id),
     name: device.name,
-    isDefault: String(device.id) === String(current.id),
+    isDefault: current !== undefined && String(device.id) === String(current.id),
   }));
 }
