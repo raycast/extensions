@@ -109,7 +109,7 @@ describe("unconfirmed creation records", () => {
     expect(laterCreationKey).not.toBe(originalCreationKey);
     expect(buildRetryItemKey("calendar", laterParsed)).toBe(buildRetryItemKey("calendar", originalParsed));
     expect(partition.matching.map((item) => item.id)).toEqual([record.id]);
-    expect(partition.remaining).toEqual([]);
+    expect(partition.remaining).toEqual([record]);
   });
 
   it("keeps non-recurring retries on different dates distinct", () => {
@@ -152,7 +152,7 @@ describe("unconfirmed creation records", () => {
     );
   });
 
-  it("keeps an option-edited retry bound after storage reload", () => {
+  it("warns on an option-edited retry without consuming the ambiguous record", () => {
     const editedParsed = {
       ...parsed,
       location: "Meeting Room B",
@@ -180,7 +180,38 @@ describe("unconfirmed creation records", () => {
     expect(editedKey).not.toBe(originalKey);
     expect(editedRetryItemKey).toBe(retryItemKey);
     expect(partition.matching.map((item) => item.id)).toEqual([record.id]);
-    expect(partition.remaining).toEqual([]);
+    expect(partition.remaining).toEqual([record]);
+  });
+
+  it("does not let a different item clear the original warning through a shared retry key", () => {
+    const originalKey = buildCreationOutcomeKey({
+      targetType: "calendar",
+      parsed,
+      recurrence: { frequency: "daily", end: { type: "count", count: 10 } },
+    });
+    const retryItemKey = buildRetryItemKey("calendar", parsed);
+    const record = createUnconfirmedCreationRecord(originalKey, retryItemKey);
+    const otherParsed = { ...parsed, location: "Meeting Room B" };
+    const otherCandidate = {
+      creationOutcomeKey: buildCreationOutcomeKey({
+        targetType: "calendar" as const,
+        parsed: otherParsed,
+        recurrence: { frequency: "daily", end: { type: "count", count: 5 } },
+      }),
+      retryItemKey: buildRetryItemKey("calendar", otherParsed),
+    };
+
+    const otherPartition = partitionUnconfirmedCreationRecords([record], [otherCandidate]);
+    const originalPartition = partitionUnconfirmedCreationRecords(otherPartition.remaining, [
+      { creationOutcomeKey: originalKey, retryItemKey },
+    ]);
+
+    expect(otherCandidate.creationOutcomeKey).not.toBe(originalKey);
+    expect(otherCandidate.retryItemKey).toBe(retryItemKey);
+    expect(otherPartition.matching).toEqual([record]);
+    expect(otherPartition.remaining).toEqual([record]);
+    expect(originalPartition.matching).toEqual([record]);
+    expect(originalPartition.remaining).toEqual([]);
   });
 
   it("does not bind another item or target type", () => {
@@ -244,6 +275,22 @@ describe("unconfirmed creation records", () => {
 
     expect(partition.matching.map((item) => item.id)).toEqual([second.id]);
     expect(partition.remaining.map((item) => item.id)).toEqual([first.id]);
+  });
+
+  it("prioritizes a later exact candidate over an earlier relaxed candidate", () => {
+    const retryItemKey = "c".repeat(64);
+    const record = createUnconfirmedCreationRecord("a".repeat(64), retryItemKey);
+
+    const partition = partitionUnconfirmedCreationRecords(
+      [record],
+      [
+        { creationOutcomeKey: "b".repeat(64), retryItemKey },
+        { creationOutcomeKey: record.creationOutcomeKey, retryItemKey },
+      ],
+    );
+
+    expect(partition.matching).toEqual([record]);
+    expect(partition.remaining).toEqual([]);
   });
 
   it("prefers an exact migrated key over another record's retry key", () => {

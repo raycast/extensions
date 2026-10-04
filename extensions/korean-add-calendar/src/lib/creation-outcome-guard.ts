@@ -122,36 +122,43 @@ export function partitionUnconfirmedCreationRecords(
   candidates: CreationOutcomeCandidate[],
 ): { matching: UnconfirmedCreationRecord[]; remaining: UnconfirmedCreationRecord[] } {
   const available = records.map(() => true);
-  const matching: UnconfirmedCreationRecord[] = [];
+  const consumed = records.map(() => false);
+  const matchingByCandidate: Array<UnconfirmedCreationRecord | undefined> = candidates.map(() => undefined);
 
-  for (const candidate of candidates) {
-    const matchedIndex = findAvailableRecord(records, available, (record) => {
-      return !record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
-    });
-    const fallbackExactIndex =
-      matchedIndex >= 0
-        ? matchedIndex
-        : findAvailableRecord(records, available, (record) => {
-            return record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
-          });
-    const retryMatchedIndex =
-      fallbackExactIndex >= 0
-        ? fallbackExactIndex
-        : findAvailableRecord(records, available, (record) => {
-            return !record.matchAny && record.retryItemKey === candidate.retryItemKey;
-          });
-    const fallbackIndex =
-      retryMatchedIndex >= 0 ? retryMatchedIndex : findAvailableRecord(records, available, (record) => record.matchAny);
-
-    if (fallbackIndex >= 0) {
-      available[fallbackIndex] = false;
-      matching.push(records[fallbackIndex]);
+  const matchPass = (
+    predicate: (record: UnconfirmedCreationRecord, candidate: CreationOutcomeCandidate) => boolean,
+    shouldConsume: boolean,
+  ) => {
+    for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex += 1) {
+      if (matchingByCandidate[candidateIndex]) {
+        continue;
+      }
+      const candidate = candidates[candidateIndex];
+      const matchedIndex = findAvailableRecord(records, available, (record) => predicate(record, candidate));
+      if (matchedIndex < 0) {
+        continue;
+      }
+      available[matchedIndex] = false;
+      consumed[matchedIndex] = shouldConsume;
+      matchingByCandidate[candidateIndex] = records[matchedIndex];
     }
-  }
+  };
+
+  matchPass((record, candidate) => {
+    return !record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
+  }, true);
+  matchPass((record, candidate) => {
+    return record.matchAny && record.creationOutcomeKey === candidate.creationOutcomeKey;
+  }, true);
+  // A relaxed match may be a different item with edited location or recurrence settings.
+  matchPass((record, candidate) => {
+    return !record.matchAny && record.retryItemKey === candidate.retryItemKey;
+  }, false);
+  matchPass((record) => record.matchAny, true);
 
   return {
-    matching,
-    remaining: records.filter((_, index) => available[index]),
+    matching: matchingByCandidate.filter((record): record is UnconfirmedCreationRecord => record !== undefined),
+    remaining: records.filter((_, index) => !consumed[index]),
   };
 }
 
