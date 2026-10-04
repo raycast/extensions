@@ -270,7 +270,7 @@ function ProjectDropdown({
                 key={project.id}
                 value={project.id}
                 title={project.name}
-                icon={getCategoryIcon(category.id)}
+                icon={getCategoryIcon(categories, category.id)}
               />
             ))}
           </Form.Dropdown.Section>

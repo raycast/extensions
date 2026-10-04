@@ -200,6 +200,7 @@ function isProjectCategory(value: unknown): value is ProjectCategory {
   return (
     isNonEmptyString(value.id) &&
     isNonEmptyString(value.name) &&
+    (value.icon === undefined || typeof value.icon === "string") &&
     isIsoDate(value.createdAt) &&
     isIsoDate(value.updatedAt)
   );

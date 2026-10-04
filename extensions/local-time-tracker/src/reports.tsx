@@ -75,7 +75,7 @@ export default function ReportsCommand() {
         {categories.map((category) => (
           <List.Item
             key={category.id}
-            icon={getCategoryIcon(category.id)}
+            icon={getCategoryIcon(categories, category.id)}
             title={category.name}
             accessories={[{ text: formatDuration(report.categorySeconds[category.id] ?? 0) }]}
           />
@@ -93,7 +93,7 @@ export default function ReportsCommand() {
         {report.projects.map((project) => (
           <List.Item
             key={project.projectId}
-            icon={project.type === "unknown" ? Icon.QuestionMark : getCategoryIcon(project.type)}
+            icon={project.type === "unknown" ? Icon.QuestionMark : getCategoryIcon(categories, project.type)}
             title={project.projectName}
             subtitle={project.type === "unknown" ? "UNKNOWN" : getCategoryName(categories, project.type).toUpperCase()}
             accessories={[{ text: formatDuration(project.seconds) }]}

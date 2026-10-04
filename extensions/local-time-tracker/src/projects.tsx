@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailure } from "./lib/errors";
-import { getCategoryIcon, getCategoryName } from "./lib/categories";
+import { CATEGORY_ICONS, getCategoryIcon, getCategoryIconName, getCategoryName } from "./lib/categories";
 import { sortProjectsByPreference } from "./lib/projects";
 import { getProjectCategories, getProjects, saveProjectCategories, saveProjects } from "./lib/storage";
 import type { Project, ProjectCategory } from "./lib/types";
@@ -121,7 +121,7 @@ function ProjectSection({
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={getCategoryIcon(project.type)}
+          icon={getCategoryIcon(categories, project.type)}
           title={project.name}
           subtitle={project.isActive ? undefined : "Disabled"}
           keywords={[getCategoryName(categories, project.type), project.isPreferred ? "preferred" : ""]}
@@ -300,7 +300,7 @@ function ProjectForm({
             key={category.id}
             value={category.id}
             title={category.name}
-            icon={getCategoryIcon(category.id)}
+            icon={getCategoryIcon(categories, category.id)}
           />
         ))}
       </Form.Dropdown>
@@ -346,7 +346,7 @@ function CategoryList({ projects, onChanged }: { projects: Project[]; onChanged:
         return (
           <List.Item
             key={category.id}
-            icon={getCategoryIcon(category.id)}
+            icon={getCategoryIcon(categories, category.id)}
             title={category.name}
             accessories={[{ text: `${projectCount} project${projectCount === 1 ? "" : "s"}` }]}
             actions={
@@ -387,7 +387,7 @@ function CategoryForm({
   onSaved: () => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  async function submit(values: { name: string }) {
+  async function submit(values: { name: string; icon: string }) {
     const name = values.name.trim();
     if (!name) return void showToast({ style: Toast.Style.Failure, title: "Category name is required" });
     if (
@@ -398,8 +398,10 @@ function CategoryForm({
       return void showToast({ style: Toast.Style.Failure, title: "Category name already exists" });
     const now = new Date().toISOString();
     const next = category
-      ? categories.map((item) => (item.id === category.id ? { ...item, name, updatedAt: now } : item))
-      : [...categories, { id: crypto.randomUUID(), name, createdAt: now, updatedAt: now }];
+      ? categories.map((item) =>
+          item.id === category.id ? { ...item, name, icon: values.icon, updatedAt: now } : item,
+        )
+      : [...categories, { id: crypto.randomUUID(), name, icon: values.icon, createdAt: now, updatedAt: now }];
     await saveProjectCategories(next);
     await onSaved();
     pop();
@@ -413,6 +415,11 @@ function CategoryForm({
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={category?.name} autoFocus />
+      <Form.Dropdown id="icon" title="Icon" defaultValue={getCategoryIconName(categories, category?.id ?? "")}>
+        {CATEGORY_ICONS.map(({ name, icon }) => (
+          <Form.Dropdown.Item key={name} value={name} title={name} icon={icon} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

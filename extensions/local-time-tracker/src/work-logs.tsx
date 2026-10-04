@@ -76,7 +76,7 @@ export default function WorkLogsCommand() {
             return (
               <List.Item
                 key={workLog.id}
-                icon={getCategoryIcon(findProject(projects, workLog.projectId)?.type ?? "")}
+                icon={getCategoryIcon(categories, findProject(projects, workLog.projectId)?.type ?? "")}
                 title={projectName}
                 subtitle={workLog.description || "No description"}
                 keywords={[projectName, workLog.description].filter(Boolean)}
@@ -328,7 +328,7 @@ function ProjectDropdown({
                 key={project.id}
                 value={project.id}
                 title={project.isActive ? project.name : `${project.name} (Disabled)`}
-                icon={getCategoryIcon(category.id)}
+                icon={getCategoryIcon(categories, category.id)}
               />
             ))}
           </Form.Dropdown.Section>
