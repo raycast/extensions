@@ -1,8 +1,8 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { AbortError } from "node-fetch";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAutoSearchResults, getSearchHistory, getStaticResult } from "./handleResults";
-import { SearchResult, HISTORY_KEY, Preferences } from "./types";
+import { HISTORY_KEY, Preferences, SearchResult } from "./types";
 
 export function useSearch() {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -23,18 +23,15 @@ export function useSearch() {
     };
   }, []);
 
-  // Static result and filter history
   useEffect(() => {
     setStaticResults(getStaticResult(searchText));
   }, [searchText]);
 
-  // Static result and filter history
   useEffect(() => {
     const lowerSearchText = searchText?.toLowerCase();
     setHistoryResults(history.filter((item) => item.query?.toLowerCase().includes(lowerSearchText)));
   }, [searchText, history]);
 
-  // Autosuggestions
   useEffect(() => {
     const fetchQuery = async () => {
       cancelRef.current?.abort();
@@ -64,7 +61,6 @@ export function useSearch() {
     fetchQuery();
   }, [searchText]);
 
-  // Combine all results
   useEffect(() => {
     const combinedResults = [...staticResults, ...historyResults, ...autoResults].filter(
       (value, index, self) => index === self.findIndex((t) => t.id === value.id),
