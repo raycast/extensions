@@ -241,49 +241,53 @@ export interface XiuInfo {
 
 // LODGE ICON AUDIT — read this before touching any xiu icon.
 //
-// The per-lodge zodiac ANIMAL is real tradition, stated explicitly in the
-// IbnArbi xiu data and in every xiu table: each palace's seven lodges carry
-// seven consecutive zodiac animals, in zodiac order, starting from that
-// palace's head animal:
+// The per-lodge animal is the PALACE animal, not a zodiac animal. Source of
+// truth is the IbnArbi `LUNAR_MANSIONS_XIU.animal` field, which carries:
+//   lodges  1–7  (Azure Dragon):    Dragon
+//   lodges  8–14 (Black Tortoise):  Tortoise
+//   lodges 15–21 (White Tiger):     Tiger
+//   lodges 22–28 (Vermilion Bird):  Bird
 //
-//   lodges  1–7  (Azure Dragon):   Dragon → Dog
-//   lodges  8–14 (Black Tortoise): Dog → Dragon
-//   lodges 15–21 (White Tiger):    Dragon → Tiger
-//   lodges 22–28 (Vermilion Bird): Horse → Rat
+// Each palace's seven lodges are that creature's body parts (Dragon's Horn,
+// Dragon's Neck, Tortoise's Head / the Dipper, Phoenix's Head / the Well), so
+// all seven legitimately share one animal. There is NO per-lodge zodiac cycle:
+// an earlier version of this table asserted one ("seven consecutive zodiac
+// animals per palace") and was wrong — it invented animals the source does not
+// carry, and mislabelled lodges the user can see. Do not reintroduce it.
 //
-// This table names the animal AND its emoji together, so both stay in sync
-// and a "dragon shown for Ox" mismatch cannot recur. Audit rule: adding or
-// renumbering a lodge requires the animal AND emoji here, the Swift mirror,
-// and the fixture's xiuAnimal field — drift in any of the three fails parity.
+// This table names the animal AND its emoji together so the two cannot drift.
+// Audit rule: changing the palace order or a lodge number requires the animal
+// and emoji here, the Swift mirror in MoonMansions/Data.swift, and the
+// fixture's xiuAnimal field — divergence in any of the three fails parity.
 export const XIU_ANIMALS: { animal: string; emoji: string }[] = [
+  { animal: "Dragon", emoji: "🐉" }, // 1–7 Azure Dragon
   { animal: "Dragon", emoji: "🐉" },
-  { animal: "Snake", emoji: "🐍" },
-  { animal: "Horse", emoji: "🐴" },
-  { animal: "Goat", emoji: "🐐" },
-  { animal: "Monkey", emoji: "🐒" },
-  { animal: "Rooster", emoji: "🐓" },
-  { animal: "Dog", emoji: "🐕" }, // 1–7 Azure Dragon
-  { animal: "Dog", emoji: "🐕" },
-  { animal: "Pig", emoji: "🐖" },
-  { animal: "Rat", emoji: "🐀" },
-  { animal: "Ox", emoji: "🐂" },
-  { animal: "Rabbit", emoji: "🐇" },
-  { animal: "Tiger", emoji: "🐅" },
-  { animal: "Dragon", emoji: "🐉" }, // 8–14 Black Tortoise
   { animal: "Dragon", emoji: "🐉" },
-  { animal: "Dog", emoji: "🐕" },
-  { animal: "Pig", emoji: "🐖" },
-  { animal: "Rat", emoji: "🐀" },
-  { animal: "Ox", emoji: "🐂" },
-  { animal: "Rabbit", emoji: "🐇" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Tortoise", emoji: "🐢" }, // 8–14 Black Tortoise
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
   { animal: "Tiger", emoji: "🐅" }, // 15–21 White Tiger
-  { animal: "Horse", emoji: "🐴" },
-  { animal: "Goat", emoji: "🐐" },
-  { animal: "Monkey", emoji: "🐒" },
-  { animal: "Rooster", emoji: "🐓" },
-  { animal: "Dog", emoji: "🐕" },
-  { animal: "Pig", emoji: "🐖" },
-  { animal: "Rat", emoji: "🐀" }, // 22–28 Vermilion Bird
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Bird", emoji: "🐦" }, // 22–28 Vermilion Bird
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
 ];
 export const XIU: XiuInfo[] = [
   {
