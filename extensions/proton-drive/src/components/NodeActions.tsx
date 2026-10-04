@@ -21,7 +21,7 @@ import { FolderView } from "./FolderView";
 export function NodeActions(props: { node: DriveNode; extraActions?: ReactNode }) {
   const { node, extraActions } = props;
   const isFolder = node.type === "folder";
-  const { primaryAction } = getPreferenceValues<{ primaryAction?: "open" | "download" }>();
+  const { primaryAction } = getPreferenceValues<Preferences>();
 
   const openAction = <Action title="Open" icon={Icon.ArrowNe} onAction={() => openFile(node)} />;
   const downloadAction = (

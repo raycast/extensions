@@ -8,6 +8,8 @@ import { displayPath, NodeActions } from "./NodeActions";
 export interface FolderContents {
   nodes?: DriveNode[];
   isLoading: boolean;
+  /** Loading the contents failed: show that instead of a loading state forever. */
+  failed?: boolean;
 }
 
 export function NodeItem(props: {
@@ -60,22 +62,25 @@ function FolderDetail({ node, contents, sort }: { node: DriveNode; contents?: Fo
     .sort()
     .at(-1);
 
-  const preview = !children
-    ? "_Loading contents…_"
-    : children.length === 0
-      ? "_Empty folder_"
-      : [...folders, ...files]
-          .slice(0, PREVIEW_LIMIT)
-          .map((c) => `${c.type === "folder" ? FOLDER_IMG : FILE_IMG} ${escapeMarkdown(c.name)}`)
-          .join("  \n") +
-        (children.length > PREVIEW_LIMIT ? `  \n_… and ${children.length - PREVIEW_LIMIT} more_` : "");
+  const failed = contents?.failed === true;
+  const preview = failed
+    ? "_Could not load the contents of this folder. Open it to try again._"
+    : !children
+      ? "_Loading contents…_"
+      : children.length === 0
+        ? "_Empty folder_"
+        : [...folders, ...files]
+            .slice(0, PREVIEW_LIMIT)
+            .map((c) => `${c.type === "folder" ? FOLDER_IMG : FILE_IMG} ${escapeMarkdown(c.name)}`)
+            .join("  \n") +
+          (children.length > PREVIEW_LIMIT ? `  \n_… and ${children.length - PREVIEW_LIMIT} more_` : "");
 
-  const value = (text: string | undefined) => (children ? (text ?? NONE) : LOADING);
+  const value = (text: string | undefined) => (children ? (text ?? NONE) : failed ? NONE : LOADING);
 
   return (
     <List.Item.Detail
       // Raycast keeps some metadata rows stale when their text changes in place: remount once loaded.
-      key={children ? "loaded" : "loading"}
+      key={children ? "loaded" : failed ? "failed" : "loading"}
       isLoading={contents?.isLoading}
       markdown={`### ${escapeMarkdown(node.name)}\n\n${preview}`}
       metadata={

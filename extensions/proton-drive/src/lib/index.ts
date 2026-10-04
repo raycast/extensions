@@ -95,7 +95,7 @@ export function entryToNode(index: DriveIndex, i: number): DriveNode {
 }
 
 export function backgroundRefreshEnabled(): boolean {
-  return getPreferenceValues<{ enableBackgroundRefresh?: boolean }>().enableBackgroundRefresh === true;
+  return getPreferenceValues<Preferences>().enableBackgroundRefresh === true;
 }
 
 export function isStale(index: DriveIndex | undefined, maxAgeMs = 24 * 3600_000): boolean {

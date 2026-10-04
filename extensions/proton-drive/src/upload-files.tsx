@@ -56,7 +56,10 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
     [data, query],
   );
   const elsewhere = useMemo(
-    () => (words.length ? indexedFolders.filter((p) => matches(p) && !p.startsWith(`${path}/`)).slice(0, 50) : []),
+    () =>
+      words.length
+        ? indexedFolders.filter((p) => matches(p) && p.slice(0, p.lastIndexOf("/")) !== path).slice(0, 50)
+        : [],
     [indexedFolders, query, path],
   );
 

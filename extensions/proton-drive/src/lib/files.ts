@@ -65,7 +65,7 @@ export async function localCopyForOpening(node: DriveNode): Promise<string> {
 
 /** Downloads a file or folder into the user's download directory, never overwriting anything. */
 export async function downloadToDownloads(node: DriveNode): Promise<string> {
-  const { downloadDirectory } = getPreferenceValues<{ downloadDirectory?: string }>();
+  const { downloadDirectory } = getPreferenceValues<Preferences>();
   const destDir = (downloadDirectory || "~/Downloads").replace(/^~(?=\/|$)/, homedir());
   const tmp = await downloadToTemp(node);
   const target = await reservePath(destDir, basename(tmp), (await stat(tmp)).isDirectory());

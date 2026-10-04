@@ -55,7 +55,7 @@ const CANDIDATES = [
 ];
 
 export function cliPath(): string {
-  const { cliPath } = getPreferenceValues<{ cliPath?: string }>();
+  const { cliPath } = getPreferenceValues<Preferences>();
   if (cliPath?.trim()) {
     const custom = cliPath.trim().replace(/^~(?=\/)/, homedir());
     if (!existsSync(custom)) {
