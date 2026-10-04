@@ -66,16 +66,19 @@ export default function ConnectCommand() {
   const aliasQuery = searchText.startsWith(ALIAS_PREFIX)
     ? searchText.slice(ALIAS_PREFIX.length).toLowerCase()
     : undefined;
-  const aliasMatch = sessions.find(
-    (session) => session.Alias && session.Alias.toLowerCase() === (aliasQuery ?? searchText.toLowerCase()),
+  const query = aliasQuery ?? searchText.toLowerCase();
+  const nameMatch = aliasQuery === undefined && sessions.some((session) => session.Name.toLowerCase() === query);
+  const aliasMatch = nameMatch
+    ? undefined
+    : sessions.find((session) => session.Alias && session.Alias.toLowerCase() === query);
+  const aliasPrefixMatches = sessions.filter(
+    (session) => session.Alias && session.Alias.toLowerCase().startsWith(query),
   );
-  const visibleSessions = aliasMatch
-    ? [aliasMatch]
-    : aliasQuery !== undefined
-      ? sessions.filter((session) => session.Alias && session.Alias.toLowerCase().startsWith(aliasQuery))
-      : sessions;
+  const visibleSessions = aliasQuery !== undefined ? aliasPrefixMatches : aliasMatch ? [aliasMatch] : sessions;
   const autoConnectTarget =
-    aliasMatch && (aliasQuery !== undefined || aliasMatch.AliasAutoConnect) ? aliasMatch.Name : undefined;
+    aliasMatch && aliasPrefixMatches.length === 1 && (aliasQuery !== undefined || aliasMatch.AliasAutoConnect)
+      ? aliasMatch.Name
+      : undefined;
 
   useEffect(() => {
     if (!autoConnectTarget) return;
