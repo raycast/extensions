@@ -21,7 +21,7 @@ brew install ghq
 Raycast does not load your shell `PATH`, so set the absolute path to `ghq` once.
 
 1. Run `which ghq` and copy the path (for example `/opt/homebrew/bin/ghq`).
-2. Open **Raycast Settings > Extensions > ghq** and paste it into **Ghq Path**.
+2. Open **Raycast Settings > Extensions > Ghq Plus** and paste it into **Ghq Path**.
 3. Choose an **Editor**, a **Terminal**, or both. **List Repositories** needs at least one.
 
    ```bash

@@ -35,7 +35,7 @@ export function GetRepositoryForm({ onGet }: { onGet?: () => void }) {
     };
   }, []);
 
-  const { handleSubmit, itemProps, setValue, focus } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue, focus, values } = useForm<FormValues>({
     initialValues: { repository: "", ssh: preferences.cloneWithSSH ?? false },
     validation: { repository: (value) => validateRepositoryInput(value ?? "") },
     async onSubmit(values) {
@@ -71,13 +71,16 @@ export function GetRepositoryForm({ onGet }: { onGet?: () => void }) {
     },
   });
 
+  // Clipboard.readText is async: keep the latest field so a late read does not overwrite what was typed.
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
+
   useEffect(() => {
     Clipboard.readText()
       .then((text) => {
         const detected = text === undefined ? undefined : detectGitHubRepository(text);
-        if (detected !== undefined) {
-          // The form is usable while the clipboard is being read: never overwrite what has been typed meanwhile.
-          setValue("repository", (current) => (current ? current : detected));
+        if (detected !== undefined && !valuesRef.current.repository) {
+          setValue("repository", detected);
         }
       })
       .catch(() => {
