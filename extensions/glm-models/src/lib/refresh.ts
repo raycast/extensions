@@ -7,19 +7,24 @@ import {
   type ModelsProbe,
 } from "./catalog";
 
-export type RefreshOutcome = {
-  models: AI.RegisteredModel[];
-  probe: ModelsProbe;
-};
+export type RefreshOutcome =
+  | {
+      status: "ok";
+      models: AI.RegisteredModel[];
+      probe: Extract<ModelsProbe, { ok: true }>;
+    }
+  | { status: "failed"; probe: Extract<ModelsProbe, { ok: false }> };
 
 /**
  * One explicit refresh, shared by the Check Setup and Show Models commands:
  * re-runs discovery with both the 60s /models probe cache and the 24h
  * models.dev metadata cache bypassed (concurrent bypasses dedupe onto one
  * fetch each), realigns Raycast's model list, and reports the probe outcome —
- * never a green toast for a key or endpoint that just failed. Returns the
- * fresh discovery for callers that render it, or undefined when the extension
- * is not configured / the refresh failed.
+ * never a green toast for a key or endpoint that just failed. Returns "ok"
+ * with the fresh discovery, or "failed" with the probe outcome so callers can
+ * keep their current list (which is what the picker serves) while surfacing
+ * the failure; undefined means the extension is not configured or the refresh
+ * threw.
  */
 export async function refreshModelsWithToast(): Promise<
   RefreshOutcome | undefined
@@ -56,10 +61,11 @@ export async function refreshModelsWithToast(): Promise<
     );
     // On a failed probe the fresh discovery is a fallback list, while
     // Raycast's picker keeps serving its cached discovery until the TTL
-    // expires — returning undefined tells callers to keep showing what they
-    // have, so the two never desync. The toast already reports the failure.
-    if (!probe.ok) return undefined;
-    return { models, probe };
+    // expires — handing it to callers would desync the view from the picker.
+    // Report the failure instead: callers keep their current list and surface
+    // it in the view. The toast above already reported it too.
+    if (!probe.ok) return { status: "failed", probe };
+    return { status: "ok", models, probe };
   } catch (error) {
     await showFailureToast(error, { title: "Refresh failed" });
     return undefined;

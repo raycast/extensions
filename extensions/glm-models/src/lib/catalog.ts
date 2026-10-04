@@ -683,8 +683,11 @@ export const getModels = async (options?: {
     // when the discovery actually changes, judged against a signature that
     // survives module re-instantiation so a reset instance doesn't re-log
     // the same line on every poll. The endpoint is part of the signature so
-    // a platform switch that serves the same ids is still logged.
-    const signature = [baseURL, ...[...probe.ids].sort()].join("\n");
+    // a platform switch that serves the same ids is still logged — in its
+    // redacted form, so a credential-bearing custom URL is never persisted.
+    const signature = [redactEndpoint(baseURL), ...[...probe.ids].sort()].join(
+      "\n",
+    );
     if (signature !== lastDiscoverySignature) {
       lastDiscoverySignature = signature;
       let persistedSignature: string | undefined;
@@ -696,7 +699,9 @@ export const getModels = async (options?: {
         // Dev-diagnostic nicety only — a failed read can log one extra line.
       }
       if (signature !== persistedSignature) {
-        log(`discovered ${probe.ids.length} model ids via ${baseURL}/models`);
+        log(
+          `discovered ${probe.ids.length} model ids via ${redactEndpoint(baseURL)}/models`,
+        );
         try {
           await LocalStorage.setItem(DISCOVERY_SIGNATURE_LS_KEY, signature);
         } catch {
@@ -706,7 +711,9 @@ export const getModels = async (options?: {
     }
     dynamicIds = probe.ids;
   } else {
-    log(`/models lookup failed on ${baseURL}: ${probe.message}`);
+    log(
+      `/models lookup failed on ${redactEndpoint(baseURL)}: ${probe.message}`,
+    );
     // models.dev mirrors the platform model lists and is already filtered to
     // chat models; the curated catalog is the last resort.
     const catalogIds = Object.keys(metadata);

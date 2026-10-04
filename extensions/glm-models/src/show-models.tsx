@@ -42,6 +42,9 @@ function describeSource(
 export default function ShowModels() {
   const [result, setResult] = useState<DiscoveryResult | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+  // Set when an explicit refresh's probe failed: the list deliberately keeps
+  // showing what the picker serves, and this surfaces the failure in the view.
+  const [refreshError, setRefreshError] = useState<string | undefined>();
   // Render-time snapshot for the unconfigured empty state; load() and the
   // refresh action re-read preferences so settings changes are picked up.
   const savedPrefs = getPreferences();
@@ -102,7 +105,14 @@ export default function ShowModels() {
     try {
       const outcome = await refreshModelsWithToast();
       if (!outcome) return;
-      apply(outcome.models, outcome.probe, getPreferences());
+      if (outcome.status === "ok") {
+        setRefreshError(undefined);
+        apply(outcome.models, outcome.probe, getPreferences());
+      } else {
+        // Keep the list the picker is still serving; surface the failure in
+        // the view so an explicit refresh never looks like a silent no-op.
+        setRefreshError(outcome.probe.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -118,6 +128,37 @@ export default function ShowModels() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={hasModels}>
+      {refreshError && hasModels && (
+        <List.Section title="Last refresh failed">
+          <List.Item
+            title="Showing the last good model list"
+            subtitle={refreshError}
+            // The list is in split view and this row is selected first — give
+            // the detail pane the full message, which the subtitle truncates.
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label
+                      title="Refresh Error"
+                      text={refreshError}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Refresh Models"
+                  icon={Icon.ArrowClockwise}
+                  onAction={refresh}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {result && hasModels ? (
         <List.Section
           title={`${result.models.length} models — ${platformTitle(result.platform)}`}
@@ -136,11 +177,13 @@ export default function ShowModels() {
           icon={Icon.Warning}
           title="No models to show"
           description={
-            result?.probe && !result.probe.ok
-              ? result.probe.message
-              : result
-                ? "Discovery returned no usable models. For a Custom endpoint, add model IDs via the Extra Models preference, then refresh."
-                : "Could not load the model list. Check your connection, then run Refresh Models."
+            refreshError
+              ? `Refresh failed — ${refreshError}`
+              : result?.probe && !result.probe.ok
+                ? result.probe.message
+                : result
+                  ? "Discovery returned no usable models. For a Custom endpoint, add model IDs via the Extra Models preference, then refresh."
+                  : "Could not load the model list. Check your connection, then run Refresh Models."
           }
           actions={
             <ActionPanel>
