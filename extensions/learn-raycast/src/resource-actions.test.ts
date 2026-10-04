@@ -192,22 +192,36 @@ describe("capture destination badge refresh", () => {
     expect(refreshDestination).toHaveBeenCalledOnce();
   });
 
-  it("propagates refresh through workspace creation inside the add form", async () => {
+  it("refreshes workspace names and the destination after creating a workspace inside an add form", async () => {
     mocks.usePromise.mockReturnValue({
       data: ["papers"],
       revalidate: mocks.revalidate,
     });
     const refreshDestination = vi.fn().mockResolvedValue(undefined);
+    const refreshWorkspaces = vi.fn().mockResolvedValue(undefined);
     const form = AddResourceForm({
       workspace: "papers",
       executable: "learn",
-      onWorkspaceCreated: refreshDestination,
+      onWorkspaceCreated: refreshWorkspaces,
     });
     await action(form, "Create Workspace").props.onAction!();
     const creation = mocks.push.mock.calls[0][0] as Element;
     await creation.props.onCreated!("notes");
-    expect(refreshDestination).toHaveBeenCalledOnce();
+    expect(refreshWorkspaces).toHaveBeenCalledOnce();
+    expect(refreshDestination).not.toHaveBeenCalled();
     expect(mocks.pop).toHaveBeenCalledOnce();
+  });
+
+  it("passes the parent workspace refresh through a resource list add form", async () => {
+    const refreshWorkspaces = vi.fn().mockResolvedValue(undefined);
+    const resources = WorkspaceResourceList({
+      workspace: "papers",
+      executable: "learn",
+      onWorkspacesChanged: refreshWorkspaces,
+    });
+    await action(resources, "Add Resource").props.onAction!();
+    const form = mocks.push.mock.calls[0][0] as Element;
+    expect(form.props.onWorkspaceCreated).toBe(refreshWorkspaces);
   });
 });
 

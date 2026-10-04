@@ -73,6 +73,7 @@ export default function BrowseResources() {
               workspace={workspace}
               executable={executable}
               onCaptureChanged={refreshCaptureDestination}
+              onWorkspacesChanged={refreshWorkspaces}
             />,
           );
         }}
@@ -128,6 +129,7 @@ export default function BrowseResources() {
                       workspace={workspace}
                       executable={executable}
                       onCaptureChanged={refreshCaptureDestination}
+                      onWorkspacesChanged={refreshWorkspaces}
                     />,
                   )
                 }
@@ -140,7 +142,7 @@ export default function BrowseResources() {
                     <AddResourceForm
                       executable={executable}
                       workspace={workspace}
-                      onWorkspaceCreated={refreshCaptureDestination}
+                      onWorkspaceCreated={refreshWorkspaces}
                       onAdded={async () => {
                         pop();
                         push(
@@ -148,6 +150,7 @@ export default function BrowseResources() {
                             workspace={workspace}
                             executable={executable}
                             onCaptureChanged={refreshCaptureDestination}
+                            onWorkspacesChanged={refreshWorkspaces}
                           />,
                         );
                       }}
@@ -186,10 +189,12 @@ export function WorkspaceResourceList({
   workspace,
   executable,
   onCaptureChanged,
+  onWorkspacesChanged,
 }: {
   workspace: string;
   executable: string;
   onCaptureChanged?: () => Promise<unknown>;
+  onWorkspacesChanged?: () => Promise<unknown>;
 }) {
   const { push, pop } = useNavigation();
   const [query, setQuery] = useState("");
@@ -220,7 +225,7 @@ export function WorkspaceResourceList({
       <AddResourceForm
         executable={executable}
         workspace={workspace}
-        onWorkspaceCreated={onCaptureChanged}
+        onWorkspaceCreated={onWorkspacesChanged || onCaptureChanged}
         onAdded={refreshAndPop}
       />,
     );
