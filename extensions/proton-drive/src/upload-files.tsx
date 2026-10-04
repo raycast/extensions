@@ -55,12 +55,12 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
     () => sortNodes(data ?? [], "name").filter((n) => n.type === "folder" && matches(n.name)),
     [data, query],
   );
+  // Direct subfolders are already listed above; compare real paths (names may contain an escaped "/").
+  const subfolderPaths = useMemo(() => new Set((data ?? []).map((n) => n.path)), [data]);
   const elsewhere = useMemo(
     () =>
-      words.length
-        ? indexedFolders.filter((p) => matches(p) && p.slice(0, p.lastIndexOf("/")) !== path).slice(0, 50)
-        : [],
-    [indexedFolders, query, path],
+      words.length ? indexedFolders.filter((p) => matches(p) && p !== path && !subfolderPaths.has(p)).slice(0, 50) : [],
+    [indexedFolders, query, path, subfolderPaths],
   );
 
   const uploadHere = (target: string) => (
