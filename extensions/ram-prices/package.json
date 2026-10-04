@@ -29,6 +29,13 @@
       "mode": "menu-bar"
     }
   ],
+  "tools": [
+    {
+      "name": "get-market-trends",
+      "title": "Get RAM Market Trends",
+      "description": "Get DDR4 and DDR5 average prices per GB in USD, changes since the previous observation, tracked product counts, and price history from RamRadar."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.10",
     "@raycast/utils": "^1.17.0"
