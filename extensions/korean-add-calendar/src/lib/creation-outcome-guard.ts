@@ -38,6 +38,10 @@ export interface UnconfirmedCreationMatch {
   consumeOnSuccess: boolean;
 }
 
+interface UnknownCreationCandidate extends CreationOutcomeCandidate {
+  submissionIndex: number;
+}
+
 export function buildCreationOutcomeKey({
   targetType,
   parsed,
@@ -215,6 +219,24 @@ export function mergeUnconfirmedCreationRecords(records: UnconfirmedCreationReco
     unique.set(record.id, record);
   }
   return [...unique.values()];
+}
+
+export function mergeUnknownUnconfirmedCreationRecords(
+  records: UnconfirmedCreationRecord[],
+  matches: UnconfirmedCreationMatch[],
+  unknownCandidates: UnknownCreationCandidate[],
+): UnconfirmedCreationRecord[] {
+  const matchesByCandidateIndex = new Map(
+    matches.filter((match) => match.consumeOnSuccess).map((match) => [match.candidateIndex, match.record]),
+  );
+  const unknownRecords = unknownCandidates.map((candidate) => {
+    return (
+      matchesByCandidateIndex.get(candidate.submissionIndex) ??
+      createUnconfirmedCreationRecord(candidate.creationOutcomeKey, candidate.retryItemKey)
+    );
+  });
+
+  return mergeUnconfirmedCreationRecords([...records, ...unknownRecords]);
 }
 
 export function mergeLoadedUnconfirmedCreationRecords(

@@ -5,6 +5,7 @@ import {
   buildRetryItemKey,
   createUnconfirmedCreationRecord,
   mergeLoadedUnconfirmedCreationRecords,
+  mergeUnknownUnconfirmedCreationRecords,
   mergeUnconfirmedCreationRecords,
   migrateStoredUnconfirmedCreationKeys,
   parseStoredUnconfirmedCreationRecords,
@@ -301,6 +302,67 @@ describe("unconfirmed creation records", () => {
     expect(records).toHaveLength(2);
     expect(partition.matching.map((item) => item.id)).toEqual([first.id, second.id]);
     expect(partition.remaining).toEqual([]);
+  });
+
+  it("reuses a warning when the same retry outcome is unknown again", () => {
+    const creationOutcomeKey = "a".repeat(64);
+    const retryItemKey = "b".repeat(64);
+    const record = createUnconfirmedCreationRecord(creationOutcomeKey, retryItemKey);
+    const retryPartition = partitionUnconfirmedCreationRecords(
+      [record],
+      [{ creationOutcomeKey, retryItemKey }],
+    );
+
+    const recordsAfterSecondTimeout = mergeUnknownUnconfirmedCreationRecords(
+      [record],
+      retryPartition.matches,
+      [{ submissionIndex: 0, creationOutcomeKey, retryItemKey }],
+    );
+    const finalRetryPartition = partitionUnconfirmedCreationRecords(
+      recordsAfterSecondTimeout,
+      [{ creationOutcomeKey, retryItemKey }],
+    );
+
+    expect(recordsAfterSecondTimeout).toEqual([record]);
+    expect(
+      removeSuccessfulUnconfirmedCreationMatches(recordsAfterSecondTimeout, finalRetryPartition.matches, new Set([0])),
+    ).toEqual([]);
+  });
+
+  it("keeps a separate warning when a distinct relaxed match has an unknown outcome", () => {
+    const retryItemKey = "c".repeat(64);
+    const existingRecord = createUnconfirmedCreationRecord("a".repeat(64), retryItemKey);
+    const newCreationOutcomeKey = "b".repeat(64);
+    const partition = partitionUnconfirmedCreationRecords(
+      [existingRecord],
+      [{ creationOutcomeKey: newCreationOutcomeKey, retryItemKey }],
+    );
+
+    const records = mergeUnknownUnconfirmedCreationRecords(
+      [existingRecord],
+      partition.matches,
+      [{ submissionIndex: 0, creationOutcomeKey: newCreationOutcomeKey, retryItemKey }],
+    );
+
+    expect(partition.matches[0]).toMatchObject({ kind: "relaxed", consumeOnSuccess: false });
+    expect(records).toHaveLength(2);
+    expect(records.map((record) => record.creationOutcomeKey)).toEqual([
+      existingRecord.creationOutcomeKey,
+      newCreationOutcomeKey,
+    ]);
+  });
+
+  it("creates separate warnings for identical items on their first unknown attempt", () => {
+    const creationOutcomeKey = "a".repeat(64);
+    const retryItemKey = "b".repeat(64);
+
+    const records = mergeUnknownUnconfirmedCreationRecords([], [], [
+      { submissionIndex: 0, creationOutcomeKey, retryItemKey },
+      { submissionIndex: 1, creationOutcomeKey, retryItemKey },
+    ]);
+
+    expect(records).toHaveLength(2);
+    expect(records[0].id).not.toBe(records[1].id);
   });
 
   it("prefers an exact strict key over another record's retry key", () => {

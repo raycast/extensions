@@ -44,10 +44,9 @@ import { ParsedRecurrence, ParsedSchedule } from "./lib/parse-korean-schedule";
 import {
   buildCreationOutcomeKey,
   buildRetryItemKey,
-  createUnconfirmedCreationRecord,
   createUnknownUnconfirmedCreationRecord,
   mergeLoadedUnconfirmedCreationRecords,
-  mergeUnconfirmedCreationRecords,
+  mergeUnknownUnconfirmedCreationRecords,
   migrateStoredUnconfirmedCreationKeys,
   parseStoredUnconfirmedCreationRecords,
   partitionUnconfirmedCreationRecords,
@@ -70,6 +69,7 @@ interface FormValues {
 }
 
 interface CreationAttemptOutcome {
+  submissionIndex: number;
   item: ParsedBatchItem;
   message: string;
   creationOutcomeKey: string;
@@ -603,6 +603,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         } catch (error) {
           const prefix = submitBatch.isBatch ? `[${item.input}] ` : "";
           const outcome = {
+            submissionIndex,
             item,
             creationOutcomeKey,
             retryItemKey,
@@ -642,13 +643,11 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
         const nextRetrySnapshot = buildBatchRetrySnapshot(retryableOutcomes.map((outcome) => outcome.item));
         setRetrySnapshot(nextRetrySnapshot);
         setSentence(nextRetrySnapshot.sentence);
-        const newUnconfirmedRecords = unknownOutcomes.map((outcome) =>
-          createUnconfirmedCreationRecord(outcome.creationOutcomeKey, outcome.retryItemKey),
+        const nextUnconfirmedRecords = mergeUnknownUnconfirmedCreationRecords(
+          remainingUnconfirmedRecords,
+          unconfirmedRecordPartition.matches,
+          unknownOutcomes,
         );
-        const nextUnconfirmedRecords = mergeUnconfirmedCreationRecords([
-          ...remainingUnconfirmedRecords,
-          ...newUnconfirmedRecords,
-        ]);
         setUnconfirmedCreationRecords(nextUnconfirmedRecords);
         await persistUnconfirmedCreationRecords(nextUnconfirmedRecords);
         await showToast({
