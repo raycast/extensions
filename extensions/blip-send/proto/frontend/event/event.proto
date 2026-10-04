@@ -1,0 +1,202 @@
+syntax = "proto3";
+package event;
+
+import "peerid.proto";
+import "frontend/state_inner.proto";
+import "frontend/transfer.proto";
+import "device.proto";
+import "user_agent.proto";
+
+message SetUserAgent {
+  blip.UserAgent user_agent = 1;
+}
+
+message UpdateUser {
+  optional string name = 1;
+  optional bool is_searchable = 2;
+}
+
+message UpdateDevice {
+  message Settings {
+    optional bool allow_diagnostics = 1;
+  }
+  string device_id = 1;
+  optional string name = 2;
+  event.UpdateDevice.Settings settings = 3;
+}
+
+message RemoveDevice {
+  string device_id = 1;
+}
+
+message RemoveContact {
+  string user_id = 1;
+}
+
+message AddBlockedUser {
+  string block_user_id = 1;
+}
+
+message RemoveBlockedUser {
+  string unblock_user_id = 1;
+}
+
+message SendRegistrationCodeRequested {
+  string email = 1;
+  string device_name = 2;
+}
+
+message RegistrationRequested {
+  string code = 1;
+  string device_dedupe_id = 2;
+  string device_name = 3;
+  blip.DeviceKind device_kind = 4;
+}
+
+message RemoveDeviceThenLogout {
+}
+
+message Logout {
+}
+
+message NotificationTokenGenerated {
+  int32 service_kind = 1;
+  bytes token = 2;
+}
+
+message NotificationPermissionsChanged {
+  frontend.NotificationPermissionStatus value = 1;
+}
+
+message TransferCreateRequested {
+  string transfer_id = 1;
+  optional blip.PeerId peer_id = 2;
+}
+
+message TransferRemoveRequested {
+  string transfer_id = 1;
+  bool delete_files = 2;
+}
+
+message TransferAddContentRequested {
+  string transfer_id = 1;
+  repeated string locations = 2;
+}
+
+message TransferRemoveContentRequested {
+  string transfer_id = 1;
+  repeated string paths = 2;
+}
+
+message TransferInviteRequested {
+  string transfer_id = 1;
+  optional blip.PeerId peer_id = 2;
+}
+
+message TransferAcceptanceRequested {
+  string transfer_id = 1;
+  string save_path = 2;
+}
+
+message TransferDeclineRequested {
+  string transfer_id = 1;
+}
+
+message TransferRespondFromNotification {
+  string transfer_id = 1;
+  frontend.TransferNotificationResponse response = 2;
+}
+
+message TransferHandleNotificationResponseIfExists {
+  string transfer_id = 1;
+}
+
+message TransferPauseRequested {
+  string transfer_id = 1;
+}
+
+message TransferCancellationRequested {
+  string transfer_id = 1;
+}
+
+message TransferResume {
+  string transfer_id = 1;
+}
+
+message TransferSetAutoAccept {
+  bool auto_accept = 1;
+}
+
+message TransferSetAutoSaveToMediaLibrary {
+  bool auto_save = 1;
+}
+
+message TransferSetCustomDefaultSavePath {
+  string path = 1;
+}
+
+message TransferSetSpeedLimits {
+  optional uint32 upload_mbps = 1;
+  optional uint32 download_mbps = 2;
+}
+
+message TransferDismiss {
+  string transfer_id = 1;
+}
+
+message OnboardingSkipSplash {
+}
+
+message OnboardingSkipCompanionDeviceSetup {
+}
+
+message OnboardingSkipEnableNotifications {
+}
+
+message OnboardingSkipEnableMediaLibrary {
+}
+
+message OnboardingSkipShareInstructions {
+}
+
+message OnboardingCloseOccurred {
+}
+
+message SetUserAvatar {
+  string file_path = 1;
+}
+
+message Search {
+  string id = 1;
+  string query = 2;
+}
+
+message AbandonSearch {
+  string id = 1;
+}
+
+message SaveToMediaLibrary {
+  repeated string locations = 1;
+}
+
+message SetAllowConnectionDiagnostics {
+  bool allowed = 1;
+}
+
+message InsertAnalyticsEvent {
+  string name = 1;
+  map<string, string> props = 2;
+}
+
+message NetworkAvailable {
+  string kind = 1;
+}
+
+message NetworkUnavailable {
+}
+
+message SystemIsAwake {
+}
+
+message SystemIsAsleep {
+}

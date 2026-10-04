@@ -1,0 +1,79 @@
+syntax = "proto3";
+package frontend;
+
+import "peerid.proto";
+import "google/protobuf/timestamp.proto";
+import "frontend/bsarchive/entities.proto";
+
+message Transfer {
+  enum Status {
+    UnknownStatus = 0;
+    Created = 1;
+    InviteRequested = 2;
+    Invited = 3;
+    Pending = 4;
+    Active = 5;
+    Paused = 6;
+    ResumeRequested = 7;
+    Completed = 8;
+    Cancelled = 9;
+  }
+  enum Direction {
+    UnknownDirection = 0;
+    Incoming = 1;
+    Outgoing = 2;
+  }
+  string transfer_id = 100;
+  blip.PeerId peer_id = 200;
+  uint32 content_job_count = 300;
+  bsarchive.Metadata archive_stub = 400;
+  string unpack_state = 500;
+  frontend.TransferErr local_err = 600;
+  frontend.TransferErr remote_err = 601;
+  frontend.Transfer.Direction direction = 700;
+  frontend.Transfer.Status status = 800;
+  bool is_resumable = 900;
+  bool is_dismissed = 1000;
+  int64 progress = 1100;
+  frontend.ConnStats stats = 1200;
+  google.protobuf.Timestamp updated_at = 1300;
+}
+
+message TransferErr {
+  enum Code {
+    Unknown = 0;
+    UnpackNoSpace = 100;
+    UnpackNoPermission = 101;
+    UnpackNotExist = 102;
+    UnpackNoVolume = 103;
+    UnpackIntegrity = 104;
+    PackNoPermission = 201;
+    PackNotExist = 202;
+    PackNoVolume = 203;
+    PackIntegrity = 204;
+    Connection = 300;
+    UserCancel = 400;
+    UserDecline = 401;
+    UserRevokeInvite = 402;
+    UserPause = 403;
+  }
+  frontend.TransferErr.Code code = 1;
+  string msg = 2;
+  bool action_required = 3;
+  bool fatal = 4;
+}
+
+message ConnStats {
+  double kbps = 1;
+  bool is_relayed = 2;
+  bool is_wan = 5;
+  bool is_end_to_end_encrypted = 6;
+  bool is_starved = 3;
+  int32 stripes = 4;
+}
+
+message TransferNotificationResponse {
+  bool accept = 1;
+  blip.PeerId expected_peer_id = 2;
+  bsarchive.Metadata expected_stub = 3;
+}
