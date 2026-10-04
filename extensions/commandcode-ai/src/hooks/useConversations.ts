@@ -12,10 +12,12 @@ export function useConversations() {
   const current = useRef<Conversation[]>([]);
 
   const writes = useRef<Promise<void>>(Promise.resolve());
+  // Every write waits on this; if the read failed it rejects, so we never overwrite chats we couldn't load.
+  const loaded = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
-    // Writes chain on this, so nothing is saved until the stored list has been read.
-    writes.current = loadConversations();
+    loaded.current = loadConversations();
+    loaded.current.catch(() => undefined);
   }, []);
 
   async function loadConversations() {
@@ -26,7 +28,8 @@ export function useConversations() {
         setConversations(current.current);
       }
     } catch (error) {
-      console.error("Failed to load conversations:", error);
+      await showFailureToast(error, { title: "Failed to load conversations" });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -37,6 +40,7 @@ export function useConversations() {
   const persist = useCallback((update: (saved: Conversation[]) => Conversation[]) => {
     const write = writes.current
       .catch(() => undefined)
+      .then(() => loaded.current)
       .then(async () => {
         const next = update(current.current);
         await (next.length

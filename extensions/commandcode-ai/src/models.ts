@@ -23,6 +23,8 @@ interface CatalogModel {
 interface Catalog {
   version: string;
   models: CatalogModel[];
+  /** Set when the latest catalog couldn't be fetched and this is the cached one. */
+  staleReason?: string;
 }
 
 const cache = new Cache();
@@ -56,10 +58,9 @@ export async function fetchCatalog(): Promise<Catalog> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     version = ((await res.json()) as { version: string }).version;
   } catch (error) {
-    if (cached) return cached;
-    throw new Error(
-      `Could not check the latest CommandCode version: ${error instanceof Error ? error.message : error}`,
-    );
+    const message = `Could not check the latest CommandCode version: ${error instanceof Error ? error.message : error}`;
+    if (cached) return { ...cached, staleReason: message };
+    throw new Error(message);
   }
   if (cached?.version === version) return cached;
 
@@ -76,7 +77,7 @@ export async function fetchCatalog(): Promise<Catalog> {
     return catalog;
   } catch (error) {
     // A stale list beats an empty picker; the next refresh retries the new version.
-    if (cached) return cached;
+    if (cached) return { ...cached, staleReason: error instanceof Error ? error.message : String(error) };
     throw error;
   }
 }
