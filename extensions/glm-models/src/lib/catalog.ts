@@ -1,5 +1,6 @@
 import { AI, LocalStorage, getPreferenceValues } from "@raycast/api";
 
+import { redactEndpoint } from "./format";
 import { log } from "./log";
 
 export const ZAI_BASE_URL = "https://api.z.ai/api/paas/v4";
@@ -208,25 +209,31 @@ export async function loadModelMetadata(
   if (!slug) return {};
   // An explicit refresh skips every cache gate — memory, LocalStorage TTL and
   // the failure backoff — so a just-released model gets real metadata right
-  // away; fetchMetadataForSlug still falls back to the stale cache when
-  // models.dev is unreachable.
-  if (options?.bypassCache) return fetchMetadataForSlug(slug);
-  const memory = metadataMemoryCache[slug];
-  if (memory && Date.now() - memory.fetchedAt < METADATA_TTL_MS) {
-    return memory.metadata;
-  }
-  if (Date.now() - (metadataFailedAt[slug] ?? 0) < METADATA_RETRY_BACKOFF_MS) {
-    // models.dev was recently unreachable — back off rather than eat the
-    // fetch timeout on every discovery pass, serving what we last saw.
-    return memory?.metadata ?? {};
-  }
+  // away. It still joins an in-flight fetch instead of starting a duplicate.
+  if (!options?.bypassCache) {
+    const memory = metadataMemoryCache[slug];
+    if (memory && Date.now() - memory.fetchedAt < METADATA_TTL_MS) {
+      return memory.metadata;
+    }
+    if (
+      Date.now() - (metadataFailedAt[slug] ?? 0) <
+      METADATA_RETRY_BACKOFF_MS
+    ) {
+      // models.dev was recently unreachable — back off rather than eat the
+      // fetch timeout on every discovery pass, serving what we last saw.
+      return memory?.metadata ?? {};
+    }
 
-  const cached = await readCachedMetadata(slug);
-  if (cached && Date.now() - cached.fetchedAt < METADATA_TTL_MS) {
-    metadataMemoryCache[slug] = cached;
-    return cached.metadata;
+    const cached = await readCachedMetadata(slug);
+    if (cached && Date.now() - cached.fetchedAt < METADATA_TTL_MS) {
+      metadataMemoryCache[slug] = cached;
+      return cached.metadata;
+    }
   }
-
+  // Both paths converge here: a bypassed refresh always fetches (or joins
+  // whatever fetch is already running), an ordinary lookup only after every
+  // cache gate missed. fetchMetadataForSlug itself falls back to the stale
+  // cache when models.dev is unreachable.
   return await (metadataInFlight[slug] ??= fetchMetadataForSlug(slug));
 }
 
@@ -538,14 +545,23 @@ export async function probeModelsEndpoint(
   if (!options?.bypassCache) {
     const persisted = await readPersistedProbe(fingerprint);
     if (persisted) {
-      // Rehydrate the in-memory cache so later polls skip the LocalStorage
-      // round-trip until the entry expires.
-      modelsProbeCache = {
-        key: cacheKey,
-        fetchedAt: persisted.fetchedAt,
-        probe: persisted.probe,
-      };
-      return persisted.probe;
+      // A concurrent bypass refresh may have landed a fresher result while
+      // this LocalStorage read was in flight — rehydrate only when the
+      // persisted entry is the newer one, so a refresh's result is never
+      // clobbered by an older snapshot.
+      if (
+        !modelsProbeCache ||
+        modelsProbeCache.key !== cacheKey ||
+        persisted.fetchedAt > modelsProbeCache.fetchedAt
+      ) {
+        modelsProbeCache = {
+          key: cacheKey,
+          fetchedAt: persisted.fetchedAt,
+          probe: persisted.probe,
+        };
+      }
+      const cached = modelsProbeCache;
+      if (cached && cached.key === cacheKey) return cached.probe;
     }
   }
   const inFlight = modelsProbeInFlight[cacheKey];
@@ -586,7 +602,9 @@ async function probeModelsLive(
         ok: false,
         reason: res.status === 404 ? "not-found" : "network",
         status: res.status,
-        message: `HTTP ${res.status} from ${baseURL}/models.`,
+        // Custom base URLs can be credential-bearing — display-bound messages
+        // only ever carry the redacted form.
+        message: `HTTP ${res.status} from ${redactEndpoint(baseURL)}/models.`,
       };
     }
     const json: unknown = await res.json();
@@ -606,7 +624,7 @@ async function probeModelsLive(
       return {
         ok: false,
         reason: "empty",
-        message: `${baseURL}/models responded but contained no model IDs.`,
+        message: `${redactEndpoint(baseURL)}/models responded but contained no model IDs.`,
       };
     }
     const probe: ModelsProbe = { ok: true, ids };
@@ -618,8 +636,8 @@ async function probeModelsLive(
       ok: false,
       reason: "network",
       message: aborted
-        ? `Timed out connecting to ${baseURL}.`
-        : `Could not reach ${baseURL} (${error instanceof Error ? error.message : String(error)}).`,
+        ? `Timed out connecting to ${redactEndpoint(baseURL)}.`
+        : `Could not reach ${redactEndpoint(baseURL)} (${error instanceof Error ? error.message : String(error)}).`,
     };
   } finally {
     clearTimeout(timer);
@@ -662,10 +680,11 @@ export const getModels = async (options?: {
   let dynamicIds: string[];
   if (probe.ok) {
     // Raycast polls discovery every few seconds — emit the breadcrumb only
-    // when the id set actually changes, judged against a signature that
+    // when the discovery actually changes, judged against a signature that
     // survives module re-instantiation so a reset instance doesn't re-log
-    // the same line on every poll.
-    const signature = [...probe.ids].sort().join("\n");
+    // the same line on every poll. The endpoint is part of the signature so
+    // a platform switch that serves the same ids is still logged.
+    const signature = [baseURL, ...[...probe.ids].sort()].join("\n");
     if (signature !== lastDiscoverySignature) {
       lastDiscoverySignature = signature;
       let persistedSignature: string | undefined;

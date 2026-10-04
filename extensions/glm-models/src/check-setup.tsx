@@ -54,6 +54,10 @@ export default function CheckSetup() {
     setIsValidating(true);
     setResult(null);
     setModelLines(null);
+    // Any new validation supersedes a still-in-flight bonus-list fetch from a
+    // previous one — including validations that end up failing, whose result
+    // must not end up wearing an older fetch's model list.
+    const request = ++listRequestRef.current;
     try {
       const saved = getPreferences();
       const enteredKey = values.apiKey.trim();
@@ -108,7 +112,7 @@ export default function CheckSetup() {
         let unsaved = "";
         if (keyChanged || platformChanged || urlChanged) {
           unsaved = missingSavedUrl
-            ? `\n\nThis command only validates — nothing typed here is saved, and no Custom Base URL is stored yet (the first-run setup form doesn't ask for one). Open Extension Preferences → Custom Base URL, paste ${baseURL}, then run Refresh Models.`
+            ? `\n\nThis command only validates — nothing typed here is saved, and no Custom Base URL is stored yet (the first-run setup form doesn't ask for one). Open Extension Preferences → Custom Base URL, paste the URL you entered above, then run Refresh Models.`
             : `\n\nValidated, but not applied — the saved setup is still ${savedSetup}. Update the extension preferences, then run Refresh Models.`;
         }
         setResult({
@@ -131,9 +135,9 @@ export default function CheckSetup() {
           // again, so the bonus list below is served from cache.
           await refreshModelsWithToast();
           // The list is a bonus — fetch it out of band so it never holds the
-          // validation spinner. A stale fetch from an earlier validation is
-          // dropped instead of overwriting the latest state.
-          const request = ++listRequestRef.current;
+          // validation spinner; the request token was bumped at the top of
+          // validate() so a stale fetch is dropped instead of overwriting
+          // the latest state.
           const extraIds = new Set(parseExtraModels(saved.extraModels));
           void getModels()
             .then((registered) => {

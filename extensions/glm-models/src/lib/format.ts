@@ -52,7 +52,9 @@ export function formatModelLine(
  * Base URLs are credential-bearing values (the API key travels as a bearer
  * header, and custom endpoints may embed credentials in userinfo or query).
  * Display copies drop everything but the origin and path so a detail pane
- * can be screenshotted safely. Unparseable input is returned unchanged.
+ * can be screenshotted safely. Unparseable input still gets a regex pass —
+ * a URL can be malformed (stray space, bad port) and still carry userinfo
+ * or a query string worth hiding.
  */
 export function redactEndpoint(raw: string): string {
   try {
@@ -63,6 +65,6 @@ export function redactEndpoint(raw: string): string {
     url.hash = "";
     return url.toString().replace(/\/+$/, "");
   } catch {
-    return raw;
+    return raw.replace(/\/\/[^/@\s]*@/, "//redacted@").replace(/[?#].*$/, "");
   }
 }

@@ -13,6 +13,7 @@ import {
   consoleURL,
   getModels,
   getPreferences,
+  isGlm5,
   parseExtraModels,
   platformTitle,
   probeModelsEndpoint,
@@ -191,10 +192,13 @@ function ModelListItem({
   onRefresh: () => Promise<void>;
 }) {
   // getModels() only appends Extra Models ids that live discovery didn't
-  // already return, so an id the endpoint itself serves must not be tagged.
+  // already return — and only a live probe makes provenance provable. When
+  // the list came from the models.dev / curated fallback, an id that happens
+  // to match an Extra Models entry must not be tagged as user-added.
   const isExtra =
+    result.probe?.ok === true &&
     result.extraIds.has(model.id) &&
-    !(result.probe?.ok && result.probe.ids.includes(model.id));
+    !result.probe.ids.includes(model.id);
   const source = describeSource(result.probe, result.baseURL);
   const capabilities = model.capabilities;
   const vision = capabilities?.vision;
@@ -244,7 +248,9 @@ function ModelListItem({
                 title="Reasoning"
                 text={
                   effort
-                    ? `yes — effort adjustable (default ${effort.default})`
+                    ? isGlm5(model.id)
+                      ? `yes — effort adjustable (default ${effort.default})`
+                      : "yes — thinking on/off only"
                     : "no"
                 }
               />

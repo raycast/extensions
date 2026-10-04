@@ -54,6 +54,11 @@ export async function refreshModelsWithToast(): Promise<
             message: probe.message,
           },
     );
+    // On a failed probe the fresh discovery is a fallback list, while
+    // Raycast's picker keeps serving its cached discovery until the TTL
+    // expires — returning undefined tells callers to keep showing what they
+    // have, so the two never desync. The toast already reports the failure.
+    if (!probe.ok) return undefined;
     return { models, probe };
   } catch (error) {
     await showFailureToast(error, { title: "Refresh failed" });
