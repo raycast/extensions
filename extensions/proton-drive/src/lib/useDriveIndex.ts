@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { showError } from "./errors";
-import { backgroundRefreshEnabled, buildIndex, DriveIndex, isIndexing, isStale, readIndex } from "./index";
+import {
+  backgroundRefreshEnabled,
+  buildIndex,
+  DriveIndex,
+  IndexAbortedError,
+  IndexBusyError,
+  isIndexing,
+  isStale,
+  readIndex,
+} from "./index";
 
 /** Parsed once per command run and shared by every folder view pushed on the navigation stack. */
 let shared: DriveIndex | undefined;
@@ -57,10 +66,18 @@ export function useDriveIndex() {
         }
       } catch (error) {
         await toast?.hide();
-        await showError(error, "Indexing failed");
+        if (error instanceof IndexBusyError) {
+          // Another command won the lock in the meantime: follow its progress instead.
+          refreshing.current = false;
+          setProgress("Indexing in the background…");
+          return;
+        }
+        if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
       } finally {
-        refreshing.current = false;
-        setProgress(undefined);
+        if (refreshing.current) {
+          refreshing.current = false;
+          setProgress(undefined);
+        }
       }
     },
     [setIndex],

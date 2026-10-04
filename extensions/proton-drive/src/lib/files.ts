@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFile, cp, mkdir, mkdtemp, readdir, rename, rm, stat } from "node:fs/promises";
+import { copyFile, cp, mkdir, mkdtemp, open, readdir, rename, rm, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { Cache, environment, getPreferenceValues } from "@raycast/api";
@@ -68,7 +68,7 @@ export async function downloadToDownloads(node: DriveNode): Promise<string> {
   const { downloadDirectory } = getPreferenceValues<{ downloadDirectory?: string }>();
   const destDir = (downloadDirectory || "~/Downloads").replace(/^~(?=\/|$)/, homedir());
   const tmp = await downloadToTemp(node);
-  const target = await uniquePath(destDir, basename(tmp));
+  const target = await reservePath(destDir, basename(tmp), (await stat(tmp)).isDirectory());
   await move(tmp, target);
   return target;
 }
@@ -103,12 +103,24 @@ async function move(from: string, to: string): Promise<void> {
   await rm(tmpParent, { recursive: true, force: true });
 }
 
-async function uniquePath(dir: string, name: string): Promise<string> {
-  const ext = extname(name);
+/**
+ * Finds a free name ("name (2).pdf"…) and claims it atomically with an empty placeholder,
+ * so two downloads finishing at once can never pick, and overwrite, the same file.
+ * The download then replaces its own placeholder.
+ */
+async function reservePath(dir: string, name: string, isDirectory: boolean): Promise<string> {
+  const ext = isDirectory ? "" : extname(name);
   const stem = name.slice(0, name.length - ext.length);
-  let candidate = join(dir, name);
-  for (let i = 2; await exists(candidate); i++) candidate = join(dir, `${stem} (${i})${ext}`);
-  return candidate;
+  for (let i = 1; ; i++) {
+    const candidate = join(dir, i === 1 ? name : `${stem} (${i})${ext}`);
+    try {
+      if (isDirectory) await mkdir(candidate);
+      else await (await open(candidate, "wx")).close();
+      return candidate;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+  }
 }
 
 async function exists(p: string): Promise<boolean> {

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { environment, getPreferenceValues } from "@raycast/api";
@@ -11,8 +12,9 @@ const crawlFile = () => dataFile("crawl-v2.json");
 /** Files of the first, much larger index format: parsing them alone could exceed Raycast's heap. */
 const LEGACY_FILES = ["index.json", "crawl.json"].map((f) => join(environment.supportPath, f));
 const LOCK_FILE = join(environment.supportPath, "index.lock");
-/** The lock is touched at every checkpoint; one that hasn't been touched for this long is abandoned. */
+/** A running build touches its lock every LOCK_HEARTBEAT; one untouched for LOCK_TTL is abandoned. */
 const LOCK_TTL = 3 * 60_000;
+const LOCK_HEARTBEAT = 30_000;
 const CHECKPOINT_EVERY = 30_000;
 const CONCURRENCY = 6;
 /** An interrupted crawl older than this is restarted from scratch instead of resumed. */
@@ -22,9 +24,25 @@ const FORMAT = 2;
 /**
  * One indexed item, as a compact tuple: Raycast commands get a 100 MB heap, and a large Drive has
  * tens of thousands of items. Parent folders are stored once in `folders` and referenced by index.
- * [name, parent folder index, isFolder, size, modified, mediaType, shared (0 no, 1 people, 2 link), created]
+ * [name, parent folder index, isFolder, size, modified, mediaType, shared (0 no, 1 people, 2 link), created,
+ *  path segment when it differs from the name (undecryptable names are addressed by UID)]
  */
-export type Entry = [string, number, 0 | 1, number | null, string | null, string | null, 0 | 1 | 2, (string | null)?];
+export type Entry = [
+  string,
+  number,
+  0 | 1,
+  number | null,
+  string | null,
+  string | null,
+  0 | 1 | 2,
+  (string | null)?,
+  (string | null)?,
+];
+
+/** Another command is already building the index. */
+export class IndexBusyError extends Error {}
+/** The build lost its lock (local data cleared on logout, or a stale lock taken over): nothing was written. */
+export class IndexAbortedError extends Error {}
 
 export interface DriveIndex {
   format: typeof FORMAT;
@@ -58,9 +76,9 @@ export async function readIndex(): Promise<DriveIndex | undefined> {
 
 /** Rebuilds a full node for display. Only done for the few results actually shown. */
 export function entryToNode(index: DriveIndex, i: number): DriveNode {
-  const [name, parent, isFolder, size, modified, mediaType, shared, created] = index.entries[i];
+  const [name, parent, isFolder, size, modified, mediaType, shared, created, segment] = index.entries[i];
   const parentPath = index.folders[parent];
-  const path = joinPath(parentPath, name);
+  const path = segment ? `${parentPath}/${segment}` : joinPath(parentPath, name);
   return {
     uid: path,
     name,
@@ -81,7 +99,12 @@ export function backgroundRefreshEnabled(): boolean {
 }
 
 export function isStale(index: DriveIndex | undefined, maxAgeMs = 24 * 3600_000): boolean {
-  return !index || index.partial === true || Date.now() - Date.parse(index.updatedAt) > maxAgeMs;
+  return (
+    !index ||
+    index.partial === true ||
+    Boolean(index.failedFolders?.length) ||
+    Date.now() - Date.parse(index.updatedAt) > maxAgeMs
+  );
 }
 
 /** True while another command (e.g. the background refresh) is already crawling. */
@@ -91,6 +114,7 @@ export async function isIndexing(): Promise<boolean> {
 }
 
 function toEntry(node: DriveNode, parent: number): Entry {
+  const segment = node.path.slice(node.parentPath.length + 1);
   return [
     node.name,
     parent,
@@ -100,7 +124,29 @@ function toEntry(node: DriveNode, parent: number): Entry {
     node.mediaType ?? null,
     node.sharedByUrl ? 2 : node.shared ? 1 : 0,
     node.created ?? null,
+    segment === joinPath("", node.name).slice(1) ? null : segment,
   ];
+}
+
+/** Claims the lock exclusively; a lock left by a crashed build is taken over. Returns our token. */
+async function acquireLock(): Promise<string> {
+  const token = `${process.pid}:${randomUUID()}`;
+  const claim = () => writeFile(LOCK_FILE, token, { flag: "wx" });
+  try {
+    await claim();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    if (await isIndexing()) throw new IndexBusyError("Proton Drive is already being indexed");
+    await rm(LOCK_FILE, { force: true });
+    await claim().catch(() => {
+      throw new IndexBusyError("Proton Drive is already being indexed");
+    });
+  }
+  return token;
+}
+
+async function ownsLock(token: string): Promise<boolean> {
+  return (await readFile(LOCK_FILE, "utf8").catch(() => "")) === token;
 }
 
 /**
@@ -116,9 +162,21 @@ export async function buildIndex(
   onProgress?: (foldersDone: number, foldersLeft: number, partial: DriveIndex) => void,
 ): Promise<DriveIndex> {
   await mkdir(environment.supportPath, { recursive: true, mode: 0o700 });
-  await writeFile(LOCK_FILE, String(process.pid));
+  const token = await acquireLock();
+  // Keep the lock fresh even while a slow listing holds up checkpoints.
+  const heartbeat = setInterval(() => {
+    const now = new Date();
+    ownsLock(token).then((owned) => {
+      if (owned) return utimes(LOCK_FILE, now, now).catch(() => undefined);
+    });
+  }, LOCK_HEARTBEAT);
   const previous = await readIndex();
   const publishPartial = !previous || previous.partial === true;
+  /** Every write first checks the lock is still ours, so a logout in between is never undone. */
+  const guardedWrite = async (path: string, value: unknown) => {
+    if (!(await ownsLock(token))) throw new IndexAbortedError("Indexing stopped");
+    await writeJson(path, value);
+  };
 
   try {
     const saved = await readJson<CrawlState>(crawlFile());
@@ -148,56 +206,63 @@ export async function buildIndex(
     });
 
     const saveCheckpoint = async () => {
-      const now = new Date();
-      await utimes(LOCK_FILE, now, now).catch(() => undefined);
       // Folders being listed right now aren't done: put them back so a resumed crawl redoes them.
-      await writeJson(crawlFile(), { ...state, queue: [...inFlight, ...state.queue] });
-      if (publishPartial) await writeJson(indexFile(), snapshot(true));
+      await guardedWrite(crawlFile(), { ...state, queue: [...inFlight, ...state.queue] });
+      if (publishPartial) await guardedWrite(indexFile(), snapshot(true));
     };
 
-    const listWithRetry = (path: string) => listFolder(path).catch(() => listFolder(path));
+    const crawl = () =>
+      new Promise<void>((resolve, reject) => {
+        const pump = () => {
+          if (state.queue.length === 0 && inFlight.size === 0) return resolve();
+          while (inFlight.size < CONCURRENCY && state.queue.length > 0) {
+            const folder = state.queue.shift()!;
+            const path = state.folders[folder];
+            inFlight.add(folder);
+            listFolder(path)
+              .then((children) => {
+                for (const child of children) {
+                  state.entries.push(toEntry(child, folder));
+                  if (child.type === "folder") state.queue.push(state.folders.push(child.path) - 1);
+                }
+              })
+              .catch((error) => {
+                // If the root can't be listed (signed out, CLI missing…), nothing else will work either.
+                if (path === ROOT) throw error;
+                state.failedFolders.push(path);
+              })
+              .then(async () => {
+                inFlight.delete(folder);
+                state.done++;
+                onProgress?.(state.done, state.queue.length + inFlight.size, snapshot(true));
+                if (Date.now() - lastCheckpoint > CHECKPOINT_EVERY) {
+                  lastCheckpoint = Date.now();
+                  await saveCheckpoint();
+                }
+                pump();
+              })
+              .catch(reject);
+          }
+        };
+        pump();
+      });
 
-    await new Promise<void>((resolve, reject) => {
-      const pump = () => {
-        if (state.queue.length === 0 && inFlight.size === 0) return resolve();
-        while (inFlight.size < CONCURRENCY && state.queue.length > 0) {
-          const folder = state.queue.shift()!;
-          const path = state.folders[folder];
-          inFlight.add(folder);
-          listWithRetry(path)
-            .then((children) => {
-              for (const child of children) {
-                state.entries.push(toEntry(child, folder));
-                if (child.type === "folder") state.queue.push(state.folders.push(child.path) - 1);
-              }
-            })
-            .catch((error) => {
-              // If the root can't be listed (signed out, CLI missing…), nothing else will work either.
-              if (path === ROOT) throw error;
-              state.failedFolders.push(path);
-            })
-            .then(async () => {
-              inFlight.delete(folder);
-              state.done++;
-              onProgress?.(state.done, state.queue.length + inFlight.size, snapshot(true));
-              if (Date.now() - lastCheckpoint > CHECKPOINT_EVERY) {
-                lastCheckpoint = Date.now();
-                await saveCheckpoint();
-              }
-              pump();
-            })
-            .catch(reject);
-        }
-      };
-      pump();
-    });
+    await crawl();
+    // Give folders that failed (twice, see listFolder) one more round, after the rest of the Drive.
+    if (state.failedFolders.length) {
+      state.queue = state.failedFolders.map((path) => state.folders.indexOf(path)).filter((i) => i >= 0);
+      state.failedFolders = [];
+      await crawl();
+    }
 
+    // Folders still failing are recorded: the index is marked stale and the UI says what is missing.
     const index = snapshot(false);
-    await writeJson(indexFile(), index);
+    await guardedWrite(indexFile(), index);
     await rm(crawlFile(), { force: true });
     return index;
   } finally {
-    await rm(LOCK_FILE, { force: true });
+    clearInterval(heartbeat);
+    if (await ownsLock(token)) await rm(LOCK_FILE, { force: true });
   }
 }
 

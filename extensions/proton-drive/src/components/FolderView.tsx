@@ -91,7 +91,13 @@ export function FolderView(props: { path: string; title?: string }) {
       {query && index && (
         <List.Section
           title="In the Whole Drive"
-          subtitle={index.partial ? `partial index · ${index.entries.length} items so far` : undefined}
+          subtitle={
+            index.partial
+              ? `partial index · ${index.entries.length} items so far`
+              : index.failedFolders?.length
+                ? `${index.failedFolders.length} folder(s) could not be indexed · refresh to retry`
+                : undefined
+          }
         >
           {elsewhere.map((n) => item(n, true))}
         </List.Section>
