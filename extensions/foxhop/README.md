@@ -24,7 +24,7 @@ Per-target actions:
 
 - **Focus Tab** (`↵`) — focus the matching tab
 - **Favourite / Unfavourite** (`⌘F`) — pin a target to the top of the list
-- **Edit Target** (`⌘E`) — edit it (URL-first; match and title derive from the URL; the id is generated from the title and read-only)
+- **Edit Target** (`⌘E`) — edit its URL, title, match, strategy, pick and navigate (the id is generated from the title and read-only)
 - **Add Target** (`⌘N`) — add a new target (just paste a URL; the id is generated from the title when saved)
 - **Add from Open Tab** — pick a currently open Firefox tab and prefill the form
 - **Delete Target** (`⌃X`) — remove a target
