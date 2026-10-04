@@ -67,7 +67,10 @@ export default function Command() {
           <Detail.Metadata.Label title="Ruled by" text={`${m.nakshatra.planet} · ${m.nakshatra.deity}`} />
           <Detail.Metadata.Label title="Theme" text={`💭 ${m.nakshatra.theme}`} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Chinese lodge" text={`🐉 ${m.xiu.n} · ${m.xiu.name} ${m.xiu.zh} (approx)`} />
+          <Detail.Metadata.Label
+            title="Chinese lodge"
+            text={`${m.xiu.emoji} ${m.xiu.n} · ${m.xiu.name} ${m.xiu.zh} · ${m.xiu.animal} (approx)`}
+          />
           <Detail.Metadata.Label title="Palace" text={m.xiu.group} />
           <Detail.Metadata.Label title="Theme" text={`💭 ${m.xiu.theme}`} />
           <Detail.Metadata.Separator />

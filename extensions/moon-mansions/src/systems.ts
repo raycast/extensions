@@ -256,9 +256,13 @@ export interface XiuInfo {
 // carry, and mislabelled lodges the user can see. Do not reintroduce it.
 //
 // This table names the animal AND its emoji together so the two cannot drift.
-// Audit rule: changing the palace order or a lodge number requires the animal
-// and emoji here, the Swift mirror in MoonMansions/Data.swift, and the
-// fixture's xiuAnimal field — divergence in any of the three fails parity.
+// Every lodge in a palace must carry that palace's animal: a mismatch here is
+// visible directly in both commands, so keep the count at 28 and the palace
+// blocks at seven. This file is the single source of truth — the macOS Swift
+// port and the Chrome extension vendor it byte-for-byte and are asserted
+// against parity/fixture.json, which regenerates from this core via
+// `npm run parity:gen` in the moon-mansions repository. That gate lives in the
+// source repo, not here, so run it there before publishing a change.
 export const XIU_ANIMALS: { animal: string; emoji: string }[] = [
   { animal: "Dragon", emoji: "🐉" }, // 1–7 Azure Dragon
   { animal: "Dragon", emoji: "🐉" },
