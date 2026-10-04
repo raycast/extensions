@@ -1,12 +1,12 @@
-import { getFrontmostApplication } from "@raycast/api";
+import { Action, ActionPanel, getFrontmostApplication, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppShortcuts } from "./load/app-shortcuts-provider";
 import { useApps } from "./load/apps-provider";
 import { ShortcutsList } from "./view/shortcuts-list";
 import { exitWithMessage } from "./view/exit-action";
 import { getPlatform } from "./load/platform";
-import { findMatchingApp, windowsProcessName } from "./app-matching";
+import { findMatchingApps, windowsProcessName } from "./app-matching";
 import { getDesktopTarget } from "./engine/desktop-target";
 
 interface AppShortcutsProps {
@@ -23,6 +23,7 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
     execute: !props?.slug,
     failureToastOptions: { title: "Could not detect the frontmost application" },
   });
+  const matches = useMemo(() => (native ? findMatchingApps(apps, native, getPlatform()) : []), [apps, native]);
 
   useEffect(() => {
     if (slug || appsLoading || appIdLoading) return;
@@ -30,13 +31,12 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
       exitWithMessage("Could not detect the frontmost application");
       return;
     }
-    const found = findMatchingApp(apps, native, getPlatform());
-    if (!found) {
+    if (matches.length === 0) {
       exitWithMessage(`Shortcuts not available for application ${native.name}`);
       return;
     }
-    setSlug(found.slug);
-  }, [native, appIdLoading, slug, apps, appsLoading]);
+    if (matches.length === 1) setSlug(matches[0].slug);
+  }, [native, appIdLoading, slug, matches, appsLoading]);
 
   const { isLoading: targetLoading, data: selectedTarget } = usePromise(
     async (app) => (app ? getDesktopTarget(app) : undefined),
@@ -51,6 +51,26 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
     : targetLoading
       ? undefined
       : selectedTarget;
+
+  if (!slug && !appsLoading && !appIdLoading && matches.length > 1) {
+    return (
+      <List navigationTitle={`Shortcuts for ${native?.name}`} searchBarPlaceholder="Choose a shortcut collection">
+        {matches.map((app) => (
+          <List.Item
+            key={app.slug}
+            title={app.name}
+            subtitle={app.customAppId ? "My App" : "Public Catalog"}
+            icon={Icon.AppWindow}
+            actions={
+              <ActionPanel>
+                <Action title="Show Shortcuts" onAction={() => setSlug(app.slug)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  }
 
   return (
     <ShortcutsList

@@ -9,6 +9,8 @@
 - Merge signed-in custom applications and shortcuts into existing commands
 - Add All Apps, My Apps, and Favorites filters to the application list
 - Add application and shortcut favorite actions without separate personal-data commands
+- Sync custom Windows app IDs/process names and choose between matching shortcut collections
+- Copy the current Windows app ID or executable process name for custom app setup
 
 ## [Update] - 2025-12-25
 

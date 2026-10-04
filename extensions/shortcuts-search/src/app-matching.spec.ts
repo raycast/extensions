@@ -1,4 +1,4 @@
-import { findMatchingApp, windowsProcessName } from "./app-matching";
+import { findMatchingApps, windowsProcessName } from "./app-matching";
 import type { AppMetadata } from "./model/input/input-models";
 const apps: AppMetadata[] = [
   {
@@ -12,33 +12,37 @@ const apps: AppMetadata[] = [
   { name: "Gmail", slug: "gmail", hostname: "mail.google.com", keymaps: ["Default"] },
 ];
 it("matches actual native identifiers and executable paths separately", () => {
-  expect(findMatchingApp(apps, { name: "Code", path: "C:\\Program Files\\VS Code\\CODE.EXE" }, "windows")).toBe(
-    apps[0]
-  );
+  expect(findMatchingApps(apps, { name: "Code", path: "C:\\Program Files\\VS Code\\CODE.EXE" }, "windows")).toEqual([
+    apps[0],
+  ]);
   expect(
-    findMatchingApp(apps, { name: "Code", path: "Applications", windowsAppId: "Microsoft.VisualStudioCode" }, "windows")
-  ).toBe(apps[0]);
+    findMatchingApps(
+      apps,
+      { name: "Code", path: "Applications", windowsAppId: "Microsoft.VisualStudioCode" },
+      "windows"
+    )
+  ).toEqual([apps[0]]);
   expect(
-    findMatchingApp(
+    findMatchingApps(
       apps,
       { name: "Code", path: "/Applications/VS Code.app", bundleId: "com.microsoft.VSCode" },
       "macos"
     )
-  ).toBe(apps[0]);
+  ).toEqual([apps[0]]);
 });
 it("never matches two missing identifiers or uses names on macOS", () => {
-  expect(findMatchingApp(apps, { name: "Unknown", path: "Applications" }, "windows")).toBeUndefined();
-  expect(findMatchingApp(apps, { name: "Gmail", path: "Applications" }, "macos")).toBeUndefined();
+  expect(findMatchingApps(apps, { name: "Unknown", path: "Applications" }, "windows")).toEqual([]);
+  expect(findMatchingApps(apps, { name: "Gmail", path: "Applications" }, "macos")).toEqual([]);
 });
-it("permits only unique name fallback and refuses ambiguous process mappings", () => {
-  expect(findMatchingApp(apps, { name: "Visual Studio Code", path: "Applications" }, "windows")).toBe(apps[0]);
+it("returns every matching collection so the caller can ask the user to choose", () => {
+  expect(findMatchingApps(apps, { name: "Visual Studio Code", path: "Applications" }, "windows")).toEqual([apps[0]]);
   expect(
-    findMatchingApp(
+    findMatchingApps(
       [...apps, { ...apps[0], slug: "duplicate" }],
       { name: "Visual Studio Code", path: "C:\\Code.exe" },
       "windows"
     )
-  ).toBeUndefined();
+  ).toEqual([apps[0], { ...apps[0], slug: "duplicate" }]);
 });
 it("does not confuse AUMIDs, shortcuts, or paths with executable filenames", () => {
   expect(windowsProcessName({ path: "Applications" })).toBeUndefined();

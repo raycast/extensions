@@ -20,6 +20,8 @@ export function mergeAppMetadata(
         slug: `custom-${app.slug}`,
         customAppId: app.id,
         bundleId: app.bundleId,
+        windowsAppId: app.windowsAppId,
+        windowsProcessName: app.windowsProcessName,
         hostname: app.hostname,
         source: app.source,
         icon: app.icon,

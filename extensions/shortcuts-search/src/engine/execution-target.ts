@@ -1,3 +1,5 @@
+import { isWindowsProcessName } from "../shortcut-core/windows";
+
 export type MacExecutionTarget =
   | { kind: "desktop"; bundleId: string }
   | { kind: "browser"; bundleId: string; hostname: string; url: string };
@@ -28,12 +30,7 @@ export const chromiumBundles = [
 export const safariBundles = ["com.apple.Safari", "com.apple.SafariTechPreview"];
 export function validateTarget(target: ExecutionTarget): void {
   if ("windowsProcessName" in target) {
-    if (
-      !/^[A-Za-z0-9][A-Za-z0-9 ._-]{0,99}$/.test(target.windowsProcessName) ||
-      target.windowsProcessName.includes("..") ||
-      /\.exe$/i.test(target.windowsProcessName)
-    )
-      throw new Error("Application target is unavailable");
+    if (!isWindowsProcessName(target.windowsProcessName)) throw new Error("Application target is unavailable");
     if (target.processId !== undefined || target.windowHandle !== undefined || target.kind === "browser") {
       if (
         !Number.isSafeInteger(target.processId) ||

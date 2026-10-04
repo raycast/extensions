@@ -222,6 +222,8 @@ export class ShortcutMerger<M extends string, P extends string> {
       hostname: customApp.hostname,
       slug: `custom-${customApp.slug}`,
       bundleId: customApp.bundleId,
+      windowsAppId: customApp.windowsAppId,
+      windowsProcessName: customApp.windowsProcessName,
       icon: customApp.icon,
       source: customApp.source,
       keymaps: [...customApp.keymaps]

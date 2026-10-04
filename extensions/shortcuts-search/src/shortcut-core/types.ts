@@ -17,6 +17,8 @@ export interface CustomApp<P extends string = string> {
   slug: string;
   name: string;
   bundleId?: string;
+  windowsAppId?: string;
+  windowsProcessName?: string;
   hostname?: string;
   source?: string;
   icon?: string;

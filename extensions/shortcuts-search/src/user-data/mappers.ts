@@ -59,6 +59,8 @@ function mapCustomApps(data: unknown[]): CustomApp[] {
     slug: requiredString(row.slug),
     name: requiredString(row.name),
     bundleId: optionalString(row.bundle_id),
+    windowsAppId: optionalString(row.windows_app_id),
+    windowsProcessName: optionalString(row.windows_process_name),
     hostname: optionalString(row.hostname),
     source: optionalString(row.source),
     icon: optionalString(row.icon),
