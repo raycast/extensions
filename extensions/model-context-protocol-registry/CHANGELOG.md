@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MAQAMI Travel MCP Server] - {PR_MERGE_DATE}
+
+- Add MAQAMI Travel to the official registry: official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation. Raycast connects directly to the remote Streamable HTTP server at https://mcp.maqami.co/, with no sign-in and no API key.
+
 ## [Add Clipwright MCP Server] - 2026-10-04
 
 - Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
