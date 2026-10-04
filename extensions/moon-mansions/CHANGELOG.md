@@ -1,6 +1,6 @@
 # Moon Mansions Changelog
 
-## [Exact sign degrees, VOC weekday and lodge palace icons] - {PR_MERGE_DATE}
+## [Exact sign degrees, VOC weekday and lodge palace icons] - 2026-10-04
 
 - Show the Moon's exact degree within its sign, e.g. `Cancer 14°32'`, plus a direction arrow showing which way it is travelling through the sign
 - Show the Moon's exact degree in the sidereal zodiac alongside the tropical one
