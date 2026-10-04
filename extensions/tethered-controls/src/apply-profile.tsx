@@ -22,13 +22,16 @@ async function readProfiles(): Promise<Profile[]> {
 export default function Command() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string>();
 
   async function reload() {
     setIsLoading(true);
     try {
       setProfiles(await readProfiles());
+      setLoadError(undefined);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
+      setLoadError(detail);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not load Tethered profiles",
@@ -45,7 +48,17 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Tethered profiles">
-      {profiles.length === 0 && !isLoading ? <List.EmptyView title="No saved profiles found" /> : null}
+      {profiles.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title={loadError ? "Could not load Tethered profiles" : "No saved profiles found"}
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Profiles" onAction={reload} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {profiles.map((profile) => (
         <List.Item
           key={profile.id}

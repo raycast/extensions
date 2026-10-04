@@ -22,13 +22,16 @@ async function readPresets(): Promise<Preset[]> {
 export default function Command() {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string>();
 
   async function reload() {
     setIsLoading(true);
     try {
       setPresets(await readPresets());
+      setLoadError(undefined);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
+      setLoadError(detail);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not load Caffeinate presets",
@@ -45,7 +48,17 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Caffeinate presets">
-      {presets.length === 0 && !isLoading ? <List.EmptyView title="No saved Caffeinate presets found" /> : null}
+      {presets.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title={loadError ? "Could not load Caffeinate presets" : "No saved Caffeinate presets found"}
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Presets" onAction={reload} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {presets.map((preset) => (
         <List.Item
           key={preset.id}
