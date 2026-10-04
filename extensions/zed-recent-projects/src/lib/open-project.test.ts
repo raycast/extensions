@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+vi.mock("@raycast/api", () => ({ PopToRootType: { Suspended: "suspended" } }));
+
 import { openProject } from "./open-project";
 
 describe("openProject", () => {
@@ -14,18 +16,23 @@ describe("openProject", () => {
 
     const result = openProject(open, close);
 
-    expect(close).toHaveBeenCalled();
+    expect(close).toHaveBeenCalledWith({ popToRootType: "suspended" });
     finishOpening();
     await result;
   });
 
-  it("propagates launch failures to the existing error handler", async () => {
+  it("propagates launch failures after Raycast has closed", async () => {
     const error = new Error("Zed launch failed");
-    await expect(
-      openProject(
-        () => Promise.reject(error),
-        async () => {},
-      ),
-    ).rejects.toBe(error);
+    let failOpening!: (error: Error) => void;
+    const launching = new Promise<void>((_, reject) => {
+      failOpening = reject;
+    });
+    const close = vi.fn(async () => {});
+    const result = openProject(() => launching, close);
+    const rejection = expect(result).rejects.toBe(error);
+
+    await close.mock.results[0].value;
+    failOpening(error);
+    await rejection;
   });
 });
