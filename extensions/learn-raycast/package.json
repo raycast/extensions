@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "learn-raycast",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Collect, browse, and organize resources in local Learn workspaces",
+  "author": "junjie_zhou",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "develop": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "npm run build && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@raycast/api": "2.6.2",
+    "@raycast/utils": "2.3.2",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "vitest": "1.6.1"
+  },
+  "title": "Learn",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "save-current-browser-url",
+      "title": "Save Current Browser URL",
+      "description": "Save the active browser tab to the selected Learn workspace",
+      "mode": "no-view"
+    },
+    {
+      "name": "browse-resources",
+      "title": "Browse Learn Resources",
+      "description": "Browse workspaces, find resources, edit tags, and open local content",
+      "mode": "view"
+    },
+    {
+      "name": "add-resource",
+      "title": "Add Learn Resource",
+      "description": "Save a URL, repository, or local path with a title and tags",
+      "mode": "view"
+    },
+    {
+      "name": "create-workspace",
+      "title": "Create Learn Workspace",
+      "description": "Create a learning workspace and select it for browser capture",
+      "mode": "view"
+    },
+    {
+      "name": "choose-workspace",
+      "title": "Choose Learn Workspace",
+      "description": "Choose the workspace used by browser capture",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "learnExecutable",
+      "title": "Learn Executable",
+      "description": "Path to the Learn CLI installed from Humanive/Learn; see About This Extension for setup",
+      "type": "textfield",
+      "placeholder": "/opt/homebrew/bin/learn",
+      "required": false,
+      "default": "learn"
+    }
+  ]
+}
