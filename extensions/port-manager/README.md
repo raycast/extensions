@@ -25,20 +25,3 @@ On macOS, the **Kill Signal** preference controls whether to ask for `SIGTERM` o
 A kill is only reported as successful once the process has actually exited. A process that ignores the signal is reported as still running, with a one-key **Force Kill** to follow up with `SIGKILL`.
 
 Some system-owned processes and executable paths are protected by the operating system. The extension will show the command error in Raycast when the current user lacks permission; use an elevated terminal only when you understand the process you are stopping.
-
-## Tests
-
-Install dependencies with `npm ci`, then run:
-
-```sh
-npm test
-npm run test:watch
-npm run test:coverage
-npm run typecheck
-```
-
-Tests cover macOS and Windows listener discovery, process termination and PID reuse checks, named-port storage, AI tools, and display helpers. Raycast APIs and process termination commands are mocked. Command-runner tests launch disposable Node processes to check output, exit errors, timeouts, and buffer limits.
-
-Coverage includes all source files, including UI code without tests. `npm run test:coverage` prints a summary and writes an HTML report to `coverage/index.html`, LCOV data to `coverage/lcov.info`, and totals to `coverage/coverage-summary.json`.
-
-The coverage command fails below the minimums in `vitest.config.mts`. Listener discovery, process termination, and AI tools have stricter thresholds than the overall extension.
