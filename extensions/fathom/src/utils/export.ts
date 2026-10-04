@@ -295,9 +295,7 @@ export async function exportTeamMembers(args: {
       case "csv": {
         const csvContent = [
           "Name,Email,Email Domain,Created At",
-          ...members.map((m) =>
-            [m.name, m.email, m.emailDomain || "", m.createdAt || ""].map((v) => `"${v}"`).join(","),
-          ),
+          ...members.map((m) => [m.name, m.email, m.emailDomain || "", m.createdAt || ""].map(csvCell).join(",")),
         ].join("\n");
 
         const filename = `${safeTeamName}_members_${timestamp}.csv`;
@@ -368,4 +366,15 @@ export async function exportTeamMembers(args: {
       fallbackTitle: "Export Failed",
     });
   }
+}
+
+/**
+ * One CSV cell: RFC 4180 quoting plus a formula guard. Spreadsheets evaluate a cell that
+ * starts with `=`, `+`, `-`, `@`, a tab, or a carriage return even when quoted, so a
+ * member name from the API could export as a live formula. The leading apostrophe is
+ * hidden on display.
+ */
+export function csvCell(value: string): string {
+  const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${neutralized.replace(/"/g, '""')}"`;
 }

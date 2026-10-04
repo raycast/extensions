@@ -1,5 +1,23 @@
 # Fathom for Raycast Changelog
 
+## [Open in Desktop App] - {PR_MERGE_DATE}
+
+### Added
+
+- **Open Meetings In** preference: **Open in Fathom** (⌘O) can open a meeting in the Fathom desktop app on macOS instead of the browser. It is the default, and falls back to the web when the app is not installed.
+- **Strict Redaction** preference: also hides URL query strings and fragments in debug logs, for sharing a log when reporting an issue.
+
+### Fixed
+
+- Team member CSV export quotes cells correctly, and neutralizes values a spreadsheet would run as a formula.
+
+### Changed
+
+- **Downloads**: a recording the server has not finished preparing now fails with a clear "try again later" message instead of a size mismatch, and a resumed download whose link expired picks up where it stopped rather than starting over.
+- **Cancel while preparing**: a download can now be canceled (⌘.) while Fathom is still rendering the video, not only once the transfer starts.
+- **Jump to Timestamp** no longer shares ⌘O with Open in Fathom, and **Copy Action Item** moves to ⌘C so it no longer shares ⌘⇧C with Copy Share Link.
+- Updated `@chrismessina/raycast-downloader` to 0.2.0, and `brace-expansion` to 5.0.12 to fix high-severity denial-of-service advisories.
+
 ## [Download Recordings] - 2026-09-20
 
 ### Added

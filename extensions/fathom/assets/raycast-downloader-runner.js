@@ -36,6 +36,7 @@ const RETRYABLE = new Set([
     "http_server",
     "rate_limited",
     "url_expired",
+    "pending",
     // Bytes are already on disk, so a retry resumes rather than restarting.
     "interrupted",
     // `runner_failed` is deliberately absent: the helper crashed on startup, and
@@ -185,8 +186,12 @@ function buildCurlConfig(options) {
         lines.push("continue-at = -");
     if (limitRateBytes !== undefined)
         lines.push(`limit-rate = ${limitRateBytes}`);
-    if (dumpHeaderPath)
+    if (dumpHeaderPath) {
         lines.push(`dump-header = "${escapeConfigValue(dumpHeaderPath)}"`);
+        // Through a proxy, curl dumps the tunnel's "200 Connection established"
+        // block too, and the runner would read it as the origin's answer.
+        lines.push("suppress-connect-headers");
+    }
     // Only meaningful alongside `continue-at`, which is what generates the Range
     // this validates. Harmless without one: a server ignores `If-Range` on an
     // unranged request.
@@ -347,7 +352,7 @@ const EXIT_CODES = {
  * "curl exited 22".
  */
 function classifyCurlFailure(input) {
-    const { exitCode, signal, httpCode, stderrTail, cancelled, followRedirects = true } = input;
+    const { exitCode, signal, httpCode, stderrTail, cancelled, followRedirects = true, resumed = false } = input;
     if (cancelled || signal === "SIGTERM" || signal === "SIGINT") {
         return new errors_1.DownloadError("cancelled", "Download cancelled.", { exitCode, signal });
     }
@@ -366,6 +371,24 @@ function classifyCurlFailure(input) {
         // header, pass the final URL) — exactly the non-retryable bucket
         // `http_client` names.
         "http_client", unfollowedRedirectMessage(httpCode, followRedirects), { httpStatus: httpCode, exitCode, signal });
+    }
+    // A resumed request answered with a whole body that curl did NOT refuse:
+    // measured, it exits 0 when the body's length equals the resume offset
+    // ("already downloaded") and leaves the partial as it was. Same meaning as
+    // exit 33 — the partial cannot be trusted to be this file — same message.
+    // A 2xx only reaches here when the runner refused it as not-the-file (202,
+    // 204, 205, or a 206 nobody asked for). Same reason as the 3xx branch above:
+    // curl exited 0, so EXIT_CODES has nothing to say about it.
+    if (exitCode === 0 && httpCode !== undefined && httpCode >= 200 && httpCode < 300) {
+        if (resumed && httpCode !== 206) {
+            return new errors_1.DownloadError(EXIT_CODES[33].code, EXIT_CODES[33].message, { httpStatus: httpCode, exitCode, signal });
+        }
+        const code = httpCode === 202 ? "pending" : httpCode === 206 ? "integrity" : "http_client";
+        return new errors_1.DownloadError(code, unusableSuccessMessage(httpCode), {
+            httpStatus: httpCode,
+            exitCode,
+            signal,
+        });
     }
     if (httpCode !== undefined && httpCode >= 400) {
         const code = (0, errors_1.classifyHttpStatus)(httpCode);
@@ -393,6 +416,16 @@ function unfollowedRedirectMessage(status, followRedirects) {
     if (!followRedirects)
         return `The server redirected (HTTP ${status}) but redirects are disabled.`;
     return `The server returned a redirect that could not be followed (HTTP ${status}).`;
+}
+function unusableSuccessMessage(status) {
+    switch (status) {
+        case 202:
+            return "The server accepted the request but has not produced the file yet (HTTP 202). Try again later.";
+        case 206:
+            return "The server sent only part of the file (HTTP 206).";
+        default:
+            return `The server returned no file (HTTP ${status}).`;
+    }
 }
 function httpErrorMessage(status) {
     switch (status) {
@@ -1718,6 +1751,8 @@ exports.updatePartialClaim = updatePartialClaim;
 exports.releasePartialClaim = releasePartialClaim;
 exports.partialClaimHolder = partialClaimHolder;
 exports.parseValidators = parseValidators;
+exports.parseFinalStatus = parseFinalStatus;
+exports.parseUnsatisfiedRangeTotal = parseUnsatisfiedRangeTotal;
 const node_crypto_1 = require("node:crypto");
 const node_fs_1 = require("node:fs");
 const paths_1 = __req__("paths");
@@ -1846,10 +1881,17 @@ function writePartialState(partPath, state) {
  * could not be persisted, which is a worse failure than it looks — the caller
  * then has a contaminated file that nothing on disk warns about, and must say
  * so in the status instead.
+ *
+ * On that failure the existing state is removed: it vouches for the bytes as
+ * they WERE, and with no state at all `mayResume` refuses. A full disk refuses
+ * the write but still allows the unlink.
  */
 function markPartialUnsafe(partPath) {
     const existing = readPartialState(partPath) ?? { v: 1 };
-    return writePartialState(partPath, { ...existing, unsafe: true });
+    if (writePartialState(partPath, { ...existing, unsafe: true }))
+        return true;
+    clearPartialState(partPath);
+    return false;
 }
 function clearPartialState(partPath) {
     try {
@@ -2078,6 +2120,8 @@ function claimOwnerAlive(claim) {
     // download the user can retry or redirect. Bias to ALIVE.
     return true;
 }
+/** A response's status line in a curl header dump — HTTP/1.x or HTTP/2 — which starts a new block. */
+const STATUS_LINE = /^HTTP\/\d(?:\.\d)?\s+(\d{3})/i;
 /**
  * Pull the `If-Range` validators out of a curl header dump.
  *
@@ -2103,7 +2147,7 @@ function parseValidators(dump) {
         // and answers 200 instead of 206, curl refuses to append (exit 33), and the
         // partial is reset — so the resume quietly becomes a full re-download of a
         // file that may be hundreds of megabytes.
-        if (/^HTTP\/\d(?:\.\d)?\s+\d{3}/i.test(line)) {
+        if (STATUS_LINE.test(line)) {
             result = {};
             continue;
         }
@@ -2125,6 +2169,61 @@ function parseValidators(dump) {
             result.lastModified = modified[1].trim();
     }
     return result;
+}
+/**
+ * The status of the LAST response block in a curl header dump, and whether that
+ * block's headers are complete (terminated by the blank line), or undefined when
+ * no response has been dumped yet.
+ *
+ * The runner's close handler has curl's own `http_code`; a cancellation, and the
+ * meter watching a transfer still in flight, have only this.
+ */
+function parseFinalStatus(dump) {
+    let status;
+    let complete = false;
+    // The last element is never a finished line: it is either what follows the
+    // final newline (so "" for every header line curl has written whole) or a
+    // line still being written. Counting that "" as the blank line would call a
+    // block complete after its first header.
+    for (const line of dump.split(/\r?\n/).slice(0, -1)) {
+        const match = STATUS_LINE.exec(line);
+        if (match) {
+            status = Number(match[1]);
+            complete = false;
+            // The FIRST blank line after the status line ends its headers. Chunked
+            // trailers can follow it in the same dump; they do not reopen the block.
+        }
+        else if (status !== undefined && line === "") {
+            complete = true;
+        }
+    }
+    return status === undefined ? undefined : { status, complete };
+}
+/**
+ * The complete length a 416 reported, from the LAST response block's
+ * `Content-Range: bytes * /N` (RFC 9110 §14.4), or undefined if it gave none.
+ *
+ * This is how a resumed request learns the partial is already the whole file:
+ * asking for the range that starts at byte N of an N-byte resource is
+ * unsatisfiable by definition. Same boundary rule as `parseValidators` — an
+ * earlier hop's header never describes the final response.
+ */
+function parseUnsatisfiedRangeTotal(dump) {
+    // Every Content-Range in the final block, not the last one: this result is
+    // evidence the partial is complete, and two disagreeing fields are none.
+    let totals = [];
+    for (const line of dump.split(/\r?\n/)) {
+        if (STATUS_LINE.test(line)) {
+            totals = [];
+            continue;
+        }
+        if (!/^content-range:/i.test(line))
+            continue;
+        const range = /^content-range:\s*bytes\s+\*\/(\d+)\s*$/i.exec(line);
+        totals.push(range ? Number(range[1]) : undefined);
+    }
+    // No field, a malformed one, or two that disagree all come out undefined.
+    return totals.every((total) => total === totals[0]) ? totals[0] : undefined;
 }
 //# sourceMappingURL=partial.js.map
   },
@@ -2222,7 +2321,8 @@ function main() {
      * evidence of anything.
      */
     const recordPartialForResume = () => {
-        const validators = readValidators(payload.partPath);
+        const dump = responseWroteTheFile() ? readHeaderDump(payload.partPath) : undefined;
+        const validators = dump === undefined ? undefined : (0, partial_1.parseValidators)(dump);
         const existing = (0, partial_1.readPartialState)(payload.partPath);
         // Whether THIS attempt got a response at all decides whose validators apply.
         //
@@ -2239,6 +2339,13 @@ function main() {
         // NOT keyed on the file's size: curl buffers, so a transfer can be minutes
         // into a response with a `.part` file still reporting zero bytes. Measured,
         // and it is why the first version of this check kept the stale validator.
+        //
+        // …but only a response that WROTE the file's bytes. A 403 to a resume (a
+        // signed URL that lapsed), a 200 curl refused to append, a redirect: each
+        // left the partial as it was, so the partial's own provenance still holds.
+        // Recording theirs instead drops the validator the signed-URL recovery
+        // resumes on — or, for a changed resource, labels old bytes with the new
+        // ETag, so the next `If-Range` matches and splices two representations.
         const etag = validators ? validators.etag : existing?.etag;
         const lastModified = validators ? validators.lastModified : existing?.lastModified;
         (0, partial_1.writePartialState)(payload.partPath, {
@@ -2275,6 +2382,8 @@ function main() {
         // launching us. No transfer has begun on setup failure, so retaining it
         // cannot help resume and instead burns the original filename forever.
         discardEmptyPart(payload.partPath);
+        if (!(0, node_fs_1.existsSync)(payload.partPath))
+            (0, partial_1.clearPartialState)(payload.partPath);
         releasePath();
         persist({
             state: "failed",
@@ -2311,7 +2420,13 @@ function main() {
         }
         existingBytes = 0;
     }
-    else if (existingBytes > 0 && !(0, partial_1.mayResume)(partialState, payload.url)) {
+    else if (existingBytes > 0 && (!payload.resume || !(0, partial_1.mayResume)(partialState, payload.url))) {
+        // With resume off the bytes are not wanted either — and must not outlive
+        // the attempt that replaces them. curl opens its output only once the body
+        // starts, so until then they sit beside the NEW response's headers, and
+        // anything recorded then (the meter, a cancel) labels them with its ETag.
+        // The next resume sends that ETag as If-Range and splices two versions.
+        //
         // These bytes were not put here by this download.
         //
         // Either they carry another URL's fingerprint, or they carry none at all —
@@ -2334,6 +2449,51 @@ function main() {
         existingBytes = 0;
     }
     const resume = Boolean(payload.resume) && existingBytes > 0;
+    /**
+     * Did a response with this status write bytes of THE FILE into the partial?
+     *
+     * Resumed, only a 206 appends real bytes. Fresh, any 2xx but the ones that
+     * carry no file (202, 204, 205) or only a fragment nobody asked for (206).
+     */
+    const wroteTheFile = (status) => status !== undefined &&
+        (resume ? status === 206 : status >= 200 && status < 300 && ![202, 204, 205, 206].includes(status));
+    const finalStatus = () => (0, partial_1.parseFinalStatus)(readHeaderDump(payload.partPath) ?? "");
+    /** The same question, from the header dump, for a response still arriving. */
+    function responseWroteTheFile() {
+        const final = finalStatus();
+        return final !== undefined && final.complete && wroteTheFile(final.status);
+    }
+    /**
+     * Leave behind a partial the next attempt can trust, or nothing at all.
+     *
+     * `finalStatus` is the last response's status, or undefined when none came.
+     * Whatever a response that did not write the file put there — a redirect or
+     * 202 body, an unrequested 206 — goes: rolled back to the bytes this attempt
+     * resumed from, or deleted outright when it resumed from none. An empty
+     * partial goes too, and with no partial there is no state to describe it.
+     *
+     * Returns true when unusable bytes are STILL on disk: the cleanup was denied,
+     * and the unsafe marker is then the only thing stopping a resume onto them.
+     */
+    function settlePartial(finalStatus) {
+        let unsafe = false;
+        if (finalStatus !== undefined && finalStatus > 0 && !wroteTheFile(finalStatus)) {
+            unsafe = resume ? !(0, paths_1.rollbackPartial)(payload.partPath, existingBytes) : !discardPart(payload.partPath);
+        }
+        discardEmptyPart(payload.partPath);
+        // `rollbackPartial` reports false after it falls back to deleting the file,
+        // so "unsafe" is decided by what is actually on disk.
+        if (!(0, node_fs_1.existsSync)(payload.partPath)) {
+            (0, partial_1.clearPartialState)(payload.partPath);
+            return false;
+        }
+        if (unsafe) {
+            (0, partial_1.markPartialUnsafe)(payload.partPath);
+            return true;
+        }
+        recordPartialForResume();
+        return false;
+    }
     // `If-Range` only where the validator describes the bytes we are appending
     // to. With a strong ETag, a changed resource comes back 200 and curl refuses
     // (exit 33) instead of splicing; `Last-Modified` is the documented fallback.
@@ -2412,7 +2572,11 @@ function main() {
         // Recorded HERE rather than at exit because the transfers that most need a
         // resumable partial are the ones with no exit at all: a SIGKILLed runner, a
         // machine that slept and never woke the process. Written once.
-        if (!provenanceRecorded) {
+        //
+        // Not on the first meter row: curl prints one before any response exists,
+        // and a redirect hop's headers describe nothing on disk. Written once the
+        // response that writes the file has fully landed.
+        if (!provenanceRecorded && responseWroteTheFile()) {
             provenanceRecorded = true;
             recordPartialForResume();
         }
@@ -2442,9 +2606,10 @@ function main() {
         removeConfig();
         // Keep the .part file: cancellation should still allow a later resume — and
         // record what those bytes are, which is what MAKES the later resume safe.
-        recordPartialForResume();
+        // Unless there are none, or they are not the file's.
+        const unsafe = settlePartial(finalStatus()?.status);
         releasePath();
-        persist({ state: "cancelled", finishedAt: Date.now() });
+        persist({ state: "cancelled", finishedAt: Date.now(), ...(unsafe ? { partialUnsafe: true } : {}) });
         process.exit(0);
     };
     // A group-kill (`process.kill(-pid)`) lands here first.
@@ -2459,7 +2624,7 @@ function main() {
     child.on("error", (error) => {
         clearInterval(heartbeat);
         removeConfig();
-        discardEmptyPart(payload.partPath);
+        settlePartial(undefined);
         releasePath();
         persist({
             state: "failed",
@@ -2487,25 +2652,28 @@ function main() {
         //
         // When redirects were followed and the transfer really succeeded, curl
         // reports the 2xx of the final hop, so nothing legitimate is lost here.
-        const httpOk = httpCode === undefined || (httpCode >= 200 && httpCode < 300);
+        //
+        // Nor is every 2xx. curl exits 0 on each of these and writes whatever came:
+        //
+        //  - 202 Accepted: the body is a "still processing" message, not the file;
+        //  - 204 No Content / 205 Reset Content: there is no file;
+        //  - 206 to a request that sent no Range: a fragment published as a whole.
+        //
+        // And one 4xx IS the file. A 416 to a resumed request whose
+        // `Content-Range: bytes */N` equals the bytes on disk means the partial is
+        // already complete — the case wget2 reports as "already fully retrieved".
+        // Measured: curl exits 0 on it, leaving the partial untouched. Treated as a
+        // failure, it is retained, re-recorded, and 416s again on every retry.
+        const alreadyComplete = exitCode === 0 &&
+            httpCode === 416 &&
+            resume &&
+            (0, partial_1.parseUnsatisfiedRangeTotal)(readHeaderDump(payload.partPath) ?? "") === existingBytes &&
+            safeSize(payload.partPath) === existingBytes;
+        // (A resumed 200 never gets here as a success: curl refuses it, exit 33.)
+        const httpOk = alreadyComplete || httpCode === undefined || wroteTheFile(httpCode);
         const succeeded = exitCode === 0 && httpOk;
         if (!succeeded) {
-            const error = (0, curl_1.classifyCurlFailure)({ exitCode, signal, httpCode, stderrTail: stderr, followRedirects });
-            // The .part file is retained so a retry can resume — but only when it
-            // holds something to resume FROM. curl creates the file on open, so a
-            // request that failed before its first byte (404, DNS, TLS) leaves a
-            // 0-byte file that can never be resumed and that the user has no way to
-            // account for sitting in their Downloads folder.
-            // …except whatever a 3xx wrote, which is never resumable content. curl
-            // writes the redirect BODY to the `.part` file, so a later retry would
-            // `continue-at` past that HTML and splice the real file onto it — the
-            // exact silent corruption `fail` exists to prevent.
-            //
-            // Rolled back to `existingBytes` rather than deleted outright: on a
-            // resumed transfer those bytes are the user's real progress and a 304
-            // response in particular means the partial is still valid. Only the bytes
-            // THIS attempt appended are garbage.
-            const redirectStub = error.httpStatus !== undefined && error.httpStatus >= 300 && error.httpStatus < 400;
+            const error = (0, curl_1.classifyCurlFailure)({ exitCode, signal, httpCode, stderrTail: stderr, followRedirects, resumed: resume });
             // curl REFUSING to resume: it asked for a range and got a whole body.
             // Measured — that happens both when the server has no Range support and
             // when `If-Range` says the resource changed underneath us, and curl
@@ -2516,7 +2684,17 @@ function main() {
             // non-206 response to a ranged request, including a 304 — and a 304 says
             // the partial is STILL VALID, so resetting there would destroy real
             // progress to fix a conditional header the caller chose to send.
-            const rangeRefused = exitCode === 33 && httpCode !== undefined && httpCode >= 200 && httpCode < 300;
+            // A 416 to a resume that did NOT prove the partial complete is the same
+            // dead end from the other side: the server says the partial is at least as
+            // long as the resource, so it is not a prefix of it.
+            //
+            // And a resumed whole-body 2xx curl did NOT refuse: it exits 0 when that
+            // body is exactly as long as the partial, keeping the partial — which, if
+            // `If-Range` is what produced the 200, is the OLD version of the file.
+            const rangeRefused = resume &&
+                httpCode !== undefined &&
+                (httpCode === 416 ||
+                    (httpCode >= 200 && httpCode < 300 && httpCode !== 206 && (exitCode === 33 || exitCode === 0)));
             if (rangeRefused) {
                 if (!(0, partial_1.resetPartial)(payload.partPath)) {
                     failUnsafePartial(`The partial file for ${payload.filename} cannot be resumed and could not be cleared. Delete ${payload.partPath} and try again.`);
@@ -2524,33 +2702,23 @@ function main() {
                     return;
                 }
             }
-            // `rolledBack` is READ, not discarded. When the partial could not be made
-            // safe — deletion denied AND emptying denied — the redirect body is still
-            // on disk, and the next attempt would compute `existingBytes` from that
-            // longer file and `curl -C -` the real recording onto the end of it. That
-            // is precisely the corruption this branch exists to prevent, so it has to
-            // reach the status as `partialUnsafe`: a consumer cannot see a cleanup
-            // failure any other way, and `bytesDownloaded: 0` cannot carry it (an
-            // empty response and a failed setup both report zero too).
-            let unsafePartial = false;
-            if (redirectStub && existingBytes > 0)
-                unsafePartial = !(0, paths_1.rollbackPartial)(payload.partPath, existingBytes);
-            // The zero-prefix case is NOT exempt. Nothing needs preserving, so the
-            // whole file goes — but if the delete is denied the redirect body is
-            // still on disk, and `resume` defaults to true, so the next attempt
-            // appends the real download to it. Same corruption, same flag.
-            else if (redirectStub)
-                unsafePartial = !discardPart(payload.partPath);
-            else
-                discardEmptyPart(payload.partPath);
-            // The marker goes on DISK, beside the file it describes. The status field
-            // says the same thing, but a status is addressed by id — and a retry with
-            // a new id, which is the normal case, never reads it. The one thing that
-            // must not happen is the next attempt appending to these bytes.
-            if (unsafePartial)
-                (0, partial_1.markPartialUnsafe)(payload.partPath);
-            else
-                recordPartialForResume();
+            // The .part file is retained so a retry can resume — but only when it
+            // holds something to resume FROM, and only what the file's own response
+            // wrote. curl creates the file on open, so a request that failed before
+            // its first byte (404, DNS, TLS) leaves a 0-byte file nobody can account
+            // for. And curl writes a redirect's or a 202's BODY to the `.part` file, so
+            // a later retry would `continue-at` past it and splice the real file on —
+            // the silent corruption `fail` exists to prevent. Decided by status, NOT
+            // by exit code: an unrequested 206 that drops mid-body exits non-zero and
+            // its fragment is no more the file than a clean one.
+            //
+            // The result is READ. When cleanup was denied the junk is still on disk,
+            // and the next attempt would `curl -C -` the real file onto the end of it;
+            // the marker goes on DISK because a retry under a new id never reads this
+            // status. `bytesDownloaded: 0` cannot carry it: an empty response and a
+            // failed setup both report zero too.
+            // No write-out when curl itself was killed; the dump still has the status.
+            const unsafePartial = settlePartial(httpCode ?? finalStatus()?.status);
             releasePath();
             const cancelled = error.code === "cancelled";
             const message = unsafePartial
@@ -2586,8 +2754,32 @@ function main() {
         // clean curl exit is the only available signal. Better to publish on that
         // than to invent an expectation and reject good downloads.
         const expected = payload.expectedBytes;
+        // curl exited 0 but produced an empty file. Publishing a zero-byte
+        // "recording" would look like success. Checked BEFORE the size check and
+        // whatever the caller expected: that branch keeps its partial for a resume,
+        // and advisory mode skips it — which published this as completed.
+        // `expectedBytes: 0` is the one caller who asked for an empty file.
+        if (finalBytes === 0 && expected !== 0) {
+            // Nothing to resume from, so nothing to keep: the empty `.part` and the
+            // state the meter recorded for it would otherwise both be left behind.
+            // Settled before the status, like every other terminal path.
+            discardEmptyPart(payload.partPath);
+            (0, partial_1.clearPartialState)(payload.partPath);
+            releasePath();
+            persist({
+                state: "failed",
+                finishedAt: Date.now(),
+                bytesDownloaded: 0,
+                error: { code: "integrity", message: "The server returned an empty file." },
+            });
+            process.exit(1);
+            return;
+        }
         const strict = (payload.sizeCheck ?? "strict") === "strict";
         if (strict && expected !== undefined && expected > 0 && finalBytes !== expected) {
+            // Genuine bytes, just not all of them — resumable, so record what they are.
+            recordPartialForResume();
+            releasePath();
             persist({
                 state: "failed",
                 finishedAt: Date.now(),
@@ -2597,22 +2789,6 @@ function main() {
                     message: `Incomplete download: expected ${expected} bytes, got ${finalBytes}.`,
                 },
             });
-            // Genuine bytes, just not all of them — resumable, so record what they are.
-            recordPartialForResume();
-            releasePath();
-            process.exit(1);
-            return;
-        }
-        // Sanity check for the no-expected-size case: curl exited 0 but produced an
-        // empty file. Publishing a zero-byte "recording" would look like success.
-        if (expected === undefined && finalBytes === 0) {
-            persist({
-                state: "failed",
-                finishedAt: Date.now(),
-                bytesDownloaded: 0,
-                error: { code: "integrity", message: "The server returned an empty file." },
-            });
-            releasePath();
             process.exit(1);
             return;
         }
@@ -2662,9 +2838,10 @@ function main() {
  * carried no usable validator", which is an answer, while undefined means "no
  * response yet", which is not.
  */
-function readValidators(partPath) {
+/** curl's header dump for this attempt, or undefined before any response. */
+function readHeaderDump(partPath) {
     try {
-        return (0, partial_1.parseValidators)((0, node_fs_1.readFileSync)((0, partial_1.headerPath)(partPath), "utf8"));
+        return (0, node_fs_1.readFileSync)((0, partial_1.headerPath)(partPath), "utf8");
     }
     catch {
         return undefined;
