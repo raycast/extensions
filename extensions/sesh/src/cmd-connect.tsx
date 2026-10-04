@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -43,6 +43,8 @@ const ALIAS_PREFIX = "/";
 export default function ConnectCommand() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const connectingRef = useRef(false);
+  const autoConnectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
@@ -77,11 +79,14 @@ export default function ConnectCommand() {
 
   useEffect(() => {
     if (!autoConnectTarget) return;
-    const timer = setTimeout(() => connect(autoConnectTarget), ALIAS_AUTO_CONNECT_DELAY_MS);
-    return () => clearTimeout(timer);
+    autoConnectTimerRef.current = setTimeout(() => connect(autoConnectTarget), ALIAS_AUTO_CONNECT_DELAY_MS);
+    return () => clearTimeout(autoConnectTimerRef.current);
   }, [autoConnectTarget]);
 
   async function connect(session: string) {
+    clearTimeout(autoConnectTimerRef.current);
+    if (connectingRef.current) return;
+    connectingRef.current = true;
     try {
       setIsConnecting(true);
       await connectToSession(session);
@@ -91,6 +96,7 @@ export default function ConnectCommand() {
     } catch (error) {
       await showFailureToast(error, { title: "Couldn't connect to session" });
     } finally {
+      connectingRef.current = false;
       setIsConnecting(false);
     }
   }
