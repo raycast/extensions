@@ -1,6 +1,11 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { LearnCommandResult } from "./capture.js";
+import {
+  parseWorkspaceResources,
+  type LearnResource,
+  type WorkspaceResources,
+} from "./resources.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -24,7 +29,7 @@ export async function runLearn(
   try {
     const { stdout, stderr } = await execFileAsync(executable, args, {
       encoding: "utf8",
-      maxBuffer: 1024 * 1024,
+      maxBuffer: 16 * 1024 * 1024,
       env: learnEnv(),
     });
     return { stdout, stderr, code: 0 };
@@ -43,6 +48,144 @@ export async function runLearn(
       stderr: result.stderr || (exited ? "" : result.message || ""),
       code: exited ? (result.code as number) : 1,
     };
+  }
+}
+
+export async function checkedLearn(
+  args: string[],
+  executable = "learn",
+): Promise<void> {
+  const result = await runLearn(args, executable);
+  if (result.code !== 0)
+    throw new Error(result.stderr || result.stdout || "Learn command failed");
+}
+
+export async function listLearnResources(
+  workspace: string,
+  executable = "learn",
+): Promise<WorkspaceResources> {
+  const result = await runLearn([workspace, "ls", "--json"], executable);
+  if (result.code !== 0)
+    throw new Error(
+      result.stderr || result.stdout || "Unable to list resources",
+    );
+  try {
+    return parseWorkspaceResources(result.stdout, workspace);
+  } catch {
+    throw new Error("Learn returned an invalid resource list");
+  }
+}
+
+export async function addLearnResource(
+  workspace: string,
+  source: string,
+  title: string,
+  tags: string[],
+  executable = "learn",
+): Promise<void> {
+  await checkedLearn(
+    [
+      "add",
+      "--workspace",
+      workspace,
+      ...(title ? ["--title", title] : []),
+      ...(tags.length ? ["--tags", tags.join(",")] : []),
+      "--",
+      source,
+    ],
+    executable,
+  );
+}
+
+export async function updateLearnTags(
+  workspace: string,
+  resource: LearnResource,
+  tags: string[],
+  executable = "learn",
+): Promise<void> {
+  const current = (
+    await listLearnResources(workspace, executable)
+  ).resources.find((item) => item.source === resource.source);
+  if (!current) throw new Error("Resource no longer exists. Reload resources.");
+  const operations = [
+    ...current.tags
+      .filter((tag) => !tags.includes(tag))
+      .map((tag) => `-${tag}`),
+    ...tags
+      .filter((tag) => !current.tags.includes(tag))
+      .map((tag) => `+${tag}`),
+  ];
+  if (!operations.length) return;
+  // Published 0.1.0 reads raw tag args and treats `--` as a request to
+  // remove the tag "-". Use legacy-compatible operands for ordinary tags;
+  // literal option-like removals need the updated CLI's separator support.
+  const needsSeparator = operations.some(
+    (operation) => operation === "-w" || operation === "--workspace",
+  );
+  if (needsSeparator) {
+    const help = await runLearn(["tag", "--help"], executable);
+    if (
+      help.code !== 0 ||
+      !help.stdout.includes("literal resource/tag operands")
+    ) {
+      throw new Error(
+        "Removing tags named w or -workspace requires an updated Learn CLI. Build it from the latest Learn source checkout.",
+      );
+    }
+  }
+  await checkedLearn(
+    [
+      "tag",
+      "--workspace",
+      workspace,
+      ...(needsSeparator ? ["--"] : []),
+      resource.source,
+      ...operations,
+    ],
+    executable,
+  );
+  const updated = (
+    await listLearnResources(workspace, executable)
+  ).resources.find((item) => item.source === resource.source);
+  if (
+    !updated ||
+    updated.tags.length !== tags.length ||
+    !tags.every((tag) => updated.tags.includes(tag))
+  ) {
+    throw new Error(
+      "Tags did not match the requested change. Update your Learn CLI and reload resources.",
+    );
+  }
+}
+
+export async function removeLearnResource(
+  workspace: string,
+  source: string,
+  purge: boolean,
+  executable = "learn",
+): Promise<void> {
+  await checkedLearn(
+    [
+      "rm",
+      "--workspace",
+      workspace,
+      ...(purge ? ["--purge"] : []),
+      "--",
+      source,
+    ],
+    executable,
+  );
+}
+
+export async function createLearnWorkspace(
+  name: string,
+  executable = "learn",
+): Promise<void> {
+  const result = await runLearn(["new", "--", name], executable);
+  if (result.code !== 0) {
+    throw new Error(
+      result.stderr || result.stdout || "Unable to create Learn workspace",
+    );
   }
 }
 

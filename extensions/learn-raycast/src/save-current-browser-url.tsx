@@ -46,11 +46,6 @@ export default async function SaveCurrentBrowserUrl({
         applicationName: application?.name,
         tabs,
       });
-      if (workspaces.length === 0) {
-        throw new Error(
-          "No Learn workspace found. Create one with: learn new <name>",
-        );
-      }
       const savedWorkspace = await getSavedCaptureWorkspace({
         listWorkspaces: async () => workspaces,
         store: LocalStorage,

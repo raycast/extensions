@@ -3,7 +3,7 @@
   "name": "learn-raycast",
   "version": "0.1.0",
   "private": true,
-  "description": "Save the current browser URL to a local Learn workspace",
+  "description": "Collect, browse, and organize resources in local Learn workspaces",
   "author": "junjie_zhou",
   "license": "MIT",
   "type": "module",
@@ -31,7 +31,7 @@
     "typescript": "5.9.3",
     "vitest": "1.6.1"
   },
-  "title": "Learn Browser Capture",
+  "title": "Learn",
   "icon": "icon.png",
   "platforms": [
     "macOS"
@@ -45,6 +45,24 @@
       "title": "Save Current Browser URL",
       "description": "Save the active browser tab to the selected Learn workspace",
       "mode": "no-view"
+    },
+    {
+      "name": "browse-resources",
+      "title": "Browse Learn Resources",
+      "description": "Browse workspaces, find resources, edit tags, and open local content",
+      "mode": "view"
+    },
+    {
+      "name": "add-resource",
+      "title": "Add Learn Resource",
+      "description": "Save a URL, repository, or local path with a title and tags",
+      "mode": "view"
+    },
+    {
+      "name": "create-workspace",
+      "title": "Create Learn Workspace",
+      "description": "Create a learning workspace and select it for browser capture",
+      "mode": "view"
     },
     {
       "name": "choose-workspace",

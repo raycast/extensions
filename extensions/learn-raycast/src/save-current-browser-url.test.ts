@@ -144,6 +144,22 @@ describe("Save Current Browser URL", () => {
     expect(mocks.setItem).not.toHaveBeenCalled();
   });
 
+  it("opens the workspace picker for creation when no workspaces exist", async () => {
+    mocks.listLearnWorkspaces.mockResolvedValue([]);
+
+    await SaveCurrentBrowserUrl(launchProps);
+
+    expect(mocks.launchCommand).toHaveBeenCalledWith({
+      name: "choose-workspace",
+      type: "userInitiated",
+      context: {
+        capture: { tabs: [tab], workspaces: [], savedWorkspace: undefined },
+      },
+    });
+    expect(mocks.runLearn).not.toHaveBeenCalled();
+    expect(mocks.showToast).not.toHaveBeenCalled();
+  });
+
   it("asks which active browser window to save even with a remembered workspace", async () => {
     const secondTab = { ...tab, id: 2, url: "https://example.com/other" };
     mocks.getTabs.mockResolvedValue([tab, secondTab]);

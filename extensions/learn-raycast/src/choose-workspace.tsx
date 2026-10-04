@@ -1,12 +1,15 @@
 import {
   Action,
   ActionPanel,
+  Icon,
+  Keyboard,
   launchCommand,
   LaunchType,
   List,
   LocalStorage,
   showToast,
   Toast,
+  useNavigation,
   type LaunchProps,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -15,6 +18,7 @@ import { CAPTURE_WORKSPACE_KEY } from "./capture.js";
 import type { BrowserTab } from "./browser.js";
 import { listLearnWorkspaces } from "./learn-cli.js";
 import { getLearnExecutable } from "./preferences.js";
+import { CreateWorkspaceForm } from "./create-workspace.js";
 
 interface CaptureContext {
   tabs: BrowserTab[];
@@ -40,6 +44,7 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
     context.tabs.length === 1 ? context.tabs[0] : undefined,
   );
   const launching = useRef(false);
+  const { push } = useNavigation();
 
   async function save(
     tab: BrowserTab,
@@ -96,6 +101,26 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
 
   return (
     <List searchBarPlaceholder="Choose a Learn workspace">
+      <List.EmptyView
+        title="Create your first Learn workspace"
+        description="Choose a name, then save this browser tab to it."
+        actions={
+          <ActionPanel>
+            <Action
+              title="Create Workspace and Save Tab"
+              icon={Icon.Plus}
+              onAction={() =>
+                push(
+                  <CreateWorkspaceForm
+                    executable={getLearnExecutable()}
+                    onCreated={(workspace) => save(selectedTab, workspace)}
+                  />,
+                )
+              }
+            />
+          </ActionPanel>
+        }
+      />
       {context.workspaces.map((workspace) => (
         <List.Item
           key={workspace}
@@ -107,6 +132,19 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
                 title="Save to Workspace"
                 onAction={() => save(selectedTab, workspace, true)}
               />
+              <Action
+                title="Create Workspace and Save Tab"
+                icon={Icon.Plus}
+                shortcut={Keyboard.Shortcut.Common.New}
+                onAction={() =>
+                  push(
+                    <CreateWorkspaceForm
+                      executable={getLearnExecutable()}
+                      onCreated={(name) => save(selectedTab, name)}
+                    />,
+                  )
+                }
+              />
             </ActionPanel>
           }
         />
@@ -116,10 +154,12 @@ function CaptureSelection({ context }: { context: CaptureContext }) {
 }
 
 function WorkspaceSelection({ executable }: { executable: string }) {
+  const { push, pop } = useNavigation();
   const {
     data: workspaces,
     isLoading,
     error,
+    revalidate,
   } = usePromise(listLearnWorkspaces, [executable], {
     onError: () => undefined,
     failureToastOptions: { title: "Could not list Learn workspaces" },
@@ -134,8 +174,45 @@ function WorkspaceSelection({ executable }: { executable: string }) {
     });
   }, [error]);
 
+  function createWorkspace() {
+    push(
+      <CreateWorkspaceForm
+        executable={executable}
+        onCreated={async () => {
+          await revalidate();
+          pop();
+        }}
+      />,
+    );
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Choose a Learn workspace">
+      <List.EmptyView
+        title={
+          error
+            ? "Could not load workspaces"
+            : "Create your first Learn workspace"
+        }
+        description={
+          error
+            ? error.message
+            : "Create a workspace to start collecting learning resources."
+        }
+        actions={
+          <ActionPanel>
+            {error ? (
+              <Action title="Reload Workspaces" onAction={revalidate} />
+            ) : (
+              <Action
+                title="Create Workspace"
+                icon={Icon.Plus}
+                onAction={createWorkspace}
+              />
+            )}
+          </ActionPanel>
+        }
+      />
       {(workspaces || []).map((workspace) => (
         <List.Item
           key={workspace}
@@ -151,6 +228,12 @@ function WorkspaceSelection({ executable }: { executable: string }) {
                     title: `Using ${workspace}`,
                   });
                 }}
+              />
+              <Action
+                title="Create Workspace"
+                icon={Icon.Plus}
+                shortcut={Keyboard.Shortcut.Common.New}
+                onAction={createWorkspace}
               />
             </ActionPanel>
           }

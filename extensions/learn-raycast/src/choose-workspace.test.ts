@@ -5,12 +5,19 @@ const mocks = vi.hoisted(() => ({
   launchCommand: vi.fn(),
   setItem: vi.fn(),
   showToast: vi.fn(),
+  push: vi.fn(),
 }));
 
 vi.mock("@raycast/api", () => ({
   Action: "Action",
   ActionPanel: "ActionPanel",
-  List: Object.assign(() => null, { Item: "List.Item" }),
+  List: Object.assign(() => null, {
+    Item: "List.Item",
+    EmptyView: "List.EmptyView",
+  }),
+  Icon: { Plus: "plus" },
+  Keyboard: { Shortcut: { Common: { New: { modifiers: ["cmd"], key: "n" } } } },
+  useNavigation: () => ({ push: mocks.push }),
   launchCommand: mocks.launchCommand,
   LaunchType: { UserInitiated: "userInitiated" },
   LocalStorage: { setItem: mocks.setItem },
@@ -24,6 +31,9 @@ vi.mock("react", () => ({
   useEffect: vi.fn(),
 }));
 vi.mock("./preferences.js", () => ({ getLearnExecutable: () => "learn" }));
+vi.mock("./create-workspace.js", () => ({
+  CreateWorkspaceForm: "CreateWorkspaceForm",
+}));
 
 type Element = {
   type: string | ((props: Record<string, unknown>) => Element);
@@ -31,19 +41,39 @@ type Element = {
     children?: Element | Element[];
     actions?: Element;
     onAction?: () => Promise<void>;
+    title?: string;
+    onCreated?: (workspace: string) => Promise<void>;
   };
 };
 
-function findAction(element: Element): () => Promise<void> {
-  if (typeof element.type === "function" && !element.props.children) {
-    return findAction(element.type(element.props));
+function findAction(element: Element, title?: string): () => Promise<void> {
+  function search(
+    node: Element | Element[] | undefined,
+  ): (() => Promise<void>) | undefined {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      for (const child of node) {
+        const action = search(child);
+        if (action) return action;
+      }
+      return;
+    }
+    if (typeof node.type === "function" && !node.props.children) {
+      return search(node.type(node.props));
+    }
+    if (
+      node.props.onAction &&
+      (title
+        ? node.props.title === title
+        : node.props.title?.startsWith("Save"))
+    ) {
+      return node.props.onAction;
+    }
+    return search(node.props.actions) || search(node.props.children);
   }
-  if (element.props.onAction) return element.props.onAction;
-  if (element.props.actions) return findAction(element.props.actions);
-  const children = element.props.children;
-  if (Array.isArray(children)) return findAction(children[0]);
-  if (children) return findAction(children);
-  throw new Error("No action found");
+  const action = search(element);
+  if (!action) throw new Error("No action found");
+  return action;
 }
 
 const tab = { id: 1, title: "Article", url: "https://example.com/article" };
@@ -56,6 +86,28 @@ beforeEach(() => {
 });
 
 describe("capture workspace picker", () => {
+  it("offers creation with no workspaces and saves the original tab after creation", async () => {
+    const action = findAction(
+      ChooseWorkspace({
+        ...launchProps,
+        launchContext: { capture: { tabs: [tab], workspaces: [] } },
+      }) as Element,
+      "Create Workspace and Save Tab",
+    );
+
+    await action();
+    const form = mocks.push.mock.calls[0][0] as Element;
+    await form.props.onCreated!("new-topic");
+
+    expect(mocks.launchCommand).toHaveBeenCalledWith({
+      name: "save-current-browser-url",
+      type: "userInitiated",
+      context: {
+        capture: { url: tab.url, title: tab.title, workspace: "new-topic" },
+      },
+    });
+  });
+
   it("remembers an explicit workspace choice before starting the capture", async () => {
     let finishRemembering!: () => void;
     mocks.setItem.mockReturnValue(
