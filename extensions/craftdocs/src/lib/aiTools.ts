@@ -141,7 +141,8 @@ export const buildCraftApiUrl = (apiUrl: string, path: string, query?: string) =
 
   const url = new URL(`${base.href}${path}`);
   // The search setter percent-encodes "#", so values like RE2 patterns aren't cut off as a fragment.
-  url.search = query ?? "";
+  // Without a separate query, keep any query already in the path (e.g. "/blocks?id=abc").
+  url.search = query || url.search;
 
   if (!path.startsWith("/") || url.origin !== base.origin || !url.pathname.startsWith(`${base.pathname}/`)) {
     throw new Error(`Invalid path "${path}".`);

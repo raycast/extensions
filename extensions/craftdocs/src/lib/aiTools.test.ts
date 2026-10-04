@@ -33,6 +33,10 @@ describe("buildCraftApiUrl", () => {
     );
   });
 
+  it("keeps a query given inside the path", () => {
+    expect(buildCraftApiUrl(apiUrl, "/blocks?id=1").href).toBe("https://connect.craft.do/links/ID/api/v1/blocks?id=1");
+  });
+
   it("keeps # inside the query", () => {
     expect(buildCraftApiUrl(apiUrl, "/blocks/search", "blockId=1&pattern=#tag").href).toBe(
       "https://connect.craft.do/links/ID/api/v1/blocks/search?blockId=1&pattern=%23tag",
