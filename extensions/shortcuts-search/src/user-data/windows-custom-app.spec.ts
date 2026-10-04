@@ -43,6 +43,7 @@ function storedApp(windows: Record<string, string | null | undefined> = {}) {
 
 it.each([
   { windows_app_id: installed.windowsAppId, windows_process_name: "Code" },
+  { windows_app_id: installed.windowsAppId, windows_process_name: "OldCode" },
   { windows_app_id: installed.windowsAppId, windows_process_name: null },
   { windows_app_id: null, windows_process_name: "Code" },
 ])("resolves renamed custom apps from persisted Windows identifiers %j", async (windows) => {

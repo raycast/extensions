@@ -46,8 +46,19 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
     }
   );
   const currentProcess = getPlatform() === "windows" && !props?.slug && native ? windowsProcessName(native) : undefined;
+  const currentIdentityVerified =
+    application &&
+    (!application.windowsAppId ||
+      native?.windowsAppId === application.windowsAppId ||
+      (!native?.windowsAppId &&
+        !targetLoading &&
+        selectedTarget &&
+        "windowsProcessName" in selectedTarget &&
+        selectedTarget.windowsProcessName.toLowerCase() === currentProcess?.toLowerCase()));
   const target = currentProcess
-    ? { kind: "desktop" as const, windowsProcessName: currentProcess }
+    ? currentIdentityVerified
+      ? { kind: "desktop" as const, windowsProcessName: currentProcess }
+      : undefined
     : targetLoading
       ? undefined
       : selectedTarget;

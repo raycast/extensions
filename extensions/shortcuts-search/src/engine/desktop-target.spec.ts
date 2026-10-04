@@ -44,3 +44,30 @@ it("preserves macOS bundle targets without querying Windows apps", async () => {
   });
   expect(getApplications).not.toHaveBeenCalled();
 });
+it("resolves the current executable by app ID when a saved process name is stale", async () => {
+  jest.mocked(getPlatform).mockReturnValue("windows");
+  jest.mocked(getApplications).mockResolvedValue([
+    { name: "Renamed Example", path: "C:\\ExampleNew.exe", windowsAppId: "Vendor.Package!App" },
+    { name: "Other App", path: "C:\\ExampleOld.exe", windowsAppId: "Other.Package!App" },
+  ]);
+  expect(
+    await getDesktopTarget({ ...app, windowsAppId: "Vendor.Package!App", windowsProcessName: "ExampleOld" })
+  ).toEqual({ kind: "desktop", windowsProcessName: "ExampleNew" });
+});
+it.each(
+  [
+    [],
+    [{ name: "Example", path: "C:\\Example.exe", windowsAppId: "Other.Package!App" }],
+    [{ name: "Example", path: "Applications", windowsAppId: "Vendor.Package!App" }],
+    [
+      { name: "Example", path: "C:\\Example.exe", windowsAppId: "Vendor.Package!App" },
+      { name: "Example", path: "C:\\Other.exe", windowsAppId: "Vendor.Package!App" },
+    ],
+  ].map((installed) => ({ installed }))
+)("does not fall back to a saved process when the stored app ID cannot resolve uniquely: %j", async ({ installed }) => {
+  jest.mocked(getPlatform).mockReturnValue("windows");
+  jest.mocked(getApplications).mockResolvedValue(installed);
+  expect(
+    await getDesktopTarget({ ...app, windowsAppId: "Vendor.Package!App", windowsProcessName: "Example" })
+  ).toBeUndefined();
+});
