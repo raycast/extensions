@@ -1,6 +1,6 @@
 # Schwab Portfolio Changelog
 
-## [Consistent Position Returns] - {PR_MERGE_DATE}
+## [Consistent Position Returns] - 2026-10-04
 
 - Use the same unrealized return calculation in portfolio views and AI answers, including short positions and option multipliers
 
