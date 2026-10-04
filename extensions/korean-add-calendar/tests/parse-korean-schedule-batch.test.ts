@@ -1,12 +1,30 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildBatchParseErrorMessage,
   buildBatchRetryInput,
   buildBatchRetrySnapshot,
   MAX_BATCH_ITEMS,
   parseKoreanScheduleBatch,
   parseKoreanScheduleBatchWithRetrySnapshot,
 } from "../src/lib/parse-korean-schedule-batch";
+
+describe("buildBatchParseErrorMessage", () => {
+  it("identifies the failed clause", () => {
+    expect(buildBatchParseErrorMessage([{ input: "오후 13시 테스트", error: "Use an hour from 1 to 12." }])).toBe(
+      "[오후 13시 테스트] Use an hour from 1 to 12.",
+    );
+  });
+
+  it("identifies every failed clause", () => {
+    expect(
+      buildBatchParseErrorMessage([
+        { input: "오후 13시 테스트", error: "Use an hour from 1 to 12." },
+        { input: "시간 없는 일정", error: "Include a date or time." },
+      ]),
+    ).toBe("[오후 13시 테스트] Use an hour from 1 to 12. | [시간 없는 일정] Include a date or time.");
+  });
+});
 
 describe("parseKoreanScheduleBatch", () => {
   const baseNow = new Date(2026, 1, 17, 9, 0, 0, 0);

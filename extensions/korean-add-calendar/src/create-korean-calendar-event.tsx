@@ -33,6 +33,7 @@ import { resolveDestinationSelection } from "./lib/destination-selection";
 import { resolveInitialSentence } from "./lib/launch-input";
 import {
   BatchRetrySnapshot,
+  buildBatchParseErrorMessage,
   buildBatchRetrySnapshot,
   firstBatchParseResult,
   MAX_BATCH_ITEMS,
@@ -464,7 +465,7 @@ export default function Command(props: LaunchProps<{ arguments: { sentence?: str
       await showToast({
         style: Toast.Style.Failure,
         title: "Fix parsing errors before creating items",
-        message: `[${submitBatch.errors[0].input}] ${submitBatch.errors[0].error}`,
+        message: buildBatchParseErrorMessage(submitBatch.errors),
       });
       return;
     }
@@ -960,8 +961,7 @@ function buildSentenceError({
   }
 
   if (parsedBatch.errors.length > 0) {
-    const firstError = parsedBatch.errors[0]?.error ?? "Could not recognize the schedule sentence.";
-    return parsedBatch.errors.length > 1 ? `${firstError} (${parsedBatch.errors.length} clauses failed)` : firstError;
+    return buildBatchParseErrorMessage(parsedBatch.errors) ?? "Could not recognize the schedule sentence.";
   }
 
   if (batchIntent === "mixed") {
