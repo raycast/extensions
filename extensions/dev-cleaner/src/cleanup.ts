@@ -162,18 +162,25 @@ export async function cleanCandidates(
   return results;
 }
 
-/** The most recent scan's candidates, or `undefined` while a scan is running or after it was cancelled. */
-export type LatestScan = readonly CleanupCandidate[] | undefined;
+/** Where the most recent scan stands; a failed or cancelled scan is `unavailable` rather than still running. */
+export type LatestScan =
+  { state: "scanning" } | { state: "unavailable" } | { state: "complete"; candidates: readonly CleanupCandidate[] };
 
 export type RetryTargets =
-  { status: "scanning" } | { status: "missing" } | { status: "ready"; candidates: CleanupCandidate[] };
+  | { status: "scanning" }
+  | { status: "unavailable" }
+  | { status: "missing"; missing: CleanupCandidate[] }
+  | { status: "ready"; candidates: CleanupCandidate[]; missing: CleanupCandidate[] };
 
 /**
  * Picks failed items from the latest completed scan rather than reusing the original candidates, whose recorded
- * modification time would make an item that changed after scanning fail revalidation again.
+ * modification time would make an item that changed after scanning fail revalidation again. Failed items that are no
+ * longer found are returned separately so the caller can report them instead of skipping them silently.
  */
-export function freshRetryTargets(failedIds: ReadonlySet<string>, latestScan: LatestScan): RetryTargets {
-  if (!latestScan) return { status: "scanning" };
-  const candidates = latestScan.filter((candidate) => failedIds.has(candidate.id));
-  return candidates.length > 0 ? { status: "ready", candidates } : { status: "missing" };
+export function freshRetryTargets(failed: readonly CleanupCandidate[], latestScan: LatestScan): RetryTargets {
+  if (latestScan.state !== "complete") return { status: latestScan.state };
+  const latestById = new Map(latestScan.candidates.map((candidate) => [candidate.id, candidate] as const));
+  const candidates = failed.flatMap((candidate) => latestById.get(candidate.id) ?? []);
+  const missing = failed.filter((candidate) => !latestById.has(candidate.id));
+  return candidates.length > 0 ? { status: "ready", candidates, missing } : { status: "missing", missing };
 }

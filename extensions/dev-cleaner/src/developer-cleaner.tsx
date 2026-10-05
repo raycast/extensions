@@ -172,7 +172,7 @@ function Dashboard({
   const [protectedItems, setProtectedItems] = useState<ProtectedItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const selectionTouches = useRef<SelectionTouches>(emptySelectionTouches());
-  const latestScan = useRef<LatestScan>(undefined);
+  const latestScan = useRef<LatestScan>({ state: "scanning" });
   const [excludedItems, setExcludedItems] = useState(initialExcludedItems);
   const excludedItemsRef = useRef(initialExcludedItems);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,7 +202,7 @@ function Dashboard({
     setProtectedItems([]);
     setSelected(new Set());
     selectionTouches.current = emptySelectionTouches();
-    latestScan.current = undefined;
+    latestScan.current = { state: "scanning" };
     scanAll({ ...context, signal: controller.signal }, (partial) => {
       if (!active) return;
       setCandidates(partial.candidates);
@@ -214,11 +214,12 @@ function Dashboard({
         setCandidates(result.candidates);
         setIssues(result.issues);
         setProtectedItems(result.protectedItems ?? []);
-        latestScan.current = result.candidates;
+        latestScan.current = { state: "complete", candidates: result.candidates };
         const keptIds = new Set(excludedItemsRef.current.map((item) => item.id));
         setSelected((current) => mergeScanSelection(current, result.candidates, keptIds, selectionTouches.current));
       })
       .catch(async (error) => {
+        if (active) latestScan.current = { state: "unavailable" };
         if (active && !isAbortError(error))
           await showToast({ style: Toast.Style.Failure, title: "Scan failed", message: (error as Error).message });
       })
@@ -287,7 +288,7 @@ function Dashboard({
     push(<ExcludedItems initialItems={excludedItemsRef.current} onAllow={allowExcludedItem} />);
   }
 
-  async function runCleanup(targets: CleanupCandidate[]) {
+  async function runCleanup(targets: CleanupCandidate[], notice?: string) {
     if (cleanupController.current) return;
     let savedKeptItems: ExcludedItem[];
     try {
@@ -316,7 +317,7 @@ function Dashboard({
     const currentFootprint = targets.reduce((sum, candidate) => sum + (candidate.bytes ?? 0), 0);
     const confirmed = await confirmAlert({
       title: `Clean ${targets.length} selected item${targets.length === 1 ? "" : "s"}?`,
-      message: `The known selected footprint is ${formatBytes(currentFootprint)}. ${formatBytes(trashBytes)} will move to Trash and only frees disk space after Trash is emptied. ${permanent} native cleanup command${permanent === 1 ? " is" : "s are"} permanent and will determine its own reclaimable amount.`,
+      message: `${notice ? `${notice} ` : ""}The known selected footprint is ${formatBytes(currentFootprint)}. ${formatBytes(trashBytes)} will move to Trash and only frees disk space after Trash is emptied. ${permanent} native cleanup command${permanent === 1 ? " is" : "s are"} permanent and will determine its own reclaimable amount.`,
       primaryAction: { title: "Clean Selected", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
@@ -351,8 +352,11 @@ function Dashboard({
             : undefined;
       const run = await recordCleanupRun(targets, results, startedAt, new Date());
       const failedIds = new Set(failures.map((failure) => failure.candidateId));
-      latestScan.current = undefined;
-      push(<CleanupReport run={run} onRetry={failedIds.size > 0 ? () => retryFailed(failedIds) : undefined} />);
+      const failedTargets = targets.filter((candidate) => failedIds.has(candidate.id));
+      latestScan.current = { state: "scanning" };
+      push(
+        <CleanupReport run={run} onRetry={failedTargets.length > 0 ? () => retryFailed(failedTargets) : undefined} />,
+      );
       refresh();
     } finally {
       cleanupController.current = undefined;
@@ -360,8 +364,8 @@ function Dashboard({
     }
   }
 
-  async function retryFailed(failedIds: ReadonlySet<string>) {
-    const retry = freshRetryTargets(failedIds, latestScan.current);
+  async function retryFailed(failedTargets: CleanupCandidate[]) {
+    const retry = freshRetryTargets(failedTargets, latestScan.current);
     if (retry.status === "scanning") {
       await showToast({
         style: Toast.Style.Failure,
@@ -370,11 +374,31 @@ function Dashboard({
       });
       return;
     }
-    if (retry.status === "missing") {
-      await showToast({ style: Toast.Style.Failure, title: "Failed items no longer found in the latest scan" });
+    if (retry.status === "unavailable") {
+      refresh();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Scan restarted",
+        message: "Retry after the scan finishes so changed items are revalidated",
+      });
       return;
     }
-    await runCleanup(retry.candidates);
+    const missingTitles = retry.missing.map((candidate) => candidate.title).join(", ");
+    if (retry.status === "missing") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed items no longer found in the latest scan",
+        message: missingTitles,
+      });
+      return;
+    }
+    const skipped = retry.missing.length;
+    await runCleanup(
+      retry.candidates,
+      skipped > 0
+        ? `${skipped} failed item${skipped === 1 ? " is" : "s are"} no longer in the latest scan and will be skipped: ${missingTitles}.`
+        : undefined,
+    );
   }
 
   async function cleanSelection() {
