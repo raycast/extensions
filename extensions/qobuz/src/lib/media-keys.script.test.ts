@@ -1,13 +1,13 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
-import { SCRIPT } from "./media-keys";
+import { SCRIPT, buildScriptArgs } from "./media-keys";
 
 const exec = promisify(execFile);
 
 // NX_KEYTYPE_NUM_LOCK: a real system-defined key event that no Mac acts on,
 // so the script can run for real without touching playback.
-const HARMLESS_KEY_CODE = "10";
+const HARMLESS_KEY_CODE = 10;
 
 describe("media key script", () => {
   it("is valid JavaScript defining run(argv)", () => {
@@ -15,11 +15,10 @@ describe("media key script", () => {
     expect(typeof defineRun()).toBe("function");
   });
 
-  it("builds a system-defined event and posts it to the HID tap", () => {
-    expect(SCRIPT).toContain(
-      "otherEventWithTypeLocationModifierFlagsTimestampWindowNumberContextSubtypeData1Data2(14,",
-    );
-    expect(SCRIPT).toContain("$.CGEventPost($.kCGHIDEventTap, ev.CGEvent)");
+  it("rebuilds the event from serialised data and posts it to the HID tap", () => {
+    expect(SCRIPT).toContain("$.CGEventCreateFromData(null, data)");
+    expect(SCRIPT).toContain("$.CGEventPost($.kCGHIDEventTap, event)");
+    expect(SCRIPT).not.toContain("ev.CGEvent");
   });
 
   // Runs the real script through osascript. Without Accessibility the script
@@ -27,7 +26,7 @@ describe("media key script", () => {
   // acceptable failure is `not-trusted`; anything else means it is broken.
   it.runIf(process.platform === "darwin")("runs under osascript and reaches the event APIs", async () => {
     try {
-      await exec("osascript", ["-l", "JavaScript", "-e", SCRIPT, HARMLESS_KEY_CODE]);
+      await exec("osascript", ["-l", "JavaScript", "-e", SCRIPT, ...buildScriptArgs(HARMLESS_KEY_CODE)]);
     } catch (error) {
       expect((error as { stderr?: string }).stderr ?? "").toContain("not-trusted");
     }

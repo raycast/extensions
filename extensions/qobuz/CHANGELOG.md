@@ -1,5 +1,11 @@
 # Qobuz Changelog
 
+## [Fix media keys never posting] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Media commands (play, next, previous, forward, rewind) silently did nothing since the switch to JavaScript for Automation: the key event could not cross into Core Graphics and was never posted. The event is now rebuilt from a serialised template and read back before posting, so a format change fails loudly instead of silently
+
 ## [Raycast 1.x support] - 2026-10-04
 
 - Restore compatibility with Raycast 1.x
