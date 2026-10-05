@@ -316,6 +316,7 @@ export default function Command(props: LaunchProps) {
         if (cancelled) return;
 
         setCollections(result);
+        setLoadError(undefined);
 
         const firstCollectionId = candidates[0] ?? result[0]?.id;
 
@@ -449,6 +450,11 @@ export default function Command(props: LaunchProps) {
     });
   }
 
+  const groups = useMemo(
+    () => groupResources(resources, statusFilter === "scheduled"),
+    [resources, statusFilter],
+  );
+
   if (loadError) {
     const guidance =
       loadError.status === 401
@@ -482,11 +488,6 @@ export default function Command(props: LaunchProps) {
 
   const selectedCollection = collections.find(
     (collection) => collection.id === selectedCollectionId,
-  );
-
-  const groups = useMemo(
-    () => groupResources(resources, statusFilter === "scheduled"),
-    [resources, statusFilter],
   );
 
   function resourceListItem(resource: Resource) {

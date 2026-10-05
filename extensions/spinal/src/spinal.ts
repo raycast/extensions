@@ -1,8 +1,8 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
+import { createHash } from "crypto";
 
 const cache = new Cache({ namespace: "spinal" });
 
-const collectionsCacheKey = "collections";
 const collectionsCacheDurationMilliseconds = 60 * 60 * 1000;
 const resourcesCacheDurationMilliseconds = 10 * 60 * 1000;
 const requestTimeoutMilliseconds = 30_000;
@@ -24,10 +24,6 @@ export type ResourceStatusFilter = (typeof resourceStatusFilters)[number];
 interface CacheEntry<T> {
   cachedAt: number;
   data: T;
-}
-
-export interface Preferences {
-  apiKey: string;
 }
 
 export interface Field {
@@ -130,10 +126,8 @@ async function requestJson<T>(
     requestTimeoutMilliseconds,
   );
 
-  let response: Response;
-
   try {
-    response = await fetch(`${appBaseUrl}${path}`, {
+    const response = await fetch(`${appBaseUrl}${path}`, {
       ...requestInit,
       signal: controller.signal,
       headers: {
@@ -142,34 +136,34 @@ async function requestJson<T>(
         ...requestInit?.headers,
       },
     });
+
+    let body: Record<string, unknown> = {};
+
+    try {
+      body = (await response.json()) as Record<string, unknown>;
+    } catch {
+      body = {};
+    }
+
+    if (!response.ok) {
+      const error = (body.error ?? {}) as {
+        code?: string;
+        message?: string;
+        details?: Record<string, string[]>;
+      };
+
+      throw new SpinalError(
+        response.status,
+        error.code ?? "http_error",
+        error.message ?? response.statusText,
+        error.details,
+      );
+    }
+
+    return body as T;
   } finally {
     clearTimeout(timeout);
   }
-
-  let body: Record<string, unknown> = {};
-
-  try {
-    body = (await response.json()) as Record<string, unknown>;
-  } catch {
-    body = {};
-  }
-
-  if (!response.ok) {
-    const error = (body.error ?? {}) as {
-      code?: string;
-      message?: string;
-      details?: Record<string, string[]>;
-    };
-
-    throw new SpinalError(
-      response.status,
-      error.code ?? "http_error",
-      error.message ?? response.statusText,
-      error.details,
-    );
-  }
-
-  return body as T;
 }
 
 function loadCachedValue<T>(
@@ -202,9 +196,19 @@ function saveCachedValue<T>(key: string, data: T): void {
   );
 }
 
+function apiKeyCacheIdentity(): string {
+  const { apiKey } = preferences();
+
+  return createHash("sha256").update(apiKey).digest("hex").slice(0, 16);
+}
+
+function collectionsCacheKey(): string {
+  return `collections:${apiKeyCacheIdentity()}`;
+}
+
 export async function fetchCollections(): Promise<Collection[]> {
   const cached = loadCachedValue<Collection[]>(
-    collectionsCacheKey,
+    collectionsCacheKey(),
     collectionsCacheDurationMilliseconds,
   );
 
@@ -224,7 +228,7 @@ export async function fetchCollections(): Promise<Collection[]> {
     page += 1;
   } while (page <= lastPage);
 
-  saveCachedValue(collectionsCacheKey, collections);
+  saveCachedValue(collectionsCacheKey(), collections);
   return collections;
 }
 
@@ -258,7 +262,7 @@ function resourcesCacheKey(
   collectionId: string,
   status: ResourceStatusFilter,
 ): string {
-  return `resources:${collectionId}:${status}`;
+  return `resources:${apiKeyCacheIdentity()}:${collectionId}:${status}`;
 }
 
 export function loadCachedResources(

@@ -59,6 +59,10 @@ const mappableFieldTypes = new Set([
   "multi_select",
 ]);
 
+function fieldValueId(collectionId: string, fieldKey: string): string {
+  return `fieldValues.${collectionId}.${fieldKey}`;
+}
+
 function mappableFields(collection: Collection): Field[] {
   return collection.fields.filter(
     (field) => mappableFieldTypes.has(field.field_type) && !field.read_only,
@@ -146,7 +150,7 @@ function validationIssues(
   const issues: ValidationIssue[] = [];
 
   for (const field of mappableFields(collection)) {
-    const rawValue = values[`fieldValues.${field.key}`];
+    const rawValue = values[fieldValueId(collection.id, field.key)];
     const serialized = serializeFieldValue(field, rawValue);
 
     if (field.required && serialized === undefined) {
@@ -191,8 +195,14 @@ function fieldSelectOptions(field: Field): string[] {
   return field.allowed_values ?? [];
 }
 
-function FieldControl({ field }: { field: Field }) {
-  const id = `fieldValues.${field.key}`;
+function FieldControl({
+  collectionId,
+  field,
+}: {
+  collectionId: string;
+  field: Field;
+}) {
+  const id = fieldValueId(collectionId, field.key);
   const label = fieldLabel(field);
   const placeholder = field.description || undefined;
   const defaultValue = fieldDefaultValue(field);
@@ -238,6 +248,7 @@ function FieldControl({ field }: { field: Field }) {
         <Form.DatePicker
           id={id}
           title={label}
+          type={Form.DatePicker.Type.DateTime}
           defaultValue={defaultValue ? new Date(defaultValue) : undefined}
         />
       );
@@ -368,7 +379,7 @@ export default function Command(props: LaunchProps) {
     for (const field of mappableFields(target)) {
       const value = serializeFieldValue(
         field,
-        values[`fieldValues.${field.key}`],
+        values[fieldValueId(target.id, field.key)],
       );
 
       if (value !== undefined) fieldValues[field.key] = value;
@@ -516,7 +527,11 @@ export default function Command(props: LaunchProps) {
 
       {selected
         ? mappableFields(selected).map((field) => (
-            <FieldControl key={`${selected.id}.${field.key}`} field={field} />
+            <FieldControl
+              key={`${selected.id}.${field.key}`}
+              collectionId={selected.id}
+              field={field}
+            />
           ))
         : null}
     </Form>
