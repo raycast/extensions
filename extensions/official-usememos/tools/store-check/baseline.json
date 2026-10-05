@@ -1,0 +1,80 @@
+[
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "setup",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "search-memos",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "create-memo",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "capture-memo",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "save-clipboard",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleDuplicatesTitle",
+    "subject": "open-memos",
+    "reason": "Every command subtitle repeats the title. Removing all six is a manifest change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleReadsAsDescription",
+    "subject": "capture-memo",
+    "reason": "Subtitle is a description; goes away with the subtitle removal above.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleReadsAsDescription",
+    "subject": "save-clipboard",
+    "reason": "Subtitle is a description; goes away with the subtitle removal above.",
+    "owner": "human"
+  },
+  {
+    "check": "naming.subtitleReadsAsDescription",
+    "subject": "open-memos",
+    "reason": "Subtitle is a description; goes away with the subtitle removal above.",
+    "owner": "human"
+  },
+  {
+    "check": "screenshots.missing",
+    "subject": "metadata",
+    "reason": "Screenshots are captured from a real instance right before the submission PR.",
+    "owner": "human"
+  },
+  {
+    "check": "readme.mediaInAssets",
+    "subject": "README.md",
+    "reason": "README embeds the bundled icon. Moving it to media/ is a separate change.",
+    "owner": "human"
+  },
+  {
+    "check": "code.rootNavigationTitle",
+    "subject": "components/SetupGuide.tsx",
+    "reason": "Root List sets navigationTitle to the command name. Removing it is a UI change with its own review.",
+    "owner": "human"
+  },
+  {
+    "check": "code.rootNavigationTitle",
+    "subject": "components/CreateMemoForm.tsx",
+    "reason": "Root form sets navigationTitle to the command name. Removing it is a UI change with its own review.",
+    "owner": "human"
+  }
+]
