@@ -7,6 +7,7 @@ import {
   parseLocalDate,
   resolveSpaceId,
   waitForDailyNote,
+  describeTargetSpace,
 } from "../lib/aiTools";
 import { buildDailyNoteOpenUrl } from "../lib/dailyNotes";
 
@@ -24,7 +25,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   info: [
     { name: "Content", value: input.content },
     { name: "Date", value: input.date ?? "today" },
-    { name: "Space", value: input.spaceId },
+    { name: "Space", value: await describeTargetSpace(input.spaceId) },
     {
       name: "Note",
       value:

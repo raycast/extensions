@@ -54,6 +54,12 @@ export const resolveSpaceId = (
   return resolved;
 };
 
+/** Display name of the space a write will target, so confirmations show it even when spaceId is omitted. */
+export const describeTargetSpace = async (spaceId: string | undefined) => {
+  const { config } = await loadCraftSnapshot();
+  return config.getSpaceDisplayName(resolveSpaceId(config, spaceId));
+};
+
 export const buildCreateBlockUrl = ({
   parentBlockId,
   spaceId,

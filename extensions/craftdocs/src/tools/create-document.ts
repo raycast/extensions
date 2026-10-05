@@ -1,5 +1,5 @@
 import { open, Tool } from "@raycast/api";
-import { buildCreateDocumentUrl, loadCraftSnapshot, resolveSpaceId } from "../lib/aiTools";
+import { buildCreateDocumentUrl, loadCraftSnapshot, resolveSpaceId, describeTargetSpace } from "../lib/aiTools";
 
 type Input = {
   /** Title of the new document. */
@@ -15,7 +15,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   info: [
     { name: "Title", value: input.title },
     { name: "Content", value: input.content },
-    { name: "Space", value: input.spaceId },
+    { name: "Space", value: await describeTargetSpace(input.spaceId) },
   ],
 });
 

@@ -1,5 +1,5 @@
 import { open, Tool } from "@raycast/api";
-import { buildCreateBlockUrl, loadCraftSnapshot, resolveSpaceId } from "../lib/aiTools";
+import { buildCreateBlockUrl, loadCraftSnapshot, resolveSpaceId, describeTargetSpace } from "../lib/aiTools";
 
 type Input = {
   /** ID of the document to write to (documentId from search-blocks). */
@@ -16,7 +16,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   message: "Add this content to the Craft document?",
   info: [
     { name: "Document", value: input.documentId },
-    { name: "Space", value: input.spaceId },
+    { name: "Space", value: await describeTargetSpace(input.spaceId) },
     { name: "Content", value: input.content },
     { name: "Position", value: input.position ?? "end" },
   ],
