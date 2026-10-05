@@ -35,13 +35,17 @@ export default function Command() {
   const calls = data?.calls ?? [];
   const call = calls.find((c) => c.id === selected);
 
-  // Tagged with the call it belongs to, so a reply for a previous selection is never shown.
+  // Tagged with the call it belongs to, errors included, so a reply for a previous selection is never shown.
   const preview = usePromise(
     async (id: string | undefined, hasSummary: boolean | undefined, hasTranscript: boolean | undefined) => {
       if (!id) return { id: "", text: "" };
-      if (hasSummary) return { id, text: await readSummary(id) };
-      if (!hasTranscript) return { id, text: "" };
-      return { id, text: await readTranscript(id, 3000, false) };
+      try {
+        if (hasSummary) return { id, text: await readSummary(id) };
+        if (!hasTranscript) return { id, text: "" };
+        return { id, text: await readTranscript(id, 3000, false) };
+      } catch (e) {
+        return { id, text: "", error: e instanceof Error ? e.message : String(e) };
+      }
     },
     [call?.id, call?.hasSummary, call?.hasTranscript],
   );
@@ -51,10 +55,10 @@ export default function Command() {
     const parts: string[] = [];
     if (snippet) parts.push(`> ${snippet}`);
     if (c.id === call?.id) {
-      const text = preview.data?.id === c.id ? preview.data.text : "";
-      if (text) parts.push(text);
-      else if (preview.error) parts.push(`Couldn't load the preview: ${preview.error.message}`);
-      else if (!preview.isLoading && preview.data?.id === c.id) parts.push("No transcript yet.");
+      const current = preview.data?.id === c.id ? preview.data : undefined;
+      if (current?.text) parts.push(current.text);
+      else if (current?.error) parts.push(`Couldn't load the preview: ${current.error}`);
+      else if (!preview.isLoading && current) parts.push("No transcript yet.");
     }
     return parts.join("\n\n");
   }
@@ -142,7 +146,7 @@ export default function Command() {
                 />
               ) : null}
               <Action.ShowInFinder path={c.folder} />
-              {preview.error && c.id === call?.id ? (
+              {preview.data?.error && preview.data.id === c.id ? (
                 <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => preview.revalidate()} />
               ) : null}
             </ActionPanel>
@@ -150,7 +154,13 @@ export default function Command() {
         />
       ))}
       {data?.truncated ? (
-        <List.Section title="Showing the latest 100 calls. Refine your search to see others." />
+        <List.Section
+          title={
+            text.trim()
+              ? "Not every match is shown. Refine your search to narrow it down."
+              : "Showing the latest 100 calls. Search to find older ones."
+          }
+        />
       ) : null}
     </List>
   );
