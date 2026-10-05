@@ -1,5 +1,11 @@
 # Mint Changelog
 
+## [Clearer AI answers] - {PR_MERGE_DATE}
+
+- When Mint does not answer, Raycast AI says so instead of saying the Mac has not been scanned.
+- With an older Mint, disk sizes are read in the units Mint writes them, and a full disk's 0 bytes free is shown.
+- Without Mint installed, asking Raycast AI to open a Mint command says how to get Mint instead of opening a command that cannot run.
+
 ## [Ask Mint in Raycast AI] - 2026-10-05
 
 - Ask Mint in Raycast AI: "@mint what's taking up space?", "@mint which apps are using the most memory?", "@mint what grew on my disk this week?" The answers come from Mint and only read. To act, Mint opens Free Disk, Optimize Storage or Free Memory for you to review and confirm.
