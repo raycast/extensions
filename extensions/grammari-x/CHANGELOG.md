@@ -1,5 +1,12 @@
 # GrammariX Changelog
 
+## [Quick Fix Command and OpenAI Provider Fallback] - {PR_MERGE_DATE}
+
+- Rewrite the AI prompts so edits are context-aware: the whole text is read before editing, wording is corrected as well as grammar, and changes are kept to the minimum needed while the author's voice, meaning and formatting are preserved. Prompts now use a system message, a delimited input block so text is never mistaken for instructions, and a per-action creativity level.
+- Add an "AI Provider" preference (Auto, Raycast AI, OpenAI). A configured OpenAI key is now used instead of being ignored whenever Raycast AI happens to be available, and a failing provider falls back to the other one. Failures are reported with the provider name and the underlying error.
+- Change model from GPT-5 nano to GPT-5.6 Luna (`gpt-5.6-luna`), with reasoning disabled for fast, low-cost rewrites. Upgrade the OpenAI SDK to v7.
+- Add "Quick Fix Selected Text" command: a no-view command that fixes the selected text and pastes it back in place, without opening Raycast. Configurable action (fix grammar, paraphrase, change tone, continue text) and tone.
+
 ## [Fix] - 2025-12-08
 
 - Change the order of the copy/paste actions and the shortcut.

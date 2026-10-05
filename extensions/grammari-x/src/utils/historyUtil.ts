@@ -53,3 +53,10 @@ export function useHistory() {
 
   return useMemo(() => ({ data, isLoading, add, remove, clear }), [data, isLoading, add, remove, clear]);
 }
+
+export async function addChatToHistory(chat: Chat) {
+  const storedHistory = await LocalStorage.getItem<string>("history");
+  const history: Chat[] = storedHistory ? JSON.parse(storedHistory) : [];
+  history.push(chat);
+  await LocalStorage.setItem("history", JSON.stringify(history));
+}

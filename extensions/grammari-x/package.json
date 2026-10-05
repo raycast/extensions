@@ -55,6 +55,79 @@
       "mode": "view"
     },
     {
+      "name": "quick-fix",
+      "title": "Quick Fix Selected Text",
+      "subtitle": "GrammariX",
+      "description": "Instantly improve the selected text and paste it back in place, without opening Raycast. Assign a hotkey to this command for one-shortcut writing fixes.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "quickAction",
+          "title": "Quick Action",
+          "description": "What to do with the selected text when the shortcut is pressed.",
+          "type": "dropdown",
+          "required": false,
+          "default": "Fix grammer",
+          "data": [
+            {
+              "title": "Fix Grammar",
+              "value": "Fix grammer"
+            },
+            {
+              "title": "Paraphrase",
+              "value": "Paraphrase"
+            },
+            {
+              "title": "Change Tone",
+              "value": "Change Tone"
+            },
+            {
+              "title": "Continue Text",
+              "value": "Continue Text"
+            }
+          ]
+        },
+        {
+          "name": "quickTone",
+          "title": "Quick Tone",
+          "description": "Tone used when the quick action is set to Change Tone.",
+          "type": "dropdown",
+          "required": false,
+          "default": "Professional",
+          "data": [
+            {
+              "title": "Professional",
+              "value": "Professional"
+            },
+            {
+              "title": "Friendly",
+              "value": "Friendly"
+            },
+            {
+              "title": "Romantic",
+              "value": "Romantic"
+            },
+            {
+              "title": "Happy",
+              "value": "Happy"
+            },
+            {
+              "title": "Sad",
+              "value": "Sad"
+            },
+            {
+              "title": "Sarcastic",
+              "value": "Sarcastic"
+            },
+            {
+              "title": "Angry",
+              "value": "Angry"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "history",
       "title": "History",
       "subtitle": "GrammariX",
@@ -80,6 +153,28 @@
       "type": "textfield"
     },
     {
+      "name": "aiProvider",
+      "title": "AI Provider",
+      "description": "Which AI to use. Auto uses your OpenAI key when one is set, and Raycast AI otherwise. If the chosen provider fails, the other one is tried as a fallback.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (OpenAI key if set, else Raycast AI)",
+          "value": "auto"
+        },
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "OpenAI (use my key)",
+          "value": "openai"
+        }
+      ]
+    },
+    {
       "name": "isHistoryPaused",
       "label": "Enable pause history",
       "description": "Pause the history of the conversation",
@@ -93,7 +188,7 @@
     "@raycast/api": "^1.67.1",
     "@raycast/utils": "^1.12.4",
     "dotenv": "^16.3.1",
-    "openai": "^4.0.1",
+    "openai": "^7.9.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
