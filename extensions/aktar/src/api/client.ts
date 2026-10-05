@@ -3,7 +3,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import type { BucketListing, Destination, Status, TemporaryLink, Upload } from "./types";
+import type { BucketListing, Destination, Status, TemporaryLink, Upload, WatchedFolder, WatchedFolders } from "./types";
 
 export const DEFAULT_PORT = 47913;
 const CONNECTION_KEY = "connection";
@@ -256,4 +256,28 @@ export function createTemporaryLink(destinationId: string, key: string, expiresI
   return request<TemporaryLink>("POST", bucketRoute(destinationId, "links"), {
     json: { key, expiresIn: expiresInSeconds },
   });
+}
+
+// MARK: - Watched folders
+
+/** True when this Aktar predates watched folders and doesn't know the route. */
+export function isWatchedFoldersUnsupported(error: unknown) {
+  return error instanceof AktarError && error.kind === "request-failed" && error.status === 404;
+}
+
+export function listWatchedFolders() {
+  return request<WatchedFolders>("GET", "watched-folders");
+}
+
+/** Pauses every watched folder for `minutes`, or until resumed when it's left out. */
+export function pauseWatching(minutes?: number) {
+  return request<WatchedFolders>("POST", "watched-folders/pause", { json: { minutes: minutes ?? null } });
+}
+
+export function resumeWatching() {
+  return request<WatchedFolders>("POST", "watched-folders/resume");
+}
+
+export function setWatchedFolderEnabled(id: string, enabled: boolean) {
+  return request<WatchedFolder>("POST", `watched-folders/${encodeURIComponent(id)}`, { json: { enabled } });
 }

@@ -1,5 +1,25 @@
 # Qobuz Changelog
 
+## [Raycast 1.x support] - 2026-10-04
+
+- Restore compatibility with Raycast 1.x
+
+## [Fix media keys] - 2026-10-03
+
+- Fix play, next, previous, forward and rewind failing on Macs whose Swift toolchain is out of step with the macOS SDK: the media key is now posted through JavaScript for Automation, so nothing is compiled on your machine
+- Show a clear error naming System Settings → Privacy & Security → Accessibility when the permission is missing
+
+## [Copy Share Links] - 2026-10-02
+
+- Convert Track Link is now Show Current Track; converting a pasted link moved to Copy Share Links
+- Copy Share Links: a no-view command that puts a ready-to-paste message on the clipboard for the track Qobuz is on — title and artist, then a link per service (Qobuz, Spotify, Apple Music, Deezer, Tidal) and a song.link line that resolves every other platform
+- Copy Share Links: Spotify, Tidal and Apple Music links point at the exact track when MusicBrainz knows its ISRC, and fall back to a search otherwise; each service can be switched off in the preferences
+- Copy Share Links: the clipboard also carries a rich-text version — title and one line of linked platform names — which Slack, Notion and Mail paste in place of the plain lines
+- Convert Track Link: the Qobuz → other services direction gains the same Copy Share Links action, one Open/Search action per service, and per-service match tags in the metadata
+- Rename the list and menu-bar "Copy Share Link" actions to "Copy Qobuz Link", matching the detail views
+- Copy Share Links / Convert Track Link: extension preferences let you choose which streaming services appear in the share message (Spotify, Apple Music, Deezer, Tidal, All platforms); all enabled by default
+- song.link prefers exact sources in order: Deezer → MusicBrainz Spotify → MusicBrainz Apple; approximate iTunes matches are omitted
+
 ## [Now Playing fallback] - 2026-09-12
 
 - Convert Track Link: convert the track Qobuz is currently on, falling back to a track link on the clipboard; when both are available, an action switches to the other one

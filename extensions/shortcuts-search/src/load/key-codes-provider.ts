@@ -1,4 +1,8 @@
+import { getWindowsKeyNames } from "./windows-key-names";
+import { catalogUrl } from "../config/catalog";
 import { useFetch } from "@raycast/utils";
+import { getPlatform } from "./platform";
+import { useMemo } from "react";
 
 export type KeyCodes = Record<string, string>;
 
@@ -12,10 +16,15 @@ interface UseKeyCodesResult {
   revalidate: () => void;
 }
 
+export { getWindowsKeyNames } from "./windows-key-names";
+
 export default function useKeyCodes(): UseKeyCodesResult {
+  const platform = getPlatform();
+
   const { isLoading, data, revalidate } = useFetch<IncomingKeyCodes, undefined, KeyCodes>(
-    "https://hotkys.com/data/key-codes.json",
+    catalogUrl("data/key-codes.json"),
     {
+      execute: platform === "macos", // Only fetch on macOS
       mapResult: (result) => ({
         data: Object.fromEntries(result.keyCodes),
       }),
@@ -25,9 +34,17 @@ export default function useKeyCodes(): UseKeyCodesResult {
     }
   );
 
+  // On Windows, provide static key names immediately
+  const windowsData = useMemo(() => {
+    if (platform === "windows") {
+      return getWindowsKeyNames();
+    }
+    return undefined;
+  }, [platform]);
+
   return {
-    isLoading,
-    data,
+    isLoading: platform === "windows" ? false : isLoading,
+    data: platform === "windows" ? windowsData : data,
     revalidate,
   };
 }

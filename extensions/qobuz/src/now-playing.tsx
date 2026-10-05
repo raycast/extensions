@@ -70,8 +70,8 @@ export default function Command() {
   const control = (key: Parameters<typeof sendMediaKey>[0]) => async () => {
     try {
       await sendMediaKey(key);
-    } catch {
-      await showHUD("Couldn't control Qobuz — grant Accessibility permission");
+    } catch (error) {
+      await showHUD(error instanceof Error ? error.message : "Couldn't control Qobuz");
     }
     // The menu-bar repaints on its interval — Raycast tears this command down
     // when the menu closes, so there's no reliable way to refresh it sooner.
@@ -122,7 +122,7 @@ export default function Command() {
       {data?.current && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
-            title="Copy Share Link"
+            title="Copy Qobuz Link"
             icon={Icon.Clipboard}
             onAction={async () => {
               await Clipboard.copy(deepLink.track(data.current!.id));

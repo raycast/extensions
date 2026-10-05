@@ -1,5 +1,5 @@
 // Video and Audio Formats
-export type VideoFormat = "mp4" | "mov" | "avi" | "mkv" | "webm" | "mpeg";
+export type VideoFormat = "mp4" | "mov" | "avi" | "mkv" | "webm" | "mpeg" | "gif";
 export type AudioFormat = "mp3" | "wav" | "flac" | "aac" | "ogg" | "wma";
 
 // Codec Types
@@ -18,6 +18,9 @@ export interface FormValues {
   bitrate: string;
   maxSize: string;
   audioBitrate: string;
+  removeAudio: boolean;
+  gifQuality: string;
+  gifFps: string;
   outputFolder: string[];
   rename: string;
   subfolderName: string;
@@ -29,6 +32,7 @@ export interface FormValues {
 
 // Constants
 export const AVAILABLE_VIDEO_FORMATS: readonly VideoFormat[] = ["mp4", "mov", "avi", "mkv", "webm", "mpeg"] as const;
+export const OUTPUT_FORMATS: readonly VideoFormat[] = [...AVAILABLE_VIDEO_FORMATS, "gif"];
 export const AVAILABLE_AUDIO_FORMATS: readonly AudioFormat[] = ["mp3", "wav", "flac", "aac", "ogg", "wma"] as const;
 export const AVAILABLE_PRESETS: readonly Preset[] = [
   "ultrafast",
@@ -42,6 +46,7 @@ export const AVAILABLE_PRESETS: readonly Preset[] = [
 ] as const;
 
 export const CODEC_OPTIONS: Record<VideoFormat, VideoCodec[]> = {
+  gif: [],
   mp4: ["h264", "h265"],
   mov: ["h264", "h265"],
   avi: ["mpeg4", "h264"],

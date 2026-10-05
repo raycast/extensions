@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, Keyboard, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  open,
+  showHUD,
+} from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { useState, useEffect } from "react";
 import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
@@ -58,6 +69,24 @@ export function MeetingCopyActions(props: {
   );
 }
 
+/** Bundle ID of the Fathom desktop app, which registers the `fathom://` scheme. */
+const FATHOM_DESKTOP_BUNDLE_ID = "video.fathom.electron";
+
+/**
+ * Where "Open in Fathom" should go: the desktop app's deep link when the user prefers it
+ * and the app is installed, otherwise the web URL. The deep link takes the CALL id from
+ * the web URL (`/calls/<id>`), which is not the recording id.
+ */
+async function meetingOpenTarget(webUrl: string): Promise<string> {
+  const callId = /\/calls\/(\d+)/.exec(webUrl)?.[1];
+  if (getPreferenceValues<Preferences>().openMeetingsIn !== "desktop" || !callId) return webUrl;
+  // A failed app scan falls back to the web rather than failing the action.
+  const apps = await getApplications().catch(() => []);
+  if (!apps.some((app) => app.bundleId === FATHOM_DESKTOP_BUNDLE_ID)) return webUrl;
+  // The same link fathom.video's "open in desktop app" page hands the app.
+  return `fathom://open-window/desktop_app/pages/calls/${callId}/details?fathomName=calls&roundedCorners=true`;
+}
+
 // Shared Open Actions Section
 export function MeetingOpenActions(props: { meeting: Meeting }) {
   const { meeting } = props;
@@ -66,7 +95,19 @@ export function MeetingOpenActions(props: { meeting: Meeting }) {
   return (
     <ActionPanel.Section title="Open">
       {meeting.url && (
-        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={Keyboard.Shortcut.Common.Open} />
+        <Action
+          title="Open in Fathom"
+          icon={Icon.ArrowNe}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={async () => {
+            try {
+              await open(await meetingOpenTarget(meeting.url));
+              await closeMainWindow();
+            } catch (error) {
+              await showError(error, { title: "Could Not Open Meeting" });
+            }
+          }}
+        />
       )}
       {shareUrl && shareUrl !== meeting.url && (
         <Action.OpenInBrowser url={shareUrl} title="Open Share Link" shortcut={Keyboard.Shortcut.Common.OpenWith} />

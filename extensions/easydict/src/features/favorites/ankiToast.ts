@@ -6,7 +6,7 @@ import { myPreferences } from "@/consts";
 import { normalizeError } from "@/shared/errors";
 import { logError, logTrace } from "@/shared/logger";
 
-import { addFavoritesToAnki } from "./anki";
+import { addFavoritesToAnki, resolveAnkiDeckName } from "./anki";
 import type { FavoriteWord } from "./model";
 
 /**
@@ -18,7 +18,7 @@ export async function addFavoritesToAnkiWithToast(
   favorites: readonly FavoriteWord[],
   { justFavorited = false }: { justFavorited?: boolean } = {},
 ) {
-  const deckName = myPreferences.ankiDeckName;
+  const deckName = resolveAnkiDeckName(myPreferences.ankiDeckName);
   const toast = await showToast({ style: Toast.Style.Animated, title: "Adding to Anki..." });
   try {
     const { added, skipped, failed } = await addFavoritesToAnki(favorites, {

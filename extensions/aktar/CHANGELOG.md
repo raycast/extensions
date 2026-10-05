@@ -1,5 +1,11 @@
 # Aktar Changelog
 
+## [Watched Folders] - 2026-10-03
+
+- Watched Folders command: see the folders Aktar uploads from automatically, with their status, files waiting, uploading, or failed, their destination, and when they last uploaded. Enable or disable a folder, pause watching for 1 hour, until tomorrow, or until you resume it, show a folder in Finder, copy its path, or open Aktar's Watched Folders settings
+- Toggle Watching command: pause all watched folders until you resume them, or resume them, with one keystroke
+- Watched folders need an Aktar version with watched folders. Older versions show a message asking you to update
+
 ## [QR Codes and Renaming] - 2026-10-01
 
 - Show QR Code (⌘⇧Q) in Search Uploads and Browse Buckets, for public links and temporary links. Copy the QR code image or save it to Downloads, or create a new temporary link (⌘R)

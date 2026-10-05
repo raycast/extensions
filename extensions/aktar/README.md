@@ -23,6 +23,8 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 - **Upload File**: pick files, a destination, an optional folder, and when to delete them. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
 - **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, show a QR code for the link, and delete uploads. Uploads set to auto-delete show the day they go away.
 - **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, show QR codes for either, rename, move, delete, create folders, and upload into any folder.
+- **Watched Folders**: see the folders Aktar uploads from automatically and what each one is doing, enable or disable them, and pause or resume watching.
+- **Toggle Watching**: pauses all watched folders until you resume them, or resumes them.
 - **Connect to Aktar**: pairs the extension with the app.
 
 ## QR Codes
@@ -30,6 +32,17 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 **Show QR Code** (⌘⇧Q) in Search Uploads or Browse Buckets shows a QR code for the file's link, to open it on your phone or put it on a slide. Copy the QR code image to paste it anywhere, or save it as a PNG in your Downloads folder. In Browse Buckets you can also show a QR code for a temporary link (1 hour, 1 day, or 7 days), which works even for private buckets. **Create New Link** (⌘R) makes a fresh one when it has expired.
 
 The QR code is made on your Mac. The link is never sent to a QR service. The QR images of temporary links are removed from the extension's support folder once those links expire.
+
+## Watched Folders
+
+Aktar can upload files the moment they land in a folder you pick, such as your screenshots folder. You add folders and set their rules (destination, which files, what happens to the original) in Aktar > Settings > Watched Folders; the extension shows and controls them.
+
+- **Watched Folders** lists every folder with its status (Watching, Paused, Disabled, Access Needed, Folder Not Found), how many files are waiting to finish writing, uploading, or failed, how many wait for you to confirm a large batch, its destination, and when it last uploaded.
+- **Enable Folder** / **Disable Folder** turns one folder on or off. **Pause Watching** (⌘⇧P) pauses every folder for 1 hour, until tomorrow (midnight), or until you resume it; **Resume Watching** starts them again. Files that arrive while paused are uploaded when watching resumes.
+- **Show in Finder**, **Copy Path**, and **Open Watched Folders Settings** (which opens that tab in Aktar).
+- **Toggle Watching** pauses or resumes watching without opening a window, handy with a hotkey.
+
+Watched folders need an Aktar version that has them. With an older one, the commands ask you to update Aktar.
 
 ## What Aktar Does for You
 

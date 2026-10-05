@@ -238,6 +238,61 @@ export interface XiuInfo {
   group: string;
   theme: string;
 }
+
+// LODGE ICON AUDIT — read this before touching any xiu icon.
+//
+// The per-lodge animal is the PALACE animal, not a zodiac animal. Source of
+// truth is the IbnArbi `LUNAR_MANSIONS_XIU.animal` field, which carries:
+//   lodges  1–7  (Azure Dragon):    Dragon
+//   lodges  8–14 (Black Tortoise):  Tortoise
+//   lodges 15–21 (White Tiger):     Tiger
+//   lodges 22–28 (Vermilion Bird):  Bird
+//
+// Each palace's seven lodges are that creature's body parts (Dragon's Horn,
+// Dragon's Neck, Tortoise's Head / the Dipper, Phoenix's Head / the Well), so
+// all seven legitimately share one animal. There is NO per-lodge zodiac cycle:
+// an earlier version of this table asserted one ("seven consecutive zodiac
+// animals per palace") and was wrong — it invented animals the source does not
+// carry, and mislabelled lodges the user can see. Do not reintroduce it.
+//
+// This table names the animal AND its emoji together so the two cannot drift.
+// Every lodge in a palace must carry that palace's animal: a mismatch here is
+// visible directly in both commands, so keep the count at 28 and the palace
+// blocks at seven. This file is the single source of truth — the macOS Swift
+// port and the Chrome extension vendor it byte-for-byte and are asserted
+// against parity/fixture.json, which regenerates from this core via
+// `npm run parity:gen` in the moon-mansions repository. That gate lives in the
+// source repo, not here, so run it there before publishing a change.
+export const XIU_ANIMALS: { animal: string; emoji: string }[] = [
+  { animal: "Dragon", emoji: "🐉" }, // 1–7 Azure Dragon
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Dragon", emoji: "🐉" },
+  { animal: "Tortoise", emoji: "🐢" }, // 8–14 Black Tortoise
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tortoise", emoji: "🐢" },
+  { animal: "Tiger", emoji: "🐅" }, // 15–21 White Tiger
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Tiger", emoji: "🐅" },
+  { animal: "Bird", emoji: "🐦" }, // 22–28 Vermilion Bird
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+  { animal: "Bird", emoji: "🐦" },
+];
 export const XIU: XiuInfo[] = [
   {
     n: 1,
