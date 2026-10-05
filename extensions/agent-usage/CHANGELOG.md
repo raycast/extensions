@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Raycast AI credits] - {PR_MERGE_DATE}
+## [Add Raycast AI credits] - 2026-10-05
 
 ### New Features
 
