@@ -1,5 +1,12 @@
 # Changelog
 
+## [Archive Reliability] - {PR_MERGE_DATE}
+
+- Keep saved articles visible and apply the selected retention when a feed refresh fails.
+- Preserve newer read and favorite states during background refreshes.
+- Store every fitting article when an archive safety limit is reached and keep the incomplete state visible.
+- Continue search pagination normally after changing the query during a page load.
+
 ## [Initial Release] - 2026-10-02
 
 - Browse the latest Techgedöns articles in a compact list.

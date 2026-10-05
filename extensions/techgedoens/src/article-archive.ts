@@ -1,12 +1,16 @@
-import { LocalStorage } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Article, fetchArticleFeedPage } from "./articles";
 
 const ARTICLE_ARCHIVE_KEY = "article-archive-v1";
+const ARTICLE_ARCHIVE_LIMIT_KEY = "article-archive-limit-v1";
+const ARTICLE_READ_STATUS_KEY = "article-read-status-v1";
+const ARTICLE_FAVORITE_STATUS_KEY = "article-favorite-status-v1";
 const MAX_INCREMENTAL_FEED_PAGES = 20;
 const MAX_BACKFILL_FEED_PAGES = 200;
 const MAX_ARCHIVE_ARTICLES = 2_000;
 const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
 const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
+const ARCHIVE_LIMIT_TITLE = "Article Archive Limit Reached";
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
@@ -26,6 +30,13 @@ type StoredArticleArchive = {
   updatedAt: string;
 };
 
+type StoredArticleStatuses = Record<string, boolean>;
+
+type ArticleBackfillResult = {
+  articles: Article[];
+  limitMessage?: string;
+};
+
 const retentionRank: Record<ArticleRetention, number> = {
   week: 0,
   month: 1,
@@ -38,6 +49,19 @@ export function normalizeArticleRetention(value: string | undefined): ArticleRet
 }
 
 export async function refreshArticleArchive(retention: ArticleRetention): Promise<ArchivedArticle[]> {
+  try {
+    return await refreshArticleArchiveStrict(retention);
+  } catch (error) {
+    const storedArchive = await readStoredArchive();
+    if (storedArchive) {
+      return applyRetention(storedArchive.articles, retention);
+    }
+
+    throw error;
+  }
+}
+
+export async function refreshArticleArchiveStrict(retention: ArticleRetention): Promise<ArchivedArticle[]> {
   return runArchiveUpdate(() => performArticleArchiveRefresh(retention));
 }
 
@@ -45,23 +69,44 @@ async function performArticleArchiveRefresh(retention: ArticleRetention): Promis
   const storedArchive = await readStoredArchive();
   const existingArticles = storedArchive?.articles ?? [];
   const shouldBackfill = !storedArchive || retentionRank[retention] > retentionRank[storedArchive.retention];
-  const fetchedArticles = shouldBackfill
-    ? await fetchArticlesForRetention(retention)
-    : await fetchArticlesUntilKnown(existingArticles);
-  const mergedArticles = mergeArticles(existingArticles, fetchedArticles);
-  const retainedArticles = applyRetention(mergedArticles, retention);
+  const backfillResult = shouldBackfill ? await fetchArticlesForRetention(retention, existingArticles) : undefined;
+  const fetchedArticles = backfillResult?.articles ?? (await fetchArticlesUntilKnown(existingArticles));
+
+  // Article choices are also stored separately, so a refresh cannot revert a read or favorite change
+  // even if another Raycast command saves that change after this read and before the archive write.
+  const latestStoredArchive = await readStoredArchive();
+  const latestExistingArticles = latestStoredArchive?.articles ?? existingArticles;
+  const mergeResult = mergeArticlesWithinLimits(latestExistingArticles, fetchedArticles, retention);
+  const retainedArticles = mergeResult.articles;
+  const limitMessage =
+    backfillResult?.limitMessage ??
+    mergeResult.limitMessage ??
+    (storedArchive?.retention === retention ? storedArchive.limitMessage : undefined);
 
   await writeStoredArchive({
     articles: retainedArticles,
+    limitMessage,
     retention,
     updatedAt: new Date().toISOString(),
   });
 
-  return retainedArticles;
+  if (limitMessage && environment.launchType === LaunchType.UserInitiated) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: ARCHIVE_LIMIT_TITLE,
+      message: limitMessage,
+    });
+  }
+
+  return (await readStoredArchive())?.articles ?? retainedArticles;
 }
 
 export async function readArticleArchive(): Promise<ArchivedArticle[]> {
   return (await readStoredArchive())?.articles ?? [];
+}
+
+export async function readArticleArchiveLimitMessage(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>(ARTICLE_ARCHIVE_LIMIT_KEY);
 }
 
 export async function setArticleReadStatus(articleId: string, isRead: boolean): Promise<void> {
@@ -70,6 +115,7 @@ export async function setArticleReadStatus(articleId: string, isRead: boolean): 
 
 export async function setArticleReadStatusForArticle(article: Article, isRead: boolean): Promise<void> {
   await runArchiveUpdate(async () => {
+    await setStoredArticleStatuses(ARTICLE_READ_STATUS_KEY, [[article.id, isRead]]);
     const storedArchive = await readStoredArchive();
     const existingArticles = storedArchive?.articles ?? [];
     const existingArticle = existingArticles.find((archivedArticle) => archivedArticle.id === article.id);
@@ -86,6 +132,7 @@ export async function setArticleReadStatusForArticle(article: Article, isRead: b
 
     await writeStoredArchive({
       articles: articles.sort((first, second) => second.publishedAt.getTime() - first.publishedAt.getTime()),
+      limitMessage: storedArchive?.limitMessage,
       retention: storedArchive?.retention ?? "month",
       updatedAt: new Date().toISOString(),
     });
@@ -98,17 +145,33 @@ export async function setArticlesReadStatus(articleIds: string[], isRead: boolea
   }
 
   const articleIdSet = new Set(articleIds);
-  await updateArticleReadStatuses((articles) =>
+  await updateArticleReadStatuses(articleIds, isRead, (articles) =>
     articles.map((article) => (articleIdSet.has(article.id) ? { ...article, isRead } : article)),
   );
 }
 
 export async function setAllArticlesReadStatus(isRead: boolean): Promise<void> {
-  await updateArticleReadStatuses((articles) => articles.map((article) => ({ ...article, isRead })));
+  await runArchiveUpdate(async () => {
+    const storedArchive = await readStoredArchive();
+    if (!storedArchive) {
+      return;
+    }
+
+    await setStoredArticleStatuses(
+      ARTICLE_READ_STATUS_KEY,
+      storedArchive.articles.map((article) => [article.id, isRead]),
+    );
+    await writeStoredArchive({
+      ...storedArchive,
+      articles: storedArchive.articles.map((article) => ({ ...article, isRead })),
+      updatedAt: new Date().toISOString(),
+    });
+  });
 }
 
 export async function setArticleFavoriteStatus(article: Article, isFavorite: boolean): Promise<void> {
   await runArchiveUpdate(async () => {
+    await setStoredArticleStatuses(ARTICLE_FAVORITE_STATUS_KEY, [[article.id, isFavorite]]);
     const storedArchive = await readStoredArchive();
     const existingArticles = storedArchive?.articles ?? [];
     const existingArticle = existingArticles.find((archivedArticle) => archivedArticle.id === article.id);
@@ -125,6 +188,7 @@ export async function setArticleFavoriteStatus(article: Article, isFavorite: boo
 
     await writeStoredArchive({
       articles: articles.sort((first, second) => second.publishedAt.getTime() - first.publishedAt.getTime()),
+      limitMessage: storedArchive?.limitMessage,
       retention: storedArchive?.retention ?? "month",
       updatedAt: new Date().toISOString(),
     });
@@ -132,9 +196,15 @@ export async function setArticleFavoriteStatus(article: Article, isFavorite: boo
 }
 
 async function updateArticleReadStatuses(
+  articleIds: string[],
+  isRead: boolean,
   updateArticles: (articles: ArchivedArticle[]) => ArchivedArticle[],
 ): Promise<void> {
   await runArchiveUpdate(async () => {
+    await setStoredArticleStatuses(
+      ARTICLE_READ_STATUS_KEY,
+      articleIds.map((articleId) => [articleId, isRead]),
+    );
     const storedArchive = await readStoredArchive();
     if (!storedArchive) {
       return;
@@ -157,54 +227,56 @@ async function runArchiveUpdate<T>(update: () => Promise<T>): Promise<T> {
   return queuedUpdate;
 }
 
-async function fetchArticlesForRetention(retention: ArticleRetention): Promise<Article[]> {
+async function fetchArticlesForRetention(
+  retention: ArticleRetention,
+  existingArticles: ArchivedArticle[],
+): Promise<ArticleBackfillResult> {
   const cutoff = getRetentionCutoff(retention);
   const articles: Article[] = [];
   const articleIds = new Set<string>();
-  let fetchedArticleBytes = 0;
+  const accumulator = createArchiveAccumulator(existingArticles, retention);
 
   for (let page = 1; page <= MAX_BACKFILL_FEED_PAGES; page += 1) {
     const pageArticles = await fetchArticleFeedPage(page);
     const newArticles = pageArticles.filter((article) => !articleIds.has(article.id));
 
     if (pageArticles.length === 0 || newArticles.length === 0) {
-      return articles;
-    }
-
-    if (articles.length + newArticles.length > MAX_ARCHIVE_ARTICLES) {
-      throw new Error(
-        `The initial archive import exceeds the ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} article safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
-    }
-
-    const newArticleBytes = newArticles.reduce(
-      (total, article) => total + getSerializedByteLength(JSON.stringify(article)),
-      0,
-    );
-    if (fetchedArticleBytes + newArticleBytes > MAX_ARCHIVE_BYTES) {
-      throw new Error(
-        `The initial archive import exceeds the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
+      return { articles };
     }
 
     for (const article of newArticles) {
       articleIds.add(article.id);
-      articles.push(article);
+      const result = accumulator.add(article);
+      if (result === "article-limit") {
+        return {
+          articles,
+          limitMessage: getArticleLimitMessage(),
+        };
+      }
+      if (result === "byte-limit") {
+        return {
+          articles,
+          limitMessage: getByteLimitMessage(),
+        };
+      }
+      if (result === "added") {
+        articles.push(article);
+      }
     }
-    fetchedArticleBytes += newArticleBytes;
 
     if (cutoff && pageArticles.some((article) => article.publishedAt < cutoff)) {
-      return articles;
+      return { articles };
     }
 
     if (page === MAX_BACKFILL_FEED_PAGES) {
-      throw new Error(
-        `The initial archive import reached the ${MAX_BACKFILL_FEED_PAGES.toLocaleString("en-US")} page safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
-      );
+      return {
+        articles,
+        limitMessage: `The initial archive import reached the ${MAX_BACKFILL_FEED_PAGES.toLocaleString("en-US")} page safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      };
     }
   }
 
-  return articles;
+  return { articles };
 }
 
 async function fetchArticlesUntilKnown(existingArticles: ArchivedArticle[]): Promise<Article[]> {
@@ -234,21 +306,77 @@ async function fetchArticlesUntilKnown(existingArticles: ArchivedArticle[]): Pro
   return fetchedArticles;
 }
 
-function mergeArticles(existingArticles: ArchivedArticle[], fetchedArticles: Article[]): ArchivedArticle[] {
-  const mergedArticles = new Map(existingArticles.map((article) => [article.id, article]));
+function mergeArticlesWithinLimits(
+  existingArticles: ArchivedArticle[],
+  fetchedArticles: Article[],
+  retention: ArticleRetention,
+): { articles: ArchivedArticle[]; limitMessage?: string } {
+  const accumulator = createArchiveAccumulator(existingArticles, retention);
+  let limitMessage: string | undefined;
 
   for (const article of fetchedArticles) {
-    const existingArticle = mergedArticles.get(article.id);
-    mergedArticles.set(article.id, {
+    const result = accumulator.add(article);
+    if (result === "article-limit") {
+      limitMessage = getArticleLimitMessage();
+      break;
+    }
+    if (result === "byte-limit") {
+      limitMessage = getByteLimitMessage();
+      break;
+    }
+  }
+
+  return { articles: accumulator.getArticles(), limitMessage };
+}
+
+function createArchiveAccumulator(existingArticles: ArchivedArticle[], retention: ArticleRetention) {
+  const cutoff = getRetentionCutoff(retention);
+  const retainedExistingArticles = applyRetention(existingArticles, retention);
+  const articlesById = new Map(retainedExistingArticles.map((article) => [article.id, article]));
+  const articleBytesById = new Map(
+    retainedExistingArticles.map((article) => [article.id, getStoredArticleByteLength(article)]),
+  );
+  let totalArticleBytes = [...articleBytesById.values()].reduce((total, bytes) => total + bytes, 0);
+  const archiveBaseBytes = getEmptyArchiveByteLength(retention);
+
+  function add(article: Article): "added" | "skipped" | "article-limit" | "byte-limit" {
+    const existingArticle = articlesById.get(article.id);
+    const archivedArticle: ArchivedArticle = {
       ...article,
       isFavorite: existingArticle?.isFavorite ?? false,
       isRead: existingArticle?.isRead ?? false,
-    });
+    };
+
+    if (cutoff && !archivedArticle.isFavorite && archivedArticle.publishedAt < cutoff) {
+      return "skipped";
+    }
+
+    const nextArticleCount = existingArticle ? articlesById.size : articlesById.size + 1;
+    if (nextArticleCount > MAX_ARCHIVE_ARTICLES) {
+      return "article-limit";
+    }
+
+    const previousArticleBytes = articleBytesById.get(article.id) ?? 0;
+    const nextArticleBytes = getStoredArticleByteLength(archivedArticle);
+    const nextTotalArticleBytes = totalArticleBytes - previousArticleBytes + nextArticleBytes;
+    const commaBytes = Math.max(0, nextArticleCount - 1);
+    if (archiveBaseBytes + nextTotalArticleBytes + commaBytes > MAX_ARCHIVE_BYTES) {
+      return "byte-limit";
+    }
+
+    articlesById.set(article.id, archivedArticle);
+    articleBytesById.set(article.id, nextArticleBytes);
+    totalArticleBytes = nextTotalArticleBytes;
+    return "added";
   }
 
-  return [...mergedArticles.values()].sort(
-    (first, second) => second.publishedAt.getTime() - first.publishedAt.getTime(),
-  );
+  function getArticles(): ArchivedArticle[] {
+    return [...articlesById.values()].sort(
+      (first, second) => second.publishedAt.getTime() - first.publishedAt.getTime(),
+    );
+  }
+
+  return { add, getArticles };
 }
 
 function applyRetention(articles: ArchivedArticle[], retention: ArticleRetention): ArchivedArticle[] {
@@ -272,8 +400,15 @@ function getRetentionCutoff(retention: ArticleRetention): Date | undefined {
   return cutoff;
 }
 
-async function readStoredArchive(): Promise<{ articles: ArchivedArticle[]; retention: ArticleRetention } | undefined> {
-  const storedValue = await LocalStorage.getItem<string>(ARTICLE_ARCHIVE_KEY);
+async function readStoredArchive(): Promise<
+  { articles: ArchivedArticle[]; limitMessage?: string; retention: ArticleRetention } | undefined
+> {
+  const [storedValue, limitMessage, readStatuses, favoriteStatuses] = await Promise.all([
+    LocalStorage.getItem<string>(ARTICLE_ARCHIVE_KEY),
+    LocalStorage.getItem<string>(ARTICLE_ARCHIVE_LIMIT_KEY),
+    readStoredArticleStatuses(ARTICLE_READ_STATUS_KEY),
+    readStoredArticleStatuses(ARTICLE_FAVORITE_STATUS_KEY),
+  ]);
   if (!storedValue) {
     return undefined;
   }
@@ -293,14 +428,15 @@ async function readStoredArchive(): Promise<{ articles: ArchivedArticle[]; reten
         {
           ...article,
           publishedAt,
-          isFavorite: Boolean(article.isFavorite),
-          isRead: Boolean(article.isRead),
+          isFavorite: favoriteStatuses[article.id] ?? Boolean(article.isFavorite),
+          isRead: readStatuses[article.id] ?? Boolean(article.isRead),
         },
       ];
     });
 
     return {
       articles,
+      limitMessage: typeof limitMessage === "string" ? limitMessage : undefined,
       retention: normalizeArticleRetention(storedArchive.retention),
     };
   } catch {
@@ -310,11 +446,12 @@ async function readStoredArchive(): Promise<{ articles: ArchivedArticle[]; reten
 
 async function writeStoredArchive(archive: {
   articles: ArchivedArticle[];
+  limitMessage?: string;
   retention: ArticleRetention;
   updatedAt: string;
 }): Promise<void> {
   const storedArchive: StoredArticleArchive = {
-    articles: archive.articles.map((article) => ({ ...article, publishedAt: article.publishedAt.toISOString() })),
+    articles: archive.articles.map(toStoredArchivedArticle),
     retention: archive.retention,
     updatedAt: archive.updatedAt,
   };
@@ -332,6 +469,65 @@ async function writeStoredArchive(archive: {
   }
 
   await LocalStorage.setItem(ARTICLE_ARCHIVE_KEY, serializedArchive);
+  if (archive.limitMessage) {
+    await LocalStorage.setItem(ARTICLE_ARCHIVE_LIMIT_KEY, archive.limitMessage);
+  } else {
+    await LocalStorage.removeItem(ARTICLE_ARCHIVE_LIMIT_KEY);
+  }
+}
+
+function toStoredArchivedArticle(article: ArchivedArticle): StoredArchivedArticle {
+  return { ...article, publishedAt: article.publishedAt.toISOString() };
+}
+
+function getStoredArticleByteLength(article: ArchivedArticle): number {
+  return getSerializedByteLength(JSON.stringify(toStoredArchivedArticle(article)));
+}
+
+function getEmptyArchiveByteLength(retention: ArticleRetention): number {
+  return getSerializedByteLength(
+    JSON.stringify({ articles: [], retention, updatedAt: new Date().toISOString() } satisfies StoredArticleArchive),
+  );
+}
+
+function getArticleLimitMessage(): string {
+  return `The initial archive import reached the ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} article safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`;
+}
+
+function getByteLimitMessage(): string {
+  return `The initial archive import reached the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`;
+}
+
+async function readStoredArticleStatuses(key: string): Promise<StoredArticleStatuses> {
+  const storedValue = await LocalStorage.getItem<string>(key);
+  if (!storedValue) {
+    return {};
+  }
+
+  try {
+    const parsedValue = JSON.parse(storedValue) as unknown;
+    if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsedValue).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean"),
+    );
+  } catch {
+    return {};
+  }
+}
+
+async function setStoredArticleStatuses(key: string, entries: [string, boolean][]): Promise<void> {
+  if (entries.length === 0) {
+    return;
+  }
+
+  const statuses = await readStoredArticleStatuses(key);
+  for (const [articleId, status] of entries) {
+    statuses[articleId] = status;
+  }
+  await LocalStorage.setItem(key, JSON.stringify(statuses));
 }
 
 function getSerializedByteLength(value: string): number {
