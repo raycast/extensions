@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="shackleGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+  </defs>
+  <path d="M 360 400 L 360 280 A 152 152 0 0 1 664 280 L 664 400" 
+        fill="none" stroke="url(#shackleGrad)" stroke-width="64" stroke-linecap="round" />
+</svg>
