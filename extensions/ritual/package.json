@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ritual",
+  "title": "Ritual",
+  "description": "Ritual tasks: quick capture, Today, and search.",
+  "icon": "icon.png",
+  "author": "kaihirota",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Capture a task into Ritual",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Task",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "today",
+      "title": "Today",
+      "description": "Show today's open tasks",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming",
+      "title": "Upcoming",
+      "description": "Tasks scheduled after today",
+      "mode": "view",
+      "keywords": [
+        "later",
+        "scheduled",
+        "future"
+      ]
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "description": "Un-triaged capture: no start date, no project",
+      "mode": "view",
+      "keywords": [
+        "capture",
+        "untriaged",
+        "unscheduled"
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "description": "Search all Ritual tasks",
+      "mode": "view"
+    },
+    {
+      "name": "habits",
+      "title": "Habits",
+      "description": "Today's routine habits",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Ritual CLI Path",
+      "description": "Optional. Only needed if `ritual` isn't in Ritual.app, ~/bin, /usr/local/bin or /opt/homebrew/bin.",
+      "placeholder": "/usr/local/bin/ritual"
+    },
+    {
+      "name": "quickCaptureDestination",
+      "type": "dropdown",
+      "required": false,
+      "title": "Quick Capture Destination",
+      "description": "Where a task goes when you type its title straight into the Add Task argument.",
+      "default": "inbox",
+      "data": [
+        {
+          "title": "Inbox",
+          "value": "inbox"
+        },
+        {
+          "title": "Today",
+          "value": "today"
+        }
+      ]
+    },
+    {
+      "name": "deadlineLeadDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Deadline Countdown",
+      "description": "How many days before its due date a task's deadline turns red. Matches the same setting in the iPhone app, which this extension cannot read \u2014 it is stored on the device, not synced.",
+      "default": "7",
+      "placeholder": "7"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run"
+  }
+}
