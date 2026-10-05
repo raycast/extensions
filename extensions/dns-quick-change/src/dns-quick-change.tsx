@@ -12,6 +12,7 @@ import {
   Form,
   getPreferenceValues,
   openExtensionPreferences,
+  useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { execFile } from "child_process";
@@ -92,18 +93,39 @@ export function parseDefaultRouteInterface(routeOutput: string): string | undefi
 }
 
 /**
+ * Parse active non-tunnel network interfaces from `scutil --nwi` output.
+ */
+export function parseNwiActiveInterfaces(nwiOutput: string): string[] {
+  const match = nwiOutput.match(/Network interfaces:\s*([^\n]+)/);
+  if (!match) return [];
+  return match[1]
+    .trim()
+    .split(/\s+/)
+    .filter((dev) => !/^(utun|ppp|ipsec|gif|stf|bridge)/i.test(dev));
+}
+
+/**
  * Select the active network service based on the detected route interface
- * with fallback for VPN tunnels and unmapped interfaces.
+ * and active devices with fallback for VPN tunnels and unmapped interfaces.
  */
 export function selectActiveNetworkService(
   services: Array<{ service: string; device: string }>,
   routeIface?: string,
+  activeDevices?: string[],
 ): { service: string; device: string } {
   // If route interface is not a virtual tunnel (utun, ppp, ipsec, etc.), try direct match
   if (routeIface && !/^(utun|ppp|ipsec|gif|stf)/i.test(routeIface)) {
     const direct = services.find((entry) => entry.device === routeIface);
     if (direct) {
       return direct;
+    }
+  }
+
+  // If active devices are known from connectivity checks, pick the matching physical service
+  if (activeDevices && activeDevices.length > 0) {
+    const activeMatch = services.find((entry) => activeDevices.includes(entry.device));
+    if (activeMatch) {
+      return activeMatch;
     }
   }
 
@@ -140,7 +162,7 @@ export async function getNetworkServices(
 
 /**
  * Asynchronously detect the network service attached to the default route.
- * Handles VPN/tunnel fallback gracefully.
+ * Handles VPN/tunnel fallback gracefully by inspecting active network interfaces.
  */
 export async function getActiveNetworkService(
   exec: typeof execFileAsync = execFileAsync,
@@ -156,8 +178,43 @@ export async function getActiveNetworkService(
     console.error("Unable to inspect default route:", error);
   }
 
+  let activeDevices: string[] = [];
+
+  // When default route is missing or pointing to a virtual tunnel, query scutil --nwi for active physical adapters
+  if (!iface || /^(utun|ppp|ipsec|gif|stf)/i.test(iface)) {
+    try {
+      const { stdout: nwi } = await exec("/usr/sbin/scutil", ["--nwi"], {
+        encoding: "utf-8",
+        timeout: COMMAND_TIMEOUT_MS,
+      });
+      activeDevices = parseNwiActiveInterfaces(nwi);
+    } catch (error) {
+      console.error("Unable to query scutil --nwi:", error);
+    }
+  }
+
   const services = await getNetworkServices(exec);
-  const chosen = selectActiveNetworkService(services, iface);
+
+  // If activeDevices is still empty, verify candidate physical services with ifconfig for active status or IP
+  if (activeDevices.length === 0) {
+    const physicalServices = services.filter((s) => !/^(utun|ppp|ipsec|gif|stf|bridge)/i.test(s.device));
+    for (const service of physicalServices) {
+      try {
+        const { stdout: ifconfigOut } = await exec("/sbin/ifconfig", [service.device], {
+          encoding: "utf-8",
+          timeout: 2000,
+        });
+        if (/status:\s*active/i.test(ifconfigOut) || /\binet\s+\d/.test(ifconfigOut)) {
+          activeDevices.push(service.device);
+          break;
+        }
+      } catch {
+        // Continue checking other candidates
+      }
+    }
+  }
+
+  const chosen = selectActiveNetworkService(services, iface, activeDevices);
   NETWORK_INTERFACE = chosen.device;
   NETWORK_SERVICE = chosen.service;
   return chosen;
@@ -205,36 +262,69 @@ opendns=208.67.222.222,208.67.220.220:OpenDNS - Filtering & protection
 }
 
 /**
- * Parse a preset line: name=servers:description
+ * Parse a preset line: name=servers[:description]
+ * Correctly distinguishes IPv6 colons from the optional trailing description delimiter.
  */
-function parsePresetLine(line: string): DNSPreset | null {
+export function parsePresetLine(line: string): DNSPreset | null {
   line = line.trim();
   if (!line || line.startsWith("#")) return null;
 
   const eqIndex = line.indexOf("=");
   if (eqIndex === -1) return null;
 
-  const name = line.substring(0, eqIndex);
-  const rest = line.substring(eqIndex + 1);
+  const name = line.substring(0, eqIndex).trim();
+  const rest = line.substring(eqIndex + 1).trim();
 
   // Validate preset name (no spaces or equals signs allowed)
-  if (!/^[^\s=]+$/.test(name)) {
+  if (!name || !/^[^\s=]+$/.test(name) || !rest) {
     return null; // Skip invalid preset names
   }
 
-  const colonIndex = rest.indexOf(":");
-  let servers: string;
-  let description: string | undefined;
-
-  if (colonIndex === -1) {
-    servers = rest;
-  } else {
-    servers = rest.substring(0, colonIndex);
-    description = rest.substring(colonIndex + 1).trim();
+  // If all comma-separated parts in rest are already valid IPs, there is no description
+  const rawParts = rest
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (rawParts.length > 0 && rawParts.every((ip) => Boolean(net.isIP(ip)))) {
+    return { name, servers: rawParts.join(","), description: undefined };
   }
 
-  if (!name || !servers) return null;
-  return { name, servers, description: description || undefined };
+  // Otherwise, the last part contains `<last-ip>:<description>`.
+  const commaIndex = rest.lastIndexOf(",");
+  const prefix = commaIndex !== -1 ? rest.substring(0, commaIndex).trim() : "";
+  const lastPart = commaIndex !== -1 ? rest.substring(commaIndex + 1).trim() : rest;
+
+  if (prefix) {
+    const prefixIps = prefix
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!prefixIps.every((ip) => Boolean(net.isIP(ip)))) {
+      return null;
+    }
+  }
+
+  let foundServers: string | null = null;
+  let foundDescription: string | undefined = undefined;
+
+  // Search for the colon separating the last valid IP from description from right to left
+  for (let i = lastPart.length - 1; i >= 0; i--) {
+    if (lastPart[i] === ":") {
+      const candidateIp = lastPart.substring(0, i).trim();
+      const candidateDesc = lastPart.substring(i + 1).trim();
+      if (net.isIP(candidateIp)) {
+        foundServers = prefix ? `${prefix},${candidateIp}` : candidateIp;
+        foundDescription = candidateDesc || undefined;
+        break;
+      }
+    }
+  }
+
+  if (!foundServers) {
+    return null;
+  }
+
+  return { name, servers: foundServers, description: foundDescription };
 }
 
 /**
@@ -524,10 +614,10 @@ export async function setDNS(
 
   // Use absolute paths since `do shell script` has a minimal PATH
   const networksetup = "/usr/sbin/networksetup";
-  const flushCmd = "/usr/bin/dscacheutil -flushcache && /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true";
+  const flushCmd = "(/usr/bin/dscacheutil -flushcache; /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true)";
 
   if (servers.length === 0) {
-    // Reset to DHCP and flush cache
+    // Reset to DHCP and flush cache - if networksetup fails, do not mask exit code
     await runWithAdmin(`${networksetup} -setdnsservers '${service}' empty && ${flushCmd}`, exec);
   } else {
     const dnsArgs = servers.map((s) => `'${s}'`).join(" ");
@@ -703,6 +793,7 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
  * Form to add or edit a DNS preset
  */
 function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSaved: () => void }) {
+  const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [serversError, setServersError] = useState<string | undefined>();
   const isEditing = !!existing;
@@ -710,9 +801,10 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
   function validateName(value: string | undefined): string | undefined {
     if (!value || value.trim().length === 0) return "Name is required";
     if (/[=\s]/.test(value)) return "Name cannot contain spaces or '='";
-    // If creating new (not editing) and name already exists
-    if (!isEditing && getPreset(value.trim())) {
-      return `Preset "${value.trim()}" already exists`;
+    const trimmed = value.trim();
+    // Disallow existing name unless editing and keeping the same name
+    if ((!isEditing || trimmed !== existing?.name) && getPreset(trimmed)) {
+      return `Preset "${trimmed}" already exists`;
     }
     return undefined;
   }
@@ -761,6 +853,7 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
         message: trimmedServers,
       });
       onSaved();
+      pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,

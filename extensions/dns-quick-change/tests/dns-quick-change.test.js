@@ -19,26 +19,55 @@ function parsePresetLine(line) {
   const eqIndex = line.indexOf("=");
   if (eqIndex === -1) return null;
 
-  const name = line.substring(0, eqIndex);
-  const rest = line.substring(eqIndex + 1);
+  const name = line.substring(0, eqIndex).trim();
+  const rest = line.substring(eqIndex + 1).trim();
 
-  if (!/^[^\s=]+$/.test(name)) {
+  if (!name || !/^[^\s=]+$/.test(name) || !rest) {
     return null;
   }
 
-  const colonIndex = rest.indexOf(":");
-  let servers;
-  let description;
-
-  if (colonIndex === -1) {
-    servers = rest;
-  } else {
-    servers = rest.substring(0, colonIndex);
-    description = rest.substring(colonIndex + 1).trim();
+  const rawParts = rest
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (rawParts.length > 0 && rawParts.every((ip) => Boolean(net.isIP(ip)))) {
+    return { name, servers: rawParts.join(","), description: undefined };
   }
 
-  if (!name || !servers) return null;
-  return { name, servers, description: description || undefined };
+  const commaIndex = rest.lastIndexOf(",");
+  const prefix = commaIndex !== -1 ? rest.substring(0, commaIndex).trim() : "";
+  const lastPart = commaIndex !== -1 ? rest.substring(commaIndex + 1).trim() : rest;
+
+  if (prefix) {
+    const prefixIps = prefix
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!prefixIps.every((ip) => Boolean(net.isIP(ip)))) {
+      return null;
+    }
+  }
+
+  let foundServers = null;
+  let foundDescription = undefined;
+
+  for (let i = lastPart.length - 1; i >= 0; i--) {
+    if (lastPart[i] === ":") {
+      const candidateIp = lastPart.substring(0, i).trim();
+      const candidateDesc = lastPart.substring(i + 1).trim();
+      if (Boolean(net.isIP(candidateIp))) {
+        foundServers = prefix ? `${prefix},${candidateIp}` : candidateIp;
+        foundDescription = candidateDesc || undefined;
+        break;
+      }
+    }
+  }
+
+  if (!foundServers) {
+    return null;
+  }
+
+  return { name, servers: foundServers, description: foundDescription };
 }
 
 function parseNetworkServices(output) {
@@ -70,12 +99,29 @@ function parseDefaultRouteInterface(routeOutput) {
   return routeOutput.match(/^\s*interface:\s*(\S+)/m)?.[1];
 }
 
-function selectActiveNetworkService(services, routeIface) {
+function parseNwiActiveInterfaces(nwiOutput) {
+  const match = nwiOutput.match(/Network interfaces:\s*([^\n]+)/);
+  if (!match) return [];
+  return match[1]
+    .trim()
+    .split(/\s+/)
+    .filter((dev) => !/^(utun|ppp|ipsec|gif|stf|bridge)/i.test(dev));
+}
+
+function selectActiveNetworkService(services, routeIface, activeDevices) {
   // If route interface is not a virtual tunnel (utun, ppp, ipsec, etc.), try direct match
   if (routeIface && !/^(utun|ppp|ipsec|gif|stf)/i.test(routeIface)) {
     const direct = services.find((entry) => entry.device === routeIface);
     if (direct) {
       return direct;
+    }
+  }
+
+  // If active devices are known from connectivity checks, pick the matching physical service
+  if (activeDevices && activeDevices.length > 0) {
+    const activeMatch = services.find((entry) => activeDevices.includes(entry.device));
+    if (activeMatch) {
+      return activeMatch;
     }
   }
 
@@ -264,7 +310,7 @@ async function setDNS(servers, service = "Wi-Fi", exec = execFileAsync) {
   }
 
   const networksetup = "/usr/sbin/networksetup";
-  const flushCmd = "/usr/bin/dscacheutil -flushcache && /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true";
+  const flushCmd = "(/usr/bin/dscacheutil -flushcache; /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true)";
 
   if (servers.length === 0) {
     await runWithAdmin(`${networksetup} -setdnsservers '${service}' empty && ${flushCmd}`, exec);
@@ -305,6 +351,33 @@ describe("DNS Preset Line Parsing", () => {
       name: "cloudflare",
       servers: "1.1.1.1,1.0.0.1",
       description: "Fast & Private",
+    });
+  });
+
+  test("parses IPv6 preset with multiple colons and description", () => {
+    const res = parsePresetLine("cloudflare-v6=2606:4700:4700::1111,2606:4700:4700::1001:Cloudflare IPv6");
+    assert.deepStrictEqual(res, {
+      name: "cloudflare-v6",
+      servers: "2606:4700:4700::1111,2606:4700:4700::1001",
+      description: "Cloudflare IPv6",
+    });
+  });
+
+  test("parses IPv6 preset without description", () => {
+    const res = parsePresetLine("ipv6=2606:4700:4700::1111,2606:4700:4700::1001");
+    assert.deepStrictEqual(res, {
+      name: "ipv6",
+      servers: "2606:4700:4700::1111,2606:4700:4700::1001",
+      description: undefined,
+    });
+  });
+
+  test("parses single IPv6 preset with description", () => {
+    const res = parsePresetLine("localhost=::1:Localhost DNS");
+    assert.deepStrictEqual(res, {
+      name: "localhost",
+      servers: "::1",
+      description: "Localhost DNS",
     });
   });
 
@@ -418,6 +491,28 @@ destination: default
     ];
     const selected = selectActiveNetworkService(services, "utun2");
     assert.deepStrictEqual(selected, { service: "Wi-Fi", device: "en0" });
+  });
+
+  test("prioritizes active physical device over disconnected device on tunnel route", () => {
+    const services = [
+      { service: "Display Ethernet", device: "en11" },
+      { service: "Wi-Fi", device: "en0" },
+    ];
+    // en11 is disconnected, en0 is active in activeDevices
+    const selected = selectActiveNetworkService(services, "utun2", ["en0"]);
+    assert.deepStrictEqual(selected, { service: "Wi-Fi", device: "en0" });
+  });
+
+  test("parses active devices from scutil --nwi", () => {
+    const sampleNwi = `Network information
+
+IPv4 network interface information
+     en0 : flags      : 0x5 (IPv4,DNS)
+           address    : 10.11.59.49
+
+Network interfaces: en0 utun2
+`;
+    assert.deepStrictEqual(parseNwiActiveInterfaces(sampleNwi), ["en0"]);
   });
 
   test("falls back to physical adapter when route interface is unmapped", () => {
@@ -709,7 +804,11 @@ describe("Async Network Operations & Error Handling", () => {
     assert.ok(b64Match);
     const decoded = Buffer.from(b64Match[1], "base64").toString("utf-8");
     assert.ok(decoded.includes("-setdnsservers 'Wi-Fi' '1.1.1.1' '1.0.0.1'"));
-    assert.ok(decoded.includes("dscacheutil -flushcache"));
+    assert.ok(
+      decoded.includes(
+        "&& (/usr/bin/dscacheutil -flushcache; /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true)",
+      ),
+    );
   });
 });
 
