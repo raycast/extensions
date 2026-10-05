@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-sessions",
+  "title": "App Sessions",
+  "description": "Start and end groups of apps with optional Apple Shortcuts and Raycast command automation",
+  "icon": "icon.png",
+  "author": "yasinkavakli",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "start-session",
+      "title": "Start Session",
+      "description": "Open all apps and run the start Shortcut for a session",
+      "mode": "view"
+    },
+    {
+      "name": "end-session",
+      "title": "End Session",
+      "description": "Gracefully quit all apps and run the end Shortcut for a session",
+      "mode": "view"
+    },
+    {
+      "name": "manage-sessions",
+      "title": "Manage Sessions",
+      "description": "Create, edit, and delete app sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "launchDelay",
+      "title": "Start Delay",
+      "description": "Delay between opening each app",
+      "type": "dropdown",
+      "required": false,
+      "default": "0",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "500ms",
+          "value": "500"
+        },
+        {
+          "title": "1 second",
+          "value": "1000"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/*.test.mts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
