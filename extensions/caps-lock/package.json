@@ -43,7 +43,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "npm run build:native && npx @raycast/api@latest publish",
     "build:native": "sh native/build.sh",
     "test": "node --test tests/*.test.cjs"
   }

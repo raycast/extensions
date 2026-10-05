@@ -23,4 +23,6 @@ npm run build:native
 
 [`native/build.sh`](native/build.sh) compiles the same C source for arm64 and x86_64 with a macOS 12 deployment target, combines the results with `lipo`, and applies an ad-hoc signature. The helper links only to system libraries and IOKit. Command Line Tools are required only for rebuilding, not for users running the command.
 
-`npm run build` rebuilds the native helper before bundling the extension, so the packaged binary matches the checked-in C source. Run `npm test` on macOS to test concurrent helper processes against a simulated keyboard and command notifications against a mocked Raycast API; these tests do not change the real Caps Lock state.
+Both `npm run build` and `npm run publish` rebuild the native helper before invoking the Raycast CLI. If compilation fails, bundling or publishing stops. When contributing directly through Git, run `npm run build:native` after changing the native source or build script and commit the rebuilt `assets/caps-lock` alongside those changes; the Store packages this checked-in binary.
+
+Run `npm test` on macOS to test concurrent helper processes against a simulated keyboard, command notifications against a mocked Raycast API, and build/publish ordering with the real native compiler and stubbed Raycast CLIs. These tests do not change the real Caps Lock state or publish the extension.
