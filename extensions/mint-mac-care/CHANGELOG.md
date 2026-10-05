@@ -1,5 +1,11 @@
 # Mint Changelog
 
+## [Ask Mint in Raycast AI] - {PR_MERGE_DATE}
+
+- Ask Mint in Raycast AI: "@mint what's taking up space?", "@mint which apps are using the most memory?", "@mint what grew on my disk this week?" The answers come from Mint and only read. To act, Mint opens Free Disk, Optimize Storage or Free Memory for you to review and confirm.
+- The commands are easier to find in Raycast's search: cleaner, junk, disk space, duplicates, uninstaller, system data and more.
+- Without Mint yet, the first page also offers one line for Homebrew: `brew install --cask dzg-studio/mint/mint`.
+
 ## [Optimize, Organize and a status at a glance] - 2026-10-01
 
 - Every command is a list with a picture: groups on the left, what is in each on the right, ↵ acting on the whole group.
