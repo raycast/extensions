@@ -192,6 +192,99 @@ test("recovers an abandoned published lock and removes its candidate directory",
   await assert.rejects(() => lstat(candidatePath), /ENOENT/);
 });
 
+test("takes over a recovery claim whose claimant is no longer running", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const candidatePath = `${lockPath}.candidate.abandoned-writer`;
+  const abandonedPID = 2_147_483_647;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(candidatePath);
+  await writeFile(
+    path.join(candidatePath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(
+    path.join(candidatePath, ".recovery-claim"),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: "crashed-recovery",
+      claimantPid: abandonedPID,
+    })}\n`,
+  );
+  await symlink(candidatePath, lockPath, "dir");
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+  await assert.rejects(() => lstat(candidatePath), /ENOENT/);
+});
+
+test("recovers when a previous claimant crashed during claim takeover", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const candidatePath = `${lockPath}.candidate.abandoned-writer`;
+  const abandonedPID = 2_147_483_647;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(candidatePath);
+  await writeFile(
+    path.join(candidatePath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(
+    path.join(candidatePath, ".recovery-claim.takeover.crashed-recovery"),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: "older-recovery",
+      claimantPid: abandonedPID,
+    })}\n`,
+  );
+  await symlink(candidatePath, lockPath, "dir");
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+  await assert.rejects(() => lstat(candidatePath), /ENOENT/);
+});
+
+test("does not take a recovery claim from a live claimant", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const candidatePath = `${lockPath}.candidate.abandoned-writer`;
+  const abandonedPID = 2_147_483_647;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(candidatePath);
+  await writeFile(
+    path.join(candidatePath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(
+    path.join(candidatePath, ".recovery-claim"),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: "live-recovery",
+      claimantPid: process.pid,
+    })}\n`,
+  );
+  await symlink(candidatePath, lockPath, "dir");
+
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
+  );
+
+  assert.equal((await lstat(lockPath)).isSymbolicLink(), true);
+  assert.equal((await lstat(candidatePath)).isDirectory(), true);
+});
+
 test("does not reclaim an ownerless lock that could still belong to a writer", async (t) => {
   const directory = await temporaryDirectory(t);
   const storagePath = path.join(directory, "deeplinks.json");
@@ -201,7 +294,7 @@ test("does not reclaim an ownerless lock that could still belong to a writer", a
 
   await assert.rejects(
     () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
-    /Timed out waiting/,
+    /unfinished storage update from an older version/,
   );
 
   assert.equal((await lstat(lockPath)).isDirectory(), true);
