@@ -1,6 +1,6 @@
 # Font Converter Changelog
 
-## [OTF Conversion, Windows File Selection, and AI Tools] - {PR_MERGE_DATE}
+## [OTF Conversion, Windows File Selection, and AI Tools] - 2026-10-05
 
 - Added reliable OTF input conversion to TTF, WOFF, WOFF2, and EOT. Web formats preserve the source outlines and tables, with warnings when converting CFF outlines to TrueType.
 - Added a font file picker for every command on Windows and a fallback when no font is selected in Finder on macOS.
