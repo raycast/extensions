@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Raycast build output
+.raycast-swift-build/
+raycast-env.d.ts
+dist/
+build/
+
+# Logs & caches
+*.log
+npm-debug.log*
+.eslintcache
+.vitest/
+coverage/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

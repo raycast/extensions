@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "targetprocess",
+  "title": "Targetprocess",
+  "description": "Search Targetprocess items and see your assigned work without leaving Raycast",
+  "icon": "extension-icon.png",
+  "author": "Synthetium",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "targetprocess",
+    "tp",
+    "apptio",
+    "agile",
+    "user story",
+    "project management"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Targetprocess",
+      "description": "Find user stories, bugs, tasks, features, epics and requests by name or ID",
+      "mode": "view"
+    },
+    {
+      "name": "my-work",
+      "title": "My Work",
+      "subtitle": "Targetprocess",
+      "description": "Show every open item assigned to you, grouped by state",
+      "mode": "view"
+    },
+    {
+      "name": "manage-instances",
+      "title": "Manage Instances",
+      "subtitle": "Targetprocess",
+      "description": "Add, edit and remove the Targetprocess instances you connect to",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "icon": "node scripts/render-icon.mjs",
+    "icons": "node scripts/sync-icons.mjs",
+    "probe": "node scripts/probe.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
