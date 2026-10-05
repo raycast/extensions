@@ -51,6 +51,7 @@ export default function Command() {
   const [submitting, setSubmitting] = useState(false);
 
   const { data, isLoading, error, revalidate } = usePromise(async () => {
+    await assertPromptSupported();
     const snapshot = await getShell();
     const [models, lastProjectId] = await Promise.all([
       modelChoices(snapshot),

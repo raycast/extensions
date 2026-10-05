@@ -90,7 +90,12 @@ type EnvironmentDescriptor = {
  * branch on `kind` to decide whether offering "Launch T3 Code" makes sense. */
 export class T3Error extends Error {
   constructor(
-    readonly kind: "unreachable" | "unauthorized" | "http" | "insecure-origin",
+    readonly kind:
+      | "unreachable"
+      | "unauthorized"
+      | "http"
+      | "insecure-origin"
+      | "unsupported",
     message: string,
   ) {
     super(message);
@@ -268,7 +273,8 @@ export const getShell = async (): Promise<ShellSnapshot> => {
  * extension does not speak yet. */
 export async function assertPromptSupported(): Promise<void> {
   if ((await serverProtocolVersion(await resolveOrigin())) >= 2) {
-    throw new Error(
+    throw new T3Error(
+      "unsupported",
       "This T3 Code server uses protocol v2, where threads can only be created over WebSocket. Prompt T3 Code is not supported yet.",
     );
   }
@@ -458,6 +464,9 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
+// The preference used to default to this, which matches neither installed bundle,
+// so a stored copy of it counts as unset.
+const LEGACY_APP_NAME = "T3 Code";
 const STABLE_APP = "T3 Code (Alpha)";
 const NIGHTLY_APP = "T3 Code (Nightly)";
 // Same pattern T3 uses to brand a build as Nightly. Preview builds share the branding.
@@ -480,7 +489,7 @@ async function isInstalled(name: string): Promise<boolean> {
  * with no server running use whichever app is installed, stable first. */
 async function appName(): Promise<string> {
   const configured = preferences().appName?.trim();
-  if (configured) {
+  if (configured && configured !== LEGACY_APP_NAME) {
     return configured;
   }
   try {
