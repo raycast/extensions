@@ -1,8 +1,9 @@
+import { Issue } from "@linear/sdk";
 import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
-import { resolveIssueLabel } from "./linearUtils";
+import { resolveIssueLabel, resolveIssueLabelForTeam } from "./linearUtils";
 import { serializeIssue } from "./serializers";
 import { withLinear } from "./withLinear";
 
@@ -16,8 +17,8 @@ type Input = {
 
 export default withLinear(async ({ issueId, label }: Input) => {
   const { linearClient } = getLinearClient();
-  const labelId = (await resolveIssueLabel(label)).id;
   const issue = await linearClient.issue(issueId);
+  const labelId = (await resolveLabelForIssue(issue, label)).id;
   const currentLabelIds = issue.labelIds || [];
   const result = await linearClient.updateIssue(issueId, {
     labelIds: [...currentLabelIds, labelId],
@@ -37,8 +38,8 @@ export default withLinear(async ({ issueId, label }: Input) => {
 
 export const confirmation = withAccessToken(linear)(async ({ issueId, label: labelQuery }: Input) => {
   const { linearClient } = getLinearClient();
-  const label = await resolveIssueLabel(labelQuery);
   const issue = await linearClient.issue(issueId);
+  const label = await resolveLabelForIssue(issue, labelQuery);
 
   return {
     info: [
@@ -47,3 +48,8 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, label: lab
     ],
   };
 });
+
+/** Resolves the label within the issue's team, where shared names like "Bug" are unambiguous, falling back to the workspace when the issue has no team ID. */
+function resolveLabelForIssue(issue: Issue, query: string) {
+  return issue.teamId ? resolveIssueLabelForTeam(query, issue.teamId) : resolveIssueLabel(query);
+}

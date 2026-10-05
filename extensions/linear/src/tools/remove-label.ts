@@ -1,9 +1,10 @@
+import { Issue } from "@linear/sdk";
 import { Action } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
-import { resolveIssueLabel } from "./linearUtils";
+import { findExact } from "./linearUtils";
 import { serializeIssue } from "./serializers";
 import { withLinear } from "./withLinear";
 
@@ -17,8 +18,8 @@ type Input = {
 
 export default withLinear(async ({ issueId, label }: Input) => {
   const { linearClient } = getLinearClient();
-  const labelId = (await resolveIssueLabel(label)).id;
   const issue = await linearClient.issue(issueId);
+  const labelId = (await findIssueLabel(issue, label)).id;
   const currentLabelIds = issue.labelIds || [];
   const updatedLabelIds = currentLabelIds.filter((id) => id !== labelId);
   const result = await linearClient.updateIssue(issueId, {
@@ -40,8 +41,8 @@ export default withLinear(async ({ issueId, label }: Input) => {
 export const confirmation = withAccessToken(linear)(async ({ issueId, label: labelQuery }: Input) => {
   const { linearClient } = getLinearClient();
 
-  const label = await resolveIssueLabel(labelQuery);
   const issue = await linearClient.issue(issueId);
+  const label = await findIssueLabel(issue, labelQuery);
 
   return {
     style: Action.Style.Destructive,
@@ -51,3 +52,8 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, label: lab
     ],
   };
 });
+
+/** Finds the label to remove among the issue's current labels, so a name shared by several teams' labels still identifies the one on this issue. */
+async function findIssueLabel(issue: Issue, query: string) {
+  return findExact((await issue.labels()).nodes, query, "label on this issue");
+}

@@ -14,7 +14,7 @@ interface Input extends CursorPageInput {
  *
  * Queries GraphQL directly with a compact selection instead of reusing the UI's notification query, which embeds a full issue per notification and made unpaginated results large enough to derail the model.
  *
- * Linear's `NotificationFilter` has no read-state field, so `unreadOnly` filters fetched pages on the client.
+ * Linear's `NotificationFilter` has no read-state field, so `unreadOnly` filters fetched pages on the client. The scan stops after `MAX_UNREAD_SCAN_PAGES` pages so a long, mostly read inbox does not trigger a burst of requests; the returned cursor continues from there.
  */
 export default withLinear(async (input: Input) => {
   const { graphQLClient } = getLinearClient();
@@ -29,6 +29,7 @@ export default withLinear(async (input: Input) => {
     },
     (notification) => !input.unreadOnly || !notification.readAt,
     input,
+    input.unreadOnly ? MAX_UNREAD_SCAN_PAGES : undefined,
   );
   return { nodes: page.nodes.map(serializeNotification), nextCursor: page.nextCursor };
 });
@@ -63,6 +64,7 @@ function truncate(text: string, maxLength: number) {
 }
 
 const MAX_COMMENT_LENGTH = 500;
+const MAX_UNREAD_SCAN_PAGES = 3;
 
 const NOTIFICATIONS_QUERY = `
   query ($first: Int, $after: String) {

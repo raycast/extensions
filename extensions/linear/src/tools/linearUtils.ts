@@ -35,18 +35,20 @@ export async function collect<T>(
   return collectFiltered(fetchPage, () => true, input);
 }
 
-/** Collects full API pages until enough matching entities are found, preserving a cursor after every scanned entity. */
+/** Collects full API pages until enough matching entities are found, preserving a cursor after every scanned entity. `maxPages` bounds sparse filters; the returned cursor continues where the scan stopped. */
 export async function collectFiltered<T>(
   fetchPage: (variables: { first: number; after?: string }) => Promise<Connection<T>>,
   predicate: (entity: T) => boolean | Promise<boolean>,
   input: PageInput = {},
+  maxPages = Infinity,
 ): Promise<{ nodes: T[]; nextCursor?: string }> {
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 250);
   const result: T[] = [];
   let cursor = input.cursor;
   let hasNextPage = false;
+  let pages = 0;
 
-  while (result.length < limit) {
+  while (result.length < limit && pages++ < maxPages) {
     const page = await fetchPage({ first: Math.min(100, limit - result.length), after: cursor });
     for (const entity of page.nodes) {
       if (await predicate(entity)) result.push(entity);
@@ -208,6 +210,26 @@ export async function resolveIssueLabel(query: string) {
     "issue label",
     (id) => client().issueLabel(id),
     async () => (await client().issueLabels({ first: 250 })).nodes,
+  );
+}
+
+/**
+ * Resolves an issue label among the labels an issue in `teamId` can use: the team's own labels and workspace labels.
+ *
+ * Label names repeat across teams, so the workspace-wide `resolveIssueLabel` rejects a name like "Bug" that is unambiguous for the issue's team.
+ */
+export async function resolveIssueLabelForTeam(query: string, teamId: string) {
+  return resolveFrom(
+    query,
+    "issue label",
+    (id) => client().issueLabel(id),
+    async () =>
+      (
+        await client().issueLabels({
+          first: 250,
+          filter: { or: [{ team: { id: { eq: teamId } } }, { team: { null: true } }] },
+        })
+      ).nodes,
   );
 }
 
