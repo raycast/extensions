@@ -97,16 +97,17 @@ JSON export — only import.
 The extension can also put your Claude models into Raycast AI's own model picker, so you
 can choose them in AI Chat, Quick AI, and AI Commands, billed to your own API key.
 
-- **Every model your key can reach**, listed under its own name. New models appear as soon
-  as Anthropic ships them, without waiting for an extension or Raycast update.
+- **Every model your key can reach**, listed under its own name. A model Anthropic releases
+  appears on Raycast's next refresh of the list, with no extension or Raycast update needed.
 - **Each of your Presets**, under the preset's name. Picking one applies its system prompt,
   model, output limit, and (where the model accepts one) temperature, so a preset you built
   for code review becomes a
   model you can select in any AI Chat.
 
-Each model declares what it actually supports, read from the Anthropic API rather than
-guessed: image attachments, tool use with your AI Extensions, and the reasoning-effort
-levels Raycast shows in its picker.
+Each model declares what it supports. Image attachments and the reasoning-effort levels
+Raycast shows in its picker are read from the Anthropic API for that model; tool use with
+your AI Extensions is on for every Claude model, and temperature only where the model
+accepts one.
 
 This requires **Raycast Pro**. Turn it on with **Allow AI Models** in this extension's
 settings, or by choosing one of its models in the picker.
@@ -114,7 +115,7 @@ settings, or by choosing one of its models in the picker.
 # How to use
 
 This extension requires a valid Anthropic API key. Create one at
-[console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys).
+[platform.claude.com/settings/keys](https://platform.claude.com/settings/keys).
 
 > All the preferences value will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
 
@@ -124,7 +125,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties        | Label               | Value     | Required | Default | Description                                                                                                       |
 | ----------------- | ------------------- | --------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| `apiKey`          | API Key             | `string`  | `true`   | `empty` | Create a key at console.anthropic.com/settings/keys, then paste it here.                                          |
+| `apiKey`          | API Key             | `string`  | `true`   | `empty` | Create a key at platform.claude.com/settings/keys, then paste it here.                                          |
 | `useStream`       | Stream Responses    | `boolean` | `true`   | `true`  | Stream responses from Claude in real-time                                                                         |
 | `isAutoLoad`      | Auto-load           | `boolean` | `false`  | `false` | Load selected text from your front most application to the question bar automatically                             |
 | `isAutoFullInput` | Full Text Input     | `boolean` | `false`  | `false` | Always start questions in the multi-line form instead of the search bar                                           |

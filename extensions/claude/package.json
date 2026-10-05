@@ -58,7 +58,7 @@
     {
       "name": "apiKey",
       "label": "Anthropic API Key",
-      "description": "Create a key at console.anthropic.com/settings/keys, then paste it here.",
+      "description": "Create a key at platform.claude.com/settings/keys, then paste it here.",
       "type": "password",
       "title": "API Key",
       "required": true

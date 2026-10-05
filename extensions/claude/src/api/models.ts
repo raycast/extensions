@@ -100,7 +100,28 @@ const FALLBACK_MODELS: AvailableModel[] = [
  * page would simply never see the rest. This requests the maximum page size and
  * follows `has_more`/`last_id` until the list is exhausted.
  */
-export async function fetchAvailableModels(): Promise<AvailableModel[]> {
+/** A non-2xx response from `/v1/models`, carrying the status so callers can tell a rejected
+ *  key apart from an outage. */
+class ModelsRequestError extends Error {
+  constructor(
+    readonly status: number,
+    statusText: string,
+  ) {
+    super(`API request failed: ${status} ${statusText}`);
+  }
+}
+
+export async function fetchAvailableModels(
+  options: {
+    /**
+     * Throw when Anthropic rejects the key (401/403) instead of falling back to the cache or
+     * the hardcoded list. The commands want the fallback — a bad key still leaves them a
+     * picker to show. The Raycast AI provider must not: a fallback list there advertises
+     * models to Raycast that will each fail with the same rejected key.
+     */
+    throwOnAuthError?: boolean;
+  } = {},
+): Promise<AvailableModel[]> {
   const { apiKey } = getPreferenceValues<Preferences>();
 
   try {
@@ -122,7 +143,7 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        throw new ModelsRequestError(response.status, response.statusText);
       }
 
       const data = (await response.json()) as ModelApiResponse;
@@ -147,6 +168,13 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
 
     return models;
   } catch (error) {
+    if (
+      options.throwOnAuthError &&
+      error instanceof ModelsRequestError &&
+      (error.status === 401 || error.status === 403)
+    ) {
+      throw new Error("Anthropic rejected the API key. Check it in the Claude extension's preferences.");
+    }
     console.error("Failed to fetch models from API:", error);
     // Try to return cached models on error
     const cached = await getCachedModels();

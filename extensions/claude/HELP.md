@@ -2,7 +2,7 @@
 
 ## Get an API key
 
-1. Sign in at [console.anthropic.com](https://console.anthropic.com).
+1. Sign in at [platform.claude.com](https://platform.claude.com).
 2. Open **Settings → API Keys** and create a key.
 3. Paste it into the **API Key** field.
 
@@ -15,8 +15,8 @@ This extension can also add your Claude models — and each of your saved Preset
 - It requires **Raycast Pro**.
 - Turn it on with **Allow AI Models** in this extension's settings, or by choosing one of its models in the picker.
 
-A Preset appears in the picker under its own name and applies its system prompt, model, and output limit when you select it.
+A Preset appears in the picker under its own name and applies its system prompt, model, and output limit when you select it. New or edited Presets show up the next time Raycast refreshes the list.
 
 ## Stream Responses
 
-Leave **Stream Responses** on unless you have a reason not to. With it off, an answer appears only once it is complete, and very long answers are capped shorter.
+This applies to the **Ask Question** command. Leave it on unless you have a reason not to: with it off, an answer appears only once it is complete, and very long answers are capped shorter. Raycast AI always streams, whatever this is set to.

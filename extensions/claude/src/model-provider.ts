@@ -10,6 +10,7 @@ import {
 } from "./api/models";
 import type { Model } from "./type";
 import { getMaxTokensForModel, supportsTemperature } from "./utils/models";
+import { DEFAULT_PROMPT } from "./utils/presets";
 
 /**
  * Raycast AI model provider (`ai.modelProvider` in package.json).
@@ -92,7 +93,18 @@ async function readPresets(): Promise<Model[]> {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? (parsed as Model[]) : [];
+    if (!Array.isArray(parsed)) return [];
+    // Row by row: one malformed preset (a hand-edited store, an interrupted write) must not
+    // throw out of `getModels` and take every bare model down with it.
+    return parsed.filter(
+      (row): row is Model =>
+        typeof row === "object" &&
+        row !== null &&
+        typeof row.id === "string" &&
+        row.id.length > 0 &&
+        typeof row.name === "string" &&
+        typeof row.option === "string",
+    );
   } catch {
     // An unreadable presets key must not take the bare models down with it.
     return [];
@@ -100,7 +112,7 @@ async function readPresets(): Promise<Model[]> {
 }
 
 export const getModels: AI.GetModels = async () => {
-  const liveModels = await fetchAvailableModels();
+  const liveModels = await fetchAvailableModels({ throwOnAuthError: true });
   const byId = new Map(liveModels.map((model) => [model.id, model]));
 
   const models: AI.RegisteredModel[] = liveModels.map((model) => ({
@@ -111,11 +123,11 @@ export const getModels: AI.GetModels = async () => {
     ...(model.max_input_tokens ? { contextWindow: model.max_input_tokens } : {}),
   }));
 
-  // The built-in default preset is left out: its prompt is the generic default and its
-  // model is the newest Sonnet, so it would be a second, indistinguishable copy of an entry
-  // already in the list above.
+  // The built-in default preset is left out only while its prompt is still the generic
+  // default: then it is a second copy of a bare model already listed above. Once the user
+  // gives it their own prompt it is a preset like any other and appears.
   for (const preset of await readPresets()) {
-    if (preset.id === "default") continue;
+    if (preset.id === "default" && preset.prompt === DEFAULT_PROMPT) continue;
     const underlying = byId.get(preset.option) ?? { id: preset.option, display_name: preset.option, created_at: "" };
     models.push({
       id: `${PRESET_ID_PREFIX}${preset.id}`,
@@ -166,9 +178,25 @@ function splitSystem(messages: AI.ModelMessage[]): { systemParts: string[]; rest
   const rest: AI.ModelMessage[] = [];
   for (const message of messages) {
     if (message.role === "system") systemParts.push(message.content);
+    else if (message.role === "assistant") rest.push(withoutAssistantFiles(message));
     else rest.push(message);
   }
   return { systemParts, rest };
+}
+
+/**
+ * Anthropic accepts no files in an assistant turn, and the AI SDK drops them silently — a
+ * turn that was only a file vanishes from the history Claude sees. A short text marker keeps
+ * the turn and tells the model something was there that it cannot read.
+ */
+function withoutAssistantFiles(message: Extract<AI.ModelMessage, { role: "assistant" }>): AI.ModelMessage {
+  if (!message.content.some((part) => part.type === "file")) return message;
+  return {
+    ...message,
+    content: message.content.map((part) =>
+      part.type === "file" ? { type: "text" as const, text: `[${part.mediaType} attachment, not shown]` } : part,
+    ),
+  };
 }
 
 /** Tool input schemas arrive as plain JSON Schema; the AI SDK wants them wrapped. */
@@ -211,9 +239,13 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
   const requestedTemperature = target.presetTemperature ?? request.temperature;
   const temperature = supportsTemperature(target.modelId) ? requestedTemperature : undefined;
 
-  // Streaming carries no output ceiling of its own, so the model's full limit applies
-  // unless a preset narrows it.
-  const maxOutputTokens = target.presetMaxTokens ?? getMaxTokensForModel(target.modelId, liveModels);
+  // Streaming carries no output ceiling of its own, so the model's full limit applies unless
+  // a preset narrows it — clamped, because a preset saved against an older model (or a
+  // hand-edited store) can hold more than this model accepts, which is a 400.
+  const modelCeiling = getMaxTokensForModel(target.modelId, liveModels);
+  const maxOutputTokens = target.presetMaxTokens
+    ? Math.min(Math.floor(target.presetMaxTokens), modelCeiling)
+    : modelCeiling;
 
   const effortLevels = supportedEffortLevels(liveModel);
   const requestedEffort = request.providerOptions?.raycast?.reasoningEffort;
@@ -232,8 +264,8 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
       ? {
           thinking: {
             type: "adaptive",
-            // The default, "omitted", streams empty reasoning — Raycast would show a long
-            // silent pause where it could show what the model is weighing.
+            // Opus 4.7 and later default to "omitted", which streams empty reasoning — Raycast
+            // would show a long silent pause where it could show what the model is weighing.
             display: "summarized",
             // Raycast rebuilds the history it replays. If that ever changes an earlier turn,
             // a signed thinking block from it no longer verifies, and the API would reject
@@ -245,6 +277,13 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
       : {}),
   } satisfies AnthropicLanguageModelOptions;
 
+  // Forcing a tool call (`any`) is a 400 on Claude Opus 5.5, Sonnet 5.5, and Fable 5.1.
+  // "required" is kept only where it is the long-standing request shape — a pre-4.7 model
+  // with thinking off — and degrades to "auto" everywhere else rather than risk a rejected
+  // request on a model or thinking combination this code has not verified. Raycast runs
+  // the tools either way.
+  const canForceToolCall = !adaptive && supportsTemperature(target.modelId);
+
   const { apiKey } = getPreferenceValues<Preferences>();
   const anthropic = createAnthropic({ apiKey });
 
@@ -255,10 +294,7 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
     maxOutputTokens,
     temperature: wantsTemperature ? temperature : undefined,
     tools: toToolSet(request.tools),
-    // Forcing a tool call (`any`) is a 400 on Claude Opus 5.5, Sonnet 5.5, and Fable 5.1,
-    // and Raycast executes the tools either way. "auto" with the tools present is the form
-    // every Claude model accepts.
-    toolChoice: request.toolChoice ? "auto" : undefined,
+    toolChoice: request.toolChoice === "required" && !canForceToolCall ? "auto" : request.toolChoice,
     headers: adaptive ? { "anthropic-beta": THINKING_BINDING_BETA } : undefined,
     providerOptions: { anthropic: anthropicOptions },
   });

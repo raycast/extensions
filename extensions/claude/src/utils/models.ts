@@ -161,7 +161,12 @@ export function nonstreamingRetryParams<T extends { max_tokens: number }>(params
  * this gates the request rather than dropping the value everywhere.
  */
 export function supportsTemperature(modelId: string): boolean {
-  return getModelGeneration(modelId) < 4.7;
+  // Generation 0 means the id carries no version this parser recognizes (e.g. a preview
+  // id). Treat it as unsupported: omitting temperature is accepted by every Claude model,
+  // while advertising it for a model that discards it is a setting that silently does
+  // nothing.
+  const generation = getModelGeneration(modelId);
+  return generation > 0 && generation < 4.7;
 }
 
 /**
