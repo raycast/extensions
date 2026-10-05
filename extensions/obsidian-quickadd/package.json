@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-quickadd",
+  "title": "Obsidian QuickAdd",
+  "description": "Run Obsidian QuickAdd choices from Raycast and answer their prompts without leaving your current app",
+  "icon": "extension-icon.png",
+  "author": "pavel_ievlev",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quickadd",
+      "title": "QuickAdd",
+      "description": "Run a QuickAdd choice and answer its prompts in Raycast",
+      "mode": "view",
+      "keywords": [
+        "obsidian",
+        "capture",
+        "template",
+        "note",
+        "macro"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault Folder",
+      "description": "Obsidian vault that has QuickAdd installed. Leave empty to detect it automatically.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "cliPath",
+      "title": "Obsidian CLI",
+      "description": "Path to obsidian-cli. Leave empty to use the one inside the Obsidian app.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.6"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
