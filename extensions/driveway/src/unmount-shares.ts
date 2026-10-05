@@ -9,8 +9,8 @@ export default async function command() {
   if (!entries.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "No servers configured",
-      message: "Run “Add SMB Server” to add one.",
+      title: "No drives configured",
+      message: "Run “Add Drive” to add one.",
     });
     return;
   }
@@ -51,7 +51,7 @@ export default async function command() {
   if (problems.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Some SMB shares were not unmounted",
+      title: "Some drives were not unmounted",
       message: problems.join("; "),
     });
     return;
@@ -61,14 +61,14 @@ export default async function command() {
     await showToast({
       style: Toast.Style.Success,
       title: "Nothing to unmount",
-      message: "No saved shares are currently mounted.",
+      message: "No saved drives are currently mounted.",
     });
     return;
   }
 
   await showToast({
     style: Toast.Style.Success,
-    title: "Shares unmounted",
+    title: "Drives unmounted",
     message: unmounted.join(", "),
   });
 }

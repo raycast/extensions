@@ -43,7 +43,7 @@ function EditServer({
 
   async function handleSave(values: ServerFormInput) {
     await updateServer(server.id, values);
-    await showToast({ style: Toast.Style.Success, title: "Server updated" });
+    await showToast({ style: Toast.Style.Success, title: "Drive updated" });
     onSaved();
     pop();
   }
@@ -105,7 +105,11 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     if (!confirmed) return;
 
     await removeServer(server.id);
-    await showToast({ style: Toast.Style.Success, title: "Server removed" });
+    // Selection is controlled, so a selectedItemId left pointing at the removed
+    // row selects nothing and takes the action panel with it. Hand selection
+    // back to Raycast instead.
+    setSelectedId((current) => (current === server.id ? undefined : current));
+    await showToast({ style: Toast.Style.Success, title: "Drive removed" });
     await load();
   }
 
@@ -127,7 +131,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Invalid server",
+        title: "Invalid drive",
         message: error instanceof Error ? error.message : "Check the saved host and path.",
       });
       return;
@@ -176,7 +180,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Invalid server",
+        title: "Invalid drive",
         message: error instanceof Error ? error.message : "Check the saved host and path.",
       });
       return;
@@ -393,7 +397,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                     />
                   )}
                   <Action
-                    title="Edit Server"
+                    title="Edit Drive"
                     icon={Icon.Pencil}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     onAction={() => push(<EditServer server={server} onSaved={load} onDuplicate={setSelectedId} />)}
@@ -401,7 +405,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                   {addServerAction}
                   {discoverAction}
                   <Action
-                    title="Remove Server"
+                    title="Remove Drive"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}

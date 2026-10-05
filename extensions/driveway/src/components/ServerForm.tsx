@@ -45,7 +45,7 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Couldn't save server",
+        title: "Couldn't save drive",
         message: error instanceof Error ? error.message : "Check the host and path.",
       });
       return;

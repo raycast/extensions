@@ -7,7 +7,7 @@ export default function Command() {
     await addServer(values);
     await showToast({
       style: Toast.Style.Success,
-      title: "Server added",
+      title: "Drive added",
       message: values.alias ?? `${values.host}/${values.path}`,
     });
     await launchCommand({ name: "index", type: LaunchType.UserInitiated });

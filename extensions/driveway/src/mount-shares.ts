@@ -9,8 +9,8 @@ export default async function command() {
   if (!entries.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "No servers configured",
-      message: "Run “Add SMB Server” to add one.",
+      title: "No drives configured",
+      message: "Run “Add Drive” to add one.",
     });
     return;
   }
@@ -54,7 +54,7 @@ export default async function command() {
   if (failures.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Some SMB shares were not mounted",
+      title: "Some drives were not mounted",
       message: failures.join("; "),
     });
     return;

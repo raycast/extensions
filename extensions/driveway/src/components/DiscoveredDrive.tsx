@@ -95,7 +95,7 @@ export function AddServer({
     await addServer(values);
     await showToast({
       style: Toast.Style.Success,
-      title: "Server added",
+      title: "Drive added",
       message: values.alias ?? `${values.host}/${values.path}`,
     });
     onSaved();
