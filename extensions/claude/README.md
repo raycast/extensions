@@ -98,7 +98,7 @@ The extension can also put your Claude models into Raycast AI's own model picker
 can choose them in AI Chat, Quick AI, and AI Commands, billed to your own API key.
 
 - **Every model your key can reach**, listed under its own name. A model Anthropic releases
-  appears on Raycast's next refresh of the list, with no extension or Raycast update needed.
+  appears the next time Raycast refreshes the list successfully, with no extension or Raycast update needed.
 - **Each of your Presets**, under the preset's name. Picking one applies its system prompt,
   model, output limit, and (where the model accepts one) temperature, so a preset you built
   for code review becomes a

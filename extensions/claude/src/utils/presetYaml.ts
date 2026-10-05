@@ -138,7 +138,9 @@ function coercePresetYamlEntry(raw: unknown): PresetYamlEntry | null {
     // would (silently) land on the model's ceiling. See importPresetsFromYaml's history:
     // that silent path used to hand a user who typed `max_tokens: 0` the OPPOSITE of what
     // they asked for, indistinguishable from having omitted the field.
-    if (typeof row.max_tokens !== "number" || Number.isNaN(row.max_tokens) || row.max_tokens <= 0) return null;
+    // Integers of at least 1 only — the same floor the preset form enforces. A fractional
+    // value like 0.5 used to pass the positive check here and then floor to a stored "0".
+    if (typeof row.max_tokens !== "number" || !Number.isInteger(row.max_tokens) || row.max_tokens < 1) return null;
     entry.max_tokens = row.max_tokens;
   }
 

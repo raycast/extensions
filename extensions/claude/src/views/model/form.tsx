@@ -106,7 +106,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         if (numValue % 1 !== 0) {
           return "Value must be an integer";
         }
-        // 1, not 0 — the same floor the YAML importer enforces. A preset saved at 0 meant
+        // At least 1, the same floor the YAML importer enforces. A preset saved at 0 meant
         // "fall back to 4096" in Ask and "the model's full ceiling" in Raycast AI: two
         // opposite readings of a value that should never have been accepted.
         if (numValue < 1) {

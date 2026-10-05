@@ -10,7 +10,6 @@ import {
 } from "./api/models";
 import type { Model } from "./type";
 import { getMaxTokensForModel, supportsTemperature } from "./utils/models";
-import { DEFAULT_PROMPT } from "./utils/presets";
 
 /**
  * Raycast AI model provider (`ai.modelProvider` in package.json).
@@ -96,6 +95,7 @@ async function readPresets(): Promise<Model[]> {
     if (!Array.isArray(parsed)) return [];
     // Row by row: one malformed preset (a hand-edited store, an interrupted write) must not
     // throw out of `getModels` and take every bare model down with it.
+    const isScalar = (value: unknown) => value === undefined || typeof value === "string" || typeof value === "number";
     return parsed.filter(
       (row): row is Model =>
         typeof row === "object" &&
@@ -103,7 +103,12 @@ async function readPresets(): Promise<Model[]> {
         typeof row.id === "string" &&
         row.id.length > 0 &&
         typeof row.name === "string" &&
-        typeof row.option === "string",
+        row.name.length > 0 &&
+        typeof row.option === "string" &&
+        row.option.length > 0 &&
+        (row.prompt === undefined || typeof row.prompt === "string") &&
+        isScalar(row.max_tokens) &&
+        isScalar(row.temperature),
     );
   } catch {
     // An unreadable presets key must not take the bare models down with it.
@@ -123,11 +128,11 @@ export const getModels: AI.GetModels = async () => {
     ...(model.max_input_tokens ? { contextWindow: model.max_input_tokens } : {}),
   }));
 
-  // The built-in default preset is left out only while its prompt is still the generic
-  // default: then it is a second copy of a bare model already listed above. Once the user
-  // gives it their own prompt it is a preset like any other and appears.
+  // Every preset is listed, the built-in default included. Hiding an "unedited" default
+  // was tried twice and each rule hid a default the user had in fact customized (first any
+  // prompt, then any setting other than the prompt); one entry that resembles its
+  // underlying model is a smaller cost than a preset that silently is not there.
   for (const preset of await readPresets()) {
-    if (preset.id === "default" && preset.prompt === DEFAULT_PROMPT) continue;
     const underlying = byId.get(preset.option) ?? { id: preset.option, display_name: preset.option, created_at: "" };
     models.push({
       id: `${PRESET_ID_PREFIX}${preset.id}`,
@@ -163,7 +168,7 @@ async function resolveTarget(registeredId: string): Promise<ResolvedTarget> {
   return {
     modelId: preset.option,
     presetPrompt: preset.prompt,
-    presetMaxTokens: Number.isFinite(maxTokens) && maxTokens > 0 ? maxTokens : undefined,
+    presetMaxTokens: Number.isFinite(maxTokens) && maxTokens >= 1 ? Math.floor(maxTokens) : undefined,
     presetTemperature: Number.isFinite(temperature) ? temperature : undefined,
   };
 }
@@ -240,12 +245,16 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
   const temperature = supportsTemperature(target.modelId) ? requestedTemperature : undefined;
 
   // Streaming carries no output ceiling of its own, so the model's full limit applies unless
-  // a preset narrows it — clamped, because a preset saved against an older model (or a
-  // hand-edited store) can hold more than this model accepts, which is a 400.
-  const modelCeiling = getMaxTokensForModel(target.modelId, liveModels);
+  // a preset narrows it. A preset's limit is clamped only against a ceiling the API itself
+  // advertised for this model: `getMaxTokensForModel` falls back to a name-based GUESS when
+  // the model is missing from the cache, and clamping against a guess silently cut a valid
+  // 100,000-token Opus 5.5 preset to 32,000.
+  const advertisedCeiling = liveModels.find((candidate) => candidate.id === target.modelId)?.max_tokens ?? undefined;
   const maxOutputTokens = target.presetMaxTokens
-    ? Math.min(Math.floor(target.presetMaxTokens), modelCeiling)
-    : modelCeiling;
+    ? advertisedCeiling
+      ? Math.min(target.presetMaxTokens, advertisedCeiling)
+      : target.presetMaxTokens
+    : getMaxTokensForModel(target.modelId, liveModels);
 
   const effortLevels = supportedEffortLevels(liveModel);
   const requestedEffort = request.providerOptions?.raycast?.reasoningEffort;
@@ -280,8 +289,8 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
   // Forcing a tool call (`any`) is a 400 on Claude Opus 5.5, Sonnet 5.5, and Fable 5.1.
   // "required" is kept only where it is the long-standing request shape — a pre-4.7 model
   // with thinking off — and degrades to "auto" everywhere else rather than risk a rejected
-  // request on a model or thinking combination this code has not verified. Raycast runs
-  // the tools either way.
+  // request on a model or thinking combination this code has not verified. With "auto"
+  // the model may decline to call a tool; Raycast executes whatever calls it makes.
   const canForceToolCall = !adaptive && supportsTemperature(target.modelId);
 
   const { apiKey } = getPreferenceValues<Preferences>();

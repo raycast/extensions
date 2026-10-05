@@ -15,7 +15,7 @@ This extension can also add your Claude models — and each of your saved Preset
 - It requires **Raycast Pro**.
 - Turn it on with **Allow AI Models** in this extension's settings, or by choosing one of its models in the picker.
 
-A Preset appears in the picker under its own name and applies its system prompt, model, and output limit when you select it. New or edited Presets show up the next time Raycast refreshes the list.
+A Preset appears in the picker under its own name and applies its system prompt, model, and output limit when you select it. New or edited Presets show up the next time Raycast refreshes the list successfully.
 
 ## Stream Responses
 

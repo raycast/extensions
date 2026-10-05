@@ -8,8 +8,8 @@
   stop working and needs to be re-pointed at Recents
 - Feature: **Use Claude in Raycast AI.** Your Claude models — and each of your Presets — can
   now appear in Raycast AI's model picker, so you can choose them in AI Chat, Quick AI, and AI
-  Commands on your own API key. A newly released model appears on Raycast's next refresh with
-  no update needed, and a Preset brings its system prompt and settings with it. Requires Raycast Pro; turn it on with
+  Commands on your own API key. A newly released model appears on Raycast's next successful
+  refresh with no update needed, and a Preset brings its system prompt and settings with it. Requires Raycast Pro; turn it on with
   **Allow AI Models** in the extension's settings
 - Feature: Setup help now appears beside the API key field, covering where to get a key and
   how to turn on the Raycast AI integration

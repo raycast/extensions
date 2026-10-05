@@ -2,11 +2,6 @@ import type { AvailableModel } from "../api/models";
 import type { Model } from "../type";
 import { findNewestModelInTier, getMaxTokensForModel, shortModelName, type ModelTier } from "./models";
 
-/** The built-in default preset's system prompt. Lives here, not in the React hook, so the
- *  model provider (`src/model-provider.ts`) can recognize an unedited default without
- *  importing React. */
-export const DEFAULT_PROMPT = "You are a useful assistant";
-
 /**
  * Starter presets, defined against model *families* rather than pinned ids so they
  * resolve to whatever the newest Opus/Sonnet/Haiku is at seed time.

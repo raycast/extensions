@@ -6,13 +6,15 @@ import { createCollectionStore, type CollectionStore } from "../stores/collectio
 import { mutations } from "../stores/useStoredCollection";
 import { getApiKeyToastAction } from "../utils/errors";
 import { findNewestModelInTier, getMaxTokensForModel, shortModelName } from "../utils/models";
-import { buildSeedPresets, DEFAULT_PROMPT } from "../utils/presets";
+import { buildSeedPresets } from "../utils/presets";
 import { showResolvedToast } from "../utils/toast";
 
 const MODELS_KEY = "models";
 
 /** Marks that starter presets have been seeded, so a deleted preset stays deleted. */
 const PRESETS_SEEDED_KEY = "presets_seeded_v1";
+
+const DEFAULT_PROMPT = "You are a useful assistant";
 
 /** The generic name the built-in preset originally shipped with. */
 const LEGACY_DEFAULT_NAME = "Default Model";
