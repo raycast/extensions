@@ -21,6 +21,33 @@
       "interval": "10m"
     }
   ],
+  "tools": [
+    {
+      "name": "summarize-unread-stories",
+      "title": "Summarize Unread Stories",
+      "description": "Get your unread Hacker News stories with their articles and top comments, ready to summarize."
+    },
+    {
+      "name": "mark-stories-as-read",
+      "title": "Mark Stories as Read",
+      "description": "Mark Hacker News stories as read when the user asks to."
+    },
+    {
+      "name": "get-comments",
+      "title": "Get Comments",
+      "description": "Get what people are saying about a Hacker News story, top comment threads first."
+    },
+    {
+      "name": "search-comments",
+      "title": "Search Comments",
+      "description": "Search Hacker News comments by keyword, in one story or across all of Hacker News."
+    },
+    {
+      "name": "read-article",
+      "title": "Read Article",
+      "description": "Read what a Hacker News story is about: the article it links to, or the text of an Ask HN post."
+    }
+  ],
   "preferences": [
     {
       "name": "points",
@@ -47,14 +74,67 @@
       "type": "checkbox",
       "default": false,
       "required": false
+    },
+    {
+      "name": "syncWithICloud",
+      "title": "iCloud Sync",
+      "description": "Sync read stories between your Macs through the \"Raycast Hacker News\" folder in iCloud Drive.",
+      "label": "Sync Read Stories with iCloud Drive",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "summaryLimit",
+      "title": "Stories per Summary",
+      "description": "How many unread stories Raycast AI summarizes at a time.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "markReadByAi",
+      "title": "Raycast AI",
+      "description": "Mark a story as read when Raycast AI reads its article or comments.",
+      "label": "Mark Stories Raycast AI Reads as Read",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
+  "ai": {
+    "instructions": "For any question about Hacker News, new stories or the user's stories, call summarize-unread-stories. Never answer from memory, and never describe what you are about to do instead of calling the tool. For each story it returns, write the title in bold with its points, a two or three sentence summary of the article, the two top comments in one line each with the commenter's name, then a line reading [Article](articleUrl) | [Comments](discussionUrl). If articleError is set, say the article couldn't be read and summarize from the comments. If moreUnread is above zero, end by saying how many more unread stories there are. If no stories come back, say the user is all caught up. Use read-article or get-comments when the user wants more on one story, search-comments to find something in a discussion, and mark-stories-as-read only when the user asks to mark stories read."
+  },
   "dependencies": {
-    "@raycast/api": "^1.96.1",
-    "@raycast/utils": "^1.19.1"
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
+    "linkedom": "^0.18.13"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.15.2",
     "@types/react": "19.1.2",
     "eslint": "^9.25.1",
