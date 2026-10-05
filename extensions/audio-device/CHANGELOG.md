@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-10-05
 
 - Add Ask AI tools to list audio devices, switch the active input or output device, and get or set volume.
 
