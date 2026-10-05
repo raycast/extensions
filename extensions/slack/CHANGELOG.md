@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Archive Channels AI Tool] - {PR_MERGE_DATE}
+## [Archive Channels AI Tool] - 2026-10-05
 
 - Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
 
