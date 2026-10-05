@@ -1,5 +1,21 @@
 # List by FullForms Changelog
 
+## [Recently Added Section, Description Callouts, and Raycast-Tagged Tokens] - 2026-08-24
+
+- The description field in Quick Add Entry and the entry edit form now speaks the web editor's callout syntax with one keystroke: Cmd+Shift+E, Cmd+Shift+N, and Cmd+Shift+R append an Example, Note, or Reference callout block and focus the field. A ⓘ tooltip on the field documents the syntax for hand-typing
+- New "Copy as Mention" action (Cmd+Shift+M) on Search Entries results copies the entry's mention token, ready to paste into any description; the web app renders it as a link to the entry
+- Fixed editing an entry silently removing mention links from its description: the edit form previously pre-filled from the display copy (which strips mention tokens for readability) and saved that back, so any edit flattened `[term](#id)` links to plain text. Edits now round-trip the raw description, keeping mentions intact
+
+- Search Entries now opens with a "Recently Added by You" section: your own newest entries, newest first, shown while the search bar is empty and scoped by the same workspace dropdown as search. Rows behave exactly like search results, with the detail pane, star toggle, edit, notes, report, copy, and speech actions all available, so the entry you just added is one keystroke away
+- Setup now links to `list.fullforms.com/account?token_client=raycast`, which opens the Generate dialog pre-filled and tags the minted token as Raycast's. Entries added from Raycast then read "via Raycast" in the web app's entry history panel instead of the generic "via API"; teammates viewing the same entry see the same label. Existing tokens were tagged retroactively server-side, so this needs no action from current users
+
+## [Full List Icon Parity with the Web] - 2026-07-27
+
+- Lists now show the same icon here as they do on the web. The glyph set grew from 30 keys to all 92 the web can store, so a list using any of the newer icons (fish, train, truck, ship, banknote, wallet, shopping cart, shirt, radio tower, flask, atom, crypto and the rest) no longer falls back to the default list icon
+- Lists that never had an icon picked now resolve to a far more specific one: the name-matching table grew from 9 rules to 55, adding money, legal, accounting, commerce, logistics, marketing, analytics, data, devops, AI, network, security, gaming, design, film, photography, education, team, transport, science, energy, water, outdoor, winter, crypto, broadcast, fashion, auth, mobile and print
+- Fixed name matching that picked confidently wrong icons. Terms now match only at the start of a word, so "Labels" and "Collaboration" no longer read as a lab, "Latest Releases" no longer reads as a test, and "Employee Training" no longer reads as a train. Where two terms both match, the more specific one wins, so "Plant Taxonomy" gets a leaf rather than a task clipboard
+- Split the single nature icon that used to cover everything living: fish, animals and pets now get their own marks instead of all sharing a leaf
+
 ## [Detail Pane Previews, Windows Shortcut Fixes, and Onboarding] - 2026-07-26
 
 - Fixed keyboard shortcuts on Windows: actions such as Open Last Added Entry (Ctrl+O), Open List / View Existing Entry (Ctrl+Shift+O), Edit Entry (Ctrl+E), Star Entry (Ctrl+S), and the note, report, and detail-toggle shortcuts now actually fire; previously their macOS Command bindings were silently ignored on Windows, so the keys did nothing even though the hints looked correct

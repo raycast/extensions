@@ -1,13 +1,15 @@
-import { useHAStates } from "@components/hooks";
+import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { List, Toast, showToast } from "@raycast/api";
 import React, { useState } from "react";
 
 export function DoorsList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "", "door", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "", "door", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -21,11 +23,19 @@ export function DoorsList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const updateRequiredStates = states.filter((s) => s.state === "on");
-  const otherStates = states.filter((s) => s.state !== "on");
+  const { favorites, others } = partitionFavoriteStates(states, favoriteEntityIds);
+  const updateRequiredStates = others.filter((s) => s.state === "on");
+  const otherStates = others.filter((s) => s.state !== "on");
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+      {favorites.length > 0 && (
+        <List.Section title="Favorites" subtitle={`${favorites.length}`}>
+          {favorites.map((state) => (
+            <StateListItem key={state.entity_id} state={state} />
+          ))}
+        </List.Section>
+      )}
       <List.Section title="Open Doors" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => (
           <StateListItem key={state.entity_id} state={state} />

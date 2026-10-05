@@ -5,6 +5,7 @@ import {
   confirmAlert,
   FileIcon,
   Icon,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
@@ -209,7 +210,17 @@ const createDestructiveActions = (file: File): ActionGroup<DetailActionPreferenc
             },
           });
           if (confirm) {
-            methods.deleteFile(file);
+            try {
+              await methods.deleteFile(file);
+              await showHUD("Bookmark deleted");
+              await popToRoot();
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to delete bookmark",
+                message: String(error),
+              });
+            }
           }
         },
       },

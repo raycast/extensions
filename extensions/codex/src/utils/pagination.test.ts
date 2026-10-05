@@ -11,6 +11,7 @@ const isNumber = (value: unknown): value is number => typeof value === "number";
 test("collects pages until the stop condition is met", async () => {
   const { collectPaginatedEntries } = await paginationModule;
   const requestedCursors: Array<string | null> = [];
+  const pageSnapshots: Array<{ page: number[]; accumulated: number[] }> = [];
   const pages = new Map<string | null, unknown>([
     [null, { data: [3, 2], nextCursor: "next" }],
     ["next", { data: [1], nextCursor: "unused" }],
@@ -24,11 +25,17 @@ test("collects pages until the stop condition is met", async () => {
     },
     isEntry: isNumber,
     description: "test pages",
+    onPage: (page, accumulated) =>
+      pageSnapshots.push({ page: [...page], accumulated: [...accumulated] }),
     shouldStop: (values) => values.includes(1),
   });
 
   assert.deepEqual(entries, [3, 2, 1]);
   assert.deepEqual(requestedCursors, [null, "next"]);
+  assert.deepEqual(pageSnapshots, [
+    { page: [3, 2], accumulated: [3, 2] },
+    { page: [1], accumulated: [3, 2, 1] },
+  ]);
 });
 
 test("honors a hard page limit", async () => {

@@ -6,9 +6,15 @@ import { SLACK_EMOJI_CODE_MAP } from "./constants/emoji.constants";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type SlackStatusForm, StatusForm } from "./components/set-status/status-form.component";
 import { EmojiPicker } from "./components/set-status/emoji-picker.component";
-import { getDurationOptionFromTimestamp, getTextForExpiration } from "./utils/set-status/expiration.util";
+import {
+  getDurationOptionFromTimestamp,
+  getExpirationTimestamp,
+  getTextForExpiration,
+} from "./utils/set-status/expiration.util";
 import { showToastWithPromise } from "./utils/toast.util";
 import SetAiStatusForm from "./components/set-status/set-ai-status-form.component";
+
+const BUILT_IN_EMOJIS: Record<string, string> = SLACK_EMOJI_CODE_MAP;
 
 // Reverse of SLACK_EMOJI_CODE_MAP: raw emoji glyph -> `:name:`. Raycast's argument field attaches an
 // emoji auto-picker that inserts a raw Unicode glyph (e.g. 👈) rather than its name, so we map it back.
@@ -40,8 +46,19 @@ function normalizeEmoji(emoji?: string): string | undefined {
   return EMOJI_NAME_BY_CHAR[trimmed] ?? EMOJI_NAME_BY_CHAR[trimmed.replace(/️/g, "")];
 }
 
+// Accepts what `getExpirationTimestamp` understands: a keyword or a minute count. Returns undefined
+// otherwise, so the caller can report it instead of hitting that helper's NaN-to-"don't clear" path.
+function normalizeExpiration(expiration?: string): string | undefined {
+  const trimmed = expiration?.trim();
+  if (!trimmed) {
+    return "0";
+  }
+
+  return trimmed === "today" || trimmed === "week" || /^\d+$/.test(trimmed) ? trimmed : undefined;
+}
+
 function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>) {
-  const { statusText: statusTextArgument, emoji: emojiArgument } = props.arguments;
+  const { statusText: statusTextArgument, emoji: emojiArgument, expiration: expirationArgument } = props.arguments;
 
   const { data: me, isLoading: isFetchMeLoading } = useMe();
   const {
@@ -61,28 +78,27 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
       execute: !!me?.id,
     },
   );
-  const { data: workspaceEmojis, isLoading: isFetchWorkspaceEmojisLoading } = useCachedPromise(
-    SlackClient.getWorkspaceEmojis,
-  );
-
   const isLoading = useMemo(() => {
-    return isFetchProfileLoading || isFetchMeLoading || isFetchWorkspaceEmojisLoading;
-  }, [isFetchProfileLoading, isFetchMeLoading, isFetchWorkspaceEmojisLoading]);
-
-  const emojis: { [key: string]: string } = useMemo(() => {
-    return {
-      ...workspaceEmojis,
-      ...SLACK_EMOJI_CODE_MAP,
-    };
-  }, [workspaceEmojis]);
+    return isFetchProfileLoading || isFetchMeLoading;
+  }, [isFetchProfileLoading, isFetchMeLoading]);
 
   const currentStatusEmoji = useMemo(() => {
     if (!profile?.status_emoji) {
       return undefined;
     }
 
-    return emojis[profile.status_emoji];
-  }, [profile?.status_emoji, emojis]);
+    return BUILT_IN_EMOJIS[profile.status_emoji];
+  }, [profile?.status_emoji]);
+
+  const statusFormEmojis = useMemo<Record<string, string | undefined>>(() => {
+    const currentEmoji = profile?.status_emoji;
+    if (!currentEmoji || BUILT_IN_EMOJIS[currentEmoji]) {
+      return BUILT_IN_EMOJIS;
+    }
+
+    // Preserve an existing custom emoji in the form without loading the full workspace catalog.
+    return { ...BUILT_IN_EMOJIS, [currentEmoji]: undefined };
+  }, [profile?.status_emoji]);
 
   const getCurrentStatusText = useCallback(
     (defaultStatusText?: string) => {
@@ -214,6 +230,17 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
 
     const statusText = statusTextArgument?.trim() || undefined;
     const emoji = normalizeEmoji(emojiArgument);
+    const expirationValue = normalizeExpiration(expirationArgument);
+
+    if (expirationValue === undefined) {
+      didAutoSetStatus.current = true;
+      showFailureToast(new Error(`"${expirationArgument?.trim()}" isn't a number of minutes, "today", or "week".`), {
+        title: "Failed to set status",
+      });
+      return;
+    }
+
+    const expiration = getExpirationTimestamp(expirationValue);
 
     // The emoji was provided but couldn't be mapped to a Slack `:name:` (e.g. a composite/ZWJ glyph
     // absent from SLACK_EMOJI_CODE_MAP). Surface it rather than silently dropping the launch.
@@ -240,7 +267,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
         await SlackClient.setStatus({
           statusText,
           emoji,
-          expiration: 0,
+          expiration,
           originProfile: profile,
         });
         await mutate();
@@ -252,7 +279,9 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
         error: "An error occurred while changing the state.",
         success: () => ({
           title: "Set status",
-          message: [emoji, statusText].filter(Boolean).join(" "),
+          message: [[emoji, statusText].filter(Boolean).join(" "), getTextForExpiration(expiration)]
+            .filter(Boolean)
+            .join(" · "),
         }),
       },
     );
@@ -265,6 +294,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
     mutate,
     statusTextArgument,
     emojiArgument,
+    expirationArgument,
   ]);
 
   return (
@@ -287,7 +317,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
                 title={"Open Status Form"}
                 target={
                   <StatusForm
-                    emojis={emojis}
+                    emojis={statusFormEmojis}
                     formInitialValues={{
                       statusText: getCurrentStatusText(),
                       emoji: getCurrentStatusEmojiName(),
@@ -307,10 +337,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
           icon={"😁"}
           actions={
             <ActionPanel>
-              <Action.Push
-                title={"Choose Emoji"}
-                target={<EmojiPicker emojis={emojis} onSelect={handleEmojiChange} />}
-              />
+              <Action.Push title={"Choose Emoji"} target={<EmojiPicker onSelect={handleEmojiChange} />} />
             </ActionPanel>
           }
         />

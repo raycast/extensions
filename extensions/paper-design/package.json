@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paper-design",
+  "title": "Paper Design",
+  "description": "Browse recent Paper designs, create new files, and manage design tokens directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "asifk",
+  "license": "MIT",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "paper",
+    "design system",
+    "design tokens",
+    "tokens",
+    "variables",
+    "styles",
+    "colors",
+    "typography",
+    "spacing",
+    "canvas",
+    "prototype",
+    "wireframe"
+  ],
+  "commands": [
+    {
+      "name": "recent-paper-files",
+      "title": "Search Recent Files",
+      "subtitle": "Paper Desktop",
+      "description": "Browse and open recent Paper Desktop files.",
+      "mode": "view",
+      "keywords": [
+        "paper",
+        "design",
+        "document",
+        "canvas"
+      ]
+    },
+    {
+      "name": "create-paper-file",
+      "title": "Create File",
+      "subtitle": "Paper Desktop",
+      "description": "Create and open a new Paper Desktop file.",
+      "mode": "view",
+      "keywords": [
+        "paper",
+        "design",
+        "document",
+        "canvas"
+      ]
+    },
+    {
+      "name": "manage-design-tokens",
+      "title": "Manage Design Tokens",
+      "subtitle": "Paper Desktop",
+      "description": "Browse, copy, create, edit, and delete design tokens in Paper files.",
+      "mode": "view",
+      "keywords": [
+        "paper",
+        "design system",
+        "variables",
+        "styles",
+        "colors",
+        "typography",
+        "spacing"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "RAY_Target=x ray build",
+    "dev": "RAY_Target=x ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

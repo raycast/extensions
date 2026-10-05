@@ -1,9 +1,9 @@
 # `getAccessToken`
 
-Utility function designed for retrieving authorization tokens within a component. It ensures that your React components have the necessary authentication state, either through OAuth or a personal access token.
+Synchronous utility function for retrieving the OAuth or personal access token authorized by [`withAccessToken`](./withAccessToken.md). It can be called from components, event callbacks, and plain helper functions.
 
 {% hint style="info" %}
-`getAccessToken` **must** be used within components that are nested inside a component wrapped with [`withAccessToken`](./withAccessToken.md). Otherwise, the function will fail with an error.
+The command **must** first be authenticated by [`withAccessToken`](./withAccessToken.md). Calling `getAccessToken` before authentication finishes throws an error.
 {% endhint %}
 
 ## Signature
@@ -20,7 +20,7 @@ function getAccessToken(): {
 The function returns an object containing the following properties:
 
 - `token`: A string representing the access token.
-- `type`: An optional string that indicates the type of token retrieved. It can either be `oauth` for OAuth tokens or `personal` for personal access tokens.
+- `type`: Indicates the type of token retrieved. It is either `oauth` for OAuth tokens or `personal` for personal access tokens.
 
 ## Example
 

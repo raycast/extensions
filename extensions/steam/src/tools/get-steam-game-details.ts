@@ -2,6 +2,7 @@ import {
   cleanSteamGameQuery,
   getSteamGameData,
   getSteamAppIdFromInput,
+  localListWarning,
   resolveSteamGame,
   toSteamGameSummary,
 } from "../lib/games";
@@ -62,10 +63,11 @@ export default async function getSteamGameDetailsTool(input: Input): Promise<Out
     }
 
     const result = await resolveSteamGame(query);
+    const listWarnings = [localListWarning()].filter((warning): warning is string => Boolean(warning));
     if (!result.game || !result.data) {
       return {
         query: result.query,
-        warnings: ["No matching Steam game was found."],
+        warnings: ["No matching Steam game was found.", ...listWarnings],
       };
     }
 
@@ -77,7 +79,7 @@ export default async function getSteamGameDetailsTool(input: Input): Promise<Out
         matchType: result.matchType,
       },
       game,
-      warnings: [],
+      warnings: listWarnings,
     };
   } catch (error) {
     return {

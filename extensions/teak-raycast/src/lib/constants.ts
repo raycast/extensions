@@ -1,12 +1,6 @@
 import { environment } from "@raycast/api";
 
-const DEFAULT_TEAK_DEV_APP_URL = "http://app.teak.localhost:1355";
-// HTTPS so the token-authenticated card API calls reach portless directly.
-// Over http, portless 302-upgrades to https and undici drops the Authorization
-// header across the scheme change (cross-origin redirect), so the gateway 401s.
-// undici trusts the portless cert (verified: the redirected https request
-// returns a real 401 rather than a TLS error), so hitting https up front is safe.
-const DEFAULT_TEAK_DEV_API_URL = "https://api.teak.localhost:1355";
+const DEFAULT_TEAK_DEV_APP_URL = "http://localhost:3000";
 // Dev Convex deployment that `convex dev` targets and where the OAuth server
 // (Better Auth `mcp` plugin) and its seeded clients live. The token exchange
 // must reach THIS deployment — see getOAuthTokenBaseUrl. Overridable via
@@ -16,6 +10,7 @@ const DEFAULT_TEAK_DEV_API_URL = "https://api.teak.localhost:1355";
 // `.env.local`, which can point at a different/stale deployment.
 const DEFAULT_TEAK_DEV_CONVEX_SITE_URL =
   "https://reminiscent-kangaroo-59.convex.site";
+const DEFAULT_TEAK_DEV_API_URL = DEFAULT_TEAK_DEV_CONVEX_SITE_URL;
 
 const normalizeBaseUrl = (label: string, rawUrl: string): string => {
   let parsedUrl: URL;
@@ -50,7 +45,7 @@ const DEV_API_URL = `${resolveDevUrl(
   DEFAULT_TEAK_DEV_API_URL,
   "TEAK_DEV_API_URL",
 )}/v1`;
-const PROD_API_URL = "https://api.teakvault.com/v1";
+const PROD_API_URL = "https://teakvault.com/api/v1";
 
 const normalizeUrl = (url: string): string =>
   url.endsWith("/") ? url.slice(0, -1) : url;
@@ -84,13 +79,12 @@ const resolveDevConvexSiteUrl = (): string => {
 
 // Base origin for the OAuth token exchange (POST `/api/auth/mcp/token`).
 //
-// The token POST must reach Better Auth without crossing a redirecting proxy.
-// In local dev, portless upgrades http -> https with a 302 that Raycast's token
-// fetch (undici, default redirect: "follow") replays as a GET, so the POST 404s
-// and sign-in bounces back. Convex's own site origin serves the same endpoint
-// over publicly-trusted HTTPS with no redirect, so we hit it directly in dev.
-// In production the app origin already serves the token endpoint without any
-// redirect, so it stays there.
+// The token POST must reach Better Auth directly with no redirect in between.
+// (A proxy that upgrades http -> https with a 302 would replay the POST as a
+// GET, so the exchange 404s and sign-in bounces back.) Convex's own site
+// origin serves the same endpoint over publicly-trusted HTTPS with no
+// redirect, so we hit it directly in dev. In production the app origin already
+// serves the token endpoint without any redirect, so it stays there.
 export const getOAuthTokenBaseUrl = (): string =>
   environment.isDevelopment ? resolveDevConvexSiteUrl() : TEAK_APP_URL;
 

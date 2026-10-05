@@ -7,6 +7,9 @@ instructions: |
   If no attendees are provided, create the event without attendees.
   Custom event labels are calendar-specific. List them with manage-calendar-labels before assigning one.
   Use create-event, not quick-add-event, whenever the user gives structured details such as an explicit duration, time zone, or recurrence.
+  For an all-day event, call create-event with allDay=true and a YYYY-MM-DD startDate; do not supply a time or duration.
+  For a single-day all-day event, omit endDate and durationDays. For an inclusive multi-day request (for example, August 3 through August 5), set durationDays to the number of days (3 in this example).
+  An all-day endDate is exclusive: if it is supplied, use the day after the user's final all-day date.
 evals:
   - input: "@google-calendar Create a one-hour Project Sync tomorrow at 10:00."
     mocks:
@@ -166,6 +169,28 @@ evals:
               includes: "Offsite"
             startDate: "2026-08-03"
             allDay: true
+
+  - input: "@google-calendar Add an all-day company offsite from August 3 through August 5, 2026."
+    mocks:
+      create-event:
+        id: "evt-203"
+        calendarId: "primary"
+        title: "Company Offsite"
+        start: "2026-08-03"
+        end: "2026-08-06"
+        allDay: true
+        durationDays: 3
+        attendees: []
+        htmlLink: "https://calendar.google.com/event?eid=evt-203"
+    expected:
+      - callsTool:
+          name: "create-event"
+          arguments:
+            title:
+              includes: "Offsite"
+            startDate: "2026-08-03"
+            allDay: true
+            durationDays: 3
 
   - input: "@google-calendar Create a weekly team review every Monday at 9 AM Paris time, starting August 3, 2026, for one hour."
     mocks:

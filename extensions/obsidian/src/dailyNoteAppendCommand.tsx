@@ -71,10 +71,10 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
   }
 
   if (vaultsWithPlugin.length === 0) {
-    return <AdvancedURIPluginNotInstalled />;
+    return <AdvancedURIPluginNotInstalled corePlugins={["daily-notes"]} />;
   }
   if (vaultName && !vaultsWithPlugin.some((v) => v.name === vaultName)) {
-    return <AdvancedURIPluginNotInstalled vaultName={vaultName} />;
+    return <AdvancedURIPluginNotInstalled vaultName={vaultName} corePlugins={["daily-notes"]} />;
   }
 
   // Only show the vault selection list if we have multiple vaults and no specific vault configured

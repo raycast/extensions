@@ -202,7 +202,7 @@ const MultiTranslateItems: React.FC<{
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
-  const { proxy } = usePreferences();
+  const { proxy, prioritizeCrossLanguage } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [text, setText] = useTextState();
   const debouncedValue = useDebouncedValue(text, 500);
@@ -229,7 +229,12 @@ export default function Translate(): ReactElement {
       ) : (
         <MultiTranslateItems
           value={debouncedValue}
-          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
+          selectedLanguageSet={{
+            langFrom: selectedLanguageSet.langFrom,
+            langTo: selectedLanguageSet.langTo,
+            proxy,
+            prioritizeCrossLanguage,
+          }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       )}

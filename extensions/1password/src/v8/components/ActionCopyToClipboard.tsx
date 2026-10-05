@@ -1,8 +1,7 @@
 import { Action, Clipboard, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
-import { execFileSync } from "node:child_process";
 
 import { useFrontmostApp } from "../hooks/useFrontmostApp";
-import { ExtensionError, getCliPath, handleErrors, titleCaseWord, windowsEnv } from "../utils";
+import { execOp, ExtensionError, handleErrors, titleCaseWord } from "../utils";
 
 export function CopyToClipboard({
   attribute,
@@ -19,7 +18,6 @@ export function CopyToClipboard({
   shortcut: Keyboard.Shortcut;
   vault_id: string;
 }) {
-  const cliPath = getCliPath();
   const frontmostApp = useFrontmostApp(!!isPasteAction);
 
   return (
@@ -34,18 +32,18 @@ export function CopyToClipboard({
         });
 
         try {
-          let stdout;
+          let stdout: string;
           if (attribute === "otp") {
             // based on OTP-type not field name
-            stdout = execFileSync(cliPath, ["item", "get", id, "--otp"], windowsEnv ? { env: windowsEnv } : {});
+            stdout = await execOp(["item", "get", id, "--otp"]);
           } else {
             const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
             const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
 
-            stdout = execFileSync(cliPath, ["read", uri], windowsEnv ? { env: windowsEnv } : {});
+            stdout = await execOp(["read", uri]);
           }
 
-          const value = stdout.toString().trim();
+          const value = stdout.trim();
 
           if (isPasteAction) {
             await Clipboard.paste(value);

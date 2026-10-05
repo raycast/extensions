@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
-import { listSites, useKobbeQuery } from "./api";
+import { listSites } from "./api";
 import { getKobbePreferences } from "./preferences";
 import { SiteListItem } from "./views";
 
 export default function SearchSites() {
   const range = getKobbePreferences().defaultRange;
-  const sites = useKobbeQuery(listSites);
+  const sites = useCachedPromise(listSites, [], { keepPreviousData: true });
 
   return (
     <List

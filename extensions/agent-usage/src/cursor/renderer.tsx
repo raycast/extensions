@@ -1,25 +1,25 @@
 import { List } from "@raycast/api";
-import { formatResetTime } from "../agents/format";
-import type { Accessory } from "../agents/types";
+
+import { formatResetTime } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { CursorError, CursorRateWindow, CursorUsage } from "./types";
+} from "../agents/ui.tsx";
+import { formatCursorAccessory, formatPercent } from "./accessory.ts";
+import type { CursorError, CursorRateWindow, CursorUsage } from "./types.ts";
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 2,
 });
-
-function formatPercent(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
-}
 
 function formatUsd(value: number): string {
   return usdFormatter.format(value);
@@ -29,9 +29,8 @@ function formatReset(value: string | null): string {
   return value ? formatResetTime(value) : "unknown";
 }
 
-function formatWindow(label: string, window: CursorRateWindow): string {
-  const remaining = formatPercent(window.percentageRemaining);
-  return `${label}: ${remaining}% remaining\n${generateAsciiBar(window.percentageRemaining)}\nResets In: ${formatReset(window.resetsAt)}`;
+function formatWindow(label: string, window: CursorRateWindow, mode: PercentageDisplayMode): string {
+  return `${label}: ${formatPercentDisplay(window.percentageRemaining, mode, formatPercent)}\n${generateAsciiBar(toDisplayPercent(window.percentageRemaining, mode))}\nResets In: ${formatReset(window.resetsAt)}`;
 }
 
 export function formatCursorUsageText(usage: CursorUsage | null, error: CursorError | null): string {
@@ -39,20 +38,21 @@ export function formatCursorUsageText(usage: CursorUsage | null, error: CursorEr
   if (fallback !== null) return fallback;
   const u = usage as CursorUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = `Cursor Usage\nAccount: ${u.account}\nSource: ${u.source}`;
   if (u.membershipType) {
     text += `\nPlan: ${u.membershipType}`;
   }
 
-  text += `\n\n${formatWindow(u.legacyRequests ? "Requests" : "Total", u.total)}`;
+  text += `\n\n${formatWindow(u.legacyRequests ? "Requests" : "Total", u.total, mode)}`;
   if (u.legacyRequests) {
     text += `\n${u.legacyRequests.used} / ${u.legacyRequests.limit} requests`;
   }
   if (u.auto) {
-    text += `\n\n${formatWindow("Auto", u.auto)}`;
+    text += `\n\n${formatWindow("Auto", u.auto, mode)}`;
   }
   if (u.api) {
-    text += `\n\n${formatWindow("API", u.api)}`;
+    text += `\n\n${formatWindow("API", u.api, mode)}`;
   }
 
   if (u.planLimitUsd > 0 || u.planUsedUsd > 0) {
@@ -75,6 +75,7 @@ export function renderCursorDetail(usage: CursorUsage | null, error: CursorError
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CursorUsage;
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -86,7 +87,7 @@ export function renderCursorDetail(usage: CursorUsage | null, error: CursorError
       )}
       <List.Item.Detail.Metadata.Label
         title={u.legacyRequests ? "Requests" : "Total"}
-        text={`${generateAsciiBar(u.total.percentageRemaining)} ${formatPercent(u.total.percentageRemaining)}% remaining`}
+        text={`${generateAsciiBar(toDisplayPercent(u.total.percentageRemaining, mode))} ${formatPercentDisplay(u.total.percentageRemaining, mode, formatPercent)}`}
       />
       {u.legacyRequests && (
         <List.Item.Detail.Metadata.Label
@@ -101,7 +102,7 @@ export function renderCursorDetail(usage: CursorUsage | null, error: CursorError
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Auto"
-            text={`${generateAsciiBar(u.auto.percentageRemaining)} ${formatPercent(u.auto.percentageRemaining)}% remaining`}
+            text={`${generateAsciiBar(toDisplayPercent(u.auto.percentageRemaining, mode))} ${formatPercentDisplay(u.auto.percentageRemaining, mode, formatPercent)}`}
           />
         </>
       )}
@@ -111,7 +112,7 @@ export function renderCursorDetail(usage: CursorUsage | null, error: CursorError
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="API"
-            text={`${generateAsciiBar(u.api.percentageRemaining)} ${formatPercent(u.api.percentageRemaining)}% remaining`}
+            text={`${generateAsciiBar(toDisplayPercent(u.api.percentageRemaining, mode))} ${formatPercentDisplay(u.api.percentageRemaining, mode, formatPercent)}`}
           />
         </>
       )}
@@ -168,11 +169,10 @@ export function getCursorAccessory(
     return getNoDataAccessory();
   }
 
-  const remaining = usage.total.percentageRemaining;
-  const label = usage.legacyRequests ? "Requests" : "Total";
+  const badge = formatCursorAccessory(usage, getPercentageDisplayMode());
   return {
-    icon: generatePieIcon(remaining),
-    text: `${formatPercent(remaining)}%`,
-    tooltip: `${label}: ${formatPercent(remaining)}% remaining`,
+    icon: generatePieIcon(badge.remainingForIcon),
+    text: badge.text,
+    tooltip: badge.tooltip,
   };
 }

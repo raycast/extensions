@@ -240,5 +240,8 @@
       "default": "favicon",
       "required": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

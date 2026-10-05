@@ -5,6 +5,9 @@
   "description": "Control Herdr workspaces and coding agents from Raycast",
   "icon": "extension-icon.png",
   "author": "vlades",
+  "contributors": [
+    "xhaoxu"
+  ],
   "type": "module",
   "license": "MIT",
   "platforms": [
@@ -231,7 +234,8 @@
       "name": "menu-bar",
       "title": "Agent Status in Menu Bar",
       "description": "Monitor and control Herdr agents from the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "open-herdr",
@@ -330,6 +334,24 @@
       "placeholder": "default"
     },
     {
+      "name": "sessionEnterAction",
+      "title": "Attaching a Session",
+      "description": "What Enter does on a session in Manage Sessions. Switch detaches the selected session's clients in the terminal and, in WezTerm, reuses their window. The other action stays available under a shortcut.",
+      "type": "dropdown",
+      "required": false,
+      "default": "attach",
+      "data": [
+        {
+          "title": "Attach Alongside",
+          "value": "attach"
+        },
+        {
+          "title": "Switch in Place",
+          "value": "switch"
+        }
+      ]
+    },
+    {
       "name": "terminalApplication",
       "title": "Terminal Application",
       "description": "Terminal application used when opening or attaching to Herdr.",
@@ -348,7 +370,7 @@
     {
       "name": "refreshInterval",
       "title": "Refresh Interval",
-      "description": "How often visible lists and the menu bar refresh.",
+      "description": "How often visible lists and the open menu bar refresh. The menu bar icon also refreshes in the background every minute.",
       "type": "dropdown",
       "required": false,
       "default": "5",
@@ -439,7 +461,9 @@
     "@raycast/utils": "^2.2.7"
   },
   "overrides": {
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

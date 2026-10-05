@@ -76,10 +76,12 @@ export type RepositoryContext = {
     data: Commit[];
     selectedBranch?: SelectedBranch;
     filter: BranchFilter;
+    searchText: string;
     isLoading: boolean;
     error: Error | undefined;
     pagination: ListPagination | undefined;
     setFilter: (filter: BranchFilter) => void;
+    setSearchText: (text: string) => void;
     revalidate: () => void;
   };
   stashes: {

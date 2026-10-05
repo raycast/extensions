@@ -43,6 +43,15 @@ export default function Command() {
     setAllUsers(foundedUsers);
   }, [fetchedUsers]);
 
+  /**
+   * Apple refuses to remove the Account Holder — the role can only be transferred, from
+   * App Store Connect, by the holder themselves. Offering a Remove action that always
+   * fails is worse than not offering it, and this is also the case where a user is most
+   * likely looking at their OWN row: an API key has no user identity, so "is this me?"
+   * cannot be answered, but "can this person be removed at all?" can.
+   */
+  const isAccountHolder = (user: User) => user.attributes.roles.includes("ACCOUNT_HOLDER");
+
   const allowedRoles = [
     "ADMIN",
     "APP_MANAGER",
@@ -73,10 +82,12 @@ export default function Command() {
     return "";
   };
 
-  const makeTitle = (user: User) => {
+  // Accepts an invitation too: both carry the same name fields, and both need a title
+  // for their ActionPanel section.
+  const makeTitle = (user: User | UserInvitation) => {
     const firstName = JSON.stringify(user.attributes.firstName ?? "");
     const lastName = JSON.stringify(user.attributes.lastName ?? "");
-    return `${JSON.parse(firstName)} ${JSON.parse(lastName)}`;
+    return `${JSON.parse(firstName)} ${JSON.parse(lastName)}`.trim();
   };
 
   const inviteAction = () => {
@@ -129,38 +140,42 @@ export default function Command() {
           <List.Section title="Invited">
             {allInvitedUsers.map((user: UserInvitation) => (
               <List.Item
-                title={user.attributes.firstName + " " + user.attributes.lastName}
+                key={user.id}
+                title={makeTitle(user)}
                 subtitle={user.attributes.email}
                 accessories={[{ text: rolesString(user.attributes.roles), tooltip: "Roles" }]}
                 actions={
                   <ActionPanel>
-                    {copyAction(user)}
-                    <Action
-                      title="Revoke"
-                      icon={Icon.Trash}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                      style={Action.Style.Destructive}
-                      onAction={async () => {
-                        if (
-                          await confirmAlert({
-                            title: "Are you sure?",
-                            primaryAction: { title: "Revoke", style: Alert.ActionStyle.Destructive },
-                          })
-                        ) {
-                          const revoked = allInvitedUsers.find((user) => user.id === user.id);
-                          try {
-                            setAllInvitedUsers(allInvitedUsers.filter((user) => user.id !== user.id));
-                            await fetchAppStoreConnect(`/userInvitations/${user.id}`, "DELETE");
-                          } catch (error) {
-                            if (revoked) {
-                              setAllInvitedUsers([...allInvitedUsers, revoked]);
+                    <ActionPanel.Section title={makeTitle(user)}>
+                      {copyAction(user)}
+                      <Action
+                        title="Revoke"
+                        icon={Icon.Trash}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          if (
+                            await confirmAlert({
+                              title: `Revoke the invitation for ${makeTitle(user)}?`,
+                              message: `${user.attributes.email} will no longer be able to join this team with this invitation.`,
+                              primaryAction: { title: "Revoke", style: Alert.ActionStyle.Destructive },
+                            })
+                          ) {
+                            const revoked = allInvitedUsers.find((u) => u.id === user.id);
+                            try {
+                              setAllInvitedUsers(allInvitedUsers.filter((u) => u.id !== user.id));
+                              await fetchAppStoreConnect(`/userInvitations/${user.id}`, "DELETE");
+                            } catch (error) {
+                              if (revoked) {
+                                setAllInvitedUsers([...allInvitedUsers, revoked]);
+                              }
+                              presentError(error);
                             }
-                            presentError(error);
                           }
-                        }
-                      }}
-                    />
-                    {inviteAction()}
+                        }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>{inviteAction()}</ActionPanel.Section>
                   </ActionPanel>
                 }
               />
@@ -173,56 +188,68 @@ export default function Command() {
               title={makeTitle(user)}
               key={user.id}
               subtitle={user.attributes.username}
-              accessories={[{ text: rolesString(user.attributes.roles), tooltip: "Roles" }]}
+              accessories={[
+                {
+                  text: rolesString(user.attributes.roles),
+                  tooltip: isAccountHolder(user)
+                    ? "Roles — the Account Holder can't be removed. Transfer the role in App Store Connect first."
+                    : "Roles",
+                },
+              ]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="Edit User"
-                    icon={Icon.Person}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
-                    target={
-                      <EditTeamMember
-                        user={user}
-                        userChanged={(newUser) => {
-                          setAllUsers(
-                            allUsers.map((user) => {
-                              if (user.id === newUser.id) {
-                                return newUser;
+                  <ActionPanel.Section title={makeTitle(user)}>
+                    <Action.Push
+                      title="Edit User"
+                      icon={Icon.Person}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                      target={
+                        <EditTeamMember
+                          user={user}
+                          userChanged={(newUser) => {
+                            setAllUsers(
+                              allUsers.map((user) => {
+                                if (user.id === newUser.id) {
+                                  return newUser;
+                                }
+                                return user;
+                              }),
+                            );
+                          }}
+                        />
+                      }
+                    />
+                    {copyAction(user)}
+                    {!isAccountHolder(user) && (
+                      <Action
+                        title="Remove"
+                        icon={Icon.Trash}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          if (
+                            await confirmAlert({
+                              title: `Remove ${makeTitle(user)}?`,
+                              message: `${user.attributes.username} will lose access to this App Store Connect team.`,
+                              primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                            })
+                          ) {
+                            const removed = allUsers.find((u) => u.id === user.id);
+                            try {
+                              setAllUsers(allUsers.filter((u) => u.id !== user.id));
+                              await fetchAppStoreConnect(`/users/${user.id}`, "DELETE");
+                            } catch (error) {
+                              if (removed) {
+                                setAllUsers([...allUsers, removed]);
                               }
-                              return user;
-                            }),
-                          );
+                              presentError(error);
+                            }
+                          }
                         }}
                       />
-                    }
-                  />
-                  {copyAction(user)}
-                  <Action
-                    title="Remove"
-                    icon={Icon.Trash}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                    style={Action.Style.Destructive}
-                    onAction={async () => {
-                      if (
-                        await confirmAlert({
-                          title: "Are you sure?",
-                          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-                        })
-                      ) {
-                        const removed = allUsers.find((user) => user.id === user.id);
-                        try {
-                          setAllUsers(allUsers.filter((user) => user.id !== user.id));
-                          await fetchAppStoreConnect(`/users/${user.id}`, "DELETE");
-                        } catch (error) {
-                          if (removed) {
-                            setAllUsers([...allUsers, removed]);
-                          }
-                          presentError(error);
-                        }
-                      }
-                    }}
-                  />
-                  {inviteAction()}
+                    )}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>{inviteAction()}</ActionPanel.Section>
                 </ActionPanel>
               }
             />

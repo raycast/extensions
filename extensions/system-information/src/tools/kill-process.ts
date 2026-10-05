@@ -1,18 +1,18 @@
 import { Tool, Action } from "@raycast/api";
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 import si from "systeminformation";
 
 /**
  * Input type for kill-process tool
  */
-interface KillProcessInput {
+type KillProcessInput = {
   pid: string;
-}
+};
 
-interface KillProcessResult {
+type KillProcessResult = {
   success: boolean;
   message: string;
-}
+};
 
 /**
  * Confirmation for killing a process
@@ -40,7 +40,7 @@ export const confirmation: Tool.Confirmation<{ pid: string }> = async (input) =>
     };
   } catch (error) {
     throw new Error(
-      `Failed to retrieve process information: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to retrieve process information: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 };
@@ -52,9 +52,10 @@ export const confirmation: Tool.Confirmation<{ pid: string }> = async (input) =>
  */
 export default async function Command(input: KillProcessInput): Promise<KillProcessResult> {
   const pid = input.pid;
+  const command = process.platform === "win32" ? `taskkill /PID ${pid} /F` : `kill ${pid}`;
 
   return new Promise<KillProcessResult>((resolve, reject) => {
-    exec(`kill ${pid}`, (error) => {
+    exec(command, (error) => {
       if (error) {
         reject(new Error(`Failed to kill process with PID ${pid}: ${error.message}`));
         return;

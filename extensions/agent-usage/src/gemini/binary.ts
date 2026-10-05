@@ -1,16 +1,34 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { cleanString } from "./utils";
+
+import { cleanString } from "./utils.ts";
 
 export const GEMINI_BINARY_NAME = "gemini";
 
 const GEMINI_PATH_ENV_KEYS = ["GEMINI_PATH", "GEMINI_CLI_PATH"];
 
+function executableExtensions(): string[] {
+  if (process.platform !== "win32") {
+    return [""];
+  }
+
+  return (
+    cleanString(process.env.PATHEXT)
+      ?.split(";")
+      .map((ext) => ext.trim().toLowerCase())
+      .filter((ext) => ext.length > 0) ?? [".exe", ".cmd", ".bat", ".com"]
+  );
+}
+
 function isExecutableFile(filePath: string): boolean {
   try {
     if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
       return false;
+    }
+
+    if (process.platform === "win32") {
+      return executableExtensions().includes(path.extname(filePath).toLowerCase());
     }
 
     fs.accessSync(filePath, fs.constants.X_OK);
@@ -27,15 +45,8 @@ function resolveGeminiBinaryPathFromPathEnv(): string | null {
   }
 
   const pathDirs = pathEnv.split(path.delimiter).filter((dir) => dir.length > 0);
-  const windowsExtensions =
-    process.platform === "win32"
-      ? (cleanString(process.env.PATHEXT)
-          ?.split(";")
-          .filter((ext) => ext.length > 0) ?? [".exe", ".cmd", ".bat", ".com"])
-      : [""];
-
   for (const dir of pathDirs) {
-    for (const ext of windowsExtensions) {
+    for (const ext of executableExtensions()) {
       const candidate = path.join(dir, `${GEMINI_BINARY_NAME}${ext}`);
       if (isExecutableFile(candidate)) {
         return candidate;
@@ -77,9 +88,11 @@ export function findLatestMiseGeminiBinaryPath(nodeInstallDir: string): string |
       .sort(compareVersionDesc);
 
     for (const version of versions) {
-      const candidate = path.join(nodeInstallDir, version, "bin", GEMINI_BINARY_NAME);
-      if (isExecutableFile(candidate)) {
-        return candidate;
+      for (const ext of executableExtensions()) {
+        const candidate = path.join(nodeInstallDir, version, "bin", `${GEMINI_BINARY_NAME}${ext}`);
+        if (isExecutableFile(candidate)) {
+          return candidate;
+        }
       }
     }
 

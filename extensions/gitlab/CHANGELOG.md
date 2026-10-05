@@ -1,5 +1,30 @@
 # GitLab Changelog
 
+## [My Merge Requests scope fix] - 2026-10-04
+
+- Change the `My Merge Requests` command to list merge requests you created, matching its title and the menu bar
+- Add an optional `scope` argument to the command so the menu bar's "Open Assigned Merge Requests" action opens the assigned list again
+
+## [Project avatars, grouped project dropdown, and paginated project search] - 2026-09-27
+
+- Show avatars of private projects and groups; avatars are downloaded with authentication and cached locally
+- Fix project dropdown search only finding projects from the first page
+- Group projects in the project dropdown by GitLab group and add a "Recent" section with the last 3 selected projects
+- Add "Show Group Name in Project Dropdowns" preference to hide the top-level group from project names
+- Paginate Search Projects (30 per page) with server-side search that also matches group names
+- Speed up loading of multi-page lists by fetching pages in parallel
+
+## [Squash commits checkbox in MR create form] - 2026-09-11
+
+- Add "Squash commits when merge request is accepted" checkbox to the MR create and edit forms
+- Fix boolean form values being dropped on submit
+
+## [Simplified authentication] - 2026-08-12
+
+- Remove the `Sign out of GitLab` command. Raycast adds a logout option to the extension preferences once you have signed in with OAuth
+- Remove the `Authentication` preference. The extension uses the `API Token` when one is set and OAuth otherwise
+- Clear the `API Token` field to keep using OAuth if both are configured
+
 ## [MR todos, project search, and API logging] - 2026-07-17
 
 - Show MR todo state from the list query; add or mark todos done without loading the full todos list

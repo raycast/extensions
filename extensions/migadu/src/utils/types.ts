@@ -1,3 +1,20 @@
+// DOMAINS
+export type Domain = {
+  name: string;
+  state: string;
+  description: string;
+};
+export type FormDomainCreate = {
+  name: string;
+  hosted_dns: string;
+  create_default_addresses: boolean;
+};
+export type DomainCreate = {
+  name: string;
+  hosted_dns: boolean;
+  create_default_addresses: boolean;
+};
+
 // MAILBOXES
 export type Mailbox = {
   address: string;
@@ -223,6 +240,7 @@ export type RewriteEdit = {
 };
 
 export type BodyRequest =
+  | DomainCreate
   | MailboxCreate
   | MailboxEdit
   | IdentityCreate

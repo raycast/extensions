@@ -113,13 +113,18 @@ function DownloadRepository() {
 
   return (
     <Form
+      navigationTitle="Download Repository as ZIP"
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Download" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Download ZIP" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="ZIP Download"
+        text="Downloads GitHub content as an archive. This does not create a Git repository or use the Default Clone Path."
+      />
       <Form.TextField
         id="url"
         title="GitHub URL"

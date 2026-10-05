@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("parseAntigravityUserStatusResponse parses account and prioritized models", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const response = {
     code: 0,
@@ -47,7 +47,7 @@ test("parseAntigravityUserStatusResponse parses account and prioritized models",
 });
 
 test("parseAntigravityCommandModelConfigsResponse supports fallback payload", async () => {
-  const { parseAntigravityCommandModelConfigsResponse } = await import("./parser");
+  const { parseAntigravityCommandModelConfigsResponse } = await import("./parser.ts");
 
   const response = {
     code: "OK",
@@ -76,7 +76,7 @@ test("parseAntigravityCommandModelConfigsResponse supports fallback payload", as
 });
 
 test("formatResetTime supports ISO and epoch values", async () => {
-  const { formatResetTime } = await import("../agents/format");
+  const { formatResetTime } = await import("../agents/format.ts");
 
   const originalNow = Date.now;
   Date.now = () => new Date("2026-01-01T00:00:00Z").getTime();
@@ -90,7 +90,7 @@ test("formatResetTime supports ISO and epoch values", async () => {
 });
 
 test("parseAntigravityUserStatusResponse falls back to Claude Sonnet when Opus is unavailable", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const response = {
     code: 0,
@@ -127,7 +127,7 @@ test("parseAntigravityUserStatusResponse falls back to Claude Sonnet when Opus i
 });
 
 test("parseAntigravityUserStatusResponse returns parse_error for invalid payload", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const result = parseAntigravityUserStatusResponse({ code: 0, userStatus: { cascadeModelConfigData: {} } });
 
@@ -136,7 +136,7 @@ test("parseAntigravityUserStatusResponse returns parse_error for invalid payload
 });
 
 test("selectDisplayModels selects any Claude/Gemini Pro models and fills remaining slots up to 3", async () => {
-  const { selectDisplayModels } = await import("./parser");
+  const { selectDisplayModels } = await import("./parser.ts");
 
   const models = [
     {
@@ -175,7 +175,7 @@ test("selectDisplayModels selects any Claude/Gemini Pro models and fills remaini
 });
 
 test("parseAntigravityUserStatusResponse parses detailed quota groups when provided", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const response = {
     code: 0,
@@ -224,7 +224,7 @@ test("parseAntigravityUserStatusResponse parses detailed quota groups when provi
 });
 
 test("parseAntigravityUserStatusResponse accepts quota groups without legacy model configs", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const response = {
     code: 0,
@@ -264,8 +264,78 @@ test("parseAntigravityUserStatusResponse accepts quota groups without legacy mod
   assert.equal(result.usage?.quotaGroups?.[0].buckets[0].percentLeft, 31);
 });
 
+test("parseAntigravityQuotaSummaryResponse accepts Cloud Code top-level groups", async () => {
+  const { parseAntigravityQuotaSummaryResponse } = await import("./parser.ts");
+
+  const cloudCodeResponse = {
+    groups: [
+      {
+        displayName: "Gemini Models",
+        description: "Models within this group: Gemini Flash, Gemini Pro",
+        buckets: [
+          {
+            bucketId: "gemini-weekly",
+            displayName: "Weekly Limit Remaining",
+            window: "weekly",
+            remainingFraction: 0.8789438,
+            resetTime: "2099-12-24T12:00:00Z",
+          },
+          {
+            bucketId: "gemini-5h",
+            displayName: "Five Hour Limit Remaining",
+            window: "5h",
+            remainingFraction: 1,
+            resetTime: "2099-12-24T10:00:00Z",
+          },
+        ],
+      },
+      {
+        displayName: "Claude and GPT models",
+        description: "Models within this group: Claude Opus, Claude Sonnet, GPT-OSS",
+        buckets: [
+          {
+            bucketId: "3p-weekly",
+            displayName: "Weekly Limit Remaining",
+            window: "weekly",
+            remainingFraction: 1,
+            resetTime: "2099-12-24T12:00:00Z",
+          },
+        ],
+      },
+    ],
+    description: "Within each group, models share a weekly limit and a 5-hour limit.",
+  };
+
+  const result = parseAntigravityQuotaSummaryResponse(cloudCodeResponse, {
+    email: "user@example.com",
+    plan: "Google AI Pro",
+  });
+
+  assert.equal(result.error, null);
+  assert.equal(result.usage?.quotaGroups?.length, 2);
+  assert.equal(result.usage?.quotaGroups?.[0].displayName, "Gemini Models");
+  assert.equal(result.usage?.quotaGroups?.[0].buckets[0].percentLeft, 88);
+  assert.equal(result.usage?.quotaGroups?.[0].buckets[1].percentLeft, 100);
+  assert.equal(result.usage?.primaryModel, null);
+  assert.equal(result.usage?.accountEmail, "user@example.com");
+  assert.equal(result.usage?.accountPlan, "Google AI Pro");
+});
+
+test("extractAntigravityPlanFromLoadCodeAssist prefers paidTier name", async () => {
+  const { extractAntigravityPlanFromLoadCodeAssist } = await import("./parser.ts");
+
+  assert.equal(
+    extractAntigravityPlanFromLoadCodeAssist({
+      currentTier: { name: "Antigravity" },
+      paidTier: { name: "Google AI Pro" },
+    }),
+    "Google AI Pro",
+  );
+  assert.equal(extractAntigravityPlanFromLoadCodeAssist({ currentTier: { name: "Antigravity" } }), "Antigravity");
+});
+
 test("parseAntigravityUserStatusResponse ignores quota groups without usable buckets", async () => {
-  const { parseAntigravityUserStatusResponse } = await import("./parser");
+  const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 
   const response = {
     code: 0,

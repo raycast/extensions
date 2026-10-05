@@ -1,11 +1,9 @@
-import { existsSync } from "fs";
-import { mkdirSync } from "fs";
+import { statSync, createReadStream, createWriteStream } from "node:fs";
 import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD, LaunchProps } from "@raycast/api";
-import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
-import { dirname, basename, join, extname } from "path";
 import { compressImageResponseScheme } from "./lib/zodSchema";
-import { resolveOutputPath } from "./lib/utils";
+import { filterSupportedImagePaths, isMacOS, resolveOutputFile } from "./lib/utils";
+import { showFailureToast } from "@raycast/utils";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -15,43 +13,50 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Com
 
   try {
     compressionCount = _parseCompressionCount(props.arguments.count);
-  } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: e instanceof Error ? e.message : "Could not validate arguments",
-    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    showFailureToast(message, { title: "Could not validate arguments" });
     return;
   }
 
   try {
-    filePaths = (await getSelectedFinderItems()).map((f) => f.path);
-  } catch (e) {
+    filePaths = filterSupportedImagePaths((await getSelectedFinderItems()).map((f) => f.path));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    showFailureToast(message, { title: `Could not get the selected ${isMacOS ? "Finder" : "File Explorer"} items` });
+    return;
+  }
+
+  if (filePaths.length === 0) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error",
-      message: e instanceof Error ? e.message : "Could not get the selected Finder items",
+      title: "No images found",
+      message: "Selected files must be AVIF, PNG, JPEG or WebP images.",
     });
     return;
   }
+
+  const isSingleFile = filePaths.length === 1;
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: `Compressing images ${compressionCount} times...`,
+    title: `Compressing ${filePaths.length} ${isSingleFile ? "image" : "images"} ${compressionCount} times...`,
   });
 
   try {
-    const results = await Promise.all(filePaths.map((filePath) => _compressImage(filePath, compressionCount)));
+    const results = await Promise.all(
+      filePaths.map((filePath) => _compressImage(filePath, isSingleFile, compressionCount)),
+    );
     const totalOriginalSize = results.reduce((acc, cur) => acc + cur[0].originalSize, 0);
     const totalCompressedSize = results.reduce((acc, cur) => acc + cur[0].compressedSize, 0);
 
     await showHUD(
       `Compression successful 🎉  (-${(100 - (totalCompressedSize / totalOriginalSize) * 100).toFixed(1)}%)`,
     );
-  } catch (e) {
+  } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error";
-    toast.message = e instanceof Error ? e.message : "failed to compress images";
+    toast.message = error instanceof Error ? error.message : "Failed to compress images";
   }
 }
 
@@ -71,6 +76,7 @@ const _parseCompressionCount = (count: string | undefined) => {
 
 const _compressImage = async (
   filePath: string,
+  isSingleFile: boolean,
   compressionCount: number,
 ): Promise<
   [
@@ -93,19 +99,12 @@ const _compressImage = async (
   }
 
   // Save compressed image
-  let outputDir = dirname(filePath);
-  if (!preferences.overwrite) {
-    outputDir = resolveOutputPath(filePath, preferences.destinationFolderPath);
-    if (!existsSync(outputDir)) {
-      mkdirSync(outputDir);
-    }
-  }
-
-  let outputPath = join(outputDir, basename(filePath));
-  if (outputPath === filePath && !preferences.overwrite) {
-    const ext = extname(filePath);
-    outputPath = join(outputDir, `${basename(filePath, ext)}.compressed-${compressionCount}x${ext}`);
-  }
+  const outputPath = resolveOutputFile(filePath, {
+    destinationFolderPath: preferences.destinationFolderPath,
+    overwrite: preferences.overwrite,
+    isSingleFile: preferences.saveSingleFileNextToOriginal && isSingleFile,
+    suffix: `-compressed-${compressionCount}x`,
+  });
 
   const outputFileStream = createWriteStream(outputPath);
 

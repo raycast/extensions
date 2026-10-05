@@ -73,5 +73,8 @@
   "prettier": {
     "printWidth": 120,
     "singleQuote": false
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

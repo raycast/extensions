@@ -1,21 +1,24 @@
-import { List } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { Color, Icon, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { DiscussionFieldsFragment } from "../generated/graphql";
+import { uniqueById } from "../helpers";
 import { DISCUSSION_DEFAULT_SORT_QUERY, formatDateForQuery } from "../helpers/discussion";
 
 import { DiscussionListItem } from "./DiscussionListItem";
 
-function DiscussionFilterDropdown(props: { onChange?: (value: string) => void }) {
+const DISCUSSIONS_PAGE_SIZE = 20;
+
+function DiscussionFilterDropdown(props: { value: string; onChange?: (value: string) => void }) {
   return (
-    <List.Dropdown tooltip="Filter" onChange={props.onChange}>
-      <List.Dropdown.Item value="" title="All" />
-      <List.Dropdown.Item value="answered" title="Answered" />
-      <List.Dropdown.Item value="unanswered" title="Unanswered" />
-      <List.Dropdown.Item value="locked" title="Locked" />
-      <List.Dropdown.Item value="unlocked" title="Unlocked" />
+    <List.Dropdown tooltip="Filter" value={props.value} onChange={props.onChange}>
+      <List.Dropdown.Item value="" title="All" icon={Icon.SpeechBubble} />
+      <List.Dropdown.Item value="answered" title="Answered" icon={{ source: Icon.Checkmark, tintColor: Color.Green }} />
+      <List.Dropdown.Item value="unanswered" title="Unanswered" icon={Icon.Circle} />
+      <List.Dropdown.Item value="locked" title="Locked" icon={Icon.Lock} />
+      <List.Dropdown.Item value="unlocked" title="Unlocked" icon={Icon.LockUnlocked} />
     </List.Dropdown>
   );
 }
@@ -29,19 +32,24 @@ export function RepositoryDiscussionList(props: { repository: string }) {
   });
 
   const filterText = filter.length > 0 ? `is:${filter}` : "";
-
   const repoFilter = props.repository && props.repository.length > 0 ? `repo:${props.repository}` : "";
 
-  const { data, isLoading } = usePromise(
-    async (searchText, filter, sortTxt) => {
+  const { data, isLoading, pagination } = useCachedPromise(
+    (searchText, filterText, sortTxt) => async (options: { page: number; cursor?: string }) => {
       const result = await github.searchDiscussions({
-        query: `${repoFilter} ${filter} ${formatDateForQuery(sortTxt)} ${searchText}`,
-        numberOfOpenItems: 20,
+        query: `${repoFilter} ${filterText} ${formatDateForQuery(sortTxt)} ${searchText}`.replace(/\s+/g, " ").trim(),
+        numberOfItems: DISCUSSIONS_PAGE_SIZE,
+        after: options.page > 0 ? options.cursor : undefined,
       });
-      return result.searchDiscussions.nodes?.map((d) => d as DiscussionFieldsFragment);
+      return {
+        data: result.searchDiscussions.nodes?.map((d) => d as DiscussionFieldsFragment) ?? [],
+        hasMore: result.searchDiscussions.pageInfo.hasNextPage,
+        cursor: result.searchDiscussions.pageInfo.endCursor ?? undefined,
+      };
     },
     [searchText, filterText, sortQuery],
   );
+  const discussions = uniqueById(data ?? []);
 
   return (
     <List
@@ -49,10 +57,13 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       onSearchTextChange={setSearchText}
       navigationTitle={props.repository}
       throttle
-      searchBarAccessory={<DiscussionFilterDropdown onChange={setFilter} />}
+      pagination={pagination}
+      searchBarAccessory={<DiscussionFilterDropdown value={filter} onChange={setFilter} />}
     >
-      <List.Section title="Discussions" subtitle={`${data?.length}`}>
-        {data?.map((d) => <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />)}
+      <List.Section title="Discussions" subtitle={`${discussions.length}`}>
+        {discussions.map((d) => (
+          <DiscussionListItem key={d.id} discussion={d} {...{ sortQuery, setSortQuery }} />
+        ))}
       </List.Section>
     </List>
   );

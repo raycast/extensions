@@ -1,3 +1,4 @@
+import { shortcut } from "./shortcuts";
 import { useAtom } from "jotai";
 import { TodoSections, todoAtom } from "./atoms";
 import { Action, Alert, Color, Icon, confirmAlert, showToast } from "@raycast/api";
@@ -15,7 +16,7 @@ const ClearCompletedAction = () => {
       await confirmAlert({
         title: "Clear Completed Todos",
         icon: { source: Icon.Trash, tintColor: Color.Red },
-        message: "Are you sure you want to delete all todos?",
+        message: "Delete completed todos, including completed pinned todos? Incomplete todos will be kept.",
         primaryAction: {
           style: Alert.ActionStyle.Destructive,
           title: "Clear completed",
@@ -43,7 +44,7 @@ const ClearCompletedAction = () => {
     <Action
       icon={{ source: Icon.Trash, tintColor: hasCompletedTodo ? Color.Red : undefined }}
       onAction={handleClearCompleted}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      shortcut={shortcut("c", ["cmd", "opt"])}
       style={hasCompletedTodo ? Action.Style.Destructive : undefined}
       title="Clear Completed Todos"
     />

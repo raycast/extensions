@@ -1,13 +1,12 @@
 import { Color, Detail } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
 import { IssueDetailFieldsFragment, IssueFieldsFragment, UserFieldsFragment } from "../generated/graphql";
-import { pluralize } from "../helpers";
+import { pluralize, RevalidateList } from "../helpers";
 import { getIssueAuthor, getIssueStatus } from "../helpers/issue";
 import { getGitHubUser } from "../helpers/users";
-import { useMyIssues } from "../hooks/useMyIssues";
 import { useViewer } from "../hooks/useViewer";
 
 import IssueActions from "./IssueActions";
@@ -15,7 +14,7 @@ import IssueActions from "./IssueActions";
 type IssueDetailProps = {
   initialIssue: IssueFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
+  mutateList?: RevalidateList;
 };
 
 export default function IssueDetail({ initialIssue, mutateList }: IssueDetailProps) {

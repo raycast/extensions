@@ -35,7 +35,13 @@ import {
 import { FormValidation, useForm } from "@raycast/utils";
 import { apiFetch, errorMessage } from "../lib/api";
 import type { Tag } from "../lib/api";
+import {
+  CALLOUTS,
+  appendCalloutPrefix,
+  descriptionFieldInfo,
+} from "../lib/descriptionMarkup";
 import { ENTRY_TYPES } from "../lib/entryTypes";
+import { crossShortcut } from "../lib/platform";
 import { parseTagNames, tagsFieldInfo } from "../lib/tags";
 
 // The entry fields this form needs, narrowed from the search row.
@@ -43,6 +49,11 @@ export interface EditableEntry {
   id: number;
   entry: string;
   definition: string;
+  // The RAW description text (mention tokens like [label](#id)
+  // intact), NOT the mention-stripped display copy the search rows
+  // render. This field round-trips through the PATCH verbatim, so
+  // callers passing the stripped copy would silently destroy mention
+  // links on save; EntrySearchRow passes descriptionRaw.
   description: string;
   type: string;
   listName: string;
@@ -82,55 +93,56 @@ export function EntryEditForm({
   // tags are preserved unless the user edits the field.
   const initialTags = (Array.isArray(entry.tags) ? entry.tags : []).join(", ");
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: async (input) => {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Saving changes…",
-      });
-      try {
-        const tagNames = parseTagNames(input.tags);
-
-        // Send the full desired tag set as tag_names; the server replaces
-        // the entry's tags with the resolved set (an empty field clears
-        // them all, since the route omits an empty array and the RPC
-        // treats the absent param as "no tags").
-        const body: Record<string, unknown> = {
-          entry: input.entry ?? "",
-          definition: input.definition ?? "",
-          description: input.description ?? "",
-          type: input.type ?? "term",
-          tag_names: tagNames,
-        };
-
-        await apiFetch(`/api/v1/entries/${entry.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(body),
+  const { handleSubmit, itemProps, setValue, values, focus } =
+    useForm<FormValues>({
+      onSubmit: async (input) => {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Saving changes…",
         });
+        try {
+          const tagNames = parseTagNames(input.tags);
 
-        toast.style = Toast.Style.Success;
-        toast.title = "Entry updated";
-        onSaved();
-        pop();
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Could not update entry";
-        toast.message = errorMessage(error);
-      }
-    },
-    initialValues: {
-      entry: entry.entry ?? "",
-      type: entry.type || "term",
-      definition: entry.definition ?? "",
-      description: entry.description ?? "",
-      tags: initialTags,
-    },
-    validation: {
-      entry: FormValidation.Required,
-      definition: FormValidation.Required,
-      type: FormValidation.Required,
-    },
-  });
+          // Send the full desired tag set as tag_names; the server replaces
+          // the entry's tags with the resolved set (an empty field clears
+          // them all, since the route omits an empty array and the RPC
+          // treats the absent param as "no tags").
+          const body: Record<string, unknown> = {
+            entry: input.entry ?? "",
+            definition: input.definition ?? "",
+            description: input.description ?? "",
+            type: input.type ?? "term",
+            tag_names: tagNames,
+          };
+
+          await apiFetch(`/api/v1/entries/${entry.id}`, {
+            method: "PATCH",
+            body: JSON.stringify(body),
+          });
+
+          toast.style = Toast.Style.Success;
+          toast.title = "Entry updated";
+          onSaved();
+          pop();
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Could not update entry";
+          toast.message = errorMessage(error);
+        }
+      },
+      initialValues: {
+        entry: entry.entry ?? "",
+        type: entry.type || "term",
+        definition: entry.definition ?? "",
+        description: entry.description ?? "",
+        tags: initialTags,
+      },
+      validation: {
+        entry: FormValidation.Required,
+        definition: FormValidation.Required,
+        type: FormValidation.Required,
+      },
+    });
 
   return (
     <Form
@@ -141,6 +153,26 @@ export function EntryEditForm({
             icon={Icon.Check}
             onSubmit={handleSubmit}
           />
+          {/* Same callout inserts as Quick Add (the two forms share
+              the description markup vocabulary; see
+              lib/descriptionMarkup.ts). */}
+          <ActionPanel.Section title="Insert into Description">
+            {CALLOUTS.map((c) => (
+              <Action
+                key={c.name}
+                title={`Insert ${c.name} Callout`}
+                icon={Icon.QuoteBlock}
+                shortcut={crossShortcut(["cmd", "shift"], c.shortcutKey)}
+                onAction={() => {
+                  setValue(
+                    "description",
+                    appendCalloutPrefix(values.description ?? "", c.prefix),
+                  );
+                  focus("description");
+                }}
+              />
+            ))}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -156,7 +188,11 @@ export function EntryEditForm({
 
       <Form.TextArea title="Definition" {...itemProps.definition} />
 
-      <Form.TextArea title="Description" {...itemProps.description} />
+      <Form.TextArea
+        title="Description"
+        info={descriptionFieldInfo()}
+        {...itemProps.description}
+      />
 
       <Form.TextField
         title="Tags"

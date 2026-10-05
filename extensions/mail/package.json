@@ -214,7 +214,7 @@
     "javascript-time-ago": "^2.5.10",
     "json2md": "^1.13.0",
     "juice": "^9.1.0",
-    "mailparser": "^3.9.4",
+    "mailparser": "^3.9.31",
     "mime-types": "^2.1.35",
     "plist": "^3.1.0",
     "string-strip-html": "^13.4.12",
@@ -243,5 +243,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
 }

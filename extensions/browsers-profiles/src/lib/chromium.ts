@@ -36,7 +36,7 @@ export const getChromiumProfiles = (filter: string[]) => {
     try {
       const localStateFile = fs.readFileSync(localStatePath, "utf-8");
       localState = JSON.parse(localStateFile);
-    } catch (error) {
+    } catch {
       return null;
     }
 

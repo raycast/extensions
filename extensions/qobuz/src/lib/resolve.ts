@@ -14,17 +14,6 @@ export type ResolveOutcome =
   | { ok: true; direction: "from-qobuz"; qobuzTrackId: number }
   | { ok: false; reason: ResolveFailure };
 
-export const spotifySearchUrl = (query: string) => `https://open.spotify.com/search/${encodeURIComponent(query)}`;
-
-export const ytMusicSearchUrl = (query: string) => `https://music.youtube.com/search?q=${encodeURIComponent(query)}`;
-
-export const deezerByIsrc = async (isrc: string): Promise<string | undefined> => {
-  const res = await fetch(`https://api.deezer.com/track/isrc:${isrc}`).catch(() => null);
-  if (!res || !res.ok) return undefined;
-  const track = (await res.json()) as { link?: string };
-  return track.link;
-};
-
 const isQobuz = (host: string) => host.endsWith("qobuz.com");
 
 const isSpotify = (host: string) => host.endsWith("open.spotify.com");
@@ -62,6 +51,25 @@ const resolveYouTube = async (url: string): Promise<ResolvedTrack | null> => {
     title: data.title,
     artist: data.author_name.replace(/ - Topic$/, ""),
   };
+};
+
+/**
+ * Cheap, offline check that a string is a single-track link from a supported
+ * service — the shape test of resolveLink without its network round-trip, for
+ * deciding whether to offer the clipboard as an alternative input.
+ */
+export const looksLikeTrackLink = (input: string): boolean => {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return false;
+  }
+  const host = url.hostname;
+  if (isQobuz(host)) return /\/track\/\d+/.test(url.pathname);
+  if (isSpotify(host)) return url.pathname.includes("/track/");
+  if (isYouTube(host)) return url.pathname === "/watch" || host.endsWith("youtu.be");
+  return false;
 };
 
 export const resolveLink = async (input: string): Promise<ResolveOutcome> => {

@@ -1,5 +1,24 @@
 # Home Assistant Changelog
 
+## [Fix Quicklink search filtering] - 2026-09-25
+
+- Fix "Save as Quicklink" opening entity list commands (including Cameras and Zones) without applying the entity filter, requiring an extra keystroke before the intended entity showed up
+
+## [Entity Customization] - 2026-08-29
+
+- Add local rename, hide, and favorite actions for entities in list commands
+- Add Entity Settings command to manage hidden entities, custom display names, and favorites
+- Add Save as Quicklink action to create Raycast quicklinks for entity list commands
+
+## [Add contributor] - 2026-08-10
+
+- Add mattiacolombomc to the contributors list
+
+## [Fix .local resolution picking unbracketed IPv6] - 2026-08-10
+
+- Prefer mDNS A records (IPv4) when resolving `.local` hostnames, falling back to an AAAA record only if no A record arrives before the timeout
+- Wrap IPv6 literals in brackets before substituting them into the instance URL, fixing "Invalid URL: ws://fd6c:…:8123/api/websocket" on IPv6-enabled networks
+
 ## [Update] - 2026-08-03
 
 - Show multiple zones for person entities

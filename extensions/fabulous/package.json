@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fabulous",
+  "title": "Fabulous",
+  "description": "List Domains and their DNS Records",
+  "categories": [
+    "Developer Tools"
+  ],
+  "icon": "fabulous.png",
+  "author": "xmok",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "username",
+      "title": "Username",
+      "placeholder": "username",
+      "description": "Your Fabulous Username",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "placeholder": "password",
+      "description": "Your Fabulous Password",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Fabulous",
+      "description": "List Domains and their DNS Records",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
+    "fast-xml-parser": "^5.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

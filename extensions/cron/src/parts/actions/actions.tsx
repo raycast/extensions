@@ -155,7 +155,10 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
         <>
           <Action.CopyToClipboard
             title="Copy Date"
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
             content={
               day ? `${getDayName(day)} ${day}, ${getMonthName(currentMonth)} ${currentYear}` : "No date selected"
             }

@@ -1,5 +1,12 @@
 # Espanso Changelog
 
+## [Fix trigger search and overflowing labels] - 2026-08-21
+
+### Bug Fixes
+
+- Fixed Search Matches finding nothing for a trigger whenever the match also has a label. The label took the list title *instead of* the triggers, and Raycast's built-in filter only reads the title, subtitle and keywords — so every labeled match dropped its trigger out of the search index, and only turned up when the search term happened to appear in the label prose. Triggers are now indexed as keywords alongside the label, and punctuation-heavy triggers are also split into their parts, so `email` matches `;;email.ooo`.
+- Fixed a long label overflowing the detail panel. The Label tag neither wraps nor truncates, so it ran past the panel edge; it is now cut to fit. The full label is unaffected elsewhere — it is already the match's title.
+
 ## [Fix Espanso binary not being found] - 2026-08-03
 
 ### Bug Fixes

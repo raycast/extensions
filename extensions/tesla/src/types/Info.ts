@@ -74,6 +74,20 @@ export interface Info {
     user_charge_enable_request: string | null;
   };
   display_name: string;
+  drive_state: {
+    active_route_latitude?: number;
+    active_route_longitude?: number;
+    gps_as_of?: number;
+    heading?: number;
+    latitude?: number;
+    longitude?: number;
+    native_latitude?: number;
+    native_longitude?: number;
+    power?: number;
+    shift_state: string | null;
+    speed: number | null;
+    timestamp: number;
+  };
   climate_state: {
     battery_heater: boolean;
     battery_heater_no_power: boolean | null;

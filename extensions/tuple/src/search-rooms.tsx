@@ -2,26 +2,27 @@ import { Action, ActionPanel, Color, Icon, List, showHUD, showToast, Toast } fro
 import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
-import { joinCall, setRoomFavorite } from "./lib/tuple";
-import { Room } from "./lib/types";
+import { joinRoom, setRoomFavorite } from "./lib/tuple";
+import { primaryPersonalRoom, Room } from "./lib/types";
 
 export default function SearchRooms() {
   // `tuple rooms list` returns one flat, kind-tagged array, with occupants and the active-room
-  // marker resolved server-side. Pass --limit -1: this picker shows the user's complete room
-  // list, so opt out of the CLI's default count cap.
-  const { data, isLoading, error, revalidate } = useTupleJson<Room[]>(["rooms", "list", "--limit", "-1"], {
+  // marker resolved server-side. Pass --limit -1 so the primary personal room can be identified
+  // before the picker collapses old personal rooms to that single canonical entry.
+  const { data, isLoading, error, revalidate } = useTupleJson<Room[]>(["rooms", "list", "--members", "--limit", "-1"], {
     failureTitle: "Could Not Load Rooms",
   });
 
   const rooms = data ?? [];
-  const personal = sortRooms(rooms.filter((room) => room.kind === "personal"));
+  const primaryRoom = primaryPersonalRoom(rooms);
+  const personal = primaryRoom ? [primaryRoom] : [];
   const team = sortRooms(rooms.filter((room) => room.kind === "team"));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your rooms">
       <List.Section title="Personal">
         {personal.map((room) => (
-          <RoomItem key={room.slug} room={room} onChange={revalidate} />
+          <RoomItem key={room.slug} room={room} primary={room.slug === primaryRoom?.slug} onChange={revalidate} />
         ))}
       </List.Section>
       <List.Section title="Team">
@@ -42,11 +43,14 @@ export default function SearchRooms() {
   );
 }
 
-function RoomItem({ room, onChange }: { room: Room; onChange: () => void }) {
+function RoomItem({ room, primary = false, onChange }: { room: Room; primary?: boolean; onChange: () => void }) {
   const label = roomLabel(room);
   const occupants = room.members.map((member) => member.full_name || member.email || "Someone");
   const accessories: List.Item.Accessory[] = [];
 
+  if (primary) {
+    accessories.push({ tag: "Primary" });
+  }
   if (occupants.length > 0) {
     accessories.push({
       icon: { source: Icon.TwoPeople, tintColor: Color.Green },
@@ -63,14 +67,14 @@ function RoomItem({ room, onChange }: { room: Room; onChange: () => void }) {
 
   return (
     <List.Item
-      icon={Icon.Window}
+      icon={Icon.AppWindowGrid2x2}
       title={label}
       subtitle={occupants.length > 0 ? occupants.join(", ") : undefined}
       keywords={[room.slug, room.name, ...occupants]}
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title="Join Room" icon={Icon.Phone} onAction={() => joinRoom(room.slug, label)} />
+          <Action title="Join Room" icon={Icon.Phone} onAction={() => joinRoomWithFeedback(room.slug, label)} />
           <Action
             title={room.favorited ? "Remove Favorite" : "Add Favorite"}
             icon={Icon.Star}
@@ -85,9 +89,9 @@ function RoomItem({ room, onChange }: { room: Room; onChange: () => void }) {
   );
 }
 
-async function joinRoom(slug: string, label: string) {
+async function joinRoomWithFeedback(slug: string, label: string) {
   try {
-    await joinCall(slug);
+    await joinRoom(slug);
     await showHUD(`Joining ${label}`);
   } catch (error) {
     await showFailureToast(error, { title: "Could Not Join Room" });

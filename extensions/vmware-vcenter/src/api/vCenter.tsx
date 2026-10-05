@@ -38,6 +38,10 @@ export class vCenter {
       method: "POST",
       headers: {
         Authorization: `Basic ${this._credential}`,
+        // undici (Raycast's Node runtime) sends `Accept-Language: *` by default, which makes
+        // vCenter store `*` as the session locale; VMRC's CloneSession then fails with
+        // vim.fault.InvalidLocale. Pin a valid locale so console tickets stay redeemable.
+        "Accept-Language": "en-US",
       },
       signal: AbortSignal.timeout(this._timeout),
     })

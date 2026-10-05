@@ -38,7 +38,21 @@ function splitTextForSectionBlocks(text: string): string[] | undefined {
   return chunks;
 }
 
-export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "sent"): KnownBlock[] | undefined {
+type MessageBlocksOptions = {
+  /**
+   * When false, never emit a `markdown` block. Slack's `files.completeUploadExternal`
+   * (used by `filesUploadV2`) rejects the newer `markdown` block type with a bare
+   * `internal_error`, so file uploads must fall back to `section`/`mrkdwn` blocks.
+   * See https://github.com/slackapi/node-slack-sdk/issues/2564
+   */
+  allowMarkdownBlock?: boolean;
+};
+
+export function getAiMessageBlocks(
+  text: string,
+  action: "sent" | "updated" = "sent",
+  { allowMarkdownBlock = true }: MessageBlocksOptions = {},
+): KnownBlock[] | undefined {
   const { showAiMessageSignature } = getPreferenceValues<Preferences>();
 
   if (!showAiMessageSignature) {
@@ -46,7 +60,7 @@ export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "s
   }
 
   const contentBlocks: KnownBlock[] =
-    text.length <= SECTION_TEXT_MAX_LENGTH
+    allowMarkdownBlock && text.length <= SECTION_TEXT_MAX_LENGTH
       ? [{ type: "markdown", text }]
       : (splitTextForSectionBlocks(text)?.map((chunk) => ({
           type: "section" as const,

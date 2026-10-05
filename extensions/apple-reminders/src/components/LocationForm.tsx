@@ -31,9 +31,11 @@ export default function LocationForm({ onSubmit, location, isCustomLocation }: S
   const { itemProps, values, handleSubmit } = useForm<LocationFormValues>({
     async onSubmit(values) {
       const icon = (values.icon as LocationIcon) ?? "home";
-      location
-        ? await onSubmit({ ...location, ...values, icon })
-        : await onSubmit({ ...values, icon, id: crypto.randomUUID() });
+      if (location) {
+        await onSubmit({ ...location, ...values, icon });
+      } else {
+        await onSubmit({ ...values, icon, id: crypto.randomUUID() });
+      }
       pop();
     },
     initialValues: {

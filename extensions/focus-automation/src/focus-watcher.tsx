@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues, launchCommand, LaunchType, open } from "@raycast/api";
 import { logEvent, logSystem, logLiveness, LOG_PATH } from "./lib/logger";
-import { getAccessTokenSilently } from "./lib/oauth";
+import { disconnect, getAccessTokenSilently, recoverFromRejectedToken } from "./lib/oauth";
 import { fetchUpcomingEvents, PolledEvent } from "./lib/gcal";
 import { filterEvents, selectNextEvent, focusDurationSeconds } from "./lib/decision";
 import { WATCHER_LOCK_STALE_SECONDS, FOCUS_CATEGORIES, CONFIRM_TIMEOUT_SECONDS } from "./lib/constants";
@@ -22,20 +22,57 @@ import {
   SysState,
 } from "./lib/watcher-store";
 
+// Phase C4 — the trigger path (builds on C3's decision rules).
+//
+// Each 60s tick reads the chosen calendar (C2), runs the fetched list through
+// the daemon's filter + selection logic (C3), logs skips and the would-fire
+// winner (SCHEDULED), and — new in C4 — FIRES when the winner's start has been
+// reached (never before: decision 1, winner.start <= now). Firing means: skip
+// if a modeled session is still running, mark processed, model the new session
+// window, then prompt (confirm) or trigger (auto). `dryRun` gates only the side
+// effect; the whole decision pipeline still runs. C4.b ships this behind dryRun.
+//
+// Key constraint: this runs as a fresh process every tick, so anything the
+// daemon kept in RAM (dedup markers, last count, processed events, the active
+// session) lives in LocalStorage via ./lib/state and ./lib/watcher-store. The
+// decision rules themselves are pure (./lib/decision); the watcher applies the
+// transition-guarded logging and the fire side effects around them. The whole
+// tick is serialized by the C4.a write-race lock. See specs/phase-c4-trigger.md.
+
 type Preferences = {
   triggerMode: "auto" | "confirm";
 };
 
 export default async function FocusWatcher() {
   const prefs = getPreferenceValues<Preferences>();
+  // Live everywhere, dev included (2026-07-02). The dev-only dry default was a
+  // dual-run-era safety net; with the daemon retired (D.4) and the manifest
+  // checkbox long gone, `prefs.dryRun` could never be set anyway — the old
+  // `?? true` silently made every fresh dev build a no-op watcher (caught when
+  // a throwaway event logged DRY_RUN_WOULD_PROMPT instead of prompting). Dev
+  // now behaves exactly like the shipped build. The dryRun PLUMBING below
+  // stays: flip this constant to true for a one-off dry test session.
   const dryRun = false;
   const launchedInBackground = environment.launchType === LaunchType.Background;
   const tickStart = new Date();
 
+  // 0. Write-race guard (C4.a). Raycast can overlap background ticks; the daemon
+  //    never could (one process, sleeping between polls). Bail quietly if another
+  //    tick stamped a lock less than WATCHER_LOCK_STALE_SECONDS ago. A stale lock
+  //    (a tick that crashed before clearing it) self-heals: we take over. A
+  //    future-dated lock (clock skew) reads as fresh and bails — the safe side.
+  //    This is a mitigation, not a mutex (no atomic get-set in LocalStorage); it
+  //    shrinks the overlap window to ~ms. We only clear the lock on paths that
+  //    acquired it — the early return below must not touch another tick's lock.
   const existingLock = await loadWatcherLock();
   if (existingLock !== null) {
     const lockAgeSeconds = (tickStart.getTime() - existingLock.getTime()) / 1000;
     if (lockAgeSeconds < WATCHER_LOCK_STALE_SECONDS) {
+      // Unconditional (unlike the poll-OK line below): the bail is the only
+      // evidence the guard fired, and real ticks run as Background — gating it
+      // on a foreground launch would hide it during the very scenario it guards.
+      // This is stdout for the `ray develop` console, never the focus.log sink,
+      // so "bail quietly" (no event line, no Phase D diff noise) still holds.
       console.log(
         `[focus-watcher] tick skipped — watcher_lock held ${lockAgeSeconds.toFixed(1)}s ago (< ${WATCHER_LOCK_STALE_SECONDS}s)`,
       );
@@ -44,48 +81,77 @@ export default async function FocusWatcher() {
   }
   await setWatcherLock(tickStart);
 
+  // Liveness fields (D.3.a). Captured during the tick, read in `finally` to emit
+  // exactly one UNCONDITIONAL heartbeat per tick — including ticks that return
+  // early (no auth / no calendar) or throw. Default null = "tick errored or
+  // returned before this point", which the heartbeat renders distinctly.
+  // See specs/phase-d3a-liveness-heartbeat.md.
   let eventsFetched: number | null = null;
   let liveWinner: PolledEvent | null = null;
 
   try {
+    // 1. Auth, refresh-only. A background command has no UI, so it must never
+    //    start the interactive browser flow. No token => not onboarded yet.
     const token = await getAccessTokenSilently();
     if (!token) {
       await logOnce("auth", "[watcher] No Google authorization yet. Waiting for onboarding; skipping poll.");
       return;
     }
 
+    // 2. Calendar selection, name-agnostic. Reads the id the D.5 onboarding
+    //    picker stored (any calendar, any name).
     const calendarId = await getSelectedCalendarId();
     if (!calendarId) {
       await logOnce("calendar", "[watcher] No calendar selected. Waiting for onboarding; skipping poll.");
       return;
     }
 
+    // 3. Fetch the next 14h of events on that calendar.
     const events = await fetchUpcomingEvents(token, calendarId);
     eventsFetched = events.length; // for the liveness heartbeat (D.3.a)
 
+    // 4. Count heartbeat, transition-only. Persisted because this process can't
+    //    hold the last count in memory across ticks (mirrors the daemon's
+    //    _last_event_count guard).
     const lastCount = await loadLastCount();
     if (lastCount !== events.length) {
       logSystem(`[watcher] Poll complete — ${events.length} event(s) fetched from GCal.`);
       await saveLastCount(events.length);
     }
 
+    // 5. Decision rules (C3). Run the fetched list through the daemon's filter
+    //    + selection logic and log the outcome. Still LOG-ONLY: the winner is
+    //    logged as SCHEDULED (would-fire), no timer is armed and no trigger
+    //    fires. Firing lands in C4. Every line is transition-guarded via
+    //    LocalStorage (the stateless-tick fix).
     const processed = await state.load();
     const logState = await loadLogState();
     const currentIds = new Set(events.map((e) => e.id));
 
+    // Capture `now` once per poll and reuse it for the missed-window check and
+    // the would-fire countdown, mirroring the daemon's single `now` in
+    // filter_events. Per-event capture could classify equal-aged events
+    // differently on a slow poll.
     const now = new Date();
 
+    // Filter: log each skip with its first-failing reason, in daemon order
+    // (all-day → short → duplicate → missed).
     const { qualifying, skipped } = filterEvents(events, processed, now);
     for (const { action, event } of skipped) {
       logIfChanged(logState, action, event);
     }
 
+    // Select: pick the next event; log same-start losers as SKIPPED_OVERLAP.
     const { winner, overlapped } = selectNextEvent(qualifying);
-    liveWinner = winner;
+    liveWinner = winner; // for the liveness heartbeat (D.3.a)
     for (const event of overlapped) {
       logIfChanged(logState, "SKIPPED_OVERLAP", event);
     }
 
+    // Would-fire: log the winner as SCHEDULED (+XmYYs). The countdown is
+    // display-only; the transition guard keys on the bare "SCHEDULED" + start
+    // (via guardAction) so the line logs once per (winner, start), not once per
+    // tick as the countdown shrinks — mirroring pipeline.schedule_next.
     if (winner && winner.start) {
       const delayMs = Math.max(0, winner.start.getTime() - now.getTime());
       const totalSeconds = Math.floor(delayMs / 1000);
@@ -95,15 +161,28 @@ export default async function FocusWatcher() {
       logIfChanged(logState, action, winner, "SCHEDULED");
     }
 
+    // Fire (C4). The winner is logged SCHEDULED above (would-fire countdown);
+    // once its start has been reached — never before (decision 1) — this tick
+    // fires instead of just counting down. The missed filter bounds the late
+    // side at start + MISSED_GRACE_SECONDS (120s since the D.3.c-fix), so the
+    // fire lands in [start, start + 120s] — wide enough that a skipped poll tick
+    // can't drop it. The daemon's line order is SCHEDULED then the fire action;
+    // keeping the SCHEDULED block above preserves that on the same tick when an
+    // event is first seen already-started. dryRun gates the side effect inside.
     if (winner && winner.start && winner.start.getTime() <= now.getTime()) {
       await fireWinner(winner, winner.start, now, processed, logState, dryRun, prefs.triggerMode);
     }
 
+    // Forget log markers for events GCal no longer returns, so the map can't
+    // grow forever (mirrors the cleanup in pipeline.schedule_next).
     for (const id of Object.keys(logState)) {
       if (!currentIds.has(id)) delete logState[id];
     }
     await saveLogState(logState);
 
+    // Clear one-shot system flags after a clean poll, so a later auth/calendar
+    // failure logs again instead of being suppressed (mirrors the daemon
+    // resetting _auth_failure_notified on a successful poll).
     await clearSysFlags();
 
     if (!launchedInBackground) {
@@ -113,24 +192,77 @@ export default async function FocusWatcher() {
     }
   } catch (e) {
     const msg = String(e);
-    // A dead login must read distinctly from a network blip, so route it to the
-    // re-auth line (C4.a). Three shapes mean "the token is gone, re-consent
-    // needed": Google's invalid_grant on a revoked refresh token, our own
-    // refreshTokens wrapper ("Token refresh failed:"), and the gcal fetch
-    // wrappers rejecting the access token ("... failed: 401"). Anything else is
-    // treated as transient and retried next cycle.
-    const needsReauth =
-      msg.includes("invalid_grant") || msg.includes("Token refresh failed:") || msg.includes("failed: 401");
-    if (needsReauth) {
-      await logOnce("auth", "[watcher] Auth error: GCal token expired or revoked. Re-authorization required.");
+    // A dead login must read distinctly from a network blip (C4.a), and — new
+    // 2026-07-16 — a CONFIRMED-dead login must also be CLEARED. Before, the
+    // watcher kept the dead tokens and just logged; every later tick failed the
+    // same way, and Set Up kept routing as if connected (the dead-grant loop).
+    // Clearing is destructive, so each shape gets exactly the confidence it
+    // earns:
+    //   invalid_grant            → Google says the grant itself is dead. Clear.
+    //   "Token refresh failed:"  → refresh failed for a non-invalid_grant
+    //                              reason (network, Google 5xx, config).
+    //                              Transient: tokens kept, retried. Never clear
+    //                              on this — a Google outage must not force
+    //                              re-consents. Checked BEFORE the 401 branch
+    //                              so a token-ENDPOINT 401 (invalid_client:
+    //                              config breakage, not a dead grant) can't
+    //                              match "failed: 401" and trigger a doomed
+    //                              refresh probe every tick.
+    //   "fetch failed: 401"      → gcal rejected an access token before local
+    //                              expiry: usually a revoke, rarely an expiry
+    //                              race or clock skew. VERIFY with one silent
+    //                              refresh (recoverFromRejectedToken) — clear
+    //                              only if Google answers invalid_grant; a
+    //                              successful refresh self-heals a false alarm
+    //                              instead of killing a healthy login.
+    // Once cleared, the next tick logs "No Google authorization yet" and the
+    // next Set Up open routes straight to Connect Google. The two "cleared"
+    // lines carry distinct suffixes on purpose: the live-verify (and any future
+    // regression hunt) must be able to tell WHICH route handled a revoke.
+    if (msg.includes("invalid_grant")) {
+      await disconnect();
+      await logOnce(
+        "auth",
+        "[watcher] Auth error: Google access revoked or expired (refresh grant rejected). Login cleared; run Set Up Focus Automation to reconnect.",
+      );
+    } else if (msg.includes("Token refresh failed:")) {
+      await logOnce(
+        "auth",
+        "[watcher] Token refresh failed, keeping login and retrying next cycle. If this persists, reconnect via Set Up Focus Automation.",
+      );
+    } else if (msg.includes("fetch failed: 401")) {
+      const outcome = await recoverFromRejectedToken();
+      if (outcome === "cleared") {
+        await logOnce(
+          "auth",
+          "[watcher] Auth error: Google access revoked or expired (401, confirmed dead by refresh check). Login cleared; run Set Up Focus Automation to reconnect.",
+        );
+      } else if (outcome === "refreshed") {
+        await logOnce("auth", "[watcher] Access token rejected (401) but silently refreshed. Retrying next cycle.");
+      } else {
+        await logOnce(
+          "auth",
+          "[watcher] Access token rejected (401); refresh attempt failed transiently, keeping login and retrying next cycle.",
+        );
+      }
     } else {
       // Transition-guarded by message so a persistent failure doesn't write an
       // identical line every 60s.
       await logOnce("error", `[watcher] Poll error (will retry next cycle): ${msg}`);
     }
   } finally {
+    // Unconditional per-tick liveness heartbeat (D.3.a). Runs on every tick that
+    // reaches the try — healthy, early-return (no auth / no calendar), or thrown
+    // — so a silent stretch in liveness.log means "not running", unlike the
+    // transition-logged focus.log (S7). The lock-bail path returns before the
+    // try and so doesn't beat here: that's correct, since it only bails when a
+    // concurrent FRESH tick is mid-run and will beat for that minute (no gap).
+    // logLiveness can't throw, so it never masks the tick's real error above.
     logLiveness(formatLiveness(eventsFetched, liveWinner));
 
+    // Release the write-race lock for the next tick. Only reached on paths that
+    // acquired it (the fresh-lock bail returns before the try), so this never
+    // clears a lock another tick still holds.
     await clearWatcherLock();
   }
 }
@@ -155,6 +287,7 @@ function formatLiveness(eventsFetched: number | null, winner: PolledEvent | null
     // a newline in it could forge an extra heartbeat line and poison the very
     // attribution liveness.log exists to provide for D.3.c. Sanitize here (the
     // liveness sink), not in logEvent — focus.log must stay byte-identical to
+    // the un-sanitizing Python daemon for the dual-run diff. (/ce-review 2026-06-22)
     const safeTitle = winner.title.replace(/[\r\n]+/g, " ").replace(
       // eslint-disable-next-line no-control-regex
       /[\x00-\x1f]/g,
@@ -165,6 +298,11 @@ function formatLiveness(eventsFetched: number | null, winner: PolledEvent | null
   return `heartbeat — fetched=${eventsFetched} ${winnerPart}`;
 }
 
+// C4 fire path. Called on a tick where the selected winner's start has been
+// reached. Mirrors the daemon's pipeline.fire + trigger.py byte-for-byte:
+// mark-processed BEFORE the attempt (decision 2, so a crash or failed launch
+// never re-fires), the modeled session window written at the same moment, and
+// dryRun stopping at the dry label. Every action label matches the daemon's.
 async function fireWinner(
   winner: PolledEvent,
   start: Date,
@@ -174,12 +312,20 @@ async function fireWinner(
   dryRun: boolean,
   triggerMode: "auto" | "confirm",
 ): Promise<void> {
+  // Skip-if-running guard (Phase A 2.5). No Raycast API exposes whether Focus is
+  // running, so the guard tracks our own fire DECISIONS, not Focus processes
+  // (the daemon never detected it either). If a session we modeled is still
+  // inside its window, skip silently — transition-logged once, and NOT marked
+  // processed, so the event retires naturally via the missed grace. Byte-
+  // identical on both sides, which is what makes the Phase D diff line up.
   const active = await loadActiveSession();
   if (active && now.getTime() < Date.parse(active.endIso)) {
     logIfChanged(logState, "SKIPPED_FOCUS_RUNNING", winner);
     return;
   }
 
+  // durationMin is non-null for a qualifier (filterEvents drops all-day/short);
+  // `?? 0` mirrors the daemon's `(parse_duration_minutes(e) or 0)` defensiveness.
   const focusSeconds = focusDurationSeconds(winner.durationMin ?? 0);
 
   // Mark-before-attempt (decision 2). The state label is the SUCCESS label even
@@ -189,6 +335,13 @@ async function fireWinner(
   const label =
     triggerMode === "confirm" ? (dryRun ? "DRY_RUN_WOULD_PROMPT" : "PROMPTED") : dryRun ? "DRY_RUN" : "TRIGGERED";
   await state.markProcessed(processed, winner.id, label, start);
+
+  // The skip-if-running window is written ONLY when a Focus session actually
+  // starts — the auto branch below (after `open`) and, in confirm mode, the
+  // modal on "Start" (confirm-focus.tsx). It is deliberately NOT written here:
+  // writing it before the prompt was the confirm-mode bug where a Skip/timeout
+  // left a stale window that silently suppressed later events. (Daemon parity no
+  // longer applies — the daemon was retired at D.4, 2026-07-01.)
 
   // Dry-run: log the literal dry action and stop before any side effect. The
   // side effects (launchCommand / open) are the ONLY thing dryRun suppresses —
@@ -227,6 +380,9 @@ async function fireWinner(
       logSystem(`[watcher] Failed to launch confirm modal: ${e}`);
     }
   } else {
+    // Auto: stop-then-start, mirroring trigger.py handle_trigger. complete is
+    // best-effort (no-op when idle, must not block the start). Commas in
+    // categories stay literal to match the daemon's quote(..., safe=',').
     const goal = encodeURIComponent(winner.title);
     const categories = FOCUS_CATEGORIES.split(",").map(encodeURIComponent).join(",");
     const startUrl = `raycast://focus/start?goal=${goal}&duration=${focusSeconds}&categories=${categories}`;
@@ -253,6 +409,10 @@ async function fireWinner(
 // last line logged for that event id. Mutates logState in place.
 //
 // Keys on the PARSED start (toISOString, or "null" for all-day), mirroring the
+// daemon's `start_dt.isoformat() if start_dt else None` in pipeline._log_if_changed.
+// Keying on the raw GCal `startIso` string instead would risk a transition guard
+// that fires or suppresses differently than the daemon when GCal returns a
+// non-normalized offset, muddying the Phase D dual-run diff.
 //
 // `guardAction` overrides the action used in the guard key, defaulting to
 // `action`. SCHEDULED passes the bare "SCHEDULED" while logging the full

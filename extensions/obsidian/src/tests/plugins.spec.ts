@@ -31,6 +31,7 @@ describe("plugins", () => {
     if (tempVaultData) {
       tempVaultData.cleanup();
     }
+    vi.restoreAllMocks();
   });
 
   describe("readCommunityPlugins", () => {
@@ -126,7 +127,7 @@ describe("plugins", () => {
           communityPlugins: ["plugin1", "plugin2"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(1);
         expect(vaultsWithPlugin[0]).toBe(tempVaultData.vault);
@@ -144,7 +145,7 @@ describe("plugins", () => {
           communityPlugins: ["required-plugin"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
@@ -156,10 +157,27 @@ describe("plugins", () => {
           communityPlugins: ["plugin1"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
+      });
+
+      it("should not cache a failed community plugin configuration read", () => {
+        const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
+        fs.writeFileSync(pluginsPath, JSON.stringify(["plugin1"]));
+        vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
+          throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+        });
+
+        const result = vaultPluginCheck({
+          vaults: [tempVaultData.vault],
+          communityPlugins: ["plugin1"],
+        });
+
+        expect(result.vaultsWithPlugin).toHaveLength(0);
+        expect(result.vaultsWithoutPlugin).toEqual([tempVaultData.vault]);
+        expect(result.cacheable).toBe(false);
       });
     });
 
@@ -187,7 +205,7 @@ describe("plugins", () => {
           corePlugins: ["file-explorer", "search"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(1);
         expect(vaultsWithPlugin[0]).toBe(tempVaultData.vault);
@@ -201,7 +219,7 @@ describe("plugins", () => {
           corePlugins: ["file-explorer"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
@@ -219,10 +237,27 @@ describe("plugins", () => {
           corePlugins: ["file-explorer", "missing-plugin"],
         };
 
-        const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+        const { vaultsWithPlugin, vaultsWithoutPlugin } = vaultPluginCheck(params);
 
         expect(vaultsWithPlugin).toHaveLength(0);
         expect(vaultsWithoutPlugin).toHaveLength(1);
+      });
+
+      it("should not cache a failed core plugin configuration read", () => {
+        const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
+        fs.writeFileSync(pluginsPath, JSON.stringify({ "daily-notes": true }));
+        vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
+          throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+        });
+
+        const result = vaultPluginCheck({
+          vaults: [tempVaultData.vault],
+          corePlugins: ["daily-notes"],
+        });
+
+        expect(result.vaultsWithPlugin).toHaveLength(0);
+        expect(result.vaultsWithoutPlugin).toEqual([tempVaultData.vault]);
+        expect(result.cacheable).toBe(false);
       });
     });
 
@@ -231,10 +266,11 @@ describe("plugins", () => {
         vaults: [tempVaultData.vault],
       };
 
-      const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(params);
+      const { vaultsWithPlugin, vaultsWithoutPlugin, cacheable } = vaultPluginCheck(params);
 
       expect(vaultsWithPlugin).toEqual([tempVaultData.vault]);
       expect(vaultsWithoutPlugin).toEqual([]);
+      expect(cacheable).toBe(true);
     });
   });
 });

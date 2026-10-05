@@ -29,7 +29,7 @@ const projectSchema = z.array(
 );
 
 const preferences = getPreferenceValues<Preferences>();
-axios.defaults.baseURL = `https:/${preferences.url_prefix}.mocoapp.com/api/v1`;
+axios.defaults.baseURL = `https://${preferences.url_prefix}.mocoapp.com/api/v1`;
 
 export const fetchProjects = async (): Promise<Project[]> => {
   const { data } = await axios.get("/projects/assigned", {

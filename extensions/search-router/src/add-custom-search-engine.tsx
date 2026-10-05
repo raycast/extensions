@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import type { SearchEngine } from "./types";
 import { getCustomSearchEngines, addCustomSearchEngine } from "./data/custom-search-engines";
-import { builtinSearchEngines } from "./data/builtin-search-engines";
+import { getBuiltinSearchEngine } from "./data/search-engines";
+import { useDefaultSearchEngine } from "./data/cache";
 import { isValidUrl } from "./utils";
 import { platform } from "os";
 
@@ -14,6 +15,7 @@ type AddCustomSearchEngineProps = {
 export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCustomSearchEngineProps) {
   const isWindows = platform() === "win32";
   const { pop } = useNavigation();
+  const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
   const [nameError, setNameError] = useState<string | undefined>();
   const [triggerError, setTriggerError] = useState<string | undefined>();
   const [urlErrors, setUrlErrors] = useState<Record<number, string | undefined>>({});
@@ -24,7 +26,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     return engine?.u ? [engine.u] : [""];
   });
 
-  const isEditing = !!engine;
+  const isEditing = engine?.isCustom === true;
 
   const handleSubmit = async (values: {
     name: string;
@@ -37,6 +39,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
   }) => {
     // Validation
     let hasErrors = false;
+    const cleanedTrigger = values.trigger.trim().toLowerCase().replace(/^!/, "");
 
     if (!values.name.trim()) {
       setNameError("Name is required");
@@ -48,8 +51,8 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     if (!values.trigger.trim()) {
       setTriggerError("Trigger is required");
       hasErrors = true;
-    } else if (!/^!?[a-zA-Z0-9-_]+$/.test(values.trigger.trim())) {
-      setTriggerError("Trigger can only contain letters, numbers, hyphens, and underscores");
+    } else if (!getBuiltinSearchEngine(cleanedTrigger) && !/^!?[a-zA-Z0-9-_]+$/.test(values.trigger.trim())) {
+      setTriggerError("Use letters, numbers, hyphens, underscores, or an existing built-in trigger");
       hasErrors = true;
     } else {
       setTriggerError(undefined);
@@ -81,9 +84,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       return;
     }
 
-    // Check for duplicate triggers in both custom and built-in engines
     const existingEngines = getCustomSearchEngines();
-    const cleanedTrigger = values.trigger.trim().toLowerCase().replace(/^!/, "");
 
     // Check custom engines first
     const duplicateCustomEngine = existingEngines.find(
@@ -91,13 +92,6 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     );
     if (duplicateCustomEngine) {
       setTriggerError("A custom search engine with this trigger already exists");
-      return;
-    }
-
-    // Check built-in engines (but allow editing existing custom engines)
-    const duplicateBuiltInEngine = builtinSearchEngines.find((e) => e.t === cleanedTrigger);
-    if (duplicateBuiltInEngine && !isEditing) {
-      setTriggerError("A built-in search engine with this trigger already exists");
       return;
     }
 
@@ -113,7 +107,10 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     };
 
     try {
-      addCustomSearchEngine(newEngine);
+      addCustomSearchEngine(newEngine, isEditing ? engine.t : newEngine.t);
+      if (isEditing && defaultSearchEngine?.isCustom && defaultSearchEngine.t === engine.t) {
+        setDefaultSearchEngine(newEngine);
+      }
       onEngineAdded?.();
       pop();
 
@@ -171,10 +168,7 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
             <Action
               title="Add Another URL"
               icon={Icon.Plus}
-              shortcut={{
-                macOS: { modifiers: ["cmd"], key: "n" },
-                Windows: { modifiers: ["ctrl"], key: "n" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.New}
               onAction={addUrl}
             />
             {urls.length > 1 && (

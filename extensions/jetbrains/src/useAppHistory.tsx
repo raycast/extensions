@@ -14,10 +14,9 @@ import {
   setSort,
   ToolboxApp,
 } from "./util";
-import { usePreferences } from "raycast-hooks";
 import React, { useEffect, useReducer } from "react";
 import { sortTools } from "./sortTools";
-import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
+import { useCachedPromise, useFrecencySorting, useLocalStorage } from "@raycast/utils";
 import { captureException, Icon, Image } from "@raycast/api";
 
 function appHistorySorter(results: AppHistory[], sortOrder: string[]) {
@@ -222,14 +221,15 @@ const initialSettings: JBSettings = {
 };
 
 export function useAppHistory(): appHistoryReturn {
-  const [{ screenshotMode, filter, showDates }, prefActions] = usePreferences({
-    screenshotMode: false,
-    filter: "",
-    showDates: true,
-  });
-  const toggleScreenshotMode = () => prefActions.update("screenshotMode", !screenshotMode);
-  const toggleDates = () => prefActions.update("showDates", !showDates);
-  const setFilter = (value: string) => prefActions.update("filter", value);
+  const { value: screenshotMode = false, setValue: setScreenshotMode } = useLocalStorage<boolean>(
+    "screenshotMode",
+    false,
+  );
+  const { value: filter = "", setValue: setFilterValue } = useLocalStorage<string>("filter", "");
+  const { value: showDates = true, setValue: setShowDates } = useLocalStorage<boolean>("showDates", true);
+  const toggleScreenshotMode = () => setScreenshotMode(!screenshotMode).catch((err) => captureException(err));
+  const toggleDates = () => setShowDates(!showDates).catch((err) => captureException(err));
+  const setFilter = (value: string) => setFilterValue(value).catch((err) => captureException(err));
   const {
     isLoading: settingsIsLoading,
     data: settingsData,

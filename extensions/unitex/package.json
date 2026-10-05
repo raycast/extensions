@@ -4,7 +4,7 @@
   "title": "UniTex - LaTeX Math to Unicode Text.",
   "description": "Convert LaTeX math to Unicode Text.",
   "icon": "command-icon.png",
-  "author": "jaykmody",
+  "author": "applepie",
   "categories": [
     "Productivity"
   ],
@@ -35,5 +35,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

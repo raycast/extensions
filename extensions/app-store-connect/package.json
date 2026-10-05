@@ -6,10 +6,17 @@
   "icon": "icon.png",
   "author": "johanthorell",
   "contributors": [
-    "danilorequena"
+    "danilorequena",
+    "chrismessina"
   ],
   "categories": [
     "Developer Tools"
+  ],
+  "keywords": [
+    "app store connect",
+    "apple",
+    "ios",
+    "asc"
   ],
   "license": "MIT",
   "commands": [
@@ -31,7 +38,7 @@
       "name": "testInformation",
       "title": "Edit Test Information",
       "subtitle": "App Store Connect",
-      "description": "Edit Test information",
+      "description": "Edit test information",
       "mode": "view"
     },
     {
@@ -50,22 +57,28 @@
     },
     {
       "name": "manageTeams",
-      "title": "Manage Teams",
+      "title": "Manage API Keys",
       "subtitle": "App Store Connect",
-      "description": "Show and manage teams",
-      "mode": "view"
+      "description": "Add, switch between, and remove App Store Connect API keys",
+      "mode": "view",
+      "keywords": [
+        "teams",
+        "manage teams",
+        "credentials",
+        "sign in",
+        "sign out"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "@raycast/utils": "^1.16.4",
-    "node-app-store-connect-api": "^5.0.4",
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
+    "jose": "^6.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "22.13.10",
-    "@types/node-fetch": "^2.6.11",
     "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
@@ -77,7 +90,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-strip-types --test src/Utils/*.test.ts"
   },
   "platforms": [
     "macOS"

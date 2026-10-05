@@ -1,4 +1,4 @@
-import { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
+import type { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types.ts";
 
 const ZAI_UNIT_DAYS = 1;
 const ZAI_WINDOW_DAILY = 1;

@@ -15,7 +15,7 @@ export type MeetErrorCode =
   | "INVALID_MEETING_URL"
   | "CLIPBOARD_WRITE_FAILED"
   | "PWA_NOT_INSTALLED"
-  | "ARC_LITTLE_ARC_UNSUPPORTED";
+  | "ARC_URL_UNREADABLE";
 
 const DEFAULT_MESSAGES: Record<MeetErrorCode, string> = {
   APP_NOT_FOUND: "Couldn't find the selected application.",
@@ -27,7 +27,7 @@ const DEFAULT_MESSAGES: Record<MeetErrorCode, string> = {
   INVALID_MEETING_URL: "The detected URL didn't look like a real Google Meet link.",
   CLIPBOARD_WRITE_FAILED: "Couldn't copy the link to the clipboard.",
   PWA_NOT_INSTALLED: "The Google Meet PWA isn't installed.",
-  ARC_LITTLE_ARC_UNSUPPORTED: "Arc opened this meeting in Little Arc, which doesn't expose its URL to Raycast.",
+  ARC_URL_UNREADABLE: "Couldn't read the meeting link from any Arc window.",
 };
 
 const DEFAULT_RECOVERY: Partial<Record<MeetErrorCode, string>> = {
@@ -36,8 +36,8 @@ const DEFAULT_RECOVERY: Partial<Record<MeetErrorCode, string>> = {
     "Grant Raycast Automation permission for your browser (and Accessibility permission for Firefox) in System Settings → Privacy & Security, then try again.",
   MEETING_URL_TIMEOUT: "Try again, or increase the detection timeout in the extension preferences.",
   PWA_NOT_INSTALLED: 'Install the Google Meet PWA, or switch "Open Meetings In" back to Browser.',
-  ARC_LITTLE_ARC_UNSUPPORTED:
-    "Disable Air Traffic Control for meet.google.com in Arc, or copy the link manually from the Little Arc window.",
+  ARC_URL_UNREADABLE:
+    "A Little Arc window doesn't expose its URL to Raycast, so if Air Traffic Control routed the meeting into one, disable it for meet.google.com. Otherwise copy the link from Arc manually.",
 };
 
 export type MeetErrorOptions = {

@@ -30,7 +30,7 @@ ft_Review/empty|corrupt|junk/      set aside, never deleted
 - **Similar images** — perceptual hashing catches bursts, re-exports at another resolution, and messenger-recompressed copies that byte-level hashing cannot see.
 - **Broken files and junk** — zero-byte files, files whose content doesn't match their extension, and OS debris like `.DS_Store`.
 
-Near-duplicates and similar images are heuristics, not proof, so they are only flagged in the plan and still archived normally — you decide what to delete. Broken files and junk are moved to a review folder and never deleted.
+Near-duplicates and similar images are heuristics, not proof, so they are never moved anywhere special — they are flagged and then archived normally, and you decide what to delete. Because they end up in their ordinary folders, the grouping would otherwise vanish the moment the plan closes, so each run that flags anything writes `.tidy/similar.md` in the destination listing every group and where its files landed. Broken files and junk are moved to a review folder and never deleted.
 
 **Options**
 

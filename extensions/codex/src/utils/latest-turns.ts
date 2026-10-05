@@ -1,22 +1,21 @@
-export type LatestTurn = {
-  heading: string;
-  body: string;
-  order: number;
-};
-
-function createTextCodeBlock(value: string): string {
-  return `\`\`\`text\n${value.replaceAll("```", "``\\`")}\n\`\`\``;
+export function renderLatestTurnsMarkdown({
+  response,
+  userMessage,
+}: {
+  response: string;
+  userMessage: string;
+}): string {
+  return `### Last Codex turn:\n\n${createMarkdownCodeBlock(response)}\n\n---\n\n### Last User reply:\n\n${createMarkdownCodeBlock(userMessage)}`;
 }
 
-export function renderLatestTurnsMarkdown(turns: LatestTurn[]): string {
-  return turns
-    .flatMap((turn, index) => [
-      `#### ${turn.heading}`,
-      "",
-      createTextCodeBlock(turn.body),
-      ...(index === turns.length - 1 ? [] : [""]),
-    ])
-    .join("\n");
+function createMarkdownCodeBlock(markdown: string): string {
+  // Keep embedded code fences literal, even when a preview cuts one short.
+  let fenceLength = 3;
+  for (const match of markdown.matchAll(/`+/g)) {
+    fenceLength = Math.max(fenceLength, match[0].length + 1);
+  }
+  const fence = "`".repeat(fenceLength);
+  return `${fence}markdown\n${markdown}\n${fence}`;
 }
 
 export function getLatestTurnsLoadingOrErrorMarkdown(

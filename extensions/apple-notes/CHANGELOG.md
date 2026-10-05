@@ -1,5 +1,16 @@
 # Apple Notes Changelog
 
+## [Meeting Notes to Actions Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Extract decisions and action items from meeting notes and save requested summaries with source links.
+
+## [AI Extension Improvements] - 2026-09-01
+
+- Add `delete-note`, `restore-note`, `move-note`, `append-to-note`, and `list-folders` AI tools
+- Add tag filtering to the `search-notes` AI tool
+- Let the "AI Note" command append AI-generated content to an existing note via a new optional `note` argument
+
 ## [Bug Fixes] - 2026-06-07
 
 - Fix tags not rendering in note detail view

@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { getWindowsUserDataPath, isWindows } from "./platform";
 
 export interface HeliumServicesPreferences {
   enabled: boolean;
@@ -32,7 +33,13 @@ export const FALLBACK_SEARCH_ENGINE: HeliumSearchEngine = {
   suggestionsUrl: "https://duckduckgo.com/ac/?q={searchTerms}&type=list",
 };
 
+/**
+ * Root of Helium's Chromium user data, which holds `Local State` and the
+ * profile directories. Both platforms use the standard Chromium layout below
+ * this path, so only the root differs.
+ */
 export function getHeliumBasePath(home = homedir()): string {
+  if (isWindows) return getWindowsUserDataPath() ?? join(home, "AppData", "Local", "imput", "Helium", "User Data");
   return join(home, HELIUM_SUPPORT_PATH);
 }
 

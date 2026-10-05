@@ -47,11 +47,6 @@ export async function refreshToken(): Promise<string> {
   return runAuthorizationFlow();
 }
 
-/** Clear the stored token set, e.g. to switch accounts. */
-export async function logout(): Promise<void> {
-  await client.removeTokens();
-}
-
 function tryRefresh(): Promise<string | undefined> {
   if (inflightRefresh) return inflightRefresh;
   inflightRefresh = (async () => {
@@ -60,21 +55,28 @@ function tryRefresh(): Promise<string | undefined> {
       // new refresh token, so anything captured outside would be stale.
       const tokenSet = await client.getTokens();
       if (!tokenSet?.refreshToken) return undefined;
-      const tokens = await postToken(
-        new URLSearchParams({
-          client_id: requireOAuthClientId(),
-          refresh_token: tokenSet.refreshToken,
-          grant_type: "refresh_token",
-        }),
-        "Token refresh",
-      );
+      // Outside the catch below, so a missing Application ID surfaces as a
+      // configuration error instead of being mistaken for a revoked token and
+      // costing the user their still-valid refresh token.
+      const clientId = requireOAuthClientId();
+      let tokens: OAuth.TokenResponse;
+      try {
+        tokens = await postToken(
+          new URLSearchParams({
+            client_id: clientId,
+            refresh_token: tokenSet.refreshToken,
+            grant_type: "refresh_token",
+          }),
+          "Token refresh",
+        );
+      } catch {
+        // Refresh rejected (revoked or aged out). Drop tokens; caller restarts
+        // the full authorization flow.
+        await client.removeTokens();
+        return undefined;
+      }
       await client.setTokens(tokens);
       return tokens.access_token;
-    } catch {
-      // Refresh rejected (revoked or aged out). Drop tokens; caller restarts
-      // the full authorization flow.
-      await client.removeTokens();
-      return undefined;
     } finally {
       inflightRefresh = null;
     }
@@ -84,33 +86,38 @@ function tryRefresh(): Promise<string | undefined> {
 
 function runAuthorizationFlow(): Promise<string> {
   if (inflightAuthorizationFlow) return inflightAuthorizationFlow;
-  inflightAuthorizationFlow = (async () => {
-    try {
-      const preference = getPreferences();
-      const clientId = requireOAuthClientId(preference);
-      const authRequest = await client.authorizationRequest({
-        endpoint: `${getInstance(preference)}/oauth/authorize`,
-        clientId,
-        scope: OAUTH_SCOPES.join(" "),
-      });
-      const { authorizationCode } = await client.authorize(authRequest);
-      const tokens = await postToken(
-        new URLSearchParams({
-          client_id: clientId,
-          code: authorizationCode,
-          code_verifier: authRequest.codeVerifier,
-          grant_type: "authorization_code",
-          redirect_uri: authRequest.redirectURI,
-        }),
-        "Token exchange",
-      );
-      await client.setTokens(tokens);
-      return tokens.access_token;
-    } finally {
-      inflightAuthorizationFlow = null;
-    }
+  const flow = (async () => {
+    const preference = getPreferences();
+    const clientId = requireOAuthClientId(preference);
+    const authRequest = await client.authorizationRequest({
+      endpoint: `${getInstance(preference)}/oauth/authorize`,
+      clientId,
+      scope: OAUTH_SCOPES.join(" "),
+    });
+    const { authorizationCode } = await client.authorize(authRequest);
+    const tokens = await postToken(
+      new URLSearchParams({
+        client_id: clientId,
+        code: authorizationCode,
+        code_verifier: authRequest.codeVerifier,
+        grant_type: "authorization_code",
+        redirect_uri: authRequest.redirectURI,
+      }),
+      "Token exchange",
+    );
+    await client.setTokens(tokens);
+    return tokens.access_token;
   })();
-  return inflightAuthorizationFlow;
+  // Release the slot only after it holds `flow`. Clearing it from inside the
+  // async function would run first whenever the body throws before its initial
+  // `await` (an unset Application ID does), latching a settled rejection that
+  // every later call would replay.
+  inflightAuthorizationFlow = flow;
+  const release = () => {
+    inflightAuthorizationFlow = null;
+  };
+  void flow.then(release, release);
+  return flow;
 }
 
 async function postToken(params: URLSearchParams, context: string): Promise<OAuth.TokenResponse> {

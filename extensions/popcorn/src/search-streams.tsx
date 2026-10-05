@@ -56,6 +56,15 @@ export default function Command() {
       });
   }, [applications]);
 
+  const resolvedDefaultStreamingApp =
+    preferences.defaultStreamingApp ??
+    (process.platform === "win32"
+      ? applications?.find((app) =>
+          [app.name, app.localizedName, app.windowsAppId].some((value) => value?.toLowerCase().includes("vlc")),
+        )
+      : undefined) ??
+    streamingApps[0];
+
   // Hooks
   const api = useStremioApi(baseUrl);
   const storage = useLocalStorage();
@@ -96,7 +105,7 @@ export default function Command() {
           media={media}
           api={api}
           storage={storage}
-          defaultStreamingApp={preferences.defaultStreamingApp}
+          defaultStreamingApp={resolvedDefaultStreamingApp}
           streamingApps={streamingApps}
         />,
       );
@@ -107,7 +116,7 @@ export default function Command() {
           media={media}
           api={api}
           storage={storage}
-          defaultStreamingApp={preferences.defaultStreamingApp}
+          defaultStreamingApp={resolvedDefaultStreamingApp}
           streamingApps={streamingApps}
         />,
       );
@@ -202,7 +211,7 @@ function EpisodesView({
   media: Media;
   api: ReturnType<typeof useStremioApi>;
   storage: ReturnType<typeof useLocalStorage>;
-  defaultStreamingApp: Application;
+  defaultStreamingApp: Application | undefined;
   streamingApps: Application[];
 }) {
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
@@ -276,7 +285,7 @@ function StreamsView({
   episode?: Episode | null;
   api: ReturnType<typeof useStremioApi>;
   storage: ReturnType<typeof useLocalStorage>;
-  defaultStreamingApp: Application;
+  defaultStreamingApp: Application | undefined;
   streamingApps: Application[];
 }) {
   const { data: streamData, isLoading: isLoadingStreams } = api.useStreams(media, episode || null);

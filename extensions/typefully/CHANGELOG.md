@@ -1,5 +1,15 @@
 # Typefully Changelog
 
+## [Voice Drafting Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add a skill for drafting posts and threads in your voice, using writing samples and tailored platform versions while preserving existing draft content and comments.
+
+## [Windows Support] - 2026-08-07
+
+- Add Windows as a supported platform
+- Use platform-specific keyboard shortcuts for Show/Hide Preview and Delete Draft actions
+
 ## [Enhancements] - 2026-07-28
 
 - Add core-workflow AI evals for create/list/get/schedule/publish, social sets, comments, queue+analytics, LinkedIn mentions, and X Articles

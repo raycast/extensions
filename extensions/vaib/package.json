@@ -4,7 +4,7 @@
   "title": "vAIb - Your AI Companion",
   "description": "Get quick answers to your quick questions with the power of AI with this free extension.",
   "icon": "command-icon.png",
-  "author": "vaibhav_sisodiya",
+  "author": "Vaib215",
   "categories": [
     "Productivity",
     "Applications"
@@ -33,7 +33,7 @@
         "gpt3",
         "gpt-3"
       ]
-    }, 
+    },
     {
       "name": "clipboard",
       "title": "Search Using Clipboard",
@@ -69,5 +69,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

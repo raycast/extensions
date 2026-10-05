@@ -1,11 +1,12 @@
 import fs from "fs";
-import path from "path";
 import os from "os";
-import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
+import path from "path";
+import { countOf } from "@chrismessina/raycast-kit";
+import { logger } from "@chrismessina/raycast-logger";
+import { getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
 import { getMeetingSummary, getMeetingTranscript } from "../fathom/api";
 import type { Meeting } from "../types/Types";
 import { showContextualError } from "./errorHandling";
-import { logger } from "@chrismessina/raycast-logger";
 
 export type MeetingExportFormat = "txt" | "md" | "json";
 export type MeetingExportType = "transcript" | "summary";
@@ -30,8 +31,11 @@ export function buildFilename(opts: {
 /**
  * Get the export directory from preferences or use default
  * Validates path to prevent directory traversal attacks
+ *
+ * Exported so recording downloads land in the same place as summary/transcript
+ * exports rather than inventing a second destination.
  */
-function getExportDirectory(): string {
+export function getExportDirectory(): string {
   const preferences = getPreferenceValues<Preferences>();
   let exportDir = preferences.exportDirectory;
 
@@ -238,9 +242,15 @@ export async function exportMeeting(args: {
       title: `${type === "summary" ? "Summary" : "Transcript"} Exported`,
       message: `Saved to ${filePath}`,
       primaryAction: {
-        title: "Open in Finder",
+        title: "Open File",
         onAction: () => {
-          open(filePath);
+          void open(filePath);
+        },
+      },
+      secondaryAction: {
+        title: "Show in Finder",
+        onAction: () => {
+          void showInFinder(filePath);
         },
       },
     });
@@ -285,9 +295,7 @@ export async function exportTeamMembers(args: {
       case "csv": {
         const csvContent = [
           "Name,Email,Email Domain,Created At",
-          ...members.map((m) =>
-            [m.name, m.email, m.emailDomain || "", m.createdAt || ""].map((v) => `"${v}"`).join(","),
-          ),
+          ...members.map((m) => [m.name, m.email, m.emailDomain || "", m.createdAt || ""].map(csvCell).join(",")),
         ].join("\n");
 
         const filename = `${safeTeamName}_members_${timestamp}.csv`;
@@ -338,11 +346,17 @@ export async function exportTeamMembers(args: {
     await showToast({
       style: Toast.Style.Success,
       title: exportTitle,
-      message: `${members.length} members saved to ${savedFilename}`,
+      message: `${countOf(members.length, "member")} saved to ${savedFilename}`,
       primaryAction: {
-        title: "Open in Finder",
+        title: "Open File",
         onAction: () => {
-          open(filePath);
+          void open(filePath);
+        },
+      },
+      secondaryAction: {
+        title: "Show in Finder",
+        onAction: () => {
+          void showInFinder(filePath);
         },
       },
     });
@@ -352,4 +366,16 @@ export async function exportTeamMembers(args: {
       fallbackTitle: "Export Failed",
     });
   }
+}
+
+/**
+ * One CSV cell: RFC 4180 quoting plus a formula guard. Spreadsheets evaluate a cell that
+ * starts with `=`, `+`, `-`, `@`, a tab, or a carriage return even when quoted, so a
+ * member name from the API could export as a live formula. Leading whitespace is skipped
+ * before the check, because import paths that trim it (Google Sheets does by default)
+ * would otherwise expose the formula behind it. The leading apostrophe is hidden on display.
+ */
+export function csvCell(value: string): string {
+  const neutralized = /^[\t\r]|^\s*[=+\-@]/.test(value) ? `'${value}` : value;
+  return `"${neutralized.replace(/"/g, '""')}"`;
 }

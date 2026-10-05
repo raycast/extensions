@@ -1,4 +1,17 @@
 import { getPreferenceValues, Icon } from "@raycast/api";
+import {
+  errorMessage,
+  parseAddDelivery,
+  parseDeliveries,
+  parseJson,
+  type Carrier,
+  type Delivery,
+  type Event,
+  type ParcelApiResponse,
+  type ParcelApiStatus,
+} from "./schemas";
+
+export type { Carrier, Delivery, Event, ParcelApiResponse };
 
 interface Preferences {
   apiKey: string;
@@ -7,37 +20,6 @@ interface Preferences {
 export enum FilterMode {
   ACTIVE = "active",
   RECENT = "recent",
-}
-
-export interface Event {
-  event: string;
-  date: string;
-  location?: string;
-  additional?: string;
-}
-
-export interface Delivery {
-  carrier_code: string;
-  description: string;
-  status_code: number;
-  tracking_number: string;
-  events: Event[];
-  extra_information?: string;
-  date_expected?: string;
-  date_expected_end?: string;
-  timestamp_expected?: number;
-  timestamp_expected_end?: number;
-}
-
-export interface ParcelApiResponse {
-  success: boolean;
-  error_message?: string;
-  deliveries: Delivery[];
-}
-
-export interface Carrier {
-  code: string;
-  name: string;
 }
 
 // Status code descriptions
@@ -97,6 +79,13 @@ export function getAPIHeaders(): Record<string, string> {
   };
 }
 
+/**
+ * Build the error for a non-2xx response, preferring Parcel's own `error_message` over the HTTP status.
+ */
+export async function responseError(response: Response, fallback: string): Promise<Error> {
+  return new Error(errorMessage(await response.text()) ?? fallback);
+}
+
 export function getSupportedCarriersUrl(): string {
   return "https://api.parcel.app/external/supported_carriers.json";
 }
@@ -108,20 +97,17 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to fetch deliveries: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ""}`,
-    );
+    throw await responseError(response, `Failed to fetch deliveries: ${response.status} ${response.statusText}`);
   }
 
-  const data = (await response.json()) as ParcelApiResponse;
+  const data = parseDeliveries(parseJson(await response.text()));
 
   const err = getAPIError(data);
   if (err) {
     throw err;
   }
 
-  return data.deliveries;
+  return data.deliveries ?? [];
 }
 
 export async function addDelivery(
@@ -147,26 +133,10 @@ export async function addDelivery(
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    let errorMessage = `Failed to add delivery: ${response.status} ${response.statusText}`;
-
-    // Parse JSON error response for better error message
-    try {
-      const errorData = JSON.parse(errorText);
-      if (errorData.error_message) {
-        errorMessage = errorData.error_message;
-      }
-    } catch {
-      // Otherwise use the raw error text
-      if (errorText) {
-        errorMessage = errorText;
-      }
-    }
-
-    throw new Error(errorMessage);
+    throw await responseError(response, `Failed to add delivery: ${response.status} ${response.statusText}`);
   }
 
-  const data = (await response.json()) as ParcelApiResponse;
+  const data = parseAddDelivery(parseJson(await response.text()));
 
   const err = getAPIError(data);
   if (err) {
@@ -174,7 +144,7 @@ export async function addDelivery(
   }
 }
 
-export function getAPIError(data: ParcelApiResponse): Error | null {
+export function getAPIError(data: ParcelApiStatus): Error | null {
   if (!data.success) {
     return new Error(data?.error_message || "API request failed. Please check your API key and try again.");
   }

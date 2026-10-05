@@ -5,9 +5,34 @@ import {
   isElevationFailure,
   isInstallerBusyFailure,
   isModifiedPortableFailure,
+  isRetryableFailure,
   remapUninstallNotFound,
   remapUpgradeNotFound,
 } from "./commands";
+
+describe("isRetryableFailure", () => {
+  it("classifies environment and user-choice failures as retryable", () => {
+    // Caller cancellation, UAC decline, busy installer mutex, app in use
+    // (log-detected message), winget busy/env codes.
+    expect(isRetryableFailure({ success: false, cancelled: true })).toBe(true);
+    expect(isRetryableFailure({ success: false, exitCode: 1223, message: "Cancelled in the UAC prompt" })).toBe(true);
+    expect(isRetryableFailure({ success: false, errorCode: "1618" })).toBe(true);
+    expect(isRetryableFailure({ success: false, message: "App in use, close it first" })).toBe(true);
+    expect(isRetryableFailure({ success: false, exitCode: -1978334975 /* INSTALL_PACKAGE_IN_USE */ })).toBe(true);
+    expect(isRetryableFailure({ success: false, exitCode: -1978334969 /* INSTALL_NO_NETWORK */ })).toBe(true);
+  });
+
+  it("classifies installer-tied failures as non-retryable", () => {
+    // Unknown vendor installer exit code (e.g. an installer crash).
+    expect(isRetryableFailure({ success: false, message: "Installer failed with exit code 3221225477" })).toBe(false);
+    // Installer technology mismatch — deterministic for the offered version.
+    expect(isRetryableFailure({ success: false, exitCode: -1978335090 /* TECHNOLOGY_MISMATCH */ })).toBe(false);
+    // OS-level launch failure of a broken registered uninstaller.
+    expect(isRetryableFailure({ success: false, message: "Application not found", errorCode: "0x800401F5" })).toBe(
+      false,
+    );
+  });
+});
 
 describe("remapUpgradeNotFound", () => {
   it("remaps NO_APPLICATIONS_FOUND to a no-op for upgrades (source-filter quirk)", () => {

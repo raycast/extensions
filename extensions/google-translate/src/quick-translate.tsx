@@ -9,7 +9,7 @@ import { multiTranslate } from "./simple-translate";
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
   const [targetLanguages] = useTargetLanguages();
-  const { proxy } = usePreferences();
+  const { proxy, prioritizeCrossLanguage } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [text, setText] = useTextState();
   const debouncedText = useDebouncedValue(text, 500).trim();
@@ -17,7 +17,7 @@ export default function QuickTranslate(): ReactElement {
   const { data: results, isLoading } = usePromise(
     async (txt, src, targets) => {
       if (!txt) return [];
-      return await multiTranslate(txt, { langFrom: src, langTo: targets, proxy });
+      return await multiTranslate(txt, { langFrom: src, langTo: targets, proxy, prioritizeCrossLanguage });
     },
     [debouncedText, sourceLanguage, targetLanguages],
   );

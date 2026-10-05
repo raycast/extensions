@@ -7,7 +7,6 @@ import * as child_process from "child_process";
 import { existsSync, writeFileSync, unlinkSync } from "fs";
 import { LanguageCode } from "./languages";
 import { LanguageCodeSet } from "./types";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 export const AUTO_DETECT = "auto";
 
@@ -115,14 +114,19 @@ export async function multiTranslate(text: string, options: LanguageCodeSet): Pr
 
   const validResults = results.filter(Boolean) as SimpleTranslateResult[];
 
-  // Prioritize actual translations (where langFrom !== langTo) over same-language translations
-  validResults.sort((a, b) => {
-    const aIsSame = isSameLanguage(a.langFrom, a.langTo);
-    const bIsSame = isSameLanguage(b.langFrom, b.langTo);
-    if (aIsSame && !bIsSame) return 1;
-    if (!aIsSame && bIsSame) return -1;
-    return 0;
-  });
+  // By default, preserve the user-configured target language order (results are
+  // already returned in `options.langTo` order). Only when the user opts in via
+  // the "Prioritize cross-language translations" preference do we move
+  // same-language results (e.g. English -> English) to the bottom.
+  if (options.prioritizeCrossLanguage) {
+    validResults.sort((a, b) => {
+      const aIsSame = isSameLanguage(a.langFrom, a.langTo);
+      const bIsSame = isSameLanguage(b.langFrom, b.langTo);
+      if (aIsSame && !bIsSame) return 1;
+      if (!aIsSame && bIsSame) return -1;
+      return 0;
+    });
+  }
 
   return validResults;
 }
@@ -177,22 +181,18 @@ export async function playTTS(text: string, langTo: string, proxy?: string) {
     host: "https://translate.google.com",
   });
 
-  let agent: HttpsProxyAgent<string> | undefined;
+  // https-proxy-agent (via agent-base) is imported lazily and only when a proxy is
+  // set, so the common path never pulls it in.
+  const requestOptions: https.RequestOptions = {};
 
   if (proxy) {
     try {
-      agent = new HttpsProxyAgent(proxy);
+      const { HttpsProxyAgent } = await import("https-proxy-agent");
+      requestOptions.agent = new HttpsProxyAgent(proxy);
     } catch (e) {
       console.error(`Error creating proxy agent for ${proxy}:`, e);
-      agent = undefined; // Fallback to no proxy if agent creation fails
     }
   }
-
-  // The options object for https.get. If 'agent' is undefined, it won't be included,
-  // and https.get will use the default agent.
-  const requestOptions: https.RequestOptions = {
-    agent: agent,
-  };
 
   https.get(audioUrl, requestOptions, (response) => {
     const chunks: Uint8Array[] = [];

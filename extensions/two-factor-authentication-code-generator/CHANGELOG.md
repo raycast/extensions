@@ -1,5 +1,13 @@
 # Changelog
 
+## [Improvements] - 2026-08-07
+
+- Document Copy vs Paste and preferences in the README
+- Clarify the Default Action preference description
+- Enable Backup and Restore commands by default
+- Fix backup destination validation (directory check) and early returns
+- Show an empty state when no 2FA codes are saved
+
 ## [Add README + Rename Codes] - 2025-05-13
 
 - Add a README
@@ -10,16 +18,19 @@
 ## [Update] - 2024-11-12
 
 ### Added
-- Storing last time the 2FA code was used, so it's the first option when you see the list next time. 
+
+- Storing last time the 2FA code was used, so it's the first option when you see the list next time.
 
 ## [Update] - 2024-08-05
 
 ### Added
+
 - New "Backup App" feature in the action panel for each app
   - Allows users to copy app data (name, secret, and options) as JSON string
 - Extended app state to include `secret` and `options` fields
 
 ### Changed
+
 - Updated `apps` state type to include new fields:
   - `secret: string`
   - `options: Options`

@@ -9,7 +9,6 @@
   "contributors": [
     "qeude",
     "oliep",
-    "kiliankoe",
     "3llomi",
     "ridemountainpig"
   ],
@@ -705,5 +704,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
 }

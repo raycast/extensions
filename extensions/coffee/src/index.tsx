@@ -4,13 +4,24 @@ import {
   LaunchProps,
   LaunchType,
   MenuBarExtra,
+  environment,
   getPreferenceValues,
   launchCommand,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
+import { useCachedState, useExec } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
+import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
+import { maybeAutoCaffeinate } from "./status";
+import { get_caffeinate_state } from "rust:../rust";
+
+interface CaffeinateStatus {
+  running: boolean;
+  startTime: number | null;
+  durationSeconds: number | null;
+}
 
 function parseEtime(etime: string): number {
   const parts = etime.split(":").reverse();
@@ -45,7 +56,13 @@ const DURATION_PRESETS: { label: string; seconds: number }[] = [
   { label: "12 Hours", seconds: 12 * 3600 },
 ];
 
+const HIDE_DECAFFEINATED_DELAY_MS = 5 * 1000;
+
 function useCaffeinateInfo(execute: boolean) {
+  if (process.platform === "win32") {
+    return useWindowsCaffeinateInfo(execute);
+  }
+
   const { isLoading, data, mutate } = useExec("ps -o etime,args= -p $(pgrep caffeinate) 2>/dev/null", [], {
     shell: true,
     execute,
@@ -74,14 +91,84 @@ function useCaffeinateInfo(execute: boolean) {
   };
 }
 
+type MutateOptions = { optimisticUpdate?: () => CaffeinateInfo };
+
+function useWindowsCaffeinateInfo(execute: boolean) {
+  const [isLoading, setIsLoading] = useState(execute);
+  const [data, setData] = useState<CaffeinateInfo>({ isRunning: false, totalSeconds: null, startTime: null });
+
+  const applyState = (info: CaffeinateStatus): CaffeinateInfo => ({
+    isRunning: info.running,
+    totalSeconds: info.durationSeconds,
+    startTime: info.startTime ? info.startTime * 1000 : null,
+  });
+
+  useEffect(() => {
+    if (!execute) return;
+    let disposed = false;
+
+    const refresh = async () => {
+      try {
+        const info = await get_caffeinate_state();
+        if (disposed) return;
+        setData(applyState(info));
+      } catch {
+        if (disposed) return;
+        setData({ isRunning: false, totalSeconds: null, startTime: null });
+      } finally {
+        if (!disposed) setIsLoading(false);
+      }
+    };
+
+    refresh();
+    const interval = setInterval(refresh, 5000);
+    return () => {
+      disposed = true;
+      clearInterval(interval);
+    };
+  }, [execute]);
+
+  const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
+    const previous = data;
+    if (options?.optimisticUpdate) setData(options.optimisticUpdate());
+    let operationError: unknown;
+    if (ctx) {
+      try {
+        await ctx;
+      } catch (e) {
+        operationError = e;
+      }
+    }
+    if (operationError) {
+      setData(previous);
+      throw operationError;
+    }
+    try {
+      const info = await get_caffeinate_state();
+      setData(applyState(info));
+    } catch {
+      // The operation succeeded but the refresh failed; keep the optimistic
+      // value, which reflects the completed operation, until a later refresh.
+    }
+  };
+
+  return { isLoading, data, mutate };
+}
+
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
+  const [cachedCaffeinated, setCachedCaffeinated] = useCachedState<boolean>("caffeinateStatus");
+
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
-  const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
-  const caffeinateLoader = hasLaunchContext ? false : isLoading;
+  const caffeinateStatus = hasLaunchContext
+    ? props?.launchContext?.caffeinated
+    : isLoading
+      ? cachedCaffeinated
+      : data.isRunning;
   const preferences = getPreferenceValues<Preferences.Index>();
+  const isHideEnabled = Boolean(preferences.hidenWhenDecaffeinated);
 
   const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
@@ -89,8 +176,61 @@ export default function Command(props: LaunchProps) {
   const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
 
   useEffect(() => {
+    if (hasLaunchContext && props.launchContext?.caffeinated !== undefined) {
+      setCachedCaffeinated(props.launchContext.caffeinated);
+    } else if (!isLoading) {
+      setCachedCaffeinated(data.isRunning);
+    }
+  }, [hasLaunchContext, props.launchContext?.caffeinated, isLoading, data.isRunning, setCachedCaffeinated]);
+
+  const isUserInitiated =
+    props.launchType === LaunchType.UserInitiated || environment.launchType === LaunchType.UserInitiated;
+
+  const [userInitiatedAt, setUserInitiatedAt] = useState(() => (isUserInitiated ? Date.now() : 0));
+  const [visibleUntil, setVisibleUntil] = useState(() =>
+    isUserInitiated ? Date.now() + HIDE_DECAFFEINATED_DELAY_MS : 0,
+  );
+
+  const prevLaunchTypeRef = useRef(props.launchType);
+  if (prevLaunchTypeRef.current !== props.launchType) {
+    prevLaunchTypeRef.current = props.launchType;
+    if (props.launchType === LaunchType.UserInitiated) {
+      setUserInitiatedAt(Date.now());
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
+    }
+  }
+
+  const prevStatusRef = useRef(displayCaffeinateStatus);
+  const justDecaffeinated = prevStatusRef.current === true && displayCaffeinateStatus === false;
+  prevStatusRef.current = displayCaffeinateStatus;
+
+  const isUserInitiatedGrace = userInitiatedAt > 0 && Date.now() - userInitiatedAt < HIDE_DECAFFEINATED_DELAY_MS;
+  const isGracePeriod = isHideEnabled && (justDecaffeinated || isUserInitiatedGrace || Date.now() < visibleUntil);
+
+  useEffect(() => {
+    if (displayCaffeinateStatus) {
+      setVisibleUntil(0);
+    } else if (justDecaffeinated && isHideEnabled) {
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
+    }
+  }, [displayCaffeinateStatus, justDecaffeinated, isHideEnabled]);
+
+  useEffect(() => {
+    if (!isGracePeriod || !isHideEnabled) return;
+    const deadline = Math.max(visibleUntil, userInitiatedAt > 0 ? userInitiatedAt + HIDE_DECAFFEINATED_DELAY_MS : 0);
+    const remaining = Math.max(0, deadline - Date.now());
+    const timer = setTimeout(() => setTick((t) => t + 1), remaining);
+    return () => clearTimeout(timer);
+  }, [isGracePeriod, isHideEnabled, visibleUntil, userInitiatedAt]);
+
+  useEffect(() => {
     setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    void maybeAutoCaffeinate();
+  }, [isLoading]);
 
   useEffect(() => {
     if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
@@ -123,31 +263,72 @@ export default function Command(props: LaunchProps) {
 
   const handleStartFor = async (seconds: number | null, durationLabel: string) => {
     setLocalCaffeinateStatus(true);
+    setCachedCaffeinated(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
+    const reason =
+      seconds === null
+        ? undefined
+        : { kind: "for" as const, endsAt: new Date(Date.now() + seconds * 1000).toISOString() };
     const hudMessage =
-      seconds === null ? `Caffeinating your Mac ${durationLabel}` : `Caffeinating your Mac for ${durationLabel}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
-      optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
-    });
-  };
-
-  const handleDeactivate = async () => {
-    setLocalCaffeinateStatus(false);
-    await mutate(stopCaffeinate({ menubar: true, status: true }), {
-      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-    });
-    if (preferences.hidenWhenDecaffeinated) {
-      showHUD("Your Mac is now decaffeinated");
+      seconds === null
+        ? `Caffeinating your ${deviceName()} ${durationLabel}`
+        : `Caffeinating your ${deviceName()} for ${durationLabel}`;
+    try {
+      await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
+        optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
+      });
+    } catch {
+      setLocalCaffeinateStatus(null);
+      setCachedCaffeinated(false);
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
+  const handleDeactivate = async () => {
+    const schedule = await getSchedule();
+    if (schedule != undefined && schedule.IsRunning == true && !preferences.decaffeinatePausesSchedules) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Caffeination schedule running",
+        message: "Pause to decaffeinate",
+        primaryAction: {
+          title: "Open Schedules",
+          onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+        },
+      });
+      return;
+    }
+    try {
+      await mutate(
+        stopCaffeinate({ menubar: true, status: true }, undefined, {
+          pauseRunningSchedule: schedule != undefined && schedule.IsRunning == true,
+        }),
+        { optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }) },
+      );
+    } catch {
+      setLocalCaffeinateStatus(null);
+      setCachedCaffeinated(true);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to decaffeinate",
+        message: "Caffeination may still be running",
+      });
+      return;
+    }
+    setLocalCaffeinateStatus(false);
+    setCachedCaffeinated(false);
+    if (isHideEnabled) {
+      setVisibleUntil(Date.now() + HIDE_DECAFFEINATED_DELAY_MS);
+      showHUD(`Your ${deviceName()} is now decaffeinated`);
+    }
+  };
+
+  if (isHideEnabled && displayCaffeinateStatus === false && !isGracePeriod) {
     return null;
   }
 
   return (
     <MenuBarExtra
-      isLoading={caffeinateLoader}
+      isLoading={isLoading && cachedCaffeinated === undefined}
       icon={
         displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }

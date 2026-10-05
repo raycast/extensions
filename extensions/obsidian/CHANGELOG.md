@@ -1,5 +1,45 @@
 # Obsidian Changelog
 
+## [Quick Capture] - 2026-10-02
+
+- Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
+
+## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
+
+- Fix Search Note and Bookmarked Notes showing no notes for a vault when any note's file name contains a backslash
+
+## [Fix Search Media crash when opened via hotkey] - 2026-09-24
+
+- Fix a crash in Search Media when the command is launched without a search argument, e.g. via a hotkey
+
+## [Added contributor] - 2026-09-07
+
+## [Fix Misleading Required Plugin Message] - 2026-09-06
+
+- Name the core plugin a command actually needs instead of always naming Daily Notes, so Open Workspace now asks for Workspaces
+- Drop the core plugin sentence from the Append Task message, which only needs Advanced URI
+- Retitle the screen to "Required plugins missing", since Advanced URI is often already installed
+
+## [Fix Open Note on Creation] - 2026-08-27
+
+- Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably
+
+## [Exact Content Match Navigation] - 2026-08-27
+
+- Show each exact content occurrence as a separate result with highlighted context and line and column information
+- Open Obsidian at the selected occurrence using the official Obsidian CLI
+- Exclude fuzzy-only candidates without a literal title, path, or content match
+
+## [Fix Plugin Configuration Permission Errors] - 2026-08-19
+
+- Prevent plugin checks from crashing when Obsidian configuration files cannot be read
+
+## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
+
+- Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
+- Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
+- Default the AI `searchNote` `searchContent` parameter to `false`, matching the UI Search Note command
+
 ## [Fix Delete Note Shortcut] - 2026-07-18
 
 - Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut

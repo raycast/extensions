@@ -120,11 +120,41 @@ export const LimitWindowSchema = z.object({
   resets_at: z.string().nullable(),
 });
 
+/**
+ * One window from the `limits` array returned by `https://api.anthropic.com/api/oauth/usage`.
+ * Anthropic publishes no schema for this endpoint, so the fields below are what the live
+ * response carries:
+ *
+ * - `kind` names the bucket (`session`, `weekly_all`, `weekly_scoped`)
+ * - `group` is the period the bucket covers (`session`, `weekly`)
+ * - `scope.model.display_name` names the model a scoped bucket applies to
+ *
+ * Entries are self-describing, so a window for a model or period not seen here still parses.
+ * Every field but those four is nullish, because the response omits them on some accounts and
+ * one unreadable entry must not fail the parse for the whole payload. An entry that names no
+ * model is dropped when the rows are derived rather than rejected here.
+ */
+export const LimitEntrySchema = z.object({
+  kind: z.string(),
+  group: z.string(),
+  percent: z.number(),
+  severity: z.string().nullish(),
+  resets_at: z.string().nullable(),
+  is_active: z.boolean().nullish(),
+  scope: z
+    .object({
+      model: z.object({ id: z.string().nullish(), display_name: z.string().nullish() }).nullish(),
+      surface: z.unknown().nullish(),
+    })
+    .nullish(),
+});
+
 export const UsageLimitDataSchema = z.object({
   five_hour: LimitWindowSchema,
   seven_day: LimitWindowSchema,
   seven_day_sonnet: LimitWindowSchema.nullish(),
   seven_day_opus: LimitWindowSchema.nullish(),
+  limits: z.array(LimitEntrySchema).nullish(),
   extra_usage: z
     .object({
       is_enabled: z.boolean(),

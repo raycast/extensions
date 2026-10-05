@@ -11,7 +11,8 @@
     "xilopaint",
     "krsntn",
     "mikikiv",
-    "techmaved"
+    "techmaved",
+    "mattiacolombomc"
   ],
   "license": "MIT",
   "description": "Manage your smart home with Raycast",
@@ -22,6 +23,13 @@
       "title": "All Entities",
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant entities",
+      "mode": "view"
+    },
+    {
+      "name": "entity-settings",
+      "title": "Entity Settings",
+      "subtitle": "Home Assistant",
+      "description": "Manage hidden entities and custom display names",
       "mode": "view"
     },
     {

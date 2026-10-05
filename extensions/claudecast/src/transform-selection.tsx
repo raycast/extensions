@@ -19,6 +19,7 @@ import {
   ensureClaudeApiAuth,
   ensureClaudeInstalled,
 } from "./lib/claude-cli";
+import { shortcut } from "./lib/shortcuts";
 
 interface Transform {
   id: string;
@@ -528,12 +529,12 @@ function ExecutingTransformView({
           <Action.CopyToClipboard
             title="Copy Result"
             content={result?.result || ""}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={shortcut.copy}
           />
           <Action.Paste
             title="Paste Result"
             content={result?.result || ""}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            shortcut={shortcut.primaryShift("v")}
           />
           <Action.CopyToClipboard
             title="Copy as Code Block"

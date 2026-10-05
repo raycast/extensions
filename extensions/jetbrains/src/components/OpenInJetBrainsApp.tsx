@@ -1,5 +1,7 @@
-import { AppHistory, execPromise, recentEntry } from "../util";
+import { AppHistory, execPromise, isWin, recentEntry, resolveLaunchTarget } from "../util";
 import { popToRoot, showHUD, showToast, Toast, open, Action, captureException } from "@raycast/api";
+import { basename } from "node:path";
+import { stat } from "node:fs/promises";
 import React from "react";
 import { entryAppAction } from "../useAppHistory";
 
@@ -14,10 +16,25 @@ export function openInApp(
   recent: recentEntry | null,
   visit: entryAppAction | null,
 ): () => Promise<Toast | undefined> {
-  const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
-  const toOpen = tool.app?.path ?? "";
-  async function isRunning() {
-    const grep = `ps aux | grep -v "grep" | grep "${tool.app?.path}"`;
+  const appPath = tool.app?.path ?? "";
+  async function isRunning(launchTarget: string) {
+    if (isWin) {
+      if (launchTarget === "") {
+        return true;
+      }
+      const exe = basename(launchTarget);
+      const { stdout } = await execPromise(`tasklist /FI "IMAGENAME eq ${exe}" /FO CSV /NH`).catch((err) => {
+        captureException(err);
+        return {
+          stdout: "",
+        };
+      });
+      return stdout.toLowerCase().includes(exe.toLowerCase());
+    }
+    if (appPath === "") {
+      return true;
+    }
+    const grep = `ps aux | grep -v "grep" | grep "${appPath}"`;
     const { stdout } = await execPromise(grep).catch((err) => {
       captureException(err);
       return {
@@ -33,15 +50,34 @@ export function openInApp(
     });
   }
 
+  async function openProject(): Promise<void> {
+    if (recent === null) {
+      return;
+    }
+    if (tool.tool) {
+      await execPromise(`"${tool.tool}" "${recent.path}"`);
+    } else if (tool.url) {
+      // `open` shell builtin only exists on macOS — use the Raycast API so
+      // protocol-url fallback also works on Windows.
+      await open(`${tool.url}${recent.title}`);
+    }
+  }
+
   return async function () {
-    if (toOpen === "" && tool.tool === false) {
+    if (appPath === "" && tool.tool === false) {
       return showToast(Toast.Style.Failure, "Failed", "No app path");
     }
-    let running: boolean = await isRunning();
-    if (!running) {
-      if (toOpen === "") {
-        return showToast(Toast.Style.Failure, "Failed", "No app path");
-      }
+    // On Windows the install location is a plain folder — resolve the actual
+    // launcher exe so we don't just open the folder in File Explorer.
+    const launchTarget = await resolveLaunchTarget(appPath, tool.toolName);
+    const launchIsFile =
+      launchTarget !== "" &&
+      (!isWin ||
+        (await stat(launchTarget)
+          .then((stats) => stats.isFile())
+          .catch(() => false)));
+    let running: boolean = await isRunning(launchTarget);
+    if (!running && launchIsFile) {
       /**
        * WORKAROUND FOR ENVIRONMENT PROBLEMS
        * if the app is not running open it and wait for a bit
@@ -49,15 +85,17 @@ export function openInApp(
        * and we need to wait so the tool actually does open
        */
       console.log("not-running");
-      await showHUD(`Opening ${tool.title}`).then(() => open(toOpen));
+      await showHUD(`Opening ${tool.title}`).then(() => open(launchTarget));
+      let attempts = 0;
       do {
         await sleep(2);
-        running = await isRunning();
-      } while (!running);
+        running = await isRunning(launchTarget);
+        attempts += 1;
+      } while (!running && attempts < 15);
     }
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
       .then(() => visit && recent && visit(recent, tool))
-      .then(() => (recent !== null ? execPromise(cmd) : null))
+      .then(() => openProject())
       .then(() => popToRoot())
       .catch((err) => showToast(Toast.Style.Failure, "Failed", err.message).then(() => captureException(err)));
   };

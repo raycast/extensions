@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "boox-companion",
+  "title": "BOOX Companion",
+  "description": "Browse, transfer files, and capture the screen of BOOX devices over your local network",
+  "icon": "extension-icon.png",
+  "author": "metrovoc",
+  "categories": ["Applications", "Productivity"],
+  "keywords": ["boox", "booxdrop", "e-reader", "file transfer", "screen mirroring"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "boox",
+      "title": "BOOX",
+      "description": "Browse your BOOX library, notes, and storage",
+      "mode": "view"
+    },
+    {
+      "name": "send-to-boox",
+      "title": "Send to BOOX",
+      "description": "Send files to storage or add documents to the BOOX library",
+      "mode": "view"
+    },
+    {
+      "name": "quick-send-selected-files",
+      "title": "Quick Send Selected Files",
+      "description": "Send the files selected in Finder to the configured BOOX inbox",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-boox-screen",
+      "title": "Open BOOX Screen",
+      "description": "Open the BOOX screen stream in a native viewer",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-boox-screen",
+      "title": "Capture BOOX Screen",
+      "description": "Copy the current BOOX screen to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-boox-region",
+      "title": "Capture BOOX Region",
+      "description": "Select and copy a region from the current BOOX screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "boox-status",
+      "title": "BOOX Status",
+      "description": "Show BOOX status and quick actions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "manualHost",
+      "title": "Device Address",
+      "description": "Optional BOOXDrop address. Leave empty to discover devices automatically. Passwords require HTTPS.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "192.168.1.100 or https://boox.local"
+    },
+    {
+      "name": "password",
+      "title": "BOOXDrop Password",
+      "description": "Optional password configured in BOOXDrop.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "quickSendDirectory",
+      "title": "Quick Send Inbox",
+      "description": "Storage directory used by Quick Send Selected Files.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Download"
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Optional local destination. Defaults to Downloads/BOOX.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "scanVirtualInterfaces",
+      "title": "Network Discovery",
+      "description": "Also scan VPN and virtual private-network interfaces.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Scan VPN interfaces"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build:native": "bash scripts/build-native.sh",
+    "build": "npm run build:native && ray build -e dist",
+    "dev": "npm run build:native && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "smoke:device": "vite-node scripts/smoke-device.ts",
+    "publish": "npm run build:native && npx @raycast/api@latest publish"
+  }
+}

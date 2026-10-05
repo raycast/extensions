@@ -18,6 +18,7 @@ import { type OperationGate, type PackageTarget } from "../core/operations";
 import { useDetails } from "../hooks/useDetails";
 import { useIndex, type UseIndexOptions } from "../hooks/useIndex";
 import { useOperation } from "../hooks/useOperation";
+import { usePackageIcons } from "../hooks/usePackageIcons";
 import { buildLookups, duplicateNameSet, makeItemId, type IndexLookups, type PackageInfo } from "../utils/packages";
 
 import { PackageActions, type ViewKind } from "./PackageActions";
@@ -72,7 +73,7 @@ function PackageListView({
   bulkTargets,
   pullOperatingRow,
 }: PackageListViewProps) {
-  const { index, isLoading, isRefreshing, wingetAvailable, updateIndex } = useIndex(indexOptions);
+  const { index, isLoading, isRefreshing, wingetAvailable, updateIndex, cleanIndex } = useIndex(indexOptions);
   const { gate, launchDetached, runInline, cancelActive } = useOperation();
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -151,6 +152,13 @@ function PackageListView({
     neighbors,
   );
 
+  // Row icons, resolved from the top of the list down without waiting for the
+  // selection to move, and never while an operation is running.
+  usePackageIcons(
+    useMemo(() => [...new Set(allRows.map((row) => row.id))], [allRows]),
+    gate.status === "busy",
+  );
+
   const bulk = useMemo(
     () => (index && lookups && bulkTargets ? bulkTargets(index, lookups) : {}),
     [index, lookups, bulkTargets],
@@ -220,6 +228,7 @@ function PackageListView({
                   gate={gate}
                   ops={{ launchDetached, runInline, cancelActive }}
                   onUpdateIndex={() => void updateIndex()}
+                  onCleanIndex={() => void cleanIndex()}
                   homepage={details?.homepage}
                   moniker={details?.moniker}
                   upgradeAllTargets={bulk.upgradeAllTargets}

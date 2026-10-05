@@ -7,10 +7,16 @@ import { Group, getGroupStatistics } from "../../lib/Groups";
  * @param props.group The group to copy information about.
  * @param props.groups The list of groups to use for statistics.
  * @param props.pins The list of pins to use for statistics.
+ * @param props.deeplink The deeplink used to open the group.
  * @returns A submenu component.
  */
-export default function CopyGroupActionsSubmenu(props: { group: Group; groups: Group[]; pins: Pin[] }) {
-  const { group, groups, pins } = props;
+export default function CopyGroupActionsSubmenu(props: {
+  group: Group;
+  groups: Group[];
+  pins: Pin[];
+  deeplink: string;
+}) {
+  const { group, groups, pins, deeplink } = props;
 
   return (
     <ActionPanel.Submenu title="Clipboard Actions" icon={Icon.Clipboard}>
@@ -24,6 +30,7 @@ export default function CopyGroupActionsSubmenu(props: { group: Group; groups: G
         content={group.id.toString()}
         shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
       />
+      <Action.CopyToClipboard title="Copy Group Deeplink" content={deeplink} />
       <Action
         title="Copy Group JSON"
         icon={Icon.Clipboard}

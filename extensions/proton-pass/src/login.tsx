@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { checkAuth, loginWithBrowser } from "./lib/pass-cli";
 import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { openTerminalForLogin } from "./lib/terminal";
+import { platformShortcut } from "./lib/shortcuts";
 
 type AuthState = "loading" | "not-installed" | "not-authenticated" | "authenticated";
 
@@ -94,21 +95,27 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Lock}
           title="Not Logged In"
-          description="Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+          description={
+            process.platform === "darwin"
+              ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+              : "Use browser login to authenticate with Proton Pass."
+          }
           actions={
             <ActionPanel>
               <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              <Action
-                title="Open Terminal Login (Fallback)"
-                icon={Icon.Terminal}
-                onAction={openTerminalForLogin}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-              />
+              {process.platform === "darwin" && (
+                <Action
+                  title="Open Terminal Login (Fallback)"
+                  icon={Icon.Terminal}
+                  onAction={openTerminalForLogin}
+                  shortcut={platformShortcut(["cmd"], "t")}
+                />
+              )}
               <Action.OpenInBrowser
                 title="View CLI Documentation"
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={platformShortcut(["cmd"], "d")}
               />
             </ActionPanel>
           }
@@ -130,7 +137,7 @@ export default function Command() {
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={platformShortcut(["cmd"], "d")}
             />
           </ActionPanel>
         }

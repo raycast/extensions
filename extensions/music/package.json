@@ -16,7 +16,9 @@
     "hrishabhn",
     "bogdan_bucur",
     "xmok",
-    "byheaven"
+    "byheaven",
+    "christianmagill",
+    "0xdhrv"
   ],
   "license": "MIT",
   "keywords": [
@@ -25,6 +27,7 @@
     "media"
   ],
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist",
     "dev": "ray develop",
@@ -131,7 +134,7 @@
       "description": "Get info about currently playing track.",
       "disabledByDefault": true,
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "1m"
     },
     {
       "name": "remove-current-playing-from-current-playlist",
@@ -330,6 +333,21 @@
           "default": "30",
           "required": false
         }
+      ]
+    },
+    {
+      "name": "search-apple-music",
+      "title": "Search Apple Music",
+      "subtitle": "Apple Music",
+      "description": "Search the Apple Music catalog for songs and albums, and add them to your library.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "keywords": [
+        "search",
+        "catalog",
+        "album",
+        "song",
+        "library"
       ]
     },
     {
@@ -1271,9 +1289,7 @@
           },
           "get-library-tracks": {
             "_tag": "Right",
-            "right": [
-              {}
-            ]
+            "right": []
           },
           "get-currently-playing": {
             "_tag": "Right",
@@ -1347,7 +1363,6 @@
     "@raycast/utils": "^2.2.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
-    "run-applescript": "^6.0.0",
     "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
@@ -1360,5 +1375,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  }
 }

@@ -3,14 +3,25 @@ import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
 import { joinCall, setFavorite, startCall } from "./lib/tuple";
-import { Contact } from "./lib/types";
+import { Contact, ContactCallAction, contactCallAction, Machine, machineCallAction } from "./lib/types";
 
 export default function SearchContacts() {
-  const { data, isLoading, error, revalidate } = useTupleJson<Contact[]>(["contacts", "list"], {
+  const contactsQuery = useTupleJson<Contact[]>(["contacts", "list"], {
     failureTitle: "Could Not Load Contacts",
   });
+  const machinesQuery = useTupleJson<Machine[]>(["machines", "list"], {
+    failureTitle: "Could Not Load Machines",
+  });
 
-  const contacts = data ?? [];
+  const isLoading = contactsQuery.isLoading || machinesQuery.isLoading;
+  const error = contactsQuery.error || machinesQuery.error;
+  const revalidate = () => {
+    contactsQuery.revalidate();
+    machinesQuery.revalidate();
+  };
+
+  const contacts = contactsQuery.data ?? [];
+  const machines = [...(machinesQuery.data ?? [])].sort((a, b) => machineName(a).localeCompare(machineName(b)));
   // Sections keep this ordering even while Raycast filters during search (a one-shot sort would be
   // reordered by match score on every keystroke). Order mirrors the Tuple app's contacts popover:
   // people in a call float to the very top, then favorites, then everyone else online, then offline.
@@ -20,7 +31,12 @@ export default function SearchContacts() {
   const offline = contacts.filter((c) => !c.favorited && c.status !== "online" && c.status !== "busy").sort(byName);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search contacts by name or email">
+    <List isLoading={isLoading} searchBarPlaceholder="Search contacts and machines">
+      <List.Section title="Your Machines">
+        {machines.map((machine) => (
+          <MachineItem key={machine.id} machine={machine} />
+        ))}
+      </List.Section>
       <List.Section title="In a Call">
         {inCall.map((contact) => (
           <ContactItem key={contact.id} contact={contact} onChange={revalidate} />
@@ -44,13 +60,43 @@ export default function SearchContacts() {
       {error ? (
         <TupleErrorEmptyView error={error} onRetry={revalidate} />
       ) : (
-        <List.EmptyView icon={Icon.TwoPeople} title="No Contacts" description="You have no Tuple contacts yet." />
+        <List.EmptyView
+          icon={Icon.TwoPeople}
+          title="No Contacts or Machines"
+          description="No callable Tuple contacts or connected machines are available."
+        />
       )}
     </List>
   );
 }
 
+function MachineItem({ machine }: { machine: Machine }) {
+  const name = machineName(machine);
+  const available = machineCallAction(machine) === "start";
+  const status = available
+    ? { value: "Available", color: Color.Green }
+    : { value: "In a Call", color: Color.SecondaryText };
+  return (
+    <List.Item
+      title={name}
+      subtitle={machine.device_name?.trim() ? `${platformName(machine.platform)} machine` : undefined}
+      keywords={[machine.id, machine.platform, machine.device_name ?? ""]}
+      icon={{ source: Icon.Devices, tintColor: status.color }}
+      accessories={[{ tag: status }]}
+      actions={
+        <ActionPanel>
+          {available && (
+            <Action title="Start Call" icon={Icon.Phone} onAction={() => startCallWithFeedback(machine.id, name)} />
+          )}
+          <Action.CopyToClipboard title="Copy Machine ID" content={machine.id} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => void }) {
+  const callAction = contactCallAction(contact);
   const accessories: List.Item.Accessory[] = [];
   if (contact.favorited) {
     accessories.push({ icon: "⭐", tooltip: "Favorite" });
@@ -58,7 +104,7 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
   if (contact.recent) {
     accessories.push({ tag: "Recent" });
   }
-  const presence = presenceTag(contact);
+  const presence = presenceTag(contact, callAction);
   accessories.push({ tag: presence });
 
   return (
@@ -70,11 +116,15 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
       accessories={accessories}
       actions={
         <ActionPanel>
-          {contact.status === "busy" ? (
-            // They're already in a call/room, so joining is the only sensible action.
+          {callAction === "join" && (
             <Action title="Join Call" icon={Icon.Phone} onAction={() => joinCallWithFeedback(contact)} />
-          ) : (
-            <Action title="Start Call" icon={Icon.Phone} onAction={() => startCallWithFeedback(contact)} />
+          )}
+          {callAction === "start" && (
+            <Action
+              title="Start Call"
+              icon={Icon.Phone}
+              onAction={() => startCallWithFeedback(contact.email, contact.short_name)}
+            />
           )}
           <Action
             title={contact.favorited ? "Remove Favorite" : "Add Favorite"}
@@ -89,17 +139,26 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
   );
 }
 
-async function startCallWithFeedback(contact: Contact) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: `Calling ${contact.short_name}…` });
+async function startCallWithFeedback(target: string, label: string) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: `Calling ${label}…` });
   try {
-    await startCall(contact.email);
+    await startCall(target);
     toast.style = Toast.Style.Success;
-    toast.title = `Calling ${contact.short_name}`;
+    toast.title = `Calling ${label}`;
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could Not Start Call";
     toast.message = error instanceof Error ? error.message : String(error);
   }
+}
+
+function machineName(machine: Machine): string {
+  return machine.device_name?.trim() || `${platformName(machine.platform)} machine`;
+}
+
+function platformName(platform: string): string {
+  const trimmed = platform.trim();
+  return trimmed ? trimmed[0].toUpperCase() + trimmed.slice(1) : "Connected";
 }
 
 async function joinCallWithFeedback(contact: Contact) {
@@ -134,13 +193,14 @@ function isPresent(contact: Contact): boolean {
   return contact.status === "online" || contact.status === "busy";
 }
 
-/** Status pill: green when online, orange when in a call, muted when offline. */
-function presenceTag(contact: Contact): { value: string; color: Color } {
+function presenceTag(contact: Contact, callAction: ContactCallAction): { value: string; color: Color } {
   switch (contact.status) {
     case "online":
       return { value: "Online", color: Color.Green };
     case "busy":
-      return { value: "In a Call", color: Color.Orange };
+      return callAction === "join"
+        ? { value: "In a Call", color: Color.Orange }
+        : { value: "Call Full", color: Color.SecondaryText };
     default:
       return { value: "Offline", color: Color.SecondaryText };
   }

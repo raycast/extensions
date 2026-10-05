@@ -22,7 +22,8 @@
     "xmok",
     "pernielsentikaer",
     "0xdhrv",
-    "ridemountainpig"
+    "ridemountainpig",
+    "alvesrafa"
   ],
   "pastContributors": [
     "thomaslombart",
@@ -38,6 +39,12 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "manage-connection",
+      "title": "Manage Notion Connection",
+      "description": "Test your Notion connection, reconnect, or manage page access.",
+      "mode": "view"
+    },
     {
       "name": "create-database-page",
       "title": "Create Database Page",
@@ -110,6 +117,62 @@
       "mode": "view"
     },
     {
+      "name": "add-note",
+      "title": "Add Note",
+      "subtitle": "Notion",
+      "description": "Write a quick note into a daily page inside your notes page.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "note",
+          "type": "text",
+          "title": "Note",
+          "placeholder": "Note",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "notes_page_name",
+          "type": "textfield",
+          "title": "Notes Page",
+          "required": false,
+          "default": "NOTES",
+          "description": "Name of the Notion page holding the daily note pages. It is created automatically if you pick a parent page in the form."
+        },
+        {
+          "name": "note_date_format",
+          "type": "textfield",
+          "title": "Date Page Format",
+          "required": false,
+          "default": "yyyy-MM-dd",
+          "description": "date-fns format used as the title of the daily page, e.g. yyyy-MM-dd or 'dd MMM yyyy'."
+        },
+        {
+          "name": "note_style",
+          "type": "dropdown",
+          "title": "Note Style",
+          "required": false,
+          "default": "bulleted",
+          "data": [
+            {
+              "title": "Bulleted List",
+              "value": "bulleted"
+            },
+            {
+              "title": "To-do Checkbox",
+              "value": "todo"
+            },
+            {
+              "title": "Plain Paragraph",
+              "value": "paragraph"
+            }
+          ],
+          "description": "How each note is written to the daily page."
+        }
+      ]
+    },
+    {
       "description": "Append or prepend text, along with date, to a Notion page.",
       "mode": "view",
       "name": "add-text-to-page",
@@ -159,6 +222,12 @@
     }
   ],
   "ai": {
+    "skills": [
+      {
+        "name": "notion-knowledge-capture",
+        "title": "Capture Knowledge in Notion"
+      }
+    ],
     "instructions": "-If asked to summarize or view a document, look for pages with the title of the document.\\n - When referring to a page or database, always include a link to the page or database. \\n - When creating a page, always include the database name. Ask for the database name if it's not provided.",
     "evals": [
       {
@@ -282,7 +351,7 @@
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
     "@notionhq/client": "^5.9.0",
-    "@raycast/api": "^1.104.5",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.2",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^4.1.0",
@@ -298,9 +367,11 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "katex": "^0.16.21"
+    "katex": "^0.16.21",
+    "brace-expansion": "5.0.9"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

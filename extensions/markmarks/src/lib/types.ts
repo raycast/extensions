@@ -24,4 +24,4 @@ export interface ActiveTab {
   url: string;
 }
 
-export type SupportedBrowser = "Safari" | "Google Chrome" | "Arc" | "Dia" | "Zen";
+export type SupportedBrowser = "Safari" | "Google Chrome" | "Arc" | "Aside" | "Dia" | "Zen";

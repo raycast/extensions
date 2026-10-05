@@ -11,43 +11,57 @@ import {
   confirmAlert,
   popToRoot,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { existsSync } from "fs";
+import { useState, useEffect, useRef } from "react";
 import {
   listAllSessions,
-  getSessionDetail,
+  getSessionDetailForSession,
   deleteSession,
   safeTruncate,
-  SessionMetadata,
-  SessionDetail,
-  PermissionMode,
+  type SessionMetadata,
+  type SessionDetail,
 } from "./lib/session-parser";
-import { launchClaudeCode } from "./lib/terminal";
-import { ensureClaudeInstalled } from "./lib/claude-cli";
+import { shortcut } from "./lib/shortcuts";
+import { isWslSession, launchStoredSession } from "./lib/session-launch";
 
 export default function BrowseSessions() {
   const [isLoading, setIsLoading] = useState(true);
   const [sessions, setSessions] = useState<SessionMetadata[]>([]);
   const [filterProject, setFilterProject] = useState<string | null>(null);
+  const loadSequence = useRef(0);
 
   async function loadSessions() {
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
-    const allSessions = await listAllSessions({ limit: 200 });
-    // Deduplicate sessions by ID (same session can exist across multiple project directories)
-    // Keep the most recent one when duplicates exist
-    const seenIds = new Map<string, SessionMetadata>();
-    for (const session of allSessions) {
-      const existing = seenIds.get(session.id);
-      if (!existing || session.lastModified > existing.lastModified) {
-        seenIds.set(session.id, session);
+    try {
+      const allSessions = await listAllSessions({ limit: 200 });
+      if (sequence !== loadSequence.current) return;
+      const seenIdentities = new Map<string, SessionMetadata>();
+      for (const session of allSessions) {
+        const identity = session.identity ?? session.filePath;
+        const existing = seenIdentities.get(identity);
+        if (!existing || session.lastModified > existing.lastModified) {
+          seenIdentities.set(identity, session);
+        }
       }
+      setSessions(Array.from(seenIdentities.values()));
+    } catch (error) {
+      if (sequence === loadSequence.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Session Inbox Could Not Be Loaded",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } finally {
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
-    setSessions(Array.from(seenIds.values()));
-    setIsLoading(false);
   }
 
   useEffect(() => {
-    loadSessions();
+    void loadSessions();
+    return () => {
+      loadSequence.current++;
+    };
   }, []);
 
   // Get unique projects for filter dropdown
@@ -60,7 +74,7 @@ export default function BrowseSessions() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search sessions..."
+      searchBarPlaceholder="Search Sessions, Sources, Branches, and Paths"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Project"
@@ -81,16 +95,18 @@ export default function BrowseSessions() {
     >
       {filteredSessions.map((session) => (
         <SessionItem
-          key={session.id}
+          key={session.identity ?? session.filePath}
           session={session}
           onDelete={async () => {
             try {
-              await deleteSession(session.id);
-              loadSessions();
+              const deleted = await deleteSession(session.id, session.filePath);
+              if (!deleted)
+                throw new Error("This Session Could Not Be Moved to Trash");
+              await loadSessions();
             } catch (error) {
               await showToast({
                 style: Toast.Style.Failure,
-                title: "Failed to delete session",
+                title: "Session Could Not Be Deleted",
                 message: error instanceof Error ? error.message : String(error),
               });
             }
@@ -103,8 +119,8 @@ export default function BrowseSessions() {
           title="No Sessions Found"
           description={
             filterProject
-              ? `No sessions found for ${filterProject}`
-              : "Run Claude Code to create your first session"
+              ? `No Sessions Found for ${filterProject}`
+              : "Run Claude Code to Create Your First Session"
           }
           icon={Icon.Message}
         />
@@ -120,7 +136,8 @@ function SessionItem({
   session: SessionMetadata;
   onDelete: () => void;
 }) {
-  const title = session.firstMessage || session.summary || session.id;
+  const title =
+    session.title || session.firstMessage || session.summary || session.id;
   const truncatedTitle = safeTruncate(title, 60, "...");
 
   const accessories: List.Item.Accessory[] = [];
@@ -132,9 +149,21 @@ function SessionItem({
     },
   });
 
+  const sourceNames = (session.sources ?? [])
+    .map((source) => formatBackendName(source.backend))
+    .filter((value, index, values) => values.indexOf(value) === index);
+  if (sourceNames.length > 0) {
+    accessories.push({ text: sourceNames.join(" + "), icon: Icon.Layers });
+  }
+  if (session.archived) {
+    accessories.push({
+      tag: { value: "Archived", color: Color.SecondaryText },
+    });
+  }
+
   if (session.turnCount > 0) {
     accessories.push({
-      text: `${session.turnCount} turns`,
+      text: `${session.turnCount} Turns`,
       icon: Icon.Message,
     });
   }
@@ -151,40 +180,29 @@ function SessionItem({
   });
 
   async function handleResume() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(session.projectPath)) {
+    try {
+      await launchStoredSession(session);
+      await popToRoot();
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: session.projectPath,
+        title: "Session Could Not Be Resumed",
+        message: error instanceof Error ? error.message : String(error),
       });
-      return;
     }
-    await launchClaudeCode({
-      projectPath: session.projectPath,
-      sessionId: session.id,
-      permissionMode: session.permissionMode,
-    });
-    await popToRoot();
   }
 
   async function handleFork() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(session.projectPath)) {
+    try {
+      await launchStoredSession(session, { fork: true });
+      await popToRoot();
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: session.projectPath,
+        title: "Session Could Not Be Forked",
+        message: error instanceof Error ? error.message : String(error),
       });
-      return;
     }
-    await launchClaudeCode({
-      projectPath: session.projectPath,
-      sessionId: session.id,
-      forkSession: true,
-      permissionMode: session.permissionMode,
-    });
-    await popToRoot();
   }
 
   async function handleDelete() {
@@ -200,17 +218,21 @@ function SessionItem({
     if (confirmed) {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Deleting session...",
+        title: "Deleting Session...",
       });
       onDelete();
-      await showToast({ style: Toast.Style.Success, title: "Session deleted" });
+      await showToast({ style: Toast.Style.Success, title: "Session Deleted" });
     }
   }
 
   return (
     <List.Item
       title={truncatedTitle}
-      subtitle={session.summary || undefined}
+      subtitle={
+        session.summary && session.summary !== title
+          ? session.summary
+          : session.gitBranch || undefined
+      }
       icon={Icon.Message}
       accessories={accessories}
       actions={
@@ -224,20 +246,14 @@ function SessionItem({
             <Action
               title="Fork Session"
               icon={Icon.ArrowNe}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={shortcut.primary("f")}
               onAction={handleFork}
             />
             <Action.Push
               title="View Details"
               icon={Icon.Eye}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              target={
-                <SessionDetailView
-                  sessionId={session.id}
-                  projectPath={session.projectPath}
-                  permissionMode={session.permissionMode}
-                />
-              }
+              shortcut={shortcut.primary("d")}
+              target={<SessionDetailView result={session} />}
             />
           </ActionPanel.Section>
 
@@ -245,53 +261,64 @@ function SessionItem({
             <Action.CopyToClipboard
               title="Copy Session Id"
               content={session.id}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={shortcut.copy}
             />
             <Action.CopyToClipboard
               title="Copy Project Path"
               content={session.projectPath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={shortcut.copyPath}
             />
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="Danger">
-            <Action
-              title="Delete Session"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={handleDelete}
-            />
-          </ActionPanel.Section>
+          {!isWslSession(session) ? (
+            <ActionPanel.Section title="Danger">
+              <Action
+                title="Delete Session"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={shortcut.remove}
+                onAction={handleDelete}
+              />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />
   );
 }
 
-function SessionDetailView({
-  sessionId,
-  projectPath,
-  permissionMode,
-}: {
-  sessionId: string;
-  projectPath: string;
-  permissionMode?: PermissionMode;
-}) {
+function SessionDetailView({ result }: { result: SessionMetadata }) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<SessionDetail | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadDetail() {
-      const detail = await getSessionDetail(sessionId);
-      setSession(detail);
-      setIsLoading(false);
-    }
-    loadDetail();
-  }, [sessionId]);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const detail = await getSessionDetailForSession(result);
+        if (!cancelled) setSession(detail);
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : String(error));
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [result]);
 
   if (isLoading) {
     return <Detail isLoading={true} />;
+  }
+
+  if (loadError) {
+    return (
+      <Detail markdown={`# Session Could Not Be Loaded\n\n${loadError}`} />
+    );
   }
 
   if (!session) {
@@ -310,6 +337,23 @@ function SessionDetailView({
           <Detail.Metadata.Label title="Session ID" text={session.id} />
           <Detail.Metadata.Label title="Project" text={session.projectName} />
           <Detail.Metadata.Label title="Path" text={session.projectPath} />
+          {session.sources && session.sources.length > 0 ? (
+            <Detail.Metadata.Label
+              title="Sources"
+              text={session.sources
+                .map((source) => formatBackendName(source.backend))
+                .filter(
+                  (value, index, values) => values.indexOf(value) === index,
+                )
+                .join(", ")}
+            />
+          ) : null}
+          {session.gitBranch ? (
+            <Detail.Metadata.Label
+              title="Git Branch"
+              text={session.gitBranch}
+            />
+          ) : null}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Turns"
@@ -336,43 +380,34 @@ function SessionDetailView({
             title="Resume Session"
             icon={Icon.ArrowRight}
             onAction={async () => {
-              if (!(await ensureClaudeInstalled())) return;
-              if (!existsSync(projectPath)) {
+              try {
+                await launchStoredSession(session);
+                await popToRoot();
+              } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Project path no longer exists",
-                  message: projectPath,
+                  title: "Session Could Not Be Resumed",
+                  message:
+                    error instanceof Error ? error.message : String(error),
                 });
-                return;
               }
-              await launchClaudeCode({
-                projectPath,
-                sessionId,
-                permissionMode,
-              });
-              await popToRoot();
             }}
           />
           <Action
             title="Fork Session"
             icon={Icon.ArrowNe}
             onAction={async () => {
-              if (!(await ensureClaudeInstalled())) return;
-              if (!existsSync(projectPath)) {
+              try {
+                await launchStoredSession(session, { fork: true });
+                await popToRoot();
+              } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Project path no longer exists",
-                  message: projectPath,
+                  title: "Session Could Not Be Forked",
+                  message:
+                    error instanceof Error ? error.message : String(error),
                 });
-                return;
               }
-              await launchClaudeCode({
-                projectPath,
-                sessionId,
-                forkSession: true,
-                permissionMode,
-              });
-              await popToRoot();
             }}
           />
           <Action.CopyToClipboard
@@ -428,4 +463,21 @@ function formatConversationText(session: SessionDetail): string {
     );
   }
   return body;
+}
+
+function formatBackendName(
+  backend: NonNullable<SessionMetadata["sources"]>[number]["backend"],
+): string {
+  switch (backend) {
+    case "claude-cli":
+      return "Claude CLI";
+    case "claude-desktop":
+      return "Claude Desktop";
+    case "vscode":
+      return "VS Code";
+    case "conductor":
+      return "Conductor";
+    case "wsl":
+      return "WSL";
+  }
 }

@@ -7,16 +7,29 @@ import {
   Form,
   Icon,
   Toast,
+  environment,
   getPreferenceValues,
   getSelectedText,
   openExtensionPreferences,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CompareDetail } from "./compare";
+import {
+  askProvider,
+  getDefaultProviderModel,
+  getProviderSummary,
+  loadOpenRouterModels,
+  PROVIDER_OPTIONS,
+  SUGGESTED_MODELS,
+  type GenerationProvider,
+  type ProviderModel,
+  type ProviderAnswer,
+} from "./lib/providers";
+import { appendHistory } from "./lib/history-storage";
 import {
   NO_PRESET,
-  appendHistory,
   clearLastUsedSettings,
   loadLastUsedSettings,
   loadPresets,
@@ -37,6 +50,7 @@ import {
 type GenerationSession = {
   values: FormValues;
   result: string;
+  incompleteReason?: string;
 };
 
 const PURPOSES = [
@@ -248,6 +262,18 @@ const MODELS = [
     value: AI.Model["OpenAI_GPT-5.2"],
   },
   {
+    id: "gpt-5.3-instant",
+    title: "GPT-5.3 Instant",
+    provider: "OpenAI",
+    value: AI.Model["OpenAI_GPT-5.3_Instant"],
+  },
+  {
+    id: "gpt-5.4",
+    title: "GPT-5.4",
+    provider: "OpenAI",
+    value: AI.Model["OpenAI_GPT-5.4"],
+  },
+  {
     id: "gpt-4.1",
     title: "GPT-4.1",
     provider: "OpenAI",
@@ -381,6 +407,17 @@ export default function Command() {
   const [session, setSession] = useState<GenerationSession | null>(null);
   const [correctionPrompt, setCorrectionPrompt] = useState("");
   const [isCorrectionMode, setIsCorrectionMode] = useState(false);
+  const [openRouterModels, setOpenRouterModels] = useState<ProviderModel[]>([]);
+  const [modelListError, setModelListError] = useState("");
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const requestRef = useRef<AbortController | null>(null);
+  const usesRaycastAI = values.generationProvider === "raycast";
+  const providerModels =
+    values.generationProvider === "openrouter"
+      ? openRouterModels
+      : values.generationProvider === "raycast"
+        ? []
+        : SUGGESTED_MODELS[values.generationProvider];
 
   const selectedPreset =
     selectedPresetId === NO_PRESET
@@ -392,8 +429,8 @@ export default function Command() {
 
     async function bootstrap() {
       try {
-        const storedPresets = await loadPresets();
-        const rememberedSettings = await loadLastUsedSettings();
+        const storedPresets = await loadPresets(defaultValues);
+        const rememberedSettings = await loadLastUsedSettings(defaultValues);
         const startupValues = rememberedSettings
           ? { ...defaultValues, ...rememberedSettings }
           : defaultValues;
@@ -430,6 +467,29 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+    if (values.generationProvider !== "openrouter") return;
+    const controller = new AbortController();
+    setIsLoadingModels(true);
+    setModelListError("");
+    setOpenRouterModels([]);
+    void loadOpenRouterModels(preferences.openRouterApiKey, controller.signal)
+      .then(setOpenRouterModels)
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setModelListError(
+            error instanceof Error ? error.message : "Could not load models.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoadingModels(false);
+      });
+    return () => controller.abort();
+  }, [values.generationProvider, preferences.openRouterApiKey]);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
+
+  useEffect(() => {
     if (isBootstrapping) {
       return;
     }
@@ -442,10 +502,13 @@ export default function Command() {
     values.tone,
     values.customPrompt,
     values.model,
+    values.generationProvider,
+    values.providerModel,
     values.creativity,
   ]);
 
   async function handleGenerate(nextValues: FormValues, correction?: string) {
+    if (requestRef.current) return;
     if (!nextValues.draft.trim()) {
       await showToast({
         style: Toast.Style.Failure,
@@ -455,53 +518,179 @@ export default function Command() {
       return;
     }
 
+    if (
+      nextValues.generationProvider === "raycast" &&
+      !environment.canAccess(AI)
+    ) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Raycast AI access required",
+        message:
+          "This extension needs access to Raycast's AI API. Check your Raycast Pro subscription and Settings > AI.",
+      });
+      return;
+    }
+
+    const controller = new AbortController();
+    requestRef.current = controller;
     setIsSubmitting(true);
+    let progressToast: Toast | undefined;
 
     try {
-      const result = await AI.ask(
-        buildPrompt(nextValues, session?.result, correction),
-        {
-          model: getModel(nextValues.model),
-          creativity: getCreativity(nextValues.creativity),
-        },
-      );
+      progressToast = await showToast({
+        style: Toast.Style.Animated,
+        title: correction ? "Refining text" : "Enhancing text",
+        message: getProviderSummary({
+          ...preferences,
+          generationProvider: nextValues.generationProvider,
+          providerModel: nextValues.providerModel,
+        }),
+      });
+      const prompt = buildPrompt(nextValues, session?.result, correction);
+      const creativity = getCreativity(nextValues.creativity);
+      let usedAutomaticModel = nextValues.model === "automatic";
+      let answer: ProviderAnswer;
 
-      if (preferences.autoCopyResult ?? true) {
-        await Clipboard.copy(result);
+      if (nextValues.generationProvider !== "raycast") {
+        answer = await askProvider(
+          prompt,
+          {
+            ...preferences,
+            generationProvider: nextValues.generationProvider,
+            providerModel: nextValues.providerModel,
+          },
+          controller.signal,
+        );
+      } else {
+        try {
+          const model = getModel(nextValues.model);
+          const text = await AI.ask(prompt, {
+            ...(model ? { model } : {}),
+            creativity,
+            signal: controller.signal,
+          });
+          answer = { text };
+        } catch (error) {
+          if (
+            nextValues.model !== "automatic" &&
+            error instanceof Error &&
+            /no model found/i.test(error.message)
+          ) {
+            const text = await AI.ask(prompt, {
+              creativity,
+              signal: controller.signal,
+            });
+            answer = { text };
+            usedAutomaticModel = true;
+          } else {
+            throw error;
+          }
+        }
       }
 
-      await appendHistory({
-        id: `${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        values: nextValues,
-        result,
-      });
+      if (controller.signal.aborted) return;
 
+      if (!answer.text.trim()) {
+        throw new Error(
+          "The selected provider returned an empty response. Please try again.",
+        );
+      }
+
+      const effectiveValues =
+        nextValues.generationProvider === "raycast" && usedAutomaticModel
+          ? { ...nextValues, model: "automatic" as const }
+          : nextValues;
+      if (
+        nextValues.generationProvider === "raycast" &&
+        usedAutomaticModel &&
+        nextValues.model !== "automatic"
+      ) {
+        setValues(effectiveValues);
+        setSelectedPresetId(NO_PRESET);
+      }
+      const { text: result, incompleteReason } = answer;
+      setSession({ values: effectiveValues, result, incompleteReason });
+      setCorrectionPrompt("");
+      setIsCorrectionMode(false);
+
+      let copied = false;
+      let historySaved = incompleteReason
+        ? true
+        : !(preferences.saveGenerationHistory ?? true);
+      try {
+        if (!incompleteReason && (preferences.autoCopyResult ?? true)) {
+          await Clipboard.copy(result);
+          copied = true;
+        }
+      } catch {
+        // Keep the generated result visible if clipboard access fails.
+      }
+      if (!incompleteReason && (preferences.saveGenerationHistory ?? true)) {
+        try {
+          await appendHistory({
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            values: effectiveValues,
+            result,
+          });
+          historySaved = true;
+        } catch {
+          // Keep the generated result visible if history storage fails.
+        }
+      }
+
+      const notices = [
+        incompleteReason
+          ? `${incompleteReason} Review the partial result; automatic copy and history were skipped.`
+          : undefined,
+        nextValues.generationProvider === "raycast" &&
+        usedAutomaticModel &&
+        nextValues.model !== "automatic"
+          ? "Selected model was unavailable; Raycast chose another."
+          : undefined,
+        !incompleteReason && (preferences.autoCopyResult ?? true) && !copied
+          ? "Could not copy to clipboard."
+          : undefined,
+        !historySaved ? "Could not save to history." : undefined,
+      ].filter(Boolean);
+      await progressToast.hide();
+      progressToast = undefined;
       await showToast({
-        style: Toast.Style.Success,
-        title: correction ? "Text regenerated" : "Text enhanced",
-        message:
-          (preferences.autoCopyResult ?? true)
+        style: notices.length ? Toast.Style.Failure : Toast.Style.Success,
+        title: incompleteReason
+          ? "Response may be incomplete"
+          : correction
+            ? "Text regenerated"
+            : "Text enhanced",
+        message: notices.length
+          ? notices.join(" ")
+          : copied
             ? "The result was copied to your clipboard."
             : "The result is ready.",
       });
-
-      setSession({ values: nextValues, result });
-      setCorrectionPrompt("");
-      setIsCorrectionMode(false);
     } catch (error) {
+      if (controller.signal.aborted) return;
       const rawMessage =
-        error instanceof Error ? error.message : "Unknown Raycast AI error";
-      const message = needsAccessGuidance(rawMessage)
-        ? getModelAccessErrorMessage(nextValues.model)
-        : rawMessage;
+        error instanceof Error ? error.message : "Unknown generation error";
+      const message =
+        nextValues.generationProvider === "raycast" &&
+        /no model found/i.test(rawMessage)
+          ? "Raycast's Extension AI API could not find a model for this account. In Settings > AI > Models & Providers, enable a Raycast model. Local models cannot power extension AI requests."
+          : nextValues.generationProvider === "raycast" &&
+              needsAccessGuidance(rawMessage)
+            ? getModelAccessErrorMessage(nextValues.model)
+            : rawMessage;
 
+      await progressToast?.hide();
+      progressToast = undefined;
       await showToast({
         style: Toast.Style.Failure,
         title: "Generation failed",
         message,
       });
     } finally {
+      await progressToast?.hide();
+      requestRef.current = null;
       setIsSubmitting(false);
     }
   }
@@ -524,6 +713,8 @@ export default function Command() {
       tone: preset.tone,
       customPrompt: preset.customPrompt,
       model: preset.model,
+      generationProvider: preset.generationProvider,
+      providerModel: preset.providerModel,
       creativity: preset.creativity,
     };
     setValues((current) => ({
@@ -540,13 +731,15 @@ export default function Command() {
     }
 
     const nextPreset: SavedPreset = {
-      id: String(Date.now()),
+      id: crypto.randomUUID(),
       name: trimmedName,
       purpose: values.purpose,
       enhancement: values.enhancement,
       tone: values.tone,
       customPrompt: values.customPrompt,
       model: values.model,
+      generationProvider: values.generationProvider,
+      providerModel: values.providerModel,
       creativity: values.creativity,
     };
 
@@ -637,13 +830,21 @@ export default function Command() {
           navigationTitle="Refine Generated Text"
           actions={
             <ActionPanel>
-              <Action.SubmitForm
-                title="Regenerate with Correction"
-                icon={Icon.Wand}
-                onSubmit={async () => {
-                  await handleGenerate(session.values, correctionPrompt);
-                }}
-              />
+              {isSubmitting ? (
+                <Action
+                  title="Cancel Generation"
+                  icon={Icon.XMarkCircle}
+                  onAction={() => requestRef.current?.abort()}
+                />
+              ) : (
+                <Action.SubmitForm
+                  title="Regenerate with Correction"
+                  icon={Icon.Wand}
+                  onSubmit={async () => {
+                    await handleGenerate(session.values, correctionPrompt);
+                  }}
+                />
+              )}
               <Action
                 title="Back to Result"
                 icon={Icon.ArrowLeft}
@@ -673,9 +874,19 @@ export default function Command() {
       <Detail
         isLoading={isSubmitting}
         navigationTitle="Enhanced Text"
-        markdown={renderResultMarkdown(session.result)}
+        markdown={renderResultMarkdown(
+          session.result,
+          session.incompleteReason,
+        )}
         actions={
           <ActionPanel>
+            {isSubmitting ? (
+              <Action
+                title="Cancel Generation"
+                icon={Icon.XMarkCircle}
+                onAction={() => requestRef.current?.abort()}
+              />
+            ) : null}
             <Action.Paste title="Paste Result" content={session.result} />
             <Action.CopyToClipboard
               title="Copy Result Again"
@@ -704,6 +915,17 @@ export default function Command() {
                 setIsCorrectionMode(false);
               }}
             />
+            <Action.Push
+              title="Compare with Original"
+              icon={Icon.Text}
+              target={
+                <CompareDetail
+                  original={session.values.draft}
+                  result={session.result}
+                  incompleteReason={session.incompleteReason}
+                />
+              }
+            />
           </ActionPanel>
         }
       />
@@ -716,17 +938,25 @@ export default function Command() {
       navigationTitle="Enhance Text"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={
-              (preferences.autoCopyResult ?? true)
-                ? "Enhance and Copy"
-                : "Enhance Text"
-            }
-            icon={Icon.Wand}
-            onSubmit={async () => {
-              await handleGenerate(values);
-            }}
-          />
+          {isSubmitting ? (
+            <Action
+              title="Cancel Generation"
+              icon={Icon.XMarkCircle}
+              onAction={() => requestRef.current?.abort()}
+            />
+          ) : (
+            <Action.SubmitForm
+              title={
+                (preferences.autoCopyResult ?? true)
+                  ? "Enhance and Copy"
+                  : "Enhance Text"
+              }
+              icon={Icon.Wand}
+              onSubmit={async () => {
+                await handleGenerate(values);
+              }}
+            />
+          )}
           <Action.Push
             title="Save Current Settings as Preset"
             icon={Icon.SaveDocument}
@@ -805,7 +1035,7 @@ export default function Command() {
         title="Preset Status"
         text={
           selectedPreset
-            ? `Using "${selectedPreset.name}". If you change purpose, enhancement, tone, model, creativity, or extra instruction, the preset switches back to No Preset.`
+            ? `Using "${selectedPreset.name}". Changing a saved setting switches back to No Preset.`
             : "Using custom settings. Last used settings are remembered; use Cmd+Shift+R to reset back to extension defaults."
         }
       />
@@ -867,78 +1097,168 @@ export default function Command() {
         ))}
       </Form.Dropdown>
       <Form.Dropdown
-        id="model"
-        title="Model"
-        value={values.model}
-        onChange={(model) =>
+        id="generationProvider"
+        title="AI Provider"
+        value={values.generationProvider}
+        onChange={(provider) =>
           updateCustomValues((current) => ({
             ...current,
-            model: model as ModelId,
+            generationProvider: provider as GenerationProvider,
+            providerModel: getDefaultProviderModel(
+              provider as GenerationProvider,
+            ),
           }))
         }
       >
-        <Form.Dropdown.Section title="Anthropic">
-          {MODELS.filter((model) => model.provider === "Anthropic").map(
-            (model) => (
-              <Form.Dropdown.Item
-                key={model.id}
-                value={model.id}
-                title={model.title}
-              />
-            ),
-          )}
-        </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="OpenAI">
-          {MODELS.filter((model) => model.provider === "OpenAI").map(
-            (model) => (
-              <Form.Dropdown.Item
-                key={model.id}
-                value={model.id}
-                title={model.title}
-              />
-            ),
-          )}
-        </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="Google">
-          {MODELS.filter((model) => model.provider === "Google").map(
-            (model) => (
-              <Form.Dropdown.Item
-                key={model.id}
-                value={model.id}
-                title={model.title}
-              />
-            ),
-          )}
-        </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="Perplexity">
-          {MODELS.filter((model) => model.provider === "Perplexity").map(
-            (model) => (
-              <Form.Dropdown.Item
-                key={model.id}
-                value={model.id}
-                title={model.title}
-              />
-            ),
-          )}
-        </Form.Dropdown.Section>
-        <Form.Dropdown.Section title="Other Providers">
-          {MODELS.filter(
-            (model) =>
-              !["Anthropic", "OpenAI", "Google", "Perplexity"].includes(
-                model.provider,
-              ),
-          ).map((model) => (
-            <Form.Dropdown.Item
-              key={model.id}
-              value={model.id}
-              title={`${model.provider} · ${model.title}`}
-            />
-          ))}
-        </Form.Dropdown.Section>
+        {PROVIDER_OPTIONS.map((provider) => (
+          <Form.Dropdown.Item
+            key={provider.id}
+            value={provider.id}
+            title={provider.name}
+          />
+        ))}
       </Form.Dropdown>
+      {usesRaycastAI ? (
+        <Form.Dropdown
+          id="model"
+          title="Model"
+          value={values.model}
+          onChange={(model) =>
+            updateCustomValues((current) => ({
+              ...current,
+              model: model as ModelId,
+            }))
+          }
+        >
+          <Form.Dropdown.Item
+            value="automatic"
+            title="Automatic (Raycast chooses)"
+          />
+          <Form.Dropdown.Section title="Anthropic">
+            {MODELS.filter((model) => model.provider === "Anthropic").map(
+              (model) => (
+                <Form.Dropdown.Item
+                  key={model.id}
+                  value={model.id}
+                  title={model.title}
+                />
+              ),
+            )}
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="OpenAI">
+            {MODELS.filter((model) => model.provider === "OpenAI").map(
+              (model) => (
+                <Form.Dropdown.Item
+                  key={model.id}
+                  value={model.id}
+                  title={model.title}
+                />
+              ),
+            )}
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="Google">
+            {MODELS.filter((model) => model.provider === "Google").map(
+              (model) => (
+                <Form.Dropdown.Item
+                  key={model.id}
+                  value={model.id}
+                  title={model.title}
+                />
+              ),
+            )}
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="Perplexity">
+            {MODELS.filter((model) => model.provider === "Perplexity").map(
+              (model) => (
+                <Form.Dropdown.Item
+                  key={model.id}
+                  value={model.id}
+                  title={model.title}
+                />
+              ),
+            )}
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="Other Providers">
+            {MODELS.filter(
+              (model) =>
+                !["Anthropic", "OpenAI", "Google", "Perplexity"].includes(
+                  model.provider,
+                ),
+            ).map((model) => (
+              <Form.Dropdown.Item
+                key={model.id}
+                value={model.id}
+                title={`${model.provider} · ${model.title}`}
+              />
+            ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      ) : null}
+      {!usesRaycastAI ? (
+        <>
+          <Form.Dropdown
+            id="providerModelPicker"
+            title="Choose Model"
+            value={
+              values.providerModel ||
+              getDefaultProviderModel(values.generationProvider)
+            }
+            isLoading={isLoadingModels}
+            onChange={(providerModel) =>
+              updateCustomValues((current) => ({ ...current, providerModel }))
+            }
+          >
+            {!providerModels.some(
+              (model) =>
+                model.id ===
+                (values.providerModel ||
+                  getDefaultProviderModel(values.generationProvider)),
+            ) ? (
+              <Form.Dropdown.Item
+                value={
+                  values.providerModel ||
+                  getDefaultProviderModel(values.generationProvider)
+                }
+                title={`${values.providerModel || getDefaultProviderModel(values.generationProvider)} (current)`}
+              />
+            ) : null}
+            {providerModels.map((model) => (
+              <Form.Dropdown.Item
+                key={model.id}
+                value={model.id}
+                title={model.name}
+                keywords={[model.id]}
+              />
+            ))}
+          </Form.Dropdown>
+          <Form.TextField
+            id="providerModel"
+            title="Model ID"
+            info="Type a model ID if it is not in the picker."
+            value={values.providerModel}
+            onChange={(providerModel) =>
+              updateCustomValues((current) => ({ ...current, providerModel }))
+            }
+          />
+          {modelListError ? (
+            <Form.Description
+              title="Model List"
+              text={`${modelListError} You can still enter a model ID manually.`}
+            />
+          ) : null}
+        </>
+      ) : null}
       <Form.Description
-        title="Model Access"
-        text={getModelAccessHint(values.model)}
+        title="Generation Provider"
+        text={
+          usesRaycastAI
+            ? getModelAccessHint(values.model)
+            : getProviderSummary({
+                ...preferences,
+                generationProvider: values.generationProvider,
+                providerModel: values.providerModel,
+              })
+        }
       />
       <Form.Dropdown
         id="creativity"
@@ -1044,6 +1364,11 @@ function buildPrompt(
     `Target format: ${purpose.prompt}.`,
     enhancement.prompt,
     tone.prompt,
+    values.creativity === "low"
+      ? "Keep changes restrained and wording precise."
+      : values.creativity === "high"
+        ? "Use fresh, expressive wording where it improves the text."
+        : "Balance clarity and originality.",
     "Preserve the original intent and any concrete facts unless the user explicitly asks to change them.",
     "Return only the final rewritten text with no explanation, no bullets, and no quotation marks around it.",
   ];
@@ -1068,79 +1393,11 @@ function buildPrompt(
 }
 
 function getModel(modelId: ModelId) {
-  switch (modelId) {
-    case "claude-4.6-sonnet":
-      return AI.Model["Anthropic_Claude_4.6_Sonnet"];
-    case "claude-4-sonnet":
-      return AI.Model["Anthropic_Claude_4_Sonnet"];
-    case "claude-4.5-sonnet":
-      return AI.Model["Anthropic_Claude_4.5_Sonnet"];
-    case "claude-4.5-haiku":
-      return AI.Model["Anthropic_Claude_4.5_Haiku"];
-    case "claude-4.5-opus":
-      return AI.Model["Anthropic_Claude_4.5_Opus"];
-    case "claude-4.6-opus":
-      return AI.Model["Anthropic_Claude_4.6_Opus"];
-    case "gpt-5-mini":
-      return AI.Model["OpenAI_GPT-5_mini"];
-    case "gpt-5":
-      return AI.Model["OpenAI_GPT-5"];
-    case "gpt-5.1":
-      return AI.Model["OpenAI_GPT-5.1"];
-    case "gpt-5.2":
-      return AI.Model["OpenAI_GPT-5.2"];
-    case "gpt-4.1":
-      return AI.Model["OpenAI_GPT-4.1"];
-    case "gpt-4.1-mini":
-      return AI.Model["OpenAI_GPT-4.1_mini"];
-    case "gemini-2.5-flash":
-      return AI.Model["Google_Gemini_2.5_Flash"];
-    case "gemini-2.5-pro":
-      return AI.Model["Google_Gemini_2.5_Pro"];
-    case "gemini-3-flash":
-      return AI.Model["Google_Gemini_3_Flash"];
-    case "gemini-3.1-pro":
-      return AI.Model["Google_Gemini_3.1_Pro"];
-    case "gemini-3.1-flash-lite":
-      return AI.Model["Google_Gemini_3.1_Flash_Lite"];
-    case "gemini-2.5-flash-lite":
-      return AI.Model["Google_Gemini_2.5_Flash_Lite"];
-    case "perplexity-sonar":
-      return AI.Model["Perplexity_Sonar"];
-    case "perplexity-sonar-pro":
-      return AI.Model["Perplexity_Sonar_Pro"];
-    case "grok-4.1-fast":
-      return AI.Model["xAI_Grok-4.1_Fast"];
-    case "grok-4":
-      return AI.Model["xAI_Grok-4"];
-    case "mistral-large":
-      return AI.Model["Mistral_Large"];
-    case "mistral-medium":
-      return AI.Model["Mistral_Medium"];
-    case "mistral-small-3":
-      return AI.Model["Mistral_Small_3"];
-    case "deepseek-v3":
-      return AI.Model["Together_AI_DeepSeek-V3"];
-    case "deepseek-r1":
-      return AI.Model["Together_AI_DeepSeek-R1"];
-    case "qwen3-32b":
-      return AI.Model["Groq_Qwen3-32B"];
-    case "kimi-k2-instruct":
-      return AI.Model["Groq_Kimi_K2_Instruct"];
-    case "gpt-4o-mini":
-      return AI.Model["OpenAI_GPT-4o_mini"];
-    case "gpt-4o":
-      return AI.Model["OpenAI_GPT-4o"];
-    case "claude-sonnet":
-      return AI.Model["Anthropic_Claude_4.5_Sonnet"];
-    case "gemini-2-flash":
-      return AI.Model["Google_Gemini_2.0_Flash"];
-    default:
-      return MODELS[0].value;
-  }
+  return MODELS.find((model) => model.id === modelId)?.value;
 }
 
 function getModelLabel(modelId: ModelId) {
+  if (modelId === "automatic") return "Automatic";
   const model = MODELS.find((item) => item.id === modelId);
   if (model) {
     return `${model.provider} · ${model.title}`;
@@ -1169,6 +1426,9 @@ function needsAccessGuidance(message: string) {
 }
 
 function getModelAccessHint(modelId: ModelId) {
+  if (modelId === "automatic") {
+    return "Raycast chooses an available model. If generation still fails, check Raycast Settings > AI and update Raycast.";
+  }
   const provider = getModelProvider(modelId);
 
   if (
@@ -1208,10 +1468,13 @@ function getCreativity(creativityId: CreativityId) {
   ).value;
 }
 
-function renderResultMarkdown(result: string) {
+function renderResultMarkdown(result: string, incompleteReason?: string) {
   return [
     "# Enhanced Text",
     "",
+    ...(incompleteReason
+      ? [`**Response may be incomplete:** ${incompleteReason}`, ""]
+      : []),
     "```text",
     result.replace(/```/g, "\\`\\`\\`"),
     "```",
@@ -1225,6 +1488,8 @@ function matchesPreset(values: FormValues, preset: SavedPreset) {
     values.tone === preset.tone &&
     values.customPrompt === preset.customPrompt &&
     values.model === preset.model &&
+    values.generationProvider === preset.generationProvider &&
+    values.providerModel === preset.providerModel &&
     values.creativity === preset.creativity
   );
 }
@@ -1236,6 +1501,8 @@ function extractRememberedSettings(values: FormValues): RememberedSettings {
     tone: values.tone,
     customPrompt: values.customPrompt,
     model: values.model,
+    generationProvider: values.generationProvider,
+    providerModel: values.providerModel,
     creativity: values.creativity,
   };
 }
@@ -1248,6 +1515,10 @@ function getDefaultFormValues(preferences: Preferences): FormValues {
     tone: preferences.defaultTone ?? "natural",
     customPrompt: preferences.defaultExtraInstruction ?? "",
     model: normalizeModelId(preferences.defaultModel),
+    generationProvider: preferences.generationProvider ?? "openrouter",
+    providerModel:
+      preferences.providerModel?.trim() ||
+      getDefaultProviderModel(preferences.generationProvider ?? "openrouter"),
     creativity: preferences.defaultCreativity ?? "balanced",
   };
 }

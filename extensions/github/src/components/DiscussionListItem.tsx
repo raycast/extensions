@@ -56,10 +56,14 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           icon: d.comments ? Icon.SpeechBubble : undefined,
           tooltip: d.comments ? `Comments: ${d.comments.totalCount}` : undefined,
         },
-        {
-          date: new Date(d.publishedAt),
-          tooltip: d.publishedAt ? format(new Date(d.publishedAt), "EEEE d MMMM yyyy 'at' HH:mm") : undefined,
-        },
+        ...(d.publishedAt
+          ? [
+              {
+                date: new Date(d.publishedAt),
+                tooltip: format(new Date(d.publishedAt), "EEEE d MMMM yyyy 'at' HH:mm"),
+              },
+            ]
+          : []),
         { icon: user.icon, tooltip: user.text },
       ]}
       actions={

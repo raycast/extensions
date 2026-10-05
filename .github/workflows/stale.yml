@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v11
         with:
           repo-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           only-issue-labels: "never-match-this"

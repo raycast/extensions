@@ -9,6 +9,11 @@ function getCredentials(): { clientId: string; clientSecret: string } {
   };
 }
 
+export function getCredentialStatus() {
+  const { clientId, clientSecret } = getCredentials();
+  return { hasAppKey: Boolean(clientId), hasAppSecret: Boolean(clientSecret) };
+}
+
 export function hasSchwabCredentials(): boolean {
   const { clientId, clientSecret } = getCredentials();
   return Boolean(clientId && clientSecret);
@@ -18,7 +23,8 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Charles Schwab",
   providerIcon: "schwab-logo.png",
-  description: "Connect your Charles Schwab account to view your portfolio",
+  description:
+    "Sign in to Charles Schwab. Your saved App Key and Secret stay in Raycast; weekly sign-in does not require developer setup.",
 });
 
 function basicAuth(clientId: string, clientSecret: string): string {
@@ -51,8 +57,7 @@ async function exchangeToken(
   });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => "Unknown error");
-    throw new Error(`Token exchange failed (${response.status}): ${errorText}`);
+    throw await tokenError(response);
   }
 
   const tokens = (await response.json()) as OAuth.TokenResponse;
@@ -80,8 +85,7 @@ async function refreshToken(
   });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => "Unknown error");
-    throw new Error(`Token refresh failed (${response.status}): ${errorText}`);
+    throw await tokenError(response);
   }
 
   const tokens = (await response.json()) as OAuth.TokenResponse;
@@ -89,53 +93,74 @@ async function refreshToken(
   return tokens;
 }
 
-export const schwabOAuth = {
-  client,
-  authorize: async (): Promise<string> => {
-    const credentials = getCredentials();
-    if (!credentials.clientId || !credentials.clientSecret) {
-      throw new Error("Missing Schwab App Key/Secret. Set them in the extension preferences and try again.");
-    }
+class TokenError extends Error {
+  constructor(
+    message: string,
+    readonly expiredGrant: boolean,
+  ) {
+    super(message);
+  }
+}
 
-    const currentTokenSet = await client.getTokens();
-    if (currentTokenSet?.accessToken) {
-      if (currentTokenSet.refreshToken && currentTokenSet.isExpired()) {
-        try {
-          const refreshed = await refreshToken(currentTokenSet, credentials);
-          await client.setTokens({
-            accessToken: refreshed.access_token,
-            refreshToken: refreshed.refresh_token ?? currentTokenSet.refreshToken,
-            expiresIn: refreshed.expires_in,
-            scope: refreshed.scope,
-            idToken: refreshed.id_token,
-          });
-          return refreshed.access_token;
-        } catch {
-          await client.removeTokens();
-        }
+async function tokenError(response: Response): Promise<TokenError> {
+  const payload = (await response.json().catch(() => ({}))) as { error?: string };
+  const expiredGrant = response.status === 400 && payload?.error === "invalid_grant";
+  const invalidClient = payload?.error === "invalid_client";
+  return new TokenError(
+    expiredGrant
+      ? "Your Schwab sign-in expired. Sign in again using your saved app credentials."
+      : invalidClient
+        ? "Schwab rejected the saved App Key or Secret. Check them in extension preferences."
+        : `Schwab sign-in is temporarily unavailable (${response.status}). Try again; your saved connection has been kept.`,
+    expiredGrant,
+  );
+}
+
+async function authorize(rejectedAccessToken?: string, signIn = false): Promise<string> {
+  const credentials = getCredentials();
+  if (!credentials.clientId || !credentials.clientSecret) {
+    throw new Error("Missing Schwab App Key/Secret. Set them once in extension preferences and try again.");
+  }
+
+  const current = await client.getTokens();
+  if (!signIn && current?.accessToken) {
+    const rejected = current.accessToken === rejectedAccessToken;
+    if (!current.isExpired() && !rejected) return current.accessToken;
+    if (current.refreshToken) {
+      try {
+        const refreshed = await refreshToken(current, credentials);
+        await client.setTokens({ ...refreshed, refresh_token: refreshed.refresh_token ?? current.refreshToken });
+        return refreshed.access_token;
+      } catch (error) {
+        // Only an expired/revoked grant needs browser sign-in. Network, server,
+        // rate-limit and app-credential errors must not erase the saved session.
+        if (!(error instanceof TokenError) || !error.expiredGrant) throw error;
       }
-      if (!currentTokenSet.isExpired()) {
-        return currentTokenSet.accessToken;
-      }
-
-      // Expired access token without refresh token — force re-auth.
-      await client.removeTokens();
     }
+  }
 
-    const authRequest = await client.authorizationRequest({
-      endpoint: SCHWAB_AUTH_URL,
-      clientId: credentials.clientId,
-      scope: "readonly",
+  const authRequest = await client.authorizationRequest({
+    endpoint: SCHWAB_AUTH_URL,
+    clientId: credentials.clientId,
+    scope: "readonly",
+  });
+  const { authorizationCode } = await client.authorize(authRequest);
+  const exchanged = await exchangeToken(authRequest, authorizationCode, credentials);
+  await client.setTokens(exchanged);
+  return exchanged.access_token;
+}
+
+// Share refresh/sign-in work between concurrent requests in this command.
+let authorization: Promise<string> | undefined;
+function authorizeOnce(rejectedAccessToken?: string, signIn = false): Promise<string> {
+  if (!authorization) {
+    authorization = authorize(rejectedAccessToken, signIn).finally(() => {
+      authorization = undefined;
     });
-    const { authorizationCode } = await client.authorize(authRequest);
-    const exchanged = await exchangeToken(authRequest, authorizationCode, credentials);
-    await client.setTokens({
-      accessToken: exchanged.access_token,
-      refreshToken: exchanged.refresh_token,
-      expiresIn: exchanged.expires_in,
-      scope: exchanged.scope,
-      idToken: exchanged.id_token,
-    });
-    return exchanged.access_token;
-  },
-};
+  }
+  return authorization;
+}
+
+export const schwabOAuth = { client, authorize: () => authorizeOnce() };
+export const refreshRejectedToken = (token: string) => authorizeOnce(token);
+export const signInToSchwab = () => authorizeOnce(undefined, true);

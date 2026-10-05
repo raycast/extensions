@@ -17,7 +17,6 @@ A comprehensive Raycast extension that provides full integration with your Radar
 
 - **Upcoming Releases** - View upcoming movie releases from calendar
 - **Download Queue** - Monitor active downloads with real-time progress tracking
-- **System Status** - Background health check with notifications
 
 ### 🔧 Multi-Instance Support
 
@@ -29,6 +28,7 @@ A comprehensive Raycast extension that provides full integration with your Radar
 
 ### Prerequisites
 
+- Raycast for macOS or Windows
 - Radarr v3.0+ running and accessible
 - Radarr API key (found in Settings > General > Security)
 
@@ -66,7 +66,6 @@ A comprehensive Raycast extension that provides full integration with your Radar
 | **Missing Movies**     | Find wanted movies and their availability status           |
 | **Unmonitored Movies** | Manage movies not being actively monitored                 |
 | **Instance Status**    | Monitor connection status of your Radarr instances         |
-| **System Status**      | Check system health (background command)                   |
 
 ## Development
 
@@ -96,19 +95,28 @@ ray lint            # Same as npm run lint
 
 ```
 src/
-├── types.ts                    # TypeScript interfaces
-├── config.ts                   # Multi-instance configuration
-├── utils.ts                    # Helper functions
-├── hooks/
-│   └── useRadarrAPI.ts        # API hooks with error handling
-├── search-movies.tsx          # Search and add movies
-├── upcoming-releases.tsx      # Calendar view
-├── download-queue.tsx         # Download management
-├── movie-library.tsx          # Collection browser
-├── missing-movies.tsx         # Missing movie tracking
-├── unmonitored-movies.tsx     # Unmonitored management
-├── instance-status.tsx        # Instance status monitoring
-└── system-status.ts           # Health checks
+├── search-movies.tsx                     # Search and add movies
+├── upcoming-releases.tsx                 # Calendar view
+├── download-queue.tsx                    # Download management
+├── movie-library.tsx                     # Collection browser
+├── missing-movies.tsx                    # Missing movie tracking
+├── unmonitored-movies.tsx                # Unmonitored management
+├── instance-status.tsx                   # Instance status monitoring
+└── lib/
+    ├── components/
+    │   ├── AddMovieForm.tsx              # Add-movie configuration form
+    │   └── OpenPreferencesAction.tsx     # Cross-platform preferences action
+    ├── hooks/
+    │   ├── useInstanceManager.ts         # Instance state management
+    │   └── useRadarrAPI.ts               # API hooks with error handling
+    ├── types/                            # TypeScript interfaces
+    │   ├── config.ts                     # Multi-instance configuration
+    │   ├── movie.ts
+    │   ├── queue.ts
+    │   └── system.ts
+    └── utils/
+        ├── api-helpers.ts                # URL building and error handling
+        └── formatting.ts                 # Display formatting helpers
 ```
 
 ## API Integration

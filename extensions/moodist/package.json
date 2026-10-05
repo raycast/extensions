@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "moodist",
   "title": "Moodist",
-  "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
-  "icon": "icon.png",
+  "description": "Ambient sound mixer for focus and relaxation. Layer over 80 sounds, save presets, set a sleep timer, and control it all from your menu bar.",
+  "icon": "extension-icon.png",
   "author": "chandlervdw",
   "contributors": [
     "pernielsentikaer"
@@ -21,14 +21,14 @@
       "name": "mix-sounds",
       "title": "Mix Sounds",
       "subtitle": "Moodist",
-      "description": "Browse and mix ambient sounds with individual volume control",
+      "description": "Browse, play, and mix ambient sounds with individual and master volume",
       "mode": "view"
     },
     {
       "name": "toggle-playback",
       "title": "Toggle Playback",
       "subtitle": "Moodist",
-      "description": "Play or pause the current sound mix",
+      "description": "Pause or resume the current mix",
       "mode": "no-view"
     },
     {
@@ -43,41 +43,91 @@
       "name": "manage-presets",
       "title": "Manage Presets",
       "subtitle": "Moodist",
-      "description": "Save, load, and delete sound mix presets",
+      "description": "Save, load, pin, and delete sound mix presets",
       "mode": "view"
+    },
+    {
+      "name": "load-preset",
+      "title": "Play Preset",
+      "subtitle": "Moodist",
+      "description": "Play a saved preset by name. Create a quicklink from Manage Presets to give a preset its own hotkey",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset name",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "set-timer",
       "title": "Set Sleep Timer",
       "subtitle": "Moodist",
-      "description": "Set an auto-stop timer for the current mix",
+      "description": "Pause the mix after a set time",
       "mode": "view"
     },
     {
       "name": "stop-all",
       "title": "Stop All Sounds",
       "subtitle": "Moodist",
-      "description": "Stop all playing sounds and kill any orphaned processes",
+      "description": "Stop every sound and clear the mix",
       "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-sounds",
+      "title": "List Sounds",
+      "description": "List every Moodist sound with its id, category, and whether it is playing or paused in the mix"
     },
     {
-      "name": "keep-alive",
-      "title": "Keep Alive",
-      "subtitle": "Moodist",
-      "description": "Background task that restarts sounds if they stop unexpectedly",
-      "mode": "no-view",
-      "interval": "20s",
-      "disabledByDefault": true
+      "name": "play-sounds",
+      "title": "Play Sounds",
+      "description": "Play one or more Moodist sounds by id, optionally replacing the current mix"
+    },
+    {
+      "name": "stop-sounds",
+      "title": "Stop Sounds",
+      "description": "Stop specific Moodist sounds and remove them from the mix, or stop everything"
+    },
+    {
+      "name": "play-preset",
+      "title": "Play Preset",
+      "description": "Replace the current mix with a saved Moodist preset by name"
     }
   ],
   "preferences": [
     {
       "name": "defaultVolume",
       "title": "Default Volume",
-      "description": "Default volume when adding a new sound (0-100)",
-      "type": "textfield",
-      "default": "75",
-      "required": false
+      "description": "Volume for a sound you add to the mix",
+      "type": "dropdown",
+      "default": "50",
+      "required": false,
+      "data": [
+        {
+          "title": "10%",
+          "value": "10"
+        },
+        {
+          "title": "25%",
+          "value": "25"
+        },
+        {
+          "title": "50%",
+          "value": "50"
+        },
+        {
+          "title": "75%",
+          "value": "75"
+        },
+        {
+          "title": "100%",
+          "value": "100"
+        }
+      ]
     },
     {
       "name": "showMenuBarCount",
@@ -102,12 +152,11 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "prebuild": "cd native/looper && swift build && cp .build/debug/looper ../../assets/looper",
     "build": "ray build",
-    "predev": "cd native/looper && swift build && cp .build/debug/looper ../../assets/looper",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

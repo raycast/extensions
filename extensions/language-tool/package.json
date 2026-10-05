@@ -5,6 +5,9 @@
   "description": "Raycast extension that provides instant spelling and grammar correction using LanguageTool. Type any text, get real-time suggestions, and copy the improved version. Ideal for developers, writers, and anyone who wants fast, high-quality text corrections in multiple languages.",
   "icon": "extension-icon.png",
   "author": "lucastaonline",
+  "contributors": [
+    "pasquale.salza"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -26,6 +29,13 @@
       "title": "Check Text Instant",
       "description": "Check a text with LanguageTool using the clipboard content and paste the result instantly. The language is detected automatically.",
       "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "check-selected-text",
+      "title": "Check Selected Text",
+      "description": "Check the selected text, review each correction with the result in view, then replace the selection.",
+      "mode": "view",
       "icon": "extension-icon.png"
     }
   ],

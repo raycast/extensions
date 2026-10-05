@@ -1,9 +1,8 @@
 import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
-import { homedir } from "os";
-import { resolve } from "path";
 import { checkAntinoteInstalled } from "./utils";
 import { useEffect, useState } from "react";
+import { STABLE_DB_PATH, BETA_DB_PATH, SETAPP_DB_PATH } from "./constants";
 
 type Note = {
   id: string;
@@ -12,17 +11,24 @@ type Note = {
   lastModified: string;
 };
 
-const DB_PATH = resolve(homedir(), "Library/Containers/com.chabomakers.Antinote/Data/Documents/notes.sqlite3");
-const SETAPP_DB_PATH = resolve(
-  homedir(),
-  "Library/Containers/com.chabomakers.Antinote-setapp/Data/Documents/notes.sqlite3",
-);
-
 const query = `
   SELECT id, content, created, lastModified
   FROM notes
   WHERE content IS NOT ''
   ORDER BY lastModified DESC
+`;
+
+const beta_query = `
+SELECT upper(
+    substr(hex(ZID), 1, 8)  || '-' ||
+    substr(hex(ZID), 9, 4)  || '-' ||
+    substr(hex(ZID), 13, 4) || '-' ||
+    substr(hex(ZID), 17, 4) || '-' ||
+    substr(hex(ZID), 21, 12)
+) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified
+  FROM ZNOTE
+  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 0 AND ZSOFTDELETED = 0
+  ORDER BY ZLASTMODIFIED DESC
 `;
 
 function getTitle(content: string) {
@@ -54,15 +60,16 @@ async function openInAntinote(noteId: string) {
   }
 }
 
+function resolveDb(version: string | null) {
+  const dbPath = version === "setapp" ? SETAPP_DB_PATH : version === "beta" ? BETA_DB_PATH : STABLE_DB_PATH;
+  return useSQL<Note>(dbPath, version === "beta" ? beta_query : query);
+}
+
 export default function Command() {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   const [version, setVersion] = useState<string | null>(null);
 
-  const {
-    isLoading,
-    data: notes,
-    permissionView,
-  } = useSQL<Note>(version === "setapp" ? SETAPP_DB_PATH : DB_PATH, query);
+  const { isLoading, data: notes, permissionView } = resolveDb(version);
 
   useEffect(() => {
     async function checkInstallation() {
@@ -116,7 +123,7 @@ export default function Command() {
               <Action
                 title="Find in Antinote"
                 onAction={async () => {
-                  openInAntinote(item.id);
+                  await openInAntinote(item.id);
                 }}
               />
             </ActionPanel>

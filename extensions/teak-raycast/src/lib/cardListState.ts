@@ -1,8 +1,7 @@
 import type { RaycastCard } from "./api";
 
-const sortByCreatedAtDesc = (cards: RaycastCard[]): RaycastCard[] => {
-  return [...cards].sort((left, right) => right.createdAt - left.createdAt);
-};
+const sortByCreatedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
+  [...cards].sort((left, right) => right.createdAt - left.createdAt);
 
 export const upsertCard = (
   cards: RaycastCard[],
@@ -43,6 +42,4 @@ export const removeCardById = (
   };
 };
 
-export const toTagQuery = (tag: string): string => {
-  return tag.trim();
-};
+export const toTagQuery = (tag: string): string => tag.trim();

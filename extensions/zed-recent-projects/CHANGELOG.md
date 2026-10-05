@@ -1,5 +1,24 @@
 # Zed Recent Projects Changelog
 
+## [Dismiss Raycast During Project Launch] - 2026-10-05
+
+- Fix Search Recent Projects making Raycast appear unresponsive while waiting for Zed to launch. Raycast now dismisses immediately after selection, matching the Visual Studio Code extension's behavior.
+
+## [Open in New Window Preference] - 2026-09-25
+
+- Add an "Open in New Window" preference to the "Open with Zed" and "Search Recent Projects" commands that opens items in a new Zed window.
+- Change the "Move Up" and "Move Down" shortcuts for pinned entries to `⌘⌥↑` / `⌘⌥↓` to match Raycast 2.0.
+- Change the "Pin Entry" and "Unpin Entry" shortcut to `⌘.` to match Raycast 2.0.
+- Add Windows shortcuts for pinning, moving and removing entries, following Raycast's standard shortcuts.
+
+## [Fix Missing PATH Entries from ~/.zshrc] - 2026-09-10
+
+- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login _and_ interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
+
+## [Fix Project Launch in Raycast 2] - 2026-08-15
+
+- Open projects before closing Raycast so CLI launches complete reliably.
+
 ## [Fix Nix aware `$PATH` lookup] - 2026-07-21
 
 - Fix an issue where nix-managed language tooling (e.g. LSPs) could never be resolved from `$PATH` due to the missing `$USER` env var

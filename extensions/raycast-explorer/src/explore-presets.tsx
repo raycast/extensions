@@ -3,8 +3,9 @@ import { getAvatarIcon, useCachedPromise, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { getAvailableAiModels } from "./api";
+import { CategoryDropdownItems } from "./catalog";
 import { Preset, PresetCategory } from "./data/presets";
-import { getIcon, raycastProtocol } from "./helpers";
+import { getCreativityIcon, getIcon, platformShortcut, prepareModel, raycastProtocol } from "./helpers";
 
 const CONTRIBUTE_URL = "https://github.com/raycast/ray-so";
 const baseUrl = "https://ray.so/presets";
@@ -30,17 +31,7 @@ export default function ExplorePresets() {
       searchBarAccessory={
         <List.Dropdown tooltip="Select Category" onChange={setSelectedCategory} value={selectedCategory}>
           <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
-          {categories?.map((category) => {
-            const icon = getIcon(category.icon || "");
-            return (
-              <List.Dropdown.Item
-                key={category.slug}
-                title={category.name}
-                icon={Icon[icon] ?? Icon.List}
-                value={category.slug}
-              />
-            );
-          })}
+          <CategoryDropdownItems categories={categories} />
         </List.Dropdown>
       }
     >
@@ -112,12 +103,12 @@ export default function ExplorePresets() {
                     <Action.Open title="Add to Raycast" icon={Icon.RaycastLogoNeg} target={addToRaycastUrl} />
                     <Action.CopyToClipboard
                       title="Copy Instructions"
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                      shortcut={platformShortcut(["cmd"], ".")}
                       content={preset.instructions}
                     />
                     <Action.CopyToClipboard
                       title="Copy URL to Share"
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      shortcut={platformShortcut(["cmd", "shift"], "s")}
                       icon={Icon.Link}
                       content={`${baseUrl}/preset/${preset.id}`}
                     />
@@ -125,7 +116,7 @@ export default function ExplorePresets() {
                       <Action.OpenInBrowser
                         title="Contribute"
                         icon={Icon.PlusSquare}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        shortcut={platformShortcut(["cmd", "shift"], "c")}
                         url={CONTRIBUTE_URL}
                       />
                     </ActionPanel.Section>
@@ -138,28 +129,6 @@ export default function ExplorePresets() {
       ))}
     </List>
   );
-}
-
-function getCreativityIcon(creativity: Preset["creativity"]) {
-  if (!creativity || creativity === "none") {
-    return Icon.CircleDisabled;
-  }
-
-  if (creativity === "low") {
-    return Icon.StackedBars1;
-  }
-
-  if (creativity === "medium") {
-    return Icon.StackedBars2;
-  }
-
-  if (creativity === "high") {
-    return Icon.StackedBars3;
-  }
-
-  if (creativity === "maximum") {
-    return Icon.StackedBars4;
-  }
 }
 
 function makeQueryString(preset: Preset): string {
@@ -178,11 +147,4 @@ function makeQueryString(preset: Preset): string {
       id,
     }),
   )}`;
-}
-
-function prepareModel(model: Preset["model"]) {
-  if (model && /^".*"$/.test(model)) {
-    return model.slice(1, model.length - 1);
-  }
-  return model;
 }

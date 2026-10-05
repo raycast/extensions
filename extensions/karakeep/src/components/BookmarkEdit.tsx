@@ -71,7 +71,10 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
       // Same pre-flight as the create forms: don't write into a dead server and
       // lose the user's edits. Reuses the toast already on screen rather than
       // opening a second one that would replace it.
-      if ((await ensureReachable(undefined, toast)) === "unreachable") return;
+      // The note is handed over as the recoverable input. This form is nested in
+      // navigation, where Raycast's own drafts do not work, so the clipboard is
+      // the ONLY thing standing between a failed write and retyping the note.
+      if ((await ensureReachable(values.note.trim() || values.title.trim(), toast)) !== "ok") return;
 
       try {
         await fetchUpdateBookmark(bookmark.id, {

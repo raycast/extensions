@@ -1,16 +1,22 @@
 import { Action, ActionPanel, Icon, List, Color, Image } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
+import type { InstanceState } from "@/lib/types/instance";
 import type { SeriesLookup } from "@/lib/types/series";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { searchSeries, useSeries } from "@/lib/hooks/useSonarrAPI";
-import { getSeriesPoster, getSeriesStatus } from "@/lib/utils/formatting";
+import { getSearchPlaceholder, getSeriesPoster, getSeriesStatus } from "@/lib/utils/formatting";
 import AddSeriesForm from "@/lib/components/AddSeriesForm";
+import { InstanceActions } from "@/lib/components/InstanceActions";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState<SeriesLookup[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchRequestId = useRef(0);
-  const { data: existingSeries, mutate } = useSeries();
+  const instanceState = useInstance();
+  const { instance } = instanceState;
+  const { data: existingSeries, mutate } = useSeries(instance);
 
   const existingSeriesIds = useMemo(() => {
     return new Set((existingSeries || []).map((s) => s.tvdbId));
@@ -19,7 +25,7 @@ export default function Command() {
   useEffect(() => {
     const searchTerm = searchText.trim();
 
-    if (searchTerm.length < 3) {
+    if (searchTerm.length < 3 || !instance) {
       searchRequestId.current += 1;
       setSearchResults([]);
       setIsSearching(false);
@@ -33,7 +39,7 @@ export default function Command() {
 
     const timer = setTimeout(async () => {
       try {
-        const results = await searchSeries(searchTerm);
+        const results = await searchSeries(instance, searchTerm);
 
         if (requestId === searchRequestId.current) {
           setSearchResults(results);
@@ -46,23 +52,38 @@ export default function Command() {
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [searchText]);
+  }, [searchText, instance]);
+
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
 
   return (
     <List
-      searchBarPlaceholder="Search for TV series..."
+      actions={instancePanel}
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search for TV series")}
       onSearchTextChange={setSearchText}
-      isLoading={isSearching}
+      isLoading={isSearching || instanceState.isLoading}
       throttle
     >
       {searchResults.length === 0 && searchText.trim().length >= 3 && !isSearching && (
-        <List.EmptyView title="No Series Found" description="Try a different search term" icon={Icon.MagnifyingGlass} />
+        <List.EmptyView
+          title="No Series Found"
+          description="Try a different search term"
+          icon={Icon.MagnifyingGlass}
+          actions={instancePanel}
+        />
       )}
       {searchResults.length === 0 && searchText.trim().length < 3 && (
         <List.EmptyView
           title="Search for TV Series"
           description="Enter at least 3 characters to start searching"
           icon={Icon.Video}
+          actions={instancePanel}
         />
       )}
       {searchResults.map((series) => (
@@ -71,6 +92,7 @@ export default function Command() {
           series={series}
           isInLibrary={existingSeriesIds.has(series.tvdbId)}
           onSeriesAdded={mutate}
+          instanceState={instanceState}
         />
       ))}
     </List>
@@ -81,10 +103,12 @@ function SeriesListItem({
   series,
   isInLibrary,
   onSeriesAdded,
+  instanceState,
 }: {
   series: SeriesLookup;
   isInLibrary: boolean;
   onSeriesAdded: () => void;
+  instanceState: InstanceState;
 }) {
   const poster = getSeriesPoster(series.images) || series.remotePoster;
   const status = getSeriesStatus(series.status);
@@ -128,8 +152,10 @@ function SeriesListItem({
               <Action.Push
                 title="Configure & Add"
                 icon={Icon.Plus}
-                target={<AddSeriesForm series={series} onSeriesAdded={onSeriesAdded} />}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                target={
+                  <AddSeriesForm series={series} onSeriesAdded={onSeriesAdded} instance={instanceState.instance} />
+                }
+                shortcut={Shortcuts.configureAndAdd}
               />
             )}
           </ActionPanel.Section>
@@ -150,6 +176,8 @@ function SeriesListItem({
               />
             )}
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

@@ -1,7 +1,23 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Keyboard, Icon } from "@raycast/api";
-import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Keyboard,
+  Icon,
+  Toast,
+  showToast,
+} from "@raycast/api";
+import {
+  closeActiveTab,
+  openNewTab,
+  reloadTab,
+  setActiveTab,
+  createNewGuestWindowToWebsite,
+  setActiveWindow,
+} from "../actions";
+import { Preferences, SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
 
@@ -9,6 +25,7 @@ export class ChromeActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static WindowList = WindowListActions;
 }
 
 function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
@@ -68,52 +85,58 @@ function HistoryItemActions({
   title,
   url,
   profile: profileOriginal,
+  onVisit,
+  onResetRanking,
 }: {
   title: string;
   url: string;
   profile: string;
+  onVisit?: () => Promise<void>;
+  onResetRanking?: () => void | Promise<void>;
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
+  async function openAndRecordVisit(openBehaviour: SettingsProfileOpenBehaviour): Promise<void> {
+    onVisit?.().catch((error) => console.error("Failed to record bookmark visit:", error));
+    await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile: openBehaviour });
+  }
+
   return (
     <ActionPanel title={title}>
-      <Action onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} title={"Open"} />
+      <Action onAction={() => openAndRecordVisit(openTabInProfile)} title={"Open"} />
       <Action
         title="Open in Guest Window"
         icon={{ source: Icon.Person }}
         onAction={async () => {
+          onVisit?.().catch((error) => console.error("Failed to record bookmark visit:", error));
           await createNewGuestWindowToWebsite(url);
           await closeMainWindow();
         }}
       />
       <ActionPanel.Section title={"Open in profile"}>
         <Action
-          onAction={() =>
-            openNewTab({
-              url,
-              profileOriginal,
-              profileCurrent,
-              openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
-            })
-          }
+          onAction={() => openAndRecordVisit(SettingsProfileOpenBehaviour.ProfileCurrent)}
           title={"Open in Current Profile"}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action
-          onAction={() =>
-            openNewTab({
-              url,
-              profileOriginal,
-              profileCurrent,
-              openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
-            })
-          }
+          onAction={() => openAndRecordVisit(SettingsProfileOpenBehaviour.ProfileOriginal)}
           title={"Open in Original Profile"}
           shortcut={Keyboard.Shortcut.Common.OpenWith}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      {onResetRanking ? (
+        <ActionPanel.Section>
+          <Action
+            title="Reset Ranking"
+            icon={{ source: Icon.ArrowCounterClockwise }}
+            onAction={onResetRanking}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
@@ -173,5 +196,35 @@ function ReloadTab(props: { tab: Tab }) {
       onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
     />
+  );
+}
+
+function WindowListActions({
+  window,
+  refreshWindowsListOnFailure,
+}: {
+  window: ChromeWindow;
+  refreshWindowsListOnFailure?: () => void;
+}): ReactElement {
+  return (
+    <ActionPanel title={window.title}>
+      <Action
+        title="Focus Window"
+        icon={{ source: Icon.Window }}
+        onAction={async () => {
+          try {
+            await setActiveWindow(window.id);
+            await closeMainWindow();
+          } catch {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to focus window",
+              message: "Window may have been closed",
+            });
+            if (refreshWindowsListOnFailure) refreshWindowsListOnFailure();
+          }
+        }}
+      />
+    </ActionPanel>
   );
 }

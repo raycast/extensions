@@ -1,5 +1,12 @@
 # Things Changelog
 
+## [Things 3.23 Compatibility] - 2026-08-29
+
+- Fixed Today and Anytime missing to-dos whose scheduled date had arrived when the Unofficial API preference is enabled. Things 3.23 leaves such a to-do marked as scheduled, so the extension has to decide list membership by date.
+- Fixed Upcoming dropping repeating to-dos while an occurrence was pending. They now appear as dateless entries after the dated ones, matching Things, which computes the next date internally and does not expose it.
+- Fixed to-dos inside trashed projects leaking into every Unofficial API list, into Quick Find, and into search results. Trashing a project leaves its to-dos untouched in the database, so each query has to check the parent.
+- Marking a repeating to-do's template as completed or canceled now shows an error instead of a false success toast. Things silently ignores the write, so complete or cancel the scheduled occurrence instead.
+
 ## [Fix Marking To-Dos Completed] - 2026-07-22
 
 - Restore marking to-dos completed or canceled from list rows and the Today menu bar. The previous release's writable-key allowlist in the property setter rejected `status`, so those actions threw an error.

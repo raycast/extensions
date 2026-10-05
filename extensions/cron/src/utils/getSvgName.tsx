@@ -5,37 +5,15 @@ import {
   fontFamily as defFontFamily,
   customTheme as defCustomTheme,
 } from "u/options";
-import { Color, environment } from "@raycast/api";
-
-function mapValueToColor(value: string): Color | undefined {
-  switch (value) {
-    case "Blue":
-      return Color.Blue;
-    case "Green":
-      return Color.Green;
-    case "Magenta":
-      return Color.Magenta;
-    case "Orange":
-      return Color.Orange;
-    case "Purple":
-      return Color.Purple;
-    case "Red":
-      return Color.Red;
-    case "Yellow":
-      return Color.Yellow;
-    case "Default":
-    default:
-      return undefined;
-  }
-}
+import { mapValueToColor } from "u/getSvg";
 
 export default function SVGName({
   fontColorAccent = defFontColorAccent.trim().length > 0
     ? defFontColorAccent
-    : mapValueToColor(defCustomTheme) || Color.Green,
+    : mapValueToColor(defCustomTheme) || "#30D158",
   fontColorAccentWeekend = defFontColorAccentWeekend.trim().length > 0
     ? defFontColorAccentWeekend
-    : mapValueToColor(defCustomTheme) || Color.Orange,
+    : mapValueToColor(defCustomTheme) || "#FF9F0A",
   fontWeight = defFontWeight,
   fontFamily = defFontFamily,
   isWeekend = false,
@@ -56,27 +34,23 @@ export default function SVGName({
   let color;
 
   if (isToday) {
-    color = fontColorAccent || mapValueToColor(defCustomTheme) || Color.PrimaryText;
+    color = fontColorAccent;
   } else if (isWeekend) {
-    color = fontColorAccentWeekend || mapValueToColor(defCustomTheme) || Color.SecondaryText;
-  } else if (weekDay) {
-    color = Color.SecondaryText;
+    color = fontColorAccentWeekend;
   } else {
-    color = environment.appearance === "light" ? "#000000" : "#ffffff";
+    // Plain black placeholder; the Grid.Item applies a theme-aware tintColor
+    // (Color.SecondaryText), so the label adapts to light/dark mode.
+    color = "#000000";
   }
 
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" width="60" height="60">
-          <style>
-            text {
-              font-family: ${fontFamily ? fontFamily : "sans-serif"};
-              font-weight: ${fontWeight ? fontWeight : "normal"};
-              fill: ${color};
-              text-anchor: middle;
-            }
-          </style>
-        <text x="-5" y="5">
-          ${weekDay}
-        </text>
-    </svg>
-  `;
+  const label = (weekDay ?? "").toString();
+  // Shrink long labels (e.g. month names in the week column header) to fit the 24-unit canvas
+  const fontSize = Math.min(8, 22 / Math.max(1, label.length * 0.62));
+  const baselineY = 12 + fontSize * 0.35;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="96" height="96">
+    <text x="12" y="${baselineY}" font-size="${fontSize}" font-family="${fontFamily || "sans-serif"}" font-weight="${fontWeight || "normal"}" fill="${color}" text-anchor="middle">${label}</text>
+  </svg>`;
+
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

@@ -34,7 +34,7 @@ export const competitions = [
 export default function SearchBarCompetition(props: {
   type: string;
   selected: string;
-  onSelect: React.Dispatch<React.SetStateAction<string>>;
+  onSelect: (value: string) => void;
   data: { title: string; value: string }[];
 }) {
   return (

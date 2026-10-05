@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, environment, Keyboard } from "@raycast/api";
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
@@ -103,7 +103,7 @@ export default function Stats() {
         title={t("stats.refresh")}
         icon={Icon.ArrowClockwise}
         onAction={revalidate}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
       />
     </ActionPanel>
   );

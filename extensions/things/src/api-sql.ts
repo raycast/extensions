@@ -147,8 +147,14 @@ const TODO_SELECT_DETAIL = `${TODO_SELECT_SUMMARY},
   COALESCE(t.notes, '') as notes,
   ${taskTagsSql('t')} as tagList`;
 
-// Used by AI tool queries (queryTodos, searchTodos) — todos only, no projects
-const TODO_BASE_WHERE = `t.type = 0 AND t.trashed = 0 AND t.status = 0`;
+// Trashing a project does not set trashed on its child todos, so the parent's
+// flag has to be checked explicitly. Requires a `p` join onto t.project, present
+// in both TODO_JOINS and LIST_SELECT. COALESCE covers the rows where p is absent:
+// a todo outside any project, or one whose project uuid no longer resolves.
+const PARENT_PROJECT_NOT_TRASHED = `COALESCE(p.trashed, 0) = 0`;
+
+// Used by AI tool queries (queryTodos, searchTodos) — todos only, no projects.
+const TODO_BASE_WHERE = `t.type = 0 AND t.trashed = 0 AND t.status = 0 AND ${PARENT_PROJECT_NOT_TRASHED}`;
 
 /** Build WHERE clause for queryTodos() project/area filters, mutually exclusive. */
 function buildTodosWhereClause(projectId?: string | null, areaId?: string | null): string {
@@ -481,18 +487,23 @@ const LIST_SELECT = `
     LEFT JOIN TMArea pa ON p.area = pa.uuid
     LEFT JOIN TMArea a ON t.area = a.uuid`;
 
-// Excludes recurring master templates that have at least one active instance scheduled.
-// Active instances have rt1_repeatingTemplate pointing back to the master.
-const EXCLUDE_MASTER_WHERE = `
-  AND NOT (
-    t.rt1_repeatingTemplate IS NULL
-    AND t.rt1_recurrenceRule IS NOT NULL
-    AND EXISTS (
+// A repeating master's open instance, which points back at it via
+// rt1_repeatingTemplate and may be materialized well ahead of its scheduled date.
+const HAS_OPEN_INSTANCE = `
+    EXISTS (
       SELECT 1 FROM TMTask i
       WHERE i.rt1_repeatingTemplate = t.uuid
         AND i.trashed = 0
         AND i.status = 0
-    )
+    )`;
+
+// Excludes recurring master templates that have at least one open instance. The
+// instance row is shown in place of the master.
+const EXCLUDE_MASTER_WHERE = `
+  AND NOT (
+    t.rt1_repeatingTemplate IS NULL
+    AND t.rt1_recurrenceRule IS NOT NULL
+    AND ${HAS_OPEN_INSTANCE}
   )`;
 
 type ListTodoRow = {
@@ -600,12 +611,15 @@ async function getInboxTodosFromDB(dbPath: string): Promise<Todo[]> {
       AND t.trashed = 0
       AND t.status = 0
       AND t.start = 0
+      AND ${PARENT_PROJECT_NOT_TRASHED}
     ORDER BY t."index" ASC
   `,
   );
 }
 
-// Open, scheduled for today or earlier (start=1, startDate <= end-of-today).
+// Open, scheduled for today or earlier (startDate <= end-of-today). Membership
+// is date-driven: a scheduled item can still carry start=2 after its date has
+// arrived, so both start values qualify and only the date decides.
 // Includes todos (type=0) and projects (type=1) — Things shows both in Today.
 // Excludes recurring master templates that have an active instance already scheduled.
 async function getTodayTodosFromDB(dbPath: string): Promise<Todo[]> {
@@ -618,9 +632,10 @@ async function getTodayTodosFromDB(dbPath: string): Promise<Todo[]> {
       t.type IN (0, 1)
       AND t.trashed = 0
       AND t.status = 0
-      AND t.start = 1
+      AND t.start IN (1, 2)
       AND t.startDate IS NOT NULL
       AND t.startDate <= ${todayEnd}
+      AND ${PARENT_PROJECT_NOT_TRASHED}
       ${EXCLUDE_MASTER_WHERE}
     ORDER BY t.todayIndex ASC, t."index" ASC
   `,
@@ -628,7 +643,9 @@ async function getTodayTodosFromDB(dbPath: string): Promise<Todo[]> {
 }
 
 // Anytime is built in two groups:
-//   1. Today todos (type=0, start=1, startDate <= today) — sorted by index
+//   1. Today todos (type=0, start IN (1, 2), startDate <= today) — sorted by index.
+//      Both start values qualify because a scheduled todo can still carry
+//      start=2 after its date has arrived.
 //   2. Rest todos  (type=0, start=1, startDate IS NULL or > today) — sorted by index
 // Projects are not included. Todos inside Someday/Upcoming projects (project.start = 2) are excluded.
 // Recurring master templates that have an active instance are excluded (the instance is shown instead).
@@ -643,9 +660,10 @@ async function getAnytimeTodosFromDB(dbPath: string): Promise<Todo[]> {
         t.type = 0
         AND t.trashed = 0
         AND t.status = 0
-        AND t.start = 1
+        AND t.start IN (1, 2)
         AND t.startDate IS NOT NULL
         AND t.startDate <= ${todayEnd}
+        AND ${PARENT_PROJECT_NOT_TRASHED}
         AND (t.project IS NULL OR (SELECT p.start FROM TMTask p WHERE p.uuid = t.project) = 1)
         ${EXCLUDE_MASTER_WHERE}
       ORDER BY
@@ -664,6 +682,7 @@ async function getAnytimeTodosFromDB(dbPath: string): Promise<Todo[]> {
         AND t.status = 0
         AND t.start = 1
         AND (t.startDate IS NULL OR t.startDate > ${todayEnd})
+        AND ${PARENT_PROJECT_NOT_TRASHED}
         AND (t.project IS NULL OR (SELECT p.start FROM TMTask p WHERE p.uuid = t.project) = 1)
         ${EXCLUDE_MASTER_WHERE}
       ORDER BY
@@ -677,10 +696,14 @@ async function getAnytimeTodosFromDB(dbPath: string): Promise<Todo[]> {
   return [...todayTodos, ...restTodos.filter((t) => !seenIds.has(t.id))];
 }
 
-// Open, start=2, has a concrete startDate OR is a recurring master with a known next instance date
-// (rt1_nextInstanceStartDate != NEXT_INSTANCE_PLACEHOLDER). Things shows these in Upcoming via the next instance date.
-// Includes todos (type=0) and projects (type=1). Sorted: todos first, then projects, each by index.
+// Open, start=2, scheduled strictly after today, OR a recurring master awaiting its
+// next instance. Rows whose date has arrived belong to Today. A master
+// qualifies via a known next instance date, or datelessly while an open instance
+// exists (Things clears rt1_nextInstanceStartDate until that instance completes and
+// computes the "future repeat" date internally, so no date is available to show).
+// Includes todos (type=0) and projects (type=1). Dateless masters sort last.
 async function getUpcomingTodosFromDB(dbPath: string): Promise<Todo[]> {
+  const todayEnd = getEndOfToday();
   return runListQuery(
     dbPath,
     `
@@ -690,16 +713,23 @@ async function getUpcomingTodosFromDB(dbPath: string): Promise<Todo[]> {
       AND t.trashed = 0
       AND t.status = 0
       AND t.start = 2
+      AND ${PARENT_PROJECT_NOT_TRASHED}
       AND (
-        t.startDate IS NOT NULL
+        (t.startDate IS NOT NULL AND t.startDate > ${todayEnd})
         OR (
           t.rt1_recurrenceRule IS NOT NULL
           AND t.rt1_repeatingTemplate IS NULL
-          AND t.rt1_nextInstanceStartDate IS NOT NULL
-          AND t.rt1_nextInstanceStartDate != ${NEXT_INSTANCE_PLACEHOLDER}
+          AND (
+            (
+              t.rt1_nextInstanceStartDate IS NOT NULL
+              AND t.rt1_nextInstanceStartDate != ${NEXT_INSTANCE_PLACEHOLDER}
+            )
+            OR ${HAS_OPEN_INSTANCE}
+          )
         )
       )
     ORDER BY
+      COALESCE(t.startDate, NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER})) IS NULL ASC,
       COALESCE(t.startDate, NULLIF(t.rt1_nextInstanceStartDate, ${NEXT_INSTANCE_PLACEHOLDER})) ASC,
       CASE WHEN t.project IS NULL THEN 0 ELSE 1 END ASC,
       p."index" ASC,
@@ -727,6 +757,7 @@ async function getSomedayTodosFromDB(dbPath: string): Promise<Todo[]> {
       AND t.startDate IS NULL
       AND t.rt1_recurrenceRule IS NULL
       AND t.rt1_repeatingTemplate IS NULL
+      AND ${PARENT_PROJECT_NOT_TRASHED}
     ORDER BY t.type ASC, t."index" ASC
   `,
   );
@@ -744,6 +775,7 @@ async function getLogbookTodosFromDB(dbPath: string): Promise<Todo[]> {
       AND t.trashed = 0
       AND t.status IN (2, 3)
       AND t.stopDate IS NOT NULL
+      AND ${PARENT_PROJECT_NOT_TRASHED}
     ORDER BY t.stopDate DESC
   `,
   );
@@ -945,7 +977,7 @@ export const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
       LEFT JOIN TMTask p ON p.uuid = t.project
       LEFT JOIN TMArea da ON da.uuid = t.area
       LEFT JOIN TMArea pa ON pa.uuid = p.area
-      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0`,
+      WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0 AND ${PARENT_PROJECT_NOT_TRASHED}`,
     ),
   ]);
 

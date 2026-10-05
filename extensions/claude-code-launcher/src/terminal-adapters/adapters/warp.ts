@@ -4,7 +4,8 @@ import { writeFile, mkdir, unlink } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { TerminalAdapter } from "../types";
+import { TerminalAdapter, TerminalOpenOptions } from "../types";
+import { buildClaudeCommand } from "../claude-command";
 
 const execFileAsync = promisify(execFile);
 
@@ -14,9 +15,10 @@ export class WarpAdapter implements TerminalAdapter {
 
   private readonly launchConfigDir = join(homedir(), ".warp", "launch_configurations");
 
-  async open(directory: string): Promise<void> {
+  async open(directory: string, options?: TerminalOpenOptions): Promise<void> {
     const configName = `claude-code-${randomUUID()}`;
     const configPath = join(this.launchConfigDir, `${configName}.yaml`);
+    const claudeCommand = buildClaudeCommand(options);
 
     const yamlContent = `
 name: ${configName}
@@ -26,7 +28,7 @@ windows:
         layout:
           cwd: "${directory.replace(/"/g, '\\"')}"
           commands:
-            - exec: claude
+            - exec: "${claudeCommand.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"
 `;
 
     try {

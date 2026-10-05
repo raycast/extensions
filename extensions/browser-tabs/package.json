@@ -6,7 +6,8 @@
   "icon": "browser-tabs-icon.png",
   "author": "koinzhang",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "artistro08"
   ],
   "license": "MIT",
   "commands": [
@@ -76,8 +77,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.1.0",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
@@ -97,6 +98,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

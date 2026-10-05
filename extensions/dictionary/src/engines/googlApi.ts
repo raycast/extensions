@@ -12,17 +12,22 @@ interface GooglApiDefinitionItem {
   detectedSourceLanguage: LanguageCode;
 }
 const prepareRequestUrl = (versioning: "v2" | "v3" = "v2") => {
-  return (_query: string): RequestInfo => `https://translation.googleapis.com/language/translate/${versioning}`;
+  return (): string => `https://translation.googleapis.com/language/translate/${versioning}`;
 };
 
-const getOpts = (query: string, to: LanguageCode, apiKey?: string, _from?: string): RequestInit => {
+const getOpts = (query: string, to: LanguageCode, apiKey?: string): RequestInit => {
+  if (!apiKey) {
+    throw new Error("Set your Google Cloud Translation API key in extension preferences.");
+  }
+
   const data = {
     target: to,
     q: query,
   };
   return {
     headers: {
-      "X-goog-api-key": apiKey || "",
+      "Content-Type": "application/json; charset=utf-8",
+      "X-goog-api-key": apiKey,
     },
     method: "POST",
     body: JSON.stringify(data),

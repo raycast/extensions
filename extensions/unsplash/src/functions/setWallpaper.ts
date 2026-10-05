@@ -3,6 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync, unlinkSync } from "fs";
+import { join } from "path";
 import { resolveHome } from "./utils";
 import { triggerDownload } from "./apiRequest";
 
@@ -62,16 +63,14 @@ export const setWallpaper = async ({
     }
   }
 
-  const fixedPathName = selectedPath.endsWith("/")
-    ? `${selectedPath}${id}-${downloadSize}.jpg`
-    : `${selectedPath}/${id}-${downloadSize}.jpg`;
+  const fixedPathName = join(selectedPath, `${id}-${downloadSize}.jpg`);
 
   try {
     if (process.platform === "win32") {
       // Windows: SPI sets wallpaper on all monitors; `every` is always true
       if (!existsSync(fixedPathName)) {
         try {
-          await execFileP("curl.exe", ["-s", "--fail", "-o", fixedPathName, url]);
+          await execFileP("curl.exe", ["-s", "--fail", "-L", "-o", fixedPathName, url]);
         } catch (err) {
           try {
             unlinkSync(fixedPathName);

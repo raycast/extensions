@@ -1,5 +1,40 @@
 # Fathom for Raycast Changelog
 
+## [Open in Desktop App] - 2026-10-05
+
+### Added
+
+- **Open Meetings In** preference: **Open in Fathom** (⌘O) can open a meeting in the Fathom desktop app on macOS instead of the browser. It is the default, and falls back to the web when the app is not installed.
+- **Strict Redaction** preference: also hides URL query strings and fragments in debug logs, for sharing a log when reporting an issue.
+
+### Fixed
+
+- Team member CSV export quotes cells correctly, and neutralizes values a spreadsheet would run as a formula.
+
+### Changed
+
+- **Downloads**: a recording the server has not finished preparing now fails with a clear "try again later" message instead of a size mismatch, and keeps any bytes already downloaded. A resumed download whose link expired picks up where it stopped rather than starting over, and the download link is no longer written to a temporary file.
+- **Cancel while preparing**: a download can now be canceled (⌘.) while Fathom is still rendering the video, not only once the transfer starts.
+- **Jump to Timestamp** no longer shares ⌘O with Open in Fathom, and **Copy Action Item** moves to ⌘C so it no longer shares ⌘⇧C with Copy Share Link.
+- Updated `@chrismessina/raycast-downloader` to 0.2.1, and `brace-expansion` to 5.0.12 to fix high-severity denial-of-service advisories.
+
+## [Download Recordings] - 2026-09-20
+
+### Added
+
+- **Download Recording**: Save a meeting's recording to your export directory (⌘⇧D). Recordings are typically 250–650 MB, so the transfer runs in a background process that **keeps going after you dismiss Raycast** — reopen the command to see where it got to.
+- **Copy Download Link** (⌘⇧L): Copy a direct link to the recording. The link is signed and expires within 24 hours.
+- **Resumable transfers**: An interrupted download resumes from where it stopped instead of starting over, and a cancelled one leaves no partial file behind.
+- **Live progress**: Percentage, transferred size, speed, and time remaining, with a Cancel action throughout.
+- **Transcript search reaches the whole transcript.** Transcripts moved to disk with a compact index in storage, and a word appearing later in a long meeting fell outside it. Search now consults the transcript on disk whenever that index cannot answer.
+- **Search Older Meetings** (⌘L): search covers the meetings loaded so far, so a match further back can be missing. This fetches another batch of older meetings on demand, and the empty state now says when there is more to look through rather than reporting no results.
+
+### Changed
+
+- Failure notifications now carry a **Copy Error** action, so a problem can be reported with its details attached.
+- Keyboard shortcuts are now platform-explicit (macOS and Windows) rather than ambiguous.
+- Export Summary as Markdown moved to ⌘⇧M (⌘⇧S conflicted with a system shortcut).
+
 ## [Instant Display, Stop Fetching & Cache Performance] - 2026-02-25
 
 ### Added

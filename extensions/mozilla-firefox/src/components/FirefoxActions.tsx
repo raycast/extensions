@@ -1,50 +1,62 @@
-import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
-import { HistoryEntry, Tab } from "../interfaces";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { buildNewTabUrl, newTabTitle, openHistoryTab, openInNewWindow, openNewTab } from "../actions";
+import { HistoryEntry } from "../interfaces";
 
-export const NewTabAction = NewTabActionComponent;
-export const HistoryItemAction = HistoryItemActionComponent;
-export const TabListItemAction = TabListItemActionComponent;
+function OpenInNewWindowAction({ url }: { url?: string }) {
+  if (process.platform !== "win32") return null;
+  return (
+    <Action
+      title="Open in New Window"
+      icon={{ source: Icon.Window }}
+      shortcut={{
+        macOS: { modifiers: ["ctrl"], key: "enter" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
+      }}
+      onAction={() => openInNewWindow(url)}
+    />
+  );
+}
 
-function NewTabActionComponent({ query }: { query?: string }) {
+function EditUrlAction({ url, onEditUrl }: { url?: string; onEditUrl?: (url: string) => void }) {
+  if (!onEditUrl || !url) return null;
+  return (
+    <Action
+      title="Edit URL in Search Bar"
+      icon={{ source: Icon.Pencil }}
+      shortcut={{ modifiers: ["shift"], key: "return" }}
+      onAction={() => onEditUrl(url)}
+    />
+  );
+}
+
+export function NewTabAction({ query }: { query?: string }) {
+  const title = newTabTitle(query);
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
+      <Action onAction={() => openNewTab(query)} title={title} />
+      <OpenInNewWindowAction url={buildNewTabUrl(query)} />
     </ActionPanel>
   );
 }
 
-function HistoryItemActionComponent({ entry: { title, url } }: { entry: HistoryEntry }) {
+export function HistoryItemAction({
+  entry: { title, url },
+  onEditUrl,
+}: {
+  entry: HistoryEntry;
+  onEditUrl?: (url: string) => void;
+}) {
   return (
     <ActionPanel title={title}>
       <MozillaFirefoxHistoryTab url={url} />
+      {url ? <OpenInNewWindowAction url={url} /> : null}
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
-      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
+      <EditUrlAction url={url} onEditUrl={onEditUrl} />
     </ActionPanel>
   );
-}
-
-function TabListItemActionComponent(props: { tab: Tab }) {
-  return (
-    <ActionPanel title={props.tab.title}>
-      <MozillaFirefoxGoToTab tab={props.tab} />
-      <Action.CopyToClipboard title="Copy URL" content={props.tab.url} />
-    </ActionPanel>
-  );
-}
-
-function MozillaFirefoxGoToTab(props: { tab: Tab }) {
-  async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
-  }
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
 function MozillaFirefoxHistoryTab({ url }: { url: string }) {
-  async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
-  }
-  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={() => openHistoryTab(url)} />;
 }

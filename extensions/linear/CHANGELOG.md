@@ -1,5 +1,42 @@
 # Linear Changelog
 
+## [Fix AI Tool Errors] - 2026-10-02
+
+- Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.
+- AI tools now return plain, explicitly shaped data instead of Linear SDK objects. Related entities like assignees, teams, states, and labels are returned as compact references.
+- **List Projects** now includes members and milestones when `includeMembers` or `includeMilestones` is set, even without listing them in `fields`.
+
+## [Fix Preferred Team in Create Issue for Myself] - 2026-09-28
+
+- Fix **Create Issue for Myself** ignoring the Preferred Team in workspaces with more than 50 teams. The team is now looked up by key directly instead of searching the first page of teams, and the key is matched case-insensitively.
+- When no Preferred Team is set (or it isn't found), fall back to the first team you are a member of.
+
+## [Plan and Review Work Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Added a skill for turning specs into tasks, triaging issues, and reporting cycle status with linked evidence and clear scope.
+
+## [Favorites Crash Fix] - 2026-09-14
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
+
+## [AI Comment Reliability] - 2026-09-02
+
+- Prevent AI comment tools from retrying successful writes and creating duplicate comments.
+
+## [Expanded AI Tools] - 2026-08-26
+
+- Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.
+- Add cursor pagination to collection tools, full-text issue search, structured issue filtering, and issue deletion with confirmation.
+
+## [Issue Attachments] - 2026-08-20
+
+- Fix attachments added through Create Issue failing to upload.
+
+## [Copy as Prompt] - 2026-08-19
+
+- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
+
 ## [My Issues Sub Views] - 2026-07-30
 
 - Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.

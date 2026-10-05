@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
-import type { Preferences } from "../types";
 import { getPortFromUrl, isLocalHost } from "../utils/connection";
 import { DockerContainer, findContainerByPort, findDockerPath, isDockerRunning } from "../utils/docker";
 import { ensureReachable } from "../utils/submitGuard";

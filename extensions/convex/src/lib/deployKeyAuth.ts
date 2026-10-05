@@ -34,14 +34,14 @@ export function extractDeploymentNameFromUrl(url: string): string | null {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname;
 
-    // Handle *.convex.cloud format
-    if (hostname.endsWith(".convex.cloud")) {
-      return hostname.replace(".convex.cloud", "");
-    }
-
-    // Handle *.convex.site format
-    if (hostname.endsWith(".convex.site")) {
-      return hostname.replace(".convex.site", "");
+    // Handle *.convex.cloud / *.convex.site, including region-scoped domains
+    // like name.eu-west-1.convex.cloud — the deployment name is always the
+    // first label
+    if (
+      hostname.endsWith(".convex.cloud") ||
+      hostname.endsWith(".convex.site")
+    ) {
+      return hostname.split(".")[0];
     }
 
     // For self-hosted or custom domains, try to use the subdomain
@@ -76,6 +76,33 @@ export function extractDeploymentNameFromKey(deployKey: string): string | null {
 
   // Direct instance name format
   return prefix;
+}
+
+/**
+ * Extract the deployment type from a deploy key prefix
+ * e.g., "prod:instance-name|key" -> "prod", "dev:instance-name|key" -> "dev"
+ * Returns null when the key has no type prefix.
+ */
+export function extractDeploymentTypeFromKey(
+  deployKey: string,
+): "dev" | "prod" | "preview" | null {
+  const pipeIndex = deployKey.indexOf("|");
+  if (pipeIndex === -1) {
+    return null;
+  }
+
+  const prefix = deployKey.substring(0, pipeIndex);
+  const colonIndex = prefix.indexOf(":");
+  if (colonIndex === -1) {
+    return null;
+  }
+
+  const type = prefix.substring(0, colonIndex);
+  if (type === "dev" || type === "prod" || type === "preview") {
+    return type;
+  }
+
+  return null;
 }
 
 /**

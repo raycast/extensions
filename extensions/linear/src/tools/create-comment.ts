@@ -5,6 +5,9 @@ import { withAccessToken } from "@raycast/utils";
 import { appendFileAttachments } from "../api/attachments";
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { serializeComment } from "./serializers";
+import { withLinear } from "./withLinear";
+
 type Input = {
   /** The ID of the issue to associate the comment with. Format is a combination of a team key and a unique number, like `ENG-123` */
   issueId?: string;
@@ -22,7 +25,7 @@ type Input = {
   attachmentPaths?: string[];
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
+export default withLinear(async (inputs: Input) => {
   const { linearClient } = getLinearClient();
   const body = await appendFileAttachments(inputs.body, inputs.attachmentPaths);
   const result = await linearClient.createComment({
@@ -32,11 +35,11 @@ export default withAccessToken(linear)(async (inputs: Input) => {
     body,
   });
 
-  if (!result.success) {
+  if (!result.success || !result.comment) {
     throw new Error("Failed to create comment");
   }
 
-  return result.comment;
+  return serializeComment(await result.comment);
 });
 
 export const confirmation = withAccessToken(linear)(async ({

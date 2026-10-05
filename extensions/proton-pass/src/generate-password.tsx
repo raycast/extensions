@@ -1,53 +1,31 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Clipboard,
+  getPreferenceValues,
+  Keyboard,
+} from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { generatePassword, passwordScore } from "./lib/pass-cli";
 import { PasswordScore, PassCliError, PassCliErrorType, PasswordType } from "./lib/types";
 import { getPasswordStrengthLabel, getPasswordStrengthIcon, maskPassword } from "./lib/utils";
 import { renderErrorView } from "./lib/error-views";
-
-const MIN_RANDOM_LENGTH = 8;
-const MAX_RANDOM_LENGTH = 128;
-const MIN_PASSPHRASE_WORDS = 3;
-const MAX_PASSPHRASE_WORDS = 10;
-const DEFAULT_RANDOM_LENGTH = 20;
-const DEFAULT_PASSPHRASE_WORDS = 4;
-const PASSPHRASE_SEPARATORS = ["-", "_", ".", " "] as const;
-
-type PassphraseSeparator = (typeof PASSPHRASE_SEPARATORS)[number];
-
-interface GeneratorSettings {
-  type: PasswordType;
-  length: number;
-  words: number;
-  includeNumbers: boolean;
-  includeUppercase: boolean;
-  includeSymbols: boolean;
-  separator: PassphraseSeparator;
-  capitalize: boolean;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function parseDefaultLength(value: string): number {
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed)) return DEFAULT_RANDOM_LENGTH;
-  return clamp(parsed, MIN_RANDOM_LENGTH, MAX_RANDOM_LENGTH);
-}
-
-function getInitialSettings(preferences: Preferences.GeneratePassword): GeneratorSettings {
-  return {
-    type: preferences.defaultPasswordType === "passphrase" ? "passphrase" : "random",
-    length: parseDefaultLength(preferences.defaultPasswordLength ?? String(DEFAULT_RANDOM_LENGTH)),
-    words: DEFAULT_PASSPHRASE_WORDS,
-    includeNumbers: true,
-    includeUppercase: true,
-    includeSymbols: true,
-    separator: "-",
-    capitalize: true,
-  };
-}
+import { platformShortcut } from "./lib/shortcuts";
+import {
+  clamp,
+  GeneratorSettings,
+  getInitialSettings,
+  MAX_PASSPHRASE_WORDS,
+  MAX_RANDOM_LENGTH,
+  MIN_PASSPHRASE_WORDS,
+  MIN_RANDOM_LENGTH,
+  PASSPHRASE_SEPARATORS,
+  PassphraseSeparator,
+} from "./lib/generator-defaults";
 
 function areSettingsEqual(a: GeneratorSettings, b: GeneratorSettings): boolean {
   return (
@@ -63,7 +41,7 @@ function areSettingsEqual(a: GeneratorSettings, b: GeneratorSettings): boolean {
 }
 
 function getSeparatorLabel(separator: PassphraseSeparator): string {
-  return separator === " " ? "space" : separator;
+  return separator.replaceAll("-", " ");
 }
 
 function getSettingsSummary(settings: GeneratorSettings): string {
@@ -157,7 +135,7 @@ export default function Command() {
       return;
     }
 
-    await Clipboard.copy(password, { transient: preferences.copyPasswordTransient ?? true });
+    await Clipboard.copy(password, { concealed: preferences.copyPasswordTransient ?? true });
     showToast({
       style: Toast.Style.Success,
       title: "Password Copied",
@@ -183,25 +161,25 @@ export default function Command() {
         title="Copy Password"
         icon={Icon.Clipboard}
         onAction={copyPassword}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />
       <Action
         title="Copy and Generate Next"
         icon={Icon.ArrowClockwise}
         onAction={copyAndGenerate}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={platformShortcut(["cmd", "shift"], "c")}
       />
       <Action
         title="Generate New Password"
         icon={Icon.Shuffle}
         onAction={() => generate(settings)}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
       />
       <Action
         title={showPassword ? "Hide Password" : "Show Password"}
         icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
         onAction={() => setShowPassword(!showPassword)}
-        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        shortcut={platformShortcut(["cmd"], "y")}
       />
       <Action
         title={settings.type === "random" ? "Switch to Passphrase" : "Switch to Random Password"}
@@ -212,7 +190,7 @@ export default function Command() {
             type: previous.type === "random" ? "passphrase" : "random",
           }))
         }
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        shortcut={platformShortcut(["cmd"], "t")}
       />
 
       {settings.type === "random" ? (

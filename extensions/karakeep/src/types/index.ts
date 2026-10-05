@@ -1,5 +1,10 @@
+import type { Language } from "../i18n";
+
 // Action types
-export type linkMainActionType = "openInBrowser" | "viewDetail" | "edit" | "copy";
+// Kept in step with `package.json > preferences`. "copy" was listed here but has
+// never been an option the manifest offers, so neither switch on this type has a
+// branch for it.
+export type linkMainActionType = "openInBrowser" | "viewDetail" | "edit";
 export type textMainActionType = "viewDetail" | "edit" | "copy";
 
 // Common display preferences for internal use
@@ -17,22 +22,19 @@ interface DisplayOptions {
 interface BaseConfig {
   apiUrl: string;
   apiKey: string;
-  language: string;
+  // Narrower than `string` so an invalid locale can't type-check its way in.
+  // The manifest offers exactly these, and the generated Preferences agrees.
+  language: Language;
   showWebsitePreview: boolean;
   linkMainAction: linkMainActionType;
   textMainAction: textMainActionType;
   prefillUrlFromBrowser: boolean;
 }
 
-export interface Preferences extends Partial<DisplayOptions> {
-  apiUrl: string;
-  apiKey: string;
-  language?: string;
-  showWebsitePreview: boolean;
-  linkMainAction?: linkMainActionType;
-  textMainAction?: textMainActionType;
-  prefillUrlFromBrowser?: boolean;
-}
+// NOTE: there is deliberately no `Preferences` interface here. Raycast generates
+// one into `raycast-env.d.ts` from the manifest, as an ambient global — so
+// `getPreferenceValues<Preferences>()` resolves without an import and cannot
+// drift from `package.json`. A hand-written copy silently did drift.
 
 export interface Config extends BaseConfig, DisplayOptions {}
 

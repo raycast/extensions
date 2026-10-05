@@ -1,5 +1,17 @@
 # Wispr Flow Changelog
 
+## [Faster Search Transcripts] - 2026-09-29
+
+- Fixed Search Transcripts opening on the list from the previous run before showing current transcripts
+- Fixed a delay on open caused by the app filter query scanning every row, including stored audio
+- Fixed transcript rows showing the microphone icon before switching to their app icon
+
+## [Fix Transcript Selection on Open] - 2026-09-03
+
+- Fixed Search Transcripts restoring the previously viewed transcript as the selected row, leaving the highlight below newly recorded entries
+- Fixed the selection landing in the last date section under the Oldest First, Longest Duration, and Most Words sort orders
+- Fixed the selection anchoring to an archived transcript after it left the results
+
 ## [Add Windows Support] - 2026-04-30
 
 ### Platform Support

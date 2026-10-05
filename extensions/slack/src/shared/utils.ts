@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
+import { formatRetryAfter, getRetryAfter, isRateLimitError, slackRateLimitDocumentationUrl } from "./client/rateLimit";
 import * as emoji from "node-emoji";
 
 function convertSlackEmojiToUnicode(text: string): string {
@@ -57,14 +58,23 @@ const isCodedError = (error: unknown): error is CodedError => {
 };
 
 const handleError = async (error: CodedError | Error | unknown, title?: string) => {
-  if (isCodedError(error)) {
-    if (error.code === ErrorCode.RateLimitedError) {
-      return showFailureToast(error, {
-        title: "You've been rate-limited.",
-        message: "Please try again in a few seconds/minutes.",
-      });
-    }
+  const retryAfter = getRetryAfter(error);
+  const rateLimited = (isCodedError(error) && error.code === ErrorCode.RateLimitedError) || isRateLimitError(error);
 
+  if (rateLimited) {
+    return showFailureToast(error, {
+      title: "Slack rate limit exceeded",
+      message: retryAfter
+        ? `Slack asked us to wait ${formatRetryAfter(retryAfter)}. Please try again after that.`
+        : "Slack is temporarily limiting requests. Please wait and try again.",
+      primaryAction: {
+        title: "View Slack Rate Limits",
+        onAction: () => open(slackRateLimitDocumentationUrl),
+      },
+    });
+  }
+
+  if (isCodedError(error)) {
     if (error.message.includes("missing_scope")) {
       const isUsingOAuth = !!(await slack.client.getTokens());
 
@@ -100,6 +110,40 @@ const isValidChannelId = (channelId?: string) => {
   return channelIdRegex.test(channelId.trim());
 };
 
+type SlackFileLike = {
+  id?: string;
+  name?: string;
+  title?: string;
+  mimetype?: string;
+  filetype?: string;
+  size?: number;
+};
+
+type FormattedSlackFile = {
+  id: string;
+  name?: string;
+  mimetype?: string;
+  size?: number;
+};
+
+/**
+ * Normalizes a message's `files` array into a compact shape the AI can act on.
+ * The `id` values can be passed to the Download Files tool. Returns `undefined`
+ * when a message has no downloadable files so the key can be omitted.
+ */
+const formatSlackFiles = (files?: SlackFileLike[]): FormattedSlackFile[] | undefined => {
+  const formatted = (files ?? [])
+    .filter((file): file is SlackFileLike & { id: string } => Boolean(file.id))
+    .map((file) => ({
+      id: file.id,
+      name: file.name ?? file.title,
+      mimetype: file.mimetype ?? file.filetype,
+      size: file.size,
+    }));
+
+  return formatted.length > 0 ? formatted : undefined;
+};
+
 export {
   timeDifference,
   convertTimestampToDate,
@@ -107,4 +151,5 @@ export {
   handleError,
   convertSlackEmojiToUnicode,
   isValidChannelId,
+  formatSlackFiles,
 };

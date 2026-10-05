@@ -26,7 +26,7 @@ type CloneRepositoryFormProps = {
 
 export default function CloneRepositoryForm({ repository }: CloneRepositoryFormProps) {
   const { octokit } = getGitHubClient();
-  const { application, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const { data: branches, isLoading } = useCachedPromise(
     async (repo) => {
@@ -47,6 +47,7 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
     cloneTool: AcceptableCloneTool;
   }>({
     initialValues: {
+      clonePath: baseClonePath ? [baseClonePath] : [],
       cloneProtocol: repositoryCloneProtocol,
       cloneTool: "git",
     },
@@ -166,6 +167,14 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
           <Form.Dropdown.Item key={tool} value={tool} title={CLONE_TOOLS_TO_LABELS[tool]} />
         ))}
       </Form.Dropdown>
+      <Form.Description
+        title="Clone Location"
+        text={
+          baseClonePath
+            ? `Starts at your Default Clone Path (${baseClonePath}). Choose another directory to override it for this clone.`
+            : "Choose the directory where the repository should be cloned. Set a Default Clone Path in extension preferences to reuse a directory."
+        }
+      />
       <Form.FilePicker
         {...itemProps.clonePath}
         title="Clone Path"

@@ -19,12 +19,13 @@ export function detectTerminalKind(application?: Pick<Application, "bundleId" | 
 export function expandCustomLauncher(template: string, binary: string, args: string[]): [string, string[]] {
   const words = parseShellWords(template);
   if (words.length === 0) throw new Error("The Custom Terminal Launcher preference is empty.");
+  const command = [binary, ...args].map(shellQuote).join(" ");
   const expanded: string[] = [];
   for (const word of words) {
-    if (word === "{herdr}") expanded.push(binary);
-    else if (word === "{args}") expanded.push(...args);
-    else if (word === "{command}") expanded.push([binary, ...args].map(shellQuote).join(" "));
-    else expanded.push(word.replaceAll("{herdr}", binary));
+    if (word === "{args}") expanded.push(...args);
+    else if (word.includes("{args}"))
+      throw new Error("{args} must be a standalone word in the Custom Terminal Launcher.");
+    else expanded.push(word.replaceAll("{herdr}", binary).replaceAll("{command}", command));
   }
   if (!template.includes("{herdr}") && !template.includes("{command}")) {
     throw new Error("Custom Terminal Launcher must contain {herdr} or {command}.");

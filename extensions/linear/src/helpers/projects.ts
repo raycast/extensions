@@ -1,5 +1,4 @@
-import { Project } from "@linear/sdk";
-import { ProjectStatusType } from "@linear/sdk/dist/_generated_documents";
+import { Project, ProjectStatusType } from "@linear/sdk";
 import { Image } from "@raycast/api";
 
 import { getIcon } from "./icons";
@@ -24,8 +23,8 @@ export function getProjectIcon(project?: Pick<Project, "icon" | "color">) {
   }
 
   return getIcon({
-    icon: project.icon,
-    color: project.color,
+    icon: project.icon ?? undefined,
+    color: project.color ?? undefined,
     fallbackIcon: { source: { light: "light/project.svg", dark: "dark/project.svg" } },
   });
 }

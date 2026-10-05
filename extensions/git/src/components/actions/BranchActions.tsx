@@ -13,6 +13,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { useCachedState } from "@raycast/utils";
 import { Branch, MergeMode, Remote } from "../../types";
 import InteractiveRebaseEditorView from "../views/InteractiveRebaseEditorView";
 import { RemoteHostIcon } from "../icons/RemoteHostIcons";
@@ -376,7 +377,7 @@ export function BranchRenameAction(context: RepositoryContext & NavigationContex
 
 function BranchCreateForm(context: RepositoryContext) {
   const { pop } = useNavigation();
-  const [branchName, setBranchName] = useState("");
+  const [branchName, setBranchName] = useCachedState(`create-branch-draft-${context.gitManager.repoPath}`, "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: { branchName: string }) => {
@@ -385,6 +386,7 @@ function BranchCreateForm(context: RepositoryContext) {
       await context.gitManager.createBranch(values.branchName);
       context.branches.revalidate();
       context.status.revalidate();
+      setBranchName("");
       pop();
     } catch {
       // Git error is already shown by GitManager

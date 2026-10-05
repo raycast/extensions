@@ -94,7 +94,7 @@ function MailboxesIndex({ domain }: MailboxesIndexProps) {
                 <Action
                   title="Create New Mailbox"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => push(<MailboxesCreate domain={domain} onMailboxCreated={getMailboxesFromApi} />)}
                 />
                 <Action

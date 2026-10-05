@@ -9,6 +9,7 @@ import {
   calculateStats,
   formatDuration,
   getCurrentSessionElapsedTime,
+  getCurrentSessionElapsedTimeForPeriod,
   type DeskState,
 } from "./utils/standing-desk-utils";
 
@@ -62,7 +63,8 @@ export default function Command() {
       let totalSitting = stats.totalSitting;
 
       if (currentState) {
-        const currentElapsed = await getCurrentSessionElapsedTime();
+        const currentElapsed =
+          await getCurrentSessionElapsedTimeForPeriod("day");
         if (currentState === "standing") {
           totalStanding += currentElapsed;
         } else {

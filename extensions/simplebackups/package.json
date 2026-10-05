@@ -16,7 +16,7 @@
       "name": "index",
       "title": "Manage Backups",
       "subtitle": "SimpleBackups",
-      "icon": "simplebackups-ico-64.png",
+      "icon": "simplebackups-icon.png",
       "description": "View and manage your backups",
       "mode": "view"
     }

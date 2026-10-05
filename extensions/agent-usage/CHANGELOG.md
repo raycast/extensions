@@ -1,6 +1,170 @@
 # Agent Usage Changelog
 
-## [Support Claude Fable Usage Limits] - {YYYY-MM-DD}
+## [Multiple Claude accounts] - 2026-09-19
+
+### New Features
+
+- Show every Claude account side by side instead of only the first one found. Claude now uses the same multi-account rendering as Codex and Copilot, in the list, the menu bar, and background refresh
+- Add an **Additional Claude Homes** preference for extra `CLAUDE_CONFIG_DIR` directories (e.g. `~/.claude-personal, ~/.claude-work`), mirroring **Additional Codex Homes**. Accounts are labelled from their directory (`~/.claude-work` → "Claude • work")
+- Name each row after the account it belongs to. A directory name carries the user's own meaning, so `~/.claude-work` stays "Claude • work"; the stock `~/.claude` names nothing, so it falls back to the signed-in account ("Claude • yourname") instead of an unattributable bare "Claude" row. The account email and organization are shown in the detail pane, the tooltip and the copied usage text
+
+### Fixes
+
+- Read each account's credentials from the macOS Keychain before its `.credentials.json`. Claude Code writes to the Keychain, so a credentials file left next to it can be days stale — Claude could report "Token Expired" while a valid token was already stored. Keychain services are resolved per config dir (the bare service for `~/.claude`, and a `sha256(<config dir>)` prefix for others), with the credentials file as fallback
+- Refreshing a Keychain-backed token now writes back to the service it came from instead of the default one, so refreshing a secondary profile no longer overwrites the primary profile's entry
+- Collapse accounts whose config directories resolve to the same place. `~/.claude` symlinked to a profile directory produced two Keychain entries with different tokens for one account, which token de-duplication alone could not catch
+
+### Improvements
+
+- An account whose token is missing the `user:profile` scope now shows that error on its own row instead of hiding the account
+- Share the additional-home parsing between Claude and Codex, with test coverage it did not have before
+
+## [Add Percentage Display preference] - 2026-09-14
+
+### New Features
+
+- Add a global **Percentage Display** preference (Remaining by default, or Used). In **Used** mode, quota percentages are shown as `100 − remaining` consistently across the main list, menu bar, tooltips, detail views, and copied usage text (e.g. 58% remaining → 42% used)
+- Pie and progress bars flip direction in Used mode while warning colors stay based on quota remaining, so the visual meaning stays consistent
+
+## [Fixed exhausted quota display] - 2026-09-10
+
+- Keep MiniMax CN 5h and weekly usage visible with 0% remaining and reset countdowns when quotas are exhausted.
+- Apply the same display to copied usage text.
+
+## [Cached usage and background refresh] - 2026-09-09
+
+### Improvements
+
+- Add configurable background refresh every 1, 5, 15, 30, or 60 minutes, including when the menu bar is disabled
+- Show cached provider and account rows immediately while checking credentials, then update the list when accounts or availability change
+- Add the standard Refresh keyboard shortcut and avoid duplicate refresh requests for multi-account providers
+- Keep cached usage for unchanged Amp and Grok credentials, and invalidate it on confirmed login changes
+- Retain cached usage with an Account unverified label when credential checks fail or Antigravity's active account cannot be determined
+- Keep manual and scheduled refresh independent of foreground credential checks
+
+## [Fix Antigravity Closed-App Quota] - 2026-09-09
+
+### Bug Fixes
+
+- Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
+- Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
+
+## [Apply Saved Provider Order] - 2026-09-09
+
+### Bug Fixes
+
+- Apply the provider order from Move Up/Down in the list to the menu bar (use Refresh All after reordering)
+
+## [Add OpenRouter credit balance] - 2026-09-08
+
+### New Features
+
+- Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
+- Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
+
+## [OpenCode Go Zen usage API] - 2026-09-07
+
+### Improvements
+
+- Fetch OpenCode Go usage from the Zen JSON API (`https://opencode.ai/zen/go/v1/usage`) instead of scraping the workspace web page
+- Replace the workspace ID and session cookie setup with an optional Zen API key, auto-detected from OpenCode (`~/.local/share/opencode/auth.json`)
+- Show rolling, weekly, and monthly limits with per-window reset times in the detail view
+
+## [Show Grok limit reset credits] - 2026-09-04
+
+### New Features
+
+- Show Grok manual usage-limit reset tokens in the detail view: remaining count and each expiration time, matching Codex
+
+## [Copilot multi-account and AI credits] - 2026-08-29
+
+### New Features
+
+- Support unlimited named GitHub Copilot accounts, with separate rows in the main list and menu bar
+- Add Copilot accounts through the existing **Manage Accounts** action
+- Prefer the active GitHub CLI token from `gh auth token`, then fall back to `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
+
+### Improvements
+
+- Rename Copilot's Premium Interactions quota to AI Credits
+- Show the remaining AI Credits as both a percentage and a credit balance, such as `24 / 300 credits`
+- Support GitHub token discovery from Windows command shells as well as Unix login shells
+
+## [Fix Amp usage parse] - 2026-08-27
+
+### Bug Fixes
+
+- Parse `amp usage` when labels are markdown-bold (`**Amp Free:**`), which is what the CLI emits when it is not attached to a TTY (Raycast's fetch path)
+- Parse Amp Megawatt/Gigawatt subscription remaining (other usage + orb usage) in the detail view
+- List and menu bar still show Amp Free when present; if Amp Free is absent they use the tighter subscription pool instead of 0%
+
+## [Add AIHubMix Usage] - 2026-08-22
+
+- Add AIHubMix balance monitoring to the main list and menu bar
+- Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`
+
+## [Add MinimaxCN support] - 2026-08-21
+
+### New Features
+
+- Add MinimaxCN (Chinese-region MiniMax) to the main list and menu bar
+- Coding-plan quota window: 5h interval + weekly, with `current_interval_remaining_percent` fallback when counts are 0
+
+## [Show Cursor Auto and API percentages] - 2026-08-16
+
+### Improvements
+
+- Show Auto and API remaining percentages together on the Cursor list and menu bar when both windows are available
+- Color the Cursor usage pie from the tighter of the two windows
+
+## [Add support for multiple CODEX_HOME] - 2026-08-15
+
+- Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
+
+## [Add DeepSeek Usage] - 2026-08-14
+
+- Add DeepSeek balance monitoring to the main list and menu bar
+- Show total, topped-up, and granted balances
+- Automatically detect API keys from OpenCode or environment variables, with manual setup available in Preferences
+
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
+
+### Bug Fixes
+
+- Detect the suffix-less `language_server` binary shipped by Antigravity 2.7+, which left the Antigravity row stuck on "Not Running" while the app was running
+
+## [Fix ClinePass usage limits windows] - 2026-08-12
+
+### Bug Fixes
+
+- Restore the 5h Limit "Resets At" field, display the full usage limit window when no value have been returned (when the window haven't been consumed yet)
+
+## [Add support for ClinePass] - 2026-08-10
+
+### New Features
+
+- Support the ClinePass subscription
+  - Display the 5h (also in the progress pie), weekly and monthly limits
+  - Also display your regular Cline credits if you have any
+  - Allow to add multiple accounts just like Codex
+  - Reads data from `~/.cline` (install the CLI or IDE extension & login) with support for manual User ID & API Key entry
+- Show the Codex Display Name in the agents list in place of the email when possible (users might need to go on ChatGPT -> Profile to mint a new CloudFlare token as the endpoint is protected)
+- Allow to reset manual Agents order
+- Additional Codex rate-limits like 5.3-Codex-Spark now display
+
+### Improvements
+
+- Agents icons are now legible on dark mode (auto-generated dark variants couldn't be resolved on Windows so they're now bundled)
+- Agents are now sorted by name by default (you might need to reset the order to benefit from it)
+- Reduce the progressbar from 15 to 12 segments to avoid it being clipped on monitors with different resolutions/DPI/scale factors
+- Display error messages in a Markdown box so they're not clipped
+
+### Bug Fixes
+
+- Usage pie charts now display again on Windows
+- First-selected agent when you open the extension is the actual first of the list, not the first alphabetically
+
+## [Support Claude Fable Usage Limits] - 2026-07-22
 
 ### Improvements
 

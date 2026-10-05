@@ -1,7 +1,11 @@
 import { environment } from "@raycast/api";
+import { logger } from "@chrismessina/raycast-logger";
 import { mkdir, readdir, rename, stat, unlink, writeFile } from "fs/promises";
 import path from "path";
 import { getApiConfig } from "./config";
+import { describeConnectionError, getConnectionErrorCode, isConnectionError } from "./connection";
+
+const log = logger.child("[Screenshot]");
 
 const CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 const IMAGE_EXTENSIONS = ["jpg", "png", "gif", "webp", "img"];
@@ -34,13 +38,15 @@ async function sweepExpiredCacheEntries(imageCacheDirectory: string) {
           if (cached.isFile() && now - cached.mtimeMs > CACHE_MAX_AGE_MS) {
             await unlink(entryPath);
           }
-        } catch {
+        } catch (error) {
           // Ignore races with other preview loads or user cleanup.
+          log.log("Could not sweep cache entry", { entry, error });
         }
       }),
     );
-  } catch {
+  } catch (error) {
     // Cache cleanup should never block preview loading.
+    log.log("Cache sweep skipped", { error });
   }
 }
 
@@ -60,24 +66,44 @@ export async function getScreenshot(id: string) {
       const cached = await stat(cachedPath);
       if (cached.size > 0) return cachedPath;
     } catch {
-      // cache miss
+      // cache miss — the common path on a first load, not worth logging
     }
   }
 
-  const response = await fetch(imageUrl, {
-    headers: {
-      Accept: "image/png,image/jpeg;q=0.9,*/*;q=0.1",
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(imageUrl, {
+      headers: {
+        Accept: "image/png,image/jpeg;q=0.9,*/*;q=0.1",
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+  } catch (error) {
+    // Previews fail silently into a placeholder, so without this a stopped
+    // server looks identical to a bookmark that simply has no screenshot.
+    if (isConnectionError(error)) {
+      log.error("Preview fetch could not connect", {
+        assetId: id,
+        errorCode: getConnectionErrorCode(error) ?? "unknown",
+        detail: describeConnectionError(error, apiUrl),
+      });
+    } else {
+      log.error("Preview fetch failed", { assetId: id, error });
+    }
+    throw error;
+  }
 
   if (!response.ok) {
+    // Log the body rather than interpolating it into the message — this
+    // endpoint answers with a full HTML error page, not JSON.
     const body = await response.text();
-    throw new Error(`HTTP ${response.status}: ${body}`);
+    log.error("Preview request rejected", { assetId: id, status: response.status, body: body.slice(0, 500) });
+    throw new Error(`HTTP ${response.status}`);
   }
 
   const contentType = response.headers.get("content-type") || "image/png";
   if (!contentType.startsWith("image/")) {
+    log.error("Preview response was not an image", { assetId: id, contentType });
     throw new Error(`Expected image response, got ${contentType}`);
   }
 

@@ -1,17 +1,26 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { cache, HttpService, KEY } from "./service";
+import { Icon, MenuBarExtra, open } from '@raycast/api'
+import { useCachedState } from '@raycast/utils'
+import { useEffect } from 'react'
+import { cache, Http, HttpService, KEY } from './service'
+import { useServiceStatuses } from './use-service-statuses'
 
-HttpService.fetch();
+Http.fetch()
 export default function Command() {
-  const [items, setItems] = useCachedState<HttpService[]>(KEY);
+  const [items, setItems] = useCachedState<HttpService[]>(KEY)
+  const statuses = useServiceStatuses(items)
 
-  const set = () => {
-    setItems(HttpService.services);
-  };
+  useEffect(() => {
+    const set = () => setItems(Http.services)
+    const interval = setInterval(set, 3000)
 
-  setTimeout(set, 3 * 1000);
-  cache.subscribe(set);
+    const unsubscribe = cache.subscribe(set)
+    set()
+
+    return () => {
+      clearInterval(interval)
+      unsubscribe()
+    }
+  }, [setItems])
 
   return (
     <MenuBarExtra icon="menubar_icon.png" tooltip="View local services">
@@ -27,15 +36,15 @@ export default function Command() {
               title={service.name}
               icon={{
                 source: Icon.CircleFilled,
-                tintColor: service.host.status,
+                tintColor: statuses[service.url],
               }}
               onAction={() => {
-                open(service.origin);
+                open(service.url)
               }}
             />
-          );
+          )
         })
       )}
     </MenuBarExtra>
-  );
+  )
 }

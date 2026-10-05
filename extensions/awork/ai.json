@@ -1,5 +1,5 @@
 {
-  "instructions": "- Do not show IDs. Use the names instead\\n- When there is no exact match of task titles with the provided name, analyze the input and titles of existing objects and use such objects only if the meaning is the same. Do not use objects that are not related to the input\\n- Do not set any fields when time boking if the user didn't specify any. For example, if the user didn't specify a start time, do not set it.\\n- A synonym for task is ticket",
+  "instructions": "- Do not show IDs to the user; use names instead.\\n- Never invent UUIDs.\\n- When there is no exact task-title match, use a result only when its meaning clearly matches the request.\\n- A synonym for task is ticket.\\n- Do not set time-booking fields the user did not specify.\\n- Before creating a project task from a project name, call get-projects and use the exact project ID; ask the user when multiple projects are plausible.\\n- Before editing a task, call get-tasks to resolve its exact UUID and project. Pass only fields the user asked to change so all other task details remain unchanged.\\n- Set isPrivate=true only when the user explicitly requests a private task.\\n- Resolve task statuses with get-task-statuses, parent tasks with get-tasks scoped to the project, task lists with get-task-lists, assignees with get-project-members, and types of work with get-types-of-work.\\n- Only use a task without parentId as a parent task; awork tasks support one subtask level.\\n- When creating a subtask and no type of work was requested, use the parent task's typeOfWorkId.\\n- For assigneeIds, join the returned userId values as a comma-separated string.\\n- Omit taskStatusId and typeOfWorkId when creating a task and the user did not request a specific value so awork applies its defaults.\\n- If a lookup tool reports a permission error, explain the required project permission and do not describe it as an empty result.\\n- Treat create-task warnings as a successfully created task with a partial follow-up failure. Include returned task URLs when available.",
   "evals": [
     {
       "input": "@awork Show me all my tasks not marked as done",
@@ -420,18 +420,171 @@
               "projectId": "10000",
               "taskId": "10004",
               "typeOfWorkId": {
-                "or": [
-                  "1001",
-                  "1002"
-                ]
+                "or": ["1001", "1002"]
               },
               "duration": {
-                "or": [
-                  "1h 30m",
-                  "1,5h",
-                  "1:30"
-                ]
+                "or": ["1h 30m", "1,5h", "1:30"]
               }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Create a private task called Buy oat milk",
+      "mocks": {
+        "create-task": {
+          "id": "623e4567-e89b-42d3-a456-426614174000",
+          "name": "Buy oat milk",
+          "url": "https://example.awork.com/tasks/623e4567-e89b-42d3-a456-426614174000",
+          "warnings": []
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "create-task",
+            "arguments": {
+              "name": { "eq": "Buy oat milk" },
+              "isPrivate": { "eq": true }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Create a task called Prepare launch in the Website Relaunch project",
+      "mocks": {
+        "get-projects": {
+          "data": [
+            {
+              "id": "123e4567-e89b-42d3-a456-426614174000",
+              "name": "Website Relaunch"
+            }
+          ],
+          "hasMore": false
+        },
+        "create-task": {
+          "id": "623e4567-e89b-42d3-a456-426614174000",
+          "name": "Prepare launch",
+          "url": "https://example.awork.com/tasks/623e4567-e89b-42d3-a456-426614174000",
+          "warnings": []
+        }
+      },
+      "expected": [
+        { "callsTool": { "name": "get-projects" } },
+        {
+          "callsTool": {
+            "name": "create-task",
+            "arguments": {
+              "name": { "eq": "Prepare launch" },
+              "projectId": { "eq": "123e4567-e89b-42d3-a456-426614174000" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Create a task called Review copy in project 123e4567-e89b-42d3-a456-426614174000, put it in the Backlog task list and assign Alice Example",
+      "mocks": {
+        "get-task-lists": [
+          {
+            "id": "323e4567-e89b-42d3-a456-426614174000",
+            "name": "Backlog"
+          }
+        ],
+        "get-project-members": [
+          {
+            "userId": "523e4567-e89b-42d3-a456-426614174000",
+            "name": "Alice Example",
+            "isExternal": false
+          }
+        ],
+        "create-task": {
+          "id": "623e4567-e89b-42d3-a456-426614174000",
+          "name": "Review copy",
+          "url": "https://example.awork.com/tasks/623e4567-e89b-42d3-a456-426614174000",
+          "warnings": []
+        }
+      },
+      "expected": [
+        { "callsTool": { "name": "get-task-lists" } },
+        { "callsTool": { "name": "get-project-members" } },
+        {
+          "callsTool": {
+            "name": "create-task",
+            "arguments": {
+              "projectId": { "eq": "123e4567-e89b-42d3-a456-426614174000" },
+              "taskListId": { "eq": "323e4567-e89b-42d3-a456-426614174000" },
+              "assigneeIds": { "eq": "523e4567-e89b-42d3-a456-426614174000" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Create a subtask called Check analytics under the task Prepare launch in project 123e4567-e89b-42d3-a456-426614174000",
+      "mocks": {
+        "get-tasks": {
+          "data": [
+            {
+              "id": "223e4567-e89b-42d3-a456-426614174000",
+              "name": "Prepare launch",
+              "projectId": "123e4567-e89b-42d3-a456-426614174000",
+              "typeOfWorkId": "423e4567-e89b-42d3-a456-426614174000"
+            }
+          ],
+          "hasMore": false
+        },
+        "create-task": {
+          "id": "623e4567-e89b-42d3-a456-426614174000",
+          "name": "Check analytics",
+          "url": "https://example.awork.com/tasks/623e4567-e89b-42d3-a456-426614174000",
+          "warnings": []
+        }
+      },
+      "expected": [
+        { "callsTool": { "name": "get-tasks" } },
+        {
+          "callsTool": {
+            "name": "create-task",
+            "arguments": {
+              "parentTaskId": { "eq": "223e4567-e89b-42d3-a456-426614174000" },
+              "typeOfWorkId": { "eq": "423e4567-e89b-42d3-a456-426614174000" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Rename the task Prepare launch to Ship launch and mark it as priority",
+      "mocks": {
+        "get-tasks": {
+          "data": [
+            {
+              "id": "123e4567-e89b-42d3-a456-426614174000",
+              "name": "Prepare launch",
+              "projectId": "223e4567-e89b-42d3-a456-426614174000",
+              "taskStatus": { "type": "todo", "icon": "circle" }
+            }
+          ],
+          "hasMore": false
+        },
+        "edit-task": {
+          "id": "123e4567-e89b-42d3-a456-426614174000",
+          "name": "Ship launch",
+          "url": "https://example.awork.com/tasks/123e4567-e89b-42d3-a456-426614174000"
+        }
+      },
+      "expected": [
+        { "callsTool": { "name": "get-tasks" } },
+        {
+          "callsTool": {
+            "name": "edit-task",
+            "arguments": {
+              "taskId": { "eq": "123e4567-e89b-42d3-a456-426614174000" },
+              "name": { "eq": "Ship launch" },
+              "isPrio": { "eq": true }
             }
           }
         }

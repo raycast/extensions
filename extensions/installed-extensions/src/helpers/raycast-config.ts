@@ -1,7 +1,6 @@
 import { showToast, Toast, environment } from "@raycast/api";
 import os from "os";
 import path from "path";
-import { isWindows } from "./utils";
 
 const BUNDLE_ID_TO_CONFIG_DIR: Record<string, string> = {
   "com.raycast-x.macos.internal": "raycast-x-internal",
@@ -13,6 +12,9 @@ const BUNDLE_ID_TO_CONFIG_DIR: Record<string, string> = {
   "com.raycast.macos": "raycast",
   "com.raycast-x.windows.internal": "raycast-x-internal",
   "com.raycast-x.windows": "raycast-x",
+  "com.raycast.windows.internal": "raycast-internal",
+  "com.raycast.windows.debug": "raycast-debug",
+  "com.raycast.windows": "raycast",
 };
 
 const BUNDLE_ID_MATCH_ORDER = Object.keys(BUNDLE_ID_TO_CONFIG_DIR).sort((a, b) => b.length - a.length);
@@ -50,7 +52,7 @@ export function getConfigDirNameFromBundleId(bundleId: string): string | undefin
 }
 
 function getDefaultConfigDirName(): string {
-  return isWindows ? "raycast-x" : "raycast";
+  return "raycast";
 }
 
 /**

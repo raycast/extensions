@@ -9,7 +9,8 @@
     "lunareclipsewasshort",
     "litomore",
     "cristiangrojas",
-    "xmok"
+    "xmok",
+    "0xdhrv"
   ],
   "license": "MIT",
   "keywords": [
@@ -29,21 +30,19 @@
       "name": "backup",
       "title": "Backup 2FA Codes",
       "description": "Create a backup of your 2FA codes.",
-      "mode": "view",
-      "disabledByDefault": true
+      "mode": "view"
     },
     {
       "name": "restore",
       "title": "Restore 2FA Codes",
       "description": "Restore your 2FA codes from a backup.",
-      "mode": "view",
-      "disabledByDefault": true
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "defaultAction",
-      "description": "Set the default action",
+      "description": "Choose whether Enter copies the code or pastes it into the focused app",
       "type": "dropdown",
       "required": false,
       "title": "Default Action",
@@ -80,5 +79,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

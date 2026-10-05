@@ -4,6 +4,14 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-08-08
+
+### Added
+
+- **PR Filters** — create named, saved filters over **View Pull Requests** using GitHub-style search qualifiers: `assignee:`, `author:`, `involves:`, `review-requested:`, `label:`, and `draft:true|false`. Any qualifier can be negated with `-` (e.g. `-author:dependabot`), combined with commas or repeated for multiple values, and `@me` resolves to your own GitHub login. Leftover plain words search the PR title.
+- A dropdown in the search bar lets you switch the active filter instantly; **Create Filter…**, **Edit…**, and **Delete…** actions manage them from the action panel.
+- The active filter is applied while fetching (both the standard and GraphQL APIs), so it doesn't waste your **Max Unread/Scan** budget on pull requests it excludes, and the **Unread PR Alert** menu bar badge always matches whichever filter is active.
+
 ## [1.2.0] - 2026-07-30
 
 ### Fixed

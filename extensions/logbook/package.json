@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logbook",
+  "title": "Logbook",
+  "description": "Capture and complete your Logbook tasks without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "rushi_gandhi",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "log",
+    "journal",
+    "todo",
+    "task",
+    "daily",
+    "notes"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Logbook",
+      "description": "Browse your logbook, mark tasks complete, and delete entries.",
+      "mode": "view",
+      "keywords": [
+        "todo",
+        "journal",
+        "log"
+      ]
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "subtitle": "Logbook",
+      "description": "Add a task to your logbook without opening a window.",
+      "mode": "no-view",
+      "keywords": [
+        "create",
+        "new",
+        "todo"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "What needs doing?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "webUrl",
+      "title": "Web URL",
+      "description": "Where the Logbook web app is hosted. Change this only if you self-host.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://logbook.acrosaas.com",
+      "default": "https://logbook.acrosaas.com"
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Where the Logbook API is hosted. Change this only if you self-host.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.logbook.acrosaas.com",
+      "default": "https://api.logbook.acrosaas.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

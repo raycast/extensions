@@ -9,7 +9,8 @@
     "FeernandoOFF"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Security",
@@ -36,7 +37,151 @@
       "title": "Generate Password",
       "subtitle": "Proton Pass",
       "description": "Generate secure passwords or passphrases",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultPasswordType",
+          "type": "dropdown",
+          "title": "Password Type",
+          "description": "The generator opens with this type.",
+          "default": "random",
+          "required": false,
+          "data": [
+            {
+              "title": "Random",
+              "value": "random"
+            },
+            {
+              "title": "Passphrase",
+              "value": "passphrase"
+            }
+          ]
+        },
+        {
+          "name": "defaultPasswordLength",
+          "type": "textfield",
+          "title": "Password Length",
+          "description": "For random passwords, from 8 to 128.",
+          "default": "20",
+          "required": false
+        },
+        {
+          "name": "includeUppercase",
+          "type": "checkbox",
+          "title": "Characters",
+          "label": "Uppercase letters",
+          "description": "In random passwords.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "includeSymbols",
+          "type": "checkbox",
+          "title": "",
+          "label": "Symbols",
+          "description": "In random passwords.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "includeNumbers",
+          "type": "checkbox",
+          "title": "",
+          "label": "Numbers",
+          "description": "In random passwords and passphrases.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "defaultPassphraseWords",
+          "type": "dropdown",
+          "title": "Passphrase Words",
+          "description": "Number of words in passphrases.",
+          "default": "4",
+          "required": false,
+          "data": [
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            }
+          ]
+        },
+        {
+          "name": "passphraseSeparator",
+          "type": "dropdown",
+          "title": "Passphrase Separator",
+          "description": "Between the words of passphrases.",
+          "default": "hyphens",
+          "required": false,
+          "data": [
+            {
+              "title": "Hyphens",
+              "value": "hyphens"
+            },
+            {
+              "title": "Spaces",
+              "value": "spaces"
+            },
+            {
+              "title": "Periods",
+              "value": "periods"
+            },
+            {
+              "title": "Commas",
+              "value": "commas"
+            },
+            {
+              "title": "Underscores",
+              "value": "underscores"
+            },
+            {
+              "title": "Numbers",
+              "value": "numbers"
+            },
+            {
+              "title": "Numbers and Symbols",
+              "value": "numbers-and-symbols"
+            }
+          ]
+        },
+        {
+          "name": "capitalizeWords",
+          "type": "checkbox",
+          "title": "Capitalization",
+          "label": "Capitalize words",
+          "description": "In passphrases.",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "get-totp",
@@ -63,62 +208,110 @@
       "required": false
     },
     {
-      "name": "defaultPasswordLength",
-      "type": "textfield",
-      "title": "Default Password Length",
-      "description": "Default length for generated passwords",
-      "default": "20",
-      "required": false
-    },
-    {
-      "name": "defaultPasswordType",
+      "name": "primaryAction",
       "type": "dropdown",
-      "title": "Default Password Type",
-      "description": "Type of password to generate by default",
-      "default": "random",
+      "title": "Primary Action",
+      "description": "What Enter does on an item.",
+      "default": "details",
       "required": false,
       "data": [
         {
-          "title": "Random",
-          "value": "random"
+          "title": "View Details",
+          "value": "details"
         },
         {
-          "title": "Passphrase",
-          "value": "passphrase"
+          "title": "Copy Password",
+          "value": "copy"
+        },
+        {
+          "title": "Fill Login (macOS)",
+          "value": "fill"
         }
       ]
+    },
+    {
+      "name": "submitAfterFill",
+      "type": "checkbox",
+      "title": "Fill Login",
+      "label": "Press Return after the password",
+      "description": "Submits the login form.",
+      "default": false,
+      "required": false
     },
     {
       "name": "copyPasswordTransient",
       "type": "checkbox",
       "title": "Transient Clipboard",
-      "label": "Clear password from clipboard after paste",
-      "description": "When enabled, passwords will be cleared from clipboard after pasting",
+      "label": "Keep copied secrets out of clipboard history",
+      "description": "Passwords, 2FA codes, notes and hidden fields.",
       "default": true,
       "required": false
     },
     {
+      "name": "cacheExpiration",
+      "type": "dropdown",
+      "title": "Cache Expiration",
+      "description": "How long cached items stay fresh.",
+      "default": "5",
+      "required": false,
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "5 hours",
+          "value": "300"
+        },
+        {
+          "title": "1 day",
+          "value": "1440"
+        },
+        {
+          "title": "7 days",
+          "value": "10080"
+        },
+        {
+          "title": "30 days",
+          "value": "43200"
+        }
+      ]
+    },
+    {
       "name": "enableBackgroundRefresh",
       "type": "checkbox",
-      "title": "Background Refresh",
-      "label": "Automatically refresh cached vault and item data",
-      "description": "When enabled, cached results will refresh in the background",
+      "title": "Item List",
+      "label": "Refresh items in the background",
+      "description": "Even when the cache is still fresh.",
       "default": true,
       "required": false
     },
     {
       "name": "enableWebIntegration",
       "type": "checkbox",
-      "title": "Web Integration",
-      "label": "Match active browser tab URL in Search Items",
-      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
+      "title": "",
+      "label": "Suggest logins for the active browser tab",
+      "description": "Requires the Raycast browser extension.",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "showWebsiteIcons",
+      "type": "checkbox",
+      "title": "",
+      "label": "Show website icons",
+      "description": "From Raycast's favicon provider, which receives the domains.",
+      "default": false,
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -133,7 +326,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "rm -rf .test-build && tsc -p tsconfig.test.json && node --test .test-build/src/lib/pass-cli-normalize.test.js",
+    "test": "node -e \"require('node:fs').rmSync('.test-build',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node -e \"const{readdirSync}=require('node:fs'),{join}=require('node:path'),{spawnSync}=require('node:child_process');const tests=readdirSync('.test-build',{recursive:true}).filter(f=>f.endsWith('.test.js')).map(f=>join('.test-build',f));process.exit(spawnSync(process.execPath,['--test',...tests],{stdio:'inherit'}).status??1)\"",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

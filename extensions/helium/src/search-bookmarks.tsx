@@ -15,6 +15,7 @@ import {
 } from "./utils/actions";
 import { Bookmark } from "./types";
 import { filterSearchable } from "./utils/search";
+import { SHORTCUTS } from "./utils/shortcuts";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
@@ -93,7 +94,7 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
               title="Open in Default Browser"
               target={bookmark.url}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+              shortcut={SHORTCUTS.openInDefaultBrowser}
             />
             <ReloadAction subject="Bookmarks" revalidate={revalidate} />
             <DeduplicateTabsAction />

@@ -1,4 +1,4 @@
-import type { MiniMaxModelRemain } from "./types";
+import type { MiniMaxModelRemain } from "./types.ts";
 
 export function getCodingModelRemain(remains: MiniMaxModelRemain[]): MiniMaxModelRemain | null {
   const active = remains.find((r) => r.current_interval_status === 1 || r.current_weekly_status === 1);

@@ -22,6 +22,10 @@ export const like = `(function() {
 export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(like);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "like-already-clicked":
         await showHUD("👍 Already liked");
@@ -37,6 +41,6 @@ export default async () => {
     }
     await closeMainWindow();
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

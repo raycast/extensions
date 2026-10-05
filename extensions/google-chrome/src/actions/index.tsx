@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 import { LocalStorage, popToRoot } from "@raycast/api";
-import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
@@ -269,4 +269,63 @@ export async function getActiveTabURL(): Promise<string> {
   `);
 
   return url;
+}
+
+export async function getOpenWindows(): Promise<ChromeWindow[]> {
+  await checkAppInstalled();
+  try {
+    const openWindows = await runAppleScript(`
+      set _rec_sep to character id ${ChromeWindow.WINDOW_RECORD_SEPARATOR.charCodeAt(0)}
+      set _field_sep to character id ${ChromeWindow.WINDOW_FIELD_SEPARATOR.charCodeAt(0)}
+      set _output to ""
+      
+      tell application "Google Chrome"
+        -- 1. Bulk fetch properties into parallel lists
+        set _ids to id of windows
+        set _titles to title of windows
+        
+        set _urls to {}
+        try
+          set _urls to URL of active tab of windows
+        end try
+        
+        -- 2. Iterate using a shared index (i)
+        repeat with i from 1 to length of _ids
+          set _w_id to item i of _ids
+          set _title to item i of _titles
+          
+          set _url to ""
+          try
+            set _url to item i of _urls
+          end try
+          
+          set _output to _output & _w_id & _field_sep & _title & _field_sep & _url & _rec_sep
+        end repeat
+      end tell
+      
+      return _output
+    `);
+
+    return openWindows
+      .split(ChromeWindow.WINDOW_RECORD_SEPARATOR)
+      .filter((line) => line.length !== 0)
+      .map((line) => ChromeWindow.parse(line));
+  } catch (err) {
+    if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
+      LocalStorage.removeItem("is-installed");
+    }
+    await checkAppInstalled();
+    throw err;
+  }
+}
+
+export async function setActiveWindow(windowId: number): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      set _wnd to first window where id is ${windowId}
+      set index of _wnd to 1
+      activate
+    end tell
+    return true
+  `);
 }

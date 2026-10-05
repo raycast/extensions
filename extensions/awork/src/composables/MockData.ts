@@ -1,4 +1,4 @@
-import { project, task, typeOfWork } from "./FetchData";
+import { project, ProjectMember, task, TaskList, TaskStatus, typeOfWork } from "./FetchData";
 
 export const mockProjects: project[] = [
   {
@@ -9,6 +9,7 @@ export const mockProjects: project[] = [
       id: "200",
       name: "Hypercode GmbH",
     },
+    projectKey: "AW-RAY",
     projectStatus: {
       type: "progress",
     },
@@ -21,6 +22,7 @@ export const mockProjects: project[] = [
       id: "200",
       name: "Hypercode GmbH",
     },
+    projectKey: "HC-WEB",
     projectStatus: {
       type: "progress",
     },
@@ -33,6 +35,7 @@ export const mockProjects: project[] = [
       id: "201",
       name: "Basler AG",
     },
+    projectKey: "BSL-WEB",
     projectStatus: {
       type: "progress",
     },
@@ -45,6 +48,7 @@ export const mockProjects: project[] = [
       id: "202",
       name: "Canyon Bicycles GmbH",
     },
+    projectKey: "CYN-WEB",
     projectStatus: {
       type: "progress",
     },
@@ -57,6 +61,7 @@ export const mockProjects: project[] = [
       id: "203",
       name: "dimedis GmbH",
     },
+    projectKey: "FM-APP",
     projectStatus: {
       type: "progress",
     },
@@ -69,6 +74,7 @@ export const mockProjects: project[] = [
       id: "203",
       name: "dimedis GmbH",
     },
+    projectKey: "LM-APP",
     projectStatus: {
       type: "progress",
     },
@@ -81,6 +87,7 @@ export const mockProjects: project[] = [
       id: "204",
       name: "KMS TEAM GmbH",
     },
+    projectKey: "KMS",
     projectStatus: {
       type: "progress",
     },
@@ -93,6 +100,7 @@ export const mockProjects: project[] = [
       id: "205",
       name: "Uebemann Rohr- und Walzwerk GmbH und Co KG",
     },
+    projectKey: "WALZ",
     projectStatus: {
       type: "closed",
     },
@@ -117,6 +125,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "AW-RAY-15",
     taskStatus: {
       type: "done",
       icon: "",
@@ -139,6 +148,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "HC-WEB-105",
     taskStatus: {
       type: "review",
       icon: "",
@@ -161,6 +171,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "BSL-WEB-273",
     taskStatus: {
       type: "progress",
       icon: "",
@@ -183,6 +194,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "BSL-WEB-274",
     taskStatus: {
       type: "progress",
       icon: "",
@@ -205,6 +217,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "FM-APP-56",
     taskStatus: {
       type: "progress",
       icon: "",
@@ -227,6 +240,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "FM-APP-57",
     taskStatus: {
       type: "review",
       icon: "",
@@ -249,6 +263,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "LM-APP-80",
     taskStatus: {
       type: "todo",
       icon: "",
@@ -271,6 +286,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "WALZ-26",
     taskStatus: {
       type: "todo",
       icon: "",
@@ -293,6 +309,7 @@ export const mockTasks: task[] = [
       },
     },
     typeOfWorkId: "400",
+    taskIdentifier: "KMS-94",
     taskStatus: {
       type: "done",
       icon: "",
@@ -305,4 +322,35 @@ export const mockTypeOfWork: typeOfWork[] = [
     id: "400",
     name: "Content creation",
   },
+  {
+    id: "401",
+    name: "Development",
+  },
+];
+
+export const mockTaskStatuses: TaskStatus[] = [
+  { id: "500", name: "To Do", type: "todo", order: 1 },
+  { id: "501", name: "In Progress", type: "progress", order: 2 },
+  { id: "502", name: "Review", type: "review", order: 3 },
+  { id: "503", name: "Done", type: "done", order: 4 },
+];
+
+export const mockPrivateTaskStatuses: TaskStatus[] = [
+  { id: "510", name: "To Do", type: "todo", order: 1 },
+  { id: "511", name: "In Progress", type: "progress", order: 2 },
+  { id: "512", name: "Done", type: "done", order: 3 },
+];
+
+export const mockTaskLists: TaskList[] = [
+  { id: "600", name: "Client Ideas", order: 1, isArchived: false },
+  { id: "601", name: "Own Ideas", order: 2, isArchived: false },
+  { id: "602", name: "Maintenance", order: 3, isArchived: false },
+  { id: "603", name: "Marketing", order: 4, isArchived: false },
+];
+
+export const mockProjectMembers: ProjectMember[] = [
+  { id: "700", userId: "800", firstName: "Stefan", lastName: "Grund", isDeactivated: false, isExternal: false },
+  { id: "701", userId: "801", firstName: "Jan", lastName: "Müller", isDeactivated: false, isExternal: false },
+  { id: "702", userId: "802", firstName: "Lisa", lastName: "Schmidt", isDeactivated: false, isExternal: true },
+  { id: "703", userId: "803", firstName: "Tom", lastName: "Weber", isDeactivated: true, isExternal: false },
 ];

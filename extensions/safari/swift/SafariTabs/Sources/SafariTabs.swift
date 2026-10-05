@@ -59,25 +59,36 @@ struct LocalTab: Codable {
       continue
     }
 
-    var tabIndex = 1
-    for tab in windowTabs {
-      guard let safariTab = tab as? SafariTab else {
-        continue
+    let tabCount = windowTabs.count
+    let batchedTitles = windowTabs.array(byApplying: #selector(getter: SafariTab.name))
+    let batchedUrls = windowTabs.array(byApplying: #selector(getter: SafariTab.URL))
+
+    // Batched selectors are fast but omit empty values, so preserve alignment
+    // with individual reads only for affected windows.
+    let tabData: [(title: String, url: String)]
+    if batchedTitles.count == tabCount && batchedUrls.count == tabCount {
+      tabData = zip(batchedTitles, batchedUrls).map { tab in
+        (tab.0 as? String ?? "", tab.1 as? String ?? "")
       }
+    } else {
+      tabData = windowTabs.compactMap {
+        guard let tab = $0 as? SafariTab else {
+          return nil
+        }
+        return (tab.name ?? "", tab.URL ?? "")
+      }
+    }
 
-      let tabTitle = safariTab.name ?? ""
-      let tabUrl = safariTab.URL ?? ""
-
+    for (tabOffset, tab) in tabData.enumerated() {
+      let tabIndex = tabOffset + 1
       tabs.append(LocalTab(
         uuid: "\(windowId)-\(tabIndex)",
-        title: tabTitle,
-        url: tabUrl,
+        title: tab.title,
+        url: tab.url,
         window_id: windowId,
         index: tabIndex,
         is_local: true
       ))
-
-      tabIndex += 1
     }
   }
 

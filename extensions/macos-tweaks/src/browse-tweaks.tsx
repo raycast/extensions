@@ -1,34 +1,33 @@
 import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert, showToast, Toast, Clipboard } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { ALL_TWEAKS } from "./tweaks";
 import { CATEGORY_META } from "./types";
-import type { TweakCategory, TweakState } from "./types";
+import type { TweakCategory, TweakRisk, TweakState } from "./types";
 import { applyTweak, getAllTweakStates, getCommandString, getResetCommandString, resetTweak } from "./utils/defaults";
-import { formatValue, buildDetailMarkdown } from "./utils/format";
+import { formatValue } from "./utils/format";
+import { TweakMetadata, tweakKeywords } from "./components/tweak-metadata";
 
 type FilterMode = "all" | "modified" | "default";
 
 export default function BrowseTweaks() {
-  const [tweakStates, setTweakStates] = useState<TweakState[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<FilterMode>("all");
+  const [riskFilter, setRiskFilter] = useState<TweakRisk | "all">("all");
 
-  const loadTweaks = useCallback(async () => {
-    setIsLoading(true);
-    const states = await getAllTweakStates(ALL_TWEAKS);
-    setTweakStates(states);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadTweaks();
-  }, [loadTweaks]);
+  // Reading 129 defaults takes a moment, so the cached values render immediately
+  // and are replaced as soon as the fresh read lands.
+  const {
+    data: tweakStates,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(() => getAllTweakStates(ALL_TWEAKS), [], { initialData: [] as TweakState[] });
 
   const filtered = tweakStates.filter((t) => {
     if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
     if (statusFilter === "modified" && !t.isModified) return false;
     if (statusFilter === "default" && t.isModified) return false;
+    if (riskFilter !== "all" && t.risk !== riskFilter) return false;
     return true;
   });
 
@@ -52,12 +51,17 @@ export default function BrowseTweaks() {
           tooltip="Filter"
           storeValue
           onChange={(val) => {
-            if (val === "all" || val === "modified" || val === "default") {
+            setStatusFilter("all");
+            setCategoryFilter("all");
+            setRiskFilter("all");
+            if (val === "modified" || val === "default") {
               setStatusFilter(val);
-              setCategoryFilter("all");
-            } else {
+            } else if (val === "risk-safe") {
+              setRiskFilter("safe");
+            } else if (val === "risk-moderate") {
+              setRiskFilter("moderate");
+            } else if (val !== "all") {
               setCategoryFilter(val);
-              setStatusFilter("all");
             }
           }}
         >
@@ -65,6 +69,16 @@ export default function BrowseTweaks() {
             <List.Dropdown.Item title={`All Tweaks (${tweakStates.length})`} value="all" />
             <List.Dropdown.Item title={`Modified (${modifiedCount})`} value="modified" />
             <List.Dropdown.Item title={`Default (${tweakStates.length - modifiedCount})`} value="default" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Risk">
+            <List.Dropdown.Item
+              title={`Safe (${tweakStates.filter((t) => t.risk === "safe").length})`}
+              value="risk-safe"
+            />
+            <List.Dropdown.Item
+              title={`Moderate (${tweakStates.filter((t) => t.risk === "moderate").length})`}
+              value="risk-moderate"
+            />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Category">
             {Object.entries(CATEGORY_META).map(([key, meta]) => {
@@ -78,7 +92,7 @@ export default function BrowseTweaks() {
       {Array.from(grouped.entries()).map(([category, tweaks]) => (
         <List.Section key={category} title={CATEGORY_META[category].title} subtitle={`${tweaks.length} tweaks`}>
           {tweaks.map((tweak) => (
-            <TweakItem key={tweak.id} tweak={tweak} onUpdate={loadTweaks} />
+            <TweakItem key={tweak.id} tweak={tweak} onUpdate={revalidate} />
           ))}
         </List.Section>
       ))}
@@ -95,8 +109,9 @@ function TweakItem({ tweak, onUpdate }: { tweak: TweakState; onUpdate: () => voi
     <List.Item
       title={tweak.title}
       icon={statusIcon}
+      keywords={tweakKeywords(tweak)}
       accessories={[{ text: formatValue(tweak) }]}
-      detail={<List.Item.Detail markdown={buildDetailMarkdown(tweak)} />}
+      detail={<List.Item.Detail metadata={<TweakMetadata tweak={tweak} />} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

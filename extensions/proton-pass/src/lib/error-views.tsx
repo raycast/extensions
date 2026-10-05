@@ -27,6 +27,8 @@ interface ErrorViewProps {
   errorType: PassCliErrorType;
   onRetry?: () => void;
   contextTitle?: string;
+  /** Shown for errors without a dedicated description, so pass-cli's reason isn't lost. */
+  message?: string;
 }
 
 interface ErrorConfig {
@@ -37,8 +39,16 @@ interface ErrorConfig {
   showRetry: boolean;
 }
 
-function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): ErrorConfig {
+function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, message?: string): ErrorConfig {
   switch (errorType) {
+    case "unsupported_platform":
+      return {
+        icon: Icon.XMarkCircle,
+        title: "Unsupported Platform",
+        description: `Proton Pass supports macOS arm64/x64 and Windows x64. Current platform: ${process.platform}-${process.arch}.`,
+        showDocsLink: false,
+        showRetry: false,
+      };
     case "not_installed":
       return {
         icon: Icon.XMarkCircle,
@@ -85,15 +95,15 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): Err
       return {
         icon: Icon.ExclamationMark,
         title: contextTitle ? `Failed to ${contextTitle}` : "An Error Occurred",
-        description: "An error occurred. Please try again.",
+        description: message || "An error occurred. Please try again.",
         showDocsLink: true,
         showRetry: true,
       };
   }
 }
 
-export function ErrorListView({ errorType, onRetry, contextTitle }: ErrorViewProps) {
-  const config = getErrorConfig(errorType, contextTitle);
+export function ErrorListView({ errorType, onRetry, contextTitle, message }: ErrorViewProps) {
+  const config = getErrorConfig(errorType, contextTitle, message);
 
   return (
     <List>
@@ -119,7 +129,8 @@ export function renderErrorView(
   errorType: PassCliErrorType | null,
   onRetry?: () => void,
   contextTitle?: string,
+  message?: string,
 ): JSX.Element | null {
   if (!errorType) return null;
-  return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} />;
+  return <ErrorListView errorType={errorType} onRetry={onRetry} contextTitle={contextTitle} message={message} />;
 }

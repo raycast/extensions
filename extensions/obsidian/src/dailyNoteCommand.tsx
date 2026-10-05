@@ -24,7 +24,7 @@ export default function Command() {
   }
 
   if (vaultsWithPlugin.length == 0) {
-    return <AdvancedURIPluginNotInstalled />;
+    return <AdvancedURIPluginNotInstalled corePlugins={["daily-notes"]} />;
   }
 
   if (preselectedVault || vaultsWithPlugin.length == 1) {
