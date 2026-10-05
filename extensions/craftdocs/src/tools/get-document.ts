@@ -11,10 +11,15 @@ type Input = {
   spaceId?: string;
 };
 
+const MAX_BLOCKS = 500;
+
+// Title row first so the limit never cuts it; +2 = title row + one extra to detect truncation.
 const documentBlocksQuery = `
 SELECT id, content, type, entityType, documentId
 FROM BlockSearch
 WHERE documentId = ? OR id = ?
+ORDER BY id = ? DESC
+LIMIT ${MAX_BLOCKS + 2}
 `;
 
 /**
@@ -33,20 +38,29 @@ export default async function (input: Input) {
       return "Document not found.";
     }
 
-    const blocks = searchBlocks(databaseWrap.database, spaceId, documentBlocksQuery, [documentId, documentId]);
+    const blocks = searchBlocks(databaseWrap.database, spaceId, documentBlocksQuery, [
+      documentId,
+      documentId,
+      documentId,
+    ]);
     const title = blocks.find((block) => block.entityType === "document")?.content;
 
     if (blocks.length === 0) {
       return "Document not found.";
     }
 
+    const contentBlocks = blocks.filter((block) => block.entityType !== "document");
+
     return {
       title,
       documentId,
       spaceId,
       url: buildOpenBlockUrl(documentId, spaceId),
-      note: "Blocks are unordered (local search index has no document order).",
-      blocks: blocks.filter((block) => block.entityType !== "document").map((block) => block.content),
+      note:
+        contentBlocks.length > MAX_BLOCKS
+          ? `Blocks are unordered (local search index has no document order). Only the first ${MAX_BLOCKS} blocks are shown; use craft-api GET /blocks for the full document.`
+          : "Blocks are unordered (local search index has no document order).",
+      blocks: contentBlocks.slice(0, MAX_BLOCKS).map((block) => block.content),
     };
   });
 }

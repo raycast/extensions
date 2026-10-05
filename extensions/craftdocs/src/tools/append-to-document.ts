@@ -15,6 +15,8 @@ type Input = {
 export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   message: "Add this content to the Craft document?",
   info: [
+    { name: "Document", value: input.documentId },
+    { name: "Space", value: input.spaceId },
     { name: "Content", value: input.content },
     { name: "Position", value: input.position ?? "end" },
   ],

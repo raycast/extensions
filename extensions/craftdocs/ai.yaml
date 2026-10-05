@@ -93,6 +93,23 @@ evals:
             path: /blocks
             body:
               includes: "Monday"
+  - input: "@craftdocs rename my Work space to Client Work"
+    mocks:
+      list-spaces:
+        - spaceId: SPACE-2
+          name: Work
+          customName: Work
+          primary: false
+          enabled: true
+      manage-space: "Space updated."
+    expected:
+      - callsTool: list-spaces
+      - callsTool:
+          name: manage-space
+          arguments:
+            spaceId: SPACE-2
+            name:
+              includes: "Client"
   - input: "@craftdocs list my spaces"
     mocks:
       list-spaces:

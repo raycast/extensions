@@ -112,7 +112,6 @@ export const findDailyNoteBlockIdFresh = async (
   }
 };
 
-// ponytail: re-reads the whole index each poll; watch the file mtime instead if large spaces make this slow.
 export const waitForDailyNote = async (
   config: Awaited<ReturnType<typeof loadCraftSnapshot>>["config"],
   spaceId: string,

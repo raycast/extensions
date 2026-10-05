@@ -24,6 +24,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
   info: [
     { name: "Content", value: input.content },
     { name: "Date", value: input.date ?? "today" },
+    { name: "Space", value: input.spaceId },
     {
       name: "Note",
       value:

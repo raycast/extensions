@@ -11,7 +11,7 @@ LIMIT 1
 `;
 
 export const buildDailyNoteOpenUrl = (query: string, spaceID: string) => {
-  return `craftdocs://openByQuery?query=${query}&spaceId=${spaceID}`;
+  return `craftdocs://openByQuery?query=${encodeURIComponent(query)}&spaceId=${encodeURIComponent(spaceID)}`;
 };
 
 export const buildDailyNoteDateQuery = (date: Date) => {
