@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add DropTheHassle MCP Server] - 2026-10-05
+
+- Add DropTheHassle to the official registry: your AI puts the site it built online on a live HTTPS link, checks domain availability with the registry, and manages your sites (new version or rollback, link rename, domains, share image and favicon, certificate and visitor checks). Hosted remote Streamable HTTP server at https://dropthehassle.com/mcp through `mcp-remote`; publishing and domain checks need no sign-in, managing sites uses OAuth 2.1 sign-in with dynamic client registration.
+
 ## [Add LinkMCP MCP Server] - 2026-10-05
 
 - Add LinkMCP to the community registry: use your own LinkedIn account from your AI assistant (profiles and companies, people, job and Sales Navigator search, LinkedIn inbox, posts, comments and reactions, connection requests, your own analytics, work email and mobile finding). Hosted remote Streamable HTTP server at https://app.linkmcp.io/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Connecting a LinkedIn account needs a paid plan. Not affiliated with LinkedIn.
