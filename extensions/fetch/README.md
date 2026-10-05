@@ -5,7 +5,7 @@
 # Fetch
 
 [![Raycast Store](https://img.shields.io/badge/Raycast-Store-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/chrismessina/fetch)
-[![Licence MIT](https://img.shields.io/badge/Licence-MIT-22C55E?style=flat-square)](LICENSE)
+[![License MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Follow @chrismessina](https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social)](https://github.com/chrismessina)
 [![Stars](https://img.shields.io/github/stars/chrismessina/raycast-fetch?style=social)](https://github.com/chrismessina/raycast-fetch/stargazers)
 
@@ -82,7 +82,7 @@
 
 **Strict Redaction** also masks every URL query string and fragment in the logs, not just values it recognizes as secrets by name. Turn it on before reproducing a problem you plan to share a log of.
 
-**Stall Timeout is an idle limit, not a time limit.** It is the number of seconds a transfer may go without receiving *any* data before it is abandoned. A large file downloading slowly is left alone for as long as it keeps making progress.
+**Stall Timeout is a speed limit, not a time limit.** It is the number of seconds a transfer may stay below 1 KiB/s before it is abandoned. A large file downloading at a steady pace above that is left alone however long it takes.
 
 The batch form's output directory overrides the preference for that batch only.
 
