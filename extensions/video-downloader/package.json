@@ -166,6 +166,15 @@
           "value": "vivaldi"
         }
       ]
+    },
+    {
+      "name": "fastRemux",
+      "title": "Fast Remux",
+      "description": "Package video and audio streams directly into the target container without re-encoding. Much faster and preserves lossless quality.",
+      "type": "checkbox",
+      "label": "Remux streams without re-encoding (faster, recommended)",
+      "default": true,
+      "required": false
     }
   ],
   "ai": {

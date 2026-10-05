@@ -135,6 +135,7 @@ export const {
   ytdlPath: ytdlPathPreference,
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
+  fastRemux = true,
 } = getPreferenceValues<ExtensionPreferences>();
 
 // The directory preference can hold a literal "~/..." path (its default is

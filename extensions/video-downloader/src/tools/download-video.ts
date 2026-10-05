@@ -11,6 +11,7 @@ import {
   looksLikeFilePath,
   normalizeVideoUrl,
   sanitizeVideoTitle,
+  fastRemux,
 } from "../utils.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -69,7 +70,7 @@ export default async function tool(input: Input) {
     const [downloadFormat, recodeFormat] = formatValue.split("#");
     options.push("--ffmpeg-location", ffmpegPath);
     options.push("--format", downloadFormat);
-    options.push("--recode-video", recodeFormat);
+    options.push(fastRemux ? "--remux-video" : "--recode-video", recodeFormat);
   }
 
   options.push("--print", "after_move:filepath");
