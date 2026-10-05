@@ -59,7 +59,10 @@ export async function createTodo(
       preferences.properties.status.type === 'status'
         ? {
             [preferences.properties.status.name]: {
-              status: todo?.status?.id ? { id: todo?.status?.id } : null,
+              status:
+                todo?.status?.id && todo.status.id !== 'no-status'
+                  ? { id: todo.status.id }
+                  : null,
             },
           }
         : {}),

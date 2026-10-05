@@ -1,5 +1,13 @@
 # Hypersonic Changelog
 
+## [Fix task creation failing with invalid select option "no-status"] - {PR_MERGE_DATE}
+
+#### Fixed
+
+- Fetch the configured database directly by its ID instead of searching by name, which could resolve to the wrong database and break loading statuses and tags
+- Never send the internal `no-status` placeholder to the Notion API when creating a task
+- Ignore a cached status filter that no longer exists in the database when picking the default status for a new task
+
 ## [Create tasks with details] - 2026-08-03
 
 #### New

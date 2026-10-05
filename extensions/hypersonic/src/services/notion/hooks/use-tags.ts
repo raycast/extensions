@@ -1,17 +1,17 @@
 import { useCachedPromise } from '@raycast/utils'
 import { getTags } from '../operations/get-tags'
 
-export function useTags(databaseName: string) {
+export function useTags(databaseId: string) {
   const { data, error, isLoading } = useCachedPromise(
-    async (databaseName) => {
-      const tags = await getTags(databaseName)
+    async (databaseId) => {
+      const tags = await getTags(databaseId)
       return tags
     },
-    [databaseName],
+    [databaseId],
     {
       initialData: [],
       keepPreviousData: true,
-      execute: !!databaseName,
+      execute: !!databaseId,
     }
   )
 

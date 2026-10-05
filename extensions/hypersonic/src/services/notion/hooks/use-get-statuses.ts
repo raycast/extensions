@@ -1,17 +1,17 @@
 import { useCachedPromise } from '@raycast/utils'
 import { getStatuses } from '../operations/get-statuses'
 
-export function useStatuses(databaseName: string) {
+export function useStatuses(databaseId: string) {
   const { data, error, isLoading } = useCachedPromise(
-    async (databaseName) => {
-      const statuses = await getStatuses(databaseName)
+    async (databaseId) => {
+      const statuses = await getStatuses(databaseId)
       return statuses
     },
-    [databaseName],
+    [databaseId],
     {
       initialData: [],
       keepPreviousData: true,
-      execute: !!databaseName,
+      execute: !!databaseId,
     }
   )
 
