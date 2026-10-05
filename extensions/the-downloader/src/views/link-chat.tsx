@@ -361,7 +361,11 @@ function AboutMetadata({ ctx, textOnly }: { ctx: LinkContext; textOnly: boolean 
  * answers with the chosen AI engine. The search bar is the question box;
  * answers stream into the detail pane, with clickable timestamps for videos.
  */
-export function LinkChat({ url, initialQuestion }: { url: string; initialQuestion?: string }) {
+/**
+ * `root`: opened as the command itself (Chat About Link with a link), where
+ * Raycast shows the command name and the Store guidelines ask not to change it.
+ */
+export function LinkChat({ url, initialQuestion, root }: { url: string; initialQuestion?: string; root?: boolean }) {
   const prefs = useMemo(() => getPreferenceValues<Preferences.ChatLink>(), []);
   const settings = useMemo(() => engineSettings(prefs), [prefs]);
   const expectedKind = useMemo(() => {
@@ -715,7 +719,7 @@ export function LinkChat({ url, initialQuestion }: { url: string; initialQuestio
       searchBarPlaceholder={
         ctx ? `Ask anything about this ${words.noun}…` : loadError ? loadErrorTitle : `${words.loading}…`
       }
-      navigationTitle={ctx?.title ?? "Chat About Link"}
+      navigationTitle={root ? undefined : (ctx?.title ?? "Chat About Link")}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarAccessory={

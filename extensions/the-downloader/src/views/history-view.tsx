@@ -116,9 +116,10 @@ function detailMarkdown(e: HistoryEntry): string {
   return `${markdownImage(card, `card-${e.id}`, CARD_W)}${error}`;
 }
 
-async function downloadAgain(url: string) {
+/** Open the Download command, with a link to download again or empty for a new one. */
+async function openDownload(url?: string) {
   try {
-    await launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { url } });
+    await launchCommand({ name: "index", type: LaunchType.UserInitiated, context: url ? { url } : undefined });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -215,7 +216,7 @@ export function DownloadHistory() {
       title="New Download"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+      onAction={() => openDownload()}
     />
   );
 
@@ -225,7 +226,6 @@ export function DownloadHistory() {
       isShowingDetail={split}
       filtering
       onSearchTextChange={setSearchText}
-      navigationTitle="Download History"
       searchBarPlaceholder="Search downloads by title, channel or site"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" storeValue onChange={(value) => setFilter(value as HistoryFilter)}>
@@ -348,7 +348,7 @@ export function DownloadHistory() {
                           macOS: { modifiers: ["cmd", "shift"], key: "r" },
                           Windows: { modifiers: ["ctrl", "shift"], key: "r" },
                         }}
-                        onAction={() => downloadAgain(e.url)}
+                        onAction={() => openDownload(e.url)}
                       />
                       {canChat(e.kind) && <ChatAboutLinkAction url={e.url} />}
                       <Action

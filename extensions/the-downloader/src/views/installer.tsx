@@ -163,7 +163,6 @@ export default function Installer({
     return (
       <Detail
         isLoading={busy}
-        navigationTitle={`Set Up ${toolInfoFor(executable).name}`}
         actions={
           <ManagedInstall
             executable={executable}
@@ -183,7 +182,6 @@ export default function Installer({
   return (
     <Detail
       isLoading={busy}
-      navigationTitle={`Set Up ${toolInfoFor(executable).name}`}
       actions={
         <AutoInstall executable={executable} onRefresh={onRefresh} onBusyChange={setBusy} alternatives={alternatives} />
       }

@@ -9,6 +9,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.ChatLi
   const context = props.launchContext as ChatLaunchContext | undefined;
   const url = (props.arguments.url?.trim() || context?.url?.trim()) ?? "";
   // Normalized, so Open Link and the saved chat get a real URL even for `youtube.com/…`.
-  if (isValidUrl(url)) return <LinkChat url={normalizeUrl(url)} />;
+  if (isValidUrl(url)) return <LinkChat url={normalizeUrl(url)} root />;
   return <ChatHome initialText={url} />;
 }
