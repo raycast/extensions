@@ -42,28 +42,54 @@ function createClient(): ImapFlow {
   });
 }
 
+// One connection for the whole command: every action used to open (and log out of) its own connection
+// to Bridge, which made each click wait for a new TLS handshake and login.
+// imapflow queues commands and mailbox locks, so concurrent operations can share it.
+let sharedClient: ImapFlow | null = null;
+let connecting: Promise<ImapFlow> | null = null;
+
+async function getClient(): Promise<ImapFlow> {
+  if (sharedClient?.usable) return sharedClient;
+  if (!connecting) {
+    connecting = (async () => {
+      const client = createClient();
+      // Without a listener, a dropped connection would crash the command; the next call reconnects instead
+      client.on("error", () => {});
+      client.on("close", () => {
+        if (sharedClient === client) sharedClient = null;
+      });
+      await client.connect();
+      sharedClient = client;
+      return client;
+    })().finally(() => {
+      connecting = null;
+    });
+  }
+  return connecting;
+}
+
 async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promise<T> {
-  const client = createClient();
   try {
-    await client.connect();
-    return await operation(client);
+    return await operation(await getClient());
   } catch (error) {
     const prefs = getPreferenceValues<Preferences>();
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
       `IMAP connection failed: ${errorMessage}\n\nPlease verify:\n- Proton Mail Bridge is running\n- Host: ${prefs.imapHost}, Port: ${prefs.imapPort}\n- Username and password are correct (use Bridge password, not Proton account password)`,
     );
-  } finally {
+  }
+}
+
+export async function disconnectClient(): Promise<void> {
+  const client = sharedClient;
+  sharedClient = null;
+  if (client) {
     try {
       await client.logout();
     } catch {
       // Ignore logout errors
     }
   }
-}
-
-export async function disconnectClient(): Promise<void> {
-  // No-op now since we create fresh connections
 }
 
 export async function listFolders(): Promise<Folder[]> {
