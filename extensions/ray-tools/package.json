@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ray-tools",
+  "title": "Ray Tools",
+  "description": "A focused set of independent tools for everyday work",
+  "icon": "icon.png",
+  "author": "kirill",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "subtitle": "RU ↔ EN",
+      "description": "Translate selected or typed text between Russian and English",
+      "mode": "view"
+    },
+    {
+      "name": "proofread-russian",
+      "title": "Proofread Russian Text",
+      "subtitle": "Spelling & Punctuation",
+      "description": "Check Russian spelling and punctuation in selected or typed text",
+      "mode": "view"
+    },
+    {
+      "name": "clean-markdown",
+      "title": "Очистить Markdown",
+      "subtitle": "Убрать форматирование",
+      "description": "Убрать Markdown-разметку из выделенного или введённого текста",
+      "mode": "view"
+    },
+    {
+      "name": "ping",
+      "title": "Пинг",
+      "subtitle": "Состояние сети",
+      "description": "Постоянно проверять локальную сеть, интернет, удалённый сервер и VPN",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "remoteEndpoint",
+          "title": "Удалённый адрес",
+          "description": "HTTPS-адрес для отличия проблемы удалённого сервера от общей проблемы с интернетом",
+          "type": "textfield",
+          "required": false,
+          "default": "https://example.com",
+          "placeholder": "https://example.com/health"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.0.10",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^10.8.1",
+    "prettier": "^3.5.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^4.0.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run test && npm run typecheck && npm run lint && npm run build",
+    "publish": "ray publish"
+  }
+}
