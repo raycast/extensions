@@ -2014,4 +2014,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.empiriolabs.ai/mcp"],
     },
   },
+  {
+    name: "linkmcp",
+    title: "LinkMCP",
+    description:
+      "Use your own LinkedIn account from your AI assistant: look up profiles and companies, search people, jobs and Sales Navigator (with your own seat), read and send LinkedIn messages, read and write posts, comments and reactions, manage connection requests, read your own post analytics, and find work emails and mobile numbers. Not affiliated with LinkedIn. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. 7-day free trial without a card; connecting a LinkedIn account needs a paid plan (from $19/month).",
+    icon: "https://app.linkmcp.io/logo-512.png",
+    homepage: "https://app.linkmcp.io",
+    remoteUrl: "https://app.linkmcp.io/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
+    },
+  },
 ];
