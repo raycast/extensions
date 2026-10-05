@@ -57,6 +57,7 @@ function TaskResult({
   home,
   action,
   operation,
+  uncertain = false,
 }: {
   initial: unknown;
   query: ReturnType<typeof taskQuery>;
@@ -65,13 +66,15 @@ function TaskResult({
   home: string;
   action: string;
   operation?: string;
+  uncertain?: boolean;
 }) {
   const [result, setResult] = useState(initial),
     [query, setQuery] = useState(initialQuery),
     [loading, setLoading] = useState(false);
   const pending = useRef(false);
   async function refresh() {
-    if ((!query && !operation) || pending.current) return;
+    if ((!query && !(operation && auth.mode === "oauth")) || pending.current)
+      return;
     pending.current = true;
     setLoading(true);
     try {
@@ -132,25 +135,30 @@ function TaskResult({
         unknown: "Status Unconfirmed",
       };
   const status = labels[summary.status] ?? labels.unknown;
-  const guidance = summary.url
-    ? cn
-      ? "结果已就绪。使用“打开结果”查看或下载；打开链接不代表文件已保存。"
-      : "Your result is ready. Open it to view or download; opening a link does not confirm a saved file."
-    : summary.status === "success"
+  const guidance =
+    uncertain && auth.mode === "api-key"
       ? cn
-        ? "处理已完成，但没有可用的结果链接。可再次查询或到网站查看。"
-        : "Processing completed, but no valid result link is available. Check again or visit the website."
-      : summary.failure
+        ? "提交结果未确认。保留操作 ID，到网站任务记录核查，或联系支持。取得任务 ID 后使用图片/视频任务查询。不要换操作 ID 重新提交；API Key 接口不提供按操作 ID 查询回执。"
+        : "Submission outcome is unconfirmed. Keep the operation ID and check your task history on the website or contact support. Once you have a task ID, use Image Task or Video Task. Do not resubmit with a new ID; the API Key API has no operation receipt lookup."
+      : summary.url
         ? cn
-          ? "请查看失败说明，再决定下一步。"
-          : "Review the failure details before continuing."
-        : summary.status === "expired"
+          ? "结果已就绪。使用“打开结果”查看或下载；打开链接不代表文件已保存。"
+          : "Your result is ready. Open it to view or download; opening a link does not confirm a saved file."
+        : summary.status === "success"
           ? cn
-            ? "结果已过期，请到网站查看。"
-            : "The result has expired. Visit the website for details."
-          : cn
-            ? "受理不等于完成。可手动查询状态，不会重新提交任务。"
-            : "Acceptance is not completion. Check status manually without resubmitting.";
+            ? "处理已完成，但没有可用的结果链接。可再次查询或到网站查看。"
+            : "Processing completed, but no valid result link is available. Check again or visit the website."
+          : summary.failure
+            ? cn
+              ? "请查看失败说明，再决定下一步。"
+              : "Review the failure details before continuing."
+            : summary.status === "expired"
+              ? cn
+                ? "结果已过期，请到网站查看。"
+                : "The result has expired. Visit the website for details."
+              : cn
+                ? "受理不等于完成。可手动查询状态，不会重新提交任务。"
+                : "Acceptance is not completion. Check status manually without resubmitting.";
   return (
     <Detail
       isLoading={loading}
@@ -180,7 +188,7 @@ function TaskResult({
               url={summary.url}
             />
           )}
-          {(query || operation) && (
+          {(query || (operation && auth.mode === "oauth")) && (
             <Action
               title={cn ? "查询任务状态" : "Check Task Status"}
               onAction={refresh}
@@ -410,6 +418,25 @@ export default function Command() {
         />,
       );
     } catch (error) {
+      if (requested && ["image", "video", "share"].includes(values.action)) {
+        const auth: Auth =
+          prefs.authMode === "api-key"
+            ? { mode: "api-key", apiKey: prefs.apiKey, userNo: prefs.userNo }
+            : { mode: "oauth", region, session };
+        push(
+          <TaskResult
+            initial={{ code: 200, status: "unknown" }}
+            query={undefined}
+            auth={auth}
+            cn={cn}
+            home={home}
+            action={values.action}
+            operation={values.operationId}
+            uncertain
+          />,
+        );
+        return;
+      }
       await showToast({
         style: Toast.Style.Failure,
         title: requested
