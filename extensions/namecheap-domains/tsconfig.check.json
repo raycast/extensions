@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "react"]
+  }
+}
