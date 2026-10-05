@@ -1,5 +1,12 @@
 # Aktar Changelog
 
+## [Replace Files and Automatic Destination] - {PR_MERGE_DATE}
+
+- Replace File (⌘⇧R, Ctrl+Shift+R on Windows) in Search Uploads and Browse Buckets: pick a new file and Aktar writes it at the same key, so every link already shared shows the new file. The link is copied again, and the list and thumbnails refresh. Needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions ask you to update
+- Upload File starts on Automatic: Aktar sends each file to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Pick a destination to upload into a folder
+- Search Uploads shows when an upload was replaced
+- Upload Clipboard and Upload Selected Files follow Use For too, as they don't name a destination
+
 ## [Windows] - 2026-10-05
 
 - The extension now works with Raycast for Windows and Aktar for Windows 0.1.0 or later. Connect to Aktar finds Aktar from the Microsoft Store or from the installer

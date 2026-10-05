@@ -20,9 +20,9 @@ Prefer to set it up by hand? Turn on **Allow local connections** in Aktar > Sett
 
 - **Upload Clipboard**: uploads the copied file or screenshot and copies its link.
 - **Upload Selected Files**: uploads the files selected in Finder (or File Explorer on Windows) to your default destination.
-- **Upload File**: pick files, a destination, an optional folder, and when to delete them. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
-- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, show a QR code for the link, and delete uploads. Uploads set to auto-delete show the day they go away.
-- **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, show QR codes for either, rename, move, delete, create folders, and upload into any folder.
+- **Upload File**: pick files, a destination (or Automatic, which follows each destination's Use For in Aktar), an optional folder, and when to delete them. With a single file, the optional **Name** field uploads it under a different name (its extension is kept unless you type one); it's what replaces `{filename}` in the destination's path template.
+- **Search Uploads**: search your upload history with previews, copy links as URL, Markdown, HTML, or your custom template, jump to a file's folder, show a QR code for the link, replace an upload's file while its link stays the same, and delete uploads. Uploads set to auto-delete show the day they go away.
+- **Browse Buckets**: browse every folder and file in your buckets (not only what Aktar uploaded), copy public links or temporary links that also work for private buckets, show QR codes for either, rename, move, replace a file in place, delete, create folders, and upload into any folder.
 - **Watched Folders**: see the folders Aktar uploads from automatically and what each one is doing, enable or disable them, and pause or resume watching.
 - **Toggle Watching**: pauses all watched folders until you resume them, or resumes them.
 - **Connect to Aktar**: pairs the extension with the app.
@@ -47,6 +47,9 @@ Watched folders need an Aktar version that has them. With an older one, the comm
 ## What Aktar Does for You
 
 Uploads from Raycast go through the Aktar app, so they follow its settings:
+
+- **Use For** (Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0): a destination can claim kinds of files (images, videos, documents...) and extensions. Upload Clipboard, Upload Selected Files and Upload File on Automatic send each file to the destination that claims it, else to the one selected in Aktar.
+- **Replace File** (same versions): writes a new file at an upload's key, so its link keeps working. Aktar can also clear the old version from a Cloudflare cache and run the destination's webhooks after it.
 
 - **Already uploaded** (Aktar 0.10.0 or later): when the same file is already in that destination with the same Delete After time, Aktar doesn't upload it again and copies its existing link. The extension tells you with an "Already uploaded" message and the day the existing file is deleted, with a warning when that's not the Delete After you picked. Older Aktar versions upload the file again.
 - **Image conversion**: Aktar can convert images to WebP or AVIF before uploading (Aktar 0.10.0 or later).

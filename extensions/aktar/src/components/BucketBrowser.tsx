@@ -31,6 +31,7 @@ import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
+import { ReplaceForm } from "./ReplaceForm";
 import { UploadForm } from "./UploadForm";
 
 type Entry = { type: "folder"; folder: BucketFolder } | { type: "object"; object: BucketObject };
@@ -273,6 +274,17 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                     icon={Icon.Pencil}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<MoveForm destination={destination} object={object} onMoved={revalidate} />}
+                  />
+                  <Action.Push
+                    title="Replace File"
+                    icon={Icon.Repeat}
+                    shortcut={primaryShortcut("r", "shift")}
+                    target={
+                      <ReplaceForm
+                        target={{ kind: "object", destinationId: destination.id, key: object.key, name: object.name }}
+                        onReplaced={revalidate}
+                      />
+                    }
                   />
                   <Action
                     title="Delete"
