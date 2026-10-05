@@ -1,8 +1,7 @@
 import { Document, Initiative, Project, User } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 import { sortBy } from "lodash";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { getLinearClient } from "./linearClient";
 
 export type DocumentResult = Pick<
   Document,
@@ -85,20 +84,3 @@ export async function getDocuments(query: string = "", entity: DocumentEntity = 
 
   return { docs, hasMoreDocs };
 }
-
-export default withAccessToken(linear)(async (inputs: {
-  /** Search query to filter documents */
-  query?: string;
-  /** Restrict the documents/PRDs returned to a specific initiative */
-  initiativeId?: string;
-  /** Restrict the documents/PRDs returned to a specific project */
-  projectId?: string;
-}) => {
-  let entity: DocumentEntity = { projectId: "" };
-  if (inputs.projectId) {
-    entity = { projectId: inputs.projectId };
-  } else if (inputs.initiativeId) {
-    entity = { initiativeId: inputs.initiativeId };
-  }
-  return (await getDocuments(inputs.query || undefined, entity)).docs;
-});

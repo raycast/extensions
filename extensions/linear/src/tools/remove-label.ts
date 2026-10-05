@@ -3,19 +3,21 @@ import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { resolveIssueLabel } from "./linearUtils";
 import { serializeIssue } from "./serializers";
 import { withLinear } from "./withLinear";
 
 type Input = {
-  /** The ID of the issue to add the label to. Format is a combination of a team key and a unique number, like `ENG-123` */
+  /** The issue ID or identifier. Format is a combination of a team key and a unique number, like `ENG-123` */
   issueId: string;
 
-  /** The ID of the label to add to the issue. Never use title as ID: you have to use `get-labels` tool to get the actual ID from the list of labels */
-  labelId: string;
+  /** Label name or ID to remove from the issue. Other labels on the issue are kept. */
+  label: string;
 };
 
-export default withLinear(async ({ issueId, labelId }: Input) => {
+export default withLinear(async ({ issueId, label }: Input) => {
   const { linearClient } = getLinearClient();
+  const labelId = (await resolveIssueLabel(label)).id;
   const issue = await linearClient.issue(issueId);
   const currentLabelIds = issue.labelIds || [];
   const updatedLabelIds = currentLabelIds.filter((id) => id !== labelId);
@@ -35,10 +37,10 @@ export default withLinear(async ({ issueId, labelId }: Input) => {
   return serializeIssue(updatedIssue);
 });
 
-export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
+export const confirmation = withAccessToken(linear)(async ({ issueId, label: labelQuery }: Input) => {
   const { linearClient } = getLinearClient();
 
-  const label = await linearClient.issueLabel(labelId);
+  const label = await resolveIssueLabel(labelQuery);
   const issue = await linearClient.issue(issueId);
 
   return {

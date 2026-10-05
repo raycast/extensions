@@ -83,6 +83,17 @@ export async function tryGet<T>(get: () => Promise<T>): Promise<T | undefined> {
   }
 }
 
+/**
+ * Whether a value can be used in a GraphQL ID comparator.
+ *
+ * Linear validates `id: { eq }` values and rejects the whole query when one is not a UUID, so filters that accept "ID or name" must only add the ID branch for UUIDs.
+ */
+export function isUuid(value: string) {
+  return UUID_PATTERN.test(value);
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function resolveFrom<T extends Entity>(
   query: string,
   kind: string,

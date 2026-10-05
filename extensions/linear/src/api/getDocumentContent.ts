@@ -1,9 +1,7 @@
 import { Document } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { getLinearClient, linear } from "../api/linearClient";
-
-import { DocumentResult } from "./get-documents";
+import { DocumentResult } from "./getDocuments";
+import { getLinearClient } from "./linearClient";
 
 export type DocumentWithContent = Pick<Document, "content"> & DocumentResult;
 
@@ -57,10 +55,3 @@ export async function getDocumentContent(documentId: string) {
 
   return data?.documents.nodes?.[0];
 }
-
-export default withAccessToken(linear)(async (inputs: {
-  /** The ID of the document/PRD to fetch */
-  documentId: string;
-}) => {
-  return await getDocumentContent(inputs.documentId);
-});
