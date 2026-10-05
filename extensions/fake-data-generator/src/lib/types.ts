@@ -32,3 +32,49 @@ export function groups(value: string, sizes: number[], separator = " "): string 
   if (index < value.length) out.push(value.slice(index));
   return out.join(separator);
 }
+
+const MINOR_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "and",
+  "but",
+  "or",
+  "nor",
+  "for",
+  "so",
+  "yet",
+  "as",
+  "at",
+  "by",
+  "from",
+  "in",
+  "into",
+  "of",
+  "off",
+  "on",
+  "onto",
+  "per",
+  "to",
+  "up",
+  "via",
+  "with",
+]);
+
+/**
+ * Apple-style Title Case for action titles: "Copy date of birth (local)" -> "Copy Date of Birth (Local)".
+ * Tokens that aren't plain words (first.last, MM/YY, +) are left untouched.
+ */
+export function titleCase(value: string): string {
+  const words = value.split(" ");
+  return words
+    .map((word, i) => {
+      const m = word.match(/^([([]?)(\p{Ll})(\p{L}*)([)\]]?)$/u);
+      if (!m) return word;
+      const [, open, first, rest, close] = m;
+      const isEdge = i === 0 || i === words.length - 1;
+      if (!isEdge && !open && MINOR_WORDS.has(first + rest)) return word;
+      return open + first.toUpperCase() + rest + close;
+    })
+    .join(" ");
+}

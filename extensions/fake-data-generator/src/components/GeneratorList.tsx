@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, Color, Icon, Image, Keyboard, List, showHUD } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 import { ReactElement, useState } from "react";
-import { Generated } from "../lib/types";
+import { Generated, titleCase } from "../lib/types";
 import { preferences, preferredValue } from "../preferences";
 
 export interface GeneratorItem {
@@ -163,7 +163,7 @@ function ValueActions(props: ActionsProps) {
         {value.variants?.map((variant, i) => (
           <Action.CopyToClipboard
             key={variant.label}
-            title={`Copy ${variant.label}`}
+            title={titleCase(`Copy ${variant.label}`)}
             content={variant.value}
             shortcut={i < 9 ? { modifiers: ["cmd"], key: String(i + 1) as Keyboard.KeyEquivalent } : undefined}
             onCopy={props.onCopyVariant}

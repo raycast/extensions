@@ -22,6 +22,7 @@ function fields(e: Emails): RecordField[] {
     title: email.label,
     value: email.value,
     icon: Icon.Envelope,
+    copyTitle: "Copy Email",
   }));
 }
 

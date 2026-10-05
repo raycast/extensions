@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useState } from "react";
 import { Profile, PROFILES, profile as findProfile } from "../lib/people";
-import { flag } from "../lib/types";
+import { flag, titleCase } from "../lib/types";
 
 export interface RecordField {
   id: string;
@@ -10,6 +10,8 @@ export interface RecordField {
   value: string | undefined;
   icon?: Image.ImageLike;
   tag?: { value: string; color: Color };
+  /** Overrides the "Copy <title>" action title, e.g. when the title is a pattern like "first.last". */
+  copyTitle?: string;
 }
 
 interface Props<T> {
@@ -65,7 +67,11 @@ export function RecordList<T>({ create, fields, toText, toJson, searchBarPlaceho
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title={`Copy ${row.title}`} content={row.value!} onCopy={onCopy} />
+                      <Action.CopyToClipboard
+                        title={row.copyTitle ?? titleCase(`Copy ${row.title}`)}
+                        content={row.value!}
+                        onCopy={onCopy}
+                      />
                       <Action.Paste title="Paste into Active App" content={row.value!} onPaste={onCopy} />
                       <Action.CopyToClipboard
                         title="Copy All as Text"
