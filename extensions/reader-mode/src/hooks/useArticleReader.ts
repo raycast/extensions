@@ -156,6 +156,18 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   const cacheModel = modelOverride ?? preferredModel;
   const aiConfig = getAIConfigForStyle(summaryStyle, cacheModel ?? DEFAULT_SUMMARY_MODEL);
 
+  // Puts back the summary a regenerate was replacing, in the same render, when that regenerate
+  // is stopped or fails. Returns false when no regenerate was in progress.
+  const restoreReplacedSummary = () => {
+    const previous = regenerateFromRef.current;
+    regenerateFromRef.current = null;
+    if (!previous) return false;
+    setModelOverride(previous.model);
+    setSummaryStyle(previous.style);
+    setCachedSummaryState(previous.summary || null);
+    return true;
+  };
+
   // useAI hook for summarization
   const {
     data: summaryData,
@@ -186,6 +198,11 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       runSucceededRef.current = true;
     },
     onError: async (err) => {
+      // The failure toast below replaces the "Generating summary..." one; a generation toast
+      // still opening must hide itself rather than land after it.
+      summaryRequestRef.current++;
+      toastRef.current = null;
+      restoreReplacedSummary();
       if (summaryStyle) {
         const durationMs = summaryStartTime ? Math.round(performance.now() - summaryStartTime) : undefined;
         logSummaryError(summaryStyle, err.message, durationMs);
@@ -337,15 +354,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       toastRef.current = null;
     }
 
-    // A stopped regenerate puts back the summary it was replacing, in the same render.
-    const previous = regenerateFromRef.current;
-    regenerateFromRef.current = null;
-    if (previous) {
-      setModelOverride(previous.model);
-      setSummaryStyle(previous.style);
-      setCachedSummaryState(previous.summary || null);
-      return;
-    }
+    if (restoreReplacedSummary()) return;
 
     if (!article) {
       setSummaryStyle(null);

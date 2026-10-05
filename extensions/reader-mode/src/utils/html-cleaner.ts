@@ -36,8 +36,19 @@ type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
  * docs/known-issues.md; it is far less likely than the segmented subscriber-only case.)
  */
 const CLEANER_KEEP = new Set([".subscriber-only"]);
+
+/**
+ * Article-body wrappers a barrier selector also matches. Medium and the NYT put the body in
+ * `meteredContent`, which `[class*="metered"]` catches; segmented, it falls under the 30% guard
+ * like `.subscriber-only`. Other metered elements (`meteredMessage`, a meter gate) are gate UI and
+ * are still stripped.
+ */
+const CONTENT_WRAPPERS: Record<string, string> = {
+  '[class*="metered"]': ':not([class*="meteredcontent" i]):not([class*="metered-content" i])',
+};
+
 const BARRIER_REMOVE_SELECTORS = BARRIER_SELECTORS.filter((s) => !CLEANER_KEEP.has(s)).map(
-  (s) => `${caseInsensitive(s)}:not(p)`,
+  (s) => `${caseInsensitive(s)}${CONTENT_WRAPPERS[s] ?? ""}:not(p)`,
 );
 
 /**

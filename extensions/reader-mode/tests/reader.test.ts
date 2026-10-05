@@ -751,6 +751,32 @@ describe("Condé Nast paywall-class content", () => {
     );
     assert.ok(text.length > 1000, `expected the segmented content to remain, got ${text.length} chars`);
   });
+
+  // Greptile (#31933): Medium and the NYT put the article body in a `meteredContent` container,
+  // so `[class*="metered"]` marks content, like `.subscriber-only` — detected, never deleted.
+  it("does not delete segmented metered article content", () => {
+    const para = "Metered reporting that must survive the cleaning pass. ".repeat(8);
+    const blocks = Array.from({ length: 4 }, () => `<div class="meteredContent"><p>${para}</p></div>`).join("");
+    const { document } = parseHTML(`<html><body><article><h1>Metered Feature</h1>${blocks}</article></body></html>`);
+    preCleanHtml(document, "https://example.com/metered/feature");
+    const text = document.body?.textContent ?? "";
+    assert.ok(text.includes("Metered reporting"), "metered content must survive — deleting it guts the article");
+    assert.ok(text.length > 1000, `expected the segmented content to remain, got ${text.length} chars`);
+  });
+
+  // ...but only the content wrapper is kept. A small metered *gate* is still gate UI, and its text
+  // would make the candidate validator reject a complete article.
+  it("still strips a metered gate message inside a full article", () => {
+    const para = "Full reporting that the reader came for. ".repeat(8);
+    const { document } = parseHTML(
+      `<html><body><article><h1>Feature</h1><p>${para}</p><p>${para}</p>` +
+        `<div class="meteredMessage"><p>Subscribe to read the full story.</p></div></article></body></html>`,
+    );
+    preCleanHtml(document, "https://example.com/metered/gate");
+    const text = document.body?.textContent ?? "";
+    assert.ok(text.includes("Full reporting"), "the article body must survive");
+    assert.ok(!text.includes("Subscribe to read"), "the metered gate's text should have been stripped");
+  });
 });
 
 describe("Summary Model preference", () => {
