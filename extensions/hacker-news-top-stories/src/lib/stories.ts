@@ -31,21 +31,26 @@ export function resetIfPointsChanged(points: string) {
   if (read) cache.set(readKey, read);
 }
 
-function getLocalReadStories() {
-  return JSON.parse(cache.get(readKey) ?? "[]") as string[];
+// Read time by story URL
+function getLocalReadTimes(): Record<string, number> {
+  const stored: unknown = JSON.parse(cache.get(readKey) ?? "{}");
+  // Lists saved before read times were kept count as read now
+  if (Array.isArray(stored)) return Object.fromEntries(stored.map((url: string) => [url, Date.now()]));
+  return stored as Record<string, number>;
 }
 
-function saveReadStories(urls: string[]) {
-  cache.set(readKey, JSON.stringify(urls));
-  writeSyncedStories(urls);
+function saveReadTimes(readTimes: Record<string, number>) {
+  cache.set(readKey, JSON.stringify(readTimes));
+  writeSyncedStories(Object.keys(readTimes));
 }
 
 export function getReadStories() {
-  return new Set([...getLocalReadStories(), ...readSyncedStories()]);
+  return new Set([...Object.keys(getLocalReadTimes()), ...readSyncedStories()]);
 }
 
 export function markStoriesRead(urls: string[]) {
-  saveReadStories(Array.from(new Set([...getLocalReadStories(), ...urls])));
+  const now = Date.now();
+  saveReadTimes({ ...Object.fromEntries(urls.map((url) => [url, now])), ...getLocalReadTimes() });
 }
 
 export function getNotifiedStories() {
@@ -81,8 +86,8 @@ export async function refreshStories(points: string) {
     .sort((a, b) => b.seen - a.seen);
   cache.set(seenKey, JSON.stringify(allStoriesSeen));
 
-  const keptUrls = new Set(allStoriesSeen.map(({ story }) => story.external_url));
-  saveReadStories(getLocalReadStories().filter((url) => keptUrls.has(url)));
+  // By age, not by the current list, so raising Minimum Points and lowering it again keeps the reads
+  saveReadTimes(Object.fromEntries(Object.entries(getLocalReadTimes()).filter(([, at]) => now - at < eightDaysInMs)));
   removeStaleSyncFiles();
 
   return {
