@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proton-vpn",
+  "title": "Proton VPN",
+  "description": "Connect, disconnect, and switch countries in the official Proton VPN app for macOS.",
+  "icon": "icon.png",
+  "author": "jorgetoh",
+  "categories": [
+    "Security",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Connection",
+      "subtitle": "Proton VPN",
+      "description": "See the status, connect to the fastest server, and switch countries sorted by distance.",
+      "mode": "view",
+      "keywords": [
+        "vpn",
+        "country",
+        "connect",
+        "disconnect",
+        "status"
+      ]
+    },
+    {
+      "name": "quick-switch",
+      "title": "Switch Country",
+      "subtitle": "Proton VPN",
+      "description": "Connect to the fastest server in a country, straight from the root search.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "country",
+          "placeholder": "Country or code",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "vpn",
+        "country",
+        "switch",
+        "connect"
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "Proton VPN",
+      "description": "Connect if disconnected, disconnect if connected. Made for a global hotkey.",
+      "mode": "no-view",
+      "keywords": [
+        "vpn",
+        "connect",
+        "disconnect"
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Menu Bar Status",
+      "subtitle": "Proton VPN",
+      "description": "Show the VPN status in the menu bar with quick connect and disconnect actions.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "vpn",
+        "status",
+        "menu bar"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
