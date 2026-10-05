@@ -1,4 +1,5 @@
 import { ProcessInfo } from "../models/interfaces";
+import path from "path";
 import { isWindows } from "./platform";
 import { runCommand } from "./runCommand";
 
@@ -138,6 +139,33 @@ export async function killall(processname: string | string[], signal: KillSignal
   }
 
   await runCommand("/usr/bin/killall", [`-${signal}`, ...processNames], { timeout: 5_000 });
+}
+
+/** Capture all processes with this name, including those without TCP listeners. */
+export async function getPidsByName(processName: string): Promise<number[]> {
+  if (isWindows) {
+    const { stdout } = await runCommand(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "Get-CimInstance Win32_Process | Select-Object ProcessId, Name | ConvertTo-Json -Compress",
+      ],
+      { timeout: 10_000 },
+    );
+    const parsed = JSON.parse(stdout.replace(/^\uFEFF/, "").trim() || "[]");
+    const entries: { ProcessId: number; Name: string }[] = Array.isArray(parsed) ? parsed : [parsed];
+    return entries
+      .filter((entry) => entry.Name.toLowerCase() === processName.toLowerCase())
+      .map((entry) => entry.ProcessId);
+  }
+
+  const { stdout } = await runCommand("/bin/ps", ["-axo", "pid=,comm="], { timeout: 2_000 });
+  return stdout.split("\n").flatMap((line) => {
+    const match = line.trim().match(/^(\d+)\s+(.+)$/);
+    return match !== null && path.basename(match[2]) === processName ? [Number(match[1])] : [];
+  });
 }
 
 export async function killProcess(
