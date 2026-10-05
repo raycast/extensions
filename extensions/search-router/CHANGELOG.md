@@ -1,5 +1,9 @@
 # Search Router Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Add a configurable first-token search engine prefix, including support for bare triggers while reserving `@` for site searches
+
 ## [Add bang tips and support bang aliases] - 2026-10-02
 
 - Add search tips to the query form as there is a lot of empty space there on the form.
