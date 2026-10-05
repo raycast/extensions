@@ -3,17 +3,24 @@ import {
   List,
   Action,
   Icon,
+  Color,
+  Keyboard,
   showToast,
   Toast,
   confirmAlert,
   Alert,
   Form,
   getPreferenceValues,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { execSync, execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as fs from "fs";
 import * as os from "os";
+import * as net from "net";
+
+const execFileAsync = promisify(execFile);
 
 // Preferences type is auto-generated in raycast-env.d.ts — no manual interface needed.
 
@@ -32,56 +39,144 @@ interface NetworkInfo {
 
 const PRESETS_FILE = `${os.homedir()}/.dns_presets`;
 
-// Module-level placeholder; will be updated in useEffect to avoid blocking UI
+// Module-level placeholders; populated during startup network detection.
 let NETWORK_SERVICE = "Wi-Fi";
+let NETWORK_INTERFACE = "en0";
+
+const COMMAND_TIMEOUT_MS = 8000;
 
 /**
  * Validate network service name against a safe pattern.
  * Prevents shell injection via service names with special characters.
- * Allows word characters, hyphens, spaces, and forward slashes (valid in macOS service names).
- * Blocks shell-sensitive characters: ', ", `, $, \
+ * Allows alphanumeric, hyphens, spaces, forward slashes, dots, and parentheses (valid in macOS service names).
+ * Blocks shell-sensitive characters: ', ", `, $, \, ;, &, |, <, >
  */
-function validateNetworkServiceName(serviceName: string): boolean {
-  return /^[\w\- /]+$/.test(serviceName);
+export function validateNetworkServiceName(serviceName: string): boolean {
+  return /^[\w\- /().]+$/.test(serviceName);
 }
 
 /**
- * Get the active network service (e.g., "Wi-Fi", "Ethernet").
- * Detects the default interface via route and maps it to the macOS hardware port name.
- * Falls back to "Wi-Fi" if detection fails.
+ * Parse macOS network services output into service-name and BSD-interface pairs.
  */
-function getActiveNetworkService(): string {
-  try {
-    const iface = execSync("route get default 2>/dev/null | awk '/interface: /{print $2}'", {
-      encoding: "utf-8",
-    }).trim();
-    if (!iface) return "Wi-Fi";
+export function parseNetworkServices(output: string): Array<{ service: string; device: string }> {
+  const mappings: Array<{ service: string; device: string }> = [];
+  let service: string | undefined;
 
-    const hwports = execSync("networksetup -listallhardwareports", {
-      encoding: "utf-8",
-    });
-
-    const lines = hwports.split(/\r?\n/);
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.startsWith("Device:")) {
-        const dev = line.split("Device:")[1].trim();
-        if (dev === iface) {
-          const prev = (lines[i - 1] || "").trim();
-          if (prev.startsWith("Hardware Port:")) {
-            const serviceName = prev.split("Hardware Port:")[1].trim();
-            // Validate before returning to prevent injection
-            if (validateNetworkServiceName(serviceName)) {
-              return serviceName;
-            }
-          }
-        }
-      }
+  for (const line of output.split(/\r?\n/)) {
+    const serviceMatch = line.match(/^\s*\(\d+\)\s+(.+)\s*$/);
+    if (serviceMatch) {
+      service = serviceMatch[1].trim();
+      continue;
     }
-  } catch {
-    // Silently fall back
+
+    const deviceMatch = line.match(/^\s*\(Hardware Port: .*?, Device: ([^)]+)\)\s*$/);
+    if (service && deviceMatch) {
+      const device = deviceMatch[1].trim();
+      if (validateNetworkServiceName(service) && /^[A-Za-z0-9._-]+$/.test(device)) {
+        mappings.push({ service, device });
+      }
+      service = undefined;
+    } else if (line.trim() === "" || line.startsWith("(*)")) {
+      // Clear dangling service state on empty lines or disabled service blocks
+      service = undefined;
+    }
   }
-  return "Wi-Fi";
+  return mappings;
+}
+
+/**
+ * Extract default route interface from `route -n get default` output.
+ */
+export function parseDefaultRouteInterface(routeOutput: string): string | undefined {
+  return routeOutput.match(/^\s*interface:\s*(\S+)/m)?.[1];
+}
+
+/**
+ * Select the active network service based on the detected route interface
+ * with fallback for VPN tunnels and unmapped interfaces.
+ */
+export function selectActiveNetworkService(
+  services: Array<{ service: string; device: string }>,
+  routeIface?: string,
+): { service: string; device: string } {
+  // If route interface is not a virtual tunnel (utun, ppp, ipsec, etc.), try direct match
+  if (routeIface && !/^(utun|ppp|ipsec|gif|stf)/i.test(routeIface)) {
+    const direct = services.find((entry) => entry.device === routeIface);
+    if (direct) {
+      return direct;
+    }
+  }
+
+  // Fallback: Skip virtual tunnel interfaces (utun, ppp, ipsec, bridge) and pick first physical adapter
+  const physical = services.find((entry) => !/^(utun|ppp|ipsec|gif|stf|bridge)/i.test(entry.device));
+  if (physical) {
+    return physical;
+  }
+
+  if (services.length > 0) {
+    return services[0];
+  }
+
+  return { service: "Wi-Fi", device: "en0" };
+}
+
+/**
+ * Asynchronously retrieve macOS network services and BSD interface mappings.
+ */
+export async function getNetworkServices(
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<Array<{ service: string; device: string }>> {
+  try {
+    const { stdout } = await exec("/usr/sbin/networksetup", ["-listnetworkserviceorder"], {
+      encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
+    });
+    return parseNetworkServices(stdout);
+  } catch (error) {
+    console.error("Unable to list network services:", error);
+    return [];
+  }
+}
+
+/**
+ * Asynchronously detect the network service attached to the default route.
+ * Handles VPN/tunnel fallback gracefully.
+ */
+export async function getActiveNetworkService(
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<{ service: string; device: string }> {
+  let iface: string | undefined;
+  try {
+    const { stdout: route } = await exec("/sbin/route", ["-n", "get", "default"], {
+      encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
+    });
+    iface = parseDefaultRouteInterface(route);
+  } catch (error) {
+    console.error("Unable to inspect default route:", error);
+  }
+
+  const services = await getNetworkServices(exec);
+  const chosen = selectActiveNetworkService(services, iface);
+  NETWORK_INTERFACE = chosen.device;
+  NETWORK_SERVICE = chosen.service;
+  return chosen;
+}
+
+/**
+ * Asynchronously resolve the BSD interface for a configured network service.
+ */
+export async function getNetworkInterfaceForService(
+  serviceName: string,
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<string | undefined> {
+  try {
+    const services = await getNetworkServices(exec);
+    return services.find((entry) => entry.service === serviceName)?.device;
+  } catch (error) {
+    console.error("Unable to map network service to interface:", error);
+    return undefined;
+  }
 }
 
 // Default descriptions for known presets — used to migrate old files
@@ -245,96 +340,138 @@ function deletePreset(name: string): void {
 }
 
 /**
- * Get manually configured DNS servers (empty if using DHCP)
+ * Parse raw scutil --dns output into distinct IP addresses.
  */
-function getManualDNS(): string[] {
+export function parseActiveDNS(output: string): string[] {
+  const nameservers = new Set<string>();
+  const lines = output.split(/\r?\n/);
+  for (const line of lines) {
+    const match = line.match(/nameserver\[\d+\]\s*:\s*([^\s]+)/);
+    if (match && net.isIP(match[1])) {
+      nameservers.add(match[1]);
+    }
+  }
+  return Array.from(nameservers);
+}
+
+/**
+ * Parse raw networksetup -getdnsservers output into distinct IP addresses.
+ */
+export function parseManualDNS(output: string): string[] {
+  if (
+    !output ||
+    output.includes("aren't any DNS Servers set") ||
+    output.toLowerCase().includes("there aren't any") ||
+    output.trim() === ""
+  ) {
+    return [];
+  }
+
+  return output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => Boolean(line) && !line.startsWith("*") && net.isIP(line) !== 0);
+}
+
+/**
+ * Asynchronously get manually configured DNS servers (empty if using DHCP).
+ */
+export async function getManualDNS(service: string, exec: typeof execFileAsync = execFileAsync): Promise<string[]> {
   try {
-    const output = execSync(`networksetup -getdnsservers "${NETWORK_SERVICE}"`, {
+    const { stdout } = await exec("/usr/sbin/networksetup", ["-getdnsservers", service], {
       encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
     });
-
-    if (output.includes("aren't any DNS Servers set") || output.trim() === "") {
-      return [];
-    }
-
-    return output
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("*"));
-  } catch {
+    return parseManualDNS(stdout);
+  } catch (error) {
+    console.error("Unable to get manual DNS servers:", error);
     return [];
   }
 }
 
 /**
- * Get active DNS servers (what the system is actually using, including DHCP-assigned)
+ * Asynchronously get active DNS servers (including DHCP-assigned).
  */
-function getActiveDNS(): string[] {
+export async function getActiveDNS(exec: typeof execFileAsync = execFileAsync): Promise<string[]> {
   try {
-    const output = execSync("scutil --dns", { encoding: "utf-8" });
-    const nameservers = new Set<string>();
-
-    // Extract nameserver IPs from scutil output
-    const lines = output.split("\n");
-    lines.forEach((line) => {
-      const match = line.match(/nameserver\[\d+\]\s*:\s*([\d.]+)/);
-      if (match) {
-        nameservers.add(match[1]);
-      }
+    const { stdout } = await exec("/usr/sbin/scutil", ["--dns"], {
+      encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
     });
-
-    return Array.from(nameservers);
-  } catch {
+    return parseActiveDNS(stdout);
+  } catch (error) {
+    console.error("Unable to get active DNS:", error);
     return [];
   }
 }
 
 /**
- * Get network interface details (IP, subnet, gateway, etc.)
+ * Asynchronously get network interface details (IP, subnet, gateway, MAC).
  */
-function getNetworkInterfaceDetails(): { [key: string]: string } {
-  try {
-    const details: { [key: string]: string } = {};
+export async function getNetworkInterfaceDetails(
+  service: string,
+  device?: string,
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<{ [key: string]: string }> {
+  const details: { [key: string]: string } = {};
 
-    // Get IPv4 address and subnet
-    const ipinfo = execSync(`networksetup -getinfo "${NETWORK_SERVICE}" 2>/dev/null || echo ""`, { encoding: "utf-8" });
-    ipinfo.split("\n").forEach((line) => {
-      const match = line.match(/^([^:]+):\s*(.*)$/);
-      if (match) {
-        const [, key, value] = match;
-        if (value.trim()) {
-          details[key.trim()] = value.trim();
+  try {
+    const ipinfoPromise = exec("/usr/sbin/networksetup", ["-getinfo", service], {
+      encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
+    }).catch((err) => {
+      console.error("networksetup -getinfo failed:", err);
+      return null;
+    });
+
+    const targetDevice = device ?? (await getNetworkInterfaceForService(service, exec)) ?? "en0";
+    const ifconfigPromise = exec("/sbin/ifconfig", [targetDevice], {
+      encoding: "utf-8",
+      timeout: COMMAND_TIMEOUT_MS,
+    }).catch((err) => {
+      console.error("ifconfig failed:", err);
+      return null;
+    });
+
+    const [ipinfoRes, ifconfigRes] = await Promise.all([ipinfoPromise, ifconfigPromise]);
+
+    if (ipinfoRes?.stdout) {
+      ipinfoRes.stdout.split(/\r?\n/).forEach((line) => {
+        const match = line.match(/^([^:]+):\s*(.*)$/);
+        if (match) {
+          const [, key, value] = match;
+          if (value.trim()) {
+            details[key.trim()] = value.trim();
+          }
         }
-      }
-    });
-
-    // Get hardware (MAC) address
-    try {
-      const mac = execSync(
-        `ifconfig $(networksetup -listnetworkserviceorder | grep "${NETWORK_SERVICE}" | grep -oE "en[0-9]+") | grep ether | awk '{print $2}'`,
-        { encoding: "utf-8" },
-      ).trim();
-      if (mac) details["MAC Address"] = mac;
-    } catch {
-      // Silently ignore if we can't get MAC
+      });
     }
 
-    return details;
-  } catch {
-    return {};
+    if (ifconfigRes?.stdout) {
+      const mac = ifconfigRes.stdout.match(/\bether\s+([\da-f:]+)/i)?.[1];
+      if (mac) {
+        details["MAC Address"] = mac;
+      }
+    }
+  } catch (error) {
+    console.error("Error retrieving network interface details:", error);
   }
+
+  return details;
 }
 
 /**
- * Get network information
+ * Asynchronously get complete network information.
  */
-function getNetworkInfo(): NetworkInfo {
-  const manualDNS = getManualDNS();
-  const activeDNS = getActiveDNS();
+export async function getNetworkInfo(
+  service: string,
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<NetworkInfo> {
+  const [manualDNS, activeDNS] = await Promise.all([getManualDNS(service, exec), getActiveDNS(exec)]);
   const isDHCP = manualDNS.length === 0;
 
   return {
-    service: NETWORK_SERVICE,
+    service,
     manualDNS,
     activeDNS,
     isDHCP,
@@ -342,92 +479,117 @@ function getNetworkInfo(): NetworkInfo {
 }
 
 /**
- * Run a command with admin privileges via the native macOS auth dialog.
+ * Run a command with admin privileges via the native macOS auth dialog asynchronously.
  * This uses AppleScript's `do shell script ... with administrator privileges` which
- * triggers the system authorization UI. On some macOS versions and settings this
- * will present Touch ID as an option; behavior depends on system configuration.
+ * triggers the system authorization UI. On modern macOS versions and settings this
+ * will present Touch ID or password. Running asynchronously prevents freezing the Raycast UI.
  */
-function runWithAdmin(command: string): void {
+export async function runWithAdmin(command: string, exec: typeof execFileAsync = execFileAsync): Promise<void> {
   // Encode the command to base64 to avoid shell quoting/escaping issues.
   const b64 = Buffer.from(command, "utf8").toString("base64");
   const script = `do shell script "echo '${b64}' | base64 -D | sh" with administrator privileges`;
-  execFileSync("/usr/bin/osascript", ["-e", script]);
+  try {
+    await exec("/usr/bin/osascript", ["-e", script], {
+      encoding: "utf-8",
+      timeout: 60000,
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("(-128)") || message.includes("User canceled")) {
+      throw new Error("DNS change canceled by user");
+    }
+    throw error;
+  }
 }
 
 /**
- * Set DNS to specific servers
+ * Set DNS to specific servers (supports IPv4 and IPv6)
  */
-function setDNS(servers: string[]): void {
+export async function setDNS(
+  servers: string[],
+  service = NETWORK_SERVICE,
+  exec: typeof execFileAsync = execFileAsync,
+): Promise<void> {
   // Validate network service name (prevents shell injection via preferences)
-  if (!validateNetworkServiceName(NETWORK_SERVICE)) {
-    throw new Error(`Invalid network service name: "${NETWORK_SERVICE}". Service name may have been tampered with.`);
+  if (!validateNetworkServiceName(service)) {
+    throw new Error(`Invalid network service name: "${service}". Service name may have been tampered with.`);
   }
 
   // Validate all IPs before execution (defense in depth - prevents shell injection)
-  const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
   for (const ip of servers) {
-    if (!ipRegex.test(ip)) {
-      throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
-    }
-    const parts = ip.split(".").map(Number);
-    if (parts.some((p) => p < 0 || p > 255)) {
+    if (!net.isIP(ip)) {
       throw new Error(`Invalid IP address: "${ip}". Preset file may have been tampered with.`);
     }
   }
 
-  // Use the absolute path to networksetup since `do shell script` has a minimal PATH
+  // Use absolute paths since `do shell script` has a minimal PATH
   const networksetup = "/usr/sbin/networksetup";
+  const flushCmd = "/usr/bin/dscacheutil -flushcache && /usr/bin/killall -HUP mDNSResponder 2>/dev/null || true";
+
   if (servers.length === 0) {
-    // Reset to DHCP
-    runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' empty`);
+    // Reset to DHCP and flush cache
+    await runWithAdmin(`${networksetup} -setdnsservers '${service}' empty && ${flushCmd}`, exec);
   } else {
     const dnsArgs = servers.map((s) => `'${s}'`).join(" ");
-    runWithAdmin(`${networksetup} -setdnsservers '${NETWORK_SERVICE}' ${dnsArgs}`);
+    await runWithAdmin(`${networksetup} -setdnsservers '${service}' ${dnsArgs} && ${flushCmd}`, exec);
   }
 }
 
 /**
  * Set DNS from a preset
  */
-function setDNSFromPreset(presetName: string): void {
+async function setDNSFromPreset(presetName: string, service = NETWORK_SERVICE): Promise<void> {
   const servers = getPreset(presetName);
   if (!servers) {
     throw new Error(`Preset "${presetName}" not found`);
   }
 
   const serverArray = servers.split(",").map((s) => s.trim());
-  setDNS(serverArray);
+  await setDNS(serverArray, service);
 }
 
 /**
  * Reset DNS to DHCP
  */
-function resetDNS(): void {
-  setDNS([]);
+async function resetDNS(service = NETWORK_SERVICE): Promise<void> {
+  await setDNS([], service);
 }
 
 /**
  * List view showing all network interface info — press Enter on any row to copy.
  */
-function NetworkDetailsView() {
+function NetworkDetailsView({ service, device }: { service: string; device: string }) {
   const [details, setDetails] = useState<{ [key: string]: string }>({});
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    try {
-      const fetchedDetails = getNetworkInterfaceDetails();
-      const fetchedNetworkInfo = getNetworkInfo();
-      setDetails(fetchedDetails);
-      setNetworkInfo(fetchedNetworkInfo);
-    } catch (error) {
-      // Silently handle errors
-      console.error("Failed to fetch network details:", error);
-    } finally {
-      setIsLoading(false);
+    let isCancelled = false;
+    async function load() {
+      setIsLoading(true);
+      try {
+        const [fetchedDetails, fetchedNetworkInfo] = await Promise.all([
+          getNetworkInterfaceDetails(service, device),
+          getNetworkInfo(service),
+        ]);
+        if (!isCancelled) {
+          setDetails(fetchedDetails);
+          setNetworkInfo(fetchedNetworkInfo);
+        }
+      } catch (error) {
+        console.error("Failed to fetch network details:", error);
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
     }
-  }, []);
+
+    load();
+    return () => {
+      isCancelled = true;
+    };
+  }, [service, device]);
 
   // Helper to safely pull a value from the networksetup -getinfo output
   const get = (key: string): string | undefined => {
@@ -455,8 +617,10 @@ function NetworkDetailsView() {
         accessories={[{ text: value }]}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title={`Copy ${title}`} content={value} />
-            {extraActions}
+            <ActionPanel.Section>
+              <Action.CopyToClipboard title={`Copy ${title}`} content={value} />
+              {extraActions}
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -466,24 +630,32 @@ function NetworkDetailsView() {
   const activeDNS = networkInfo?.activeDNS.join(", ") || "";
 
   if (isLoading) {
-    return <List navigationTitle={`${NETWORK_SERVICE} Details`} isLoading={true} />;
+    return <List navigationTitle={`${service} Details`} isLoading={true} />;
   }
 
   return (
-    <List navigationTitle={`${NETWORK_SERVICE} Details`} searchBarPlaceholder="Search network info...">
+    <List navigationTitle={`${service} Details`} searchBarPlaceholder="Search network info...">
       {/* DNS Section */}
       <List.Section title="DNS">
         <List.Item
-          icon={networkInfo?.isDHCP ? Icon.Globe : Icon.Lock}
+          icon={{
+            source: networkInfo?.isDHCP ? Icon.Globe : Icon.Lock,
+            tintColor: networkInfo?.isDHCP ? Color.Blue : Color.Orange,
+          }}
           title="DNS Source"
           accessories={[
             {
               tag: {
                 value: networkInfo?.isDHCP ? "DHCP" : "Manual",
-                color: networkInfo?.isDHCP ? "#3b82f6" : "#f59e0b",
+                color: networkInfo?.isDHCP ? Color.Blue : Color.Orange,
               },
             },
           ]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy DNS Source" content={networkInfo?.isDHCP ? "DHCP" : "Manual"} />
+            </ActionPanel>
+          }
         />
         {activeDNS && <InfoItem icon={Icon.Network} title="Active DNS Servers" value={activeDNS} />}
       </List.Section>
@@ -498,7 +670,7 @@ function NetworkDetailsView() {
             title="Router"
             value={get("Router")!}
             extraActions={
-              /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(get("Router")!) ? (
+              net.isIP(get("Router")!) ? (
                 <Action.OpenInBrowser title="Open Router in Browser" url={`http://${get("Router")}`} />
               ) : undefined
             }
@@ -551,13 +723,8 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
     for (const ip of servers) {
-      if (!ipRegex.test(ip)) {
-        return `Invalid IP: "${ip}"`;
-      }
-      const parts = ip.split(".").map(Number);
-      if (parts.some((p) => p < 0 || p > 255)) {
+      if (!net.isIP(ip)) {
         return `Invalid IP: "${ip}"`;
       }
     }
@@ -620,6 +787,7 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
         id="name"
         title="Preset Name"
         placeholder="e.g. cloudflare, home, work"
+        autoFocus
         defaultValue={existing?.name}
         error={nameError}
         onChange={() => setNameError(undefined)}
@@ -628,8 +796,8 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
       <Form.TextField
         id="servers"
         title="DNS Servers"
-        placeholder="1.1.1.1, 1.0.0.1"
-        info="Comma-separated list of IPv4 addresses"
+        placeholder="1.1.1.1, 1.0.0.1 or 2606:4700:4700::1111"
+        info="Comma-separated list of IPv4 or IPv6 addresses"
         defaultValue={existing?.servers}
         error={serversError}
         onChange={() => setServersError(undefined)}
@@ -649,49 +817,96 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
 export default function Command() {
   const [presets, setPresets] = useState<DNSPreset[]>([]);
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [networkService, setNetworkService] = useState<string>(NETWORK_SERVICE);
+  const [networkInterface, setNetworkInterface] = useState<string>(NETWORK_INTERFACE);
   const [isLoading, setIsLoading] = useState(true);
 
-  function refresh() {
-    // Defer I/O operations to next event loop tick to allow React to render loading state first
-    setTimeout(() => {
-      setIsLoading(true);
-      try {
-        setPresets(getPresets());
-        setNetworkInfo(getNetworkInfo());
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load DNS info",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 0);
-  }
-
-  useEffect(() => {
-    // Update network service asynchronously (avoiding blocking startup)
+  async function resolveService(): Promise<{ service: string; device: string }> {
     try {
       const prefs = getPreferenceValues<Preferences>();
       if (prefs.networkService && prefs.networkService.trim() !== "") {
         const trimmedService = prefs.networkService.trim();
         // Validate service name before using it
         if (validateNetworkServiceName(trimmedService)) {
+          const device = (await getNetworkInterfaceForService(trimmedService)) ?? "en0";
           NETWORK_SERVICE = trimmedService;
+          NETWORK_INTERFACE = device;
+          return { service: trimmedService, device };
         } else {
-          throw new Error(`Invalid network service name in preferences: "${trimmedService}". Falling back to Wi-Fi.`);
+          throw new Error(
+            `Invalid network service name in preferences: "${trimmedService}". Falling back to auto-detect.`,
+          );
         }
-      } else {
-        NETWORK_SERVICE = getActiveNetworkService();
       }
     } catch (error) {
-      // Keep the default "Wi-Fi" if detection or validation fails
-      console.error("Network service detection error:", error);
-      NETWORK_SERVICE = "Wi-Fi";
+      console.error("Network service preference error:", error);
     }
 
-    refresh();
+    const detected = await getActiveNetworkService();
+    NETWORK_SERVICE = detected.service;
+    NETWORK_INTERFACE = detected.device;
+    return detected;
+  }
+
+  async function refresh(targetService?: string) {
+    setIsLoading(true);
+    try {
+      const serviceToUse = targetService ?? networkService;
+      const [loadedPresets, loadedInfo] = await Promise.all([
+        Promise.resolve(getPresets()),
+        getNetworkInfo(serviceToUse),
+      ]);
+      setPresets(loadedPresets);
+      setNetworkInfo(loadedInfo);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load DNS info",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function init() {
+      setIsLoading(true);
+      try {
+        const { service, device } = await resolveService();
+        if (!isCancelled) {
+          setNetworkService(service);
+          setNetworkInterface(device);
+        }
+
+        const [loadedPresets, loadedInfo] = await Promise.all([Promise.resolve(getPresets()), getNetworkInfo(service)]);
+
+        if (!isCancelled) {
+          setPresets(loadedPresets);
+          setNetworkInfo(loadedInfo);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load DNS info",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    init();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   async function handleSetPreset(preset: DNSPreset) {
@@ -700,13 +915,13 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: `Setting DNS to ${preset.name}...`,
       });
-      setDNSFromPreset(preset.name);
+      await setDNSFromPreset(preset.name, networkService);
       await showToast({
         style: Toast.Style.Success,
         title: `DNS set to ${preset.name}`,
         message: preset.servers,
       });
-      refresh();
+      await refresh();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -722,12 +937,12 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: "Resetting DNS to DHCP...",
       });
-      resetDNS();
+      await resetDNS(networkService);
       await showToast({
         style: Toast.Style.Success,
         title: "DNS reset to DHCP",
       });
-      refresh();
+      await refresh();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -751,7 +966,7 @@ export default function Command() {
           style: Toast.Style.Success,
           title: `Deleted "${preset.name}"`,
         });
-        refresh();
+        await refresh();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -766,24 +981,71 @@ export default function Command() {
   const dnsSourceTag = networkInfo?.isDHCP ? "DHCP" : "Manual";
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search presets...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search presets or IP addresses...">
+      <List.EmptyView
+        icon={Icon.Network}
+        title="No Presets Found"
+        description="Add a DNS preset to quickly toggle nameservers or reset to DHCP."
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Add DNS Preset"
+              icon={Icon.Plus}
+              target={<AddEditPresetForm onSaved={() => refresh()} />}
+            />
+            <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />
+          </ActionPanel>
+        }
+      />
+
       {/* Network Interface — click for full details */}
-      <List.Section title="Network">
+      <List.Section title="Current Connection">
         <List.Item
-          icon={networkInfo?.isDHCP ? Icon.Globe : Icon.Lock}
-          title="Network Interface in Use"
-          subtitle={networkInfo?.service ?? ""}
-          accessories={[{ text: activeDNSText }, { tag: dnsSourceTag }]}
+          icon={{
+            source: networkInfo?.isDHCP ? Icon.Globe : Icon.Lock,
+            tintColor: networkInfo?.isDHCP ? Color.Blue : Color.Orange,
+          }}
+          title="Active Network Service"
+          subtitle={networkInfo?.service ?? "Detecting..."}
+          accessories={[
+            { text: activeDNSText },
+            {
+              tag: {
+                value: dnsSourceTag,
+                color: networkInfo?.isDHCP ? Color.Blue : Color.Orange,
+              },
+            },
+            ...(networkInterface ? [{ tag: networkInterface }] : []),
+          ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Network Details" icon={Icon.Info} target={<NetworkDetailsView />} />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
-              <Action
-                title="Reset to DHCP"
-                icon={Icon.XMarkCircle}
-                onAction={handleReset}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
+              <ActionPanel.Section title="Network Details">
+                <Action.Push
+                  title="Show Network Details"
+                  icon={Icon.Info}
+                  target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Active DNS"
+                  content={activeDNSText}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Network Controls">
+                <Action
+                  title="Reset to DHCP"
+                  icon={Icon.XMarkCircle}
+                  onAction={handleReset}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+                <Action
+                  title="Refresh Network Info"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => refresh()}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
+                <Action title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -792,17 +1054,21 @@ export default function Command() {
       {/* Quick Actions */}
       <List.Section title="Quick Actions">
         <List.Item
-          icon={Icon.Plus}
+          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
           title="Add DNS Preset"
           subtitle="Create a new preset to quickly switch to"
           actions={
             <ActionPanel>
-              <Action.Push title="Add Preset" icon={Icon.Plus} target={<AddEditPresetForm onSaved={refresh} />} />
+              <Action.Push
+                title="Add Preset"
+                icon={Icon.Plus}
+                target={<AddEditPresetForm onSaved={() => refresh()} />}
+              />
             </ActionPanel>
           }
         />
         <List.Item
-          icon={Icon.XMarkCircle}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Orange }}
           title="Reset to DHCP"
           subtitle="Remove manual DNS and use automatic settings"
           actions={
@@ -824,52 +1090,85 @@ export default function Command() {
 
           const accessories: List.Item.Accessory[] = [];
           if (preset.description) {
-            // Show the IP servers as a secondary accessory when there's a description
             accessories.push({ text: preset.servers });
           }
           if (isActive) {
-            accessories.push({ tag: "Active" });
+            accessories.push({ tag: { value: "Active", color: Color.Green } });
           }
 
           return (
             <List.Item
               key={preset.name}
-              icon={isActive ? Icon.CheckCircle : Icon.Circle}
+              icon={{
+                source: isActive ? Icon.CheckCircle : Icon.Circle,
+                tintColor: isActive ? Color.Green : Color.SecondaryText,
+              }}
               title={preset.name}
               subtitle={preset.description || preset.servers}
+              keywords={[...serverArray, ...(preset.description ? preset.description.split(" ") : [])]}
               accessories={accessories}
               actions={
                 <ActionPanel>
-                  <Action
-                    title={`Set DNS to ${preset.name}`}
-                    icon={Icon.Network}
-                    onAction={() => handleSetPreset(preset)}
-                  />
-                  <Action.Push
-                    title="Edit Preset"
-                    icon={Icon.Pencil}
-                    target={<AddEditPresetForm existing={preset} onSaved={refresh} />}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  />
-                  <Action.Push
-                    title="Add New Preset"
-                    icon={Icon.Plus}
-                    target={<AddEditPresetForm onSaved={refresh} />}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  />
-                  <Action
-                    title="Reset to DHCP"
-                    icon={Icon.XMarkCircle}
-                    onAction={handleReset}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                  <Action
-                    title="Delete Preset"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => handleDelete(preset)}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  />
+                  <ActionPanel.Section title="Apply">
+                    <Action
+                      title={`Set DNS to ${preset.name}`}
+                      icon={Icon.Network}
+                      onAction={() => handleSetPreset(preset)}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard
+                      title="Copy DNS Servers"
+                      content={preset.servers}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Preset Name"
+                      content={preset.name}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Manage Presets">
+                    <Action.Push
+                      title="Edit Preset"
+                      icon={Icon.Pencil}
+                      target={<AddEditPresetForm existing={preset} onSaved={() => refresh()} />}
+                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    />
+                    <Action.Push
+                      title="Add New Preset"
+                      icon={Icon.Plus}
+                      target={<AddEditPresetForm onSaved={() => refresh()} />}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    />
+                    <Action
+                      title="Delete Preset"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => handleDelete(preset)}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Network">
+                    <Action.Push
+                      title="Show Network Details"
+                      icon={Icon.Info}
+                      target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    />
+                    <Action
+                      title="Reset to DHCP"
+                      icon={Icon.XMarkCircle}
+                      onAction={handleReset}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      onAction={() => refresh()}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
