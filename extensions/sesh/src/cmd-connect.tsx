@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -8,6 +8,9 @@ import { openApp } from "./app";
 import { WindowList } from "./windows";
 
 function getIcon(session: Session) {
+  if (session.Icon) {
+    return session.Icon;
+  }
   switch (session.Src) {
     case "tmux":
       return {
@@ -34,13 +37,14 @@ function getIcon(session: Session) {
   }
 }
 
-function formatScore(score: number) {
-  if (score === 0) return undefined;
-  return String(Number.isInteger(score) ? score : score.toFixed(2));
-}
+const ALIAS_AUTO_CONNECT_DELAY_MS = 150;
+const ALIAS_PREFIX = "/";
 
 export default function ConnectCommand() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const connectingRef = useRef(false);
+  const autoConnectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
@@ -59,8 +63,33 @@ export default function ConnectCommand() {
     },
   );
   const sessions = isSetupError(error) ? [] : (data ?? []);
+  const aliasQuery = searchText.startsWith(ALIAS_PREFIX)
+    ? searchText.slice(ALIAS_PREFIX.length).toLowerCase()
+    : undefined;
+  const query = aliasQuery ?? searchText.toLowerCase();
+  const nameMatch = aliasQuery === undefined && sessions.some((session) => session.Name.toLowerCase() === query);
+  const aliasMatch = nameMatch
+    ? undefined
+    : sessions.find((session) => session.Alias && session.Alias.toLowerCase() === query);
+  const aliasPrefixMatches = sessions.filter(
+    (session) => session.Alias && session.Alias.toLowerCase().startsWith(query),
+  );
+  const visibleSessions = aliasQuery !== undefined ? aliasPrefixMatches : aliasMatch ? [aliasMatch] : sessions;
+  const autoConnectTarget =
+    aliasMatch && aliasPrefixMatches.length === 1 && (aliasQuery !== undefined || aliasMatch.AliasAutoConnect)
+      ? aliasMatch.Name
+      : undefined;
+
+  useEffect(() => {
+    if (!autoConnectTarget) return;
+    autoConnectTimerRef.current = setTimeout(() => connect(autoConnectTarget), ALIAS_AUTO_CONNECT_DELAY_MS);
+    return () => clearTimeout(autoConnectTimerRef.current);
+  }, [autoConnectTarget]);
 
   async function connect(session: string) {
+    clearTimeout(autoConnectTimerRef.current);
+    if (connectingRef.current) return;
+    connectingRef.current = true;
     try {
       setIsConnecting(true);
       await connectToSession(session);
@@ -70,6 +99,7 @@ export default function ConnectCommand() {
     } catch (error) {
       await showFailureToast(error, { title: "Couldn't connect to session" });
     } finally {
+      connectingRef.current = false;
       setIsConnecting(false);
     }
   }
@@ -109,22 +139,26 @@ export default function ConnectCommand() {
   }
 
   return (
-    <List isLoading={isLoading || isConnecting}>
+    <List
+      key={aliasQuery === undefined ? "search" : "alias"}
+      isLoading={isLoading || isConnecting}
+      filtering={aliasQuery === undefined}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
       {renderEmptyView()}
-      {sessions.map((session, index) => {
+      {visibleSessions.map((session, index) => {
         const accessories = [];
 
-        if (session.Src === "tmux") {
+        if (session.Alias) {
+          accessories.push({ tag: session.Alias, tooltip: "Alias" });
+        }
+
+        if (session.Src === "tmux" && !session.TmuxWindows) {
           accessories.push({
             icon: Icon.AppWindow,
             text: String(session.Windows),
             tooltip: session.Windows === 1 ? "Window" : "Windows",
-          });
-        } else {
-          accessories.push({
-            text: formatScore(session.Score),
-            icon: session.Src === "tmuxinator" ? Icon.Box : Icon.Racket,
-            tooltip: "Score",
           });
         }
 
@@ -132,6 +166,8 @@ export default function ConnectCommand() {
           <List.Item
             key={index}
             title={session.Name}
+            keywords={session.Alias ? [session.Alias] : undefined}
+            subtitle={session.TmuxWindows?.map((window) => window.Name).join("  ")}
             icon={getIcon(session)}
             accessories={accessories}
             actions={

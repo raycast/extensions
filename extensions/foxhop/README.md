@@ -1,13 +1,15 @@
 # foxhop
 
+![Fox Hop: a red fox leaping over browser tabs](media/foxhop-banner.png)
+
 Focus a specific Firefox tab from anywhere on macOS — manage your saved tab targets and generate per-tab Raycast hotkey scripts.
 
 ## Requirements
 
-- **foxhop CLI** must be installed. Install via npm:
+- **foxhop CLI 2.0.0 or later** must be installed. Install via npm:
 
   ```bash
-  npm install -g @kud/foxhop-cli
+  npm install -g @kud/foxhop-cli@^2.0.0
   ```
 
   Or configure the full path to the binary in extension preferences if it is not on your PATH.
@@ -24,8 +26,8 @@ Per-target actions:
 
 - **Focus Tab** (`↵`) — focus the matching tab
 - **Favourite / Unfavourite** (`⌘F`) — pin a target to the top of the list
-- **Edit Target** (`⌘E`) — edit it (URL-first; name, match, and title derive from the URL)
-- **Add Target** (`⌘N`) — add a new target (just paste a URL)
+- **Edit Target** (`⌘E`) — edit its URL, title, match, strategy, pick and navigate (the id is generated from the title and read-only)
+- **Add Target** (`⌘N`) — add a new target (just paste a URL; the id is generated from the title when saved)
 - **Add from Open Tab** — pick a currently open Firefox tab and prefill the form
 - **Delete Target** (`⌃X`) — remove a target
 - **Generate Hotkey Scripts** — run `foxhop sync` to write Raycast script commands
