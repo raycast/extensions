@@ -52,9 +52,13 @@ export default function Command() {
   );
   const icons = useThumbnailIcons(
     visible.map((upload) => ({ id: upload.id, source: { kind: "upload", id: upload.id } })),
+    selectedId,
   );
   const selected = isShowingDetail ? visible.find((upload) => upload.id === selectedId) : undefined;
-  const preview = useDetailThumbnail(selected && { kind: "upload", id: selected.id });
+  // An image's preview is the image itself from its link, so no thumbnail is made for it.
+  const preview = useDetailThumbnail(
+    selected && !isImageUpload(selected) ? { kind: "upload", id: selected.id } : undefined,
+  );
 
   async function remove(upload: Upload) {
     const confirmed = await confirmAlert({

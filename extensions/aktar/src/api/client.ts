@@ -297,9 +297,18 @@ export function getObjectThumbnail(
   });
 }
 
-/** True when this Aktar predates thumbnails and doesn't know the route. */
+/**
+ * True when this Aktar predates thumbnails and doesn't know the route. Aktar
+ * answers an unknown route with "Not found."; a 404 about a missing upload,
+ * object or destination says so and doesn't count.
+ */
 export function isThumbnailsUnsupported(error: unknown) {
-  return error instanceof AktarError && error.kind === "request-failed" && error.status === 404;
+  return (
+    error instanceof AktarError &&
+    error.kind === "request-failed" &&
+    error.status === 404 &&
+    error.message === "Not found."
+  );
 }
 
 // MARK: - Watched folders

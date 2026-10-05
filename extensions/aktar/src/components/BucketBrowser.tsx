@@ -77,10 +77,14 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const icons = useThumbnailIcons(
     objects.map((object) => ({ id: object.key, source: { kind: "object", destinationId: destination.id, object } })),
+    selectedKey,
   );
   const selectedObject = isShowingDetail ? objects.find((object) => object.key === selectedKey) : undefined;
+  // An image with a public link is shown from that link, so no thumbnail is made for it.
   const preview = useDetailThumbnail(
-    selectedObject && { kind: "object", destinationId: destination.id, object: selectedObject },
+    selectedObject && !(selectedObject.url && isImageName(selectedObject.name))
+      ? { kind: "object", destinationId: destination.id, object: selectedObject }
+      : undefined,
   );
 
   const sharedActions = (

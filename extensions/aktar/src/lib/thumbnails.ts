@@ -2,6 +2,7 @@ import { environment, Image } from "@raycast/api";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { useEffect, useState } from "react";
 import { getObjectThumbnail, getUploadThumbnail, isThumbnailsUnsupported } from "../api/client";
 import type { BucketObject } from "../api/types";
@@ -20,7 +21,7 @@ export type ThumbnailSource =
 /** Pixels for list icons and for the detail pane. */
 export const ICON_PX = 128;
 export const DETAIL_PX = 512;
-/** List icons are asked for up to this many rows; the selected row always gets one. */
+/** List icons are asked for the first this many rows, and for the selected row wherever it is. */
 export const MAX_ICONS = 150;
 
 const folder = path.join(environment.supportPath, "thumbnails");
@@ -116,9 +117,13 @@ export function thumbnailsUnsupported() {
  * the file's identity (key, size and date), not its ID, so a file replaced
  * under the same key gets its new thumbnail after a refresh.
  */
-export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }[]) {
+export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }[], selectedId?: string | null) {
   const [files, setFiles] = useState<Record<string, string | null>>({});
-  const wanted = items.slice(0, MAX_ICONS).map((item) => ({ ...item, identity: identity(item.source) }));
+  const first = items.slice(0, MAX_ICONS);
+  // A row further down, or one found by searching, still gets its icon once it's selected.
+  const selected = items.find((item) => item.id === selectedId);
+  const rows = selected && !first.includes(selected) ? [...first, selected] : first;
+  const wanted = rows.map((item) => ({ ...item, identity: identity(item.source) }));
   const key = wanted.map((item) => item.identity).join("\u0000");
   useEffect(() => {
     let cancelled = false;
@@ -162,5 +167,5 @@ export function thumbnailIcon(file: string | null | undefined, filename: string,
 
 /** Markdown for a thumbnail file in a detail pane. */
 export function thumbnailMarkdown(file: string) {
-  return `![](${encodeURI(`file://${file}`)}?raycast-height=260)`;
+  return `![](${pathToFileURL(file).href}?raycast-height=260)`;
 }
