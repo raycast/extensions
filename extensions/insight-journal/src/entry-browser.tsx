@@ -32,7 +32,7 @@ export interface UnreadState {
 
 export interface SavedState {
   ids: string[];
-  toggle: (id: string) => Promise<void>;
+  setSaved: (id: string, saved: boolean) => Promise<void>;
 }
 
 interface EntryBrowserProps {
@@ -54,7 +54,10 @@ interface EntryState {
   minutes?: number;
 }
 
-const SAVED_FILTER = "saved";
+// Topic values get a prefix, so a topic named like a built-in filter cannot collide with it.
+const ALL_FILTER = "filter:all";
+const SAVED_FILTER = "filter:reading-list";
+const TOPIC_PREFIX = "topic:";
 
 interface ViewControls {
   layout: Layout;
@@ -75,7 +78,7 @@ export function EntryBrowser({
   readingTimes = {},
 }: EntryBrowserProps) {
   const config = KINDS[kind];
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(ALL_FILTER);
   const [showDetail, setShowDetail] = useState(true);
   const {
     value: layout = "list",
@@ -85,11 +88,11 @@ export function EntryBrowser({
 
   const filters = useMemo(() => [...new Set(entries.flatMap((entry) => entry.categories))].sort(), [entries]);
   const visible =
-    filter === "all"
+    filter === ALL_FILTER
       ? entries
       : filter === SAVED_FILTER
         ? entries.filter((entry) => saved?.ids.includes(entry.id))
-        : entries.filter((entry) => entry.categories.includes(filter));
+        : entries.filter((entry) => entry.categories.includes(filter.slice(TOPIC_PREFIX.length)));
   const sections = groupByDate(visible, config.groupBy);
 
   const controls: ViewControls = {
@@ -127,11 +130,11 @@ export function EntryBrowser({
         searchBarPlaceholder={searchBarPlaceholder}
         searchBarAccessory={
           <Grid.Dropdown tooltip={filterTooltip} storeValue onChange={setFilter}>
-            <Grid.Dropdown.Item title={allTitle} value="all" />
+            <Grid.Dropdown.Item title={allTitle} value={ALL_FILTER} />
             {saved && <Grid.Dropdown.Item title="Reading List" value={SAVED_FILTER} icon={Icon.Bookmark} />}
             <Grid.Dropdown.Section>
               {filters.map((name) => (
-                <Grid.Dropdown.Item key={name} title={name} value={name} />
+                <Grid.Dropdown.Item key={name} title={name} value={TOPIC_PREFIX + name} />
               ))}
             </Grid.Dropdown.Section>
           </Grid.Dropdown>
@@ -175,11 +178,11 @@ export function EntryBrowser({
       searchBarPlaceholder={searchBarPlaceholder}
       searchBarAccessory={
         <List.Dropdown tooltip={filterTooltip} storeValue onChange={setFilter}>
-          <List.Dropdown.Item title={allTitle} value="all" />
+          <List.Dropdown.Item title={allTitle} value={ALL_FILTER} />
           {saved && <List.Dropdown.Item title="Reading List" value={SAVED_FILTER} icon={Icon.Bookmark} />}
           <List.Dropdown.Section>
             {filters.map((name) => (
-              <List.Dropdown.Item key={name} title={name} value={name} />
+              <List.Dropdown.Item key={name} title={name} value={TOPIC_PREFIX + name} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -277,11 +280,9 @@ function EntryDetail({ entry, state }: { entry: Entry; state: EntryState }) {
     },
     saved: saved && {
       ids: savedIds,
-      toggle: async (id) => {
-        setSavedIds((current) =>
-          current.includes(id) ? current.filter((savedId) => savedId !== id) : [id, ...current],
-        );
-        await saved.toggle(id);
+      setSaved: async (id, save) => {
+        setSavedIds((current) => (save ? [id, ...current] : current.filter((savedId) => savedId !== id)));
+        await saved.setSaved(id, save);
       },
     },
   };
@@ -332,7 +333,7 @@ function EntryActions({ entry, state, controls }: { entry: Entry; state: EntrySt
             title={isSaved ? "Remove from Reading List" : "Save to Reading List"}
             icon={isSaved ? Icon.MinusCircle : Icon.Bookmark}
             shortcut={Keyboard.Shortcut.Common.Save}
-            onAction={() => saved.toggle(entry.id)}
+            onAction={() => saved.setSaved(entry.id, !isSaved)}
           />
         )}
         <Action.CopyToClipboard title="Copy Link" content={entry.url} />

@@ -10,7 +10,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
-import { BLOG_URL, Entry, fetchPosts, getUnseenPosts, markSeen, takeUnnotified } from "./feed";
+import { BLOG_URL, Entry, fetchPosts, getUnnotified, getUnseenPosts, markNotified, markSeen } from "./feed";
 
 const RECENT_LIMIT = 5;
 
@@ -29,12 +29,21 @@ async function load() {
   const posts = await fetchPosts();
   const unseen = await getUnseenPosts(posts);
 
-  // Record every unseen post as notified, but only raise a notification during background
-  // refreshes, so posts the user already saw in the open menu do not notify later.
-  const fresh = await takeUnnotified(unseen);
-  const { systemNotifications } = getPreferenceValues<Preferences.NewPosts>();
-  if (fresh.length > 0 && systemNotifications && environment.launchType === LaunchType.Background) {
-    await notify(fresh).catch(() => undefined);
+  // Notifications are only raised during background refreshes. When the user opens the menu,
+  // the posts are on screen, so they are recorded as notified without an alert. A post is
+  // recorded only after its alert is shown, so a failed alert is retried on the next refresh.
+  const fresh = await getUnnotified(unseen);
+  if (fresh.length > 0) {
+    const { systemNotifications } = getPreferenceValues<Preferences.NewPosts>();
+    if (systemNotifications && environment.launchType === LaunchType.Background) {
+      try {
+        await notify(fresh);
+      } catch (error) {
+        console.error("Could not show notification", error);
+        return { posts, unseen };
+      }
+    }
+    await markNotified(fresh.map((post) => post.id));
   }
 
   return { posts, unseen };

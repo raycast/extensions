@@ -5,9 +5,14 @@ export const FEED_URL = "https://www.aryantechie.com/api/rss";
 export const BLOG_URL = "https://aryantechie.com/blog";
 export const WORK_URL = "https://aryantechie.com/work";
 
-const SEEN_KEY = "seen-post-ids";
-const NOTIFIED_KEY = "notified-post-ids";
-const SAVED_KEY = "saved-post-ids";
+// Each post gets its own storage key, so commands running at the same time
+// (for example the menu bar and a search window) never overwrite each other.
+const SEEN_INITIALIZED_KEY = "seen-initialized";
+const SEEN_PREFIX = "seen:";
+const NOTIFIED_PREFIX = "notified:";
+const SAVED_PREFIX = "saved:";
+
+const SITE_HOSTS = ["aryantechie.com", "www.aryantechie.com"];
 
 export type EntryKind = "post" | "project";
 
@@ -59,9 +64,17 @@ function extractBody(html?: string): { excerpt: string; tags: string[] } {
   return { excerpt, tags };
 }
 
+/** Only accepts https links on aryantechie.com, since post pages are fetched automatically. */
 function kindOf(link?: string): EntryKind | undefined {
-  if (link?.includes("/blog/")) return "post";
-  if (link?.includes("/work/")) return "project";
+  let url: URL;
+  try {
+    url = new URL(link ?? "");
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== "https:" || !SITE_HOSTS.includes(url.hostname)) return undefined;
+  if (url.pathname.startsWith("/blog/")) return "post";
+  if (url.pathname.startsWith("/work/")) return "project";
   return undefined;
 }
 
@@ -109,9 +122,19 @@ export async function fetchProjects(): Promise<Entry[]> {
   return (await fetchEntries()).filter((entry) => entry.kind === "project");
 }
 
+/** Returns the ids stored under `prefix`, mapped to their stored values. */
+async function itemsWithPrefix(prefix: string): Promise<Map<string, string>> {
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  return new Map(
+    Object.entries(items)
+      .filter(([key]) => key.startsWith(prefix))
+      .map(([key, value]) => [key.slice(prefix.length), String(value)]),
+  );
+}
+
 export async function getSeenIds(): Promise<Set<string> | undefined> {
-  const raw = await LocalStorage.getItem<string>(SEEN_KEY);
-  return raw ? new Set(JSON.parse(raw) as string[]) : undefined;
+  if (!(await LocalStorage.getItem(SEEN_INITIALIZED_KEY))) return undefined;
+  return new Set((await itemsWithPrefix(SEEN_PREFIX)).keys());
 }
 
 /**
@@ -119,17 +142,13 @@ export async function getSeenIds(): Promise<Set<string> | undefined> {
  * functions below then do nothing: that first call marks every post as seen.
  */
 export async function markSeen(ids: string[]): Promise<void> {
-  const seen = await getSeenIds();
-  if (!seen) return;
-  ids.forEach((id) => seen.add(id));
-  await LocalStorage.setItem(SEEN_KEY, JSON.stringify([...seen]));
+  if (!(await LocalStorage.getItem(SEEN_INITIALIZED_KEY))) return;
+  await Promise.all(ids.map((id) => LocalStorage.setItem(SEEN_PREFIX + id, "1")));
 }
 
 export async function markUnseen(ids: string[]): Promise<void> {
-  const seen = await getSeenIds();
-  if (!seen) return;
-  ids.forEach((id) => seen.delete(id));
-  await LocalStorage.setItem(SEEN_KEY, JSON.stringify([...seen]));
+  if (!(await LocalStorage.getItem(SEEN_INITIALIZED_KEY))) return;
+  await Promise.all(ids.map((id) => LocalStorage.removeItem(SEEN_PREFIX + id)));
 }
 
 /**
@@ -139,39 +158,44 @@ export async function markUnseen(ids: string[]): Promise<void> {
 export async function getUnseenPosts(posts: Entry[]): Promise<Entry[]> {
   const seen = await getSeenIds();
   if (!seen) {
-    await LocalStorage.setItem(SEEN_KEY, JSON.stringify(posts.map((post) => post.id)));
+    await Promise.all(posts.map((post) => LocalStorage.setItem(SEEN_PREFIX + post.id, "1")));
+    await LocalStorage.setItem(SEEN_INITIALIZED_KEY, "1");
     return [];
   }
   return posts.filter((post) => !seen.has(post.id));
 }
 
-/** Returns the posts from `posts` that have not triggered a notification yet, and records them. */
-export async function takeUnnotified(posts: Entry[]): Promise<Entry[]> {
-  const raw = await LocalStorage.getItem<string>(NOTIFIED_KEY);
-  const notified = new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
-  const fresh = posts.filter((post) => !notified.has(post.id));
-  if (fresh.length > 0) {
-    fresh.forEach((post) => notified.add(post.id));
-    await LocalStorage.setItem(NOTIFIED_KEY, JSON.stringify([...notified]));
-  }
-  return fresh;
+/** Returns the posts from `posts` that have not triggered a notification yet. */
+export async function getUnnotified(posts: Entry[]): Promise<Entry[]> {
+  const notified = await itemsWithPrefix(NOTIFIED_PREFIX);
+  return posts.filter((post) => !notified.has(post.id));
+}
+
+export async function markNotified(ids: string[]): Promise<void> {
+  await Promise.all(ids.map((id) => LocalStorage.setItem(NOTIFIED_PREFIX + id, "1")));
 }
 
 /** Ids of posts in the reading list, most recently saved first. */
 export async function getSavedIds(): Promise<string[]> {
-  const raw = await LocalStorage.getItem<string>(SAVED_KEY);
-  return raw ? (JSON.parse(raw) as string[]) : [];
+  const saved = await itemsWithPrefix(SAVED_PREFIX);
+  return [...saved].sort(([, a], [, b]) => Number(b) - Number(a)).map(([id]) => id);
 }
 
 export async function setSaved(id: string, saved: boolean): Promise<string[]> {
-  const ids = (await getSavedIds()).filter((savedId) => savedId !== id);
-  const next = saved ? [id, ...ids] : ids;
-  await LocalStorage.setItem(SAVED_KEY, JSON.stringify(next));
-  return next;
+  if (saved) {
+    await LocalStorage.setItem(SAVED_PREFIX + id, String(Date.now()));
+  } else {
+    await LocalStorage.removeItem(SAVED_PREFIX + id);
+  }
+  return getSavedIds();
 }
 
 const readingTimeCache = new Cache({ namespace: "reading-time" });
 const READING_TIME_CONCURRENCY = 5;
+const READING_TIME_TIMEOUT_MS = 10_000;
+/** A page without a readable time is checked again after a day, not on every launch. */
+const READING_TIME_RETRY_MS = 24 * 60 * 60 * 1000;
+const MISSING_PREFIX = "missing:";
 
 /**
  * Reads the "N min read" value the website renders for a post. The site is a
@@ -179,7 +203,7 @@ const READING_TIME_CONCURRENCY = 5;
  * `"children":[N," min read"]` (with escaped quotes).
  */
 async function fetchReadingTime(url: string): Promise<number | undefined> {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(READING_TIME_TIMEOUT_MS) });
   if (!response.ok) return undefined;
   const match = (await response.text()).match(/children\\?":\[(\d+),\\?" min read/);
   return match ? Number(match[1]) : undefined;
@@ -194,7 +218,11 @@ export async function getReadingTimes(entries: Entry[], refresh = false): Promis
   const missing: Entry[] = [];
   for (const entry of entries) {
     const cached = refresh ? undefined : readingTimeCache.get(entry.id);
-    if (cached) {
+    if (cached?.startsWith(MISSING_PREFIX)) {
+      const checkedAt = Number(cached.slice(MISSING_PREFIX.length));
+      if (Date.now() - checkedAt < READING_TIME_RETRY_MS) continue;
+      missing.push(entry);
+    } else if (cached) {
       times[entry.id] = Number(cached);
     } else {
       missing.push(entry);
@@ -205,9 +233,13 @@ export async function getReadingTimes(entries: Entry[], refresh = false): Promis
     const batch = missing.slice(i, i + READING_TIME_CONCURRENCY);
     const results = await Promise.all(batch.map((entry) => fetchReadingTime(entry.url).catch(() => undefined)));
     results.forEach((minutes, index) => {
-      if (minutes === undefined) return;
-      times[batch[index].id] = minutes;
-      readingTimeCache.set(batch[index].id, String(minutes));
+      const { id } = batch[index];
+      if (minutes === undefined) {
+        readingTimeCache.set(id, `${MISSING_PREFIX}${Date.now()}`);
+        return;
+      }
+      times[id] = minutes;
+      readingTimeCache.set(id, String(minutes));
     });
   }
   return times;

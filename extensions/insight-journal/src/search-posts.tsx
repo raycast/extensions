@@ -38,8 +38,7 @@ export default function Command() {
 
   const { data: savedIds = [], mutate: mutateSaved } = usePromise(getSavedIds);
 
-  async function toggleSaved(id: string) {
-    const save = !savedIds.includes(id);
+  async function updateSaved(id: string, save: boolean) {
     await mutateSaved(setSaved(id, save), {
       optimisticUpdate: (current = []) => (save ? [id, ...current] : current.filter((savedId) => savedId !== id)),
       shouldRevalidateAfter: false,
@@ -73,7 +72,7 @@ export default function Command() {
       isLoading={isLoading || isLoadingUnseen}
       onRefresh={revalidate}
       unread={{ ids: unseenIds, markRead, markUnread }}
-      saved={{ ids: savedIds, toggle: toggleSaved }}
+      saved={{ ids: savedIds, setSaved: updateSaved }}
       readingTimes={readingTimes}
     />
   );
