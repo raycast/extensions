@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2026-10-05
 
 - The extension now works with Raycast for Windows and Aktar for Windows 0.1.0 or later. Connect to Aktar finds Aktar from the Microsoft Store or from the installer
 - Upload Selected Files uploads the files selected in File Explorer on Windows
