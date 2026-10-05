@@ -21,7 +21,7 @@ export default function WeaknessMetadata(props: {
 
   const allTypes = props.allTypes ?? fetchedTypes ?? [];
 
-  const { weak, resistant, immune } = calculateEffectiveness(
+  const { weak, normal, resistant, immune } = calculateEffectiveness(
     props.types,
     allTypes,
   );
@@ -32,6 +32,16 @@ export default function WeaknessMetadata(props: {
     tagList.push(
       <TagListComponent title="Weaknesses" key="weak">
         {weak.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
+        ))}
+      </TagListComponent>,
+    );
+  }
+
+  if (normal.length) {
+    tagList.push(
+      <TagListComponent title="Normal" key="normal">
+        {normal.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,

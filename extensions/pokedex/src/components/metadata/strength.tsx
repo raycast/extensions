@@ -21,10 +21,8 @@ export default function StrengthMetadata(props: {
 
   const allTypes = props.allTypes ?? fetchedTypes ?? [];
 
-  const { superEffective, notVeryEffective, noEffect } = calculateStrengths(
-    props.types,
-    allTypes,
-  );
+  const { superEffective, normal, notVeryEffective, noEffect } =
+    calculateStrengths(props.types, allTypes);
 
   const tagList = [];
 
@@ -32,6 +30,16 @@ export default function StrengthMetadata(props: {
     tagList.push(
       <TagListComponent title="Super Effective" key="super-effective">
         {superEffective.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
+        ))}
+      </TagListComponent>,
+    );
+  }
+
+  if (normal.length) {
+    tagList.push(
+      <TagListComponent title="Normal" key="normal">
+        {normal.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,

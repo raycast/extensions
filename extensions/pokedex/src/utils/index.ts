@@ -155,14 +155,12 @@ export const calculateEffectiveness = (
       }
     });
 
-    if (factor !== 1) {
-      const relationName = attacker.name;
-      effectivenessMap.set(relationName, factor);
-      typeNameMap.set(
-        relationName,
-        getLocalizedName(attacker.typenames, attacker.name),
-      );
-    }
+    const relationName = attacker.name;
+    effectivenessMap.set(relationName, factor);
+    typeNameMap.set(
+      relationName,
+      getLocalizedName(attacker.typenames, attacker.name),
+    );
   });
 
   const normal: Detail.Metadata.TagList.Item.Props[] = [];
@@ -186,6 +184,12 @@ export const calculateEffectiveness = (
     } else if (factor === 0) {
       immune.push({
         text: `${typeNameMap.get(type)}`,
+        color: typeColor[type],
+        icon: `types/${type}.svg`,
+      });
+    } else {
+      normal.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
         color: typeColor[type],
         icon: `types/${type}.svg`,
       });
@@ -231,8 +235,7 @@ export const calculateStrengths = (
       }
     });
 
-    // Only track non-neutral matchups for the final output
-    if (maxDamageFactor !== 1 && types.length > 0) {
+    if (types.length > 0) {
       effectivenessMap.set(defender.name, maxDamageFactor);
       typeNameMap.set(
         defender.name,
@@ -262,6 +265,12 @@ export const calculateStrengths = (
     } else if (factor === 0) {
       noEffect.push({
         text: `${typeNameMap.get(type)}`,
+        color: typeColor[type],
+        icon: `types/${type}.svg`,
+      });
+    } else {
+      normal.push({
+        text: `${factor}x ${typeNameMap.get(type)}`,
         color: typeColor[type],
         icon: `types/${type}.svg`,
       });
