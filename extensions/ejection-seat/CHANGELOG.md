@@ -1,6 +1,6 @@
 # Ejection Seat Changelog
 
-## [Whole-Disk Scans] - {PR_MERGE_DATE}
+## [Whole-Disk Scans] - 2026-10-05
 
 - Hide system helper volumes mounted `nobrowse` — such as `Recovery` on the internal disk and an external boot disk's `Preboot` — matching what Finder shows
 - Scan every volume on the same physical disk, hidden ones included, because `diskutil eject` ejects them together; the volume list marks volumes that share a disk
