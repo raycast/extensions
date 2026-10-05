@@ -43,6 +43,11 @@ branch, and presses Enter only when that query matches exactly one thread;
 otherwise the palette stays open on the narrowed list for you to pick from.
 macOS asks for Accessibility permission the first time.
 
+The app is found by release channel. The stable build is named `T3 Code (Alpha)` and the
+Nightly build `T3 Code (Nightly)`. With the `App Name` preference empty, the extension
+picks one from the running server's version, or from the installed apps when no server
+is running. Set the preference to override it.
+
 Worktrees are created by the extension with `git worktree add`, since the HTTP
 dispatch handler passes commands straight to the engine and never runs the
 server's worktree bootstrap. The path matches T3's own convention,

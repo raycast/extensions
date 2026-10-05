@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -81,6 +81,7 @@ export type ShellSnapshot = {
 };
 
 type EnvironmentDescriptor = {
+  serverVersion?: string;
   /** Absent on servers that predate protocol v2. */
   orchestrationProtocolVersion?: number;
 };
@@ -159,28 +160,31 @@ export async function resolveOrigin(): Promise<string> {
 
 const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
 
-const protocolVersions = new Map<string, Promise<number>>();
+const descriptors = new Map<string, Promise<EnvironmentDescriptor>>();
 
-/** v2 servers reject orchestration reads without the protocol header; older servers
- * predate the field, so a missing value means v1. Cached per origin for the life of
- * the command, so a server that restarts on another port or version is asked again. */
-function serverProtocolVersion(origin: string): Promise<number> {
-  let version = protocolVersions.get(origin);
-  if (!version) {
-    version = request<EnvironmentDescriptor>(
+/** The server describes itself once per command run. Cached per origin, so a server
+ * that restarts on another port or version is asked again. */
+function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
+  let descriptor = descriptors.get(origin);
+  if (!descriptor) {
+    descriptor = request<EnvironmentDescriptor>(
       "/.well-known/t3/environment",
       undefined,
       false,
       origin,
-    )
-      .then((descriptor) => descriptor.orchestrationProtocolVersion ?? 1)
-      .catch((error) => {
-        protocolVersions.delete(origin);
-        throw error;
-      });
-    protocolVersions.set(origin, version);
+    ).catch((error) => {
+      descriptors.delete(origin);
+      throw error;
+    });
+    descriptors.set(origin, descriptor);
   }
-  return version;
+  return descriptor;
+}
+
+/** v2 servers reject orchestration reads without the protocol header; older servers
+ * predate the field, so a missing value means v1. */
+async function serverProtocolVersion(origin: string): Promise<number> {
+  return (await serverDescriptor(origin)).orchestrationProtocolVersion ?? 1;
 }
 
 async function request<T>(
@@ -229,7 +233,7 @@ async function request<T>(
 /** v2 reports run state on the thread itself. Rebuild the v1 latestTurn so every
  * consumer keeps reading one shape. */
 function normalizeThread(thread: Thread): Thread {
-  if (thread.latestTurn !== undefined) {
+  if (thread.latestTurn !== undefined || thread.status === undefined) {
     return thread;
   }
   const state: LatestTurn["state"] | null =
@@ -454,7 +458,43 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
-const appName = () => preferences().appName?.trim() || "T3 Code";
+const STABLE_APP = "T3 Code (Alpha)";
+const NIGHTLY_APP = "T3 Code (Nightly)";
+// Same pattern T3 uses to brand a build as Nightly. Preview builds share the branding.
+const NIGHTLY_VERSION = /^[^-+]+-(?:nightly|preview)\.\d{8}\.\d+$/;
+
+async function isInstalled(name: string): Promise<boolean> {
+  for (const dir of ["/Applications", join(homedir(), "Applications")]) {
+    try {
+      await access(join(dir, `${name}.app`));
+      return true;
+    } catch {
+      // not in this folder
+    }
+  }
+  return false;
+}
+
+/** The app bundle is named after its release channel, so a fixed name only fits one
+ * of them. The preference wins; otherwise follow the running server's version, and
+ * with no server running use whichever app is installed, stable first. */
+async function appName(): Promise<string> {
+  const configured = preferences().appName?.trim();
+  if (configured) {
+    return configured;
+  }
+  try {
+    const { serverVersion } = await serverDescriptor(await resolveOrigin());
+    if (serverVersion) {
+      return NIGHTLY_VERSION.test(serverVersion) ? NIGHTLY_APP : STABLE_APP;
+    }
+  } catch {
+    // the server is not running, so look at what is installed
+  }
+  return (await isInstalled(STABLE_APP)) || !(await isInstalled(NIGHTLY_APP))
+    ? STABLE_APP
+    : NIGHTLY_APP;
+}
 
 const escapeForAppleScript = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -520,7 +560,7 @@ export async function focusThread(
   target: PaletteThread,
 ): Promise<"opened" | "ambiguous" | "unfocused"> {
   const query = paletteQuery(target);
-  const name = appName();
+  const name = await appName();
   await run("/usr/bin/open", ["-a", name]);
   await run("/usr/bin/osascript", [
     "-e",
@@ -558,7 +598,7 @@ return "unfocused"`,
 }
 
 export async function launchApp(): Promise<void> {
-  await run("/usr/bin/open", ["-a", appName()]);
+  await run("/usr/bin/open", ["-a", await appName()]);
 }
 
 export function worktreePathFor(workspaceRoot: string, branch: string): string {
