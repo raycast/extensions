@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Zihin MCP Server] - 2026-10-04
+
+- Add Zihin to the official registry: build and operate AI agents on the Zihin platform (agents, personas, tools, triggers, budgets, human approvals, run inspection) and chat with them. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.
+
 ## [Add Clipwright MCP Server] - 2026-10-04
 
 - Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
