@@ -11,7 +11,8 @@
     "xilopaint",
     "yug2005",
     "ridemountainpig",
-    "0xdhrv"
+    "0xdhrv",
+    "alexi.build"
   ],
   "license": "MIT",
   "commands": [
@@ -66,6 +67,28 @@
           "type": "text"
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-videos",
+      "title": "Search Videos",
+      "description": "Search YouTube videos by topic and return titles, channels, publish dates, descriptions, and watch URLs."
+    },
+    {
+      "name": "search-channels",
+      "title": "Search Channels",
+      "description": "Search YouTube channels by name or topic and return channel details and URLs."
+    },
+    {
+      "name": "search-live-streams",
+      "title": "Search Live Streams",
+      "description": "Find live YouTube streams by topic and return stream details and watch URLs."
+    },
+    {
+      "name": "get-popular-videos",
+      "title": "Get Popular Videos",
+      "description": "Get currently popular YouTube videos with titles, channels, view counts, and watch URLs."
     }
   ],
   "preferences": [
