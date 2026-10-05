@@ -228,13 +228,21 @@ export default function Ask(props: { conversation?: Conversation }) {
         )
       }
       selectedItemId={chats.selectedChatId || undefined}
+      // Mounted only once its options have loaded. Before that, the controlled `value` —
+      // the pick restored from storage — names an item that does not exist yet (presets
+      // and the live model list both arrive after mount). The reported symptom was a pick
+      // that did not stick across launches; the presumed mechanism is the dropdown falling
+      // back to its first item and its onChange overwriting the saved choice. Not mounting
+      // it until its items exist removes that window whatever the exact mechanism.
       searchBarAccessory={
-        <ModelDropdown
-          models={models.data}
-          availableModels={models.availableModels}
-          onModelChange={setSelectedModelId}
-          selectedModel={selectedModelId}
-        />
+        models.isLoading ? undefined : (
+          <ModelDropdown
+            models={models.data}
+            availableModels={models.availableModels}
+            onModelChange={setSelectedModelId}
+            selectedModel={selectedModelId}
+          />
+        )
       }
       onSelectionChange={(id) => {
         if (id !== chats.selectedChatId) {

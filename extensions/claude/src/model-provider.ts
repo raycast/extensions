@@ -9,7 +9,7 @@ import {
   type EffortLevel,
 } from "./api/models";
 import type { Model } from "./type";
-import { getMaxTokensForModel, supportsTemperature } from "./utils/models";
+import { getMaxTokensForModel, shortModelName, supportsTemperature } from "./utils/models";
 
 /**
  * Raycast AI model provider (`ai.modelProvider` in package.json).
@@ -98,6 +98,20 @@ function capabilitiesFor(model: AvailableModel): AI.RegisteredModel["capabilitie
   };
 }
 
+/**
+ * A preset named exactly like a live model ("Sonnet 5.5") would show as a second, identical
+ * row that behaves differently. That is always true of the built-in default, which is
+ * auto-named after its model, and can be true of any preset the user names that way. Where
+ * the collision exists the preset is marked — "· Default" for the built-in one, "· Preset"
+ * otherwise; hiding it instead was tried twice and each time hid a default the user had
+ * customized. Presets whose names are unique keep them. Display only; stored names are
+ * untouched.
+ */
+function presetTitle(preset: Model, liveTitles: Set<string>): string {
+  if (!liveTitles.has(preset.name)) return preset.name;
+  return `${preset.name} · ${preset.id === "default" ? "Default" : "Preset"}`;
+}
+
 async function readPresets(): Promise<Model[]> {
   const raw = await LocalStorage.getItem<string>(PRESETS_KEY);
   if (!raw) return [];
@@ -131,9 +145,11 @@ export const getModels: AI.GetModels = async () => {
   const liveModels = await fetchAvailableModels({ throwOnAuthError: true });
   const byId = new Map(liveModels.map((model) => [model.id, model]));
 
+  // Titles drop the "Claude" prefix: Raycast already labels every row with the extension
+  // name ("Claude"), and the rest of this extension shortens model names the same way.
   const models: AI.RegisteredModel[] = liveModels.map((model) => ({
     id: model.id,
-    title: model.display_name,
+    title: shortModelName(model.display_name),
     description: "Through your Anthropic API key",
     capabilities: capabilitiesFor(model),
     ...(model.max_input_tokens ? { contextWindow: model.max_input_tokens } : {}),
@@ -143,11 +159,12 @@ export const getModels: AI.GetModels = async () => {
   // was tried twice and each rule hid a default the user had in fact customized (first any
   // prompt, then any setting other than the prompt); one entry that resembles its
   // underlying model is a smaller cost than a preset that silently is not there.
+  const liveTitles = new Set(models.map((model) => model.title));
   for (const preset of await readPresets()) {
     const underlying = byId.get(preset.option) ?? { id: preset.option, display_name: preset.option, created_at: "" };
     models.push({
       id: `${PRESET_ID_PREFIX}${preset.id}`,
-      title: preset.name,
+      title: presetTitle(preset, liveTitles),
       description: `Preset · ${underlying.display_name}`,
       capabilities: capabilitiesFor(underlying),
       ...(underlying.max_input_tokens ? { contextWindow: underlying.max_input_tokens } : {}),
