@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qveris",
+  "type": "module",
+  "title": "QVeris",
+  "description": "Discover, inspect, and safely run capabilities from the QVeris network.",
+  "icon": "icon.png",
+  "author": "dev_qveris",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "tools",
+    "capabilities",
+    "api",
+    "mcp",
+    "automation",
+    "agents"
+  ],
+  "commands": [
+    {
+      "name": "discover-capabilities",
+      "title": "Discover Capabilities",
+      "description": "Find and inspect tools available through QVeris",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "discover-capabilities",
+      "title": "Discover Capabilities",
+      "description": "Find ranked QVeris capabilities for a task using a natural-language query. Discovery is free and returns tool IDs, parameter hints, reliability, and pricing metadata."
+    },
+    {
+      "name": "inspect-capability",
+      "title": "Inspect Capability",
+      "description": "Get the current schema, examples, reliability, and pricing metadata for a QVeris capability ID. Inspection is free."
+    },
+    {
+      "name": "probe-capability",
+      "title": "Probe Capability",
+      "description": "Validate parameters and request a free pre-call quote for a QVeris capability without executing it."
+    },
+    {
+      "name": "call-capability",
+      "title": "Call Capability",
+      "description": "Execute a QVeris capability selected from a prior discovery. The extension validates parameters and shows a confirmation with the available cost estimate before execution."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Discover before Inspect or Call. Preserve tool_id and search_id exactly as returned. Inspect the selected capability and build parameters only from its current schema. Probe before calling whenever parameters or cost are uncertain. Never invent a tool ID or parameter. Capability calls can consume QVeris credits and may have third-party side effects; rely on the confirmation shown by the extension."
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "QVeris API Key",
+      "description": "API key used only to authenticate requests to the selected QVeris API region.",
+      "placeholder": "Enter your QVeris API key"
+    },
+    {
+      "name": "apiRegion",
+      "type": "dropdown",
+      "required": true,
+      "title": "API Region",
+      "description": "Choose the QVeris service where your API key was created.",
+      "default": "global",
+      "data": [
+        {
+          "title": "Global",
+          "value": "global"
+        },
+        {
+          "title": "China",
+          "value": "china"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
