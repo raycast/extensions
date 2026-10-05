@@ -235,6 +235,7 @@ export default function Command() {
     pending.current = true;
     setBusy(true);
     let requested = false;
+    let uploading = false;
     try {
       if (
         ["image", "video", "share"].includes(values.action) &&
@@ -345,7 +346,9 @@ export default function Command() {
               Number.MAX_SAFE_INTEGER,
               Number.MAX_SAFE_INTEGER,
             );
+          uploading = true;
           const uploaded = await request("uploadVideo", auth, {}, file);
+          uploading = false;
           if (uploaded.code !== 200) result = uploaded;
           else {
             const { width, height, duration, videoUrl } = uploaded;
@@ -439,18 +442,26 @@ export default function Command() {
       }
       await showToast({
         style: Toast.Style.Failure,
-        title: requested
+        title: uploading
           ? cn
-            ? "请求未确认；先查询任务再重试"
-            : "Request Not Confirmed; Query Before Retrying"
-          : cn
-            ? "请检查输入"
-            : "Check Input",
-        message: requested
-          ? home
-          : error instanceof Error
-            ? error.message
-            : "Invalid input",
+            ? "视频上传未确认"
+            : "Video Upload Not Confirmed"
+          : requested
+            ? cn
+              ? "请求未确认；先查询任务再重试"
+              : "Request Not Confirmed; Query Before Retrying"
+            : cn
+              ? "请检查输入"
+              : "Check Input",
+        message: uploading
+          ? cn
+            ? "尚未发送处理请求。请检查上传并重新选择文件；不要查询不存在的处理任务。"
+            : "No processing request was sent. Check the upload and select the file again; there is no processing task to query."
+          : requested
+            ? home
+            : error instanceof Error
+              ? error.message
+              : "Invalid input",
       });
     } finally {
       pending.current = false;
