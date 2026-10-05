@@ -8,17 +8,20 @@
 - 📍 **Server Discovery** - List countries, cities, and servers with commands like "Show cities in USA"
 - 🔄 **Intelligent Server Switching** - Change servers by country/city with automatic reconnection
 - 📊 **Enhanced Status Reporting** - Get VPN status and IP information with "What's my IP?"
+- 👤 **Account Portal Access** - Open and manage your Mozilla Account portal directly via AI ("Open Account", "Manage subscription") or the extension UI
 - 🌍 **Country Aliases Support** - Understands "USA", "US", "United States", "UK", etc.
-- 🔁 **Auto-Retry Logic** - Automatic connection retries (up to 3 attempts) for reliability
+- 🔁 **Auto-Retry Logic** - Automatic connection retries for reliability
 - 🎯 **Partial Name Matching** - Find countries/cities with partial names
 - ⚡ **Instant Disconnection** - Immediate VPN disconnection without confirmation prompts
 
 ### Technical Improvements
-- Full TypeScript rewrite with comprehensive type safety
-- Reduced console verbosity for cleaner logs
-- Modular code architecture with reusable functions
-- Robust error handling with helpful user messages
-- Optimized connection timing and retry mechanisms
+- Modernized for Raycast 2.0 (macOS 27 Tahoe) compatibility
+- Migrated background menubar refresh to compliant 1m interval with event-driven cache notifications
+- Switched to FlagsAPI CDN for server location flags
+- Replaced legacy Node.js http/https callbacks with native HTTPS fetch for geolocation and IP detection
+- Switched Mozilla VPN binary execution to `execFile` with robust city/state parsing
+- Full TypeScript rewrite with clean @raycast/api component typings
+- Comprehensive AI tool schema generation and evaluation test fixtures
 
 ## [1.1.0] - {PR_MERGE_DATE}
 

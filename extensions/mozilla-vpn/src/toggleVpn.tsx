@@ -1,81 +1,24 @@
 import React from 'react';
-import * as Raycast from '@raycast/api';
-import { exec } from 'child_process';
-
-// Extract simple components
-const showToast = Raycast.showToast;
-const Toast = Raycast.Toast;
-
-// Define proper types for List to avoid 'any' usage and interface extension issues
-interface ListProps {
-  isLoading?: boolean;
-  navigationTitle?: string;
-  children?: React.ReactNode;
-}
-
-interface ListComponent {
-  (props: ListProps): React.ReactElement | null;
-  Item: React.ComponentType<Record<string, unknown>>;
-  Section: React.ComponentType<Record<string, unknown>>;
-  EmptyView: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for ActionPanel
-interface ActionPanelProps {
-  children?: React.ReactNode;
-}
-
-interface ActionPanelComponent {
-  (props: ActionPanelProps): React.ReactElement | null;
-  Section: React.ComponentType<Record<string, unknown>>;
-}
-
-// Define proper types for Action
-interface ActionProps {
-  title: string;
-  icon?: unknown;
-  onAction?: () => void;
-  shortcut?: unknown;
-}
-
-interface ActionComponent {
-  (props: ActionProps): React.ReactElement | null;
-  OpenInBrowser: React.ComponentType<Record<string, unknown>>;
-  Push: React.ComponentType<Record<string, unknown>>;
-  Pop: React.ComponentType<Record<string, unknown>>;
-  Copy: React.ComponentType<Record<string, unknown>>;
-  Paste: React.ComponentType<Record<string, unknown>>;
-  ShowInFinder: React.ComponentType<Record<string, unknown>>;
-  Open: React.ComponentType<Record<string, unknown>>;
-  OpenWith: React.ComponentType<Record<string, unknown>>;
-  SubmitForm: React.ComponentType<Record<string, unknown>>;
-  Trash: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertions to bypass the complex intersection type issues
-const List = (Raycast as unknown as { List: ListComponent }).List;
-const ActionPanel = (
-  Raycast as unknown as { ActionPanel: ActionPanelComponent }
-).ActionPanel;
-const Action = (Raycast as unknown as { Action: ActionComponent }).Action;
+import { Action, ActionPanel, List, Toast, showToast } from '@raycast/api';
+import { runCommand } from './utils/vpnService';
 
 export default function Command() {
-  const runCommand = (command: string) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        showToast(
-          Toast.Style.Failure,
-          'Failed to execute command',
-          error.message
-        );
-        return;
-      }
-      showToast(
-        Toast.Style.Success,
-        'Command executed successfully',
-        stdout || stderr
+  const handleToggle = async (action: 'activate' | 'deactivate') => {
+    try {
+      await showToast(
+        Toast.Style.Animated,
+        `${action === 'activate' ? 'Connecting' : 'Disconnecting'} Mozilla VPN...`
       );
-    });
+      await runCommand(action);
+      await showToast(
+        Toast.Style.Success,
+        `VPN ${action === 'activate' ? 'activated' : 'deactivated'} successfully`
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      await showToast(Toast.Style.Failure, 'Failed to toggle VPN', message);
+    }
   };
 
   return (
@@ -85,13 +28,8 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              // eslint-disable-next-line @raycast/prefer-title-case
-              title="Activate VPN"
-              onAction={() =>
-                runCommand(
-                  '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN activate'
-                )
-              }
+              title="Activate Vpn"
+              onAction={() => handleToggle('activate')}
             />
           </ActionPanel>
         }
@@ -101,13 +39,8 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              // eslint-disable-next-line @raycast/prefer-title-case
-              title="Deactivate VPN"
-              onAction={() =>
-                runCommand(
-                  '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN deactivate'
-                )
-              }
+              title="Deactivate Vpn"
+              onAction={() => handleToggle('deactivate')}
             />
           </ActionPanel>
         }

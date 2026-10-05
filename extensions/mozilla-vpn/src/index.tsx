@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import * as Raycast from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  Toast,
+  openExtensionPreferences,
+  showToast,
+} from '@raycast/api';
 import { fetchCurrentIP } from './utils/fetchCurrentIP';
 import { checkVpnStatus, runCommand } from './utils/vpnService';
 import VpnStatus from './components/vpnStatus';
@@ -7,71 +16,9 @@ import CheckLogin from './components/checkLogin';
 import ServerSelector from './components/serverSelector';
 import ServerDetails from './components/serverDetails';
 import fs from 'fs';
+import { notifyVpnStatusChange } from './utils/vpnCache';
 
 const MOZILLA_VPN_PATH = '/Applications/Mozilla VPN.app';
-
-// Extract components with explicit typing to avoid type conflicts
-const showToast = Raycast.showToast;
-const Toast = Raycast.Toast;
-const Icon = Raycast.Icon;
-const Color = Raycast.Color;
-
-// Define proper types for Action to avoid 'any' usage
-interface ActionProps {
-  title: string;
-  icon?: unknown;
-  onAction?: () => void;
-  shortcut?: unknown;
-}
-
-interface ActionComponent {
-  (props: ActionProps): React.ReactElement | null;
-  OpenInBrowser: React.ComponentType<Record<string, unknown>>;
-  Push: React.ComponentType<Record<string, unknown>>;
-  Pop: React.ComponentType<Record<string, unknown>>;
-  Copy: React.ComponentType<Record<string, unknown>>;
-  Paste: React.ComponentType<Record<string, unknown>>;
-  ShowInFinder: React.ComponentType<Record<string, unknown>>;
-  Open: React.ComponentType<Record<string, unknown>>;
-  OpenWith: React.ComponentType<Record<string, unknown>>;
-  SubmitForm: React.ComponentType<Record<string, unknown>>;
-  Trash: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertion to bypass the complex intersection type issue for Action
-const Action = (Raycast as unknown as { Action: ActionComponent }).Action;
-
-// Define proper types for ActionPanel to avoid 'any' usage
-interface ActionPanelProps {
-  children?: React.ReactNode;
-}
-
-interface ActionPanelComponent {
-  (props: ActionPanelProps): React.ReactElement | null;
-  Section: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertion to bypass the complex intersection type issue for ActionPanel
-const ActionPanel = (
-  Raycast as unknown as { ActionPanel: ActionPanelComponent }
-).ActionPanel;
-
-// Define proper types to avoid 'any' usage and interface extension issues
-interface ListProps {
-  isLoading?: boolean;
-  navigationTitle?: string;
-  children?: React.ReactNode;
-}
-
-interface ListComponent {
-  (props: ListProps): React.ReactElement | null;
-  Item: React.ComponentType<Record<string, unknown>>;
-  Section: React.ComponentType<Record<string, unknown>>;
-  EmptyView: React.ComponentType<Record<string, unknown>>;
-}
-
-// Type assertion to bypass the complex intersection type issue
-const List = (Raycast as unknown as { List: ListComponent }).List;
 
 // Define view types for navigation
 type ViewType = 'main' | 'serverSelector' | 'serverDetails';
@@ -165,6 +112,9 @@ const Command: React.FC = () => {
             setVpnStatus(status.isActive);
             setServerCity(status.serverCity);
             setServerCountry(status.serverCountry);
+
+            // Notify menubar about the change
+            notifyVpnStatusChange();
 
             // Also update IP after connection change
             try {
@@ -279,6 +229,9 @@ const Command: React.FC = () => {
             setVpnStatus(status.isActive);
             setServerCity(status.serverCity);
             setServerCountry(status.serverCountry);
+
+            // Notify menubar about the server change
+            notifyVpnStatusChange();
 
             // If we're connected, update IP too
             if (status.isActive) {
@@ -460,6 +413,10 @@ const Command: React.FC = () => {
     setIsLoading(true);
     try {
       await fetchInitialData();
+
+      // Notify menubar about the refresh
+      notifyVpnStatusChange();
+
       await showToast(Toast.Style.Success, 'Data refreshed successfully');
     } catch (error) {
       console.error('Error refreshing data:', error);
@@ -626,6 +583,19 @@ const Command: React.FC = () => {
             />
 
             <List.Item
+              title="Manage Mozilla Account"
+              icon={{ source: Icon.Person }}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser
+                    url="https://accounts.firefox.com/"
+                    title="Open Mozilla Account"
+                  />
+                </ActionPanel>
+              }
+            />
+
+            <List.Item
               title="Refresh VPN Status"
               icon={{ source: Icon.RotateClockwise }}
               actions={
@@ -634,6 +604,20 @@ const Command: React.FC = () => {
                     title="Refresh Data"
                     icon={Icon.RotateClockwise}
                     onAction={refreshData}
+                  />
+                </ActionPanel>
+              }
+            />
+
+            <List.Item
+              title="Extension Settings"
+              icon={{ source: Icon.Gear }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Settings"
+                    icon={Icon.Gear}
+                    onAction={openExtensionPreferences}
                   />
                 </ActionPanel>
               }

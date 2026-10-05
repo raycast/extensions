@@ -8,6 +8,7 @@ import {
 } from '../utils/serverUtils';
 import { runCommand, checkVpnStatus } from '../utils/vpnService';
 import { fetchCurrentIP } from '../utils/fetchCurrentIP';
+import { open } from '@raycast/api';
 
 // Timing constants for VPN operations
 const DISCONNECT_DELAY_MS = 4000;
@@ -17,7 +18,21 @@ const RETRY_DELAY_MS = 2000;
 const RETRY_CONNECT_DELAY_MS = 3000;
 const MAX_CONNECTION_RETRIES = 2;
 
+/**
+ * Input parameters for controlling Mozilla VPN.
+ */
 type VpnControlInput = {
+  /**
+   * The action to perform with Mozilla VPN:
+   * - 'connect': Connect to the VPN, optionally targeting a specific country/city.
+   * - 'disconnect': Disconnect the active VPN connection.
+   * - 'status': Check current VPN connection status, active location, and external IP.
+   * - 'list': List all available VPN countries.
+   * - 'list_cities': List all available cities in a country (requires `country`).
+   * - 'list_servers': List all available servers in a country or city (requires `country`).
+   * - 'change_server': Change the configured VPN server without connecting.
+   * - 'open_account': Open the Mozilla/Firefox Account management and subscription portal in your default browser (e.g. 'Open Account', 'Open My Account', 'Manage subscription').
+   */
   action?:
     | 'connect'
     | 'disconnect'
@@ -25,9 +40,21 @@ type VpnControlInput = {
     | 'list'
     | 'list_cities'
     | 'list_servers'
-    | 'change_server';
+    | 'change_server'
+    | 'open_account';
+  /**
+   * Country name or country code (e.g. 'USA', 'Germany', 'UK', 'ca').
+   * Required for list_cities, list_servers, and when connecting/switching to a specific country.
+   */
   country?: string;
+  /**
+   * City name (e.g. 'Seattle', 'Berlin', 'London').
+   * Optional filter for connect, change_server, or list_servers.
+   */
   city?: string;
+  /**
+   * Whether to automatically connect to the VPN after changing the server location. Defaults to true for connect requests.
+   */
   connect_after_change?: boolean;
 };
 
@@ -134,10 +161,31 @@ function detectActionFromInput(
   | 'list'
   | 'change_server'
   | 'list_cities'
-  | 'list_servers' {
-  // If action is explicitly provided, use it
+  | 'list_servers'
+  | 'open_account' {
+  // If action is explicitly provided, normalize and inspect
   if (input.action) {
+    const rawAction = (input.action as string)
+      .toLowerCase()
+      .replace(/[-_\s]+/g, '_')
+      .trim();
+    if (
+      rawAction === 'open_account' ||
+      rawAction === 'account' ||
+      rawAction === 'open_my_account' ||
+      rawAction.includes('account')
+    ) {
+      return 'open_account';
+    }
     return input.action;
+  }
+
+  // Check if country or city was passed containing account keywords
+  if (
+    (input.country && input.country.toLowerCase().includes('account')) ||
+    (input.city && input.city.toLowerCase().includes('account'))
+  ) {
+    return 'open_account';
   }
 
   // Default to status if no parameters
@@ -210,10 +258,42 @@ async function handleCountryCityOperation(
   }
 }
 
+/**
+ * Control Mozilla VPN: connect, disconnect, check connection status, and list or select server locations.
+ */
 export default async function tool(input: VpnControlInput): Promise<string> {
   const action = detectActionFromInput(input);
 
   switch (action) {
+    case 'open_account': {
+      try {
+        let userEmail: string | undefined;
+        try {
+          const status = await checkVpnStatus();
+          userEmail = status.userEmail;
+        } catch {
+          // If status lookup fails, still proceed to open base portal
+        }
+
+        const accountUrl = userEmail
+          ? `https://accounts.firefox.com/?email=${encodeURIComponent(userEmail)}`
+          : 'https://accounts.firefox.com/';
+
+        try {
+          await open(accountUrl);
+        } catch {
+          const { execFile } = await import('child_process');
+          execFile('open', [accountUrl]);
+        }
+
+        return userEmail
+          ? `Opened Mozilla account portal in browser for ${userEmail}: ${accountUrl}`
+          : `Opened Mozilla account portal in browser: ${accountUrl}`;
+      } catch (error) {
+        return `Failed to open account portal: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
     case 'disconnect': {
       try {
         await runCommand('deactivate');
