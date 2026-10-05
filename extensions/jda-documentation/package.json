@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jda-documentation",
+  "title": "JDA Documentation",
+  "description": "Search the JDA documentation with gateway intent and RestAction hints, plus a permissions calculator, embed builder and Raycast AI tools.",
+  "icon": "icon.png",
+  "author": "cemyilmazzzz122",
+  "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "discord",
+    "jda",
+    "java",
+    "bot",
+    "documentation",
+    "docs",
+    "javadoc",
+    "api",
+    "intents",
+    "embed",
+    "permissions"
+  ],
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "JDA",
+      "description": "Search classes, interfaces, methods, fields, events, exceptions, guides and FAQ answers in the JDA documentation",
+      "mode": "view"
+    },
+    {
+      "name": "permissions-calculator",
+      "title": "Permissions Calculator",
+      "subtitle": "JDA",
+      "description": "Pick Discord permissions and get the raw value, the Java code and a bot invite URL",
+      "mode": "view"
+    },
+    {
+      "name": "embed-builder",
+      "title": "Embed Builder",
+      "subtitle": "JDA",
+      "description": "Fill in a form and copy the matching EmbedBuilder Java code",
+      "mode": "view"
+    },
+    {
+      "name": "discord-colors",
+      "title": "Discord Colours",
+      "subtitle": "JDA",
+      "description": "Browse the Discord colour palette with hex, integer and java.awt.Color values",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1",
+    "node-html-parser": "^9.0.3",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "includeGuides",
+      "title": "Wiki Guides",
+      "label": "Index the JDA wiki",
+      "description": "Index the guides and the troubleshooting FAQ from jda.wiki alongside the Javadoc.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a result does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Show Details in Raycast",
+          "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ]
+    },
+    {
+      "name": "jdaVariable",
+      "title": "JDA Variable Name",
+      "description": "The variable name used in generated boilerplate.",
+      "type": "dropdown",
+      "required": false,
+      "default": "jda",
+      "data": [
+        {
+          "title": "jda (JDA)",
+          "value": "jda"
+        },
+        {
+          "title": "shardManager (ShardManager)",
+          "value": "shardManager"
+        }
+      ]
+    },
+    {
+      "name": "applicationId",
+      "title": "Application ID",
+      "description": "Your bot's application ID, used to build invite URLs in the permissions calculator.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "123456789012345678"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-docs",
+      "title": "Search JDA Documentation",
+      "description": "Searches the indexed JDA documentation and returns signatures, required gateway intents, whether a call returns a RestAction that must be queued, descriptions and code examples. Use this before answering any JDA question so the answer matches the real API instead of being guessed."
+    },
+    {
+      "name": "read-entry",
+      "title": "Read JDA Documentation Entry",
+      "description": "Returns the full documentation for one JDA type or member, optionally with the list of a type's own fields, constants and methods."
+    }
+  ]
+}
