@@ -76,6 +76,8 @@ type RequestOptions = {
   json?: unknown;
   file?: { path: string; onProgress?: (fraction: number) => void };
   connection?: Connection;
+  /** The reply's bytes instead of JSON: a Buffer, or null for 204 No Content. */
+  binary?: boolean;
 };
 
 async function request<T>(method: string, route: string, options: RequestOptions = {}): Promise<T> {
@@ -120,6 +122,11 @@ async function request<T>(method: string, route: string, options: RequestOptions
         const chunks: Buffer[] = [];
         res.on("data", (chunk: Buffer) => chunks.push(chunk));
         res.on("end", () => {
+          const status = res.statusCode ?? 0;
+          if (options.binary && status >= 200 && status < 300) {
+            resolve((status === 204 ? null : Buffer.concat(chunks)) as T);
+            return;
+          }
           const text = Buffer.concat(chunks).toString("utf8");
           let payload: unknown;
           try {
@@ -127,7 +134,6 @@ async function request<T>(method: string, route: string, options: RequestOptions
           } catch {
             payload = {};
           }
-          const status = res.statusCode ?? 0;
           if (status >= 200 && status < 300) {
             resolve(payload as T);
             return;
@@ -256,6 +262,44 @@ export function createTemporaryLink(destinationId: string, key: string, expiresI
   return request<TemporaryLink>("POST", bucketRoute(destinationId, "links"), {
     json: { key, expiresIn: expiresInSeconds },
   });
+}
+
+// MARK: - Thumbnails
+
+/**
+ * A PNG thumbnail, its longest side at most `px` pixels, or null when there's
+ * none (thumbnails are off for the destination, or none could be made).
+ * With `generate` false, Aktar only returns one it already has, never
+ * downloading the file to make one. Aktar versions before thumbnails answer
+ * 404; see `isThumbnailsUnsupported`.
+ */
+export function getUploadThumbnail(id: string, options: { px: number; generate: boolean }) {
+  return request<Buffer | null>("GET", `uploads/${encodeURIComponent(id)}/thumbnail`, {
+    query: { px: options.px, generate: options.generate ? undefined : 0 },
+    binary: true,
+  });
+}
+
+export function getObjectThumbnail(
+  destinationId: string,
+  object: { key: string; size: number; lastModified: string | null },
+  options: { px: number; generate: boolean },
+) {
+  return request<Buffer | null>("GET", bucketRoute(destinationId, "thumbnail"), {
+    query: {
+      key: object.key,
+      objectSize: object.size,
+      lastModified: object.lastModified,
+      px: options.px,
+      generate: options.generate ? undefined : 0,
+    },
+    binary: true,
+  });
+}
+
+/** True when this Aktar predates thumbnails and doesn't know the route. */
+export function isThumbnailsUnsupported(error: unknown) {
+  return error instanceof AktarError && error.kind === "request-failed" && error.status === 404;
 }
 
 // MARK: - Watched folders

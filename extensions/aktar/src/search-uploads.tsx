@@ -22,14 +22,16 @@ import { QRCodeView } from "./components/QRCodeView";
 import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
-import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix, thumbnail } from "./lib/format";
+import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix } from "./lib/format";
 import { resolveFormat } from "./lib/output";
+import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "./lib/thumbnails";
 
 const ALL_DESTINATIONS = "all";
 
 export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("search-uploads-detail", true);
   const [destinationFilter, setDestinationFilter] = useState(ALL_DESTINATIONS);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const { data: status } = useCachedPromise(getStatus, []);
   const { data: destinations } = useCachedPromise(listDestinations, []);
   const {
@@ -48,6 +50,11 @@ export default function Command() {
   const visible = (uploads ?? []).filter(
     (upload) => destinationFilter === ALL_DESTINATIONS || upload.destinationId === destinationFilter,
   );
+  const icons = useThumbnailIcons(
+    visible.map((upload) => ({ id: upload.id, source: { kind: "upload", id: upload.id } })),
+  );
+  const selected = isShowingDetail ? visible.find((upload) => upload.id === selectedId) : undefined;
+  const preview = useDetailThumbnail(selected && { kind: "upload", id: selected.id });
 
   async function remove(upload: Upload) {
     const confirmed = await confirmAlert({
@@ -73,6 +80,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail && visible.length > 0}
+      onSelectionChange={setSelectedId}
       searchBarPlaceholder="Search uploads by name or key"
       searchBarAccessory={
         destinations && destinations.length > 1 ? (
@@ -111,7 +119,8 @@ export default function Command() {
         return (
           <List.Item
             key={upload.id}
-            icon={thumbnail(upload.filename, upload.url)}
+            id={upload.id}
+            icon={thumbnailIcon(icons[upload.id], upload.filename, upload.url)}
             title={upload.filename}
             keywords={[upload.objectKey, upload.destinationName]}
             accessories={
@@ -130,7 +139,7 @@ export default function Command() {
                     { date: new Date(upload.createdAt), tooltip: new Date(upload.createdAt).toLocaleString() },
                   ]
             }
-            detail={<UploadDetail upload={upload} />}
+            detail={<UploadDetail upload={upload} preview={upload.id === selected?.id ? preview : undefined} />}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -218,8 +227,13 @@ function showsFormat(format: OutputFormat) {
   return getPreferenceValues<Preferences>().copyFormat === "aktar";
 }
 
-function UploadDetail({ upload }: { upload: Upload }) {
-  const markdown = isImageUpload(upload) ? `![](${upload.url})` : `### ${upload.filename}\n\nNo preview for this file.`;
+/** `preview`: the thumbnail of a video, PDF or document, for files that aren't images. */
+function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | null }) {
+  const markdown = isImageUpload(upload)
+    ? `![](${upload.url})`
+    : preview
+      ? thumbnailMarkdown(preview)
+      : `### ${upload.filename}\n\n${preview === undefined ? "" : "No preview for this file."}`;
   return (
     <List.Item.Detail
       markdown={markdown}

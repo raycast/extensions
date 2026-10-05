@@ -1,0 +1,166 @@
+import { environment, Image } from "@raycast/api";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { useEffect, useState } from "react";
+import { getObjectThumbnail, getUploadThumbnail, isThumbnailsUnsupported } from "../api/client";
+import type { BucketObject } from "../api/types";
+import { thumbnail as legacyThumbnail } from "./format";
+
+/**
+ * Thumbnails come from Aktar (Aktar for Mac 0.13 and Aktar for Windows 0.6
+ * or later), which makes them for photos, videos, PDFs and documents, also
+ * in private buckets. They're kept as PNG files in the extension's support
+ * folder, since Raycast shows images from files. Older Aktar versions fall
+ * back to the image itself from its public link.
+ */
+export type ThumbnailSource =
+  { kind: "upload"; id: string } | { kind: "object"; destinationId: string; object: BucketObject };
+
+/** Pixels for list icons and for the detail pane. */
+export const ICON_PX = 128;
+export const DETAIL_PX = 512;
+/** List icons are asked for up to this many rows; the selected row always gets one. */
+export const MAX_ICONS = 150;
+
+const folder = path.join(environment.supportPath, "thumbnails");
+const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+/** A file Aktar had no thumbnail for is asked about again after this long. */
+const RETRY_AFTER_MS = 24 * 60 * 60 * 1000;
+const MAX_RUNNING = 4;
+
+let unsupported = false;
+let pruned = false;
+let running = 0;
+const waiting: (() => void)[] = [];
+
+function identity(source: ThumbnailSource) {
+  return source.kind === "upload"
+    ? `upload\n${source.id}`
+    : ["object", source.destinationId, source.object.key, source.object.size, source.object.lastModified ?? ""].join(
+        "\n",
+      );
+}
+
+function cacheFile(source: ThumbnailSource, px: number) {
+  const hash = createHash("sha256").update(identity(source)).digest("hex");
+  return path.join(folder, `${hash}-${px}`);
+}
+
+function prune() {
+  if (pruned) return;
+  pruned = true;
+  try {
+    const now = Date.now();
+    for (const name of readdirSync(folder)) {
+      const file = path.join(folder, name);
+      if (now - statSync(file).mtimeMs > MAX_AGE_MS) unlinkSync(file);
+    }
+  } catch {
+    // Nothing cached yet.
+  }
+}
+
+async function limited<T>(work: () => Promise<T>): Promise<T> {
+  if (running >= MAX_RUNNING) await new Promise<void>((resolve) => waiting.push(resolve));
+  running += 1;
+  try {
+    return await work();
+  } finally {
+    running -= 1;
+    waiting.shift()?.();
+  }
+}
+
+/**
+ * The thumbnail's file, or null when there's none. `generate` lets Aktar
+ * make one it doesn't have yet, which can mean downloading the file, so
+ * it's only used for the selected row.
+ */
+export async function thumbnailFile(source: ThumbnailSource, px: number, generate: boolean): Promise<string | null> {
+  if (unsupported) return null;
+  prune();
+  const file = cacheFile(source, px);
+  const png = `${file}.png`;
+  if (existsSync(png)) return png;
+  const none = `${file}.none`;
+  if (existsSync(none) && Date.now() - statSync(none).mtimeMs < RETRY_AFTER_MS) return null;
+  try {
+    const data = await limited(() =>
+      source.kind === "upload"
+        ? getUploadThumbnail(source.id, { px, generate })
+        : getObjectThumbnail(source.destinationId, source.object, { px, generate }),
+    );
+    mkdirSync(folder, { recursive: true });
+    if (data) {
+      writeFileSync(png, data);
+      return png;
+    }
+    // Without `generate` Aktar may just not have made it yet.
+    if (generate) writeFileSync(none, "");
+    return null;
+  } catch (error) {
+    if (isThumbnailsUnsupported(error)) unsupported = true;
+    return null;
+  }
+}
+
+/** Whether Aktar answered that it can't make thumbnails (an older version). */
+export function thumbnailsUnsupported() {
+  return unsupported;
+}
+
+/**
+ * List icons for the first `MAX_ICONS` items, filled in as they arrive. Only
+ * thumbnails Aktar already has: nothing is downloaded for a list.
+ */
+export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }[]) {
+  const [files, setFiles] = useState<Record<string, string | null>>({});
+  const key = items
+    .slice(0, MAX_ICONS)
+    .map((item) => identity(item.source))
+    .join("\u0000");
+  useEffect(() => {
+    let cancelled = false;
+    for (const item of items.slice(0, MAX_ICONS)) {
+      if (item.id in files) continue;
+      thumbnailFile(item.source, ICON_PX, false).then((file) => {
+        if (!cancelled) setFiles((current) => ({ ...current, [item.id]: file }));
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [key]);
+  return files;
+}
+
+/** The selected item's thumbnail for the detail pane, made if needed. */
+export function useDetailThumbnail(source: ThumbnailSource | undefined) {
+  const [file, setFile] = useState<{ id: string; file: string | null }>();
+  const id = source ? identity(source) : "";
+  useEffect(() => {
+    if (!source) return;
+    let cancelled = false;
+    thumbnailFile(source, DETAIL_PX, true).then((result) => {
+      if (!cancelled) setFile({ id, file: result });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+  return file?.id === id ? file.file : undefined;
+}
+
+/** A list icon: the thumbnail, or what the extension showed before thumbnails. */
+export function thumbnailIcon(file: string | null | undefined, filename: string, url: string | null): Image.ImageLike {
+  if (file) return { source: file };
+  // The image itself from its public link only for Aktar versions without
+  // thumbnails; otherwise a file icon until (or unless) there's one.
+  return legacyThumbnail(filename, unsupported ? url : null);
+}
+
+/** Markdown for a thumbnail file in a detail pane. */
+export function thumbnailMarkdown(file: string) {
+  return `![](${encodeURI(`file://${file}`)}?raycast-height=260)`;
+}

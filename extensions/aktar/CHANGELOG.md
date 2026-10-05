@@ -1,5 +1,11 @@
 # Aktar Changelog
 
+## [Thumbnails] - {PR_MERGE_DATE}
+
+- Search Uploads and Browse Buckets show thumbnails made by Aktar: photos, but also videos, PDFs and documents, and files in private buckets. The preview shows the thumbnail of a file that isn't an image
+- Icons no longer download each full-size image: a thumbnail is a few kilobytes. List icons only use thumbnails Aktar already has; the selected file gets one made if needed
+- When thumbnails are off for a destination in Aktar, its files show file-type icons
+- Needs Aktar 0.13.0 for Mac or 0.6.0 for Windows. With older versions, images show as before
 ## [Watched Folders] - 2026-10-03
 
 - Watched Folders command: see the folders Aktar uploads from automatically, with their status, files waiting, uploading, or failed, their destination, and when they last uploaded. Enable or disable a folder, pause watching for 1 hour, until tomorrow, or until you resume it, show a folder in Finder, copy its path, or open Aktar's Watched Folders settings

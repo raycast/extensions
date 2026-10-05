@@ -25,7 +25,8 @@ import {
 } from "../api/client";
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
-import { FORMAT_TITLES, formatBytes, formatLink, isImageName, thumbnail } from "../lib/format";
+import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
+import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
@@ -73,6 +74,14 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
   const folders = (data ?? []).flatMap((entry) => (entry.type === "folder" ? [entry.folder] : []));
   const objects = (data ?? []).flatMap((entry) => (entry.type === "object" ? [entry.object] : []));
   const location = `${destination.bucket}/${prefix}`;
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const icons = useThumbnailIcons(
+    objects.map((object) => ({ id: object.key, source: { kind: "object", destinationId: destination.id, object } })),
+  );
+  const selectedObject = isShowingDetail ? objects.find((object) => object.key === selectedKey) : undefined;
+  const preview = useDetailThumbnail(
+    selectedObject && { kind: "object", destinationId: destination.id, object: selectedObject },
+  );
 
   const sharedActions = (
     <>
@@ -102,6 +111,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
       isLoading={isLoading}
       pagination={pagination}
       isShowingDetail={isShowingDetail && objects.length > 0}
+      onSelectionChange={setSelectedKey}
       navigationTitle={location}
       searchBarPlaceholder={`Filter ${prefix ? prefix : destination.bucket}`}
     >
@@ -139,7 +149,8 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
         {objects.map((object) => (
           <List.Item
             key={object.key}
-            icon={thumbnail(object.name, object.url)}
+            id={object.key}
+            icon={thumbnailIcon(icons[object.key], object.name, object.url)}
             title={object.name}
             accessories={
               isShowingDetail
@@ -156,7 +167,13 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       : []),
                   ]
             }
-            detail={<ObjectDetail destination={destination} object={object} />}
+            detail={
+              <ObjectDetail
+                destination={destination}
+                object={object}
+                preview={object.key === selectedObject?.key ? preview : undefined}
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -274,11 +291,23 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
   );
 }
 
-function ObjectDetail({ destination, object }: { destination: Destination; object: BucketObject }) {
-  const preview = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+/** `preview`: the thumbnail of a video, PDF or document, or of an image without a public link. */
+function ObjectDetail({
+  destination,
+  object,
+  preview,
+}: {
+  destination: Destination;
+  object: BucketObject;
+  preview?: string | null;
+}) {
+  const image = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+  const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail
-      markdown={preview || `### ${object.name}\n\nNo preview for this file.`}
+      markdown={
+        image || thumbnail || `### ${object.name}\n\n${preview === undefined ? "" : "No preview for this file."}`
+      }
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Name" text={object.name} />
