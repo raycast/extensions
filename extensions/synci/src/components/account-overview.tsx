@@ -21,6 +21,7 @@ import {
   transactionName,
 } from "../lib/format";
 import { supportsHoldings } from "../lib/holdings";
+import { SignInRequiredError } from "../lib/oauth-session";
 import type { FinancialAccount } from "../lib/types";
 import { CommonActions, ToggleDetailsAction } from "./common";
 import { HoldingsList } from "./holdings-list";
@@ -28,15 +29,32 @@ import { TransactionList } from "./transaction-list";
 
 type AccountOverviewProps = { account: FinancialAccount; accountId?: never } | { accountId: number; account?: never };
 
+function accountAccessLost(error?: Error) {
+  return (
+    error instanceof SignInRequiredError || (error instanceof SynciApiError && [401, 403, 404].includes(error.status))
+  );
+}
+
 export function AccountOverview({ account: initialAccount, accountId }: AccountOverviewProps) {
   const abortable = useRef<AbortController | null>(null);
+  // usePromise clears data on failure. Retain the last account only for this open view.
+  const lastAccount = useRef(initialAccount);
+  const requestedId = accountId ?? initialAccount!.id;
   const { data, error, isLoading, revalidate } = usePromise(
     (id: number) => api.accountSummary(id, abortable.current?.signal),
-    [accountId ?? initialAccount!.id],
-    { abortable, onError: () => {} },
+    [requestedId],
+    {
+      abortable,
+      onData: (account) => {
+        lastAccount.current = account;
+      },
+      onError: (error) => {
+        if (accountAccessLost(error)) lastAccount.current = undefined;
+      },
+    },
   );
-  const account = data ?? initialAccount;
-  if (error || !account) {
+  const account = [data, lastAccount.current].find((value) => value?.id === requestedId);
+  if (accountAccessLost(error) || !account) {
     const unavailable = error instanceof SynciApiError && [403, 404].includes(error.status);
     return (
       <Detail
@@ -59,17 +77,26 @@ export function AccountOverview({ account: initialAccount, accountId }: AccountO
       />
     );
   }
-  return <AccountOverviewContent account={account} isRefreshing={isLoading} refreshAccount={revalidate} />;
+  return (
+    <AccountOverviewContent
+      account={account}
+      isRefreshing={isLoading}
+      refreshAccount={revalidate}
+      refreshError={error}
+    />
+  );
 }
 
 function AccountOverviewContent({
   account: initialAccount,
   isRefreshing,
   refreshAccount,
+  refreshError,
 }: {
   account: FinancialAccount;
   isRefreshing: boolean;
   refreshAccount: () => void;
+  refreshError?: Error;
 }) {
   const [showDetails, setShowDetails] = useDetails("account-overview", true);
   const [range, setRange] = useCachedState<HistoryRange>("balance-history-range", "30d", {
@@ -117,6 +144,9 @@ function AccountOverviewContent({
   const content = [
     `# ${markdown(money(balance.amount, balance.currency))}`,
     `${markdown(balance.kind)} balance · Synced ${markdown(dateLabel(account.balances_last_synced_at, true))}`,
+    refreshError
+      ? `Couldn't refresh the account. Showing the last loaded account details. ${markdown(refreshError.message)}`
+      : "",
     account.balance_warning ? markdown(account.balance_warning) : "",
     history.error
       ? `${rangeTitle} · Couldn't load balance history: ${markdown(history.error.message)}`
@@ -219,7 +249,9 @@ function AccountOverviewContent({
             url={accountUrl(account)}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
-          {(history.error || activity.error) && <CopyErrorDetails error={history.error || activity.error} />}
+          {(refreshError || history.error || activity.error) && (
+            <CopyErrorDetails error={refreshError || history.error || activity.error} />
+          )}
           <CommonActions refresh={refresh} />
         </ActionPanel>
       }

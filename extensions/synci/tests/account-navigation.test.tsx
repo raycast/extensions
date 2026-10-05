@@ -2,12 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LaunchProps } from "@raycast/api";
 import { Detail } from "@raycast/api";
 import { SynciApiError } from "../src/lib/diagnostics";
+import { SignInRequiredError } from "../src/lib/oauth-session";
 
 const mocks = vi.hoisted(() => ({
   useAccounts: vi.fn(),
   usePromise: vi.fn(),
   accountSummary: vi.fn(),
   revalidate: vi.fn(),
+  refs: [] as { current: unknown }[],
+  refIndex: 0,
 }));
 
 vi.mock("@raycast/api", () => ({
@@ -22,7 +25,7 @@ vi.mock("@raycast/api", () => ({
 vi.mock("@raycast/utils", () => ({ usePromise: mocks.usePromise }));
 vi.mock("react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react")>()),
-  useRef: () => ({ current: null }),
+  useRef: (initial: unknown) => (mocks.refs[mocks.refIndex++] ??= { current: initial }),
 }));
 vi.mock("../src/lib/api", () => ({ api: { accountSummary: mocks.accountSummary } }));
 vi.mock("../src/hooks/use-data", () => ({ useAccounts: mocks.useAccounts }));
@@ -37,8 +40,15 @@ vi.mock("../src/components/holdings-list", () => ({ HoldingsList: "HoldingsList"
 import CheckBalances from "../src/check-balances";
 import { AccountOverview } from "../src/components/account-overview";
 
+function renderOverview(props: Parameters<typeof AccountOverview>[0]) {
+  mocks.refIndex = 0;
+  return AccountOverview(props);
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
+  mocks.refs = [];
+  mocks.refIndex = 0;
   mocks.usePromise.mockReturnValue({ isLoading: true, revalidate: mocks.revalidate });
 });
 
@@ -53,7 +63,7 @@ describe("account deep links", () => {
   });
 
   it("stays in a detail loading view and fetches only the requested account summary", async () => {
-    const view = AccountOverview({ accountId: 42 });
+    const view = renderOverview({ accountId: 42 });
     expect(view.type).toBe(Detail);
     expect(view.props.isLoading).toBe(true);
     expect(view.props.markdown).toContain("Loading Account");
@@ -67,7 +77,7 @@ describe("account deep links", () => {
   it("renders the requested account as soon as its summary arrives", () => {
     const account = { id: 42, enabled: true, name: "Linked Account" };
     mocks.usePromise.mockReturnValue({ data: account, isLoading: false, revalidate: mocks.revalidate });
-    const view = AccountOverview({ accountId: 42 });
+    const view = renderOverview({ accountId: 42 });
     expect(view.props.account).toBe(account);
     expect(view.props.isRefreshing).toBe(false);
     expect(mocks.useAccounts).not.toHaveBeenCalled();
@@ -75,7 +85,7 @@ describe("account deep links", () => {
 
   it("refreshes a pushed overview by its own ID while showing the supplied account", () => {
     const account = { id: 42, enabled: true, name: "Selected Account" };
-    const view = AccountOverview({ account });
+    const view = renderOverview({ account });
     expect(view.props.account).toBe(account);
     expect(view.props.isRefreshing).toBe(true);
     expect(mocks.usePromise.mock.calls[0][1]).toEqual([42]);
@@ -90,7 +100,7 @@ describe("account deep links", () => {
         isLoading: false,
         revalidate: mocks.revalidate,
       });
-      const view = AccountOverview({ accountId: 42 });
+      const view = renderOverview({ accountId: 42 });
       expect(view.type).toBe(Detail);
       expect(view.props.markdown).toContain("Account Unavailable");
       expect(view.props.actions).toBeDefined();
@@ -104,10 +114,79 @@ describe("account deep links", () => {
       isLoading: false,
       revalidate: mocks.revalidate,
     });
-    const view = AccountOverview({ accountId: 42 });
+    const view = renderOverview({ accountId: 42 });
     expect(view.type).toBe(Detail);
     expect(view.props.markdown).toContain("Couldn't Load Account");
     expect(view.props.markdown).toContain("Try again shortly");
     expect(view.props.actions.props.children[1].props.refresh).toBe(mocks.revalidate);
+  });
+
+  it.each([
+    new SynciApiError("Network unavailable", 0, "network"),
+    new SynciApiError("Try again shortly", 429),
+    new SynciApiError("Server unavailable", 503),
+  ])("keeps a supplied account visible when its summary fails: %s", (error) => {
+    const account = { id: 42, enabled: true, balance: { cleared: "100" } };
+    const initial = renderOverview({ account });
+    mocks.usePromise.mockReturnValue({ error, isLoading: false, revalidate: mocks.revalidate });
+    const failed = renderOverview({ account });
+    expect(failed.type).toBe(initial.type);
+    expect(failed.props.account).toBe(account);
+    expect(failed.props.refreshError).toBe(error);
+    expect(failed.props.refreshAccount).toBe(mocks.revalidate);
+  });
+
+  it("retains a linked account across refresh failure when usePromise clears its data, then replaces it on recovery", () => {
+    renderOverview({ accountId: 42 });
+    const account = { id: 42, enabled: true, balance: { cleared: "100" } };
+    mocks.usePromise.mock.lastCall![2].onData(account);
+    mocks.usePromise.mockReturnValue({ data: account, isLoading: false, revalidate: mocks.revalidate });
+    const loaded = renderOverview({ accountId: 42 });
+
+    const error = new SynciApiError("Try again shortly", 429);
+    mocks.usePromise.mock.lastCall![2].onError(error);
+    mocks.usePromise.mockReturnValue({ error, isLoading: false, revalidate: mocks.revalidate });
+    const failed = renderOverview({ accountId: 42 });
+    expect(failed.type).toBe(loaded.type);
+    expect(failed.props.account).toBe(account);
+    expect(failed.props.refreshError).toBe(error);
+
+    const refreshed = { ...account, balance: { cleared: "200" } };
+    mocks.usePromise.mock.lastCall![2].onData(refreshed);
+    mocks.usePromise.mockReturnValue({ data: refreshed, isLoading: false, revalidate: mocks.revalidate });
+    const recovered = renderOverview({ accountId: 42 });
+    expect(recovered.type).toBe(loaded.type);
+    expect(recovered.props.account).toBe(refreshed);
+    expect(recovered.props.refreshError).toBeUndefined();
+  });
+
+  it.each([
+    new SignInRequiredError(),
+    new SynciApiError("Session expired", 401),
+    new SynciApiError("Access revoked", 403),
+    new SynciApiError("Account removed", 404),
+  ])("hides and forgets a previously available account after access is lost: %s", (error) => {
+    const account = { id: 42, enabled: true, balance: { cleared: "100" } };
+    renderOverview({ account });
+    mocks.usePromise.mock.lastCall![2].onData(account);
+    mocks.usePromise.mock.lastCall![2].onError(error);
+    mocks.usePromise.mockReturnValue({ error, isLoading: false, revalidate: mocks.revalidate });
+    const unavailable = renderOverview({ account });
+    expect(unavailable.type).toBe(Detail);
+    expect(unavailable.props.account).toBeUndefined();
+
+    // A failed retry must not bring back the account supplied before access was revoked.
+    mocks.usePromise.mockReturnValue({
+      error: new SynciApiError("Network unavailable", 0, "network"),
+      isLoading: false,
+      revalidate: mocks.revalidate,
+    });
+    const failedRetry = renderOverview({ account });
+    expect(failedRetry.type).toBe(Detail);
+    expect(failedRetry.props.markdown).toContain("Couldn't Load Account");
+
+    mocks.usePromise.mock.lastCall![2].onData(account);
+    mocks.usePromise.mockReturnValue({ data: account, isLoading: false, revalidate: mocks.revalidate });
+    expect(renderOverview({ account }).props.account).toBe(account);
   });
 });
