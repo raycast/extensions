@@ -19,7 +19,7 @@ import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
 import { CLAUDE_ICON } from "./constants";
-import { useRecents } from "./hooks/useRecents";
+import { recentsStore, useRecents } from "./hooks/useRecents";
 import type { Conversation } from "./type";
 import { exportConversationsToJson } from "./utils/historyExport";
 import { resolveToast } from "./utils/toast";
@@ -103,16 +103,21 @@ export default function Recents() {
    * because the dropdown happened to be set to "Active" would be exactly the kind of
    * quiet data loss Export History exists to prevent.
    *
-   * Sources from `recents.data` — the same in-memory state Recents renders from — so the
-   * export can never disagree with what's on screen. Pure read: never calls
-   * `recents.update`/`remove`/`clear`, so it cannot mutate `recents_v1` or any legacy key.
+   * Reads storage at the moment of export, not `recents.data`: that list loads when Recents
+   * opens and is not refreshed by writes from Ask, so a conversation saved while Recents
+   * stayed open would be missing from a file that promises the whole history. Pure read:
+   * never calls `recents.update`/`remove`/`clear`, so it cannot mutate `recents_v1` or any
+   * legacy key.
    *
    * Fires the "Exporting…" toast BEFORE the write begins (not after) — a large history
    * writing to disk is exactly the kind of operation that must not go silent while it runs.
    */
   const exportHistory = async () => {
     const toast = await showToast({ title: "Exporting history...", style: Toast.Style.Animated });
-    if (recents.data.length === 0) {
+    // If storage cannot be read, fall back to the list on screen rather than exporting
+    // nothing — this is the action a user reaches for when something is already wrong.
+    const conversations = await recentsStore.read().catch(() => recents.data);
+    if (conversations.length === 0) {
       // Hide-and-reshow rather than mutating the live toast — see `src/utils/toast.ts`.
       await resolveToast(toast, {
         style: Toast.Style.Failure,
@@ -122,7 +127,7 @@ export default function Recents() {
       return;
     }
     try {
-      const json = exportConversationsToJson(recents.data);
+      const json = exportConversationsToJson(conversations);
       const filePath = join(
         homedir(),
         "Downloads",

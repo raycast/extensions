@@ -106,8 +106,15 @@ export async function bumpRecentsGeneration(): Promise<void> {
  * writes, applied consistently to the store's writers.
  */
 export async function withGenerationBump<T>(write: () => Promise<T>): Promise<T> {
+  // Bumped on BOTH sides of the write. The bump before tells a migration that a write has
+  // started (so it cannot commit a payload computed before this write read storage). The
+  // bump after tells it the write has LANDED: a migration that sampled the counter after
+  // the first bump, then read the list before this write saved, would otherwise see no
+  // change at commit time and write its stale list over this one.
   await bumpRecentsGeneration();
-  return write();
+  const result = await write();
+  await bumpRecentsGeneration();
+  return result;
 }
 
 /**
@@ -255,6 +262,34 @@ async function readLegacyKey<T extends { id: string }>(key: string): Promise<Leg
  * derivation straight over it — destroying whatever the key held with no rescue copy,
  * bypassing the very corrupt-data protection `collection.ts` exists to provide.
  */
+/** A turn the merge and the UI can read: an object carrying a string id. */
+function isWellFormedChat(value: unknown): value is Chat {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return typeof (value as { id?: unknown }).id === "string";
+}
+
+/**
+ * Repairs conversations whose turns cannot be read: a `chats` that is not an array becomes
+ * `[]`, and turns that are not objects with an id are dropped. Reports whether anything was
+ * changed, so the caller can preserve the original value before writing the repaired one.
+ */
+function sanitizeConversations(rows: Conversation[]): { rows: Conversation[]; changed: boolean } {
+  let changed = false;
+  const repaired = rows.map((row) => {
+    const chats: unknown = (row as { chats?: unknown }).chats;
+    if (chats === undefined) return row;
+    if (!Array.isArray(chats)) {
+      changed = true;
+      return { ...row, chats: [] };
+    }
+    const kept = chats.filter(isWellFormedChat);
+    if (kept.length === chats.length) return row;
+    changed = true;
+    return { ...row, chats: kept };
+  });
+  return { rows: repaired, changed };
+}
+
 async function readRecents(): Promise<Conversation[]> {
   const raw = await LocalStorage.getItem<string>(RECENTS_KEY);
   if (raw === undefined) return [];
@@ -270,7 +305,15 @@ async function readRecents(): Promise<Conversation[]> {
   }
 
   if (Array.isArray(parsed)) {
-    return (parsed as unknown[]).filter(isWellFormedRow) as Conversation[];
+    const { rows, changed } = sanitizeConversations((parsed as unknown[]).filter(isWellFormedRow) as Conversation[]);
+    if (changed || rows.length !== parsed.length) {
+      // Some rows were dropped or repaired. The next write replaces this value with the
+      // repaired list, so the original bytes are copied aside FIRST — the same rescue the
+      // legacy keys get — rather than losing a damaged row's text for good. The key itself
+      // is left alone: its well-formed rows are still live data.
+      await rescueRawValue(RECENTS_KEY, raw);
+    }
+    return rows;
   }
 
   // Valid JSON, wrong shape. Rescue it the same way `collection.ts` rescues unparseable
@@ -716,12 +759,23 @@ export async function runRecentsMigration(): Promise<RecentsMigrationResult> {
     // our "expected" value and go unnoticed.
     const generation = await readGeneration();
 
-    const [conversations, history, savedChats, existingRecents] = await Promise.all([
+    const [rawConversations, history, savedChats, existingRecents] = await Promise.all([
       readLegacyKey<Conversation>(CONVERSATIONS_KEY),
       readLegacyKey<Chat>(HISTORY_KEY),
       readLegacyKey<SavedChat>(SAVED_CHATS_KEY),
       readRecents(),
     ]);
+
+    // A legacy conversation is only checked for its own id by `readLegacyKey`; a `null`
+    // turn or a non-array `chats` then threw inside `mergeIntoRecents`, and one damaged
+    // turn kept the user out of Recents — and its export action — entirely. Repaired rows
+    // mark the key as not fully understood, so its raw value is rescued like any other.
+    const sanitizedConversations = sanitizeConversations(rawConversations.rows);
+    const conversations = {
+      ...rawConversations,
+      rows: sanitizedConversations.rows,
+      fullyUnderstood: rawConversations.fullyUnderstood && !sanitizedConversations.changed,
+    };
 
     // Every legacy key the migration is about to migrate-and-retire, paired with whether
     // it was fully understood. Used for the panic-case rescue below.

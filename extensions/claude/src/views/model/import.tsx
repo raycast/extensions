@@ -79,7 +79,13 @@ export const ModelImportForm = (props: { use: { models: ModelHook } }) => {
         const defaultModel = use.models.data.find((m) => m.id === "default") ?? use.models.data[0];
         if (!defaultModel) throw new Error("No default preset available to fall back to.");
 
-        const result = importAgentsAsPresets(parsedShape as RaycastAgent[], use.models.availableModels, defaultModel);
+        const result = importAgentsAsPresets(
+          parsedShape as RaycastAgent[],
+          use.models.availableModels,
+          defaultModel,
+          undefined,
+          use.models.data,
+        );
 
         for (const model of result.models) {
           await use.models.add(model);

@@ -12,7 +12,7 @@ import {
 import { mutations, reconcileById, replaceState } from "../stores/useStoredCollection";
 import { createCollectionStore, type CollectionStore } from "../stores/collection";
 import type { Conversation } from "../type";
-import { toChronological } from "../utils";
+import { isBlankAnswer, toChronological } from "../utils";
 import { resolveToast } from "../utils/toast";
 
 /**
@@ -73,6 +73,20 @@ const baseRecentsStore: CollectionStore<Conversation> = createCollectionStore<Co
     const owned = carryRecentsOwnedFields(incoming, current);
     return { ...owned, ...resolvePinState(current, incoming), chats: pickLongerTranscript(incoming, current) };
   },
+  /**
+   * Recents' own actions (Pin, Archive, Rename) send the whole row from the list they
+   * loaded. Their fields are the point of the write, so they win — the opposite of Ask's
+   * `mergeOnUpdate`, which keeps them from storage. Everything they did not set comes from
+   * what storage holds now: the transcript (an answer Ask saved after the list loaded must
+   * survive an Archive) and pin state, resolved by timestamp as everywhere else.
+   */
+  mergeOnUpsert: (incoming, current) => ({
+    ...current,
+    archived: incoming.archived,
+    title: incoming.title,
+    ...resolvePinState(current, incoming),
+    chats: pickLongerTranscript(incoming, current),
+  }),
 });
 
 /**
@@ -102,6 +116,17 @@ const baseRecentsStore: CollectionStore<Conversation> = createCollectionStore<Co
 function pickLongerTranscript(incoming: Conversation, current: Conversation): Conversation["chats"] {
   const incomingChats = incoming.chats ?? [];
   const currentChats = current.chats ?? [];
+
+  // Answered turns first, rows second. A blank turn can reach storage before Ask removes
+  // it (asking again before the first stream produced text), and a row count alone then
+  // preferred that two-turn copy — one blank, one blank — over the finished one-turn
+  // answer the user saw.
+  const answered = (chats: Conversation["chats"]) => chats.filter((chat) => !isBlankAnswer(chat.answer)).length;
+  const incomingAnswered = answered(incomingChats);
+  const currentAnswered = answered(currentChats);
+  if (incomingAnswered !== currentAnswered) {
+    return incomingAnswered > currentAnswered ? incomingChats : currentChats;
+  }
 
   if (incomingChats.length !== currentChats.length) {
     return incomingChats.length > currentChats.length ? incomingChats : currentChats;

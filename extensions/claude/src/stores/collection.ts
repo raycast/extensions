@@ -43,6 +43,14 @@ export type CollectionOptions<T> = {
    * now. Return the row to persist.
    */
   mergeOnUpdate?: (incoming: T, current: T) => T;
+  /**
+   * Merge applied by `update` when the row already exists. Without it, `update` replaces
+   * the stored row with `incoming` outright. A caller holding an older copy of the row (a
+   * Recents action working from the list it loaded) would otherwise erase whatever was
+   * written since — so this merges onto what storage holds NOW, inside the same
+   * read-then-write as the replace it stands in for.
+   */
+  mergeOnUpsert?: (incoming: T, current: T) => T;
 };
 
 /** Outcome of a conditional write — see `updateIfPresent`. */
@@ -91,7 +99,7 @@ export function createCollectionStore<T extends { id: string }>(
   key: string,
   options: CollectionOptions<T> = {},
 ): CollectionStore<T> {
-  const { transformOnRead, keep, persistFilter, mergeOnUpdate } = options;
+  const { transformOnRead, keep, persistFilter, mergeOnUpdate, mergeOnUpsert } = options;
 
   /**
    * Picks a side-key for a corrupt-value rescue that nothing already occupies. Two
@@ -191,7 +199,11 @@ export function createCollectionStore<T extends { id: string }>(
     const current = await readRaw();
     const previouslyPersistedIds = new Set(current.map((existing) => existing.id));
     const exists = current.some((existing) => existing.id === item.id);
-    const next = exists ? current.map((existing) => (existing.id === item.id ? item : existing)) : [...current, item];
+    const next = exists
+      ? current.map((existing) =>
+          existing.id === item.id ? (mergeOnUpsert ? mergeOnUpsert(item, existing) : item) : existing,
+        )
+      : [...current, item];
     await persist(next, previouslyPersistedIds);
     return next;
   };

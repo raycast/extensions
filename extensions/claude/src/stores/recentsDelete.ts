@@ -137,6 +137,14 @@ export async function deleteRecent(token: MigrationVerifiedToken, conversationId
   // The token's only job is to exist (see its docstring) — this reference is purely to
   // keep it a used parameter under lint, not a runtime check.
   void token;
+  // The generation bump comes BEFORE the read, so nothing is awaited between reading the
+  // list and writing it back. It used to sit between them, and an Ask save landing in that
+  // await — to any conversation — was overwritten when this wrote its earlier list. A
+  // migration that read `recents_v1` before this delete still sees the counter move and
+  // discards its stale payload; the second bump, after the write, also covers a migration
+  // that sampled the counter in between.
+  await bumpRecentsGeneration();
+
   const [recents, legacyConversations] = await Promise.all([
     readJsonArray<Conversation>(RECENTS_KEY),
     readJsonArray<Conversation>(CONVERSATIONS_KEY),
@@ -172,15 +180,6 @@ export async function deleteRecent(token: MigrationVerifiedToken, conversationId
   const nextRecents = recents.filter((c) => c.id !== conversationId);
   const nextLegacyConversations = legacyConversations.filter((c) => c.id !== conversationId);
 
-  // Bump the generation counter as part of writing `recents_v1`. A migration
-  // that read `recents_v1` BEFORE this delete will re-read the counter before committing,
-  // see it has moved, and discard its now-stale payload instead of writing the deleted
-  // conversation back. Without this bump the delete is invisible to that check and the
-  // stale migration silently resurrects the row — which is exactly the sequence Codex
-  // identified, and which the migration's own verify-by-re-read cannot catch, because it
-  // only confirms the stale write itself landed.
-  await bumpRecentsGeneration();
-
   await Promise.all([
     LocalStorage.setItem(RECENTS_KEY, JSON.stringify(nextRecents)),
     // Same never-recreate-a-retired-key rule as `pruneLegacyKey`: only write
@@ -189,6 +188,7 @@ export async function deleteRecent(token: MigrationVerifiedToken, conversationId
     writeIfPresent(CONVERSATIONS_KEY, nextLegacyConversations),
     removeChatsFromLegacyKeys(chatIds),
   ]);
+  await bumpRecentsGeneration();
 
   return nextRecents;
 }
@@ -245,5 +245,7 @@ export async function clearAllRecents(token: MigrationVerifiedToken): Promise<Co
     ...[CONVERSATIONS_KEY, HISTORY_KEY, SAVED_CHATS_KEY].map((key) => LocalStorage.removeItem(key)),
     ...sideKeysToRemove.map((key) => LocalStorage.removeItem(key)),
   ]);
+  // Bumped on both sides of the write, like `withGenerationBump`.
+  await bumpRecentsGeneration();
   return [];
 }

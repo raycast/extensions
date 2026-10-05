@@ -89,14 +89,26 @@ export function importAgentsAsPresets(
   availableModels: AvailableModel[],
   defaultModel: Model,
   now: () => string = () => new Date().toISOString(),
+  existingPresets: Model[] = [],
 ): ImportAgentsResult {
   const outcomes: AgentImportOutcome[] = [];
   const models: Model[] = [];
+  // An agent already imported — same name and same instructions — is skipped, so importing
+  // one file twice does not fill the picker with copies. A same-named agent whose
+  // instructions differ is still imported: it is a different preset that happens to share
+  // a name, and dropping it silently would lose it.
+  const seen = new Set(existingPresets.map((preset) => `${preset.name}\u0000${preset.prompt}`));
 
   for (const raw of rawRows) {
     const agent = coerceAgent(raw);
     if (!agent) {
       outcomes.push({ status: "failed", reason: "Row is missing a required field (name, instructions, or model)." });
+      continue;
+    }
+
+    const key = `${agent.name}\u0000${agent.instructions}`;
+    if (seen.has(key)) {
+      outcomes.push({ status: "skipped", reason: `"${agent.name}" already exists.` });
       continue;
     }
 
@@ -128,6 +140,7 @@ export function importAgentsAsPresets(
       updated_at: timestamp,
     };
 
+    seen.add(key);
     models.push(model);
     outcomes.push({ status: "imported", model, warning });
   }
