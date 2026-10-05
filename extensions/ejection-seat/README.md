@@ -110,7 +110,9 @@ Nothing is force-unmounted and no process is ever terminated automatically. `dis
 ```
 raycast-ejection-seat/
 ├── src/
-│   └── find-ejection-blockers.tsx    # The single command
+│   ├── find-ejection-blockers.tsx    # The single command
+│   └── disks.ts                      # Pure parsers for mount flags and disk layout
+├── tests/                            # node --test fixtures for disks.ts
 ├── assets/                           # Extension icon (runtime)
 ├── media/                            # README images
 ├── metadata/                         # Store screenshots
@@ -125,6 +127,7 @@ raycast-ejection-seat/
 | `npm run dev` | Start in development mode with hot reload |
 | `npm run build` | Build for production |
 | `npm run lint` | Run Raycast ESLint config |
+| `npm test` | Run the parser tests (`node --test`, Node 22.18+) |
 | `npm run fix-lint` | Auto-fix lint issues |
 | `npm run publish` | Publish to the Raycast Store |
 
