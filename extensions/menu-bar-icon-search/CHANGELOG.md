@@ -1,6 +1,6 @@
 # Menu Bar Icon Search Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-05
 
 - Search and open menu bar app icons from Raycast, including icons hidden through macOS Menu Bar settings.
 - Open icons through macOS Accessibility, without revealing them in the real menu bar.
