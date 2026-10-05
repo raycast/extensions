@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-10-05
 
 - Let Ask AI list open ports and create, edit, or delete named ports
 - Let Ask AI kill a port's listener, all processes with a listed name, or a listed process's parent after confirmation
