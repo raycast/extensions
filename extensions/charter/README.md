@@ -14,7 +14,7 @@ A catalog of chart and diagram types for Raycast. Browse by family, pick the lib
 
 - **Mermaid**: the first-line keyword, a complete example and the docs page. Types added since Mermaid 10 carry the release that added them, as `Mermaid 11.6+`, because whether a type renders in a given app depends on the Mermaid version that app bundles.
 - **shadcn**: the chart block from the shadcn registry with its component source and install command, plus every variant in that family (stacked, horizontal, interactive and so on) with its own install command. shadcn charts are built on Recharts, so there is no separate Recharts lens. Thumbnails are the real cards from ui.shadcn.com.
-- **ECharts**: the series type and a complete option as JSON, ready to paste.
+- **ECharts**: the series type and a complete option as JSON, ready to paste. Choropleth Map and Flow Map require your own GeoJSON map data, registered with `echarts.registerMap("world", geoJson)` before applying the option. Charter does not bundle map data; Choropleth data names must match the names in your GeoJSON.
 
 ## Actions
 
@@ -22,7 +22,7 @@ A catalog of chart and diagram types for Raycast. Browse by family, pick the lib
 - Under the shadcn lens, **Open Preview** opens the block on ui.shadcn.com.
 - **Copy Docs Link**, **Copy Template** and **Copy Prompt Snippet** put the link, the example, or a ready-to-paste instruction for a model on the clipboard, for the current lens. The template comes inside a fence (```mermaid, ```json or ```tsx) so it drops straight into a chat or a note; **Copy Raw Template** gives the bare text.
 - **Copy Install Command** copies `npx shadcn@latest add <block>`; **Copy Variant Install Command** and **Copy Variant Component** offer every block in the family.
-- Under **Libraries**, the other libraries' docs, examples and renders stay one action away whatever the lens.
+- Under **Libraries**, the other libraries' docs and examples stay one action away whatever the lens.
 - **Add to Favorites** pins a type to the top of the catalog, and **Clear Recent** empties the Recent section.
 
 ## Development
