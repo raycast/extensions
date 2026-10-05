@@ -1,6 +1,6 @@
 # Fetch Changelog
 
-## [Cleaner Failures] - {PR_MERGE_DATE}
+## [Cleaner Failures] - 2026-10-05
 
 - A download that fails before receiving any data (an access-denied link, say) no longer leaves a stray `.part.state` file in your download folder.
 - A server that answers without sending the file no longer produces one. "Accepted, not ready yet" (HTTP 202) fails with a message to try again later, and a "no content" or unrequested partial response fails instead of being saved as the finished file.
