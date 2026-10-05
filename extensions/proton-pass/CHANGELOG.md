@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Smoother List Scrolling] - {PR_MERGE_DATE}
+
+- The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
