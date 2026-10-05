@@ -12,7 +12,7 @@ import {
 } from "../src/deep-link-utils.js";
 
 test("keeps JavaScript replacement patterns literal", () => {
-  const resolved = resolveDeepLink("https://example.test/{{TOKEN}}/${TOKEN}/{{TOKEN}}", { TOKEN: "a$&b$$c" });
+  const resolved = resolveDeepLink("https://example.test/{{TOKEN}}/${ TOKEN }/{{ TOKEN }}", { TOKEN: "a$&b$$c" });
   assert.equal(resolved, "https://example.test/a$&b$$c/a$&b$$c/a$&b$$c");
 });
 

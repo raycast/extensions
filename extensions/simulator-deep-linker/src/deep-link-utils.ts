@@ -37,11 +37,10 @@ export function environmentIDAfterLoad(
 }
 
 export function resolveDeepLink(source: string, variables: Record<string, string>): string {
-  return Object.entries(variables).reduce(
-    (value, [key, replacement]) =>
-      value.replaceAll(`{{${key}}}`, () => replacement).replaceAll(`\${${key}}`, () => replacement),
-    source,
-  );
+  return Object.entries(variables).reduce((value, [key, replacement]) => {
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return value.replace(new RegExp(`{{\\s*${escapedKey}\\s*}}|\\$\\{\\s*${escapedKey}\\s*}`, "g"), () => replacement);
+  }, source);
 }
 
 export function findUnresolvedVariables(value: string): string[] {

@@ -187,23 +187,29 @@ export async function withStorageLock<T>(
   const lockPath = `${destinationPath}.simulator-deep-linker.lock`;
   const ownerPath = path.join(lockPath, "owner");
   const owner: StorageLockOwner = { schemaVersion: 1, token: randomUUID(), pid: process.pid };
+  const candidatePath = `${lockPath}.candidate.${owner.token}`;
+  const candidateOwnerPath = path.join(candidatePath, "owner");
   const retryMilliseconds = options.retryMilliseconds ?? storageLockRetryMilliseconds;
   const timeoutMilliseconds = options.timeoutMilliseconds ?? storageLockTimeoutMilliseconds;
   const deadline = Date.now() + timeoutMilliseconds;
 
   while (true) {
+    await mkdir(candidatePath);
     try {
-      await mkdir(lockPath);
-      try {
-        await writeFile(ownerPath, `${JSON.stringify(owner)}\n`, { encoding: "utf8", flag: "wx" });
-      } catch (error) {
-        await unlink(ownerPath).catch(() => undefined);
-        await rmdir(lockPath).catch(() => undefined);
-        throw error;
-      }
+      await writeFile(candidateOwnerPath, `${JSON.stringify(owner)}\n`, { encoding: "utf8", flag: "wx" });
+    } catch (error) {
+      await unlink(candidateOwnerPath).catch(() => undefined);
+      await rmdir(candidatePath).catch(() => undefined);
+      throw error;
+    }
+
+    try {
+      await rename(candidatePath, lockPath);
       break;
     } catch (error) {
-      if (!isNodeError(error, "EEXIST")) throw error;
+      await unlink(candidateOwnerPath).catch(() => undefined);
+      await rmdir(candidatePath).catch(() => undefined);
+      if (!isNodeError(error, "EEXIST") && !isNodeError(error, "ENOTEMPTY")) throw error;
       await recoverAbandonedStorageLock(lockPath, ownerPath);
       if (Date.now() >= deadline) {
         throw new Error(
