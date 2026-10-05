@@ -64,7 +64,7 @@ const HOST_SEGMENT = /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i;
  * it does the verification job instead — and where it varies between neighbours that the package, being
  * the sort key, cannot. Nothing searchable is lost either — `keywords` still carries the whole title.
  */
-const nameWithoutHost = (name: string) => {
+export const nameWithoutHost = (name: string) => {
   const separator = name.indexOf(" · ");
   if (separator < 0) return name;
 

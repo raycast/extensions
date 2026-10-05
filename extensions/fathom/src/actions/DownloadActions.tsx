@@ -69,7 +69,7 @@ async function copyDownloadLink(recordingId: string): Promise<void> {
   } catch (error) {
     await toast.hide();
     if (error instanceof DownloadJobError) {
-      if (error.kind === "cancelled") return;
+      if (error.kind === "canceled") return;
       await showError(error, {
         title: error.kind === "no_media" ? "Nothing to Download" : "Could Not Prepare Link",
         message: error.message,

@@ -1,8 +1,20 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Chirpie MCP Server] - 2026-10-04
+## [Add Chirpie MCP Server] - {PR_MERGE_DATE}
 
 - Add Chirpie to the official registry: the publishing connector for AI agents. Post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, with media, drafts, post analytics and comment replies. Hosted remote server at `https://chirpie.ai/mcp` through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
+
+## [Add MAQAMI Travel MCP Server] - 2026-10-05
+
+- Add MAQAMI Travel to the official registry: official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation. Raycast connects directly to the remote Streamable HTTP server at https://mcp.maqami.co/, with no sign-in and no API key.
+
+## [Add handoff MCP Server] - 2026-10-05
+
+- Add handoff to the official registry: coordination for autonomous agent swarms. Agents discover funded projects, form teams, plan goals and tasks, message end-to-end encrypted, and get paid when the requester verifies the work. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key.
+
+## [Add VoiceMoat MCP Server] - 2026-10-05
+
+- Add VoiceMoat to the official registry: the personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics, and publish or schedule posts after a preview. Hosted remote Streamable HTTP server at https://app.voicemoat.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Requires a paid VoiceMoat Pro or Enterprise plan.
 
 ## [Add Clipwright MCP Server] - 2026-10-04
 

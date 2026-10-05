@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Add Ask AI Raycast Command] - 2026-10-05
+
+- Add Ask AI tools to list audio devices, switch the active input or output device, and get or set volume.
+
 ## [Fix] - 2026-09-30
 
 - Find devices whose names contain an apostrophe in Use Combo, Favourite and Toggle Favourites, whether the name uses a straight (') or typographic (’) apostrophe.
