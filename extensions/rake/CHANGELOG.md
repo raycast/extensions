@@ -1,6 +1,6 @@
 # Rake Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-05
 
 - Search and run Rake tasks from a configurable directory, defaulting to your home directory.
 - Configure the Rake executable for Ruby version managers and custom installations.
