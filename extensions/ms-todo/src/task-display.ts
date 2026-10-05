@@ -22,6 +22,11 @@ export function notesMarkdown(task: Task): string {
   return text ? literalMarkdown(text) : "No notes.";
 }
 
+export function statusLabel(status: string): string {
+  const words = status.replace(/([a-z])([A-Z])/g, "$1 $2");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 function isoDay(date: Date, zone: string): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: zone,

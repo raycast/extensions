@@ -21,24 +21,28 @@
     {
       "name": "quick-add",
       "title": "Quick Add Task",
+      "subtitle": "Microsoft To Do",
       "description": "Capture a task with ms-todo quick add",
       "mode": "view"
     },
     {
       "name": "search-tasks",
       "title": "Search Tasks",
+      "subtitle": "Microsoft To Do",
       "description": "Fuzzy search all cached tasks and reopen or complete them",
       "mode": "view"
     },
     {
       "name": "browse-tasks",
       "title": "Browse Tasks",
+      "subtitle": "Microsoft To Do",
       "description": "Browse smart views and lists, inspect and edit tasks",
       "mode": "view"
     },
     {
       "name": "my-day",
       "title": "My Day",
+      "subtitle": "Microsoft To Do",
       "description": "View and manage today\u2019s My Day tasks",
       "mode": "view"
     }
