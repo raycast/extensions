@@ -14,6 +14,11 @@
 - Updated to the latest Raycast API.
 - "Import from Browser Tab" no longer has a keyboard shortcut; ⌘R now regenerates the summary, as in Raycast AI Chat.
 
+### Fixed
+
+- The Paywall Hopper could throw away a full article from an archive when the page still carried a leftover subscription meter or overlay. Those prompts are now removed before the article is checked, so the full text comes through.
+- Articles that mark their body text as "subscriber-only" no longer lose that text.
+
 ## [Fix Paywall Extraction] - 2026-09-01
 
 ### Fixed
