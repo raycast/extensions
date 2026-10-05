@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yaps",
+  "title": "Yaps Memory",
+  "description": "Search your local Yaps memory and save clipboard text as Markdown notes.",
+  "icon": "extension-icon.png",
+  "author": "yaps",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "memory",
+    "notes",
+    "vault",
+    "clipboard",
+    "local",
+    "capture",
+    "quick capture",
+    "markdown"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "title": "Yaps CLI Path",
+      "description": "Optional executable path. Leave blank to auto-detect yaps or yaps_cli in common install locations and Raycast's PATH.",
+      "placeholder": "/Applications/Yaps.app/Contents/MacOS/yaps_cli",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-memory",
+      "title": "Search Yaps Memory",
+      "subtitle": "Local Vault",
+      "keywords": [
+        "search",
+        "find",
+        "find note",
+        "notes",
+        "note",
+        "vault",
+        "memory",
+        "local"
+      ],
+      "description": "Search your private Yaps vault and inspect or copy matching notes.",
+      "mode": "view"
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard to Yaps",
+      "subtitle": "Quick Capture",
+      "keywords": [
+        "save",
+        "capture",
+        "clipboard",
+        "quick capture",
+        "note",
+        "markdown"
+      ],
+      "description": "Save clipboard text as a Markdown note in your Yaps vault.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "captureFolder",
+          "type": "textfield",
+          "title": "Clipboard Capture Folder",
+          "description": "Vault-relative folder used by Save Clipboard to Yaps, such as Inbox.",
+          "default": "Inbox",
+          "placeholder": "Inbox",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-yaps",
+      "title": "Open Yaps",
+      "subtitle": "Desktop App",
+      "keywords": [
+        "launch",
+        "desktop app",
+        "download",
+        "install",
+        "setup"
+      ],
+      "description": "Launch Yaps, or open its download page if it is not installed.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "eslint src --fix && prettier --write src tests package.json tsconfig.json README.md eslint.config.js",
+    "lint": "eslint src --max-warnings 0 && prettier --check src tests package.json tsconfig.json README.md eslint.config.js && tsc --noEmit",
+    "lint:store": "ray lint",
+    "test": "bun test",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "version": "0.1.3"
+}
