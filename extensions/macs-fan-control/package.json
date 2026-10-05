@@ -1,0 +1,194 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macs-fan-control",
+  "title": "Macs Fan Control",
+  "description": "Control Macs Fan Control from Raycast \u2014 switch presets, set fan speeds, create new presets, and watch live fan RPM and temperatures.",
+  "icon": "icon.png",
+  "author": "davidlam04",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "start-fan",
+      "title": "Start Fan",
+      "subtitle": "Macs Fan Control",
+      "description": "Live fan dashboard \u2014 RPM, temperatures, and every preset in one place.",
+      "mode": "view",
+      "keywords": [
+        "set fan",
+        "fan",
+        "fans",
+        "rpm",
+        "cooling",
+        "temperature",
+        "dashboard",
+        "macs fan control"
+      ]
+    },
+    {
+      "name": "start-fan-control",
+      "title": "Start Fan Control",
+      "subtitle": "Macs Fan Control",
+      "description": "Launch Macs Fan Control (or toggle it off, depending on your preference).",
+      "mode": "no-view",
+      "keywords": [
+        "set fan control",
+        "toggle fan",
+        "launch",
+        "quit",
+        "macs fan control"
+      ]
+    },
+    {
+      "name": "start-fan-auto",
+      "title": "Start Fan Auto",
+      "subtitle": "Macs Fan Control",
+      "description": "Hand every fan back to the system's automatic control.",
+      "mode": "no-view",
+      "keywords": [
+        "set fan auto",
+        "automatic",
+        "system",
+        "reset fans",
+        "default"
+      ]
+    },
+    {
+      "name": "start-fan-full",
+      "title": "Start Fan Full Blast",
+      "subtitle": "Macs Fan Control",
+      "description": "Spin every fan up to its maximum speed.",
+      "mode": "no-view",
+      "keywords": [
+        "set fan full",
+        "full blast",
+        "max",
+        "maximum",
+        "boost",
+        "cool down"
+      ]
+    },
+    {
+      "name": "start-fan-preset",
+      "title": "Start Fan Preset",
+      "subtitle": "Macs Fan Control",
+      "description": "Apply one of your Macs Fan Control presets by name.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "type": "text",
+          "placeholder": "Preset name",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "set fan preset",
+        "preset",
+        "profile",
+        "apply",
+        "switch"
+      ]
+    },
+    {
+      "name": "set-fan-speed",
+      "title": "Set Fan Speed",
+      "subtitle": "Macs Fan Control",
+      "description": "Pin your fans to a specific RPM without leaving Raycast.",
+      "mode": "view",
+      "keywords": [
+        "start fan speed",
+        "speed",
+        "rpm",
+        "custom",
+        "manual"
+      ]
+    },
+    {
+      "name": "create-fan-preset",
+      "title": "Create Fan Preset",
+      "subtitle": "Macs Fan Control",
+      "description": "Save a new named preset into Macs Fan Control.",
+      "mode": "view",
+      "keywords": [
+        "new fan preset",
+        "save preset",
+        "profile",
+        "add preset"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "temperatureUnit",
+      "title": "Temperature Unit",
+      "description": "Unit used for every temperature shown by this extension.",
+      "type": "dropdown",
+      "required": false,
+      "default": "celsius",
+      "data": [
+        {
+          "title": "Celsius (\u00b0C)",
+          "value": "celsius"
+        },
+        {
+          "title": "Fahrenheit (\u00b0F)",
+          "value": "fahrenheit"
+        }
+      ]
+    },
+    {
+      "name": "toggleBehavior",
+      "title": "Start Fan Control",
+      "description": "What \u201cStart Fan Control\u201d does when Macs Fan Control is already running.",
+      "type": "dropdown",
+      "required": false,
+      "default": "activate",
+      "data": [
+        {
+          "title": "Keep it running",
+          "value": "activate"
+        },
+        {
+          "title": "Quit it (toggle off)",
+          "value": "toggle"
+        }
+      ]
+    },
+    {
+      "name": "scratchPresetName",
+      "title": "Quick Speed Preset",
+      "description": "Name of the preset \u201cSet Fan Speed\u201d writes to. It is overwritten each time, so your own presets are never touched.",
+      "type": "textfield",
+      "required": false,
+      "default": "Raycast Custom"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "native": "make -C native",
+    "e2e": "esbuild scripts/e2e.ts --bundle --platform=node --outfile=node_modules/.cache/e2e.js && node node_modules/.cache/e2e.js",
+    "publish": "npx @raycast/api@latest publish",
+    "guard": "esbuild scripts/guard.ts --bundle --platform=node --outfile=node_modules/.cache/guard.js && node node_modules/.cache/guard.js"
+  }
+}
