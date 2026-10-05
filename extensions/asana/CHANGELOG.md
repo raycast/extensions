@@ -1,5 +1,10 @@
 # Asana Changelog
 
+## [Fix due date timezone handling] - {PR_MERGE_DATE}
+
+- Fix date-only deadlines appearing a day early in task lists, tooltips, and details.
+- Keep due date colors and Set Due Date confirmations consistent with the selected local date.
+
 ## [Fix apostrophes in task descriptions] - 2026-08-06
 
 - Preserve apostrophes in task and subtask descriptions
