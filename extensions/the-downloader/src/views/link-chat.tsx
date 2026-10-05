@@ -360,8 +360,7 @@ function AboutMetadata({ ctx, textOnly }: { ctx: LinkContext; textOnly: boolean 
  * can (details, statistics, and the transcript, caption or article text), then
  * answers with the chosen AI engine. The search bar is the question box;
  * answers stream into the detail pane, with clickable timestamps for videos.
- */
-/**
+ *
  * `root`: opened as the command itself (Chat About Link with a link), where
  * Raycast shows the command name and the Store guidelines ask not to change it.
  */
