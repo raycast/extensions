@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Developer Cleaner</title>
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="#5145cd"/>
+  <path d="m141 206-50 50 50 50m230-100 50 50-50 50" fill="none" stroke="#fafaff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(256 256) scale(.72) translate(-256 -256) rotate(35 256 256)" fill="#aff2db">
+    <rect x="234" y="99" width="44" height="166" rx="22"/>
+    <rect x="219" y="276" width="74" height="24" rx="12"/>
+    <path d="M222 311h68c5 0 9 3 11 8l24 71c3 10-3 18-13 18h-32v-46a4 4 0 0 0-8 0v46h-32v-46a4 4 0 0 0-8 0v46h-32c-10 0-16-8-13-18l24-71c2-5 6-8 11-8Z"/>
+  </g>
+</svg>

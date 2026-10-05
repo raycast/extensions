@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.raycast-swift-build/
+.DS_Store
+*.log
+raycast-env.d.ts
+/.cocoindex_code/
