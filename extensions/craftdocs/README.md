@@ -1,6 +1,6 @@
 # Craft for Raycast
 
-Search your content, open and add to Daily Notes, and manage Spaces from Raycast.
+Search your content, open and add to Daily Notes, and manage Spaces from Raycast. Use `@craftdocs` in Raycast AI to search, read and write your Craft documents.
 
 ## Requirements
 
@@ -75,6 +75,29 @@ Back in Raycast, return to **Manage Spaces**, find the matching ID, and rename i
 
 Once you know which ID corresponds to which Space, you can rename them for better organization.
 
+### 🤖 Raycast AI
+
+Mention `@craftdocs` in Quick AI or AI Chat to work with Craft in natural language.
+
+- "find my notes about the product launch"
+- "what did I write in today's daily note?"
+- "add 'ship v2 on Friday' to my Roadmap document"
+- "create a document called Meeting Notes"
+- "in my Roadmap document, change 'Friday' to 'Monday'" (requires the Craft API)
+
+| Tool                   | Description                                                                | Needs Craft API |
+| ---------------------- | -------------------------------------------------------------------------- | --------------- |
+| **List Spaces**        | List Spaces with their IDs and status                                      | No              |
+| **Search Blocks**      | Search Documents and Blocks                                                | No              |
+| **Get Document**       | Read a Document or Daily Note                                              | No              |
+| **Create Document**    | Create a new Document                                                      | No              |
+| **Append to Document** | Add content to the beginning or end of a Document                          | No              |
+| **Add to Daily Note**  | Add content to a Daily Note, creating the note if needed                   | No              |
+| **Manage Space**       | Rename, enable or disable a Space                                          | No              |
+| **Craft API**          | Edit, delete and move content; manage tasks, collections, folders and more | Yes             |
+
+Raycast AI asks for confirmation before any tool changes your content.
+
 ## Commands
 
 | Command               | Description                                       |
@@ -96,10 +119,20 @@ If you have multiple versions of Craft installed, choose the app in extension pr
 
 ### Add to Daily Note Preferences
 
+These apply to both the **Add to Daily Note** command and the AI tool.
+
 - **Position**: Append content at the beginning or end
 - **Timestamp**: Automatically include current time with each entry
 - **Time Format**: Use patterns like `HH:mm` (14:30), `h:mm A` (2:30 PM) or `HH:mm:ss` (14:30:45)
 - **Prefix / Suffix**: Wrap content with custom text
+
+### Craft API (optional)
+
+Craft's URL Scheme can only create Documents and add content. To let Raycast AI edit, delete and move existing content, connect the [Craft API](https://support.craft.do/en/integrate/api):
+
+1. In Craft, open the **Imagine** tab and create an API connection (space-level access gives the AI access to all Documents)
+2. Copy the API URL (`https://connect.craft.do/links/.../api/v1`) into **Craft API URL** in the extension preferences
+3. If the connection uses an API key, paste it into **Craft API Key**
 
 ### Space Management
 
@@ -111,7 +144,7 @@ If you have multiple versions of Craft installed, choose the app in extension pr
 
 The extension reads Craft's local container data to discover Spaces and uses Craft's local SQLite search index for `Search Blocks` and Daily Note lookup. Search is offline and limited to Spaces that are both synced locally in Craft and enabled in the extension.
 
-Currently the extension uses [Craft's URL Scheme](https://support.craft.do/hc/en-us/articles/360020168838-Using-URL-Scheme) for Document creation, note opening, and note appending. Migration to their new API is planned but not implemented yet.
+The extension uses [Craft's URL Scheme](https://support.craft.do/hc/en-us/articles/360020168838-Using-URL-Scheme) for Document creation, note opening, and appending content. When the optional Craft API is configured, the **Craft API** AI tool uses it to edit, delete and move content.
 
 ## Troubleshooting
 
@@ -122,6 +155,10 @@ Open the selected Craft app once so it can create its local data directory, then
 ### Add to Daily Note Opens Craft Instead of Appending
 
 This is expected when today's Daily Note cannot be found in the local Craft search database. The command still copies the formatted content, then opens today's Daily Note so you can paste it manually.
+
+### AI Can't Edit or Delete Content
+
+Editing existing content requires the Craft API. Add the **Craft API URL** in the extension preferences (see [Craft API](#craft-api-optional)).
 
 ### Multiple Craft Versions
 

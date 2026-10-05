@@ -1,5 +1,11 @@
 # Craftdocs Changelog
 
+## [AI Extension] - {PR_MERGE_DATE}
+
+- Added AI tools: list and manage spaces, search blocks, read documents and Daily Notes, create documents, and add content to any document or Daily Note.
+- Add to Daily Note settings are now extension-wide so the AI tools use them too. Previously customized values reset to defaults; please re-check them in the extension preferences.
+- Added optional Craft API connection: lets Raycast AI edit, delete and move content and manage tasks, collections and folders.
+
 ## [Reliability and UX improvements] - 2026-04-08
 
 - Prevented issues when Craft is missing, not set up yet, or still syncing its local data.
