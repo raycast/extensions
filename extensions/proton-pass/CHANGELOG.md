@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Smoother List Scrolling] - {PR_MERGE_DATE}
+## [Smoother List Scrolling] - 2026-10-05
 
 - The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
 
