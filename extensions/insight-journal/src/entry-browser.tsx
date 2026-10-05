@@ -345,7 +345,7 @@ function EntryActions({ entry, state, controls }: { entry: Entry; state: EntrySt
         <Action.CopyToClipboard
           title="Copy as Rich Link"
           content={{
-            html: `<a href="${entry.url}">${escapeHtml(entry.title)}</a>`,
+            html: `<a href="${escapeHtml(entry.url)}">${escapeHtml(entry.title)}</a>`,
             text: `${entry.title} ${entry.url}`,
           }}
           shortcut={Keyboard.Shortcut.Common.CopyName}
@@ -423,12 +423,26 @@ function EntryActions({ entry, state, controls }: { entry: Entry; state: EntrySt
   );
 }
 
+/** Escapes feed text so it renders as plain text, not as Markdown links, images or HTML. */
+function escapeMarkdown(text: string): string {
+  return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&");
+}
+
+function coverImageMarkdown(entry: Entry): string {
+  if (!entry.coverImage) return "";
+  const url = new URL(entry.coverImage);
+  url.searchParams.set("raycast-width", "480");
+  // Parentheses and spaces would end the Markdown link target early.
+  const target = url.href.replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/ /g, "%20");
+  return `![${escapeMarkdown(entry.title)}](${target})`;
+}
+
 function entryMarkdown(entry: Entry): string {
   return [
-    entry.coverImage ? `![${entry.title}](${entry.coverImage}?raycast-width=480)` : "",
-    `## ${entry.title}`,
-    entry.summary ? `*${entry.summary}*` : "",
-    entry.excerpt.replace(/\n+/g, "\n\n"),
+    coverImageMarkdown(entry),
+    `## ${escapeMarkdown(entry.title)}`,
+    entry.summary ? `*${escapeMarkdown(entry.summary)}*` : "",
+    ...entry.excerpt.split(/\n+/).map(escapeMarkdown),
   ]
     .filter(Boolean)
     .join("\n\n");

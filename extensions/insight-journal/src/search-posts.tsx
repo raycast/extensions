@@ -35,7 +35,7 @@ export default function Command() {
   // Reading times fill in once loaded; they do not hold up the list. Refresh asks the next
   // load (and only that one) to re-check pages that had no reading time.
   const retryReadingTimes = useRef(false);
-  const { data: readingTimes } = usePromise(
+  const { data: readingTimes, revalidate: revalidateReadingTimes } = usePromise(
     (items: Entry[]) => {
       const retryNow = retryReadingTimes.current;
       retryReadingTimes.current = false;
@@ -47,6 +47,7 @@ export default function Command() {
 
   function refresh() {
     retryReadingTimes.current = true;
+    revalidateReadingTimes();
     revalidate();
   }
 

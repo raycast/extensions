@@ -23,15 +23,17 @@ import {
 
 const RECENT_LIMIT = 5;
 
-function escapeAppleScript(text: string): string {
-  return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
 async function notify(posts: Entry[]) {
   const title =
     posts.length === 1 ? "New post on The Insight Journal" : `${posts.length} new posts on The Insight Journal`;
   const message = posts.length === 1 ? posts[0].title : posts.map((post) => post.title).join(", ");
-  await runAppleScript(`display notification "${escapeAppleScript(message)}" with title "${escapeAppleScript(title)}"`);
+  // Feed text is passed as script arguments, never spliced into the script source.
+  await runAppleScript(
+    `on run argv
+  display notification (item 1 of argv) with title (item 2 of argv)
+end run`,
+    [message, title],
+  );
 }
 
 async function load() {

@@ -13,6 +13,8 @@ const NOTIFIED_PREFIX = "notified:";
 const SAVED_PREFIX = "saved:";
 
 const SITE_HOSTS = ["aryantechie.com", "www.aryantechie.com"];
+const FEED_TIMEOUT_MS = 15_000;
+const MAX_REDIRECTS = 3;
 
 export type EntryKind = "post" | "project";
 
@@ -35,9 +37,14 @@ type FeedItem = { categories?: FeedCategory[]; "content:encoded"?: string };
 
 const parser = new Parser<object, FeedItem>();
 
+function decodeCodePoint(code: number): string {
+  return Number.isInteger(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : "";
+}
+
 function decodeEntities(text: string): string {
   return text
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => decodeCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, code: string) => decodeCodePoint(Number(code)))
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&lt;/g, "<")
@@ -64,23 +71,63 @@ function extractBody(html?: string): { excerpt: string; tags: string[] } {
   return { excerpt, tags };
 }
 
-/** Only accepts https links on aryantechie.com, since post pages are fetched automatically. */
-function kindOf(link?: string): EntryKind | undefined {
-  let url: URL;
+/** Parses `link` and returns it only if it is an https URL on aryantechie.com. */
+function siteUrl(link?: string, base?: string): URL | undefined {
   try {
-    url = new URL(link ?? "");
+    const url = new URL(link ?? "", base);
+    return url.protocol === "https:" && SITE_HOSTS.includes(url.hostname) ? url : undefined;
   } catch {
     return undefined;
   }
-  if (url.protocol !== "https:" || !SITE_HOSTS.includes(url.hostname)) return undefined;
-  if (url.pathname.startsWith("/blog/")) return "post";
-  if (url.pathname.startsWith("/work/")) return "project";
+}
+
+/** Parses an https URL on any host, for cover images. */
+function httpsUrl(link?: string): string | undefined {
+  try {
+    const url = new URL(link ?? "");
+    return url.protocol === "https:" ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Only accepts https links on aryantechie.com, since post pages are fetched
+ * automatically. Returns the normalized URL, never the raw feed string.
+ */
+function parseLink(link?: string): { kind: EntryKind; url: string } | undefined {
+  const url = siteUrl(link);
+  if (!url) return undefined;
+  if (url.pathname.startsWith("/blog/")) return { kind: "post", url: url.href };
+  if (url.pathname.startsWith("/work/")) return { kind: "project", url: url.href };
   return undefined;
+}
+
+/**
+ * Fetches a page on aryantechie.com. Redirects are followed by hand, and only
+ * to https URLs on the same site, so a redirect cannot send the request elsewhere.
+ */
+async function fetchFromSite(url: string, timeoutMs: number): Promise<Response> {
+  const signal = AbortSignal.timeout(timeoutMs);
+  let current = url;
+  for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+    const response = await fetch(current, { signal, redirect: "manual" });
+    if (response.status < 300 || response.status >= 400) return response;
+    const next = siteUrl(response.headers.get("location") ?? undefined, current);
+    if (!next) throw new Error(`Blocked redirect away from aryantechie.com: ${current}`);
+    current = next.href;
+  }
+  throw new Error(`Too many redirects: ${url}`);
+}
+
+function parseDate(value?: string): Date | undefined {
+  const date = value ? new Date(value) : undefined;
+  return date && !Number.isNaN(date.getTime()) ? date : undefined;
 }
 
 /** Fetches the RSS feed and returns every post and project, newest first. */
 export async function fetchEntries(): Promise<Entry[]> {
-  const response = await fetch(FEED_URL);
+  const response = await fetchFromSite(FEED_URL, FEED_TIMEOUT_MS);
   if (!response.ok) {
     throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
   }
@@ -88,10 +135,11 @@ export async function fetchEntries(): Promise<Entry[]> {
 
   return feed.items
     .flatMap((item): Entry[] => {
-      const kind = kindOf(item.link);
-      if (!kind) {
+      const link = parseLink(item.link);
+      if (!link) {
         return [];
       }
+      const { kind, url } = link;
       const { excerpt, tags } = extractBody(item["content:encoded"]);
       const feedCategories = (item.categories ?? [])
         .map((category) => (typeof category === "string" ? category : category._))
@@ -99,15 +147,15 @@ export async function fetchEntries(): Promise<Entry[]> {
 
       return [
         {
-          id: item.guid ?? item.link ?? item.title ?? "",
+          id: item.guid || url,
           kind,
           title: decodeEntities(item.title ?? "Untitled"),
-          url: item.link ?? (kind === "post" ? BLOG_URL : WORK_URL),
+          url,
           summary: decodeEntities(item.contentSnippet ?? item.content ?? ""),
           excerpt,
-          coverImage: item.enclosure?.url,
+          coverImage: httpsUrl(item.enclosure?.url),
           categories: [...new Set([...feedCategories, ...tags])],
-          date: item.isoDate ? new Date(item.isoDate) : undefined,
+          date: parseDate(item.isoDate),
         },
       ];
     })
@@ -158,6 +206,8 @@ export async function markUnseen(ids: string[]): Promise<void> {
 export async function getUnseenPosts(posts: Entry[]): Promise<Entry[]> {
   const seen = await getSeenIds();
   if (!seen) {
+    // Wait for a non-empty feed, or every post would later look new.
+    if (posts.length === 0) return [];
     await Promise.all(posts.map((post) => LocalStorage.setItem(SEEN_PREFIX + post.id, "1")));
     await LocalStorage.setItem(SEEN_INITIALIZED_KEY, "1");
     return [];
@@ -213,7 +263,7 @@ type ReadingTimeResult = number | "missing" | "failed";
  */
 async function fetchReadingTime(url: string): Promise<ReadingTimeResult> {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(READING_TIME_TIMEOUT_MS) });
+    const response = await fetchFromSite(url, READING_TIME_TIMEOUT_MS);
     if (!response.ok) return "failed";
     const match = (await response.text()).match(/children\\?":\[(\d+),\\?" min read/);
     return match ? Number(match[1]) : "missing";
