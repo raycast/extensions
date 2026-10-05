@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getObjectThumbnail, getUploadThumbnail, isThumbnailsUnsupported } from "../api/client";
 import type { BucketObject } from "../api/types";
 import { thumbnail as legacyThumbnail } from "./format";
@@ -34,6 +34,8 @@ let unsupported = false;
 let pruned = false;
 let running = 0;
 const waiting: (() => void)[] = [];
+/** Requests still running, by cache file, so the same thumbnail is never asked for twice at once. */
+const inFlight = new Map<string, Promise<string | null>>();
 
 function identity(source: ThumbnailSource) {
   return source.kind === "upload"
@@ -78,7 +80,16 @@ async function limited<T>(work: () => Promise<T>): Promise<T> {
  * make one it doesn't have yet, which can mean downloading the file, so
  * it's only used for the selected row.
  */
-export async function thumbnailFile(source: ThumbnailSource, px: number, generate: boolean): Promise<string | null> {
+export function thumbnailFile(source: ThumbnailSource, px: number, generate: boolean): Promise<string | null> {
+  const request = `${cacheFile(source, px)}\u0000${generate}`;
+  const running = inFlight.get(request);
+  if (running) return running;
+  const promise = fetchThumbnailFile(source, px, generate).finally(() => inFlight.delete(request));
+  inFlight.set(request, promise);
+  return promise;
+}
+
+async function fetchThumbnailFile(source: ThumbnailSource, px: number, generate: boolean): Promise<string | null> {
   if (unsupported) return null;
   prune();
   const file = cacheFile(source, px);
@@ -119,6 +130,15 @@ export function thumbnailsUnsupported() {
  */
 export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }[], selectedId?: string | null) {
   const [files, setFiles] = useState<Record<string, string | null>>({});
+  // Asked for already (answered or still running), so a new selection doesn't ask again.
+  const requested = useRef(new Set<string>());
+  const mounted = useRef(true);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    [],
+  );
   const first = items.slice(0, MAX_ICONS);
   // A row further down, or one found by searching, still gets its icon once it's selected.
   const selected = items.find((item) => item.id === selectedId);
@@ -126,16 +146,13 @@ export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }
   const wanted = rows.map((item) => ({ ...item, identity: identity(item.source) }));
   const key = wanted.map((item) => item.identity).join("\u0000");
   useEffect(() => {
-    let cancelled = false;
     for (const item of wanted) {
-      if (item.identity in files) continue;
+      if (requested.current.has(item.identity)) continue;
+      requested.current.add(item.identity);
       thumbnailFile(item.source, ICON_PX, false).then((file) => {
-        if (!cancelled) setFiles((current) => ({ ...current, [item.identity]: file }));
+        if (mounted.current) setFiles((current) => ({ ...current, [item.identity]: file }));
       });
     }
-    return () => {
-      cancelled = true;
-    };
   }, [key]);
   return Object.fromEntries(wanted.map((item) => [item.id, files[item.identity]]));
 }
