@@ -49,6 +49,17 @@ const DEFAULT_EFFORT_EXCEPTIONS: Record<string, EffortLevel> = {
   "claude-opus-5-5": "medium",
 };
 
+/**
+ * The output cap applied when the Models API advertised no ceiling for the target model.
+ * It is the largest output any current Claude model accepts, so it never lowers a valid
+ * limit on any model shipping today, while still bounding a corrupt one (a stored "1e9").
+ *
+ * ponytail: a newly released model with a SMALLER ceiling and no advertised metadata could
+ * still be sent more than it accepts. The cure is the metadata, which every current model
+ * reports; this only covers its absence.
+ */
+const UNADVERTISED_OUTPUT_CAP = 128_000;
+
 /** Raycast accepts these four, and they are exactly the image types Anthropic accepts. */
 const VISION_MEDIA_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 
@@ -244,16 +255,15 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
   const requestedTemperature = target.presetTemperature ?? request.temperature;
   const temperature = supportsTemperature(target.modelId) ? requestedTemperature : undefined;
 
-  // Streaming carries no output ceiling of its own, so the model's full limit applies unless
-  // a preset narrows it. A preset's limit is clamped only against a ceiling the API itself
-  // advertised for this model: `getMaxTokensForModel` falls back to a name-based GUESS when
-  // the model is missing from the cache, and clamping against a guess silently cut a valid
-  // 100,000-token Opus 5.5 preset to 32,000.
-  const advertisedCeiling = liveModels.find((candidate) => candidate.id === target.modelId)?.max_tokens ?? undefined;
+  // Without a preset limit: the model's advertised ceiling, or a name-based estimate when
+  // the API reported none. With one: clamped against the advertised ceiling when there is
+  // one, and against UNADVERTISED_OUTPUT_CAP otherwise — never against the name-based
+  // estimate, which silently cut a valid 100,000-token Opus 5.5 preset to 32,000. A cached
+  // ceiling that is not a positive number is malformed and is ignored.
+  const cachedCeiling = liveModels.find((candidate) => candidate.id === target.modelId)?.max_tokens;
+  const advertisedCeiling = typeof cachedCeiling === "number" && cachedCeiling > 0 ? cachedCeiling : undefined;
   const maxOutputTokens = target.presetMaxTokens
-    ? advertisedCeiling
-      ? Math.min(target.presetMaxTokens, advertisedCeiling)
-      : target.presetMaxTokens
+    ? Math.min(target.presetMaxTokens, advertisedCeiling ?? UNADVERTISED_OUTPUT_CAP)
     : getMaxTokensForModel(target.modelId, liveModels);
 
   const effortLevels = supportedEffortLevels(liveModel);

@@ -58,9 +58,12 @@ export function modelToPresetYamlEntry(model: Model): PresetYamlEntry {
     entry.temperature = Number(model.temperature);
   }
 
+  // Written in the shape the importer accepts — an integer of at least 1 — so every export
+  // re-imports. A legacy fractional limit is floored; one below 1 is left out, and the
+  // importer then fills in the model's ceiling.
   const maxTokens = Number(model.max_tokens);
-  if (Number.isFinite(maxTokens) && maxTokens > 0) {
-    entry.max_tokens = maxTokens;
+  if (Number.isFinite(maxTokens) && maxTokens >= 1) {
+    entry.max_tokens = Math.floor(maxTokens);
   }
 
   return entry;
