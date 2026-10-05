@@ -132,3 +132,6 @@ export const severityLabel = (severity: TempSeverity): string => {
       return "Unavailable";
   }
 };
+
+/** Severity color for a Celsius reading — the one composition every temperature display uses. */
+export const temperatureColor = (tempCelsius: number): Color => severityColor(getSeverity(tempCelsius));
