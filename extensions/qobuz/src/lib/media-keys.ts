@@ -27,14 +27,19 @@ export const expectedData1 = (code: number, flags: number): number => ((code << 
 
 export const buildEventBlob = (code: number, flags: number): string => {
   const bytes = Buffer.from(EVENT_TEMPLATE_BASE64, "base64");
-  bytes.writeUInt16BE(flags, FLAGS_OFFSET);
+  bytes.writeUInt32BE(flags, FLAGS_OFFSET);
   bytes.writeUInt32BE(expectedData1(code, flags), DATA1_OFFSET);
   return bytes.toString("base64");
 };
 
 // Kept as source so the same function runs in JXA and is unit-tested. JXA values are boxed, hence Number().
-export const GUARD_SOURCE = `function isExpectedMediaKeyEvent(type, subtype, data1, expectedData1) {
-  return Number(type) === 14 && Number(subtype) === 8 && Number(data1) === Number(expectedData1);
+export const GUARD_SOURCE = `function isExpectedMediaKeyEvent(type, subtype, data1, flags, expectedData1) {
+  return (
+    Number(type) === 14 &&
+    Number(subtype) === 8 &&
+    Number(data1) === Number(expectedData1) &&
+    Number(flags) === (Number(expectedData1) & 0xffff)
+  );
 }`;
 
 export const SCRIPT = `${GUARD_SOURCE}
@@ -53,7 +58,7 @@ function run(argv) {
     const data = $.NSData.alloc.initWithBase64EncodedStringOptions(press.blob, 0);
     const event = $.CGEventCreateFromData(null, data);
     const ns = $.NSEvent.eventWithCGEvent(event);
-    if (!isExpectedMediaKeyEvent($.CGEventGetType(event), ns.subtype, ns.data1, press.expected)) {
+    if (!isExpectedMediaKeyEvent($.CGEventGetType(event), ns.subtype, ns.data1, $.CGEventGetFlags(event), press.expected)) {
       throw new Error("unexpected-event-format");
     }
     $.CGEventPost($.kCGHIDEventTap, event);
@@ -61,6 +66,8 @@ function run(argv) {
       delay(0.001);
     }
   });
+  // CGEventPost is asynchronous: exiting straight away can drop the key-up.
+  delay(0.05);
 }`;
 
 export const buildScriptArgs = (code: number): string[] => [

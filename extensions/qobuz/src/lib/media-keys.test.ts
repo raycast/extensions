@@ -87,7 +87,7 @@ describe("buildEventBlob", () => {
   ])("patches flags and data1 big-endian for key %s", (_name, flags) => {
     const bytes = decode(17, flags);
 
-    expect(bytes.readUInt16BE(0x44)).toBe(flags);
+    expect(bytes.readUInt32BE(0x44)).toBe(flags);
     expect(bytes.readUInt32BE(0x74)).toBe(((17 << 16) | flags) >>> 0);
   });
 
@@ -96,7 +96,7 @@ describe("buildEventBlob", () => {
     const b = decode(20, KEY_UP_FLAGS);
     const differing = a.reduce<number[]>((acc, byte, i) => (byte === b[i] ? acc : [...acc, i]), []);
 
-    expect(differing.every((i) => (i >= 0x44 && i < 0x46) || (i >= 0x74 && i < 0x78))).toBe(true);
+    expect(differing.every((i) => (i >= 0x44 && i < 0x48) || (i >= 0x74 && i < 0x78))).toBe(true);
   });
 
   it("computes the expected data1 as (code<<16)|flags", () => {
@@ -121,27 +121,31 @@ describe("read-back guard", () => {
     type: unknown,
     subtype: unknown,
     data1: unknown,
+    flags: unknown,
     expected: unknown,
   ) => boolean;
 
   it("accepts a matching media key event", () => {
-    expect(isExpected(14, 8, 0x110a00, String(0x110a00))).toBe(true);
+    expect(isExpected(14, 8, 0x110a00, 0xa00, String(0x110a00))).toBe(true);
   });
 
   it("compares boxed values numerically", () => {
-    expect(isExpected(new Number(14), new Number(8), new Number(0x110a00), 0x110a00)).toBe(true);
+    expect(isExpected(new Number(14), new Number(8), new Number(0x110a00), new Number(0xa00), 0x110a00)).toBe(true);
   });
 
   it.each([
-    ["wrong type", 0, 8, 0x110a00],
-    ["wrong subtype", 14, 7, 0x110a00],
-    ["wrong data1", 14, 8, 0x120a00],
-  ])("rejects %s", (_name, type, subtype, data1) => {
-    expect(isExpected(type, subtype, data1, 0x110a00)).toBe(false);
+    ["wrong type", 0, 8, 0x110a00, 0xa00],
+    ["wrong subtype", 14, 7, 0x110a00, 0xa00],
+    ["wrong data1", 14, 8, 0x120a00, 0xa00],
+    ["key-up flags on a key-down", 14, 8, 0x110a00, 0xb00],
+  ])("rejects %s", (_name, type, subtype, data1, flags) => {
+    expect(isExpected(type, subtype, data1, flags, 0x110a00)).toBe(false);
   });
 
   it("is wired into the script before posting", () => {
-    expect(SCRIPT.indexOf("isExpectedMediaKeyEvent(")).toBeLessThan(SCRIPT.indexOf("CGEventPost"));
+    const guardCall = SCRIPT.indexOf("if (!isExpectedMediaKeyEvent(");
+    expect(guardCall).toBeGreaterThan(-1);
+    expect(guardCall).toBeLessThan(SCRIPT.indexOf("CGEventPost("));
     expect(SCRIPT).toContain("CGEventCreateFromData");
   });
 });
