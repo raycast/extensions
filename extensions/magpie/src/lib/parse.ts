@@ -50,6 +50,8 @@ export type UsageReport =
       breakdown: string;
       agents: UsageRow[];
       models: UsageRow[];
+      /** Sections added after agents/models, such as provider keys and accounts. */
+      extras: { title: string; rows: UsageRow[] }[];
       sessions: UsageRow[];
       /** Text after `sessions ·`, for example `top 10 of 18`. */
       sessionNote?: string;
@@ -254,9 +256,10 @@ export function parseUsage(text: string): UsageReport {
   const breakdown = lines.find((line) => /^\s+in /.test(line))?.trim() ?? "";
   const agents: UsageRow[] = [];
   const models: UsageRow[] = [];
+  const extras: { title: string; rows: UsageRow[] }[] = [];
   const sessions: UsageRow[] = [];
   let sessionNote: string | undefined;
-  let section: "agents" | "models" | "sessions" | null = null;
+  let section: "agents" | "models" | "sessions" | "extra" | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -279,10 +282,24 @@ export function parseUsage(text: string): UsageReport {
       continue;
 
     const row = parseUsageRow(line);
-    if (!row) return { ok: false, raw };
-    const bucket =
-      section === "agents" ? agents : section === "models" ? models : sessions;
-    bucket.push(row);
+    if (row) {
+      const bucket =
+        section === "agents"
+          ? agents
+          : section === "models"
+            ? models
+            : section === "sessions"
+              ? sessions
+              : extras[extras.length - 1]?.rows;
+      if (!bucket) return { ok: false, raw };
+      bucket.push(row);
+      continue;
+    }
+    // Newer reports insert indented headers (provider keys, accounts) between
+    // the known tables. A line with a percent sign is still a broken row.
+    if (trimmed.includes("%")) return { ok: false, raw };
+    section = "extra";
+    extras.push({ title: trimmed, rows: [] });
   }
 
   return {
@@ -296,6 +313,7 @@ export function parseUsage(text: string): UsageReport {
     breakdown,
     agents,
     models,
+    extras: extras.filter((section) => section.rows.length > 0),
     sessions,
     sessionNote,
     path: usagePath(lines),

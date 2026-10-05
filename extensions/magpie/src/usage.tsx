@@ -46,11 +46,6 @@ export default function Usage() {
       isLoading={isLoading}
       searchBarPlaceholder="Search usage"
       searchBarAccessory={dropdown}
-      navigationTitle={
-        data?.ok && !data.empty
-          ? `${data.tokens} tokens · ${data.period}`
-          : "Usage"
-      }
     >
       {error && !data ? (
         <List.EmptyView
@@ -89,7 +84,10 @@ function UsageSections({
     .join("\n");
   return (
     <>
-      <List.Section title="Agents">
+      <List.Section
+        title="Agents"
+        subtitle={`${usage.tokens} tokens · ${usage.period}`}
+      >
         {usage.agents.map((row) => (
           <UsageItem
             key={`agent-${row.name}`}
@@ -109,6 +107,18 @@ function UsageSections({
           />
         ))}
       </List.Section>
+      {usage.extras.map((section) => (
+        <List.Section key={section.title} title={sectionTitle(section.title)}>
+          {section.rows.map((row) => (
+            <UsageItem
+              key={`${section.title}-${row.name}`}
+              row={row}
+              detail={detail}
+              onReload={onReload}
+            />
+          ))}
+        </List.Section>
+      ))}
       {usage.sessions.length > 0 ? (
         <List.Section
           title={
@@ -127,6 +137,10 @@ function UsageSections({
       ) : null}
     </>
   );
+}
+
+function sectionTitle(title: string): string {
+  return title.replace(/(^|\s)\S/g, (chunk) => chunk.toUpperCase());
 }
 
 function UsageItem({

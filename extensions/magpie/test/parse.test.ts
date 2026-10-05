@@ -240,9 +240,30 @@ test("parseUsage accepts a priced headline and an empty report", () => {
   if (empty.ok && empty.empty) assert.match(empty.path ?? "", /usage\.jsonl$/);
 });
 
+test("parseUsage keeps provider-key and account sections", () => {
+  const usage = parseUsage(fixture("usage-0.1.671.txt"));
+  assert.equal(usage.ok, true);
+  if (!usage.ok || usage.empty) throw new Error("expected a usage report");
+  assert.equal(usage.price, "≈$1.20");
+  assert.equal(usage.agents[0].price, "≈$0.80 ttft 1.2 s · 10 tok/s");
+  assert.equal(usage.agents[1].price, "≈$0.40");
+  assert.equal(usage.models[0].name, "openai/gpt-5.6-luna @ chatgpt.com");
+  assert.deepEqual(
+    usage.models.map((row) => row.name),
+    ["openai/gpt-5.6-luna @ chatgpt.com", "autolink/grok-4.7"],
+  );
+  assert.deepEqual(
+    usage.extras.map((section) => section.title),
+    ["upstream provider keys", "accounts"],
+  );
+  assert.equal(usage.extras[0].rows[0].name, "autolink / key not recorded");
+  assert.equal(usage.extras[1].rows[0].name, "codex / ada@example.com · Team");
+  assert.equal(usage.sessions[0].name, "Codex  sess-example");
+});
+
 test("parseUsage falls back when a row is not a table line", () => {
   const broken = parseUsage(
-    "1 token today · 1 call · no price\n  agents\n  not a row\n",
+    "1 token today · 1 call · no price\n  agents\n  Codex  no%  1 call\n",
   );
   assert.equal(broken.ok, false);
 });

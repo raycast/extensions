@@ -1,0 +1,21 @@
+2 tokens last 7 days · 3 calls · ≈$1.20
+  in 2  out 1  cache read 0  cache write 0  reasoning 0  · 0 errors
+
+  agents
+  Codex     67% 2     2 calls ≈$0.80 ttft 1.2 s · 10 tok/s
+  Pi        33% 1     1 call  ≈$0.40 
+
+  models
+  openai/gpt-5.6-luna @ chatgpt.com  67% 2  2 calls ≈$0.80 ttft 6.1 s · 102 tok/s
+  autolink/grok-4.7                  33% 1  1 call  ≈$0.40
+
+  upstream provider keys
+  autolink / key not recorded   50% 1  2 calls ≈$0.60
+  autolink / abcdef0123         50% 1  1 call  ≈$0.60
+
+  accounts
+  codex / ada@example.com · Team  100% 2  3 calls ≈$1.20
+
+  sessions · top 10 of 2
+  Codex  sess-example  100% 2  3 calls ≈$1.20
+  /Users/me/.config/magpie/usage.jsonl
