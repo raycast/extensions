@@ -112,27 +112,27 @@ export function thumbnailsUnsupported() {
 
 /**
  * List icons for the first `MAX_ICONS` items, filled in as they arrive. Only
- * thumbnails Aktar already has: nothing is downloaded for a list.
+ * thumbnails Aktar already has: nothing is downloaded for a list. Kept by
+ * the file's identity (key, size and date), not its ID, so a file replaced
+ * under the same key gets its new thumbnail after a refresh.
  */
 export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }[]) {
   const [files, setFiles] = useState<Record<string, string | null>>({});
-  const key = items
-    .slice(0, MAX_ICONS)
-    .map((item) => identity(item.source))
-    .join("\u0000");
+  const wanted = items.slice(0, MAX_ICONS).map((item) => ({ ...item, identity: identity(item.source) }));
+  const key = wanted.map((item) => item.identity).join("\u0000");
   useEffect(() => {
     let cancelled = false;
-    for (const item of items.slice(0, MAX_ICONS)) {
-      if (item.id in files) continue;
+    for (const item of wanted) {
+      if (item.identity in files) continue;
       thumbnailFile(item.source, ICON_PX, false).then((file) => {
-        if (!cancelled) setFiles((current) => ({ ...current, [item.id]: file }));
+        if (!cancelled) setFiles((current) => ({ ...current, [item.identity]: file }));
       });
     }
     return () => {
       cancelled = true;
     };
   }, [key]);
-  return files;
+  return Object.fromEntries(wanted.map((item) => [item.id, files[item.identity]]));
 }
 
 /** The selected item's thumbnail for the detail pane, made if needed. */
