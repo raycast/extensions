@@ -52,7 +52,7 @@
     {
       "name": "points",
       "title": "Minimum Points",
-      "description": "Minimum points to show stories. Updating this will reset your activity.",
+      "description": "Minimum points to show stories. Changing it starts the story list over; stories you've read stay read.",
       "type": "textfield",
       "default": "500",
       "required": false

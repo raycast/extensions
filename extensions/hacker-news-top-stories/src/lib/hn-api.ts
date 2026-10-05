@@ -79,7 +79,7 @@ export function decodeEntities(text: string) {
   return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code: string) => {
     if (code[0] !== "#") return namedEntities[code.toLowerCase()] ?? match;
     const point = code[1].toLowerCase() === "x" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
-    return String.fromCodePoint(point);
+    return point <= 0x10ffff ? String.fromCodePoint(point) : match;
   });
 }
 

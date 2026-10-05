@@ -24,8 +24,11 @@ export type SeenStory = { story: Story; seen: number };
 
 export function resetIfPointsChanged(points: string) {
   if (cache.get(prefKey) === points) return;
+  // Other Macs' sync files keep their reads, so clearing this Mac's would only make the two disagree
+  const read = cache.get(readKey);
   cache.clear();
   cache.set(prefKey, points);
+  if (read) cache.set(readKey, read);
 }
 
 function getLocalReadStories() {

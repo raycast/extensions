@@ -14,14 +14,14 @@ const maxTotalLength = 40_000;
 
 type Comment = { id: number; author: string; depth: number; text: string };
 
-function flatten(items: AlgoliaItem[], depth = 0): Comment[] {
-  if (depth > maxDepth) return [];
-  return items.flatMap((item) => [
-    ...(item.text && item.author
-      ? [{ id: item.id, author: item.author, depth, text: truncate(htmlToText(item.text), maxCommentLength) }]
-      : []),
-    ...flatten(item.children, depth + 1),
-  ]);
+function* walk(items: AlgoliaItem[], depth = 0): Generator<Comment> {
+  if (depth > maxDepth) return;
+  for (const item of items) {
+    if (item.text && item.author) {
+      yield { id: item.id, author: item.author, depth, text: truncate(htmlToText(item.text), maxCommentLength) };
+    }
+    yield* walk(item.children, depth + 1);
+  }
 }
 
 /**
@@ -36,7 +36,7 @@ export default async function tool({ id }: Input) {
 
   const comments: Comment[] = [];
   let length = 0;
-  for (const comment of flatten(threads)) {
+  for (const comment of walk(threads)) {
     length += comment.text.length;
     if (length > maxTotalLength) break;
     comments.push(comment);
