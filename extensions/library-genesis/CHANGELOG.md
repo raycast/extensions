@@ -12,6 +12,9 @@
 - Validate book responses and checksums before saving, including downloads to a chosen folder.
 - Show search errors for unavailable mirrors and ignore cancelled searches.
 - Fetch and cache book covers with the required referrer so they display in Raycast.
+- Restrict cover URLs and redirects to allowed HTTPS mirrors and reject private or reserved network destinations.
+- Limit cover downloads and cached images to 5 MiB, checking both declared and streamed response sizes.
+- Bound the cover cache to 100 MiB and 500 images, evict least recently used covers, and clean up expired images and abandoned temporary files.
 - Display full-resolution covers at a proportional preview size, falling back to thumbnails when needed.
 - Batch cover updates and keep book row identities and the detail pane stable while results load.
 

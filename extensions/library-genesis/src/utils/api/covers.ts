@@ -1,12 +1,72 @@
-import { createHash, randomUUID } from "node:crypto";
-import { mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { extname, join } from "node:path";
 
+import { MAX_COVER_BYTES, getCachedCoverFile, saveCoverFile } from "./cover-cache";
+import { CoverSecurityError, coverDispatcher, validateCoverUrl } from "./cover-security";
 import { LIBGEN_USER_AGENT } from "./request";
+
+export { MAX_COVER_BYTES } from "./cover-cache";
 
 const MAX_CONCURRENT_DOWNLOADS = 4;
 let activeDownloads = 0;
 const waitingDownloads: (() => void)[] = [];
+
+const readCover = async (response: Response, signal: AbortSignal): Promise<Buffer> => {
+  const sizeError = () => new Error("The cover image exceeds the 5 MiB size limit.");
+  if (Number(response.headers.get("content-length")) > MAX_COVER_BYTES) {
+    await response.body?.cancel();
+    throw sizeError();
+  }
+  if (!response.body) throw new Error("The mirror returned an empty cover image.");
+
+  const reader = response.body.getReader();
+  let content = Buffer.alloc(0);
+  let bytes = 0;
+  try {
+    while (true) {
+      signal.throwIfAborted();
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value.byteLength > MAX_COVER_BYTES - bytes) throw sizeError();
+      const required = bytes + value.byteLength;
+      if (required > content.length) {
+        const capacity = Math.min(MAX_COVER_BYTES, Math.max(65536, content.length * 2, required));
+        const larger = Buffer.allocUnsafe(capacity);
+        content.copy(larger, 0, 0, bytes);
+        content = larger;
+      }
+      content.set(value, bytes);
+      bytes += value.byteLength;
+    }
+    if (bytes === 0) throw new Error("The mirror returned an empty cover image.");
+    return content.subarray(0, bytes);
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+};
+
+const fetchCover = async (initialUrl: URL, signal: AbortSignal, preferredMirror?: string): Promise<Response> => {
+  let url = initialUrl;
+  for (let redirects = 0; redirects <= 5; redirects++) {
+    signal.throwIfAborted();
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": LIBGEN_USER_AGENT,
+        Referer: `${url.origin}/index.php`,
+      },
+      signal,
+      redirect: "manual",
+      dispatcher: coverDispatcher as unknown as NonNullable<Parameters<typeof fetch>[1]>["dispatcher"],
+    });
+    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+    const location = response.headers.get("location");
+    await response.body?.cancel();
+    if (!location || redirects === 5) throw new Error("The cover redirect could not be followed.");
+    url = validateCoverUrl(new URL(location, url).toString(), preferredMirror);
+  }
+  throw new Error("The cover redirect could not be followed.");
+};
 
 export const getFullSizeCoverUrl = (coverUrl: string): string => {
   if (coverUrl === "N/A") return coverUrl;
@@ -19,7 +79,9 @@ export const getCachedBookCover = async (
   coverUrl: string,
   cacheDirectory: string,
   signal?: AbortSignal,
+  preferredMirror?: string,
 ): Promise<string> => {
+  const url = validateCoverUrl(coverUrl, preferredMirror);
   await new Promise<void>((resolve) => {
     if (activeDownloads < MAX_CONCURRENT_DOWNLOADS) {
       activeDownloads++;
@@ -31,39 +93,23 @@ export const getCachedBookCover = async (
 
   try {
     signal?.throwIfAborted();
-    const url = new URL(coverUrl);
     const extension = extname(url.pathname).toLowerCase();
     const imageExtension = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(extension) ? extension : ".jpg";
     const directory = join(cacheDirectory, "covers");
     const filename = `${createHash("sha256").update(url.toString()).digest("hex")}${imageExtension}`;
     const path = join(directory, filename);
-    const cached = await stat(path).catch(() => undefined);
-    if (cached?.isFile() && cached.size > 0) return path;
+    if (await getCachedCoverFile(directory, filename, signal)) return path;
 
     const requestSignal = AbortSignal.any([AbortSignal.timeout(10000), ...(signal ? [signal] : [])]);
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": LIBGEN_USER_AGENT,
-        Referer: `${url.origin}/index.php`,
-      },
-      signal: requestSignal,
-    });
+    const response = await fetchCover(url, requestSignal, preferredMirror);
     if (!response.ok || !response.headers.get("content-type")?.toLowerCase().startsWith("image/")) {
+      await response.body?.cancel();
       throw new Error("The mirror did not return a cover image.");
     }
-    const content = await response.arrayBuffer();
-    if (content.byteLength === 0) throw new Error("The mirror returned an empty cover image.");
+    const content = await readCover(response, requestSignal);
     signal?.throwIfAborted();
 
-    await mkdir(directory, { recursive: true });
-    const temporaryPath = `${path}.${randomUUID()}.tmp`;
-    try {
-      await writeFile(temporaryPath, Buffer.from(content));
-      signal?.throwIfAborted();
-      await rename(temporaryPath, path);
-    } finally {
-      await rm(temporaryPath, { force: true });
-    }
+    await saveCoverFile(directory, filename, content, signal);
     return path;
   } finally {
     const next = waitingDownloads.shift();
@@ -76,12 +122,20 @@ export const getCachedFullSizeBookCover = async (
   coverUrl: string,
   cacheDirectory: string,
   signal?: AbortSignal,
+  preferredMirror?: string,
 ): Promise<string> => {
+  validateCoverUrl(coverUrl, preferredMirror);
   const fullSizeUrl = getFullSizeCoverUrl(coverUrl);
   try {
-    return await getCachedBookCover(fullSizeUrl, cacheDirectory, signal);
+    return await getCachedBookCover(fullSizeUrl, cacheDirectory, signal, preferredMirror);
   } catch (error) {
-    if (signal?.aborted || fullSizeUrl === coverUrl) throw error;
-    return getCachedBookCover(coverUrl, cacheDirectory, signal);
+    if (
+      signal?.aborted ||
+      fullSizeUrl === coverUrl ||
+      error instanceof CoverSecurityError ||
+      (error as Error & { cause?: unknown }).cause instanceof CoverSecurityError
+    )
+      throw error;
+    return getCachedBookCover(coverUrl, cacheDirectory, signal, preferredMirror);
   }
 };

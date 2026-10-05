@@ -5,10 +5,12 @@ import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
+import type { TestContext } from "node:test";
+import { gzipSync } from "node:zlib";
 
 import { SearchType } from "../src/types";
 import { getLibgenSearchResults } from "../src/utils/api";
-import { getCachedBookCover, getCachedFullSizeBookCover } from "../src/utils/api/covers";
+import { MAX_COVER_BYTES, getCachedBookCover, getCachedFullSizeBookCover } from "../src/utils/api/covers";
 import { getValidatedMirror, mirror, mirrors, testMirror } from "../src/utils/api/mirrors";
 import { fetchLibgenPage, fetchLibgenSearchPage } from "../src/utils/api/request";
 import { fitCoverPreview } from "../src/utils/cover-preview";
@@ -25,7 +27,23 @@ const placeholderPage = "<title>Welcome to nginx!</title><h1>Welcome to nginx!</
 const requests: { url: URL; userAgent: string | undefined; referer: string | undefined }[] = [];
 let baseUrl: string;
 let coverCache: string;
+const coverBaseUrl = "https://libgen.li";
+const mockCoverFetch = (context: TestContext) => {
+  const actualFetch = globalThis.fetch;
+  context.mock.method(globalThis, "fetch", (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    const url = new URL(input instanceof Request ? input.url : input.toString());
+    assert.equal(url.origin, coverBaseUrl);
+    assert.equal(init?.redirect, "manual");
+    assert.ok(init?.dispatcher);
+    url.protocol = "http:";
+    url.host = new URL(baseUrl).host;
+    const options = { ...init };
+    delete options.dispatcher;
+    return actualFetch(url, options);
+  });
+};
 const coverImage = Buffer.from("/9j/2Q==", "base64");
+const compressedOversizedCover = gzipSync(Buffer.alloc(MAX_COVER_BYTES + 1, 42));
 
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
@@ -33,9 +51,13 @@ const server = createServer((request, response) => {
   response.setHeader("Content-Type", "text/html");
   if (url.pathname.startsWith("/covers/")) {
     response.setHeader("Content-Type", "image/jpeg");
-    if (url.pathname === "/covers/missing.jpg") {
+    if (url.pathname === "/covers/compressed-large.jpg") {
+      response.setHeader("Content-Encoding", "gzip");
+      response.setHeader("Content-Length", compressedOversizedCover.length);
+      response.end(compressedOversizedCover);
+    } else if (url.pathname === "/covers/missing.jpg") {
       response.writeHead(404).end();
-    } else if (url.pathname === "/covers/empty.jpg" || request.headers.referer !== `${baseUrl}/index.php`) {
+    } else if (url.pathname === "/covers/empty.jpg" || request.headers.referer !== `${coverBaseUrl}/index.php`) {
       response.end();
     } else if (url.pathname === "/covers/slow.jpg") {
       response.write(coverImage.subarray(0, 2));
@@ -73,40 +95,55 @@ after(async () => {
   await rm(coverCache, { recursive: true, force: true });
 });
 
-test("covers include the required referrer and are reused from the local cache", async () => {
-  const url = `${baseUrl}/covers/alice.jpg`;
+test("covers include the required referrer and are reused from the local cache", async (context) => {
+  mockCoverFetch(context);
+  const url = `${coverBaseUrl}/covers/alice.jpg`;
   const path = await getCachedBookCover(url, coverCache);
   assert.deepEqual(await readFile(path), coverImage);
-  assert.equal(requests.at(-1)!.referer, `${baseUrl}/index.php`);
+  assert.equal(requests.at(-1)!.referer, `${coverBaseUrl}/index.php`);
   assert.equal(requests.at(-1)!.userAgent, "Raycast-Library-Genesis");
   const count = requests.length;
   assert.equal(await getCachedBookCover(url, coverCache), path);
   assert.equal(requests.length, count);
 });
 
-test("empty images, placeholder pages and HTTP failures are not cached as covers", async () => {
+test("empty images, placeholder pages and HTTP failures are not cached as covers", async (context) => {
+  mockCoverFetch(context);
   const before = await readdir(join(coverCache, "covers"));
-  await assert.rejects(getCachedBookCover(`${baseUrl}/covers/empty.jpg`, coverCache), /empty cover/);
-  await assert.rejects(getCachedBookCover(`${baseUrl}/placeholder`, coverCache), /did not return a cover/);
-  await assert.rejects(getCachedBookCover(`${baseUrl}/unavailable`, coverCache), /did not return a cover/);
+  await assert.rejects(getCachedBookCover(`${coverBaseUrl}/covers/empty.jpg`, coverCache), /empty cover/);
+  await assert.rejects(getCachedBookCover(`${coverBaseUrl}/placeholder`, coverCache), /did not return a cover/);
+  await assert.rejects(getCachedBookCover(`${coverBaseUrl}/unavailable`, coverCache), /did not return a cover/);
   assert.deepEqual(await readdir(join(coverCache, "covers")), before);
 });
 
-test("cancelled cover downloads leave no partial image in the cache", async () => {
+test("cancelled cover downloads leave no partial image in the cache", async (context) => {
+  mockCoverFetch(context);
   const before = await readdir(join(coverCache, "covers"));
   const controller = new AbortController();
-  const pending = getCachedBookCover(`${baseUrl}/covers/slow.jpg`, coverCache, controller.signal);
+  const pending = getCachedBookCover(`${coverBaseUrl}/covers/slow.jpg`, coverCache, controller.signal);
   setTimeout(() => controller.abort(), 20);
   await assert.rejects(pending, (error: Error) => error.name === "AbortError");
   assert.deepEqual(await readdir(join(coverCache, "covers")), before);
 });
 
-test("full-size covers are preferred, with a thumbnail fallback when the original is missing", async () => {
-  const fullSizePath = await getCachedBookCover(`${baseUrl}/covers/alice.jpg`, coverCache);
-  assert.equal(await getCachedFullSizeBookCover(`${baseUrl}/covers/alice_small.jpg`, coverCache), fullSizePath);
+test("compressed covers are limited by decoded bytes despite their small Content-Length", async (context) => {
+  mockCoverFetch(context);
+  assert.ok(compressedOversizedCover.length < MAX_COVER_BYTES);
+  const before = await readdir(join(coverCache, "covers"));
+  await assert.rejects(
+    getCachedBookCover(`${coverBaseUrl}/covers/compressed-large.jpg`, coverCache),
+    /5 MiB size limit/,
+  );
+  assert.deepEqual(await readdir(join(coverCache, "covers")), before);
+});
+
+test("full-size covers are preferred, with a thumbnail fallback when the original is missing", async (context) => {
+  mockCoverFetch(context);
+  const fullSizePath = await getCachedBookCover(`${coverBaseUrl}/covers/alice.jpg`, coverCache);
+  assert.equal(await getCachedFullSizeBookCover(`${coverBaseUrl}/covers/alice_small.jpg`, coverCache), fullSizePath);
 
   const requestCount = requests.length;
-  const fallbackPath = await getCachedFullSizeBookCover(`${baseUrl}/covers/missing_small.jpg`, coverCache);
+  const fallbackPath = await getCachedFullSizeBookCover(`${coverBaseUrl}/covers/missing_small.jpg`, coverCache);
   assert.deepEqual(await readFile(fallbackPath), coverImage);
   assert.deepEqual(
     requests.slice(requestCount).map((request) => request.url.pathname),
@@ -114,10 +151,11 @@ test("full-size covers are preferred, with a thumbnail fallback when the origina
   );
 });
 
-test("cancelling a full-size cover request does not start a thumbnail fallback", async () => {
+test("cancelling a full-size cover request does not start a thumbnail fallback", async (context) => {
+  mockCoverFetch(context);
   const controller = new AbortController();
   const requestCount = requests.length;
-  const pending = getCachedFullSizeBookCover(`${baseUrl}/covers/slow_small.jpg`, coverCache, controller.signal);
+  const pending = getCachedFullSizeBookCover(`${coverBaseUrl}/covers/slow_small.jpg`, coverCache, controller.signal);
   setTimeout(() => controller.abort(), 20);
   await assert.rejects(pending, (error: Error) => error.name === "AbortError");
   assert.deepEqual(
