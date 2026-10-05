@@ -244,18 +244,21 @@ export default function Recents() {
     return !conversation.archived;
   });
 
+  const needle = searchText.toLowerCase();
+  const matches = (value: unknown) => typeof value === "string" && value.toLowerCase().includes(needle);
   const searchFiltered = searchText
-    ? statusFiltered.filter((x) =>
-        // `?? []`, matching `recents-list.tsx`'s same defensive read — currently
-        // unreachable in practice (`isWellFormedRow` in `recentsMigration.ts` guarantees
-        // every row this store sees has a `chats` array), but that guarantee lives in a
-        // different file and a future change to it shouldn't be able to turn this into a
-        // crash here.
-        (x.chats ?? []).some(
-          (chat) =>
-            chat.question.toLowerCase().includes(searchText.toLowerCase()) ||
-            chat.answer.toLowerCase().includes(searchText.toLowerCase()),
-        ),
+    ? statusFiltered.filter(
+        (x) =>
+          // A renamed conversation is found by its title, not only by what was said in it.
+          matches(x.title) ||
+          // `?? []`, matching `recents-list.tsx`'s same defensive read — currently
+          // unreachable in practice (`isWellFormedRow` in `recentsMigration.ts` guarantees
+          // every row this store sees has a `chats` array), but that guarantee lives in a
+          // different file and a future change to it shouldn't be able to turn this into a
+          // crash here.
+          // `matches` type-checks each field: a migrated row can carry a chat with a missing
+          // question or answer, and `.toLowerCase()` on it crashed the list mid-typing.
+          (x.chats ?? []).some((chat) => matches(chat.question) || matches(chat.answer)),
       )
     : statusFiltered;
 

@@ -84,7 +84,9 @@ export default function Ask(props: { conversation?: Conversation }) {
   };
 
   /** Guards the auto-open of the full-text form so it fires once per empty conversation. */
-  const hasOpenedForEmptyRef = useRef(false);
+  // Keyed by conversation id: Start New Conversation swaps the id without remounting, and a
+  // plain boolean stayed set, so the form never auto-opened for the new conversation.
+  const openedForConversationRef = useRef<string | null>(null);
 
   useEffect(() => {
     const isEmptyConversation = conversation.chats.length === 0;
@@ -92,7 +94,9 @@ export default function Ask(props: { conversation?: Conversation }) {
     // to populated after mount, and without this guard that second transition pushes a
     // duplicate form, leaving a stale screen behind the first back press. Re-opening as
     // the user types on an existing conversation is intentional and stays ungated.
-    const shouldOpen = isEmptyConversation ? !hasOpenedForEmptyRef.current : question.data.length > 0;
+    const shouldOpen = isEmptyConversation
+      ? openedForConversationRef.current !== conversation.id
+      : question.data.length > 0;
 
     // Read fresh on every effect run (not cached in a useState initializer) so a
     // preference change after mount takes effect on the next render pass rather than
@@ -106,7 +110,7 @@ export default function Ask(props: { conversation?: Conversation }) {
 
     if (isAutoFullInput && shouldOpen && isSelectionSettled) {
       if (isEmptyConversation) {
-        hasOpenedForEmptyRef.current = true;
+        openedForConversationRef.current = conversation.id;
       }
       push(
         <QuestionForm
@@ -131,7 +135,7 @@ export default function Ask(props: { conversation?: Conversation }) {
     }
 
     setLoading(false);
-  }, [question.data, models.data, models.isLoading, isSelectionReady]);
+  }, [question.data, models.data, models.isLoading, isSelectionReady, conversation.id]);
 
   useEffect(() => {
     // One persistence effect, not the previous add-on-mount + update-on-change pair.

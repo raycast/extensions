@@ -56,7 +56,15 @@ export function useSelectedModel(
     // Runs once per mount, matching every other load effect in this codebase.
   }, []);
 
+  const selectedRef = useRef(selectedModelId);
+  selectedRef.current = selectedModelId;
+
   const setSelectedModelId = useCallback((next: string) => {
+    // The dropdown fires onChange with its first item when it mounts, and that item is the
+    // current selection (see `ModelDropdown`). Writing it back would be a no-op at best — and
+    // when the saved pick could not be read, the "current selection" is the default, so the
+    // write would replace the user's real choice with it. Only a CHANGE is a user selection.
+    if (next === selectedRef.current) return;
     // A real user selection: the persisted value has been superseded, so the in-flight
     // restore above must not overwrite it.
     canRestoreRef.current = false;

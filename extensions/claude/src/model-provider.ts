@@ -60,6 +60,17 @@ const DEFAULT_EFFORT_EXCEPTIONS: Record<string, EffortLevel> = {
  */
 const UNADVERTISED_OUTPUT_CAP = 128_000;
 
+/** What Ask sends for a stored limit it cannot use (`Number(x) || 4096` in `buildModelRequestParams`). */
+const LEGACY_UNUSABLE_LIMIT_TOKENS = 4096;
+
+/**
+ * Anthropic's documented substitute for a forced tool call on models that reject one: `auto`
+ * plus an instruction naming the requirement. Raycast asked for a tool call to be required;
+ * this is as close as those models allow, rather than silently making it optional.
+ */
+const REQUIRED_TOOL_INSTRUCTION =
+  "Respond by calling one of the provided tools. Do not answer in text without making a tool call.";
+
 /** Raycast accepts these four, and they are exactly the image types Anthropic accepts. */
 const VISION_MEDIA_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 
@@ -75,7 +86,10 @@ function supportsAdaptiveThinking(model: AvailableModel): boolean {
 }
 
 function defaultEffortFor(modelId: string, levels: EffortLevel[]): string {
-  const preferred = DEFAULT_EFFORT_EXCEPTIONS[modelId] ?? "high";
+  // Prefix match, so a dated snapshot of the same model ("claude-opus-5-5-YYYYMMDD") gets the
+  // same default as its alias.
+  const exception = Object.entries(DEFAULT_EFFORT_EXCEPTIONS).find(([prefix]) => modelId.startsWith(prefix));
+  const preferred = exception?.[1] ?? "high";
   return levels.includes(preferred) ? preferred : levels[levels.length - 1];
 }
 
@@ -196,7 +210,15 @@ async function resolveTarget(registeredId: string): Promise<ResolvedTarget> {
   return {
     modelId: preset.option,
     presetPrompt: preset.prompt,
-    presetMaxTokens: Number.isFinite(maxTokens) && maxTokens >= 1 ? Math.floor(maxTokens) : undefined,
+    // A stored limit that is present but unusable (a legacy "0" the old form accepted) gets
+    // the same 4096 Ask gives it (`buildModelRequestParams`), so one preset does not answer
+    // at 4,096 tokens in Ask and at the model's full ceiling in Raycast AI.
+    presetMaxTokens:
+      Number.isFinite(maxTokens) && maxTokens >= 1
+        ? Math.floor(maxTokens)
+        : preset.max_tokens === undefined || preset.max_tokens === ""
+          ? undefined
+          : LEGACY_UNUSABLE_LIMIT_TOKENS,
     presetTemperature: Number.isFinite(temperature) ? temperature : undefined,
   };
 }
@@ -320,17 +342,19 @@ export const streamCompletion: AI.StreamCompletion = async (model, request) => {
   // the model may decline to call a tool; Raycast executes whatever calls it makes.
   const canForceToolCall = !adaptive && supportsTemperature(target.modelId);
 
+  const requiredDowngraded = request.toolChoice === "required" && !canForceToolCall;
+
   const { apiKey } = getPreferenceValues<Preferences>();
   const anthropic = createAnthropic({ apiKey });
 
   return streamText({
     model: anthropic(target.modelId),
-    system,
+    system: requiredDowngraded ? [system, REQUIRED_TOOL_INSTRUCTION].filter(Boolean).join("\n\n") : system,
     messages: rest as ModelMessage[],
     maxOutputTokens,
     temperature: wantsTemperature ? temperature : undefined,
     tools: toToolSet(request.tools),
-    toolChoice: request.toolChoice === "required" && !canForceToolCall ? "auto" : request.toolChoice,
+    toolChoice: requiredDowngraded ? "auto" : request.toolChoice,
     headers: adaptive ? { "anthropic-beta": THINKING_BINDING_BETA } : undefined,
     providerOptions: { anthropic: anthropicOptions },
   });
