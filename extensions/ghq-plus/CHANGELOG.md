@@ -1,6 +1,6 @@
 # ghq plus Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-05
 
 - Add List Repositories to search every repository `ghq list` reports and open it in an editor or terminal
 - Add Get Repository to clone with `ghq get` over HTTPS or SSH
