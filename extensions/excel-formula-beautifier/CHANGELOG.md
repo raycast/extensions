@@ -1,6 +1,6 @@
 # Excel Formula Beautifier Changelog
 
-## [Raycast 2 Support] - {PR_MERGE_DATE}
+## [Raycast 2 Support] - 2026-10-05
 
 - Upgrade to Raycast API 2.x so the extension loads in Raycast 2 on macOS and Windows
 - Use platform-aware keyboard shortcuts
