@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add LinkMCP MCP Server] - {PR_MERGE_DATE}
+## [Add LinkMCP MCP Server] - 2026-10-05
 
 - Add LinkMCP to the community registry: use your own LinkedIn account from your AI assistant (profiles and companies, people, job and Sales Navigator search, LinkedIn inbox, posts, comments and reactions, connection requests, your own analytics, work email and mobile finding). Hosted remote Streamable HTTP server at https://app.linkmcp.io/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Connecting a LinkedIn account needs a paid plan. Not affiliated with LinkedIn.
 
