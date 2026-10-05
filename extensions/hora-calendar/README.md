@@ -87,6 +87,7 @@ To put one event somewhere else, use **Create Meeting** and pick the calendar in
 | --- | --- |
 | **Default Calendar** | The calendar Create Calendar Event writes to. Empty means the primary calendar of your first connected account. |
 | **Close Raycast after adding** | Dismiss the Raycast window as soon as an event is sent. On by default. |
+| **Date and Time Locale** | Format event dates and times in English (United States) or Polish (Poland). English (United States) by default. |
 
 ## Privacy
 
@@ -96,7 +97,7 @@ The extension makes no network requests of its own. It has no server, no analyti
 
 Your calendar data is read from hora's local store and used only to draw the list you are looking at. It is never stored by the extension, never cached anywhere outside Raycast's own process, and never sent anywhere.
 
-The only preference stored is the default calendar name you type in, which stays in Raycast's own preferences on your Mac.
+Your default calendar name, close-after-add setting, and date and time locale stay in Raycast's own preferences on your Mac.
 
 ## How it talks to hora
 
