@@ -39,6 +39,8 @@ export function useSelectedModel(
   // stomp a choice the user already made this session, which is the same
   // "displayed value drifts from real value" failure in the opposite direction.
   const canRestoreRef = useRef(restoreSaved);
+  /** The selection as of the latest change, ahead of React's render. See `setSelectedModelId`. */
+  const selectedRef = useRef(initialModelId);
 
   useEffect(() => {
     (async () => {
@@ -47,6 +49,10 @@ export function useSelectedModel(
         const stored = await LocalStorage.getItem<string>(SELECTED_MODEL_KEY);
         if (!canRestoreRef.current) return;
         if (typeof stored === "string" && stored.length > 0) {
+          // Updated synchronously, ahead of the render the setState schedules: a change event
+          // arriving in between must compare against the value about to be shown, not the
+          // one still on screen.
+          selectedRef.current = stored;
           setSelectedModelIdState(stored);
         }
       } finally {
@@ -56,18 +62,20 @@ export function useSelectedModel(
     // Runs once per mount, matching every other load effect in this codebase.
   }, []);
 
-  const selectedRef = useRef(selectedModelId);
-  selectedRef.current = selectedModelId;
-
   const setSelectedModelId = useCallback((next: string) => {
-    // The dropdown fires onChange with its first item when it mounts, and that item is the
-    // current selection (see `ModelDropdown`). Writing it back would be a no-op at best — and
-    // when the saved pick could not be read, the "current selection" is the default, so the
-    // write would replace the user's real choice with it. Only a CHANGE is a user selection.
+    // A dropdown fires onChange with its first item when it mounts, and that item is the
+    // current selection (see `ModelDropdown`). Such an event is indistinguishable from the
+    // user re-picking the current model, so an unchanged value is ignored outright: it neither
+    // writes (which, after a failed read, would save the default over the real choice) nor
+    // cancels a restore still in flight (which would lose the saved pick). The only case this
+    // gives up is a genuine re-pick of the current model during the one local read.
     if (next === selectedRef.current) return;
     // A real user selection: the persisted value has been superseded, so the in-flight
     // restore above must not overwrite it.
     canRestoreRef.current = false;
+    // Synchronous, for the same reason as in the restore: a second change before the next
+    // render must compare against this one.
+    selectedRef.current = next;
     setSelectedModelIdState(next);
     // Fire-and-forget, like `useStatusFilter`'s write: the displayed value already changed
     // via `setSelectedModelIdState` (the single source of truth). This write only affects

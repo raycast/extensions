@@ -86,9 +86,11 @@ function supportsAdaptiveThinking(model: AvailableModel): boolean {
 }
 
 function defaultEffortFor(modelId: string, levels: EffortLevel[]): string {
-  // Prefix match, so a dated snapshot of the same model ("claude-opus-5-5-YYYYMMDD") gets the
-  // same default as its alias.
-  const exception = Object.entries(DEFAULT_EFFORT_EXCEPTIONS).find(([prefix]) => modelId.startsWith(prefix));
+  // The alias or its dated snapshot ("claude-opus-5-5-YYYYMMDD") — not a bare prefix, which
+  // would also catch a different model such as "claude-opus-5-50".
+  const exception = Object.entries(DEFAULT_EFFORT_EXCEPTIONS).find(
+    ([alias]) => modelId === alias || new RegExp(`^${alias}-\\d{8}$`).test(modelId),
+  );
   const preferred = exception?.[1] ?? "high";
   return levels.includes(preferred) ? preferred : levels[levels.length - 1];
 }
