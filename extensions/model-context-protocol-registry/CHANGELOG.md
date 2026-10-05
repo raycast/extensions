@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Zihin MCP Server] - {PR_MERGE_DATE}
+## [Add Zihin MCP Server] - 2026-10-05
 
 - Add Zihin to the official registry: build and operate AI agents on the Zihin platform (agents, personas, tools, triggers, budgets, human approvals, run inspection) and chat with them. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.
 
