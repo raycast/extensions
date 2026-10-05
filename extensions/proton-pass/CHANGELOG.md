@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Password Generator Defaults] - 2026-10-05
+
+- Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
+- Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen
