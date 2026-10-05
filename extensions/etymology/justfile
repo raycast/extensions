@@ -1,0 +1,116 @@
+# etymology — task surface
+#
+# Two things get confused, so they have separate recipes:
+#
+#   a CODE change     is live as soon as it builds — Raycast reads an
+#                     extension's .js when the command runs.
+#   a MANIFEST change (a new command, a changed title or preference, a new AI
+#                     tool) stays invisible until Raycast restarts, because it
+#                     caches package.json and only rereads it on launch.
+#
+# One branch. Etymonline used to be scraped behind a preference, which needed a
+# second branch to keep it out of the store; it is a link now, so there is
+# nothing to keep out and nothing to keep in sync.
+
+# Default target: list recipes.
+default:
+    @just --list
+
+# Install dependencies. Puts nothing in Raycast.
+setup:
+    npm install
+
+# Build into Raycast. Enough for a code change; a manifest change needs `install`.
+build:
+    npx ray build -e dist
+
+# Build and restart — the one that makes a new command or preference appear.
+install: build reload
+
+# `ray build` never tells the app anything; only `ray develop` registers. Ctrl-C
+# once it says "built successfully" — the registration outlives the watcher.
+
+# Teach Raycast the extension exists. Once per machine, or if it stops appearing.
+register:
+    npx ray develop
+
+# Watch and hot-reload against the running Raycast.
+dev:
+    npx ray develop
+
+# Restart Raycast so it rereads the manifest.
+reload:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if pgrep -x Raycast > /dev/null; then
+      killall Raycast
+      while pgrep -x Raycast > /dev/null; do sleep 0.2; done
+    fi
+    # LaunchServices keeps the app registered as terminating for a moment after
+    # the process is gone, and `open` fails with -600 in that window. Retry
+    # rather than sleep-and-hope: the first attempt usually succeeds.
+    for _ in $(seq 1 10); do
+      if open -a Raycast 2>/dev/null; then break; fi
+      sleep 1
+    done
+    for _ in $(seq 1 10); do
+      if pgrep -x Raycast > /dev/null; then
+        echo "Raycast restarted — manifest reread."
+        exit 0
+      fi
+      sleep 1
+    done
+    echo "Raycast did not come back up; start it by hand." >&2
+    exit 1
+
+# Typecheck.
+types:
+    npx tsc --noEmit
+
+# Manifest shape, ESLint, Prettier.
+lint:
+    npx ray lint
+
+# Apply every fixable lint and formatting change.
+fix:
+    npx ray lint --fix
+
+# The one check that catches upstream drift: a typechecker cannot see that
+# Wiktionary moved a template argument or renamed an HTML attribute.
+
+# Run both parsers against live Wiktionary.
+parsers:
+    node scripts/check-parsers.mjs
+
+# Rebuild assets/langcodes.json from Wiktionary's three language modules.
+langcodes:
+    node scripts/build-langcodes.mjs
+
+# Run before committing.
+check: types lint parsers
+
+# Fail unless the checkout is on main with nothing uncommitted. Runs first, so
+# the common mistakes say so plainly instead of surfacing eight steps later —
+# `ray publish` refuses on a dirty tree, but only after running every check.
+_publishable:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    branch=$(git branch --show-current)
+    if [ "$branch" != "main" ]; then
+      echo "on '$branch' — publish from main:" >&2
+      echo "    git checkout main && just publish" >&2
+      exit 1
+    fi
+    if [ -n "$(git status --porcelain)" ]; then
+      echo "uncommitted changes — ray publish refuses to run:" >&2
+      git status --short >&2
+      exit 1
+    fi
+
+# Blocked unless you are on main and everything passes. The body is one plain
+# line on purpose: `ray publish` is interactive, and it should inherit the
+# terminal exactly as if you had typed it.
+
+# Open the pull request against raycast/extensions.
+publish: _publishable check
+    npx @raycast/api@latest publish
