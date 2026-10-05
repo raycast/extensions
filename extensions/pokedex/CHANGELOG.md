@@ -1,5 +1,13 @@
 # Pokédex Changelog
 
+## [PokéMart & GO] - {PR_MERGE_DATE}
+
+- Added **Prices** to the Items command, showing buy/sell values for each item.
+- Added **Base Stats** to Pokémon form details, so alternate forms now display their own stat spreads.
+- Added support for Pokémon GO sprite artwork variants.
+- Reworked the **Evolution Chain** display to render each evolution stage as its own table, with name/dex-number headers.
+- Refactored the **Type Chart** command and effectiveness calculations for improved performance and layout clarity.
+
 ## [Fix Missing Base Stats] - 2026-07-22
 
 - Fixed missing **Type**, **Weaknesses**, and **Base Stats** on some Pokémon profiles by no longer caching incomplete API responses.
