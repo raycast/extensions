@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Name row in detail] - {PR_MERGE_DATE}
+## [Name row in detail] - 2026-10-05
 
 ### Fixed
 
