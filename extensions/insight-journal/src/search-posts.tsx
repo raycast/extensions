@@ -1,10 +1,10 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useRef } from "react";
 import { EntryBrowser } from "./entry-browser";
 import {
   Entry,
   fetchPosts,
+  forgetMissingReadingTimes,
   getReadingTimes,
   getSavedIds,
   getUnseenPosts,
@@ -32,23 +32,23 @@ export default function Command() {
     execute: posts.length > 0,
   });
 
-  // Reading times fill in once loaded; they do not hold up the list. Refresh asks the next
-  // load (and only that one) to re-check pages that had no reading time.
-  const retryReadingTimes = useRef(false);
-  const { data: readingTimes, revalidate: revalidateReadingTimes } = usePromise(
-    (items: Entry[]) => {
-      const retryNow = retryReadingTimes.current;
-      retryReadingTimes.current = false;
-      return getReadingTimes(items, retryNow);
-    },
-    [posts],
-    { execute: posts.length > 0 },
-  );
+  // Reading times fill in once loaded; they do not hold up the list.
+  const { data: readingTimes, revalidate: revalidateReadingTimes } = usePromise(getReadingTimes, [posts], {
+    execute: posts.length > 0,
+  });
 
-  function refresh() {
-    retryReadingTimes.current = true;
-    revalidateReadingTimes();
-    revalidate();
+  // Refresh re-checks pages that had no reading time. A changed post list reloads reading
+  // times on its own; an unchanged one does not, so that case reloads them here.
+  async function refresh() {
+    forgetMissingReadingTimes(posts);
+    try {
+      const reloaded = await revalidate();
+      if (JSON.stringify(reloaded) === JSON.stringify(posts)) {
+        revalidateReadingTimes();
+      }
+    } catch {
+      // The failure toast comes from `onError` on the posts request.
+    }
   }
 
   const { data: savedIds = [], mutate: mutateSaved } = usePromise(getSavedIds);

@@ -290,19 +290,29 @@ function isWaitingToRetry(cached: string): boolean {
 }
 
 /**
+ * Forgets cached misses and failures, so the next `getReadingTimes` call checks
+ * those pages again. Used by Refresh. Clearing the cache (instead of passing a
+ * flag to one call) keeps the retry in effect for whichever load runs next.
+ */
+export function forgetMissingReadingTimes(entries: Entry[]): void {
+  for (const entry of entries) {
+    if (!isReadingTime(readingTimeCache.get(entry.id))) readingTimeCache.remove(entry.id);
+  }
+}
+
+/**
  * Returns reading times in minutes, keyed by entry id. Found times are cached
  * for good, so each post page is only downloaded once. Pages without a time
- * wait before the next check; pass `retryNow` (used by Refresh) to check them
- * again right away.
+ * wait before the next check.
  */
-export async function getReadingTimes(entries: Entry[], retryNow = false): Promise<Record<string, number>> {
+export async function getReadingTimes(entries: Entry[]): Promise<Record<string, number>> {
   const times: Record<string, number> = {};
   const pending: Entry[] = [];
   for (const entry of entries) {
     const cached = readingTimeCache.get(entry.id);
     if (cached && isReadingTime(cached)) {
       times[entry.id] = Number(cached);
-    } else if (!cached || retryNow || !isWaitingToRetry(cached)) {
+    } else if (!cached || !isWaitingToRetry(cached)) {
       pending.push(entry);
     }
   }
