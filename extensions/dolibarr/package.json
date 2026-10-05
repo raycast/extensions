@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dolibarr",
+  "title": "Dolibarr",
+  "description": "Search companies and contacts in Dolibarr and review their proposals and invoices",
+  "icon": "extension-icon.png",
+  "author": "baxter",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Dolibarr",
+      "description": "Find companies and contacts in Dolibarr",
+      "mode": "view"
+    },
+    {
+      "name": "check-connection",
+      "title": "Check Connection",
+      "subtitle": "Dolibarr",
+      "description": "Verify the Dolibarr URL and API key against the instance",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-dolibarr",
+      "title": "Search Dolibarr",
+      "description": "Searches companies and contacts in Dolibarr by name, email address or phone number."
+    },
+    {
+      "name": "company-overview",
+      "title": "Dolibarr Company Overview",
+      "description": "Returns a company's master data, its proposals, orders and invoices, and totals for open and overdue amounts."
+    },
+    {
+      "name": "recent-documents",
+      "title": "Recent Dolibarr Documents",
+      "description": "Lists the most recent proposals, orders or invoices across all customers, newest first. Answers questions like \"what are the latest orders?\"."
+    },
+    {
+      "name": "open-items",
+      "title": "Dolibarr Open Items",
+      "description": "Everything that needs following up across all customers: overdue invoices, expired proposals and delivered orders that have not been invoiced yet."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dolibarrUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Dolibarr URL",
+      "description": "Address of the Dolibarr instance, for example https://dolibarr.example.org",
+      "placeholder": "https://dolibarr.example.org"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Found in Dolibarr on your own user card under the API key tab"
+    },
+    {
+      "name": "displayLocale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number and Date Format",
+      "description": "How amounts and dates are displayed. The interface language stays English.",
+      "default": "de-DE",
+      "data": [
+        {
+          "title": "German — 7.980,00 € · 07.08.2026",
+          "value": "de-DE"
+        },
+        {
+          "title": "US — €7,980.00 · 08/07/2026",
+          "value": "en-US"
+        },
+        {
+          "title": "British — €7,980.00 · 07/08/2026",
+          "value": "en-GB"
+        },
+        {
+          "title": "System setting",
+          "value": "system"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
