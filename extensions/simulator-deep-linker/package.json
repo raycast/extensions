@@ -17,12 +17,14 @@
     {
       "name": "search-deep-links",
       "title": "Search Deep Links",
+      "subtitle": "Simulator Deep Linker",
       "description": "Search saved links and open them on the configured target",
       "mode": "view"
     },
     {
       "name": "add-deep-link",
       "title": "Add Deep Link",
+      "subtitle": "Simulator Deep Linker",
       "description": "Add a link to the shared Simulator Deep Linker storage",
       "mode": "view"
     }

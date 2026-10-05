@@ -260,7 +260,17 @@ export default function SearchDeepLinks() {
               <Action
                 title="Add Deep Link"
                 icon={Icon.Plus}
-                onAction={() => launchCommand({ name: "add-deep-link", type: LaunchType.UserInitiated })}
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "add-deep-link", type: LaunchType.UserInitiated });
+                  } catch (launchError) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Could Not Open Add Deep Link",
+                      message: launchError instanceof Error ? launchError.message : String(launchError),
+                    });
+                  }
+                }}
               />
               <Action
                 title="Refresh"
