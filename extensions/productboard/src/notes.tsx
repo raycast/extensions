@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import useProductboardPaginated from "./lib/hooks/useProductboardPaginated";
-import { Note } from "./lib/types";
+import { ConversationPart, Note } from "./lib/types";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import AddNote from "./lib/components/AddNote";
@@ -17,27 +17,31 @@ export default function Notes() {
       searchBarPlaceholder="Search notes"
     >
       {notes.map((note) => {
-        const color = note.state === "processed" ? Color.Green : Color.Red;
+        const state = note.fields.archived ? "archived" : note.fields.processed ? "processed" : "unprocessed";
+        const color = note.fields.archived ? Color.SecondaryText : note.fields.processed ? Color.Green : Color.Red;
+        const content = Array.isArray(note.fields.content)
+          ? note.fields.content.map(formatConversationPart).join("\n\n")
+          : note.fields.content;
         return (
           <List.Item
             key={note.id}
-            title={note.title}
+            title={note.fields.name}
             icon={{ source: Icon.Dot, tintColor: color }}
             accessories={[{ date: new Date(note.updatedAt) }]}
             detail={
               <List.Item.Detail
-                markdown={note.content}
+                markdown={content}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="ID" text={note.id} />
-                    <List.Item.Detail.Metadata.Label title="Title" text={note.title} />
+                    <List.Item.Detail.Metadata.Label title="Title" text={note.fields.name} />
                     <List.Item.Detail.Metadata.TagList title="State">
-                      <List.Item.Detail.Metadata.TagList.Item text={note.state} color={color} />
+                      <List.Item.Detail.Metadata.TagList.Item text={state} color={color} />
                     </List.Item.Detail.Metadata.TagList>
-                    {note.tags.length ? (
+                    {note.fields.tags?.length ? (
                       <List.Item.Detail.Metadata.TagList title="Tags">
-                        {note.tags.map((tag) => (
-                          <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
+                        {note.fields.tags.map((tag) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={tag.id || tag.name} text={tag.name} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                     ) : (
@@ -56,8 +60,8 @@ export default function Notes() {
                 />
                 <Action.OpenInBrowser
                   title="Open in Productboard"
-                  icon={getFavicon(note.displayUrl, { fallback: "logo.png" })}
-                  url={note.displayUrl}
+                  icon={getFavicon(note.links.html, { fallback: "logo.png" })}
+                  url={note.links.html}
                 />
                 <ActionPanel.Section>
                   <Action.Push
@@ -74,4 +78,8 @@ export default function Notes() {
       })}
     </List>
   );
+}
+
+function formatConversationPart(part: ConversationPart) {
+  return part.authorName ? `**${part.authorName}**\n\n${part.content}` : part.content;
 }
