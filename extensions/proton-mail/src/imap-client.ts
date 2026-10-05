@@ -66,9 +66,11 @@ export async function disconnectClient(): Promise<void> {
   // No-op now since we create fresh connections
 }
 
-export async function listFolders(): Promise<Folder[]> {
+export async function listFolders({ withCounts = false }: { withCounts?: boolean } = {}): Promise<Folder[]> {
   return withClient(async (client) => {
-    const list: ListResponse[] = await client.list();
+    const list: ListResponse[] = await client.list(
+      withCounts ? { statusQuery: { messages: true, unseen: true } } : undefined,
+    );
 
     const folders: Folder[] = list.map((item) => ({
       path: item.path,
@@ -76,6 +78,8 @@ export async function listFolders(): Promise<Folder[]> {
       delimiter: item.delimiter,
       flags: item.flags,
       specialUse: item.specialUse,
+      messagesCount: item.status?.messages,
+      unseenCount: item.status?.unseen,
     }));
 
     // Sort folders: special folders first, then alphabetically
