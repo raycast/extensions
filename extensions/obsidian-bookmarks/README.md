@@ -34,6 +34,7 @@ If unchanged, the default action is "Open Obsidian", which will open the Obsidia
 - **Copy Obsidian Link**: Copy the Obsidian link to your clipboard (as both rich and plain text).
 - **Copy Obsidian Link as Markdown**: Copy the Obsidian link to your clipboard as a Markdown-style link.
 - **Open Link**: Open the bookmarked link in your browser.
+- **Open Link in Current Window**: Open the bookmarked link as a tab of the browser window in front.
 - **Copy Link**: Copy the bookmarked link to your clipboard (as both rich and plain text).
 - **Copy Link as Markdown**: Copy the bookmarked link to your clipboard as a Markdown-style link.
 

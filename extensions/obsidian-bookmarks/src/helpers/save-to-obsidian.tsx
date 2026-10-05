@@ -190,12 +190,17 @@ export default async function saveToObsidian(file: File): Promise<string> {
 
 // The generated heading takes the whole first line. URLs can contain
 // parentheses (Wikipedia's often do), so the link runs to the last `)`.
-const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\(([^\n]*)\)[ \t]*(?:\n|$)/;
+const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\([^\n]*\)[ \t]*(?:\n|$)/;
 
-function splitBookmarkBody(body: string | undefined, source: string): { hasHeading: boolean; description: string } {
+function splitBookmarkBody(
+  body: string | undefined,
+  source: string,
+  title: string
+): { hasHeading: boolean; description: string } {
   const content = body ?? "";
   const match = content.match(BOOKMARK_HEADING);
-  if (!match || match[1] !== source) return { hasHeading: false, description: content };
+  const generated = `# [${title.replace(/[[\]]/g, "")}](${source})`;
+  if (!match || match[0].trimEnd() !== generated) return { hasHeading: false, description: content };
 
   return { hasHeading: true, description: content.slice(match[0].length).replace(/^\n+/, "") };
 }
@@ -206,7 +211,7 @@ export function asFormValues(file: File): LinkFormState["values"] {
     title: file.attributes.title,
     favicon: file.attributes.favicon ?? "",
     tags: file.attributes.tags,
-    description: splitBookmarkBody(file.body, file.attributes.source).description,
+    description: splitBookmarkBody(file.body, file.attributes.source, file.attributes.title).description,
   };
 }
 
@@ -233,7 +238,7 @@ export function asUpdatedFile(values: LinkFormState["values"], original: File): 
   tags: ${JSON.stringify(attributes.tags)}
   ` + extraLines(attributes);
 
-  const { hasHeading } = splitBookmarkBody(original.body, original.attributes.source);
+  const { hasHeading } = splitBookmarkBody(original.body, original.attributes.source, original.attributes.title);
   const heading = `# [${values.title.replace(/[[\]]/g, "")}](${values.url})`;
 
   return {

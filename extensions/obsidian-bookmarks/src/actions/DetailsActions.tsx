@@ -177,7 +177,10 @@ const createFavoriteActions = (
   return { key: "favorites", useDivider: "unless-first", title: "Favorites", actions };
 };
 
-const createDestructiveActions = (file: File): ActionGroup<DetailActionPreference> => ({
+const createDestructiveActions = (
+  file: File,
+  onFileUpdated?: (file: File) => void
+): ActionGroup<DetailActionPreference> => ({
   key: "destructive",
   useDivider: "always",
   actions: new Map([
@@ -187,7 +190,8 @@ const createDestructiveActions = (file: File): ActionGroup<DetailActionPreferenc
         title: file.attributes.read ? "Mark as Unread" : "Mark as Read",
         icon: file.attributes.read ? Icon.Circle : Icon.Checkmark,
         shortcut: { modifiers: ["cmd", "shift"], key: "x" },
-        onAction: () => (file.attributes.read ? methods.markAsUnread(file) : methods.markAsRead(file)),
+        onAction: async () =>
+          onFileUpdated?.(await (file.attributes.read ? methods.markAsUnread(file) : methods.markAsRead(file))),
       },
     ],
     [
@@ -293,9 +297,9 @@ export default function DetailsActions({
       createBrowserActions(file),
       createFavoriteActions(file, files, applyFavorites),
       createObsidianActions(file, obsidianFileIcon),
-      createDestructiveActions(file),
+      createDestructiveActions(file, onFileUpdated),
     ];
-  }, [file, files, obsidianFileIcon, showDetail, setShowDetail, editBookmark, applyFavorites]);
+  }, [file, files, obsidianFileIcon, showDetail, setShowDetail, editBookmark, applyFavorites, onFileUpdated]);
 
   return <OrderedActionPanel groups={groups} defaultAction={defaultAction} />;
 }
