@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1001,
+    "name": "{mlang it}Introduzione{mlang}{mlang en}Introduction{mlang}",
+    "visible": 1,
+    "uservisible": true,
+    "modules": [
+      {
+        "id": 2001,
+        "name": "{mlang it}informazioni generali{mlang}{mlang en}general info{mlang}",
+        "modname": "folder",
+        "url": "https://webeep.polimi.it/mod/folder/view.php?id=2001",
+        "uservisible": true,
+        "contents": [
+          {
+            "type": "file",
+            "filename": "Course Calendar.pdf",
+            "filepath": "/",
+            "filesize": 300074,
+            "fileurl": "https://webeep.polimi.it/webservice/pluginfile.php/900001/mod_folder/content/1/Course%20Calendar.pdf?forcedownload=1",
+            "timemodified": 1789200000,
+            "mimetype": "application/pdf"
+          },
+          {
+            "type": "file",
+            "filename": "lab-setup.zip",
+            "filepath": "/lab/",
+            "filesize": 5242880,
+            "fileurl": "https://webeep.polimi.it/webservice/pluginfile.php/900001/mod_folder/content/1/lab/lab-setup.zip?forcedownload=1",
+            "timemodified": 1789100000,
+            "mimetype": "application/zip"
+          }
+        ]
+      },
+      {
+        "id": 2002,
+        "name": "{mlang it}annunci{mlang}{mlang en}announcements{mlang}",
+        "modname": "forum",
+        "url": "https://webeep.polimi.it/mod/forum/view.php?id=2002",
+        "uservisible": true
+      }
+    ]
+  },
+  {
+    "id": 1002,
+    "name": "{mlang it}Registrazioni{mlang}{mlang en}Recordings{mlang}",
+    "visible": 1,
+    "uservisible": true,
+    "modules": [
+      {
+        "id": 2003,
+        "name": "{mlang it}archivio registrazione{mlang}{mlang en}recording archive{mlang}",
+        "modname": "url",
+        "url": "https://webeep.polimi.it/mod/url/view.php?id=2003",
+        "uservisible": true,
+        "contents": [
+          {
+            "type": "url",
+            "filename": "archive",
+            "fileurl": "https://aunicalogin.polimi.it/aunicalogin/getservizio.xml?id_servizio=2294&c_classe_webeep=000000-STD"
+          }
+        ]
+      },
+      {
+        "id": 2004,
+        "name": "{mlang it}collegamento ad aula virtuale{mlang}{mlang en}link to virtual classroom{mlang}",
+        "modname": "url",
+        "url": "https://webeep.polimi.it/mod/url/view.php?id=2004",
+        "uservisible": true,
+        "contents": [
+          { "type": "url", "filename": "webex", "fileurl": "https://example.webex.com/meet/teacher" }
+        ]
+      },
+      {
+        "id": 2005,
+        "name": "Textbook",
+        "modname": "page",
+        "url": "https://webeep.polimi.it/mod/page/view.php?id=2005",
+        "uservisible": true,
+        "contents": [
+          {
+            "type": "file",
+            "filename": "index.html",
+            "filepath": "/",
+            "fileurl": "https://webeep.polimi.it/webservice/pluginfile.php/900002/mod_page/content/index.html?forcedownload=1"
+          }
+        ]
+      },
+      {
+        "id": 2006,
+        "name": "Hidden module",
+        "modname": "resource",
+        "uservisible": false,
+        "contents": [
+          {
+            "type": "file",
+            "filename": "secret.pdf",
+            "filepath": "/",
+            "fileurl": "https://webeep.polimi.it/webservice/pluginfile.php/900003/mod_resource/content/1/secret.pdf?forcedownload=1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 1003,
+    "name": "Hidden section",
+    "visible": 0,
+    "uservisible": false,
+    "modules": []
+  }
+]
