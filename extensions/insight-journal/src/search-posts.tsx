@@ -31,11 +31,10 @@ export default function Command() {
     execute: posts.length > 0,
   });
 
-  const { data: readingTimes, isLoading: isLoadingReadingTimes } = usePromise(
-    (items: Entry[]) => getReadingTimes(items),
-    [posts],
-    { execute: posts.length > 0 },
-  );
+  // Reading times fill in once loaded; they do not hold up the list.
+  const { data: readingTimes } = usePromise((items: Entry[]) => getReadingTimes(items), [posts], {
+    execute: posts.length > 0,
+  });
 
   const { data: savedIds = [], mutate: mutateSaved } = usePromise(getSavedIds);
 
@@ -71,7 +70,7 @@ export default function Command() {
     <EntryBrowser
       kind="post"
       entries={posts}
-      isLoading={isLoading || isLoadingUnseen || isLoadingReadingTimes}
+      isLoading={isLoading || isLoadingUnseen}
       onRefresh={revalidate}
       unread={{ ids: unseenIds, markRead, markUnread }}
       saved={{ ids: savedIds, toggle: toggleSaved }}

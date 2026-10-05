@@ -251,9 +251,41 @@ export function EntryBrowser({
   );
 }
 
-/** Full-screen details, pushed from the grid layout, which has no side panel. */
-function EntryDetail({ entry, minutes }: { entry: Entry; minutes?: number }) {
+/**
+ * Full-screen details, pushed from the grid layout, which has no side panel.
+ * A pushed view keeps the props it was pushed with, so it mirrors the read and
+ * saved state locally to keep its actions in sync.
+ */
+function EntryDetail({ entry, state }: { entry: Entry; state: EntryState }) {
   const config = KINDS[entry.kind];
+  const { unread, saved, minutes } = state;
+  const [unreadIds, setUnreadIds] = useState(unread?.ids ?? new Set<string>());
+  const [savedIds, setSavedIds] = useState(saved?.ids ?? []);
+
+  const localState: EntryState = {
+    minutes,
+    unread: unread && {
+      ids: unreadIds,
+      markRead: async (ids) => {
+        setUnreadIds((current) => new Set([...current].filter((id) => !ids.includes(id))));
+        await unread.markRead(ids);
+      },
+      markUnread: async (ids) => {
+        setUnreadIds((current) => new Set([...current, ...ids]));
+        await unread.markUnread(ids);
+      },
+    },
+    saved: saved && {
+      ids: savedIds,
+      toggle: async (id) => {
+        setSavedIds((current) =>
+          current.includes(id) ? current.filter((savedId) => savedId !== id) : [id, ...current],
+        );
+        await saved.toggle(id);
+      },
+    },
+  };
+
   return (
     <Detail
       navigationTitle={entry.title}
@@ -272,14 +304,14 @@ function EntryDetail({ entry, minutes }: { entry: Entry; minutes?: number }) {
           <Detail.Metadata.Link title="Link" text="Read on aryantechie.com" target={entry.url} />
         </Detail.Metadata>
       }
-      actions={<EntryActions entry={entry} state={{ minutes }} />}
+      actions={<EntryActions entry={entry} state={localState} />}
     />
   );
 }
 
 function EntryActions({ entry, state, controls }: { entry: Entry; state: EntryState; controls?: ViewControls }) {
   const config = KINDS[entry.kind];
-  const { unread, saved, minutes } = state;
+  const { unread, saved } = state;
   const isNew = unread?.ids.has(entry.id) ?? false;
   const isSaved = saved?.ids.includes(entry.id) ?? false;
 
@@ -292,7 +324,7 @@ function EntryActions({ entry, state, controls }: { entry: Entry; state: EntrySt
             title="Show Details"
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
-            target={<EntryDetail entry={entry} minutes={minutes} />}
+            target={<EntryDetail entry={entry} state={state} />}
           />
         )}
         {saved && (
