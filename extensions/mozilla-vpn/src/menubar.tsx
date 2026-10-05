@@ -8,7 +8,7 @@ import {
   launchCommand,
   LaunchType,
 } from '@raycast/api';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { exec } from 'child_process';
 import { checkVpnStatus, runCommand } from './utils/vpnService';
 import { fetchCurrentIP } from './utils/fetchCurrentIP';
@@ -24,44 +24,54 @@ export default function Command() {
   const [serverCountry, setServerCountry] = useState<string>('Unknown');
   const [currentIP, setCurrentIP] = useState<string>('Loading...');
   const [isLoading, setIsLoading] = useState(true);
-
-  // If menubar is disabled, return null (hide it)
-  if (!preferences.showMenuBar) {
-    return null;
-  }
+  const lastFetchedServerRef = useRef<string>('');
 
   // Refresh VPN status
-  const refreshStatus = useCallback(async (silent = false) => {
-    try {
-      if (!silent) console.log('Refreshing VPN status...');
+  const refreshStatus = useCallback(
+    async (silent = false, shouldFetchIP = true) => {
+      try {
+        if (!silent) console.log('Refreshing VPN status...');
 
-      const status = await checkVpnStatus();
+        const status = await checkVpnStatus();
 
-      setVpnStatus(status.isActive);
-      setServerCity(status.serverCity);
-      setServerCountry(status.serverCountry);
+        setVpnStatus(status.isActive);
+        setServerCity(status.serverCity);
+        setServerCountry(status.serverCountry);
 
-      // Fetch IP if connected
-      if (status.isActive) {
-        try {
-          const ip = await fetchCurrentIP();
-          setCurrentIP(ip);
-        } catch (error) {
-          console.error('Error fetching IP:', error);
-          setCurrentIP('IP unavailable');
+        // Fetch IP if connected and server changed or not yet loaded
+        if (status.isActive) {
+          const serverKey = `${status.serverCity}|${status.serverCountry}`;
+          if (
+            shouldFetchIP &&
+            (serverKey !== lastFetchedServerRef.current ||
+              currentIP === 'Loading...' ||
+              currentIP === 'Not connected' ||
+              currentIP === 'IP unavailable')
+          ) {
+            try {
+              const ip = await fetchCurrentIP();
+              setCurrentIP(ip);
+              lastFetchedServerRef.current = serverKey;
+            } catch (error) {
+              console.error('Error fetching IP:', error);
+              setCurrentIP('IP unavailable');
+            }
+          }
+        } else {
+          lastFetchedServerRef.current = '';
+          setCurrentIP('Not connected');
         }
-      } else {
-        setCurrentIP('Not connected');
-      }
 
-      return status;
-    } catch (error) {
-      console.error('Error fetching VPN status:', error);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        return status;
+      } catch (error) {
+        console.error('Error fetching VPN status:', error);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentIP]
+  );
 
   // Toggle VPN connection
   const toggleVPN = async () => {
@@ -88,10 +98,16 @@ export default function Command() {
       const maxAttempts = 15;
 
       while (attempts < maxAttempts) {
-        const status = await refreshStatus(true);
+        // Poll status without querying external IP service on every attempt
+        const status = await refreshStatus(true, false);
 
         if (status && status.isActive === expectedStatus) {
           console.log('Status matched!');
+
+          // If connected, fetch the external IP once for the new connection
+          if (expectedStatus) {
+            refreshStatus(true, true);
+          }
 
           // Notify other components (main extension) about the change
           notifyVpnStatusChange();
@@ -162,6 +178,12 @@ export default function Command() {
     ? `${serverCity}, ${serverCountry}`
     : 'Disconnected';
 
+  // If menubar is disabled, return null (hide it)
+  // Evaluated after all hooks to comply with React's Rules of Hooks
+  if (!preferences.showMenuBar) {
+    return null;
+  }
+
   return (
     <MenuBarExtra
       icon={icon}
@@ -216,7 +238,7 @@ export default function Command() {
       <MenuBarExtra.Item
         title="Refresh Status"
         icon={Icon.RotateClockwise}
-        onAction={() => refreshStatus(false)}
+        onAction={() => refreshStatus(false, true)}
         shortcut={{ modifiers: ['cmd'], key: 'r' }}
       />
 
