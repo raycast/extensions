@@ -1,5 +1,11 @@
 # Link Commands Changelog
 
+## [Name row in detail] - 2026-10-05
+
+### Fixed
+
+- The detail pane now shows the command's full name at the top of the metadata, because the narrowed list column truncates long titles.
+
 ## [Readable brand suggestion] - 2026-10-05
 
 ### Added
