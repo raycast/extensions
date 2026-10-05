@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-05
 
 - Show the exit IP, country, city, and ISP that claude.ai sees, read from Claude's own edge with verified provenance and IPv4 and IPv6 support.
 - Degrade to country-only when the location lookup fails, and distinguish a blocked response from an unreachable one.
