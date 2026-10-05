@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>MeetingCaptureHelper</string>
+<key>CFBundleIdentifier</key><string>com.raycast.extensions.meeting-capture.helper</string>
+<key>CFBundleName</key><string>MeetingCaptureHelper</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>LSMinimumSystemVersion</key><string>27.0</string>
+<key>LSUIElement</key><true/>
+<key>NSScreenCaptureUsageDescription</key><string>Record meeting system audio after you press the Raycast toggle.</string>
+<key>NSMicrophoneUsageDescription</key><string>Record your microphone together with meeting audio.</string>
+<key>NSSpeechRecognitionUsageDescription</key><string>Create a private on-device text transcript after you stop recording.</string>
+</dict></plist>
