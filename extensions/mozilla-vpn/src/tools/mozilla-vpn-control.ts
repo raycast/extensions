@@ -105,38 +105,33 @@ async function findCountryFromLocations(
       loc.countryCode.toLowerCase() === query
   );
 
-  // 2. Match against alias group
+  // 2. Exact match against alias group
   if (!country && matchedCanonical) {
     const aliasGroup = COUNTRY_ALIASES[matchedCanonical];
-    country = locations.find(
-      (loc) =>
-        loc.country.toLowerCase() === matchedCanonical ||
-        loc.countryCode.toLowerCase() === matchedCanonical ||
-        aliasGroup.includes(loc.country.toLowerCase()) ||
-        aliasGroup.includes(loc.countryCode.toLowerCase())
-    );
+    country = locations.find((loc) => {
+      const locCountry = loc.country.toLowerCase();
+      const locCode = loc.countryCode.toLowerCase();
+      return (
+        locCountry === matchedCanonical ||
+        locCode === matchedCanonical ||
+        aliasGroup.includes(locCountry) ||
+        aliasGroup.includes(locCode)
+      );
+    });
   }
 
-  // 3. Partial match against query
-  if (!country) {
-    country = locations.find(
-      (loc) =>
-        loc.country.toLowerCase().includes(query) ||
-        query.includes(loc.country.toLowerCase()) ||
-        loc.countryCode.toLowerCase() === query
-    );
-  }
-
-  // 4. Partial match against alias group
-  if (!country && matchedCanonical) {
-    const aliasGroup = COUNTRY_ALIASES[matchedCanonical];
+  // 3. Prefix match against country name (minimum 3 characters to avoid short code collisions)
+  if (!country && query.length > 2) {
     country = locations.find((loc) =>
-      aliasGroup.some(
-        (alias) =>
-          loc.country.toLowerCase().includes(alias) ||
-          alias.includes(loc.country.toLowerCase())
-      )
+      loc.country.toLowerCase().startsWith(query)
     );
+  }
+
+  // 4. Whole-word boundary match against country name (minimum 3 characters)
+  if (!country && query.length > 2) {
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapedQuery}\\b`, 'i');
+    country = locations.find((loc) => regex.test(loc.country));
   }
 
   return country || null;
@@ -495,6 +490,10 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       }
 
       notifyVpnStatusChange();
+      const currentStatus = await checkVpnStatus().catch(() => null);
+      if (currentStatus?.isActive) {
+        return `${message}\nVPN remains connected on ${currentStatus.serverCity}, ${currentStatus.serverCountry}.`;
+      }
       return `${message}\nVPN server changed but not connected.`;
     }
 
@@ -559,6 +558,10 @@ export default async function tool(input: VpnControlInput): Promise<string> {
         }
       }
 
+      const currentStatus = await checkVpnStatus().catch(() => null);
+      if (currentStatus?.isActive) {
+        return `${message}\nVPN remains connected on ${currentStatus.serverCity}, ${currentStatus.serverCountry}.`;
+      }
       return `${message}\nVPN server changed but not connected. Say 'connect' to activate the VPN.`;
     }
 
