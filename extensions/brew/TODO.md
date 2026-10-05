@@ -4,6 +4,16 @@ This is the small set of work that remains both useful to Brew users and realist
 
 ## Next
 
+### Finish action toasts in place again
+
+Next, once the Remove Tap fix (#31853) merges. A finished install can be left showing its progress toast: "Installing Tinycast / Operation completed successfully" with a live Cancel button, instead of "Installed Tinycast" (seen 2026-10-02).
+
+The likely cause is a choice brew made. Raycast's convention is to finish a toast in place (`toast.style = Toast.Style.Success`), and a Sourcegraph search of `raycast/extensions` on 2026-10-02 found 212 extensions doing exactly that and none with any toast queue or controller. Brew did too until `5c5526d` (2026-09-06), which switched `settle` in `src/utils/toast.ts` to replacing the toast with `showToast`, so that a stale Cancel could not survive. That puts two kinds of request in flight together, the `updateToast` a progress setter sends and the `showToast` that finishes, and those two were seen to apply out of order. Nothing shows that updates to the same toast reorder; that part is inferred.
+
+- **Finish in place.** In `settle`, set `style`, `title`, `message = undefined`, `primaryAction = undefined` and `secondaryAction = undefined` on the toast itself, with no replacing `showToast`. Keep the `hide()` only on the Close After Action path.
+- **Confirm it before calling it fixed**, two ways: install a tapped cask (the case that reproduced it) and check the toast ends on "Installed …" with no Cancel; and a throwaway dev command that sets a progress message and finishes in place in the same tick, a few hundred times, checking the toast never ends animated with Cancel.
+- **If it still sticks,** write up the Raycast behavior with that repro before trying anything broader. A timing-based fix (hold the final toast until the last update is 250 ms old) was built and pulled from #31853 after four review rounds kept finding new late hides; it is not the way back in.
+
 ### Import and export a Brewfile
 
 Homebrew's own portability format, and the missing half of "set up a new Mac". `brew bundle dump --file=<path>` writes every installed formula, cask and tap; `brew bundle install --file=<path>` pours them back. Both already exist — the work is the UI around them, not the mechanism.

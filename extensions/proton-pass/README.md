@@ -50,8 +50,6 @@ pass-cli vault list
 ## Preferences
 
 - **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Default Password Length**: Length for generated passwords (default: 20)
-- **Default Password Type**: Random characters or memorable passphrase
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
@@ -60,6 +58,17 @@ pass-cli vault list
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
   - Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
+
+### Generate Password
+
+Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
+
+- **Password Type**: Random password or passphrase (default: random)
+- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Characters**: Uppercase letters, symbols and numbers, all on by default (numbers also apply to passphrases)
+- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Capitalization**: Capitalize passphrase words (on by default)
 
 ## Filling Logins (macOS)
 

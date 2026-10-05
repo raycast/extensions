@@ -1,5 +1,9 @@
 # Qobuz Changelog
 
+## [Raycast 1.x support] - 2026-10-04
+
+- Restore compatibility with Raycast 1.x
+
 ## [Fix media keys] - 2026-10-03
 
 - Fix play, next, previous, forward and rewind failing on Macs whose Swift toolchain is out of step with the macOS SDK: the media key is now posted through JavaScript for Automation, so nothing is compiled on your machine

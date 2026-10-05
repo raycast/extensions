@@ -30,7 +30,23 @@
       "default": true,
       "title": "Detection",
       "label": "Use the on-device language model",
-      "description": "Japanese personal names are found only by this layer. Requires macOS 26 with Apple Intelligence; without it, names are not detected at all."
+      "description": "The main source of Japanese personal names. Requires macOS 26 with Apple Intelligence; without it, names are found only by the privmask name model, when that is installed."
+    },
+    {
+      "name": "useNameModel",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use the privmask name model when installed",
+      "description": "A trained model for Japanese personal names that comes with the privmask CLI (brew install snaka/tap/privmask). It runs on any macOS 13 or later, so names are still found without Apple Intelligence."
+    },
+    {
+      "name": "nameModelPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Name Model",
+      "placeholder": "/opt/homebrew/share/privmask/ner",
+      "description": "The directory holding ner.mlmodelc. Leave empty to use the one installed with the privmask CLI by Homebrew."
     },
     {
       "name": "dictionaryPath",

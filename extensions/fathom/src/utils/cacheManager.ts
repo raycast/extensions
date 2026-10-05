@@ -97,7 +97,7 @@ class CacheManager {
 
   /**
    * Abort any in-progress background fetch.
-   * The current page request will finish (HTTP can't be cancelled),
+   * The current page request will finish (HTTP can't be canceled),
    * but no further pages will be fetched and the cache won't be updated.
    */
   stopBackgroundFetch(): void {
