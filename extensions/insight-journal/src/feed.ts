@@ -175,6 +175,10 @@ export async function markNotified(ids: string[]): Promise<void> {
   await Promise.all(ids.map((id) => LocalStorage.setItem(NOTIFIED_PREFIX + id, "1")));
 }
 
+export async function unmarkNotified(ids: string[]): Promise<void> {
+  await Promise.all(ids.map((id) => LocalStorage.removeItem(NOTIFIED_PREFIX + id)));
+}
+
 /** Ids of posts in the reading list, most recently saved first. */
 export async function getSavedIds(): Promise<string[]> {
   const saved = await itemsWithPrefix(SAVED_PREFIX);
@@ -193,53 +197,73 @@ export async function setSaved(id: string, saved: boolean): Promise<string[]> {
 const readingTimeCache = new Cache({ namespace: "reading-time" });
 const READING_TIME_CONCURRENCY = 5;
 const READING_TIME_TIMEOUT_MS = 10_000;
-/** A page without a readable time is checked again after a day, not on every launch. */
-const READING_TIME_RETRY_MS = 24 * 60 * 60 * 1000;
+/** A page that loaded but shows no reading time is checked again after a day. */
+const MISSING_RETRY_MS = 24 * 60 * 60 * 1000;
+/** A request that failed (network error, timeout, bad status) is retried after 15 minutes. */
+const FAILED_RETRY_MS = 15 * 60 * 1000;
 const MISSING_PREFIX = "missing:";
+const FAILED_PREFIX = "failed:";
+
+type ReadingTimeResult = number | "missing" | "failed";
 
 /**
  * Reads the "N min read" value the website renders for a post. The site is a
  * Next.js app, so the value sits in the page's serialized React payload as
  * `"children":[N," min read"]` (with escaped quotes).
  */
-async function fetchReadingTime(url: string): Promise<number | undefined> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(READING_TIME_TIMEOUT_MS) });
-  if (!response.ok) return undefined;
-  const match = (await response.text()).match(/children\\?":\[(\d+),\\?" min read/);
-  return match ? Number(match[1]) : undefined;
+async function fetchReadingTime(url: string): Promise<ReadingTimeResult> {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(READING_TIME_TIMEOUT_MS) });
+    if (!response.ok) return "failed";
+    const match = (await response.text()).match(/children\\?":\[(\d+),\\?" min read/);
+    return match ? Number(match[1]) : "missing";
+  } catch {
+    return "failed";
+  }
+}
+
+/** True when a cached miss or failure is recent enough that the page should not be checked yet. */
+function isWaitingToRetry(cached: string): boolean {
+  for (const [prefix, retryMs] of [
+    [MISSING_PREFIX, MISSING_RETRY_MS],
+    [FAILED_PREFIX, FAILED_RETRY_MS],
+  ] as const) {
+    if (cached.startsWith(prefix)) {
+      return Date.now() - Number(cached.slice(prefix.length)) < retryMs;
+    }
+  }
+  return false;
 }
 
 /**
- * Returns reading times in minutes, keyed by entry id. Results are cached for
- * good, so each post page is only downloaded once; pass `refresh` to re-fetch.
+ * Returns reading times in minutes, keyed by entry id. Found times are cached
+ * for good, so each post page is only downloaded once. Pages without a time
+ * wait before the next check; pass `retryNow` (used by Refresh) to check them
+ * again right away.
  */
-export async function getReadingTimes(entries: Entry[], refresh = false): Promise<Record<string, number>> {
+export async function getReadingTimes(entries: Entry[], retryNow = false): Promise<Record<string, number>> {
   const times: Record<string, number> = {};
-  const missing: Entry[] = [];
+  const pending: Entry[] = [];
   for (const entry of entries) {
-    const cached = refresh ? undefined : readingTimeCache.get(entry.id);
-    if (cached?.startsWith(MISSING_PREFIX)) {
-      const checkedAt = Number(cached.slice(MISSING_PREFIX.length));
-      if (Date.now() - checkedAt < READING_TIME_RETRY_MS) continue;
-      missing.push(entry);
-    } else if (cached) {
+    const cached = readingTimeCache.get(entry.id);
+    if (cached && /^\d+$/.test(cached)) {
       times[entry.id] = Number(cached);
-    } else {
-      missing.push(entry);
+    } else if (!cached || retryNow || !isWaitingToRetry(cached)) {
+      pending.push(entry);
     }
   }
 
-  for (let i = 0; i < missing.length; i += READING_TIME_CONCURRENCY) {
-    const batch = missing.slice(i, i + READING_TIME_CONCURRENCY);
-    const results = await Promise.all(batch.map((entry) => fetchReadingTime(entry.url).catch(() => undefined)));
-    results.forEach((minutes, index) => {
+  for (let i = 0; i < pending.length; i += READING_TIME_CONCURRENCY) {
+    const batch = pending.slice(i, i + READING_TIME_CONCURRENCY);
+    const results = await Promise.all(batch.map((entry) => fetchReadingTime(entry.url)));
+    results.forEach((result, index) => {
       const { id } = batch[index];
-      if (minutes === undefined) {
-        readingTimeCache.set(id, `${MISSING_PREFIX}${Date.now()}`);
-        return;
+      if (typeof result === "number") {
+        times[id] = result;
+        readingTimeCache.set(id, String(result));
+      } else {
+        readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${Date.now()}`);
       }
-      times[id] = minutes;
-      readingTimeCache.set(id, String(minutes));
     });
   }
   return times;

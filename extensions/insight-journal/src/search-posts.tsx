@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { EntryBrowser } from "./entry-browser";
 import {
   Entry,
@@ -31,10 +32,19 @@ export default function Command() {
     execute: posts.length > 0,
   });
 
-  // Reading times fill in once loaded; they do not hold up the list.
-  const { data: readingTimes } = usePromise((items: Entry[]) => getReadingTimes(items), [posts], {
-    execute: posts.length > 0,
-  });
+  // Reading times fill in once loaded; they do not hold up the list. After Refresh,
+  // pages that had no reading time are checked again right away.
+  const [hasRefreshed, setHasRefreshed] = useState(false);
+  const { data: readingTimes } = usePromise(
+    (items: Entry[], retryNow: boolean) => getReadingTimes(items, retryNow),
+    [posts, hasRefreshed],
+    { execute: posts.length > 0 },
+  );
+
+  function refresh() {
+    setHasRefreshed(true);
+    revalidate();
+  }
 
   const { data: savedIds = [], mutate: mutateSaved } = usePromise(getSavedIds);
 
@@ -70,7 +80,7 @@ export default function Command() {
       kind="post"
       entries={posts}
       isLoading={isLoading || isLoadingUnseen}
-      onRefresh={revalidate}
+      onRefresh={refresh}
       unread={{ ids: unseenIds, markRead, markUnread }}
       saved={{ ids: savedIds, setSaved: updateSaved }}
       readingTimes={readingTimes}
