@@ -1,0 +1,14 @@
++-o AppleSmartBattery  <class AppleSmartBattery, id 0x100000abc, registered, matched, active, busy 0 (0 ms), retain 8>
+    {
+      "ExternalConnected" = No
+      "Voltage" = 11572
+      "PowerTelemetryData" = {"SystemEnergyConsumed"=0,"AdapterEfficiencyLoss"=0,"SystemLoad"=3422,"SystemCurrentIn"=0,"WallEnergyEstimate"=0,"SystemVoltageIn"=0,"SystemPowerIn"=0,"PowerTelemetryErrorCount"=0,"BatteryPower"=18446744073709548194}
+      "MaxCapacity" = 100
+      "CurrentCapacity" = 46
+      "CycleCount" = 35
+      "ChargerData" = {"NotChargingReason"=128,"SlowChargingReason"=0,"PMUConfigured"=0,"PMUConfiguration"=0,"TimeChargingThermallyLimited"=0,"IsCharging"=0}
+      "BatteryData" = {"FullChargeCapacity"=8413,"NominalChargeCapacity"=8657,"FullyCharged"=0,"DesignCapacity"=8579,"CurrentCapacity"=46,"BatteryPower"=18446744073709548399}
+      "InstantAmperage" = 18446744073709551338
+      "FullyCharged" = No
+      "IsCharging" = No
+    }
