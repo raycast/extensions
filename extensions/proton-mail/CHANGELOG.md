@@ -1,6 +1,6 @@
 # Proton Mail Changelog
 
-## [Updated Icon] - {PR_MERGE_DATE}
+## [Updated Icon] - 2026-10-05
 
 - Update the extension icon to the current official Proton Mail logo
 
