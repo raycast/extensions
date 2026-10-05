@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linten",
+  "title": "Linten",
+  "description": "The definitive llms.txt auditor, 100-link health checker, token budgeter, and companion llms-full.txt compiler.",
+  "icon": "icon.png",
+  "author": "loopstate-admin",
+  "owner": "loopstates",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "homepage": "https://loopstates.com",
+  "commands": [
+    {
+      "name": "audit",
+      "title": "Audit Llms.txt",
+      "subtitle": "Linten",
+      "description": "Audit Spec v2 syntax, probe 100-link reachability, budget token context, and compile companion archives.",
+      "mode": "view"
+    },
+    {
+      "name": "compile",
+      "title": "Compile Llms-Full.txt",
+      "subtitle": "Linten",
+      "description": "Compile companion full-text archive from an llms.txt URL or clipboard directly to macOS clipboard.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
