@@ -16,7 +16,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { getNetworks, searchTokens } from "./lib/codex";
 import { getApiKey } from "./lib/key";
 import { Onboarding } from "./components/Onboarding";
@@ -89,7 +89,7 @@ function SearchView({ apiKey, onApiKeyChange }: { apiKey: string; onApiKeyChange
         setInvalidKey(true);
         return;
       }
-      void showToast({ style: Toast.Style.Failure, title: "Failed to load networks", message: error.message });
+      void showFailureToast(error, { title: "Failed to load networks" });
     },
   });
 
@@ -149,11 +149,7 @@ function SearchView({ apiKey, onApiKeyChange }: { apiKey: string; onApiKeyChange
         setEmptyState("error");
 
         if (!(error instanceof CodexError)) {
-          void showToast({
-            style: Toast.Style.Failure,
-            title: "Search failed",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          void showFailureToast(error, { title: "Search failed" });
           return;
         }
 
@@ -170,7 +166,7 @@ function SearchView({ apiKey, onApiKeyChange }: { apiKey: string; onApiKeyChange
           case "network":
           case "unknown":
           default:
-            void showToast({ style: Toast.Style.Failure, title: "Search failed", message: error.message });
+            void showFailureToast(error, { title: "Search failed" });
             break;
         }
       })

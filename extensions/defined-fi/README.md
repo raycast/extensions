@@ -25,4 +25,6 @@ To change the key later, set **Codex.io API Key** in the extension preferences.
 | `⌘⇧E` | Open on block explorer |
 | `⌘D` | Show or hide details |
 
+The extension supports macOS only. It is not verified on Windows yet.
+
 This extension is not affiliated with Defined.fi or Codex.io.
