@@ -370,13 +370,18 @@ export const getFormats = (video?: Video) => {
 
 export const getFormatValue = (format: Format) => {
   const { hasAcodec } = hasCodec(format);
-  const audio = hasAcodec
-    ? ""
-    : format.ext === "webm"
-      ? "+ba[ext=webm]/+ba[acodec^=opus]/+ba[acodec^=vorbis]/bestaudio"
-      : "+bestaudio";
+  const id = format.format_id;
   const targetExt = `#${format.ext}`;
-  return format.format_id + audio + targetExt;
+  if (hasAcodec) {
+    return `${id}${targetExt}`;
+  }
+
+  const downloadFormat =
+    format.ext === "webm"
+      ? `${id}+ba[ext=webm]/${id}+ba[acodec^=opus]/${id}+ba[acodec^=vorbis]/${id}+bestaudio`
+      : `${id}+bestaudio`;
+
+  return `${downloadFormat}${targetExt}`;
 };
 
 export const getFormatTitle = (format: Format) =>

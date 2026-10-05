@@ -88,9 +88,7 @@ export default function DownloadVideo() {
         options.push("--audio-quality", "0");
       } else {
         options.push("--format", downloadFormat);
-        const hasWebmAudio = video?.formats.some(
-          (f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis") || f.ext === "webm",
-        );
+        const hasWebmAudio = video?.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
         const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
         options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
       }

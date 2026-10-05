@@ -68,9 +68,7 @@ export default async function tool(input: Input) {
   if (bestFormat) {
     const formatValue = getFormatValue(bestFormat);
     const [downloadFormat, recodeFormat] = formatValue.split("#");
-    const hasWebmAudio = video.formats.some(
-      (f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis") || f.ext === "webm",
-    );
+    const hasWebmAudio = video.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
     const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
     options.push("--ffmpeg-location", ffmpegPath);
     options.push("--format", downloadFormat);
