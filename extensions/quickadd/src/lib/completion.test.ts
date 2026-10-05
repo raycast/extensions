@@ -86,4 +86,9 @@ describe("insertTag", () => {
   it("replaces the # with the tag and keeps the text after it", () => {
     expect(insertTag("a # c", 2, "work")).toBe("a #work c");
   });
+
+  it("adds a space so the next word does not join the tag", () => {
+    expect(insertTag("a #", 2, "work")).toBe("a #work ");
+    expect(insertTag("a #later", 2, "work")).toBe("a #work later");
+  });
 });

@@ -63,7 +63,7 @@ Polling continues while a prompt is open. The poll is the server's only sign tha
 - A select or multi field with `allowCustomInput` gets a text field for values outside the list. For multi, the text field takes comma-separated values.
 - As in QuickAdd's one-page form, a single-note picker (`picker: "file"`) starts with no note picked, and the form won't submit until a required one has a pick.
 
-Text and number fields are controlled, because Raycast clears an uncontrolled text field when the form re-renders with its error. When an edit to a text field ends in a new `[[`, or types `#` at the start of a word, the field pushes `LinkPicker` or `TagPicker` (`src/completion-pickers.tsx`), which loads its items from `quickadd:suggest`. A pick replaces the trigger with `[[text]]` or `#tag `, and the field takes focus again when the picker closes. The trigger rules are pure functions in `src/lib/completion.ts`.
+Text and number fields are controlled, because Raycast clears an uncontrolled text field when the form re-renders with its error. When an edit to a text field ends in a new `[[`, or types `#` at the start of a word, the field pushes `LinkPicker` or `TagPicker` (`src/completion-pickers.tsx`), which loads its items from `quickadd:suggest`. A pick replaces the trigger with `[[text]]` or `#tag` followed by a space when none is there, and the field takes focus again when the picker closes. The trigger rules are pure functions in `src/lib/completion.ts`.
 
 The suggester, confirm, checkbox, and info prompts keep their own views. A suggester is a searchable list, which suits a single pick from many items.
 

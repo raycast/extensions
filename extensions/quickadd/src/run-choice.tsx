@@ -72,10 +72,6 @@ export default function RunChoiceCommand(
   return <VaultGate vault={chosen.vault} registry={registry} {...context} />;
 }
 
-interface Preferences {
-  vaultPath?: string;
-}
-
 function runChoiceDeeplink(context: RunChoiceContext): string {
   return createDeeplink({ command: "run-choice", context });
 }

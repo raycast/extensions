@@ -1,13 +1,9 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { doneMessage } from "./interactive";
-import { prepareVault, runChoiceByName } from "./obsidianCli";
+import { listChoices, prepareVault, runChoice } from "./obsidianCli";
+import { resolveCaptureChoice } from "./capture-choice";
 import { chooseVault, readRegistry } from "./vaults";
-
-interface CapturePreferences {
-  captureChoice: string;
-  vaultPath?: string;
-}
 
 export interface CaptureContext {
   vaultPath?: string;
@@ -18,7 +14,7 @@ export async function capture(
   contextVaultPath: string | undefined,
 ): Promise<void> {
   const { captureChoice, vaultPath } =
-    getPreferenceValues<CapturePreferences>();
+    getPreferenceValues<Preferences.QuickCapture>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -36,14 +32,16 @@ export async function capture(
     }
     const ready = await prepareVault(chosen.vault, undefined, registry);
     if (!ready.ok) throw new Error(ready.message);
-    const result = await runChoiceByName(chosen.vault, captureChoice, {
+    const listed = await listChoices(chosen.vault);
+    const choice = resolveCaptureChoice(listed.choices ?? [], captureChoice);
+    const result = await runChoice(chosen.vault, choice.id, {
       vars: { value: text },
     });
     if (!result.ok) {
       throw new Error(result.error ?? "Capture failed");
     }
     toast.style = Toast.Style.Success;
-    toast.title = doneMessage(captureChoice, result);
+    toast.title = doneMessage(choice.name, result);
   } catch (error) {
     await toast.hide();
     await showFailureToast(error, { title: "Could not capture" });

@@ -26,10 +26,6 @@ const CLI_CANDIDATES = [
   `${homedir()}/Applications/Obsidian.app/Contents/MacOS/obsidian-cli`,
 ];
 
-interface Preferences {
-  cliPath?: string;
-}
-
 /** Raised for transport-level failures (CLI missing, Obsidian/vault unreachable). */
 export class ObsidianCliError extends Error {}
 
@@ -192,17 +188,6 @@ export async function runChoice(
 ): Promise<RunResponse> {
   return invoke<RunResponse>(vault, "quickadd:run", {
     id: choiceId,
-    ...runParams(options),
-  });
-}
-
-export async function runChoiceByName(
-  vault: Vault,
-  name: string,
-  options: RunOptions = {},
-): Promise<RunResponse> {
-  return invoke<RunResponse>(vault, "quickadd:run", {
-    choice: name,
     ...runParams(options),
   });
 }

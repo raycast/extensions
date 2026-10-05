@@ -43,5 +43,7 @@ export function insertLink(value: string, at: number, text: string): string {
 }
 
 export function insertTag(value: string, at: number, tag: string): string {
-  return `${value.slice(0, at)}#${tag}${value.slice(at + 1)}`;
+  const rest = value.slice(at + 1);
+  const separator = /^\s/.test(rest) ? "" : " ";
+  return `${value.slice(0, at)}#${tag}${separator}${rest}`;
 }
