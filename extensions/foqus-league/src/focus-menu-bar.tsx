@@ -68,23 +68,26 @@ export default function FocusMenuBar() {
 
   const setups = [...quickStarts, ...moreGoals].flatMap(({ name, need }) => (need ? [{ name, need }] : []));
 
-  const startItem = (goal: (typeof goals)[number], shortcut?: Keyboard.Shortcut) => (
-    <MenuBarExtra.Item
-      key={goal.name}
-      title={`${formatDuration(goal.minutes)} ${goal.name}`}
-      subtitle={goal.need && `without ${strandedSummary(goal.need.stranded)}`}
-      icon={Icon.Play}
-      shortcut={shortcut}
-      tooltip={
-        goal.need &&
-        `${strandedSummary(goal.need.stranded, 3)}\nQuick starts leave these out until they're in ${goal.need.own.title}. See Set Up Categories.`
-      }
-      onAction={async () => {
-        if (isRaycast2) await rememberQuickStart(goal.name, goal.plan.categories).catch(() => undefined);
-        await open(startSessionUrl(goal.name, goal.minutes, goal.plan.categories, goal.plan.mode));
-      }}
-    />
-  );
+  const startItem = (goal: (typeof goals)[number], shortcut?: Keyboard.Shortcut) => {
+    const gap = goal.need?.pending ? undefined : goal.need;
+    return (
+      <MenuBarExtra.Item
+        key={goal.name}
+        title={`${formatDuration(goal.minutes)} ${goal.name}`}
+        subtitle={gap && `without ${strandedSummary(gap.stranded)}`}
+        icon={Icon.Play}
+        shortcut={shortcut}
+        tooltip={
+          gap &&
+          `${strandedSummary(gap.stranded, 3)}\nQuick starts leave these out until they're in ${gap.own.title}. See Set Up Categories.`
+        }
+        onAction={async () => {
+          if (isRaycast2) await rememberQuickStart(goal.name, goal.plan.categories).catch(() => undefined);
+          await open(startSessionUrl(goal.name, goal.minutes, goal.plan.categories, goal.plan.mode));
+        }}
+      />
+    );
+  };
 
   return (
     <MenuBarExtra title={title} isLoading={isLoading || announcing}>
