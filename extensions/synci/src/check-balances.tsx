@@ -134,6 +134,12 @@ function AccountItem({
 }
 
 function CheckBalances(props: LaunchProps<{ launchContext: { accountId?: string } }>) {
+  const initialId = props.launchContext?.accountId;
+  if (typeof initialId === "string") return <AccountOverview accountId={Number(initialId)} />;
+  return <AccountsList />;
+}
+
+function AccountsList() {
   const { data, error, isLoading, revalidate } = useAccounts(true);
   const [filter, setFilter] = useState("enabled");
   const [search, setSearch] = useState("");
@@ -150,10 +156,6 @@ function CheckBalances(props: LaunchProps<{ launchContext: { accountId?: string 
   const toggleDetails = (
     <ToggleDetailsAction showDetails={showDetails} onToggle={() => setShowDetails((value) => !value)} />
   );
-  const initialId = props.launchContext?.accountId;
-  const initialAccount =
-    typeof initialId === "string" ? data?.find((account) => String(account.id) === initialId) : undefined;
-  if (initialAccount) return <AccountOverview account={initialAccount} />;
   return (
     <List
       isLoading={isLoading}

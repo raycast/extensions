@@ -27,6 +27,32 @@ const page = (data: Transaction[], current: number, last: number) =>
   Response.json({ data, meta: { current_page: current, last_page: last }, links: {} });
 
 describe("account details", () => {
+  it("loads only the linked account's summary without fetching sensitive identifiers or other accounts", async () => {
+    const data = account(42);
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ data }));
+    expect(await new SynciClient(async () => "token", transport).accountSummary(42)).toEqual(data);
+    expect(transport).toHaveBeenCalledOnce();
+    const url = new URL(String(transport.mock.calls[0][0]));
+    expect(url.pathname).toBe("/api/v1/finance/accounts/42");
+    expect(url.searchParams.get("omit_sensitive_identifiers")).toBe("1");
+    expect(url.searchParams.get("include")).toBe("financial_connection.institution");
+  });
+  it.each([NaN, 0, -1, 1.5, Infinity, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects invalid linked account ID %s before making a request",
+    async (id) => {
+      const transport = vi.fn<typeof fetch>();
+      await expect(new SynciClient(async () => "token", transport).accountSummary(id)).rejects.toThrow(
+        "link is invalid",
+      );
+      expect(transport).not.toHaveBeenCalled();
+    },
+  );
+  it("rejects a mismatched linked account instead of showing another account", async () => {
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ data: account(2) }));
+    await expect(new SynciClient(async () => "token", transport).accountSummary(1)).rejects.toThrow(
+      "unexpected account details",
+    );
+  });
   it("includes available identifiers without inventing missing fields or unmasking account numbers", () => {
     const data = {
       ...account(1),

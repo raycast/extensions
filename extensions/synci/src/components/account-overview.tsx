@@ -3,16 +3,18 @@ import { AccountDetails } from "./account-details";
 import { Action, ActionPanel, Detail, environment, Icon, Keyboard } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
-import { useAccounts } from "../hooks/use-data";
 import { useDetails } from "../hooks/use-details";
 import { api } from "../lib/api";
 import { balanceHistory, HISTORY_RANGES, type HistoryRange } from "../lib/balance-history";
+import { restoreMissingBalances } from "../lib/balances";
 import { historyChart } from "../lib/chart";
+import { SynciApiError } from "../lib/diagnostics";
 import {
   accountBalance,
   accountName,
   accountUrl,
   dateLabel,
+  decimal,
   markdown,
   money,
   transactionDate,
@@ -24,11 +26,51 @@ import { CommonActions, ToggleDetailsAction } from "./common";
 import { HoldingsList } from "./holdings-list";
 import { TransactionList } from "./transaction-list";
 
-export function AccountOverview({ account: initialAccount }: { account: FinancialAccount }) {
-  const accounts = useAccounts(true);
-  const account = accounts.data?.find(({ id }) => id === initialAccount.id) ?? initialAccount;
-  const balance = accountBalance(account);
-  const currency = balance.currency || account.currency || "";
+type AccountOverviewProps = { account: FinancialAccount; accountId?: never } | { accountId: number; account?: never };
+
+export function AccountOverview({ account: initialAccount, accountId }: AccountOverviewProps) {
+  const abortable = useRef<AbortController | null>(null);
+  const { data, error, isLoading, revalidate } = usePromise(
+    (id: number) => api.accountSummary(id, abortable.current?.signal),
+    [accountId ?? initialAccount!.id],
+    { abortable, onError: () => {} },
+  );
+  const account = data ?? initialAccount;
+  if (error || !account) {
+    const unavailable = error instanceof SynciApiError && [403, 404].includes(error.status);
+    return (
+      <Detail
+        isLoading={isLoading}
+        markdown={
+          error
+            ? unavailable
+              ? "# Account Unavailable\n\nThis account is no longer available to Raycast. Reconnect Synci to review account access."
+              : `# Couldn't Load Account\n\n${markdown(error.message)}`
+            : "# Loading Account…"
+        }
+        actions={
+          error ? (
+            <ActionPanel>
+              <CopyErrorDetails error={error} />
+              <CommonActions refresh={revalidate} />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    );
+  }
+  return <AccountOverviewContent account={account} isRefreshing={isLoading} refreshAccount={revalidate} />;
+}
+
+function AccountOverviewContent({
+  account: initialAccount,
+  isRefreshing,
+  refreshAccount,
+}: {
+  account: FinancialAccount;
+  isRefreshing: boolean;
+  refreshAccount: () => void;
+}) {
   const [showDetails, setShowDetails] = useDetails("account-overview", true);
   const [range, setRange] = useCachedState<HistoryRange>("balance-history-range", "30d", {
     cacheNamespace: "synci-views",
@@ -37,13 +79,24 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
   const activityAbort = useRef<AbortController | null>(null);
   const history = usePromise(
     (id: number) => api.accountBalanceHistory(id, historyAbort.current?.signal),
-    [account.id],
+    [initialAccount.id],
     { abortable: historyAbort, onError: () => {} },
   );
-  const activity = usePromise((id: number) => api.recentTransactions(id, activityAbort.current?.signal), [account.id], {
-    abortable: activityAbort,
-    onError: () => {},
-  });
+  const activity = usePromise(
+    (id: number) => api.recentTransactions(id, activityAbort.current?.signal),
+    [initialAccount.id],
+    {
+      abortable: activityAbort,
+      onError: () => {},
+    },
+  );
+  // Reuse this account's complete chart history if its summary has no balance.
+  const account =
+    !decimal(accountBalance(initialAccount).amount) && history.data && !history.error
+      ? restoreMissingBalances(initialAccount, history.data)
+      : initialAccount;
+  const balance = accountBalance(account);
+  const currency = balance.currency || account.currency || "";
   const series = balanceHistory(history.data ?? [], currency, range);
   const chart = historyChart(series.points, currency, environment.appearance === "dark");
   const rangeTitle = HISTORY_RANGES.find(({ value }) => value === range)?.title ?? "Last 30 Days";
@@ -53,7 +106,7 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
   const typeLabel = series.type?.toLowerCase().replace(/_/g, " ") || "reported";
   const coverage = first && last ? `${dateLabel(first.date)} – ${dateLabel(last.date)}` : "No dated history";
   const refresh = () => {
-    void accounts.revalidate();
+    refreshAccount();
     void history.revalidate();
     void activity.revalidate();
   };
@@ -64,7 +117,6 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
   const content = [
     `# ${markdown(money(balance.amount, balance.currency))}`,
     `${markdown(balance.kind)} balance · Synced ${markdown(dateLabel(account.balances_last_synced_at, true))}`,
-    accounts.error ? `Couldn't refresh the account: ${markdown(accounts.error.message)}` : "",
     account.balance_warning ? markdown(account.balance_warning) : "",
     history.error
       ? `${rangeTitle} · Couldn't load balance history: ${markdown(history.error.message)}`
@@ -93,25 +145,10 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
   ]
     .filter(Boolean)
     .join("\n\n");
-  if (accounts.data && !accounts.data.some(({ id }) => id === initialAccount.id)) {
-    return (
-      <Detail
-        markdown="# Account Unavailable\n\nThis account is no longer available to Raycast. Reconnect Synci to review account access."
-        actions={
-          <ActionPanel>
-            {(accounts.error || history.error || activity.error) && (
-              <CopyErrorDetails error={accounts.error || history.error || activity.error} />
-            )}
-            <CommonActions refresh={refresh} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
   return (
     <Detail
       navigationTitle={accountName(account)}
-      isLoading={accounts.isLoading || history.isLoading || activity.isLoading}
+      isLoading={isRefreshing || history.isLoading || activity.isLoading}
       markdown={content}
       metadata={
         showDetails ? (
@@ -182,9 +219,7 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
             url={accountUrl(account)}
             shortcut={Keyboard.Shortcut.Common.Open}
           />
-          {(accounts.error || history.error || activity.error) && (
-            <CopyErrorDetails error={accounts.error || history.error || activity.error} />
-          )}
+          {(history.error || activity.error) && <CopyErrorDetails error={history.error || activity.error} />}
           <CommonActions refresh={refresh} />
         </ActionPanel>
       }

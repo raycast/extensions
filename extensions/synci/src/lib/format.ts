@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import { APP_URL } from "./config";
-import type { Amount, FinancialAccount, Transaction } from "./types";
+import type { Amount, FinancialAccount, FinancialConnection, Transaction } from "./types";
 
 export function decimal(value: Amount | null | undefined): Decimal | undefined {
   if (value === null || value === undefined || value === "") return undefined;
@@ -102,6 +102,12 @@ export function accountSection(account: FinancialAccount): "banks" | "brokerages
 
 export function accountUrl(account: FinancialAccount): string {
   return `${APP_URL}/${accountSection(account)}/accounts/${account.id}`;
+}
+
+export function connectionUrl(connection: FinancialConnection): string {
+  const category = connection.institution?.category?.toUpperCase();
+  const section = category === "CRYPTO" ? "crypto" : category === "BROKERAGE" ? "brokerages" : "banks";
+  return `${APP_URL}/${section}/connections/${connection.id}`;
 }
 
 export function accountBalance(account: FinancialAccount) {

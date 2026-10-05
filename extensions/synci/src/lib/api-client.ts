@@ -116,10 +116,21 @@ export class SynciClient {
       signal,
     );
   }
-  async accountDetails(accountId: number, signal?: AbortSignal): Promise<FinancialAccount> {
+  accountSummary(accountId: number, signal?: AbortSignal) {
+    return this.account(accountId, true, signal);
+  }
+  accountDetails(accountId: number, signal?: AbortSignal) {
+    return this.account(accountId, false, signal);
+  }
+  private async account(
+    accountId: number,
+    omitSensitiveIdentifiers: boolean,
+    signal?: AbortSignal,
+  ): Promise<FinancialAccount> {
+    if (!Number.isSafeInteger(accountId) || accountId <= 0) throw new Error("This account link is invalid.");
     const payload = (await this.request(
       `/finance/accounts/${accountId}`,
-      { include: "financial_connection.institution", omit_sensitive_identifiers: "0" },
+      { include: "financial_connection.institution", omit_sensitive_identifiers: omitSensitiveIdentifiers ? "1" : "0" },
       signal,
     )) as { data?: FinancialAccount } | null;
     if (!payload?.data || String(payload.data.id) !== String(accountId))
@@ -128,39 +139,48 @@ export class SynciClient {
   }
   async accountsWithBalances(signal?: AbortSignal): Promise<FinancialAccount[]> {
     const accounts = await this.accounts(signal);
+    const controller = new AbortController();
+    const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     // Only resolve genuinely unavailable summaries; account filters stay lightweight.
     // A small worker pool avoids flooding the API for users with many accounts.
     const result = [...accounts];
     let next = 0;
-    await Promise.all(
-      Array.from({ length: Math.min(3, accounts.length) }, async () => {
-        while (next < accounts.length) {
-          const index = next++;
-          const account = accounts[index];
-          if (decimal(accountBalance(account).amount)) continue;
-          try {
-            const history = await this.all<BalanceEntry>(
-              `/finance/accounts/${account.id}/balances`,
-              { sort: "-updated_at,-id" },
-              signal,
-            );
-            result[index] = restoreMissingBalances(account, history);
-          } catch (error) {
-            if (
-              signal?.aborted ||
-              error instanceof SignInRequiredError ||
-              (error instanceof SynciApiError && [403, 429].includes(error.status))
-            )
-              throw error;
-            result[index] = {
-              ...account,
-              balance_warning:
-                "Recorded balances could not be loaded completely. Refresh to try again; this balance remains unavailable.",
-            };
+    try {
+      await Promise.all(
+        Array.from({ length: Math.min(3, accounts.length) }, async () => {
+          while (next < accounts.length) {
+            requestSignal.throwIfAborted();
+            const index = next++;
+            const account = accounts[index];
+            if (decimal(accountBalance(account).amount)) continue;
+            try {
+              const history = await this.all<BalanceEntry>(
+                `/finance/accounts/${account.id}/balances`,
+                { sort: "-updated_at,-id" },
+                requestSignal,
+              );
+              result[index] = restoreMissingBalances(account, history);
+            } catch (error) {
+              if (
+                requestSignal.aborted ||
+                error instanceof SignInRequiredError ||
+                (error instanceof SynciApiError && [403, 429].includes(error.status))
+              )
+                throw error;
+              result[index] = {
+                ...account,
+                balance_warning:
+                  "Recorded balances could not be loaded completely. Refresh to try again; this balance remains unavailable.",
+              };
+            }
           }
-        }
-      }),
-    );
+        }),
+      );
+    } catch (error) {
+      // Stop sibling pagination and queued accounts after access or rate-limit failures.
+      controller.abort();
+      throw error;
+    }
     return result;
   }
   connections(signal?: AbortSignal) {

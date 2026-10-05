@@ -4,6 +4,7 @@ import {
   accountBalance,
   accountUrl,
   compareTransactionsNewestFirst,
+  connectionUrl,
   dateLabel,
   decimal,
   markdown,
@@ -190,6 +191,22 @@ describe("presentation", () => {
       accountUrl(account({ financial_connection: connection({ institution: { id: 3, category: "BROKERAGE" } }) })),
     ).toContain("/brokerages/accounts/1");
     expect(accountUrl(account())).toContain("/banks/accounts/1");
+  });
+  it.each([
+    ["CRYPTO", "crypto"],
+    ["crypto", "crypto"],
+    ["Crypto", "crypto"],
+    ["BROKERAGE", "brokerages"],
+    ["brokerage", "brokerages"],
+    ["Brokerage", "brokerages"],
+    ["BANK", "banks"],
+    ["unknown", "banks"],
+    [null, "banks"],
+  ])("routes connection category %s to %s", (category, section) => {
+    expect(connectionUrl(connection({ institution: { id: 3, category } }))).toContain(`/${section}/connections/1`);
+  });
+  it("keeps connections with missing institution metadata on the bank route", () => {
+    expect(connectionUrl(connection({ institution: null }))).toContain("/banks/connections/1");
   });
   it.each([
     { account_category: "INVESTMENT" },

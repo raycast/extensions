@@ -189,6 +189,73 @@ describe("Synci API", () => {
     expect(account.balance).toEqual({ cleared: "0", available: "0" });
     expect(String(transport.mock.calls[1][0])).toContain("/finance/accounts/1/balances");
   });
+  it.each([401, 403, 429])("aborts sibling balance requests and queued accounts after HTTP %s", async (status) => {
+    const accounts = Array.from({ length: 8 }, (_, index) => ({ id: index + 1, currency: "NOK", enabled: true }));
+    const siblings: AbortSignal[] = [];
+    let fail: () => void = () => {};
+    const transport = vi.fn<typeof fetch>().mockImplementation(async (input, init) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/accounts")) return page(accounts);
+      if (url.pathname.endsWith("/accounts/1/balances")) {
+        return new Promise<Response>((resolve) => {
+          fail = () => resolve(new Response("", { status }));
+        });
+      }
+      const signal = init!.signal!;
+      siblings.push(signal);
+      return new Promise<Response>((_, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    });
+    const pending = new SynciClient(async () => "token", transport).accountsWithBalances();
+    const rejected = expect(pending).rejects.toThrow();
+    await vi.waitFor(() => expect(siblings).toHaveLength(2));
+    fail();
+    await rejected;
+    expect(siblings.every((signal) => signal.aborted)).toBe(true);
+    expect(transport).toHaveBeenCalledTimes(4); // Account list plus three workers, no more pages or queued accounts.
+    if (status === 401) await expect(pending).rejects.toBeInstanceOf(SignInRequiredError);
+    else await expect(pending).rejects.toMatchObject({ status });
+  });
+  it("cancels active balance workers when the caller aborts", async () => {
+    const controller = new AbortController();
+    const accounts = Array.from({ length: 6 }, (_, index) => ({ id: index + 1, enabled: true }));
+    const signals: AbortSignal[] = [];
+    const transport = vi.fn<typeof fetch>().mockImplementation(async (input, init) => {
+      if (new URL(String(input)).pathname.endsWith("/accounts")) return page(accounts);
+      const signal = init!.signal!;
+      signals.push(signal);
+      return new Promise<Response>((_, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    });
+    const pending = new SynciClient(async () => "token", transport).accountsWithBalances(controller.signal);
+    const rejected = expect(pending).rejects.toThrow();
+    await vi.waitFor(() => expect(signals).toHaveLength(3));
+    controller.abort();
+    await rejected;
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+    expect(transport).toHaveBeenCalledTimes(4);
+  });
+  it("keeps individual balance failures unavailable while resolving the remaining accounts", async () => {
+    const transport = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/accounts"))
+        return page([
+          { id: 1, currency: "NOK", enabled: true },
+          { id: 2, currency: "NOK", enabled: true },
+          { id: 3, currency: "NOK", enabled: true, balance: { cleared: "0" } },
+        ]);
+      if (url.pathname.endsWith("/accounts/1/balances")) return new Response("", { status: 500 });
+      return page([{ id: 2, currency: "NOK", type: "CLOSING_BOOKED", amount: "15" }]);
+    });
+    const result = await new SynciClient(async () => "token", transport).accountsWithBalances();
+    expect(result[0].balance).toBeUndefined();
+    expect(result[0].balance_warning).toContain("could not be loaded completely");
+    expect(result[1].balance?.cleared).toBe("15");
+    expect(result[2].balance?.cleared).toBe("0");
+    expect(transport).toHaveBeenCalledTimes(3);
+  });
   it("fails the whole aggregate when a later page fails", async () => {
     const transport = vi
       .fn<typeof fetch>()

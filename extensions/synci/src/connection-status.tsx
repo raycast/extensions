@@ -3,9 +3,8 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { CommonActions, EmptyState, healthColor, ToggleDetailsAction } from "./components/common";
 import { ErrorView, withSynci } from "./components/session";
 import { useConnections } from "./hooks/use-data";
-import { APP_URL } from "./lib/config";
 import { connectionState } from "./lib/finance";
-import { dateLabel, markdown } from "./lib/format";
+import { connectionUrl, dateLabel, markdown } from "./lib/format";
 import type { FinancialConnection } from "./lib/types";
 
 function ConnectionItem({
@@ -21,13 +20,7 @@ function ConnectionItem({
 }) {
   const state = connectionState(connection);
   const name = connection.institution?.name || `Connection ${connection.id}`;
-  const section =
-    connection.institution?.category === "CRYPTO"
-      ? "crypto"
-      : connection.institution?.category === "BROKERAGE"
-        ? "brokerages"
-        : "banks";
-  const url = `${APP_URL}/${section}/connections/${connection.id}`;
+  const url = connectionUrl(connection);
   return (
     <List.Item
       title={name}
