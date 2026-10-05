@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 22.22.2
+          node-version-file: .node-version
 
       - name: Get changed files in the docs folder
         id: changed-files
