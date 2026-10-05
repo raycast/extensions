@@ -120,7 +120,7 @@ function managedFields(): Set<string> {
   return new Set(["title", "saved", "source", "publisher", "read", "tags", "favorite", getFaviconField()]);
 }
 
-const TOP_LEVEL_KEY = /^(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|([^\s#'"-][^:]*?))[ \t]*:(?:\s|$)/;
+const TOP_LEVEL_KEY = /^(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|(?!-(?:\s|$))([^\s#'"][^:]*?))[ \t]*:(?:\s|$)/;
 
 /**
  * Returns the top-level entries of a raw YAML frontmatter that this extension
@@ -190,12 +190,12 @@ export default async function saveToObsidian(file: File): Promise<string> {
 
 // The generated heading takes the whole first line. URLs can contain
 // parentheses (Wikipedia's often do), so the link runs to the last `)`.
-const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\([^\n]*\)[ \t]*(?:\n|$)/;
+const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\(([^\n]*)\)[ \t]*(?:\n|$)/;
 
-function splitBookmarkBody(body: string | undefined): { hasHeading: boolean; description: string } {
+function splitBookmarkBody(body: string | undefined, source: string): { hasHeading: boolean; description: string } {
   const content = body ?? "";
   const match = content.match(BOOKMARK_HEADING);
-  if (!match) return { hasHeading: false, description: content };
+  if (!match || match[1] !== source) return { hasHeading: false, description: content };
 
   return { hasHeading: true, description: content.slice(match[0].length).replace(/^\n+/, "") };
 }
@@ -206,7 +206,7 @@ export function asFormValues(file: File): LinkFormState["values"] {
     title: file.attributes.title,
     favicon: file.attributes.favicon ?? "",
     tags: file.attributes.tags,
-    description: splitBookmarkBody(file.body).description,
+    description: splitBookmarkBody(file.body, file.attributes.source).description,
   };
 }
 
@@ -233,7 +233,7 @@ export function asUpdatedFile(values: LinkFormState["values"], original: File): 
   tags: ${JSON.stringify(attributes.tags)}
   ` + extraLines(attributes);
 
-  const { hasHeading } = splitBookmarkBody(original.body);
+  const { hasHeading } = splitBookmarkBody(original.body, original.attributes.source);
   const heading = `# [${values.title.replace(/[[\]]/g, "")}](${values.url})`;
 
   return {

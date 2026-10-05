@@ -28,11 +28,15 @@ export default function useFiles(): FilesHook {
         setLoading(false);
 
         // Process files and update as they complete
-        const loadedFiles: File[] = [];
-        await getObsidianFiles(localFiles, (file) => {
-          loadedFiles.push(file);
-          setFiles([...loadedFiles]);
+        const scanned = await getObsidianFiles(localFiles, (file) => {
+          setFiles((current) =>
+            current.some((f) => f.fullPath === file.fullPath)
+              ? current.map((f) => (f.fullPath === file.fullPath ? file : f))
+              : [...current, file]
+          );
         });
+        const paths = new Set(scanned.map((file) => file.fullPath));
+        setFiles((current) => current.filter((file) => paths.has(file.fullPath)));
       } catch (error) {
         console.error("Error loading files:", error);
       } finally {

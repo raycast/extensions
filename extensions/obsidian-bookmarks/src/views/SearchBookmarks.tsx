@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import useFiles from "../hooks/use-files";
 import { getFavorites, isFavorite } from "../helpers/favorites";
 import { completeTag, matchesTags, parseSearchQuery } from "../helpers/search-query";
-import { sanitizeUrl } from "../helpers/url-sanitizer";
+import { comparableUrl } from "../helpers/url-sanitizer";
 import { File } from "../types";
 import FileListItem from "./FileListItem";
 import path from "node:path";
@@ -56,7 +56,7 @@ export default function SearchBookmarks() {
     return new Fuse<File>(files, {
       ignoreLocation: true,
       threshold: MATCH_THRESHOLD,
-      keys: [{ name: "url", getFn: (file) => sanitizeUrl(file.attributes.source) }],
+      keys: [{ name: "url", getFn: (file) => comparableUrl(file.attributes.source) }],
     });
   }, [files]);
 
@@ -119,10 +119,11 @@ export default function SearchBookmarks() {
       }
     };
 
-    // URL matches (query params stripped) come first, then title/tags/body matches.
+    // URL matches come first, then title/tags/body matches.
     const searched = () => {
       if (!text) return files;
-      const byUrl = urlFuse.search(text).map(({ item }) => item);
+      const urlQuery = /^https?:\/\//i.test(text) ? comparableUrl(text) : text;
+      const byUrl = urlFuse.search(urlQuery).map(({ item }) => item);
       const matched = new Set(byUrl.map((file) => file.fullPath));
       const byContent = contentFuse.search(text).map(({ item }) => item);
       return [...byUrl, ...byContent.filter((file) => !matched.has(file.fullPath))];
