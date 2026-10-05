@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "session-limits",
+  "title": "Session Limits",
+  "description": "Track Codex and Claude Code usage limits, remaining quotas, and reset times in Raycast and your menu bar.",
+  "icon": "icon.png",
+  "author": "vedant_kalipatnapu",
+  "license": "MIT",
+  "version": "1.2.2",
+  "private": true,
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "session-limits",
+      "title": "Show Session Limits",
+      "description": "Check usage quotas and reset times for your coding assistants.",
+      "mode": "view",
+      "keywords": [
+        "codex",
+        "claude",
+        "usage",
+        "quota",
+        "limits",
+        "reset",
+        "remaining",
+        "subscription"
+      ]
+    },
+    {
+      "name": "limits-menu-bar",
+      "title": "Session Limits Menu Bar",
+      "description": "Keep your remaining coding assistant quotas in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "keywords": [
+        "codex",
+        "claude",
+        "usage",
+        "quota",
+        "limits",
+        "reset",
+        "remaining",
+        "subscription"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableCodex",
+      "type": "checkbox",
+      "title": "Providers",
+      "label": "Codex",
+      "description": "Read quota limits using your existing Codex sign-in.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableClaude",
+      "type": "checkbox",
+      "title": "",
+      "label": "Claude Code",
+      "description": "Read quota snapshots from Claude Code through a one-time local status-line connection.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "codexHome",
+      "type": "directory",
+      "title": "Codex Home",
+      "description": "Optional Codex account directory. Defaults to CODEX_HOME or ~/.codex.",
+      "required": false
+    },
+    {
+      "name": "claudeConfigDir",
+      "type": "directory",
+      "title": "Claude Config Directory",
+      "description": "Optional Claude profile directory containing settings.json. Defaults to CLAUDE_CONFIG_DIR or ~/.claude.",
+      "required": false
+    },
+    {
+      "name": "customProviderFile",
+      "type": "file",
+      "title": "Custom Providers",
+      "description": "Optional local JSON file with quota snapshots for any other provider. See the README for the format.",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "lint:store": "ray lint",
+    "bundle": "node scripts/package.mjs",
+    "typecheck": "tsc --noEmit && node --check assets/claude-statusline.cjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run build && npm run typecheck && npm run lint && npm run format:check",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}

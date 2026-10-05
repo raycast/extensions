@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+  <title id="title">codex session quota preview</title>
+  <desc id="desc">72 percent remaining, resets in 2 hours and 14 minutes.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffbaa0" />
+      <stop offset="0.55" stop-color="#df7863" />
+      <stop offset="1" stop-color="#a04b45" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="440" rx="24" fill="url(#background)" />
+  <rect x="112" y="24" width="496" height="392" rx="20" fill="#242221" />
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+    <text x="140" y="60" fill="#fff7ee" font-size="15" font-weight="600">codex</text>
+    <text x="580" y="60" fill="#bfb5ab" font-size="13" text-anchor="end">session</text>
+    <g transform="translate(180 78)">
+      <path d="M 52 173 A 128 128 0 0 1 308 173" fill="none" stroke="#46403b" stroke-width="17" stroke-linecap="round" />
+      <path d="M 52 173 A 128 128 0 0 1 308 173" fill="none" stroke="#ff9f82" stroke-width="17" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="28" />
+      <line x1="180" y1="173" x2="79" y2="173" transform="rotate(129.6 180 173)" stroke="#ffe6d0" stroke-width="3" stroke-linecap="round" />
+      <circle cx="180" cy="173" r="6" fill="#ffe6d0" />
+      <text x="180" y="232" text-anchor="middle" fill="#fff7ee" font-size="47" font-weight="700" letter-spacing="-2">72%</text>
+      <g fill="#bfb5ab" font-size="11" text-anchor="middle">
+        <text x="180" y="253">remaining</text>
+        <text x="50" y="200">0</text>
+        <text x="310" y="200">100</text>
+      </g>
+    </g>
+    <path d="M 112 366 H 608" stroke="#ffffff" stroke-opacity="0.07" />
+    <text x="140" y="396" fill="#bfb5ab" font-size="12">resets in <tspan fill="#f3e5d8">2h 14m</tspan></text>
+  </g>
+</svg>
