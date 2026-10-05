@@ -26,6 +26,7 @@ import {
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
 import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
+import { isWindows, primaryShortcut } from "../lib/platform";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
@@ -92,13 +93,13 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
       <Action.Push
         title="Upload Files Here"
         icon={Icon.Upload}
-        shortcut={{ modifiers: ["cmd"], key: "u" }}
+        shortcut={primaryShortcut("u")}
         target={<UploadForm destinationId={destination.id} prefix={prefix} onUploaded={revalidate} />}
       />
       <Action.Push
         title="New Folder"
         icon={Icon.NewFolder}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+        shortcut={primaryShortcut("n", "shift")}
         target={<NewFolderForm destination={destination} prefix={prefix} onCreated={revalidate} />}
       />
       <Action
@@ -125,7 +126,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
         <List.EmptyView
           icon={Icon.Folder}
           title={isLoading ? "Loading…" : "This Folder Is Empty"}
-          description={isLoading ? undefined : "Upload files here with ⌘U."}
+          description={isLoading ? undefined : `Upload files here with ${isWindows ? "Ctrl+U" : "⌘U"}.`}
           actions={<ActionPanel>{sharedActions}</ActionPanel>}
         />
       )}
@@ -191,7 +192,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.Push
                         title="Show QR Code"
                         icon={Icon.Mobile}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        shortcut={primaryShortcut("q", "shift")}
                         target={<QRCodeView name={object.name} link={object.url} />}
                       />
                     </>
@@ -206,7 +207,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.Push
                         title="Show 1-Hour Link QR Code"
                         icon={Icon.Mobile}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        shortcut={primaryShortcut("q", "shift")}
                         target={<TemporaryLinkQRCode destination={destination} object={object} seconds={3600} />}
                       />
                     </>
@@ -214,7 +215,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                   <Action
                     title={isShowingDetail ? "Hide Preview" : "Show Preview"}
                     icon={Icon.Sidebar}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={primaryShortcut("p", "shift")}
                     onAction={() => setIsShowingDetail((value) => !value)}
                   />
                 </ActionPanel.Section>
@@ -233,11 +234,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.CopyToClipboard title="Copy HTML" content={formatLink(object.url, object.name, "html")} />
                     </>
                   )}
-                  <ActionPanel.Submenu
-                    title="Copy Temporary Link"
-                    icon={Icon.Clock}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  >
+                  <ActionPanel.Submenu title="Copy Temporary Link" icon={Icon.Clock} shortcut={primaryShortcut("t")}>
                     {TEMPORARY_LINK_DURATIONS.map((duration) => (
                       <TemporaryLinkAction
                         key={duration.seconds}
@@ -251,7 +248,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                   <ActionPanel.Submenu
                     title="Show Temporary Link QR Code"
                     icon={Icon.Mobile}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                    shortcut={primaryShortcut("t", "shift")}
                   >
                     {TEMPORARY_LINK_DURATIONS.map((duration) => (
                       <Action.Push
@@ -281,7 +278,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                     title="Delete"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => confirmAndDelete(destination, object, revalidate)}
                   />
                 </ActionPanel.Section>

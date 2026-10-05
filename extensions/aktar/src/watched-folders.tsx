@@ -19,6 +19,7 @@ import {
   UPDATE_FOR_WATCHED_FOLDERS,
   WATCHED_FOLDERS_SETTINGS_URL,
 } from "./lib/watching";
+import { primaryShortcut } from "./lib/platform";
 
 export default function Command() {
   const { data: destinations } = useCachedPromise(listDestinations, []);
@@ -73,18 +74,9 @@ export default function Command() {
   function watchingActions() {
     if (!data) return null;
     return data.paused ? (
-      <Action
-        title="Resume Watching"
-        icon={Icon.Play}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-        onAction={resume}
-      />
+      <Action title="Resume Watching" icon={Icon.Play} shortcut={primaryShortcut("p", "shift")} onAction={resume} />
     ) : (
-      <ActionPanel.Submenu
-        title="Pause Watching"
-        icon={Icon.Pause}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-      >
+      <ActionPanel.Submenu title="Pause Watching" icon={Icon.Pause} shortcut={primaryShortcut("p", "shift")}>
         <Action title="For 1 Hour" icon={Icon.Clock} onAction={() => pause(60, "for 1 hour")} />
         <Action
           title="Until Tomorrow"

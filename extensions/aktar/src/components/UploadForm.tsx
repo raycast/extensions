@@ -117,12 +117,12 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       <Form.TextField
         title="Folder"
         placeholder="Optional, e.g. screenshots/2026"
-        info="Leave empty to name files with the destination's path template, like a drop on the menu bar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
+        info="Leave empty to name files with the destination's path template, like a file dropped on Aktar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
         {...itemProps.folder}
       />
       <Form.Dropdown
         title="Delete After"
-        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 or later with auto-delete set up for the destination (Delete after in Aktar's menu bar)."
+        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 for Mac or 0.1.2 for Windows with auto-delete set up for the destination (Delete after in Aktar's menu bar or tray panel)."
         {...itemProps.deleteAfter}
       >
         {DELETE_AFTER_OPTIONS.map((option) => (
