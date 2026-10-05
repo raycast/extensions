@@ -464,8 +464,8 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
-// The preference used to default to this, which matches neither installed bundle,
-// so a stored copy of it counts as unset.
+// The preference used to default to this, which matches neither release bundle, so a
+// stored copy counts as unset unless an app with that exact name is installed.
 const LEGACY_APP_NAME = "T3 Code";
 const STABLE_APP = "T3 Code (Alpha)";
 const NIGHTLY_APP = "T3 Code (Nightly)";
@@ -489,7 +489,10 @@ async function isInstalled(name: string): Promise<boolean> {
  * with no server running use whichever app is installed, stable first. */
 async function appName(): Promise<string> {
   const configured = preferences().appName?.trim();
-  if (configured && configured !== LEGACY_APP_NAME) {
+  if (
+    configured &&
+    (configured !== LEGACY_APP_NAME || (await isInstalled(configured)))
+  ) {
     return configured;
   }
   try {

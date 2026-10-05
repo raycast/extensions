@@ -12,19 +12,19 @@ Issue a token and paste it into the extension preferences on first run:
 
 ```
 # Server address: the running server publishes it here.
-ORIGIN=$(sed -E 's/.*"origin":"([^"]+)".*/\1/' ~/.t3/userdata/server-runtime.json)
+ORIGIN=$(node -p "JSON.parse(require('fs').readFileSync(process.env.HOME+'/.t3/userdata/server-runtime.json','utf8')).origin")
 # If that file is missing or has no origin, or you set the Server Origin preference,
 # use that value instead:
 # ORIGIN=http://127.0.0.1:3773
 
 # Issue the token with the CLI at the server's own version.
-VERSION=$(curl -s $ORIGIN/.well-known/t3/environment | sed -E 's/.*"serverVersion":"([^"]+)".*/\1/')
+VERSION=$(curl -s $ORIGIN/.well-known/t3/environment | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).serverVersion")
 npx t3@$VERSION auth session issue --ttl 365d --label raycast --token-only
 ```
 
 The CLI must match the server's version: a token issued by a different version can be
 written to the previous database, and the server then rejects it. The commands use only
-`sed`, `curl` and `npx`, which ship with macOS and Node.
+`node`, `curl` and `npx`, which come with macOS and Node.
 
 Revoke it with `t3 auth session revoke`, list sessions with `t3 auth session list`.
 
