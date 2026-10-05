@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "channel-mixer-helper",
+  "title": "Channel Mixer Helper",
+  "description": "Generate stable Photoshop Channel Mixer settings from source and target HEX colors.",
+  "version": "1.0.0",
+  "author": "AyakaNya",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": [
+    "Design Tools"
+  ],
+  "crossExtensions": [
+    "thomas/color-picker"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-color",
+      "title": "Convert HEX with Channel Mixer",
+      "description": "Generate stable Photoshop Channel Mixer settings from two HEX colors.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Conversion History",
+      "description": "Review recent HEX color conversions.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "typescript": "^5.7.2"
+  }
+}
