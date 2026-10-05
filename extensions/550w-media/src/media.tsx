@@ -214,11 +214,7 @@ function TaskResult({
   );
 }
 export default function Command() {
-  const prefs = getPreferenceValues<{
-    authMode: string;
-    apiKey?: string;
-    userNo?: string;
-  }>();
+  const prefs = getPreferenceValues<Preferences>();
   const cn = region === "cn",
     home = links.home;
   const [busy, setBusy] = useState(false),
@@ -241,6 +237,16 @@ export default function Command() {
         prefs.authMode === "api-key"
           ? { mode: "api-key", apiKey: prefs.apiKey, userNo: prefs.userNo }
           : { mode: "oauth", region, session };
+      if (auth.mode === "api-key") {
+        if (!auth.apiKey?.trim() || !auth.userNo?.trim())
+          throw new Error(
+            cn
+              ? "请先配置 API Key 和 User No"
+              : "Configure API Key and User No first",
+          );
+      } else {
+        await session.accessToken(false);
+      }
       let result;
       if (values.action === "image" || values.action === "video") {
         token(values.operationId, values.action === "image" ? 64 : 128);
@@ -331,7 +337,6 @@ export default function Command() {
               Number.MAX_SAFE_INTEGER,
               Number.MAX_SAFE_INTEGER,
             );
-          requested = true;
           const uploaded = await request("uploadVideo", auth, {}, file);
           if (uploaded.code !== 200) result = uploaded;
           else {
@@ -345,14 +350,16 @@ export default function Command() {
               duration > 600
             )
               throw new Error("Unsupported video metadata");
-            result = await request("submitTask", auth, {
+            const parameters = {
               videoUrl: publicUrl(videoUrl),
               width,
               height,
               duration,
               idempotencyKey: values.operationId,
               ...videoRegion(values.rectangle, width, height),
-            });
+            };
+            requested = true;
+            result = await request("submitTask", auth, parameters);
           }
         }
       } else if (values.action === "share") {

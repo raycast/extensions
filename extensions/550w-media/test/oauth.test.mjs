@@ -97,23 +97,25 @@ test("explicit invalid resource metadata never replaces stored tokens", async ()
       storage: f.storage,
       region: "global",
       fetcher: async (url) =>
-        Response.json(
-          url.endsWith("/register")
-            ? { client_id: "public-client" }
-            : {
-                access_token: "access",
-                refresh_token: "refresh",
-                token_type: "Bearer",
-                expires_in: 3600,
-                resource,
-              },
+        new Response(
+          JSON.stringify(
+            url.endsWith("/register")
+              ? { client_id: "public-client" }
+              : {
+                  access_token: "access",
+                  refresh_token: "refresh",
+                  token_type: "Bearer",
+                  expires_in: 3600,
+                  resource,
+                },
+          ),
         ),
     });
     await assert.rejects(() => session.accessToken(true));
     assert.equal(saved, false);
   }
 });
-test("disconnect always clears native tokens when client registration is missing or unreadable", async () => {
+test("disconnect retains native tokens when client registration is missing or unreadable", async () => {
   for (const unreadable of [false, true]) {
     const f = fixture("global", {
       accessToken: "live",
@@ -124,12 +126,53 @@ test("disconnect always clears native tokens when client registration is missing
       f.storage.getItem = async () => {
         throw Error("private storage error");
       };
-    await assert.rejects(
-      f.session.disconnect(),
-      /remote revocation not confirmed/,
-    );
-    assert.equal(await f.client.getTokens(), undefined);
+    await assert.rejects(f.session.disconnect(), /revocation not confirmed/);
+    assert.equal((await f.client.getTokens()).refreshToken, "refresh");
     assert.equal(f.calls.length, 0);
+  }
+});
+test("interactive reconnect recovers invalid grant but not network failure", async () => {
+  for (const status of [400, 503]) {
+    const f = fixture("global", {
+      accessToken: "expired",
+      refreshToken: "old",
+      isExpired: () => true,
+    });
+    const calls = [];
+    const session = createSession({
+      ...f,
+      region: "global",
+      fetcher: async (url, options) => {
+        calls.push(options);
+        if (url.endsWith("/register"))
+          return new Response(JSON.stringify({ client_id: "id" }));
+        if (options.body.get("grant_type") === "refresh_token")
+          return new Response(
+            JSON.stringify({
+              error: status === 400 ? "invalid_grant" : "unavailable",
+            }),
+            { status },
+          );
+        return new Response(
+          JSON.stringify({
+            access_token: "new",
+            refresh_token: "new-refresh",
+            token_type: "Bearer",
+            expires_in: 3600,
+          }),
+        );
+      },
+    });
+    if (status === 400) assert.equal(await session.accessToken(true), "new");
+    else await assert.rejects(session.accessToken(true));
+    assert.equal(
+      calls.filter(
+        (c) =>
+          c.body instanceof URLSearchParams &&
+          c.body.get("grant_type") === "authorization_code",
+      ).length,
+      status === 400 ? 1 : 0,
+    );
   }
 });
 test("native PKCE, DCR and secure token storage isolate regional resources", async () => {
@@ -171,7 +214,7 @@ test("background requests never initiate interactive authorization", async () =>
   await assert.rejects(f.session.accessToken(), /Connect/);
   assert.equal(f.calls.length, 0);
 });
-test("failed revocation clears local credentials but reports uncertainty", async () => {
+test("failed revocation retains credentials for a successful retry", async () => {
   const f = fixture("global", {
     accessToken: "live",
     refreshToken: "refresh",
@@ -185,7 +228,9 @@ test("failed revocation clears local credentials but reports uncertainty", async
       throw new Error("private token");
     },
   });
-  await assert.rejects(session.disconnect(), /remote revocation not confirmed/);
+  await assert.rejects(session.disconnect(), /revocation not confirmed/);
+  assert.equal((await f.client.getTokens()).refreshToken, "refresh");
+  await f.session.disconnect();
   assert.equal(await f.client.getTokens(), undefined);
 });
 test("invalid or cross-region token is never stored; provider content redacted", async () => {

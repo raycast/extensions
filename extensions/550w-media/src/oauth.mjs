@@ -79,7 +79,18 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
         redirect: "error",
         signal: AbortSignal.timeout(15000),
       });
-      if (!response.ok)
+      if (!response.ok) {
+        if (path === "/oauth2/token" && response.status === 400) {
+          const raw = await response.text();
+          if (raw.length <= 65536) {
+            try {
+              if (JSON.parse(raw).error === "invalid_grant")
+                throw new OAuthFailure("token", "invalid_grant");
+            } catch (error) {
+              if (error instanceof OAuthFailure) throw error;
+            }
+          }
+        }
         throw new OAuthFailure(
           path === "/oauth2/register"
             ? "registration"
@@ -88,6 +99,7 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
               : "token",
           `http_${response.status}`,
         );
+      }
       const raw = await response.text();
       if (path === "/oauth2/revoke" && !raw.trim()) return {};
       if (raw.length > 65536) throw new Error();
@@ -153,17 +165,29 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
     if (!tokens && !interactive)
       throw new Error("Connect your 550W account first");
     const clientId = await atStage("registration", registration);
-    if (tokens?.refreshToken)
-      return atStage("refresh", () =>
-        exchange(
-          {
-            grant_type: "refresh_token",
-            refresh_token: tokens.refreshToken,
-            client_id: clientId,
-          },
-          tokens,
-        ),
-      );
+    if (tokens?.refreshToken) {
+      try {
+        return await atStage("refresh", () =>
+          exchange(
+            {
+              grant_type: "refresh_token",
+              refresh_token: tokens.refreshToken,
+              client_id: clientId,
+            },
+            tokens,
+          ),
+        );
+      } catch (error) {
+        // Only an explicit invalid grant permits interactive recovery; outages
+        // must not discard a potentially valid refresh token or open a browser.
+        if (
+          !interactive ||
+          !(error instanceof OAuthFailure) ||
+          error.code !== "invalid_grant"
+        )
+          throw error;
+      }
+    }
     if (!interactive) throw new Error("Connect your 550W account first");
     const nativeRequest = await atStage("initialization", () =>
       client.authorizationRequest({
@@ -220,13 +244,12 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
           });
       } catch {
         failed = true;
-      } finally {
-        await client.removeTokens();
       }
       if (failed)
         throw new Error(
-          "Local authorization removed; remote revocation not confirmed",
+          "Remote revocation not confirmed; authorization retained so you can retry Disconnect",
         );
+      await client.removeTokens();
     },
   };
 }
