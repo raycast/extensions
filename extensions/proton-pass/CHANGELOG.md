@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Password Generator Defaults] - {PR_MERGE_DATE}
+## [Password Generator Defaults] - 2026-10-05
 
 - Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
 - Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
