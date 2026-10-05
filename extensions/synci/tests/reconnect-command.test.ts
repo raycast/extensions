@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   popToRoot: vi.fn().mockResolvedValue(undefined),
   showToast: vi.fn().mockResolvedValue(undefined),
   launchCommand: vi.fn().mockResolvedValue(undefined),
+  showFailureToast: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@raycast/api", () => ({
@@ -15,6 +16,7 @@ vi.mock("@raycast/api", () => ({
   Toast: { Style: { Success: "success", Failure: "failure" } },
 }));
 vi.mock("../src/lib/auth", () => ({ session: { reconnect: mocks.reconnect } }));
+vi.mock("@raycast/utils", () => ({ showFailureToast: mocks.showFailureToast }));
 
 import ReconnectSynci from "../src/reconnect-synci";
 
@@ -51,5 +53,19 @@ describe("Reconnect Synci navigation", () => {
     expect(mocks.launchCommand).not.toHaveBeenCalled();
     await mocks.showToast.mock.calls[0][0].primaryAction.onAction();
     expect(mocks.launchCommand).toHaveBeenCalledExactlyOnceWith({ name: "reconnect-synci", type: "userInitiated" });
+  });
+
+  it("shows a failure toast when Try Again cannot launch the reconnect command", async () => {
+    mocks.reconnect.mockRejectedValue(new Error("Authorization canceled"));
+    await ReconnectSynci();
+    const error = new Error("Command is disabled");
+    mocks.launchCommand.mockRejectedValueOnce(error);
+
+    await expect(mocks.showToast.mock.calls[0][0].primaryAction.onAction()).resolves.toBeUndefined();
+
+    expect(mocks.showFailureToast).toHaveBeenCalledExactlyOnceWith(error, {
+      title: "Could Not Open Reconnect Synci",
+    });
+    expect(mocks.reconnect).toHaveBeenCalledOnce();
   });
 });

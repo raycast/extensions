@@ -1,8 +1,9 @@
 import { CopyErrorDetails } from "./diagnostics";
-import { Action, ActionPanel, Detail, Icon, List, launchCommand, LaunchType, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, LaunchType, popToRoot } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { createContext, useContext, type ComponentType, type ReactNode } from "react";
 import { session } from "../lib/auth";
+import { launchCommandWithFeedback } from "../lib/launch-command";
 import { APP_URL } from "../lib/config";
 import { markdown } from "../lib/format";
 import { SignInRequiredError } from "../lib/oauth-session";
@@ -15,7 +16,11 @@ export function withSynci<P extends object>(Command: ComponentType<P>) {
     const { data, error, isLoading, revalidate } = usePromise(() => session.accessToken(true), [], {
       onError: () => {},
     });
-    const reconnect = () => launchCommand({ name: "reconnect-synci", type: LaunchType.UserInitiated });
+    const reconnect = () =>
+      launchCommandWithFeedback(
+        { name: "reconnect-synci", type: LaunchType.UserInitiated },
+        "Could Not Open Reconnect Synci",
+      );
     const signOut = async () => {
       await session.disconnect();
       await popToRoot();

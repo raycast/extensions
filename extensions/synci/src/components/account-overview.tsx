@@ -152,7 +152,7 @@ export function AccountOverview({ account: initialAccount }: { account: Financia
             <Action.Push
               title="View Holdings"
               icon={Icon.LineChart}
-              target={<HoldingsList initialAccountId={String(account.id)} />}
+              target={<HoldingsList initialAccountId={String(account.id)} navigationTitle={accountName(account)} />}
             />
           )}
           <ActionPanel.Submenu

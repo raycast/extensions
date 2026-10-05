@@ -1,6 +1,7 @@
 import { copyDiagnostics } from "./components/diagnostics";
-import { launchCommand, LaunchType, popToRoot, showToast, Toast } from "@raycast/api";
+import { LaunchType, popToRoot, showToast, Toast } from "@raycast/api";
 import { session } from "./lib/auth";
+import { launchCommandWithFeedback } from "./lib/launch-command";
 
 export default async function ReconnectSynci() {
   try {
@@ -13,7 +14,11 @@ export default async function ReconnectSynci() {
       secondaryAction: { title: "Copy Error Details", onAction: () => copyDiagnostics(error) },
       primaryAction: {
         title: "Try Again",
-        onAction: () => launchCommand({ name: "reconnect-synci", type: LaunchType.UserInitiated }),
+        onAction: () =>
+          launchCommandWithFeedback(
+            { name: "reconnect-synci", type: LaunchType.UserInitiated },
+            "Could Not Open Reconnect Synci",
+          ),
       },
     });
     await popToRoot({ clearSearchBar: true });

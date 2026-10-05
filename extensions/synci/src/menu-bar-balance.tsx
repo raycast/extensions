@@ -1,7 +1,8 @@
-import { Color, Icon, launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { api } from "./lib/api";
+import { launchCommandWithFeedback } from "./lib/launch-command";
 import { accountBalance, accountName, dateLabel, money } from "./lib/format";
 import { menuBarSummary } from "./lib/menu-bar";
 import { SignInRequiredError } from "./lib/oauth-session";
@@ -21,11 +22,14 @@ export default function MenuBarBalance() {
   const [currency, setCurrency] = useCachedState("menu-bar-currency", "", { cacheNamespace: "synci-views" });
   const summary = menuBarSummary(error ? [] : (data ?? []), selectedIds, currency);
   const openAccounts = (accountId?: string) =>
-    launchCommand({
-      name: "check-balances",
-      type: LaunchType.UserInitiated,
-      context: accountId ? { accountId } : undefined,
-    });
+    launchCommandWithFeedback(
+      {
+        name: "check-balances",
+        type: LaunchType.UserInitiated,
+        context: accountId ? { accountId } : undefined,
+      },
+      "Could Not Open View Accounts",
+    );
   const toggle = async (id: string) => {
     await setSelectedIds((ids) => (ids.includes(id) ? ids.filter((value) => value !== id) : [...ids, id]));
   };

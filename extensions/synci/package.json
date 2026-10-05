@@ -19,6 +19,7 @@
     {
       "name": "search-transactions",
       "title": "Search Transactions",
+      "subtitle": "Synci",
       "description": "Search transactions across your connected accounts with account and date filters",
       "mode": "view",
       "arguments": [
@@ -33,6 +34,7 @@
     {
       "name": "check-balances",
       "title": "View Accounts",
+      "subtitle": "Synci",
       "description": "View account balances, history, and recent activity",
       "mode": "view",
       "keywords": [
@@ -43,6 +45,7 @@
     {
       "name": "view-holdings",
       "title": "View Holdings",
+      "subtitle": "Synci",
       "description": "Explore investment and crypto holdings, quantities, market values, and account details",
       "mode": "view",
       "keywords": [
@@ -56,18 +59,21 @@
     {
       "name": "recent-spending",
       "title": "Show Recent Spending",
+      "subtitle": "Synci",
       "description": "Explore booked outflows by currency, merchant, and account",
       "mode": "view"
     },
     {
       "name": "connection-status",
       "title": "Open Connection Status",
+      "subtitle": "Synci",
       "description": "Check connection health, consent expiry, and open connections in Synci",
       "mode": "view"
     },
     {
       "name": "reconnect-synci",
       "title": "Reconnect Synci",
+      "subtitle": "Synci",
       "description": "Choose which Synci accounts Raycast can access and approve updated permissions",
       "mode": "no-view",
       "keywords": [
@@ -82,6 +88,7 @@
     {
       "name": "menu-bar-balance",
       "title": "Synci Balance",
+      "subtitle": "Synci",
       "description": "Show balances for selected accounts in the macOS menu bar",
       "mode": "menu-bar",
       "platforms": [

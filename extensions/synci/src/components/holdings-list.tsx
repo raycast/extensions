@@ -148,7 +148,13 @@ function HoldingItem({
   );
 }
 
-export function HoldingsList({ initialAccountId = "all" }: { initialAccountId?: string }) {
+export function HoldingsList({
+  initialAccountId = "all",
+  navigationTitle,
+}: {
+  initialAccountId?: string;
+  navigationTitle?: string;
+}) {
   const [accountId, setAccountId] = useState(initialAccountId);
   const [showDetails, setShowDetails] = useDetails("holdings");
   const [search, setSearch] = useState("");
@@ -184,7 +190,7 @@ export function HoldingsList({ initialAccountId = "all" }: { initialAccountId?: 
   const selectedAccount = data?.accounts.find((account) => String(account.id) === accountId);
   return (
     <List
-      navigationTitle="Holdings"
+      navigationTitle={navigationTitle}
       isLoading={isLoading}
       isShowingDetail={showDetails && !!holdings.length}
       filtering
