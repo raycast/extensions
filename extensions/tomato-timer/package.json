@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tomato-timer",
+  "title": "Tomato Timer",
+  "description": "Pomodoro timer for Windows with a floating on-screen countdown, session history and focus charts.",
+  "icon": "icon.png",
+  "author": "gabriel_s",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro",
+      "subtitle": "Tomato Timer",
+      "description": "Start, pause and stop focus sessions and breaks, with a floating timer, history and charts.",
+      "mode": "view",
+      "keywords": [
+        "pomodoro",
+        "timer",
+        "focus",
+        "tomato",
+        "break"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusMinutes",
+      "title": "Focus Length",
+      "description": "Length of a focus session.",
+      "type": "dropdown",
+      "required": false,
+      "default": "25",
+      "data": [
+        { "title": "15 minutes", "value": "15" },
+        { "title": "20 minutes", "value": "20" },
+        { "title": "25 minutes", "value": "25" },
+        { "title": "30 minutes", "value": "30" },
+        { "title": "45 minutes", "value": "45" },
+        { "title": "50 minutes", "value": "50" },
+        { "title": "60 minutes", "value": "60" },
+        { "title": "90 minutes", "value": "90" }
+      ]
+    },
+    {
+      "name": "shortBreakMinutes",
+      "title": "Short Break Length",
+      "description": "Length of a short break.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        { "title": "3 minutes", "value": "3" },
+        { "title": "5 minutes", "value": "5" },
+        { "title": "10 minutes", "value": "10" }
+      ]
+    },
+    {
+      "name": "longBreakMinutes",
+      "title": "Long Break Length",
+      "description": "Length of a long break.",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        { "title": "10 minutes", "value": "10" },
+        { "title": "15 minutes", "value": "15" },
+        { "title": "20 minutes", "value": "20" },
+        { "title": "30 minutes", "value": "30" }
+      ]
+    },
+    {
+      "name": "longBreakInterval",
+      "title": "Long Break Every",
+      "description": "How many focus sessions before a long break is suggested.",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "data": [
+        { "title": "2 sessions", "value": "2" },
+        { "title": "3 sessions", "value": "3" },
+        { "title": "4 sessions", "value": "4" },
+        { "title": "5 sessions", "value": "5" },
+        { "title": "6 sessions", "value": "6" }
+      ]
+    },
+    {
+      "name": "dailyGoal",
+      "title": "Daily Goal",
+      "description": "Focus sessions you want to finish per day.",
+      "type": "dropdown",
+      "required": false,
+      "default": "8",
+      "data": [
+        { "title": "4 sessions", "value": "4" },
+        { "title": "6 sessions", "value": "6" },
+        { "title": "8 sessions", "value": "8" },
+        { "title": "10 sessions", "value": "10" },
+        { "title": "12 sessions", "value": "12" }
+      ]
+    },
+    {
+      "name": "showOverlay",
+      "title": "Floating Timer",
+      "label": "Show a floating countdown on screen",
+      "description": "Keeps a small always-on-top timer on screen while a session runs.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "playSound",
+      "title": "Sound",
+      "label": "Play a sound when a session ends",
+      "description": "Plays the Windows alarm sound when a session ends.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
