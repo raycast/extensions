@@ -18,7 +18,7 @@ Retain the operation ID when investigating an uncertain submission. Do not submi
 
 Run `npm ci`, `npm test`, `npm run typecheck`, `npm run lint:source`, `npm run lint`, and `npm run build`. Strict lint checks Store metadata as well as source; an invalid author blocks publication even when compilation succeeds. Builds use distribution mode and write to `staging/build`, without importing a development extension into Raycast. The repository build prepares and formats the bundled API source from the canonical distribution source; standalone review sources must include `src/generated/api.mjs`. Never submit credentials or private media in screenshots.
 
-This is a local candidate, not an approved Store release. Real Raycast verification, screenshots, metadata checks, and review remain outstanding; see the repository readiness report for details.
+This is a review candidate, not an approved Store release. The image, video, and share-link views were opened in the real Raycast 2.6.2 client on 2026-10-05. Three real captures in `metadata/` use 2000×1250 PNG with a consistent neutral border; no UI text or results were fabricated. This UI check does not replace end-to-end authorization, paid processing, or Store approval.
 
 ## Independent regional candidates
 
