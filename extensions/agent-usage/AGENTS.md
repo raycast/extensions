@@ -131,6 +131,7 @@ src/
   kimi/                    # Kimi provider
   minimax/                 # MiniMax provider
   opencode-go/             # OpenCode Go provider
+  raycast/                 # Raycast AI credits — website session cookie + unofficial credits API
   synthetic/               # Synthetic provider
   zai/                     # z.ai / GLM provider
   **/*.test.ts             # Node test-runner tests colocated with modules
@@ -169,6 +170,7 @@ Key imports from `@raycast/utils`:
 - Each provider should keep its `fetcher`, `renderer`, and `types` responsibilities separate. Add `auth`, `parser`, or small utility modules only when the provider already needs that boundary.
 - Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useClinePassAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
 - ClinePass auto-detection reads shared auth from `~/.cline/data/settings/providers.json` (`providers.cline.settings.auth`) before the legacy `~/.cline/data/secrets.json` entry. File-backed sessions may be refreshed and must be persisted atomically with an optimistic credential check so concurrent Cline writes and unrelated provider settings are not overwritten. Manual ClinePass accounts require both a `usr-` user ID and an `sk_` API key.
+- Raycast AI credits come from the unofficial website endpoint `GET https://www.raycast.com/frontend_api/current_user/ai_credits`, authenticated with the `__raycast_session` cookie pasted into `raycastCookieHeader` (only `__raycast_session` and `csrf_token` are forwarded; a bare value is treated as the session). The desktop app's `backend.raycast.com/api/v1/ai/credits` needs the app's OAuth bearer, which extensions cannot read, and rejects website cookies. Chrome cookie auto-import (as CodexBar does) is intentionally not implemented to avoid Keychain prompts and browser-specific decryption.
 - Reuse shared UI helpers from `src/agents/ui.tsx` for error/loading/empty states before adding custom UI.
 - Reuse shared formatting, HTTP, JWT, and OpenCode helpers from `src/agents` before adding provider-local duplicates.
 - Provider `fetcher`/`auth`/`parser` modules must not import `@raycast/api` or `src/agents/hooks.ts` (directly or transitively) — the package has no runtime entry outside Raycast, so any such import breaks the Node test runner. Hook wiring, preference reads, and caching live in `src/agents/provider-hooks.ts` and `src/agents/hooks.ts` instead.
