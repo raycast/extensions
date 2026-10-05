@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Chirpie MCP Server] - 2026-10-04
+
+- Add Chirpie to the official registry: the publishing connector for AI agents. Post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, with media, drafts, post analytics and comment replies. Hosted remote server at `https://chirpie.ai/mcp` through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
+
 ## [Add Clipwright MCP Server] - 2026-10-04
 
 - Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
