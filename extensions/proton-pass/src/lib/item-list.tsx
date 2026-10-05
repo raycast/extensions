@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
 import { hostnameOf, itemKey, toOpenableUrl } from "./format";
 import { ItemActions } from "./item-actions";
@@ -64,6 +64,19 @@ export function ItemList({
     [items, selectedKey, firstItem],
   );
   const activeKey = selectedItem ? itemKey(selectedItem) : undefined;
+  // Decided when the list first shows items: its first suggestion, if any, so that a suggestion showing up later
+  // (e.g. after a refresh) never moves the cursor.
+  const initialSelection = useRef<string | null | undefined>(undefined);
+  if (initialSelection.current === undefined && items.length > 0) {
+    initialSelection.current = suggested[0] ? itemKey(suggested[0]) : null;
+  }
+  // Once Raycast reports that selection, the selection is left to Raycast: setting it on every move made Raycast
+  // recentre the list each time, which flickered.
+  const [isInitialSelectionApplied, setIsInitialSelectionApplied] = useState(false);
+  const onSelectionChange = useCallback((id: string | null) => {
+    if (id !== null && id === initialSelection.current) setIsInitialSelectionApplied(true);
+    setSelectedKey(id);
+  }, []);
   // Hidden details do not fetch secrets; copy actions can load them on demand.
   const {
     detail: visibleDetail,
@@ -127,8 +140,8 @@ export function ItemList({
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search by name, username or website…"
       filtering={true}
-      selectedItemId={activeKey}
-      onSelectionChange={setSelectedKey}
+      selectedItemId={isInitialSelectionApplied ? undefined : (initialSelection.current ?? undefined)}
+      onSelectionChange={onSelectionChange}
       searchBarAccessory={searchBarAccessory}
     >
       {items.length === 0 && !isLoading ? (
