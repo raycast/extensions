@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Fix requests failing against cobalt API v11] - {PR_MERGE_DATE}
+## [Fix requests failing against cobalt API v11] - 2026-10-05
 
 - Renamed `twitterGif` to `convertGif` and `tiktokH265` to `allowH265` in the API request body, matching the current cobalt request schema; v11 instances reject unknown fields with `error.api.invalid_body`, which broke every download
 
