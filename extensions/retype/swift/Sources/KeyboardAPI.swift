@@ -162,8 +162,10 @@ private func translateKey(_ keyCode: UInt16, modifier: UInt32, data: Data, kbdTy
         )
     }
 
-    guard status == noErr, length > 0 else { return "\u{0}" }
-    return String(String.UnicodeScalarView(chars[0..<length].compactMap { UnicodeScalar($0) }))
+    // JS indexes keyMap by UTF-16 unit, so every key must be exactly one unit or positions shift.
+    // ponytail: multi-unit keys (ligatures, combining marks, non-BMP) are not mapped; widen the key map format if users need them.
+    guard status == noErr, length == 1, let scalar = UnicodeScalar(chars[0]) else { return "\u{0}" }
+    return String(scalar)
 }
 
 private func currentLayoutName() -> String {

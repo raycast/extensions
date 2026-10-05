@@ -48,7 +48,6 @@ export default async function main() {
     await showHUD("Please select text");
     return;
   }
-  selectedText = selectedText.replace(/\n$/, "");
 
   // 3. Detect source layout (prefer active layout, then history as tiebreakers)
   const activeId = layouts.find((l) => l.active)?.id;
@@ -78,11 +77,16 @@ export default async function main() {
     [],
   );
 
+  if (pick.transformed === selectedText) {
+    await showHUD("Nothing to retype");
+    return;
+  }
+
   // 5. Paste and switch keyboard layout
   try {
     await new Promise((r) => setTimeout(r, 50));
     await Clipboard.paste(pick.transformed);
-    await LayoutManager.setInput(pick.target.title);
+    await LayoutManager.setInput(pick.target.id);
     await showHUD(`✅ ${pick.target.title}`);
   } catch (e) {
     await showHUD((e as Error).message);

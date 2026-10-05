@@ -80,7 +80,7 @@ export function detectSourceLayout(opts: {
     return { layout, score, priority };
   });
   scored.sort((a, b) => b.score - a.score || a.priority - b.priority);
-  return scored[0].layout;
+  return scored[0].score > 0 ? scored[0].layout : null;
 }
 
 /**

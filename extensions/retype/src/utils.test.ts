@@ -81,7 +81,11 @@ describe("detectSourceLayout", () => {
 
   it("ignores null chars (\\u0000) in scoring", () => {
     const result = detectSourceLayout({ text: "\u0000\u0000", layouts: [EN] });
-    expect(result).toBe(EN);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when no character exists in any layout", () => {
+    expect(detectSourceLayout({ text: "🙂 🙂", layouts: [EN] })).toBeNull();
   });
 
   it("breaks tie in favor of activeId", () => {
