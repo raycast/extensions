@@ -130,7 +130,9 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
     revalidate,
     mutate,
   } = useCachedPromise(getSchedule, [date], {
-    keepPreviousData: true,
+    // Reuse only this date's cache. A previous day's payload can arrive before
+    // isLoading turns true and would be remembered under the new date.
+    keepPreviousData: false,
   });
   const data = useLastGood(fetched, date, isLoading);
   // The first view uses the device date. The account timezone can put "today" on

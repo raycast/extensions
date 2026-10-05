@@ -17,11 +17,8 @@ import {
   type TodayModel,
 } from "../src/lib/schedule-model";
 
-// Guards the DayView stale-data leak: `useCachedPromise(getSchedule, [date],
-// { keepPreviousData: true })` briefly holds the *previous* day's single-day
-// payload while a new, uncached date is in flight. `buildTodayModel` must not
-// borrow another day's events for the requested date — it returns null so
-// DayView renders its loading state instead of wrong-day rows.
+// A response missing the requested date must not borrow another day's events.
+// Returning null keeps missing dates distinct from present-but-empty days.
 
 function makeNow(date: string, clock = "10:30"): Now {
   return `${date}T${clock}`;
@@ -271,6 +268,63 @@ it("keeps a tail row when its start row is on a fetched day that is not shown", 
   };
   const [a] = buildRangeAgenda(schedule, [dayA, dayB]);
   expect(a.events.map((e) => e.name)).toEqual(["overnight"]);
+});
+
+// A multi-day block: start row on a fetched-but-hidden day, with a tail on
+// every spanned shown day. Pre-fix this duplicated once per spanned shown day.
+function multiDayEvent(
+  startISO: string,
+  endISO: string,
+  id: string,
+  extra: Partial<ScheduleEvent> = {},
+): ScheduleEvent {
+  return { id, name: id, start: `${startISO}T22:00`, end: `${endISO}T02:00`, ...extra };
+}
+
+it("collapses a block that starts on a fetched-but-hidden day to one appearance across multiple shown days", () => {
+  // Regression for d915aa6: the fix narrowed `startIds` to shown dates, so a
+  // 3+ day block whose start row sits on a hidden fetched day survived on
+  // every spanned shown day and rendered under multiple day headers.
+  const dayBefore = addDaysISO(dayA, -1);
+  const dayC = addDaysISO(dayA, 2);
+  const long = multiDayEvent(dayBefore, dayC, "long");
+  const schedule: ScheduleResponse = {
+    timezone: "Europe/Ljubljana",
+    now: makeNow(dayA),
+    days: [
+      { date: dayBefore, events: [long] },
+      { date: dayA, events: [long] },
+      { date: dayB, events: [long] },
+    ],
+    areas: [],
+    activityTypes: [],
+  };
+  const [a, b] = buildRangeAgenda(schedule, [dayA, dayB]);
+  expect(a.events.map((e) => e.name)).toEqual(["long"]);
+  expect(b.events).toEqual([]);
+  expect(a.events.length + b.events.length).toBe(1);
+});
+
+it("collapses a long block whose start row is outside the fetched window", () => {
+  // A block whose start row sits outside the entire fetched window carries
+  // only tail rows into the range; it should appear once on the first shown
+  // day it overlaps, not once per spanned shown day.
+  const dayBeforeFetch = addDaysISO(dayA, -2);
+  const dayC = addDaysISO(dayA, 2);
+  const long = multiDayEvent(dayBeforeFetch, dayC, "long");
+  const schedule: ScheduleResponse = {
+    timezone: "Europe/Ljubljana",
+    now: makeNow(dayA),
+    days: [
+      { date: dayA, events: [long] },
+      { date: dayB, events: [long] },
+    ],
+    areas: [],
+    activityTypes: [],
+  };
+  const [a, b] = buildRangeAgenda(schedule, [dayA, dayB]);
+  expect(a.events.map((e) => e.name)).toEqual(["long"]);
+  expect(b.events).toEqual([]);
 });
 
 it("addresses an occurrence, the later blocks, or the whole series", () => {

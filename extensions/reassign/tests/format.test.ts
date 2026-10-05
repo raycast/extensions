@@ -92,6 +92,16 @@ it("reads a minutes part of 60 or more only with an explicit unit", () => {
   expect(parseDuration(" lunch 1h60 ")).toBeNull();
 });
 
+// A trailing punctuation period (1h30.) is sentence punctuation, not a decimal
+// point, and must not make the bare-minute branch reject the whole token. The
+// guard blocks only a period that starts a decimal (\.\d, e.g. the `1` of
+// `2h 1.5h`). Regression from dfff283, which widened the lookahead to
+// `(?![\d.]|\s*:)`; the decimal and clock traps are still covered by the
+// `it.each` above (`focus 2h 1.5h`, `lunch 1h 12:30`).
+it("parses a bare duration followed by a period", () => {
+  expect(parseDuration(" 1h30. ")).toEqual({ minutes: 90, match: "1h30" });
+});
+
 it("reads a form scope, and falls back to this block for an unknown value", () => {
   expect(parseReach("future")).toBe("future");
   expect(parseReach("all")).toBe("all");

@@ -3,12 +3,16 @@ import { beforeEach, expect, it, vi } from "vitest";
 type SearchEvent = { id: string; name: string; date: string; start: string; end: string };
 type OkData = { ok: true; data: { events: SearchEvent[] } };
 type ErrorData = { ok: false; code: "network" | "unauthenticated" | "permission" | "scope"; message: string };
+// SearchView tags each resolved payload with the query it was issued for, so the
+// hook's `data` is `{ query, result }`. `laggy` mirrors `keepPreviousData`'s
+// `laggyDataRef`, which the real hook republishes on the empty-cache-key branch.
+type Wrapped = { query: string; result: OkData | ErrorData };
 
 const mock = vi.hoisted(() => ({
   slots: [] as unknown[],
   cursor: 0,
   revalidate: vi.fn(),
-  laggy: undefined as OkData | ErrorData | undefined,
+  laggy: undefined as Wrapped | undefined,
   error: undefined as ErrorData | undefined,
   loading: false,
   pending: false,
@@ -65,6 +69,9 @@ vi.mock("@raycast/api", () => ({
 // `pending` models the very first in-flight fetch in a mounted SearchView, where
 // `laggyDataRef.current` is still undefined and `keepPreviousData` republishes
 // `undefined` as `data` while `isLoading === true`.
+// SearchView wraps its call as `({ query, result: await searchEvents(q) })`, so
+// `data` is the tagged shape; `laggy` holds the wrapped value to match the real
+// hook's `laggyDataRef`.
 vi.mock("@raycast/utils", () => ({
   useCachedPromise: (_fn: unknown, args: unknown[], options: { execute: boolean; keepPreviousData: boolean }) => {
     mock.options = options;
@@ -74,8 +81,9 @@ vi.mock("@raycast/utils", () => ({
         return { data: undefined, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
       }
       const result = mock.error ?? { ok: true as const, data: { events: mock.events } };
-      mock.laggy = result;
-      return { data: result, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
+      const wrapped: Wrapped = { query, result };
+      mock.laggy = wrapped;
+      return { data: wrapped, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
     }
     return { data: mock.laggy, isLoading: options.execute && mock.loading, revalidate: mock.revalidate };
   },

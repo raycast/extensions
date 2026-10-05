@@ -125,9 +125,10 @@ export function humanDuration(minutes: number): string {
  */
 export function parseDuration(text: string): { minutes: number; match: string } | null {
   // 1h30, 1h 5m, 1h 90m, 1 hour 30 minutes. An explicit m unit allows any minutes. The bare form
-  // keeps [0-5]?\d and (?![\d.]|\s*:), so it does not eat a clock's HH (1h 12:30) or a decimal (2h 1.5h).
+  // keeps [0-5]?\d and (?![\d]|\.\d|\s*:), so it does not eat a clock's HH (1h 12:30) or a decimal
+  // (2h 1.5h), but a trailing punctuation period (1h30.) is not a decimal point.
   const hm =
-    /(?<![\d.])(\d+)\s*h(?:ours?|rs?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?\b|([0-5]?\d)(?![\d.]|\s*:)\s*(?:m(?:in(?:ute)?s?)?)?\b)/i.exec(
+    /(?<![\d.])(\d+)\s*h(?:ours?|rs?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?\b|([0-5]?\d)(?![\d]|\.\d|\s*:)\s*(?:m(?:in(?:ute)?s?)?)?\b)/i.exec(
       text,
     );
   if (hm) return { minutes: Number(hm[1]) * 60 + Number(hm[2] ?? hm[3]), match: hm[0] };

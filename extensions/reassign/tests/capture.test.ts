@@ -56,6 +56,7 @@ it.each([
   ["ship v1.5h fix", "ship v fix", 90],
   ["lunch 1h 60m", "lunch", 120],
   ["lunch 1h 90m", "lunch", 150],
+  ["deep work 1h30.", "deep work", 90],
 ])("strips every duration token for %s", (input, name, durationMinutes) => {
   const parsed = parseCapture(input, ref);
   expect(parsed).toMatchObject({ kind: "flexible", name, durationMinutes });

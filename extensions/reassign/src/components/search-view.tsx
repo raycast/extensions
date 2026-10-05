@@ -16,21 +16,33 @@ import { refusalView } from "./states";
 export function SearchView(props: { initialQuery?: string }) {
   const [text, setText] = useState(props.initialQuery ?? "");
   const query = text.trim();
-  const { data, isLoading, revalidate } = useCachedPromise((q: string) => searchEvents(q), [query], {
-    execute: query.length > 0,
-    keepPreviousData: true,
-  });
+  // Tag each resolved payload with the query it was issued for. On the
+  // intermediate commit after an args change, `keepPreviousData` republishes
+  // the *previous* query's result as `data` while `isLoading` is still false
+  // (the passive effect that starts the new fetch and flips `isLoading` back to
+  // true runs after this commit). Without the tag, `data` for the stale query
+  // reads as "settled" for the current query and the EmptyView copy asserts a
+  // definitive verdict ("No matches" / "Could not search") before the new fetch
+  // has started. `fresh` is the result only when it matches the current query;
+  // rows still read from the laggy `data` so `keepPreviousData` keeps the prior
+  // query's rows on screen while the new one loads.
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async (q: string) => ({ query: q, result: await searchEvents(q) }),
+    [query],
+    { execute: query.length > 0, keepPreviousData: true },
+  );
 
-  const failure = query.length > 0 && data && !data.ok ? data : undefined;
+  const fresh = data && data.query === query ? data.result : undefined;
+  const failure = fresh && !fresh.ok ? fresh : undefined;
   // Only a sign-in or Pro refusal leaves the search. Other errors keep the query editable.
   if (failure && (needsSignIn(failure.code) || failure.code === "permission")) return refusalView(failure, revalidate);
 
-  const events = query.length === 0 || !data?.ok ? [] : data.data.events;
-  // The first in-flight fetch (or any refetch) for a non-empty query has not
-  // produced a result yet: keepPreviousData leaves `data` undefined on the very
-  // first fetch, and `isLoading` is true on every fetch. Guard the empty-state
-  // copy on it so we never assert "No matches" before the server has answered.
-  const searching = query.length > 0 && (data === undefined || isLoading);
+  const events = query.length === 0 || !data?.result?.ok ? [] : data.result.data.events;
+  // `fresh` is undefined until the *current* query has a settled result, and
+  // `isLoading` is true while its fetch is in flight. Either condition keeps the
+  // copy neutral, so the view never asserts "No matches" (or treats a laggy old
+  // failure as current) before the server has answered the query now in the bar.
+  const searching = query.length > 0 && (fresh === undefined || isLoading);
   const todayIso = todayISO();
   const groups = groupByDate(events);
 

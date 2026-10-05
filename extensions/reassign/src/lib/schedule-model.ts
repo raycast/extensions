@@ -272,15 +272,9 @@ export interface TodayModel {
 
 /** Group a day's events into the Now / Up next / Later / Done sections. */
 export function buildTodayModel(schedule: ScheduleResponse, dateISO: string): TodayModel | null {
-  // Do not fall back to `schedule.days[0]` for a missing date. DayView calls
-  // `useCachedPromise(getSchedule, [date], { keepPreviousData: true })`, so on
-  // the first navigation to an uncached date `data` still holds the *previous*
-  // day's single-day payload. A fallback would borrow that day's events and
-  // render them under the new day's header (and bucket them against the wrong
-  // clock) for the duration of the in-flight fetch. Returning null lets DayView
-  // render its loading state instead, mirroring `buildRangeAgenda`'s policy:
-  // "a date the server omits becomes an empty day, so it never borrows another
-  // day's events."
+  // Do not fall back to `schedule.days[0]` for a missing date. Borrowing another
+  // day's events would render them under the wrong header and clock. Returning
+  // null keeps a missing date distinct from a present-but-empty day.
   const day = schedule.days.find((d) => d.date === dateISO);
   if (!day) return null;
 
@@ -352,30 +346,30 @@ export interface DayAgenda {
 /**
  * One DayAgenda per requested date, from a single range response (days[]).
  * A date the server omits becomes an empty day, so it never borrows another
- * day's events. A tail row (its start is on an earlier day) drops when its start
- * row is on a shown date. A tail whose start row is not shown survives.
+ * day's events. A block appears once in the shown range — on the first shown
+ * date it overlaps — so a tail row drops once its id has already been emitted
+ * on an earlier shown date. This holds whether the start row itself sits on a
+ * shown date, on a fetched-but-hidden day, or entirely outside the fetch.
  */
 export function buildRangeAgenda(schedule: ScheduleResponse, dates: string[]): DayAgenda[] {
   const days = schedule.days ?? [];
   const byDate = new Map(days.map((d) => [d.date, d]));
   const areas = schedule.areas ?? [];
   const activityTypes = schedule.activityTypes ?? [];
-  // The start-row id of every block on a shown date. A start on a fetched but
-  // hidden day does not count, or its tail would vanish from the first day.
-  const shown = new Set(dates);
-  const startIds = new Set(
-    days
-      .filter((d) => shown.has(d.date))
-      .flatMap((d) => (d.events ?? []).filter((e) => !isTailRow(e, d.date)).map((e) => e.id)),
-  );
+  // The shown dates are walked in order, so a block's first appearance is its
+  // earliest shown day. Drop a tail row only when the same id was already kept
+  // on an earlier shown date — a start row is always kept, and an unseen tail
+  // survives (its own start row may be hidden, or sit outside the fetch).
+  const seen = new Set<string>();
   return dates.map((date) => {
     const day = byDate.get(date);
-    const events = day
-      ? (day.events ?? [])
-          .filter((e) => !(isTailRow(e, date) && startIds.has(e.id)))
-          .slice()
-          .sort((a, b) => a.start.localeCompare(b.start))
-      : [];
+    if (!day) return { date, events: [], areas, activityTypes };
+    const events: ScheduleEvent[] = [];
+    for (const e of (day.events ?? []).slice().sort((a, b) => a.start.localeCompare(b.start))) {
+      if (isTailRow(e, date) && seen.has(e.id)) continue;
+      seen.add(e.id);
+      events.push(e);
+    }
     return { date, events, areas, activityTypes };
   });
 }

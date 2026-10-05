@@ -20,15 +20,21 @@ export function refusalView(error: ApiError, onRecover: () => void) {
 /** Re-run OAuth for session expiry; intentional logout waits for a user action. */
 function ReauthView(props: { onSignedIn: () => void; automatic?: boolean }) {
   const started = useRef(false);
-  const [failed, setFailed] = useState(props.automatic === false);
-  // A cancelled or failed flow shows a manual retry, not a stuck spinner.
+  // Gate the spinner solely on the `signIn` window, so the manual retry
+  // reappears the moment `signIn` settles — even when the parent reconciles
+  // `ReauthView` in place after `revalidate` returns the same refusal. Seeding
+  // `true` for the automatic path keeps the initial spinner until the mount
+  // effect fires `reauth(true)`.
+  const [inFlight, setInFlight] = useState(props.automatic !== false);
   async function reauth(automatic = false) {
-    setFailed(false);
+    setInFlight(true);
     try {
       await signIn({ automatic });
       props.onSignedIn();
     } catch {
-      setFailed(true);
+      // Keep the manual retry visible; `inFlight` flips back in `finally`.
+    } finally {
+      setInFlight(false);
     }
   }
   useEffect(() => {
@@ -36,7 +42,7 @@ function ReauthView(props: { onSignedIn: () => void; automatic?: boolean }) {
     started.current = true;
     void reauth(true);
   }, []);
-  if (!failed) return <List isLoading />;
+  if (inFlight) return <List isLoading />;
   return (
     <List>
       <List.EmptyView
