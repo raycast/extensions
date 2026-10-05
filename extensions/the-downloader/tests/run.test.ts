@@ -38,20 +38,23 @@ describe("DEFAULT_IDLE_MS", () => {
 });
 
 describe("runWithWatchdog", () => {
-  it("spawns with stdin closed so the child can never hang on an interactive prompt", () => {
+  it("spawns with stdin closed so the child can never hang on an interactive prompt", async () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
-    runWithWatchdog("/bin/x", ["arg"], { idleMs: 1_000 });
+    const run = runWithWatchdog("/bin/x", ["arg"], { idleMs: 1_000 });
 
     expect(spawn).toHaveBeenCalledWith(
       "/bin/x",
       ["arg"],
       expect.objectContaining({ stdio: ["ignore", "pipe", "pipe"] }),
     );
+    // End the run here, so its idle timer can't fire after the test.
+    child.emit("close", 0);
+    await run;
   });
 
-  it("spawns the child detached on POSIX so it leads its own process group — lets termination reach grandchildren (yt-dlp's ffmpeg) instead of orphaning them", () => {
+  it("spawns the child detached on POSIX so it leads its own process group — lets termination reach grandchildren (yt-dlp's ffmpeg) instead of orphaning them", async () => {
     // Force darwin so the test exercises the POSIX branch regardless of the
     // host OS the suite runs on (Windows has no POSIX process groups and
     // correctly sets detached:false there).
@@ -59,19 +62,23 @@ describe("runWithWatchdog", () => {
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
-    runWithWatchdog("/bin/x", ["arg"], { idleMs: 1_000 });
+    const run = runWithWatchdog("/bin/x", ["arg"], { idleMs: 1_000 });
 
     expect(spawn).toHaveBeenCalledWith("/bin/x", ["arg"], expect.objectContaining({ detached: true }));
+    child.emit("close", 0);
+    await run;
   });
 
-  it("does NOT set detached on Windows — there are no POSIX process groups, so detached would just orphan the child", () => {
+  it("does NOT set detached on Windows — there are no POSIX process groups, so detached would just orphan the child", async () => {
     setPlatform("win32");
     const child = fakeChild();
     (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
 
-    runWithWatchdog("C:/bin/x.exe", ["arg"], { idleMs: 1_000 });
+    const run = runWithWatchdog("C:/bin/x.exe", ["arg"], { idleMs: 1_000 });
 
     expect(spawn).toHaveBeenCalledWith("C:/bin/x.exe", ["arg"], expect.objectContaining({ detached: false }));
+    child.emit("close", 0);
+    await run;
   });
 
   it("signals the whole process group (negative pid) on POSIX termination so a grandchild like ffmpeg dies with the child", async () => {
