@@ -1,4 +1,4 @@
-## [New icon] - {PR_MERGE_DATE}
+## [New icon] - 2026-10-05
 
 - New extension icon
 - Added a banner image to the README
