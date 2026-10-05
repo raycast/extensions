@@ -1,6 +1,6 @@
 # Extension Changelog
 
-## [Batch Parsing and Recurring Events] - {PR_MERGE_DATE}
+## [Batch Parsing and Recurring Events] - 2026-10-05
 
 ### Added
 
