@@ -5,6 +5,7 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import * as refresh from "./refresh";
+import * as itemCounts from "./item-counts";
 import * as format from "./format";
 import * as shortcuts from "./shortcuts";
 import * as fillSequence from "./fill-sequence";
@@ -307,6 +308,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
     "./format": {},
     "./item-list": {},
     "./refresh": refresh,
+    "./item-counts": itemCounts,
   });
   const render = () => {
     return harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" } });
@@ -356,6 +358,46 @@ test("item-list authentication failures clear saved session metadata on both lis
   await assert.rejects(api.listItems("vault", [vault]), /Session ended/);
   await assert.rejects(api.listVaultsAndItems(), /Session ended/);
   assert.equal(clears, 2);
+});
+
+test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
+  const counted: string[] = [];
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":" },
+    "./cache": {},
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        listVaultRoles: async () =>
+          new Map([
+            ["personal", "owner"],
+            ["family", "owner"],
+            ["work", "viewer"],
+            ["offline", "owner"],
+          ]),
+        countVaultMembers: async (shareId: string) => {
+          counted.push(shareId);
+          if (shareId === "offline") throw new PassCliError("Network unavailable", "network_error");
+          return shareId === "family" ? 3 : 1;
+        },
+      }),
+    },
+    "./core/login": {},
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { listVaultSharing: () => Promise<Map<string, unknown>> };
+
+  const sharing = await api.listVaultSharing();
+  assert.deepEqual(counted.sort(), ["family", "offline", "personal"]);
+  // A vault whose members couldn't be counted isn't known to be shared, or not.
+  assert.deepEqual(JSON.parse(JSON.stringify([...sharing])), [
+    ["personal", { role: "owner", isShared: false }],
+    ["family", { role: "owner", isShared: true }],
+    ["work", { role: "viewer", isShared: true }],
+    ["offline", { role: "owner" }],
+  ]);
 });
 
 test("opening a vault offline preserves its earlier per-vault item cache", async () => {
@@ -415,6 +457,7 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       "./format": {},
       "./item-list": {},
       "./refresh": refresh,
+      "./item-counts": itemCounts,
     });
     const render = () => harness.render(SearchItemsView, { initialVault: vault });
     render();
@@ -470,6 +513,7 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     "./format": {},
     "./item-list": {},
     "./refresh": refresh,
+    "./item-counts": itemCounts,
   });
   const render = () => harness.render(SearchItemsView, {});
   render();
@@ -1201,6 +1245,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     "./format": {},
     "./item-list": {},
     "./refresh": refresh,
+    "./item-counts": itemCounts,
   });
   const render = () => harness.render(SearchItemsView, { initialVault: vault });
   render();
