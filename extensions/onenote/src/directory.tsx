@@ -1,13 +1,22 @@
 import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { useState } from "react";
+import { searchCondition } from "./search";
 import { OneNoteItem, PAGE, types } from "./types";
 import { ONENOTE_MERGED_DB } from "./database";
 import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatetime } from "./utils";
 
-export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
+// Rows loaded at a time; more are loaded as the user scrolls, which bounds each query's work and payload.
+const PAGE_SIZE = 100;
+
+export function getListItems(query: string, fullTextIndexed: boolean, elt: OneNoteItem | undefined = undefined) {
   const [sort, setSort] = useState(0);
-  const { data, isLoading, permissionView } = useSQL<OneNoteItem>(ONENOTE_MERGED_DB, query);
+  const [searchText, setSearchText] = useState("");
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const { data, isLoading, permissionView } = useSQL<OneNoteItem>(
+    ONENOTE_MERGED_DB,
+    `${query.replace("ORDER BY", `${searchCondition(searchText, fullTextIndexed)} ORDER BY`)} LIMIT ${limit};`
+  );
   const results = data;
 
   if (permissionView) {
@@ -23,6 +32,17 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
 
   return (
     <List
+      filtering={false}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        setLimit(PAGE_SIZE);
+      }}
+      pagination={{
+        pageSize: PAGE_SIZE,
+        hasMore: (results?.length ?? 0) >= limit,
+        onLoadMore: () => setLimit((current) => current + PAGE_SIZE),
+      }}
+      throttle={true}
       navigationTitle={context}
       isLoading={isLoading}
       searchBarPlaceholder={placeholderStr}
@@ -33,11 +53,11 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
           .sort((a, b) => b.id - a.id)
           .map((type) => (
             <List.Section title={type.desc} key={type.id}>
-              <Items items={results || []} elt={elt} type={type.id} />
+              <Items items={results || []} elt={elt} type={type.id} fullTextIndexed={fullTextIndexed} />
             </List.Section>
           ))
       ) : (
-        <Items items={results || []} elt={elt} type={0} />
+        <Items items={results || []} elt={elt} type={0} fullTextIndexed={fullTextIndexed} />
       )}
 
       <List.EmptyView
@@ -58,7 +78,7 @@ function quoteSql(value: string) {
   return value.replaceAll("'", "''");
 }
 
-function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined }): JSX.Element {
+function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | undefined; fullTextIndexed: boolean }) {
   return (
     <>
       {props.items.map((item) => {
@@ -81,7 +101,7 @@ function Items(props: { items: OneNoteItem[]; type: number; elt: OneNoteItem | u
                   <Action.Push
                     title="Browse"
                     icon={Icon.ChevronRight}
-                    target={<Directory elt={item} />}
+                    target={<Directory elt={item} fullTextIndexed={props.fullTextIndexed} />}
                     shortcut={{ modifiers: [], key: "tab" }}
                   />
                   {/* <Action
@@ -119,7 +139,7 @@ function TypeDropdown(props: { onSortChange: (newSort: string) => void }) {
   );
 }
 
-export function Directory(props: { elt?: OneNoteItem }) {
+export function Directory(props: { elt?: OneNoteItem; fullTextIndexed: boolean }) {
   if (props) {
     if (props.elt) {
       const item = props.elt;
@@ -128,14 +148,14 @@ export function Directory(props: { elt?: OneNoteItem }) {
       } else {
         const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
           props.elt.GOID
-        )}' ORDER BY RecentTime DESC;`;
-        return getListItems(query, props.elt);
+        )}' ORDER BY RecentTime DESC`;
+        return getListItems(query, props.fullTextIndexed, props.elt);
       }
     }
   }
-  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
-  const query = `SELECT ${LIST_COLUMNS} FROM Entities ORDER BY RecentTime DESC;`;
-  return getListItems(query);
+  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC`;
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC`;
+  return getListItems(query, props.fullTextIndexed);
 }
 
 function PageDetail({ item }: { item: OneNoteItem }) {
