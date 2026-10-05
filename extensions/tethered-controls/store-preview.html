@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tethered — Raycast Store Preview</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #111114; color: #f4f4f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: inherit; }
+    button { font: inherit; }
+    .preview-banner { padding: 10px 24px; text-align: center; background: #342a17; color: #f5d992; font-size: 13px; }
+    header { height: 66px; border-bottom: 1px solid #29292e; display: flex; align-items: center; justify-content: space-between; padding: 0 max(28px, calc((100vw - 1180px)/2)); }
+    .brand { font-weight: 750; letter-spacing: -.04em; font-size: 25px; }
+    .brand-mark { display: inline-grid; place-items: center; background: #f05a47; width: 26px; height: 26px; border-radius: 7px; margin-right: 9px; transform: rotate(-12deg); font-size: 17px; }
+    .top-links { display: flex; gap: 26px; color: #a9a9ae; font-size: 14px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 48px 28px 100px; }
+    .crumbs { color: #89898f; font-size: 13px; margin-bottom: 40px; }
+    .intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; }
+    .identity { display: flex; gap: 24px; align-items: center; }
+    .icon { width: 86px; height: 86px; border-radius: 19px; box-shadow: 0 12px 30px #0008; }
+    h1 { font-size: 42px; line-height: 1.1; letter-spacing: -.04em; margin: 0 0 9px; }
+    .author { color: #a8a8af; font-size: 15px; }
+    .install { background: #f0f0f3; border: 0; border-radius: 9px; color: #18181b; padding: 11px 19px; font-weight: 650; opacity: .7; cursor: not-allowed; white-space: nowrap; }
+    .description { color: #c4c4c9; font-size: 18px; line-height: 1.5; margin: 32px 0 24px; max-width: 800px; }
+    .chips { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 38px; }
+    .chip { color: #b9b9c0; background: #25252b; border: 1px solid #35353c; border-radius: 7px; padding: 7px 11px; font-size: 13px; }
+    .gallery { margin: 0 0 52px; }
+    .hero { border: 1px solid #303037; border-radius: 13px; overflow: hidden; background: #000; aspect-ratio: 16/10; }
+    .hero img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .thumbs { display: flex; gap: 14px; margin-top: 14px; }
+    .thumb { width: 180px; aspect-ratio: 16/10; padding: 0; overflow: hidden; border-radius: 8px; border: 2px solid #3a3a41; background: #000; cursor: pointer; }
+    .thumb[aria-pressed="true"] { border-color: #f36f5c; }
+    .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .content { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 72px; }
+    h2 { font-size: 22px; letter-spacing: -.025em; margin: 0 0 20px; }
+    h3 { font-size: 17px; margin: 30px 0 10px; }
+    p, li { line-height: 1.65; color: #b7b7be; }
+    p { margin: 0 0 16px; }
+    ul { padding-left: 21px; margin: 0 0 19px; }
+    .section { border-top: 1px solid #303037; padding-top: 28px; margin-top: 36px; }
+    .commands { display: grid; gap: 0; }
+    .command { padding: 13px 0; border-bottom: 1px solid #29292f; }
+    .command strong { display: block; font-size: 14px; font-weight: 600; }
+    .command span { display: block; color: #85858d; margin-top: 3px; font-size: 13px; }
+    aside { border-top: 1px solid #303037; padding-top: 28px; }
+    .side-row { margin-bottom: 24px; }
+    .side-label { display: block; color: #85858d; font-size: 12px; margin-bottom: 6px; }
+    .side-value { font-size: 14px; }
+    @media (max-width: 700px) { header { padding: 0 22px; } .top-links { display: none; } main { padding: 30px 20px 80px; } .intro { display: block; } .identity { gap: 16px; } .icon { width: 66px; height: 66px; } h1 { font-size: 32px; } .install { margin-top: 25px; } .content { display: block; } aside { margin-top: 40px; } .thumb { width: 31%; } }
+  </style>
+</head>
+<body>
+  <div class="preview-banner">Local layout mockup · This is not a live Raycast Store page</div>
+  <header><div class="brand"><span class="brand-mark">⌘</span>raycast</div><div class="top-links"><span>Store</span><span>Developer</span><span>Blog</span></div></header>
+  <main>
+    <div class="crumbs">Store / Extensions / Tethered</div>
+    <div class="intro">
+      <div class="identity"><img class="icon" src="assets/icon.png" alt="Tethered icon"><div><h1>Tethered</h1><div class="author">by Tumerit</div></div></div>
+      <button class="install" disabled>Install Extension</button>
+    </div>
+    <p class="description">Control Tethered directly from Raycast. Tethered must be installed and running. A number of actions are only available to users with Pro access.</p>
+    <div class="chips"><span class="chip">System</span><span class="chip">Productivity</span><span class="chip">macOS</span></div>
+    <div class="gallery">
+      <div class="hero"><img id="hero-image" src="metadata/01-tethered-overview.png" alt="Tethered extension overview in Raycast Settings"></div>
+      <div class="thumbs">
+        <button class="thumb" type="button" aria-label="Show Tethered overview" aria-pressed="true" data-src="metadata/01-tethered-overview.png" data-alt="Tethered extension overview in Raycast Settings"><img src="metadata/01-tethered-overview.png" alt=""></button>
+        <button class="thumb" type="button" aria-label="Show command search" aria-pressed="false" data-src="metadata/02-command-search.png" data-alt="Tethered commands in Raycast search"><img src="metadata/02-command-search.png" alt=""></button>
+        <button class="thumb" type="button" aria-label="Show all commands" aria-pressed="false" data-src="metadata/03-tethered-commands.png" data-alt="Tethered command list in Raycast Settings"><img src="metadata/03-tethered-commands.png" alt=""></button>
+      </div>
+    </div>
+    <div class="content">
+      <div>
+        <section><h2>About This Extension</h2><p>Control <a href="https://tetheredmac.com/">Tethered</a> directly from Raycast. Tethered must be installed and running. A number of actions are only available to users with Pro access.</p>
+          <h3>Commands</h3><ul><li>Choose Auto, Low, or High Power mode.</li><li>Start or stop Caffeinate, or search your saved Caffeinate presets.</li><li>Search and apply your saved Tethered profiles.</li><li>Enable or disable Topup, Sailing, and Heat Protection.</li><li>Start or cancel a manual battery calibration cycle.</li><li>Show the current battery and control status.</li></ul>
+          <p>Saved profiles and Caffeinate presets are read from Tethered's local preferences. Some actions require an unlocked Tethered feature or suitable battery conditions. High Power requires a supported Mac. Topup requires AC power and active charging control. Calibration can charge to full and then discharge the battery.</p>
+          <h3>Setup</h3><p>Install and open the current Tethered app, then install this extension from the Raycast Store. Search for <strong>Tethered</strong> in Raycast to find its commands. You can assign aliases or hotkeys in Raycast's Extensions settings.</p><p>The extension sends requests to the running Tethered app. If <strong>Show Status</strong> cannot get a fresh response, check that Tethered is running and updated. Raycast's action confirmation means the request was sent; use <strong>Show Status</strong> or Tethered itself to confirm the resulting state.</p>
+        </section>
+        <section class="section"><h2>Version History</h2><h3>Initial Release</h3><ul><li>Control Tethered power modes, Caffeinate, Topup, Sailing, and Heat Protection from Raycast.</li><li>Search saved profiles and Caffeinate presets.</li><li>View battery and control status, and start or cancel calibration.</li></ul></section>
+      </div>
+      <aside><h2>Commands</h2><div class="commands" id="command-list"></div><div class="side-row" style="margin-top:34px"><span class="side-label">Platform</span><span class="side-value">macOS</span></div><div class="side-row"><span class="side-label">License</span><span class="side-value">MIT</span></div></aside>
+    </div>
+  </main>
+  <script>
+    for (const button of document.querySelectorAll('.thumb')) {
+      button.addEventListener('click', () => {
+        const hero = document.getElementById('hero-image');
+        hero.src = button.dataset.src;
+        hero.alt = button.dataset.alt;
+        for (const thumbnail of document.querySelectorAll('.thumb')) thumbnail.setAttribute('aria-pressed', String(thumbnail === button));
+      });
+    }
+    const commands = [
+      ['Auto Power', 'Set Tethered to Auto Power'], ['Low Power', 'Set Tethered to Low Power'], ['High Power', 'Set Tethered to High Power'],
+      ['Start Caffeinate', 'Start the default Tethered Caffeinate preset'], ['Start Timed Caffeinate', 'Keep your Mac awake for a chosen number of minutes'], ['Stop Caffeinate', 'Stop Tethered Caffeinate'], ['Run Caffeinate Preset', 'Browse and run saved Caffeinate presets'],
+      ['Show Status', 'Read the current Tethered battery and control state'], ['Get Tethered Pro', 'Open checkout for Tethered Pro on this Mac'], ['Start Calibration', 'Start a manual battery calibration cycle'], ['Cancel Calibration', 'Cancel the current battery calibration cycle'],
+      ['Enable Topup', 'Charge to full with Tethered Topup'], ['Disable Topup', 'Return to the normal charging limit'], ['Enable Sailing', 'Enable Tethered Sailing behavior'],
+      ['Disable Sailing', 'Disable Tethered Sailing behavior'], ['Enable Heat Protection', 'Enable battery temperature protection'], ['Disable Heat Protection', 'Disable battery temperature protection'],
+      ['Apply Profile', 'Browse and apply saved Tethered settings profiles']
+    ];
+    document.getElementById('command-list').replaceChildren(...commands.map(([title, description]) => {
+      const row = document.createElement('div'); row.className = 'command';
+      const name = document.createElement('strong'); name.textContent = title;
+      const detail = document.createElement('span'); detail.textContent = description;
+      row.append(name, detail); return row;
+    }));
+  </script>
+</body>
+</html>
