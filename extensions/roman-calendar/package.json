@@ -1,0 +1,38 @@
+{
+  "name": "roman-calendar",
+  "title": "Roman Calendar",
+  "description": "Convert Gregorian dates to Roman dates and back",
+  "icon": "calendar.png",
+  "author": "david",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "roman-calendar",
+      "title": "Roman Calendar",
+      "description": "Explore and convert Roman dates",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "tsc src/calendar.ts --target ES2022 --module commonjs --strict --skipLibCheck --outDir .test-build && node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
+  }
+}
