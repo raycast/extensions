@@ -1,6 +1,6 @@
 # Grokipedia Changelog
 
-## [Search Fixes and AI Tools] - {PR_MERGE_DATE}
+## [Search Fixes and AI Tools] - 2026-10-05
 
 - Restored article loading using Grokipedia's current endpoint.
 - Improved search reliability, request cancellation, error messages, and retry actions.
