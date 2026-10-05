@@ -1,0 +1,348 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-tab-link",
+  "title": "Copy Tab Link",
+  "description": "Copy the current browser tab as a clickable rich text link for Teams, Outlook or Word, or in Markdown, HTML, Slack, Jira, AsciiDoc and more. Works with Arc, Chrome, Safari, Brave, Edge, Vivaldi, Opera, Orion and Firefox, cleans tracking parameters and tidies up page titles.",
+  "icon": "icon.png",
+  "author": "jnbp",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-rich-text-link",
+      "title": "Copy Tab as Rich Text Link",
+      "subtitle": "Copy Tab Link",
+      "description": "Copies the current tab as a formatted link, ready to paste into Teams, Outlook, Word or any rich text field.",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-rich-text-link",
+      "title": "Paste Tab as Rich Text Link",
+      "subtitle": "Copy Tab Link",
+      "description": "Pastes the current tab as a formatted link straight into the field you were typing in.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-markdown-link",
+      "title": "Copy Tab as Markdown Link",
+      "subtitle": "Copy Tab Link",
+      "description": "Copies the current tab as [Title](URL).",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-plain-link",
+      "title": "Copy Tab as Plain Text",
+      "subtitle": "Copy Tab Link",
+      "description": "Copies the current tab as plain text in the shape you configured, for example the bare URL or Title — URL.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-custom-link",
+      "title": "Copy Tab in Custom Format",
+      "subtitle": "Copy Tab Link",
+      "description": "Copies the current tab using your own template.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-tab-as",
+      "title": "Copy Tab as…",
+      "subtitle": "Copy Tab Link",
+      "description": "Pick a format from a list with a live preview, then copy or paste it.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-all-tabs",
+      "title": "Copy All Tabs",
+      "subtitle": "Copy Tab Link",
+      "description": "Copies every tab of the frontmost browser window as a list. Uses AppleScript, so it is not available for Firefox or Zen.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browserSource",
+      "title": "Read the Current Tab From",
+      "description": "AppleScript works without any extra install. The Raycast browser extension also covers Firefox and Zen.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic — AppleScript, then browser extension",
+          "value": "auto"
+        },
+        {
+          "title": "AppleScript only",
+          "value": "applescript"
+        },
+        {
+          "title": "Raycast browser extension only",
+          "value": "extension"
+        }
+      ]
+    },
+    {
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "description": "Always read the tab from this browser instead of whichever app is in front.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "richTextMethod",
+      "title": "Rich Text Method",
+      "description": "How the formatted link is put on the clipboard. Automatic offers RTF, HTML and plain text at once, which covers Teams, Outlook and Word as well as browsers. Pick RTF only if an app still refuses the link.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic — RTF, HTML and plain text together",
+          "value": "auto"
+        },
+        {
+          "title": "RTF only — the safest bet for Teams, Outlook, Word",
+          "value": "rtf"
+        },
+        {
+          "title": "HTML only — for browsers, Notion and other web apps",
+          "value": "html"
+        }
+      ]
+    },
+    {
+      "name": "richTextFallback",
+      "title": "Rich Text Fallback",
+      "description": "What lands on the clipboard for apps that cannot handle formatted text.",
+      "type": "dropdown",
+      "required": false,
+      "default": "url",
+      "data": [
+        {
+          "title": "URL",
+          "value": "url"
+        },
+        {
+          "title": "Title",
+          "value": "title"
+        },
+        {
+          "title": "Title and URL",
+          "value": "titleUrl"
+        },
+        {
+          "title": "Markdown link",
+          "value": "markdown"
+        }
+      ]
+    },
+    {
+      "name": "plainFormat",
+      "title": "Plain Text Format",
+      "description": "Used by the Copy Tab as Plain Text command.",
+      "type": "dropdown",
+      "required": false,
+      "default": "titleUrl",
+      "data": [
+        {
+          "title": "URL only",
+          "value": "url"
+        },
+        {
+          "title": "Title only",
+          "value": "title"
+        },
+        {
+          "title": "Title — URL",
+          "value": "titleUrl"
+        },
+        {
+          "title": "Title, URL on the next line",
+          "value": "titleUrlNewline"
+        }
+      ]
+    },
+    {
+      "name": "titleUrlSeparator",
+      "title": "Title and URL Separator",
+      "description": "Sits between the title and the URL in the plain text formats.",
+      "type": "textfield",
+      "required": false,
+      "default": " — "
+    },
+    {
+      "name": "customTemplate",
+      "title": "Custom Format",
+      "description": "Tokens: {title} {url} {host} {domain} {path} {scheme} {markdown} {html} {date} {time}",
+      "type": "textfield",
+      "required": false,
+      "default": "{title} — {url}"
+    },
+    {
+      "name": "allTabsFormat",
+      "title": "Format for All Tabs",
+      "description": "Which format the Copy All Tabs command uses for each line.",
+      "type": "dropdown",
+      "required": false,
+      "default": "markdown",
+      "data": [
+        {
+          "title": "Markdown link",
+          "value": "markdown"
+        },
+        {
+          "title": "URL only",
+          "value": "url"
+        },
+        {
+          "title": "Title — URL",
+          "value": "titleUrl"
+        },
+        {
+          "title": "HTML link",
+          "value": "html"
+        },
+        {
+          "title": "Slack link",
+          "value": "slack"
+        },
+        {
+          "title": "Jira link",
+          "value": "jira"
+        },
+        {
+          "title": "Custom format",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "allTabsPrefix",
+      "title": "List Style for All Tabs",
+      "description": "Whether each line starts with a bullet, a number, or nothing at all.",
+      "type": "dropdown",
+      "required": false,
+      "default": "bullet",
+      "data": [
+        {
+          "title": "Plain lines",
+          "value": "none"
+        },
+        {
+          "title": "Bullet list",
+          "value": "bullet"
+        },
+        {
+          "title": "Numbered list",
+          "value": "number"
+        }
+      ]
+    },
+    {
+      "name": "stripTracking",
+      "title": "URL Cleanup",
+      "label": "Remove tracking parameters",
+      "description": "Strips campaign and click-id parameters from the URL before copying.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "trackingParams",
+      "title": "Tracking Parameters",
+      "description": "Comma-separated. A trailing asterisk matches a prefix, for example utm_*.",
+      "type": "textfield",
+      "required": false,
+      "default": "utm_*, fbclid, gclid, gbraid, wbraid, msclkid, dclid, twclid, ttclid, yclid, igshid, mc_cid, mc_eid, _hsenc, _hsmi, vero_id, wickedid, si, spm, ref_src, oly_enc_id, oly_anon_id"
+    },
+    {
+      "name": "removeFragment",
+      "title": "Fragment",
+      "label": "Remove everything after the # in the URL",
+      "description": "Cuts off the #section part at the end of the address.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "stripSiteSuffix",
+      "title": "Title Cleanup",
+      "label": "Remove a trailing site name, for example \" | Example Corp\"",
+      "description": "Many pages append their own name to the title. This removes it.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "titlePatterns",
+      "title": "Title Patterns",
+      "description": "Regular expressions removed from the title, separated by ;; — for example \\s*[-|] Google Docs$;;^\\(\\d+\\)\\s*",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "stripEmoji",
+      "title": "Emoji",
+      "label": "Remove emoji from the title",
+      "description": "Some sites put an emoji in front of the page title.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "maxTitleLength",
+      "title": "Maximum Title Length",
+      "description": "Shortens longer titles with an ellipsis. Leave empty for no limit.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action in Copy Tab As…",
+      "description": "What the Enter key does in the Copy Tab As list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into the frontmost app",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1",
+    "tldts": "^7.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
