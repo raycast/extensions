@@ -4,16 +4,41 @@ export interface AvailableModel {
   id: string;
   display_name: string;
   created_at: string;
-  /** Output-token ceiling as advertised by the API. Absent on older API responses. */
-  max_tokens?: number;
+  /**
+   * Output-token ceiling as advertised by the API. `null` for a model that does not
+   * advertise one, and absent entirely on older API responses — every consumer must treat
+   * the three cases alike, which is what `??` here and in `contextWindow.ts` does.
+   */
+  max_tokens?: number | null;
   /**
    * Maximum input context window in tokens, as advertised by the API. Absent on older
    * API responses. This is the whole input budget and `max_tokens` is NOT drawn from it —
    * the two are separate limits, so `src/utils/contextWindow.ts` spends this entire value
    * on conversation history rather than reserving output headroom out of it.
    */
-  max_input_tokens?: number;
+  max_input_tokens?: number | null;
+  /**
+   * What the model supports, as advertised by the API — vision, thinking modes, and each
+   * effort level, every leaf a `{ supported: boolean }`. Read by the Raycast AI model
+   * provider (`src/model-provider.ts`) to declare each model's capabilities from the
+   * source rather than guessing them from the model's name. Absent on older responses and
+   * on the hardcoded fallback list, where the provider declares only what every Claude
+   * model has.
+   */
+  capabilities?: ModelCapabilities | null;
 }
+
+/** The subset of the API's `capabilities` tree this extension reads. Every leaf is optional
+ *  because the tree is untyped upstream and grows as features ship. */
+export interface ModelCapabilities {
+  image_input?: { supported?: boolean };
+  thinking?: { supported?: boolean; types?: { adaptive?: { supported?: boolean } } };
+  effort?: { supported?: boolean } & Partial<Record<EffortLevel, { supported?: boolean }>>;
+}
+
+/** The effort levels the Messages API accepts, lowest first. */
+export const EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
+export type EffortLevel = (typeof EFFORT_LEVELS)[number];
 
 interface ModelApiResponse {
   data: Array<{
@@ -21,8 +46,9 @@ interface ModelApiResponse {
     id: string;
     display_name: string;
     created_at: string;
-    max_tokens?: number;
-    max_input_tokens?: number;
+    max_tokens?: number | null;
+    max_input_tokens?: number | null;
+    capabilities?: ModelCapabilities | null;
   }>;
   has_more: boolean;
   first_id: string | null;
@@ -35,9 +61,22 @@ const MODELS_PAGE_LIMIT = 1000;
 /** Stops a malformed `has_more` from looping forever. */
 const MAX_MODEL_PAGES = 10;
 
-const MODELS_CACHE_KEY = "available_models_cache";
+const LEGACY_MODELS_CACHE_KEY = "available_models_cache";
 
-// Hardcoded fallback list in case API and cache both fail
+/**
+ * Versioned because the cached shape changed: rows written before `max_tokens` and
+ * `max_input_tokens` were captured lack both fields, and an unversioned key would serve
+ * those rows to a build that now depends on them — quietly falling back to the name
+ * heuristic and the default context window until the cache happened to refresh.
+ */
+const MODELS_CACHE_KEY = "available_models_cache_v2";
+
+// Hardcoded fallback list in case API and cache both fail.
+//
+// Deliberately carries no Opus entry. The one that used to be here — Opus 4.1 — has since
+// reached end-of-life and dropped out of the live model list, and there is no way to name
+// its successor here without guessing an id that may not exist. A short, true list beats a
+// longer one containing a model the account cannot call.
 const FALLBACK_MODELS: AvailableModel[] = [
   {
     id: "claude-haiku-4-5-20251001",
@@ -51,12 +90,6 @@ const FALLBACK_MODELS: AvailableModel[] = [
     created_at: "2025-09-29T00:00:00Z",
     max_tokens: 64000,
   },
-  {
-    id: "claude-opus-4-1-20250805",
-    display_name: "Claude Opus 4.1",
-    created_at: "2025-08-05T00:00:00Z",
-    max_tokens: 32000,
-  },
 ];
 
 /**
@@ -67,7 +100,28 @@ const FALLBACK_MODELS: AvailableModel[] = [
  * page would simply never see the rest. This requests the maximum page size and
  * follows `has_more`/`last_id` until the list is exhausted.
  */
-export async function fetchAvailableModels(): Promise<AvailableModel[]> {
+/** A non-2xx response from `/v1/models`, carrying the status so callers can tell a rejected
+ *  key apart from an outage. */
+class ModelsRequestError extends Error {
+  constructor(
+    readonly status: number,
+    statusText: string,
+  ) {
+    super(`API request failed: ${status} ${statusText}`);
+  }
+}
+
+export async function fetchAvailableModels(
+  options: {
+    /**
+     * Throw when Anthropic rejects the key (401/403) instead of falling back to the cache or
+     * the hardcoded list. The commands want the fallback — a bad key still leaves them a
+     * picker to show. The Raycast AI provider must not: a fallback list there advertises
+     * models to Raycast that will each fail with the same rejected key.
+     */
+    throwOnAuthError?: boolean;
+  } = {},
+): Promise<AvailableModel[]> {
   const { apiKey } = getPreferenceValues<Preferences>();
 
   try {
@@ -89,7 +143,7 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        throw new ModelsRequestError(response.status, response.statusText);
       }
 
       const data = (await response.json()) as ModelApiResponse;
@@ -101,7 +155,8 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
           created_at: model.created_at,
           max_tokens: model.max_tokens,
           max_input_tokens: model.max_input_tokens,
-        }))
+          capabilities: model.capabilities,
+        })),
       );
 
       if (!data.has_more || !data.last_id) break;
@@ -113,6 +168,13 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
 
     return models;
   } catch (error) {
+    if (
+      options.throwOnAuthError &&
+      error instanceof ModelsRequestError &&
+      (error.status === 401 || error.status === 403)
+    ) {
+      throw new Error("Anthropic rejected the API key. Check it in the Claude extension's preferences.");
+    }
     console.error("Failed to fetch models from API:", error);
     // Try to return cached models on error
     const cached = await getCachedModels();
@@ -145,6 +207,9 @@ export async function getCachedModels(): Promise<AvailableModel[] | null> {
 export async function cacheModels(models: AvailableModel[]): Promise<void> {
   try {
     await LocalStorage.setItem(MODELS_CACHE_KEY, JSON.stringify(models));
+    // Sweep the pre-versioning key once a v2 cache exists. Nothing reads it any more, so
+    // leaving it would be dead storage the user has no way to see or clear.
+    await LocalStorage.removeItem(LEGACY_MODELS_CACHE_KEY);
   } catch (error) {
     console.error("Failed to cache models:", error);
   }
