@@ -1,5 +1,13 @@
 # Google Meet Changelog
 
+## [Safari Web App Support & Per-Profile Open In] - {PR_MERGE_DATE}
+
+- Create meetings directly inside a Google Meet Safari web app (File → Add to Dock) when "Open Meetings In" is set to the PWA. The meeting link is read from the web app's window title ("Meet - <code>") through System Events, so no browser tab is opened and neither the preferred nor the default browser is consulted. A default browser that isn't a supported browser, such as a link router like Finicky, no longer causes "isn't a supported browser" in this mode.
+- Detect Safari web apps by their `com.apple.Safari.WebApp.` bundle identifier prefix, alongside the Chromium PWA prefixes.
+- Ignore meeting codes already showing in the web app before the command ran, so a meeting window left open from an earlier call is never copied instead of the new one.
+- Wait up to 30 seconds for the web app to show its meeting code, regardless of the timeout preference, since Meet takes 6–15+ seconds to get from `/new` to a meeting there. Requires Accessibility permission for Raycast.
+- Let each saved profile choose where its meetings open — Preferred Browser, Google Meet PWA, or the extension's Open Meetings In setting — with a new Open In field when adding a profile and a Set Where Meetings Open action on existing ones. Profiles saved before this release keep following the extension setting.
+
 ## [Added Aside support] - 2026-09-29
 
 ## [Fix Arc Detection] - 2026-08-07
