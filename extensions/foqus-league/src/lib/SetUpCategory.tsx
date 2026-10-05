@@ -49,6 +49,7 @@ export function SetUpCategory({ goal }: { goal: string }) {
     update
       ? `**Add to Existing ${own.title}** to ${verb} ${them} on every ${goal} quick start. In Raycast's Focus categories, pick ${own.title} and add ${them}.`
       : `**Import ${own.title}** to ${verb} ${them} on every ${goal} quick start. In Raycast's importer, press **Select File** and pick \`${importFileName(goal)}\` from Downloads.`,
+    ...(need.pending ? [`Already did this? Your next ${goal} quick start confirms it.`] : []),
   ].join("\n\n");
 
   const importIt = (

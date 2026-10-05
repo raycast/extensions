@@ -63,14 +63,15 @@ export async function readCategories(): Promise<FocusCategory[]> {
   }
 }
 
+const tagFor = (goal: string) => createHash("sha256").update(goal.trim()).digest("hex").slice(0, 6);
+
 export function categoryTitleFor(goal: string): string {
   const plain = goal
     .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}️]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
   if (/^[a-z0-9]+( [a-z0-9]+)*$/i.test(plain)) return `Foqus ${plain}`;
-  const tag = createHash("sha256").update(goal.trim()).digest("hex").slice(0, 6);
-  return `Foqus ${plain || "Focus"} ${tag}`;
+  return `Foqus ${plain || "Focus"} ${tagFor(goal)}`;
 }
 
 export function categoryIdFor(title: string): string {
@@ -97,12 +98,10 @@ export function findCategory(categories: FocusCategory[], title: string): FocusC
   return categories.find((c) => c.title.trim().toLowerCase() === wanted);
 }
 
-function slugFor(goal: string): string {
-  const slug = goal.trim().toLowerCase().replace(/\W+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
-  return slug || "focus";
+export function importFileName(goal: string): string {
+  const { id } = ownCategoryFor(goal);
+  return `${id.length > 60 ? `${id.slice(0, 53)}-${tagFor(goal)}` : id}.json`;
 }
-
-export const importFileName = (goal: string) => `foqus-${slugFor(goal)}.json`;
 
 export async function writeImportFile(
   goal: string,

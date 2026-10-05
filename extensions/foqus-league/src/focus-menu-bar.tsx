@@ -59,10 +59,10 @@ export default function FocusMenuBar() {
     }
   })();
 
-  const goals = quickStartGoals(data?.sessions ?? []).map((goal) => {
-    const { plan, need } = quickStartPlan(goal.name, learned ?? NOTHING_LEARNED, categories ?? [], isRaycast2);
-    return { ...goal, plan, need: need?.pending ? undefined : need };
-  });
+  const goals = quickStartGoals(data?.sessions ?? []).map((goal) => ({
+    ...goal,
+    ...quickStartPlan(goal.name, learned ?? NOTHING_LEARNED, categories ?? [], isRaycast2),
+  }));
   const quickStarts = goals.slice(0, QUICK_STARTS);
   const moreGoals = goals.slice(QUICK_STARTS).filter((goal) => Date.now() - goal.lastAt <= RECENT_MS);
 
@@ -119,8 +119,8 @@ export default function FocusMenuBar() {
               <MenuBarExtra.Item
                 key={name}
                 title={need.own.title}
-                subtitle={strandedSummary(need.stranded)}
-                icon={need.exists ? Icon.Pencil : Icon.Plus}
+                subtitle={need.pending ? "waiting for your next start" : strandedSummary(need.stranded)}
+                icon={need.pending ? Icon.Clock : need.exists ? Icon.Pencil : Icon.Plus}
                 tooltip={strandedSummary(need.stranded, 3)}
                 onAction={() =>
                   tryLaunch(

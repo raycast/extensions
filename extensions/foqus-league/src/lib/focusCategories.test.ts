@@ -146,11 +146,21 @@ test("the import filename survives goals that leave nothing to name it after", a
     const surf = await writeImportFile("\u{1F3C4} Break", [], dir);
     const long = await writeImportFile("x".repeat(250), [], dir);
     const again = await writeImportFile("\u{1F680}", [{ id: "x.com", app: false }], dir);
-    assert.equal(basename(rocket), "foqus-focus.json");
+    assert.match(basename(rocket), /^foqus-focus-[0-9a-f]{6}\.json$/);
     assert.equal(again, rocket, "a repeat import replaces its own file, so the setup screen names the right one");
     assert.deepEqual(JSON.parse(await readFile(again, "utf8"))[0].websites, ["x.com"]);
     assert.equal(basename(surf), "foqus-break.json", "a stripped emoji leaves no double dash");
     assert.ok(Buffer.byteLength(basename(long)) <= 255);
+    assert.notEqual(
+      basename(long),
+      basename(await writeImportFile("x".repeat(251), [], dir)),
+      "names cut for length stay apart",
+    );
+    assert.notEqual(
+      basename(await writeImportFile("写作", [], dir)),
+      basename(await writeImportFile("阅读", [], dir)),
+      "goals with nothing Latin to name them by never share a file",
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

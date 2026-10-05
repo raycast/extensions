@@ -163,12 +163,6 @@ test("a quick start lists a category to set up only when it would drop blocks", 
     false,
     "Raycast 1 reads its categories, so it never has to trust",
   );
-  const dayLater = Date.now() + 25 * 60 * 60 * 1000;
-  assert.equal(
-    quickStartPlan("Break", learnedOf(imported), [], true, dayLater).need?.pending,
-    false,
-    "a day on, an import that was never confirmed is listed again, in case it was cancelled",
-  );
 
   const shown = { Break: { ...known.Break, categories: [cat("foqus-break", "Foqus Break")] } };
   assert.equal(
