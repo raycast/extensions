@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add DropTheHassle MCP Server] - {PR_MERGE_DATE}
+## [Add DropTheHassle MCP Server] - 2026-10-05
 
 - Add DropTheHassle to the official registry: your AI puts the site it built online on a live HTTPS link, checks domain availability with the registry, and manages your sites (new version or rollback, link rename, domains, share image and favicon, certificate and visitor checks). Hosted remote Streamable HTTP server at https://dropthehassle.com/mcp through `mcp-remote`; publishing and domain checks need no sign-in, managing sites uses OAuth 2.1 sign-in with dynamic client registration.
 
