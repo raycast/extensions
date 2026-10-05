@@ -245,6 +245,11 @@
       "title": "Download Files",
       "name": "download-files",
       "description": "Download one or more files (attachments) from Slack to a local folder. Pass Slack file IDs, one per line; file IDs start with F and appear in the `files` array returned by Read Conversation, Read Thread, Get Channel History, or Search Messages. Files are saved to the user's ~/Downloads folder by default, or to an optional destination directory. Returns the saved absolute paths."
+    },
+    {
+      "title": "Archive Channels",
+      "name": "archive-channels",
+      "description": "Archive one or more Slack channels. Pass channel IDs (starting with C or G), one per line; use Get Channels to resolve channel names to IDs. Returns whether each channel was archived."
     }
   ],
   "ai": {
