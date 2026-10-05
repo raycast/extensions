@@ -1,0 +1,6 @@
+node_modules/
+dist/
+raycast-env.d.ts
+# 由 scripts/build-helper.mjs 用 swiftc 生成的产物，源码在 swift/SyncHelper.swift
+assets/goose-2fa-helper
+.DS_Store
