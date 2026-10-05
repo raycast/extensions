@@ -45,7 +45,9 @@ After Save, you land on the app's **Basic Information** screen:
 
 ## Where your credentials go
 
-The auto-downloaded spotDL and Homebrew's run with their own folder inside the extension's support folder (`spotdl-home`). The Client ID and Secret are written to spotDL's config file there, readable only by you, and spotDL loads it with `--config`, so the secret never shows up in the list of running processes. spotDL's saved Spotify login lives there too, and your own `~/.spotdl` is never read or changed. A spotDL installed another way (for example `pip install --user`) uses your normal home folder and gets the credentials on its command line.
+The auto-downloaded spotDL and Homebrew's normally run with their own folder inside the extension's support folder (`spotdl-home`). The Client ID and Secret are written to spotDL's config file there, readable only by you, and spotDL loads it with `--config`, so the secret doesn't show up in the list of running processes. spotDL's saved Spotify login lives there too, so your own `~/.spotdl` isn't read or changed.
+
+Two cases use your normal home folder and pass the credentials on spotDL's command line instead: a spotDL installed another way (for example `pip install --user`), and a download for which that folder can't be prepared (for example the disk is full or the folder isn't writable) — the download still runs rather than failing. In that second case the extension doesn't clear spotDL's saved login in `~/.spotdl`.
 
 ## Private playlists & your library (optional)
 
