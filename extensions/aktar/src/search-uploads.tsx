@@ -23,6 +23,7 @@ import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
 import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix } from "./lib/format";
+import { primaryShortcut } from "./lib/platform";
 import { resolveFormat } from "./lib/output";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "./lib/thumbnails";
 
@@ -153,13 +154,13 @@ export default function Command() {
                   <Action.Push
                     title="Show QR Code"
                     icon={Icon.Mobile}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    shortcut={primaryShortcut("q", "shift")}
                     target={<QRCodeView name={upload.filename} link={upload.url} />}
                   />
                   <Action
                     title={isShowingDetail ? "Hide Details" : "Show Details"}
                     icon={Icon.Sidebar}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={primaryShortcut("p", "shift")}
                     onAction={() => setIsShowingDetail(!isShowingDetail)}
                   />
                 </ActionPanel.Section>
@@ -197,7 +198,7 @@ export default function Command() {
                   <Action.Push
                     title="Upload File"
                     icon={Icon.Upload}
-                    shortcut={{ modifiers: ["cmd"], key: "u" }}
+                    shortcut={primaryShortcut("u")}
                     target={<UploadForm onUploaded={revalidate} />}
                   />
                   <Action
@@ -212,7 +213,7 @@ export default function Command() {
                     title="Delete Upload"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => remove(upload)}
                   />
                 </ActionPanel.Section>

@@ -4,7 +4,7 @@ import { showAktarFailure } from "./lib/errors";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
 import { fetchFormat, formatUploads } from "./lib/output";
 
-/** Aktar reads the clipboard itself, so copied Finder files and raw screenshots both work. */
+/** Aktar reads the clipboard itself, so files copied in Finder or File Explorer and raw screenshots both work. */
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading clipboard" });
   try {

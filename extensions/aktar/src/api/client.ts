@@ -192,7 +192,7 @@ export async function deleteUpload(id: string) {
 
 /**
  * Uploads one file. Without a `prefix`, Aktar names it with the
- * destination's path template, same as a drop on the menu bar. With one,
+ * destination's path template, same as a file dropped on Aktar. With one,
  * the file keeps its name inside that folder (numbered if it's taken).
  * `expires` (days) asks Aktar to auto-delete the file; it can't be combined
  * with a `prefix`, and 0 or undefined keeps it forever.

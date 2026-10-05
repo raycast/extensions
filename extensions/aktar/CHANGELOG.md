@@ -1,5 +1,12 @@
 # Aktar Changelog
 
+## [Windows] - {PR_MERGE_DATE}
+
+- The extension now works with Raycast for Windows and Aktar for Windows 0.1.0 or later. Connect to Aktar finds Aktar from the Microsoft Store or from the installer
+- Upload Selected Files uploads the files selected in File Explorer on Windows
+- Shortcuts that use ⌘ on macOS use Ctrl on Windows
+- QR codes saved to Downloads leave out characters Windows doesn't allow in file names
+
 ## [Thumbnails] - 2026-10-05
 
 - Search Uploads and Browse Buckets show thumbnails made by Aktar: photos, but also videos, PDFs and documents, and files in private buckets. The preview shows the thumbnail of a file that isn't an image
