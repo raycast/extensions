@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "atomberg",
+  "title": "Atomberg",
+  "description": "Control your Atomberg smart fans \u2014 power, speed, sleep mode, light and timer.",
+  "icon": "icon.png",
+  "author": "aryan_rao",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fans",
+      "title": "Control Fans",
+      "subtitle": "Atomberg",
+      "description": "List your Atomberg fans and change speed, power, sleep mode, light and timer.",
+      "mode": "view"
+    },
+    {
+      "name": "fan-menu",
+      "title": "Fan Menu Bar",
+      "subtitle": "Atomberg",
+      "description": "A menu bar item for quick fan control: power, speed, sleep mode, light and timer.",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Atomberg Home app \u2192 Profile \u2192 Developer Options \u2192 API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "refreshToken",
+      "title": "Refresh Token",
+      "description": "Atomberg Home app \u2192 Profile \u2192 Developer Options \u2192 Refresh Token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
