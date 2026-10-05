@@ -1,0 +1,299 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "calendar-shortcuts-google",
+  "title": "DayCal",
+  "description": "A fast Google Calendar schedule, menu bar, quick add, and event management extension for Raycast.",
+  "icon": "daycal.png",
+  "author": "jonah_tweed",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "calendar",
+    "google",
+    "schedule",
+    "events"
+  ],
+  "commands": [
+    {
+      "name": "schedule",
+      "title": "Schedule",
+      "subtitle": "DayCal",
+      "description": "View and manage your Google Calendar schedule directly in Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "enabled-calendars",
+      "title": "Enabled Calendars",
+      "subtitle": "DayCal",
+      "description": "Choose which Google calendars appear when Custom calendar selection is active.",
+      "mode": "view"
+    },
+    {
+      "name": "set-up-calendars",
+      "title": "Set up Calendars",
+      "subtitle": "DayCal",
+      "description": "Assign calendar roles and optional smart-routing keywords.",
+      "mode": "view"
+    },
+    {
+      "name": "add-personal-event",
+      "title": "Add Personal Event",
+      "subtitle": "DayCal",
+      "description": "Add an event to Personal with smart timed/all-day parsing and calendar checking.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Event title",
+          "required": true
+        },
+        {
+          "name": "when",
+          "type": "text",
+          "placeholder": "When: tomorrow, Friday, next Thu 5pm",
+          "required": true
+        },
+        {
+          "name": "details",
+          "type": "text",
+          "placeholder": "3d / 45m @ Location / Zoom / URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-shared-event",
+      "title": "Add Shared Event",
+      "subtitle": "DayCal",
+      "description": "Add an event to your Shared / Partner calendar with smart timed/all-day parsing and calendar checking.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Event title",
+          "required": true
+        },
+        {
+          "name": "when",
+          "type": "text",
+          "placeholder": "When: tomorrow, Friday, next Thu 5pm",
+          "required": true
+        },
+        {
+          "name": "details",
+          "type": "text",
+          "placeholder": "3d / 45m @ Location / Zoom / URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-work-event",
+      "title": "Add Work Event",
+      "subtitle": "DayCal",
+      "description": "Add an event to Work with smart timed/all-day parsing and calendar checking.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Event title",
+          "required": true
+        },
+        {
+          "name": "when",
+          "type": "text",
+          "placeholder": "When: tomorrow, Friday, next Thu 5pm",
+          "required": true
+        },
+        {
+          "name": "details",
+          "type": "text",
+          "placeholder": "3d / 45m @ Location / Zoom / URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-settings",
+      "title": "Calendar Settings",
+      "subtitle": "DayCal",
+      "description": "Configure independent Schedule and menu-bar calendars and menu-bar filtering.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Calendar Menu Bar",
+      "subtitle": "DayCal",
+      "description": "Show current and upcoming Google Calendar events in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "disconnect-google",
+      "title": "Disconnect Google Account",
+      "subtitle": "DayCal",
+      "description": "Disconnect Google Calendar and choose whether to keep or delete this account’s saved DayCal setup.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "daysAhead",
+      "title": "Schedule Range",
+      "description": "How far ahead Schedule should load.",
+      "type": "dropdown",
+      "required": true,
+      "default": "14",
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "14 days",
+          "value": "14"
+        },
+        {
+          "title": "30 days",
+          "value": "30"
+        },
+        {
+          "title": "60 days",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "hideDeclined",
+      "title": "Declined Events",
+      "description": "Hide invitations that you have declined.",
+      "type": "checkbox",
+      "label": "Hide declined events",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "calendarSelectionMode",
+      "title": "Calendar Selection Mode",
+      "description": "Choose which calendars DayCal uses. Custom is managed with the Enabled Calendars command.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Custom Enabled Calendars",
+          "value": "custom"
+        },
+        {
+          "title": "Google Calendar Visibility",
+          "value": "google"
+        },
+        {
+          "title": "All Calendars",
+          "value": "all"
+        }
+      ],
+      "default": "custom"
+    },
+    {
+      "name": "menuBarMode",
+      "title": "Show Events in Menu Bar",
+      "description": "Choose when DayCal should appear in the macOS menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "upcoming",
+      "data": [
+        {
+          "title": "Never",
+          "value": "never"
+        },
+        {
+          "title": "2 minutes before",
+          "value": "2"
+        },
+        {
+          "title": "5 minutes before",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes before",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes before",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes before",
+          "value": "30"
+        },
+        {
+          "title": "1 hour before",
+          "value": "60"
+        },
+        {
+          "title": "Upcoming Events",
+          "value": "upcoming"
+        },
+        {
+          "title": "Always",
+          "value": "always"
+        }
+      ]
+    },
+    {
+      "name": "menuBarHeadlineStyle",
+      "title": "Menu Bar Headline",
+      "description": "Choose whether the menu bar shows smart timing status or only the current/next event title.",
+      "type": "dropdown",
+      "required": false,
+      "default": "smart",
+      "data": [
+        {
+          "title": "Smart Status",
+          "value": "smart"
+        },
+        {
+          "title": "Event Title Only",
+          "value": "event-only"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "test:edit": "node --test tests/edit-event.test.mjs",
+    "test:disconnect": "node --test tests/disconnect.test.mjs",
+    "test:branding": "node --test tests/branding.test.mjs",
+    "test:parser": "tsx tests/parser.test.ts",
+    "test:routing": "tsx tests/routing.test.ts",
+    "test": "npm run test:parser && npm run test:routing && npm run test:refresh && npm run test:onboarding && npm run test:smart-status && npm run test:menu-row && npm run test:event-opening && npm run test:branding && npm run test:disconnect && npm run test:edit",
+    "test:refresh": "node tests/refresh.test.mjs",
+    "test:onboarding": "node tests/onboarding.test.mjs",
+    "test:smart-status": "node tests/smart-status.test.mjs",
+    "test:menu-row": "node tests/menu-row.test.mjs",
+    "test:event-opening": "node tests/event-opening.test.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy policy — DayCal</title>
+    <meta
+      name="description"
+      content="How DayCal uses Google Calendar data, Raycast OAuth, local storage and cache. Data sharing, revoking access and privacy contact information."
+    />
+    <meta name="theme-color" content="#111216" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://daycal.co.uk/privacy/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DayCal" />
+    <meta property="og:title" content="Privacy policy — DayCal" />
+    <meta
+      property="og:description"
+      content="How DayCal uses Google Calendar data, Raycast OAuth, local storage and cache. Data sharing, revoking access and privacy contact information."
+    />
+    <meta property="og:url" content="https://daycal.co.uk/privacy/" />
+    <link rel="icon" type="image/png" href="../assets/daycal-icon.png" />
+    <link rel="apple-touch-icon" href="../assets/daycal-icon.png" />
+    <link rel="stylesheet" href="../assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header wrap">
+      <a class="brand" href="../" aria-label="DayCal home"
+        ><img
+          src="../assets/daycal-icon.png"
+          alt=""
+          width="32"
+          height="32"
+        />DayCal</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="../privacy/" aria-current="page">Privacy</a
+        ><a href="../security/">Security</a
+        ><a href="https://github.com/JonahTweed/CalFlow"
+          >GitHub <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </header>
+    <main id="main" class="wrap legal">
+      <div class="legal-heading">
+        <p class="eyebrow">DAYCAL / PRIVACY</p>
+        <h1>Privacy policy.</h1>
+        <p class="intro">
+          How DayCal accesses, uses and stores your calendar information.
+        </p>
+      </div>
+      <p><strong>Effective date:</strong> 18 September 2026</p>
+      <p>
+        DayCal is a Google Calendar extension for Raycast. Privacy and security
+        are core design priorities: DayCal is built to work directly between
+        Raycast on your Mac and Google Calendar, without a DayCal-operated
+        backend service.
+      </p>
+      <h2 id="summary">Summary</h2>
+      <ul>
+        <li>
+          DayCal does <strong>not</strong> operate a server that receives your
+          calendar data.
+        </li>
+        <li>DayCal does <strong>not</strong> sell user data.</li>
+        <li>
+          DayCal does <strong>not</strong> use calendar data for advertising,
+          profiling, analytics, tracking, or training AI/ML models.
+        </li>
+        <li>Google OAuth tokens are managed by Raycast.</li>
+        <li>
+          Calendar preferences, account-scoped configuration, and a local
+          menu-bar event cache are stored locally through Raycast on your Mac.
+        </li>
+        <li>
+          DayCal requests only the Google Calendar scopes needed for its visible
+          calendar features.
+        </li>
+      </ul>
+      <h2 id="google-data-daycal-accesses">Google data DayCal accesses</h2>
+      <p>DayCal currently requests these Google OAuth scopes:</p>
+      <ul>
+        <li>
+          <code>https://www.googleapis.com/auth/calendar.events</code> — read
+          and manage calendar events;
+        </li>
+        <li>
+          <code
+            >https://www.googleapis.com/auth/calendar.calendarlist.readonly</code
+          >
+          — read the user's calendar list, calendar colours, and access roles.
+        </li>
+      </ul>
+      <p>
+        Depending on the feature you use, DayCal may access Google Calendar
+        information such as:
+      </p>
+      <ul>
+        <li>calendar names, colours, IDs, and access roles;</li>
+        <li>event titles, dates, start/end times, and all-day status;</li>
+        <li>event descriptions and locations;</li>
+        <li>organiser/attendee metadata and response status;</li>
+        <li>conference/meeting links;</li>
+        <li>
+          reminders, recurrence information, source links, and attachment
+          metadata when present.
+        </li>
+      </ul>
+      <p>
+        DayCal uses this information only to provide user-facing calendar
+        features such as Schedule, Menu Bar, Quick Add, editing, copying,
+        moving, deleting, calendar routing, meeting links, and permission-aware
+        event actions.
+      </p>
+      <h2 id="how-google-data-is-transmitted">
+        How Google data is transmitted
+      </h2>
+      <p>
+        Calendar API requests are made directly from the Raycast extension to
+        the Google Calendar API at <code>www.googleapis.com</code> using the
+        Google OAuth access token supplied by Raycast.
+      </p>
+      <p>DayCal does not proxy those requests through a DayCal-owned server.</p>
+      <p>
+        When you explicitly choose <strong>Open Event</strong>,
+        <strong>Open in Google Calendar</strong>, or
+        <strong>Open Calendar</strong>, DayCal opens the Google Calendar event
+        or calendar link in your default browser for the connected Google
+        account. Actions such as <strong>Open Location</strong> or
+        <strong>Join Meeting</strong> may open the relevant maps, conferencing,
+        or other event-provided URL using the system default handler. Those
+        destinations then operate under their own privacy policies.
+      </p>
+      <h2 id="local-storage-on-your-mac">Local storage on your Mac</h2>
+      <p>
+        DayCal stores some information locally through Raycast so the extension
+        can remember your choices and remain responsive.
+      </p>
+      <p>This can include:</p>
+      <ul>
+        <li>extension preferences;</li>
+        <li>account-scoped calendar role mappings;</li>
+        <li>Schedule and Menu Bar calendar selections;</li>
+        <li>optional routing keywords;</li>
+        <li>menu-bar display settings;</li>
+        <li>
+          a local cached snapshot of upcoming calendar events used to render the
+          persistent Menu Bar efficiently without contacting Google every time
+          you open it.
+        </li>
+      </ul>
+      <p>
+        This local event cache can contain calendar event information returned
+        by Google. It is used only for DayCal's local UI and refresh behaviour.
+      </p>
+      <p>
+        DayCal does not intentionally transmit this locally stored configuration
+        or cache to the developer.
+      </p>
+      <h2 id="oauth-tokens">OAuth tokens</h2>
+      <p>
+        Google OAuth authentication is provided through Raycast's native OAuth
+        support. DayCal does not contain a Google client secret, refresh token,
+        or access token in its public source repository.
+      </p>
+      <p>
+        The public OAuth client ID is included in the source code because OAuth
+        client IDs are application identifiers, not secrets.
+      </p>
+      <p>
+        DayCal does not log or intentionally transmit OAuth tokens to the
+        developer.
+      </p>
+      <h2 id="disconnecting-and-revoking-access">
+        Disconnecting and revoking access
+      </h2>
+      <p>
+        The <strong>Disconnect Google Account</strong> command removes DayCal's
+        locally stored Google OAuth tokens through Raycast and clears DayCal's
+        local Menu Bar event cache. Before disconnecting, you choose what
+        happens to the connected account's saved DayCal calendar setup:
+      </p>
+      <ul>
+        <li>
+          <strong>Keep DayCal Settings</strong> preserves that account's calendar
+          selections, role mappings, routing keywords, and setup-complete state
+          so they are available if the same Google account reconnects later.
+        </li>
+        <li>
+          <strong>Delete DayCal Settings</strong> deletes that account's locally
+          saved calendar selections, role mappings, routing keywords, and
+          setup-complete state so reconnecting behaves like a fresh DayCal
+          setup. This does not delete any Google Calendar events.
+        </li>
+      </ul>
+      <p>
+        Extension-wide Raycast preferences are not account-specific and are not
+        deleted by either disconnect option.
+      </p>
+      <p>
+        Disconnecting inside DayCal does <strong>not</strong> revoke the app's
+        authorization in your Google Account. You can separately revoke Google
+        access from your Google Account's third-party access/security settings.
+      </p>
+      <h2 id="analytics-advertising-and-tracking">
+        Analytics, advertising, and tracking
+      </h2>
+      <p>
+        DayCal currently includes no DayCal-operated analytics, advertising SDK,
+        behavioural tracking, telemetry service, or crash-reporting service that
+        sends calendar data to the developer.
+      </p>
+      <p>
+        DayCal does not sell, rent, or trade Google user data or DayCal user
+        data.
+      </p>
+      <p>
+        DayCal does not use Google user data for advertising, credit decisions,
+        or training generalized AI or machine-learning models.
+      </p>
+      <h2 id="human-access-to-calendar-data">Human access to calendar data</h2>
+      <p>
+        The developer does not receive or routinely have access to your calendar
+        data through DayCal.
+      </p>
+      <p>
+        If you choose to submit a GitHub issue, screenshot, screen recording,
+        log, or other diagnostic information, that information is provided
+        voluntarily by you. Please redact private event details, email
+        addresses, private calendar links, OAuth tokens, and other credentials
+        before posting publicly.
+      </p>
+      <p>
+        Security-sensitive reports should follow
+        <a href="../security/">security policy</a> instead of being posted
+        publicly.
+      </p>
+      <h2 id="google-api-services-user-data-policy">
+        Google API Services User Data Policy
+      </h2>
+      <p>
+        DayCal's use and transfer of information received from Google APIs will
+        adhere to the <strong>Google API Services User Data Policy</strong>,
+        including the <strong>Limited Use</strong> requirements.
+      </p>
+      <p>
+        DayCal requests Google data only for features that are visible to and
+        initiated for the benefit of the user, and does not use that data for
+        unrelated purposes.
+      </p>
+      <h2 id="data-sharing">Data sharing</h2>
+      <p>
+        DayCal does not share Google Calendar data with advertisers, data
+        brokers, or unrelated third parties.
+      </p>
+      <p>
+        Data may be handled by the services required to provide the extension's
+        functionality, principally:
+      </p>
+      <ul>
+        <li>
+          <strong>Google</strong>, which provides Google Calendar and the Google
+          Calendar API;
+        </li>
+        <li>
+          <strong>Raycast</strong>, which provides the extension runtime, native
+          OAuth handling, and local extension storage.
+        </li>
+      </ul>
+      <p>
+        Any additional external destination is opened only when you explicitly
+        trigger an action such as opening a map, conference link, event source
+        link, or calendar page.
+      </p>
+      <h2 id="security">Security</h2>
+      <p>
+        DayCal is open source so its Google API usage and local data handling
+        can be inspected publicly.
+      </p>
+      <p>
+        The project aims to use the minimum Google scopes required for its
+        current features, avoids embedding secrets in the repository,
+        distinguishes writable/owned events from guest or read-only events, and
+        runs automated regression and TypeScript checks on changes.
+      </p>
+      <p>
+        See <a href="../security/">security policy</a> for vulnerability
+        reporting guidance.
+      </p>
+      <h2 id="changes-to-this-policy">Changes to this policy</h2>
+      <p>
+        If DayCal's data handling changes materially, this policy will be
+        updated before or alongside that change. The effective date at the top
+        of this document will be revised when appropriate.
+      </p>
+      <h2 id="contact">Contact</h2>
+      <p>
+        For privacy questions that do not contain sensitive information, email
+        <a href="mailto:support@daycal.co.uk">support@daycal.co.uk</a
+        >, use the
+        <a href="https://github.com/JonahTweed/CalFlow"
+          >DayCal GitHub repository</a
+        >, or contact the maintainer through the
+        <a href="https://github.com/JonahTweed">GitHub profile</a>.
+      </p>
+      <p>
+        For suspected vulnerabilities or anything involving credentials or
+        private calendar data, follow the private reporting guidance in
+        <a href="../security/">security policy</a>.
+      </p>
+      <h2 id="this-website">This website</h2>
+      <p>
+        This static website is hosted on GitHub Pages. It has no added
+        analytics, advertising, tracking scripts or cookies. GitHub processes
+        visits under its
+        <a
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+          >privacy statement</a
+        >. The website does not connect to your Google Calendar.
+      </p>
+      <p class="policy-source">
+        Adapted from the project’s
+        <a href="https://github.com/JonahTweed/CalFlow/blob/main/PRIVACY.md"
+          >privacy policy</a
+        >
+        with DayCal branding and the current public support contact. The web
+        policy is kept aligned with the project privacy policy.
+      </p>
+    </main>
+    <footer class="site-footer wrap">
+      <div>
+        <a class="brand" href="../">DayCal</a>
+        <p>A small utility for a full day.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="../privacy/">Privacy</a><a href="../security/">Security</a
+        ><a href="https://github.com/JonahTweed/CalFlow/issues"
+          >Report an issue</a
+        ><a href="mailto:support@daycal.co.uk">Contact</a>
+      </nav>
+      <p class="footer-note">
+        An independent, open-source extension for Raycast on macOS.
+      </p>
+    </footer>
+  </body>
+</html>
