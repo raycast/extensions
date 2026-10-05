@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Fix due date timezone handling] - {PR_MERGE_DATE}
+## [Fix due date timezone handling] - 2026-10-05
 
 - Fix date-only deadlines appearing a day early in task lists, tooltips, and details.
 - Keep due date colors and Set Due Date confirmations consistent with the selected local date.
