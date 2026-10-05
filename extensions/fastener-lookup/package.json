@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastener-lookup",
+  "title": "Fastener Lookup",
+  "description": "Tap drills, clearance holes, counterbores, and thread specs (ASME/ISO) for CAD workflows",
+  "icon": "icon.png",
+  "author": "alexjdiaz2503",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Fastener Lookup",
+      "subtitle": "Drill & Tap Chart",
+      "description": "Search tap drills, clearance holes, counterbores by screw size",
+      "mode": "view",
+      "keywords": ["drill", "tap", "clearance", "hole", "screw", "bolt", "thread", "counterbore", "cbore", "fastener"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "tsx --test tests/*.test.ts"
+  }
+}
