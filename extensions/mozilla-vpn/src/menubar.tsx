@@ -28,7 +28,7 @@ export default function Command() {
 
   // Refresh VPN status
   const refreshStatus = useCallback(
-    async (silent = false, shouldFetchIP = true) => {
+    async (silent = false, shouldFetchIP = true, forceFetchIP = false) => {
       try {
         if (!silent) console.log('Refreshing VPN status...');
 
@@ -38,23 +38,33 @@ export default function Command() {
         setServerCity(status.serverCity);
         setServerCountry(status.serverCountry);
 
-        // Fetch IP if connected and server changed or not yet loaded
+        // Fetch IP if connected and (force requested, server changed, or prior attempt failed/missing)
         if (status.isActive) {
           const serverKey = `${status.serverCity}|${status.serverCountry}`;
+          const isMissingOrFailedIP =
+            currentIP === 'Loading...' ||
+            currentIP === 'Not connected' ||
+            currentIP.includes('unavailable');
+
           if (
             shouldFetchIP &&
-            (serverKey !== lastFetchedServerRef.current ||
-              currentIP === 'Loading...' ||
-              currentIP === 'Not connected' ||
-              currentIP === 'IP unavailable')
+            (forceFetchIP ||
+              serverKey !== lastFetchedServerRef.current ||
+              isMissingOrFailedIP)
           ) {
             try {
               const ip = await fetchCurrentIP();
               setCurrentIP(ip);
-              lastFetchedServerRef.current = serverKey;
+              // Only record cache key if IP lookup succeeded
+              if (!ip.includes('unavailable')) {
+                lastFetchedServerRef.current = serverKey;
+              } else {
+                lastFetchedServerRef.current = '';
+              }
             } catch (error) {
               console.error('Error fetching IP:', error);
               setCurrentIP('IP unavailable');
+              lastFetchedServerRef.current = '';
             }
           }
         } else {
@@ -106,7 +116,7 @@ export default function Command() {
 
           // If connected, fetch the external IP once for the new connection
           if (expectedStatus) {
-            refreshStatus(true, true);
+            refreshStatus(true, true, true);
           }
 
           // Notify other components (main extension) about the change
@@ -160,7 +170,7 @@ export default function Command() {
   useEffect(() => {
     refreshStatus();
     const unsubscribe = subscribeToVpnStatusChange(() => {
-      refreshStatus(true);
+      refreshStatus(true, true, true);
     });
     return () => {
       unsubscribe();
@@ -238,7 +248,7 @@ export default function Command() {
       <MenuBarExtra.Item
         title="Refresh Status"
         icon={Icon.RotateClockwise}
-        onAction={() => refreshStatus(false, true)}
+        onAction={() => refreshStatus(false, true, true)}
         shortcut={{ modifiers: ['cmd'], key: 'r' }}
       />
 
