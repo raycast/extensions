@@ -8,6 +8,10 @@ export interface Session {
   Score: number; // The score of the session (from Zoxide)
   Attached: number; // Whether the session is currently attached
   Windows: number; // The number of windows in the session
+  Icon?: string;
+  Alias?: string;
+  AliasAutoConnect?: boolean;
+  TmuxWindows?: Window[];
 }
 
 export interface Window {
@@ -20,7 +24,7 @@ export interface Window {
 export const UPGRADE_SESH_MESSAGE = "Please upgrade to the latest version of the sesh CLI";
 
 export function getSessions({ tmuxOnly = false } = {}) {
-  const args = ["list", "--json", ...(tmuxOnly ? ["--tmux"] : [])];
+  const args = ["list", "--json", "--hide-duplicates", ...(tmuxOnly ? ["--tmux"] : [])];
   return new Promise<Session[]>((resolve, reject) => {
     execFile("sesh", args, { env: getEnv() }, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -120,5 +124,18 @@ export async function switchToWindow(session: string, window: Window, sessionWin
 export function isTmuxRunning(): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     execFile("tmux", ["ls"], { env: getEnv() }, (error, _, stderr) => resolve(!(error || stderr)));
+  });
+}
+
+export function connectToBrowserWorktree(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    execFile("sesh", ["worktree", "connect", "--browser", "--switch"], { env: getEnv() }, (error, _, stderr) => {
+      if (error) {
+        console.error("error ", error);
+        console.error("stderr ", stderr);
+        return reject(stderr.trim() || error.message);
+      }
+      return resolve();
+    });
   });
 }

@@ -310,6 +310,36 @@ describe("parseKoreanSchedule", () => {
     expectDate(result.value.end, { year: 2026, month: 2, day: 18, hour: 1, minute: 0 });
   });
 
+  it("infers the nearest meridiem for an unmarked range end", () => {
+    const overnight = parseKoreanSchedule("내일 오후 11시부터 1시까지 점검", { now: baseNow });
+    expect(overnight.ok).toBe(true);
+    if (overnight.ok) {
+      expectDate(overnight.value.start, { year: 2026, month: 2, day: 18, hour: 23, minute: 0 });
+      expectDate(overnight.value.end, { year: 2026, month: 2, day: 19, hour: 1, minute: 0 });
+    }
+
+    const midday = parseKoreanSchedule("내일 오전 11시부터 1시까지 회의", { now: baseNow });
+    expect(midday.ok).toBe(true);
+    if (midday.ok) {
+      expectDate(midday.value.start, { year: 2026, month: 2, day: 18, hour: 11, minute: 0 });
+      expectDate(midday.value.end, { year: 2026, month: 2, day: 18, hour: 13, minute: 0 });
+    }
+  });
+
+  it("infers an unmarked range end after a night time token", () => {
+    const evening = parseKoreanSchedule("내일 밤 8시부터 10시까지 회의", { now: baseNow });
+    expect(evening.ok).toBe(true);
+    if (!evening.ok) return;
+    expect(evening.value.start.getHours()).toBe(20);
+    expect(evening.value.end.getHours()).toBe(22);
+    expect(evening.value.end.getTime() - evening.value.start.getTime()).toBe(2 * 60 * 60 * 1000);
+
+    const midnight = parseKoreanSchedule("내일 밤 12시부터 1시까지 점검", { now: baseNow });
+    expect(midnight.ok).toBe(true);
+    if (!midnight.ok) return;
+    expect(midnight.value.end.getTime() - midnight.value.start.getTime()).toBe(60 * 60 * 1000);
+  });
+
   it("parses '전에' deadline marker without polluting title", () => {
     const result = parseKoreanSchedule("내일 6시 전에 제출", { now: baseNow });
 
@@ -462,6 +492,20 @@ describe("parseKoreanSchedule", () => {
     }
   });
 
+  it("does not normalize token-like text inside titles or locations", () => {
+    const titleResult = parseKoreanSchedule("내일 오후 3시 부담 주제 논의", { now: baseNow });
+    expect(titleResult.ok).toBe(true);
+    if (titleResult.ok) {
+      expect(titleResult.value.title).toBe("부담 주제 논의");
+    }
+
+    const locationResult = parseKoreanSchedule("내일 오후 3시 회의 장소: 다음 주 회의실", { now: baseNow });
+    expect(locationResult.ok).toBe(true);
+    if (locationResult.ok) {
+      expect(locationResult.value.location).toBe("다음 주 회의실");
+    }
+  });
+
   it("parses keyword-only deadline cues without explicit date", () => {
     const result = parseKoreanSchedule("마감 보고서 제출", { now: baseNow });
     expect(result.ok).toBe(true);
@@ -490,6 +534,25 @@ describe("parseKoreanSchedule", () => {
     expect(result.value.recurrence?.frequency).toBe("weekly");
     expect(result.value.recurrence?.weekday).toBe(2);
     expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 16, minute: 0 });
+  });
+
+  it("preserves an explicit short duration for recurring events", () => {
+    const result = parseKoreanSchedule("매주 화요일 오후 4시부터 4시 30분까지 회의", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.end.getTime() - result.value.start.getTime()).toBe(30 * 60 * 1000);
+  });
+
+  it("preserves recurring range wall-clock times across DST transitions", () => {
+    const result = parseKoreanSchedule("매주 일요일 오전 1:30부터 3:30까지 회의", {
+      now: new Date(2026, 2, 2, 9, 0, 0, 0),
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expectDate(result.value.start, { year: 2026, month: 3, day: 8, hour: 1, minute: 30 });
+    expectDate(result.value.end, { year: 2026, month: 3, day: 8, hour: 3, minute: 30 });
   });
 
   it("parses monthly recurrence", () => {
@@ -557,6 +620,50 @@ describe("parseKoreanSchedule", () => {
 
     expect(result.value.title).toBe("코드리뷰");
     expect(result.value.location).toBe("회의실");
+  });
+
+  it("parses a leading location before the date expression", () => {
+    const result = parseKoreanSchedule("회의실에서 내일 오후 3시 회의", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("회의");
+    expect(result.value.location).toBe("회의실");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 15, minute: 0 });
+  });
+
+  it("parses a location between the date and time expressions", () => {
+    const result = parseKoreanSchedule("내일 회의실에서 오후 3시 회의", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("회의");
+    expect(result.value.location).toBe("회의실");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 15, minute: 0 });
+  });
+
+  it.each(["오후 3시반", "오후 3시30분", "오후 3시 30분"])(
+    "parses attached minutes after an interleaved location: %s",
+    (timeExpression) => {
+      const result = parseKoreanSchedule(`내일 회의실에서 ${timeExpression} 회의`, { now: baseNow });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+
+      expect(result.value.title).toBe("회의");
+      expect(result.value.location).toBe("회의실");
+      expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 15, minute: 30 });
+    },
+  );
+
+  it("keeps the weekday out of a recurring location before the time expression", () => {
+    const result = parseKoreanSchedule("매주 화요일 회의실에서 오후 4시 코드리뷰", { now: baseNow });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("코드리뷰");
+    expect(result.value.location).toBe("회의실");
+    expect(result.value.recurrence).toEqual({ frequency: "weekly", weekday: 2 });
+    expect(result.value.start.getHours()).toBe(16);
   });
 });
 
