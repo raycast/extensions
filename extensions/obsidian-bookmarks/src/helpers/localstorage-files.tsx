@@ -50,6 +50,7 @@ interface SerializedFile {
   attributes: {
     source: string;
     publisher: string | null;
+    favicon: string | null;
     title: string;
     tags: string[];
     saved: string;
@@ -69,6 +70,7 @@ async function replaceLocalStorageFilesInternal(files: File[]): Promise<void> {
       ...file.attributes,
       source: file.attributes.source || "",
       publisher: file.attributes.publisher || null,
+      favicon: file.attributes.favicon || null,
       title: file.attributes.title || "",
       tags: file.attributes.tags || [],
       saved: file.attributes.saved.toISOString(),
