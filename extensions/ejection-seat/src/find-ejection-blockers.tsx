@@ -156,11 +156,30 @@ async function physicalDisks(): Promise<Map<string, string>> {
 class StatTimeout extends Error {}
 
 // stat() on a hung volume can block forever; give up after STAT_TIMEOUT_MS.
+// A stat() that lost the race keeps a libuv worker thread until the kernel answers, and
+// the pool holds four. Share one in-flight call per path, so repeated refreshes of a hung
+// volume wait on the same call instead of stacking new ones until the pool is full.
+// A call that has already outlived the timeout is never joined: its answer describes the
+// volume as it was when it started, which may since have been ejected or remounted.
+const pendingStats = new Map<string, { promise: Promise<Stats>; startedAt: number }>();
+
+function sharedStat(path: string): Promise<Stats> {
+  const pending = pendingStats.get(path);
+  if (pending) {
+    if (performance.now() - pending.startedAt >= STAT_TIMEOUT_MS) return Promise.reject(new StatTimeout(path));
+    return pending.promise;
+  }
+
+  const promise = stat(path).finally(() => pendingStats.delete(path));
+  pendingStats.set(path, { promise, startedAt: performance.now() });
+  return promise;
+}
+
 async function statWithTimeout(path: string): Promise<Stats> {
   let timer: NodeJS.Timeout | undefined;
   try {
     return await Promise.race([
-      stat(path),
+      sharedStat(path),
       new Promise<never>((_, reject) => {
         timer = setTimeout(() => reject(new StatTimeout(path)), STAT_TIMEOUT_MS);
       }),
@@ -478,7 +497,8 @@ async function scanVolume(volume: Volume): Promise<Scan> {
 }
 
 async function scanAll(): Promise<Scan[]> {
-  return Promise.all((await volumes()).map(scanVolume));
+  // A volume can vanish between listing and scanning; drop it rather than list it as failed.
+  return (await Promise.all((await volumes()).map(scanVolume))).filter((scan) => !scan.gone);
 }
 
 /* -------------------------------------------------------------------------- */
