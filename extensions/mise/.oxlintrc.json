@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "options": {
+    "denyWarnings": true
+  },
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": ["raycast-env.d.ts"],
+  "jsPlugins": [
+    {
+      "name": "raycast",
+      "specifier": "@raycast/eslint-plugin"
+    }
+  ],
+  "rules": {
+    "raycast/prefer-title-case": "error",
+    "raycast/prefer-ellipsis": "error",
+    "raycast/prefer-placeholders": "error",
+    "raycast/prefer-common-shortcut": "error",
+    "raycast/no-reserved-shortcut": "error",
+    "raycast/no-ambiguous-platform-shortcut": "error"
+  }
+}
