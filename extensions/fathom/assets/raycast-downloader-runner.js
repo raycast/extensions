@@ -101,10 +101,10 @@ function classifyHttpStatus(status) {
  *
  * Two decisions here are load-bearing, both verified empirically:
  *
- *  1. The URL is passed in a 0600 CONFIG FILE, never on the command line.
- *     Signed URLs are bearer credentials; argv is world-readable via `ps`.
- *     Measured: with the URL as an argument it is visible in `ps`; via `-K` it
- *     is not.
+ *  1. The URL is passed as CONFIG on curl's stdin (`curl -K -`), never on the
+ *     command line and never in a file. Signed URLs are bearer credentials;
+ *     argv is world-readable via `ps`, and a file outlives a process killed
+ *     before it can delete it.
  *  2. Timeouts are THROUGHPUT-based (`--speed-limit`/`--speed-time`), not
  *     wall-clock (`--max-time`). `--max-time` counts machine sleep against the
  *     budget, so a laptop closed for ten minutes guarantees a spurious failure
@@ -151,10 +151,9 @@ function hasCurl() {
 exports.DEFAULT_SPEED_LIMIT_BYTES = 1024;
 exports.DEFAULT_STALL_SECONDS = 120;
 /**
- * Build the contents of a curl config file (`curl -K <file>`).
+ * Build curl's config, which the runner writes to curl's stdin (`curl -K -`).
  *
- * Everything sensitive lives in this file, which the caller must create 0600 and
- * delete once curl has started.
+ * Everything sensitive lives in this text, so it must never reach argv or disk.
  */
 function buildCurlConfig(options) {
     const { url, outputPath, headers = {}, followRedirects = true, resume = false, speedLimitBytes = exports.DEFAULT_SPEED_LIMIT_BYTES, stallSeconds = exports.DEFAULT_STALL_SECONDS, connectTimeoutSeconds = 30, limitRateBytes, maxTimeSeconds, dumpHeaderPath, ifRange, } = options;
@@ -379,6 +378,12 @@ function classifyCurlFailure(input) {
     // A 2xx only reaches here when the runner refused it as not-the-file (202,
     // 204, 205, or a 206 nobody asked for). Same reason as the 3xx branch above:
     // curl exited 0, so EXIT_CODES has nothing to say about it.
+    // A 202 means "not ready yet" whether or not this was a resume, and whether curl
+    // exited 0 (took the body) or 33 (refused it as an answer to a range). The
+    // runner keeps a resumed partial for it, so it must not read as "cannot resume".
+    if (httpCode === 202 && (exitCode === 0 || exitCode === 33)) {
+        return new errors_1.DownloadError("pending", unusableSuccessMessage(202), { httpStatus: 202, exitCode, signal });
+    }
     if (exitCode === 0 && httpCode !== undefined && httpCode >= 200 && httpCode < 300) {
         if (resumed && httpCode !== 206) {
             return new errors_1.DownloadError(EXIT_CODES[33].code, EXIT_CODES[33].message, { httpStatus: httpCode, exitCode, signal });
@@ -2248,11 +2253,12 @@ function __req__(name) {
  * MUST NOT import `@raycast/api`: this executes outside Raycast's host, where
  * that module does not resolve.
  *
- * Invoked as:  node runner.js <payloadJsonPath>
+ * Invoked as:  node runner.js   (the payload JSON arrives on stdin)
  *
- * The payload arrives via a 0600 FILE rather than argv because it carries the
- * download URL, which for signed-URL APIs is a bearer credential and argv is
- * world-readable through `ps`. The runner unlinks the payload immediately.
+ * The payload carries the download URL and the caller's headers, either of
+ * which can be a bearer credential. argv is world-readable through `ps`, and a
+ * file outlives a process killed before it can unlink it, so it comes through
+ * a pipe. curl's config is handed over the same way, for the same reason.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_child_process_1 = require("node:child_process");
@@ -2264,17 +2270,14 @@ const partial_1 = __req__("partial");
 const status_1 = __req__("status");
 const HEARTBEAT_MS = 500;
 function main() {
-    const payloadPath = process.argv[2];
-    if (!payloadPath) {
-        process.exit(2);
-    }
-    const payload = JSON.parse((0, node_fs_1.readFileSync)(payloadPath, "utf8"));
-    // The payload holds the signed URL; remove it from disk before transferring.
+    // Blocks until `startDownload` closes the pipe. Nothing to report a bad
+    // payload to: without it there is no id, so no status file to write.
+    let payload;
     try {
-        (0, node_fs_1.unlinkSync)(payloadPath);
+        payload = JSON.parse((0, node_fs_1.readFileSync)(0, "utf8"));
     }
     catch {
-        // Nothing to do — proceed rather than abandoning the download.
+        process.exit(2);
     }
     const startedAt = Date.now();
     // The OS process creation time, NOT the time JavaScript got here.
@@ -2499,9 +2502,9 @@ function main() {
     // (exit 33) instead of splicing; `Last-Modified` is the documented fallback.
     const ifRange = resume ? (partialState?.etag ?? partialState?.lastModified) : undefined;
     const followRedirects = payload.followRedirects ?? true;
-    let configPath;
+    let config;
     try {
-        const config = (0, curl_1.buildCurlConfig)({
+        config = (0, curl_1.buildCurlConfig)({
             url: payload.url,
             outputPath: payload.partPath,
             headers: payload.headers,
@@ -2513,8 +2516,6 @@ function main() {
             dumpHeaderPath: (0, partial_1.headerPath)(payload.partPath),
             ifRange,
         });
-        configPath = `${payload.partPath}.curlrc`;
-        (0, paths_1.writeSecretFile)(configPath, config);
     }
     catch (error) {
         // buildCurlConfig rejects control characters in the URL or headers.
@@ -2526,30 +2527,12 @@ function main() {
     // as THIS attempt's response is exactly the stale-validator bug one release
     // over. Cleared before curl can write a new one.
     discardHeaderDump(payload.partPath);
-    const child = (0, node_child_process_1.spawn)("curl", ["-K", configPath], { stdio: ["ignore", "pipe", "pipe"] });
-    // The config holds the download URL, which for signed-URL APIs is a bearer
-    // credential — so it comes off disk as soon as curl has read it.
-    //
-    // curl parses its config at startup (measured: unlinking 50ms after spawn
-    // still completes a full transfer), so the first byte of output is proof it
-    // no longer needs the file. The timer is only a fallback for a transfer that
-    // produces no output at all.
-    let configRemoved = false;
-    const removeConfig = () => {
-        if (configRemoved)
-            return;
-        configRemoved = true;
-        try {
-            (0, node_fs_1.unlinkSync)(configPath);
-        }
-        catch {
-            // Already gone.
-        }
-    };
-    child.stderr?.once("data", removeConfig);
-    child.stdout?.once("data", removeConfig);
-    const configTimer = setTimeout(removeConfig, 2000);
-    configTimer.unref?.();
+    // `-K -`: the config holds the URL and headers, so it goes through curl's
+    // stdin, never argv or a file. curl reads it to EOF before it does anything.
+    const child = (0, node_child_process_1.spawn)("curl", ["-K", "-"], { stdio: ["pipe", "pipe", "pipe"] });
+    // curl failing to start closes the pipe; the `error` handler below reports it.
+    child.stdin?.on("error", () => { });
+    child.stdin?.end(config);
     persist({ state: "downloading", bytesDownloaded: existingBytes });
     let stdout = "";
     let stderr = "";
@@ -2603,7 +2586,6 @@ function main() {
     heartbeat.unref?.();
     const finishCancelled = () => {
         clearInterval(heartbeat);
-        removeConfig();
         // Keep the .part file: cancellation should still allow a later resume — and
         // record what those bytes are, which is what MAKES the later resume safe.
         // Unless there are none, or they are not the file's.
@@ -2623,7 +2605,6 @@ function main() {
     process.on("SIGINT", finishCancelled);
     child.on("error", (error) => {
         clearInterval(heartbeat);
-        removeConfig();
         settlePartial(undefined);
         releasePath();
         persist({
@@ -2635,9 +2616,6 @@ function main() {
     });
     child.on("close", (exitCode, signal) => {
         clearInterval(heartbeat);
-        // Belt and braces: the listeners above normally win, but a transfer that
-        // produced no output at all must not leave the credential on disk.
-        removeConfig();
         const writeOut = (0, curl_1.parseWriteOut)(stdout);
         const httpCode = writeOut.httpCode;
         // Success is strictly 2xx. A 3xx is NEVER a downloaded file:
@@ -2691,10 +2669,18 @@ function main() {
             // And a resumed whole-body 2xx curl did NOT refuse: it exits 0 when that
             // body is exactly as long as the partial, keeping the partial — which, if
             // `If-Range` is what produced the 200, is the OLD version of the file.
+            //
+            // A 202 is excluded: it says the file is not ready yet, which says nothing
+            // against the bytes already on disk. `settlePartial` below rolls back any
+            // 202 body curl appended, and the retry resumes onto the real prefix.
             const rangeRefused = resume &&
                 httpCode !== undefined &&
                 (httpCode === 416 ||
-                    (httpCode >= 200 && httpCode < 300 && httpCode !== 206 && (exitCode === 33 || exitCode === 0)));
+                    (httpCode >= 200 &&
+                        httpCode < 300 &&
+                        httpCode !== 202 &&
+                        httpCode !== 206 &&
+                        (exitCode === 33 || exitCode === 0)));
             if (rangeRefused) {
                 if (!(0, partial_1.resetPartial)(payload.partPath)) {
                     failUnsafePartial(`The partial file for ${payload.filename} cannot be resumed and could not be cleared. Delete ${payload.partPath} and try again.`);

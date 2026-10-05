@@ -166,9 +166,9 @@ Vitest, or test files.
 - **API key**: a `password` preference (`fathomApiKey`), read via
   `getPreferenceValues<Preferences>()`. Never hardcode or log it.
 - **Signed download URLs are bearer credentials.** They live ~24h and must never reach
-  argv, a log line, a status file, LocalStorage, or a toast. The helper passes the URL
-  through a `0600` payload file and a `curl -K` config; `ps` is world-readable, which is
-  why it is not an argument. Server-supplied strings that get logged (for example a job's
+  argv, a log line, a status file, LocalStorage, a toast, or any file on disk. As of
+  `@chrismessina/raycast-downloader` 0.2.1 the URL reaches the runner on its stdin and curl
+  on curl's stdin (`curl -K -`); `ps` is world-readable, which is why it is not an argument. Server-supplied strings that get logged (for example a job's
   `failure_reason`) are run through `redactString(s, { level: "strict" })` from
   `@chrismessina/raycast-logger` first.
 - **Logging**: use `@chrismessina/raycast-logger`. A field named `code` is treated as

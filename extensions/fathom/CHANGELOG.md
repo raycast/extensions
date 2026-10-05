@@ -13,10 +13,10 @@
 
 ### Changed
 
-- **Downloads**: a recording the server has not finished preparing now fails with a clear "try again later" message instead of a size mismatch, and a resumed download whose link expired picks up where it stopped rather than starting over.
+- **Downloads**: a recording the server has not finished preparing now fails with a clear "try again later" message instead of a size mismatch, and keeps any bytes already downloaded. A resumed download whose link expired picks up where it stopped rather than starting over, and the download link is no longer written to a temporary file.
 - **Cancel while preparing**: a download can now be canceled (⌘.) while Fathom is still rendering the video, not only once the transfer starts.
 - **Jump to Timestamp** no longer shares ⌘O with Open in Fathom, and **Copy Action Item** moves to ⌘C so it no longer shares ⌘⇧C with Copy Share Link.
-- Updated `@chrismessina/raycast-downloader` to 0.2.0, and `brace-expansion` to 5.0.12 to fix high-severity denial-of-service advisories.
+- Updated `@chrismessina/raycast-downloader` to 0.2.1, and `brace-expansion` to 5.0.12 to fix high-severity denial-of-service advisories.
 
 ## [Download Recordings] - 2026-09-20
 

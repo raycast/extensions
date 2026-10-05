@@ -371,10 +371,11 @@ export async function exportTeamMembers(args: {
 /**
  * One CSV cell: RFC 4180 quoting plus a formula guard. Spreadsheets evaluate a cell that
  * starts with `=`, `+`, `-`, `@`, a tab, or a carriage return even when quoted, so a
- * member name from the API could export as a live formula. The leading apostrophe is
- * hidden on display.
+ * member name from the API could export as a live formula. Leading whitespace is skipped
+ * before the check, because import paths that trim it (Google Sheets does by default)
+ * would otherwise expose the formula behind it. The leading apostrophe is hidden on display.
  */
 export function csvCell(value: string): string {
-  const neutralized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  const neutralized = /^[\t\r]|^\s*[=+\-@]/.test(value) ? `'${value}` : value;
   return `"${neutralized.replace(/"/g, '""')}"`;
 }
