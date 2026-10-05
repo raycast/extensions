@@ -88,7 +88,11 @@ export default function DownloadVideo() {
         options.push("--audio-quality", "0");
       } else {
         options.push("--format", downloadFormat);
-        options.push(fastRemux ? "--remux-video" : "--recode-video", recodeFormat);
+        const hasWebmAudio = video?.formats.some(
+          (f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis") || f.ext === "webm",
+        );
+        const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
+        options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
       }
 
       const toast = await showToast({
@@ -169,7 +173,6 @@ export default function DownloadVideo() {
         // The exit code is the sole success/failure verdict: 0 is success,
         // anything else (including null, i.e. killed by a signal) is a failure.
         if (code !== 0) {
-          showHUD("❌ Download Failed");
           const reason = code === null ? "yt-dlp was terminated" : `yt-dlp exited with code ${code}`;
           toast.title = "Download Failed";
           toast.style = Toast.Style.Failure;
@@ -202,7 +205,6 @@ export default function DownloadVideo() {
           return;
         }
 
-        showHUD(`✅ ${medium} Downloaded: ${video?.title || "Video"}`);
         toast.title = `${medium} Downloaded`;
         toast.style = Toast.Style.Success;
         toast.message = video?.title;
