@@ -1,4 +1,4 @@
-import { launchCommand, LaunchType } from "@raycast/api";
+import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { Project } from "../projects/types";
 import { Task } from "../tasks/types";
 import { Activity } from "../activities/types";
@@ -12,5 +12,14 @@ export type MenuBarToolsContext =
   | { view: "favorites" }
   | { view: "settings" };
 
+// launchCommand throws when the target command is disabled.
+export const launchFromMenuBar = async (options: Parameters<typeof launchCommand>[0], title: string) => {
+  try {
+    await launchCommand(options);
+  } catch (error) {
+    await showToast({ style: Toast.Style.Failure, title: `Could not open ${title}`, message: String(error) });
+  }
+};
+
 export const openMenuBarTool = (context: MenuBarToolsContext) =>
-  launchCommand({ name: "menu_bar_tools", type: LaunchType.UserInitiated, context });
+  launchFromMenuBar({ name: "menu_bar_tools", type: LaunchType.UserInitiated, context }, "Menu Bar Tools");

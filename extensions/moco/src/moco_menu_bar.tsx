@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, Icon, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
+import { environment, getPreferenceValues, Icon, LaunchType, MenuBarExtra, open } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { startActivity, toggleActivity } from "./commands/activities/api";
 import { Activity, StartActivityRequest } from "./commands/activities/types";
@@ -9,7 +9,7 @@ import { Task } from "./commands/tasks/types";
 import { Preferences } from "./types";
 import { refreshCache, refreshTodaysActivities } from "./utils/refresh";
 import { useStatuses } from "./utils/useStatuses";
-import { openMenuBarTool } from "./commands/menu-bar/tools";
+import { launchFromMenuBar, openMenuBarTool } from "./commands/menu-bar/tools";
 import {
   CustomerLayout,
   getCustomerLayouts,
@@ -230,11 +230,10 @@ export default function Command() {
           tooltip={`Project: ${timerActivity.project.name}\nTask: ${timerActivity.task.name}\nDescription: ${timerActivity.description}\n\nClick: ${runningActivity ? "stop" : "continue"} timer · Right-click: edit`}
           onAction={async (event: MenuBarExtra.ActionEvent) => {
             if (event.type === "right-click") {
-              await launchCommand({
-                name: "edit_timer",
-                type: LaunchType.UserInitiated,
-                context: { activity: timerActivity },
-              });
+              await launchFromMenuBar(
+                { name: "edit_timer", type: LaunchType.UserInitiated, context: { activity: timerActivity } },
+                "Edit Timer",
+              );
               return;
             }
             await toggleActivity(timerActivity.id, runningActivity === undefined);
@@ -250,7 +249,9 @@ export default function Command() {
             icon={Icon.Plus}
             title="Add Activity…"
             tooltip="Book hours or start a timer for any project and task"
-            onAction={() => launchCommand({ name: "start_timer", type: LaunchType.UserInitiated })}
+            onAction={() =>
+              launchFromMenuBar({ name: "start_timer", type: LaunchType.UserInitiated }, "Start New Timer")
+            }
           />
           <MenuBarExtra.Item
             key="open-dashboard"
