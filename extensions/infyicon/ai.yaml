@@ -1,0 +1,77 @@
+instructions: |
+  Infyicon provides 161,000+ free vector icons in four matching styles: outline (black line), fill (black solid),
+  color-outline and color-fill. Every icon id has the form "slug_number" (e.g. "rocket-44_207078").
+  - Always call search-icons first when the user describes an icon; only call get-icon-svg for the icons the user
+    actually wants, never for every search result.
+  - Prefer one style per project. Default to outline unless the user asks for another style or the context suggests
+    a solid/colored icon.
+  - When the user asks for the SVG or code, return the markup from get-icon-svg in a fenced code block labelled with
+    the icon name. Otherwise list matches as markdown links to the icon page.
+  - If a search returns nothing, retry once with a simpler synonym (e.g. "gear" for "settings") before saying so.
+  - Icons are free for personal and commercial use with attribution to infyicon.com (https://infyicon.com/license).
+    Mention this once when the user ships icons in a product.
+evals:
+  - input: "@infyicon find a shopping cart icon"
+    mocks:
+      search-icons:
+        query: "shopping cart"
+        style: "all"
+        total_matches: 652
+        icons:
+          - id: "shopping-cart-checkout_207166"
+            name: "Shopping Cart"
+            style: "outline"
+            page: "https://infyicon.com/free-icon/shopping-cart-checkout_207166"
+            svg_url: "https://infyicon.com/i2/outline/svg/shopping-cart-checkout_207166.svg"
+            png_512: "https://infyicon.com/i2/outline/png/512/shopping-cart-checkout_207166.png"
+            tags: ["shopping cart", "add to cart"]
+          - id: "shopping-cart-online_201304"
+            name: "Shopping Cart"
+            style: "outline"
+            page: "https://infyicon.com/free-icon/shopping-cart-online_201304"
+            svg_url: "https://infyicon.com/i2/outline/svg/shopping-cart-online_201304.svg"
+            png_512: "https://infyicon.com/i2/outline/png/512/shopping-cart-online_201304.png"
+            tags: ["shopping cart", "grocery cart"]
+        license: "Free for personal & commercial use with attribution to infyicon.com — https://infyicon.com/license"
+    expected:
+      - callsTool:
+          name: "search-icons"
+          arguments:
+            query:
+              includes: "cart"
+      - matches: "\\[([^\\]]+)\\]\\(https://infyicon\\.com/free-icon/[^)]+\\)"
+  - input: "@infyicon give me the SVG for a rocket icon in fill style"
+    mocks:
+      search-icons:
+        query: "rocket"
+        style: "fill"
+        total_matches: 120
+        icons:
+          - id: "rocket-44_207079"
+            name: "Rocket"
+            style: "fill"
+            page: "https://infyicon.com/free-icon/rocket-44_207079"
+            svg_url: "https://infyicon.com/i2/fill/svg/rocket-44_207079.svg"
+            png_512: "https://infyicon.com/i2/fill/png/512/rocket-44_207079.png"
+            tags: ["rocket", "launch"]
+        license: "Free for personal & commercial use with attribution to infyicon.com — https://infyicon.com/license"
+      get-icon-svg:
+        icons:
+          - id: "rocket-44_207079"
+            style: "fill"
+            page: "https://infyicon.com/free-icon/rocket-44_207079"
+            svg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 412 412\"><path d=\"M10 10h392v392H10z\"/></svg>"
+        license: "Free for personal & commercial use with attribution to infyicon.com — https://infyicon.com/license"
+    expected:
+      - callsTool:
+          name: "search-icons"
+          arguments:
+            style: "fill"
+      - callsTool: "get-icon-svg"
+      - includes: "<svg"
+  - input: "@infyicon which icon styles are available?"
+    expected:
+      - includes: "outline"
+      - includes: "fill"
+      - not:
+          callsTool: "get-icon-svg"

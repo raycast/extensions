@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "infyicon",
+  "title": "Infyicon Free Icons",
+  "description": "Search 161,000+ free hand-drawn vector icons in four matching styles and copy or paste the SVG, PNG or JSX in one keystroke. No account, no API key.",
+  "icon": "icon.png",
+  "author": "infyicon",
+  "categories": ["Design Tools", "Developer Tools", "Web"],
+  "keywords": ["icons", "svg", "png", "vector", "design", "free icons", "infyicon", "icon search"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "subtitle": "Infyicon",
+      "description": "Search 161,000+ free icons and copy, paste or download SVG/PNG",
+      "mode": "view",
+      "keywords": ["icon", "svg", "png", "vector"],
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "description": "What Enter does on an icon",
+          "default": "copy-svg",
+          "data": [
+            { "title": "Copy SVG", "value": "copy-svg" },
+            { "title": "Paste SVG", "value": "paste-svg" },
+            { "title": "Copy JSX", "value": "copy-jsx" },
+            { "title": "Copy PNG URL", "value": "copy-png" },
+            { "title": "Download SVG", "value": "download-svg" },
+            { "title": "Open Icon Page", "value": "open" }
+          ]
+        },
+        {
+          "name": "defaultStyle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Style",
+          "description": "Style filter selected when the command opens",
+          "default": "",
+          "data": [
+            { "title": "All styles", "value": "" },
+            { "title": "Outline", "value": "outline" },
+            { "title": "Fill", "value": "fill" },
+            { "title": "Color outline", "value": "color-outline" },
+            { "title": "Color fill", "value": "color-fill" }
+          ]
+        },
+        {
+          "name": "pngSize",
+          "type": "dropdown",
+          "required": false,
+          "title": "PNG Size",
+          "description": "Size used for Copy PNG URL and Download PNG",
+          "default": "512",
+          "data": [
+            { "title": "64 px", "value": "64" },
+            { "title": "128 px", "value": "128" },
+            { "title": "256 px", "value": "256" },
+            { "title": "512 px", "value": "512" }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "description": "Search Infyicon's 161,000+ free vector icons by keyword. Returns icon ids, names, styles, page/SVG/PNG URLs and tags. Use before get-icon-svg."
+    },
+    {
+      "name": "get-icon-svg",
+      "title": "Get Icon SVG",
+      "description": "Return the ready-to-embed SVG markup for one or more icon ids returned by search-icons."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
