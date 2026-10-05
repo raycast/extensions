@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timezone-travel",
+  "title": "Timezone Travel",
+  "description": "Travel through time and compare the same moment across cities.",
+  "icon": "icon.png",
+  "author": "mincer_m",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "world clock",
+    "time zones",
+    "timezone converter",
+    "meeting planner"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "time-travel",
+      "title": "Timezone Travel",
+      "subtitle": "Compare Cities",
+      "description": "Move one moment across all configured cities",
+      "mode": "view"
+    },
+    {
+      "name": "manage-cities",
+      "title": "Manage Cities",
+      "subtitle": "Timezone Travel",
+      "description": "Add, remove, or choose the anchor city",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clockFormat",
+      "title": "Clock Format",
+      "description": "Choose how local times are displayed",
+      "type": "dropdown",
+      "required": true,
+      "default": "12",
+      "data": [
+        {
+          "title": "12-hour",
+          "value": "12"
+        },
+        {
+          "title": "24-hour",
+          "value": "24"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.1.2",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
