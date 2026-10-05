@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.raycast-swift-build/
+.swiftpm/
+compiled_raycast_swift/
+raycast-env.d.ts
+.DS_Store
+e2e-vault/.obsidian/plugins/quickadd/main.js
+e2e-vault/.obsidian/plugins/quickadd/styles.css
+e2e-vault/.obsidian/workspace.json
+e2e-vault/Output/
+demo-vault/.obsidian/plugins/quickadd/main.js
+demo-vault/.obsidian/plugins/quickadd/styles.css
+demo-vault/.obsidian/workspace.json
