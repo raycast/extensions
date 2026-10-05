@@ -1,0 +1,12 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+
+# Raycast specific files
+raycast-env.d.ts
+
+# misc
+.DS_Store
+.vscode
