@@ -11,14 +11,17 @@ type Values = { files: string[] };
  */
 export function ReplaceForm({ target, onReplaced }: { target: ReplaceTarget; onReplaced?: () => void }) {
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<Values>({
+  const { handleSubmit, itemProps, setValidationError } = useForm<Values>({
     initialValues: { files: [] },
     validation: {
       files: (value) => (value && value.length === 1 ? undefined : "Pick one file"),
     },
     async onSubmit(values) {
       const file = values.files[0];
-      if (!(await stat(file).catch(() => undefined))?.isFile()) return false;
+      if (!(await stat(file).catch(() => undefined))?.isFile()) {
+        setValidationError("files", "That file can't be read anymore. Pick it again.");
+        return false;
+      }
       const upload = await replaceFile(target, file);
       if (!upload) return false;
       onReplaced?.();

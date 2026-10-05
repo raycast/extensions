@@ -20,21 +20,16 @@ export const REPLACE_MIN_VERSION = isWindows ? "Aktar for Windows 0.7.0" : "Akta
  */
 export async function replaceFile(target: ReplaceTarget, filePath: string): Promise<Upload | undefined> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Replacing ${target.name}` });
+  let upload: Upload;
   try {
     await getStatus();
     const onProgress = (fraction: number) => {
       toast.message = `${path.basename(filePath)} · ${Math.round(fraction * 100)}%`;
     };
-    const upload =
+    upload =
       target.kind === "upload"
         ? await replaceUpload(target.id, filePath, onProgress)
         : await replaceObject(target.destinationId, target.key, filePath, onProgress);
-    await Clipboard.copy(formatUploads([upload], await fetchFormat()));
-    toast.style = Toast.Style.Success;
-    toast.title = `Replaced ${target.name}`;
-    toast.message = "Same link, copied to clipboard";
-    toast.primaryAction = { title: "Open in Browser", onAction: () => open(upload.url) };
-    return upload;
   } catch (error) {
     if (isReplaceUnsupported(error)) {
       toast.style = Toast.Style.Failure;
@@ -45,4 +40,17 @@ export async function replaceFile(target: ReplaceTarget, filePath: string): Prom
     await showAktarFailure(error, "Couldn't replace the file");
     return undefined;
   }
+
+  // The file is replaced from here on, whatever happens to copying the link.
+  toast.title = `Replaced ${target.name}`;
+  toast.primaryAction = { title: "Open in Browser", onAction: () => open(upload.url) };
+  try {
+    await Clipboard.copy(formatUploads([upload], await fetchFormat()));
+    toast.style = Toast.Style.Success;
+    toast.message = "Same link, copied to clipboard";
+  } catch {
+    toast.style = Toast.Style.Success;
+    toast.message = "The link stays the same";
+  }
+  return upload;
 }

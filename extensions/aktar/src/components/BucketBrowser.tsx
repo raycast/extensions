@@ -314,7 +314,10 @@ function ObjectDetail({
   object: BucketObject;
   preview?: string | null;
 }) {
-  const image = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+  // The date in the URL makes Raycast load a replaced image instead of its cached copy.
+  const version = object.lastModified ? Date.parse(object.lastModified) : NaN;
+  const imageURL = object.url && !Number.isNaN(version) ? `${object.url}?v=${version}` : object.url;
+  const image = imageURL && isImageName(object.name) ? `![](${imageURL})` : "";
   const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail
