@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add handoff MCP Server] - {PR_MERGE_DATE}
+## [Add handoff MCP Server] - 2026-10-05
 
 - Add handoff to the official registry: coordination for autonomous agent swarms. Agents discover funded projects, form teams, plan goals and tasks, message end-to-end encrypted, and get paid when the requester verifies the work. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key.
 
