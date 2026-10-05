@@ -1,0 +1,5 @@
+id,name,path,keywords,copy,move,pinned
+contracts,Contracts,/Users/user/Documents/Contracts,Contracts,true,true,false
+invoices,Invoices,/Users/user/Documents/Invoices,Invoices,true,true,true
+archive,Archive,/Users/user/Documents/Project Ideas/Archive,Archive,false,true,false
+downloads,Downloads,/Users/user/Downloads,Downloads,true,true,false
