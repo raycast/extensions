@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pi-cast",
+  "title": "Pi Cast",
+  "description": "Launch Pi coding agent sessions in Terminal from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "matthewferoz",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "open-pi",
+      "title": "Open Pi",
+      "subtitle": "New Session",
+      "description": "Start a new Pi coding agent session in Terminal.",
+      "mode": "no-view",
+      "keywords": [
+        "agent",
+        "coding",
+        "terminal",
+        "new"
+      ],
+      "arguments": [
+        {
+          "name": "directory",
+          "placeholder": "Project Directory",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "placeholder": "Initial Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "continue-pi",
+      "title": "Continue Pi",
+      "subtitle": "Latest Session",
+      "description": "Continue the latest Pi session for a project in Terminal.",
+      "mode": "no-view",
+      "keywords": [
+        "agent",
+        "coding",
+        "terminal",
+        "continue"
+      ],
+      "arguments": [
+        {
+          "name": "directory",
+          "placeholder": "Project Directory",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "placeholder": "Initial Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "resume-pi",
+      "title": "Resume Pi",
+      "subtitle": "Choose a Session",
+      "description": "Open Pi's session picker for a project in Terminal.",
+      "mode": "no-view",
+      "keywords": [
+        "agent",
+        "coding",
+        "terminal",
+        "resume"
+      ],
+      "arguments": [
+        {
+          "name": "directory",
+          "placeholder": "Project Directory",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "prompt",
+          "placeholder": "Initial Prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  }
+}
