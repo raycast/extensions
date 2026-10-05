@@ -67,6 +67,10 @@ export type Thread = {
     activeTurnId: string | null;
     lastError: string | null;
   } | null;
+  /** Protocol v2 replaced latestTurn and session with these. */
+  status?: string;
+  activeRunId?: string | null;
+  lastError?: string | null;
 };
 
 export type ShellSnapshot = {
@@ -74,6 +78,11 @@ export type ShellSnapshot = {
   projects: Project[];
   threads: Thread[];
   updatedAt: string;
+};
+
+type EnvironmentDescriptor = {
+  /** Absent on servers that predate protocol v2. */
+  orchestrationProtocolVersion?: number;
 };
 
 /** The server is unreachable, the token is rejected, or the request failed. Commands
@@ -148,10 +157,35 @@ export async function resolveOrigin(): Promise<string> {
   return "http://127.0.0.1:3773";
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
+
+let protocolVersion: Promise<number> | undefined;
+
+/** v2 servers reject orchestration reads without the protocol header; older servers
+ * predate the field, so a missing value means v1. Cached for the life of the command. */
+function serverProtocolVersion(): Promise<number> {
+  protocolVersion ??= request<EnvironmentDescriptor>(
+    "/.well-known/t3/environment",
+    undefined,
+    false,
+  )
+    .then((descriptor) => descriptor.orchestrationProtocolVersion ?? 1)
+    .catch((error) => {
+      protocolVersion = undefined;
+      throw error;
+    });
+  return protocolVersion;
+}
+
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+  versioned = true,
+): Promise<T> {
   const origin = await resolveOrigin();
   assertTokenSafeOrigin(origin);
   const { token } = preferences();
+  const version = versioned ? await serverProtocolVersion() : 1;
   let response: Response;
   try {
     response = await fetch(`${origin}${path}`, {
@@ -159,6 +193,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(version >= 2 ? { [PROTOCOL_HEADER]: String(version) } : {}),
         ...(init?.headers ?? {}),
       },
     });
@@ -184,8 +219,49 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export const getShell = () =>
-  request<ShellSnapshot>("/api/orchestration/shell");
+/** v2 reports run state on the thread itself. Rebuild the v1 latestTurn so every
+ * consumer keeps reading one shape. */
+function normalizeThread(thread: Thread): Thread {
+  if (thread.latestTurn !== undefined) {
+    return thread;
+  }
+  const state: LatestTurn["state"] | null =
+    thread.activeRunId || thread.status === "running"
+      ? "running"
+      : thread.status === "failed" || thread.status === "error"
+        ? "error"
+        : thread.status === "interrupted"
+          ? "interrupted"
+          : null;
+  return {
+    ...thread,
+    latestTurn: state && {
+      turnId: thread.activeRunId ?? "",
+      state,
+      requestedAt: thread.updatedAt,
+      startedAt: null,
+      completedAt: null,
+    },
+    session: thread.lastError
+      ? { status: "error", activeTurnId: null, lastError: thread.lastError }
+      : null,
+  };
+}
+
+export const getShell = async (): Promise<ShellSnapshot> => {
+  const snapshot = await request<ShellSnapshot>("/api/orchestration/shell");
+  return { ...snapshot, threads: snapshot.threads.map(normalizeThread) };
+};
+
+/** Thread creation is an HTTP command on v1 and WebSocket-only on v2, which this
+ * extension does not speak yet. */
+export async function assertPromptSupported(): Promise<void> {
+  if ((await serverProtocolVersion()) >= 2) {
+    throw new Error(
+      "This T3 Code server uses protocol v2, where threads can only be created over WebSocket. Prompt T3 Code is not supported yet.",
+    );
+  }
+}
 
 export const dispatch = (command: Record<string, unknown>) =>
   request<{ sequence: number }>("/api/orchestration/dispatch", {

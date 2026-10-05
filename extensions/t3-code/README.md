@@ -11,9 +11,11 @@ Three commands against the T3 Code server running on this Mac.
 Issue a token and paste it into the extension preferences on first run:
 
 ```
-~/.t3/cli/node_modules/.bin/t3 auth session issue --ttl 365d --label raycast --token-only
+npx t3@nightly auth session issue --ttl 365d --label raycast --token-only
 ```
 
+Use a CLI version that matches the running server (`npx t3@<serverVersion>`). A token
+issued by an older CLI is written to the previous database and the server rejects it.
 Revoke it with `t3 auth session revoke`, list sessions with `t3 auth session list`.
 
 The server origin comes from `~/.t3/userdata/server-runtime.json` unless the
@@ -26,6 +28,11 @@ Everything runs against the T3 Code server on this machine, over loopback:
 
 - `GET /api/orchestration/shell` for projects and threads.
 - `POST /api/orchestration/dispatch` for `thread.create` and `thread.turn.start`.
+- `GET /.well-known/t3/environment` for the server's orchestration protocol version.
+
+On protocol v2 the extension sends the `x-t3-orchestration-protocol` header and maps the
+v2 thread fields onto the v1 shape. v2 removed thread creation over HTTP, so Prompt T3
+Code only works against v1 servers for now.
 
 Opening a thread activates T3 Code and drives its command palette, because the
 desktop app registers `t3code://` for its own auth callbacks and an external URL

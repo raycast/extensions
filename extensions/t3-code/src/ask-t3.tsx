@@ -14,6 +14,7 @@ import {
 import { usePromise } from "@raycast/utils";
 import { ErrorView } from "./thread-list";
 import {
+  assertPromptSupported,
   createWorktree,
   defaultBaseBranch,
   errorMessage,
@@ -135,6 +136,7 @@ export default function Command() {
       title: "Starting session",
     });
     try {
+      await assertPromptSupported();
       const modelSelection = selectedModel
         ? parseModelKey(selectedModel)
         : inheritedSettings(
