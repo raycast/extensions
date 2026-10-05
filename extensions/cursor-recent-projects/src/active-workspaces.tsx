@@ -15,6 +15,23 @@ const DB_PATH = `${homedir()}/Library/Application Support/Cursor/User/globalStor
 const RECENT_ENTRIES_QUERY =
   "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'";
 
+const WINDOW_MENU_SCRIPT = `
+  on getWindowMenuData()
+    tell application "System Events" to tell process "Cursor"
+      -- Batch identifiers for all top-level menus to find windows regardless of locale.
+      set menuIdentifiers to value of (every attribute of every menu item of menu 1 of every menu bar item of menu bar 1 whose name is "AXIdentifier")
+    end tell
+    repeat with menuIndex from 1 to count menuIdentifiers
+      repeat with itemIdentifiers in item menuIndex of menuIdentifiers
+        if itemIdentifiers contains "makeKeyAndOrderFront:" then
+          return {menuIndex as integer, item menuIndex of menuIdentifiers}
+        end if
+      end repeat
+    end repeat
+    return {0, {}}
+  end getWindowMenuData
+`;
+
 interface CursorWindow {
   rawTitle: string;
   fileName: string;
@@ -48,35 +65,47 @@ function parseWindowTitle(rawTitle: string): CursorWindow {
   };
 }
 
-function buildFocusScript(windowTitle: string): string {
-  const escaped = windowTitle.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+function buildFocusScript(): string {
   return `
-    tell application "Cursor" to activate
-    tell application "System Events"
-      tell process "Cursor"
-        set frontmost to true
-        perform action "AXRaise" of (first window whose name is "${escaped}")
+    on run argv
+      set windowTitle to item 1 of argv
+      tell application "Cursor" to activate
+      set {windowMenuIndex, identifiers} to my getWindowMenuData()
+      if windowMenuIndex is 0 then error "No open Cursor windows found"
+      tell application "System Events"
+        tell process "Cursor"
+          set frontmost to true
+          -- Selecting the native Window menu entry switches to its Space as well.
+          click (first menu item of menu 1 of menu bar item windowMenuIndex of menu bar 1 whose name is windowTitle and value of attribute "AXIdentifier" is "makeKeyAndOrderFront:")
+        end tell
       end tell
-    end tell
+    end run
+    ${WINDOW_MENU_SCRIPT}
   `;
 }
 
 function getActiveWindowsScript(): string {
   return `
     tell application "System Events"
-      if exists process "Cursor" then
-        tell process "Cursor"
-          set windowNames to name of every window
-          set output to ""
-          repeat with wName in windowNames
-            set output to output & wName & linefeed
-          end repeat
-          return output
-        end tell
-      else
-        return ""
-      end if
+      if not (exists process "Cursor") then return ""
     end tell
+    -- Cursor's Window menu lists user-facing windows across all Spaces;
+    -- its AXWindows list omits other Spaces. Core Graphics is faster but
+    -- needs a native bridge and can require Screen Recording access for titles.
+    set {windowMenuIndex, identifiers} to my getWindowMenuData()
+    if windowMenuIndex is 0 then return ""
+    tell application "System Events" to tell process "Cursor"
+      set windowNames to name of every menu item of menu 1 of menu bar item windowMenuIndex of menu bar 1
+    end tell
+    -- Filter the fetched values locally, outside the System Events tell block.
+    set output to ""
+    repeat with i from 1 to count windowNames
+      if item i of identifiers contains "makeKeyAndOrderFront:" then
+        set output to output & item i of windowNames & linefeed
+      end if
+    end repeat
+    return output
+    ${WINDOW_MENU_SCRIPT}
   `;
 }
 
@@ -197,7 +226,7 @@ export default function ActiveWorkspaces() {
                   onAction={async () => {
                     try {
                       await closeMainWindow();
-                      await runAppleScript(buildFocusScript(window.rawTitle));
+                      await runAppleScript(buildFocusScript(), [window.rawTitle]);
                     } catch (error) {
                       await showToast({
                         title: "Failed to focus window",
