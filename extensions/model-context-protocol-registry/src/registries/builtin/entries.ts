@@ -254,6 +254,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://dchub.cloud/mcp",
   },
   {
+    name: "dropthehassle",
+    title: "DropTheHassle",
+    description:
+      "Put the website your AI built online on a live HTTPS link, check with the domain registry whether a domain name is available, and look after your sites: publish a new version or roll back, rename the link, point a domain, set the share image and favicon, and check certificate and visitor numbers. Hosted remote Streamable HTTP server through `mcp-remote`; publishing and domain checks work with no sign-in and no API key, managing sites uses OAuth 2.1 sign-in with dynamic client registration.",
+    icon: "https://dropthehassle.com/apple-touch-icon.png",
+    homepage: "https://dropthehassle.com/guides/deploy-with-your-ai-mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://dropthehassle.com/mcp"],
+    },
+    remoteUrl: "https://dropthehassle.com/mcp",
+  },
+  {
     name: "git",
     title: "Git",
     description:
