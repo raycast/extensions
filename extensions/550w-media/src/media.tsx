@@ -32,8 +32,9 @@ type Values = {
 };
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
-  providerName:
-    region === "cn" ? "550W AI去字幕去水印" : "550W Watermark & Text Eraser",
+  // Raycast 2.6.2 compares callback state using btoa(JSON.stringify(state)).
+  // Keep this SDK state field ASCII; localized manifests and links stay regional.
+  providerName: "550W Watermark & Text Eraser",
   providerId: `550w-${region}`,
   providerIcon: "icon.png",
 });
