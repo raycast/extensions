@@ -44,7 +44,7 @@ export const ActivityList = ({ projectID = null }: { projectID?: number | null }
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter tasks by name..."
+      searchBarPlaceholder="Filter activities by name..."
       isShowingDetail={true}
       actions={
         <ActionPanel>
