@@ -147,11 +147,6 @@ describe("a page behind a login or a paywall that answers HTTP 200", () => {
   it("is an access page, not unreadable, so no archived copy is offered around it", () => {
     for (const ctx of [
       parsePage(thin(paywallMarkup), "https://news.example/story", NOW),
-      parsePage(
-        thin("", '<form><input name="user"><input type="password" name="pass"></form>'),
-        "https://news.example/story",
-        NOW,
-      ),
       parsePage(thin(""), "https://accounts.example.com/login?next=%2Fstory", NOW),
       parsePage(thin(""), "https://news.example/subscribe?return=/story", NOW),
     ]) {
@@ -165,6 +160,12 @@ describe("a page behind a login or a paywall that answers HTTP 200", () => {
     const ctx = parsePage(html, "https://news.example/story", NOW);
     expect(ctx.noteReason).toBeUndefined();
     expect(bodyText(ctx.body).length).toBeGreaterThan(200);
+  });
+
+  it("keeps a public page with a sign-in box in its header unreadable, so it can still get the archived copy", () => {
+    const header = '<header><form><input name="user"><input type="password" name="pass"></form></header>';
+    const ctx = parsePage(thin("", `${header}<div id="app"></div>`), "https://news.example/story", NOW);
+    expect(ctx.noteReason).toBe("unreadable");
   });
 
   it("keeps a JavaScript app with no sign of a wall unreadable", () => {

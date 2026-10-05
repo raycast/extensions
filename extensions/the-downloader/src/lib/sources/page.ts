@@ -21,13 +21,13 @@ const ACCESS_PATH = /(^|\/)(log-?in|sign-?in|sso|auth|subscribe|paywall)(\/|$)/i
 
 /**
  * True for a login or paywall page served with HTTP 200: the site's paywall
- * markup (schema.org `isAccessibleForFree: false`), a sign-in form, or a
- * sign-in or subscribe address after redirects. Only asked when the page has
- * no readable text, so a metered paywall that sends the article is still read.
+ * markup (schema.org `isAccessibleForFree: false`) or a sign-in or subscribe
+ * address after redirects. A password field alone doesn't count — public pages
+ * put sign-in boxes in their headers. Only asked when the page has no readable
+ * text, so a metered paywall that sends the article is still read.
  */
-function behindAccessWall(document: Doc, ld: Json[], url: string): boolean {
+function behindAccessWall(ld: Json[], url: string): boolean {
   if (ld.some((o) => String(o.isAccessibleForFree).toLowerCase() === "false")) return true;
-  if (document.querySelector('input[type="password"]')) return true;
   try {
     const { hostname, pathname } = new URL(url);
     return ACCESS_PATH.test(pathname) || /^(login|signin|accounts?|auth|sso)\./i.test(hostname);
@@ -162,7 +162,7 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
   );
   const image = metaContent(document, 'meta[property="og:image"]', 'meta[name="twitter:image"]');
   const language = clean(document.documentElement?.getAttribute("lang")) || undefined;
-  const walled = behindAccessWall(document, ld, url);
+  const walled = behindAccessWall(ld, url);
 
   const readable = new Readability(document as unknown as Document, { charThreshold: MIN_TEXT }).parse();
   let paragraphs = readable?.content ? paragraphsOf(readable.content) : [];
