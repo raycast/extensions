@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Chirpie MCP Server] - {PR_MERGE_DATE}
+## [Add Chirpie MCP Server] - 2026-10-05
 
 - Add Chirpie to the official registry: the publishing connector for AI agents. Post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, with media, drafts, post analytics and comment replies. Hosted remote server at `https://chirpie.ai/mcp` through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
 
