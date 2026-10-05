@@ -159,33 +159,40 @@ export async function resolveOrigin(): Promise<string> {
 
 const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
 
-let protocolVersion: Promise<number> | undefined;
+const protocolVersions = new Map<string, Promise<number>>();
 
 /** v2 servers reject orchestration reads without the protocol header; older servers
- * predate the field, so a missing value means v1. Cached for the life of the command. */
-function serverProtocolVersion(): Promise<number> {
-  protocolVersion ??= request<EnvironmentDescriptor>(
-    "/.well-known/t3/environment",
-    undefined,
-    false,
-  )
-    .then((descriptor) => descriptor.orchestrationProtocolVersion ?? 1)
-    .catch((error) => {
-      protocolVersion = undefined;
-      throw error;
-    });
-  return protocolVersion;
+ * predate the field, so a missing value means v1. Cached per origin for the life of
+ * the command, so a server that restarts on another port or version is asked again. */
+function serverProtocolVersion(origin: string): Promise<number> {
+  let version = protocolVersions.get(origin);
+  if (!version) {
+    version = request<EnvironmentDescriptor>(
+      "/.well-known/t3/environment",
+      undefined,
+      false,
+      origin,
+    )
+      .then((descriptor) => descriptor.orchestrationProtocolVersion ?? 1)
+      .catch((error) => {
+        protocolVersions.delete(origin);
+        throw error;
+      });
+    protocolVersions.set(origin, version);
+  }
+  return version;
 }
 
 async function request<T>(
   path: string,
   init?: RequestInit,
   versioned = true,
+  knownOrigin?: string,
 ): Promise<T> {
-  const origin = await resolveOrigin();
+  const origin = knownOrigin ?? (await resolveOrigin());
   assertTokenSafeOrigin(origin);
   const { token } = preferences();
-  const version = versioned ? await serverProtocolVersion() : 1;
+  const version = versioned ? await serverProtocolVersion(origin) : 1;
   let response: Response;
   try {
     response = await fetch(`${origin}${path}`, {
@@ -256,7 +263,7 @@ export const getShell = async (): Promise<ShellSnapshot> => {
 /** Thread creation is an HTTP command on v1 and WebSocket-only on v2, which this
  * extension does not speak yet. */
 export async function assertPromptSupported(): Promise<void> {
-  if ((await serverProtocolVersion()) >= 2) {
+  if ((await serverProtocolVersion(await resolveOrigin())) >= 2) {
     throw new Error(
       "This T3 Code server uses protocol v2, where threads can only be created over WebSocket. Prompt T3 Code is not supported yet.",
     );

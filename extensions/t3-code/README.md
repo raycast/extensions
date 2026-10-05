@@ -11,11 +11,13 @@ Three commands against the T3 Code server running on this Mac.
 Issue a token and paste it into the extension preferences on first run:
 
 ```
-npx t3@nightly auth session issue --ttl 365d --label raycast --token-only
+ORIGIN=$(jq -r .origin ~/.t3/userdata/server-runtime.json)
+npx t3@$(curl -s $ORIGIN/.well-known/t3/environment | jq -r .serverVersion) auth session issue --ttl 365d --label raycast --token-only
 ```
 
-Use a CLI version that matches the running server (`npx t3@<serverVersion>`). A token
-issued by an older CLI is written to the previous database and the server rejects it.
+The first line reads the running server's address and the second runs the CLI at the
+server's own version. A token issued by a different CLI version can be written to the
+previous database, and the server then rejects it.
 Revoke it with `t3 auth session revoke`, list sessions with `t3 auth session list`.
 
 The server origin comes from `~/.t3/userdata/server-runtime.json` unless the
