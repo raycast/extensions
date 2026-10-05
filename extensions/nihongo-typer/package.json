@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nihongo-typer",
+  "title": "Nihongo Typer",
+  "description": "Raycast extension that converts Romaji typed into the search bar into Hiragana, Katakana, and common-word Kanji in real time, plus reverse Kanji lookup and English word search.",
+  "keywords": [
+    "japanese",
+    "romaji",
+    "hiragana",
+    "katakana",
+    "kanji",
+    "kana",
+    "furigana",
+    "ime",
+    "dictionary",
+    "anki",
+    "jmdict",
+    "transliterate"
+  ],
+  "icon": "icon.png",
+  "author": "cemyilmazzzz122",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Romaji to Kana",
+      "subtitle": "Nihongo Typer",
+      "description": "Type Romaji and get instant Hiragana and Katakana conversions",
+      "keywords": [
+        "japanese",
+        "hiragana",
+        "katakana",
+        "kanji",
+        "ime",
+        "furigana",
+        "nihongo",
+        "transliterate"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "title": "Primary Action",
+          "description": "What pressing Enter on a result does",
+          "type": "dropdown",
+          "required": false,
+          "default": "copyAndClose",
+          "data": [
+            {
+              "title": "Copy and Close Raycast",
+              "value": "copyAndClose"
+            },
+            {
+              "title": "Copy Only",
+              "value": "copyOnly"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        },
+        {
+          "name": "keepHistory",
+          "title": "Recent Conversions",
+          "description": "Remember recent conversions and show them when the search bar is empty",
+          "type": "checkbox",
+          "label": "Keep a history of recent conversions",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "voice",
+          "title": "Pronunciation Voice",
+          "description": "macOS system voice used by the Pronounce action",
+          "type": "dropdown",
+          "required": false,
+          "default": "Kyoko",
+          "data": [
+            {
+              "title": "Kyoko (female)",
+              "value": "Kyoko"
+            },
+            {
+              "title": "Otoya (male)",
+              "value": "Otoya"
+            },
+            {
+              "title": "System default",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "convert-clipboard",
+      "title": "Convert Clipboard",
+      "subtitle": "Nihongo Typer",
+      "description": "Convert Romaji in the clipboard to Kana and paste it into the active app",
+      "keywords": [
+        "japanese",
+        "romaji",
+        "kana",
+        "hiragana",
+        "katakana",
+        "paste",
+        "ime"
+      ],
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "clipboardTarget",
+          "title": "Target Script",
+          "description": "Which script Romaji in the clipboard is converted to",
+          "type": "dropdown",
+          "required": false,
+          "default": "hiragana",
+          "data": [
+            {
+              "title": "Hiragana",
+              "value": "hiragana"
+            },
+            {
+              "title": "Katakana",
+              "value": "katakana"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "wanakana": "^5.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
