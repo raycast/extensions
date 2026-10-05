@@ -34,12 +34,14 @@ export const formatTitle = ({
   name,
   artistName,
   hideArtistName,
+  hideTrackTitle = false,
   maxTextLength,
   cleanupTitle,
 }: {
   name: string;
   artistName: string;
   hideArtistName: boolean;
+  hideTrackTitle?: boolean;
   maxTextLength: string;
   cleanupTitle: boolean;
 }) => {
@@ -54,7 +56,7 @@ export const formatTitle = ({
   }
 
   const filteredName = cleanupTitle ? cleanupSongTitle(name) : name;
-  const title = hideArtistName ? filteredName : `${filteredName} · ${artistName}`;
+  const title = [hideTrackTitle ? "" : filteredName, hideArtistName ? "" : artistName].filter(Boolean).join(" · ");
 
   if (title.length <= max) {
     return title;

@@ -18,7 +18,8 @@
     "xmok",
     "byheaven",
     "christianmagill",
-    "0xdhrv"
+    "0xdhrv",
+    "stillo"
   ],
   "license": "MIT",
   "keywords": [
@@ -305,7 +306,7 @@
           "name": "hideIconWhenIdle",
           "description": "If enabled, the icon in the Menu Bar will be hidden when Music is not running or when nothing is playing",
           "type": "checkbox",
-          "label": "Hide icon when idle",
+          "label": "Hide Icon When Idle",
           "default": false,
           "required": false
         },
@@ -313,7 +314,15 @@
           "name": "hideArtistName",
           "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
-          "label": "Hide artist's name",
+          "label": "Hide Artist Name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "hideTrackTitle",
+          "description": "If enabled, the track title will be hidden in the Menu Bar",
+          "type": "checkbox",
+          "label": "Hide Track Title",
           "default": false,
           "required": false
         },
@@ -321,7 +330,7 @@
           "name": "cleanupTitle",
           "description": "If enabled cleans up extra info like remix titles or versions from the song name",
           "type": "checkbox",
-          "label": "Cleanup song title",
+          "label": "Cleanup Song Title",
           "default": false,
           "required": false
         },
@@ -331,6 +340,28 @@
           "description": "Maximum number of characters to show for the currently playing track in the menu bar. Leave empty to use default (30 characters)",
           "type": "textfield",
           "default": "30",
+          "required": false
+        },
+        {
+          "name": "iconType",
+          "title": "Menu Bar Icon",
+          "description": "Choose between the Apple Music icon, the cover art of the current track, or no icon.",
+          "type": "dropdown",
+          "default": "music-icon",
+          "data": [
+            {
+              "title": "Apple Music Icon",
+              "value": "music-icon"
+            },
+            {
+              "title": "Cover Art",
+              "value": "cover-image"
+            },
+            {
+              "title": "No Icon",
+              "value": "none"
+            }
+          ],
           "required": false
         }
       ]
