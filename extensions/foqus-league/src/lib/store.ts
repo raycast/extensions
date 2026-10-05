@@ -159,6 +159,24 @@ export function parseSession(value: unknown): Session | null {
   };
 }
 
+export function editedSession(
+  before: Session | undefined,
+  edit: { start: number; goal: string; duration: number; notes: string },
+): Session {
+  const retimed = !before || before.start !== edit.start || before.duration !== edit.duration;
+  const next: Session = {
+    ...before,
+    start: edit.start,
+    goal: edit.goal.trim(),
+    duration: edit.duration,
+    source: before && !retimed ? before.source : "manual",
+  };
+  const notes = edit.notes.trim();
+  if (notes) next.notes = notes;
+  else delete next.notes;
+  return next;
+}
+
 function parseNotes(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const notes = value.trim().slice(0, MAX_NOTES);

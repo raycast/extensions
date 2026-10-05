@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { LocalSessionStore, MAX_NOTES, parseSession, pruneDeleted, type SyncState } from "./store.ts";
+import { editedSession, LocalSessionStore, MAX_NOTES, parseSession, pruneDeleted, type SyncState } from "./store.ts";
 import type { Session } from "./types.ts";
 
 const DAY = 86_400_000;
@@ -654,6 +654,34 @@ test("a session moved to a new start keeps its old start tombstoned even if the 
     await assert.rejects(store.saveSession({ previousStart: T1, session: manual(T2, "Write", 40) }));
     assert.ok((await store.readState()).deleted.includes(T1));
   }));
+
+test("editing a recorded session keeps what Focus logged, and only a new time or length makes it manual", () => {
+  const recorded: Session = {
+    start: T1,
+    goal: "Ship",
+    duration: 25,
+    source: "reported",
+    planned: 25,
+    pauses: 1,
+    blocks: 2,
+    sites: { "x.com": 2 },
+  };
+  assert.deepEqual(editedSession(recorded, { start: T1, goal: "Ship ", duration: 25, notes: " Good one " }), {
+    ...recorded,
+    notes: "Good one",
+  });
+  assert.equal(editedSession(recorded, { start: T1, goal: "Ship", duration: 30, notes: "" }).source, "manual");
+  assert.deepEqual(
+    editedSession({ ...recorded, notes: "old" }, { start: T1, goal: "Ship", duration: 25, notes: "" }),
+    recorded,
+  );
+  assert.deepEqual(editedSession(undefined, { start: T2, goal: "Read", duration: 15, notes: "" }), {
+    start: T2,
+    goal: "Read",
+    duration: 15,
+    source: "manual",
+  });
+});
 
 test("a goal's set-up mark survives a round trip through the state file", () =>
   withStore(async (store, dir) => {

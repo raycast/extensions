@@ -3,7 +3,6 @@ import { writeFile, readFile } from "fs/promises";
 import { homedir } from "os";
 import * as path from "path";
 import type { Category } from "./focusSetup.ts";
-import { saveNew } from "./shareImage.ts";
 
 export const CATEGORIES_PATH = path.join(
   homedir(),
@@ -116,7 +115,7 @@ export async function writeImportFile(
     apps: stranded.filter((s) => s.app).map((s) => s.id),
     websites: stranded.filter((s) => !s.app).map((s) => s.id),
   };
-  return saveNew(dir, importFileName(goal), (file) =>
-    writeFile(file, `${JSON.stringify([category], null, 2)}\n`, "utf8"),
-  );
+  const file = path.join(dir, importFileName(goal));
+  await writeFile(file, `${JSON.stringify([category], null, 2)}\n`, "utf8");
+  return file;
 }

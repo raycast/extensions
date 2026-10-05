@@ -57,7 +57,7 @@ export default function FocusWrapped() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making your recap…" });
     try {
       const file = await drawShareable((name, draw) => draw(path.join(environment.supportPath, name)));
-      if (!file) return;
+      if (!file) return toast.hide();
       await Clipboard.copy({ file });
       toast.style = Toast.Style.Success;
       toast.title = "Recap copied";
@@ -72,7 +72,7 @@ export default function FocusWrapped() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making your recap…" });
     try {
       const file = await drawShareable((name, draw) => saveNew(DOWNLOADS, name, draw));
-      if (!file) return;
+      if (!file) return toast.hide();
       toast.style = Toast.Style.Success;
       toast.title = "Saved to Downloads";
       toast.message = path.basename(file);
@@ -107,18 +107,22 @@ export default function FocusWrapped() {
               )
             }
           />
-          <Action
-            title="Copy as Image"
-            icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            onAction={copyPoster}
-          />
-          <Action
-            title="Save to Downloads"
-            icon={Icon.Download}
-            shortcut={Keyboard.Shortcut.Common.Save}
-            onAction={savePoster}
-          />
+          {facts && (
+            <>
+              <Action
+                title="Copy as Image"
+                icon={Icon.Clipboard}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                onAction={copyPoster}
+              />
+              <Action
+                title="Save to Downloads"
+                icon={Icon.Download}
+                shortcut={Keyboard.Shortcut.Common.Save}
+                onAction={savePoster}
+              />
+            </>
+          )}
           <ActionPanel.Section title="Period">
             {steps && (
               <Action

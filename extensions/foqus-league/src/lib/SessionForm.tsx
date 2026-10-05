@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { MAX_SESSION_MINUTES } from "./log.ts";
 import { store } from "./runtime.ts";
 import { UNLABELLED } from "./stats.ts";
-import { MAX_NOTES, type SaveResult } from "./store.ts";
+import { editedSession, MAX_NOTES, type SaveResult } from "./store.ts";
 import type { Session } from "./types.ts";
 
 type Props = {
@@ -38,13 +38,7 @@ export function SessionForm({ session, goals, onDone }: Props) {
     if (minutesError || startError || notesError || !start || inFlight.current) return;
     inFlight.current = true;
 
-    const next: Session = {
-      start: start.getTime(),
-      goal: goal.trim(),
-      duration,
-      source: "manual",
-      ...(notes.trim() ? { notes: notes.trim() } : {}),
-    };
+    const next = editedSession(session, { start: start.getTime(), goal, duration, notes });
 
     let result: SaveResult;
     try {

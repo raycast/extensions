@@ -71,11 +71,14 @@ export function withNamedCategory(plan: BlockPlan, goal: string): BlockPlan {
 
 export type CategoryNeed = { name: string; stranded: Stranded[]; own: Category; exists: boolean; pending: boolean };
 
+const SET_UP_TRUST_MS = 24 * 60 * 60 * 1000;
+
 export function quickStartPlan(
   goal: string,
   learned: LearnedBlocks,
   categories: FocusCategory[],
   raycast2: boolean,
+  now = Date.now(),
 ): { plan: BlockPlan; need?: CategoryNeed } {
   const own = ownCategoryFor(goal);
   const owned = raycast2 ? undefined : findCategory(categories, own.title);
@@ -84,7 +87,7 @@ export function quickStartPlan(
   if (!plan.skipped.length || (raycast2 && plan.mode === "allow")) return { plan };
   const known = learned.blocks[goal];
   const exists = raycast2 ? (known?.categories ?? []).some((c) => c.id === own.id) : !!owned;
-  const pending = raycast2 && known?.setUpAt !== undefined;
+  const pending = raycast2 && known?.setUpAt !== undefined && now - known.setUpAt < SET_UP_TRUST_MS;
   return { plan, need: { name: goal, stranded: plan.skipped, own, exists, pending } };
 }
 
