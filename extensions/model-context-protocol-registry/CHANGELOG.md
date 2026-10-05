@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add VoiceMoat MCP Server] - {PR_MERGE_DATE}
+## [Add VoiceMoat MCP Server] - 2026-10-05
 
 - Add VoiceMoat to the official registry: the personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics, and publish or schedule posts after a preview. Hosted remote Streamable HTTP server at https://app.voicemoat.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Requires a paid VoiceMoat Pro or Enterprise plan.
 
