@@ -115,35 +115,82 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   };
 }
 
+/** Frontmatter fields this extension writes; every other field is kept as is. */
+function managedFields(): Set<string> {
+  return new Set(["title", "saved", "source", "publisher", "read", "tags", "favorite", getFaviconField()]);
+}
+
+const TOP_LEVEL_KEY = /^(?:"((?:[^"\\]|\\.)*)"|'((?:[^']|'')*)'|([^\s#'"-][^:]*?))[ \t]*:(?:\s|$)/;
+
+/**
+ * Returns the top-level entries of a raw YAML frontmatter that this extension
+ * doesn't manage — `aliases`, `cssclasses`… — with their original text, so
+ * nested values, comments and formatting survive a rewrite.
+ */
+export function unmanagedFrontmatter(raw: string): string {
+  const managed = managedFields();
+  const kept: string[] = [];
+  let keep = true;
+
+  for (const line of raw.split(/\r?\n/)) {
+    const match = line.match(TOP_LEVEL_KEY);
+    if (match) {
+      const key = match[1] ?? match[2]?.replace(/''/g, "'") ?? match[3];
+      keep = !managed.has(key);
+    }
+    // Indented lines, list items and comments belong to the entry above.
+    if (keep) kept.push(line);
+  }
+
+  return kept.join("\n").trim();
+}
+
+async function readUnmanagedFrontmatter(fullPath: string): Promise<string> {
+  let content: string;
+  try {
+    content = await fs.readFile(fullPath, { encoding: "utf-8" });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return "";
+    throw error;
+  }
+
+  const raw = content.match(/^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/)?.[1];
+  return raw ? unmanagedFrontmatter(raw) : "";
+}
+
 export default async function saveToObsidian(file: File): Promise<string> {
   // Combine the form tags with the required tags
   const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
   const combinedTags = Array.from(new Set(file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags)));
 
-  const tagsAndExtras = `tags: ${JSON.stringify(combinedTags)}${extraLines(file.attributes)}`;
+  // Read from disk rather than from the cache, so fields added in Obsidian
+  // since the last scan aren't lost either.
+  const unmanaged = await readUnmanagedFrontmatter(file.fullPath);
 
-  const template = dedent`
-    ---
-    title: ${JSON.stringify(file.attributes.title)}
-    saved: ${formatDate(file.attributes.saved)}
-    source: ${JSON.stringify(file.attributes.source)}
-    publisher: ${JSON.stringify(file.attributes.publisher)}
-    read: ${JSON.stringify(file.attributes.read)}
-    ${tagsAndExtras}
-    ---
+  const template = [
+    "---",
+    `title: ${JSON.stringify(file.attributes.title)}`,
+    `saved: ${formatDate(file.attributes.saved)}`,
+    `source: ${JSON.stringify(file.attributes.source)}`,
+    `publisher: ${JSON.stringify(file.attributes.publisher)}`,
+    `read: ${JSON.stringify(file.attributes.read)}`,
+    `tags: ${JSON.stringify(combinedTags)}${extraLines(file.attributes)}`,
+    ...(unmanaged ? [unmanaged] : []),
+    "---",
+    "",
+    file.body ?? "",
+  ].join("\n");
 
-    ${file.body}
-  `;
-
-  await Promise.allSettled([
-    fs.writeFile(file.fullPath, template, { encoding: "utf-8" }),
-    addToLocalStorageTags(file.attributes.tags),
-    addToLocalStorageFiles([file]),
-  ]);
+  // The caches must only learn about the bookmark once it's actually on disk,
+  // and a failed write has to reach the caller.
+  await fs.writeFile(file.fullPath, template, { encoding: "utf-8" });
+  await Promise.allSettled([addToLocalStorageTags(file.attributes.tags), addToLocalStorageFiles([file])]);
   return file.fileName;
 }
 
-const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\([^)\n]*\)\n?/;
+// The generated heading takes the whole first line. URLs can contain
+// parentheses (Wikipedia's often do), so the link runs to the last `)`.
+const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\([^\n]*\)[ \t]*(?:\n|$)/;
 
 function splitBookmarkBody(body: string | undefined): { hasHeading: boolean; description: string } {
   const content = body ?? "";

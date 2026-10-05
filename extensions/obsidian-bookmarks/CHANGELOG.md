@@ -1,5 +1,13 @@
 # Obsidian Bookmarks Changelog
 
+## [Safer Bookmark Editing] - {PR_MERGE_DATE}
+
+- Keep frontmatter fields the extension doesn't manage, such as `aliases` or `cssclasses`, when editing, favoriting or marking a bookmark as read. They used to be dropped.
+- "Fetch Page Content" now reads the tab that matches the bookmark, even when it isn't in the focused window, instead of whatever tab happened to be in front.
+- Query parameters now count when comparing URLs, so two YouTube videos are no longer mistaken for the same page, and no longer flagged as duplicates. Tracking parameters such as `utm_*` are still ignored.
+- Report a bookmark as saved only once it has actually been written to disk, and show an error if the write fails.
+- Fix editing a bookmark whose URL contains parentheses, as Wikipedia's often do, leaving part of the link in Notes.
+
 ## [Save From Little Arc] - {PR_MERGE_DATE}
 
 - Fix the save form prefilling the page of the full Arc window behind when invoked from a Little Arc window. Arc doesn't expose Little Arc windows to scripting, so reading the right page relies on the [Raycast Browser Extension](https://www.raycast.com/browser-extension) when it is installed; without it, the previous behaviour remains.

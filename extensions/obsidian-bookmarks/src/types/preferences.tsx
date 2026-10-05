@@ -8,6 +8,7 @@ export type FormActionPreference =
   | "copyUrlAsMarkdown"
   | "clearCache"
   | "fetchContent"
+  | "refetchUrl"
   | "saveChanges";
 
 export type DetailActionPreference =
