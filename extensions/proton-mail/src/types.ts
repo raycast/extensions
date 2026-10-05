@@ -9,6 +9,8 @@ export interface Email {
   flags: Set<string>;
   hasAttachment: boolean;
   preview?: string;
+  // Proton's own message ID (Bridge's X-Pm-Internal-Id header), used to open the email on the web
+  protonId?: string;
   body?: string;
   htmlBody?: string;
 }
