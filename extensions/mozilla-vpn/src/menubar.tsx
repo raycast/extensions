@@ -1,31 +1,29 @@
 import {
   MenuBarExtra,
-  open,
   Icon,
   Color,
   showToast,
   Toast,
   getPreferenceValues,
+  launchCommand,
+  LaunchType,
 } from '@raycast/api';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { exec } from 'child_process';
-import { checkVpnStatus } from './utils/vpnService';
-import { runCommand } from './utils/vpnService';
+import { checkVpnStatus, runCommand } from './utils/vpnService';
 import { fetchCurrentIP } from './utils/fetchCurrentIP';
-import { notifyVpnStatusChange, getVpnStatusTimestamp } from './utils/vpnCache';
-
-interface Preferences {
-  showMenuBar: boolean;
-}
+import {
+  notifyVpnStatusChange,
+  subscribeToVpnStatusChange,
+} from './utils/vpnCache';
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Menubar>();
   const [vpnStatus, setVpnStatus] = useState<boolean | null>(null);
   const [serverCity, setServerCity] = useState<string>('Unknown');
   const [serverCountry, setServerCountry] = useState<string>('Unknown');
   const [currentIP, setCurrentIP] = useState<string>('Loading...');
   const [isLoading, setIsLoading] = useState(true);
-  const lastCacheCheckRef = useRef<number>(0);
 
   // If menubar is disabled, return null (hide it)
   if (!preferences.showMenuBar) {
@@ -142,13 +140,15 @@ export default function Command() {
     });
   }, []);
 
-  // Initial load - runs when menubar extra is shown
+  // Initial load and cache subscription
   useEffect(() => {
-    const currentTimestamp = getVpnStatusTimestamp();
-    if (currentTimestamp > lastCacheCheckRef.current) {
-      lastCacheCheckRef.current = currentTimestamp;
-    }
     refreshStatus();
+    const unsubscribe = subscribeToVpnStatusChange(() => {
+      refreshStatus(true);
+    });
+    return () => {
+      unsubscribe();
+    };
   }, [refreshStatus]);
 
   // Menubar icon based on status
@@ -198,7 +198,17 @@ export default function Command() {
       <MenuBarExtra.Item
         title="Change Server"
         icon={Icon.Globe}
-        onAction={() => open('raycast://extensions/natew/mozilla-vpn/index')}
+        onAction={async () => {
+          try {
+            await launchCommand({
+              name: 'index',
+              type: LaunchType.UserInitiated,
+              context: { view: 'serverSelector' },
+            });
+          } catch (error) {
+            console.error('Failed to launch server selector:', error);
+          }
+        }}
       />
 
       <MenuBarExtra.Separator />
@@ -213,7 +223,17 @@ export default function Command() {
       <MenuBarExtra.Item
         title="Open Main Extension"
         icon={Icon.Window}
-        onAction={() => open('raycast://extensions/natew/mozilla-vpn/index')}
+        onAction={async () => {
+          try {
+            await launchCommand({
+              name: 'index',
+              type: LaunchType.UserInitiated,
+              context: { view: 'main' },
+            });
+          } catch (error) {
+            console.error('Failed to launch main extension:', error);
+          }
+        }}
       />
 
       <MenuBarExtra.Item

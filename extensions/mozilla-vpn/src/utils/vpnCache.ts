@@ -15,3 +15,11 @@ export function getVpnStatusTimestamp(): number {
   const timestamp = cache.get(VPN_STATUS_KEY);
   return timestamp ? parseInt(timestamp, 10) : 0;
 }
+
+export function subscribeToVpnStatusChange(callback: () => void): () => void {
+  return cache.subscribe((key) => {
+    if (key === VPN_STATUS_KEY) {
+      callback();
+    }
+  });
+}

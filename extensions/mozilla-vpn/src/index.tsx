@@ -32,7 +32,13 @@ const isMozillaVPNInstalled = () => {
   }
 };
 
-const Command: React.FC = () => {
+interface CommandProps {
+  launchContext?: {
+    view?: ViewType;
+  };
+}
+
+const Command: React.FC<CommandProps> = (props) => {
   const [currentIP, setCurrentIP] = useState<string>(
     'Fetching IP and location...'
   );
@@ -45,7 +51,9 @@ const Command: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Replace individual show states with a single currentView state
-  const [currentView, setCurrentView] = useState<ViewType>('main');
+  const [currentView, setCurrentView] = useState<ViewType>(
+    props?.launchContext?.view || 'main'
+  );
 
   const navigateTo = (view: ViewType) => {
     setCurrentView(view);

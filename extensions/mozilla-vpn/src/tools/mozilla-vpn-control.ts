@@ -9,6 +9,7 @@ import {
 import { runCommand, checkVpnStatus } from '../utils/vpnService';
 import { fetchCurrentIP } from '../utils/fetchCurrentIP';
 import { open } from '@raycast/api';
+import { notifyVpnStatusChange } from '../utils/vpnCache';
 
 // Timing constants for VPN operations
 const DISCONNECT_DELAY_MS = 4000;
@@ -58,49 +59,88 @@ type VpnControlInput = {
   connect_after_change?: boolean;
 };
 
-const COUNTRY_ALIASES: Record<string, string> = {
-  usa: 'USA',
-  'united states': 'USA',
-  'united states of america': 'USA',
-  us: 'USA',
-  uk: 'UK',
-  'united kingdom': 'UK',
-  'great britain': 'UK',
-  gb: 'UK',
-  gbr: 'UK',
-  de: 'Germany',
-  deu: 'Germany',
+const COUNTRY_ALIASES: Record<string, string[]> = {
+  usa: ['usa', 'us', 'united states', 'united states of america'],
+  uk: [
+    'uk',
+    'gb',
+    'gbr',
+    'united kingdom',
+    'great britain',
+    'britain',
+    'england',
+  ],
+  germany: ['germany', 'de', 'deu', 'deutschland'],
+  netherlands: ['netherlands', 'nl', 'holland'],
+  switzerland: ['switzerland', 'ch', 'swiss'],
+  sweden: ['sweden', 'se', 'sverige'],
+  spain: ['spain', 'es', 'españa'],
+  france: ['france', 'fr'],
+  italy: ['italy', 'it', 'italia'],
+  japan: ['japan', 'jp'],
+  canada: ['canada', 'ca'],
+  australia: ['australia', 'au'],
+  brazil: ['brazil', 'br', 'brasil'],
 };
-
-function normalizeCountryName(countryName: string): string {
-  return COUNTRY_ALIASES[countryName.trim().toLowerCase()] || countryName;
-}
 
 async function findCountryFromLocations(
   countryName: string,
   locations: CountryLocation[]
 ): Promise<CountryLocation | null> {
-  const normalizedName = normalizeCountryName(countryName);
+  const query = countryName.trim().toLowerCase();
 
-  // Exact match first
+  // Find canonical key from alias dictionary if present
+  let matchedCanonical: string | null = null;
+  for (const [canonical, aliases] of Object.entries(COUNTRY_ALIASES)) {
+    if (canonical === query || aliases.includes(query)) {
+      matchedCanonical = canonical;
+      break;
+    }
+  }
+
+  // 1. Direct exact match against client country name or countryCode
   let country = locations.find(
     (loc) =>
-      loc.country.toLowerCase() === normalizedName.toLowerCase() ||
-      loc.countryCode.toLowerCase() === normalizedName.toLowerCase()
+      loc.country.toLowerCase() === query ||
+      loc.countryCode.toLowerCase() === query
   );
 
-  // Partial match fallback
+  // 2. Match against alias group
+  if (!country && matchedCanonical) {
+    const aliasGroup = COUNTRY_ALIASES[matchedCanonical];
+    country = locations.find(
+      (loc) =>
+        loc.country.toLowerCase() === matchedCanonical ||
+        loc.countryCode.toLowerCase() === matchedCanonical ||
+        aliasGroup.includes(loc.country.toLowerCase()) ||
+        aliasGroup.includes(loc.countryCode.toLowerCase())
+    );
+  }
+
+  // 3. Partial match against query
   if (!country) {
     country = locations.find(
       (loc) =>
-        loc.country.toLowerCase().includes(normalizedName.toLowerCase()) ||
-        loc.countryCode.toLowerCase().includes(normalizedName.toLowerCase())
+        loc.country.toLowerCase().includes(query) ||
+        query.includes(loc.country.toLowerCase()) ||
+        loc.countryCode.toLowerCase() === query
+    );
+  }
+
+  // 4. Partial match against alias group
+  if (!country && matchedCanonical) {
+    const aliasGroup = COUNTRY_ALIASES[matchedCanonical];
+    country = locations.find((loc) =>
+      aliasGroup.some(
+        (alias) =>
+          loc.country.toLowerCase().includes(alias) ||
+          alias.includes(loc.country.toLowerCase())
+      )
     );
   }
 
   return country || null;
 }
-
 async function connectByCountryAndCity(
   countryName: string,
   cityName?: string
@@ -177,7 +217,52 @@ function detectActionFromInput(
     ) {
       return 'open_account';
     }
-    return input.action;
+    if (
+      rawAction === 'disconnect' ||
+      rawAction === 'deactivate' ||
+      rawAction === 'stop'
+    ) {
+      return 'disconnect';
+    }
+    if (
+      rawAction === 'connect' ||
+      rawAction === 'activate' ||
+      rawAction === 'start'
+    ) {
+      return 'connect';
+    }
+    if (
+      rawAction === 'change_server' ||
+      rawAction === 'server' ||
+      rawAction === 'switch_server'
+    ) {
+      return 'change_server';
+    }
+    if (rawAction === 'list_cities' || rawAction === 'cities') {
+      return 'list_cities';
+    }
+    if (rawAction === 'list_servers' || rawAction === 'servers') {
+      return 'list_servers';
+    }
+    if (
+      rawAction === 'list' ||
+      rawAction === 'countries' ||
+      rawAction === 'list_countries'
+    ) {
+      return 'list';
+    }
+    if (rawAction === 'status' || rawAction === 'info' || rawAction === 'ip') {
+      return 'status';
+    }
+    return rawAction as
+      | 'connect'
+      | 'disconnect'
+      | 'status'
+      | 'list'
+      | 'change_server'
+      | 'list_cities'
+      | 'list_servers'
+      | 'open_account';
   }
 
   // Check if country or city was passed containing account keywords
@@ -302,6 +387,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
         );
         const status = await checkVpnStatus();
         if (!status.isActive) {
+          notifyVpnStatusChange();
           return 'Mozilla VPN disconnected successfully.';
         } else {
           return 'Tried to disconnect, but VPN is still active. Please try again or use the VPN app directly.';
@@ -342,8 +428,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
       return await handleCountryCityOperation(input, 'list_servers');
     }
 
-    case 'connect':
-    case 'change_server': {
+    case 'connect': {
       if (
         !input.country ||
         ['connect', 'activate', 'start', 'vpn'].includes(
@@ -355,6 +440,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
           await new Promise((resolve) => setTimeout(resolve, CONNECT_DELAY_MS));
           const status = await checkVpnStatus();
           if (status.isActive) {
+            notifyVpnStatusChange();
             const newIp = await fetchCurrentIP();
             return `VPN connected using your last configuration.\nServer: ${status.serverCity}, ${status.serverCountry}\nNew IP address: ${newIp}`;
           } else {
@@ -365,15 +451,63 @@ export default async function tool(input: VpnControlInput): Promise<string> {
         }
       }
 
+      const { success, message } = await connectByCountryAndCity(
+        input.country,
+        input.city
+      );
+      if (!success) {
+        return message;
+      }
+
+      const shouldConnect = input.connect_after_change !== false;
+      if (shouldConnect) {
+        try {
+          await runCommand('activate');
+          await new Promise((resolve) =>
+            setTimeout(resolve, SERVER_SWITCH_DELAY_MS)
+          );
+
+          let status = await checkVpnStatus();
+          let retries = 0;
+
+          while (!status.isActive && retries < MAX_CONNECTION_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+            await runCommand('activate');
+            await new Promise((resolve) =>
+              setTimeout(resolve, RETRY_CONNECT_DELAY_MS)
+            );
+            status = await checkVpnStatus();
+            retries++;
+          }
+
+          if (status.isActive) {
+            notifyVpnStatusChange();
+            const newIp = await fetchCurrentIP();
+            return `${message}\nVPN connected successfully.\nServer: ${status.serverCity}, ${status.serverCountry}\nNew IP address: ${newIp}`;
+          } else {
+            notifyVpnStatusChange();
+            return `${message}\nServer changed but failed to connect after ${MAX_CONNECTION_RETRIES + 1} attempts. Please try connecting manually or check the VPN app.`;
+          }
+        } catch (error) {
+          notifyVpnStatusChange();
+          return `${message}\nFailed to connect VPN: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      }
+
+      notifyVpnStatusChange();
+      return `${message}\nVPN server changed but not connected.`;
+    }
+
+    case 'change_server': {
       if (!input.country) {
-        return 'Country is required for this action.';
+        return 'Please specify a country to change the VPN server to (e.g. "Change server to Germany").';
       }
 
       let wasConnected = false;
       try {
         const currentStatus = await checkVpnStatus();
         wasConnected = currentStatus.isActive;
-      } catch (error) {
+      } catch {
         // Silently continue if status check fails
       }
 
@@ -385,13 +519,13 @@ export default async function tool(input: VpnControlInput): Promise<string> {
         return message;
       }
 
+      notifyVpnStatusChange();
+
+      // Only connect if explicitly requested via connect_after_change=true,
+      // or if VPN was ALREADY connected when the change was requested
       const shouldConnect =
-        action === 'connect' ||
-        (input.country && input.city) ||
-        wasConnected ||
-        ['connect', 'activate', 'start'].some((keyword) =>
-          input.country!.trim().toLowerCase().includes(keyword)
-        );
+        input.connect_after_change === true ||
+        (input.connect_after_change === undefined && wasConnected);
 
       if (shouldConnect) {
         try {
@@ -414,10 +548,11 @@ export default async function tool(input: VpnControlInput): Promise<string> {
           }
 
           if (status.isActive) {
+            notifyVpnStatusChange();
             const newIp = await fetchCurrentIP();
             return `${message}\nVPN connected successfully.\nServer: ${status.serverCity}, ${status.serverCountry}\nNew IP address: ${newIp}`;
           } else {
-            return `${message}\nServer changed but failed to connect after ${MAX_CONNECTION_RETRIES + 1} attempts. Please try connecting manually or check the VPN app.`;
+            return `${message}\nServer changed but failed to connect after ${MAX_CONNECTION_RETRIES + 1} attempts.`;
           }
         } catch (error) {
           return `${message}\nFailed to connect VPN: ${error instanceof Error ? error.message : String(error)}`;

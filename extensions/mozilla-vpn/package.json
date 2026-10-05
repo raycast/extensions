@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-vpn",
-  "title": "Mozilla Vpn Connect",
+  "title": "Mozilla VPN Connect",
   "description": "Interact with the Mozilla VPN from Raycast.",
   "icon": "MozillaVPN.png",
   "author": "natew",
@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Vpn Connect",
+      "title": "VPN Connect",
       "subtitle": "Mozilla VPN",
       "description": "Activate or deactivate the Mozilla VPN.",
       "mode": "view"
     },
     {
       "name": "menubar",
-      "title": "Vpn Status",
+      "title": "VPN Status",
       "subtitle": "Mozilla VPN",
       "description": "Show VPN status in menubar",
       "mode": "menu-bar",
@@ -40,7 +40,7 @@
   "tools": [
     {
       "name": "mozilla-vpn-control",
-      "title": "Mozilla Vpn Control",
+      "title": "Mozilla VPN Control",
       "description": "Ai Enablement of the extension Mozilla VPN Connect."
     }
   ],

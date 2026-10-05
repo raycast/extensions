@@ -73,8 +73,8 @@ The status command shows connection state, server location, and all configured d
 
 ## APIs Used for IP Data
 
-- **IP Address**: `https://api.ipify.org` - For retrieving your current external IP
-- **Geolocation**: `http://ip-api.com` - For determining the geographic location of your IP address
+- **Geolocation & IP Address**: `https://ipwho.is` - For retrieving your current external IP and geographic location via HTTPS
+- **IP Address Fallback**: `https://api.ipify.org` - Fallback service for IP lookup
 
 ## Technical Features
 
