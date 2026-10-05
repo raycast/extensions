@@ -18,25 +18,39 @@ export const SELECTED_MODEL_KEY = "ask_selected_model";
  * Ask session. Only the generic `"default"` start is treated as "nothing chosen yet" and
  * allowed to be replaced by the persisted selection.
  */
-export function useSelectedModel(initialModelId: string): {
+export function useSelectedModel(
+  initialModelId: string,
+  /** Restore the last saved pick. True for a new Ask; false for a conversation opened from
+   *  Recents, which keeps its own model even when that model is the default — the old rule
+   *  ("restore only when the start is `default`") overrode those. */
+  restoreSaved: boolean,
+): {
   selectedModelId: string;
   setSelectedModelId: (next: string) => void;
+  /** False until the saved pick has been read (or there was nothing to restore). The Ask
+   *  dropdown must not mount before this: see `ModelDropdown`. */
+  isReady: boolean;
 } {
   const [selectedModelId, setSelectedModelIdState] = useState<string>(initialModelId);
+  const [isReady, setReady] = useState<boolean>(!restoreSaved);
 
   // Whether the restore-from-storage effect is still allowed to apply. A user selection
   // that lands before the async read resolves must win — otherwise the restore would
   // stomp a choice the user already made this session, which is the same
   // "displayed value drifts from real value" failure in the opposite direction.
-  const canRestoreRef = useRef(initialModelId === "default");
+  const canRestoreRef = useRef(restoreSaved);
 
   useEffect(() => {
     (async () => {
-      if (!canRestoreRef.current) return;
-      const stored = await LocalStorage.getItem<string>(SELECTED_MODEL_KEY);
-      if (!canRestoreRef.current) return;
-      if (typeof stored === "string" && stored.length > 0) {
-        setSelectedModelIdState(stored);
+      try {
+        if (!canRestoreRef.current) return;
+        const stored = await LocalStorage.getItem<string>(SELECTED_MODEL_KEY);
+        if (!canRestoreRef.current) return;
+        if (typeof stored === "string" && stored.length > 0) {
+          setSelectedModelIdState(stored);
+        }
+      } finally {
+        setReady(true);
       }
     })();
     // Runs once per mount, matching every other load effect in this codebase.
@@ -54,5 +68,5 @@ export function useSelectedModel(initialModelId: string): {
     LocalStorage.setItem(SELECTED_MODEL_KEY, next);
   }, []);
 
-  return { selectedModelId, setSelectedModelId };
+  return { selectedModelId, setSelectedModelId, isReady };
 }

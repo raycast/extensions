@@ -25,8 +25,10 @@ export function toChronological(chats: Chat[]): Chat[] {
  * stream-error handler and the non-streaming path). Those drifting apart is what let a
  * whitespace-only answer reach the wire.
  */
-export function isBlankAnswer(answer: string | undefined): boolean {
-  return !answer || answer.trim().length === 0;
+export function isBlankAnswer(answer: unknown): boolean {
+  // Anything but a non-empty string counts as blank — including a non-string value a
+  // malformed stored row can carry, which would otherwise throw on `.trim()` while rendering.
+  return typeof answer !== "string" || answer.trim().length === 0;
 }
 
 /**

@@ -7,7 +7,7 @@ import { PreferencesActionSection } from "../actions/preferences";
 import { RegenerateActionSection } from "../actions/regenerate";
 import { PinActionSection } from "../actions/pin";
 import { Chat, ChatViewProps } from "../type";
-import { buildAnswerAccessories } from "../utils";
+import { buildAnswerAccessories, isBlankAnswer } from "../utils";
 import { AnswerDetailView } from "./answer-detail";
 import { EmptyView } from "./empty";
 
@@ -132,7 +132,17 @@ export const ChatView = ({
             key={sortedChat.id}
             accessories={buildAnswerAccessories(sortedChat, use.chats.data.length - i)}
             title={sortedChat.question}
-            detail={sortedChat.answer && <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />}
+            detail={
+              !isBlankAnswer(sortedChat.answer) ? (
+                <AnswerDetailView chat={sortedChat} streamData={use.chats.streamData} />
+              ) : use.chats.isLoading && use.chats.data.at(-1)?.id === sortedChat.id ? (
+                // The row being answered is the one `ask()` appended last — identified by id,
+                // not by sort position, which equal timestamps can reorder. Until its first
+                // words arrive it has no text to show: the whole wait without streaming, and
+                // the thinking phase with it. An empty pane there read as a stalled request.
+                <List.Item.Detail isLoading markdown="_Thinking…_" />
+              ) : undefined
+            }
             actions={use.chats.isLoading ? undefined : getActionPanel(sortedChat)}
           />
         );

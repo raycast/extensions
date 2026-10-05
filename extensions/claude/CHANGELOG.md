@@ -42,8 +42,10 @@
 - Fix: The model you pick in Ask is now the model your question is actually sent to. Picking
   a preset, quitting Raycast, and reopening Ask previously showed the preset you chose while
   sending the request on the default model
-- Fix: Ask's model picker now waits for its list to load before appearing, so it opens on
-  the model you picked last time rather than on the default
+- Fix: Ask now opens on the model you picked last time. Raycast's picker selects its first
+  entry when it appears, which overwrote the saved choice; the saved choice is now listed first
+- Improved: While Claude is thinking, the answer pane says so instead of sitting empty until
+  the first words arrive
 - Fix: Asking a follow-up now selects the new answer. The list is newest-first, so a follow-up
   appeared at the top while the highlight and the detail pane stayed on the previous question
   — it looked like nothing had happened

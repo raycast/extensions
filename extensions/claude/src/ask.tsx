@@ -56,9 +56,11 @@ export default function Ask(props: { conversation?: Conversation }) {
   // which restored the DISPLAYED value without firing `onChange` — so this state, which
   // the model actually sent to the API is resolved from below, silently disagreed with
   // what the dropdown showed). See THE DROPDOWN RULE on `src/views/model/dropdown.tsx`.
-  const { selectedModelId, setSelectedModelId } = useSelectedModel(
-    props.conversation ? props.conversation.model.id : "default",
-  );
+  const {
+    selectedModelId,
+    setSelectedModelId,
+    isReady: isSelectionReady,
+  } = useSelectedModel(props.conversation ? props.conversation.model.id : "default", !props.conversation);
 
   // Only `push` — `QuestionForm` pops itself on submit, so Ask must not also pop. See the
   // submit callback below.
@@ -97,7 +99,12 @@ export default function Ask(props: { conversation?: Conversation }) {
     // requiring a relaunch.
     const isAutoFullInput = getPreferenceValues<Preferences>().isAutoFullInput;
 
-    if (isAutoFullInput && shouldOpen) {
+    // Not before the saved pick has been read and the models it names have loaded: the form
+    // captures its selection once, when pushed, so opening early submitted the default even
+    // when another model had been saved.
+    const isSelectionSettled = isSelectionReady && !models.isLoading;
+
+    if (isAutoFullInput && shouldOpen && isSelectionSettled) {
       if (isEmptyConversation) {
         hasOpenedForEmptyRef.current = true;
       }
@@ -124,7 +131,7 @@ export default function Ask(props: { conversation?: Conversation }) {
     }
 
     setLoading(false);
-  }, [question.data, models.data]);
+  }, [question.data, models.data, models.isLoading, isSelectionReady]);
 
   useEffect(() => {
     // One persistence effect, not the previous add-on-mount + update-on-change pair.
@@ -228,14 +235,10 @@ export default function Ask(props: { conversation?: Conversation }) {
         )
       }
       selectedItemId={chats.selectedChatId || undefined}
-      // Mounted only once its options have loaded. Before that, the controlled `value` —
-      // the pick restored from storage — names an item that does not exist yet (presets
-      // and the live model list both arrive after mount). The reported symptom was a pick
-      // that did not stick across launches; the presumed mechanism is the dropdown falling
-      // back to its first item and its onChange overwriting the saved choice. Not mounting
-      // it until its items exist removes that window whatever the exact mechanism.
+      // Mounted only once BOTH the saved pick has been read and the options it names have
+      // loaded — see `ModelDropdown` for why the dropdown's mount is the dangerous moment.
       searchBarAccessory={
-        models.isLoading ? undefined : (
+        models.isLoading || !isSelectionReady ? undefined : (
           <ModelDropdown
             models={models.data}
             availableModels={models.availableModels}
