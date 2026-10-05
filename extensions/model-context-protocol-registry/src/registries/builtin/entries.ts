@@ -728,6 +728,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "truthifi",
+    title: "Truthifi",
+    description:
+      "One verified household record for your AI: accounts, activity, holdings, fees, performance, cash flow and your Truthifi Score, from 18,000+ institutions. Remote Streamable HTTP server with Truthifi OAuth sign-in through `mcp-remote`; no API key needed. It can't move money or place trades.",
+    icon: "https://framerusercontent.com/images/u37AxMviOa9x9r67PQkR35LJQ.png",
+    homepage: "https://truthifi.com/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://api.truthifi.com/mcp"],
+    },
+  },
+  {
     name: "webhound",
     title: "Webhound",
     description:
