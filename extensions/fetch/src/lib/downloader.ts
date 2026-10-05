@@ -10,8 +10,8 @@ import { logDownloadComplete, logDownloadError, logDownloadStart, logInfo } from
  *
  * The transfer itself is DETACHED: `startDownload` spawns a runner that outlives
  * this command, streams into `<outputPath>.part`, and renames on success. That is
- * why there is no curl handling here any more — the package owns the config file,
- * `fail`, resume via HTTP Range, stall detection and failure classification.
+ * why there is no curl handling here any more — the package owns the curl
+ * configuration, `fail`, resume via HTTP Range, stall detection and failure classification.
  *
  * The `{ promise, cancel }` shape is preserved so the commands did not have to be
  * rewritten: the promise is synthesized from the status file reaching a terminal
@@ -24,7 +24,7 @@ export interface DownloadOptions {
   outputPath: string;
   headers?: Record<string, string>;
   followRedirects?: boolean;
-  /** Seconds with NO data received before the transfer is abandoned. */
+  /** Seconds below 1 KiB/s before the transfer is abandoned (curl's `speed-time`). */
   timeout?: number;
   filename?: string;
   expectedBytes?: number;
@@ -80,8 +80,8 @@ export interface DownloadHandle {
 
 export type DownloadStatus = "pending" | "downloading" | "completed" | "failed" | "cancelled";
 
-/** User-facing text for a cancelled transfer. Status is decided by `errorCode`, never by this string. */
-const CANCELLED = "Download cancelled";
+/** User-facing text for a canceled transfer. Status is decided by `errorCode`, never by this string. */
+const CANCELED = "Download canceled";
 
 function toProgress(status: RunnerStatus): DownloadProgress {
   const total = status.totalBytes ?? 0;
@@ -97,11 +97,12 @@ function toProgress(status: RunnerStatus): DownloadProgress {
 export function downloadFile(options: DownloadOptions, onProgress?: ProgressCallback): DownloadHandle {
   const { url, outputPath, headers, followRedirects = true, timeout, filename, expectedBytes } = options;
 
-  let cancelled = false;
+  let canceled = false;
   let watcher: { stop(): void } | undefined;
   let ticketId: string | undefined;
   let ticketPid: number | undefined;
-  const startedAt = Date.now();
+  // Monotonic: a wall-clock correction mid-transfer would log a negative duration.
+  const startedAt = performance.now();
 
   logDownloadStart(url, outputPath);
 
@@ -124,10 +125,13 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
       // output path to second-guess this — that scan was strictly weaker, since it
       // could not see a partial whose status had been pruned.
       expectedBytes,
-      // A HEAD-derived size can legitimately disagree with the GET (gzip, stale
-      // content-length), and Fetch's size always comes from a separate HEAD.
+      // No caller passes `expectedBytes` today: `resolveOutputPath` reads a
+      // Content-Length in its HEAD but does not return it. "advisory" is for when
+      // one does, since a HEAD's size can legitimately disagree with the GET (gzip,
+      // a stale Content-Length). An empty 200 fails either way, unless
+      // `expectedBytes` is 0.
       sizeCheck: "advisory",
-      // Wall-clock `maxTimeSeconds` is not plumbed to the runner either; stall
+      // Wall-clock `maxTimeSeconds` is not plumbed to the runner; stall
       // detection is the better control regardless — a large file should not die
       // at N seconds just for being large.
       stallSeconds: timeout,
@@ -136,15 +140,15 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
       .then((ticket) => {
         ticketId = ticket.id;
         ticketPid = ticket.pid;
-        if (cancelled) {
+        if (canceled) {
           void killDownload({ id: ticket.id, pid: ticket.pid });
           settle({
             success: false,
             id: ticket.id,
             url,
-            error: CANCELLED,
+            error: CANCELED,
             errorCode: "cancelled",
-            duration: Date.now() - startedAt,
+            duration: Math.round(performance.now() - startedAt),
           });
           return;
         }
@@ -157,7 +161,7 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
             url,
             error: message,
             errorCode: (code as DownloadErrorCode | undefined) ?? "unknown",
-            duration: Date.now() - startedAt,
+            duration: Math.round(performance.now() - startedAt),
           });
         };
 
@@ -165,8 +169,10 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
           onChange: (status) => onProgress?.(toProgress(status)),
           onSettled: (status) => {
             if (status.state !== "completed") {
+              // A canceled transfer always shows our own copy: the package's
+              // message for it ("Download cancelled.") is British-spelled and adds nothing.
               fail(
-                status.error?.message ?? (status.state === "cancelled" ? CANCELLED : "Download failed"),
+                status.state === "cancelled" ? CANCELED : (status.error?.message ?? "Download failed"),
                 status.error?.code ?? (status.state === "cancelled" ? "cancelled" : undefined),
               );
               return;
@@ -177,7 +183,7 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
               url,
               outputPath: status.outputPath,
               bytesDownloaded: status.bytesDownloaded,
-              duration: Date.now() - startedAt,
+              duration: Math.round(performance.now() - startedAt),
             };
             logDownloadComplete(url, result);
             settle(result);
@@ -198,13 +204,13 @@ export function downloadFile(options: DownloadOptions, onProgress?: ProgressCall
           url,
           error: message,
           errorCode: (error as { code?: DownloadErrorCode })?.code ?? "unknown",
-          duration: Date.now() - startedAt,
+          duration: Math.round(performance.now() - startedAt),
         });
       });
   });
 
   const cancel = () => {
-    cancelled = true;
+    canceled = true;
     if (ticketId) void killDownload({ id: ticketId, pid: ticketPid });
   };
 
@@ -274,11 +280,11 @@ export function downloadBatch(
   }));
 
   const handles = new Map<string, DownloadHandle>();
-  // Items cancelled while still queued. `startNext` consults this before spawning:
+  // Items canceled while still queued. `startNext` consults this before spawning:
   // marking the item "cancelled" alone was cosmetic, because startNext would
   // overwrite the status and launch the download anyway.
-  const cancelledIds = new Set<string>();
-  let cancelled = false;
+  const canceledIds = new Set<string>();
+  let canceled = false;
   let currentIndex = 0;
 
   logInfo("Batch download started", { totalItems: items.length, maxConcurrent });
@@ -289,20 +295,20 @@ export function downloadBatch(
   };
 
   const startNext = async (): Promise<void> => {
-    if (cancelled || currentIndex >= batchItems.length) return;
+    if (canceled || currentIndex >= batchItems.length) return;
 
     const index = currentIndex++;
     const item = batchItems[index];
     const original = items[index];
 
-    if (cancelledIds.has(item.id)) {
-      // Cancelled while queued: never spawn it, and release the reserved `.part`
+    if (canceledIds.has(item.id)) {
+      // Canceled while queued: never spawn it, and release the reserved `.part`
       // so the name stays available for a later attempt.
       releaseReservation(item.outputPath);
       item.status = "cancelled";
-      item.error = CANCELLED;
+      item.error = CANCELED;
       emitProgress();
-      if (!cancelled && currentIndex < batchItems.length) await startNext();
+      if (!canceled && currentIndex < batchItems.length) await startNext();
       return;
     }
 
@@ -343,7 +349,7 @@ export function downloadBatch(
     } finally {
       handles.delete(item.id);
       emitProgress();
-      if (!cancelled && currentIndex < batchItems.length) await startNext();
+      if (!canceled && currentIndex < batchItems.length) await startNext();
     }
   };
 
@@ -359,25 +365,25 @@ export function downloadBatch(
   const promise = runBatch();
 
   const cancel = () => {
-    cancelled = true;
+    canceled = true;
     for (const handle of handles.values()) handle.cancel();
     for (const item of batchItems) {
       if (item.status === "pending") {
         releaseReservation(item.outputPath);
         item.status = "cancelled";
-        item.error = CANCELLED;
+        item.error = CANCELED;
       }
     }
     emitProgress();
   };
 
   const cancelItem = (id: string) => {
-    cancelledIds.add(id);
+    canceledIds.add(id);
     handles.get(id)?.cancel();
     const item = batchItems.find((i) => i.id === id);
     if (item && item.status === "pending") {
       item.status = "cancelled";
-      item.error = CANCELLED;
+      item.error = CANCELED;
       emitProgress();
     }
   };

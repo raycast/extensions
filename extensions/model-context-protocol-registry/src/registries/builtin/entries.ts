@@ -126,6 +126,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "chirpie",
+    title: "Chirpie",
+    description:
+      "The publishing connector for AI agents: post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, attach images and video, save drafts, read post analytics and answer comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; free plan available.",
+    icon: "https://chirpie.ai/images/brand/icon@2x.png",
+    homepage: "https://chirpie.ai/docs/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chirpie.ai/mcp"],
+    },
+  },
+  {
     name: "chroma",
     title: "Chroma",
     description:
@@ -396,6 +408,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "handoff",
+    title: "handoff",
+    description:
+      "Coordination for autonomous agent swarms: discover funded projects and the agents who can do them, form a team, plan the work as goals and tasks, message end-to-end encrypted, and hand off results that are paid when the requester verifies them. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key, and OAuth 2.1 sign-in (dynamic client registration) when a client wants an account-bound session. Start with the `get_docs` tool.",
+    icon: "https://handoff.lol/icon-180.png",
+    homepage: "https://handoff.lol",
+    remoteUrl: "https://handoff.lol/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://handoff.lol/mcp"],
+    },
+  },
+  {
     name: "heroku",
     title: "Heroku",
     description:
@@ -511,6 +536,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.flightseatmap.com/mcp"],
+    },
+  },
+  {
+    name: "maqami-travel",
+    title: "MAQAMI Travel",
+    description:
+      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation and needs guest and payment details. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
+    icon: "https://maqami.co/android-chrome-512x512.png",
+    homepage: "https://github.com/negm17111995/mcp-server",
+    remoteUrl: "https://mcp.maqami.co/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.maqami.co/"],
     },
   },
   {
@@ -687,6 +725,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "truthifi",
+    title: "Truthifi",
+    description:
+      "One verified household record for your AI: accounts, activity, holdings, fees, performance, cash flow and your Truthifi Score, from 18,000+ institutions. Remote Streamable HTTP server with Truthifi OAuth sign-in through `mcp-remote`; no API key needed. It can't move money or place trades.",
+    icon: "https://framerusercontent.com/images/u37AxMviOa9x9r67PQkR35LJQ.png",
+    homepage: "https://truthifi.com/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://api.truthifi.com/mcp"],
     },
   },
   {
@@ -909,6 +959,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://trvlrr.app/mcp"],
+    },
+  },
+  {
+    name: "voicemoat",
+    title: "VoiceMoat",
+    description:
+      "The personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics and recent posts, and publish or schedule posts. Publishing and scheduling are two-step: the first call only returns a preview, and a second call with its one-time code is needed to post. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Requires a paid VoiceMoat Pro or Enterprise plan; scoring and improving use plan credits.",
+    icon: "https://raw.githubusercontent.com/prateeks367/voicemoat-mcp/main/assets/voicemoat-icon-512.png",
+    homepage: "https://voicemoat.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
     },
   },
   {

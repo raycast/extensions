@@ -1,5 +1,7 @@
 # foxhop
 
+![Fox Hop: a red fox leaping over browser tabs](media/foxhop-banner.png)
+
 Focus a specific Firefox tab from anywhere on macOS — manage your saved tab targets and generate per-tab Raycast hotkey scripts.
 
 ## Requirements
