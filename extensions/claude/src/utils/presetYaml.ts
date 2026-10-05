@@ -84,7 +84,7 @@ export function exportPresetsToYaml(models: Model[]): string {
   };
 
   const header =
-    '# Claude presets — exported from the Raycast "Presets" command.\n' +
+    '# Claude presets — exported from the Raycast "Manage Presets" command.\n' +
     "# `temperature` is omitted for models that reject sampling parameters (Opus 4.7+).\n";
 
   return header + yaml.dump(document, { indent: 2, lineWidth: 120, noRefs: true });

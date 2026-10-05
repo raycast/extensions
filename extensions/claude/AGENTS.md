@@ -26,7 +26,7 @@ Two structural problems drove the rework:
 | Upstream | Here | Note |
 |---|---|---|
 | `ask` — Ask Question | `ask` — Ask Question | kept |
-| `model` — Models | `model` — **Presets** | retitled only; the command `name` is deliberately unchanged |
+| `model` — Models | `model` — **Manage Presets** | retitled only; the command `name` is deliberately unchanged |
 | `conversation` — Conversations | — | folded into Recents |
 | `history` — History | — | folded into Recents |
 | `saved` — Saved Answers | — | folded into Recents; starring became a pin flag |

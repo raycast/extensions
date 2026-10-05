@@ -45,7 +45,7 @@
     },
     {
       "name": "model",
-      "title": "Presets",
+      "title": "Manage Presets",
       "subtitle": "Claude",
       "description": "Manage your model presets: system prompt, temperature, and output limit",
       "mode": "view"

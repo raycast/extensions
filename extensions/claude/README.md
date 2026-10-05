@@ -69,7 +69,7 @@ extension update. The model picker has two sections:
 - **Presets** — a saved model pairing: a system prompt, temperature, and max output
   tokens. The extension ships starter presets (Deep Reasoning, Balanced, Quick Answer,
   Code) built from the newest Opus, Sonnet, and Haiku your account can access. Manage
-  them with the **Presets** command.
+  them with the **Manage Presets** command.
 - **Models** — every model available to your API key, for a one-off question using the
   default prompt.
 
@@ -77,7 +77,7 @@ extension update. The model picker has two sections:
 
 Presets can leave the extension as a YAML file and come back in, so you can keep a backup,
 edit them in a text editor, or move them to another machine. Both actions live in the
-**Presets** command:
+**Manage Presets** command:
 
 - **Export Presets to YAML** (⌘⇧E) writes every preset — name, model, system prompt,
   temperature, and max output tokens — to a file you choose.

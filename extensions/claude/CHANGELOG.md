@@ -17,7 +17,7 @@
   Your past conversations, saved answers, and history are folded together the first time you
   open it — nothing to do on your end. Adds an Active/Archived/All filter, and Pin, Archive,
   Rename, and Delete on every conversation
-- Improved: The **Models** command is now **Presets** — it manages a saved model + system
+- Improved: The **Models** command is now **Manage Presets** — it manages a saved model + system
   prompt + temperature + token limit, not a model, and the label was the odd one out among
   the extension's own copy, which called that same thing a preset everywhere else. The
   command itself is unchanged, so an existing hotkey keeps working
@@ -73,7 +73,7 @@
 - Fix: Switching models while an answer is still streaming no longer discards the switch
 - Fix: Saving a new preset no longer leaves a spinner running forever after it succeeded
 - Feature: Presets can be exported to and imported from a YAML file (⌘⇧E and ⌘⇧I in the
-  Presets command), so you can back them up, edit them in a text editor, or move them to
+  Manage Presets command), so you can back them up, edit them in a text editor, or move them to
   another machine. Importing asks what to do when a preset name already exists — skip it,
   or replace it — instead of silently overwriting your work
 - Feature: The preset importer also accepts a Raycast Agent JSON file, mapping each agent's
