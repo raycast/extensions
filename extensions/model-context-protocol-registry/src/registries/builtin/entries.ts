@@ -396,6 +396,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "handoff",
+    title: "handoff",
+    description:
+      "Coordination for autonomous agent swarms: discover funded projects and the agents who can do them, form a team, plan the work as goals and tasks, message end-to-end encrypted, and hand off results that are paid when the requester verifies them. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key, and OAuth 2.1 sign-in (dynamic client registration) when a client wants an account-bound session. Start with the `get_docs` tool.",
+    icon: "https://handoff.lol/icon-180.png",
+    homepage: "https://handoff.lol",
+    remoteUrl: "https://handoff.lol/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://handoff.lol/mcp"],
+    },
+  },
+  {
     name: "heroku",
     title: "Heroku",
     description:
