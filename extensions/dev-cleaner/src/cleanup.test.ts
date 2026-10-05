@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, utimes } from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, rm, symlink, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -8,7 +8,7 @@ const { trash } = vi.hoisted(() => ({
 }));
 vi.mock("@raycast/api", () => ({ trash }));
 
-import { cleanCandidate, cleanCandidates } from "./cleanup";
+import { cleanCandidate, cleanCandidates, freshRetryTargets } from "./cleanup";
 import type { CleanupCandidate } from "./types";
 
 const temporaryDirectories: string[] = [];
@@ -108,8 +108,16 @@ describe("cleanup orchestration", () => {
   it("allows runtime caches only inside their managed roots", async () => {
     const home = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-runtime-cleanup-"));
     temporaryDirectories.push(home);
-    const nodeVersion = path.join(home, ".local/share/fnm/node-versions/v18.20.0");
-    await mkdir(nodeVersion, { recursive: true });
+    const versionsRoot = path.join(home, ".local/share/fnm/node-versions");
+    for (const version of ["v18.20.0", "v22.16.0", "v24.18.0"]) {
+      await mkdir(path.join(versionsRoot, version, "installation"), { recursive: true });
+    }
+    await mkdir(path.join(home, ".local/share/fnm/aliases"), { recursive: true });
+    await symlink(
+      path.join(versionsRoot, "v24.18.0/installation"),
+      path.join(home, ".local/share/fnm/aliases/default"),
+    );
+    const nodeVersion = path.join(versionsRoot, "v18.20.0");
     const candidate: CleanupCandidate = {
       id: "node:v18",
       providerId: "node",
@@ -124,6 +132,72 @@ describe("cleanup orchestration", () => {
     };
     expect((await cleanCandidate(candidate, { homeDirectory: home, projectRoots: [] })).status).toBe("cleaned");
     expect(trash).toHaveBeenCalledWith(nodeVersion);
+  });
+
+  it("refuses a Node.js version that became the fnm default after scanning", async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-runtime-default-"));
+    temporaryDirectories.push(home);
+    const versionsRoot = path.join(home, ".local/share/fnm/node-versions");
+    for (const version of ["v16.20.0", "v18.20.0", "v22.16.0", "v24.18.0"]) {
+      await mkdir(path.join(versionsRoot, version, "installation"), { recursive: true });
+    }
+    await mkdir(path.join(home, ".local/share/fnm/aliases"), { recursive: true });
+    await symlink(
+      path.join(versionsRoot, "v16.20.0/installation"),
+      path.join(home, ".local/share/fnm/aliases/default"),
+    );
+    const nodeVersion = path.join(versionsRoot, "v16.20.0");
+    const candidate: CleanupCandidate = {
+      id: `node:runtime:${nodeVersion}`,
+      providerId: "node",
+      section: "Runtime Versions",
+      title: "Node.js v16.20.0",
+      subtitle: nodeVersion,
+      description: "test",
+      cleanupPolicy: "trash",
+      risk: "review",
+      selectedByDefault: false,
+      path: nodeVersion,
+    };
+
+    await expect(cleanCandidate(candidate, { homeDirectory: home, projectRoots: [] })).resolves.toMatchObject({
+      status: "failed",
+      message: expect.stringContaining("Default fnm version"),
+    });
+    expect(trash).not.toHaveBeenCalled();
+  });
+
+  it("refuses a Rust toolchain that became active after scanning", async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-runtime-rust-"));
+    temporaryDirectories.push(home);
+    const bin = path.join(home, "bin");
+    await mkdir(bin);
+    const marker = path.join(home, "uninstalled");
+    await writeFile(
+      path.join(bin, "rustup"),
+      `#!/bin/sh\nif [ "$1" = "show" ]; then echo "nightly-aarch64-apple-darwin (overridden)"; elif [ "$1" = "toolchain" ] && [ "$2" = "list" ]; then echo "stable-aarch64-apple-darwin (default)"; echo "nightly-aarch64-apple-darwin (active)"; elif [ "$1" = "toolchain" ]; then touch "${marker}"; fi\n`,
+    );
+    await chmod(path.join(bin, "rustup"), 0o755);
+    const candidate: CleanupCandidate = {
+      id: "rustup:toolchain:nightly-aarch64-apple-darwin",
+      providerId: "rustup",
+      section: "Runtime Versions",
+      title: "Rust nightly-aarch64-apple-darwin",
+      subtitle: "rustup toolchain uninstall nightly-aarch64-apple-darwin",
+      description: "test",
+      cleanupPolicy: "command",
+      risk: "review",
+      selectedByDefault: false,
+      command: {
+        executable: path.join(bin, "rustup"),
+        args: ["toolchain", "uninstall", "nightly-aarch64-apple-darwin"],
+      },
+    };
+
+    await expect(
+      cleanCandidate(candidate, { homeDirectory: home, projectRoots: [], extraPath: bin }),
+    ).resolves.toMatchObject({ status: "failed", message: expect.stringContaining("Active toolchain") });
+    await expect(access(marker)).rejects.toThrow();
   });
 
   it("runs commands sequentially and reports progress", async () => {
@@ -259,5 +333,33 @@ describe("cleanup orchestration", () => {
     await expect(
       cleanCandidate(failed, { homeDirectory: os.tmpdir(), projectRoots: [], signal: controller.signal }),
     ).resolves.toMatchObject({ status: "cancelled" });
+  });
+});
+
+describe("retry targets", () => {
+  const fresh: CleanupCandidate = {
+    id: "project:build",
+    providerId: "projects",
+    section: "Project Artifacts",
+    title: "build",
+    subtitle: "/tmp/build",
+    description: "test",
+    cleanupPolicy: "trash",
+    risk: "review",
+    selectedByDefault: false,
+    path: "/tmp/build",
+    modifiedAt: new Date("2026-02-01T00:00:00Z"),
+  };
+
+  it("waits for the refresh scan before retrying", () => {
+    expect(freshRetryTargets(new Set([fresh.id]), undefined)).toEqual({ status: "scanning" });
+  });
+
+  it("uses the rescanned candidate for failed items", () => {
+    expect(freshRetryTargets(new Set([fresh.id]), [fresh])).toEqual({ status: "ready", candidates: [fresh] });
+  });
+
+  it("reports failed items that no longer appear in the scan", () => {
+    expect(freshRetryTargets(new Set([fresh.id]), [])).toEqual({ status: "missing" });
   });
 });

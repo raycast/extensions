@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import os from "node:os";
-import path from "node:path";
 import { useState } from "react";
 
-import { normalizeProjectRoots, writeProjectRoots } from "../storage";
+import { normalizeProjectRoots, projectRootWarnings, writeProjectRoots } from "../storage";
 
 interface ProjectRootsFormProps {
   initialRoots?: string[];
@@ -16,11 +15,12 @@ export function ProjectRootsForm({ initialRoots = [], onSave }: ProjectRootsForm
 
   async function submit() {
     const normalizedRoots = await normalizeProjectRoots(roots);
-    if (normalizedRoots.includes(path.parse(os.homedir()).root)) {
+    const warnings = await projectRootWarnings(normalizedRoots, os.homedir());
+    if (warnings.filesystemRoot) {
       await showToast({ style: Toast.Style.Failure, title: "A filesystem root cannot be scanned" });
       return;
     }
-    if (normalizedRoots.includes(os.homedir())) {
+    if (warnings.coversHome) {
       const confirmed = await confirmAlert({
         title: "Scan your entire home directory?",
         message: "This can be slow and may surface unrelated folders named build, dist, or target.",

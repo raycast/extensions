@@ -16,7 +16,7 @@ import {
 import os from "node:os";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { cleanCandidates } from "./cleanup";
+import { cleanCandidates, freshRetryTargets, type LatestScan } from "./cleanup";
 import {
   CandidateDetail,
   CandidateListDetail,
@@ -32,6 +32,7 @@ import { ProjectRootsForm } from "./components/ProjectRootsForm";
 import { isAbortError } from "./lib/async";
 import { formatBytes } from "./lib/format";
 import { scanAll } from "./providers";
+import { emptySelectionTouches, mergeScanSelection, type SelectionTouches } from "./selection";
 import { readExcludedItems, readProjectRoots, recordCleanupRun, writeExcludedItems } from "./storage";
 import type { CleanupCandidate, ExcludedItem, ProtectedItem, RiskLevel, ScanIssue } from "./types";
 
@@ -170,6 +171,8 @@ function Dashboard({
   const [issues, setIssues] = useState<ScanIssue[]>([]);
   const [protectedItems, setProtectedItems] = useState<ProtectedItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const selectionTouches = useRef<SelectionTouches>(emptySelectionTouches());
+  const latestScan = useRef<LatestScan>(undefined);
   const [excludedItems, setExcludedItems] = useState(initialExcludedItems);
   const excludedItemsRef = useRef(initialExcludedItems);
   const [isLoading, setIsLoading] = useState(true);
@@ -198,6 +201,8 @@ function Dashboard({
     setIssues([]);
     setProtectedItems([]);
     setSelected(new Set());
+    selectionTouches.current = emptySelectionTouches();
+    latestScan.current = undefined;
     scanAll({ ...context, signal: controller.signal }, (partial) => {
       if (!active) return;
       setCandidates(partial.candidates);
@@ -209,14 +214,9 @@ function Dashboard({
         setCandidates(result.candidates);
         setIssues(result.issues);
         setProtectedItems(result.protectedItems ?? []);
+        latestScan.current = result.candidates;
         const keptIds = new Set(excludedItemsRef.current.map((item) => item.id));
-        setSelected(
-          new Set(
-            result.candidates
-              .filter((candidate) => candidate.selectedByDefault && !keptIds.has(candidate.id))
-              .map(({ id }) => id),
-          ),
-        );
+        setSelected((current) => mergeScanSelection(current, result.candidates, keptIds, selectionTouches.current));
       })
       .catch(async (error) => {
         if (active && !isAbortError(error))
@@ -351,13 +351,30 @@ function Dashboard({
             : undefined;
       const run = await recordCleanupRun(targets, results, startedAt, new Date());
       const failedIds = new Set(failures.map((failure) => failure.candidateId));
-      const retryTargets = targets.filter((candidate) => failedIds.has(candidate.id));
-      push(<CleanupReport run={run} onRetry={retryTargets.length > 0 ? () => runCleanup(retryTargets) : undefined} />);
+      latestScan.current = undefined;
+      push(<CleanupReport run={run} onRetry={failedIds.size > 0 ? () => retryFailed(failedIds) : undefined} />);
       refresh();
     } finally {
       cleanupController.current = undefined;
       setIsCleaning(false);
     }
+  }
+
+  async function retryFailed(failedIds: ReadonlySet<string>) {
+    const retry = freshRetryTargets(failedIds, latestScan.current);
+    if (retry.status === "scanning") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Scan still refreshing",
+        message: "Retry after the scan finishes so changed items are revalidated",
+      });
+      return;
+    }
+    if (retry.status === "missing") {
+      await showToast({ style: Toast.Style.Failure, title: "Failed items no longer found in the latest scan" });
+      return;
+    }
+    await runCleanup(retry.candidates);
   }
 
   async function cleanSelection() {
@@ -381,6 +398,7 @@ function Dashboard({
   }, [candidates, excludedIds, riskFilter, sortMode]);
 
   function toggle(id: string) {
+    selectionTouches.current.ids.add(id);
     setSelected((current) => {
       const next = new Set(current);
       if (next.has(id)) next.delete(id);
@@ -389,32 +407,33 @@ function Dashboard({
     });
   }
 
-  const selectSafe = useCallback(
-    () =>
-      setSelected(
-        new Set(
-          candidates
-            .filter((candidate) => candidate.risk === "safe" && !excludedIds.has(candidate.id))
-            .map((candidate) => candidate.id),
-        ),
+  const selectSafe = useCallback(() => {
+    selectionTouches.current.all = true;
+    setSelected(
+      new Set(
+        candidates
+          .filter((candidate) => candidate.risk === "safe" && !excludedIds.has(candidate.id))
+          .map((candidate) => candidate.id),
       ),
-    [candidates, excludedIds],
-  );
-  const clearSelection = useCallback(() => setSelected(new Set()), []);
-  const selectLarge = useCallback(
-    () =>
-      setSelected(
-        new Set(
-          candidates
-            .filter(
-              (candidate) =>
-                !excludedIds.has(candidate.id) && candidate.risk !== "high" && (candidate.bytes ?? 0) >= 1024 ** 3,
-            )
-            .map((candidate) => candidate.id),
-        ),
+    );
+  }, [candidates, excludedIds]);
+  const clearSelection = useCallback(() => {
+    selectionTouches.current.all = true;
+    setSelected(new Set());
+  }, []);
+  const selectLarge = useCallback(() => {
+    selectionTouches.current.all = true;
+    setSelected(
+      new Set(
+        candidates
+          .filter(
+            (candidate) =>
+              !excludedIds.has(candidate.id) && candidate.risk !== "high" && (candidate.bytes ?? 0) >= 1024 ** 3,
+          )
+          .map((candidate) => candidate.id),
       ),
-    [candidates, excludedIds],
-  );
+    );
+  }, [candidates, excludedIds]);
   const cycleSort = useCallback(
     () => setSortMode((current) => (current === "size" ? "age" : current === "age" ? "name" : "size")),
     [],
@@ -725,25 +744,41 @@ function Dashboard({
   );
 }
 
+class LoadFailure extends Error {
+  constructor(
+    readonly source: "roots" | "kept",
+    cause: unknown,
+  ) {
+    super(cause instanceof Error ? cause.message : String(cause), { cause });
+  }
+}
+
+function failLoading(source: LoadFailure["source"]): (error: unknown) => never {
+  return (error) => {
+    throw new LoadFailure(source, error);
+  };
+}
+
 export default function Command() {
   const [roots, setRoots] = useState<string[] | undefined>();
   const [initialExcludedItems, setInitialExcludedItems] = useState<ExcludedItem[]>([]);
   const [isReady, setIsReady] = useState(false);
-  const [loadError, setLoadError] = useState<string>();
+  const [loadError, setLoadError] = useState<LoadFailure>();
   const [loadVersion, setLoadVersion] = useState(0);
+  const reload = useCallback(() => setLoadVersion((version) => version + 1), []);
 
   useEffect(() => {
     let active = true;
     setIsReady(false);
     setLoadError(undefined);
-    Promise.all([readProjectRoots(), readExcludedItems()])
+    Promise.all([readProjectRoots().catch(failLoading("roots")), readExcludedItems().catch(failLoading("kept"))])
       .then(([storedRoots, storedExcludedItems]) => {
         if (!active) return;
         setRoots(storedRoots);
         setInitialExcludedItems(storedExcludedItems);
       })
       .catch((error) => {
-        if (active) setLoadError((error as Error).message);
+        if (active) setLoadError(error instanceof LoadFailure ? error : new LoadFailure("kept", error));
       })
       .finally(() => {
         if (active) setIsReady(true);
@@ -758,16 +793,23 @@ export default function Command() {
     return (
       <List>
         <List.EmptyView
-          icon={Icon.Shield}
-          title="Kept Items Unavailable"
-          description={`${loadError}. Cleanup is paused until these items can be loaded.`}
+          icon={loadError.source === "roots" ? Icon.Folder : Icon.Shield}
+          title={loadError.source === "roots" ? "Project Roots Unavailable" : "Kept Items Unavailable"}
+          description={
+            loadError.source === "roots"
+              ? `${loadError.message}. Retry loading, or reset them to choose project directories again.`
+              : `${loadError.message}. Cleanup is paused until these items can be loaded.`
+          }
           actions={
             <ActionPanel>
-              <Action
-                title="Retry Loading"
-                icon={Icon.ArrowClockwise}
-                onAction={() => setLoadVersion((version) => version + 1)}
-              />
+              <Action title="Retry Loading" icon={Icon.ArrowClockwise} onAction={reload} />
+              {loadError.source === "roots" ? (
+                <Action.Push
+                  title="Reset Project Roots"
+                  icon={Icon.Folder}
+                  target={<ProjectRootsForm onSave={reload} />}
+                />
+              ) : null}
             </ActionPanel>
           }
         />

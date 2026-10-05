@@ -1,5 +1,4 @@
-import { ChildProcess } from "node:child_process";
-import { chmod, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -7,6 +6,24 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveExecutable, runCommand } from "./command";
 
 const temporaryDirectories: string[] = [];
+
+async function waitForPid(file: string): Promise<number> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const contents = await readFile(file, "utf8").catch(() => "");
+    if (contents.trim()) return Number(contents.trim());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  throw new Error(`No pid written to ${file}`);
+}
+
+function isRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 afterEach(async () => {
   vi.restoreAllMocks();
@@ -87,16 +104,34 @@ describe("command helpers", () => {
     await expect(running).rejects.toBe(reason);
   });
 
-  it("escalates to SIGKILL when a timed-out command does not exit", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    const kill = vi.spyOn(ChildProcess.prototype, "kill");
-    const running = runCommand({ executable: "/bin/sh", args: ["-c", "sleep 5"], timeoutMs: 10 });
-    const rejection = expect(running).rejects.toThrow("timed out after 10ms");
-    vi.advanceTimersByTime(10);
-    await rejection;
-    expect(kill).toHaveBeenCalledWith("SIGTERM");
-    expect(kill).not.toHaveBeenCalledWith("SIGKILL");
-    vi.advanceTimersByTime(1_000);
-    expect(kill).toHaveBeenLastCalledWith("SIGKILL");
+  it("stops the whole process tree before reporting cancellation", async () => {
+    const directory = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-command-tree-"));
+    temporaryDirectories.push(directory);
+    const pidFile = path.join(directory, "grandchild.pid");
+    const controller = new AbortController();
+    const running = runCommand(
+      { executable: "/bin/sh", args: ["-c", `sleep 30 & echo $! > "${pidFile}"; wait`] },
+      controller.signal,
+    );
+    const grandchild = await waitForPid(pidFile);
+    controller.abort();
+    await expect(running).rejects.toMatchObject({ name: "AbortError" });
+    expect(isRunning(grandchild)).toBe(false);
+  });
+
+  it("escalates to SIGKILL and waits for exit when a timed-out command ignores SIGTERM", async () => {
+    const directory = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-command-kill-"));
+    temporaryDirectories.push(directory);
+    const pidFile = path.join(directory, "grandchild.pid");
+    const startedAt = Date.now();
+    const running = runCommand({
+      executable: "/bin/sh",
+      args: ["-c", `trap '' TERM; sleep 30 & echo $! > "${pidFile}"; wait`],
+      timeoutMs: 100,
+    });
+    const grandchild = await waitForPid(pidFile);
+    await expect(running).rejects.toThrow("timed out after 100ms");
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1_000);
+    expect(isRunning(grandchild)).toBe(false);
   });
 });

@@ -39,6 +39,15 @@ describe("runtime pins", () => {
     expect(matchingPinSources(pins.rust, "stable-aarch64-apple-darwin")).toHaveLength(1);
   });
 
+  it("reads TOML from an extension-less rust-toolchain file", async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-pins-toml-legacy-"));
+    temporaryDirectories.push(root);
+    await writeFile(path.join(root, "rust-toolchain"), '[toolchain]\nchannel = "1.80.0"\ncomponents = ["clippy"]\n');
+    const pins = await scanRuntimePins([root]);
+    expect([...pins.rust.keys()]).toEqual(["1.80.0"]);
+    expect(matchingPinSources(pins.rust, "1.80.0-aarch64-apple-darwin")).toHaveLength(1);
+  });
+
   it("ignores empty or incomplete pin files", async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-pins-empty-"));
     temporaryDirectories.push(root);

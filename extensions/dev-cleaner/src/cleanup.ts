@@ -5,7 +5,27 @@ import { runCommand } from "./lib/command";
 import { directorySize, modifiedAt, pathExists } from "./lib/fs";
 import { isAbortError } from "./lib/async";
 import { assertSafeTrashPath, PROJECT_ARTIFACT_NAMES } from "./lib/path-safety";
+import { scanRuntimePins, type RuntimePins } from "./lib/runtime-pins";
+import { runtimeProtectionReason } from "./providers/runtime-caches";
 import type { CleanupCandidate, CleanupResult, ScanContext } from "./types";
+
+type PinsLoader = () => Promise<RuntimePins>;
+
+/** Scans project runtime pins at most once per cleanup batch, and only when a runtime candidate needs them. */
+function lazyPins(context: ScanContext): PinsLoader {
+  let pins: Promise<RuntimePins> | undefined;
+  return () => (pins ??= scanRuntimePins(context.projectRoots, context.signal));
+}
+
+async function assertRuntimeStillRemovable(
+  candidate: CleanupCandidate,
+  context: ScanContext,
+  loadPins: PinsLoader,
+): Promise<void> {
+  if (candidate.providerId !== "node" && candidate.providerId !== "rustup") return;
+  const reason = await runtimeProtectionReason(candidate, context, await loadPins());
+  if (reason) throw new Error(`Runtime became protected after the scan (${reason}); refresh before cleaning it`);
+}
 
 function allowedRoots(candidate: CleanupCandidate, context: ScanContext): string[] {
   if (candidate.providerId === "projects") return context.projectRoots;
@@ -57,12 +77,17 @@ function expectedNames(candidate: CleanupCandidate): ReadonlySet<string> | undef
   return undefined;
 }
 
-export async function cleanCandidate(candidate: CleanupCandidate, context: ScanContext): Promise<CleanupResult> {
+export async function cleanCandidate(
+  candidate: CleanupCandidate,
+  context: ScanContext,
+  loadPins: PinsLoader = lazyPins(context),
+): Promise<CleanupResult> {
   try {
     context.signal?.throwIfAborted();
     if (context.excludedCandidateIds?.has(candidate.id)) {
       throw new Error("Item is kept out of cleanup; allow cleanup again before retrying");
     }
+    await assertRuntimeStillRemovable(candidate, context, loadPins);
     if (candidate.cleanupPolicy === "command") {
       if (!candidate.command) throw new Error("Missing command specification");
       const before = candidate.path
@@ -119,6 +144,7 @@ export async function cleanCandidates(
   onProgress?: (completed: number, total: number) => void,
 ): Promise<CleanupResult[]> {
   const results: CleanupResult[] = [];
+  const loadPins = lazyPins(context);
   for (const candidate of candidates) {
     if (context.signal?.aborted) {
       results.push({
@@ -130,8 +156,24 @@ export async function cleanCandidates(
       onProgress?.(results.length, candidates.length);
       continue;
     }
-    results.push(await cleanCandidate(candidate, context));
+    results.push(await cleanCandidate(candidate, context, loadPins));
     onProgress?.(results.length, candidates.length);
   }
   return results;
+}
+
+/** The most recent scan's candidates, or `undefined` while a scan is running or after it was cancelled. */
+export type LatestScan = readonly CleanupCandidate[] | undefined;
+
+export type RetryTargets =
+  { status: "scanning" } | { status: "missing" } | { status: "ready"; candidates: CleanupCandidate[] };
+
+/**
+ * Picks failed items from the latest completed scan rather than reusing the original candidates, whose recorded
+ * modification time would make an item that changed after scanning fail revalidation again.
+ */
+export function freshRetryTargets(failedIds: ReadonlySet<string>, latestScan: LatestScan): RetryTargets {
+  if (!latestScan) return { status: "scanning" };
+  const candidates = latestScan.filter((candidate) => failedIds.has(candidate.id));
+  return candidates.length > 0 ? { status: "ready", candidates } : { status: "missing" };
 }

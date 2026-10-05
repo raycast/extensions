@@ -8,7 +8,7 @@ vi.mock("../lib/command", async (importOriginal) => ({
   resolveExecutable: (await import("../test-support/command")).resolveFromExtraPath,
 }));
 
-import { RuntimeCachesProvider } from "./runtime-caches";
+import { fnmDefaultVersion, RuntimeCachesProvider } from "./runtime-caches";
 
 const temporaryDirectories: string[] = [];
 
@@ -166,6 +166,30 @@ describe("runtime and build cache provider", () => {
       ]),
     );
     expect(result.candidates.some((candidate) => candidate.providerId === "gradle")).toBe(false);
+  });
+
+  it("protects the default version when the fnm alias points at the version directory", async () => {
+    const home = await mkdtemp(path.join(os.tmpdir(), "dev-cleaner-fnm-alias-"));
+    temporaryDirectories.push(home);
+    const versionsRoot = path.join(home, ".local/share/fnm/node-versions");
+    for (const version of ["v16.20.0", "v18.20.0", "v20.11.0", "v24.18.0"]) {
+      const installation = path.join(versionsRoot, version, "installation");
+      await mkdir(installation, { recursive: true });
+      await writeFile(path.join(installation, "node"), version);
+    }
+    await mkdir(path.join(home, ".local/share/fnm/aliases"), { recursive: true });
+    await symlink(path.join(versionsRoot, "v18.20.0"), path.join(home, ".local/share/fnm/aliases/default"));
+
+    expect(await fnmDefaultVersion(home)).toBe("v18.20.0");
+    const result = await new RuntimeCachesProvider().scan({ homeDirectory: home, projectRoots: [] });
+
+    expect(result.candidates.map((candidate) => candidate.title)).toEqual(["Node.js v20.11.0"]);
+    expect(result.protectedItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Node.js v18.20.0", reason: "Default fnm version" }),
+        expect.objectContaining({ title: "Node.js v16.20.0", reason: "Newest rollback version" }),
+      ]),
+    );
   });
 
   it("protects Rust toolchains pinned by configured projects", async () => {

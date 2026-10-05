@@ -18,8 +18,11 @@ function addPin(target: Map<string, string[]>, version: string, source: string):
   target.set(normalized, [...(target.get(normalized) ?? []), source]);
 }
 
+// rustup accepts TOML in both `rust-toolchain.toml` and the extension-less `rust-toolchain`, so detect the format
+// from the contents; a legacy `rust-toolchain` holds only the bare toolchain name.
 function parseRustPin(contents: string, filename: string): string | undefined {
-  if (filename === "rust-toolchain.toml") return /^\s*channel\s*=\s*["']([^"']+)["']/m.exec(contents)?.[1];
+  const isToml = filename === "rust-toolchain.toml" || /^\s*\[toolchain\]/m.test(contents);
+  if (isToml) return /^\s*channel\s*=\s*["']([^"']+)["']/m.exec(contents)?.[1];
   return contents.trim().split(/\s+/)[0];
 }
 

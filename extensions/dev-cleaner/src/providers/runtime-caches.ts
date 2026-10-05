@@ -46,9 +46,29 @@ interface RuntimeScanOutput {
   protectedItems: ProtectedItem[];
 }
 
-async function scanFnmVersions(context: ScanContext, pins: RuntimePins): Promise<RuntimeScanOutput> {
+/**
+ * Resolves the fnm default alias to its version directory name. The alias may point at the version directory itself
+ * or at its `installation` child depending on the fnm release, so the name is taken relative to `node-versions`.
+ */
+export async function fnmDefaultVersion(homeDirectory: string): Promise<string | undefined> {
+  const defaultAlias = path.join(homeDirectory, ".local/share/fnm/aliases/default");
+  const versionsPath = path.join(homeDirectory, ".local/share/fnm/node-versions");
+  if (!(await pathExists(defaultAlias)) || !(await pathExists(versionsPath))) return undefined;
+  const versionsRoot = await realpath(versionsPath);
+  const relative = path.relative(versionsRoot, await realpath(defaultAlias));
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) return undefined;
+  return relative.split(path.sep)[0];
+}
+
+interface FnmProtection {
+  versions: { name: string; path: string }[];
+  /** Protection reason keyed by version name; a version without an entry is removable. */
+  reasons: Map<string, string>;
+}
+
+async function fnmProtection(context: ScanContext, pins: RuntimePins): Promise<FnmProtection> {
   const versionsRoot = path.join(context.homeDirectory, ".local/share/fnm/node-versions");
-  if (!(await pathExists(versionsRoot))) return { candidates: [], protectedItems: [] };
+  if (!(await pathExists(versionsRoot))) return { versions: [], reasons: new Map() };
   const directory = await opendir(versionsRoot);
   const versions: { name: string; path: string }[] = [];
   for await (const entry of directory) {
@@ -59,36 +79,25 @@ async function scanFnmVersions(context: ScanContext, pins: RuntimePins): Promise
   }
   versions.sort((left, right) => compareVersionNames(right.name, left.name));
 
-  let currentName: string | undefined;
-  const defaultAlias = path.join(context.homeDirectory, ".local/share/fnm/aliases/default");
-  if (await pathExists(defaultAlias)) {
-    const target = await realpath(defaultAlias);
-    currentName = path.basename(path.dirname(target));
-  }
-  const protectedNames = new Set<string>();
-  const protectionReasons = new Map<string, string>();
-  if (currentName) protectedNames.add(currentName);
-  if (currentName) protectionReasons.set(currentName, "Default fnm version");
+  const currentName = await fnmDefaultVersion(context.homeDirectory);
+  const reasons = new Map<string, string>();
+  if (currentName) reasons.set(currentName, "Default fnm version");
   const newest = versions[0];
-  if (newest) {
-    protectedNames.add(newest.name);
-    if (newest.name !== currentName) protectionReasons.set(newest.name, "Newest installed version");
-  }
+  if (newest && newest.name !== currentName) reasons.set(newest.name, "Newest installed version");
   const currentIndex = versions.findIndex((version) => version.name === currentName);
   const rollback = currentIndex >= 0 ? versions[currentIndex + 1] : versions[0];
-  if (rollback) {
-    protectedNames.add(rollback.name);
-    protectionReasons.set(rollback.name, "Newest rollback version");
-  }
+  if (rollback) reasons.set(rollback.name, "Newest rollback version");
   for (const version of versions) {
     const sources = matchingPinSources(pins.node, version.name);
-    if (sources.length === 0) continue;
-    protectedNames.add(version.name);
-    protectionReasons.set(version.name, `Pinned by ${sources.join(", ")}`);
+    if (sources.length > 0) reasons.set(version.name, `Pinned by ${sources.join(", ")}`);
   }
+  return { versions, reasons };
+}
 
+async function scanFnmVersions(context: ScanContext, pins: RuntimePins): Promise<RuntimeScanOutput> {
+  const { versions, reasons: protectionReasons } = await fnmProtection(context, pins);
   const candidates = await mapWithConcurrency(
-    versions.filter((version) => !protectedNames.has(version.name)),
+    versions.filter((version) => !protectionReasons.has(version.name)),
     3,
     (version) =>
       createTrashCandidate(
@@ -108,7 +117,7 @@ async function scanFnmVersions(context: ScanContext, pins: RuntimePins): Promise
   return {
     candidates: candidates.filter((candidate): candidate is CleanupCandidate => candidate !== undefined),
     protectedItems: versions
-      .filter((version) => protectedNames.has(version.name))
+      .filter((version) => protectionReasons.has(version.name))
       .map((version) => ({
         id: `node:protected:${version.name}`,
         providerId: "node",
@@ -119,9 +128,16 @@ async function scanFnmVersions(context: ScanContext, pins: RuntimePins): Promise
   };
 }
 
-async function scanRustToolchains(context: ScanContext, pins: RuntimePins): Promise<RuntimeScanOutput> {
+interface RustProtection {
+  executable: string;
+  toolchains: string[];
+  /** Protection reason keyed by toolchain name; a toolchain without an entry is removable. */
+  reasons: Map<string, string>;
+}
+
+async function rustProtection(context: ScanContext, pins: RuntimePins): Promise<RustProtection | undefined> {
   const executable = await resolveExecutable("rustup", context);
-  if (!executable) return { candidates: [], protectedItems: [] };
+  if (!executable) return undefined;
   const [activeResult, listResult, overrideResult] = await Promise.all([
     runCommand(
       { executable, args: ["show", "active-toolchain"], timeoutMs: 10_000 },
@@ -151,11 +167,18 @@ async function scanRustToolchains(context: ScanContext, pins: RuntimePins): Prom
     const sources = matchingPinSources(pins.rust, toolchain.name);
     if (sources.length > 0) reasons.set(toolchain.name, `Pinned by ${sources.join(", ")}`);
   }
-  const removable = listedToolchains.filter(({ name }) => !reasons.has(name));
+  return { executable, toolchains: listedToolchains.map(({ name }) => name), reasons };
+}
+
+async function scanRustToolchains(context: ScanContext, pins: RuntimePins): Promise<RuntimeScanOutput> {
+  const protection = await rustProtection(context, pins);
+  if (!protection) return { candidates: [], protectedItems: [] };
+  const { executable, toolchains, reasons } = protection;
+  const removable = toolchains.filter((name) => !reasons.has(name));
 
   return {
     candidates: await Promise.all(
-      removable.map(async ({ name: toolchain }): Promise<CleanupCandidate> => {
+      removable.map(async (toolchain): Promise<CleanupCandidate> => {
         const toolchainPath = path.join(context.homeDirectory, ".rustup/toolchains", toolchain);
         return {
           id: `rustup:toolchain:${toolchain}`,
@@ -173,9 +196,9 @@ async function scanRustToolchains(context: ScanContext, pins: RuntimePins): Prom
         };
       }),
     ),
-    protectedItems: listedToolchains
-      .filter(({ name }) => reasons.has(name))
-      .map(({ name }) => ({
+    protectedItems: toolchains
+      .filter((name) => reasons.has(name))
+      .map((name) => ({
         id: `rustup:protected:${name}`,
         providerId: "rustup",
         title: `Rust ${name}`,
@@ -183,6 +206,28 @@ async function scanRustToolchains(context: ScanContext, pins: RuntimePins): Prom
         path: path.join(context.homeDirectory, ".rustup/toolchains", name),
       })),
   };
+}
+
+/**
+ * Re-evaluates runtime protection for a Node.js or Rust candidate at cleanup time, since the default version, active
+ * toolchain, overrides, or project pins may have changed after the scan. Returns the reason when it is now protected.
+ */
+export async function runtimeProtectionReason(
+  candidate: CleanupCandidate,
+  context: ScanContext,
+  pins: RuntimePins,
+): Promise<string | undefined> {
+  if (candidate.providerId === "node" && candidate.path) {
+    const { reasons } = await fnmProtection(context, pins);
+    return reasons.get(path.basename(candidate.path));
+  }
+  if (candidate.providerId === "rustup") {
+    const toolchain = candidate.id.replace(/^rustup:toolchain:/, "");
+    const protection = await rustProtection(context, pins);
+    if (!protection) return "rustup is no longer available";
+    return protection.reasons.get(toolchain);
+  }
+  return undefined;
 }
 
 async function scanRegenerableCaches(context: ScanContext): Promise<CleanupCandidate[]> {

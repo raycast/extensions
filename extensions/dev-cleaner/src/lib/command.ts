@@ -72,32 +72,49 @@ export async function runCommand(
   signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     const effectivePath = [extraPath, process.env.PATH].filter(Boolean).join(path.delimiter);
+    // A detached child leads its own process group, so cancellation can also stop the processes it starts.
     const child = spawn(spec.executable, spec.args, {
+      detached: true,
       env: { ...process.env, PATH: effectivePath, NO_COLOR: "1" },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
     let stderr = "";
     let settled = false;
+    let stopReason: Error | undefined;
+    const stopTimers: NodeJS.Timeout[] = [];
     const finish = (callback: () => void) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
+      stopTimers.forEach(clearTimeout);
       signal?.removeEventListener("abort", onAbort);
       callback();
     };
-    const terminate = () => {
-      child.kill("SIGTERM");
-      setTimeout(() => child.kill("SIGKILL"), 1_000).unref();
+    const signalGroup = (name: NodeJS.Signals) => {
+      try {
+        if (child.pid !== undefined) process.kill(-child.pid, name);
+      } catch {
+        child.kill(name);
+      }
     };
-    const onAbort = () => {
-      terminate();
-      finish(() => reject(abortError(signal?.reason)));
+    // Reports the stop only after the process group has exited, so a new cleanup cannot overlap a cancelled one.
+    // The last timer settles anyway if a descendant escaped the group and keeps the output pipes open.
+    const terminate = (reason: Error) => {
+      if (stopReason) return;
+      stopReason = reason;
+      clearTimeout(timeout);
+      signalGroup("SIGTERM");
+      stopTimers.push(
+        setTimeout(() => signalGroup("SIGKILL"), 1_000),
+        setTimeout(() => finish(() => reject(reason)), 3_000),
+      );
     };
-    const timeout = setTimeout(() => {
-      terminate();
-      finish(() => reject(new Error(`Command timed out after ${spec.timeoutMs ?? 120_000}ms`)));
-    }, spec.timeoutMs ?? 120_000);
+    const onAbort = () => terminate(abortError(signal?.reason));
+    const timeout = setTimeout(
+      () => terminate(new Error(`Command timed out after ${spec.timeoutMs ?? 120_000}ms`)),
+      spec.timeoutMs ?? 120_000,
+    );
     timeout.unref();
     signal?.addEventListener("abort", onAbort, { once: true });
     child.stdout.on("data", (chunk: Buffer) => {
@@ -109,7 +126,8 @@ export async function runCommand(
     child.once("error", (error) => finish(() => reject(error)));
     child.once("close", (code, childSignal) => {
       finish(() => {
-        if (code === 0) resolve({ stdout, stderr });
+        if (stopReason) reject(stopReason);
+        else if (code === 0) resolve({ stdout, stderr });
         else reject(new Error((stderr || stdout).trim() || `Command exited with ${code ?? childSignal ?? "unknown"}`));
       });
     });

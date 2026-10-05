@@ -25,17 +25,42 @@ export async function normalizeProjectRoots(roots: string[]): Promise<string[]> 
   return unique.filter((root, index) => !unique.slice(0, index).some((parent) => isPathInside(root, parent)));
 }
 
+export interface ProjectRootWarnings {
+  /** A root is the filesystem root, which is never scanned. */
+  filesystemRoot: boolean;
+  /** A root is the home directory or one of its ancestors, so the whole home directory would be scanned. */
+  coversHome: boolean;
+}
+
+/**
+ * Checks normalized roots against the home directory canonicalized the same way, so a symlinked or firmlinked home
+ * path still triggers the warning.
+ */
+export async function projectRootWarnings(
+  normalizedRoots: string[],
+  homeDirectory: string,
+): Promise<ProjectRootWarnings> {
+  const [canonicalHome] = await normalizeProjectRoots([homeDirectory]);
+  return {
+    filesystemRoot: normalizedRoots.some((root) => root === path.parse(root).root),
+    coversHome: normalizedRoots.some((root) => root === canonicalHome || isPathInside(canonicalHome, root)),
+  };
+}
+
+/** Returns `undefined` only when no roots were saved yet; unreadable or invalid saved roots throw instead. */
 export async function readProjectRoots(): Promise<string[] | undefined> {
+  const value = await LocalStorage.getItem<string>(PROJECT_ROOTS_KEY);
+  if (value === undefined) return undefined;
+  let roots: unknown;
   try {
-    const value = await LocalStorage.getItem<string>(PROJECT_ROOTS_KEY);
-    if (!value) return undefined;
-    const roots: unknown = JSON.parse(value);
-    return Array.isArray(roots) && roots.every((root) => typeof root === "string")
-      ? await normalizeProjectRoots(roots)
-      : undefined;
+    roots = JSON.parse(value);
   } catch {
-    return undefined;
+    throw new Error("Saved project roots are invalid");
   }
+  if (!Array.isArray(roots) || !roots.every((root) => typeof root === "string")) {
+    throw new Error("Saved project roots are invalid");
+  }
+  return normalizeProjectRoots(roots);
 }
 
 export async function writeProjectRoots(roots: string[]): Promise<void> {
