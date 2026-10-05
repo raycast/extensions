@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Truthifi MCP Server] - {PR_MERGE_DATE}
+## [Add Truthifi MCP Server] - 2026-10-05
 
 - Add Truthifi to the official registry: one verified household record for your AI (accounts, activity, holdings, fees, performance, cash flow and the Truthifi Score with its findings) from 18,000+ institutions. Hosted remote Streamable HTTP server at https://api.truthifi.com/mcp through `mcp-remote`; OAuth sign-in with dynamic client registration, no API key. It can't move money or place trades.
 
