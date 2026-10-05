@@ -173,15 +173,70 @@ test("recovers a lock whose recorded writer is no longer running", async (t) => 
   await assert.rejects(() => lstat(lockPath), /ENOENT/);
 });
 
-test("recovers an empty lock left before owner metadata was written", async (t) => {
+test("recovers an abandoned published lock and removes its candidate directory", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const candidatePath = `${lockPath}.candidate.abandoned-writer`;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(candidatePath);
+  await writeFile(
+    path.join(candidatePath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: 2_147_483_647 })}\n`,
+  );
+  await symlink(candidatePath, lockPath, "dir");
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+  await assert.rejects(() => lstat(candidatePath), /ENOENT/);
+});
+
+test("does not reclaim an ownerless lock that could still belong to a writer", async (t) => {
   const directory = await temporaryDirectory(t);
   const storagePath = path.join(directory, "deeplinks.json");
   const lockPath = `${storagePath}.simulator-deep-linker.lock`;
   await writeFile(storagePath, "[]\n");
   await mkdir(lockPath);
 
-  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
+  );
 
+  assert.equal((await lstat(lockPath)).isDirectory(), true);
+});
+
+test("a waiting writer cannot replace the lock while its owner releases it", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  await writeFile(storagePath, "[]\n");
+
+  let allowFirstWriterToFinish!: () => void;
+  const firstWriterCanFinish = new Promise<void>((resolve) => {
+    allowFirstWriterToFinish = resolve;
+  });
+  let firstWriterAcquired!: () => void;
+  const firstWriterHasAcquired = new Promise<void>((resolve) => {
+    firstWriterAcquired = resolve;
+  });
+
+  const firstWriter = withStorageLock(storagePath, async () => {
+    firstWriterAcquired();
+    await firstWriterCanFinish;
+    return "first";
+  });
+  await firstWriterHasAcquired;
+  assert.equal((await lstat(lockPath)).isSymbolicLink(), true);
+
+  const secondWriter = withStorageLock(storagePath, async () => "second", {
+    retryMilliseconds: 1,
+    timeoutMilliseconds: 1_000,
+  });
+  allowFirstWriterToFinish();
+
+  assert.deepEqual(await Promise.all([firstWriter, secondWriter]), ["first", "second"]);
   await assert.rejects(() => lstat(lockPath), /ENOENT/);
 });
 
