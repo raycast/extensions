@@ -1,8 +1,44 @@
 import { parseHTML } from "linkedom";
 import { parseLog } from "./logger";
 import { getSiteConfig } from "../config/site-config";
+import { BARRIER_SELECTORS, caseInsensitive } from "./paywall-detector";
 
 type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
+
+/**
+ * Content gates / paywall barriers, stripped before extraction.
+ *
+ * These are the DETECTOR's own barrier selectors (`paywall-detector.ts`), reused rather than
+ * re-listed — a hand-maintained copy drifted twice (Greptile flagged `content-gate`… then
+ * `meter-`/`pw-overlay`/`barrier`… missing), because the two lists must agree but nothing forced
+ * it. Now they can't drift: the cleaner strips exactly what the detector recognizes.
+ *
+ * Why strip them at all: if a gate's text ("Subscribe to read the rest…") is left in the article
+ * body it lands in the extraction and trips the candidate validator's gating-phrase check,
+ * rejecting an otherwise-complete article. Gate UI is never article content. Detection is
+ * unaffected — it runs against the RAW fetch html, not this cleaned DOM.
+ *
+ * Two guards applied uniformly:
+ *   - `caseInsensitive(...)` (the detector's own helper), so a capitalized `Content-Gate` is caught;
+ *   - `:not(p)`, so a site that (like Condé Nast's `paywall`) puts body paragraphs on a barrier
+ *     class isn't gutted — a real overlay is a container, not a bare paragraph.
+ *
+ * `CLEANER_KEEP` carves out `.subscriber-only`: sites put it on gated article content, and they
+ * SEGMENT it (a class per subscriber paragraph). `:not(p)` and the per-element 30%-text guard do
+ * NOT protect segmented content — four sibling `<div class="subscriber-only">` blocks at 25% each
+ * are all below the guard and would be deleted, gutting the article. So the cleaner never DELETES
+ * it; detection still SCORES it from the raw html (it stays in BARRIER_SELECTORS).
+ *
+ * Every OTHER barrier — including `[class*="premium"][class*="wrapper"]` — is stripped. A "wrapper"
+ * is a single container, so a genuine premium-content wrapper is one large block the 30% guard
+ * protects; stripping it removes the gate-text leak that would otherwise reject a full article.
+ * (The residual — deeply segmented premium-wrapper *content* below the guard — is noted in
+ * docs/known-issues.md; it is far less likely than the segmented subscriber-only case.)
+ */
+const CLEANER_KEEP = new Set([".subscriber-only"]);
+const BARRIER_REMOVE_SELECTORS = BARRIER_SELECTORS.filter((s) => !CLEANER_KEEP.has(s)).map(
+  (s) => `${caseInsensitive(s)}:not(p)`,
+);
 
 /**
  * Selectors for elements that should be removed before Readability processing.
@@ -23,9 +59,13 @@ const NEGATIVE_SELECTORS = [
   "#disqus_thread",
   ".disqus",
 
-  // Subscription/Newsletter boxes
-  '[class*="subscribe"]',
-  '[id*="subscribe"]',
+  // Subscription/Newsletter boxes. Exclude only `subscriber-only` — the substring match catches
+  // it, but sites put that class on gated *article content*, not a subscribe box, and stripping
+  // it deleted the article (the per-element 30% guard can't save segmented subscriber-only
+  // blocks). Scoped to `subscriber-only`, not all `subscriber`, so real subscriber UI
+  // (`subscriber-offer`, `subscriber-cta`) is still removed. "subscribe" still matches everything.
+  '[class*="subscribe"]:not([class*="subscriber-only"])',
+  '[id*="subscribe"]:not([id*="subscriber-only"])',
   '[class*="newsletter"]',
   '[id*="newsletter"]',
   '[class*="signup"]',
@@ -35,29 +75,6 @@ const NEGATIVE_SELECTORS = [
   '[aria-label*="newsletter"]',
   '[aria-label*="subscribe"]',
   '[class*="email-signup"]',
-
-  // Content gates / paywall barriers embedded in the article. Detection (paywall-detector's
-  // BARRIER_SELECTORS) recognizes these, but if a gate's text ("Subscribe to read the rest…")
-  // is left in the article body it lands in the extraction and trips the candidate validator's
-  // gating-phrase check — rejecting an otherwise-complete article. Gate UI is never article
-  // content, so strip it before extraction. (Detection still runs against the RAW html, so this
-  // does not weaken it.) Two guards, both mirroring the `[class*="paywall"]` rule below:
-  //   - case-insensitive (` i`), because the detector matches capitalized class names and real
-  //     sites capitalize them, so a case-sensitive cleaner would leave `Content-Gate` behind;
-  //   - `:not(p)` on the class selectors, so a site that (like Condé Nast's `paywall`) puts body
-  //     paragraphs on a gate class isn't gutted.
-  // `subscriber-only` is deliberately NOT here: sites use it to mark gated *content*, so deleting
-  // it would remove the article. Detection still scores it from the raw html.
-  '[class*="article-gate" i]:not(p)',
-  '[class*="content-gate" i]:not(p)',
-  '[class*="regwall" i]:not(p)',
-  '[class*="registration-wall" i]:not(p)',
-  '[class*="piano-" i]:not(p)',
-  '[class*="tp-modal" i]:not(p)',
-  '[class*="subscription-wall" i]:not(p)',
-  '[data-testid*="subscribe" i]',
-  '[data-testid*="paywall" i]',
-  "[data-paywall]",
 
   // Advertisements (enhanced from Defuddle)
   '[class*="advertisement"]',
@@ -200,15 +217,9 @@ const NEGATIVE_SELECTORS = [
   '[class*="cta"]',
   '[class*="donate"]',
   '[class*="donation"]',
-  // NOT paragraphs: Condé Nast sites (New Yorker, Wired, Vanity Fair…) serve the full
-  // article in the initial HTML and tag every body <p> with class="paywall" for their
-  // JS to gate client-side. A bare `[class*="paywall"]` deleted the entire article body,
-  // leaving only the dropcap intro and the cartoons. A real blocking overlay is a
-  // container (div/aside/section) with its own button/heading structure, so :not(p) still
-  // strips it; the tradeoff is that a rare gate built as a bare <p> would now survive — but
-  // detectPaywall still catches that page by its gating text, and losing whole articles is
-  // the far worse failure.
-  '[class*="paywall"]:not(p)',
+  // `[class*="paywall"]` and the other barriers are stripped via BARRIER_REMOVE_SELECTORS (the
+  // detector's shared list, applied `:not(p)` so Condé Nast body paragraphs on `class="paywall"`
+  // survive). See the block near the top of this file.
   '[class*="upsell"]',
   '[class*="feedback"]',
 
@@ -471,8 +482,9 @@ export function preCleanHtml(document: LinkedomDocument, url: string): CleaningR
    */
   const isProtected = (el: Element): boolean => protectedElements.has(el) || holdsSubstantialText(el);
 
-  // Remove negative elements (unless protected)
-  NEGATIVE_SELECTORS.forEach((selector) => {
+  // Remove negative elements and content-gate barriers (unless protected). Barriers are the
+  // detector's shared list (see BARRIER_REMOVE_SELECTORS) so the two can't drift apart.
+  [...NEGATIVE_SELECTORS, ...BARRIER_REMOVE_SELECTORS].forEach((selector) => {
     try {
       document.querySelectorAll(selector).forEach((el) => {
         if (isProtected(el)) return;

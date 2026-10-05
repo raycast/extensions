@@ -109,6 +109,48 @@
       ]
     },
     {
+      "name": "summaryModel",
+      "title": "Summary Model",
+      "description": "Larger models write better summaries but take longer.",
+      "type": "dropdown",
+      "default": "default",
+      "required": false,
+      "data": [
+        {
+          "title": "Default (GPT-5.4 nano)",
+          "value": "default"
+        },
+        {
+          "title": "GPT-5.4 mini",
+          "value": "OpenAI_GPT-5.4_mini"
+        },
+        {
+          "title": "GPT-6 Luna",
+          "value": "OpenAI_GPT-6_Luna"
+        },
+        {
+          "title": "Claude Haiku 4.5",
+          "value": "Anthropic_Claude_Haiku_4.5"
+        },
+        {
+          "title": "Claude Sonnet 5.5",
+          "value": "Anthropic_Claude_Sonnet_5.5"
+        },
+        {
+          "title": "Gemini 3.8 Flash",
+          "value": "Google_Gemini_3.8_Flash"
+        },
+        {
+          "title": "Gemini 3.1 Pro",
+          "value": "Google_Gemini_3.1_Pro"
+        },
+        {
+          "title": "Grok 4.7",
+          "value": "xAI_Grok-4.7"
+        }
+      ]
+    },
+    {
       "name": "summaryOutputLanguage",
       "title": "Summary Output Language",
       "description": "Language for AI-generated summaries.",
@@ -237,19 +279,28 @@
     },
     {
       "name": "verboseLogging",
-      "title": "Troubleshooting",
-      "description": "Enable extra diagnostics for troubleshooting and bug reports.",
+      "title": "Debug Logging",
+      "description": "Show detailed logs in the console for debugging.",
       "type": "checkbox",
-      "label": "Enable debug logging",
+      "label": "Enable extra diagnostics in the console",
       "default": false,
       "required": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.4.0",
+    "@chrismessina/raycast-logger": "^1.5.0",
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^2.1.2",
-    "@raycast/utils": "^2.3.0",
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2",
     "linkedom": "^0.18.12",
     "marked": "^17.0.1",
     "turndown": "^7.2.2",
@@ -261,7 +312,7 @@
     "@types/react": "19.0.10",
     "@types/turndown": "^5.0.6",
     "eslint": "^9.22.0",
-    "prettier": "^3.8.1",
+    "prettier": "^3.9.9",
     "typescript": "^5.9.3"
   },
   "scripts": {

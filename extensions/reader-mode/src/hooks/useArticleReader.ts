@@ -23,7 +23,13 @@ import { useAI } from "@raycast/utils";
 import { ArticleState } from "../types/article";
 import { BrowserTab } from "../types/browser";
 import { SummaryStyle } from "../types/summary";
-import { getAIConfigForStyle } from "../config/ai";
+import {
+  getAIConfigForStyle,
+  getSummaryModelChoice,
+  getSummaryModelTitle,
+  DEFAULT_SUMMARY_MODEL,
+  SummaryModelKey,
+} from "../config/ai";
 import { rewriteArticleTitle } from "../config/prompts";
 import { getArchiveSourceLabel } from "../config/labels";
 import { getCachedSummary, setCachedSummary, getLastSummaryStyle } from "../utils/summaryCache";
@@ -32,9 +38,15 @@ import {
   reimportFromBrowserTab,
   getContentFromActiveTab,
 } from "../utils/browser-extension";
-import { urlLog } from "../utils/logger";
+import { urlLog, aiLog } from "../utils/logger";
 import { isValidUrl } from "../utils/url-resolver";
-import { getStyleLabel, buildSummaryPrompt, logSummarySuccess, logSummaryError } from "../utils/summarizer";
+import {
+  getStyleLabel,
+  buildSummaryPrompt,
+  logSummarySuccess,
+  logSummaryError,
+  regenerateNeedsRevalidate,
+} from "../utils/summarizer";
 import { loadArticleFromUrl, loadArticleViaPaywallHopper, LoadArticleResult } from "../utils/article-loader";
 
 const MINIMUM_ARTICLE_LENGTH = 100;
@@ -60,6 +72,8 @@ export interface ArticleReaderState {
   hasBrowserExtensionAvailable: boolean;
   reimportInactiveTab: { url: string; tab: { id: number; title?: string } } | null;
   summaryStyle: SummaryStyle | null;
+  /** The model the current summary comes from. */
+  summaryModel: SummaryModelKey;
   currentSummary: string | null;
   isSummarizing: boolean;
   shouldShowSummary: boolean;
@@ -68,6 +82,7 @@ export interface ArticleReaderState {
 
 export interface ArticleReaderActions {
   handleSummarize: (style: SummaryStyle) => Promise<void>;
+  handleRegenerate: (model: SummaryModelKey) => void;
   handleStopSummarizing: () => Promise<void>;
   handleReimportFromBrowser: () => Promise<void>;
   handleRetryReimport: () => Promise<void>;
@@ -118,31 +133,61 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   const [summaryInitialized, setSummaryInitialized] = useState(false);
   const [summaryStartTime, setSummaryStartTime] = useState<number | null>(null);
   const [completedSummary, setCompletedSummary] = useState<string | null>(null);
+  // A model picked with "Regenerate with Model…" applies for the rest of this session.
+  const [modelOverride, setModelOverride] = useState<SummaryModelKey | undefined>(undefined);
+  // Read once, so the model named on a summary can't change under it if the preference does.
+  const [preferredModel] = useState(getSummaryModelChoice);
 
   // Refs
   const fetchStartedRef = useRef(false);
   const toastRef = useRef<Toast | null>(null);
+  // Set only when the latest run finished: a failed or stopped run must not overwrite the cache.
+  const runSucceededRef = useRef(false);
+  // Bumped by every summary request, so a cache read that resolves late can't replace a newer one.
+  const summaryRequestRef = useRef(0);
+  // The summary a regenerate is replacing, so Stop can put it back exactly as it was shown.
+  const regenerateFromRef = useRef<{
+    model: SummaryModelKey | undefined;
+    style: SummaryStyle;
+    summary: string;
+  } | null>(null);
 
-  // Get AI config based on current summary style
-  const aiConfig = getAIConfigForStyle(summaryStyle);
+  // Undefined means the default model, which keeps the cache keys summaries had before models were selectable.
+  const cacheModel = modelOverride ?? preferredModel;
+  const aiConfig = getAIConfigForStyle(summaryStyle, cacheModel ?? DEFAULT_SUMMARY_MODEL);
 
   // useAI hook for summarization
-  const { data: summaryData, isLoading: isSummarizing } = useAI(summaryPrompt, {
+  const {
+    data: summaryData,
+    isLoading: isSummarizing,
+    revalidate: revalidateSummary,
+  } = useAI(summaryPrompt, {
     creativity: aiConfig.creativity,
     model: aiConfig.model,
     execute: !!summaryPrompt && !!summaryStyle && !cachedSummary,
     onWillExecute: async () => {
-      setSummaryStartTime(Date.now());
+      runSucceededRef.current = false;
+      setSummaryStartTime(performance.now());
       setCompletedSummary(null);
 
-      toastRef.current = await showToast({
+      const request = summaryRequestRef.current;
+      const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Generating summary...",
       });
+      // Stopped or superseded while the toast was opening: nothing will hide it later.
+      if (request !== summaryRequestRef.current) {
+        toast.hide();
+        return;
+      }
+      toastRef.current = toast;
+    },
+    onData: () => {
+      runSucceededRef.current = true;
     },
     onError: async (err) => {
       if (summaryStyle) {
-        const durationMs = summaryStartTime ? Date.now() - summaryStartTime : undefined;
+        const durationMs = summaryStartTime ? Math.round(performance.now() - summaryStartTime) : undefined;
         logSummaryError(summaryStyle, err.message, durationMs);
 
         let userMessage = err.message;
@@ -176,18 +221,30 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
 
   // When streaming completes, log final stats and cache the complete summary
   useEffect(() => {
-    if (summaryData && summaryStyle && article && !isSummarizing && !completedSummary && !cachedSummary) {
-      const durationMs = summaryStartTime ? Date.now() - summaryStartTime : undefined;
+    if (
+      runSucceededRef.current &&
+      summaryData &&
+      summaryStyle &&
+      article &&
+      !isSummarizing &&
+      !completedSummary &&
+      !cachedSummary
+    ) {
+      runSucceededRef.current = false;
+      regenerateFromRef.current = null;
+      const durationMs = summaryStartTime ? Math.round(performance.now() - summaryStartTime) : undefined;
       const estimatedTokens = Math.ceil(summaryData.length / 4);
       logSummarySuccess(summaryStyle, summaryData.length, durationMs, estimatedTokens);
 
-      setCachedSummary(article.url, summaryStyle, summaryData, preferences.summaryOutputLanguage);
+      setCachedSummary(article.url, summaryStyle, summaryData, preferences.summaryOutputLanguage, cacheModel);
       setCompletedSummary(summaryData);
 
       if (toastRef.current) {
         toastRef.current.style = Toast.Style.Success;
         toastRef.current.title = "Summary generated";
-        toastRef.current.message = `${getStyleLabel(summaryStyle)} (${(durationMs! / 1000).toFixed(1)}s)`;
+        const modelLabel =
+          cacheModel && cacheModel !== DEFAULT_SUMMARY_MODEL ? ` · ${getSummaryModelTitle(cacheModel)}` : "";
+        toastRef.current.message = `${getStyleLabel(summaryStyle)}${modelLabel} (${(durationMs! / 1000).toFixed(1)}s)`;
       }
     }
   }, [
@@ -199,6 +256,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     cachedSummary,
     summaryStartTime,
     preferences.summaryOutputLanguage,
+    cacheModel,
   ]);
 
   // Handle summarization with cache check
@@ -206,10 +264,13 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     async (style: SummaryStyle) => {
       if (!article) return;
 
+      const request = ++summaryRequestRef.current;
+      regenerateFromRef.current = null;
       setSummaryStyle(style);
       setCachedSummaryState(null);
 
-      const cached = await getCachedSummary(article.url, style, preferences.summaryOutputLanguage);
+      const cached = await getCachedSummary(article.url, style, preferences.summaryOutputLanguage, cacheModel);
+      if (request !== summaryRequestRef.current) return;
       if (cached) {
         setCachedSummaryState(cached);
         return;
@@ -219,12 +280,72 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       const prompt = buildSummaryPrompt(article.title, article.textContent, style, translationOptions);
       setSummaryPrompt(prompt);
     },
-    [article, preferences.summaryOutputLanguage],
+    [article, preferences.summaryOutputLanguage, cacheModel],
+  );
+
+  // Regenerate the current style's summary, skipping the cache, with the same model
+  // ("Regenerate") or another one ("Regenerate with Model…").
+  const handleRegenerate = useCallback(
+    (model: SummaryModelKey) => {
+      if (!article || !summaryStyle) return;
+
+      const translationOptions = { language: preferences.summaryOutputLanguage };
+      const prompt = buildSummaryPrompt(article.title, article.textContent, summaryStyle, translationOptions);
+      const currentModel = cacheModel ?? DEFAULT_SUMMARY_MODEL;
+      const force = regenerateNeedsRevalidate({
+        prompt,
+        currentPrompt: summaryPrompt,
+        fromCache: !!cachedSummary,
+        model,
+        currentModel,
+      });
+
+      aiLog.log("summary:regenerate", { style: summaryStyle, from: currentModel, to: model, force });
+      summaryRequestRef.current++;
+      regenerateFromRef.current ??= {
+        model: modelOverride,
+        style: summaryStyle,
+        summary: cachedSummary || summaryData,
+      };
+      setModelOverride(model);
+      setCachedSummaryState(null);
+      setSummaryPrompt(prompt);
+      if (force) revalidateSummary();
+    },
+    [
+      article,
+      summaryStyle,
+      summaryPrompt,
+      cachedSummary,
+      summaryData,
+      cacheModel,
+      modelOverride,
+      preferences.summaryOutputLanguage,
+      revalidateSummary,
+    ],
   );
 
   // Handle stopping summarization
   const handleStopSummarizing = useCallback(async () => {
     setSummaryPrompt("");
+    // A result that succeeded before this render must not be cached under the restored model.
+    runSucceededRef.current = false;
+    const request = ++summaryRequestRef.current;
+
+    if (toastRef.current) {
+      toastRef.current.hide();
+      toastRef.current = null;
+    }
+
+    // A stopped regenerate puts back the summary it was replacing, in the same render.
+    const previous = regenerateFromRef.current;
+    regenerateFromRef.current = null;
+    if (previous) {
+      setModelOverride(previous.model);
+      setSummaryStyle(previous.style);
+      setCachedSummaryState(previous.summary || null);
+      return;
+    }
 
     if (!article) {
       setSummaryStyle(null);
@@ -232,9 +353,11 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     }
 
     const lastStyle = await getLastSummaryStyle(article.url);
+    if (request !== summaryRequestRef.current) return;
 
     if (lastStyle) {
-      const cached = await getCachedSummary(article.url, lastStyle, preferences.summaryOutputLanguage);
+      const cached = await getCachedSummary(article.url, lastStyle, preferences.summaryOutputLanguage, cacheModel);
+      if (request !== summaryRequestRef.current) return;
 
       if (cached) {
         setSummaryStyle(lastStyle);
@@ -247,12 +370,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       setSummaryStyle(null);
       setCachedSummaryState(null);
     }
-
-    if (toastRef.current) {
-      toastRef.current.hide();
-      toastRef.current = null;
-    }
-  }, [article, preferences.summaryOutputLanguage]);
+  }, [article, preferences.summaryOutputLanguage, cacheModel]);
 
   // Process article loading result
   const handleLoadResult = useCallback(
@@ -519,12 +637,14 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     hasBrowserExtensionAvailable,
     reimportInactiveTab,
     summaryStyle,
+    summaryModel: cacheModel ?? DEFAULT_SUMMARY_MODEL,
     currentSummary: currentSummary || null,
     isSummarizing,
     shouldShowSummary,
     canAccessAI,
     // Actions
     handleSummarize,
+    handleRegenerate,
     handleStopSummarizing,
     handleReimportFromBrowser,
     handleRetryReimport,

@@ -50,3 +50,7 @@ A long non-article whose **only** tell is a visible overlay — no gating phrase
 ### Embedded gate elements and the 30% guard
 
 Gate containers (`article-gate`, `content-gate`, `regwall`, `piano-*`, `[data-testid*=subscribe]`, …) are stripped before extraction so their gating text can't pollute the article and trip the phrase check (`src/utils/html-cleaner.ts`). One residual: the cleaner protects any element holding more than ~30% of the page's text (so a substring-matched selector can't gut the article). A gate that alone exceeds that share is therefore left in place — but such a page is overwhelmingly a challenge/teaser we want rejected anyway, not a complete article.
+
+### `subscriber-only` vs other barrier classes
+
+The cleaner strips the detector's barrier selectors before extraction so gate text can't pollute the article — with one carve-out: `.subscriber-only`. Sites mark gated article _content_ with it and segment it (a class per subscriber block), and the per-element 30% protection guard can't save several sibling blocks each under 30%. So `.subscriber-only` is detected but never deleted. Every other barrier, including `[class*="premium"][class*="wrapper"]`, is stripped: a "wrapper" is a single container the 30% guard protects when it holds real content, so stripping it removes a gate-text leak without gutting an article. The residual — a premium-wrapper that is both deeply segmented _and_ real content — is possible but far less likely than the subscriber-only case, and is left stripped in favor of closing the leak.
