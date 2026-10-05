@@ -1,6 +1,6 @@
 # Mercury Changelog
 
-## [Safer Statement Downloads] - {PR_MERGE_DATE}
+## [Safer Statement Downloads] - 2026-10-05
 
 - Downloading a statement no longer writes your Mercury API token to temporary files on disk
 - A statement Mercury hasn't finished preparing now fails with a message saying so, instead of saving an unreadable PDF
