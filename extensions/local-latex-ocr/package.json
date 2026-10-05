@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-latex-ocr",
+  "title": "Local LaTeX OCR",
+  "description": "Capture a printed equation and convert it to LaTeX entirely on your Mac.",
+  "icon": "icon-v2.png",
+  "author": "do_nhat_minh",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-math",
+      "title": "Capture Math",
+      "description": "Capture a printed equation as raw LaTeX",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-math-markdown",
+      "title": "Capture Math as Markdown",
+      "description": "Capture a printed equation wrapped in inline Markdown math delimiters",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-display-math",
+      "title": "Capture Display Math",
+      "description": "Capture a printed equation wrapped in display Markdown math delimiters",
+      "mode": "no-view"
+    },
+    {
+      "name": "review-last-capture",
+      "title": "Review Last Capture",
+      "description": "Review, edit, and paste the latest OCR result",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "pasteAutomatically",
+      "title": "Output",
+      "description": "Paste recognized LaTeX into the previously focused application",
+      "type": "checkbox",
+      "label": "Paste Automatically",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "copyToClipboard",
+      "title": "Clipboard",
+      "description": "Keep recognized LaTeX on the clipboard",
+      "type": "checkbox",
+      "label": "Copy to Clipboard",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "alwaysShowPreview",
+      "title": "Review",
+      "description": "Open the review screen before delivering every result",
+      "type": "checkbox",
+      "label": "Always Show Preview",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build:worker": "node scripts/build-worker.mjs",
+    "build": "npm run build:worker && ray build -e dist",
+    "dev": "npm run build:worker && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "corpus:generate": "node scripts/generate-corpus.mjs",
+    "benchmark": "npm run build:worker && node scripts/run-benchmark.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "katex": "^0.18.7",
+    "onnxruntime-node": "^1.29.0",
+    "onnxruntime-web": "^1.29.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.2",
+    "vitest": "^5.0.0"
+  }
+}
