@@ -4,6 +4,8 @@ Download videos, audio, image galleries, Spotify music, and complete webpages fr
 
 ![The Downloader — Download form](media/the-downloader-1.png)
 
+The Downloader started as a fork of [Video Downloader](https://www.raycast.com/vimtor/video-downloader) by vimtor and its contributors — thank you.
+
 ## Commands
 
 - **Download** — paste a URL, choose what to grab (video, audio, image, transcript, or webpage) and the quality, then download. A live view follows the download: a progress ring, speed, time left and size, a download-speed chart, and the steps (prepare → video → audio → merge → saved), with the title, channel, format and folder alongside. Press Esc to go back to the form; the download keeps running and its toast keeps reporting progress.
