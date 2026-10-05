@@ -93,7 +93,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={prefix ? `Upload to ${prefix}` : "Upload File"}
+      navigationTitle={prefix ? `Upload to ${prefix}` : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Upload" icon={Icon.Upload} onSubmit={handleSubmit} />
