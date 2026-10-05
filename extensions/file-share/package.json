@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-share",
+  "title": "File Share",
+  "description": "Open a sharing session on your local network: hand out one link so anyone nearby can download and send files or drop you text, with nothing to install on their side.",
+  "icon": "icon.png",
+  "author": "shaomai98",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "share",
+      "title": "File Share",
+      "description": "Start, stop and monitor the sharing session, choose the network interface, and show the link or QR code.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "port",
+      "title": "Port",
+      "description": "Port the sharing service listens on. Must be an integer between 1024 and 49151. Changing it needs a restart.",
+      "type": "textfield",
+      "required": false,
+      "default": "7331",
+      "placeholder": "7331"
+    },
+    {
+      "name": "receiveDirectory",
+      "title": "Receive Directory",
+      "description": "Directory that files uploaded from the browser are saved into. They are added to the share list afterwards.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@radix-ui/react-checkbox": "^1.3.11",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@raycast/eslint-config": "^2.2.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "22.19.17",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^9.0.0",
+    "lucide-react": "^1.48.0",
+    "marked": "^18.0.14",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.1"
+  },
+  "scripts": {
+    "build": "npm run build:web && ray build -e dist",
+    "build:web": "tsc -p web/tsconfig.json && vite build --config web/vite.config.mts",
+    "predev": "npm run build:web",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
