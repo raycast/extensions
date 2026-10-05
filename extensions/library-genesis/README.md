@@ -30,6 +30,8 @@ The current parser supports the `index.php` / `tablelibgen` search interface. Hi
 
 The extension allows you to quickly download the book file to your local machine with a single click.
 
+Downloads resolve a fresh GET link and validate the response before saving. If a download fails, the extension tries another validated mirror for the same book. HTML error pages, incomplete files, and checksum mismatches are rejected. Both save options use the same download checks.
+
 ![Screencast](./metadata/library-genesis-2.png)
 You can choose either to save it in a default directory, or to specify the directory every time, by configuring the extension.
 

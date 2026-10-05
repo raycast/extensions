@@ -1,25 +1,23 @@
 import { List } from "@raycast/api";
 
-import { useCoverPreviewSize } from "@/hooks/use-cover-preview-size";
 import type { BookEntry } from "@/types";
+import type { BookCover } from "@/utils/book-covers";
 
 interface BookPreviewProps {
   book: BookEntry;
-  coverPath?: string;
-  loading: boolean;
+  cover: BookCover;
 }
 
-export function BookPreview({ book, coverPath, loading }: BookPreviewProps) {
-  const size = useCoverPreviewSize(coverPath);
-  const markdown = coverPath
-    ? `![Book cover](<${coverPath}?raycast-width=${size.width}&raycast-height=${size.height}>)`
-    : loading
+export function BookPreview({ book, cover }: BookPreviewProps) {
+  const markdown = cover.path
+    ? `![Book cover](<${cover.path}?raycast-width=${cover.width}&raycast-height=${cover.height}>)`
+    : cover.loading
       ? "Loading cover…"
       : "Cover unavailable";
 
   return (
     <List.Item.Detail
-      isLoading={loading}
+      isLoading={cover.loading}
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>

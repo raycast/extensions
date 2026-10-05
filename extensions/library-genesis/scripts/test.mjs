@@ -6,16 +6,18 @@ import { join } from "node:path";
 
 const directory = await mkdtemp(join(tmpdir(), "library-genesis-tests-"));
 try {
-  const output = join(directory, "api.test.cjs");
+  const testFiles = ["tests/api.test.ts", "tests/downloads.test.ts", "tests/ui-updates.test.ts"];
   await build({
-    entryPoints: ["tests/api.test.ts"],
-    outfile: output,
+    entryPoints: testFiles,
+    outdir: directory,
+    outExtension: { ".js": ".cjs" },
     bundle: true,
     platform: "node",
     format: "cjs",
     target: "node22",
   });
-  const result = spawnSync(process.execPath, ["--test", output], { stdio: "inherit" });
+  const outputs = testFiles.map((file) => join(directory, file.split("/").at(-1).replace(/\.ts$/, ".cjs")));
+  const result = spawnSync(process.execPath, ["--test", ...outputs], { stdio: "inherit" });
   if (result.error) throw result.error;
   process.exitCode = result.status ?? 1;
 } finally {

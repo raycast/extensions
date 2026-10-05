@@ -305,3 +305,67 @@ test("a failed cached mirror returns no replacement when every candidate is unav
     mirrors.splice(0, mirrors.length, ...original);
   }
 });
+
+test("mirror selection survives 75 simultaneous races across 16 mixed candidates", async (context) => {
+  const original = mirrors.slice();
+  const parse = original[0].parse;
+  const failures: string[] = [];
+  context.mock.method(console, "error", (error: AggregateError) => {
+    failures.push(error.errors.map((item) => `${item.message}: ${item.cause?.code ?? ""}`).join(", "));
+  });
+  try {
+    const candidates = Array.from({ length: 15 }, (_, index) => ({
+      baseUrl: `${baseUrl}/${["placeholder", "unavailable", "hanging", "slow", "disconnected"][index % 5]}/${index}`,
+      parse,
+    }));
+    candidates.splice(7, 0, { baseUrl: `${baseUrl}/healthy`, parse });
+    mirrors.splice(0, mirrors.length, ...candidates);
+    const count = requests.length;
+    const selected = await Promise.all(Array.from({ length: 75 }, () => mirror(AbortSignal.timeout(5000))));
+    assert.equal(selected.length, 75);
+    assert.ok(requests.length - count <= 16, "simultaneous selectors should share their 16 active probes");
+    assert.ok(
+      selected.every((value) => value === `${baseUrl}/healthy` || value?.startsWith(`${baseUrl}/slow/`)),
+      failures[0],
+    );
+    const recovered = await Promise.all(
+      Array.from({ length: 25 }, () => getValidatedMirror(`${baseUrl}/placeholder`, AbortSignal.timeout(5000))),
+    );
+    assert.ok(recovered.every((value) => value === `${baseUrl}/healthy` || value?.startsWith(`${baseUrl}/slow/`)));
+  } finally {
+    mirrors.splice(0, mirrors.length, ...original);
+  }
+});
+
+test("cancelling all hanging mirror candidates returns promptly without a winner", async () => {
+  const original = mirrors.slice();
+  try {
+    mirrors.splice(
+      0,
+      mirrors.length,
+      ...Array.from({ length: 16 }, (_, index) => ({
+        baseUrl: `${baseUrl}/hanging/${index}`,
+        parse: original[0].parse,
+      })),
+    );
+    assert.equal(await mirror(AbortSignal.timeout(30)), null);
+    const controller = new AbortController();
+    controller.abort();
+    const count = requests.length;
+    assert.equal(await mirror(controller.signal), null);
+    assert.equal(requests.length, count);
+  } finally {
+    mirrors.splice(0, mirrors.length, ...original);
+  }
+});
+
+test("cancelling one shared mirror probe does not cancel another caller's check", async () => {
+  const count = requests.length;
+  const controller = new AbortController();
+  const cancelled = testMirror(`${baseUrl}/slow/shared`, controller.signal);
+  const surviving = testMirror(`${baseUrl}/slow/shared`);
+  setTimeout(() => controller.abort(), 20);
+  await assert.rejects(cancelled, (error: Error) => error.name === "AbortError");
+  await surviving;
+  assert.equal(requests.slice(count).filter((request) => request.url.pathname === "/slow/shared/index.php").length, 1);
+});

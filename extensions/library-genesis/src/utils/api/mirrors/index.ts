@@ -43,10 +43,49 @@ export const getMirror = (libgenUrl: string | null): Mirror => {
       };
 };
 
+type MirrorProbe = {
+  controller: AbortController;
+  subscribers: number;
+  result: Promise<{ startTime: number; endTime: number }>;
+};
+const activeProbes = new Map<string, MirrorProbe>();
+
 export const testMirror = async (baseUrl: string, abortSignal?: AbortSignal) => {
-  const startTime = Date.now();
-  await fetchLibgenSearchPage(getMirrorTestUrl(baseUrl), abortSignal, 10000);
-  return { startTime, endTime: Date.now() };
+  abortSignal?.throwIfAborted();
+  let probe = activeProbes.get(baseUrl);
+  if (!probe) {
+    const controller = new AbortController();
+    const startTime = Date.now();
+    const created: MirrorProbe = {
+      controller,
+      subscribers: 0,
+      result: fetchLibgenSearchPage(getMirrorTestUrl(baseUrl), controller.signal, 10000)
+        .then(() => ({ startTime, endTime: Date.now() }))
+        .finally(() => {
+          if (activeProbes.get(baseUrl) === created) activeProbes.delete(baseUrl);
+        }),
+    };
+    activeProbes.set(baseUrl, created);
+    probe = created;
+  }
+  const shared = probe;
+  shared.subscribers++;
+  let abort: () => void = () => {};
+  try {
+    const result = await new Promise<{ startTime: number; endTime: number }>((resolve, reject) => {
+      abort = () => reject(new DOMException("The mirror check was cancelled.", "AbortError"));
+      abortSignal?.addEventListener("abort", abort, { once: true });
+      shared.result.then(resolve, reject);
+    });
+    abortSignal?.throwIfAborted();
+    return result;
+  } finally {
+    abortSignal?.removeEventListener("abort", abort);
+    if (--shared.subscribers === 0) {
+      shared.controller.abort();
+      if (activeProbes.get(baseUrl) === shared) activeProbes.delete(baseUrl);
+    }
+  }
 };
 
 export async function mirror(abortSignal?: AbortSignal, excludedMirrors: string[] = []): Promise<string | null> {

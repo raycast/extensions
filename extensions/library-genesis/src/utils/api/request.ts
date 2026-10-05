@@ -2,7 +2,11 @@ import { load } from "cheerio";
 
 export const LIBGEN_USER_AGENT = "Raycast-Library-Genesis";
 
-export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeoutMs = 15000): Promise<string> => {
+export const fetchLibgenDocument = async (
+  url: string,
+  signal?: AbortSignal,
+  timeoutMs = 15000,
+): Promise<{ content: string; url: string }> => {
   const controller = new AbortController();
   const abort = () => controller.abort();
   let timedOut = false;
@@ -21,7 +25,7 @@ export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeout
     if (!response.ok) {
       throw new Error(`${new URL(url).hostname} returned HTTP ${response.status}. Try another mirror.`);
     }
-    return await response.text();
+    return { content: await response.text(), url: response.url };
   } catch (error) {
     if (timedOut && !signal?.aborted) {
       throw new Error(`${new URL(url).hostname} timed out. Try another mirror.`);
@@ -31,6 +35,10 @@ export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeout
     clearTimeout(timeout);
     signal?.removeEventListener("abort", abort);
   }
+};
+
+export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeoutMs?: number): Promise<string> => {
+  return (await fetchLibgenDocument(url, signal, timeoutMs)).content;
 };
 
 export const fetchLibgenSearchPage = async (url: string, signal?: AbortSignal, timeoutMs?: number): Promise<string> => {

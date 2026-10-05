@@ -2,25 +2,26 @@ import { memo } from "react";
 
 import { Icon, List } from "@raycast/api";
 
-import { useBookCover } from "@/hooks/use-book-cover";
 import type { BookEntry } from "@/types";
+import type { BookCover } from "@/utils/book-covers";
 
 import { BookActionPanel } from "./book-action-panel";
 import { BookPreview } from "./book-preview";
 
 interface BookItemProps {
+  id: string;
   book: BookEntry;
+  cover: BookCover;
 }
 
-function BookItemF({ book }: BookItemProps) {
-  const { path: coverPath, loading } = useBookCover(book.coverUrl, true);
-
+function BookItemF({ id, book, cover }: BookItemProps) {
   return (
     <List.Item
+      id={id}
       title={book.title}
-      icon={{ source: coverPath || Icon.Book, fallback: Icon.Book }}
+      icon={{ source: cover.path || Icon.Book, fallback: Icon.Book }}
       actions={<BookActionPanel book={book} />}
-      detail={<BookPreview book={book} coverPath={coverPath} loading={loading} />}
+      detail={<BookPreview book={book} cover={cover} />}
     />
   );
 }

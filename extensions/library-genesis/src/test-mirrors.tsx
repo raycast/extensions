@@ -39,6 +39,7 @@ const MirrorItem = ({ mirror }: { mirror: Mirror }) => {
 
   return (
     <List.Item
+      id={mirror.baseUrl}
       title={mirror.baseUrl}
       subtitle={subTitle}
       icon={icon}

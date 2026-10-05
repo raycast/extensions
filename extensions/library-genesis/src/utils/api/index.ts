@@ -4,7 +4,7 @@ import type { BookEntry } from "@/types";
 import { SearchType } from "@/types";
 
 import { getMirror } from "./mirrors";
-import { fetchLibgenPage, fetchLibgenSearchPage } from "./request";
+import { fetchLibgenDocument, fetchLibgenSearchPage } from "./request";
 
 export const getLibgenSearchResults = async (
   searchContent: string,
@@ -71,12 +71,16 @@ export const getLibgenSearchResults = async (
   return parse(data, libgenUrl);
 };
 
-export const getUrlFromDownloadPage = async (downloadUrl: string): Promise<string | undefined> => {
-  const data = await fetchLibgenPage(downloadUrl);
+export const getUrlFromDownloadPage = async (downloadUrl: string, signal?: AbortSignal): Promise<string> => {
+  const document = await fetchLibgenDocument(downloadUrl, signal);
 
-  const $ = load(data);
-  const pathname = $("#main").find("a").first().attr("href");
-  const url = new URL(downloadUrl);
-  url.pathname = pathname || "";
-  return `${url.origin}/${pathname}`;
+  const $ = load(document.content);
+  const links = $("#main a[href]").toArray();
+  const link = links.find((element) => $(element).text().trim().toUpperCase() === "GET");
+  const href = link && $(link).attr("href");
+  if (!href) throw new Error("The download page did not provide a GET link. Try another mirror.");
+
+  const url = new URL(href, document.url);
+  if (!["http:", "https:"].includes(url.protocol)) throw new Error("The download page returned an invalid GET link.");
+  return url.toString();
 };
