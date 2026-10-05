@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Zihin MCP Server] - 2026-10-05
+
+- Add Zihin to the official registry: build and operate AI agents on the Zihin platform (agents, personas, tools, triggers, budgets, human approvals, run inspection) and chat with them. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.
+
 ## [Add Truthifi MCP Server] - 2026-10-05
 
 - Add Truthifi to the official registry: one verified household record for your AI (accounts, activity, holdings, fees, performance, cash flow and the Truthifi Score with its findings) from 18,000+ institutions. Hosted remote Streamable HTTP server at https://api.truthifi.com/mcp through `mcp-remote`; OAuth sign-in with dynamic client registration, no API key. It can't move money or place trades.

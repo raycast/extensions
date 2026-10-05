@@ -164,6 +164,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [upAPI](https://upapi.io/docs/mcp) | Call a catalog of ready-to-use APIs through one upAPI account and key, without signing up for each upstream service. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
 | [Uptimely](https://getuptimely.com/integrations) | Manage uptime monitors, incidents and status pages, and read check results, in Uptimely. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
 | [VoiceLabs](https://voicelabs.now/mcp) | Generate speech from text in your voices and transcribe audio with VoiceLabs. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
+| [Zihin](https://docs.zihin.ai/integrations/mcp-server) | Build and operate AI agents on the Zihin platform: create agents and personas, attach API and MCP tools, configure webhook, schedule and email triggers, set budgets and human-approval policies, inspect runs and chat with your agents. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`. |
 
 ### Community MCP Servers
 

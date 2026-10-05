@@ -1561,6 +1561,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://app.voicelabs.now/api/mcp"],
     },
   },
+  {
+    name: "zihin",
+    title: "Zihin",
+    description:
+      "Build and operate AI agents on the Zihin platform: create agents and personas, attach API and MCP tools, configure webhook, schedule and email triggers, set budgets and human-approval policies, inspect runs and chat with your agents. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.",
+    icon: "https://github.com/zihin-ai.png",
+    homepage: "https://docs.zihin.ai/integrations/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@zihin/mcp-server"],
+      env: {
+        ZIHIN_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
