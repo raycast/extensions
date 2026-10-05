@@ -24,10 +24,10 @@ export default function Ask(props: { conversation?: Conversation }) {
   //
   // `props.conversation` is passed so the hook knows this conversation PREDATES the view.
   // It is set if and only if Ask was opened on an existing conversation (from Recents),
-  // which is ground truth the hook cannot derive on its own: on a fresh mount its own
-  // "have I written yet" ref is `false` either way, and without this argument a
-  // pre-existing conversation deleted in Recents was re-added by the next persist. See
-  // `hasEverBeenWrittenRef`'s doc for the full mechanism.
+  // which is ground truth the hook cannot derive on its own: on a fresh mount it has no
+  // record of having written, and without this argument a pre-existing conversation
+  // deleted in Recents was re-added by the next persist. See `guardsRef`'s doc in
+  // `useAskConversation` for the full mechanism.
   const askConversation = useAskConversation(props.conversation);
   const models = useModel();
 
