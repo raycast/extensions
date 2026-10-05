@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## [Open in Desktop App] - {PR_MERGE_DATE}
+## [Open in Desktop App] - 2026-10-05
 
 ### Added
 
