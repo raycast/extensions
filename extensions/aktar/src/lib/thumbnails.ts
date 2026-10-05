@@ -29,6 +29,11 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 /** A file Aktar had no thumbnail for is asked about again after this long. */
 const RETRY_AFTER_MS = 24 * 60 * 60 * 1000;
 const MAX_RUNNING = 4;
+/**
+ * How long a row stays selected before Aktar is asked to make its
+ * thumbnail, so moving through a list doesn't download every file on the way.
+ */
+const SETTLE_MS = 400;
 
 let unsupported = false;
 let pruned = false;
@@ -132,8 +137,6 @@ export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }
   const [files, setFiles] = useState<Record<string, string | null>>({});
   // Asked for already (answered or still running), so a new selection doesn't ask again.
   const requested = useRef(new Set<string>());
-  // Selected rows already asked to have one made.
-  const generated = useRef(new Set<string>());
   const mounted = useRef(true);
   // Set again on mount: React runs effects twice in development, and a
   // cleanup that left this false would drop every icon that arrives.
@@ -158,31 +161,46 @@ export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }
       });
     }
   }, [key]);
-  // The selected row may have one made, like the detail pane does: an image
-  // shown from its link never gets one otherwise.
+  // The selected row may have one made once it stays selected, like the
+  // detail pane does: an image shown from its link never gets one otherwise.
+  // Not remembered here: a made or missing thumbnail is cached on disk, and
+  // one that failed is asked for again when the row is selected again.
   const selectedIdentity = selected ? identity(selected.source) : "";
   useEffect(() => {
-    if (!selected || generated.current.has(selectedIdentity)) return;
-    generated.current.add(selectedIdentity);
-    thumbnailFile(selected.source, ICON_PX, true).then((file) => {
-      if (mounted.current && file) setFiles((current) => ({ ...current, [selectedIdentity]: file }));
-    });
+    if (!selected) return;
+    const source = selected.source;
+    const timer = setTimeout(() => {
+      thumbnailFile(source, ICON_PX, true).then((file) => {
+        if (mounted.current && file) setFiles((current) => ({ ...current, [selectedIdentity]: file }));
+      });
+    }, SETTLE_MS);
+    return () => clearTimeout(timer);
   }, [selectedIdentity]);
   return Object.fromEntries(wanted.map((item) => [item.id, files[item.identity]]));
 }
 
-/** The selected item's thumbnail for the detail pane, made if needed. */
+/**
+ * The selected item's thumbnail for the detail pane: one Aktar already has
+ * right away, otherwise made once the item stays selected.
+ */
 export function useDetailThumbnail(source: ThumbnailSource | undefined) {
   const [file, setFile] = useState<{ id: string; file: string | null }>();
   const id = source ? identity(source) : "";
   useEffect(() => {
     if (!source) return;
     let cancelled = false;
-    thumbnailFile(source, DETAIL_PX, true).then((result) => {
+    let timer: NodeJS.Timeout | undefined;
+    const show = (result: string | null) => {
       if (!cancelled) setFile({ id, file: result });
+    };
+    thumbnailFile(source, DETAIL_PX, false).then((result) => {
+      if (cancelled) return;
+      if (result) show(result);
+      else timer = setTimeout(() => thumbnailFile(source, DETAIL_PX, true).then(show), SETTLE_MS);
     });
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [id]);
   return file?.id === id ? file.file : undefined;
