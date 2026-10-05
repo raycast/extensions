@@ -43,22 +43,26 @@ After Save, you land on the app's **Basic Information** screen:
 
 **Private playlists and your saved library** need one more step — see below.
 
+## Where your credentials go
+
+The auto-downloaded spotDL and Homebrew's run with their own folder inside the extension's support folder (`spotdl-home`). The Client ID and Secret are written to spotDL's config file there, readable only by you, and spotDL loads it with `--config`, so the secret never shows up in the list of running processes. spotDL's saved Spotify login lives there too, and your own `~/.spotdl` is never read or changed. A spotDL installed another way (for example `pip install --user`) uses your normal home folder and gets the credentials on its command line.
+
 ## Private playlists & your library (optional)
 
-The Client ID/Secret above use Spotify's *client-credentials* flow, which can only see **public** content. Trying to download a private playlist returns "0 tracks" or an `HTTP Error … /playlists/…/items` toast.
+The Client ID/Secret above use Spotify's _client-credentials_ flow, which can only see **public** content. Trying to download a private playlist returns "0 tracks" or an `HTTP Error … /playlists/…/items` toast.
 
 To unlock private content, enable **Spotify: User Authentication** in extension preferences (the checkbox right under Client Secret).
 
 What happens on the next Spotify download:
 
 1. spotDL spawns, sees the OAuth flag, and starts a local HTTP server on `http://127.0.0.1:9900/`.
-2. Your default browser opens to a Spotify authorization page for *your* Dev app. You'll see:
+2. Your default browser opens to a Spotify authorization page for _your_ Dev app. You'll see:
    - **Title:** _Allow Spotify to connect to: \<your app name\>_ (e.g. "raycast")
    - **Your Spotify account name** (with profile picture) and a small "Not you?" link
    - A list of permissions the app is requesting — view your account, your activity (saved songs, who you follow, your playlists and followed playlists)
    - A green **Agree** button and a smaller **Cancel** link
-3. Click **Agree**. The browser navigates to `http://127.0.0.1:9900/?code=…` — you'll likely see a blank page or "This site can't be reached / connection refused" *after a second or two*. That's expected and harmless: spotDL's local server captured the code in the millisecond before closing.
-4. Back in Raycast, the download proceeds. The access token is cached to disk so every subsequent download skips the browser dance.
+3. Click **Agree**. The browser navigates to `http://127.0.0.1:9900/?code=…` — you'll likely see a blank page or "This site can't be reached / connection refused" _after a second or two_. That's expected and harmless: spotDL's local server captured the code in the millisecond before closing.
+4. Back in Raycast, the download proceeds. The access token is cached to disk (in spotDL's own folder, see above) so every subsequent download skips the browser dance.
 
 Four gotchas:
 
@@ -79,13 +83,13 @@ Track and album downloads land directly in your configured download folder, name
 
 **"AudioProviderError" or YouTube-side errors** — the track isn't available on YouTube Music (region-locked, removed, etc.). spotDL can't work around this.
 
-**`spotDL upstream bug` toast (KeyError / AttributeError / TypeError in the traceback)** — Spotify changed its API response shape and the installed spotDL build hasn't caught up. Common signature: `KeyError: 'label'` on album downloads. Workarounds: try a different track/album, or check https://github.com/spotDL/spotify-downloader/issues for a fix in a newer release. To pick up a fix, delete `<Raycast extension data>/spotdl.exe` and re-run a Spotify download — the install screen reappears and grabs the latest from GitHub.
+**`spotDL upstream bug` toast (KeyError / AttributeError / TypeError in the traceback)** — Spotify changed its API response shape and the installed spotDL build hasn't caught up. Common signature: `KeyError: 'label'` on album downloads. Workarounds: try a different track/album, or check https://github.com/spotDL/spotify-downloader/issues for a fix in a newer release. To pick up a fix, delete `<Raycast extension data>/spotdl` (`spotdl.exe` on Windows) and re-run a Spotify download — the install screen reappears and grabs the latest from GitHub.
 
 **`HTTP Error for GET /v1/playlists/<id>/items returned 404`** (without user-auth): client-credentials auth can't see the playlist at all. Usually means the playlist isn't public. Enable **Spotify: User Authentication** in preferences and retry.
 
-**`HTTP Error for GET /v1/playlists/<id>/items returned 403`** (with user-auth): you authenticated successfully but Spotify refuses to expose *this specific playlist's* contents to *your* account. Three causes, in order of likelihood:
+**`HTTP Error for GET /v1/playlists/<id>/items returned 403`** (with user-auth): you authenticated successfully but Spotify refuses to expose _this specific playlist's_ contents to _your_ account. Three causes, in order of likelihood:
 
-1. The playlist is private and owned by someone else — ask the owner to flip it to **Public** (Spotify app → playlist → ⋯ → Make Public). User-auth's `playlist-read-private` scope only covers playlists *you* own.
+1. The playlist is private and owned by someone else — ask the owner to flip it to **Public** (Spotify app → playlist → ⋯ → Make Public). User-auth's `playlist-read-private` scope only covers playlists _you_ own.
 2. It's a collaborative playlist where you aren't a contributor — spotDL doesn't request `playlist-read-collaborative`, so even adding you as collaborator wouldn't help today.
 3. It's a Spotify-curated mix or radio-style playlist (Daily Mix, Discover Weekly, Release Radar) — those have special access rules that aren't exposed via the public Web API.
 
@@ -99,6 +103,6 @@ Note: spotDL often downloads a handful of tracks before the 403 surfaces — the
 
 **Credentials look right but downloads still fail "credentials missing"** — the Download form was open before you saved the preferences. Close it (`Esc` or back arrow) and re-open the Download command so it picks up the fresh values.
 
-**Changed Client ID/Secret and Spotify still rejects auth** — the extension automatically deletes spotDL's cached OAuth token (at `~/.spotdl/.spotipy`) whenever the credential set changes, so the new credentials are used on the next run. If you have a download in flight when you change credentials, finish or cancel it first and then retry — the invalidation happens at download start.
+**Changed Client ID/Secret and Spotify still rejects auth** — the extension automatically deletes spotDL's cached OAuth token (in `spotdl-home/.spotdl/` inside the extension's support folder, or `~/.spotdl/.spotipy` for a spotDL installed another way) whenever the credential set changes, so the new credentials are used on the next run. If you have a download in flight when you change credentials, finish or cancel it first and then retry — the invalidation happens at download start.
 
 **macOS only — `spotDL needs Rosetta 2` toast or `bad CPU type in executable`** — the spotDL prebuilt binary is Intel-only (no native arm64 build upstream as of v4.5.0), and Apple Silicon Macs need Rosetta 2 to run it. Open Terminal and run `softwareupdate --install-rosetta --agree-to-license`, then retry. As an alternative, use the **Install via Homebrew** action on the spotDL install screen — `brew install spotdl` uses Python and runs natively on Apple Silicon without Rosetta.
