@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { LocalStorage } from "@raycast/api";
 
-import { mirror } from "@/utils/api/mirrors";
+import { getValidatedMirror } from "@/utils/api/mirrors";
 
 type FastestMirrorState = {
   fastestMirror: string;
@@ -29,21 +29,22 @@ const useFastestMirror = () => {
       if (abortController.signal.aborted) return;
       const now = Date.now();
 
-      if (!fastestMirror || !lastUpdate || now - lastUpdate > 3600000) {
-        const fastest = await mirror(abortController.signal);
-        if (fastest && !abortController.signal.aborted) {
-          setFastestMirrorState({
-            fastestMirror: fastest,
-            lastUpdate: Date.now(),
-          });
-          await LocalStorage.setItem("fastest-mirror", fastest);
-          await LocalStorage.setItem("last-update", Date.now());
-        }
-      } else {
+      const cachedMirror = fastestMirror && lastUpdate && now - lastUpdate <= 3600000 ? fastestMirror : undefined;
+      const fastest = await getValidatedMirror(cachedMirror, abortController.signal);
+      if (abortController.signal.aborted) return;
+
+      if (fastest) {
+        const updatedAt = fastest === cachedMirror ? lastUpdate! : Date.now();
         setFastestMirrorState({
-          fastestMirror,
-          lastUpdate,
+          fastestMirror: fastest,
+          lastUpdate: updatedAt,
         });
+        await LocalStorage.setItem("fastest-mirror", fastest);
+        await LocalStorage.setItem("last-update", updatedAt);
+      } else {
+        setFastestMirrorState(undefined);
+        await LocalStorage.removeItem("fastest-mirror");
+        await LocalStorage.removeItem("last-update");
       }
     })();
 

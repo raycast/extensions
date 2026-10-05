@@ -1,7 +1,6 @@
 import { load } from "cheerio";
-import fetch from "node-fetch";
 
-const USER_AGENT = "Raycast-Library-Genesis";
+export const LIBGEN_USER_AGENT = "Raycast-Library-Genesis";
 
 export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeoutMs = 15000): Promise<string> => {
   const controller = new AbortController();
@@ -16,7 +15,7 @@ export const fetchLibgenPage = async (url: string, signal?: AbortSignal, timeout
 
   try {
     const response = await fetch(url, {
-      headers: { "User-Agent": USER_AGENT },
+      headers: { "User-Agent": LIBGEN_USER_AGENT },
       signal: controller.signal,
     });
     if (!response.ok) {

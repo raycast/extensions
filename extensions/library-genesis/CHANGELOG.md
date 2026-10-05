@@ -6,7 +6,10 @@
 - Validate actual search responses when testing and choosing mirrors.
 - Include current and historical mirror aliases, validating availability on the user's network.
 - Select the first validated mirror without waiting for unreachable candidates.
+- Recheck saved mirrors before reuse and replace unavailable mirrors with a working alternative.
 - Show search errors for unavailable mirrors and ignore cancelled searches.
+- Fetch and cache book covers with the required referrer so they display in Raycast.
+- Display full-resolution covers at a proportional preview size, falling back to thumbnails when needed.
 
 ## [Fix Download] - 2025-11-13
 

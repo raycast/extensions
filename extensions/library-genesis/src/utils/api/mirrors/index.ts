@@ -49,7 +49,7 @@ export const testMirror = async (baseUrl: string, abortSignal?: AbortSignal) => 
   return { startTime, endTime: Date.now() };
 };
 
-export async function mirror(abortSignal?: AbortSignal): Promise<string | null> {
+export async function mirror(abortSignal?: AbortSignal, excludedMirrors: string[] = []): Promise<string | null> {
   if (abortSignal?.aborted) return null;
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -57,10 +57,12 @@ export async function mirror(abortSignal?: AbortSignal): Promise<string | null> 
 
   try {
     return await Promise.any(
-      mirrors.map(async ({ baseUrl }) => {
-        await testMirror(baseUrl, controller.signal);
-        return baseUrl;
-      }),
+      mirrors
+        .filter(({ baseUrl }) => !excludedMirrors.includes(baseUrl))
+        .map(async ({ baseUrl }) => {
+          await testMirror(baseUrl, controller.signal);
+          return baseUrl;
+        }),
     );
   } catch (error) {
     if (!abortSignal?.aborted) console.error(error);
@@ -69,4 +71,17 @@ export async function mirror(abortSignal?: AbortSignal): Promise<string | null> 
     controller.abort();
     abortSignal?.removeEventListener("abort", abort);
   }
+}
+
+export async function getValidatedMirror(cachedMirror?: string, abortSignal?: AbortSignal): Promise<string | null> {
+  if (abortSignal?.aborted) return null;
+  if (cachedMirror) {
+    try {
+      await testMirror(cachedMirror, abortSignal);
+      return abortSignal?.aborted ? null : cachedMirror;
+    } catch {
+      if (abortSignal?.aborted) return null;
+    }
+  }
+  return mirror(abortSignal, cachedMirror ? [cachedMirror] : []);
 }
