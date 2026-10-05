@@ -10,6 +10,7 @@ import { runCommand, checkVpnStatus } from '../utils/vpnService';
 import { fetchCurrentIP } from '../utils/fetchCurrentIP';
 import { open } from '@raycast/api';
 import { notifyVpnStatusChange } from '../utils/vpnCache';
+import type { Tool } from '@raycast/api';
 
 // Timing constants for VPN operations
 const DISCONNECT_DELAY_MS = 4000;
@@ -338,6 +339,13 @@ async function handleCountryCityOperation(
   }
 }
 
+export const confirmation: Tool.Confirmation<VpnControlInput> = async (
+  input
+) =>
+  detectActionFromInput(input) === 'disconnect'
+    ? { message: 'Disconnect Mozilla VPN?' }
+    : undefined;
+
 /**
  * Control Mozilla VPN: connect, disconnect, check connection status, and list or select server locations.
  */
@@ -347,17 +355,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
   switch (action) {
     case 'open_account': {
       try {
-        let userEmail: string | undefined;
-        try {
-          const status = await checkVpnStatus();
-          userEmail = status.userEmail;
-        } catch {
-          // If status lookup fails, still proceed to open base portal
-        }
-
-        const accountUrl = userEmail
-          ? `https://accounts.firefox.com/?email=${encodeURIComponent(userEmail)}`
-          : 'https://accounts.firefox.com/';
+        const accountUrl = 'https://accounts.firefox.com/';
 
         try {
           await open(accountUrl);
@@ -366,9 +364,7 @@ export default async function tool(input: VpnControlInput): Promise<string> {
           execFile('open', [accountUrl]);
         }
 
-        return userEmail
-          ? `Opened Mozilla account portal in browser for ${userEmail}: ${accountUrl}`
-          : `Opened Mozilla account portal in browser: ${accountUrl}`;
+        return `Opened Mozilla account portal in browser: ${accountUrl}`;
       } catch (error) {
         return `Failed to open account portal: ${error instanceof Error ? error.message : String(error)}`;
       }

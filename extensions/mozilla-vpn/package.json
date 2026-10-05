@@ -8,6 +8,9 @@
   "categories": [
     "Security"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,31 +26,19 @@
       "subtitle": "Mozilla VPN",
       "description": "Show VPN status in menubar",
       "mode": "menu-bar",
-      "interval": "1m",
-      "preferences": [
-        {
-          "name": "showMenuBar",
-          "type": "checkbox",
-          "required": false,
-          "title": "Show Menu Bar Icon",
-          "description": "Display VPN status in the menu bar",
-          "default": true,
-          "label": "Enable menu bar icon"
-        }
-      ]
+      "interval": "1m"
     }
   ],
   "tools": [
     {
       "name": "mozilla-vpn-control",
       "title": "Mozilla VPN Control",
-      "description": "Ai Enablement of the extension Mozilla VPN Connect."
+      "description": "Connect or disconnect Mozilla VPN, check status and public IP, list countries, cities and servers, change server location, and open the Mozilla account portal."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^2.0.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

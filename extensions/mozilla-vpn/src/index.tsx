@@ -508,7 +508,7 @@ const Command: React.FC<CommandProps> = (props) => {
     case 'main':
     default:
       return (
-        <List isLoading={isLoading} navigationTitle="Mozilla VPN Connect">
+        <List isLoading={isLoading}>
           <List.Section title="VPN Controls">
             <VpnStatus
               vpnStatus={vpnStatus}

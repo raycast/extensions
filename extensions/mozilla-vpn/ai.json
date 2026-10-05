@@ -181,7 +181,7 @@
     {
       "input": "@mozilla-vpn Open my account management portal",
       "mocks": {
-        "mozilla-vpn-control": "Opened Mozilla account portal in browser for user: https://accounts.firefox.com/?email=fun.car8107%40fastmail.com"
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
       },
       "expected": [
         { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
@@ -190,7 +190,7 @@
     {
       "input": "@mozilla-vpn Open Account",
       "mocks": {
-        "mozilla-vpn-control": "Opened Mozilla account portal in browser for user: https://accounts.firefox.com/?email=fun.car8107%40fastmail.com"
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
       },
       "expected": [
         { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
@@ -199,7 +199,7 @@
     {
       "input": "@mozilla-vpn Open My Account",
       "mocks": {
-        "mozilla-vpn-control": "Opened Mozilla account portal in browser for user: https://accounts.firefox.com/?email=fun.car8107%40fastmail.com"
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
       },
       "expected": [
         { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
@@ -208,7 +208,7 @@
     {
       "input": "@mozilla-vpn Manage my subscription",
       "mocks": {
-        "mozilla-vpn-control": "Opened Mozilla account portal in browser for user: https://accounts.firefox.com/?email=fun.car8107%40fastmail.com"
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
       },
       "expected": [
         { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }

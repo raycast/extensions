@@ -6,23 +6,24 @@ import {
   Icon,
   List,
   closeMainWindow,
+  open,
   popToRoot,
 } from '@raycast/api';
-import { exec } from 'child_process';
+import { showFailureToast } from '@raycast/utils';
 
 interface CheckLoginProps {
   onBack?: () => void; // Add optional onBack prop
 }
 
-const openMozillaVPNApp = () => {
-  exec('open -a "Mozilla VPN"', (error) => {
-    if (error) {
-      console.error('Error opening Mozilla VPN:', error);
-    } else {
-      popToRoot();
-      closeMainWindow();
-    }
-  });
+const openMozillaVPNApp = async () => {
+  try {
+    await open('/Applications/Mozilla VPN.app');
+    await popToRoot();
+    await closeMainWindow();
+  } catch (error) {
+    console.error('Error opening Mozilla VPN:', error);
+    await showFailureToast(error, { title: 'Failed to open Mozilla VPN' });
+  }
 };
 
 const CheckLogin: React.FC<CheckLoginProps> = ({ onBack }) => {

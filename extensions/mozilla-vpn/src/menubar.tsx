@@ -4,25 +4,29 @@ import {
   Color,
   showToast,
   Toast,
-  getPreferenceValues,
   launchCommand,
   LaunchType,
+  open,
 } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { exec } from 'child_process';
 import { checkVpnStatus, runCommand } from './utils/vpnService';
-import { fetchCurrentIP } from './utils/fetchCurrentIP';
+import {
+  fetchCurrentIPInfo,
+  formatIPInfo,
+  IPInfo,
+} from './utils/fetchCurrentIP';
 import {
   notifyVpnStatusChange,
   subscribeToVpnStatusChange,
 } from './utils/vpnCache';
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences.Menubar>();
   const [vpnStatus, setVpnStatus] = useState<boolean | null>(null);
   const [serverCity, setServerCity] = useState<string>('Unknown');
   const [serverCountry, setServerCountry] = useState<string>('Unknown');
-  const [currentIP, setCurrentIP] = useState<string>('Loading...');
+  const [currentIPInfo, setCurrentIPInfo] = useState<IPInfo | null>(null);
+  const [ipLoading, setIpLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const lastFetchedServerRef = useRef<string>('');
 
@@ -41,10 +45,7 @@ export default function Command() {
         // Fetch IP if connected and (force requested, server changed, or prior attempt failed/missing)
         if (status.isActive) {
           const serverKey = `${status.serverCity}|${status.serverCountry}`;
-          const isMissingOrFailedIP =
-            currentIP === 'Loading...' ||
-            currentIP === 'Not connected' ||
-            currentIP.includes('unavailable');
+          const isMissingOrFailedIP = !currentIPInfo;
 
           if (
             shouldFetchIP &&
@@ -53,23 +54,25 @@ export default function Command() {
               isMissingOrFailedIP)
           ) {
             try {
-              const ip = await fetchCurrentIP();
-              setCurrentIP(ip);
-              // Only record cache key if IP lookup succeeded
-              if (!ip.includes('unavailable')) {
+              setIpLoading(true);
+              const ipInfo = await fetchCurrentIPInfo();
+              setCurrentIPInfo(ipInfo);
+              if (ipInfo) {
                 lastFetchedServerRef.current = serverKey;
               } else {
                 lastFetchedServerRef.current = '';
               }
             } catch (error) {
               console.error('Error fetching IP:', error);
-              setCurrentIP('IP unavailable');
+              setCurrentIPInfo(null);
               lastFetchedServerRef.current = '';
+            } finally {
+              setIpLoading(false);
             }
           }
         } else {
           lastFetchedServerRef.current = '';
-          setCurrentIP('Not connected');
+          setCurrentIPInfo(null);
         }
 
         return status;
@@ -80,7 +83,7 @@ export default function Command() {
         setIsLoading(false);
       }
     },
-    [currentIP]
+    [currentIPInfo]
   );
 
   // Toggle VPN connection
@@ -154,16 +157,13 @@ export default function Command() {
   };
 
   // Open Mozilla VPN app
-  const openMozillaVPN = useCallback(() => {
-    exec('open -a "Mozilla VPN"', (error) => {
-      if (error) {
-        console.error('Error opening Mozilla VPN:', error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Failed to open Mozilla VPN',
-        });
-      }
-    });
+  const openMozillaVPN = useCallback(async () => {
+    try {
+      await open('/Applications/Mozilla VPN.app');
+    } catch (error) {
+      console.error('Error opening Mozilla VPN:', error);
+      await showFailureToast(error, { title: 'Failed to open Mozilla VPN' });
+    }
   }, []);
 
   // Initial load and cache subscription
@@ -188,11 +188,13 @@ export default function Command() {
     ? `${serverCity}, ${serverCountry}`
     : 'Disconnected';
 
-  // If menubar is disabled, return null (hide it)
-  // Evaluated after all hooks to comply with React's Rules of Hooks
-  if (!preferences.showMenuBar) {
-    return null;
-  }
+  const ipSubtitle = !vpnStatus
+    ? 'Not connected'
+    : ipLoading
+      ? 'Loading...'
+      : currentIPInfo
+        ? formatIPInfo(currentIPInfo)
+        : 'IP unavailable';
 
   return (
     <MenuBarExtra
@@ -213,7 +215,7 @@ export default function Command() {
           />
           <MenuBarExtra.Item
             title="IP Address"
-            subtitle={currentIP}
+            subtitle={ipSubtitle}
             icon={Icon.Network}
           />
           <MenuBarExtra.Separator />
@@ -239,6 +241,7 @@ export default function Command() {
             });
           } catch (error) {
             console.error('Failed to launch server selector:', error);
+            await showFailureToast(error, { title: 'Failed to open command' });
           }
         }}
       />
@@ -264,6 +267,7 @@ export default function Command() {
             });
           } catch (error) {
             console.error('Failed to launch main extension:', error);
+            await showFailureToast(error, { title: 'Failed to open command' });
           }
         }}
       />
