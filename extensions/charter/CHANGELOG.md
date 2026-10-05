@@ -1,6 +1,6 @@
 # Charter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-05
 
 - Browse Charts: a catalog of chart and diagram types grouped by family, as a grid of thumbnails or a list with a detail panel
 - A lens in the search bar: All, Mermaid, shadcn or ECharts, driving the picture, example, docs link and copy actions for every type
