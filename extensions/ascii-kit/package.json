@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ascii-kit",
+  "title": "ASCII Kit",
+  "description": "Box-drawing glyphs, diagram templates and a live-preview composer for text diagrams in PRs, Slack and docs.",
+  "icon": "icon.png",
+  "author": "villem",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "compose",
+      "title": "Compose Diagram",
+      "subtitle": "ASCII Kit",
+      "description": "Turn selected or copied text into trees, tables, flows, sequence diagrams, charts and more, with a live preview.",
+      "mode": "view"
+    },
+    {
+      "name": "glyphs",
+      "title": "Search Glyphs",
+      "subtitle": "ASCII Kit",
+      "description": "Browse box-drawing, arrow, marker and block characters and paste one.",
+      "mode": "view"
+    },
+    {
+      "name": "templates",
+      "title": "Diagram Templates",
+      "subtitle": "ASCII Kit",
+      "description": "Paste a ready-made diagram skeleton: boxes, columns, wireframe, sequence, option list.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "snippets": "tsx scripts/gen-snippets.ts",
+    "examples": "tsx scripts/examples.ts",
+    "render-fonts": "swift scripts/render-fonts.swift",
+    "readme": "tsx scripts/gen-readme.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  }
+}
