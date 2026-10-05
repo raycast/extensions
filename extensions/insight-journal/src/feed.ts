@@ -222,6 +222,10 @@ async function fetchReadingTime(url: string): Promise<ReadingTimeResult> {
   }
 }
 
+function isReadingTime(cached?: string): cached is string {
+  return cached !== undefined && /^\d+$/.test(cached);
+}
+
 /** True when a cached miss or failure is recent enough that the page should not be checked yet. */
 function isWaitingToRetry(cached: string): boolean {
   for (const [prefix, retryMs] of [
@@ -246,7 +250,7 @@ export async function getReadingTimes(entries: Entry[], retryNow = false): Promi
   const pending: Entry[] = [];
   for (const entry of entries) {
     const cached = readingTimeCache.get(entry.id);
-    if (cached && /^\d+$/.test(cached)) {
+    if (cached && isReadingTime(cached)) {
       times[entry.id] = Number(cached);
     } else if (!cached || retryNow || !isWaitingToRetry(cached)) {
       pending.push(entry);
@@ -261,7 +265,8 @@ export async function getReadingTimes(entries: Entry[], retryNow = false): Promi
       if (typeof result === "number") {
         times[id] = result;
         readingTimeCache.set(id, String(result));
-      } else {
+      } else if (!isReadingTime(readingTimeCache.get(id))) {
+        // A slower, overlapping check must not replace a reading time that another check found.
         readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${Date.now()}`);
       }
     });

@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef } from "react";
 import { EntryBrowser } from "./entry-browser";
 import {
   Entry,
@@ -32,17 +32,21 @@ export default function Command() {
     execute: posts.length > 0,
   });
 
-  // Reading times fill in once loaded; they do not hold up the list. After Refresh,
-  // pages that had no reading time are checked again right away.
-  const [hasRefreshed, setHasRefreshed] = useState(false);
+  // Reading times fill in once loaded; they do not hold up the list. Refresh asks the next
+  // load (and only that one) to re-check pages that had no reading time.
+  const retryReadingTimes = useRef(false);
   const { data: readingTimes } = usePromise(
-    (items: Entry[], retryNow: boolean) => getReadingTimes(items, retryNow),
-    [posts, hasRefreshed],
+    (items: Entry[]) => {
+      const retryNow = retryReadingTimes.current;
+      retryReadingTimes.current = false;
+      return getReadingTimes(items, retryNow);
+    },
+    [posts],
     { execute: posts.length > 0 },
   );
 
   function refresh() {
-    setHasRefreshed(true);
+    retryReadingTimes.current = true;
     revalidate();
   }
 
