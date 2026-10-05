@@ -131,6 +131,8 @@ function SearchView({ apiKey, onApiKeyChange }: { apiKey: string; onApiKeyChange
 
     const controller = new AbortController();
     setIsSearching(true);
+    // A re-run of the same query (retyped, or after a new key) must not show the old outcome.
+    setResultsKey(undefined);
 
     searchTokens(apiKey, phrase, {
       networkId: networkId === "all" ? undefined : Number(networkId),
