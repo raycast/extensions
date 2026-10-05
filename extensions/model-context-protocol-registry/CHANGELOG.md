@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add VoiceMoat MCP Server] - 2026-10-05
+
+- Add VoiceMoat to the official registry: the personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics, and publish or schedule posts after a preview. Hosted remote Streamable HTTP server at https://app.voicemoat.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Requires a paid VoiceMoat Pro or Enterprise plan.
+
 ## [Add Clipwright MCP Server] - 2026-10-04
 
 - Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
