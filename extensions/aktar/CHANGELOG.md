@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Thumbnails] - {PR_MERGE_DATE}
+## [Thumbnails] - 2026-10-05
 
 - Search Uploads and Browse Buckets show thumbnails made by Aktar: photos, but also videos, PDFs and documents, and files in private buckets. The preview shows the thumbnail of a file that isn't an image
 - Icons no longer download each full-size image: a thumbnail is a few kilobytes. List icons only use thumbnails Aktar already has; the selected file gets one made if needed
