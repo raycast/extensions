@@ -177,7 +177,10 @@ async function saveFile(name: string, content: string, ext: string) {
       title: "Saved",
       message: path.basename(target),
       primaryAction: { title: "Open", onAction: () => open(target) },
-      secondaryAction: { title: "Show in Finder", onAction: () => showInFinder(target) },
+      secondaryAction: {
+        title: process.platform === "win32" ? "Show in Explorer" : "Show in Finder",
+        onAction: () => showInFinder(target),
+      },
     });
   } catch (error) {
     await showToast({
