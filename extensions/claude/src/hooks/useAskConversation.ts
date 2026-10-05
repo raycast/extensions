@@ -56,9 +56,8 @@ import type { Conversation } from "../type";
  * storage to ask "does this conversation still exist?" and then called `recentsStore.update`
  * if it did. That is check-then-write: the two are separate awaits, and a delete landing
  * between them made `update` (an upsert) recreate the row — the exact resurrection this
- * hook exists to prevent, merely made less likely. Pin was worse: it consulted only
- * `wasDeletedRef`, a local ref, and never storage at all, so it unconditionally upserted a
- * stale row.
+ * hook exists to prevent, merely made less likely. Pin was worse: it consulted only a local
+ * "was deleted" flag and never storage at all, so it unconditionally upserted a stale row.
  *
  * Both now write through `recentsStore.updateIfPresent`, which makes the existence test
  * and the write consume a SINGLE read inside one read-modify-write (`collection.ts`).
@@ -69,7 +68,7 @@ import type { Conversation } from "../type";
  * refused write reports itself (`written: false`) and a brand-new conversation goes through
  * `add`, which is allowed to insert.
  *
- * Once a refusal is observed, the guard LATCHES (`wasDeletedRef`): a conversation observed
+ * Once a refusal is observed, the guard LATCHES (`guard.deleted`): a conversation observed
  * as deleted stays un-persisted for the rest of this Ask session, so a later state tick
  * cannot re-open the window. The latch is now an optimization and a UX guarantee rather
  * than the safety mechanism — `updateIfPresent` is safe on its own.
@@ -86,52 +85,39 @@ export function useAskConversation(existingConversation?: Conversation): {
   persist: (conversation: Conversation) => Promise<void>;
   /** Resolves true when the pin was written; false when the row was absent (deleted). */
   setPinned: (conversation: Conversation, pinned: boolean) => Promise<boolean>;
-  wasDeleted: () => boolean;
 } {
-  /** Latches once a write is refused because the row is gone from storage. */
-  const wasDeletedRef = useRef(false);
   /**
-   * Whether this conversation HAS EVER BEEN FILED IN STORAGE — not merely whether this
-   * hook instance has written it.
+   * Per-conversation write guards, keyed by conversation id. Each one answers two questions
+   * about ITS conversation:
    *
-   * THE DISTINCTION, AND WHY IT IS THE WHOLE FIX . This used to be
-   * `useRef(false)` on a hook that took no arguments, which made it mean "has this hook
-   * instance written yet." Those two readings agree only when Ask CREATED the
-   * conversation. They diverge in the most common way a user reaches an existing
-   * conversation: opening it from Recents. That is a fresh mount, so the ref started
-   * `false` even though the row had been in `recents_v1` for days — and if the user then
-   * deleted it in Recents, the next persist walked straight past the "it was deleted,
-   * don't re-add it" guard below and called `add`, putting the conversation and every
-   * answer the user had just deleted back on disk.
+   * - `written` — has this conversation ever been filed in storage? Not "has this hook
+   *   instance written it": a conversation opened from Recents is seeded `true` (from
+   *   `existingConversation`, ground truth available synchronously), so a write that later
+   *   finds its row gone reads as "deleted in Recents" rather than "brand new" — the
+   *   difference between respecting a deletion and resurrecting the conversation.
+   * - `deleted` — latched once a write found the row gone, so nothing re-adds it.
    *
-   * The seed closes that. `existingConversation` is `ask.tsx`'s `props.conversation`,
-   * which is set if and only if Ask was HANDED a conversation that predates the view —
-   * ground truth about prior existence, available synchronously at construction time, with
-   * no extra storage read. Seeding the latch `true` for that case makes a refused write on
-   * a pre-existing conversation read as "deleted" (correct: it was in storage, now it is
-   * not) instead of "brand new" (wrong, and the resurrection).
-   *
-   * THE GENUINELY-NEW CASE STILL WORKS, and that is the constraint this seed had to
-   * respect. Ask creating its own conversation passes nothing here, so the ref starts
-   * `false` exactly as before: the first persist finds no row, falls through to `add`, and
-   * the conversation is filed. Nothing else could file it, so getting this wrong would
-   * mean Ask never saves anything — which is why the seed is keyed on the caller's own
-   * prop rather than on a storage probe that a race could answer "absent" for.
+   * WHY A MAP AND NOT TWO REFS. The guards used to be two hook-wide refs, reset whenever
+   * "Start New Conversation" swapped in a new id. But writes queue (`writeQueueRef`), and a
+   * task for the OLD conversation could run after the reset: reading the new conversation's
+   * `written: false`, it re-added a conversation the user had deleted; or setting
+   * `deleted: true`, it blocked every write for the new one. Keying the guard by the id each
+   * task captured means no task can ever read or write another conversation's state, so
+   * there is nothing to reset.
    */
-  const hasEverBeenWrittenRef = useRef(existingConversation !== undefined);
-  /**
-   * WHICH conversation the latch above describes.
-   *
-   * The latch answers "has this conversation ever been in storage?", but it lives on the
-   * hook, and "Start New Conversation" (`src/views/chat.tsx`) swaps in a fresh `uuidv4()`
-   * WITHOUT remounting — same hook, different conversation. Left alone, the latch stayed
-   * `true` from the previous conversation, so the new one's first write found no row,
-   * concluded it had been deleted, and refused to add it: the answer rendered and was
-   * never saved. Silent loss, on the ordinary path from Recents.
-   *
-   * Tracking the id makes the latch follow the conversation it actually describes.
-   */
-  const latchedConversationIdRef = useRef(existingConversation?.id);
+  const guardsRef = useRef(
+    new Map<string, { written: boolean; deleted: boolean }>(
+      existingConversation ? [[existingConversation.id, { written: true, deleted: false }]] : [],
+    ),
+  );
+  const guardFor = useCallback((conversationId: string) => {
+    let guard = guardsRef.current.get(conversationId);
+    if (!guard) {
+      guard = { written: false, deleted: false };
+      guardsRef.current.set(conversationId, guard);
+    }
+    return guard;
+  }, []);
   /**
    * Tail of this session's write chain. Every write appends to it, so exactly one is in
    * flight at a time and each one's read observes the previous one's write. Rejections are
@@ -148,18 +134,9 @@ export function useAskConversation(existingConversation?: Conversation): {
 
   const persist = useCallback(
     async (conversation: Conversation) => {
-      // FIRST, before any guard reads those flags. "Start New Conversation"
-      // (`src/views/chat.tsx`) swaps in a fresh `uuidv4()` without remounting this hook, so
-      // both flags still describe the PREVIOUS conversation. Checking `wasDeletedRef` ahead
-      // of this would make a new conversation started after deleting one permanently
-      // unsaveable — the same silent-loss bug this reset exists to fix, one step over.
-      if (latchedConversationIdRef.current !== conversation.id) {
-        latchedConversationIdRef.current = conversation.id;
-        hasEverBeenWrittenRef.current = false;
-        wasDeletedRef.current = false;
-      }
+      const guard = guardFor(conversation.id);
 
-      if (wasDeletedRef.current) return;
+      if (guard.deleted) return;
 
       // Nothing to file yet. A zero-chat conversation is also blocked from storage by
       // `recentsStore`'s `persistFilter`, so this is an early exit, not the only guard.
@@ -168,20 +145,20 @@ export function useAskConversation(existingConversation?: Conversation): {
       await enqueue(async () => {
         // Re-checked inside the queue: an earlier queued write may have latched the guard
         // while this one was waiting its turn.
-        if (wasDeletedRef.current) return;
+        if (guard.deleted) return;
 
         // ONE read-modify-write decides existence AND writes. A row absent from storage is
         // not recreated; a row present is updated with the field-ownership and
         // transcript-growth rules the store applies (`useRecents`'s `mergeOnUpdate`).
         const { written } = await recentsStore.updateIfPresent(conversation);
         if (written) {
-          hasEverBeenWrittenRef.current = true;
+          guard.written = true;
           return;
         }
 
         // Not written. Either this conversation is brand new and has never been filed, or
         // it HAS existed in storage and is gone now — deleted, either in this session or
-        // before this view ever mounted. `hasEverBeenWrittenRef` is what separates those,
+        // before this view ever mounted. `guard.written` is what separates those,
         // and it is seeded from `existingConversation` precisely so that a conversation
         // opened from Recents counts as "has existed" on a FRESH mount, where a
         // write-tracking-only flag would have said "brand new" and re-added it.
@@ -190,19 +167,19 @@ export function useAskConversation(existingConversation?: Conversation): {
           return;
         }
 
-        if (hasEverBeenWrittenRef.current) {
+        if (guard.written) {
           // This row has been in storage and is not there now: it was deleted. Do NOT
           // re-add it. "Delete deletes. Everywhere." — restoring the pre-delete transcript
           // from a stale React snapshot is the resurrection this hook exists to prevent.
-          wasDeletedRef.current = true;
+          guard.deleted = true;
           return;
         }
 
         await recentsStore.add(conversation);
-        hasEverBeenWrittenRef.current = true;
+        guard.written = true;
       });
     },
-    [enqueue],
+    [enqueue, guardFor],
   );
 
   /**
@@ -225,14 +202,15 @@ export function useAskConversation(existingConversation?: Conversation): {
    */
   const setPinned = useCallback(
     async (conversation: Conversation, pinned: boolean): Promise<boolean> => {
-      if (wasDeletedRef.current) return false;
+      const guard = guardFor(conversation.id);
+      if (guard.deleted) return false;
 
       return enqueue(async () => {
-        if (wasDeletedRef.current) return false;
+        if (guard.deleted) return false;
 
         const now = new Date().toISOString();
         // SAME GUARANTEE AS `persist`, and it did not have one before: `pin` used to
-        // consult `wasDeletedRef` alone — a local ref that knows nothing about storage —
+        // consult `guard.deleted` alone — a local ref that knows nothing about storage —
         // and then call `update`, an upsert. Pinning a conversation the user had deleted in
         // Recents therefore recreated it wholesale, transcript included, without ever
         // reading storage. `updateIfPresent` makes the row's presence the write's own
@@ -258,26 +236,24 @@ export function useAskConversation(existingConversation?: Conversation): {
           //
           // SAME FRESH-MOUNT HOLE AS `persist`, fixed by the same seed. Pin never had an
           // `add` fallback, so this path could not itself resurrect a row — but before the
-          // seed, `hasEverBeenWrittenRef` was `false` on a fresh view of a pre-existing
+          // seed, `guard.written` was `false` on a fresh view of a pre-existing
           // conversation, so a refused pin failed to LATCH. The pin correctly reported
           // false while leaving the guard open, and the very next `persist` tick — which
           // does have an `add` fallback — resurrected the conversation the user had just
           // deleted. The latch now fires on the first refusal in that case, which is what
           // makes the two paths consistent rather than merely both "safe-looking".
-          if (hasEverBeenWrittenRef.current) wasDeletedRef.current = true;
+          if (guard.written) guard.deleted = true;
           return false;
         }
 
-        hasEverBeenWrittenRef.current = true;
+        guard.written = true;
         return true;
       });
     },
-    [enqueue],
+    [enqueue, guardFor],
   );
 
-  const wasDeleted = useCallback(() => wasDeletedRef.current, []);
-
-  return { persist, setPinned, wasDeleted };
+  return { persist, setPinned };
 }
 
 /**

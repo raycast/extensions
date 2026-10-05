@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import type { QuestionFormProps } from "../../type";
-import { RAW_MODEL_PREFIX, shortModelName } from "../../utils/models";
+import { orderForMount, RAW_MODEL_PREFIX, shortModelName } from "../../utils/models";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -35,8 +35,36 @@ export const QuestionForm = ({
    */
   const [modelId, setModelId] = useState<string>(selectedModel);
 
-  const separateDefaultModel = models.filter((x) => x.id !== "default");
-  const defaultModel = models.find((x) => x.id === "default") ?? DEFAULT_MODEL;
+  // Same mount protection as the list dropdown (`orderForMount`). The first-item-at-mount
+  // onChange was observed on `List.Dropdown`; `Form.Dropdown` is assumed to behave the same,
+  // and here that value would be both submitted and persisted through `onModelChange`. Ordered by the selection the form opened with — which
+  // `useState` above holds stable — and never re-sorted after. The built-in default is shown
+  // even when the presets list lacks it, as before.
+  const [startModelId] = useState<string>(selectedModel);
+  const { presets, rawModels, modelsFirst } = orderForMount(
+    models.some((x) => x.id === "default") ? models : [DEFAULT_MODEL, ...models],
+    availableModels,
+    startModelId,
+  );
+
+  const presetSection = (
+    <Form.Dropdown.Section key="presets" title="Presets">
+      {presets.map((model) => (
+        <Form.Dropdown.Item key={model.id} value={model.id} title={shortModelName(model.name)} />
+      ))}
+    </Form.Dropdown.Section>
+  );
+  const modelSection = rawModels.length > 0 && (
+    <Form.Dropdown.Section key="models" title="Models">
+      {rawModels.map((model) => (
+        <Form.Dropdown.Item
+          key={`${RAW_MODEL_PREFIX}${model.id}`}
+          value={`${RAW_MODEL_PREFIX}${model.id}`}
+          title={shortModelName(model.display_name)}
+        />
+      ))}
+    </Form.Dropdown.Section>
+  );
 
   return (
     <Form
@@ -85,29 +113,7 @@ export const QuestionForm = ({
           onModelChange(id);
         }}
       >
-        <Form.Dropdown.Section title="Presets">
-          {defaultModel && (
-            <Form.Dropdown.Item
-              key={defaultModel.id}
-              title={shortModelName(defaultModel.name)}
-              value={defaultModel.id}
-            />
-          )}
-          {separateDefaultModel.map((model) => (
-            <Form.Dropdown.Item value={model.id} title={shortModelName(model.name)} key={model.id} />
-          ))}
-        </Form.Dropdown.Section>
-        {availableModels.length > 0 && (
-          <Form.Dropdown.Section title="Models">
-            {availableModels.map((model) => (
-              <Form.Dropdown.Item
-                key={`${RAW_MODEL_PREFIX}${model.id}`}
-                value={`${RAW_MODEL_PREFIX}${model.id}`}
-                title={shortModelName(model.display_name)}
-              />
-            ))}
-          </Form.Dropdown.Section>
-        )}
+        {modelsFirst ? [modelSection, presetSection] : [presetSection, modelSection]}
       </Form.Dropdown>
     </Form>
   );

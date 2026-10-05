@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useRef } from "react";
 import type { ChangeModelProp } from "../../type";
-import { RAW_MODEL_PREFIX, shortModelName } from "../../utils/models";
+import { orderForMount, RAW_MODEL_PREFIX, shortModelName } from "../../utils/models";
 
 /**
  * THE DROPDOWN RULE (applies to EVERY `List.Dropdown` in this extension — put new ones
@@ -40,24 +40,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
   // Ordered by the pick the dropdown MOUNTED with, frozen — the order only has to protect the
   // mount. Re-sorting on every selection made the list jump under the user's cursor.
   const startModel = useRef(selectedModel).current;
-  // A saved bare-model pick the live list does not contain (the fetch failed, or the list
-  // is still the hardcoded fallback) keeps an entry of its own. Otherwise the first item
-  // would be selected at mount and replace a pick the request path can still resolve.
-  const startRawId = startModel.startsWith(RAW_MODEL_PREFIX) ? startModel.slice(RAW_MODEL_PREFIX.length) : undefined;
-  const availableModels =
-    startRawId && !liveModels.some((model) => model.id === startRawId)
-      ? [{ id: startRawId, display_name: startRawId, created_at: "" }, ...liveModels]
-      : liveModels;
-  const selectedFirst = <T,>(items: T[], idOf: (item: T) => string) => [
-    ...items.filter((item) => idOf(item) === startModel),
-    ...items.filter((item) => idOf(item) !== startModel),
-  ];
-  const defaultModel = models.find((x) => x.id === "default");
-  const presets = selectedFirst(
-    [...(defaultModel ? [defaultModel] : []), ...models.filter((x) => x.id !== "default")],
-    (model) => model.id,
-  );
-  const rawModels = selectedFirst(availableModels, (model) => `${RAW_MODEL_PREFIX}${model.id}`);
+  const { presets, rawModels, modelsFirst } = orderForMount(models, liveModels, startModel);
 
   const presetSection = (
     <List.Dropdown.Section key="presets" title="Presets">
@@ -66,7 +49,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
       ))}
     </List.Dropdown.Section>
   );
-  const modelSection = availableModels.length > 0 && (
+  const modelSection = rawModels.length > 0 && (
     <List.Dropdown.Section key="models" title="Models">
       {rawModels.map((model) => (
         <List.Dropdown.Item
@@ -81,7 +64,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
   return (
     // Controlled (`value`, no `storeValue`) — see THE DROPDOWN RULE above.
     <List.Dropdown tooltip="Select Model" value={selectedModel} onChange={onModelChange}>
-      {startModel.startsWith(RAW_MODEL_PREFIX) ? [modelSection, presetSection] : [presetSection, modelSection]}
+      {modelsFirst ? [modelSection, presetSection] : [presetSection, modelSection]}
     </List.Dropdown>
   );
 };

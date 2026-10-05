@@ -217,3 +217,34 @@ export function findNewestModelInTier(models: AvailableModel[], tier: ModelTier)
     return new Date(model.created_at) > new Date(newest.created_at) ? model : newest;
   });
 }
+
+/**
+ * Orders a model picker's entries so the pick it MOUNTS with comes first. Raycast's dropdowns
+ * fire `onChange` with their first item when they mount, ignoring `value` (observed in the
+ * Osaurus extension), so a saved pick that is not first gets replaced the moment the picker
+ * appears. Used by both the list dropdown and the Full Text Input form's dropdown.
+ *
+ * The selected entry leads its section, its section leads the picker (`modelsFirst`), and a
+ * bare-model pick missing from the live list — the fetch failed, or the list is the hardcoded
+ * fallback — gets an entry of its own rather than being replaced by the first live model.
+ */
+export function orderForMount(models: Model[], availableModels: AvailableModel[], startId: string) {
+  const startRawId = startId.startsWith(RAW_MODEL_PREFIX) ? startId.slice(RAW_MODEL_PREFIX.length) : undefined;
+  const rawSource =
+    startRawId && !availableModels.some((model) => model.id === startRawId)
+      ? [{ id: startRawId, display_name: startRawId, created_at: "" }, ...availableModels]
+      : availableModels;
+  const startFirst = <T>(items: T[], idOf: (item: T) => string) => [
+    ...items.filter((item) => idOf(item) === startId),
+    ...items.filter((item) => idOf(item) !== startId),
+  ];
+  const defaultModel = models.find((model) => model.id === "default");
+  return {
+    presets: startFirst(
+      [...(defaultModel ? [defaultModel] : []), ...models.filter((model) => model.id !== "default")],
+      (model) => model.id,
+    ),
+    rawModels: startFirst(rawSource, (model) => `${RAW_MODEL_PREFIX}${model.id}`),
+    modelsFirst: startRawId !== undefined,
+  };
+}
