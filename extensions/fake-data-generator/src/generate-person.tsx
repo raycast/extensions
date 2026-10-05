@@ -1,7 +1,7 @@
 import { Color, Icon } from "@raycast/api";
 import { RecordField, RecordList } from "./components/RecordList";
-import { person, Person, Profile } from "./lib/people";
-import { preferences } from "./preferences";
+import { person, Person, Profile, personToText, personToJson } from "./lib/people";
+import { preferences, useEmailDomainWarning } from "./preferences";
 
 function create(profile: Profile): Person {
   const { emailDomain, phoneMode } = preferences();
@@ -28,7 +28,14 @@ function fields(p: Person): RecordField[] {
       value: localDate(p.birthdate, iso),
       icon: Icon.Calendar,
     },
-    { id: "email", section: "Contact", title: "Email", value: p.email, icon: Icon.Envelope },
+    {
+      id: "email",
+      section: "Contact",
+      title: "Email",
+      value: p.email,
+      icon: Icon.Envelope,
+      tag: preferences().emailDomainReserved ? undefined : { value: "deliverable", color: Color.Orange },
+    },
     { id: "username", section: "Contact", title: "Username", value: p.username, icon: Icon.AtSymbol },
     {
       id: "phone",
@@ -48,38 +55,15 @@ function fields(p: Person): RecordField[] {
   ];
 }
 
-function toText(p: Person): string {
-  return [p.fullName, p.email, p.phone, p.address.multiLine, `Born ${p.birthdate}`].filter(Boolean).join("\n");
-}
-
-function toJson(p: Person) {
-  return {
-    firstName: p.firstName,
-    lastName: p.lastName,
-    fullName: p.fullName,
-    gender: p.sex,
-    birthdate: p.birthdate,
-    email: p.email,
-    username: p.username,
-    phone: p.phone,
-    address: {
-      street: p.address.street,
-      postcode: p.address.postcode,
-      city: p.address.city,
-      region: p.address.region,
-      country: p.address.country,
-    },
-  };
-}
-
 export default function Command() {
+  useEmailDomainWarning();
   return (
     <RecordList
       dropdownId="person-country"
       create={create}
       fields={fields}
-      toText={toText}
-      toJson={toJson}
+      toText={personToText}
+      toJson={personToJson}
       searchBarPlaceholder="Search fields — ⌘⇧C copies the whole person"
     />
   );

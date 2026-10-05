@@ -68,7 +68,36 @@ export function GeneratorList({
         <List.Section key={title || "default"} title={title || undefined}>
           {sectionItems.map((item) => {
             const value = values[item.id];
-            if (!value) return null;
+            if (!value) {
+              // Never drop a row silently: show it with a retry action instead.
+              return (
+                <List.Item
+                  key={item.id}
+                  id={item.id}
+                  icon={item.icon}
+                  title={item.title}
+                  subtitle="Couldn't generate a value — press ⌘R to retry"
+                  keywords={item.keywords}
+                  accessories={[{ icon: { source: Icon.Warning, tintColor: Color.Orange } }]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Regenerate"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={() => regenerate(item)}
+                      />
+                      <Action
+                        title="Regenerate All"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                        onAction={regenerateAll}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              );
+            }
             return (
               <List.Item
                 key={item.id}

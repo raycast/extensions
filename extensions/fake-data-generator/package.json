@@ -198,7 +198,7 @@
     {
       "name": "emailDomain",
       "title": "Email Domain",
-      "description": "Domain for generated person emails. Keep a reserved domain (example.com/.org/.net) unless you own the domain.",
+      "description": "Domain for generated person and email addresses. Reserved domains (example.com/.org/.net, .test) never receive mail; any other domain is real and mail to it can be delivered. Invalid values fall back to example.com.",
       "type": "textfield",
       "required": false,
       "default": "example.com"

@@ -37,11 +37,11 @@ Rows you use often float to the top (frecency).
 
 - **Copy Format** — compact (`BE71096123456769`, default) or formatted (`BE71 0961 2345 6769`).
 - **Phone Numbers** — prefer fictional ranges (default) or always pass libphonenumber validation.
-- **Email Domain** — default `example.com`.
+- **Email Domain** — default `example.com`. Must be a valid domain; anything else falls back to `example.com`.
 
 ## Safety notes
 
-- Emails use `example.com/.org/.net` and `.test` (RFC 2606 reserved) — mail to them is never delivered.
+- Emails use `example.com/.org/.net` and `.test` (RFC 2606 reserved), so mail to them is never delivered. If you set the **Email Domain** preference to a real domain, generated addresses are tagged `deliverable` and the safety text says so; an invalid value falls back to `example.com` with a warning.
 - Phone numbers come from official fictional/drama ranges where they exist: US/Canada `555-01XX` (NANPA), UK (Ofcom), Ireland (ComReg), Australia (ACMA), France (ARCEP), Germany (BNetzA), Sweden (PTS), Norway (Nkom). UK `07700 900XXX` and French `06 39 98` mobiles are reserved but **fail** libphonenumber validation; switch the preference to "always pass validation" if your form rejects them. Countries without a reserved range get a random number in a valid range, tagged `random` — it may belong to someone, so don't let a staging system call or text it.
 - IBANs, VAT numbers and tax IDs are random and pass checksum validation; they may by chance coincide with a real one. Use them for testing only.
 - Random cards are Luhn-valid but will be declined by real processors; use the Stripe test cards for Stripe test mode.

@@ -94,6 +94,41 @@ const FICTIONAL: Partial<Record<CountryCode, Partial<Record<PhoneKind, string[]>
   NO: { landline: ["6805XXXX"] },
 };
 
+/**
+ * Real geographic area codes (national significant number, without trunk 0; X = random digit) for countries
+ * without a reserved fictional landline range. Starting from a known area code makes a valid hit near-certain,
+ * instead of relying on random digit strings.
+ */
+export const LANDLINE_SEEDS: Partial<Record<CountryCode, string[]>> = {
+  BE: ["2XXXXXXX", "3XXXXXXX", "9XXXXXXX"],
+  NL: ["20XXXXXXX", "10XXXXXXX", "70XXXXXXX"],
+  LU: ["27XXXXXX", "26XXXXXX"],
+  IE: ["1XXXXXXX", "21XXXXXXX"],
+  NZ: ["9XXXXXXX", "4XXXXXXX", "3XXXXXXX"],
+  AT: ["1XXXXXXX", "316XXXXXX"],
+  CH: ["44XXXXXXX", "22XXXXXXX", "31XXXXXXX"],
+  ES: ["91XXXXXXX", "93XXXXXXX"],
+  IT: ["06XXXXXXXX", "02XXXXXXXX"],
+  PT: ["21XXXXXXX", "22XXXXXXX"],
+  DK: ["33XXXXXX", "86XXXXXX"],
+  FI: ["9XXXXXXX", "2XXXXXXX"],
+  PL: ["22XXXXXXX", "12XXXXXXX"],
+  CZ: ["2XXXXXXXX"],
+  SK: ["2XXXXXXXX"],
+  HU: ["1XXXXXXX"],
+  RO: ["21XXXXXXX"],
+  BG: ["2XXXXXXX"],
+  HR: ["1XXXXXXX"],
+  SI: ["1XXXXXXX"],
+  GR: ["21XXXXXXXX"],
+  CY: ["22XXXXXX"],
+  MT: ["21XXXXXX"],
+  EE: ["6XXXXXX"],
+  LV: ["67XXXXXX"],
+  LT: ["52XXXXXX"],
+  IS: ["5XXXXXX"],
+};
+
 function fill(pattern: string): string {
   return pattern.replace(/X/g, () => String(int(0, 9)));
 }
@@ -135,7 +170,15 @@ function randomValid(country: CountryCode, kind: PhoneKind): PhoneNumber | undef
     return example;
   }
 
-  // Landlines: brute force around the mobile length; validation is cheap. Some plans (IT) start landlines with 0.
+  const seeds = LANDLINE_SEEDS[country];
+  if (seeds) {
+    for (let i = 0; i < 200; i++) {
+      const parsed = parsePhoneNumberFromString(`+${example.countryCallingCode}${fill(pick(seeds))}`);
+      if (parsed?.isValid() && matchesKind(parsed, kind)) return parsed;
+    }
+  }
+
+  // Last resort: brute force around the mobile length; validation is cheap. Some plans (IT) start landlines with 0.
   for (let i = 0; i < 4000; i++) {
     const candidate = digits(nsn.length + int(-2, 1));
     const parsed = parsePhoneNumberFromString(`+${example.countryCallingCode}${candidate}`);

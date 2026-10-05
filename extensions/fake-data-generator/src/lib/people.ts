@@ -643,6 +643,18 @@ export function person(p: Profile, emailDomain: string, phoneMode: PhoneMode): P
   };
 }
 
+/** Hostname with at least one dot and an alphabetic TLD, e.g. "example.com" or "acme.test". */
+const DOMAIN_PATTERN = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+
+export function isValidDomain(domain: string): boolean {
+  return DOMAIN_PATTERN.test(domain);
+}
+
+/** RFC 2606 / RFC 6761 names that never receive mail: example.com/.net/.org and the .test/.example/.invalid/.localhost TLDs. */
+export function isReservedDomain(domain: string): boolean {
+  return /(^|\.)(example\.(com|net|org)|example|test|invalid|localhost)$/.test(domain.toLowerCase());
+}
+
 export function emailVariants(firstName: string, lastName: string, domain: string): Field[] {
   const first = slug(firstName);
   const last = slug(lastName);
@@ -964,4 +976,87 @@ function domesticBankAccount(iso: CountryCode): Field[] | undefined {
     default:
       return undefined;
   }
+}
+
+// --- Copy All serializers ------------------------------------------------------------
+
+export function personToText(p: Person): string {
+  return [
+    p.fullName,
+    `${p.sex === "female" ? "Female" : "Male"}, born ${p.birthdate}`,
+    p.email,
+    `Username: ${p.username}`,
+    p.phone,
+    p.address.multiLine,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+export function personToJson(p: Person) {
+  return {
+    firstName: p.firstName,
+    lastName: p.lastName,
+    fullName: p.fullName,
+    gender: p.sex,
+    birthdate: p.birthdate,
+    email: p.email,
+    username: p.username,
+    phone: p.phone,
+    address: {
+      street: p.address.street,
+      postcode: p.address.postcode,
+      city: p.address.city,
+      region: p.address.region,
+      country: p.address.country,
+    },
+  };
+}
+
+export function companyToText(c: Company): string {
+  return [
+    c.name,
+    c.address.multiLine,
+    c.vat && `VAT: ${c.vat}`,
+    c.registration && `${c.registration.label}: ${c.registration.value}`,
+    ...c.extraIds.map((f) => `${f.label}: ${f.value}`),
+    c.phone,
+    c.email,
+    c.website,
+    c.iban && `IBAN: ${c.iban}`,
+    c.bic && `BIC: ${c.bic}`,
+    c.bank && `Bank: ${c.bank}`,
+    ...(c.bankAccount ?? []).map((f) => `${f.label}: ${f.value}`),
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Primary register number plus secondary ones (SIRET, ACN, …), keyed by their label. */
+function registrationJson(c: Company): Record<string, string> | undefined {
+  const ids = [...(c.registration ? [c.registration] : []), ...c.extraIds];
+  return ids.length ? Object.fromEntries(ids.map((f) => [f.label, f.value])) : undefined;
+}
+
+export function companyToJson(c: Company) {
+  return {
+    name: c.name,
+    legalForm: c.legalForm,
+    vatNumber: c.vat,
+    registration: registrationJson(c),
+    email: c.email,
+    website: c.website,
+    phone: c.phone,
+    address: {
+      street: c.address.street,
+      postcode: c.address.postcode,
+      city: c.address.city,
+      region: c.address.region,
+      country: c.address.country,
+    },
+    iban: c.iban?.replace(/ /g, ""),
+    bic: c.bic,
+    bank: c.bank,
+    bankAccount: c.bankAccount && Object.fromEntries(c.bankAccount.map((f) => [f.label, f.value])),
+  };
 }
