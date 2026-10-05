@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keep-md",
+  "title": "Keep.md",
+  "description": "Search and manage bookmarks in Keep.md",
+  "icon": "icon.png",
+  "author": "perry",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search, open, edit, and archive saved items in Keep.md",
+      "mode": "view"
+    },
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Save a URL to Keep.md",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Keep API Key",
+      "description": "Create a personal or connected-client key in Keep Connection settings.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your Keep API key"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "ray build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
+  }
+}
