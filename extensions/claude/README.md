@@ -92,6 +92,25 @@ rather than a verified round trip against Raycast itself, so an agent file whose
 differs may import incompletely. Plain YAML is the supported path, and there is no Agent
 JSON export — only import.
 
+# Use Claude in Raycast AI
+
+The extension can also put your Claude models into Raycast AI's own model picker, so you
+can choose them in AI Chat, Quick AI, and AI Commands, billed to your own API key.
+
+- **Every model your key can reach**, listed under its own name. New models appear as soon
+  as Anthropic ships them, without waiting for an extension or Raycast update.
+- **Each of your Presets**, under the preset's name. Picking one applies its system prompt,
+  model, output limit, and (where the model accepts one) temperature, so a preset you built
+  for code review becomes a
+  model you can select in any AI Chat.
+
+Each model declares what it actually supports, read from the Anthropic API rather than
+guessed: image attachments, tool use with your AI Extensions, and the reasoning-effort
+levels Raycast shows in its picker.
+
+This requires **Raycast Pro**. Turn it on with **Allow AI Models** in this extension's
+settings, or by choosing one of its models in the picker.
+
 # How to use
 
 This extension requires a valid Anthropic API key. Create one at

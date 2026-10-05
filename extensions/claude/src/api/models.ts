@@ -17,7 +17,28 @@ export interface AvailableModel {
    * on conversation history rather than reserving output headroom out of it.
    */
   max_input_tokens?: number | null;
+  /**
+   * What the model supports, as advertised by the API — vision, thinking modes, and each
+   * effort level, every leaf a `{ supported: boolean }`. Read by the Raycast AI model
+   * provider (`src/model-provider.ts`) to declare each model's capabilities from the
+   * source rather than guessing them from the model's name. Absent on older responses and
+   * on the hardcoded fallback list, where the provider declares only what every Claude
+   * model has.
+   */
+  capabilities?: ModelCapabilities | null;
 }
+
+/** The subset of the API's `capabilities` tree this extension reads. Every leaf is optional
+ *  because the tree is untyped upstream and grows as features ship. */
+export interface ModelCapabilities {
+  image_input?: { supported?: boolean };
+  thinking?: { supported?: boolean; types?: { adaptive?: { supported?: boolean } } };
+  effort?: { supported?: boolean } & Partial<Record<EffortLevel, { supported?: boolean }>>;
+}
+
+/** The effort levels the Messages API accepts, lowest first. */
+export const EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
+export type EffortLevel = (typeof EFFORT_LEVELS)[number];
 
 interface ModelApiResponse {
   data: Array<{
@@ -27,6 +48,7 @@ interface ModelApiResponse {
     created_at: string;
     max_tokens?: number | null;
     max_input_tokens?: number | null;
+    capabilities?: ModelCapabilities | null;
   }>;
   has_more: boolean;
   first_id: string | null;
@@ -112,6 +134,7 @@ export async function fetchAvailableModels(): Promise<AvailableModel[]> {
           created_at: model.created_at,
           max_tokens: model.max_tokens,
           max_input_tokens: model.max_input_tokens,
+          capabilities: model.capabilities,
         })),
       );
 

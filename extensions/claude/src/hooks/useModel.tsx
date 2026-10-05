@@ -1,4 +1,4 @@
-import { Clipboard, LocalStorage, showToast, Toast } from "@raycast/api";
+import { AI, Clipboard, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Model, ModelHook } from "../type";
 import { fetchAvailableModels, type AvailableModel } from "../api/models";
@@ -39,6 +39,25 @@ export const DEFAULT_MODEL: Model = {
 // Same reasoning as `FALLBACK_MODELS` in `src/api/models.ts`: no Opus id is listed,
 // because the last one hardcoded here outlived its own availability.
 const FALLBACK_OPTIONS: Model["option"][] = ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"];
+
+/**
+ * Asks Raycast to re-read this extension's model list, so a preset created, edited, or
+ * deleted here shows up the same way in Raycast AI's model picker (`src/model-provider.ts`).
+ *
+ * Debounced, because a preset import writes one preset at a time and each write would
+ * otherwise re-run the provider's model fetch. Failures are swallowed on purpose: Raycast
+ * documents this call only for an enabled provider, and what it does for the many users who
+ * never enable one is unverified — it must not be able to put an error in front of them.
+ */
+let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+const MODEL_REFRESH_DEBOUNCE_MS = 500;
+function scheduleProvidedModelsRefresh() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => {
+    refreshTimer = undefined;
+    AI.refreshModels().catch(() => undefined);
+  }, MODEL_REFRESH_DEBOUNCE_MS);
+}
 
 /**
  * The models collection store. `keep` carries `clear()`-preserves-`DEFAULT_MODEL`
@@ -292,6 +311,7 @@ export function useModel(): ModelHook {
       const newModel: Model = { ...model, created_at: new Date().toISOString() };
       const result = await mutations.add.run(store, (items) => items, newModel);
       setData((previous) => mutations.add.applyTo(result, previous));
+      scheduleProvidedModelsRefresh();
       await showResolvedToast({ title: "Preset saved", style: Toast.Style.Success });
     },
     [store],
@@ -301,6 +321,7 @@ export function useModel(): ModelHook {
     async (model: Model) => {
       const result = await mutations.update.run(store, (items) => items, model);
       setData((previous) => mutations.update.applyTo(result, previous));
+      scheduleProvidedModelsRefresh();
     },
     [store],
   );
@@ -310,6 +331,7 @@ export function useModel(): ModelHook {
       // No Animated phase — see `add` above.
       const result = await mutations.remove.run(store, (items) => items, model.id);
       setData(mutations.remove.applyTo(result));
+      scheduleProvidedModelsRefresh();
       await showResolvedToast({ title: "Preset deleted", style: Toast.Style.Success });
     },
     [store],
@@ -323,6 +345,7 @@ export function useModel(): ModelHook {
     // next state, per `mutations.clear`/`replaceState`.
     const result = await mutations.clear.run(store, (items) => items);
     setData(mutations.clear.applyTo(result));
+    scheduleProvidedModelsRefresh();
     await showResolvedToast({ title: "Presets deleted", style: Toast.Style.Success });
   }, [store]);
 

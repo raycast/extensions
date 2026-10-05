@@ -52,6 +52,24 @@ See `CONCEPTS.md` for the vocabulary these docs assume (Conversation, Turn, Rece
 - **Sampling parameters are conditional.** `temperature` is a hard 400 on Claude Opus 4.7 and later, so it is only sent where supported.
 - **Requests are bounded to the model's input budget** rather than sending the whole transcript every time. The full transcript is still displayed; only the request is trimmed.
 
+## Raycast AI model provider
+
+`src/model-provider.ts` is a fourth entry point, declared as `ai.modelProvider` in `package.json`, which Raycast requires to export `getModels` and `streamCompletion`. Raycast runs it in the background to list models and on every message a user sends to one of them, so it has no UI and no React. It only ever runs for a user who has Raycast Pro and has allowed this extension to provide models — with **Allow AI Models** in its settings, or by choosing one of its models in Raycast's picker.
+
+It talks to Anthropic through the **Vercel AI SDK** (`ai` + `@ai-sdk/anthropic`), not the `@anthropic-ai/sdk` the commands use — Raycast hands the provider AI SDK-shaped messages and accepts an AI SDK stream back, so the conversion in both directions is the SDK's, not ours. Two Anthropic clients in one extension is deliberate.
+
+Rules it encodes, each of which is a 400 or a silent misbehavior if removed:
+
+- **Entry ids.** A live model's id is the Anthropic model id; a Preset's is `preset:` + the preset id. The built-in `default` preset is left out of the list because it would duplicate the newest Sonnet's entry. A preset deleted since Raycast last refreshed throws rather than answering on some other model.
+- **Capabilities come from the Models API**, through the `capabilities` tree `src/api/models.ts` now captures: vision from `image_input`, effort levels from `effort`, adaptive thinking from `thinking.types.adaptive`. The one thing the API does not report is each model's *default* effort, so `DEFAULT_EFFORT_EXCEPTIONS` holds the models whose default is not `high` (Claude Opus 5.5 → `medium`). Add a row when one ships.
+- **Temperature and thinking are mutually exclusive.** Opus 4.7+ take no temperature at all (`supportsTemperature`). On older models the API takes no temperature *while thinking is on*, and the AI SDK drops it with only a console warning — so a deliberate temperature (anything but `1`) turns thinking off rather than being discarded. A preset's temperature wins over Raycast's.
+- **`toolChoice: "required"` is sent as `auto`.** Forced tool choice is a 400 on Opus 5.5, Sonnet 5.5, and Fable 5.1.
+- **Raycast's `role: "system"` messages are folded into the top-level `system` prompt**, which every model accepts, rather than sent as mid-conversation system messages, which only some do.
+- **Thinking blocks.** A replayed `reasoning` part is sent back only if it carries Anthropic's signature; the AI SDK drops an unsigned one, which would otherwise be a 400. `thinking.blockBinding.prefixMismatchBehavior: "drop_block"` makes the API drop, rather than reject, a signed block whose conversation Raycast has rebuilt — that field needs the `thinking-binding-controls-2026-08-01` beta header, which the AI SDK does not add itself.
+- **`streamCompletion` reads the cached model list**, not the network, because it runs once per message. `getModels` is what refreshes the cache.
+
+Preset changes call `AI.refreshModels()` from `useModel`, debounced, with any rejection swallowed. Raycast documents the call only for an enabled provider; what it does for the many users who never enable one is unverified, so it is never allowed to surface an error to them.
+
 ## Storage
 
 | Key | Holds |
@@ -61,7 +79,7 @@ See `CONCEPTS.md` for the vocabulary these docs assume (Conversation, Turn, Rece
 | `recents_legacy_retired_v1` | marker recording that the migration wrote and verified a payload |
 | `models` | saved Presets |
 | `presets_seeded_v1` | guard so default Presets seed exactly once |
-| `available_models_cache_v2` | last successful `/v1/models` response; the unversioned predecessor is deleted on the next successful write |
+| `available_models_cache_v2` | last successful `/v1/models` response, including each model's `capabilities`; the unversioned predecessor is deleted on the next successful write |
 | `recents_status_filter` | the Recents Status dropdown's last value |
 
 Legacy keys — `conversations`, `history`, `savedChats` — are migrated into `recents_v1` and then deleted. Names live in `src/stores/recentsKeys.ts`; the migration is `src/stores/recentsMigration.ts`; the deletion is `src/stores/recentsRetirement.ts`.

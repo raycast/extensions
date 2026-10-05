@@ -1,11 +1,18 @@
 # Claude Changelog
 
-## [Recents, presets, and a new storage layer] - {PR_MERGE_DATE}
+## [Raycast AI models, Recents, and presets] - {PR_MERGE_DATE}
 
 - Removed: The **History** and **Saved Answers** commands are gone. Everything they showed
   now lives in the new Recents command, and your saved answers become pinned conversations
   there automatically. If you had a hotkey or Quicklink pointing at either command, it will
   stop working and needs to be re-pointed at Recents
+- Feature: **Use Claude in Raycast AI.** Your Claude models — and each of your Presets — can
+  now appear in Raycast AI's model picker, so you can choose them in AI Chat, Quick AI, and AI
+  Commands on your own API key. New models show up the day Anthropic ships them, and a Preset
+  brings its system prompt and settings with it. Requires Raycast Pro; turn it on with
+  **Allow AI Models** in the extension's settings
+- Feature: Setup help now appears beside the API key field, covering where to get a key and
+  how to turn on the Raycast AI integration
 - Feature: **Recents** replaces Conversations, History, and Saved Answers with one list.
   Your past conversations, saved answers, and history are folded together the first time you
   open it — nothing to do on your end. Adds an Active/Archived/All filter, and Pin, Archive,
@@ -94,7 +101,7 @@
   its date column — those dates remain in the preset's detail panel
 - Fix: The model list is re-fetched after this update rather than reused from an older cache,
   so per-model output and context limits take effect immediately instead of on the next refresh
-- Chore: Updated `@raycast/utils` (1 → 2), ESLint 9 with flat config, TypeScript 5.9, Prettier
+- Chore: Updated `@raycast/api` (1 → 2.6), `@raycast/utils` (1 → 2), ESLint 9 with flat config, TypeScript 5.9, Prettier
   3, and React 19 types; removed the unused `raycast` and `cross-fetch` dependencies
 
 ## [API compatibility fixes] - 2026-08-19

@@ -51,6 +51,9 @@
       "mode": "view"
     }
   ],
+  "ai": {
+    "modelProvider": "model-provider"
+  },
   "preferences": [
     {
       "name": "apiKey",
@@ -89,9 +92,11 @@
     }
   ],
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.71",
     "@anthropic-ai/sdk": "^0.115.0",
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "^2.6.2",
     "@raycast/utils": "^2.2.7",
+    "ai": "^7.0.127",
     "csv-parse": "^7.0.1",
     "js-yaml": "^4.3.0",
     "uuid": "^14.0.1"
