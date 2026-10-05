@@ -1,4 +1,4 @@
-import { ownCategoryFor } from "./focusCategories.ts";
+import { findCategory, ownCategoryFor, type FocusCategory } from "./focusCategories.ts";
 import { readFocusSetup, type Category, type FocusSetup, type Stranded } from "./focusSetup.ts";
 import type { GoalBlocks, SessionStore } from "./store.ts";
 
@@ -8,10 +8,14 @@ export type BlockPlan = GoalBlocks & {
 
 const NOTHING: BlockPlan = { categories: [], mode: "block", skipped: [], source: "none" };
 
+export type LearnedBlocks = { setup: FocusSetup | null; blocks: Record<string, GoalBlocks> };
+
+export const NOTHING_LEARNED: LearnedBlocks = { setup: null, blocks: {} };
+
 export async function learnGoalBlocks(
   store: SessionStore,
   readSetup: () => Promise<FocusSetup | null> = readFocusSetup,
-): Promise<{ setup: FocusSetup | null; blocks: Record<string, GoalBlocks> }> {
+): Promise<LearnedBlocks> {
   const setup = await readSetup();
   const state = await store.readState();
   if (!setup?.goal) return { setup, blocks: state.goalBlocks };
@@ -65,10 +69,36 @@ export function withNamedCategory(plan: BlockPlan, goal: string): BlockPlan {
   return { ...plan, categories: [...plan.categories, own], source: "goal" };
 }
 
-export function describeStranded(stranded: Stranded[]): string {
-  const apps = stranded.filter((s) => s.app).map((s) => s.title);
-  const sites = stranded.filter((s) => !s.app).map((s) => s.title);
-  return [apps.length ? `Apps: ${apps.join(", ")}` : "", sites.length ? `Sites: ${sites.join(", ")}` : ""]
-    .filter(Boolean)
-    .join("\n");
+export type CategoryNeed = { name: string; stranded: Stranded[]; own: Category; exists: boolean; pending: boolean };
+
+export function quickStartPlan(
+  goal: string,
+  learned: LearnedBlocks,
+  categories: FocusCategory[],
+  raycast2: boolean,
+): { plan: BlockPlan; need?: CategoryNeed } {
+  const own = ownCategoryFor(goal);
+  const owned = raycast2 ? undefined : findCategory(categories, own.title);
+  const base = planFor(goal, learned.blocks, learned.setup, owned);
+  const plan = raycast2 ? withNamedCategory(base, goal) : base;
+  if (!plan.skipped.length || (raycast2 && plan.mode === "allow")) return { plan };
+  const known = learned.blocks[goal];
+  const exists = raycast2 ? (known?.categories ?? []).some((c) => c.id === own.id) : !!owned;
+  const pending = raycast2 && known?.setUpAt !== undefined;
+  return { plan, need: { name: goal, stranded: plan.skipped, own, exists, pending } };
+}
+
+export function strandedSummary(stranded: Stranded[], shown = 1): string {
+  const names = stranded
+    .slice(0, shown)
+    .map((s) => s.title)
+    .join(", ");
+  const rest = stranded.length - shown;
+  return rest > 0 ? `${names} +${rest}` : names;
+}
+
+export function strandedList(stranded: Stranded[], shown = 3): string {
+  const names = stranded.slice(0, shown).map((s) => s.title);
+  if (stranded.length > shown) names.push(`${stranded.length - shown} more`);
+  return new Intl.ListFormat("en", { type: "disjunction" }).format(names);
 }

@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describeStranded, planFor, withNamedCategory } from "./goalBlocks.ts";
+import {
+  planFor,
+  quickStartPlan,
+  strandedList,
+  strandedSummary,
+  withNamedCategory,
+  type LearnedBlocks,
+} from "./goalBlocks.ts";
 import type { FocusSetup } from "./focusSetup.ts";
 
 const cat = (id: string, title = id) => ({ id, title });
@@ -128,19 +135,84 @@ test("the named category is not asked for twice once a session has shown it", ()
   );
 });
 
-test("describeStranded splits apps from sites, since they are fixed differently", () => {
-  const stranded = [
-    { id: "com.apple.Weather", title: "Weather", app: true },
-    { id: "google.com", title: "google.com", app: false },
-    { id: "facebook.com", title: "facebook.com", app: false },
-  ];
-  assert.equal(describeStranded(stranded), "Apps: Weather\nSites: google.com, facebook.com");
+const learnedOf = (blocks: LearnedBlocks["blocks"]): LearnedBlocks => ({ setup: null, blocks });
+
+test("a quick start lists a category to set up only when it would drop blocks", () => {
+  const { plan, need } = quickStartPlan("Break", learnedOf(known), [], true);
+  assert.deepEqual(
+    plan.categories.map((c) => c.id),
+    ["foqus-break"],
+    "the start still asks for the category, in case it exists",
+  );
+  assert.deepEqual(need, {
+    name: "Break",
+    stranded: known.Break.skipped,
+    own: { id: "foqus-break", title: "Foqus Break" },
+    exists: false,
+    pending: false,
+  });
+
+  const imported = { Break: { ...known.Break, setUpAt: Date.now() } };
+  assert.equal(
+    quickStartPlan("Break", learnedOf(imported), [], true).need?.pending,
+    true,
+    "Raycast 2 takes the import on trust until the next start checks it",
+  );
+  assert.equal(
+    quickStartPlan("Break", learnedOf(imported), [], false).need?.pending,
+    false,
+    "Raycast 1 reads its categories, so it never has to trust",
+  );
+
+  const shown = { Break: { ...known.Break, categories: [cat("foqus-break", "Foqus Break")] } };
+  assert.equal(
+    quickStartPlan("Break", learnedOf(shown), [], true).need?.exists,
+    true,
+    "a category a session has shown needs filling, not importing",
+  );
+
+  const plain = { Ship: { categories: [cat("social")], mode: "block" as const, skipped: [] } };
+  assert.equal(quickStartPlan("Ship", learnedOf(plain), [], true).need, undefined, "nothing to drop");
+
+  const allow = {
+    Read: { categories: [], mode: "allow" as const, skipped: [{ id: "arxiv.org", title: "arxiv.org", app: false }] },
+  };
+  assert.equal(
+    quickStartPlan("Read", learnedOf(allow), [], true).need,
+    undefined,
+    "Raycast 2 never asks an allowlist for a category it cannot check",
+  );
 });
 
-test("describeStranded leaves out a section with nothing in it", () => {
-  assert.equal(describeStranded([{ id: "x.com", title: "x.com", app: false }]), "Sites: x.com");
-  assert.equal(describeStranded([{ id: "com.apple.Music", title: "Music", app: true }]), "Apps: Music");
-  assert.equal(describeStranded([]), "");
+test("on Raycast 1 the categories file tells a category to make from one to fill", () => {
+  const partial = { id: "foqus-break", title: "Foqus Break", apps: [], websites: [], builtin: false };
+  assert.equal(quickStartPlan("Break", learnedOf(known), [], false).need?.exists, false);
+  assert.equal(quickStartPlan("Break", learnedOf(known), [partial], false).need?.exists, true);
+
+  const full = { ...partial, apps: ["company.thebrowser.Browser"] };
+  const { plan, need } = quickStartPlan("Break", learnedOf(known), [full], false);
+  assert.equal(need, undefined, "a category that holds everything leaves nothing to set up");
+  assert.deepEqual(
+    plan.categories.map((c) => c.id),
+    ["foqus-break"],
+  );
+});
+
+test("strandedSummary names the first few and counts the rest, never the whole list", () => {
+  const site = (id: string) => ({ id, title: id, app: false });
+  const five = [...known.Break.skipped, site("x.com"), site("y.com"), site("z.com"), site("w.com")];
+  assert.equal(strandedSummary(known.Break.skipped), "Arc");
+  assert.equal(strandedSummary(five), "Arc +4");
+  assert.equal(strandedSummary(five, 3), "Arc, x.com, y.com +2");
+  assert.equal(strandedSummary(five.slice(0, 3), 3), "Arc, x.com, y.com");
+  assert.equal(strandedSummary([]), "");
+});
+
+test("strandedList reads as a sentence: the first three, then how many more", () => {
+  const site = (id: string) => ({ id, title: id, app: false });
+  assert.equal(strandedList([site("x.com")]), "x.com");
+  assert.equal(strandedList([site("x.com"), site("y.com")]), "x.com or y.com");
+  assert.equal(strandedList(["a.com", "b.com", "c.com", "d.com", "e.com"].map(site)), "a.com, b.com, c.com, or 2 more");
 });
 
 test("a stranded website is cleared by a category that holds it, not just apps", () => {

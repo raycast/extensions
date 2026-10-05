@@ -21,6 +21,7 @@ export type GoalBlocks = {
   categories: Category[];
   mode: "block" | "allow";
   skipped: Stranded[];
+  setUpAt?: number;
 };
 
 export type SaveRefusal =
@@ -89,6 +90,7 @@ function parseGoalBlocks(value: unknown): Record<string, GoalBlocks> {
       categories: categories(row.categories),
       mode: row.mode === "allow" ? "allow" : "block",
       skipped: stranded(row.skipped),
+      ...(finite(row.setUpAt) ? { setUpAt: row.setUpAt } : {}),
     };
   }
   return out;
@@ -326,11 +328,12 @@ export class LocalSessionStore implements SessionStore {
 
       const deleted = new Set(state.deleted);
       if (prev !== undefined && prev !== next.start) deleted.add(prev);
-      deleted.delete(next.start);
       await this.writeState({ ...state, deleted: pruneDeleted([...deleted]) });
 
       const kept = sessions.filter((s) => s.start !== prev && s.start !== next.start);
       await this.rewrite([...kept, next].sort((a, b) => a.start - b.start));
+
+      if (deleted.delete(next.start)) await this.writeState({ ...state, deleted: pruneDeleted([...deleted]) });
 
       return { ok: true };
     });

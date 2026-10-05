@@ -3,7 +3,7 @@ import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { posterFilename, renderPosterPng, reservePath, SHARE_PIXELS } from "./shareImage.ts";
+import { posterFilename, renderPosterPng, saveNew, SHARE_PIXELS } from "./shareImage.ts";
 import { tiersFor } from "./theme.ts";
 import { renderSharePoster, SHARE_ASPECT, SHARE_WIDTH, type WrappedFacts } from "./wrappedPoster.ts";
 
@@ -13,12 +13,18 @@ test("posterFilename slugs the period and never comes out empty", () => {
   assert.equal(posterFilename("···"), "foqus-recap-recap.png");
 });
 
-test("reservePath steps aside instead of overwriting", async () => {
+const blank = async () => undefined;
+
+test("saveNew steps aside instead of overwriting", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "foqus-test-"));
   try {
     await writeFile(path.join(dir, "a.png"), "a backup");
-    assert.equal(await reservePath(dir, "a.png"), path.join(dir, "a-2.png"));
-    assert.equal(await reservePath(dir, "a.png"), path.join(dir, "a-3.png"), "the name it returned is already taken");
+    assert.equal(await saveNew(dir, "a.png", blank), path.join(dir, "a-2.png"));
+    assert.equal(
+      await saveNew(dir, "a.png", blank),
+      path.join(dir, "a-3.png"),
+      "the name it returned is already taken",
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -27,9 +33,23 @@ test("reservePath steps aside instead of overwriting", async () => {
 test("two exports at the same moment never share a name", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "foqus-test-"));
   try {
-    const names = await Promise.all([1, 2, 3].map(() => reservePath(dir, "sessions.json")));
+    const names = await Promise.all([1, 2, 3].map(() => saveNew(dir, "sessions.json", blank)));
     assert.equal(new Set(names).size, 3);
     assert.deepEqual((await readdir(dir)).sort(), ["sessions-2.json", "sessions-3.json", "sessions.json"]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("a save that fails leaves no empty file behind, and the next one gets the name", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "foqus-test-"));
+  try {
+    const broken = async () => {
+      throw new Error("QuickLook could not draw the recap");
+    };
+    await assert.rejects(saveNew(dir, "recap.png", broken), /QuickLook could not draw the recap/);
+    assert.deepEqual(await readdir(dir), []);
+    assert.equal(await saveNew(dir, "recap.png", blank), path.join(dir, "recap.png"));
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import { getPreferences } from "./lib/runtime.ts";
 import { periodRange, type Period } from "./lib/stats.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
-import { DOWNLOADS, posterFilename, renderPosterPng, reservePath } from "./lib/shareImage.ts";
+import { DOWNLOADS, posterFilename, renderPosterPng, saveNew } from "./lib/shareImage.ts";
 import { markdownImage } from "./lib/svg.ts";
 import { themeFor, tiersFor } from "./lib/theme.ts";
 import { useStats } from "./lib/useStats.ts";
@@ -47,17 +47,16 @@ export default function FocusWrapped() {
   );
   const poster = facts ? renderWrapped(facts, theme, tiers) : "";
 
-  async function drawShareable(destination: (name: string) => Promise<string> | string) {
+  async function drawShareable(save: (name: string, draw: (file: string) => Promise<string>) => Promise<string>) {
     if (!facts) return null;
-    const file = await destination(posterFilename(range.label));
-    await renderPosterPng(renderSharePoster(facts, tiers), file, SHARE_ASPECT);
-    return file;
+    const svg = renderSharePoster(facts, tiers);
+    return save(posterFilename(range.label), (file) => renderPosterPng(svg, file, SHARE_ASPECT));
   }
 
   async function copyPoster() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making your recap…" });
     try {
-      const file = await drawShareable((name) => path.join(environment.supportPath, name));
+      const file = await drawShareable((name, draw) => draw(path.join(environment.supportPath, name)));
       if (!file) return;
       await Clipboard.copy({ file });
       toast.style = Toast.Style.Success;
@@ -72,7 +71,7 @@ export default function FocusWrapped() {
   async function savePoster() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Making your recap…" });
     try {
-      const file = await drawShareable((name) => reservePath(DOWNLOADS, name));
+      const file = await drawShareable((name, draw) => saveNew(DOWNLOADS, name, draw));
       if (!file) return;
       toast.style = Toast.Style.Success;
       toast.title = "Saved to Downloads";

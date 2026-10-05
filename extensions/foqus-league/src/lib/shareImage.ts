@@ -34,7 +34,7 @@ async function claim(file: string): Promise<boolean> {
   }
 }
 
-export async function reservePath(dir: string, filename: string): Promise<string> {
+async function reserve(dir: string, filename: string): Promise<string> {
   const ext = path.extname(filename);
   const stem = filename.slice(0, filename.length - ext.length);
   for (let n = 1; n < 1000; n++) {
@@ -44,6 +44,21 @@ export async function reservePath(dir: string, filename: string): Promise<string
   const fallback = path.join(dir, `${stem}-${Date.now()}${ext}`);
   if (!(await claim(fallback))) throw new Error(`Could not reserve a file name in ${dir}`);
   return fallback;
+}
+
+export async function saveNew(
+  dir: string,
+  filename: string,
+  write: (file: string) => Promise<unknown>,
+): Promise<string> {
+  const file = await reserve(dir, filename);
+  try {
+    await write(file);
+    return file;
+  } catch (error) {
+    await rm(file, { force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function renderPosterPng(svgMarkup: string, destination: string, aspect = 1): Promise<string> {

@@ -3,7 +3,7 @@ import { writeFile, readFile } from "fs/promises";
 import { homedir } from "os";
 import * as path from "path";
 import type { Category } from "./focusSetup.ts";
-import { reservePath } from "./shareImage.ts";
+import { saveNew } from "./shareImage.ts";
 
 export const CATEGORIES_PATH = path.join(
   homedir(),
@@ -103,18 +103,20 @@ function slugFor(goal: string): string {
   return slug || "focus";
 }
 
+export const importFileName = (goal: string) => `foqus-${slugFor(goal)}.json`;
+
 export async function writeImportFile(
   goal: string,
   stranded: { id: string; app: boolean }[],
   dir = path.join(homedir(), "Downloads"),
 ): Promise<string> {
-  const file = await reservePath(dir, `foqus-${slugFor(goal)}.json`);
   const category = {
     title: categoryTitleFor(goal),
     iconName: ICON,
     apps: stranded.filter((s) => s.app).map((s) => s.id),
     websites: stranded.filter((s) => !s.app).map((s) => s.id),
   };
-  await writeFile(file, `${JSON.stringify([category], null, 2)}\n`, "utf8");
-  return file;
+  return saveNew(dir, importFileName(goal), (file) =>
+    writeFile(file, `${JSON.stringify([category], null, 2)}\n`, "utf8"),
+  );
 }

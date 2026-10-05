@@ -1,6 +1,18 @@
-import { Action, ActionPanel, Detail, Icon, environment, launchCommand, LaunchType } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  environment,
+  launchCommand,
+  LaunchType,
+  useNavigation,
+  type LaunchProps,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { HowItWorks } from "./lib/HowItWorks.tsx";
+import { SetUpCategory } from "./lib/SetUpCategory.tsx";
 import { getPreferences, SUPPORT_URL } from "./lib/runtime.ts";
 import { renderBoard } from "./lib/statsBoard.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
@@ -8,8 +20,19 @@ import { CHART_WIDTH, markdownImage } from "./lib/svg.ts";
 import { themeFor, tiersFor } from "./lib/theme.ts";
 import { useStats } from "./lib/useStats.ts";
 
-export default function FocusStats() {
+type Context = { setUp?: string };
+
+export default function FocusStats({ launchContext }: LaunchProps<{ launchContext?: Context }>) {
   const { data, isLoading } = useStats();
+  const { push } = useNavigation();
+  const opened = useRef(false);
+
+  useEffect(() => {
+    const goal = launchContext?.setUp;
+    if (typeof goal !== "string" || opened.current) return;
+    opened.current = true;
+    push(<SetUpCategory goal={goal} />);
+  }, [launchContext, push]);
 
   const theme = themeFor(environment.appearance);
   const prefs = getPreferences();

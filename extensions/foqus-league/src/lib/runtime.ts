@@ -1,4 +1,4 @@
-import { environment, getApplications, getPreferenceValues, showHUD } from "@raycast/api";
+import { environment, getApplications, getPreferenceValues, LaunchType, showHUD } from "@raycast/api";
 import { execFile } from "child_process";
 import * as path from "path";
 import { setTimeout as sleep } from "timers/promises";
@@ -15,6 +15,12 @@ import { liveSources, markQuickStart, syncIfStale as staleSync, syncSessions as 
 import { tiersFor } from "./theme.ts";
 
 export const SUPPORT_URL = "https://buymeacoffee.com/filipimiparebine";
+
+export const RAYCAST_FOCUS = {
+  ownerOrAuthorName: "raycast",
+  extensionName: "raycast-focus",
+  type: LaunchType.UserInitiated,
+} as const;
 
 const SUCCESS_SOUND = path.join(environment.assetsPath, "chime.wav");
 
@@ -59,6 +65,13 @@ export const rememberQuickStart = (goal: string, categories: Category[]) =>
     ...state,
     quickStarts: markQuickStart(state.quickStarts, goal, categories, Date.now()),
   }));
+
+export const rememberSetUp = (goal: string) =>
+  store.mutateState((state) => {
+    const blocks = state.goalBlocks[goal];
+    if (!blocks) return state;
+    return { ...state, goalBlocks: { ...state.goalBlocks, [goal]: { ...blocks, setUpAt: Date.now() } } };
+  });
 
 export async function announce(): Promise<void> {
   const prefs = getPreferences();

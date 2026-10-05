@@ -266,6 +266,31 @@ test("a quick start that blocked the goal's stranded apps is remembered as using
   assert.equal(fake.state().quickStarts[0].start, clicked + 500, "bound to this start, so a re-read agrees");
 });
 
+test("the next start drops a set-up mark, so a category that never got imported is listed again", async () => {
+  const clicked = Date.now() - MINUTE;
+  const social = { id: "social", title: "Social" };
+  const own = { id: "foqus-ship", title: "Foqus Ship" };
+  const appStore = { id: "com.apple.AppStore", title: "App Store", app: true };
+  const fake = fakeStore({
+    goalBlocks: { Ship: { categories: [social], mode: "block", skipped: [appStore], setUpAt: clicked - MINUTE } },
+    quickStarts: [{ goal: "Ship", at: clicked, categories: [social, own] }],
+  });
+  const start: FocusEvent = {
+    type: "start",
+    at: clicked + 500,
+    goal: "Ship",
+    plannedSeconds: 1500,
+    blocked: { mode: "block", apps: [], websites: ["x.com"] },
+  };
+
+  await syncSessions(
+    fake.store,
+    fakeSources([start], [], 512, { categories: [{ ...social, apps: [], websites: ["x.com"] }] }),
+  );
+
+  assert.deepEqual(fake.state().goalBlocks.Ship, { categories: [social], mode: "block", skipped: [appStore] });
+});
+
 test("a sync that finishes late cannot rewind the resume markers a faster one set", async () => {
   const fake = fakeStore({ cursor: 1000, streamOffset: 100 });
   const running = [startEvent(Date.now() - MINUTE, "Ship")];

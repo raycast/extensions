@@ -654,3 +654,20 @@ test("a session moved to a new start keeps its old start tombstoned even if the 
     await assert.rejects(store.saveSession({ previousStart: T1, session: manual(T2, "Write", 40) }));
     assert.ok((await store.readState()).deleted.includes(T1));
   }));
+
+test("a goal's set-up mark survives a round trip through the state file", () =>
+  withStore(async (store, dir) => {
+    const blocks = { categories: [], mode: "block" as const, skipped: [], setUpAt: T1 };
+    await store.writeState({ ...(await store.readState()), goalBlocks: { Ship: blocks } });
+    assert.deepEqual((await new LocalSessionStore(dir).readState()).goalBlocks.Ship, blocks);
+  }));
+
+test("a session added onto a deleted start keeps the tombstone until it is written", () =>
+  withStore(async (store) => {
+    await store.add([at(T1)]);
+    await store.remove(T1);
+    crashOnRewrite(store);
+    await assert.rejects(store.saveSession({ session: manual(T1, "Redo", 15) }));
+    assert.deepEqual((await store.readState()).deleted, [T1]);
+    assert.equal(await store.add([at(T1)]), 0, "the next sync cannot bring the deleted session back");
+  }));
