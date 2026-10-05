@@ -87,7 +87,11 @@ export function useNetworkDiscovery(options?: { auto?: boolean }): NetworkDiscov
       if (expandedHosts.current.has(key)) return;
       expandedHosts.current.add(key);
 
-      const expansion = listShares(host, discoveryUsername(), vouchedFor ? discoveryPassword() : undefined)
+      const expansion = listShares(
+        host,
+        vouchedFor ? discoveryUsername() : "",
+        vouchedFor ? discoveryPassword() : undefined,
+      )
         .then((shares) => {
           if (cancelled()) return;
           setSmbShares((prev) => [...prev, ...shares.map((vol) => ({ host, vol }))]);

@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { exec } from "child_process";
-import { discoveryUsername } from "../lib/preferences";
+import { discoveryUsernameFor } from "../lib/preferences";
 import { VolumeUsage, usageForMountPoint } from "../lib/disk-usage";
 import { ServerForm, ServerFormInput } from "./ServerForm";
 import { buildShare, PROTOCOL_LABELS, Protocol } from "../lib/share";
@@ -67,13 +67,17 @@ export function diskUsageAccessories(mountPoint: string | undefined, volumes: Vo
   const usage = usageForMountPoint(mountPoint, volumes);
   if (!usage) return [];
 
-  // Trim trailing zeros (7.00 -> 7) so round sizes don't show fake precision.
-  const formatTB = (gb: number) => parseFloat((gb / 1024).toFixed(2)).toString();
+  // df reports whole gigabytes, so dividing a small share by 1024 would show
+  // it as 0.00 TB. The unit comes from the total, and trailing zeros are
+  // trimmed (7.00 -> 7) so round sizes don't show fake precision.
+  const inTb = usage.totalGb >= 1024;
+  const unit = inTb ? "TB" : "GB";
+  const formatSize = (gb: number) => (inTb ? parseFloat((gb / 1024).toFixed(2)).toString() : String(gb));
   const freePercent = 100 - usage.percentUsed;
   const severity = usage.percentUsed > 75 ? Color.Red : usage.percentUsed >= 25 ? Color.Yellow : Color.Green;
 
   return [
-    { tag: { value: `${formatTB(usage.usedGb)} / ${formatTB(usage.totalGb)} TB` }, tooltip: "Used / Total" },
+    { tag: { value: `${formatSize(usage.usedGb)} / ${formatSize(usage.totalGb)} ${unit}` }, tooltip: "Used / Total" },
     { tag: { value: `${freePercent}%`, color: severity }, tooltip: "Free" },
   ];
 }
@@ -214,7 +218,7 @@ function DiscoveredDriveActions(props: {
 
   async function saveToNetworkDrives() {
     try {
-      await addServer({ host: props.host, path: props.vol, user: discoveryUsername() || undefined });
+      await addServer({ host: props.host, path: props.vol, user: discoveryUsernameFor(props.host) || undefined });
     } catch (error) {
       if (!(error instanceof DuplicateServerError)) throw error;
       await showToast({ title: "Drive already added", message: error.message });

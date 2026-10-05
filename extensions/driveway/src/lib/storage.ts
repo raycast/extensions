@@ -54,7 +54,9 @@ export async function updateServer(id: string, entry: Omit<ServerEntry, "id">): 
   if (index === -1) return;
 
   assertNotDuplicate(servers, entry, id);
-  servers[index] = { id, ...entry };
+  // The form owns only its own fields. Anything else on the record, the
+  // Auto-Reconnect flag in particular, has to survive an edit.
+  servers[index] = { ...servers[index], ...entry, id };
   await saveServers(servers);
 }
 
