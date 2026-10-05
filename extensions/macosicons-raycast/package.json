@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macosicons-raycast",
+  "title": "MacOSicons",
+  "description": "Browse and apply thousands of macOS app icons from macOSicons.com.",
+  "icon": "extension-logo.png",
+  "author": "elias_ruiz_monserrat",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Design Tools"
+  ],
+  "keywords": [
+    "macos",
+    "icons",
+    "app icons",
+    "custom icons",
+    "icns",
+    "icon pack"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "macosicons",
+      "title": "Search Icons",
+      "subtitle": "MacOSicons",
+      "description": "Search and browse app icons from macOSicons.com.",
+      "mode": "view"
+    },
+    {
+      "name": "view-usage",
+      "title": "View API Usage",
+      "subtitle": "MacOSicons",
+      "description": "View your macOSicons API usage.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Optional. Paste an API key from your macOSicons.com account to skip browser sign-in. If set, it takes priority over signing in.",
+      "placeholder": "Your macOSicons API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
