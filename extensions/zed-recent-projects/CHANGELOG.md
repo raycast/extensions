@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Dismiss Raycast During Project Launch] - {PR_MERGE_DATE}
+## [Dismiss Raycast During Project Launch] - 2026-10-05
 
 - Fix Search Recent Projects making Raycast appear unresponsive while waiting for Zed to launch. Raycast now dismisses immediately after selection, matching the Visual Studio Code extension's behavior.
 
