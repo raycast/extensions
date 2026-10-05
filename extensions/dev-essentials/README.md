@@ -8,7 +8,7 @@ Everyday developer utilities for Raycast: UUIDs, Unix timestamps, and JWT / JWS 
 | --- | --- | --- |
 | **Generate UUID** | `uuid`, `uuid v7` | Generates a UUID (v4 by default, or v7), shows it, and copies it. Includes uppercase, no-dash, URN and brace formats, plus the embedded timestamp for v7. `⌘R` makes a new one, `⌘T` switches version. |
 | **Convert Timestamp** | `ts` | Live current time as Unix seconds/ms, ISO 8601 (UTC and local), HTTP date and relative time. |
-| | `ts 1700000000` | Unix timestamp → date. Seconds, milliseconds, microseconds and nanoseconds are detected by digit count. |
+| | `ts 1700000000` | Unix timestamp → date. Seconds, milliseconds, microseconds and nanoseconds are detected by digit count, or pick the unit from the search bar dropdown. |
 | | `ts 10 seconds ago`, `ts 1 day ago`, `ts in 2h`, `ts +1h30m` | Relative durations. |
 | | `ts 2024-01-01T09:30:00+07:00` | ISO date-time (also natural language such as `yesterday 5pm`). |
 | **Decode JWT** | `jwt <token>` or `jwt` | Decode (header, payload, claims with exp/nbf status), verify, and encode/sign. |

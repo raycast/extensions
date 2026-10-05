@@ -11,6 +11,8 @@ export type InputKind =
   | "iso"
   | "natural";
 
+export type UnixUnit = "auto" | "seconds" | "milliseconds" | "microseconds" | "nanoseconds";
+
 export interface ParsedTime {
   date: Date;
   kind: InputKind;
@@ -26,11 +28,12 @@ export interface TimeFormat {
 
 const MAX_DATE_MS = 8.64e15;
 
-export function parseTimeInput(raw: string, now: Date = new Date()): ParsedTime {
+/** `unit` overrides digit-count detection for numeric input, which is ambiguous near the epoch. */
+export function parseTimeInput(raw: string, now: Date = new Date(), unit: UnixUnit = "auto"): ParsedTime {
   const input = raw.trim();
   if (!input || /^now$/i.test(input)) return { date: now, kind: "now", label: "Now" };
 
-  if (/^[+-]?\d+(\.\d+)?$/.test(input)) return parseUnix(input);
+  if (/^[+-]?\d+(\.\d+)?$/.test(input)) return parseUnix(input, unit);
 
   const relative = parseRelativeTime(input);
   if (relative) {
@@ -55,15 +58,28 @@ export function parseTimeInput(raw: string, now: Date = new Date()): ParsedTime 
   throw new Error(`Couldn't understand "${input}"`);
 }
 
-function parseUnix(input: string): ParsedTime {
-  const value = Number(input);
+function detectUnixUnit(input: string): Exclude<UnixUnit, "auto"> {
   const digits = input.replace(/^[+-]/, "").split(".")[0].length;
-  if (digits <= 11) return { date: checked(new Date(value * 1000)), kind: "unix-seconds", label: "Unix seconds" };
-  if (digits <= 14) return { date: checked(new Date(value)), kind: "unix-milliseconds", label: "Unix milliseconds" };
-  if (digits <= 17) {
-    return { date: checked(new Date(value / 1e3)), kind: "unix-microseconds", label: "Unix microseconds" };
-  }
-  return { date: checked(new Date(value / 1e6)), kind: "unix-nanoseconds", label: "Unix nanoseconds" };
+  if (digits <= 11) return "seconds";
+  if (digits <= 14) return "milliseconds";
+  if (digits <= 17) return "microseconds";
+  return "nanoseconds";
+}
+
+const UNIX_UNIT_MS: Record<Exclude<UnixUnit, "auto">, number> = {
+  seconds: 1000,
+  milliseconds: 1,
+  microseconds: 1e-3,
+  nanoseconds: 1e-6,
+};
+
+function parseUnix(input: string, unit: UnixUnit): ParsedTime {
+  const resolved = unit === "auto" ? detectUnixUnit(input) : unit;
+  return {
+    date: checked(new Date(Number(input) * UNIX_UNIT_MS[resolved])),
+    kind: `unix-${resolved}`,
+    label: `Unix ${resolved}${unit === "auto" ? " (auto-detected)" : ""}`,
+  };
 }
 
 function describeIso(input: string): string {
@@ -73,8 +89,12 @@ function describeIso(input: string): string {
   return hasTime ? "ISO 8601 (no offset, local time)" : "ISO 8601 date (UTC midnight)";
 }
 
+export function isSupportedDate(date: Date): boolean {
+  return !Number.isNaN(date.getTime()) && Math.abs(date.getTime()) <= MAX_DATE_MS;
+}
+
 function checked(date: Date): Date {
-  if (Number.isNaN(date.getTime()) || Math.abs(date.getTime()) > MAX_DATE_MS) {
+  if (!isSupportedDate(date)) {
     throw new Error("Date is out of the supported range");
   }
   return date;

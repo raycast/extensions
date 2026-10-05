@@ -2,6 +2,7 @@ import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast, useNaviga
 import { useMemo, useState } from "react";
 import { applyDuration, parseDurationParts } from "../lib/duration";
 import { errorMessage } from "../lib/errors";
+import { isSupportedDate } from "../lib/timestamp";
 import {
   cleanToken,
   decodeToken,
@@ -105,13 +106,24 @@ export function VerifyForm({ token: initialToken, mode }: { token?: string; mode
           setOutcome(undefined);
         }}
       />
-      {isRawSecret(key) && <SecretEncodingDropdown value={encoding} onChange={setEncoding} />}
+      {isRawSecret(key) && (
+        <SecretEncodingDropdown
+          value={encoding}
+          onChange={(v) => {
+            setEncoding(v);
+            setOutcome(undefined);
+          }}
+        />
+      )}
       <Form.Checkbox
         id="validateClaims"
         label="Validate exp / nbf claims"
         info="Requires the payload to be a JSON claims set"
         value={validateClaims}
-        onChange={setValidateClaims}
+        onChange={(v) => {
+          setValidateClaims(v);
+          setOutcome(undefined);
+        }}
       />
     </Form>
   );
@@ -150,7 +162,11 @@ export function SignForm({
     if (expiresIn.trim()) {
       const parts = parseDurationParts(expiresIn);
       if (!parts) throw Object.assign(new Error("Use a duration like 15m, 1h or 7 days"), { field: "expiresIn" });
-      claims.exp = Math.floor(applyDuration(new Date(nowSec * 1000), parts, 1).getTime() / 1000);
+      const exp = applyDuration(new Date(nowSec * 1000), parts, 1);
+      if (!isSupportedDate(exp)) {
+        throw Object.assign(new Error("Expiry is too far in the future"), { field: "expiresIn" });
+      }
+      claims.exp = Math.floor(exp.getTime() / 1000);
     }
     return JSON.stringify(claims);
   }
@@ -261,6 +277,7 @@ export function SignForm({
         error={errors.key}
         onChange={(v) => {
           setKey(v);
+          setGenerated(undefined);
           clearError("key");
         }}
       />

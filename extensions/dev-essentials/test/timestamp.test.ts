@@ -84,3 +84,27 @@ describe("formatting", () => {
     expect(formatRelative(now, now)).toBe("now");
   });
 });
+
+describe("review fixes", () => {
+  it("clamps month additions to the end of the target month", () => {
+    const jan31 = new Date(2026, 0, 31, 12, 0, 0);
+    const result = parseTimeInput("in 1 month", jan31).date;
+    expect([result.getMonth(), result.getDate()]).toEqual([1, 28]);
+    const leap = parseTimeInput("in 1 month", new Date(2028, 0, 31, 12)).date;
+    expect([leap.getMonth(), leap.getDate()]).toEqual([1, 29]);
+    const back = parseTimeInput("1 month ago", new Date(2026, 2, 31, 12)).date;
+    expect([back.getMonth(), back.getDate()]).toEqual([1, 28]);
+  });
+
+  it("lets the caller override the Unix unit", () => {
+    expect(parseTimeInput("-10000000000", now).date.getUTCFullYear()).toBe(1653);
+    expect(parseTimeInput("-10000000000", now, "milliseconds").date.toISOString()).toBe("1969-09-07T06:13:20.000Z");
+    expect(parseTimeInput("1700000000", now, "milliseconds").kind).toBe("unix-milliseconds");
+    expect(parseTimeInput("1700000000", now).label).toBe("Unix seconds (auto-detected)");
+    expect(parseTimeInput("1700000000", now, "seconds").label).toBe("Unix seconds");
+  });
+
+  it("rejects durations beyond the supported date range", () => {
+    expect(() => parseTimeInput("in 99999999 years", now)).toThrow(/range/);
+  });
+});

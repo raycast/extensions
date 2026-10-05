@@ -100,12 +100,21 @@ export function parseRelativeTime(input: string): RelativeTime | undefined {
   return { parts, direction: direction ?? -1 };
 }
 
+/** Adds months, clamping the day so Jan 31 + 1 month is the last day of February rather than early March. */
+function addCalendarMonths(date: Date, months: number): void {
+  const day = date.getDate();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + months);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(day, lastDay));
+}
+
 export function applyDuration(base: Date, parts: DurationPart[], direction: 1 | -1): Date {
   const result = new Date(base.getTime());
   for (const { amount, unit } of parts) {
     if ((unit === "mo" || unit === "y") && Number.isInteger(amount)) {
       const months = unit === "y" ? amount * 12 : amount;
-      result.setMonth(result.getMonth() + direction * months);
+      addCalendarMonths(result, direction * months);
     } else if (unit === "mo" || unit === "y") {
       const days = unit === "y" ? amount * 365.25 : amount * 30.44;
       result.setTime(result.getTime() + direction * days * FIXED_UNIT_MS.d);

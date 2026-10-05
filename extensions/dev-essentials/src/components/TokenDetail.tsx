@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { useMemo } from "react";
 import { errorMessage } from "../lib/errors";
+import { codeBlock } from "../lib/markdown";
 import { formatRelative } from "../lib/timestamp";
 import {
   claimsStatus,
@@ -26,10 +27,6 @@ const STATUS_TAG: Record<ClaimsStatus, { text: string; color: Color }> = {
 const TIME_CLAIMS = ["iat", "nbf", "exp"] as const;
 const TEXT_CLAIMS = ["iss", "sub", "aud", "jti"] as const;
 const HEADER_FIELDS = ["typ", "cty", "kid", "zip", "jku", "x5u", "x5t"] as const;
-
-function codeBlock(content: string, lang = ""): string {
-  return `\`\`\`${lang}\n${content}\n\`\`\``;
-}
 
 function claimTime(value: unknown): string {
   if (typeof value !== "number") return String(value);
@@ -111,10 +108,11 @@ function JwsDetail({
           <Detail.Metadata.Label title="Type" text={label} />
           <Detail.Metadata.Label title="Algorithm" text={String(header.alg)} />
           <HeaderMetadata header={header} />
+          <Detail.Metadata.Label title="Signature" text="Not verified (↵ Verify Signature)" />
           {claims && status && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.TagList title="Status">
+              <Detail.Metadata.TagList title="Expiry (claims only, unverified)">
                 <Detail.Metadata.TagList.Item text={STATUS_TAG[status].text} color={STATUS_TAG[status].color} />
               </Detail.Metadata.TagList>
               {TEXT_CLAIMS.filter((c) => claims[c] !== undefined).map((c) => (

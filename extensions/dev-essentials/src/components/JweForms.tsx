@@ -208,6 +208,7 @@ export function EncryptForm({ initialPlaintext }: { initialPlaintext?: string })
         error={error}
         onChange={(v) => {
           setKey(v);
+          setGenerated(undefined);
           setError(undefined);
         }}
       />
