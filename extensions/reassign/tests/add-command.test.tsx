@@ -606,6 +606,31 @@ it("clears the dead slots when the re-plan finds none", async () => {
   expect(slot()).toBeUndefined();
 });
 
+it("keeps slots after a failed re-plan so the user can retry and confirm a fresh proposal", async () => {
+  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
+  mock.confirm.mockResolvedValue({ ok: false, code: "not_found", message: "That proposal has expired." });
+  mock.plan.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
+  await slot()();
+  expect(mock.plan).toHaveBeenCalledTimes(2);
+  expect(mock.root).not.toHaveBeenCalled();
+  expect(slot()).toBeTypeOf("function");
+
+  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
+  await slot()();
+  expect(mock.plan).toHaveBeenCalledTimes(3);
+  expect(mock.plan.mock.calls[2][0][0]).toEqual({
+    ...mock.plan.mock.calls[1][0][0],
+    requestId: expect.any(String),
+  });
+  expect(mock.plan.mock.calls[2][0][0].requestId).not.toBe(mock.plan.mock.calls[1][0][0].requestId);
+  expect(mock.root).not.toHaveBeenCalled();
+
+  mock.confirm.mockResolvedValueOnce(booked);
+  await slot()();
+  expect(mock.confirm).toHaveBeenLastCalledWith([{ token: "tok-2", choice: 0 }]);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
 it("re-plans when the server refuses the token with not_found", async () => {
   const slot = await openProposals(new Date(NOON.getTime() + 600_000));
   mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "gone" });

@@ -681,9 +681,11 @@ function ProposalsList(props: {
   // autoCommitBest off the server never books; it returns the options.
   async function replan(toast: Toast): Promise<void> {
     const result = await planSchedule([{ ...props.request, requestId: randomUUID(), autoCommitBest: false }]);
-    const outcome = result.ok ? readOutcome(result.data) : undefined;
-    if (outcome?.kind === "committed") return finishCommitted(toast, outcome, props);
-    if (outcome?.kind === "proposals") {
+    // Keep the choices available so the user can retry a failed refresh.
+    if (!result.ok) return failToast(toast, result);
+    const outcome = readOutcome(result.data);
+    if (outcome.kind === "committed") return finishCommitted(toast, outcome, props);
+    if (outcome.kind === "proposals") {
       setState({ options: outcome.options, commitToken: outcome.commitToken });
       toast.style = Toast.Style.Success;
       toast.title = "Refreshed the open slots";
@@ -692,8 +694,7 @@ function ProposalsList(props: {
     }
     // The old options are dead, so a tap on one must not send the same plan again.
     setState((current) => ({ ...current, options: [] }));
-    if (!result.ok) failToast(toast, result);
-    else showNoSlot(toast, outcome?.kind === "failed" ? outcome.error : undefined);
+    showNoSlot(toast, outcome.error);
   }
 
   async function confirm(index: number): Promise<void> {
