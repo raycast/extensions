@@ -100,6 +100,8 @@ export function getRaycastAccessory(
 
   if (!usage) return getNoDataAccessory();
 
+  // The tooltip is also the menu-bar item tooltip, so it carries the plan shown in the list detail.
+  const plan = usage.plan ? `Plan: ${usage.plan} | ` : "";
   const renews = usage.nextCreditsAt ? ` | Renews in ${formatResetTime(usage.nextCreditsAt)}` : "";
   if (usage.percentageRemaining === null) {
     // Without a positive total there is no meter; show whichever amount the API reported.
@@ -108,7 +110,7 @@ export function getRaycastAccessory(
     return {
       icon: Icon.Coins,
       text: `${formatCredits(amount)} credits`,
-      tooltip: `${label}: ${formatCredits(amount)}${renews}`,
+      tooltip: `${plan}${label}: ${formatCredits(amount)}${renews}`,
     };
   }
 
@@ -116,6 +118,6 @@ export function getRaycastAccessory(
   return {
     icon: generatePieIcon(usage.percentageRemaining),
     text: `${formatPercent(toDisplayPercent(usage.percentageRemaining, mode))}%`,
-    tooltip: `AI credits: ${formatPercentDisplay(usage.percentageRemaining, mode, formatPercent)} | ${formatBalance(usage)} left${renews}`,
+    tooltip: `${plan}AI credits: ${formatPercentDisplay(usage.percentageRemaining, mode, formatPercent)} | ${formatBalance(usage)} left${renews}`,
   };
 }

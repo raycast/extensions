@@ -14,12 +14,15 @@ const RAYCAST_HEADERS = {
 };
 const SESSION_COOKIE = "__raycast_session";
 const FORWARDED_COOKIES = new Set([SESSION_COOKIE, "csrf_token"]);
+// A bare session value can itself contain `=` (base64 padding, or DevTools' URL-decoded view), so
+// only input with several cookies or one starting with a forwarded name is read as a Cookie header.
+const COOKIE_HEADER_PATTERN = /;|^(?:__raycast_session|csrf_token)=/;
 
 type RaycastResult = { usage: RaycastUsage | null; error: RaycastError | null };
 
 /**
  * Reduce a pasted Cookie header to the cookies the credits endpoint needs.
- * A bare value (no `=`) is taken as the `__raycast_session` value copied from DevTools.
+ * Any other input is taken as the bare `__raycast_session` value copied from DevTools.
  * Returns null when no non-empty session cookie is present.
  */
 export function normalizeRaycastCookieHeader(value: string | undefined): string | null {
@@ -29,7 +32,7 @@ export function normalizeRaycastCookieHeader(value: string | undefined): string 
     .trim();
   if (!trimmed) return null;
 
-  if (!trimmed.includes("=") && !trimmed.includes(";")) {
+  if (!COOKIE_HEADER_PATTERN.test(trimmed)) {
     return `${SESSION_COOKIE}=${trimmed}`;
   }
 

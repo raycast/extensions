@@ -104,6 +104,11 @@ test("normalizeRaycastCookieHeader treats a bare value as the session cookie", (
   assert.equal(normalizeRaycastCookieHeader("  abc%3D--def  "), "__raycast_session=abc%3D--def");
 });
 
+test("normalizeRaycastCookieHeader keeps a bare value that contains `=`", () => {
+  assert.equal(normalizeRaycastCookieHeader("YWJj==--ZGVm=="), "__raycast_session=YWJj==--ZGVm==");
+  assert.equal(normalizeRaycastCookieHeader("__raycast_session=YWJj=="), "__raycast_session=YWJj==");
+});
+
 test("normalizeRaycastCookieHeader rejects headers without a usable session", () => {
   assert.equal(normalizeRaycastCookieHeader(undefined), null);
   assert.equal(normalizeRaycastCookieHeader("   "), null);
