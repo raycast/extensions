@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Readable brand suggestion] - {PR_MERGE_DATE}
+## [Readable brand suggestion] - 2026-10-05
 
 ### Added
 
