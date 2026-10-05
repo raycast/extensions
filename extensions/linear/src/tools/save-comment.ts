@@ -37,12 +37,14 @@ export default withLinear(async (input: Input) => {
   }
 
   if (input.id) {
-    const payload = await linearClient.updateComment(input.id, { body: await body() });
+    const comment = await linearClient.comment({ id: input.id });
+    const payload = await linearClient.updateComment(comment.id, { body: await body() });
     return serializeComment(await payload.comment!);
   }
 
   if (input.parentId) {
-    const payload = await linearClient.createComment({ body: await body(), parentId: input.parentId });
+    const parent = await linearClient.comment({ id: input.parentId });
+    const payload = await linearClient.createComment({ body: await body(), parentId: parent.id });
     return serializeComment(await payload.comment!);
   }
 

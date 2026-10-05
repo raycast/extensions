@@ -55,5 +55,5 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, label: lab
 
 /** Finds the label to remove among the issue's current labels, so a name shared by several teams' labels still identifies the one on this issue. */
 async function findIssueLabel(issue: Issue, query: string) {
-  return findExact((await issue.labels()).nodes, query, "label on this issue");
+  return findExact((await issue.labels({ first: 250 })).nodes, query, "label on this issue");
 }
