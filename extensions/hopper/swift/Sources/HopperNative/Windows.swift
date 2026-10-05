@@ -1,0 +1,82 @@
+import AppKit
+import ApplicationServices
+
+// Windows of any app, and native macOS tab bars (Ghostty, Finder, TextEdit...), through Accessibility.
+// Used by the tab level's fallback source (src/lib/tabs/sources/windows.ts).
+
+struct AppWindows: Codable {
+  let bundleId: String
+  let windows: [AXWindowInfo]
+}
+
+struct AXWindowInfo: Codable {
+  /// 1-based position in the app's AX window list, front to back.
+  let index: Int
+  let title: String
+  let minimized: Bool
+  /// The window's AXDocument URL: the open file (TextEdit, Preview...), a folder (Terminal), or a page; nil if none.
+  let document: String?
+  let tabs: [AXTabInfo]
+}
+
+struct AXTabInfo: Codable {
+  let title: String
+  let selected: Bool
+}
+
+/// Standard windows of each running app; apps not running are omitted.
+func readWindows(bundleIds: [String]) -> [AppWindows] {
+  bundleIds.compactMap { bundleId in
+    guard let pid = pid(of: bundleId) else { return nil }
+    let windows = children(appElement(pid), kAXWindowsAttribute).enumerated().compactMap { i, window -> AXWindowInfo? in
+      guard string(window, kAXSubroleAttribute) == kAXStandardWindowSubrole as String else { return nil }
+      return AXWindowInfo(
+        index: i + 1,
+        title: string(window, kAXTitleAttribute) ?? "",
+        minimized: bool(window, kAXMinimizedAttribute),
+        document: string(window, kAXDocumentAttribute),
+        tabs: nativeTabs(window).map { AXTabInfo(title: string($0, kAXTitleAttribute) ?? "", selected: isSelected($0)) }
+      )
+    }
+    return AppWindows(bundleId: bundleId, windows: windows)
+  }
+}
+
+/// Raise the window at `index` (1-based) if it still has this title, else the first window with this title (the
+/// order changed), else the one at `index` (the title changed); then select the native tab at `tabIndex` (0-based)
+/// or, if it moved, the first with that title. Positions tell same-titled windows and tabs apart.
+/// The caller still has to bring the app to the front (Raycast `open()`, ADR-007).
+func raiseWindow(bundleId: String, index: Int, title: String, tab: String?, tabIndex: Int) -> Bool {
+  guard let pid = pid(of: bundleId) else { return false }
+  let windows = children(appElement(pid), kAXWindowsAttribute)
+  let atIndex = index >= 1 && index <= windows.count ? windows[index - 1] : nil
+  let window =
+    atIndex.flatMap { string($0, kAXTitleAttribute) == title ? $0 : nil }
+    ?? windows.first { string($0, kAXTitleAttribute) == title }
+    ?? atIndex
+  guard let window else { return false }
+  if bool(window, kAXMinimizedAttribute) {
+    AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
+  }
+  AXUIElementSetAttributeValue(window, kAXMainAttribute as CFString, kCFBooleanTrue)
+  AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+  if let tab {
+    let tabs = nativeTabs(window)
+    let atIndex = tabIndex >= 0 && tabIndex < tabs.count && string(tabs[tabIndex], kAXTitleAttribute) == tab
+    guard let button = atIndex ? tabs[tabIndex] : tabs.first(where: { string($0, kAXTitleAttribute) == tab })
+    else { return false }
+    AXUIElementPerformAction(button, kAXPressAction as CFString)
+  }
+  return true
+}
+
+/// Tab buttons of a window's native tab bar: an AXTabGroup directly in the window.
+private func nativeTabs(_ window: AXUIElement) -> [AXUIElement] {
+  guard let group = children(window).first(where: { string($0, kAXRoleAttribute) == kAXTabGroupRole as String })
+  else { return [] }
+  return children(group).filter { string($0, kAXRoleAttribute) == kAXRadioButtonRole as String }
+}
+
+private func isSelected(_ tab: AXUIElement) -> Bool {
+  (attribute(tab, kAXValueAttribute) as? NSNumber)?.boolValue ?? false
+}
