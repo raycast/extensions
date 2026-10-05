@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add Raycast AI credits] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show remaining Raycast AI credits, plan, and renewal date in the list and menu bar
+- Add a **Raycast Session Cookie** preference for signing in with your raycast.com website session
+
 ## [Multiple Claude accounts] - 2026-09-19
 
 ### New Features
