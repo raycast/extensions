@@ -136,3 +136,38 @@ describe("loadPageLink", () => {
     await expect(loadPageLink("https://example.com/x", {})).rejects.toThrow("HTTP 500 from example.com");
   });
 });
+
+describe("a page behind a login or a paywall that answers HTTP 200", () => {
+  const thin = (head: string, body = "<p>Subscribe to keep reading.</p>") =>
+    `<html><head><title>Story</title>${head}</head><body>${body}</body></html>`;
+  const paywallMarkup =
+    '<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Story","isAccessibleForFree":false}</script>';
+  const ACCESS = "This page needs a login or a subscription to read. Open it in your browser.";
+
+  it("is an access page, not unreadable, so no archived copy is offered around it", () => {
+    for (const ctx of [
+      parsePage(thin(paywallMarkup), "https://news.example/story", NOW),
+      parsePage(
+        thin("", '<form><input name="user"><input type="password" name="pass"></form>'),
+        "https://news.example/story",
+        NOW,
+      ),
+      parsePage(thin(""), "https://accounts.example.com/login?next=%2Fstory", NOW),
+      parsePage(thin(""), "https://news.example/subscribe?return=/story", NOW),
+    ]) {
+      expect(ctx.noteReason).toBe("access");
+      expect(ctx.note).toBe(ACCESS);
+    }
+  });
+
+  it("still reads a paywalled article whose text is all there (a metered paywall)", () => {
+    const html = read("article.html").replace("</head>", `${paywallMarkup.replace('"Story"', '"Long"')}</head>`);
+    const ctx = parsePage(html, "https://news.example/story", NOW);
+    expect(ctx.noteReason).toBeUndefined();
+    expect(bodyText(ctx.body).length).toBeGreaterThan(200);
+  });
+
+  it("keeps a JavaScript app with no sign of a wall unreadable", () => {
+    expect(parsePage(read("js-only.html"), "https://excalidraw.com/", NOW).noteReason).toBe("unreadable");
+  });
+});

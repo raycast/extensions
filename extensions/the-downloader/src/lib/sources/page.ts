@@ -15,6 +15,26 @@ const TIMEOUT_MS = 15_000;
 const MIN_TEXT = 200;
 const WORDS_PER_MINUTE = 200;
 const UNREADABLE = "Couldn't read this page's text (it may need a login or JavaScript).";
+const ACCESS = "This page needs a login or a subscription to read. Open it in your browser.";
+/** A sign-in or subscribe address, where a site sends you instead of the page. */
+const ACCESS_PATH = /(^|\/)(log-?in|sign-?in|sso|auth|subscribe|paywall)(\/|$)/i;
+
+/**
+ * True for a login or paywall page served with HTTP 200: the site's paywall
+ * markup (schema.org `isAccessibleForFree: false`), a sign-in form, or a
+ * sign-in or subscribe address after redirects. Only asked when the page has
+ * no readable text, so a metered paywall that sends the article is still read.
+ */
+function behindAccessWall(document: Doc, ld: Json[], url: string): boolean {
+  if (ld.some((o) => String(o.isAccessibleForFree).toLowerCase() === "false")) return true;
+  if (document.querySelector('input[type="password"]')) return true;
+  try {
+    const { hostname, pathname } = new URL(url);
+    return ACCESS_PATH.test(pathname) || /^(login|signin|accounts?|auth|sso)\./i.test(hostname);
+  } catch {
+    return false;
+  }
+}
 
 /** Elements that hold a paragraph of text; the innermost ones are kept. */
 const BLOCKS = "p, li, h1, h2, h3, h4, h5, h6, blockquote, pre, figcaption, dd, dt, td";
@@ -142,6 +162,7 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
   );
   const image = metaContent(document, 'meta[property="og:image"]', 'meta[name="twitter:image"]');
   const language = clean(document.documentElement?.getAttribute("lang")) || undefined;
+  const walled = behindAccessWall(document, ld, url);
 
   const readable = new Readability(document as unknown as Document, { charThreshold: MIN_TEXT }).parse();
   let paragraphs = readable?.content ? paragraphsOf(readable.content) : [];
@@ -170,8 +191,8 @@ export function parsePage(html: string, url: string, now = Date.now()): LinkCont
     stats: [],
     description,
     body: { type: "paragraphs", paragraphs },
-    note: paragraphs.length ? undefined : UNREADABLE,
-    noteReason: paragraphs.length ? undefined : "unreadable",
+    note: paragraphs.length ? undefined : walled ? ACCESS : UNREADABLE,
+    noteReason: paragraphs.length ? undefined : walled ? "access" : "unreadable",
     fetchedAt: now,
   };
 }

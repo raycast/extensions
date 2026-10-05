@@ -50,7 +50,8 @@ async function readPage(url: string, signal: AbortSignal | undefined, fallback: 
       throw error;
     });
   }
-  if (!fallback || hasBody(live)) return live;
+  // A login or paywall page that answered HTTP 200 is the site's decision too.
+  if (!fallback || hasBody(live) || live.noteReason === "access") return live;
   return loadArchivedPage(url, { signal }).catch(() => live);
 }
 

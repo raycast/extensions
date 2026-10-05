@@ -127,6 +127,14 @@ describe("loadLinkContext", () => {
     expect((await loadLinkContext("https://example.com/f1")).archive).toBeUndefined();
   });
 
+  it("never falls back to the archive for a login or paywall page that answered HTTP 200", async () => {
+    vi.mocked(loadPageLink).mockResolvedValueOnce({ ...ctx("page", false), noteReason: "access", note: "login" });
+    const live = await loadLinkContext("https://example.com/f7", { archiveFallback: true });
+    expect(live.noteReason).toBe("access");
+    expect(live.archive).toBeUndefined();
+    expect(loadArchivedPage).not.toHaveBeenCalled();
+  });
+
   it("keeps the live page's own answer when the archive has nothing either", async () => {
     vi.mocked(loadArchivedPage).mockRejectedValue(
       new LinkLoadError("The Internet Archive has no saved copy of this page."),

@@ -16,7 +16,8 @@ export type LinkBody =
   { type: "segments"; segments: TranscriptSegment[] } | { type: "paragraphs"; paragraphs: string[] };
 
 /** Why the body is empty: a transcript reason, or a page without readable text. */
-export type LinkNoteReason = NoTranscriptReason | "unreadable";
+/** `unreadable`: no text found; `access`: a login or paywall page, which never gets an archived copy. */
+export type LinkNoteReason = NoTranscriptReason | "unreadable" | "access";
 
 export type LinkContext = {
   url: string;
