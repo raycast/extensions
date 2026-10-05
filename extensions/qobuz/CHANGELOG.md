@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Fix media keys never posting] - {PR_MERGE_DATE}
+## [Fix media keys never posting] - 2026-10-05
 
 ### Fixed
 
