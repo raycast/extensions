@@ -1,6 +1,6 @@
 # oMLX Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-05
 
 - Download Model: search and download from HuggingFace and ModelScope
 - Manage Downloads: track HuggingFace and ModelScope progress, cancel, retry, remove downloads
