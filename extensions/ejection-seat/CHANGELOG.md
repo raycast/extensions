@@ -1,5 +1,16 @@
 # Ejection Seat Changelog
 
+## [Whole-Disk Scans] - {PR_MERGE_DATE}
+
+- Hide system helper volumes mounted `nobrowse` — such as `Recovery` on the internal disk and an external boot disk's `Preboot` — matching what Finder shows
+- Scan every volume on the same physical disk, hidden ones included, because `diskutil eject` ejects them together; the volume list marks volumes that share a disk
+- Confirm the volume has actually unmounted before reporting an eject as successful
+- The volume list and the blocker list now show the same scan, so a count on the list matches what you find inside
+- Spotlight and other system services are tagged by name instead of counted as likely blockers
+- Rename the "Open Eject All Disks" action to "Eject All Disks"
+- Replace "Toggle Details" with "Hide Sidebar" / "Show Sidebar" on ⌘⇧D, and remember the choice across launches
+- Note how Ejection Seat complements Eject All Disks, which names the disks it could not eject since [Raycast 2.6.0](https://www.raycast.com/changelog/macos/2-6)
+
 ## [Initial Version] - 2026-08-29
 
 - Find the processes and open files that may prevent a volume from ejecting

@@ -14,8 +14,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCachedState, usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { execFile } from "node:child_process";
 import { readdir, stat } from "node:fs/promises";
 import { promisify } from "node:util";
@@ -23,12 +23,22 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 const LSOF_TIMEOUT_MS = 8_000;
+const TOPOLOGY_TIMEOUT_MS = 8_000;
 const EJECT_TIMEOUT_MS = 30_000;
 const MAX_DETAIL_REFERENCES = 12;
 
-type Volume = {
+type Mount = {
   name: string;
   mountPoint: string;
+  // Mounted with `nobrowse`: Finder hides it, and so do we — unless it shares a
+  // physical disk with a visible volume, in which case it is scanned as a sibling.
+  hidden: boolean;
+};
+
+type Volume = Mount & {
+  // Every other mount under /Volumes on the same physical disk. `diskutil eject`
+  // ejects the whole disk, so a reference on any of these vetoes the eject too.
+  siblings: Mount[];
 };
 
 type OpenFile = {
@@ -56,6 +66,9 @@ type Scan = {
   volume: Volume;
   blockers: Blocker[];
   error?: string;
+  // performance.now() when the scan began. When a full scan and a single-volume
+  // rescan overlap, the one that STARTED later describes the volume more recently.
+  startedAt: number;
 };
 
 type ExecError = Error & {
@@ -124,28 +137,110 @@ function weightOf(blocker: Blocker): number {
 /* Volume discovery                                                           */
 /* -------------------------------------------------------------------------- */
 
+// `mount` prints `<device> on <mount point> (<flags>)`. A mount point may itself end
+// in a parenthesized suffix ("Disk (2)"), so anchor on the LAST group, whose flags
+// never contain parentheses.
+const MOUNT_LINE = /^.*? on (.*) \(([^()]*)\)$/;
+
+async function nobrowseMounts(): Promise<Set<string>> {
+  const { stdout } = await execFileAsync("/sbin/mount", [], { encoding: "utf8", timeout: TOPOLOGY_TIMEOUT_MS });
+  const hidden = new Set<string>();
+
+  for (const line of bufferToString(stdout).split("\n")) {
+    const match = MOUNT_LINE.exec(line);
+    if (match && match[2].split(", ").includes("nobrowse")) hidden.add(match[1]);
+  }
+
+  return hidden;
+}
+
+type DiskutilEntry = {
+  DeviceIdentifier: string;
+  MountPoint?: string;
+  Partitions?: { MountPoint?: string }[];
+  APFSVolumes?: { MountPoint?: string }[];
+  APFSPhysicalStores?: { DeviceIdentifier: string }[];
+};
+
+function wholeDisk(identifier: string): string {
+  return /^disk\d+/.exec(identifier)?.[0] ?? identifier;
+}
+
+// Maps each mount point to the physical whole disk `diskutil eject` would eject. An
+// APFS volume lives on a synthesized container (disk10), which in turn lives on a
+// partition of the physical disk (disk7s2 -> disk7); a plain partition maps directly.
+async function physicalDisks(): Promise<Map<string, string>> {
+  const execution = execFileAsync("/usr/sbin/diskutil", ["list", "-plist"], {
+    encoding: "utf8",
+    timeout: TOPOLOGY_TIMEOUT_MS,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  const plist = bufferToString((await execution).stdout);
+
+  const conversion = execFileAsync("/usr/bin/plutil", ["-convert", "json", "-o", "-", "-"], {
+    encoding: "utf8",
+    timeout: TOPOLOGY_TIMEOUT_MS,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  conversion.child.stdin?.end(plist);
+  const listing = JSON.parse(bufferToString((await conversion).stdout)) as { AllDisksAndPartitions?: DiskutilEntry[] };
+
+  const disks = new Map<string, string>();
+  for (const entry of listing.AllDisksAndPartitions ?? []) {
+    const store = entry.APFSPhysicalStores?.[0]?.DeviceIdentifier;
+    const disk = wholeDisk(store ?? entry.DeviceIdentifier);
+
+    for (const mountPoint of [
+      entry.MountPoint,
+      ...(entry.Partitions ?? []).map((partition) => partition.MountPoint),
+      ...(entry.APFSVolumes ?? []).map((volume) => volume.MountPoint),
+    ]) {
+      if (mountPoint) disks.set(mountPoint, disk);
+    }
+  }
+
+  return disks;
+}
+
 async function volumes(): Promise<Volume[]> {
   const volumesDirectory = await stat("/Volumes");
-  const entries = await readdir("/Volumes", { withFileTypes: true });
+  const [entries, hidden, disks] = await Promise.all([
+    readdir("/Volumes", { withFileTypes: true }),
+    nobrowseMounts().catch(() => new Set<string>()),
+    // Without the topology each volume is still scanned on its own, exactly as before;
+    // a refused eject still names the dissenting process.
+    physicalDisks().catch(() => new Map<string, string>()),
+  ]);
 
-  const mountedVolumes = await Promise.all(
+  const mounted = await Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
-      .map(async (entry) => {
+      .map(async (entry): Promise<Mount | undefined> => {
         const mountPoint = `/Volumes/${entry.name}`;
 
         try {
           // macOS retains an empty directory for some formerly mounted volumes. Its
           // device matches /Volumes, so never pass it to lsof as a filesystem root.
-          return (await stat(mountPoint)).dev === volumesDirectory.dev ? undefined : { name: entry.name, mountPoint };
+          if ((await stat(mountPoint)).dev === volumesDirectory.dev) return undefined;
+          return { name: entry.name, mountPoint, hidden: hidden.has(mountPoint) };
         } catch {
           return undefined;
         }
       }),
   );
 
-  return mountedVolumes
-    .filter((volume): volume is Volume => volume !== undefined)
+  // Siblings come only from this /Volumes list, never from the full mount table: an
+  // internal volume's disk also carries / and /System/Volumes/Data, and lsof must
+  // never be pointed at the startup disk.
+  const mounts = mounted.filter((mount): mount is Mount => mount !== undefined);
+
+  return mounts
+    .filter((mount) => !mount.hidden)
+    .map((mount) => {
+      const disk = disks.get(mount.mountPoint);
+      const siblings = disk ? mounts.filter((other) => other !== mount && disks.get(other.mountPoint) === disk) : [];
+      return { ...mount, siblings };
+    })
     .sort((left, right) => left.name.localeCompare(right.name));
 }
 
@@ -153,9 +248,9 @@ async function volumes(): Promise<Volume[]> {
 /* lsof                                                                       */
 /* -------------------------------------------------------------------------- */
 
-async function lsof(mountPoint: string): Promise<string> {
+async function lsof(mountPoints: string[]): Promise<string> {
   try {
-    const { stdout } = await execFileAsync("/usr/sbin/lsof", ["-b", "-nP", "-F0pcLuafltn", "--", mountPoint], {
+    const { stdout } = await execFileAsync("/usr/sbin/lsof", ["-b", "-nP", "-F0pcLuafltn", "--", ...mountPoints], {
       encoding: "utf8",
       timeout: LSOF_TIMEOUT_MS,
       maxBuffer: 10 * 1024 * 1024,
@@ -357,8 +452,21 @@ function processAdvice(blocker: Blocker): Advice {
 /* -------------------------------------------------------------------------- */
 
 async function scanVolume(volume: Volume): Promise<Scan> {
+  const startedAt = performance.now();
   try {
-    const blockers = parseLsof(await lsof(volume.mountPoint));
+    // A pushed BlockerList can outlive its volume. Never point lsof at a mount point that
+    // is now just an empty directory on the startup disk.
+    if (!(await isStillMounted(volume.mountPoint))) {
+      return { volume, blockers: [], error: `${volume.name} is no longer mounted.`, startedAt };
+    }
+
+    // The same view keeps the siblings it was opened with, so drop any that have since
+    // been unmounted, and return the list actually scanned.
+    const stillMounted = await Promise.all(volume.siblings.map((sibling) => isStillMounted(sibling.mountPoint)));
+    volume = { ...volume, siblings: volume.siblings.filter((_, index) => stillMounted[index]) };
+
+    const mountPoints = [volume.mountPoint, ...volume.siblings.map((sibling) => sibling.mountPoint)];
+    const blockers = parseLsof(await lsof(mountPoints));
     const bundles = await appBundles(blockers.map((blocker) => blocker.pid));
 
     for (const blocker of blockers) blocker.app = bundles.get(blocker.pid);
@@ -373,9 +481,9 @@ async function scanVolume(volume: Volume): Promise<Scan> {
       return processAdvice(left).title.localeCompare(processAdvice(right).title);
     });
 
-    return { volume, blockers };
+    return { volume, blockers, startedAt };
   } catch (error) {
-    return { volume, blockers: [], error: errorMessage(error) };
+    return { volume, blockers: [], error: errorMessage(error), startedAt };
   }
 }
 
@@ -397,15 +505,45 @@ const DISSENTER = /dissented by PID (\d+) \((.*)\)/i;
 // onEjected and onFailed are deliberately separate: a failed eject must NOT pop the
 // blocker list, because the toast that names the vetoing process (and offers to
 // activate it) is useless if the view showing that process's actions is already gone.
+// True while the path is still a filesystem root of its own. A volume that has gone
+// away leaves either nothing or an empty directory on the /Volumes device.
+async function isStillMounted(mountPoint: string): Promise<boolean> {
+  try {
+    const [volumesDirectory, candidate] = await Promise.all([stat("/Volumes"), stat(mountPoint)]);
+    return candidate.dev !== volumesDirectory.dev;
+  } catch {
+    return false;
+  }
+}
+
+function ejectedNames(volume: Volume): string {
+  const names = [volume.name, ...volume.siblings.filter((sibling) => !sibling.hidden).map((sibling) => sibling.name)];
+  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 async function ejectVolume(volume: Volume, onEjected: () => void, onFailed: () => void): Promise<void> {
-  const toast = await showToast({ style: Toast.Style.Animated, title: `Ejecting ${volume.name}` });
+  const names = ejectedNames(volume);
+  const toast = await showToast({ style: Toast.Style.Animated, title: `Ejecting ${names}` });
 
   try {
     // Deliberately NOT `force` — this is the same request Finder makes, so a real
     // blocker still refuses and we surface why.
     await execFileAsync("/usr/sbin/diskutil", ["eject", volume.mountPoint], { timeout: EJECT_TIMEOUT_MS });
+
+    // Trust the filesystem, not the exit status: only call it ejected once the mount
+    // point is actually gone.
+    if (await isStillMounted(volume.mountPoint)) {
+      await toast.hide();
+      await showFailure(
+        `Could not eject ${volume.name}`,
+        new Error(`diskutil reported success, but ${volume.mountPoint} is still mounted.`),
+      );
+      onFailed();
+      return;
+    }
+
     toast.style = Toast.Style.Success;
-    toast.title = `Ejected ${volume.name}`;
+    toast.title = `Ejected ${names}`;
     onEjected();
   } catch (error) {
     const execution = error as ExecError;
@@ -499,9 +637,19 @@ async function openEjectAllDisks(): Promise<void> {
 /* Presentation helpers                                                       */
 /* -------------------------------------------------------------------------- */
 
-function relativePath(path: string | undefined, mountPoint: string): string {
+// A reference on a sibling volume is named after that volume, so it never reads as
+// a path on the one the user picked.
+function relativePath(path: string | undefined, volume: Volume): string {
   if (!path) return "Path unavailable";
-  return path.startsWith(`${mountPoint}/`) ? path.slice(mountPoint.length + 1) : path;
+  if (path.startsWith(`${volume.mountPoint}/`)) return path.slice(volume.mountPoint.length + 1);
+
+  for (const sibling of volume.siblings) {
+    if (path === sibling.mountPoint) return `${sibling.name}: /`;
+    if (path.startsWith(`${sibling.mountPoint}/`))
+      return `${sibling.name}: ${path.slice(sibling.mountPoint.length + 1)}`;
+  }
+
+  return path;
 }
 
 function referenceSummary(blocker: Blocker): { text: string; color?: Color } {
@@ -532,7 +680,7 @@ const SECTION_ORDER = ["Likely Blockers", "Other References", "System Services"]
 /* Views                                                                      */
 /* -------------------------------------------------------------------------- */
 
-function BlockerDetail({ blocker, mountPoint }: { blocker: Blocker; mountPoint: string }) {
+function BlockerDetail({ blocker, volume }: { blocker: Blocker; volume: Volume }) {
   const advice = processAdvice(blocker);
   const files = [...blocker.files].sort(
     (left, right) => REFERENCE_KINDS[referenceKind(left)].weight - REFERENCE_KINDS[referenceKind(right)].weight,
@@ -564,7 +712,7 @@ function BlockerDetail({ blocker, mountPoint }: { blocker: Blocker; mountPoint: 
             <List.Item.Detail.Metadata.Label
               key={`${file.descriptor}-${index}`}
               title={REFERENCE_KINDS[referenceKind(file)].label}
-              text={relativePath(file.path, mountPoint)}
+              text={relativePath(file.path, volume)}
             />
           ))}
           {hidden > 0 ? (
@@ -584,12 +732,14 @@ function BlockerActions({
   volume,
   onRefresh,
   onEjected,
+  isShowingDetail,
   onToggleDetail,
 }: {
   blocker: Blocker;
   volume: Volume;
   onRefresh: () => void;
   onEjected: () => void;
+  isShowingDetail: boolean;
   onToggleDetail: () => void;
 }) {
   const app = blocker.app;
@@ -613,9 +763,9 @@ function BlockerActions({
           onAction={onRefresh}
         />
         <Action
-          title="Toggle Details"
-          icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          title={isShowingDetail ? "Hide Sidebar" : "Show Sidebar"}
+          icon={Icon.AppWindowSidebarRight}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           onAction={onToggleDetail}
         />
         <Action.CopyToClipboard
@@ -644,23 +794,50 @@ function BlockerActions({
       </ActionPanel.Section>
       <ActionPanel.Section title="Other Commands">
         <Action title="Open Kill Process" icon={Icon.XMarkCircle} onAction={openKillProcess} />
-        <Action title="Open Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
+        <Action title="Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesChanged: () => void }) {
+// Opens on the very scan the volume list counted, so the two views can never disagree
+// about what was seen. A refresh re-scans this volume and hands the result back up, so
+// the volume list shows it too.
+function BlockerList({
+  initialScan,
+  isStale,
+  onScanned,
+  onVolumesChanged,
+}: {
+  initialScan: Scan;
+  // Opened while the volume list was mid-refresh, so initialScan is the previous scan
+  // and the newer one can never reach this pushed view. Re-scan once on open instead.
+  isStale: boolean;
+  onScanned: (scan: Scan) => void;
+  onVolumesChanged: () => void;
+}) {
   const { pop } = useNavigation();
-  const { data, isLoading, revalidate } = usePromise(scanVolume, [volume]);
-  const [isShowingDetail, setIsShowingDetail] = useState(true);
+  const [scan, setScan] = useState(initialScan);
+  const [isLoading, setIsLoading] = useState(false);
+  const latestRun = useRef(0);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-detail-blockers", true);
 
-  const { blockers, error } = data ?? { blockers: [], error: undefined };
+  const { volume, blockers, error } = scan;
 
-  function onRefresh() {
-    revalidate();
-    onVolumesChanged();
+  async function onRefresh() {
+    const run = ++latestRun.current;
+    setIsLoading(true);
+    // scanVolume never rejects: a failed scan comes back with `error` set.
+    const next = await scanVolume(volume);
+    if (run !== latestRun.current) return;
+    setScan(next);
+    setIsLoading(false);
+    onScanned(next);
   }
+
+  useEffect(() => {
+    if (isStale) onRefresh();
+  }, []);
 
   function onEjected() {
     onVolumesChanged();
@@ -738,13 +915,14 @@ function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesCh
                 subtitle={`PID ${blocker.pid}${blocker.user ? ` · ${blocker.user}` : ""}`}
                 keywords={[blocker.command ?? "", ...blocker.files.map((file) => file.path ?? "")]}
                 accessories={[{ tag: { value: summary.text, color: summary.color ?? Color.SecondaryText } }]}
-                detail={<BlockerDetail blocker={blocker} mountPoint={volume.mountPoint} />}
+                detail={<BlockerDetail blocker={blocker} volume={volume} />}
                 actions={
                   <BlockerActions
                     blocker={blocker}
                     volume={volume}
                     onRefresh={onRefresh}
                     onEjected={onEjected}
+                    isShowingDetail={isShowingDetail}
                     onToggleDetail={() => setIsShowingDetail((showing) => !showing)}
                   />
                 }
@@ -757,24 +935,61 @@ function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesCh
   );
 }
 
+function siblingAccessory(volume: Volume): List.Item.Accessory[] {
+  const visible = volume.siblings.filter((sibling) => !sibling.hidden);
+  if (visible.length === 0) return [];
+
+  const names = visible.map((sibling) => sibling.name).join(", ");
+  return [
+    {
+      icon: Icon.HardDrive,
+      text: `+ ${names}`,
+      tooltip: `Same physical disk as ${names}. Ejecting one ejects them all, so their blockers are listed here too.`,
+    },
+  ];
+}
+
 function volumeAccessory(scan: Scan, isLoading: boolean): List.Item.Accessory[] {
-  if (scan.error) return [{ tag: { value: "Scan failed", color: Color.Red } }];
-  if (isLoading) return [];
+  const siblings = siblingAccessory(scan.volume);
+  if (scan.error) return [...siblings, { tag: { value: "Scan failed", color: Color.Red } }];
+  if (isLoading) return siblings;
 
-  const likely = scan.blockers.filter((blocker) => weightOf(blocker) <= 1).length;
+  // Count with the same sectionFor the blocker list groups by, so a tag here always
+  // names a section the user will find after drilling in.
+  const inSection = (title: string) => scan.blockers.filter((blocker) => sectionFor(blocker) === title);
+
+  const likely = inSection("Likely Blockers").length;
   if (likely > 0) {
-    return [{ tag: { value: likely === 1 ? "1 likely blocker" : `${likely} likely blockers`, color: Color.Red } }];
+    return [
+      ...siblings,
+      { tag: { value: likely === 1 ? "1 likely blocker" : `${likely} likely blockers`, color: Color.Red } },
+    ];
   }
 
-  const others = scan.blockers.length;
+  const others = inSection("Other References").length;
   if (others > 0) {
-    return [{ tag: { value: others === 1 ? "1 other reference" : `${others} other references`, color: Color.Orange } }];
+    return [
+      ...siblings,
+      { tag: { value: others === 1 ? "1 other reference" : `${others} other references`, color: Color.Orange } },
+    ];
   }
 
-  return [{ tag: { value: "No visible blockers", color: Color.SecondaryText } }];
+  // One kind of service reads by name; a mix reads as the row count the System Services
+  // section header shows.
+  const services = inSection("System Services");
+  const names = new Set(services.map((blocker) => processAdvice(blocker).title));
+  if (services.length > 0) {
+    const value = names.size === 1 ? [...names][0] : `${services.length} system services`;
+    return [...siblings, { tag: { value, color: Color.SecondaryText } }];
+  }
+
+  return [...siblings, { tag: { value: "No visible blockers", color: Color.SecondaryText } }];
 }
 
 export default function Command() {
+  // A refresh inside BlockerList re-scans one volume. Show whichever scan of a volume
+  // started last, so a slow full scan that began earlier cannot overwrite it.
+  const [rescans, setRescans] = useState<Record<string, Scan>>({});
   const { data, isLoading, error, revalidate } = usePromise(scanAll);
 
   if (error) {
@@ -789,7 +1004,10 @@ export default function Command() {
     );
   }
 
-  const scans = data ?? [];
+  const scans = (data ?? []).map((scan) => {
+    const rescan = rescans[scan.volume.mountPoint];
+    return rescan && rescan.startedAt > scan.startedAt ? rescan : scan;
+  });
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select a mounted volume to inspect">
       {!isLoading && scans.length === 0 ? (
@@ -812,7 +1030,14 @@ export default function Command() {
                 <Action.Push
                   title="Find Ejection Blockers"
                   icon={Icon.MagnifyingGlass}
-                  target={<BlockerList volume={scan.volume} onVolumesChanged={revalidate} />}
+                  target={
+                    <BlockerList
+                      initialScan={scan}
+                      isStale={isLoading}
+                      onScanned={(next) => setRescans((current) => ({ ...current, [next.volume.mountPoint]: next }))}
+                      onVolumesChanged={revalidate}
+                    />
+                  }
                 />
                 <Action.ShowInFinder path={scan.volume.mountPoint} />
                 <Action
@@ -829,7 +1054,7 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                   onAction={() => ejectVolume(scan.volume, revalidate, revalidate)}
                 />
-                <Action title="Open Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
+                <Action title="Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
               </ActionPanel.Section>
             </ActionPanel>
           }
