@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { checkAuth, loginWithBrowser } from "./lib/pass-cli";
 import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
@@ -11,31 +11,31 @@ export default function Command() {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  useEffect(() => {
-    async function verifyAuth() {
-      try {
-        const isAuthenticated = await checkAuth();
-        setAuthState(isAuthenticated ? "authenticated" : "not-authenticated");
-      } catch (error) {
-        if (error instanceof PassCliError) {
-          if (error.type === "not_installed") {
-            setAuthState("not-installed");
-            return;
-          }
-          if (error.type === "not_authenticated") {
-            setAuthState("not-authenticated");
-            return;
-          }
+  async function verifyAuth() {
+    try {
+      const isAuthenticated = await checkAuth();
+      setAuthState(isAuthenticated ? "authenticated" : "not-authenticated");
+    } catch (error) {
+      if (error instanceof PassCliError) {
+        if (error.type === "not_installed") {
+          setAuthState("not-installed");
+          return;
         }
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error checking authentication status",
-          message: error instanceof Error ? error.message : String(error),
-        });
-        setAuthState("not-authenticated");
+        if (error.type === "not_authenticated") {
+          setAuthState("not-authenticated");
+          return;
+        }
       }
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error checking authentication status",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      setAuthState("not-authenticated");
     }
+  }
 
+  useEffect(() => {
     verifyAuth();
   }, []);
 
@@ -116,6 +116,15 @@ export default function Command() {
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
                 shortcut={platformShortcut(["cmd"], "d")}
+              />
+              <Action
+                title="Check Again"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={() => {
+                  setAuthState("loading");
+                  void verifyAuth();
+                }}
               />
             </ActionPanel>
           }

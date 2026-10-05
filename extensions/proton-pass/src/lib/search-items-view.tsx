@@ -217,7 +217,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} />;
+    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} onCheckAgain={loadItems} />;
   }
   const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
