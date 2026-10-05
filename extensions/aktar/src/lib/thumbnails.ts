@@ -132,13 +132,17 @@ export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }
   const [files, setFiles] = useState<Record<string, string | null>>({});
   // Asked for already (answered or still running), so a new selection doesn't ask again.
   const requested = useRef(new Set<string>());
+  // Selected rows already asked to have one made.
+  const generated = useRef(new Set<string>());
   const mounted = useRef(true);
-  useEffect(
-    () => () => {
+  // Set again on mount: React runs effects twice in development, and a
+  // cleanup that left this false would drop every icon that arrives.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
       mounted.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
   const first = items.slice(0, MAX_ICONS);
   // A row further down, or one found by searching, still gets its icon once it's selected.
   const selected = items.find((item) => item.id === selectedId);
@@ -150,10 +154,20 @@ export function useThumbnailIcons(items: { id: string; source: ThumbnailSource }
       if (requested.current.has(item.identity)) continue;
       requested.current.add(item.identity);
       thumbnailFile(item.source, ICON_PX, false).then((file) => {
-        if (mounted.current) setFiles((current) => ({ ...current, [item.identity]: file }));
+        if (mounted.current) setFiles((current) => ({ ...current, [item.identity]: current[item.identity] || file }));
       });
     }
   }, [key]);
+  // The selected row may have one made, like the detail pane does: an image
+  // shown from its link never gets one otherwise.
+  const selectedIdentity = selected ? identity(selected.source) : "";
+  useEffect(() => {
+    if (!selected || generated.current.has(selectedIdentity)) return;
+    generated.current.add(selectedIdentity);
+    thumbnailFile(selected.source, ICON_PX, true).then((file) => {
+      if (mounted.current && file) setFiles((current) => ({ ...current, [selectedIdentity]: file }));
+    });
+  }, [selectedIdentity]);
   return Object.fromEntries(wanted.map((item) => [item.id, files[item.identity]]));
 }
 
