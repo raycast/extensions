@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gtd-brain",
+  "title": "GTD Brain",
+  "description": "Capture anything to your GTD Brain Inbox and work your Next Actions, Projects, Waiting For and Someday/Maybe lists without leaving the keyboard.",
+  "icon": "icon.png",
+  "author": "minosin",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture to Inbox",
+      "subtitle": "GTD Brain",
+      "description": "Write a thought down with optional notes; it lands at the top of your Inbox.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "What's on your mind?",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "GTD Brain",
+      "description": "Type it and press Enter — straight to the top of your Inbox, no form.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "What's on your mind?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "GTD Brain",
+      "description": "Clarify your Inbox: move each card to Next Actions, Projects, Waiting For or Someday/Maybe, or archive it.",
+      "mode": "view"
+    },
+    {
+      "name": "next-actions",
+      "title": "Next Actions",
+      "subtitle": "GTD Brain",
+      "description": "Your Next Actions by context. Mark one done or change its context.",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "GTD Brain",
+      "description": "Your Projects with the next action pinned to each.",
+      "mode": "view"
+    },
+    {
+      "name": "waiting-for",
+      "title": "Waiting for",
+      "subtitle": "GTD Brain",
+      "description": "Everything delegated: who you are waiting on and since when.",
+      "mode": "view"
+    },
+    {
+      "name": "someday-maybe",
+      "title": "Someday/Maybe",
+      "subtitle": "GTD Brain",
+      "description": "Ideas you are incubating. Activate one into Next Actions when its time comes.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19",
+    "eslint": "^9",
+    "prettier": "^3",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
