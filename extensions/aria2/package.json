@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aria2",
+  "title": "Aria2",
+  "description": "Add and manage torrents in aria2c from magnet links or torrent files.",
+  "icon": "icon.png",
+  "author": "urbneng",
+  "platforms": ["macOS"],
+  "categories": ["Applications", "Developer Tools"],
+  "keywords": ["aria2", "torrent", "magnet", "bittorrent", "download"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-torrents",
+      "title": "Manage Torrents",
+      "subtitle": "Aria2",
+      "description": "View, pause, resume, and remove downloading, seeding, and completed torrents.",
+      "mode": "view"
+    },
+    {
+      "name": "add-torrent",
+      "title": "Add Torrent",
+      "subtitle": "Aria2",
+      "description": "Add a magnet link, torrent URL, or torrent file to aria2c.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "uri",
+          "placeholder": "Magnet or torrent URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "set-magnet-handler",
+      "title": "Set Magnet Handler",
+      "subtitle": "Aria2",
+      "description": "Install a macOS helper that downloads clicked magnet links with aria2c to your download folder.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rpcHost",
+      "type": "textfield",
+      "required": false,
+      "title": "RPC Host",
+      "description": "Host of the aria2 JSON-RPC server.",
+      "placeholder": "127.0.0.1",
+      "default": "127.0.0.1"
+    },
+    {
+      "name": "rpcPort",
+      "type": "textfield",
+      "required": false,
+      "title": "RPC Port",
+      "description": "Port of the aria2 JSON-RPC server.",
+      "placeholder": "6800",
+      "default": "6800"
+    },
+    {
+      "name": "rpcSecret",
+      "type": "password",
+      "required": false,
+      "title": "RPC Secret",
+      "description": "Value of aria2c --rpc-secret. Leave empty if RPC is unauthenticated."
+    },
+    {
+      "name": "rpcSecure",
+      "type": "checkbox",
+      "required": false,
+      "title": "RPC",
+      "label": "Use HTTPS for JSON-RPC",
+      "description": "Required if the RPC host is not on this Mac and you set an RPC secret. You can also prefix the host with https://.",
+      "default": false
+    },
+    {
+      "name": "downloadDir",
+      "type": "directory",
+      "required": false,
+      "title": "Default Download Folder",
+      "description": "Where new torrents are saved. Defaults to ~/Downloads if unset."
+    },
+    {
+      "name": "aria2Path",
+      "type": "textfield",
+      "required": false,
+      "title": "aria2c Path",
+      "description": "Path to the aria2c binary. Leave empty to auto-detect Homebrew and PATH.",
+      "placeholder": "/opt/homebrew/bin/aria2c"
+    },
+    {
+      "name": "autoStart",
+      "type": "checkbox",
+      "required": false,
+      "title": "Daemon",
+      "label": "Start aria2c with RPC if it is not running",
+      "description": "Starts a local aria2c daemon when 127.0.0.1/localhost cannot be reached. Ignored for remote hosts and HTTPS.",
+      "default": true
+    },
+    {
+      "name": "seedRatio",
+      "type": "textfield",
+      "required": false,
+      "title": "Seed Ratio",
+      "description": "Share ratio at which seeding stops for torrents this extension starts. 0 seeds forever. Default 1.0 matches aria2.",
+      "placeholder": "1.0",
+      "default": "1.0"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
