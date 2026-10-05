@@ -7,7 +7,7 @@ Fix text that you typed in a wrong keyboard layout and switch to the correct lay
 ## How to use
 
 1. Select the text. If you select nothing, Retype selects from the cursor to the start of the line.
-2. Run **Retype text typed in wrong keyboard layout**. Assign a hotkey for best results.
+2. Run **Correct Text Typed in Wrong Keyboard Layout**. Assign a hotkey for best results.
 3. Retype pastes the fixed text and switches your keyboard to the correct layout.
 
 ## Features

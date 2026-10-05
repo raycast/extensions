@@ -21,7 +21,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Retype text typed in wrong keyboard layout",
+      "title": "Correct Text Typed in Wrong Keyboard Layout",
       "description": "Fix text that you typed in a wrong keyboard layout and switch to the correct layout.",
       "mode": "no-view",
       "keywords": [
