@@ -1,6 +1,7 @@
 import "./initSentry";
 
 import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { ReclaimTaskList } from "./components/ReclaimTaskList";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
@@ -8,6 +9,7 @@ import { useTaskActions, useTasks } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
 import { formatPriority, formatPriorityIcon, formatStrDuration, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
+import { SNOOZE_OPTIONS, SnoozeOption } from "./consts/tasks.consts";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -23,6 +25,23 @@ const TASK_GROUP_LABEL: Record<TaskStatus, string> = {
   CANCELLED: "Cancelled",
   NEW: "New",
   SCHEDULED: "Scheduled",
+};
+
+const getSnoozeUntil = (snoozeOption: SnoozeOption) => {
+  const date = new Date();
+
+  if (snoozeOption.minutes) {
+    date.setMinutes(date.getMinutes() + snoozeOption.minutes);
+  } else if (snoozeOption.days) {
+    date.setDate(date.getDate() + snoozeOption.days);
+    if (snoozeOption.startOfDay) {
+      date.setHours(0, 0, 0, 0);
+    }
+  } else {
+    return undefined;
+  }
+
+  return date.toISOString();
 };
 
 type StatusDropdownProps = {
@@ -54,7 +73,7 @@ function TaskList() {
 
   const { currentUser } = useUser();
   const { tasks: sourceTasks, isLoading } = useTasks();
-  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
+  const { addTime, updateTask, doneTask, incompleteTask, rescheduleTask } = useTaskActions();
 
   /********************/
   /*     useState     */
@@ -152,6 +171,21 @@ function TaskList() {
     // optimistic update
     setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
     showToast(Toast.Style.Success, `Updated '${task.title}'!`);
+  });
+
+  const handleSnoozeTask = useCallbackSafeRef(async (task: Task, snoozeOption: SnoozeOption) => {
+    await showToast(Toast.Style.Animated, `Snoozing '${task.title}'...`);
+    try {
+      await rescheduleTask(String(task.id), snoozeOption.value);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: `Error while snoozing '${task.title}'`, message: String(error) });
+      return;
+    }
+    const snoozeUntil = getSnoozeUntil(snoozeOption);
+    if (snoozeUntil) {
+      setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, snoozeUntil } : t)));
+    }
+    showToast(Toast.Style.Success, `Snoozed '${task.title}' for ${snoozeOption.title}`);
   });
 
   const getListAccessories = useCallbackSafeRef((task: Task) => {
@@ -395,6 +429,21 @@ function TaskList() {
                               }
                             }}
                           />
+                          <ActionPanel.Submenu
+                            title="Snooze Task"
+                            icon={Icon.ArrowClockwise}
+                            shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          >
+                            {SNOOZE_OPTIONS.map((option) => (
+                              <Action
+                                key={option.value}
+                                title={option.title}
+                                onAction={() => {
+                                  handleSnoozeTask(task, option);
+                                }}
+                              />
+                            ))}
+                          </ActionPanel.Submenu>
                           {task.onDeck ? (
                             <Action
                               icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
@@ -451,7 +500,17 @@ function TaskList() {
 }
 
 function Command() {
-  return <TaskList />;
+  const { currentUser, isLoading, isAssistantEnabled } = useUser();
+
+  // We need the user loaded to know which task view to show — otherwise we'd
+  // flash the 1.0 list for 2.0 users before the flag resolves. Only block on
+  // the initial load: a cached user is populated synchronously, so we render
+  // the correct view immediately even while a background refresh runs.
+  if (!currentUser && isLoading) {
+    return <List isLoading navigationTitle="Search Tasks" searchBarPlaceholder="Search tasks" />;
+  }
+
+  return isAssistantEnabled ? <ReclaimTaskList /> : <TaskList />;
 }
 
 export default withRAIErrorBoundary(Command);

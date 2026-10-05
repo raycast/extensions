@@ -1,0 +1,11 @@
+# Show the current commit
+rev:
+  git rev-parse --short HEAD
+
+# Compile the project
+build:
+  npm run build
+
+# Run the test suite
+test: build
+  npm test

@@ -1,5 +1,16 @@
 # Lucide Icons Changelog
 
+## [Maintenance] - 2026-08-11
+
+- Update keyboard shortcuts and add Windows ones
+- Update navigationTitle to show icon name
+- Bump all dependencies to the latest
+
+## [Updates] - 2025-12-16
+
+- Add support for Windows
+- Update (dev) dependencies
+
 ## [Update] - 2025-06-12
 
 - Added the preference to select the primary action to use.

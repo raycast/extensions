@@ -30,7 +30,7 @@ You're all set! 🎉
 
 ### Local Installation
 
-If you wish to use your own local Bitwarden CLI, you can do so by entering the corresponding path in the `Bitwarden CLI Path` field (tip: use the `which bw` command to find the path).
+If you wish to use your own local Bitwarden CLI, you can do so by entering the corresponding path in the `Bitwarden CLI Path` field (tip: use the `where bw` command to find the path).
 
 ### Self-hosted Instance
 

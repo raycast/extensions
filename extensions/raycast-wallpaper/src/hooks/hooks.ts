@@ -2,21 +2,23 @@ import { useCallback, useEffect, useState } from "react";
 import { CacheKey, RAYCAST_WALLPAPER_LIST_URL } from "../utils/constants";
 import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import { captureException, showToast, Toast } from "@raycast/api";
-import { cache, cachePicture, checkCache } from "../utils/common-utils";
+import { cache } from "../utils/common-utils";
 import axios from "axios";
 import { getAppearanceByTitle } from "../utils/appearance-utils";
 import { respectAppearance } from "../types/preferences";
-import { getSystemAppearance } from "../utils/applescript-utils";
+import { getSystemAppearance } from "../utils/platform-utils";
 import Style = Toast.Style;
 
-export const getRaycastWallpaperList = (refresh: number) => {
+export const useRaycastWallpaperList = (refresh: number) => {
   const [raycastWallpapers, setRaycastWallpapers] = useState<RaycastWallpaperWithInfo[]>([]);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     //get wallpaper list
     try {
-      const systemAppearance = await getSystemAppearance();
-      let wallpaperRespectAppearance: RaycastWallpaperWithInfo[] = [];
+      const systemAppearance = respectAppearance ? await getSystemAppearance() : undefined;
       const _localStorage = cache.get(CacheKey.WALLPAPER_LIST_CACHE);
       const _wallpaperList =
         typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as RaycastWallpaper[]);
@@ -24,25 +26,23 @@ export const getRaycastWallpaperList = (refresh: number) => {
       const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
       const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
 
-      const _raycastWallpaperWithInfo1 = _wallpaperList.map((value) => {
-        return {
-          title: value.title,
-          url: value.url,
-          exclude: _excludeList.includes(value.url),
-          appearance: getAppearanceByTitle(value.title),
-        } as RaycastWallpaperWithInfo;
-      });
+      const updateWallpapers = (wallpapers: RaycastWallpaper[]) => {
+        const wallpapersWithInfo = wallpapers.map((wallpaper) => ({
+          title: wallpaper.title,
+          url: wallpaper.url,
+          exclude: _excludeList.includes(wallpaper.url),
+          appearance: getAppearanceByTitle(wallpaper.title),
+        }));
+        setRaycastWallpapers(
+          respectAppearance
+            ? wallpapersWithInfo.filter((wallpaper) => wallpaper.appearance === systemAppearance)
+            : wallpapersWithInfo,
+        );
+      };
 
-      if (respectAppearance) {
-        wallpaperRespectAppearance = _raycastWallpaperWithInfo1.filter((value) => {
-          return value.appearance === systemAppearance;
-        });
-      } else {
-        wallpaperRespectAppearance = _raycastWallpaperWithInfo1;
-      }
-      setRaycastWallpapers(wallpaperRespectAppearance);
+      updateWallpapers(_wallpaperList);
 
-      //cache picture
+      // Fetch the latest wallpaper list.
       await axios({
         method: "GET",
         url: RAYCAST_WALLPAPER_LIST_URL,
@@ -52,38 +52,20 @@ export const getRaycastWallpaperList = (refresh: number) => {
       })
         .then((axiosRes) => {
           const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
-          const _raycastWallpaperWithInfo = _raycastWallpaper.map((value) => {
-            return {
-              title: value.title,
-              url: value.url,
-              exclude: _excludeList.includes(value.url),
-              appearance: getAppearanceByTitle(value.title),
-            } as RaycastWallpaperWithInfo;
-          });
-          if (respectAppearance) {
-            wallpaperRespectAppearance = _raycastWallpaperWithInfo.filter((value) => {
-              return value.appearance === systemAppearance;
-            });
-          } else {
-            wallpaperRespectAppearance = _raycastWallpaperWithInfo;
-          }
-          setRaycastWallpapers(wallpaperRespectAppearance);
+          updateWallpapers(_raycastWallpaper);
 
           //cache list
           cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
-
-          _raycastWallpaper.forEach((value) => {
-            if (!checkCache(value)) {
-              cachePicture(value);
-            }
-          });
         })
         .catch((error) => {
           captureException(error);
           console.error(error);
+          void showToast(Style.Failure, "Could not load wallpapers");
         });
     } catch (e) {
       await showToast(Style.Failure, String(e));
+    } finally {
+      setIsLoading(false);
     }
   }, [refresh]);
 
@@ -91,5 +73,5 @@ export const getRaycastWallpaperList = (refresh: number) => {
     void fetchData();
   }, [fetchData]);
 
-  return { raycastWallpapers: raycastWallpapers };
+  return { raycastWallpapers, isLoading };
 };

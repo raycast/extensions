@@ -1,6 +1,7 @@
 /**
- * CREDIT: Snippets taken from the whois extension
+ * CREDIT: AppleScript snippets taken from the whois extension
  */
+import { BrowserExtension } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const CHROMIUM_BROWSERS_REGEX = /Chrome|Opera|Brave|Edge|Vivaldi/i;
@@ -51,7 +52,7 @@ const getArcURL = () => {
   `);
 };
 
-export const getURL = async () => {
+const getURLViaAppleScript = async (): Promise<string | undefined> => {
   try {
     const browser = await getFrontmostApp();
     let url: string | undefined;
@@ -69,4 +70,21 @@ export const getURL = async () => {
     showFailureToast(error);
     return undefined;
   }
+};
+
+const getURLViaBrowserExtension = async (): Promise<string | undefined> => {
+  try {
+    const tabs = await BrowserExtension.getTabs();
+    return tabs.find((tab) => tab.active)?.url;
+  } catch (error) {
+    showFailureToast(error, {
+      title: "Couldn't read the active browser tab",
+      message: "Install the Raycast Browser Extension in your browser.",
+    });
+    return undefined;
+  }
+};
+
+export const getURL = async (): Promise<string | undefined> => {
+  return process.platform === "darwin" ? getURLViaAppleScript() : getURLViaBrowserExtension();
 };

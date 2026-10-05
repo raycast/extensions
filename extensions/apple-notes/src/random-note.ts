@@ -11,20 +11,20 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
     const tags = props.arguments.tags?.trim() ? props.arguments.tags.split(/\s+/) : [];
 
     const { maxQueryResults } = getPreferenceValues();
-    const max = Number.isNaN(parseInt(maxQueryResults)) ? 250 : parseInt(maxQueryResults);
+    const max = parseInt(maxQueryResults, 10) || 250;
 
     const notes = await getNotes(max, tags);
 
-    if (!Array.isArray(notes) || notes.length === 0) {
-      showFailureToast(null, {
+    if (notes.length === 0) {
+      await showFailureToast(null, {
         title: tags.length ? "No notes found with specified tags" : "No notes found",
       });
       return;
     }
 
     const randomNote = notes[Math.floor(Math.random() * notes.length)];
-    open(getOpenNoteURL(randomNote.UUID));
+    await open(getOpenNoteURL(randomNote.UUID));
   } catch (error) {
-    showFailureToast(error, { title: "Could not open a random note." });
+    await showFailureToast(error, { title: "Could not open a random note." });
   }
 };

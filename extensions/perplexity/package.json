@@ -5,15 +5,20 @@
   "description": "Query Perplexity from within Raycast",
   "icon": "perplexity-logo.png",
   "author": "third774",
+  "contributors": [
+    "sbertix"
+  ],
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "ask-perplexity",
       "title": "Ask Perplexity",
-      "description": "Opens Perplexity in a browser tab with your search query in the URL",
+      "description": "Search Perplexity with your query",
       "mode": "view",
       "arguments": [
         {
@@ -21,21 +26,15 @@
           "type": "text",
           "description": "The query to search for",
           "placeholder": "Ask Anything..."
-        },
-        {
-          "name": "copilot",
-          "type": "text",
-          "description": "Use Copilot Mode?",
-          "placeholder": "Use Copilot? (y/n)"
         }
       ],
       "preferences": [
         {
-          "label": "Fallback with Copilot enabled",
-          "description": "This will enable Perplexity's Copilot mode when using this command as a Fallback",
+          "label": "Use Perplexity App",
+          "description": "Open your query in Perplexity app, instead of the default Browser",
           "default": false,
           "type": "checkbox",
-          "name": "fallbackCopilot",
+          "name": "perplexityApp",
           "required": false
         }
       ]
@@ -59,5 +58,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

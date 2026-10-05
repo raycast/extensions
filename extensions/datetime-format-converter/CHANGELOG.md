@@ -1,5 +1,8 @@
 # Datetime formatter Changelog
 
+## [Enhancement] - 2025-10-07
+
+- Added `Auto Paste Clipboard Content` preference to set whether to automatically paste clipboard content when the command is executed.
 
 ## [Fix] - 2024-12-15
 

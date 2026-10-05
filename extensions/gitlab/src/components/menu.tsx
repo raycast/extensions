@@ -5,22 +5,12 @@ import {
   LaunchType,
   MenuBarExtra,
   environment,
-  getPreferenceValues,
   launchCommand,
   openCommandPreferences,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React from "react";
 import { ReactNode } from "react";
-import { showErrorToast, getErrorMessage } from "../utils";
-
-function clipText(text: string) {
-  const maxLength = 100;
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + " ...";
-  }
-  return text;
-}
-
 export function MenuBarRoot(props: {
   children: React.ReactNode;
   icon?: Image.ImageLike;
@@ -28,20 +18,19 @@ export function MenuBarRoot(props: {
   title?: string;
   tooltip?: string;
   error?: string | undefined;
-}): JSX.Element {
-  const error = props.error;
+}) {
   const reloadMenu = async () => {
-    environment.commandName;
+    //environment.commandName;
     try {
       await launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not open Command");
+      showFailureToast(error, { title: "Could not open Command" });
     }
   };
   return (
     <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
-      {error ? (
-        <MenuBarItem title={`Error: ${error}`} icon={{ source: Icon.Warning }} onAction={reloadMenu} />
+      {props.error ? (
+        <MenuBarItem title={`Error: ${props.error}`} icon={{ source: Icon.Warning }} onAction={reloadMenu} />
       ) : (
         props.children
       )}
@@ -56,10 +45,10 @@ export function MenuBarItem(props: {
   shortcut?: Keyboard.Shortcut | undefined;
   onAction?: ((event: object) => void) | undefined;
   tooltip?: string;
-}): JSX.Element {
+}) {
   return (
     <MenuBarExtra.Item
-      title={props.title ? clipText(props.title) : "?"}
+      title={props.title ? (props.title.length > 100 ? props.title.slice(0, 100) + " ..." : props.title) : "?"}
       icon={props.icon}
       subtitle={props.subtitle}
       shortcut={props.shortcut}
@@ -76,7 +65,7 @@ function shownElements(elements?: ReactNode, maxElements?: number): { shown?: Re
   if (React.isValidElement(elements)) {
     return { shown: [elements], hidden: 0 };
   }
-  const els = elements as JSX.Element[] | undefined;
+  const els = elements as React.ReactElement[] | undefined;
   if (!els || els.length <= 0) {
     return { shown: undefined, hidden: 0 };
   }
@@ -98,15 +87,16 @@ export function MenuBarSection(props: {
   subtitle?: string;
   maxChildren?: number;
   children?: ReactNode;
-  moreElement?: (hidden: number) => JSX.Element | null;
-}): JSX.Element | null {
-  const title = joinNonEmpty(
-    [props.title, props.subtitle].filter((e) => e),
-    " "
-  );
+  moreElement?: (hidden: number) => React.ReactNode | null;
+}) {
   const { shown, hidden } = shownElements(props.children, props.maxChildren);
   return (
-    <MenuBarExtra.Section title={title}>
+    <MenuBarExtra.Section
+      title={joinNonEmpty(
+        [props.title, props.subtitle].filter((part) => part),
+        " ",
+      )}
+    >
       {shown}
       {hidden > 0 && props.moreElement && props.moreElement(hidden)}
     </MenuBarExtra.Section>
@@ -118,20 +108,23 @@ export function MenuBarSubmenu(props: {
   subtitle?: string;
   icon?: Image.ImageLike | undefined;
   children?: ReactNode;
-}): JSX.Element {
-  const title =
-    joinNonEmpty(
-      [props.title, props.subtitle].filter((e) => e),
-      " "
-    ) || "";
+}) {
   return (
-    <MenuBarExtra.Submenu title={title} icon={props.icon}>
+    <MenuBarExtra.Submenu
+      title={
+        joinNonEmpty(
+          [props.title, props.subtitle].filter((part) => part),
+          " ",
+        ) || ""
+      }
+      icon={props.icon}
+    >
       {props.children}
     </MenuBarExtra.Submenu>
   );
 }
 
-export function MenuBarItemConfigureCommand(): JSX.Element {
+export function MenuBarItemConfigureCommand() {
   return (
     <MenuBarExtra.Item
       title="Configure Command"
@@ -140,28 +133,4 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
       onAction={() => openCommandPreferences()}
     />
   );
-}
-
-export function getBoundedPreferenceNumber(params: {
-  name: string;
-  min?: number;
-  max?: number;
-  default?: number;
-}): number {
-  const boundMin = params.min || 1;
-  const boundMax = params.max || 100;
-  const fallback = params.default || 10;
-  const prefs = getPreferenceValues();
-  const maxtext = (prefs[params.name] as string) || "";
-  const max = Number(maxtext);
-  if (isNaN(max)) {
-    return fallback;
-  }
-  if (max < boundMin) {
-    return fallback;
-  }
-  if (max > boundMax) {
-    return fallback;
-  }
-  return max;
 }

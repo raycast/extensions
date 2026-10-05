@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "hemang_kinra",
     "jose-elias-alvarez",
-    "bestemic"
+    "bestemic",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -18,7 +19,18 @@
       "name": "index",
       "title": "Format Date",
       "description": "Convert timestamps and datetime strings into various formats.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoPasteClipboard",
+          "title": "Auto Paste",
+          "description": "Automatically paste clipboard content to search bar when the command is executed",
+          "type": "checkbox",
+          "required": false,
+          "label": "Auto Paste Clipboard Content",
+          "default": true
+        }
+      ]
     },
     {
       "name": "insert-natural-language-date",
@@ -186,5 +198,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,115 @@
 # Linear Changelog
 
+## [Fix AI Tool Errors] - 2026-10-02
+
+- Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.
+- AI tools now return plain, explicitly shaped data instead of Linear SDK objects. Related entities like assignees, teams, states, and labels are returned as compact references.
+- **List Projects** now includes members and milestones when `includeMembers` or `includeMilestones` is set, even without listing them in `fields`.
+
+## [Fix Preferred Team in Create Issue for Myself] - 2026-09-28
+
+- Fix **Create Issue for Myself** ignoring the Preferred Team in workspaces with more than 50 teams. The team is now looked up by key directly instead of searching the first page of teams, and the key is matched case-insensitively.
+- When no Preferred Team is set (or it isn't found), fall back to the first team you are a member of.
+
+## [Plan and Review Work Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Added a skill for turning specs into tasks, triaging issues, and reporting cycle status with linked evidence and clear scope.
+
+## [Favorites Crash Fix] - 2026-09-14
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
+
+## [AI Comment Reliability] - 2026-09-02
+
+- Prevent AI comment tools from retrying successful writes and creating duplicate comments.
+
+## [Expanded AI Tools] - 2026-08-26
+
+- Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.
+- Add cursor pagination to collection tools, full-text issue search, structured issue filtering, and issue deletion with confirmation.
+
+## [Issue Attachments] - 2026-08-20
+
+- Fix attachments added through Create Issue failing to upload.
+
+## [Copy as Prompt] - 2026-08-19
+
+- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
+
+## [My Issues Sub Views] - 2026-07-30
+
+- Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.
+
+## [Add Copy Shortcuts] - 2026-07-18
+
+- Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
+- Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
+
+## [AI Comment Attachments] - 2026-07-14
+
+- Add local file attachments to the AI tools for creating and updating comments. Images are embedded in the comment, while other files are added as links.
+
+## [Templates, Copy Title as Link, and Auth Fix] - 2026-06-17
+
+- Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138
+- Add a "Copy title as link" action to issue copy actions. Copy the issue title as a Markdown/HTML link for pasting into Slack and other apps, matching Linear’s native shortcut. See https://github.com/raycast/extensions/issues/28588
+- Fix initial OAuth connection failures that show Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
+
+## [Set Priority shortcut] - 2026-06-10
+
+- Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.
+
+## [Label Fetching] - 2026-06-09
+
+- Add an "API Label Limit" preference (default 100) so more labels can be fetched per team when creating or editing issues. Increase it if some labels are missing because your team has more than 100 labels.
+
+## [Confirmation Fixes] - 2026-05-15
+
+- Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.
+
+## [OAuth Client Unification] - 2026-04-04
+
+- Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
+- Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.
+- Fix `quick-add-comment-to-issue`: validate API result before treating the operation as successful (check `newComment` instead of the input `comment`).
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Search Custom Views] - 2026-03-16
+
+- Added new "Search Custom Views" command to browse custom views and their issues directly within Raycast
+- Custom Views in Favorites now navigate to issue list instead of opening browser
+- Paginated custom view fetching (up to 250 views)
+
+## [Auth fixes and toolbar icon] - 2026-03-12
+
+- Fix authentication errors during sign-in that could show "Something went wrong" or fail with "invalid_grant"/"fetch failed", preventing issue creation. See <https://github.com/raycast/extensions/issues/23050> and <https://github.com/raycast/extensions/issues/26174>
+- Fix red triangle icon appearing in the toolbar/menubar caused by background auth failures. See <https://github.com/raycast/extensions/issues/24993>
+
+## [Update Shortcuts] - 2026-01-06
+
+- Updated shortcuts to make them cross-platform
+- Updated README with information
+
+## [Notification improvements] - 2025-10-29
+
+- Improved notification display to support all notification types by reading directly from the API
+- Added "Mark all as read" action to notifications command and menu bar extension
+- Bumped `@linear/sdk` to v61.0.0
+
+## [Schema deprecation and update SDK] - 2025-10-13
+
+- Bumped `@linear/sdk` to v60.0.0
+- Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
+- Corrected project list empty state message
+
+## [Status Preference] - 2025-10-09
+
+- Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
+
 ## [Update API and bug fixes] - 2025-04-15
 
 - Updated dependencies

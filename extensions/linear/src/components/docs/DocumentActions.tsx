@@ -77,7 +77,7 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives, mutateDoc }: Doc
         toast.primaryAction = {
           title: "Retry",
           onAction: () => moveDocument(props),
-          shortcut: { modifiers: ["cmd"], key: "r" },
+          shortcut: Keyboard.Shortcut.Common.Refresh,
         };
       });
   };
@@ -87,7 +87,10 @@ function MoveDocument({ doc, mutateDocs, projects, initiatives, mutateDoc }: Doc
       <ActionPanel.Submenu
         title="Move Document"
         icon={Icon.Move}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "m" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+        }}
         filtering={{ keepSectionOrder: true }}
       >
         {(initiatives ?? []).length > 0 && (
@@ -194,7 +197,10 @@ export function DocumentActions({ doc, ...rest }: DocumentActionsProps) {
         <Action.CreateQuicklink
           icon={Icon.RaycastLogoPos}
           title="Create Quicklink"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "s" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+          }}
           quicklink={{ link: doc.url, name: doc.title, application: isLinearInstalled ? "Linear" : undefined }}
         />
 
@@ -202,14 +208,17 @@ export function DocumentActions({ doc, ...rest }: DocumentActionsProps) {
           icon={Icon.Link}
           content={doc.url}
           title="Copy Link"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
 
         <Action.CopyToClipboard
           icon={Icon.Clipboard}
           content={doc.title}
           title="Copy Title"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "'" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+          }}
         />
       </ActionPanel.Section>
     </>

@@ -132,20 +132,20 @@
   ],
   "dependencies": {
     "@gerhobbelt/gitignore-parser": "^0.2.0-9",
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
-    "filesize": "^10.1.4"
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
+    "filesize": "^11.0.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.12",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.2",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

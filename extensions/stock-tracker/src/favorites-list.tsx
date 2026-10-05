@@ -1,26 +1,40 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
-import { useEffect } from "react";
 import { Quote } from "./yahoo-finance";
-import { FavoritesStore, useFavoritesQuotes } from "./favorites-store";
+import { FavoritesStore } from "./favorites-store";
+import { MenuBarStore } from "./menubar-store";
+import { MenuBarAddRemoveAction } from "./menubar-actions";
 import StockListItem from "./stock-list-item";
+import { formatTime } from "./utils";
 
-export default function FavoritesList({ handleLoading }: { handleLoading: (isLoading: boolean) => void }) {
-  const { favorites, favoritesStore, isLoading } = useFavoritesQuotes();
-  useEffect(() => {
-    handleLoading(isLoading);
-  }, [isLoading]);
-
+export default function FavoritesList({
+  favorites,
+  favoriteSymbols,
+  favoritesStore,
+  menuBarSymbols,
+  menuBarStore,
+  lastUpdated,
+}: {
+  favorites: Quote[];
+  favoriteSymbols: string[];
+  favoritesStore: FavoritesStore;
+  menuBarSymbols: string[];
+  menuBarStore: MenuBarStore;
+  lastUpdated: Date | null;
+}) {
   return (
-    <List.Section title="Favorites">
+    <List.Section title="Favorites" subtitle={lastUpdated ? `Updated ${formatTime(lastUpdated)}` : undefined}>
       {favorites.map((quote) => (
         <StockListItem
           key={quote.symbol}
           quote={quote}
+          isInMenuBar={!!quote.symbol && menuBarSymbols.includes(quote.symbol)}
           actions={
             <FavouritesActions
-              favorites={favorites.map((f) => f.symbol!)}
+              favorites={favoriteSymbols}
               quote={quote}
               favoritesStore={favoritesStore}
+              menuBarSymbols={menuBarSymbols}
+              menuBarStore={menuBarStore}
             />
           }
         />
@@ -33,9 +47,11 @@ interface FavouritesActionsProps {
   favorites: string[];
   quote: Quote;
   favoritesStore: FavoritesStore;
+  menuBarSymbols: string[];
+  menuBarStore: MenuBarStore;
 }
 
-function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActionsProps) {
+function FavouritesActions({ favorites, quote, favoritesStore, menuBarSymbols, menuBarStore }: FavouritesActionsProps) {
   return (
     <ActionPanel.Section>
       <Action
@@ -51,6 +67,7 @@ function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActio
         onAction={() => favoritesStore.moveDown(quote.symbol!)}
       />
       <FavoritesAddRemoveAction favorites={favorites} favoritesStore={favoritesStore} symbol={quote.symbol!} />
+      <MenuBarAddRemoveAction menuBarSymbols={menuBarSymbols} menuBarStore={menuBarStore} symbol={quote.symbol!} />
     </ActionPanel.Section>
   );
 }

@@ -1,5 +1,17 @@
-import { ActionPanel, Form, showToast, Icon, Color, useNavigation, Action, LocalStorage, Toast } from "@raycast/api";
-import { useState } from "react";
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  Color,
+  useNavigation,
+  Action,
+  LocalStorage,
+  Toast,
+  BrowserExtension,
+  environment,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import { Feed, getFeeds } from "./feeds";
 import Parser from "rss-parser";
 import { getFavicon } from "@raycast/utils";
@@ -27,6 +39,35 @@ const getFeedItem = async (feedURL: string): Promise<Feed> => {
 function AddFeedForm() {
   const [value, setValue] = useState("");
   const navigation = useNavigation();
+
+  useEffect(() => {
+    let canceled = false;
+
+    async function prefillFromActiveTab() {
+      if (!environment.canAccess(BrowserExtension)) {
+        return;
+      }
+
+      let tabs: Awaited<ReturnType<typeof BrowserExtension.getTabs>>;
+      try {
+        tabs = await BrowserExtension.getTabs();
+      } catch {
+        return;
+      }
+
+      const activeTab = tabs.find((tab) => tab.active);
+
+      if (!canceled && activeTab?.url) {
+        setValue((currentValue) => currentValue || activeTab.url);
+      }
+    }
+
+    prefillFromActiveTab();
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   const addFeed = async (values: { feedURL: string }) => {
     try {

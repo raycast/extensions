@@ -1,0 +1,435 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anvil",
+  "title": "Anvil",
+  "version": "1.0.0",
+  "description": "Navigate Anvil's native developer toolbox from Raycast.",
+  "icon": "icon.png",
+  "author": "alexminator1999",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "typescript": "^5.5.4"
+  },
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Anvil Tools",
+      "description": "Search Anvil tools and open the selected tool.",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-json",
+      "title": "JSON Format/Validate",
+      "subtitle": "Open in Anvil",
+      "description": "Format, beautify, or minify JSON strings",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-timestamp",
+      "title": "Timestamp Converter",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between Unix timestamps, dates, and timezones",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-base64",
+      "title": "Base64 Encode/Decode",
+      "subtitle": "Open in Anvil",
+      "description": "Encode and decode Base64 strings with format variants",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-url",
+      "title": "URL Encode/Decode",
+      "subtitle": "Open in Anvil",
+      "description": "Encode and decode URLs with RFC 3986 and form encoding support",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-jwt",
+      "title": "JWT Debugger",
+      "subtitle": "Open in Anvil",
+      "description": "Decode and verify JWT tokens",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-regexp",
+      "title": "RegExp Tester",
+      "subtitle": "Open in Anvil",
+      "description": "Test and debug regular expressions with live matching",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-uuid",
+      "title": "UUID/ULID Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate and decode UUIDs, ULIDs, and other identifiers",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-textdiff",
+      "title": "Text Diff Checker",
+      "subtitle": "Open in Anvil",
+      "description": "Compare two texts and highlight differences",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-yaml",
+      "title": "YAML ↔ JSON",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between YAML and JSON formats with auto-detection",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-numberbase",
+      "title": "Number Base Converter",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between binary, octal, decimal, hexadecimal, and custom bases",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-htmlpreview",
+      "title": "HTML Preview",
+      "subtitle": "Open in Anvil",
+      "description": "Preview and format HTML with live WebView rendering",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-backslashescape",
+      "title": "Backslash Escape/Unescape",
+      "subtitle": "Open in Anvil",
+      "description": "Escape and unescape backslash sequences (\\n, \\t, etc.)",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-htmlentity",
+      "title": "HTML Entity Encode/Decode",
+      "subtitle": "Open in Anvil",
+      "description": "Encode and decode HTML entities with named and numeric formats",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-html-beautify",
+      "title": "HTML Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify HTML documents",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-css-beautify",
+      "title": "CSS Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify CSS stylesheets",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-js-beautify",
+      "title": "JS Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify JavaScript code",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-erb-beautify",
+      "title": "ERB Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format Ruby embedded templates",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-less-beautify",
+      "title": "LESS Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify LESS stylesheets",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-scss-beautify",
+      "title": "SCSS Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify SCSS/Sass stylesheets",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-xml-beautify",
+      "title": "XML Beautify/Minify",
+      "subtitle": "Open in Anvil",
+      "description": "Format and minify XML documents",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-loremipsum",
+      "title": "Lorem Ipsum Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate placeholder text, names, emails, and URLs",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-qrcode",
+      "title": "QR Code Reader/Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate and read QR codes with templates and error correction",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-stringinspector",
+      "title": "String Inspector",
+      "subtitle": "Open in Anvil",
+      "description": "Analyze string encoding, Unicode, character classes, security, and patterns",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-log-formatter",
+      "title": "Logs Formatter",
+      "subtitle": "Open in Anvil",
+      "description": "Format, inspect, and filter developer logs",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-signing-inspector",
+      "title": "Mac App / Signing Inspector",
+      "subtitle": "Open in Anvil",
+      "description": "Inspect app bundles, Info.plist files, entitlements, signing, and provisioning profiles",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-string-case",
+      "title": "String Case Converter",
+      "subtitle": "Open in Anvil",
+      "description": "Convert text between camelCase, snake_case, kebab-case, title case, and more",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-line-sort-dedupe",
+      "title": "Line Sort & Dedupe",
+      "subtitle": "Open in Anvil",
+      "description": "Sort line-based text, remove duplicates, and normalize whitespace or case",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-cron-job",
+      "title": "Cron Job Parser",
+      "subtitle": "Open in Anvil",
+      "description": "Validate cron expressions and explain each schedule field",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-color-converter",
+      "title": "Color Converter",
+      "subtitle": "Open in Anvil",
+      "description": "Convert HEX, RGB, HSL, HSV, and CMYK colors with palette harmonies",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-random-string",
+      "title": "Random String Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate secure random strings with configurable alphabets",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-csv",
+      "title": "JSON ↔ CSV",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between JSON and CSV with auto-detection and configurable delimiters",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-json-to-code",
+      "title": "JSON to Code",
+      "subtitle": "Open in Anvil",
+      "description": "Generate typed models from JSON across Swift, Kotlin, TypeScript, Python, Java, C#, Go, Rust, Dart, and more",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-localization-inspector",
+      "title": "Localization Inspector",
+      "subtitle": "Open in Anvil",
+      "description": "Analyze Android, Apple, and web localization keys, duplicates, placeholders, plurals, and safe rename exports",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-curl-to-code",
+      "title": "CURL to Code",
+      "subtitle": "Open in Anvil",
+      "description": "Convert a cURL command into request code for fetch, axios, Python, Go, PHP, Java, Rust, and more",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-hex-ascii",
+      "title": "Hex ↔ ASCII",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between hexadecimal byte pairs and ASCII text",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-hash",
+      "title": "Hash Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Compute MD2/4/5, SHA-1, SHA-2, SHA-3, Keccak-256 digests with HMAC and verify support",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-certificate-decoder",
+      "title": "X.509 Certificate Decoder",
+      "subtitle": "Open in Anvil",
+      "description": "Decode PEM and DER certificates with subject, issuer, SANs, validity, fingerprints, and warnings",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-htmltojsx",
+      "title": "HTML to JSX",
+      "subtitle": "Open in Anvil",
+      "description": "Convert HTML markup to React-compatible JSX",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-markdownpreview",
+      "title": "Markdown Preview",
+      "subtitle": "Open in Anvil",
+      "description": "Preview Markdown and convert to HTML or HTML + CSS",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-sql-formatter",
+      "title": "SQL Formatter",
+      "subtitle": "Open in Anvil",
+      "description": "Format SQL queries with dialect-aware parsing across MySQL, PostgreSQL, BigQuery, T-SQL and more",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-toml",
+      "title": "TOML Formatter",
+      "subtitle": "Open in Anvil",
+      "description": "Format, minify, validate, and convert TOML to JSON or YAML",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-keypair",
+      "title": "SSH Key Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate SSH key pairs (Ed25519, RSA, ECDSA) with OpenSSH public keys, PEM and OpenSSH private keys, fingerprints, and randomart",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-subnet",
+      "title": "IP/Subnet Calculator",
+      "subtitle": "Open in Anvil",
+      "description": "Calculate IPv4 and IPv6 subnets, masks, host ranges, and counts from CIDR or netmask notation",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-otp",
+      "title": "OTP/TOTP Generator",
+      "subtitle": "Open in Anvil",
+      "description": "Generate and validate TOTP and HOTP one-time passwords with QR code export",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-php-array",
+      "title": "PHP Array ↔ JSON",
+      "subtitle": "Open in Anvil",
+      "description": "Convert between PHP array literals and JSON, with var_export output support",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-php-serialize",
+      "title": "PHP Serialize/Unserialize",
+      "subtitle": "Open in Anvil",
+      "description": "Decode and encode PHP serialize() blobs and session data with a typed tree and JSON view",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "open-command-palette",
+      "title": "Open Anvil Command Palette",
+      "subtitle": "Run in Anvil",
+      "description": "Open Anvil's command palette.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "format-json-clipboard",
+      "title": "Format JSON Clipboard",
+      "subtitle": "Run in Anvil",
+      "description": "Format the latest copied JSON in Anvil and copy the result.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "decode-base64-clipboard",
+      "title": "Decode Base64 Clipboard",
+      "subtitle": "Run in Anvil",
+      "description": "Decode the latest copied Base64 text in Anvil and copy the result.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
+}

@@ -15,7 +15,7 @@ export function ListQueryCommand(props: {
   sectionTitle?: string;
   emptyMessage?: string;
 }) {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState<string>("");
   const query = generateQuery({ baseQuery: props.baseQuery, userQuery: searchText });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, revalidate } = useCachedPromise(

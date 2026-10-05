@@ -1,7 +1,7 @@
 import { Script } from "../type";
 import vkbeautify from "vkbeautify";
 
-export const foramtCss: Script = {
+export const formatCss: Script = {
   info: {
     title: "Format CSS",
     desc: "Format CSS stylesheets",
@@ -12,7 +12,7 @@ export const foramtCss: Script = {
   run(input) {
     try {
       return vkbeautify.css(input, 2);
-    } catch (error) {
+    } catch {
       throw Error("Invalid CSS");
     }
   },
@@ -28,7 +28,7 @@ export const minifyCss: Script = {
   run(input) {
     try {
       return vkbeautify.cssmin(input);
-    } catch (error) {
+    } catch {
       throw Error("Invalid CSS");
     }
   },

@@ -1,5 +1,18 @@
 # Cleanshot X Changelog
 
+## [New screenshots] - 2026-09-11
+
+- Update screenshots to match the branding
+
+## [Preset management commands] - 2026-03-04
+
+- Add new commands to manage recording presets
+- Add new command to record screen at a chosen preset resolution
+
+## [Update app icon] - 2026-01-09
+
+- Update icon for extension
+
 ## [Add new command] - 2024-06-19
 
 - Add new command to capture area and send to Raycast AI Chat

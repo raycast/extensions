@@ -2,6 +2,7 @@ import { AI, Icon, environment } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { parseModelResponse } from "../utils";
+import { filterIcons } from "../search-icons";
 
 export function useIconSearch() {
   const [searchText, setSearchText] = useState("");
@@ -10,11 +11,7 @@ export function useIconSearch() {
   const { data: allIconNames } = useCachedPromise(async () => Object.keys(Icon).join(", "), [], { initialData: "" });
 
   const { data: filteredIcons } = useCachedPromise(
-    async (text: string) => {
-      if (text.length === 0) return Object.entries(Icon);
-      const lowercaseText = text.toLowerCase();
-      return Object.entries(Icon).filter(([name]) => name.toLowerCase().includes(lowercaseText));
-    },
+    async (text: string) => filterIcons(Object.entries(Icon), text),
     [searchText],
     {
       initialData: Object.entries(Icon),

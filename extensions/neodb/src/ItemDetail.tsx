@@ -60,9 +60,11 @@ const ItemDetail: React.FC<{ item: Item }> = ({ item }) => {
   `;
 
   useEffect(() => {
-    isLoading
-      ? showToast(Toast.Style.Animated, "Loading details ...")
-      : showToast(Toast.Style.Success, "Details loaded");
+    if (isLoading) {
+      showToast(Toast.Style.Animated, "Loading details ...");
+    } else {
+      showToast(Toast.Style.Success, "Details loaded");
+    }
   }, [isLoading]);
 
   return (

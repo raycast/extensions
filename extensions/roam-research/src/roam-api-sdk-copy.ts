@@ -1,11 +1,9 @@
-// MAYBE replace this with the actual sdk at some point
-// one reason I want to do it this way is because I want to be able to cache the peer for the graph somewhere
-
-// Changes made from the code in https://github.com/Roam-Research/backend-sdks/blob/0933181963e8c2eb7403bdbbe9a7885e0ea2abc7/typescript/src/index.ts:
-//   0. Changed #peer declaration from just `string` to `string | undefined` because TS compiler was alerting as error/warning
+// Forked from https://github.com/Roam-Research/backend-sdks/blob/0933181963e8c2eb7403bdbbe9a7885e0ea2abc7/typescript/src/index.ts
+// Changes from upstream:
 //   1. importing fetch and Request from "cross-fetch" node module
 //   2. Changed `q`'s `args` param's type from `string[]` to `any[]`
-//   3. Other multiple changes have been made, will want to take a code diff later and move stuff to roam-api-sdk we want for everyone
+//   3. Uses proxy.api.roamresearch.com (CloudFront reverse proxy) instead of api.roamresearch.com
+//   4. Other multiple changes have been made, will want to take a code diff later and move stuff to roam-api-sdk we want for everyone
 
 import { fetch, Request } from "cross-fetch";
 
@@ -15,51 +13,36 @@ interface APICall<Response> {
 
 class BrowserHTTPClient implements APICall<Response> {
   call(request: Request): Promise<Response> {
-    return fetch(request);
+    return fetch(request, { signal: AbortSignal.timeout(30000) });
   }
 }
 
-export type peerUrlUpdatedCallbackFn = (graphName: string, newPeerUrl: string) => void;
-
 // FIXME: if we don't want to export this, export an interface for it
 export class RoamBackendClient {
-  //static #baseUrl = 'https://peer-2.api.roamresearch.com:3004';
-  static #baseUrl = "https://api.roamresearch.com";
-  //static #baseUrl = "http://localhost:3000";
+  static #baseUrl = "https://proxy.api.roamresearch.com";
   #token: string;
-  #peer: string | undefined;
-  #peerUrlUpdatedCallback: peerUrlUpdatedCallbackFn | undefined;
+  // If the proxy miscalculates, the peer will 308-redirect; fetch follows it automatically
+  // and we store the peer URL here so subsequent requests on this client instance skip the redirect.
+  #peer: string | null = null;
   #httpClient: APICall<Response>;
   readonly graph: string;
-  constructor(
-    token: string,
-    graph: string,
-    httpClient: APICall<Response>,
-    peerUrl?: string,
-    peerUrlUpdatedCallback?: peerUrlUpdatedCallbackFn
-  ) {
+  constructor(token: string, graph: string, httpClient: APICall<Response>) {
     this.#token = token;
     this.graph = graph;
     this.#httpClient = httpClient;
-    if (peerUrl) {
-      this.#peer = peerUrl;
-    }
-    if (peerUrlUpdatedCallback && typeof peerUrlUpdatedCallback === "function") {
-      this.#peerUrlUpdatedCallback = peerUrlUpdatedCallback;
-    }
   }
 
   async api(path: string, method: string, body: object): Promise<Response> {
     const req = this.makeRequest(path, method, body);
     const response = await this.#httpClient.call(req);
+    // Safety net: if the CloudFront proxy (proxy.api.roamresearch.com) miscalculates the peer,
+    // the target peer will 308-redirect to the correct one. fetch follows it automatically;
+    // we capture the peer URL here so subsequent requests on this client instance skip the redirect.
     if (response.redirected) {
       const re = /(https:\/\/peer-\d+.*?:\d+)\/.*/;
       const regexpResult = response.url.match(re);
       if (regexpResult?.length == 2) {
         this.#peer = regexpResult[1];
-        if (this.#peerUrlUpdatedCallback) {
-          this.#peerUrlUpdatedCallback(this.graph, regexpResult[1]);
-        }
       }
     }
 
@@ -67,8 +50,16 @@ export class RoamBackendClient {
       case 200:
         break;
       case 500:
-      case 400:
-        throw new Error("Error: " + (await response.json()).message ?? "HTTP " + response.status);
+      case 400: {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const body = await response.json();
+          errorMessage = body.message || errorMessage;
+        } catch {
+          /* non-JSON response */
+        }
+        throw new Error(errorMessage);
+      }
       case 429:
         throw new Error("Too many requests, try again in a minute.");
       case 401:
@@ -76,14 +67,13 @@ export class RoamBackendClient {
       case 503:
         throw new Error("HTTP Status: 503. Your graph is not ready yet for a request, please retry in a few seconds.");
       default:
-        throw new Error(response.statusText);
+        throw new Error(response.statusText || `HTTP ${response.status} error`);
     }
     return response;
   }
 
   private makeRequest(path: string, method = "POST", body: object): Request {
     const baseUrl = this.#peer ?? RoamBackendClient.#baseUrl;
-    // console.log("makeRequest: body: ", JSON.stringify(body));
     return new Request(baseUrl + path, {
       method: method,
       mode: "cors",
@@ -300,21 +290,13 @@ type InitGraph = {
   graph: string;
   token: string;
   httpClient?: APICall<Response>;
-  peerUrl?: string;
-  peerUrlUpdatedCallback?: peerUrlUpdatedCallbackFn;
 };
 
 export function initializeGraph(config: InitGraph) {
   if (config.httpClient == null) {
     config.httpClient = new BrowserHTTPClient();
   }
-  return new RoamBackendClient(
-    config.token,
-    config.graph,
-    config.httpClient,
-    config.peerUrl,
-    config.peerUrlUpdatedCallback
-  );
+  return new RoamBackendClient(config.token, config.graph, config.httpClient);
 }
 
 // UTILS below
@@ -368,5 +350,3 @@ export function dateToPageTitle(date: Date) {
     day
   )}, ${date.getFullYear()}`;
 }
-
-// console.log("today's DNP: ", dateToPageTitle(new Date()));

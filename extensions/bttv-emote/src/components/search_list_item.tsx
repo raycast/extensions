@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Keyboard } from "@raycast/api";
 import { Emote } from "./emote";
 
 export function SearchGridItem({ searchResult }: { searchResult: Emote }) {
@@ -23,23 +23,26 @@ export function SearchGridItem({ searchResult }: { searchResult: Emote }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy 1x Emote"
               content={image1x}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action.CopyToClipboard
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy 2x Emote"
               content={image2x}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "m" }, Windows: { modifiers: ["ctrl"], key: "m" } }}
             />
             <Action.CopyToClipboard
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy 3x Emote"
               content={image3x}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={browserUrl} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenInBrowser url={browserUrl} shortcut={Keyboard.Shortcut.Common.Open} />
           </ActionPanel.Section>
         </ActionPanel>
       }

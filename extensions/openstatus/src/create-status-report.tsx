@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { pageSchema, StatusReport } from "./api/schema";
-import fetch from "node-fetch";
 
 export default function CreateStatusReport() {
   const preferences = getPreferenceValues<Preferences>();

@@ -100,7 +100,7 @@ export default function AddInitPreset() {
         value={pathVal}
         onChange={setPath}
       />
-      <Form.Dropdown id="ideApp" title="IDE Application" value={selectedApp} onChange={setApp}>
+      <Form.Dropdown id="ideApp" title="Application" value={selectedApp} onChange={setApp}>
         {apps.map((app) => (
           <Form.Dropdown.Item key={app.bundleId} value={app.bundleId} title={app.name} />
         ))}

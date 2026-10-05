@@ -4,7 +4,7 @@ import { exportClipboard } from "./clipboard";
 import { GitignoreFile } from "./types";
 import { generateContents } from "./utils";
 
-function toMarkdown(title: string, code: string | null) {
+function toMarkdown(title: string, code: string | null): string | undefined {
   if (code === null) {
     return undefined;
   }
@@ -23,28 +23,30 @@ export default function GitignorePreview({
   useEffect(() => {
     const controller = new AbortController();
     generateContents(gitignoreFiles, controller.signal)
-      .then((contents: string) => setFileContents(contents))
+      .then((contents) => setFileContents(contents))
       .catch((err) => {
         if (!controller.signal.aborted) {
-          throw err;
+          console.error("Failed to generate contents:", err);
+          setFileContents("");
         }
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [gitignoreFiles]);
 
-  const ComponentType = listPreview ? List.Item.Detail : Detail;
+  const title = gitignoreFiles.map((f) => f.name).join(", ");
+  const markdown = toMarkdown(title, fileContents);
 
-  const props = listPreview
-    ? {}
-    : {
-        navigationTitle: "Gitignore Preview",
-      };
+  if (listPreview) {
+    return <List.Item.Detail isLoading={fileContents === null} markdown={markdown} />;
+  }
 
   return (
-    <ComponentType
+    <Detail
+      navigationTitle="Gitignore Preview"
       isLoading={fileContents === null}
-      {...props}
-      markdown={toMarkdown(gitignoreFiles.map((f) => f.name).join(", "), fileContents)}
+      markdown={markdown}
       actions={
         <ActionPanel>
           <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(gitignoreFiles)} />

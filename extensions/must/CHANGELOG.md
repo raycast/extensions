@@ -1,6 +1,6 @@
 # Must Changelog
 
-## [Enhancements] - {PR_MERGE_DATEE}
+## [Enhancements] - 2024-10-15
 
 - Results are cached
 - View Poster of items

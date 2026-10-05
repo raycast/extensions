@@ -1,17 +1,17 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
-  "include": ["src/**/*", "__tests__/apple-scripts.spec.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts", "__tests__/apple-scripts.spec.ts"],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["ES2023"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "@/scripts": ["./src/util/scripts/index.ts"]

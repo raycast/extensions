@@ -171,7 +171,7 @@ export default function PinListItem(props: {
               shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
               quicklink={{
                 name: pin.name,
-                link: `raycast://extensions/HelloImSteven/pins/view-pins?context=${encodeURIComponent(
+                link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/pins/view-pins?context=${encodeURIComponent(
                   JSON.stringify({
                     pinID: pin.id,
                     action: PinAction.OPEN,

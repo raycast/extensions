@@ -1,5 +1,6 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { KeyLight } from "./elgato";
+import { getTargetConfig } from "./target-config";
 
 export async function waitUntil<T>(
   promise: Promise<T> | (() => Promise<T>),
@@ -90,6 +91,19 @@ export async function discoverKeyLights(forceRefresh = false, maxRetries = 3): P
     // If initial discovery failed, try forcing a refresh
     return await discoverKeyLights(true, maxRetries - 1);
   }
+}
+
+export async function getTargetLightNames(): Promise<string[] | undefined> {
+  const config = await getTargetConfig();
+  if (config.mode === "all") {
+    return undefined;
+  }
+
+  // In "selected" mode, an empty array is a deliberate, meaningful value: it
+  // means the user opted into targeting specific lights but hasn't chosen any
+  // yet. It must never be treated the same as `undefined` (which means "all
+  // lights"), otherwise clearing a selection would silently affect every light.
+  return config.selectedLights;
 }
 
 export function formatErrorResponse(error: unknown, operation: string): ToolResponse {

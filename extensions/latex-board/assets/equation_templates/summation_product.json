@@ -1,0 +1,21 @@
+{
+  "Summation": {
+    "Sum 1": " \\sum ",
+    "Sum 2": " \\sum_{i=1}^{n}x_i ",
+    "Sum 3": " \\displaystyle \\sum_{i=1}^\\infty x_i = x_1+x_2+x_3+ \\cdots "
+  },
+  "Product": {
+    "Product 1": " \\prod ",
+    "Product 2": " \\displaystyle \\prod_{i=1}^n x_i = x_1 \\times x_2 \\times \\cdots \\times x_n "
+  },
+  "Examples": {
+    "Sum Formula 1": " \\displaystyle \\sum_{k=1}^{n} k = \\frac{1}{2}n(n+1) ",
+    "Sum Formula 2": " \\displaystyle \\sum_{k=1}^{n} k^2 = \\frac{1}{6}n(n+1)(2n+1) ",
+    "Sum Formula 3": " \\displaystyle \\sum_{k=1}^{n} k^3 = \\left\\{ \\frac{1}{2}n(n+1) \\right\\}^2 "
+  },
+  "Infinite Product Expansions": {
+    "Sine Infinite Product": " \\displaystyle \\sin(\\pi z) = \\pi z \\prod_{n=1}^\\infty \\left( 1 - \\frac{z^2}{n^2} \\right) ",
+    "Cosine Infinite Product": " \\displaystyle \\cos(\\pi z) = \\prod_{n=1}^\\infty \\left\\{ 1 - \\frac{z^2}{\\left( n - \\frac{1}{2} \\right)^2} \\right\\} ",
+    "Wallis Product": " \\displaystyle \\prod_{n=1}^\\infty \\frac{(2n)^2}{(2n-1)(2n+1)} = \\frac{\\pi}{2} "
+  }
+}

@@ -196,7 +196,9 @@ const searchResultMetadataItems = (result: SearchResult) => {
     />,
   ].concat(createMetadataLabels({ propKey: "propertyMetaData", record: result.metaData }));
 
-  const orderKeys = preferences.orderSearchResultItemProperties.split(",").map((key) => key.trim().toLowerCase());
+  const orderKeys = (preferences.orderSearchResultItemProperties ?? "")
+    .split(",")
+    .map((key) => key.trim().toLowerCase());
   const ordered = [] as JSX.Element[];
 
   orderKeys.forEach((key) => {

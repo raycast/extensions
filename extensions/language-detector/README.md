@@ -4,6 +4,7 @@ Detect languages through Raycast AI or third-party language detectors
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 [![raycast-pro-enhanced-badge]][raycast-pro-enhanced-link]
+[![raycast-macos-windows-badge]][raycast-macos-windows-link]
 
 ## Features
 
@@ -19,7 +20,7 @@ See [API.md](https://github.com/raycast/extensions/tree/main/extensions/language
 
 ## Supported Detectors
 
-- [Raycast AI](https://developers.raycast.com/api-reference/ai) (require [Raycast Pro](https://raycast.com/pro))
+- [Raycast AI](https://developers.raycast.com/api-reference/ai?via=litomore) (require [Raycast Pro](https://raycast.com/pro?via=litomore))
 - [npm:franc](https://npmjs.com/franc)
 - [npm:languagedetect](https://npmjs.com/languagedetect)
 - [npm:tinyld](https://npmjs.com/tinyld)
@@ -36,3 +37,5 @@ MIT
 [raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
 [raycast-pro-enhanced-badge]: https://shields.io/badge/Raycast-Pro_Enhanced-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
 [raycast-pro-enhanced-link]: https://github.com/LitoMore/raycast-pro-enhanced-extensions
+[raycast-macos-windows-badge]: https://shields.io/badge/Raycast-macOS%20%7C%20Windows-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-macos-windows-link]: https://raycast.com/store?via=litomore

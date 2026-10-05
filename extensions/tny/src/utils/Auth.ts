@@ -4,7 +4,7 @@ import { OAuth } from "@raycast/api";
 const clientId = "raycast_tny";
 const tokenURL = "https://account.chief.app/api/oauth/token";
 const authorizeURL = "https://account.chief.app/login/oauth/authorize";
-const scopes = "tny offline_access";
+const scopes = "profile email tny:links:write offline_access";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.App,
@@ -14,7 +14,17 @@ const client = new OAuth.PKCEClient({
   providerId: "tny",
 });
 
+let authorizationPromise: Promise<void> | undefined;
+
 export async function authorize(): Promise<void> {
+  authorizationPromise ??= authorizeWithTokens().finally(() => {
+    authorizationPromise = undefined;
+  });
+
+  return authorizationPromise;
+}
+
+async function authorizeWithTokens(): Promise<void> {
   const tokenSet = await client.getTokens();
 
   if (tokenSet?.accessToken) {

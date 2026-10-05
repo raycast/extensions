@@ -37,7 +37,7 @@ const useJotobaAsync = (api = "words") => {
         }
 
         return Promise.reject("Couldn't find results.");
-      }
+      },
     );
   };
 };

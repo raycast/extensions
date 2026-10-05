@@ -1,9 +1,14 @@
 # Raycast Jotoba Changelog
 
+## [Fix Kanji Frame Image Display] - 2025-10-27
+
+- Fixed kanji frame image display.
+
 ## [Bug Fix and New Setting Option] - 2023-01-03
+
 - Fixed search term not erasing.
 - Fixed common words priority display order.
-- Added setting option (default) to toggle the displaying of common words first in search results. 
+- Added setting option (default) to toggle the displaying of common words first in search results.
 - Raycast API bump to 1.45.1.
 - Removed cosmetic localization for "onyomi"/"kunyomi" terms.
 

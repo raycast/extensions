@@ -1,0 +1,450 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gemini-tts",
+  "title": "Gemini TTS",
+  "description": "Read selected text aloud with Gemini TTS. Supports Gemini 3.1 Flash TTS Preview plus Gemini 2.5 Flash and Pro Preview TTS.",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read Selected Text",
+      "subtitle": "Gemini TTS",
+      "description": "Read selected text, or clipboard text if no selection is available. Trigger again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-reading",
+      "title": "Resume Last Reading",
+      "subtitle": "Gemini TTS",
+      "description": "Resume the previous reading from the next unfinished chunk",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-reading",
+      "title": "Restart Last Reading",
+      "subtitle": "Gemini TTS",
+      "description": "Restart the previous reading from the beginning",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice Selection",
+      "subtitle": "Gemini TTS",
+      "description": "Browse Gemini voices and read selected text aloud",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "Gemini TTS",
+      "description": "Choose and preview the voice used by Quick Read",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "Gemini TTS",
+      "description": "Stop the current TTS playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Speed up Reading",
+      "subtitle": "Gemini TTS",
+      "description": "Increase reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Slow Down Reading",
+      "subtitle": "Gemini TTS",
+      "description": "Decrease reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playback-status",
+      "title": "Reading Status",
+      "subtitle": "Gemini TTS",
+      "description": "Menu-bar status of the current Gemini TTS reading with controls",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Gemini API Key",
+      "description": "API key from Google AI Studio; quota and billing are managed on the owning AI Studio project",
+      "placeholder": "AIza..."
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "Gemini TTS model used for synthesis",
+      "default": "gemini-3.1-flash-tts-preview",
+      "data": [
+        {
+          "title": "Gemini 3.1 Flash TTS Preview (Recommended)",
+          "value": "gemini-3.1-flash-tts-preview"
+        },
+        {
+          "title": "Gemini 2.5 Flash Preview TTS (Lower Cost)",
+          "value": "gemini-2.5-flash-preview-tts"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview TTS (Studio Quality)",
+          "value": "gemini-2.5-pro-preview-tts"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Voice used for Quick Read command",
+      "default": "Sadaltager",
+      "data": [
+        {
+          "title": "Sadaltager (Knowledgeable)",
+          "value": "Sadaltager"
+        },
+        {
+          "title": "Charon (Informative)",
+          "value": "Charon"
+        },
+        {
+          "title": "Rasalgethi (Informative)",
+          "value": "Rasalgethi"
+        },
+        {
+          "title": "Iapetus (Clear)",
+          "value": "Iapetus"
+        },
+        {
+          "title": "Erinome (Clear)",
+          "value": "Erinome"
+        },
+        {
+          "title": "Schedar (Even)",
+          "value": "Schedar"
+        },
+        {
+          "title": "Algieba (Smooth)",
+          "value": "Algieba"
+        },
+        {
+          "title": "Despina (Smooth)",
+          "value": "Despina"
+        },
+        {
+          "title": "Vindemiatrix (Gentle)",
+          "value": "Vindemiatrix"
+        },
+        {
+          "title": "Sulafat (Warm)",
+          "value": "Sulafat"
+        },
+        {
+          "title": "Kore (Firm)",
+          "value": "Kore"
+        },
+        {
+          "title": "Orus (Firm)",
+          "value": "Orus"
+        },
+        {
+          "title": "Alnilam (Firm)",
+          "value": "Alnilam"
+        },
+        {
+          "title": "Zephyr (Bright)",
+          "value": "Zephyr"
+        },
+        {
+          "title": "Autonoe (Bright)",
+          "value": "Autonoe"
+        },
+        {
+          "title": "Puck (Upbeat)",
+          "value": "Puck"
+        },
+        {
+          "title": "Laomedeia (Upbeat)",
+          "value": "Laomedeia"
+        },
+        {
+          "title": "Achird (Friendly)",
+          "value": "Achird"
+        },
+        {
+          "title": "Zubenelgenubi (Casual)",
+          "value": "Zubenelgenubi"
+        },
+        {
+          "title": "Callirrhoe (Easy-going)",
+          "value": "Callirrhoe"
+        },
+        {
+          "title": "Umbriel (Easy-going)",
+          "value": "Umbriel"
+        },
+        {
+          "title": "Aoede (Breezy)",
+          "value": "Aoede"
+        },
+        {
+          "title": "Fenrir (Excitable)",
+          "value": "Fenrir"
+        },
+        {
+          "title": "Sadachbia (Lively)",
+          "value": "Sadachbia"
+        },
+        {
+          "title": "Pulcherrima (Forward)",
+          "value": "Pulcherrima"
+        },
+        {
+          "title": "Leda (Youthful)",
+          "value": "Leda"
+        },
+        {
+          "title": "Enceladus (Breathy)",
+          "value": "Enceladus"
+        },
+        {
+          "title": "Algenib (Gravelly)",
+          "value": "Algenib"
+        },
+        {
+          "title": "Gacrux (Mature)",
+          "value": "Gacrux"
+        },
+        {
+          "title": "Achernar (Soft)",
+          "value": "Achernar"
+        }
+      ]
+    },
+    {
+      "name": "speakerMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speaker Mode",
+      "description": "Use Gemini's multi-speaker TTS only when a transcript has exactly two clear speaker labels",
+      "default": "single",
+      "data": [
+        {
+          "title": "Single Speaker (Recommended)",
+          "value": "single"
+        },
+        {
+          "title": "Auto Two-Speaker Dialogue",
+          "value": "auto-two-speaker"
+        }
+      ]
+    },
+    {
+      "name": "secondaryVoiceId",
+      "type": "textfield",
+      "required": false,
+      "title": "Second Dialogue Voice",
+      "description": "Gemini prebuilt voice for the second speaker when Auto Two-Speaker Dialogue is enabled",
+      "placeholder": "Puck"
+    },
+    {
+      "name": "readingExperience",
+      "type": "dropdown",
+      "required": false,
+      "title": "Reading Experience",
+      "description": "Director preset used to shape Gemini TTS delivery",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Smart Auto (Recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "Bilingual Academic Reader",
+          "value": "academic-bilingual"
+        },
+        {
+          "title": "Legal Text Mode",
+          "value": "legal-text"
+        },
+        {
+          "title": "Mandarin Lecture",
+          "value": "mandarin-lecture"
+        },
+        {
+          "title": "English Paper Reader",
+          "value": "english-paper"
+        },
+        {
+          "title": "News Briefing",
+          "value": "news-briefing"
+        },
+        {
+          "title": "Longform Audiobook",
+          "value": "audiobook"
+        },
+        {
+          "title": "Neutral Recitation",
+          "value": "neutral"
+        }
+      ]
+    },
+    {
+      "name": "languageMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language Handling",
+      "description": "Gemini TTS auto-detects language; this adds prompt guidance for language and pronunciation",
+      "default": "mixed-cmn-en",
+      "data": [
+        {
+          "title": "Mixed Chinese / English (Recommended)",
+          "value": "mixed-cmn-en"
+        },
+        {
+          "title": "Auto Detect",
+          "value": "auto"
+        },
+        {
+          "title": "Mandarin Chinese",
+          "value": "cmn"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
+      ]
+    },
+    {
+      "name": "expressiveness",
+      "type": "dropdown",
+      "required": false,
+      "title": "Expressiveness",
+      "description": "How much vocal contour Gemini should add before playback speed is applied",
+      "default": "balanced",
+      "data": [
+        {
+          "title": "Subtle",
+          "value": "subtle"
+        },
+        {
+          "title": "Balanced (Recommended)",
+          "value": "balanced"
+        },
+        {
+          "title": "Expressive",
+          "value": "expressive"
+        }
+      ]
+    },
+    {
+      "name": "audioTagMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Audio Tags",
+      "description": "Optional Gemini audio-tag behavior for delivery cues",
+      "default": "smart-pauses",
+      "data": [
+        {
+          "title": "Smart Academic Pauses (Recommended)",
+          "value": "smart-pauses"
+        },
+        {
+          "title": "Off (Exact Text)",
+          "value": "off"
+        },
+        {
+          "title": "Respect Existing Tags",
+          "value": "preserve"
+        },
+        {
+          "title": "Add Paragraph Pauses",
+          "value": "paragraph-pauses"
+        }
+      ]
+    },
+    {
+      "name": "directorNotes",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Director Notes",
+      "description": "Optional extra direction for tone, accent, pacing, pronunciation, or role",
+      "placeholder": "Example: sound like a calm CLSCI seminar professor; slow down around article numbers and citations."
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Playback Speed",
+      "description": "Playback rate applied by macOS afplay",
+      "default": "1",
+      "data": [
+        {
+          "title": "0.5× (Slow)",
+          "value": "0.5"
+        },
+        {
+          "title": "0.75×",
+          "value": "0.75"
+        },
+        {
+          "title": "1.0× (Normal)",
+          "value": "1"
+        },
+        {
+          "title": "1.25×",
+          "value": "1.25"
+        },
+        {
+          "title": "1.5×",
+          "value": "1.5"
+        },
+        {
+          "title": "1.75×",
+          "value": "1.75"
+        },
+        {
+          "title": "2.0× (Fast)",
+          "value": "2"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

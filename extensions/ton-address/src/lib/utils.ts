@@ -27,8 +27,8 @@ export function getFormattedAddresses(addressObj: Address): AddressFormat[] {
   return [
     // Parameters: isUserFriendly, isUrlSafe, isBounceable, isTestOnly
     { title: "Raw Address", value: addressObj.toString(false, true, false) },
-    { title: "Mainnet Bounceable", value: addressObj.toString(true, true, true) },
-    { title: "Mainnet Non-bounceable", value: addressObj.toString(true, true, false) },
+    { title: "Mainnet Bounceable", value: addressObj.toString(true, true, true, false) },
+    { title: "Mainnet Non-bounceable", value: addressObj.toString(true, true, false, false) },
     { title: "Testnet Bounceable", value: addressObj.toString(true, true, true, true) },
     { title: "Testnet Non-bounceable", value: addressObj.toString(true, true, false, true) },
   ];

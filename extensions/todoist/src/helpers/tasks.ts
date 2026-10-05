@@ -1,9 +1,8 @@
-import { isSameDay } from "date-fns";
-import { isBefore } from "date-fns";
+import { parseISO } from "date-fns";
 
 import { Task } from "../api";
 
-import { getToday, isExactTimeTask } from "./dates";
+import { isExactTimeTask } from "./dates";
 
 export const searchBarPlaceholder = "Filter tasks by name, priority, project, label or assignee";
 
@@ -103,7 +102,24 @@ export function getTasksForUpcomingView(tasks: Task[], userId: string) {
 
 export function getTasksForTodayView(tasks: Task[], userId: string) {
   return getTasksForUpcomingView(tasks, userId).filter((t) => {
-    if (!t.due) return false;
-    return isBefore(new Date(t.due.date), getToday()) || isSameDay(new Date(t.due.date), getToday());
+    return isTodayOrOverdue(t.due?.date) || isTodayOrOverdue(t.deadline?.date);
   });
+}
+
+function isTodayOrOverdue(date?: string) {
+  if (!date) return false;
+
+  // Parse the task's due or deadline date
+  const taskDate = parseISO(date);
+
+  // Get today's date at midnight in local timezone
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Get the task date at midnight in local timezone
+  const taskDateMidnight = new Date(taskDate);
+  taskDateMidnight.setHours(0, 0, 0, 0);
+
+  // Only show tasks due today, deadline today, or overdue
+  return taskDateMidnight <= today;
 }

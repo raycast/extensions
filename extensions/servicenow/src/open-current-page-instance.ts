@@ -1,49 +1,32 @@
-import { LaunchProps, LocalStorage, showToast, Toast, open } from "@raycast/api";
-import { Instance } from "./types";
+import { LaunchProps, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getURL } from "./utils/browserScripts";
+import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
+import { resolveInstanceOrToast } from "./utils/instanceResolver";
 
 export default async (props: LaunchProps) => {
-  const { instanceName } = props.arguments;
+  try {
+    const resolved = await resolveInstanceOrToast(props.arguments.instanceName);
+    if (!resolved) return;
+    const { instance, instances } = resolved;
 
-  const item = await LocalStorage.getItem<string>("saved-instances");
+    const url = await getURL();
+    if (!url) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "No URL found",
+        message: "Please open a tab in a supported browser",
+      });
+      return;
+    }
 
-  if (!item) {
-    showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
-    return;
-  }
-
-  let instance;
-  if (instanceName) {
-    const instanceProfiles = JSON.parse(item) as Instance[];
-    instance = instanceProfiles.find(
-      (i: Instance) =>
-        i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-        i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-    );
-  } else {
-    const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
-  }
-
-  if (!instance) {
-    showToast(
-      Toast.Style.Failure,
-      "Instance not found",
-      `No instance found with name or alias containing ${instanceName}`,
-    );
-    return;
-  }
-
-  const url = await getURL();
-  if (!url) {
-    showToast(Toast.Style.Failure, "No URL found", "Please open a tab in a supported browser");
-    return;
-  }
-
-  if (url.includes(".service-now.com")) {
-    const urlObject = new URL(url);
-    open(`https://${instance.name}.service-now.com${urlObject.pathname + urlObject.search}`);
-  } else {
-    showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
+    if (isServiceNowUrl(url, instances)) {
+      const urlObject = new URL(url);
+      open(`${getInstanceBaseUrl(instance)}${urlObject.pathname + urlObject.search}`);
+    } else {
+      showToast({ style: Toast.Style.Failure, title: "The current tab is not a ServiceNow instance" });
+    }
+  } catch (error) {
+    showFailureToast(error);
   }
 };

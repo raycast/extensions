@@ -1,0 +1,83 @@
+import { showFailureToast } from "@raycast/utils";
+import { List, ActionPanel, Action, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { spawnSync } from "child_process";
+import { getDisplays, isDockLockPlusInstalled, isDockMovable } from "./utils";
+
+interface DisplayInfo {
+  name: string;
+  geometry: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  dockVisible: boolean;
+  dockMovable: boolean;
+}
+
+export default function Command() {
+  const [displays, setDisplays] = useState<DisplayInfo[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function loadDisplays() {
+      if (!isDockLockPlusInstalled()) {
+        await showFailureToast("", {
+          title: "DockLock Plus not installed. Install it at https://docklockpro.com",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!(await isDockMovable())) {
+        await showFailureToast("", { title: "Dock move not allowed for this mode." });
+        setDisplays([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await getDisplays();
+      const movableDisplays = data.filter((d) => d.dockMovable !== false && d.dockVisible !== true);
+      setDisplays(movableDisplays);
+      setIsLoading(false);
+    }
+
+    loadDisplays();
+  }, []);
+
+  async function moveDockToDisplay(displayName: string) {
+    const result = spawnSync("/Applications/DockLock Plus.app/Contents/MacOS/DockLock Plus", ["move", displayName], {
+      encoding: "utf8",
+    });
+
+    if (result.status === 0) {
+      await showToast(Toast.Style.Success, `Dock moved to display: ${displayName}`);
+      await closeMainWindow();
+    } else {
+      const exitCode = result.status ?? "unknown";
+      const stdout = result.stdout?.toString().trim() ?? "";
+      const stderr = result.stderr?.toString().trim() ?? "no stderr";
+
+      console.error(`Command 'move "${displayName}"' failed`, { exitCode: String(exitCode), stdout, stderr });
+      await showFailureToast(stderr, { title: `Failed to move Dock (exit code ${exitCode})` });
+    }
+  }
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Select display to move the Dock">
+      {displays.map((display) => (
+        <List.Item
+          key={display.name}
+          title={display.name}
+          subtitle={`x:${display.geometry.x} y:${display.geometry.y} ${display.geometry.width}x${display.geometry.height}`}
+          actions={
+            <ActionPanel>
+              <Action title="Move Dock to This Display" onAction={() => moveDockToDisplay(display.name)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}

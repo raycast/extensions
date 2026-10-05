@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { ProcessInfo } from "../models/interfaces";
-import { KillSignal, killProcess } from "../utilities/killProcess";
+import { KillSignal, killProcess, resolveKillSignal } from "../utilities/killProcess";
+import { isWindows } from "../utilities/platform";
 
 const preferences = getPreferenceValues<Preferences>();
 export default function KillAllActions(props: {
@@ -8,14 +9,14 @@ export default function KillAllActions(props: {
   onKilled?: () => Promise<void> | void;
   onError?: (error: unknown) => Promise<void> | void;
 }) {
-  if (preferences.killSignal === KillSignal.KILL || preferences.killSignal === KillSignal.TERM) {
+  if (isWindows || preferences.killSignal === KillSignal.KILL || preferences.killSignal === KillSignal.TERM) {
     return (
       <Action
-        title="Killall"
+        title="Kill All"
         icon={Icon.XMarkCircle}
         onAction={async () =>
           await killProcess(props.process, {
-            killSignal: preferences.killSignal,
+            killSignal: resolveKillSignal(preferences.killSignal),
             killAll: true,
             onKilled: props.onKilled,
             onError: props.onError,
@@ -26,7 +27,7 @@ export default function KillAllActions(props: {
   }
 
   return (
-    <ActionPanel.Submenu title="Killall" icon={Icon.XMarkCircle}>
+    <ActionPanel.Submenu title="Kill All…" icon={Icon.XMarkCircle}>
       <Action
         title="With SIGTERM"
         onAction={async () =>

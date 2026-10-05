@@ -17,7 +17,6 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import os from "os";
-import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 
@@ -188,7 +187,6 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-      showFailureToast({ title: errorTitle, message: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -259,7 +257,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
           errorMessage = "You don't have permission to modify this bucket's lifecycle configuration.";
         }
 
-        showFailureToast({ title: errorTitle, message: errorMessage });
+        showToast({
+          style: Toast.Style.Failure,
+          title: errorTitle,
+          message: errorMessage,
+        });
       }
     }
   }
@@ -442,7 +444,11 @@ export default function BucketLifecycleView({ projectId, gcloudPath, bucketName 
         errorMessage = "You don't have permission to modify this bucket's lifecycle configuration.";
       }
 
-      showFailureToast({ title: errorTitle, message: errorMessage });
+      showToast({
+        style: Toast.Style.Failure,
+        title: errorTitle,
+        message: errorMessage,
+      });
     }
   }
 

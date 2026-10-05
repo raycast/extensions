@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Detail, ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { ServiceHubService, GCPService } from "../ServiceHubService";
 
 interface ServiceDetailsProps {
@@ -41,9 +40,10 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       }
     } catch (error) {
       console.error(`Error fetching details for service ${service.name}:`, error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to fetch service details",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
 
       setServiceDetails(service);
@@ -128,9 +128,10 @@ export default function ServiceDetails({ service, serviceHub, onServiceStatusCha
       }
     } catch (error) {
       console.error("Error toggling service status:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to update service status",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsToggling(false);

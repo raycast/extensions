@@ -1,7 +1,6 @@
 import { cleanLineBreaks, showTips, trimEnd, trimStart } from "../types/types";
 import { Cache, showHUD, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { load } from "cheerio";
+import { decodeHTML } from "entities";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -37,13 +36,13 @@ export const tryTrim = (str: string | undefined): string => {
 };
 
 /**
- * strips all newline characters from the string and replaces them witha space.
+ * strips all newline characters from the string and replaces them with a space.
  */
 export const tryStrip = (str: string): string => {
   if (!cleanLineBreaks) {
     return str;
   }
-  return str.replace(/[\r\n]/gm, " ");
+  return str.replace(/[ \t]*[\r\n]+[ \t]*/gm, " ");
 };
 
 export const transform = (str: string | undefined | null): string => {
@@ -76,10 +75,11 @@ export function extractNumber(input: string): string {
 
 export async function fetchTitle(url: string) {
   try {
-    const response = await axios.get(url);
-    const html = response.data;
-    const $ = load(html);
-    return $("title").text();
+    const response = await fetch(url);
+    if (!response.ok) return "";
+    const html = (await response.text()).replace(/<!--[\s\S]*?-->|<(script|style)\b[\s\S]*?<\/\1\s*>/gi, "");
+    const match = html.match(/<title[^>]*>([\s\S]*?)<\/title\s*>/i);
+    return match ? decodeHTML(match[1]).trim() : "";
   } catch (error) {
     console.error("Error fetching title:", error);
     return "";

@@ -6,6 +6,6 @@ export function writeMetadata({ filePath, key, value }: { filePath: string; key:
 
 export function readMetadata({ filePath, key }: { filePath: string; key: string }) {
   executeFFprobeCommand(
-    `ffprobe -v quiet -show_entries format_tags=${key} -of default=noprint_wrappers=1:nokey=1 ${filePath}`
+    `ffprobe -v quiet -show_entries format_tags=${key} -of default=noprint_wrappers=1:nokey=1 ${filePath}`,
   );
 }

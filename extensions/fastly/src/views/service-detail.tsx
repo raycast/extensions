@@ -1,7 +1,19 @@
-import { Detail, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { FastlyService, FastlyStats, FastlyServiceDetails } from "../types";
-import { getServiceStats, purgeCache, getServiceDetails } from "../api";
+import { Detail, ActionPanel, Action, Color, Icon, showToast, Toast, Keyboard } from "@raycast/api";
+import { FastlyService } from "../types";
+import {
+  getServiceStats,
+  purgeCache,
+  getServiceDetails,
+  isBotManagementEnabled,
+  isDdosProtectionEnabled,
+  getDdosProtectionMode,
+} from "../api";
+import { useCachedPromise } from "@raycast/utils";
+import { BotStatsDetail } from "./bot-stats-detail";
+import { DdosStatsDetail } from "./ddos-stats-detail";
+import { DdosEventList } from "./ddos-event-list";
+import { ServiceVersionList } from "./service-version-list";
+import { RealtimeStats } from "./realtime-stats";
 
 interface ServiceDetailProps {
   service: FastlyService;
@@ -17,34 +29,42 @@ interface Version {
 }
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
-  const [stats, setStats] = useState<FastlyStats | null>(null);
-  const [details, setDetails] = useState<FastlyServiceDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    try {
-      setIsLoading(true);
-      const [statsData, detailsData] = await Promise.all([
+  const {
+    isLoading,
+    data: { stats, details, botEnabled, ddosEnabled, ddosMode },
+    revalidate: loadData,
+  } = useCachedPromise(
+    async (service: FastlyService) => {
+      const [statsData, detailsData, botEnabled, ddosEnabled] = await Promise.all([
         getServiceStats(service.id, service.type),
         getServiceDetails(service.id),
+        // Security product status is supplementary; don't fail the view over it
+        isBotManagementEnabled(service.id).catch(() => undefined),
+        isDdosProtectionEnabled(service.id).catch(() => undefined),
       ]);
-      setStats(statsData);
-      setDetails(detailsData);
-    } catch (error) {
-      console.error("Loading error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      const ddosMode = ddosEnabled ? await getDdosProtectionMode(service.id).catch(() => undefined) : undefined;
+      return {
+        stats: statsData,
+        details: detailsData,
+        botEnabled,
+        ddosEnabled,
+        ddosMode,
+      };
+    },
+    [service],
+    {
+      initialData: {
+        stats: null,
+        details: null,
+        botEnabled: undefined,
+        ddosEnabled: undefined,
+        ddosMode: undefined,
+      },
+      failureToastOptions: {
         title: "Failed to load data",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      },
+    },
+  );
 
   const getDashboardUrl = (service: FastlyService) => {
     const baseUrl = "https://manage.fastly.com";
@@ -184,6 +204,39 @@ ${renderStats()}
               text={formatExecutionTime(stats.compute_execution_time_ms / (stats.compute_requests || 1))}
             />
           )}
+          {(botEnabled !== undefined || ddosEnabled !== undefined) && <Detail.Metadata.Separator />}
+          {botEnabled !== undefined && (
+            <Detail.Metadata.TagList title="Bot Management">
+              <Detail.Metadata.TagList.Item
+                text={botEnabled ? "Enabled" : "Not Enabled"}
+                color={botEnabled ? Color.Green : Color.SecondaryText}
+              />
+            </Detail.Metadata.TagList>
+          )}
+          {ddosEnabled !== undefined && (
+            <Detail.Metadata.TagList title="DDoS Protection">
+              <Detail.Metadata.TagList.Item
+                text={
+                  !ddosEnabled
+                    ? "Not Enabled"
+                    : ddosMode === "block"
+                      ? "Blocking"
+                      : ddosMode === "log"
+                        ? "Log Only"
+                        : "Enabled (Mode Unknown)"
+                }
+                color={
+                  !ddosEnabled
+                    ? Color.SecondaryText
+                    : ddosMode === "block"
+                      ? Color.Green
+                      : ddosMode === "log"
+                        ? Color.Orange
+                        : Color.SecondaryText
+                }
+              />
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
       actions={
@@ -200,7 +253,7 @@ ${renderStats()}
                   style: Toast.Style.Success,
                   title: "Cache purged successfully",
                 });
-                await loadData();
+                loadData();
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
@@ -209,25 +262,74 @@ ${renderStats()}
                 });
               }
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
           />
           <Action
             title="Refresh Data"
             icon={Icon.ArrowClockwise}
             onAction={loadData}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
+          {botEnabled && (
+            <Action.Push
+              title="View Bot Traffic"
+              icon={Icon.Shield}
+              target={<BotStatsDetail service={service} />}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "b" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+              }}
+            />
+          )}
+          {ddosEnabled && (
+            <Action.Push
+              title="View DDoS Overview"
+              icon={Icon.LineChart}
+              target={<DdosStatsDetail service={service} />}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
+            />
+          )}
+          {ddosEnabled && (
+            <Action.Push title="View Attack Events" icon={Icon.Bolt} target={<DdosEventList service={service} />} />
+          )}
           <Action.OpenInBrowser
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="View Real-time Stats"
             url={`https://manage.fastly.com/observability/dashboard/system/overview/realtime/${service.id}`}
             icon={Icon.BarChart}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
           />
           <Action.OpenInBrowser
             title="View Service Logs"
             url={`https://manage.fastly.com/observability/logs/explorer/${service.id}`}
             icon={Icon.Terminal}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "l" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+            }}
+          />
+          <Action.Push
+            title="Manage Versions"
+            icon={Icon.Layers}
+            target={<ServiceVersionList service={service} />}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "v" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+            }}
+          />
+          <Action.Push
+            title="Watch Real-Time Stats"
+            icon={Icon.LineChart}
+            target={<RealtimeStats service={service} />}
           />
         </ActionPanel>
       }

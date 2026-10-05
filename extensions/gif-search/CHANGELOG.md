@@ -1,5 +1,84 @@
 # GIF Search Changelog
 
+## [Fix search pagination with invalid preferences] - 2026-09-30
+
+- Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.
+
+## [Add Ask AI Raycast Command] - 2026-09-27
+
+- Add Ask AI search for GIFs and GIPHY Clips with direct media links.
+- Add YAML evals for GIF and clip requests.
+
+## [Separate GIF copy and paste] - 2026-09-18
+
+- Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.
+- Read the default action preference when building the action panel so it does not retain a previous selection.
+- Add regression coverage for cached favorites, copy and paste operations, failures, and default actions.
+
+## [Fix pasting and caching of GIFs] - 2026-09-17
+
+- Fixed "Paste GIF" failing with a file-not-found error for every GIF, once any favorite had been copied
+- Fixed Copy, Paste and Download serving a previously cached GIF instead of the one selected, when "Hide Filename" is turned on
+- Fixed removing a GIF from Favorites leaving its cached file behind
+- Fixed a download overwriting an existing file of the same name, and saving the server's response as a GIF when the request failed
+- Fixed a download that fails partway leaving the toast spinning instead of reporting the error
+- Fixed "Copy GIF Square" and "Paste GIF Square" ignoring the "Hide Filename" preference
+- GIPHY Clips now keep their `.mp4` extension instead of being saved as `.gif`
+- Favorites are now tracked per service, so GIFs that share an ID across providers no longer affect each other
+- A provider that can't be reached no longer empties Favorites and Recents for every other provider
+
+## [Improve provider error handling] - 2026-07-02
+
+- Improve error handling for provider fetch/search failures reported in #24313, #24571, #25591, and #27216
+- Show clearer failure messages when GIPHY, GIPHY Clips, Klipy, or Finer Gifs Club requests fail
+- Fix pagination for providers that do not return a cursor, preventing unnecessary follow-up requests
+
+## [Klipy API proxy & copy shortcut fix] - 2026-07-01
+
+- Klipy now routes requests through Raycast's API proxy, removing the need for a personal API key
+- Removed the Klipy API Key preference field
+- Fixed GIF favorites loading for Klipy (individual GIF lookup now works)
+- Use `Keyboard.Shortcut.Common.Copy` for the "Copy Page Link" action shortcut
+
+## [Remove Tenor support] - 2026-06-30
+
+- Removed Tenor from the GIF provider dropdown, preferences, API integration, URL detection, and extension metadata
+
+## [Direct Favorites & Recents commands] - 2026-06-05
+
+- Added a "Browse Favorite GIFs" command that opens straight into your favorites
+- Added a "Browse Recent GIFs" command that opens straight into your recent GIFs
+- Both commands can be assigned their own hotkey or alias for one-keystroke access
+
+## [Add square GIF actions] - 2026-06-02
+
+- Added new actions to copy and paste center-cropped square GIFs on macOS
+
+## [Add Paste GIF Link action] - 2026-05-06
+
+- Added a new action to paste a GIF link into the front-most application
+- Added Windows shortcut support
+
+## [Fix] - 2026-04-23
+
+- Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
+
+## [Add Klipy support] - 2026-02-05
+
+- Add Klipy support
+
+## [Faster Thumbnails] - 2025-12-17
+
+- Speed up loading of thumbnails in large grid items
+
+## [Enhancement] - 2025-09-29
+
+- Add a new action to paste a GIF into the front-most application
+
+## [Fix] - 2025-07-10
+
+- Expanded Tenor URL detection in ⁠getServiceFromUrl.ts to ensure GIFs from ⁠tenor.com, ⁠c.tenor.com, and ⁠media.tenor.com are added to the "Recent" list in GIF Search.
+
 ## [Refactor] - 2025-04-14
 
 - Refactored `copyFileToClipboard` to use Raycast APIs instead of relying on AppleScript.

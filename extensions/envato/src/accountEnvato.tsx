@@ -13,7 +13,7 @@ export default function accountEnvato() {
   const cache = new Cache();
   const cached = cache.get("state") ?? "";
   const stateFetch = useFetch();
-  const state: GetData = stateFetch.isLoading ? JSON.parse(cached) : stateFetch;
+  const state: GetData = stateFetch.isLoading && cached ? JSON.parse(cached) : stateFetch;
 
   const outPortfolio = state.portfolio !== undefined ? state.portfolio.matches : [];
 
@@ -27,6 +27,7 @@ export default function accountEnvato() {
     <List isLoading={outPortfolio && state.isLoading}>
       <Account state={state} />
       <List.Section title="My Portfolio">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {outPortfolio.map((item: any, index) => {
           return <PortfolioItem item={item} key={index} />;
         })}
@@ -64,7 +65,7 @@ export function AccountItem(props: {
     <List.Item
       icon={props.infoUser.image ?? "🔍"}
       title={String(props.infoUser.username ?? "Loading..")}
-      subtitle={String(`${props.infoAccount.firstname ?? ""} ${props.infoAccount.surname ?? ""}`) ?? ""}
+      subtitle={`${props.infoAccount.firstname ?? ""} ${props.infoAccount.surname ?? ""}`}
       accessories={[
         { text: `${props.infoUser.sales ?? "0"}`, icon: { source: Icon.BarChart, tintColor: Color.Green } },
         {
@@ -102,7 +103,7 @@ export function PortfolioItem(props: { item: saleItem; key: number }) {
     <List.Item
       icon={icon ?? "/"}
       title={String(title ?? "")}
-      subtitle={String(dateFormat(props.item.updated_at, "dd.mm.yyyy")) ?? ""}
+      subtitle={dateFormat(props.item.updated_at, "dd.mm.yyyy") ?? ""}
       accessories={accessories}
       actions={
         <ActionPanel>

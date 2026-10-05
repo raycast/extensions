@@ -1,11 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepwiki",
-  "version": "0.2.0",
-  "title": "Deepwiki",
+  "version": "0.2.3",
+  "title": "DeepWiki",
   "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
   "author": "vivek",
+  "contributors": [
+    "tofrankie",
+    "alexi.build",
+    "ernest0n"
+  ],
   "license": "MIT",
   "categories": [
     "Documentation",
@@ -14,55 +19,54 @@
   "commands": [
     {
       "name": "open-deepwiki",
-      "title": "Open Deepwiki Page",
-      "description": "Open Deepwiki for a specific GitHub repo URL or org/repo identifier.",
+      "title": "Open DeepWiki Page",
+      "description": "Open DeepWiki for a GitHub repo URL, org/repo, or the current browser tab.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "repoIdentifier",
           "type": "text",
-          "required": true,
-          "placeholder": "GitHub URL or org/repo (e.g., microsoft/monaco-editor)"
+          "required": false,
+          "placeholder": "Optional: GitHub URL or org/repo; falls back to current tab"
         }
       ]
     },
     {
       "name": "search-deepwiki",
-      "title": "Search Deepwiki Repos",
-      "description": "Search repositories indexed by Deepwiki.",
+      "title": "Search DeepWiki Repos",
+      "description": "Search repositories indexed by DeepWiki.",
       "mode": "view"
     },
     {
       "name": "crawl-deepwiki-docs",
-      "title": "Crawl Deepwiki Docs",
-      "description": "Crawl all documentation pages for a Deepwiki repository and copy content to clipboard.",
+      "title": "Crawl DeepWiki Docs",
+      "description": "Crawl DeepWiki docs for a repo URL, org/repo, or the current browser tab.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "repoIdentifier",
           "type": "text",
-          "required": true,
-          "placeholder": "GitHub URL or org/repo (e.g., microsoft/monaco-editor)"
+          "required": false,
+          "placeholder": "Optional: GitHub URL or org/repo; falls back to current tab"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.18.0",
-    "node-fetch": "^3.3.2",
-    "cheerio": "^1.0.0-rc.12"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "~20.11.1",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@types/node-fetch": "^2.6.11",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/cheerio": "^0.22.35",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^4.4.3"
+    "@types/node": "22.19.17",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -70,5 +74,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

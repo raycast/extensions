@@ -6,6 +6,14 @@ const createCustomer = `
     }
 `;
 
+const createInvoice = `
+    mutation ($input: InvoiceCreateInput!) {
+        invoiceCreate(input: $input) {
+            didSucceed
+        }
+    }
+`;
+
 const deleteCustomer = `
     mutation ($input: CustomerDeleteInput!) {
         customerDelete(input: $input) {
@@ -14,7 +22,20 @@ const deleteCustomer = `
     }
 `;
 
+const createProductOrService = `
+    mutation ($input: ProductCreateInput!) {
+        productCreate(input: $input) {
+            didSucceed
+            product {
+                name
+            }
+        }
+    }
+`;
+
 export const MUTATIONS = {
   createCustomer,
+  createInvoice,
   deleteCustomer,
+  createProductOrService,
 };

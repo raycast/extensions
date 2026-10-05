@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "teamwork",
+  "version": "0.1.0",
+  "type": "module",
+  "title": "Teamwork",
+  "description": "Search Teamwork tasks and control your Teamwork timer from Raycast",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "main": "dist/index.js",
+  "author": "defaced",
+  "license": "MIT",
+  "scripts": {
+    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "^5.9.3"
+  },
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Teamwork Site URL",
+      "description": "For example: https://yourcompany.teamwork.com",
+      "placeholder": "https://yourcompany.teamwork.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Teamwork API Token",
+      "description": "A Teamwork bearer token/API token"
+    },
+    {
+      "name": "recentLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent Tasks Limit",
+      "description": "Number of recent tasks to show (default: 5)",
+      "placeholder": "5",
+      "default": "5"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-tasks",
+      "title": "Search Teamwork Tasks",
+      "description": "Search tasks assigned to you and control timers",
+      "mode": "view"
+    },
+    {
+      "name": "timer-menu-bar",
+      "title": "Teamwork Timer Menu Bar",
+      "description": "Show the Teamwork timers in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Active Timer",
+      "description": "Pause the current active Teamwork timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-timer",
+      "title": "Resume Timer",
+      "description": "Resume a paused Teamwork timer",
+      "mode": "view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop and Log Timer",
+      "description": "Stop a Teamwork timer and log the time",
+      "mode": "view"
+    }
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

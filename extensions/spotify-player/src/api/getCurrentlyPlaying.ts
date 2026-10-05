@@ -1,8 +1,9 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { EpisodeObject, TrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-export async function getCurrentlyPlaying() {
+async function _getCurrentlyPlaying() {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -20,3 +21,5 @@ export async function getCurrentlyPlaying() {
     throw new Error(error);
   }
 }
+
+export const getCurrentlyPlaying = withCache("api:currently-playing", 10000, _getCurrentlyPlaying);

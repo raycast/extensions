@@ -1,5 +1,17 @@
 # Bonjour Changelog
 
+## [Features] - 2026-09-17
+
+- added refresh action
+
+## [Improvements] - 2026-09-16
+
+- improved reliability
+
+## [Updates] - 2026-08-22
+
+- updates for Raycast 2.0
+
 ## [Minor Improvements] - 2024-09-12
 
 - add status indicator to menu bar

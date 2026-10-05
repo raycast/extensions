@@ -1,18 +1,30 @@
 import * as Types from "./types";
 import * as React from "react";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
-import { DeleteModel, DeleteServer, GetModels, UpdateModel } from "./function";
+import { DeleteModel, DeleteServer, GetModels, LoadModel, UnloadModel, UpdateModel } from "./function";
+import { Shortcut } from "../shortcut";
 import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
-import { GetServerArray } from "../function";
+import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
 import { GetOllamaServers } from "../../settings/settings";
+import { GetGlobalDefaultModel, SetGlobalDefaultModel } from "../../settings/settings";
+
+const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+
+const IconsCapabilities: Record<string, Icon> = {
+  completion: Icon.SpeechBubbleActive,
+  vision: Icon.Eye,
+  thinking: Icon.Glasses,
+  tools: Icon.Hammer,
+  image: Icon.Brush,
+};
 
 /**
  * Return JSX element for managing Ollama models.
- * @returns {JSX.Element} Raycast Model View.
+ * @returns {React.JSX.Element} Raycast Model View.
  */
-export function ModelView(): JSX.Element {
+export function ModelView(): React.JSX.Element {
   const abort = React.useRef(new AbortController());
   const {
     value: SelectedServer,
@@ -23,23 +35,24 @@ export function ModelView(): JSX.Element {
   const { data: ServersSettings, revalidate: RevalidateServersSettings } = usePromise(GetOllamaServers);
   const {
     data: Models,
+    error: ModelsError,
     isLoading: IsLoadingModels,
     revalidate: RevalidateModels,
   } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [Download, setDownload]: [
     Types.UiModelDownload[],
-    React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>
+    React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
   ] = React.useState([] as Types.UiModelDownload[]);
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  function SearchBarAccessory(): JSX.Element {
+  function SearchBarAccessory(): React.JSX.Element {
     return (
       <List.Dropdown
         tooltip="Available Server"
         onChange={setSelectedServer}
         defaultValue={SelectedServer ? SelectedServer : "Local"}
       >
-        {Servers && Servers.map((s) => <List.Dropdown.Item title={s} value={s} />)}
+        {Servers && Servers.map((s) => <List.Dropdown.Item key={s} title={s} value={s} />)}
       </List.Dropdown>
     );
   }
@@ -49,7 +62,7 @@ export function ModelView(): JSX.Element {
    * @param model
    * @returns List.Item.Detail
    */
-  function ModelDetail(prop: { model: Types.UiModel }): JSX.Element {
+  function ModelDetail(prop: { model: Types.UiModel }): React.JSX.Element {
     return (
       <List.Item.Detail
         metadata={
@@ -59,14 +72,19 @@ export function ModelView(): JSX.Element {
             {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
                 {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={c} color={Color.Purple} />
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={c}
+                    icon={IconsCapabilities[c]}
+                    text={c}
+                    color={Color.Purple}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                  <List.Item.Detail.Metadata.TagList.Item key={f} text={f} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -78,7 +96,7 @@ export function ModelView(): JSX.Element {
             <List.Item.Detail.Metadata.Label
               title="Modified At"
               icon={Icon.Calendar}
-              text={prop.model.detail.modified_at}
+              text={new Date(prop.model.detail.modified_at).toLocaleString(locale)}
             />
             <List.Item.Detail.Metadata.Label
               title="Size"
@@ -86,7 +104,18 @@ export function ModelView(): JSX.Element {
               text={`${(prop.model.detail.size / 1e9).toPrecision(2).toString()} GB`}
             />
             {prop.model.ps && (
-              <List.Item.Detail.Metadata.Label title="Memory freed at" text={prop.model.ps.expires_at} />
+              <React.Fragment>
+                {typeof prop.model.ps.context_length === "number" && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Context Length"
+                    text={prop.model.ps.context_length.toLocaleString(locale)}
+                  />
+                )}
+                <List.Item.Detail.Metadata.Label
+                  title="Memory freed at"
+                  text={new Date(prop.model.ps.expires_at).toLocaleString(locale)}
+                />
+              </React.Fragment>
             )}
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="System Prompt" text={prop.model.show.system} />
@@ -96,6 +125,7 @@ export function ModelView(): JSX.Element {
               <List.Item.Detail.Metadata.TagList title="Parameters">
                 {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
                   <List.Item.Detail.Metadata.TagList.Item
+                    key={p}
                     text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
                   />
                 ))}
@@ -114,7 +144,7 @@ export function ModelView(): JSX.Element {
    * @param model
    * @returns ActionPanel
    */
-  function ModelAction(prop: { model: Types.UiModel }): JSX.Element {
+  function ModelAction(prop: { model: Types.UiModel }): React.JSX.Element {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama Model">
@@ -122,22 +152,42 @@ export function ModelView(): JSX.Element {
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
             onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
+            shortcut={Shortcut.ToggleQuickLook}
           />
-          <Action.CopyToClipboard title="Copy Model Name" content={prop.model.detail.name as string} />
+          <Action.CopyToClipboard
+            title="Copy Model Name"
+            content={prop.model.detail.name as string}
+            shortcut={Shortcut.Copy}
+          />
+          {!prop.model.ps && (
+            <Action
+              title="Load Model on Memory"
+              icon={Icon.Upload}
+              onAction={() => LoadModel(prop.model, RevalidateModels)}
+              shortcut={Shortcut.LoadUnloadModel}
+            />
+          )}
+          {prop.model.ps && (
+            <Action
+              title="Unload Model from Memory"
+              icon={Icon.Eject}
+              onAction={() => UnloadModel(prop.model, RevalidateModels)}
+              shortcut={Shortcut.LoadUnloadModel}
+            />
+          )}
           <Action
             title="Update Model"
             icon={Icon.Repeat}
             onAction={() => UpdateModel(prop.model, setDownload, RevalidateModels)}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            shortcut={Shortcut.UpdateModel}
           />
           <Action
             title="Pull Model"
             icon={Icon.Download}
             onAction={() => setShowPullModelForm(true)}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={Shortcut.New}
           />
-          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash}>
+          <ActionPanel.Submenu title="Delete Model" icon={Icon.Trash} shortcut={Shortcut.Remove}>
             <Action
               title={`Yes, Delete "${prop.model.detail.name}" Model`}
               icon={Icon.Trash}
@@ -149,8 +199,24 @@ export function ModelView(): JSX.Element {
             title="Models Library"
             icon={Icon.Globe}
             url="https://ollama.com/library"
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={Shortcut.OpenLibrary}
           />
+          <ActionPanel.Submenu title="Set as Default Model" icon={Icon.Star}>
+            <Action
+              title={`Yes, Use "${prop.model.detail.name}" as Default`}
+              icon={Icon.CheckCircle}
+              onAction={async () => {
+                const defaults = await GetGlobalDefaultModel();
+                await SetGlobalDefaultModel({
+                  ...defaults,
+                  model: prop.model.detail.name,
+                  server: prop.model.server.name,
+                });
+                await showToast({ style: Toast.Style.Success, title: "Default model updated" });
+              }}
+            />
+            <Action title="No" icon={Icon.XMarkCircle} />
+          </ActionPanel.Submenu>
         </ActionPanel.Section>
         <ActionPanel.Section title="Ollama Server">
           <Action title="Add Server" icon={Icon.NewDocument} onAction={() => setShowNewServerForm(true)} />
@@ -172,11 +238,34 @@ export function ModelView(): JSX.Element {
     );
   }
 
-  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel) {
-    const accessories = [];
-
-    if (SelectedServer === "All") accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
-    if (Model.ps) accessories.push({ tag: { color: Color.Green, value: "In Memory" } });
+  function ModelAccessories(SelectedServer: string | undefined, Model: Types.UiModel): List.Item.Accessory[] {
+    const accessories: List.Item.Accessory[] = [];
+    /* Ollama Server Name */
+    if (SelectedServer === "All") {
+      accessories.push({ tag: Model.server.name, icon: Icon.HardDrive });
+      /* Skip other accessories if details are showed */
+      if (showDetail) return accessories;
+    }
+    /* Model Ps Data */
+    if (Model.ps) {
+      accessories.push({ tag: { color: Color.Green, value: "In Memory" } });
+      /* Skip other accessories if details are showed */
+      if (showDetail) return accessories;
+      accessories.push({
+        tag: {
+          color: Color.PrimaryText,
+          value: `${(Model.ps.size_vram / 1e9).toPrecision(2).toString()} GB`,
+        },
+        icon: Icon.MemoryChip,
+      });
+      accessories.push({
+        tag: {
+          color: Color.PrimaryText,
+          value: FormatOllamaPsModelExpireAtFormat(Model.ps.expires_at),
+        },
+        icon: Icon.Hourglass,
+      });
+    }
 
     return accessories;
   }
@@ -233,13 +322,13 @@ export function ModelView(): JSX.Element {
               title="Pull Model"
               icon={Icon.Download}
               onAction={() => setShowPullModelForm(true)}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcut.New}
             />
             <Action.OpenInBrowser
               title="Models Library"
               icon={Icon.Globe}
               url="https://ollama.com/library"
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={Shortcut.OpenLibrary}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Ollama Server">
@@ -258,13 +347,25 @@ export function ModelView(): JSX.Element {
         </ActionPanel>
       }
     >
+      {ModelsError && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Unable to Load Models"
+          description={ModelsError.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={RevalidateModels} />
+            </ActionPanel>
+          }
+        />
+      )}
       {Models &&
         Models.length > 0 &&
         Models.map((item) => {
           return (
             <List.Item
               title={item.detail.name}
-              icon={Icon.Box}
+              icon={item.detail.name.endsWith(":cloud") ? Icon.Cloud : Icon.Box}
               key={`${item.server.name}_${item.detail.name}`}
               id={`${item.server.name}_${item.detail.name}`}
               actions={<ModelAction model={item} />}
@@ -285,13 +386,15 @@ export function ModelView(): JSX.Element {
             />
           );
       })}
-      {(Models === undefined || Models.length === 0) && (Download === undefined || Download.length === 0) && (
-        <List.EmptyView
-          icon={Icon.Download}
-          title="No Models Installed."
-          description="No model is currently installed on this server. You can download a new model using the ⌘+D shortcut."
-        />
-      )}
+      {!ModelsError &&
+        (Models === undefined || Models.length === 0) &&
+        (Download === undefined || Download.length === 0) && (
+          <List.EmptyView
+            icon={Icon.Download}
+            title="No Models Installed."
+            description="No model is currently installed on this server. You can download a new model using the ⌘+N (macOS) or ctrl+N (Windows) shortcut."
+          />
+        )}
     </List>
   );
 }

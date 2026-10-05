@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, useNavigation } from "@raycast/api";
+import { Action, Icon, Keyboard, showToast, useNavigation } from "@raycast/api";
 import { NamedPortForm } from "../components/named-port-form";
 import Toasts from "../feedback/Toasts";
 import { NamedPortAlreadyExistsError, useNamedPorts } from "../hooks/useNamedPorts";
@@ -29,7 +29,7 @@ export function CreateNamedPortAction() {
       }
       icon={Icon.Plus}
       title="Create Named Port"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
     />
   );
 }

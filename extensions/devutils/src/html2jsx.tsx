@@ -1,6 +1,5 @@
-import { open } from "@raycast/api";
+import { openDevUtilsTool } from "./open-devutils";
 
 export default async () => {
-  const url = "devutils://html2jsx?clipboard";
-  open(url);
+  await openDevUtilsTool("html2jsx");
 };

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "transport-nsw",
+  "title": "Transport NSW",
+  "description": "View real-time departures for Sydney trains, metro, and light rail",
+  "icon": "extension-icon.png",
+  "author": "barlow",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "keywords": [
+    "sydney",
+    "nsw",
+    "train",
+    "metro",
+    "light rail",
+    "transport",
+    "transit",
+    "departures",
+    "timetable",
+    "opal"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Transport NSW API Key",
+      "description": "Your Transport NSW Open Data API key. Get a free key at opendata.transport.nsw.gov.au",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "plan-trip",
+      "title": "Plan Trip",
+      "description": "Plan a trip between two stations with multiple journey options",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-trips",
+      "title": "Favorite Trips",
+      "description": "View upcoming departures for your favorite trips in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-stops",
+      "title": "Search Stops",
+      "description": "Search for transport stops and stations in NSW by name. Returns stop IDs needed for planning trips."
+    },
+    {
+      "name": "plan-trip",
+      "title": "Plan Trip",
+      "description": "Plan a trip between two stations. Requires origin and destination stop IDs (get these from search-stops). Returns journey options with times, duration, and number of changes."
+    },
+    {
+      "name": "get-saved-trips",
+      "title": "Get Saved Trips",
+      "description": "Get all saved/favorite trips that the user has saved for quick access."
+    },
+    {
+      "name": "save-trip",
+      "title": "Save Trip",
+      "description": "Save a trip to favorites for quick access later. Requires origin and destination stop IDs and names."
+    },
+    {
+      "name": "get-departures",
+      "title": "Get Departures",
+      "description": "Get upcoming departures from a station with real-time delay information. Use this to check if trains are running on time or delayed. Requires a stop ID (get this from search-stops)."
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for Sydney and NSW train, metro, and light rail information. You can:\n\n1. **Plan trips**: Use search-stops to find station IDs, then plan-trip to get journey options with times and platforms.\n\n2. **Check delays**: Use search-stops to find a station ID, then get-departures to see real-time departure info including delays. Report how many trains are on time vs delayed, and the average delay.\n\n3. **Save favorites**: Use save-trip to save frequently used routes, get-saved-trips to retrieve them.\n\nWhen asked about delays or service status, always use get-departures to check current real-time data. Common stations include Central, Town Hall, Circular Quay, Bondi Junction, Parramatta, Strathfield, Chatswood, and airport stations."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

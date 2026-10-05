@@ -1,19 +1,33 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
 import * as Types from "../schema.generated";
 
-import { GraphQLClient } from "graphql-request";
-import * as Dom from "graphql-request/dist/types.dom";
+import { GraphQLClient, type RequestOptions } from "graphql-request";
 import gql from "graphql-tag";
-export type SearchReviewRequestQueryVariables = Types.Exact<{
-  query: Types.Scalars["String"]["input"];
+type GraphQLClientRequestHeaders = RequestOptions["requestHeaders"];
+/** The possible commit status states. */
+export type StatusState =
+  /** Status is errored. */
+  | "ERROR"
+  /** Status is expected. */
+  | "EXPECTED"
+  /** Status is failing. */
+  | "FAILURE"
+  /** Status is pending. */
+  | "PENDING"
+  /** Status is successful. */
+  | "SUCCESS";
+
+export type SearchReviewRequestQueryVariables = Exact<{
+  query: string;
 }>;
 
 export type SearchReviewRequestQuery = {
-  __typename?: "Query";
   search: {
-    __typename?: "SearchResultItemConnection";
-    edges?: Array<{
-      __typename?: "SearchResultItemEdge";
-      node?:
+    edges: Array<{
+      node:
         | { __typename: "App" }
         | { __typename: "Discussion" }
         | { __typename: "Issue" }
@@ -24,25 +38,17 @@ export type SearchReviewRequestQuery = {
             title: string;
             url: string;
             updatedAt: string;
-            repository: { __typename?: "Repository"; nameWithOwner: string };
-            author?:
-              | { __typename?: "Bot"; avatarUrl: string }
-              | { __typename?: "EnterpriseUserAccount"; avatarUrl: string }
-              | { __typename?: "Mannequin"; avatarUrl: string }
-              | { __typename?: "Organization"; avatarUrl: string }
-              | { __typename?: "User"; avatarUrl: string }
+            repository: { nameWithOwner: string };
+            author:
+              | { avatarUrl: string }
+              | { avatarUrl: string }
+              | { avatarUrl: string }
+              | { avatarUrl: string }
+              | { avatarUrl: string }
               | null;
             commits: {
-              __typename?: "PullRequestCommitConnection";
-              edges?: Array<{
-                __typename?: "PullRequestCommitEdge";
-                node?: {
-                  __typename?: "PullRequestCommit";
-                  commit: {
-                    __typename?: "Commit";
-                    statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: Types.StatusState } | null;
-                  };
-                } | null;
+              edges: Array<{
+                node: { commit: { statusCheckRollup: { state: Types.StatusState } | null } } | null;
               } | null> | null;
             };
           }
@@ -90,25 +96,30 @@ export const SearchReviewRequestDocument = gql`
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
   operationName: string,
-  operationType?: string
+  operationType?: string,
+  variables?: any,
 ) => Promise<T>;
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, _variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     SearchReviewRequest(
       variables: SearchReviewRequestQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
     ): Promise<SearchReviewRequestQuery> {
       return withWrapper(
         wrappedRequestHeaders =>
-          client.request<SearchReviewRequestQuery>(SearchReviewRequestDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<SearchReviewRequestQuery>({
+            document: SearchReviewRequestDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         "SearchReviewRequest",
-        "query"
+        "query",
+        variables,
       );
     },
   };

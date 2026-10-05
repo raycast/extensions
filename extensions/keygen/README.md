@@ -4,16 +4,26 @@
 
 # Keygen
 
-This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-grade licensing & distribution. With this extension you can:
+This is a Raycast extension for [Keygen](https://keygen.sh/) - _Open, enterprise-grade licensing & distribution_. With this extension you can:
 
-- View Licenses
+- View **API Tokens**
+    - Revoke Token
+- View **API Usage**
+- View **Licenses**
     - Create License
-- View Policies
+- View **Policies**
     - Create Policy
+- View **Products**
+    - Create Product
+- View **Users**
+    - Create User
+    - Delete User
 
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/keygen) OR `install` via Raycast Store
+
+    <a title="Install keygen Raycast Extension" href="https://www.raycast.com/xmok/keygen"><img src="https://www.raycast.com/xmok/keygen/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 2. **Get your Keygen Account ID**:
 
@@ -47,7 +57,7 @@ Keygen has a lot to offer and there will be commands and "AI Tools" to deal with
 - Machines
 - Components
 - Processes
-- Users
+- Users (WIP)
 
 ... and more.
 
@@ -57,6 +67,7 @@ Looking for more cool OSS? Try the following extensions:
 
 <a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install unkey Raycast Extension" href="https://www.raycast.com/xmok/unkey"><img src="https://www.raycast.com/xmok/unkey/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

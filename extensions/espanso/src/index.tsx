@@ -1,24 +1,30 @@
-import { Application, Detail, List, getFrontmostApplication } from "@raycast/api";
+import type { Application } from "@raycast/api";
+import { Detail, List, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ProcessOutput } from "zx";
-import { capitalCase, kebabCase } from "change-case";
-
+import path from "node:path";
 import { commandNotFoundMd, noContentMd } from "./content/messages";
-
-import { FormattedMatch } from "./lib/types";
-import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
-
+import type { FormattedMatch } from "./lib/types";
+import { getEspansoConfig, getMatches, sortMatches, formatCategoryName } from "./lib/utils";
 import CategoryDropdown from "./components/category-dropdown";
+import ProfileDropdown from "./components/profile-dropdown";
 import MatchItem from "./components/match-item";
 
 export default function Command() {
+  const { breadcrumbSeparator = "·" } = getPreferenceValues<{ breadcrumbSeparator?: string }>();
+  const separator = ` ${breadcrumbSeparator.trim()} `;
+
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<FormattedMatch[]>([]);
   const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [error, setError] = useState<ProcessOutput | null>(null);
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<string>("all");
+  const [error, setError] = useState<Error | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [configPath, setConfigPath] = useState<string>("");
 
   useEffect(() => {
     getFrontmostApplication().then(setApplication);
@@ -26,8 +32,10 @@ export default function Command() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+        const { config, packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
+        setConfigPath(config);
 
         const combinedMatches = [
           ...getMatches(packageFilesDirectory, { packagePath: true }),
@@ -37,26 +45,64 @@ export default function Command() {
         const sortedMatches = sortMatches(combinedMatches);
 
         const categoriesSet = new Set<string>();
-        const formattedMatches: FormattedMatch[] = sortedMatches
-          .filter((match) => !match.form) // Filter out items with a `form` property
-          .map((match, index) => {
-            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            let category = pathParts[0]?.replace(".yml", "") ?? "";
-            let subcategory = pathParts[1]?.replace(".yml", "");
 
-            if (subcategory?.toLowerCase() === "index" || subcategory === category) {
-              subcategory = "";
+        const profilesSet = new Set<string>();
+
+        const formattedMatches: FormattedMatch[] = sortedMatches
+          .filter((match) => !match.form)
+          .map((match, index) => {
+            const matchDirIndex = match.filePath.lastIndexOf(`${path.sep}match${path.sep}`);
+            const packagesDirIndex = match.filePath.lastIndexOf(`${path.sep}packages${path.sep}`);
+            const startIndex = Math.max(matchDirIndex, packagesDirIndex);
+
+            let pathParts: string[] = [];
+            if (startIndex !== -1) {
+              const dirName = matchDirIndex > packagesDirIndex ? "match" : "packages";
+              const relativePath = match.filePath.substring(startIndex + dirName.length + 2);
+              pathParts = relativePath.split(path.sep);
             } else {
-              subcategory = kebabCase(subcategory ?? "");
+              pathParts = [path.basename(match.filePath)];
             }
 
-            category = kebabCase(category);
-            categoriesSet.add(category);
+            const allParts = pathParts.map((part) => part.replace(/\.yml$/i, "")).filter(Boolean);
 
+            let profile: string | undefined = undefined;
+            let category = "";
+            let subcategory = "";
+
+            if (allParts[0] === "profiles" && allParts.length > 1) {
+              profile = allParts[1];
+              profilesSet.add(profile);
+
+              const remainingParts = allParts.slice(2);
+
+              if (remainingParts.length > 1) {
+                const folderParts = remainingParts.slice(0, -1);
+                const fileName = remainingParts[remainingParts.length - 1];
+                category = folderParts.map((part) => part.toLowerCase()).join(separator);
+                subcategory = fileName.toLowerCase() === "index" ? "" : fileName.toLowerCase();
+              } else {
+                category = remainingParts[0]?.toLowerCase() || "";
+                subcategory = "";
+              }
+            } else {
+              if (allParts.length > 1) {
+                const folderParts = allParts.slice(0, -1);
+                const fileName = allParts[allParts.length - 1];
+                category = folderParts.map((part) => part.toLowerCase()).join(separator);
+                subcategory = fileName.toLowerCase() === "index" ? "" : fileName.toLowerCase();
+              } else {
+                category = allParts[0]?.toLowerCase() || "";
+                subcategory = "";
+              }
+            }
+
+            categoriesSet.add(category);
             return {
               ...match,
               category,
               subcategory,
+              profile,
               triggers: match.triggers,
               replace: match.replace,
               label: match.label,
@@ -66,31 +112,43 @@ export default function Command() {
           });
 
         const sortedCategories = Array.from(categoriesSet).sort((a, b) => {
-          if (a === "base") return -1;
-          if (b === "base") return 1;
+          if (a.startsWith("base")) return -1;
+          if (b.startsWith("base")) return 1;
           return a.localeCompare(b);
         });
+
+        const sortedProfiles = Array.from(profilesSet).sort((a, b) => a.localeCompare(b));
 
         setItems(formattedMatches);
         setFilteredItems(formattedMatches);
         setCategories(["all", ...sortedCategories]);
+        setProfiles(["all", ...sortedProfiles]);
         setIsLoading(false);
       } catch (err) {
-        setError(err instanceof ProcessOutput ? err : null);
+        setError(err instanceof Error ? err : null);
         setIsLoading(false);
       }
     };
-
     fetchData();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
-    setFilteredItems(selectedCategory === "all" ? items : items.filter((item) => item.category === selectedCategory));
-  }, [selectedCategory, items]);
+    let filtered = items;
+
+    if (selectedProfile !== "all") {
+      filtered = filtered.filter((item) => item.profile === selectedProfile);
+    }
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
+    }
+
+    setFilteredItems(filtered);
+  }, [selectedCategory, selectedProfile, items]);
 
   if (error) {
-    const notFound = /command not found/.test(error.stderr);
-    return <Detail markdown={notFound ? commandNotFoundMd : error.stderr} />;
+    const notFound = /command not found/.test(error.message);
+    return <Detail markdown={notFound ? commandNotFoundMd : error.message} />;
   }
 
   if (!isLoading && items.length === 0) {
@@ -111,8 +169,8 @@ export default function Command() {
   const sections = groupByCategory(filteredItems);
 
   const sortedSectionKeys = Object.keys(sections).sort((a, b) => {
-    if (a === "base") return -1;
-    if (b === "base") return 1;
+    if (a.startsWith("base")) return -1;
+    if (b.startsWith("base")) return 1;
     return a.localeCompare(b);
   });
 
@@ -124,8 +182,8 @@ export default function Command() {
         const subcategoryCompare = a.subcategory.localeCompare(b.subcategory);
         if (subcategoryCompare !== 0) return subcategoryCompare;
       }
-      const labelA = a.label ?? a.replace;
-      const labelB = b.label ?? b.replace;
+      const labelA = a.label ?? a.replace ?? a.triggers[0];
+      const labelB = b.label ?? b.replace ?? b.triggers[0];
       return labelA.localeCompare(labelB);
     });
   };
@@ -134,15 +192,36 @@ export default function Command() {
     <List
       isShowingDetail
       isLoading={isLoading}
-      searchBarAccessory={<CategoryDropdown categories={categories} onCategoryChange={setSelectedCategory} />}
+      onSelectionChange={setSelectedItemId}
+      searchBarAccessory={
+        <>
+          {profiles.length > 1 && (
+            <ProfileDropdown profiles={profiles} onProfileChange={setSelectedProfile} separator={separator} />
+          )}
+          <CategoryDropdown categories={categories} onCategoryChange={setSelectedCategory} separator={separator} />
+        </>
+      }
     >
       {sortedSectionKeys.map((sectionKey) => {
         const sortedItems = sortItems(sections[sectionKey]);
         return (
-          <List.Section key={sectionKey} title={capitalCase(sectionKey)}>
-            {sortedItems.map((match, index) => (
-              <MatchItem key={match.filePath + index} match={match} sectionKey={sectionKey} application={application} />
-            ))}
+          <List.Section key={sectionKey} title={formatCategoryName(sectionKey, separator)}>
+            {sortedItems.map((match, index) => {
+              const id = `${match.filePath}-${index}`;
+              return (
+                <MatchItem
+                  key={id}
+                  id={id}
+                  match={match}
+                  sectionKey={sectionKey}
+                  application={application}
+                  separator={separator}
+                  isSelected={selectedItemId === id}
+                  configPath={configPath}
+                  onEdited={() => setRefreshKey((k) => k + 1)}
+                />
+              );
+            })}
           </List.Section>
         );
       })}

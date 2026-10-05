@@ -1,0 +1,436 @@
+[
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/authentication/public/v1/api/guest?authorizationNotRequired=true",
+    "body": "",
+    "status": 200,
+    "response": [
+      "031b0000c4d6dcb4b373076a486d9b1d4fd79a3975854a01d4476be2b9830eba16e6cbda55e0a92c81ce2db5b05bec9c6e3686d4131be8370003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c11050249afa285-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:14 GMT",
+      "leshopch": "eyJsdmwiOiJVIiwiZW5jIjoiQTI1NkdDTSIsImFsZyI6ImRpciIsImtpZCI6IjBiZTgwOGIyLTFmYzMtNGRkMS05NDI4LTE3OTkwMGVmZjJlOCJ9..gOp-GJ8sN4GM3jrD.5cr9re8CDoprCefOOiS7tBflqVbIlc2RVnuCuyzS3f7r4o6SYyAsLTpiheO908wR1d4F4D1wP8VW7eczupeMP30ZBd59CqOWPmmrbaSJVnOued-7572IenUdBVXL7JGXcL9Ket83yrXc8qYSdql8w2oTOAqhJ1jn2B7Xba4yg5qUjL7pw5WJKn9gqxHzA44wX_gjl4JMCTw2rfTlkytd_Mf_dbvn3UmO3gYd5tkkI3Ycm2Tbh8P7Y5rInYQ3uGhC2UNEs7ls0NMLY_6_TknDr4WLwDJo.0RhomSQ9dMIO3jSZeJUI8w",
+      "server": "cloudflare",
+      "set-cookie": "leshop-tgt=_fnJ2w5z3WNwgZsfgWkh78TjdP6QpNp0aGOQPBgGBT4jsLaKyyNMuZwZ9JOFZ4FC75LTDT1zwfGxmNluw4pHyA|MTc2ODkzNzc3NA|U0gxQVMxMjhDQkM|feAXNeXXV9LdVKrZ5D28BA|cPa8hCKGC0OBcGdoGqfQHojvTmA; Max-Age=2592000; Expires=Thu, 19 Feb 2026 19:36:14 GMT; Path=/authentication/; Secure; HttpOnly",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/fulfilment-selector/public/cooperatives?zipOrCity=8004&uniqueMatch=false",
+    "body": "",
+    "status": 200,
+    "response": [
+      "831e0000c4a7bf49fef8b7a6e69d8fbdd8b20a1b9522d5be91c3c2964247de5e0508ae7230fa24850e95654510c4e5729a619b4287f57f531917785d0303"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c110502d9e703a9-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:14 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "POST",
+    "path": "/onesearch-oc-seaapi/public/v5/search",
+    "body": {
+      "regionId": "national",
+      "language": "de",
+      "productIds": [],
+      "query": "sashimi",
+      "sortFields": [],
+      "sortOrder": "asc",
+      "algorithm": "DEFAULT",
+      "from": 0,
+      "limit": 100
+    },
+    "status": 200,
+    "response": [
+      "3138130020becdfcacda9d77a1d2fe14e82e872ed8c62076f503dc202ea4b270537bfe2fe7b717d21d79e07fd9b7ca8aa2b817ce8df7bc69071c4860d1121d1b308bb2b9367d54eb6b0c843b7cda30f385ad013b9d788579e8f77abdc9683aef51bfd7eb8f26f3c9f889b063e0c78415e6e10be261a6a3f9683aec11a25d330c0e572ceada6abb3a14752d08e5944e5d859fcc7f5961fa044db95c674959ca07cc80f06c33c7722762fa7b2c2d0cbafb77dd0bb62588b620948f6786c1c5cec92508ba7a696010664fd7e13acf7abfb35a9d145eeb7d2ae9b51226d89532a104d63598c10f4522f68b17b2722d287f806561aa0e8473b55d852cea5aae0e3917691acee2dac261461ebeb16f257f70d368c8aced49f2ef280a47c721251f7bcfdadf929a8573fd2875680b1cb9274242108631ebd90fc043cff2a02b3a9570777f7b727974d768d687273f2094500b6702c3c6b983ec417a86e8213df54356dac95bed1461faf4294952e16fb6d163469b970c02d16860b731029f5d4893935677ffffadd8154991e2a42627ad95a54d781b7f229cfeb15c611e9e0895e4c6d99f7f86e6c88b682e9c0f27706c3bcc1738c260e76e0f04cf4333645d0afd09192906561deca04109688e55d7186cb0664f204552b4ab43e1955798af1f82f2dac622ee96f56555741537cead0d2904e50233f8310003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c1105039cb103b1-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:14 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "referrer-policy": "no-referrer",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "POST",
+    "path": "/product-display/public/v4/product-cards",
+    "body": {
+      "productFilter": {
+        "uids": [
+          100064790
+        ]
+      },
+      "language": "de",
+      "offerFilter": {
+        "storeType": "OFFLINE",
+        "region": "national",
+        "ongoingOfferDate": "2026-01-20T00:00:00"
+      }
+    },
+    "status": 200,
+    "response": [
+      "03c20200c4ff745a55cbbc0b9520db2cea36c42084803f2b0b9f246fa62cb6a8aebf9bb826f8333dbe793655d2dbdf7bad2dd2868f8fb38144926de791a0b309cfd6dce635348a3c2f284d66f6efdc7e62410d789a24c9b428ab8461469d1ddc76038e6c92167991a6599224603062a6c0712a5c4f330af684ec1d186a2b4c038e7deaece082d3ffdf5a494f83018327af1538f6a9b3830b4eff7f6b253d0d26f8f7373815605cf3a27e7aae5e04d91e180f03302c6bf04e84e9c8559d2d1fac2d9fac49cbcb2f82f4679b9e2f38b60f4ecf0e4fd61f0f0ff6aec1d079320efc16e534cdb369559493b42a70cf4033d129077efb09d91870d8e1f95980616135387aefe78ec731cd44a722a79d6c24fbb8893f9d17f2798c8750b4611afa486a1bb66d1b2793a614555656755e164b595ee4b2ae8a695d5779aaa66525552daa46d6b1535a494f83098593a113dd06429d3eb22137524c9fd57141e6c22ae3c1b9369f5ad5dc741819c617ecbc4ba90147595445990fa00337b42227fbe077b0414ef660707ad1458269c572d896a9fb91e1808baa0eedbe0c377469b294b0e464dfb279ca53d90bad8c276515f404438bd015ba62dd8ff7c36ff6dc6a375ca65e5f5f83c0a9c741a7789efd04b9fdae5e1d6673e1a9d60adcdb856220b73a18479d9929e3f76df826782bb4530c43db2a0bfe89b925a9c03fb1a168746ec81fd523507806509ab5569b2e845e287054519180219dd470a5fe76c0dcb92665c1530d1469aa8a0a331949cb828dfe8917157f1a95a9743938d224e9308e0c7f16c2f8295b4a8ba4432dda9b18a65199c63a9f3190bb109644add5a5a2aef70bb6ac4c07ff74d15167ef73058ec38d8dbded83753058d5e51a2cd7afc6c830136f87b65156d45a1d9b5e7291815753067207eaf5d0dda8a1e5e40e06bf3f5843a65b539a5eb4f1366828b261603c193c5fa9e3786f0003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c110504cf3fbaae-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:14 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/store/public/v1/stores/search?query=8004",
+    "body": "",
+    "status": 200,
+    "response": [
+      "034a170064d359552da31a6e25d9b9fb108317cce221e4bb5c77dfbd55cb660cd67c55d7105230f69e18ed3bca53fee3ec7e84f2214a74cc3a5b0a65c92a4a645462c9bb288446514854cd650ff87552aeed56ca001d3f6ee0e5536fe259051e90140a36904339aedb2baa7a13badd09ffa04fc77d59c1ffb8812a6c113c30b22e900a46c8a1f947ee718ac34c195a8f08397c6381972e8aa9230d81712215f83a746bbcfb75973b871348b48433c8b48c0b50d00a5c829256da2a292623d7fe016a5a8d1bd0d09ac86d015a5a8b3bd091bac845e20705adc0052828452f5c20a598e4661919e2022d31df3f1cbf72787de0bd84ee61b8fa5036b1dabbb882fff12bcfca1fe4d7a18fe0e1fbff7f4b2a9bacc8ee75c7b42e29567199bab05d430e677f6d0efe06aed3041e2ca2841c1e177a2be0e17ea8e21097755bc2bac64c180d399469bbb27f7f904317b6b4ed55042fcd99308e0d720edd389c441bd83385565be6bb59747a399e46f037f068cc4ef0707810e69ecefa745ac6f5ac6c0e75ea52e8e270f85fe3e1957c3b62f1208ed6e2e667e3dd635ddb8a9bfaaedf1d8e2656ca5969f8c821a0565a59c92a48270569366cad2a455d1ffaa28a5fc0593157c7fdf16a8ae0a187bb5c1b26449325f43333a4bdd089c1728e96c4c8222d8b91b564b4c26f8c36f6ca089573b44a4c85b2a206ad16232b16d21a31b2223cad15232b6d91baee09729271cf8a1cc37f45b4b1a77319e2022db154e2ccca9cac82ef8992f5ee79f0f47ef62135ddbc87a472cfea87d4745358d7708abab64cab98cdbf5728a35122034868177ea8b5d5b908bec4e1949ab1dedab44c544cdd354d99d24929ffbd2c505b830c2059bbd0cf1a3012b39a5a7498310a96a0d109011a9d10a0d109c1728e56aab8cf95e51fb45a6ca311343a2140a31302343a2140a3138255ca4cfc8a6a40df336989f9945c8efbcbd4f761dbdd6aabec862ab4e00049713bb655c2b88dc05f4da834e129a79c76a2a4525781cb18943bd6a22647180cd6c20527e251068d87bedfdd1ab66f334082ed42bfab4204bf17392028d53951222875c94489a0544ff4d70ed764232bc53f444b04a55294084af57a51222835944589a04ce7ba2b88a0548a91b5cdd9831477952d10e487b2e40dc135dfeedd9aa9ec55f1e8723aae28ae0f5d9e86a5daf6a56fbb491b85a33a12aaf981c9321e77ac2565e653157e6bc62d42430886100c211842f8d20886100c21184230846008e14b23e843b8581fcaa64fb18ad99714abd48ec3682b0e733f2d7d1cd66a5cea1371324b12cb4496dafec98c92cc2e524847bf661dfd508d2ce754236bc95423cb135523cbb997812cff508d2caf578dac50568d5dac4784dc00808c00407cbfe552768599c79f64939daf418230f46994abc5f913fa84019e8f5b39775322097793874d7a5c2045693770c61926b4047f967a4b2bb8b8906e760127771175f9d05ae1e553e764e2546bb9f7a0ea4d8a93ef85a70cabb0bafdbd7dc48603cd3cd1aecab1939c0a66fe34928938afab3bd56a51736fad41d96b03503ab479a216656b5e394b9756b9621ff5ee0e3ef6b9341502200002200002200002200002200002200002ac466a91af0fbf83472661fdfcf01054b69096cd4f1a3a780ceac81427ff6d758e7c0872a9e556088b2789d22b5aac22997d6a85a95a1aa55b19b3b7d96308bff77553a1e5ebc3ef47beeff93bff06a67d041796ee60c7d2c7563f82cd6cb8d672d2544bd254eb64d2f444d2cacc668129844008844008847c34822093e6d78fdf4b4a65cc2c6fffdffde969e4dc18d47c71cc24b5ef8e9a951551b113ef0c03"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c110505ad39a032-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "POST",
+    "path": "/onesearch-oc-seaapi/public/v5/search",
+    "body": {
+      "regionId": "national",
+      "language": "de",
+      "productIds": [],
+      "query": "sashimi",
+      "sortFields": [],
+      "sortOrder": "asc",
+      "algorithm": "DEFAULT",
+      "from": 0,
+      "limit": 100
+    },
+    "status": 200,
+    "response": [
+      "3138130020becdfcacda9d77a1d2fe14e82e872ed8c62076f503dc202ea4b270537bfe2fe7b717d21d79e07fd9b7ca8aa2b817ce8df7bc69071c4860d1121d1b308bb2b9367d54eb6b0c843b7cda30f385ad013b9d788579e8f77abdc9683aef51bfd7eb8f26f3c9f889b063e0c78415e6e10be261a6a3f9683aec11a25d330c0e572ceada6abb3a14752d08e5944e5d859fcc7f5961fa044db95c674959ca07cc80f06c33c7722762fa7b2c2d0cbafb77dd0bb62588b620948f6786c1c5cec92508ba7a696010664fd7e13acf7abfb35a9d145eeb7d2ae9b51226d89532a104d63598c10f4522f68b17b2722d287f806561aa0e8473b55d852cea5aae0e3917691acee2dac261461ebeb16f257f70d368c8aced49f2ef280a47c721251f7bcfdadf929a8573fd2875680b1cb9274242108631ebd90fc043cff2a02b3a9570777f7b727974d768d687273f2094500b6702c3c6b983ec417a86e8213df54356dac95bed1461faf4294952e16fb6d163469b970c02d16860b731029f5d4893935677ffffadd8154991e2a42627ad95a54d781b7f229cfeb15c611e9e0895e4c6d99f7f86e6c88b682e9c0f27706c3bcc1738c260e76e0f04cf4333645d0afd09192906561deca04109688e55d7186cb0664f204552b4ab43e1955798af1f82f2dac622ee96f56555741537cead0d2904e50233f8310003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c1105062c385da5-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "referrer-policy": "no-referrer",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/store-availability/public/v2/availabilities/products/100064790?costCenterIds=0150327,0150361,0150010,0150018,0150132,0150120,0150016,0150362,0150202",
+    "body": "",
+    "status": 200,
+    "response": [
+      "03900000c4aa6da96f46f6fef1d00859c41b03b4e400e430694b29e500fc993f2b2d3d7d68aab75a8f217ebb2d6e110949cff1431ab884fd9cd6e99dba0751f2616a1181e2527b0203cf7b340b22fe0623a5298614420f0599286e3ac5b4f29bfd03"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c1105075f4ebc48-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/product-display/public/v1/promotions/personalized?region=national&language=en",
+    "body": "",
+    "status": 200,
+    "response": [
+      "034a1711457d4844311f008d9485f3f747c830b715637dbeb257ab030d43fd5c8074e23ee111a954fe9f9a55b5ffb1a1421a82e278434e5ff0d170d6800f187b432afa2bda5cf4dbb9eaeeffd6fef578ba61f55d9884654f2ecf0550c83bb31b58306f263477427776030f5c00f703ba60811e1500dc3f158a84a9fcc6fc5345ae75756563ca8a54232bebaa54adae92b539ab785b9418fc7080c1e26c9398c2788888a0986bb14dcf5787f5fbe3dd87b7afdf7e7afef6cdc7bf837fd7bffcfbe3e3e94fbf3f9efffbf1f49037cd7b7cf178a7f1161f4f7f22c0a93d7d41002deaa4e930c2d94dde35cf2a624181414dfb0a30797ff9e38b0de558d61400b2a72a83ecfa35b5ad5e8df1c8e5186fb5509161e60895e470c91d2afb524e9c4cc0b78434790ed5bf779e6b9a9eeef62efbc249275cbc05b990dfe44a9f1835ab824e30e77a9483c51936a472816c2dceeca2c9ac44f35017b6666a707f358a8ddb585b150bdcb9368a190d0c4ee3ce28d2b89e314593d88c5cc1588256655ab56af3098d34cf893325b31d29f0dd6393baaca3c62bcd3a3c4720a3c8f351a3adbdf93d3c9c62050bced3b8a599febdd75278e30381187fb8e2199cacabf5f79733275f2367e30d1ce014305b4276192de66bddab1014d44747283617029f3da4df9ac0066568c728d8df840ac8352ab614a9498763c8d33f1b744eb81e6b3692a96a231750ae73d162bcadfe107bdccb9bc9a4a34b22b1c922718272b9961a99afa52248b4c793e6e7ae0f8f8fdf62d4780b1a24746759c1491764683c3bc72bcb195e5b241124302b09868582dc73a6802c81c4f98c2bfd0c0ed6211a56621a849c836b3c9ab3f24c34478038b3ef3ef30db826289753b669bb3c479f040ddb3ab174330155dab02d4c11906f8f3a136e8dbc882226019a9820a0ec4c9f24b055e615d4e0c4f918763418e2f593ceb6d1308e1caf703bd549e475f7c446c074a402249eeb31538db02739ad3de9bb783b2c3fae4f3729d5ea26a68f2d9ac1442994c411a91b87358331ad1526ae99c134ec176e427d6d28d3cd848512588e4f9a155d318aa9c8dd518aa5e18f976b331cd989361da3cca681e130b8cba5c165683338c895b1698f8a3d93cc0b4a1ba250f2fbbdec18ee6e1d06e780e56e9a5faba43ba5ddd409428d52b5b0315d1bdbb1bf25e138b923aeac9e76aa25185838392ae2dae9d4a65fec1125116a2b364d8dcccfb7920c60b4e9bb337d373b539553a1040d95d18d767c4c8d98a344d0c07ecf4a7b672d2242ada339413cea7cc942f5a9b05f8ca7a995920e5af71a73b931c710edb8a5844e958bbfaac25b1c2b15852c476c456d40437dce6444e66a357ae3849e68c5230c80ab1bb329bbde41cac48ed7150d0860602d7761258949e3da86ed33a6f2e70d392ec1f7a8d5ecc2746dd23883ea8d25d94fcbf1626dcd99daa94f5a3b3cb43e027d997e31933aa6ee0a8e72026f6d15fbd58c2e8c4dc67e70955b03674f787dd43f0c7970bc1e1fd75d6c55371162347b791a1d9499ce44580793885368466cd17302132d2d41091859572630b3a3b8e9b857ec51db0951b5c7a3246ca8a67929635ca9fb0cf4c4fe32fd22ceedc5f986b2c6ab3617c47e7073eb59dd43b375c72206398e914c95bac4428d88ba22ada204d514dd3a6945ab324acc948ec115e369307d46030e1646de497849772f556155f43952461708e7af2da963da3e36891907eef61b7524da518da177aa253d2e330d737198b9a3e84bdcec91191f8d70dc51244b6eb8737a5cffd13b9a8a50f79c45117737aeabf6eef1eca2ab0a77aa051eb77877c185768f1b993638b765c850ed2e42765b50dae064b46b50d10e68cba3b9bdd965ae9e3daa35c2a9d639d4d69aac7a550da3d694d2d1279f55440e70c004230a53b7a2042df06ab4c88d04882e33398a150e067884930abaf150ca706826f68bb58902be6a50e86bc99549d7f231cad73d5ff47a24deaeed4c0a877d92b5754b0deb00a75ca789aaf1e5c7006e77cdb505ed786d8246d74ee5156e5912ae4e574d996ae41688b86ee138c41c1b4b8406363c7682523c1a00d8cc28810d4a5f8ed3b9c867731bd5ef745b1a518d922527a58f9b26f0ec8a61714e05a7720bf045a502f48e6add3e96e0206031a71d4f79a9522cf5cecae98a984ff064590db3c53ba7ef2c51cf1463ed56788cf94e955a51163b1a069582df531290eb6fc48b46cc871cddb3dba87489bcb52d46e5655e2ae851127650c0231696ab727cb8d98480292a510a77a6be687002707a6157c6a8756990725057b22cbed0884f6da2403a7dbaa7786d13efa8bd0529d3efebca9656aa6e766f478296b651350c4263195384f3617f1c0d694db57b77663af75416ec42687cbb68b910767d0cdeb91f367355b7487b103d44d6eb8c6f9c688b3255fb24e6a08b06a1e752e842a8683681546822ef809eab488dcbf5f44fc2aaef03238532821ea106cb7df8201cd63618a8e11ac85c2348b29e26c52c9014dbc9282ef8f732a9b0c26949ad2b6390edbba76675174d4d5bf56382b62ba6fcdc730523989a8d30e2472879180d193da86d8fb57da933eddcae2d2b2b0707483f94a8dfe74cf9b97cea18252e69a134a152d80eed28ced54281e9e3ba41fa3ec48dcbcae75407b5dfc66c68aa3ef642585f1e75e195973828c53587dc9ba8604d5cbca710a3c06919bd1f99d93b2a4ad201d5f1cd304bfd750b8feafa211c4146a28c35b32df0eb42ec3caabdbd331adf40ad2d772f5184bf1628ce3c0ca8a1fbcb1f7ff9220df2bcbfffcfa77f3c7f9502f9cef1dffff9f8af0fcfdf7d7afef6cde3e9f1cdab57ff79f6db87cfff79f6e387cfcf3f7d7cf6ebebb76f3ffdfff97f3e3ebe78fcfbf9c77fbdfdfce6d3cfcfdf7c7a3c3d1e3a934b8a61865c3e2d74f60d337189697dc2b9ae1362ef0d3b87132838b3ca25c5309f3b934b8a611ef24c8fcbf12fb3cf1fefec737da98697b42cf188836a056c170e333fe29caa0731c150e782a580ae5bc1410a01db05ce82aca5e27031cc34c502b35f0a845d82c3b805256a59c3e433a8ae96b5b51e32c871c130133c8b2961a919677e8b33b1f517666c606b96e2fe3e32ce7669616bb629e520af572bc17f857aebe714736d362bbbfa920b9afd6fab58a1ab64556ab3a4ca39b792ce2a6b27a4b1256c6cdf75522a529d92a8bbceeab6936eeced50ff7630b36f9c4d6867ca6cfdfa0b2b9f0e88add983ab8f2e5fbdf7e4e2f5abef1f3cba7ff7fe939bf7ef31ce2c659376f2e352e214e38c42f26643f64aff3d243ceab2dff897a93e86bb37efddbcfbf4eefb0737af5ebefa7892371062826d4cc459a94e26f40586ffed2d67060bcd31793aa343d03763d3eb867116704b6ccdae241ff63307139d2382d35008196779d9cd99ad5f33fb0eaa56aa0a21d302712b126497f4e792e1bb8033e7532e77cfc6a0372d5b33a945af75ef960cca38cb0553b98285b6e002d55542564aacea80b6ebaa8ed94c9930ec407dffd3bd3a22ef6881cb1b7fa0b1dd1bf58165fdffcf3f603efe1572f133a5f1ef3da5cdf19f4b59bcd9800f60fd21a54c011ec7542870907d0b33ec8205350898399887cb1ee041f2fbc83b3c5e67538fed84b61edb3d73bb8df43d7d659d50ba018d18d00cdd34596c9576469ab1e947854652df4cddd02b6af4d1cdcb570d036e41d774d65b3f94f4b92e44e794187f0f057e59ecc612dd87791cd0ec67380df988a86493b1277787d5d5b9b9f8d588fc7b670661cb0a39f6ad9fceef0ccb3f8d97f1f71d2d31c0bde8135c8bc1ee08a1f692bbd1177ffc5ff5f9f3cfe10ec1f5b4fb74fc6f22b878ff019c86676836947c806bc94f7197668a3ec3c5fb0f38344209d7d9d75db3fa58b7b79151d257d6b6698414caf453d73a2586d65914b23193c161d2add5a217ba1f0cfd64e1b9eb58b9a4fc3ca24f9f38d03c67380d2e51de8089e19082a760085c8c163b07419f3e5534cfb91ab064d548e562d48f6e178b740282c79414328ed7ab2c6b4f3a30326fe93a65dc16ca702d9a5d86e75828a1c83fd26f29141ff6b370d1147f48703160c05cddc530470e1d7c845638b5773fd60d7255495577cfbf12516bfad6b46fecd46989a3d253dbe1a4514c344d3db676745a7444568ea36e6945db1568fff8b4f4532cb8ea0cb4580929f4b7f7d8abdfea8cdfd6155afc671fe1361e645a028766005ff3f786f9b42ba851fb87736717e60897136d51d3af27bb7bd747c8b11e0440fe8db4f5a0e9abb243d7da7152a26d87bed7bd1e9c1c49b869320d5add36c20c5d67a93b1eeacaeb95d7bf539a7e7236a037ea1e3b754bb7682f0725fd32ca0e56d987e8377be2674a70db17b3b9cdfb19bf3e39d96380c7e5d342f098326e09eefb85831cdbddeb5a38b6b1d65d1974fab375823c80fedfa2547620a11aea1bdb0c560c7218c6c175ad9b08a709b533a2a16974637f51f4718976b007980b723031d8f3f83e67380d064320eb343fc301e6829574505d4d5517e24e7ef9b00178ff01402e55bfb76ae1f423a5db05b2f3c5a81bf70b60416144811a127aa972d1bb6862285dbdea5475fefff75385a916f45260db0853d74a7ad4f2f1c0ae75e4f0de00aa02b9b2631a2826a1263c1008f38cfd3f1bbbc5ad6e9513ce65c2fd4c9d853a508ef1ef8eb53b9244962d7d2a06b603a563e30d04c9bb9181f12abca6a5cfa5f0d4c4c323b55c1be38a6025bbb4bfe67a3788cf0b8d9dd6b4e741e0d688c33808148751fc42c8ada68f94a98dda46901142721294974673ce267062e93d1ae930589be5d2b7070cb77c1d8692bce870a35f892b1eb9539c98b5c92f3509c7cd0d1664a7ace91c9962f740e9b406942075881e76e001b10f7b4cc4a33a8ba799a7539dee986d398bd7cbe5cfe7cecbcab54fb58d83987a37b84b7b9a781068384db36a6b6c72bdd5bb89dcaa302ce69c59034a973073ce3a0173c20c3a2a07968d66e7ac433e8ff43431ad1638a0d336c3a1f7e0401aa9970086c46417f79bda69128f68a2967810cf78aa3783783e9f972377e2fd1efa305f71ebe7655e3995a8551dbff14b2176dceabc8817e77d1b841637c29bd51387948e36dfca87da80cfa8132acb68b5936441b9e2c8274b9cb233c0c943f0883ee892a28f364815818a3c659a225691a14205571f887e0f4ffcfe17615221b43695aa019cf752790460a557e2f3755dbb7841e7754f533fd1a9f212d7faf144eb5ad3209ef074be6131675ec4274eb769aa6d14f8408a47d3e5cfbdf33288dac46e6e999713a5c3b98ddc4ac4f22fddd7b3dde32fff1d044af1699e266ee8aa5304e23dc4d4885d3f9c125efa7af1efa1b712f31b1621832c2a780405463338131112059240d1694023632e200f098bf36e2adce5f0ea05bca173cbcbadf84aa489a9d53642fe82e98ee2cd65417a6da18e0d99dd69d7480b4e630ab9012d64714016f0289eb65caf2a37f186aea813443ae0cb4e53e53688d33233dba583b89aba3f934ef9feaf90c79821703489a3219d0226650a2b629d91402180c2805925953ba2103dc3810354a8a4544f02738a16450451baefafc4e379bbd9f17255b977c5ec63f3b9ae69bf725f513a7b6bdffd729ff6bc083aafe2c3feca37c01fec87fcea697c33ef1b8b17b56f1e2ebd1e78fa766b6ef79f5cbdb8e6baaee258bb78c1cb1db74128256e8452221d072161a9883d7b48b505f9cad78d7f388afff550853255ca652c5a17159271aa389914949442f42172b2684da0e828481581fac9a8ba68348d0febc57c5e793f4f597c25a67a752e14edef28dc5c380bf4e595ea18413c73ee202834943aeda3b10acb0b11338078588fd9b363b9fc8344fefafd221ed5359d6bef14b73333d4e2d1c2fd8ea74a8bb6e34fcdca2dbabd446d111853356b587a92006c99549294a144ce29694551d910c80014d06517586f9b4aba698a58d984f7d1469fa7fea4f84876b298110141abbc9b2bfbb1f51af87c47fbe5dcc69597f1f2e776776ee37aacbdf3040f5beda851eaf5eae7a37e7843c7da58bca5b1f15acf47b1eb351dd641480d068746d8eaba48f75111ba7a49d755a98f461702936556e04cf45a19ca053d7ba51d9094d9824968d02ee5399f3242a917fa64398f6b9f17165f8934af47ee35d5048bf24d0e9bcb024cf8c5b3af05caf8a5b694201db3c90036c55bf2826be629322fdce8be433fded7891f7ce0e5fc6077b9cf54a44aa2c45f601413f508f0e5f775c89f890bc3a2c55252092607302192d688d2a4acbc4d1a3d4001ccd62b3cbb2c07881a6b2b618e281809b829adb1601da87289305801cedd57f3fda9d79126f1613e4fdcd7b46fb5df6136d942527ee22505fa07a436b1e329ae3d72aedcce6d4c7a94a526955d044eda80679592f7c53b5d629494143bebbd744eabf014fb9608d0346c5fc7b891b74c5d7c254a5df7fd4a7547a6bef985051568e69c834daa128d5819b563fd4d1af100404e367d04705f50cbb747ea3589ddf9b4f091a5328c2d3ec2271eb9f152795969ba4b0c5ef6cf1457f1709a446d02c51b3ece6d10ca90c366ed567bff82b2bf43951a97ac9436145730cbe8940eec0883c250acc358989592b1338ad410187f632027d054c55083465418fe98644044cce985af15b0966975e8245ecc473e52e6cd234a87635dd3befccd0a42b7f209af2b2ffd749eae4aec7a58d507797c3e8937f3152f6b9a7f9d8f96f9ba555ec5a32f3ee420749070c3e97d5fbb952299dd04b7a020352c7250c5810d984117c5869cf4d615820894b4b411b57359aaf025c97e68f5211e2d4c7910275afb5279155f89b8301d0aad7d95378b0b53dedce9b0b92c38653f219cdf30d67092411a293b7584911c801656fb78e223b75e5b8253b33b51eb6568fc8efbdd206483fc1ffae5f78751056329da0c9a5354f63158242aae78173351d65187ec3968c71495955e6b1b5a4b67a841203a32a4d2600c78c3fd068107c43e8c76c8dfae4fa8779efa7ca43ec18a1f34cc2079336fddf5233a84511282f6a88ad7462a488cc888d619939ccf51e714c87a0eaa8ca3a7b9c6fc25b12c67d13ad41ebc1243d855020b91a1a3c7e9f2bffdc46d9ca72c5e5ffebc6a313e8e4f9426ee9d0761c5dbb9516731f2c2b5f441284f0b7716954cf45b07430f97682affb94899be32cd3e79c76442d1853c830fce00e4e4111c8374016cd228739022017a85bb6028d483bb858586a7d88cae45409015d97330ff54e0a10224d02aca74b91f79aafb668346fdbc702bd892235f5fee97bbae2b2a39f1724a8bf93c88df6a0dfa5f4e6effffdbdf31474173c86086e80d9482d169704a5a8b2e8418733046396b64b1c5edb3761ea09b2eb6c3664c8d085243406ece0b2c72291a7a8d7fbadc8fdcae69cabc88b797fbfd44225132e7a5d9a57d6d076e6277aae9c08bb8e291da20dcbb06965b691ee42cfd11d83b3ee3f057962a6b54ca5354217a5f2c289f9242a3a2895195a82369a550c77727d56ef69d98f6f16bc6d29ac9561014180471fb67e0114ac55b20fa4d6db98b5ddacf8779a2cc6db373217849ded496e745bc3e8f3c35f1b64e693f0869ab350cc256353d309653e8d9f610b3451f8a581248c9b11472324a2781291a2064976250c6444236097ed8637d68ba07c200b8a00040f6dd2f95ad9abaeb6b9a94e49035158f6128fc846561a6e6be721bbaa6db47ea7313446d348e023c5e7e012f92b2488634c02155083e984df437a8a9333a38ec2686963e700fe5a9f436dd39b2ce6d7539a90115aae8f40acb903c13b2e7f5accf2e6739f7d9e6b0fa190fea67d5df6492fff7d5cf6693493520bfc61a795cfd4ea673dc2b36f2c477d7bacb196c74e0b69f34f3a2ffcdbd6a0c4cee67038dac468eb2ff2751f5bcbf29240c2ee98c5eebe445504a4934e45c9048e8c0172db54814f7b773b610b08ffd28e900fee95aba2381dd036c55ef298f6339bee5d36b23a02a6357b92d1f56519f3a6ea5ea5bee90f91e8eee8873f0899db6ba1db6c10e06fdbcaac12859259750926ccab0ab00119c481e088f0905755290c90a0fb1588cb2a444c1c8a830a05531160fe878d7d229b6bede3c8c2c6c12819d56000e05e75df5c5a8707f97bbbd5e8b6dfb52aa6f76e2a7d37c6c3dcca98fb1d9f2d3418d4964e5b10237b286e4b0845c94a6c79f0593a5942c14438620164401b9a052d6eb2800a300046f4cded011700ed2fc15e10763574e98b920059280a7d8cbd81d2080dd65ccddee8fd98da341a3391b4f47f668a34a7cb3e1ffaf6fdc02e399c0458008aef4159ae6a243952887908a251f74002f6c421d9291320219636d2e2eff274784e933d19271326e4ab601db1e25005719bb79320003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c1105080cf2039c-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/fulfilment-selector/public/v1/fulfilment-selection?zipCode=4001",
+    "body": "",
+    "status": 200,
+    "response": [
+      "83cc0000c4429d4efbcd8157c23f260522c3c5958124b7fcf48c02a256016661894670bb1cfc80b71fa29b1cf0ee44a7e3296dfcc27f615d77d5dd8ece31866e82dcb107ebae9d2d93458938ae62e2f9dcd8e907a1488ad0a1075b5efaaae583add7fc0113118355d7d67f9f0405a158058e397af80c5abe58fa7a3f86ce7be0ba2a247a5c57455ec6cced07dbfd188a914ce693d7e97222f23a9fce445e8388f67d4133f4e6437e57b0573b4afe329af5c5f447e6cacc742c2a821e58c6388c8cca446da3cc96c9a588ca9428efbeae2f6b4636c8775aba77a86fbb696f6c711374b9bfcc2b0ff56dc77f0303"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c110508b9fa03af-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/fulfilment-selector/public/v1/fulfilment-selection?zipCode=8004",
+    "body": "",
+    "status": 200,
+    "response": [
+      "83ce00006469ce948f1ea440b17b40b8ac4d91a7ddbb7f7a460151ab00b3b04423b85d0e7ec0db0fd14d0e7877a2d3f194367ee11348d55df5b0e1aa6205b4fd8e2b5e8054f795a4fea2449c678af17c6eecb46520f093318005487a5b6725bf48bee10fe0229a587d23f570f19d3010bcfcff95f21bc002baef929f2c7d7dac80f405f0264b44fabcc992bc541c4bcbe5b102021d4dc7fcb43c13f1d3b16cc4cf20a20d376c88de7cca4305fbb5a3e42fbabd446da96b779a4d0612222c80538583ae114ee4f21b49eadf8a285a4479f9757d9bf3af7cc707255701505d3613dfd8e3ed7713d7b7715603d565c33b0303"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c1105097ec9a625-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "GET",
+    "path": "/fulfilment-selector/public/v1/fulfilment-selection?zipCode=8004",
+    "body": "",
+    "status": 200,
+    "response": [
+      "83ce00006469ce948f1ea440b17b40b8ac4d91a7ddbb7f7a460151ab00b3b04423b85d0e7ec0db0fd14d0e7877a2d3f194367ee11348d55df5b0e1aa6205b4fd8e2b5e8054f795a4fea2449c678af17c6eecb46520f093318005487a5b6725bf48bee10fe0229a587d23f570f19d3010bcfcff95f21bc002baef929f2c7d7dac80f405f0264b44fabcc992bc541c4bcbe5b102021d4dc7fcb43c13f1d3b16cc4cf20a20d376c88de7cca4305fbb5a3e42fbabd446da96b779a4d0612222c80538583ae114ee4f21b49eadf8a285a4479f9757d9bf3af7cc707255701505d3613dfd8e3ed7713d7b7715603d565c33b0303"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c11050a0b7cbc08-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "POST",
+    "path": "/product-display/public/v3/product-detail",
+    "body": {
+      "productFilter": {
+        "migrosIds": [
+          "104241300000"
+        ]
+      },
+      "offerFilter": {
+        "warehouseId": 2,
+        "region": "gmzh",
+        "ongoingOfferDate": "2026-01-20T00:00:00",
+        "storeType": "OFFLINE"
+      },
+      "language": "de"
+    },
+    "status": 200,
+    "response": [
+      "83fd0a00e452d5ffaa76677f4890c4a0c88b8ee12c3ffb92e70d442ec17d0217fa0028398c2e57e52bea8baebeaaee86d65ce810a985d8efee6ff68fd96f88daddd4126ad1a40e130f9da5d1c41b9112878dd1aa0b50472cf083bdbbc83fbc61c71516699224d92c9d8c15b66cbc0b6715169826c36c98e6499224097273dd886521990b1fa7b3c92c4d50a1e896b0c0138a9eb822cf64c8a2c285d7526181c7dab7e4898b5fb21016786075085ca2c2e0738e580c1678caed821264468e967260e1bd05f8e95f505813f8e95f9092abfedf7f97556427e9e525420f0bc24d2304b7dab6bb7f5a54f877122edd69318405ceeff7ae0ff7ee0eb95df7d69aed71a03e0f1678737d79767df471effaf0e3d9f5fcfee6eee88dec19a3c2e20d5bcd42264fb5a10b018b3fbc215758e0e568a2ced53ff42ef5822cacc9684185c176060b5cf752723dd6dfe4561bbad5b1c1029b1857a1180c369b4dcf5268dcaa5736bdd2563d4fa15f5ad7552cdabff4432fee69d0adacd3d5e02d445d2eb783753a9ecc86d33c49f201427680c5e3e343e58f07ce3a8fdba7d6e5de9a1fb73202cbd534b742e96092e4e92449b3d1a08305854169bbdd2a942e7a8eec44db83467b5d46f21c2297e1215335a35fa0d726db2785b3b076e8c205201f7d05df8eab6e1f895f49c2e7052b60763dd535f99b5f71471cbe537062bbd205ea1dfbae8c2e5060dfad14fcbe2b97e473489cbb4ffae62142d9781715cc9d08c9c2762dc9ee9f56c1317565131b6d23b51c23d902e6ce2f38aa5ebfe9d5eedd13c1f02b057b4bfdca24b50ee4050c21bdc1ceaec943da1f7da560befbdc91efc484bcd77ec0d13b2109bbcf9d27e8a482dd3f563559e23ba1e0c2954dd0f655c151db59a3a3f34595366ca9e4d8b028d8f3ae2551704296c91737db2d2d238b8263df954decdd2e7442edee3d50d0755c3a790dbf71e991e0db031d020705a7c415d90591275170a1bd8b91e4bb3e2ad4d69237246793e41858e085160112fd959202aed896cd4b0fd7bbf7102831e80093db2e9234da463614260d80cf41a5bdee0218dab4d1c74770e45fa933c2219082b9fba417ae11920432541872f2b6b0c043263825bfeca48e418bd10b829aa5a210a1ea40773554e4e181fc4a97cb4e0cb050731db3656d2ba1d59ec3032d60f186c1c4673d762eae3c4bc4e20dbd8eb3ea422385a5cb0eb4bf688f7eec384a4962c4229fd95c6427773ab2c3623c5478e610489d8f74d944618052298b110dcaa6639b1cd760ac4bfaeb445cbf6c0675bd056d07b3b29c549351558fd3713ecccbaca6e12c1f273a9be655b9984eca7c968fa7d37e581b5438d84d392b8099b4d4f99451baecc2ccf08749a007497f064b030737ffffdbdfe84718c0d2e076abd4b7db3794c51dad9936018b7c922994c53c6a1fb018f647db7571785e51c5fa83b70ac12c1277704536a06d18acaeccecd512490ccb04e655bcd70b4b58bc61a4d43903167fc03449c0a0c214ee96c2b1bfcd1230dfe19342ef368b0b583126c7028f84bc61428507b20cf358ed384d61790edfe6d3212c4b6dbf43857996d14326939bee86f0153e6d55862d1c538c0fe2144c44d6cf4039cee12b7c5258077d496b083d5d1d1d9e7db8c28cd658e9b5133014769f636413098e29c6f9468f604559b3c9d7fad322aa5fde3c3e38e5c23596a479a9bc8ef566c76a83b9ea1dd50e0283d3359dd6331bb32338fac7309a9f9e9d9cde3a655f5bab430cd1d5f545e0acaf32afb43f95f3d4f3116f8843402e9df647a94226a064eabdf95cdbd7baf2493f47cd27fd249d02cd310da3f3d4094167b3f390dd4bdeb408ccc288044c5d192a0e88bcbad796c4102a64a9dd3d3d472cf0ab298b16ba2ba877ef1e888504aace974d281be1182d970d091cf98d2e9b404202df4e8749b2fc34c89224e9a154d1723bfebf84a5b901d799e90cbe1a7701e9381b771e7eb02077198401590e5d2363519229cf7d86a4061ec5932650f7e064d4aafa109d63e57c6427739248528e01f6d632c8f30b4833b815024d68c521c2b98db6279e87e7d859b9ceabb50db455d8056dc823017460089f32b1118aa06d80b9e87209ae220fbfdf70281b9235f9556dc9746260410ce60218c21bf3b04f71f739b2e9c4285810b7f018d16bb5a2609fbc0991d89028d8eba2ab7563cdf16be70b7128ba6ce01355e42120776448604f42f424256604b7613284d2e665d3590b6d726e617ff7ee5d1fb70a0f9d5b9eb3c5fc157c1faebb7641deb71dcf92d1f690021bd108f606908f296b391ad240cb540c2ddef96b17487cb5d4bf8ede09890b8124948dae63e8ed7752a5a93c8f9e28ee4985e82c2fb96d750cd1eb1008d251a6e0e0b4374df2147ebf7bf75c36a8d053abfd723e5e5be92ac2021f89237982df7741c75723128f603039f7cc65035aa0fb8b65aca26c567bb17b6f6cc3b2210e3080bdae5ed04637ae0162919956bcf7ae5c9280164546efead6cec3e3eeb36f0942d9ecdee32b497f769cacd52cf315955c73243caa0e8f792043517b0e6d571272d008a03fbf27afbab14012859a76a13d79386279254b2c0d71acb94d9a5512caf2026b435a3b3e57bf262e8ab0b5ab05edaf56352f1b5d36912c6e9fb65b8526b24cebf34dc6699ea759361dcdf2049fdc5d54cf275682057ab75c6a54d81988fad8a0253cdcfb733d5df7d25eec97d6f7eaba1e503dab92d9743a4aa7d5b4ca67a34c4fc6b3d15053b5a886d9a41ea675354d7247386f2fb83af61a978f3c85c7dc161a79d29e2356da9bff1ac1a83948ddadc4e056e136940fee7e743719ce86937cbc9904e69e09037c0df3dd7b086c964d1d1b6c67d6547190aada0bdd03b0a5884cbd4df3ca075e974bf2f0f56e90b4075ffba070a0ab5400afb0cc27b867ee74ea071a405b474936da1ad35c6135283479463e6d9f36a99a7ef0363866b56f361b2f44cecd2c0a395c99c5816b573ab2b3f11cd177a490c38193c0465a92182e12ad24b32974754d1e8b375c792efd13fa3826d23e08c75b3acc0a6f3c06568752ecc3ac5278d81f27a87017538937e24c16197665993c16690a245a6dd81f174371b43a34d88c8d4bfbb38c0b4d5ae8f4a5fdd869891b7bc3a5193c439618e4a07c7261da9f658374ae29e4f0a03deb85a54762d3e886f98f363c166f6a9ae5fe654558e0cdf1f1e5d9f5d17c2e312bcdfa4cfbdae05661ab9f6f7c455e2f2cfda6d8391e322c6663851cae6973a36e54c8dc1cae5dbc725e58cc21595ea7c632a829e866904420dc7c57337cbb7d320003"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c11050a9e429a60-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  },
+  {
+    "scope": "https://www.migros.ch:443",
+    "method": "POST",
+    "path": "/product-display/public/v3/product-detail",
+    "body": {
+      "productFilter": {
+        "migrosIds": [
+          "104241300000"
+        ]
+      },
+      "offerFilter": {
+        "warehouseId": 2,
+        "region": "gmzh",
+        "ongoingOfferDate": "2026-01-20T00:00:00",
+        "storeType": "OFFLINE"
+      },
+      "language": "de"
+    },
+    "status": 200,
+    "response": [
+      "6300d8af00402e55fdaf6a77f68704490c8abce818cef2b32f79de40e412dc2770a10f8092c3e87255bea2bee8eaabea6e68cd850e915a88fdeefe66ff98fd86a8dd4d2da1164dea30f1d0591a4dbc112971d818adba0075c4023fd8bb8bfcc31b765c6191264992cdd2c95861cbc6bb705661816932cc86699e2449922037d78d581692b9f0713a9bccd204158a6e090b3ca1e8892bf24c862c2a5c782d151678ac7d4b9eb8f8250b6181075687c0252a0c3ee788c56081a7dc2e284166e468290716de5b809ffe058535819ffe0529b9eafffd77594576925e5e22f4b020dc344270ab6dbbfba745857f27e1d29d164358e0fc7eeffa70efee90db756fadd91e07eaf3608137d79767d7471ff7ae0f3f9e5dcfef6fee8edec89e312a2cdeb0d52c64f2541bba10b0f8c31b7285055e8e26ea5cfd43ef522fc8c29a8c1654186c67b0c0752f25d763fd4d6eb5a15b1d1b2cb08971158ac160b3d9f42c85c6ad7a65d32b6dd5f314faa5755dc5a2fd4b3ff4e29e06ddca3a5d0dde42d4e5723b58a7e3c96c38cd93241f206407583c3e3e54fe78e0acf3b87d6a5deeadf9712b23b05c4d732b940e26499e4e92341b0d3a58501894b6dbad42e9a2e7c84eb43d68b4d76524cf2172191e325533fa057a6db27d52380b6b872e5c00f2d157f0edb8eaf691f895247c5eb00266d7535d93bff91577c4e13b0527b62b5da0deb1efcae80205f6dd4ac1efbb72493e87c4b9fba46f1e22948d7751c1dc89902c6cd792ecfe69151c535736b1d13652cb31922d60eefc82a3eaf59b5eedde3d110cbf52b0b7d4af4c52eb405ec010d21becec9a3ca4fdd1570ae6bbcf1df94e4cc87bed071cbd1392b0fbdc79824e2ad8fd63559325be130a2e5cd9046d5f151cb59d353a3a5f5469c3964a8e0d8b823def5a12052764997c71b3ddd232b22838f65dd9c4deed4227d4eede03055dc7a593d7f01b971e09be3dd0217050704a5c915d1079120517dabb1849beeba3426d2d79437236498e81055e681120d15f2929e08a6dd9bcf470bd7b0f8112830e30b9ed2249a36d644361d200f81c54daeb2e80a14d1b7d7c0447fe953a231c022998bb4f7ae11a214920438521276f0b0b3c648253f2cb4eea18b418bd20a8592a0a11aa0e745743451e1ec8af74b9ecc4000b35d7315bd6b6125aed393cd002166f184c7cd663e7e2cab3442cded0eb38ab2e345258baec40fb8bf6e8c78ea39424462cf299cd457672a7233b2cc64385670e81d4f948974d14062895b218d1a06c3ab6c9710dc6baa4bf4ec4f5cb6650d75bd076302bcb49351955f5381de7c3bccc6a1acef271a2b3695e958be9a4cc67f9783aed87b5418583dd94b30298494b9d4f19a5cb2ecc0c7f98047a90f467b0347070f3ffbffd8d7e84012c0d6eb74a7dbb7d4359dcd19a6913b0c827994259cca3f6018b617fb45d1787e71555ac3f78ab10cc227107576403da86c1eacacc5e2d91c4b04c605ec57bbdb084c51b464a9d3360f1074c93040c2a4ce16e291cfbdb2c01f31d3e29f46eb3b8801563722cf048c81b26547820cb308fd58ed31496e7f06d3e1dc2b2d4f63b549867193d6432b9e96e085fe1d35665d8c231c5f8204ec14464fd0c94e31cbec2278575d097b486d0d3d5d1e1d9872bcc688d955e3b014361f739463691e098629c6ff4085694359b7cad3f2da2fae5cde383532e5c63499a97caeb586f76ac3698abde51ed2030385dd3693db3313b82a37f0ca3f9e9d9c9e9ad53f6b5b53ac4105d5d5f04cefa2af34afb53394f3d1ff1863804e4d2697f942a64024aa6de9bcfb57dad2b9ff473d47cd24fd229d01cd3303a4f9d1074363b0fd9bde44d8bc02c8c48c0d495a1e280c8ab7b6d490ca14296daddd373c402bf9ab268a1bb827af7ee815848a0ea7cd984b2118ed172d990c091dfe8b2092424f0ed749824cb4f832c49921e4a152db7e3ff4b589a1b709d99cee0ab7117908eb371e7e1070b7297411890e5d03532162599f2dc67486ae0513c6902750f4e46adaa0fd13956ce477632278924e518606f2d833cbf8034835b21d084561c229cdb687be279788e9d95ebbc5adb405b855dd0863c12400786f029131ba108da06988b2e97e02af2f0fb0d87b22159935fd5964c270616c4602e8021bc310ffb14779f239b4e8c8205710b8f11bd562b0af6c99b10890d8982bd2eba5a37d61cbf76be1087a2cb063e51451e0272478604f624444f526246701b2643286d5e369db5d026e716f677efdef571abf0d0b9e5395bcc5fc1f7e1ba6b17e47ddbf12c196d0f29b0118d606f00f998b296a3210db44cc5d0e29dbf7681c4574bfdebe89d90b8104842d9e83a86de7e27559acaf3e889e29e5488cef292db56c710bd0e81201d650a0e4e7bd3244fe1f7bb77cf65830a3db5da2fe7e3b595ae222cf091389227f87d17747c3522f108069373cf5c36a005babf58c62aca66b517bbf7c6362c1be20003d8ebea056d74e31a20169969c57befca2509685164f4ae6eed3c3cee3efb962094cdee3dbe92f467c7c95acd325f51c93547c2a3eaf098073214b5e7d0762521078d00faf37bf2aa1b0b2451a86917da9387239657b2c4d210c79adba45925a12c2fb036a4b5e373f56be2a2085bbb5ad0fe6a55f3b2d16513c9e2f669bb556822cbb43edf649ce6799a65d3d12c4ff0c9dd45f57c622558a077cba546859d81a88f0d5ac2c3bd3fd7d3752fedc57e697dafaeeb01d5b32a994da7a3745a4dab7c36caf4643c1b0d35558b6a984dea615a57d3247784f3f682ab63af71f9c85378cc6da19127ed3962a5bdf9af118c9a83d4dd4a0c6e156e43f9e0ee477793e16c38c9c79b4960ee9930c0d730dfbd87c066d9d4b1c176664d1507a9aabdd03d005b8ac8d4db34af7ce075b9240f5fef06497bf0b50f0a07ba4a05f00acb7c827be64ea77ea001b4759464a3ad31cd155683429367e4d3f66993aae9076f836356fb66b3f142e4dccca290c395591cb876a5233b1bcf117d470a391c38096ca42589e122d14a329b4257d7e4b178c395e7d23fa18f6322ed8370bca5c3acf0c663607528c53ecc2a8587fd71820a7731957823ce6491615796c96391a640a2d586fd71311447ab4383cdd8b8b43fcbb8d0a4854e5fda8f9d96b8b1375c9ac1336489410eca2717a6fd593648e79a420e0fdab35e587a24368d6e98ff68c363f1a6a659ee5f568405de1c1f5f9e5d1fcde712b3d2accfb4af0d6e15b6faf9c657e4f5c2d26f8a9de321c3623656c8e19a3637ea4685cccde1dac52be785c51c92e5756a2c839a826e064904c2cd7735c3b7db270303"
+    ],
+    "rawHeaders": {
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9c11050b8be603a5-ZRH",
+      "connection": "close",
+      "content-encoding": "br",
+      "content-type": "application/json",
+      "date": "Tue, 20 Jan 2026 19:36:15 GMT",
+      "expires": "0",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "0"
+    },
+    "responseIsBinary": false
+  }
+]

@@ -1,4 +1,4 @@
-import { IconConstants, ShortcutConstants } from "@constants";
+import { IconConstants, ShortcutConstants } from "Const";
 
 import { ActionPanel } from "@raycast/api";
 

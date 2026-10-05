@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useState, JSX } from "react";
 
 import { Issue } from "../api/issues";
 import { getIssueListSections } from "../helpers/issues";
@@ -30,7 +30,7 @@ export default function StatusIssueList({ issues, isLoading, mutate, searchBarAc
       searchText={query}
       onSearchTextChange={setQuery}
       filtering={{ keepSectionOrder: true }}
-      {...(searchBarAccessory ? { searchBarAccessory } : {})}
+      searchBarAccessory={searchBarAccessory}
     >
       {sections.map((section) => {
         return (

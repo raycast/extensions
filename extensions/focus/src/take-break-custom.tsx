@@ -1,4 +1,4 @@
-import { Toast, showToast, LaunchProps } from "@raycast/api";
+import { Toast, showToast, showHUD, LaunchProps } from "@raycast/api";
 import { getProfileNames, takeBreakCustom, takeBreakWithProfileCustom, isBreakRunning } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -53,12 +53,11 @@ export default async function Command(props: LaunchProps<{ arguments: BreakArgum
     }
     await toast.hide();
     if (success) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: firstProfile
+      await showHUD(
+        firstProfile
           ? `Break started with profile: ${firstProfile} (${minutes} minutes)`
-          : `Break started (${minutes} minutes)`,
-      });
+          : `Break started (${minutes} minutes)`
+      );
     } else {
       await showToast({
         style: Toast.Style.Failure,

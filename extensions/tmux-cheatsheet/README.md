@@ -1,71 +1,25 @@
-# 🔎 Tmux Command Lookup for Raycast
+# Tmux Cheatsheet for Raycast
 
-Tmux Command Lookup is a Raycast extension built with TypeScript and React that provides a comprehensive, searchable cheatsheet for tmux commands. The extension groups commands by category (e.g., Session Commands, Window Commands, Pane Commands, etc.) and displays detailed information about each command, including the terminal syntax and default keyboard shortcuts.
+A searchable, categorized cheatsheet for tmux commands. Find any command instantly, see your custom keybindings, and paste directly into the terminal.
 
 ## Features
 
-- **Grouped Command List**  
-  When launching the extension with no search text, commands are organized by category:
-  - Session Commands
-  - Window Commands
-  - Pane Commands
-  - Resize Commands
-  - Copy/Paste Commands
-  - Layout & Options
-  - Miscellaneous Commands
+- **Grouped by Category** — Commands organized into Session, Window, Pane, Resize, Copy/Paste, Layout, Miscellaneous, and Zoom sections
+- **Fuzzy Search** — Search by command name, description, shortcut key, or category
+- **Category Filter** — Dropdown to filter commands by category
+- **Auto-Detected Prefix** — Reads your `~/.tmux.conf` (or XDG config) and displays shortcuts with your actual prefix
+- **Custom Keybinding Detection** — Parses `bind`/`bind-key` lines from your tmux config and shows your custom bindings instead of defaults
+- **Pretty Key Formatting** — Displays `C-a` as `⌃A`, arrow keys as `↑↓←→`, etc.
+- **Paste to Terminal** — Paste any command directly into the frontmost app
+- **Detailed View** — Select a command to see its terminal syntax, shortcut, and a description of why it's useful
 
-- **Flat Search View**  
-  As soon as you start typing in the search bar, the extension displays a flat, filtered list of commands matching your query.
+## Usage
 
-- **Detailed Command View**  
-  Select a command to view its details in a Markdown-formatted view that includes:
-  - The terminal command in a code block
-  - Keyboard shortcuts and usage instructions
-  - Helpful tips for remapping the tmux prefix
+1. Open Raycast and search for **Search Tmux Commands**
+2. Browse commands grouped by category, or start typing to fuzzy search
+3. Use the category dropdown to filter
+4. Press Enter to view details, or use actions to copy/paste the command
 
-- **Copy to Clipboard**  
-  Easily copy any command to your clipboard with a single click.
+## Prefix Override
 
-## File Structure
-```
-extension/
-├── src/ 
-│    ├── CommandDetail.tsx   # Displays detailed command info using Markdown 
-│    ├── tmux-cheatsheet.tsx # Main entry point that groups commands by category or search 
-│    └── tmuxCommands.ts     # Contains tmux commands, their descriptions, and categories
-├── package.json             # Project configuration and dependencies
-├── tsconfig.json            # TypeScript configuration
-└── README.md                # This file
-```
-
-## Usage:
-
-##### Viewing Commands:
-Launch the extension from Raycast. With no search text entered, commands are grouped by category.
-
-##### Searching Commands:
-Start typing in the search bar to see a flat, filtered list of commands that match your query.
-
-##### Viewing Details:
-Select a command to open a detailed view showing the terminal command, keyboard shortcut, and usage instructions.
-
-##### Copying Commands:
-In the detail view, click the Copy Command action to copy the tmux command to your clipboard.
-
-## Customization:
-
-##### Adding or Updating Commands:
-Edit the tmuxCommands.ts file to add, remove, or modify tmux commands. Each command includes:
-id
-command (the terminal command)
-description (with keyboard shortcuts and usage)
-category (for grouping)
-##### UI Adjustments:
-Modify CommandDetail.tsx to change how command details are displayed. The component uses Markdown, so you can easily tweak headers, code blocks, and other formatting.
-## Contributing
-
-Contributions are welcome! If you have improvements or additional tmux commands to suggest, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License.
+By default the extension auto-detects your prefix from `~/.tmux.conf`. To override it manually, open the extension preferences in Raycast and set **Tmux Prefix Override**.

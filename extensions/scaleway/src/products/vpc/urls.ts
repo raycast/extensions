@@ -1,5 +1,5 @@
-import type { VPC } from '@scaleway/sdk'
+import type { Vpcv2 } from '@scaleway/sdk'
 import { CONSOLE_URL } from '../../constants'
 
-export const getPrivateNetworkUrl = (privateNetwork: VPC.v2.PrivateNetwork) =>
+export const getPrivateNetworkUrl = (privateNetwork: Vpcv2.PrivateNetwork) =>
   `${CONSOLE_URL}/private-network/private-networks/${privateNetwork.region}/${privateNetwork.id}/overview`

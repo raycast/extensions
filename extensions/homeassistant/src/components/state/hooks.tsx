@@ -6,6 +6,7 @@ export function useStateSearch(
   domain: string,
   device_class?: string,
   allStates?: State[],
+  aliases?: Record<string, string>,
 ): {
   states?: State[] | undefined;
 } {
@@ -21,17 +22,21 @@ export function useStateSearch(
         haStates = haStates.filter((s) => s.attributes.device_class === device_class);
       }
       if (query) {
-        haStates = haStates.filter(
-          (e) =>
-            e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
-            (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase()),
-        );
+        const q = query.toLowerCase();
+        haStates = haStates.filter((e) => {
+          const alias = aliases?.[e.entity_id];
+          return (
+            e.entity_id.toLowerCase().includes(q) ||
+            (e.attributes.friendly_name || "").toLowerCase().includes(q) ||
+            (alias || "").toLowerCase().includes(q)
+          );
+        });
       }
       haStates = haStates.slice(0, 1000);
       setStates(haStates);
     } else {
       return undefined;
     }
-  }, [query, allStates]);
+  }, [query, allStates, aliases]);
   return { states };
 }

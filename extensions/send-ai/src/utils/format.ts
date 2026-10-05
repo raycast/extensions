@@ -2,6 +2,7 @@
  * Formats large numbers with appropriate suffixes (K, M, B, T)
  */
 export function formatNumber(num: number): string {
+  if (!num) return "0";
   if (num >= 1e12) {
     return (num / 1e12).toFixed(2) + "T";
   }

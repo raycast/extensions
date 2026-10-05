@@ -45,7 +45,7 @@ function ProxyGroup({ name, proxies, current, refresh, selectable }: ProxyGroupP
           />
         ) : (
           <List.Item key={index} title={proxy} accessoryTitle={proxy == select ? "Current" : ""} />
-        )
+        ),
       )}
     </List>
   );

@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bangumi",
+  "description": "A full-featured Bangumi client for Raycast. Manage collections, track progress, search subjects and characters, view daily schedules. Includes AI tools for Raycast AI.",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "author": "maxchang3",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "generate-types": "openapi-typescript --output src/types/generated.ts https://bangumi.github.io/api/dist.json && node scripts/postprocess-generated-types.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.6",
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "list-collections",
+      "title": "List Collections",
+      "description": "View and update your watching, playing, or reading subjects."
+    },
+    {
+      "mode": "view",
+      "name": "list-current-collections",
+      "title": "List Current Collections",
+      "description": "View your current watching, playing, or reading subjects."
+    },
+    {
+      "mode": "view",
+      "name": "daily-calendar",
+      "title": "Daily Calendar",
+      "description": "View the daily airing schedule of anime."
+    },
+    {
+      "mode": "view",
+      "name": "search-subjects",
+      "title": "Search Subjects",
+      "description": "Search for anime, games, books, etc. on Bangumi.",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "search-characters",
+      "title": "Search Characters",
+      "description": "Search for characters on Bangumi.",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-collections",
+      "title": "Get Collections",
+      "description": "Get the user's current collections (watching, playing, reading, etc) on Bangumi."
+    },
+    {
+      "name": "update-collection",
+      "title": "Update Collection Status",
+      "description": "Update the collection status for a given subject on Bangumi."
+    },
+    {
+      "name": "search-subjects",
+      "title": "Search Subjects",
+      "description": "Search for subjects (anime, games, books, etc.) by keyword on Bangumi."
+    },
+    {
+      "name": "search-characters",
+      "title": "Search Characters",
+      "description": "Search for characters by keyword on Bangumi."
+    },
+    {
+      "name": "get-calendar",
+      "title": "Get Daily Calendar",
+      "description": "Get the daily airing schedule of anime on Bangumi."
+    },
+    {
+      "name": "get-subject-details",
+      "title": "Get Subject Details",
+      "description": "Get detailed information about a specific subject on Bangumi."
+    },
+    {
+      "name": "get-subject-episodes",
+      "title": "Get Subject Episodes",
+      "description": "Get the episode list and user collection status for a subject's episodes on Bangumi."
+    },
+    {
+      "name": "update-episodes",
+      "title": "Update Episodes Status",
+      "description": "Update the collection status (e.g., mark as watched) for specific episodes of a subject on Bangumi."
+    }
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "showBook",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show book subjects in the collection list",
+      "label": "Show Books",
+      "default": true
+    },
+    {
+      "name": "showAnime",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show anime subjects in the collection list",
+      "label": "Show Anime",
+      "default": true
+    },
+    {
+      "name": "showMusic",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show music subjects in the collection list",
+      "label": "Show Music",
+      "default": false
+    },
+    {
+      "name": "showGame",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show game subjects in the collection list",
+      "label": "Show Games",
+      "default": false
+    },
+    {
+      "name": "showReal",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show real-life subjects in the collection list",
+      "label": "Show Real Life",
+      "default": true
+    }
+  ],
+  "title": "Bangumi",
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}

@@ -30,7 +30,7 @@ export default function AddTextForm({ draftValues, noteId }: AddTextFormProps) {
         const text = values.prepend ? `${values.text}\n\n${noteBody}` : `${noteBody}\n\n${values.text}`;
         await setNoteBody(values.note, text);
         if (noteId) {
-          await pop();
+          pop();
         } else {
           await closeMainWindow();
         }

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windows-default-wallpapers",
+  "title": "Windows Default Wallpapers",
+  "description": "Easily change between the default Windows wallpapers without changing full themes",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-wallpapers",
+      "title": "Browse Wallpapers",
+      "description": "Browse all default wallpapers included with Windows 11",
+      "mode": "view",
+      "subtitle": "Windows Default Wallpapers"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "author": "muhammadrizo",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System",
+    "Media",
+    "Other"
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Choose the primary action for a wallpaper",
+      "type": "dropdown",
+      "required": false,
+      "default": "previewWallpaper",
+      "data": [
+        {
+          "title": "Preview Wallpaper",
+          "value": "previewWallpaper"
+        },
+        {
+          "title": "Set Wallpaper",
+          "value": "setWallpaper"
+        },
+        {
+          "title": "Copy Wallpaper",
+          "value": "copyWallpaper"
+        }
+      ]
+    }
+  ]
+}

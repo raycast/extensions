@@ -7,7 +7,6 @@ export const packageToSearchResultDocument = (pkg: Package): SearchResultDocumen
     description: pkg.description,
     runtimeCompat: pkg.runtimeCompat,
     score: pkg.score ?? undefined,
-    _omc: 0,
     id: `@${pkg.scope}/${pkg.name}`,
   };
 };

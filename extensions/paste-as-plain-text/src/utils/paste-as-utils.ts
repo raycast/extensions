@@ -1,15 +1,14 @@
 import { Clipboard, closeMainWindow, Toast, updateCommandMetadata } from "@raycast/api";
 import { extractNumber, extractUrl, fetchTitle, isEmpty, showCustomHUD, transform } from "./common-utils";
 import { autoFetchTitle, PasteFormat, replaceClipboard } from "../types/types";
-import { isURL } from "validator";
-import fse from "fs-extra";
+import isURL from "validator/lib/isURL";
+import { existsSync } from "node:fs";
 import JSON5 from "json5";
 import { fileURLToPath } from "node:url";
 
 export async function pasteAs(advancedPasteFormat: string) {
-  await closeMainWindow();
-  await showCustomHUD({ title: "Pasting...", style: Toast.Style.Animated });
-  const clipboardText = await Clipboard.readText();
+  void showCustomHUD({ title: "Pasting...", style: Toast.Style.Animated });
+  const [, clipboardText] = await Promise.all([closeMainWindow(), Clipboard.readText()]);
   if (!clipboardText || isEmpty(clipboardText)) {
     await showCustomHUD({ title: "No content in clipboard", style: Toast.Style.Failure });
     return;
@@ -67,7 +66,7 @@ export async function pasteAs(advancedPasteFormat: string) {
         console.error(e);
       }
 
-      if (fse.pathExistsSync(pasteStr)) {
+      if (existsSync(pasteStr)) {
         realPasteFormatIcon = "📄";
         realPasteFormat = PasteFormat.File;
         isPasteAsFile = true;
@@ -117,15 +116,16 @@ export async function pasteAs(advancedPasteFormat: string) {
     }
   }
 
-  await showCustomHUD({ title: `${realPasteFormatIcon} Paste as ${realPasteFormat}` });
-  await updateCommandMetadata({
-    subtitle: isEmpty(advancedPasteFormat) ? PasteFormat.PLAIN_TEXT : advancedPasteFormat,
-  });
   if (isPasteAsFile) {
     await Clipboard.paste({ file: pasteStr });
   } else {
     await Clipboard.paste(pasteStr);
   }
+  // Result HUD and metadata update run after the paste so they never delay it.
+  await Promise.all([
+    showCustomHUD({ title: `${realPasteFormatIcon} Paste as ${realPasteFormat}` }),
+    updateCommandMetadata({ subtitle: isEmpty(advancedPasteFormat) ? PasteFormat.PLAIN_TEXT : advancedPasteFormat }),
+  ]);
   if (replaceClipboard) {
     if (isPasteAsFile) {
       await Clipboard.copy({ file: pasteStr });

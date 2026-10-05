@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
+
 type Item = {
   title: string;
   path: string;

@@ -41,6 +41,30 @@ In the extension preferences you can set each of the dedicated folder commands t
 
 In the extension preferences you can change the layout of the List Downloads and List User Folders commands to a List or a Grid, and when selecting a Grid you can choose any number of items wide from 3 to 8 for very large to very small items.
 
+#### Prefer Finder tabs over new windows?
+
+Set **Open Folders In** in the extension preferences to open folders in a new tab of the front Finder window, or in the current tab, instead of a new window. When no Finder window is open, a new one is opened. New Tab sends ⌘T to Finder, so Raycast needs Accessibility permission (System Settings → Privacy & Security → Accessibility).
+
+#### Need more than just opening?
+
+Every file and folder item includes additional actions: **Show in Finder** to reveal the item in its parent folder, **Copy Path** (⌘C) to copy the full path, **Quick Look** (⌘Y) to preview files, and **Move to Trash** (⌃X) to delete files directly.
+
+#### Want to keep your favorite folders at the top?
+
+In `List User Folders`, press **⌘⇧P** to pin a folder. Pinned folders appear in a dedicated section at the top of the list. Press again to unpin.
+
+#### Need to drill into subfolders?
+
+In `List User Folders`, press **⌘→** on any folder to browse its contents without leaving Raycast. You can navigate multiple levels deep.
+
+#### Frequently opening the same folders?
+
+The `Recent Folders` command remembers the last 20 folders you opened through this extension, so you can get back to them instantly.
+
+#### Need to quickly access the Trash?
+
+Use the `Open Trash` command to jump to the Trash folder in Finder.
+
 
 ## Author
 

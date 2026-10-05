@@ -60,6 +60,7 @@ function TransactionHistory() {
   }
 
   function getTransactionColor(transaction: Transaction): Color {
+    if (!transaction.from || !transaction.type) return Color.Green;
     if (
       transaction.from.toLowerCase() === walletAddress.toLowerCase() &&
       transaction.type.toLowerCase() === "transfer"

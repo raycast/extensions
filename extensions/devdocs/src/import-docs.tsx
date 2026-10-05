@@ -1,12 +1,13 @@
 import { ActionPanel, Form, Action, LocalStorage, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import fs from "fs";
+import React from "react";
 
 interface ImportFormValues {
   file: string[];
 }
 
-export default function ImportDocs(): JSX.Element {
+export default function ImportDocs() {
   const { handleSubmit, itemProps } = useForm<ImportFormValues>({
     onSubmit(values) {
       const contents = fs.readFileSync(values.file[0], "utf8");

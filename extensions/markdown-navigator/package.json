@@ -7,10 +7,10 @@
   "author": "chihkang",
   "categories": [
     "Productivity",
-    "Documentation"    
+    "Documentation"
   ],
   "license": "MIT",
-  "commands": [  
+  "commands": [
     {
       "name": "markdown-navigator",
       "title": "Markdown Navigator",
@@ -18,7 +18,7 @@
       "mode": "view",
       "subtitle": "Markdown",
       "icon": "extension-icon.png"
-    }    
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
@@ -41,7 +41,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
-    {      
+    {
       "name": "markdownDir",
       "title": "Markdown Files Directory",
       "description": "Specify the directory path for storing Markdown files",
@@ -57,5 +57,8 @@
       "placeholder": "Visual Studio Code, TextEdit, iA Writer, etc.",
       "required": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

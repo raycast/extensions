@@ -5,6 +5,8 @@ export interface Project {
   title: string;
   subtitle?: string;
   color?: Color;
+  usageCount?: number;
+  lastUsed?: string;
 }
 
 export interface ProjectLink {

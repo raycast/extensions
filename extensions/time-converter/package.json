@@ -48,8 +48,8 @@
   "dependencies": {
     "@raycast/api": "^1.86.1",
     "chrono-node": "^2.6.2",
-    "date-fns": "^2.30.0",
-    "date-fns-tz": "^2.0.0"
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -60,13 +60,15 @@
     "globals": "^15.14.0",
     "prettier": "^3.3.3",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.19.0",
-    "@raycast/eslint-config": "^1.0.11"
+    "typescript-eslint": "^8.19.0"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

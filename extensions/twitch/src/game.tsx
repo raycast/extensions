@@ -39,9 +39,9 @@ export default function main() {
             title={item.name}
             actions={
               <ActionPanel>
-                <Action.Open
+                <Action.OpenInBrowser
                   title="Open Category"
-                  target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`}
+                  url={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`}
                   onOpen={() => onAction(item)}
                 />
               </ActionPanel>

@@ -6,7 +6,7 @@ export const convertMacTime2JSTime = (time: number) => {
 
 export const getSectionNameByDate = (date: Date) => {
   const sectionDateMM = moment(date);
-  if (moment().subtract(1, "days").isSame(date, "day")) {
+  if (sectionDateMM.isBefore(moment(), "day")) {
     return "Overdue";
   }
 
@@ -25,7 +25,7 @@ export const getSectionNameByDate = (date: Date) => {
     return sectionDateMM.format("ddd, MMM Do");
   }
 
-  return "";
+  return "Later";
 };
 
 export const formatToServerDate = (date: Date | moment.Moment | null | undefined) => {

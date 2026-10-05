@@ -6,7 +6,10 @@
   "icon": "copy-path.png",
   "author": "koinzhang",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "INCHMAN1900",
+    "arjan",
+    "dans_huang"
   ],
   "categories": [
     "Developer Tools",
@@ -166,5 +169,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

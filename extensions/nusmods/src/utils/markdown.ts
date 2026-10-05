@@ -6,6 +6,8 @@ const formatWorkload = (workload?: number[]) => {
   return workload.map((hours, i) => `- ${categories[i]}: ${hours} hours`).join("\n");
 };
 
+const MODULE_PREREQ_REG = /(\w+)(?::([a-zA-Z]))?/;
+
 const formatPrereqTree = (tree?: Prereq): string => {
   if (!tree) return "";
 
@@ -15,7 +17,15 @@ const formatPrereqTree = (tree?: Prereq): string => {
     const indent = " ".repeat(depth * 2);
 
     if (typeof node === "string") {
-      sections.push(`${indent}- ${node}`);
+      const match = node.match(MODULE_PREREQ_REG);
+      if (match === null || match.length !== 3 || !match[2]) {
+        sections.push(`${indent}- ${node}`);
+        return;
+      }
+
+      const moduleCode = match[1];
+      const minGrade = match[2];
+      sections.push(`${indent}- ${moduleCode} (at least ${minGrade})`);
       return;
     }
 

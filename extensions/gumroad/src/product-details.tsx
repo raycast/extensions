@@ -21,6 +21,7 @@ ${NodeHtmlMarkdown.translate(item.description)}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={item.short_url} />
+          <Action.CopyToClipboard title="Copy Product URL" content={item.short_url} />
         </ActionPanel>
       }
     />
@@ -43,12 +44,12 @@ export function ProductMetadata(props: { product: Product }) {
           ))}
         </Detail.Metadata.TagList>
       )}
-      <Detail.Metadata.Label title={"ID"} text={item.id} />
+      <Detail.Metadata.Label title={"ID"} text={String(item.id)} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label title={"Number of Sales"} text={`${formatNumber(item.sales_count)}`} />
+      <Detail.Metadata.Label title={"Number of Sales"} text={String(formatNumber(item.sales_count))} />
       <Detail.Metadata.Label title={"Status"} text={item.published ? "🟢 Published" : "⚪ Not Published"} />
       {item.variants.length > 0 && <Detail.Metadata.Separator />}
-      {item.variants.map((variant, variantIndex) => {
+      {item.variants.flatMap((variant, variantIndex) => {
         const title = variant.title || "Variant";
         return variant.options.map((option, optionIndex) => (
           <Detail.Metadata.Label key={`${variantIndex}-${optionIndex}`} title={title} text={option.name} />

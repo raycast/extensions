@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
 	"strict": true,
 	"jsx": "react-jsx",
 	"target": "es2020",
-	"lib": ["es2020"],
+	"lib": ["es2020", "ES2022.Intl"],
 	"module": "commonjs",
 	"moduleResolution": "node",
 	"esModuleInterop": true,

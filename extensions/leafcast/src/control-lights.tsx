@@ -45,9 +45,14 @@ export default function Command() {
 
   async function doGetDeviceEffects() {
     setIsLoadingEffects(true);
-    const effects = await getDeviceEffects();
-    setEffects(effects);
-    setIsLoadingEffects(false);
+    try {
+      const effects = await getDeviceEffects();
+      setEffects(effects);
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't load effects" });
+    } finally {
+      setIsLoadingEffects(false);
+    }
   }
 
   async function doUpdateDeviceEffect(effect: string) {
@@ -134,14 +139,14 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Submenu title="Turn Your Device On or Off">
+                <ActionPanel.Submenu title="Turn Your Device on or off">
                   <Action
-                    title="Turn On"
+                    title="Turn on"
                     onAction={turnOnDevice}
                     icon={{ source: Icon.Power, tintColor: Color.Green }}
                   />
                   <Action
-                    title="Turn Off"
+                    title="Turn off"
                     onAction={turnOffDevice}
                     icon={{ source: Icon.Power, tintColor: Color.Red }}
                   />

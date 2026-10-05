@@ -37,8 +37,14 @@ export function getKey(tab: Tab) {
   return `${tab.id}`;
 }
 
-export function getOrderedLocations() {
-  return ["topApp", "pinned", "unpinned"] as TabLocation[];
+export function getOrderedLocations(): TabLocation[] {
+  return [
+    { location: "topApp" as TabLocation, order: Number(searchArcPreferences.favoritesTabsOrder) },
+    { location: "pinned" as TabLocation, order: Number(searchArcPreferences.pinnedTabsOrder) },
+    { location: "unpinned" as TabLocation, order: Number(searchArcPreferences.unpinnedTabsOrder) },
+  ]
+    .sort((a, b) => a.order - b.order)
+    .map((l) => l.location);
 }
 
 export function isLocationShown(location: TabLocation) {

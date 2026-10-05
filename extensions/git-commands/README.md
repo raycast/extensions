@@ -5,7 +5,7 @@
 <h1 align="center">Git Commands</h1>
 
 <h3 align="center">
-Quickly use and learn Git commands and Oh My Zsh alias.
+Quickly use and learn Git commands and Oh My Zsh aliases.
 </h3>
 
 <p align="center">

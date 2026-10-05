@@ -5,6 +5,10 @@
   "description": "View scores, games, standings, news, injuries, and transactions across your favorite sports leagues",
   "icon": "Sportssync.png",
   "author": "daniyal_master",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Media",
     "Fun",

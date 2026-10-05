@@ -1,7 +1,9 @@
-import { useHAStates } from "@components/hooks";
+import { useHAStates, useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
+import { getDisplayName } from "@lib/utils";
 import { List, Toast, showToast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 
@@ -27,16 +29,19 @@ export function ZoneList(props: { state: State }): React.ReactElement {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Persons in Zone" subtitle={`${persons?.length}`}>
-        {resolvedPersons?.map((ps) => <StateListItem key={ps.entity_id} state={ps} />)}
+        {resolvedPersons?.map((ps) => (
+          <StateListItem key={ps.entity_id} state={ps} />
+        ))}
       </List.Section>
     </List>
   );
 }
 
-export function ZonesList(): React.ReactElement {
-  const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "zone", "", allStates);
+export function ZonesList(props: { initialSearchText?: string | undefined }): React.ReactElement {
+  const [searchText, setSearchText] = useState<string | undefined>(props.initialSearchText);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "zone", "", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -50,9 +55,33 @@ export function ZonesList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  const sortByDisplayName = (items: State[]) =>
+    [...items].sort((a, b) =>
+      getDisplayName(a, entityAliases[a.entity_id]).localeCompare(getDisplayName(b, entityAliases[b.entity_id])),
+    );
+  const { favorites, others } = partitionFavoriteStates(states, favoriteEntityIds);
+  const favoriteStates = sortByDisplayName(favorites);
+  const otherStates = sortByDisplayName(others);
+
   return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+    <List
+      searchBarPlaceholder="Filter by name or ID..."
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+    >
+      {favoriteStates.length > 0 && (
+        <List.Section title="Favorites" subtitle={`${favoriteStates.length}`}>
+          {favoriteStates.map((state) => (
+            <StateListItem key={state.entity_id} state={state} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={favoriteStates.length > 0 ? "Zones" : undefined} subtitle={`${otherStates.length}`}>
+        {otherStates.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
+      </List.Section>
     </List>
   );
 }

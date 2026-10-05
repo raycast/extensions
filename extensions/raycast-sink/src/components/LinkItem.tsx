@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Image } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Image, Keyboard } from "@raycast/api";
 import { Link } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { URL } from "url";
@@ -47,9 +47,24 @@ export function LinkItem({ link, config, onRefresh, onCleanCache }: LinkItemProp
 
           <Action.OpenInBrowser url={`${BASE_URL}/${link.slug}`} title={t.openShortLink || "Open Short Link"} />
           <Action.OpenInBrowser url={link.url} title={t.openTargetUrl || "Open Target URL"} />
-          <Action.CopyToClipboard content={`${BASE_URL}/${link.slug}`} title={t.copyShortLink || "Copy Short Link"} />
-          <Action title={t.deleteLink || "Delete Link"} onAction={handleDelete} icon={Icon.Trash} />
-          <Action title={t.refreshList || "Refresh List"} onAction={onRefresh} icon={Icon.ArrowClockwise} />
+          <Action.CopyToClipboard
+            content={`${BASE_URL}/${link.slug}`}
+            title={t.copyShortLink || "Copy Short Link"}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+          <Action
+            title={t.deleteLink || "Delete Link"}
+            onAction={handleDelete}
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
+          />
+          <Action
+            title={t.refreshList || "Refresh List"}
+            onAction={onRefresh}
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
           <Action title={t.clearCache || "Clear Cache"} onAction={onCleanCache} icon={Icon.Trash} />
         </ActionPanel>
       }

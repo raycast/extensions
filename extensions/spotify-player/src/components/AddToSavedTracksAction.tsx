@@ -3,6 +3,7 @@ import { addToMySavedTracks } from "../api/addToMySavedTracks";
 import { getErrorMessage } from "../helpers/getError";
 import { useContainsMyLikedTracks } from "../hooks/useContainsMyLikedTracks";
 import { removeFromMySavedTracks } from "../api/removeFromMySavedTracks";
+import { Dislike, Like } from "../shortcuts/shortcuts";
 
 type AddToSavedTracksActionProps = {
   trackId?: string;
@@ -50,6 +51,7 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
               toast.message = error;
             }
           }}
+          shortcut={Dislike}
         />
       )}
 
@@ -86,6 +88,7 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
               toast.message = error;
             }
           }}
+          shortcut={Like}
         />
       )}
     </>

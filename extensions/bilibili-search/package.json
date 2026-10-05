@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bilibili-search",
+  "title": "Bilibili Search",
+  "description": "Search Bilibili videos with autosuggestions",
+  "icon": "command-icon.png",
+  "author": "55b",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Bilibili Search",
+      "subtitle": "Bilibili Search",
+      "description": "Search for videos, anime, live streams and users on Bilibili",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "preferences": [
+        {
+          "name": "rememberSearchHistory",
+          "title": "Remember Search History",
+          "description": "Enable this to locally store your Bilibili search history.",
+          "type": "checkbox",
+          "label": "Remember search history",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "useClipboardFallback",
+          "title": "Use Clipboard Fallback",
+          "description": "When no text is selected, fall back to using clipboard content for search.",
+          "type": "checkbox",
+          "label": "Use clipboard content as fallback",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.15",
+    "eslint": "^9.39.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

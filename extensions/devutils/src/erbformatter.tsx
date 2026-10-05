@@ -1,6 +1,5 @@
-import { open } from "@raycast/api";
+import { openDevUtilsTool } from "./open-devutils";
 
 export default async () => {
-  const url = "devutils://erbformatter?clipboard";
-  open(url);
+  await openDevUtilsTool("erbformatter");
 };

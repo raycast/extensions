@@ -18,7 +18,7 @@ export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): React
         <ActionPanel>
           {toolbox && <OpenJetBrainsToolbox app={toolbox} />}
           <Action.OpenInBrowser title="Open Toolbox Website" url={tbUrl} icon={JetBrainsIcon} />
-          <Action.OpenInBrowser title="Open Toolbox FAQ" url={`${tbUrl}-faq`} icon={Icon.QuestionMark} />
+          <Action.OpenInBrowser title="Open Toolbox Faq" url={`${tbUrl}-faq`} icon={Icon.QuestionMark} />
         </ActionPanel>
       }
     />

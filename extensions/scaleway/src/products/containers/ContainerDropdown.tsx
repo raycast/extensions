@@ -1,11 +1,11 @@
 import { List } from '@raycast/api'
-import type { Container } from '@scaleway/sdk'
+import type { Containerv1beta1 } from '@scaleway/sdk'
 import type { Dispatch, SetStateAction } from 'react'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type ContainerDropdownProps = {
   setSelectedNamespaceId: Dispatch<SetStateAction<string>>
-  namespaces?: Container.v1beta1.Namespace[]
+  namespaces?: Containerv1beta1.Namespace[]
 }
 export const ContainerDropdown = ({
   setSelectedNamespaceId,

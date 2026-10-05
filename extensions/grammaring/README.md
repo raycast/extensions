@@ -1,5 +1,7 @@
 # Grammaring
 
+![Banner](media/banner.png)
+
 Refine your writing effortlessly and very fast. Grammaring subtly corrects your text, keeping your unique voice intact, like a personal editor who knows your style. Need to remember a quick fact? Just ask within {curly braces} and watch it seamlessly appear in your sentence. Write smarter, not harder, with your words, perfected.
 
 ## Installation

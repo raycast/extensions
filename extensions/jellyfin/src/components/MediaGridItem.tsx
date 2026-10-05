@@ -1,7 +1,6 @@
 import { ReactNode, useState } from "react";
 import { RawMediaItem, buildUrl } from "../utils/jellyfinApi";
 import { showToast, Toast, Action, Icon, Grid, ActionPanel } from "@raycast/api";
-import fetch from "node-fetch";
 import { getErrorMessage } from "../utils/errors";
 import { getPreferences } from "../utils/preferences";
 import ListMediaCommand from "../list-movies-series";
@@ -62,7 +61,7 @@ export default function MediaGridItem({
 }: {
   item: RawMediaItem;
   pushNavigation?: (component: ReactNode) => void;
-}): JSX.Element {
+}) {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.UserData.IsFavorite);
   const [isWatched, setIsWatched] = useState<boolean>(item.UserData.Played);
 
@@ -143,7 +142,7 @@ export default function MediaGridItem({
           content={streamUrl}
           icon={Icon.Livestream}
           shortcut={{ key: "s", modifiers: ["cmd"] }}
-        />
+        />,
       );
       break;
     case "BoxSet":
@@ -152,9 +151,10 @@ export default function MediaGridItem({
           title="View Items"
           icon={Icon.Eye}
           onAction={() => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             pushNavigation && pushNavigation(<ListMediaCommand parentId={item.Id} />);
           }}
-        />
+        />,
       );
   }
 

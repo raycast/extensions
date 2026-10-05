@@ -1,34 +1,52 @@
-import { useMemo, useState } from "react";
-
-import { List, getPreferenceValues } from "@raycast/api";
-
-import ArchiveListItem from "@/components/ArchiveListItem";
-import { EmptyView } from "@/components/EmptyView";
-import { useArchive } from "@/hooks/use-archive";
+import { useCallback, useMemo, useState } from "react";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { type ArchiveFilter, isArchiveFilter, useArchive } from "@/hooks/use-archive";
+import { useMirrorDomain } from "@/hooks/use-mirror-domain";
 import { isEmpty } from "@/utils";
+import { TestMirrors } from "@/screens/TestMirrors";
+import { ArchiveListItem } from "@/components/ArchiveListItem";
+import { TestMirrorsAction } from "@/components/TestMirrorsAction";
+import { FILE_TYPES } from "@/constants";
+import { rankArchiveItems } from "@/utils/ranking";
 
-const mirror = getPreferenceValues<Preferences>().mirror ?? "https://annas-archive.org";
+const FILTER_STORAGE_KEY = "anna-s-archive-search-filter";
 
 const Command = () => {
+  const { push } = useNavigation();
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useCachedState<ArchiveFilter>(FILTER_STORAGE_KEY, "all");
 
-  const { data, error, isLoading } = useArchive(mirror, search);
+  const usedMirror = useMirrorDomain();
+
+  const onErrorPrimaryAction = useCallback(() => {
+    push(<TestMirrors />);
+  }, [push]);
+
+  const handleFilterChange = useCallback(
+    (value: string) => {
+      setFilter(isArchiveFilter(value) ? value : "all");
+    },
+    [setFilter],
+  );
+
+  const { data, error, isLoading } = useArchive(usedMirror.url, onErrorPrimaryAction, search, filter);
 
   const listData = useMemo(() => {
     if (!data || search.length === 0) {
       return [];
     }
-    return data;
-  }, [data, search]);
+    return rankArchiveItems(data, search, filter);
+  }, [data, filter, search]);
 
   const emptyViewTitle = useMemo(() => {
     if (isLoading) {
-      return "Loading...";
+      return { title: "Loading..." };
     }
     if (listData.length === 0 && !isEmpty(search)) {
-      return "No Results";
+      return { title: "No Results", description: "Try a different search term" };
     }
-    return "Search on Anna's Archive";
+    return { title: "Search on Anna's Archive" };
   }, [listData, isLoading, search]);
 
   return (
@@ -39,10 +57,42 @@ const Command = () => {
       throttle={true}
       filtering={false}
       isShowingDetail={listData.length > 0}
+      searchBarAccessory={
+        <List.Dropdown tooltip="File Type" value={filter} onChange={handleFilterChange}>
+          <List.Dropdown.Item title="All" value="all" />
+          {FILE_TYPES.map((fileType) => (
+            <List.Dropdown.Item key={fileType} title={fileType.toUpperCase()} value={fileType} />
+          ))}
+        </List.Dropdown>
+      }
     >
-      {listData.length === 0 ? <EmptyView title={emptyViewTitle} /> : undefined}
-      {error ? <List.Item title="Error" subtitle={error.message} /> : undefined}
-      {!error ? listData.map((item) => <ArchiveListItem key={item.id} item={item} />) : undefined}
+      {error && (
+        <List.EmptyView
+          title="Whoops! Something went wrong."
+          description={
+            "An error occurred! It might be that the mirror is down. Please press Enter to test the mirrors and maybe change to a different one in your extension preferences. If all are down, please copy the error message (See Actions) and report the issue."
+          }
+          icon={{ source: Icon.WifiDisabled }}
+          actions={
+            <ActionPanel>
+              <TestMirrorsAction />
+              <Action.CopyToClipboard
+                title="Copy Error Message"
+                content={`Mirror: ${usedMirror.url}\nError: ${error.message}\nStack: ${error.stack}\nSearch: ${search}`}
+                icon={Icon.Clipboard}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!error && !isLoading && listData.length === 0 && (
+        <List.EmptyView
+          title={emptyViewTitle.title}
+          description={emptyViewTitle.description}
+          icon={{ source: Icon.Book }}
+        />
+      )}
+      {!error && listData.map((item) => <ArchiveListItem key={item.id} item={item} />)}
     </List>
   );
 };

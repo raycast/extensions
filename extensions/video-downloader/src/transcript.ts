@@ -2,10 +2,21 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, ffmpegPath, forceIpv4, ytdlPath } from "./utils.js";
+import {
+  downloadPath,
+  getffmpegPath,
+  getytdlPath,
+  getCommonArgs,
+  isLiveStream,
+  normalizeVideoUrl,
+  sanitizeVideoTitle,
+} from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
+  const ytdlPath = getytdlPath();
+  const ffmpegPath = getffmpegPath();
+
   // Validate yt-dlp exists
   if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
@@ -15,12 +26,16 @@ export default async function extractTranscript(url: string, language: string = 
   }
 
   // First get video info to get the title
-  const videoInfo = await execa(ytdlPath, [forceIpv4 ? "--force-ipv4" : "", "--dump-json", url].filter(Boolean));
+  const videoInfo = await execa(ytdlPath, [
+    ...getCommonArgs({ throttle: true }),
+    "--dump-json",
+    normalizeVideoUrl(url),
+  ]);
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
   // Check if it's a live stream
-  if (video.live_status !== "not_live" && video.live_status !== undefined) {
+  if (isLiveStream(video)) {
     throw new Error("Live streams are not supported");
   }
 
@@ -33,6 +48,7 @@ export default async function extractTranscript(url: string, language: string = 
   try {
     // Download subtitles using yt-dlp
     const subtitleResult = await execa(ytdlPath, [
+      ...getCommonArgs({ throttle: true }),
       "--write-sub", // Write subtitle file
       "--write-auto-sub", // Write automatically generated subtitles
       "--skip-download", // Don't download the video
@@ -44,19 +60,35 @@ export default async function extractTranscript(url: string, language: string = 
       ffmpegPath,
       "-o", // Output template
       path.join(tmpDir, "%(id)s.%(ext)s"),
-      url,
+      normalizeVideoUrl(url),
     ]);
 
     if (subtitleResult.failed) {
       throw new Error("Failed to download subtitles");
     }
 
-    // Find the downloaded subtitle file
-    const files = fs.readdirSync(tmpDir);
-    const subtitleFile = files.find((f) => f.endsWith(".srt"));
+    // Find the downloaded subtitle file. yt-dlp names files `<id>.<lang>.srt`
+    // (e.g. `abc.en.srt`, `abc.en-US.srt`, `abc.en-orig.srt`). Match the
+    // requested language (and its regional/auto variants) so we don't return a
+    // fallback-language track as if it were the requested transcript.
+    const files = fs.readdirSync(tmpDir).filter((f) => f.endsWith(".srt"));
+    const wanted = language.toLowerCase();
+    const subtitleFile = files.find((f) => {
+      const lang = f.slice(0, -".srt".length).split(".").pop()?.toLowerCase() ?? "";
+      return lang === wanted || lang.startsWith(`${wanted}-`);
+    });
 
     if (!subtitleFile) {
-      throw new Error(`No ${language} subtitles found for this video`);
+      // Surface the languages we did get, to make the failure actionable.
+      const available = files
+        .map((f) => f.slice(0, -".srt".length).split(".").pop())
+        .filter(Boolean)
+        .join(", ");
+      throw new Error(
+        available
+          ? `No ${language} subtitles found for this video (available: ${available})`
+          : `No ${language} subtitles found for this video`,
+      );
     }
 
     // Read and parse the subtitle file
@@ -70,7 +102,7 @@ export default async function extractTranscript(url: string, language: string = 
 
     return {
       transcript,
-      title: video.title,
+      title: sanitizeVideoTitle(video.title),
     };
   } catch (error) {
     // Clean up on error

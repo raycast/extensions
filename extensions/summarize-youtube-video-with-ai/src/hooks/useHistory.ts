@@ -37,7 +37,9 @@ export const useHistory = () => {
         return item;
       }),
     );
-    return items.filter((item): item is HistoryItem => item !== null);
+    return items
+      .filter((item): item is HistoryItem => item !== null)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   };
 
   const getHistoryKeys = async (): Promise<string[]> => {

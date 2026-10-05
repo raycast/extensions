@@ -2,14 +2,14 @@ import { Color, Icon, Image } from "@raycast/api";
 import {
   DestinationDisplay,
   DirectionType,
-  EstimatedCall,
-  QuayDeparture,
   QuayLineFavorites,
   StopPlaceQuayDeparturesQuery,
   TransportMode,
   VenueCategory,
 } from "./types";
 import { useEffect, useState } from "react";
+import { EstimatedCall } from "./api/fragments";
+import { QuayDepartures } from "./api/departuresQuery";
 
 export function useDebounce<T>(value: T, delay = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -20,24 +20,27 @@ export function useDebounce<T>(value: T, delay = 500): T {
   return debouncedValue;
 }
 
-const TrainIcon: Image = { source: "transport-modes/Train.svg", tintColor: Color.Red };
+const RailIcon: Image = { source: "transport-modes/Train.svg", tintColor: Color.Red };
 const RegionalBusIcon: Image = { source: "transport-modes/Bus.svg", tintColor: Color.Blue };
 const LocalBusIcon: Image = { source: "transport-modes/Bus.svg", tintColor: Color.Green };
+const AirportLinkBusIcon: Image = { source: "transport-modes/Bus.svg", tintColor: Color.Orange };
+const AirportLinkRailIcon: Image = { source: "transport-modes/Train.svg", tintColor: Color.Orange };
 const CoachIcon: Image = { source: "transport-modes/Bus.svg", tintColor: Color.Purple };
 const AirIcon: Image = { source: "transport-modes/Plane.svg", tintColor: Color.Orange };
 const WaterIcon: Image = { source: "transport-modes/Ferry.svg", tintColor: Color.Blue };
 const TramIcon: Image = { source: "transport-modes/Tram.svg", tintColor: Color.Yellow };
 const MetroIcon: Image = { source: "transport-modes/Subway.svg", tintColor: Color.Magenta };
+const FootIcon: Image = { source: "transport-modes/Foot.svg", tintColor: Color.SecondaryText };
 const UnknownIcon: Image = { source: Icon.PlusSquare, tintColor: Color.Blue };
 
 export function getTransportIcon(transportMode?: TransportMode, transportSubmode?: string): Image {
   switch (transportMode) {
     case TransportMode.Rail:
-      return TrainIcon;
+      if (transportSubmode === "airportLinkRail") return AirportLinkRailIcon;
+      return RailIcon;
     case TransportMode.Bus:
-      if (transportSubmode === "localBus") {
-        return LocalBusIcon;
-      }
+      if (transportSubmode === "localBus") return LocalBusIcon;
+      if (transportSubmode === "airportLinkBus") return AirportLinkBusIcon;
       return RegionalBusIcon;
     case TransportMode.Coach:
       return CoachIcon;
@@ -49,6 +52,8 @@ export function getTransportIcon(transportMode?: TransportMode, transportSubmode
       return TramIcon;
     case TransportMode.Metro:
       return MetroIcon;
+    case TransportMode.Foot:
+      return FootIcon;
     default:
       return UnknownIcon;
   }
@@ -66,7 +71,7 @@ export function getVenueCategoryIcon(categories: VenueCategory[]): Image {
       return AirIcon;
     }
     if (deDupedCategories.includes("railStation")) {
-      return TrainIcon;
+      return RailIcon;
     }
     if (deDupedCategories.includes("metroStation")) {
       return MetroIcon;
@@ -88,7 +93,7 @@ export function getVenueCategoryIcon(categories: VenueCategory[]): Image {
   switch (category) {
     case "railStation":
     case "vehicleRailInterchange":
-      return TrainIcon;
+      return RailIcon;
     case "busStation":
     case "onstreetBus":
     case "coachStation":
@@ -113,6 +118,44 @@ export function formatAsClock(isoString: string) {
   const d = new Date(isoString);
   const padTime = (n: number) => n.toString().padStart(2, "0");
   return `${padTime(d.getHours())}:${padTime(d.getMinutes())}`;
+}
+
+export function formatAsDate(isoString: string) {
+  const d = new Date(isoString);
+  return d.toDateString();
+}
+
+export function formatMillisecondsToHuman(ms: number) {
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600) % 24;
+  const days = Math.floor(totalSeconds / 86400);
+
+  const parts = [];
+  if (days > 0) parts.push(`${days} d`);
+  if (hours > 0) parts.push(`${hours} hrs`);
+  if (minutes > 0) parts.push(`${minutes} mins`);
+
+  return parts.join(" ");
+}
+
+export const timeDifferenceInMilliseconds = (dateString1: string, dateString2: string) => {
+  const date1 = new Date(dateString1).getTime();
+  const date2 = new Date(dateString2).getTime();
+  return Math.abs(date1 - date2);
+};
+
+export function formatTimeDifferenceAsClock(dateString1: string, dateString2: string) {
+  const difference = timeDifferenceInMilliseconds(dateString1, dateString2);
+  return formatMillisecondsToHuman(difference);
+}
+
+export function formatMetersToHuman(distance = 0) {
+  if (distance < 1000) {
+    return `${distance.toFixed(0)} meters`;
+  }
+  const kilometers = (distance / 1000).toFixed(2);
+  return `${kilometers} km`;
 }
 
 export function formatAsClockWithSeconds(isoString: string) {
@@ -191,7 +234,7 @@ export function filterFavoritesFromResponse(
   const relevantFavorites = filterFavoritesOnStopPlace(favorites, stopPlaceId);
   if (relevantFavorites.length === 0) return { ...departures, favorites: [] };
 
-  const isFavoriteDeparture = (departure: QuayDeparture) =>
+  const isFavoriteDeparture = (departure: QuayDepartures) =>
     relevantFavorites.some(
       (f) =>
         f.quayId === departure.id &&

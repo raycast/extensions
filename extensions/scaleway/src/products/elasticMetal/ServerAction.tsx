@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { BareMetal } from '@scaleway/sdk'
+import type { Baremetalv1 } from '@scaleway/sdk'
 import { getServerUrl } from './urls'
 
 type ServerActionProps = {
-  server: BareMetal.v1.Server
+  server: Baremetalv1.Server
   toggleIsDetailOpen: () => void
 }
 

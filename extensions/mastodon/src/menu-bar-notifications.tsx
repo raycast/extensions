@@ -67,7 +67,7 @@ export default function MenuBarNotifications() {
             title="This feature requires re-authorize to use"
             onAction={async () => {
               await client.removeTokens();
-              await open("raycast://extensions/SevicheCC/mastodon/menu-bar-notifications");
+              await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/SevicheCC/mastodon/menu-bar-notifications`);
             }}
           />
         </MenuBarExtra.Section>

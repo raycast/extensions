@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ping-menu",
+  "title": "Ping Menu",
+  "description": "Monitor ping latency in the menu bar",
+  "icon": "icon.png",
+  "author": "domonkos_nagy",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ping-monitor",
+      "title": "Ping Monitor",
+      "description": "Shows ping latency in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "site",
+      "type": "textfield",
+      "title": "Site to Ping",
+      "description": "The hostname or IP address to ping",
+      "required": false,
+      "default": "google.com",
+      "placeholder": "e.g., google.com"
+    },
+    {
+      "name": "method",
+      "type": "dropdown",
+      "title": "Ping Method",
+      "description": "How frequently to ping the target",
+      "required": false,
+      "default": "standard",
+      "data": [
+        {
+          "title": "Standard (10s, background by Raycast)",
+          "value": "standard"
+        },
+        {
+          "title": "Aggressive (1s, in-app timer)",
+          "value": "aggressive"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

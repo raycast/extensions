@@ -4,6 +4,8 @@
     "local>HugoRCD/renovate-config"
   ],
   "ignoreDeps": [
-    "eslint"
+    "eslint",
+    "@types/node",
+    "@types/react"
   ]
 }

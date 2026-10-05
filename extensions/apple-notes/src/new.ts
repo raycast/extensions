@@ -24,6 +24,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   try {
     await createNote(text.trim());
   } catch (error) {
-    showFailureToast(error, { title: "Could not create a new note." });
+    await showFailureToast(error, { title: "Could not create a new note." });
   }
 };

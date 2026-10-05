@@ -68,5 +68,4 @@ function isTyped<T extends string>(value: unknown): value is { type: T } & { [K 
 }
 
 /** Used to unwrap generics. For example, {@link Pick `Pick`}.  */
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Prettify<T> = { [K in keyof T]: T[K] } & {};

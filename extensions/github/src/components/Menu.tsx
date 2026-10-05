@@ -9,10 +9,10 @@ import {
   launchCommand,
   openCommandPreferences,
 } from "@raycast/api";
+import type { JSX } from "react";
 import React, { ReactNode } from "react";
 
-function clipText(text: string) {
-  const maxLength = 100;
+export function clipText(text: string, maxLength = 100) {
   if (text.length > maxLength) {
     return text.slice(0, maxLength) + " ...";
   }
@@ -29,7 +29,6 @@ export function MenuBarRoot(props: {
 }): JSX.Element {
   const error = props.error;
   const reloadMenu = () => {
-    environment.commandName;
     launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
   };
   return (
@@ -161,4 +160,8 @@ export function getBoundedPreferenceNumber(params: {
     return fallback;
   }
   return max;
+}
+
+export function getSearchPageSize(): number {
+  return Math.min(getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }), 25);
 }

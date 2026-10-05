@@ -16,7 +16,7 @@ function CopyPasswordAction() {
     try {
       const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, "Getting password...");
       if (password) {
-        await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
+        await Clipboard.copy(password, { concealed: getTransientCopyPreference("password") });
         await showCopySuccessMessage("Copied password to clipboard");
       }
     } catch (error) {
@@ -30,6 +30,7 @@ function CopyPasswordAction() {
       title="Copy Password"
       icon={Icon.Key}
       onAction={handleCopyPassword}
+      shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, Windows: { key: "p", modifiers: ["alt"] } }}
       repromptDescription={`Copying the password of <${selectedItem.name}>`}
     />
   );

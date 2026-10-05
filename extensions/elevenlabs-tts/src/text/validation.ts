@@ -8,13 +8,20 @@
 export function validateSelectedText(text: string): string {
   try {
     if (!text?.trim()) {
-      throw new Error("No text selected - Select text and try again");
+      throw new Error("No text selected");
     }
     return text;
   } catch (error) {
     if (error instanceof Error && error.message.includes("Unable to get selected text")) {
-      throw new Error("Select text in any application before running this command");
+      throw new Error("Cannot read selection");
     }
     throw error;
   }
+}
+
+export function validateCopiedText(text: string | undefined): string {
+  if (!text?.trim()) {
+    throw new Error("No text copied");
+  }
+  return text;
 }

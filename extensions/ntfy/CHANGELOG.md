@@ -1,8 +1,11 @@
 # Ntfy Changelog
 
+## [Optional Access Token] - 2026-01-20
+
+- Configuration for access token
+
 ## [Initial version] - 2025-03-31
 
-- Configuration for server and topic
 - Send notification functionality
 - Updating Readme and License for clear communication of intent
 - Preparing package for Raycast store

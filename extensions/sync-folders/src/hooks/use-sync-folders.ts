@@ -1,7 +1,7 @@
 import { LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { SyncFolders, SyncFoldersFormValues } from "../types";
-import { createMD5HashFromStrings, executeRsync } from "../utils";
+import { addSyncHistory, createMD5HashFromStrings, executeRsync } from "../utils";
 
 const SYNC_FOLDER_STORAGE_KEY = "my-sync-folders";
 
@@ -25,7 +25,7 @@ export function useSyncFolders() {
    * @param {boolean} newSyncFolderFormValue.delete_dest - Flag indicating whether to delete the destination folder.
    */
   function setSyncFolders(newSyncFolderFormValue: SyncFoldersFormValues) {
-    const { name, icon, source_folder, dest_folder, delete_dest } = newSyncFolderFormValue;
+    const { name, icon, source_folder, dest_folder, delete_dest, exclude_patterns } = newSyncFolderFormValue;
 
     const id = createMD5HashFromStrings(
       icon,
@@ -42,6 +42,7 @@ export function useSyncFolders() {
       source_folder: source_folder[0],
       dest_folder: dest_folder[0],
       delete_dest,
+      exclude_patterns,
     };
 
     setValue([...(value ?? []), newSyncFolder]);
@@ -76,7 +77,7 @@ export function useSyncFolders() {
    * @param newSyncFolderFormValue.last_sync - The last synchronization timestamp.
    */
   function updateSyncFolders(id: string, newSyncFolderFormValue: SyncFoldersFormValues) {
-    const { name, icon, source_folder, dest_folder, delete_dest, last_sync } = newSyncFolderFormValue;
+    const { name, icon, source_folder, dest_folder, delete_dest, exclude_patterns, last_sync } = newSyncFolderFormValue;
 
     const syncFolderIndex = value?.findIndex((syncFolder) => syncFolder.id === id);
 
@@ -96,6 +97,7 @@ export function useSyncFolders() {
         source_folder: source_folder[0],
         dest_folder: dest_folder[0],
         delete_dest,
+        exclude_patterns,
         last_sync,
       };
 
@@ -154,30 +156,32 @@ export function useSyncFolders() {
       syncFolder = syncFolderById;
     }
 
-    executeRsync(syncFolder, (error, stdout, stderr) => {
-      if (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error";
-        toast.message = `An error occurred during the execution of the command ${error}`;
+    const result = await executeRsync(syncFolder);
 
-        console.error(`An error occurred during the execution of the command: ${error}`);
-        return;
-      }
-      if (stderr) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error";
-        toast.message = stderr;
-
-        console.error(stderr);
-        return;
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = "Folders synced";
+    await addSyncHistory({
+      id: syncFolder.id ?? "manual",
+      name: syncFolder.name ?? "Unknown",
+      source_folder: syncFolder.source_folder ?? "",
+      dest_folder: syncFolder.dest_folder ?? "",
+      delete_dest: syncFolder.delete_dest ?? false,
+      success: result.success,
+      error: result.error,
+      fileCount: result.fileCount,
+      duration: result.duration,
+      timestamp: new Date().toISOString(),
     });
 
-    updateLastSync(syncFolder.id);
-
-    await showHUD("Folders synced 🙌");
+    if (result.success) {
+      toast.style = Toast.Style.Success;
+      toast.title = "Folders synced";
+      updateLastSync(syncFolder.id);
+      await showHUD("Folders synced 🙌");
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error";
+      toast.message = result.error ?? "Unknown error";
+      console.error(`Rsync error: ${result.error}`);
+    }
   }
 
   return {

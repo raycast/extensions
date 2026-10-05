@@ -38,7 +38,7 @@ export default function ColorUtilities() {
       showToast(
         ToastStyle.Failure,
         "Input incorrect",
-        "Please enter a value between 0 and 1 for Lighten, Darken, or Transparentize."
+        "Please enter a value between 0 and 1 for Lighten, Darken, or Transparentize.",
       );
       return;
     }
@@ -55,7 +55,7 @@ export default function ColorUtilities() {
       showToast(
         ToastStyle.Failure,
         "Couldn't parse the color string",
-        "Please provide a valid HEX, RGB, RGBA, or CSS Color"
+        "Please provide a valid HEX, RGB, RGBA, or CSS Color",
       );
       return;
     }
@@ -93,7 +93,7 @@ export default function ColorUtilities() {
         grayscale={grayscale(color)}
         invert={invert(color)}
         readableColor={readableColor(color)}
-      />
+      />,
     );
   }
 

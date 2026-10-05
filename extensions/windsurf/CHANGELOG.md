@@ -1,5 +1,9 @@
 # Changelog
 
+## [Support Devin (formerly Windsurf) app name] - 2026-06-19
+
+- Detect and launch the renamed "Devin" app, with fallback to "Windsurf" for older installations
+
 ## [1.0.0] - 2025-06-30
 
 ### Added

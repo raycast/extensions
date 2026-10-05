@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sidecar-connect",
+  "title": "Sidecar Connect",
+  "description": "Connect and manage Sidecar devices directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "dejuknow",
+  "platforms": ["macOS"],
+  "categories": ["System"],
+  "license": "MIT",
+  "keywords": ["sidecar", "ipad", "display", "extend", "second display", "screen mirroring"],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Sidecar",
+      "description": "Connect or disconnect your preferred Sidecar device",
+      "mode": "no-view",
+      "keywords": ["sidecar", "ipad", "toggle", "connect", "disconnect"]
+    },
+    {
+      "name": "manage-displays",
+      "title": "Manage Sidecar",
+      "description": "Browse devices, connect, disconnect, and manage favorites",
+      "mode": "view",
+      "keywords": ["sidecar", "ipad", "display", "connect"]
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect Sidecar",
+      "description": "Connect to your default or favorite Sidecar device",
+      "mode": "no-view",
+      "keywords": ["sidecar", "ipad", "extend"]
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect Sidecar",
+      "description": "Disconnect all active Sidecar sessions",
+      "mode": "no-view",
+      "keywords": ["sidecar", "ipad", "disconnect"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDevice",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Device",
+      "description": "iPad name for Toggle and Quick Connect (e.g. \"My iPad\")",
+      "placeholder": "My iPad"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

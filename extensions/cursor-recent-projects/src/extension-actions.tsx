@@ -1,4 +1,4 @@
-import { showToast, Toast, Action, Icon, Color, confirmAlert, Alert, showHUD } from "@raycast/api";
+import { showToast, Toast, Action, Icon, Color, confirmAlert, Alert, showHUD, Keyboard } from "@raycast/api";
 import { getCursorCLI } from "./lib/cursor";
 import { getErrorMessage } from "./utils";
 
@@ -64,7 +64,14 @@ export function UninstallExtensionByIDAction(props: { extensionID: string; after
       });
     }
   };
-  return <Action onAction={handle} title="Uninstall Extension" icon={{ source: Icon.Trash, tintColor: Color.Red }} />;
+  return (
+    <Action
+      onAction={handle}
+      title="Uninstall Extension"
+      icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+    />
+  );
 }
 
 export function OpenExtensionByIDInCursorAction(props: {

@@ -4,11 +4,44 @@ import { buildFileName } from "../new-file-with-template";
 import { imgExt } from "./constants";
 import { allFileTypes, FileType, TemplateType } from "../types/file-type";
 import fileUrl from "file-url";
-import { showTips } from "../types/preferences";
+import { defaultDirectory, showTips } from "../types/preferences";
 import { runAppleScript } from "@raycast/utils";
+import { homedir } from "os";
+import path from "path";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
+};
+
+const getDefaultDirectory = (): string => {
+  if (!isEmpty(defaultDirectory)) {
+    return defaultDirectory;
+  }
+  return path.join(homedir(), "Desktop");
+};
+
+const scriptFinderHasWindows = `
+if application "Finder" is not running then
+    return "false"
+end if
+
+tell application "Finder"
+    if (count of windows) > 0 then
+        return "true"
+    else
+        return "false"
+    end if
+end tell
+`;
+
+export const finderHasOpenWindows = async (): Promise<boolean> => {
+  try {
+    const result = await runAppleScript(scriptFinderHasWindows);
+    return result.trim() === "true";
+  } catch (e) {
+    console.error("Error checking Finder windows:", e);
+    return false;
+  }
 };
 
 const scriptFinderPath = `
@@ -23,10 +56,15 @@ end tell
 
 export const getFinderPath = async () => {
   try {
-    return await runAppleScript(scriptFinderPath);
+    const finderHasWindows = await finderHasOpenWindows();
+    let directory = getDefaultDirectory();
+    if (finderHasWindows) {
+      directory = await runAppleScript(scriptFinderPath);
+    }
+    return directory;
   } catch (e) {
     console.error(e);
-    return "Finder not running";
+    return getDefaultDirectory();
   }
 };
 
@@ -68,7 +106,7 @@ export async function createNewFileWithText(
   fileName = "",
 ) {
   fileName = buildFileName(saveDirectory, fileName, fileExtension);
-  const filePath = saveDirectory + fileName;
+  const filePath = path.join(saveDirectory, fileName);
   fse.writeFileSync(filePath, fileContent);
   return { fileName: fileName, filePath: filePath };
 }
@@ -102,6 +140,7 @@ function findFileTypeByExtension(fileExt: string): FileType | undefined {
 
 export function getNewFileType(fileName: string): FileType {
   const { baseName, extension } = getFileDetails(fileName);
+  const hasDot = fileName.lastIndexOf(".") !== -1;
   const fileType = findFileTypeByExtension(extension.toLowerCase());
   if (fileType) {
     if (isEmpty(baseName)) {
@@ -112,6 +151,15 @@ export function getNewFileType(fileName: string): FileType {
       newFileType.name = baseName;
     }
     return newFileType;
+  } else if (!hasDot) {
+    return {
+      name: baseName,
+      extension: "",
+      languageId: baseName,
+      keywords: [baseName],
+      icon: Icon.Document,
+      inputContent: true,
+    };
   } else {
     return {
       name: baseName,
@@ -119,7 +167,7 @@ export function getNewFileType(fileName: string): FileType {
       languageId: extension,
       keywords: [extension],
       icon: Icon.Document,
-      inputContent: false,
+      inputContent: true,
     };
   }
 }

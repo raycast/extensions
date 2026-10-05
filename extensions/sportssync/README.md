@@ -1,14 +1,29 @@
-## Sportssync
+<div align="center">
+<img src="./assets/Sportssync.png" width="175" alt="App Icon">
 
-View scores, games, standings, news, injuries, and transactions across your favorite sports leagues
+  <h1>Sportssync</h1>
+  <p>An All-in-One Sports Extension for Raycast</p>
 
-![Sportssync](./metadata/Sportssync-1.png)
+</div>
+
+<div align="center">
+
+<a title="Install sportssync Raycast Extension" href="https://www.raycast.com/daniyal_master/sportssync"><img src="https://www.raycast.com/daniyal_master/sportssync/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a>
+
+</div>
+
+<br>
+<br>
+
+<img src="./assets/Sportssync-1.webp" width="100%" alt="Sportssync"/><br/>
+
+Sportssync is a raycast extension to view live scores, standings, injuries, transactions, and articles across your favorite sports leagues directly in Raycast.
 
 ## Commands:
 
 | **Command**                 | **Description**                                                                                                                                                                                                    |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Scores and Schedule**     | Dynamically view live scores, game times, and completed scores (updates dynamically based on the game state). Supports scores from the past 3 days, games for the next 5 days, and today's games.                  |
+| **Scores and Schedule**     | Dynamically view live scores, game times, and completed scores (updates dynamically based on the game state).                                                                                                      |
 | **Standings Command**       | View team standings and in-depth stats (differs based on the league).                                                                                                                                              |
 | **Tracker Command**         | View articles, injuries, and transactions (differs based on the league).                                                                                                                                           |
 | **Favorite Team Dashboard** | One command to view completed games, scheduled games, team information, team standings position, injuries, and transactions (differs based on league, also requires a favorite league, sport, and team for setup). |
@@ -33,28 +48,6 @@ _Leagues that are fully supported include the following: a scores and schedule, 
 - GER (German Bundesliga) - (Only scores, standings and news)
 - ITA (Italian Serie A) - (Only scores, standings and news)
 
-## Roadmap:
-
-View changelog here: https://github.com/daniyalmaster693/sportssync/blob/main/CHANGELOG.md
-
-- ~~Live Scores Command (Menubar): View live scores and upcoming games, and click on games to set them as the menu bar title, allowing users to view scores with automatic refreshes.~~
-- ~~Tracker Command: A command to view injuries and transactions~~
-- ~~Past Scores Command: A separate command (or something integrated into the scores and schedules command) to allow users to view scores for previous games (up to a few days)~~
-- ~~Favorite Team Command: A single command to follow a specific team~~
-- Roster View for Standings Command - In Progress
-- Player Profiles from Roster View - In Progress
-- Universal Player Search Command
-- Article Viewer for Tracker Command (Read Articles directly in Raycast)
-- Add to Calendar Action for games
-- Current Leagues Planned: (UFC, Boxing, WWE, Nascar)
-- Additional Leagues: Please request any leagues that you'd like me to add support for, and I'll look into seeing what I can do.
-
-**_In depth stats, for the scores and schedule command_**
-
-- Play by Play Tracker: A menu to view play by play events during live games - In Progress
-- Team Stats and Team Matchups: A separate similar to the play by play tracker, to view individual team stats, leaders, and the season series for upcoming games - In Progress
-- Final Team Stats: Another separate menu to view the final team stats after a game has been completed, including team leaders, player stats, and overall team stats - In Progress
-
 ## Preferences
 
 To enable the favorite team dashboard and live scores menubar commands, you will need to set a few preferences:
@@ -67,14 +60,10 @@ To enable the favorite team dashboard and live scores menubar commands, you will
 
 - **Note: F1 does not support the favorite team dashboard command, but is still available in the preferences for use in the live scores menubar command**
 
-## Data Source
+## Contributions
 
-All data is sourced directly from the unofficial ESPN Sports API. The accuracy of the data depends on ESPN's public APIs.
+Any contributions and feedback is welcome! Feel free to open issues or submit pull requests.
 
-## Disclaimer
+## License
 
-This is an unofficial Raycast extension and is not affiliated with, endorsed by, or connected to ESPN.
-
-All data is sourced from publicly available ESPN APIs services. Team logos, player images, and other league related trademarks and content are properties of their respective owners and are used for informational purposes only.
-
-All Rights Reserved.
+This project is licensed under the GPLv3 License.

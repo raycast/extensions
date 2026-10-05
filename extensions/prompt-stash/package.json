@@ -21,6 +21,20 @@
       "subtitle": "Your AI prompt collection manager",
       "description": "Manage your AI prompts with ease",
       "mode": "view"
+    },
+    {
+      "name": "export-prompts",
+      "title": "Export Prompts",
+      "subtitle": "Prompt Stash",
+      "description": "Export all prompts to a JSON file in your Downloads folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-prompts",
+      "title": "Import Prompts",
+      "subtitle": "Prompt Stash",
+      "description": "Import prompts from a Prompt Stash JSON export file",
+      "mode": "view"
     }
   ],
   "preferences": [

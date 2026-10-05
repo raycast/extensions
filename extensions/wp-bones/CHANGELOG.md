@@ -1,5 +1,38 @@
 # WP Bones Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Fixed every menu bar icon being invisible on Raycast 2: the assets were stroke-only SVG outlines, which the menu bar renderer does not draw, so they now ship as PNGs tinted with `Color.PrimaryText` and follow the current appearance
+- Fixed the menu bar logo losing the yellow "new version available" dot: it now ships a light and a dark variant, so the dot keeps its colour in both themes
+- Fixed the menu bar icon disappearing while loading: it referenced `loading.svg`, which is not in `assets` — the regular logo stays visible, and `isLoading` already shows the spinner
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+- Changed the **Preview README** shortcut to `⌘⇧P`: `⌘P` is reserved by Raycast and was being ignored
+
+## [Fixes] - 2026-05-26
+
+- Hardened menu-bar storage reads/writes against filesystem failures (e.g. `ENOSPC`) so the command no longer crashes when the Raycast cache journal can't be written
+- Fixed a faulty migration of the legacy version-storage format that could trigger a false "new version available" notification on every menu-bar launch; stale values are now discarded silently
+- Hardened documentation API response handling in both the search list and the **Ask WP Bones AI** prompt builder against malformed entries (`null`/non-object/missing `items` array)
+- Added an explicit error state to the **Ask WP Bones AI** command when the documentation lookup fails, so the UI no longer hangs on "Searching documentation..."
+- URL-encoded the embedded blueprint URL in the boilerplate preview's Playground action
+
+## [New Features & Improvements] - 2026-04-12
+
+### New Commands
+- **Ask WP Bones AI** — Ask questions about WP Bones and get AI-powered answers based on the documentation (requires Raycast Pro)
+- **WP Bones Release Notes** — View the latest release notes inline without opening the browser
+
+### New Features
+- **Boilerplate Preview** (⌘P) — Preview the README of any boilerplate template before creating a repository
+- **Copy URL** action in search results
+
+### Bug Fixes
+- Fixed version comparison that broke for multi-digit version segments (e.g. `1.10.0` vs `1.7.0`)
+- Fixed menu bar `useEffect` priority chain — error state no longer gets overwritten by other states
+- Replaced `useStreamJSON` with `useFetch` in search documentation for more reliable results
+- Added empty view with feedback when search query is too short (< 3 characters)
+- Removed dead code: unused `templates.ts` and `use-wp-bones-template.tsx`
+
 ## [Fixes] - 2025-06-25
 
 - 🔥 Removed the complete demo link for improved clarity and maintenance

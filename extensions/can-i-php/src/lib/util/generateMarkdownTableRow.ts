@@ -7,7 +7,7 @@ export function generateMarkdownTableRow(feature: Feature) {
 
   const tableHeader = `| ${versions.join(" | ")} |\n| ${versions.map(() => "---").join(" | ")} |\n`;
 
-  const supportRow = versions.map((version) => (featureSupportedIn(feature, version) ? "✅" : "🚫")).join(" | ");
+  const supportRow = versions.map((version) => (featureSupportedIn(feature, version) ? "✓" : "✗")).join(" | ");
   const featureRow = `| ${supportRow} |\n`;
 
   return tableHeader + featureRow;

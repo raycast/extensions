@@ -1,43 +1,33 @@
 import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { getHistory, removeFromHistory, formatTimestamp } from "./storage";
 import type { HistoryEntry, ActionType } from "./types";
 import { handleWebsiteAction } from "./utils";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 export default function ViewHistory() {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
-  async function loadHistory() {
-    try {
-      console.debug("Loading history...");
-      const entries = await getHistory();
-
-      setHistory(entries);
-    } catch (error) {
-      await showFailureToast(error, {
-        title: "Failed to load history",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const {
+    isLoading,
+    data: history = [],
+    mutate,
+  } = usePromise(getHistory, [], {
+    failureToastOptions: {
+      title: "Failed to load history",
+    },
+  });
 
   async function handleRemove(entry: HistoryEntry) {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Removing from history",
+    });
     try {
-      await removeFromHistory(entry);
-      setHistory((current) =>
-        current.filter((e) => !(e.website.url === entry.website.url && e.timestamp === entry.timestamp)),
-      );
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Removed from history",
+      await mutate(removeFromHistory(entry), {
+        optimisticUpdate(data) {
+          return (data || []).filter((e) => !(e.website.url === entry.website.url && e.timestamp === entry.timestamp));
+        },
       });
+      toast.style = Toast.Style.Success;
+      toast.title = "Removed from history";
     } catch (error) {
       await showFailureToast(error, {
         title: "Failed to remove entry",

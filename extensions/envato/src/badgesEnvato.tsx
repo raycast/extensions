@@ -11,7 +11,7 @@ export function AccountBadges(props: { badges: IBadgesResponse }) {
         icon={Icon.Star}
         title={"Badges"}
         accessories={props.badges.map((badge) => {
-          return { icon: badge.image };
+          return { icon: badge.image, tooltip: badge.label };
         })}
       />
     </List.Section>

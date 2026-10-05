@@ -34,7 +34,7 @@ export default function Command() {
       return;
     }
 
-    const format = (values?.ccFormat || gitmoji?.format).toString();
+    const format = (values?.ccFormat ?? gitmoji.format).toString();
     const hasEmoji = format.includes("emoji") || false;
 
     const description = formatDescription({

@@ -1,5 +1,9 @@
 # Static Marks - Bookmark Search Changelog
 
+## [Multiple YAML files support and code improvements] - 2025-09-09
+
+- Added support for reading multiple YAML files from a directory
+
 ## [Local YAML option and general improvements] - 2022-11-15
 
 - Added the possibility to reference a local YAML file

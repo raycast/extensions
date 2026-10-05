@@ -1,5 +1,43 @@
 # Search Router Changelog
 
+## [Add bang tips and support bang aliases] - 2026-10-02
+
+- Add search tips to the query form as there is a lot of empty space there on the form.
+- Add shortcut aliases such as `!w`, `!gm`, `!so`, and `!r` for searches and `@` site filters.
+
+## [Feature] - 2026-09-30
+
+- Allow custom search engines to override built-in engines that use the same trigger
+
+## [Fix Missing Query Prompt on Shortcut Launch] - 2026-08-16
+
+- Fix the issue where executing the command "Search the Web" via a shortcut key would bypass the ability to enter a search query altogether (because the `query` argument is no longer required). It now shows a query form when "Search the Web" is launched from a keyboard shortcut, while preserving fallback search.
+
+## [Bug Fixes & Improvements] - 2026-06-03
+
+- Fix fallback search support — `query` argument is no longer required, so the command works when launched as a Raycast fallback search
+- Fix missing `await` on `showToast` in `setAsDefault`
+- Move `safeOpenUrl` into `search.tsx` so `utils.ts` has no Raycast dependency (fixes `npm run download-kagi-bangs` crash)
+- Fix generated export name in `download-kagi-bangs.ts` (`builtinSearchEngines` was exported as `searchEngines`)
+- Update bang list
+- Update packages
+
+## [Make Windows Compatible] - 2025-12-16
+
+- Update action shortcuts for Windows compatibility
+
+## [Feature] - 2025-12-15
+
+- Added support for multiple search URLs for custom search engines
+
+## [Make Windows Compatible] - 2025-11-11
+
+- Update package.json to include Windows platform compatibility
+
+## [Feature] - {2025-10-09}
+
+- Added custom search engines functionality
+
 ## [Fixed & Improvements] - 2025-04-02
 
 - Removed Kagi-specific search bangs

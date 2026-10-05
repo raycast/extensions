@@ -1,68 +1,225 @@
-import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Cache,
+  confirmAlert,
+  Detail,
+  getPreferenceValues,
+  LocalStorage,
+  showHUD,
+  showToast,
+  Toast,
+  trash,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { accessSync, constants, readdirSync, statSync } from "fs";
+import {
+  accessSync,
+  closeSync,
+  constants,
+  existsSync,
+  mkdtempSync,
+  openSync,
+  opendirSync,
+  readdirSync,
+  readFileSync,
+  readSync,
+  rmSync,
+  statSync,
+} from "fs";
 import { rm } from "fs/promises";
 import { join } from "path";
+import { execFile, execSync } from "child_process";
+import { homedir, tmpdir } from "os";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
+const cache = new Cache();
+const CACHE_KEY = "customDownloadsFolder";
+const DELETION_BEHAVIOR_KEY = "deletion-behavior";
+const PERMANENT_DELETE_CONFIRMATION_KEY = "permanent-delete-confirmation-choice";
+
 const preferences = getPreferenceValues();
-export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
+
+export type Download = {
+  file: string;
+  path: string;
+  size: number;
+  isDirectory: boolean;
+  itemCount?: number;
+  lastModifiedAt: Date;
+  createdAt: Date;
+  addedAt: Date;
+  birthAt: Date;
+};
+
+function getCachedOrDetectDownloadsFolder(): string {
+  // If preference is set, use it
+  if (preferences.downloadsFolder && preferences.downloadsFolder.trim()) {
+    return untildify(preferences.downloadsFolder);
+  }
+
+  // Check cache first
+  const cached = cache.get(CACHE_KEY);
+  if (cached && typeof cached === "string") {
+    return cached;
+  }
+
+  // Detect and cache the folder
+  const detected = getCustomDownloadsFolder();
+  cache.set(CACHE_KEY, detected);
+  return detected;
+}
+
+export const downloadsFolder = getCachedOrDetectDownloadsFolder();
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
-const lastestDownloadOrder = preferences.lastestDownloadOrder;
+const latestDownloadOrder = preferences.lastestDownloadOrder;
+export const defaultDownloadsLayout = preferences.downloadsLayout ?? "list";
+export const showPreview = preferences.showPreview ?? true;
+const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".heic", ".svg"];
 
-export function getDownloads() {
-  const files = readdirSync(downloadsFolder);
-  return files
-    .filter((file) => showHiddenFiles || !file.startsWith("."))
-    .map((file) => {
-      const path = join(downloadsFolder, file);
-      const stats = statSync(path);
-      return {
-        file,
-        path,
-        lastModifiedAt: stats.mtime,
-        createdAt: stats.ctime,
-        addedAt: stats.atime,
-        birthAt: stats.birthtime,
-      };
-    })
-    .sort((a, b) => {
-      switch (fileOrder) {
-        case "addTime":
-          return b.addedAt.getTime() - a.addedAt.getTime();
-        case "createTime":
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        case "modifiedTime":
-        default:
-          return b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime();
+export function getCustomDownloadsFolder(): string {
+  // macOS
+  if (process.platform === "darwin") {
+    return untildify("~/Downloads");
+  } else if (process.platform === "win32") {
+    // Query Windows registry for the actual Downloads folder location
+    try {
+      const result = execSync(
+        `powershell -Command "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path"`,
+        { encoding: "utf-8" },
+      );
+      return result.trim();
+    } catch (error) {
+      // Fallback to default location if registry query fails
+      console.error("Failed to get Downloads folder from registry:", error);
+      return join(homedir(), "Downloads");
+    }
+  }
+  // Fallback for other platforms
+  return untildify("~/Downloads");
+}
+
+export function isImageFile(filename: string): boolean {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
+  return imageExtensions.includes(ext);
+}
+
+function countDirectoryItems(dirPath: string): number {
+  let directory;
+  try {
+    directory = opendirSync(dirPath);
+    let count = 0;
+    let entry;
+    while ((entry = directory.readSync()) !== null) {
+      if (showHiddenFiles || !entry.name.startsWith(".")) {
+        count += 1;
       }
-    });
+    }
+    return count;
+  } catch (error) {
+    console.warn(`Error counting items in directory '${dirPath}':`, error);
+    return 0;
+  } finally {
+    directory?.closeSync();
+  }
+}
+
+export function getDownloadsCount(): number {
+  return countDirectoryItems(downloadsFolder);
+}
+
+type DownloadOrder = "addTime" | "createTime" | "modifiedTime" | "birthTime";
+
+function compareDownloads(a: Download, b: Download, order: DownloadOrder): number {
+  let difference: number;
+  switch (order) {
+    case "addTime":
+      difference = b.addedAt.getTime() - a.addedAt.getTime();
+      break;
+    case "createTime":
+      difference = b.createdAt.getTime() - a.createdAt.getTime();
+      break;
+    case "birthTime":
+      difference = b.birthAt.getTime() - a.birthAt.getTime();
+      break;
+    case "modifiedTime":
+    default:
+      difference = b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime();
+      break;
+  }
+
+  return difference || a.file.localeCompare(b.file);
+}
+
+function getDownloadsInOrder(
+  order: DownloadOrder,
+  limit?: number,
+  offset: number = 0,
+  currentFolderPath: string | null = null,
+): Download[] {
+  const folderPath = currentFolderPath ?? downloadsFolder;
+  const maximumCandidates = limit === undefined ? undefined : offset + limit;
+  const candidates: Download[] = [];
+  const directory = opendirSync(folderPath);
+
+  try {
+    let entry;
+    while ((entry = directory.readSync()) !== null) {
+      if (!showHiddenFiles && entry.name.startsWith(".")) {
+        continue;
+      }
+
+      const path = join(folderPath, entry.name);
+      try {
+        const stats = statSync(path);
+        const isDirectory = stats.isDirectory();
+        const download: Download = {
+          file: entry.name,
+          path,
+          size: isDirectory ? 0 : stats.size,
+          isDirectory,
+          lastModifiedAt: stats.mtime,
+          createdAt: stats.ctime,
+          addedAt: stats.atime,
+          birthAt: stats.birthtime,
+        };
+
+        const insertionIndex = candidates.findIndex((candidate) => compareDownloads(download, candidate, order) < 0);
+        candidates.splice(insertionIndex === -1 ? candidates.length : insertionIndex, 0, download);
+        if (maximumCandidates !== undefined && candidates.length > maximumCandidates) {
+          candidates.pop();
+        }
+      } catch (error) {
+        // Skip entries we can't stat (broken symlinks, removed targets, permission issues)
+        console.warn(`Skipping '${path}' because it could not be stat'd:`, error);
+      }
+    }
+  } finally {
+    directory.closeSync();
+  }
+
+  const downloads = limit === undefined ? candidates : candidates.slice(offset, offset + limit);
+  return downloads.map((download) => ({
+    ...download,
+    itemCount: download.isDirectory ? countDirectoryItems(download.path) : undefined,
+  }));
+}
+
+export function getDownloads(limit?: number, offset: number = 0, currentFolderPath: string | null = null) {
+  return getDownloadsInOrder(fileOrder, limit, offset, currentFolderPath);
 }
 
 export function getLatestDownload() {
-  const downloads = getDownloads();
-  if (downloads.length < 1) {
-    return undefined;
-  }
-
-  if (lastestDownloadOrder === "addTime") {
-    downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
-  } else if (lastestDownloadOrder === "createTime") {
-    downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  } else if (lastestDownloadOrder === "modifiedTime") {
-    downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-  } else if (lastestDownloadOrder === "birthTime") {
-    downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
-  }
-
-  return downloads[0];
+  return getDownloadsInOrder(latestDownloadOrder, 1)[0];
 }
 
 export function hasAccessToDownloadsFolder() {
   try {
-    accessSync(preferences.downloadsFolder, constants.R_OK);
+    accessSync(downloadsFolder, constants.R_OK);
     return true;
   } catch (error) {
     console.error(error);
@@ -70,33 +227,164 @@ export function hasAccessToDownloadsFolder() {
   }
 }
 
-export async function deleteFileOrFolder(filePath: string) {
-  if (preferences.deletionBehavior === "trash") {
+type DeleteFeedback = "toast" | "hud" | "none";
+export type DeletionBehavior = "trash" | "permaDel";
+
+export function getDeletionBehaviorTitle(deletionBehavior: DeletionBehavior) {
+  return deletionBehavior === "trash" ? "Trash" : "Permanently Delete";
+}
+
+async function showDeleteFeedback(feedback: DeleteFeedback, title: string, style: Toast.Style) {
+  if (feedback === "hud") {
+    await showHUD(title);
+  } else if (feedback === "toast") {
+    await showToast({ style, title });
+  }
+}
+
+const finderTrashScript = `on run argv
+  set trashedIndexes to {}
+  set itemIndex to 1
+  repeat with filePath in argv
+    try
+      set targetFile to POSIX file (filePath as text) as alias
+      tell application "Finder" to delete targetFile
+      set end of trashedIndexes to itemIndex
+    end try
+    set itemIndex to itemIndex + 1
+  end repeat
+  set AppleScript's text item delimiters to ","
+  return trashedIndexes as string
+end run`;
+
+function getTrashedPathsFromFinderStdout(filePaths: string[], stdout: string): string[] {
+  return stdout
+    .trim()
+    .split(",")
+    .map((index) => Number.parseInt(index.trim(), 10))
+    .filter((index) => Number.isInteger(index) && index > 0 && index <= filePaths.length)
+    .map((index) => filePaths[index - 1]);
+}
+
+function trashWithFinder(filePaths: string[]): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    execFile("/usr/bin/osascript", ["-e", finderTrashScript, ...filePaths], (error, stdout) => {
+      const reportedPaths = getTrashedPathsFromFinderStdout(filePaths, stdout);
+
+      if (!error) {
+        resolve(reportedPaths);
+        return;
+      }
+
+      // osascript can exit non-zero after Finder has already moved some items.
+      // Recover those so callers can drop stale list entries instead of showing a total failure.
+      const trashedPaths = [...new Set([...reportedPaths, ...filePaths.filter((path) => !existsSync(path))])];
+      if (trashedPaths.length === 0) {
+        reject(error);
+        return;
+      }
+
+      resolve(trashedPaths);
+    });
+  });
+}
+
+export type MoveToTrashResult = {
+  trashedPaths: string[];
+  failedPaths: string[];
+};
+
+export async function moveToTrash(paths: string | string[]): Promise<MoveToTrashResult> {
+  const filePaths = Array.isArray(paths) ? paths : [paths];
+
+  try {
+    await trash(paths);
+    return { trashedPaths: filePaths, failedPaths: [] };
+  } catch (error) {
+    if (process.platform !== "darwin") {
+      throw error;
+    }
+
+    // Raycast's Trash API can fail for items in an iCloud Drive-backed Downloads folder.
+    // Finder understands the file provider location and moves those items to Trash correctly.
+    const remainingPaths = filePaths.filter(existsSync);
+    const trashedPaths = filePaths.filter((path) => !existsSync(path));
+
+    let finderTrashedPaths: string[] = [];
     try {
-      await trash(filePath);
-      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      finderTrashedPaths = remainingPaths.length > 0 ? await trashWithFinder(remainingPaths) : [];
+    } catch (finderError) {
+      if (trashedPaths.length === 0) {
+        throw finderError;
+      }
+    }
+
+    const allTrashedPaths = [...trashedPaths, ...finderTrashedPaths];
+    return {
+      trashedPaths: allTrashedPaths,
+      failedPaths: filePaths.filter((path) => !allTrashedPaths.includes(path)),
+    };
+  }
+}
+
+export async function deleteFileOrFolder(
+  filePath: string,
+  options: {
+    feedback?: DeleteFeedback;
+    beforeFeedback?: () => Promise<void>;
+    confirmationMessage?: string;
+    skipConfirmation?: boolean;
+    deletionBehavior?: DeletionBehavior;
+  } = {},
+) {
+  const feedback = options.feedback ?? "toast";
+  const deletionBehavior = options.deletionBehavior ?? (await getDeletionBehavior());
+
+  if (deletionBehavior === "trash") {
+    try {
+      const { failedPaths } = await moveToTrash(filePath);
+      if (failedPaths.length > 0) {
+        throw new Error(`Could not move ${failedPaths.join(", ")} to Trash`);
+      }
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
+      return;
     }
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Item Moved to Trash", Toast.Style.Success);
     return;
   }
 
-  const shouldDelete = await confirmAlert({
-    title: "Delete Item?",
-    message: `Are you sure you want to permanently delete:\n${filePath}?`,
-    primaryAction: {
-      title: "Delete",
-    },
-  });
+  let shouldDelete = options.skipConfirmation ?? false;
+
+  if (!options.skipConfirmation) {
+    shouldDelete = await confirmAlert({
+      title: "Delete Item?",
+      message:
+        options.confirmationMessage ??
+        `Are you sure you want to permanently delete:\n${filePath}?\nThis action cannot be undone.`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+      dismissAction: {
+        title: "Cancel",
+        style: Alert.ActionStyle.Cancel,
+      },
+    });
+    await LocalStorage.setItem(PERMANENT_DELETE_CONFIRMATION_KEY, shouldDelete ? "delete" : "cancel");
+  }
 
   if (!shouldDelete) {
-    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Cancelled", Toast.Style.Animated);
     return;
   }
 
   try {
-    rm(filePath, { recursive: true, force: true });
-    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+    await rm(filePath, { recursive: true, force: true });
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Item Deleted", Toast.Style.Success);
   } catch (error) {
     if (error instanceof Error) {
       await showFailureToast(error, { title: "Deletion Failed" });
@@ -104,26 +392,288 @@ export async function deleteFileOrFolder(filePath: string) {
   }
 }
 
+export async function getPermanentDeleteConfirmationChoice() {
+  return LocalStorage.getItem<"delete" | "cancel">(PERMANENT_DELETE_CONFIRMATION_KEY);
+}
+
+export async function getDeletionBehavior(): Promise<DeletionBehavior> {
+  const deletionBehavior = await LocalStorage.getItem<DeletionBehavior>(DELETION_BEHAVIOR_KEY);
+
+  if (deletionBehavior) {
+    return deletionBehavior;
+  }
+
+  return preferences.deletionBehavior as DeletionBehavior;
+}
+
+export async function getShowDeletingFilenameBehavior(): Promise<boolean> {
+  return preferences.showDeletingFilename;
+}
+
+export async function toggleDeletionBehavior() {
+  const currentDeletionBehavior = await getDeletionBehavior();
+  const nextDeletionBehavior = currentDeletionBehavior === "trash" ? "permaDel" : "trash";
+  await LocalStorage.setItem(DELETION_BEHAVIOR_KEY, nextDeletionBehavior);
+  return nextDeletionBehavior;
+}
+
 export const withAccessToDownloadsFolder = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
     if (hasAccessToDownloadsFolder()) {
-      accessSync(preferences.downloadsFolder, constants.R_OK);
       return <Component {...props} />;
     } else {
-      const markdown = `## Permission Required\n\nThe Downloads Manager extension requires access to your Downloads folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;
-      return (
-        <Detail
-          markdown={markdown}
-          actions={
-            <ActionPanel>
-              <Action.Open
-                title="Grant Permission"
-                target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
-              />
-            </ActionPanel>
-          }
-        />
-      );
+      if (process.platform === "darwin") {
+        const markdown = `## Permission Required\n\nThe Downloads Manager extension requires access to your Downloads folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;
+        return (
+          <Detail
+            markdown={markdown}
+            actions={
+              <ActionPanel>
+                <Action.Open
+                  title="Grant Permission"
+                  target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      } else {
+        // Windows: Usually a path issue, not a permission issue
+        const markdown = `## Cannot Access Downloads Folder\n\nUnable to access the Downloads folder at:\n\`${downloadsFolder}\`\n\nPlease check that the folder exists and the path is correct.`;
+        return (
+          <Detail
+            markdown={markdown}
+            actions={
+              <ActionPanel>
+                <Action.ShowInFinder path={downloadsFolder} />
+              </ActionPanel>
+            }
+          />
+        );
+      }
     }
   };
 };
+
+const textExtensions = new Set([
+  ".txt",
+  ".md",
+  ".markdown",
+  ".json",
+  ".jsonc",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".ts",
+  ".tsx",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".html",
+  ".htm",
+  ".xml",
+  ".csv",
+  ".tsv",
+  ".yaml",
+  ".yml",
+  ".toml",
+  ".ini",
+  ".env",
+  ".cfg",
+  ".conf",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".py",
+  ".rb",
+  ".go",
+  ".rs",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".java",
+  ".kt",
+  ".swift",
+  ".php",
+  ".cs",
+  ".sql",
+  ".graphql",
+  ".gql",
+  ".log",
+]);
+
+const extToLanguage: Record<string, string> = {
+  json: "json",
+  jsonc: "json",
+  js: "javascript",
+  jsx: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  ts: "typescript",
+  tsx: "typescript",
+  md: "markdown",
+  markdown: "markdown",
+  css: "css",
+  scss: "css",
+  sass: "css",
+  less: "css",
+  html: "html",
+  htm: "html",
+  xml: "xml",
+  yaml: "yaml",
+  yml: "yaml",
+  toml: "toml",
+  sh: "bash",
+  bash: "bash",
+  zsh: "bash",
+  fish: "bash",
+  py: "python",
+  rb: "ruby",
+  go: "go",
+  rs: "rust",
+  c: "c",
+  h: "c",
+  cpp: "cpp",
+  hpp: "cpp",
+  java: "java",
+  kt: "kotlin",
+  swift: "swift",
+  php: "php",
+  cs: "csharp",
+  sql: "sql",
+  graphql: "graphql",
+  gql: "graphql",
+};
+
+const TEXT_PREVIEW_MAX_BYTES = 10_000;
+
+export function isTextFile(filename: string): boolean {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.toLowerCase().slice(dotIndex);
+  return textExtensions.has(ext);
+}
+
+export function getTextFilePreview(filePath: string): string {
+  let descriptor: number | undefined;
+  try {
+    descriptor = openSync(filePath, "r");
+    const buffer = Buffer.alloc(TEXT_PREVIEW_MAX_BYTES + 1);
+    const bytesRead = readSync(descriptor, buffer, 0, buffer.length, 0);
+    const truncated = bytesRead > TEXT_PREVIEW_MAX_BYTES;
+    const text = buffer.subarray(0, Math.min(bytesRead, TEXT_PREVIEW_MAX_BYTES)).toString("utf-8");
+    const dotIndex = filePath.lastIndexOf(".");
+    const ext = dotIndex !== -1 ? filePath.slice(dotIndex + 1).toLowerCase() : "";
+    const lang = extToLanguage[ext] ?? "";
+    return `\`\`\`${lang}\n${text}${truncated ? "\n\u2026" : ""}\n\`\`\``;
+  } catch {
+    return "*Cannot read file content*";
+  } finally {
+    if (descriptor !== undefined) {
+      closeSync(descriptor);
+    }
+  }
+}
+
+const PREVIEW_THUMBNAIL_SIZE = 512;
+
+export function getQuickLookPreviewDataUrl(filePath: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    if (process.platform !== "darwin") {
+      resolve(null);
+      return;
+    }
+
+    const TIMEOUT_MS = 1000;
+
+    let tempDir: string | null = null;
+    let resolved = false;
+
+    const resolveOnce = (value: string | null) => {
+      if (!resolved) {
+        resolved = true;
+        resolve(value);
+      }
+    };
+
+    const cleanup = () => {
+      if (tempDir) {
+        try {
+          rmSync(tempDir, { recursive: true });
+        } catch {
+          // ignore cleanup errors
+        }
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      console.warn(`Quick Look preview timed out for '${filePath}'`);
+      cleanup();
+      resolveOnce(null);
+    }, TIMEOUT_MS);
+
+    try {
+      tempDir = mkdtempSync(join(tmpdir(), "raycast-ql-preview-"));
+      execFile(
+        "qlmanage",
+        ["-t", "-s", String(PREVIEW_THUMBNAIL_SIZE), "-o", tempDir, filePath],
+        (error, _stdout, stderr) => {
+          try {
+            if (error || stderr) {
+              resolveOnce(null);
+              return;
+            }
+
+            const files = readdirSync(tempDir!);
+            const png = files.find((f) => f.endsWith(".png"));
+
+            if (!png) {
+              resolveOnce(null);
+              return;
+            }
+
+            const buffer = readFileSync(join(tempDir!, png));
+            resolveOnce(`data:image/png;base64,${buffer.toString("base64")}`);
+          } catch (err) {
+            console.warn(`Error generating Quick Look preview for '${filePath}':`, err);
+            resolveOnce(null);
+          } finally {
+            clearTimeout(timeoutId);
+            cleanup();
+          }
+        },
+      );
+    } catch (err) {
+      console.warn(`Error starting Quick Look for '${filePath}':`, err);
+      clearTimeout(timeoutId);
+      cleanup();
+      resolveOnce(null);
+    }
+  });
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+export function getFileExtension(filename: string): string {
+  const lastDot = filename.lastIndexOf(".");
+  if (lastDot === -1 || lastDot === filename.length - 1) return "";
+  return filename.slice(lastDot + 1).toUpperCase();
+}
+
+export function getFileType(download: Download): string {
+  if (download.isDirectory) {
+    return "Folder";
+  }
+  const extension = getFileExtension(download.file);
+  return extension || "File";
+}

@@ -9,32 +9,15 @@ export interface Website {
   url: string;
 }
 
-export type Category =
-  | "ai-ml"
-  | "data-analytics"
-  | "developer-tools"
-  | "infrastructure-cloud"
-  | "integration-automation"
-  | "security-identity"
-  | "other";
+export type Category = Exclude<Preferences["defaultCategory"], "all">;
 
 // The API returns an array of websites directly
 export type WebsiteData = Website[];
 
-export type ActionType = "view_llms" | "copy_llms" | "view_llms_full" | "copy_llms_full";
+export type ActionType = Preferences["primaryAction"];
 
 export interface HistoryEntry {
   website: Website;
   timestamp: number;
   action: ActionType;
-}
-
-export interface Preferences {
-  primaryAction: ActionType;
-  historySize: string;
-  cacheDuration: string;
-  historyRetention: string;
-  defaultCategory: Category | "all";
-  showDescriptions: boolean;
-  githubToken?: string;
 }

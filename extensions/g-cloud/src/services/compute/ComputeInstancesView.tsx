@@ -17,7 +17,18 @@ import ComputeInstanceDetailView from "./ComputeInstanceDetailView";
 import CreateVMForm from "./components/CreateVMForm";
 import InstanceListItem from "./components/InstanceListItem";
 import { ServiceViewBar } from "../../utils/ServiceViewBar";
-import { showFailureToast } from "@raycast/utils";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
+import { LogsView } from "../logs-service";
+import { CloudShellAction } from "../../components/CloudShellAction";
+import {
+  ComputeLifecycleAction,
+  getLifecycleActionConfirmation,
+  getLifecycleActionFailureTitle,
+  getLifecycleActionProgressToast,
+  getLifecycleActionSuccessToast,
+  getOptimisticStatusForAction,
+  isInstanceTransitionalStatus,
+} from "./instanceLifecycle";
 
 interface ComputeInstancesViewProps {
   projectId: string;
@@ -87,27 +98,12 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         console.error("Error initializing:", error);
         loadingToast.then((toast) => toast.hide());
 
-        // Show more informative error message based on error type
-        if (error instanceof Error && error.message.includes("timeout")) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Request Timed Out",
-            message: "Try again or check your connection",
-          });
-        } else if (error instanceof Error && error.message.includes("Authentication")) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Authentication Error",
-            message: "Please re-authenticate with Google Cloud",
-          });
-        } else {
-          // Generic error message
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to load instances",
-            message: error instanceof Error ? error.message : "An unknown error occurred",
-          });
-        }
+        const friendly = friendlyErrorMessage(error, "Failed to load instances");
+        showToast({
+          style: Toast.Style.Failure,
+          title: friendly.title,
+          message: friendly.message,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -123,15 +119,12 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
   useEffect(() => {
     if (!service || !instances.length) return;
 
-    const hasTransitionalInstances = instances.some(
-      (instance) => instance.status.toLowerCase() === "stopping" || instance.status.toLowerCase() === "starting",
-    );
+    const hasTransitionalInstances = instances.some((instance) => isInstanceTransitionalStatus(instance.status));
 
     if (!hasTransitionalInstances) return;
 
     const refreshTimer = setInterval(() => {
-      //console.log("Auto-refreshing instances in transitional state...");
-      fetchInstances(service);
+      fetchInstances(service, { silent: true });
     }, 30000);
     return () => clearInterval(refreshTimer);
   }, [instances, service]);
@@ -161,31 +154,38 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
     }
   };
 
-  const fetchInstances = async (computeService: ComputeService) => {
+  const fetchInstances = async (computeService: ComputeService, options?: { silent?: boolean }) => {
+    const silent = options?.silent ?? false;
     try {
       setIsLoading(true);
 
-      const fetchingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Refreshing instances...",
-      });
+      const fetchingToast = silent
+        ? null
+        : await showToast({
+            style: Toast.Style.Animated,
+            title: "Refreshing instances...",
+          });
 
-      const fetchedInstances = await computeService.getInstances(selectedZone);
+      const fetchedInstances = await computeService.getInstances(selectedZone, { forceRefresh: true });
 
       setInstances(fetchedInstances);
 
-      fetchingToast.hide();
+      fetchingToast?.hide();
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Instances refreshed",
-        message: `${fetchedInstances.length} instances found`,
-      });
+      if (!silent) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Instances refreshed",
+          message: `${fetchedInstances.length} instances found`,
+        });
+      }
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      showFailureToast({
-        title: "Failed to refresh instances",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+      const friendly = friendlyErrorMessage(error, "Failed to refresh instances");
+      showToast({
+        style: Toast.Style.Failure,
+        title: friendly.title,
+        message: friendly.message,
       });
     } finally {
       setIsLoading(false);
@@ -212,7 +212,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
 
       // Fetch instances based on selected zone or all zones
-      const fetchedInstances = await service.getInstances(newZone);
+      const fetchedInstances = await service.getInstances(newZone, { forceRefresh: true });
 
       setInstances(fetchedInstances);
 
@@ -226,136 +226,108 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
     } catch (error: unknown) {
       console.error("Error fetching instances:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to load instances",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const startInstance = async (instance: ComputeInstance) => {
+  const runInstanceAction = async (instance: ComputeInstance, action: ComputeLifecycleAction) => {
     if (!service) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Service not initialized",
         message: "Please try again",
       });
       return;
     }
 
+    const previousStatus = instance.status;
+
     try {
       const zone = service.formatZone(instance.zone);
       const name = instance.name;
+      const confirmation = getLifecycleActionConfirmation(action, name);
 
-      const confirmationResponse = await confirmAlert({
-        title: "Start Instance",
-        message: `Are you sure you want to start the instance ${name}?`,
-        primaryAction: {
-          title: "Start",
-          style: Alert.ActionStyle.Default,
-        },
-      });
+      if (confirmation) {
+        const confirmationResponse = await confirmAlert({
+          title: confirmation.title,
+          message: confirmation.message,
+          primaryAction: {
+            title: confirmation.actionTitle,
+            style: confirmation.isDestructive ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
+          },
+        });
 
-      if (!confirmationResponse) {
-        return;
+        if (!confirmationResponse) {
+          return;
+        }
       }
 
-      const startingToast = await showToast({
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) =>
+          inst.id === instance.id ? { ...inst, status: getOptimisticStatusForAction(action) } : inst,
+        ),
+      );
+
+      const progressToast = getLifecycleActionProgressToast(action, name, zone);
+      const actionToast = await showToast({
         style: Toast.Style.Animated,
-        title: `Starting instance ${name}...`,
-        message: `Zone: ${zone}`,
+        title: progressToast.title,
+        message: progressToast.message,
       });
 
-      await service.startInstance(name, zone);
+      const result = await executeLifecycleAction(action, name, zone);
 
-      startingToast.hide();
+      actionToast.hide();
 
+      const successToast = getLifecycleActionSuccessToast(action, name, result.isTimedOut);
       showToast({
         style: Toast.Style.Success,
-        title: "Instance started",
-        message: `${name} is starting. It may take a few moments to be ready.`,
+        title: successToast.title,
+        message: successToast.message,
       });
 
-      // Refresh instances after a short delay to allow the status to update
-      setTimeout(() => fetchInstances(service), 3000);
+      if (result.instance) {
+        setInstances((prevInstances) =>
+          prevInstances.map((inst) => (inst.id === instance.id ? result.instance! : inst)),
+        );
+      }
+      await fetchInstances(service, { silent: true });
     } catch (error: unknown) {
-      console.error("Error starting instance:", error);
-      showFailureToast({
-        title: "Failed to start instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+      console.error("Error running instance action:", error);
+      setInstances((prevInstances) =>
+        prevInstances.map((inst) => (inst.id === instance.id ? { ...inst, status: previousStatus } : inst)),
+      );
+      const friendly = friendlyErrorMessage(error, getLifecycleActionFailureTitle(action));
+      showToast({
+        style: Toast.Style.Failure,
+        title: friendly.title,
+        message: friendly.message,
       });
     }
   };
 
-  const stopInstance = async (instance: ComputeInstance) => {
+  const executeLifecycleAction = (action: ComputeLifecycleAction, name: string, zone: string) => {
     if (!service) {
-      showFailureToast({
-        title: "Service not initialized",
-        message: "Please try again",
-      });
-      return;
+      throw new Error("Service not initialized");
     }
 
-    try {
-      const zone = service.formatZone(instance.zone);
-      const name = instance.name;
-
-      const confirmationResponse = await confirmAlert({
-        title: "Stop Instance",
-        message: `Are you sure you want to stop the instance ${name}?`,
-        primaryAction: {
-          title: "Stop",
-          style: Alert.ActionStyle.Destructive,
-        },
-      });
-
-      if (!confirmationResponse) {
-        return;
-      }
-
-      const stoppingToast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Stopping instance ${name}...`,
-        message: `Zone: ${zone}`,
-      });
-
-      const result = await service.stopInstance(name, zone);
-
-      stoppingToast.hide();
-
-      if (result.success) {
-        if (result.isTimedOut) {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Instance stopping",
-            message: `${name} is in the process of stopping. This may take several minutes to complete.`,
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Instance stopped",
-            message: `${name} is stopping. It may take a few moments to stop completely.`,
-          });
-        }
-
-        // Force instance refresh immediately to show updated status
-        await fetchInstances(service);
-
-        // Schedule another refresh after a delay to catch final state
-        setTimeout(() => fetchInstances(service), 10000);
-      } else {
-        showFailureToast({
-          title: "Failed to stop instance",
-          message: "An error occurred while trying to stop the VM",
-        });
-      }
-    } catch (error: unknown) {
-      console.error("Error stopping instance:", error);
-      showFailureToast({
-        title: "Failed to stop instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+    switch (action) {
+      case "start":
+        return service.startInstance(name, zone);
+      case "resume":
+        return service.resumeInstance(name, zone);
+      case "stop":
+        return service.stopInstance(name, zone);
+      case "suspend":
+        return service.suspendInstance(name, zone);
+      case "restart":
+        return service.restartInstance(name, zone);
     }
   };
 
@@ -368,7 +340,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       <ComputeInstanceDetailView
         instance={instance}
         service={service}
-        onRefresh={() => fetchInstances(service)}
+        onRefresh={() => fetchInstances(service, { silent: true })}
         projectId={projectId}
       />,
     );
@@ -405,7 +377,7 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
 
       try {
         // Refresh the instances
-        await fetchInstances(service);
+        await fetchInstances(service, { silent: true });
         refreshToast.hide();
         showToast({
           style: Toast.Style.Success,
@@ -414,9 +386,10 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
         });
       } catch (error) {
         refreshToast.hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to refresh instances",
-          message: error instanceof Error ? error.message : String(error),
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     };
@@ -440,6 +413,13 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
             icon={{ source: Icon.RotateClockwise }}
             onAction={() => service && fetchInstances(service)}
           />
+          <Action
+            title="View Logs"
+            icon={Icon.Terminal}
+            onAction={() =>
+              push(<LogsView projectId={projectId} gcloudPath={gcloudPath} initialResourceType="gce_instance" />)
+            }
+          />
           {selectedZone && (
             <Action
               title={`Clear Zone Filter: ${selectedZone}`}
@@ -456,6 +436,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               onAction={() => handleZoneChange(zone)}
             />
           ))}
+          <ActionPanel.Section title="Cloud Shell">
+            <CloudShellAction projectId={projectId} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -478,9 +461,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               key={instance.id}
               instance={instance}
               service={service}
+              projectId={projectId}
               onViewDetails={viewInstanceDetails}
-              onStart={startInstance}
-              onStop={stopInstance}
+              onInstanceAction={runInstanceAction}
               onSshCommand={copyConnectionCommand}
               onCreateVM={createVMInstance}
             />
@@ -495,9 +478,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
               key={instance.id}
               instance={instance}
               service={service}
+              projectId={projectId}
               onViewDetails={viewInstanceDetails}
-              onStart={startInstance}
-              onStop={stopInstance}
+              onInstanceAction={runInstanceAction}
               onSshCommand={copyConnectionCommand}
               onCreateVM={createVMInstance}
             />

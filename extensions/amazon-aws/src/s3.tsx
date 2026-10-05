@@ -129,7 +129,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                         }
                         toast.style = Toast.Style.Success;
                         toast.title = "Downloaded to Downloads folder";
-                      } catch (err) {
+                      } catch (_err) {
                         toast.style = Toast.Style.Failure;
                         toast.title = "Failed to download";
                       }

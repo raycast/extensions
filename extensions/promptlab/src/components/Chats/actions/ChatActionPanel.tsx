@@ -83,7 +83,7 @@ export const ChatActionPanel = (props: {
         <ActionPanel.Section title="Chat Actions">
           {chat && isActionEnabled("ChatSettingsAction", settings) ? (
             <Action.Push
-              title="Edit Chat Settings..."
+              title="Edit Chat Settings…"
               icon={Icon.Gear}
               target={
                 <ChatSettingsForm oldData={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />

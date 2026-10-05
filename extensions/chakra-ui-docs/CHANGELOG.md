@@ -1,5 +1,10 @@
 # Chakra UI Changelog
 
+## [Update component documentations + Version Selector] - 2026-07-03
+
+- Added a "Version Selector" to some commands
+- Updated component documentation
+
 ## [Update component documentations] - 2024-06-25
 
 - Added utility file `updateComponentsDoc.ts` to fetch the latest component documentation

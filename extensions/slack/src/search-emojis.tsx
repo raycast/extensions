@@ -1,18 +1,20 @@
-import { useMemo, useState } from "react";
-import { Action, ActionPanel, Grid, AI, environment } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
+import { Action, ActionPanel, Grid, Icon, AI, environment } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
-import { getSlackWebClient } from "./shared/client/WebClient";
+import { SlackClient } from "./shared/client";
+
+const DISPLAY_LIMIT = 1000;
 
 function EmojiItem({ name, url }: { name: string; url: string }) {
   return (
     <Grid.Item
       content={url}
-      title={`:${name}:`}
+      title={name}
       actions={
         <ActionPanel>
-          <Action.Paste content={`:${name}:`} />
-          <Action.CopyToClipboard content={`:${name}:`} />
+          <Action.Paste content={name} />
+          <Action.CopyToClipboard content={name} />
         </ActionPanel>
       }
     />
@@ -21,14 +23,11 @@ function EmojiItem({ name, url }: { name: string; url: string }) {
 
 function Command() {
   const [searchText, setSearchText] = useState("");
+  const [displayLimit, setDisplayLimit] = useState(DISPLAY_LIMIT);
 
-  const { data, isLoading } = useCachedPromise(async () => {
-    const slackWebClient = getSlackWebClient();
-    return await slackWebClient.emoji.list();
-  });
+  const { data, isLoading } = useCachedPromise(SlackClient.getWorkspaceEmojis);
 
-  const emojis = Object.entries(data?.emoji ?? {});
-  const allEmojiNames = emojis.map(([name]) => name).join(", ");
+  const emojis = useMemo(() => Object.entries(data ?? {}), [data]);
 
   const filteredEmojis = useMemo(() => {
     if (!searchText) return emojis;
@@ -36,6 +35,7 @@ function Command() {
   }, [searchText, emojis]);
 
   const executeAISearch = environment.canAccess(AI) && searchText.length > 0 && filteredEmojis.length === 0;
+  const allEmojiNames = useMemo(() => emojis.map(([name]) => name).join(", "), [emojis]);
   const prompt = `Here is a list of all available emoji names: ${allEmojiNames}\nReturn the emoji names in the list, separated by commas and with no additional text, that best match the semantic meaning of the following description: ${searchText}\nYou should return at least one emoji name.`;
   const { data: modelResponse, isLoading: isAILoading } = useAI(prompt, {
     model: AI.Model["OpenAI_GPT4o-mini"],
@@ -46,27 +46,48 @@ function Command() {
     return modelResponse
       .split(",")
       .map((name) => name.trim())
-      .filter((name) => !!data?.emoji?.[name])
-      .map((name) => [name, data?.emoji?.[name]]) as Array<[string, string]>;
+      .filter((name) => !!data?.[name])
+      .map((name) => [name, data?.[name]]) as Array<[string, string]>;
   }, [modelResponse, data]);
 
   const emojiEntries = useMemo(() => {
     if (!searchText) return emojis;
     if (executeAISearch) return aiEmojiEntries;
     return filteredEmojis;
-  }, [searchText, filteredEmojis, aiEmojiEntries]);
+  }, [searchText, emojis, filteredEmojis, aiEmojiEntries, executeAISearch]);
+
+  const visibleEmojis = useMemo(() => emojiEntries.slice(0, displayLimit), [emojiEntries, displayLimit]);
+  const hiddenCount = emojiEntries.length - visibleEmojis.length;
+
+  const handleSearchTextChange = useCallback((text: string) => {
+    setSearchText(text);
+    setDisplayLimit(DISPLAY_LIMIT);
+  }, []);
 
   return (
     <Grid
       isLoading={isLoading || isAILoading}
       columns={8}
       inset={Grid.Inset.Medium}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
       throttle
     >
-      {emojiEntries.map(([name, url]) => (
+      {visibleEmojis.map(([name, url]) => (
         <EmojiItem key={name} name={name} url={url} />
       ))}
+
+      {hiddenCount > 0 && (
+        <Grid.Item
+          content={Icon.Ellipsis}
+          title="Show More"
+          subtitle={`${hiddenCount} more`}
+          actions={
+            <ActionPanel>
+              <Action title="Show More" onAction={() => setDisplayLimit((limit) => limit + DISPLAY_LIMIT)} />
+            </ActionPanel>
+          }
+        />
+      )}
 
       <Grid.EmptyView title={isAILoading ? "Searching Slack emojis with AI…" : "No emojis found"} />
     </Grid>

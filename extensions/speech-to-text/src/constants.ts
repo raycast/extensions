@@ -25,6 +25,7 @@ export const LANGUAGE_OPTIONS = [
   { value: "ja", title: "Japanese" },
   { value: "ko", title: "Korean" },
   { value: "ru", title: "Russian" },
+  { value: "uk", title: "Ukrainian" },
 ] as const;
 
 /**

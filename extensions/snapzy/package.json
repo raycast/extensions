@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapzy",
+  "title": "Snapzy",
+  "description": "Capture screenshots, record your screen, and manage captures with Snapzy.",
+  "icon": "extension-icon.png",
+  "author": "chkzz",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Snapzy",
+      "description": "Take a fullscreen screenshot with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "fullscreen",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Snapzy",
+      "description": "Select an area to screenshot with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "area",
+        "selection",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-application",
+      "title": "Capture Application",
+      "subtitle": "Snapzy",
+      "description": "Capture an application window with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "window",
+        "application",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-active-window",
+      "title": "Capture Active Window",
+      "subtitle": "Snapzy",
+      "description": "Instantly capture the focused window with Snapzy, no selection step.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "window",
+        "active",
+        "focused",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-area-annotate",
+      "title": "Capture Area and Annotate",
+      "subtitle": "Snapzy",
+      "description": "Capture an area and open Snapzy annotation tools.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "area",
+        "annotate",
+        "markup"
+      ]
+    },
+    {
+      "name": "capture-scrolling",
+      "title": "Scrolling Capture",
+      "subtitle": "Snapzy",
+      "description": "Start a scrolling screenshot with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "scrolling",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-ocr",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Snapzy",
+      "description": "Extract text from a screen region with Snapzy OCR.",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "text",
+        "recognition",
+        "capture"
+      ]
+    },
+    {
+      "name": "capture-object-cutout",
+      "title": "Object Cutout",
+      "subtitle": "Snapzy",
+      "description": "Capture and cut out an object from the screen with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "object",
+        "cutout",
+        "capture",
+        "background removal"
+      ]
+    },
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "subtitle": "Snapzy",
+      "description": "Start screen recording with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "screen",
+        "video"
+      ]
+    },
+    {
+      "name": "record-application",
+      "title": "Record Application",
+      "subtitle": "Snapzy",
+      "description": "Start recording an application window with Snapzy.",
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "window",
+        "application",
+        "video"
+      ]
+    },
+    {
+      "name": "open-annotate",
+      "title": "Open Annotate",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy annotation editor.",
+      "mode": "no-view",
+      "keywords": [
+        "annotate",
+        "markup",
+        "editor"
+      ]
+    },
+    {
+      "name": "open-video-editor",
+      "title": "Open Video Editor",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy Video Editor.",
+      "mode": "no-view",
+      "keywords": [
+        "video",
+        "editor",
+        "recording"
+      ]
+    },
+    {
+      "name": "open-cloud-uploads",
+      "title": "Open Cloud Uploads",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy Cloud Uploads.",
+      "mode": "no-view",
+      "keywords": [
+        "cloud",
+        "uploads",
+        "s3",
+        "r2"
+      ]
+    },
+    {
+      "name": "open-capture-history",
+      "title": "Open Capture History",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy Capture History.",
+      "mode": "no-view",
+      "keywords": [
+        "history",
+        "captures",
+        "screenshots",
+        "recent"
+      ]
+    },
+    {
+      "name": "show-shortcuts",
+      "title": "Show Shortcuts",
+      "subtitle": "Snapzy",
+      "description": "Show the Snapzy keyboard shortcuts overlay.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "shortcuts",
+        "keyboard",
+        "help"
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Snapzy",
+      "description": "Open Snapzy Settings.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "settings",
+        "preferences",
+        "configuration"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

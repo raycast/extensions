@@ -1,32 +1,50 @@
-import fetch from "cross-fetch";
-import { useRefreshableCachedState } from "./use-refreshable-cached-state";
+import { getWindowsKeyNames } from "./windows-key-names";
+import { catalogUrl } from "../config/catalog";
+import { useFetch } from "@raycast/utils";
+import { getPlatform } from "./platform";
+import { useMemo } from "react";
 
-export type KeyCodes = Map<string, string>;
+export type KeyCodes = Record<string, string>;
 
 interface IncomingKeyCodes {
   keyCodes: [string, string][];
 }
 
-const cacheKey = "key-codes";
-
 interface UseKeyCodesResult {
   isLoading: boolean;
-  data: Map<string, string> | undefined;
+  data: KeyCodes | undefined;
   revalidate: () => void;
 }
 
+export { getWindowsKeyNames } from "./windows-key-names";
+
 export default function useKeyCodes(): UseKeyCodesResult {
-  return useRefreshableCachedState<IncomingKeyCodes, Map<string, string> | undefined>(
-    cacheKey,
-    async () => {
-      console.log("Fetching key codes");
-      const res = await fetch("https://hotkys.com/data/key-codes.json");
-      const json: IncomingKeyCodes = await res.json();
-      return json;
-    },
+  const platform = getPlatform();
+
+  const { isLoading, data, revalidate } = useFetch<IncomingKeyCodes, undefined, KeyCodes>(
+    catalogUrl("data/key-codes.json"),
     {
-      dataParser: (incomingKeyCodes: IncomingKeyCodes | undefined) =>
-        incomingKeyCodes ? new Map<string, string>(incomingKeyCodes.keyCodes) : undefined,
+      execute: platform === "macos", // Only fetch on macOS
+      mapResult: (result) => ({
+        data: Object.fromEntries(result.keyCodes),
+      }),
+      failureToastOptions: {
+        title: "Failed to load key codes",
+      },
     }
   );
+
+  // On Windows, provide static key names immediately
+  const windowsData = useMemo(() => {
+    if (platform === "windows") {
+      return getWindowsKeyNames();
+    }
+    return undefined;
+  }, [platform]);
+
+  return {
+    isLoading: platform === "windows" ? false : isLoading,
+    data: platform === "windows" ? windowsData : data,
+    revalidate,
+  };
 }

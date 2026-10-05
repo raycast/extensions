@@ -4,11 +4,12 @@ export interface TimeEntry {
   projectId: string;
   taskId: string | undefined;
   description: string;
+  tags: Tag[];
   project: Project;
   task: Task | undefined;
   timeInterval: {
     start: string;
-    end: string;
+    end: string | null;
   };
 }
 
@@ -18,6 +19,9 @@ export interface Project {
   description?: string;
   name: string;
   color: string;
+  // The project's "billable by default" setting. Optional so that an absent value stays
+  // distinguishable from false: callers omit the field entirely rather than sending a guess.
+  billable?: boolean;
 }
 
 export interface Task {
@@ -25,13 +29,31 @@ export interface Task {
   name: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+}
+
 export interface FetcherArgs {
-  method?: string;
+  method?: "PATCH" | "POST";
   body?: any;
   headers?: {
-    "X-Api-Key": any;
+    "X-Api-Key": string;
     "Content-Type": string;
   };
+}
+
+export interface User {
+  id: string;
+  name: string;
+  // Not guaranteed to be present: Clockify omits/empties these for some accounts.
+  defaultWorkspace?: string;
+  activeWorkspace?: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
 }
 
 export interface FetcherResponse {
@@ -39,15 +61,8 @@ export interface FetcherResponse {
   error?: string | Error;
 }
 
-export type ClockifyRegion = "GLOBAL" | "USA" | "AU" | "EU" | "UK";
-
-export interface PreferenceValues {
-  token: string;
-  region: ClockifyRegion;
-}
-
 export interface DataValues {
-  userId: LocalStorageValue;
-  workspaceId: LocalStorageValue;
-  name: LocalStorageValue;
+  userId: string;
+  workspaceId: string;
+  name: string;
 }

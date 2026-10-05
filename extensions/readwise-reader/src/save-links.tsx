@@ -8,6 +8,7 @@ import { extractURLs } from "./utils/url";
 interface SaveArguments {
   urls: string;
   author?: string;
+  tags?: string;
 }
 
 const rateLimit = 20;
@@ -33,10 +34,10 @@ export default function Command() {
       const toast = savingToast(values.urls);
       await toast.show();
       try {
-        await handleSaveURLs(values.urls, values.author);
+        await handleSaveURLs(values.urls, values.author, values.tags);
         toast.style = Toast.Style.Success;
         toast.message = "Links saved";
-        reset({ urls: "", author: undefined });
+        reset({ urls: "", author: undefined, tags: undefined });
       } catch (error) {
         let message: string | undefined = undefined;
         if (error instanceof Error) {
@@ -53,6 +54,7 @@ export default function Command() {
     },
     initialValues: {
       urls: "",
+      tags: "",
     },
   });
   return (
@@ -65,6 +67,7 @@ export default function Command() {
     >
       <Form.TextArea title="Links" placeholder="Enter links" {...itemProps.urls} />
       <Form.TextField title="Author" placeholder="Enter author" {...itemProps.author} />
+      <Form.TextField title="Tags" placeholder="Enter tags (comma-separated)" {...itemProps.tags} />
     </Form>
   );
 }

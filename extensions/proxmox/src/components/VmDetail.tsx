@@ -1,12 +1,12 @@
 import { List } from "@raycast/api";
-import { PveVmStatus, type PveVm, PveVmTypes } from "../api";
-import { formatPercentage, formatShortTime, formatStorageSize } from "../utils";
+import { type PveVm, PveVmStatus, PveVmTypes, type WithServer } from "@/types";
+import { formatCPU, formatPercentage, formatShortTime, formatStorageSize } from "@/utils/format";
 
-function formatCPU(maxcpu: number): string {
-  return Math.round(maxcpu) + " CPU(s)";
-}
+type VmDetailProps = {
+  vm: WithServer<PveVm>;
+};
 
-export default function VmDetail({ vm }: { vm: PveVm }) {
+export const VmDetail = ({ vm }: VmDetailProps) => {
   const hasDetails = vm.status !== PveVmStatus.stopped;
   let cpu, memory, disk;
   if (hasDetails) {
@@ -36,6 +36,7 @@ export default function VmDetail({ vm }: { vm: PveVm }) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="ID" text={vm.vmid.toString()} />
+          <List.Item.Detail.Metadata.Label title="Server" text={vm.server.name} />
           <List.Item.Detail.Metadata.Label title="Node" text={vm.node} />
           <List.Item.Detail.Metadata.Label title="Status" text={vm.status} />
           <List.Item.Detail.Metadata.Separator />
@@ -54,4 +55,4 @@ export default function VmDetail({ vm }: { vm: PveVm }) {
       }
     />
   );
-}
+};

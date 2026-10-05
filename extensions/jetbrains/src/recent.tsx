@@ -1,6 +1,6 @@
 import React from "react";
 import { ActionPanel, List } from "@raycast/api";
-import { bin, recentEntry, toolsInstall, useUrl } from "./util";
+import { bin, isWin, recentEntry, toolsInstall, useUrl, supportedMajorVersions, githubIssueUrl } from "./util";
 import { HelpTextDetail, tbUrl } from "./components/HelpTextDetail";
 import { OpenJetBrainsToolbox } from "./components/OpenJetBrainsToolbox";
 import { RecentProject } from "./components/RecentProject";
@@ -33,12 +33,16 @@ export default function ProjectList(): React.JSX.Element {
       `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,
     ];
     return <HelpTextDetail message={message} toolbox={undefined} />;
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isSupported) {
+    const supportedVersionsText = supportedMajorVersions.map((v) => `V${v}`).join(", ");
+
     const message = [
-      `# Unsupported Version of JetBrains Toolbox: ${toolboxApp.version}`,
-      "This extension only support version 2 of JetBrains Toolbox",
-      `Please check that you have installed the latest [JetBrains Toolbox](${tbUrl})`,
+      `# Unsupported JetBrains Toolbox Version: ${toolboxApp.version}`,
+      `This extension supports the following versions: ${supportedVersionsText}.`,
+      `Please use one of the supported versions, or create an issue on the [extension’s GitHub page](${githubIssueUrl}) if you believe your version should be supported.`,
+      `You can also download the supported version(s) of [JetBrains Toolbox](${tbUrl}).`,
     ];
+
     return <HelpTextDetail message={message} toolbox={toolboxApp} />;
   } else if (appHistory.length === 0) {
     const message = [
@@ -60,10 +64,10 @@ export default function ProjectList(): React.JSX.Element {
       `If you have set a custom path for your shell scripts (in JetBrains Toolbox), you must also set that in the settings for this extension. This is currently set to \`${bin}\`.`,
       missingTools.length > 0
         ? `The missing ${plural ? "scripts" : "script"} ${plural ? "are" : "is"} \`${missingTools.join(
-            "`, `"
-          )}\` please check ${plural ? "they are" : "it is"} available using ${plural ? "e.g." : ""} \`which ${
-            missingTools[0]
-          }\` from a Terminal window`
+            "`, `",
+          )}\` please check ${plural ? "they are" : "it is"} available using ${plural ? "e.g." : ""} \`${
+            isWin ? "where" : "which"
+          } ${missingTools[0]}\` from a Terminal window`
         : "",
       useUrl
         ? "Additionally, we were unable to find a protocol url link to fallback on, please ensure you are using the latest version of JetBrains Toolbox and any apps you are using."
@@ -81,6 +85,9 @@ export default function ProjectList(): React.JSX.Element {
     </>
   );
 
+  const favHint = isWin ? "Ctrl+Shift+F" : "⌘+⇧+F";
+  const sortHint = isWin ? "Ctrl+S" : "⌃+S";
+
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
@@ -88,7 +95,7 @@ export default function ProjectList(): React.JSX.Element {
       searchBarAccessory={<AppDrop filter={filter} onChange={setFilter} appHistories={appHistory} />}
     >
       {myFavs.length ? (
-        <List.Section title="Favourites" subtitle={screenshotMode ? "⌘+F to remove from favorites" : undefined}>
+        <List.Section title="Favourites" subtitle={screenshotMode ? `${favHint} to remove from favorites` : undefined}>
           {myFavs
             .filter((fav) => ["", "all", "recent"].includes(filter) || fav.app.name === filter)
             .map((fav) => (
@@ -108,10 +115,10 @@ export default function ProjectList(): React.JSX.Element {
         </List.Section>
       ) : null}
       {["", "recent"].includes(filter) && (
-        <List.Section title={"Recent"} subtitle={screenshotMode ? "⌘+F to add to favorites" : undefined}>
+        <List.Section title={"Recent"} subtitle={screenshotMode ? `${favHint} to add to favorites` : undefined}>
           {(recent ?? [])
             .filter(
-              (entry) => myFavs.find((fav) => fav.path === entry.path && fav.appName === entry.appName) === undefined
+              (entry) => myFavs.find((fav) => fav.path === entry.path && fav.appName === entry.appName) === undefined,
             )
             .slice(0, filter === "recent" ? recent.length : 10)
             .map((recent) => (
@@ -137,14 +144,16 @@ export default function ProjectList(): React.JSX.Element {
           <List.Section
             title={app.name}
             key={app.title}
-            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : app.version}
+            subtitle={
+              screenshotMode ? `${favHint} to add to favorites – ${sortHint} to change application order` : app.version
+            }
           >
             {(recent ?? [])
               .filter((entry) => entry.app.name === app.name)
               .filter(
                 (entry) =>
                   filter === "" ||
-                  myFavs.find((fav) => fav.path === entry.path && fav.app.name === entry.app.name) === undefined
+                  myFavs.find((fav) => fav.path === entry.path && fav.app.name === entry.app.name) === undefined,
               )
               .map((recent: recentEntry) => (
                 <RecentProject

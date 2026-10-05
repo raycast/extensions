@@ -1,5 +1,10 @@
 # Converter Changelog
 
+## [Scientific notation and Decimal encoding] - 2025-08-18
+
+- Add support for scientific notation in byte converter.
+- Add decimal encoding in code converter.
+
 ## [Refactor and Bug Fixes] - 2024-09-09
 
 - Fix bug with pasting values in base converter.

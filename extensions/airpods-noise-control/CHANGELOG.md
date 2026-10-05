@@ -1,5 +1,28 @@
 # AirPods Noise Control Changelog
 
+## [Major Update] - 2025-12-08
+
+> **Note:** This update has only been tested on macOS Tahoe (26).
+
+### macOS Tahoe Support
+- Updated AppleScript to work with the new ControlCenter process on macOS Tahoe
+- Added backward compatibility for pre-Sequoia macOS versions using SystemUIServer
+
+### New Features
+- Added **AirPods Type** preference to select between AirPods Pro and AirPods Max
+- Different menu layouts are now properly handled for each AirPods model:
+  - **AirPods Max**: Off, Transparency, Noise Cancellation
+  - **AirPods Pro**: Transparency, Adaptive, Noise Cancellation + Conversation Awareness
+
+### Bug Fixes
+- Fixed disclosure triangle selection to target the correct AirPods item
+- Fixed conversation awareness indices
+- Added validation to show error when "Adaptive" mode is selected for AirPods Max
+- Fixed `entire contents` statement missing object reference
+
+### Performance
+- Reduced delays for faster execution
+
 ## [Bug Fix] - 2025-04-15
 
 - Fixed incorrect logic selecting "Adaptive" instead of "Transparency" in Noise Control toggle

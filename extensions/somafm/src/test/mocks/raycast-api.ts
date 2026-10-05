@@ -6,6 +6,7 @@ export const showHUD = vi.fn();
 export const closeMainWindow = vi.fn();
 export const open = vi.fn();
 export const launchCommand = vi.fn();
+export const getPreferenceValues = vi.fn();
 
 export const Toast = {
   Style: {

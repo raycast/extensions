@@ -1,5 +1,44 @@
 # KeePassXC Extension Changelog
 
+## [1.10.0] - 2026-03-30
+
+### Added
+
+- Support for passwordless vaults (#26714).
+
+## [1.9.0] - 2026-02-11
+
+### Added
+
+- Pin entries (#24543).
+- Copy and paste URL.
+
+### Fixed
+
+- Race condition when using the inactivity timer.
+
+## [1.8.0] - 2025-10-27
+
+### Added
+
+- Support for KeePassXC placeholders in copy and paste actions.
+
+## [1.7.1] - 2025-10-14
+
+### Fixed
+
+- Find KeePassXC app location using Raycast API for macOS (#22043).
+
+## [1.7.0] - 2025-09-29
+
+### Added
+
+- Support for Windows (#21352).
+
+### Removed
+
+- App picker `KeePassXC App` in the extension preferences.
+
 ## [1.6.0] - 2025-04-07
 
 ### Added
@@ -15,7 +54,7 @@
 
 ### Fixed
 
-- Use a raw.githubusercontent.com link for the KeePassXC image in the README.
+- Use a `raw.githubusercontent.com` link for the KeePassXC image in the README.
 
 ## [1.5.5] - 2025-03-12
 

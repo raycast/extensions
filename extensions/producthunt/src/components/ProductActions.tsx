@@ -1,10 +1,11 @@
 import React from "react";
-import { ActionPanel, Action, Icon, Color, open, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Color, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { Product, User } from "../types";
 import { ProductDetailView } from "./ProductDetailView";
 import { ProductGalleryView } from "./ProductGalleryView";
 import { FrontpageWrapper } from "./FrontpageWrapper";
 import { TopicsAction } from "./TopicsAction";
+import { RELOAD_EXTENSIONS_DEEPLINK } from "../constants";
 
 type SubmenuType = React.ComponentType<{
   title: string;
@@ -28,6 +29,11 @@ interface ProductActionsProps {
   onNavigateToProduct?: (product: Product, newIndex: number) => void;
   viewContext: ViewContext;
   showTopics?: boolean;
+  onRefresh?: () => void;
+  signedIn?: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
+  onReauthorize?: () => void;
 }
 
 export function ProductActions({
@@ -39,6 +45,11 @@ export function ProductActions({
   onNavigateToProduct,
   viewContext,
   showTopics = true,
+  onRefresh,
+  signedIn,
+  onSignIn,
+  onSignOut,
+  onReauthorize,
 }: ProductActionsProps) {
   const handleUserAction = (user: User, role: string) => {
     if (user.profileUrl) {
@@ -54,34 +65,41 @@ export function ProductActions({
     <ActionPanel>
       {/* Primary Actions Section */}
       <ActionPanel.Section>
-        {/* In List view, first action is View Details */}
-        {viewContext === ViewContext.List && (
-          <Action.Push
-            title="View Details"
-            icon={Icon.Eye}
-            target={
-              <ProductDetailView
-                product={product}
-                index={index}
-                totalProducts={totalProducts || allProducts.length}
-                onNavigateToProduct={onNavigateToProduct}
+        {/* For feed items the in-app detail view has no real data, so Open in Browser is primary */}
+        {product.isFeedFallback ? (
+          <Action.OpenInBrowser url={product.url} title="Open in Browser" />
+        ) : (
+          <>
+            {/* In List view, first action is View Details */}
+            {viewContext === ViewContext.List && (
+              <Action.Push
+                title="View Details"
+                icon={Icon.Eye}
+                target={
+                  <ProductDetailView
+                    product={product}
+                    index={index}
+                    totalProducts={totalProducts || allProducts.length}
+                    onNavigateToProduct={onNavigateToProduct}
+                  />
+                }
               />
-            }
-          />
-        )}
+            )}
 
-        {/* In Detail view, first action is Open in Browser */}
-        <Action.OpenInBrowser
-          url={product.url}
-          title="Open in Browser"
-          shortcut={viewContext === ViewContext.Detail ? undefined : { modifiers: ["cmd"], key: "o" }}
-        />
+            {/* In Detail view, first action is Open in Browser */}
+            <Action.OpenInBrowser
+              url={product.url}
+              title="Open in Browser"
+              shortcut={viewContext === ViewContext.Detail ? undefined : Keyboard.Shortcut.Common.Open}
+            />
+          </>
+        )}
 
         {/* Copy URL action */}
         <Action.CopyToClipboard
           title="Copy URL"
           content={product.url}
-          shortcut={{ modifiers: ["cmd"], key: viewContext === ViewContext.List ? "c" : "o" }}
+          shortcut={viewContext === ViewContext.List ? Keyboard.Shortcut.Common.Copy : undefined}
         />
 
         {/* Gallery action - available in both views if gallery images exist */}
@@ -89,7 +107,7 @@ export function ProductActions({
           <Action.Push
             title="View Gallery"
             icon={Icon.AppWindowGrid2x2}
-            shortcut={{ modifiers: ["cmd"], key: "g" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "g" }, Windows: { modifiers: ["ctrl"], key: "g" } }}
             target={<ProductGalleryView product={product} />}
           />
         )}
@@ -100,7 +118,20 @@ export function ProductActions({
             icon={Icon.Hourglass}
             title={product.previousLaunches === 1 ? "View Previous Launch" : "View Previous Launches"}
             url={product.productHubUrl}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
+          />
+        )}
+
+        {/* Refresh action - re-fetches the frontpage with fresh data when provided */}
+        {onRefresh && (
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onRefresh}
           />
         )}
       </ActionPanel.Section>
@@ -174,10 +205,26 @@ export function ProductActions({
             title="Back to Featured Products"
             icon={Icon.ArrowUp}
             target={<FrontpageWrapper />}
-            shortcut={{ modifiers: ["cmd"], key: "[" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "[" }, Windows: { modifiers: ["ctrl"], key: "[" } }}
           />
         </ActionPanel.Section>
       )}
+
+      {/* Account Section */}
+      <ActionPanel.Section title="Account">
+        {signedIn === false && onSignIn && (
+          <Action title="Sign in to Product Hunt" icon={Icon.Person} onAction={onSignIn} />
+        )}
+        {signedIn === true && onSignOut && (
+          <Action title="Sign out of Product Hunt" icon={Icon.Logout} onAction={onSignOut} />
+        )}
+        {onReauthorize && <Action title="Sign in Again" icon={Icon.ArrowClockwise} onAction={onReauthorize} />}
+        <Action
+          title="Reload Extension"
+          icon={Icon.RotateClockwise}
+          onAction={() => open(RELOAD_EXTENSIONS_DEEPLINK)}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

@@ -1,6 +1,7 @@
 import { useSQL } from "@raycast/utils";
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { escapeSqlLiteral } from "../escapeSqlLiteral";
 
 interface TaskItem {
   id: string;
@@ -23,7 +24,9 @@ interface TasksListProps {
 export default function TasksList({ evernoteDB }: TasksListProps) {
   const [searchText, setSearchText] = useState("");
 
-  const tasksQuery = `
+  const tasksQuery = useMemo(() => {
+    const safe = escapeSqlLiteral(searchText);
+    return `
     SELECT 
       n.id,
       nb.id AS note_id, 
@@ -35,27 +38,40 @@ export default function TasksList({ evernoteDB }: TasksListProps) {
       nb.shardId as shardId		
     FROM Nodes_Task n
     LEFT JOIN Nodes_Note nb ON n.parent_Note_id = nb.id
-    WHERE n.label LIKE '%' || '${searchText}' || '%' 
+    WHERE n.label LIKE '%' || '${safe}' || '%' 
       AND n.status IS NOT 'completed' 
     ORDER BY n.updated DESC 
     LIMIT 10;
   `;
+  }, [searchText]);
 
-  const { isLoading, data, permissionView } = useSQL<TaskItem>(evernoteDB, tasksQuery);
+  const { isLoading, data, permissionView, error } = useSQL<TaskItem>(evernoteDB, tasksQuery);
 
   if (permissionView) {
     return permissionView;
   }
 
+  const items = data ?? [];
+  const showErrorEmpty = !isLoading && error;
+  const showNoResultsEmpty = !isLoading && !error && items.length === 0;
+
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search tasks...">
-      {(data || []).map((item) => (
+      {showErrorEmpty ? (
+        <List.EmptyView title="Could not load tasks" description={error.message} icon={Icon.ExclamationMark} />
+      ) : showNoResultsEmpty ? (
+        <List.EmptyView title="No tasks found" description="Try a different search." />
+      ) : null}
+      {items.map((item) => (
         <List.Item
           key={item.id}
           title={item.label}
           accessories={[
             { icon: Icon.Folder, text: item.note_label },
-            { tooltip: new Date(item.dueDate).toLocaleDateString(), date: new Date(item.dueDate) },
+            {
+              tooltip: new Date(item.dueDate).toLocaleDateString("en-US"),
+              date: new Date(item.dueDate),
+            },
           ]}
           actions={
             <ActionPanel>

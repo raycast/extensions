@@ -32,8 +32,6 @@ export const useUsageBasedSort = <T extends { name: string | number }>(data: T[]
   const { data: usages, set: setUsages } = useLocalStorage<Usages>(USAGE_KEY + localStorageKey);
 
   const recordUsage = (id: string | number) => {
-    console.warn("recordUsage", id);
-    console.warn("usages", usages?.[id]);
     setUsages({
       ...usages,
       [id]: {
@@ -43,14 +41,8 @@ export const useUsageBasedSort = <T extends { name: string | number }>(data: T[]
     });
   };
 
-  const arrayWithScores = data.map((e: T) => {
-    const usage = (usages || {})[e.name];
-    return {
-      ...e,
-      _calculatedScore: getCalculatedScore(usage),
-    };
-  });
-
-  const sortedByScores = [...(arrayWithScores || [])].sort((a, b) => b._calculatedScore - a._calculatedScore);
+  const sortedByScores = [...data].sort(
+    (a, b) => getCalculatedScore((usages || {})[b.name]) - getCalculatedScore((usages || {})[a.name]),
+  );
   return { data: sortedByScores, recordUsage };
 };

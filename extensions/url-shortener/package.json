@@ -5,6 +5,7 @@
   "description": "Experience the joy of shortening URLs to your heart's desire with Raycast's URL Shortener! Enjoy the convenience of free URL shortening, without the need for an API key or any rate limits. The domains you can use are: tinyurl.com, shrtco.de, 9qr.de, and shiny.link",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
+  "contributors": ["xmok"],
   "license": "MIT",
   "commands": [
     {
@@ -41,16 +42,8 @@
           "value": "4"
         },
         {
-          "title": "shrtco.de",
-          "value": "1"
-        },
-        {
-          "title": "9qr.de",
-          "value": "2"
-        },
-        {
-          "title": "shiny.link",
-          "value": "3"
+          "title": "v.gd",
+          "value": "5"
         }
       ]
     },
@@ -73,22 +66,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^3.0.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

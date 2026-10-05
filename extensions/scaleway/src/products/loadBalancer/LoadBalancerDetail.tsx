@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { LB } from '@scaleway/sdk'
+import type { Lbv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getLoadBalancerStatusIcon } from './status'
 
 type LoadBalancerProps = {
-  loadBalancer: LB.v1.Lb
+  loadBalancer: Lbv1.Lb
 }
 
 export const LoadBalancerDetail = ({ loadBalancer }: LoadBalancerProps) => (

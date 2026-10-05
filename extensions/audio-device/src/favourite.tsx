@@ -1,13 +1,25 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { setOutputDevice } from "./utils";
+import { getOutputDevices } from "./audio-device";
+import { setOutputAndSystemDevice } from "./device-actions";
+import { findDeviceByName } from "./utils";
 
 export default async () => {
   const preferences = getPreferenceValues();
   if (preferences.favourite != null && preferences.favourite !== "") {
     try {
-      await setOutputDevice(preferences.favourite);
+      const devices = await getOutputDevices();
+      const device = findDeviceByName(devices, preferences.favourite);
+      if (!device) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Device "${preferences.favourite}" not found`,
+        });
+        return;
+      }
+      await setOutputAndSystemDevice(device.id);
       await showHUD(`Active output audio device set to ${preferences.favourite}`);
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Favourite output audio device could not be set",

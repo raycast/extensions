@@ -1,5 +1,4 @@
-import { type BareRepository } from "#/config/types";
-import { removeProjectFromCache } from "#/helpers/cache";
+import type { BareRepository } from "#/config/types";
 import { removeDirectory } from "#/helpers/file";
 import { Action, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 
@@ -32,7 +31,7 @@ export const RemoveProject = ({
 
     try {
       await removeDirectory({ path: project.fullPath, recursive: true, force: true });
-      removeProjectFromCache({ projectName: project.name, onSuccess: revalidateProjects });
+      revalidateProjects();
 
       toast.style = Toast.Style.Success;
       toast.title = "Successfully Removed";

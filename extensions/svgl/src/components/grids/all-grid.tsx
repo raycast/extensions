@@ -1,6 +1,7 @@
 import { Grid } from "@raycast/api";
 import { useSvglExtension } from "../app-context";
 import SvgAction from "../svg-action";
+import { getSvgRouteSource } from "../../utils/svg-route";
 import PinnedGrid from "./pinned-grid";
 import RecentGrid from "./recent-grid";
 
@@ -11,19 +12,17 @@ const AllGrid = () => {
     <>
       <PinnedGrid />
       <RecentGrid />
-      {categories.map((category, index) => (
-        <Grid.Section title={category.category} subtitle={category.total.toString()} key={index}>
+      {categories.map((category) => (
+        <Grid.Section title={category.category} subtitle={category.total.toString()} key={category.category}>
           {svgs
             .filter((svg) => svg.category === category.category || svg.category?.includes(category.category))
-            .map((svg, index) => (
+            .map((svg) => (
               <Grid.Item
-                key={index}
+                key={`${category.category}_${svg.id}`}
+                id={`${category.category}_${svg.id}`}
                 content={{
                   value: {
-                    source: {
-                      light: typeof svg.route === "string" ? svg.route : svg.route.light,
-                      dark: typeof svg.route === "string" ? svg.route : svg.route.dark,
-                    },
+                    source: getSvgRouteSource(svg.route),
                   },
                   tooltip: svg.title,
                 }}

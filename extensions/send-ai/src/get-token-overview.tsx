@@ -136,17 +136,19 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
           1000 * 60 * 5,
         );
         tokenInfo = result.data as TokenInfo;
-
-        const { data } = await executeAction(
-          "getTokenDataByTicker",
-          {
-            ticker: tokenInfo.symbol, // this is the token symbol
-          },
-          true,
-          1000 * 60 * 60,
-        );
-
-        setDailyVolume((data as { daily_volume: number }).daily_volume);
+        try {
+          const { data } = await executeAction(
+            "getTokenDataByTicker",
+            {
+              ticker: tokenInfo.symbol, // this is the token symbol
+            },
+            true,
+            1000 * 60 * 60,
+          );
+          setDailyVolume((data as { daily_volume: number }).daily_volume);
+        } catch (error) {
+          console.error(error);
+        }
       } else {
         // if starts with $, remove the $
         if (values.tokenAddress.startsWith("$")) {

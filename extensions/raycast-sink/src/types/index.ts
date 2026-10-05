@@ -7,19 +7,7 @@ export interface Link {
   comment?: string;
 }
 
-export interface Preferences {
-  host: string;
-  token: string;
-  showWebsitePreview: string;
-  language: string;
-}
-
-export interface Config {
-  host: string;
-  token: string;
-  showWebsitePreview: string;
-  language: string;
-}
+export type Config = Preferences;
 
 export interface CreateLinkResponse {
   link: Link;

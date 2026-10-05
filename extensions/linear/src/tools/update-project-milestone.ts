@@ -2,6 +2,9 @@ import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { serializeMilestone } from "./serializers";
+import { withLinear } from "./withLinear";
+
 type Input = {
   /** The ID of the project update to modify. */
   milestoneId: string;
@@ -16,7 +19,7 @@ type Input = {
   targetDate?: string;
 };
 
-export default withAccessToken(linear)(async ({ milestoneId, ...inputs }: Input) => {
+export default withLinear(async ({ milestoneId, ...inputs }: Input) => {
   const { linearClient } = getLinearClient();
   const result = await linearClient.updateProjectMilestone(milestoneId, inputs);
 
@@ -24,7 +27,12 @@ export default withAccessToken(linear)(async ({ milestoneId, ...inputs }: Input)
     throw new Error("Failed to update project milestone");
   }
 
-  return JSON.stringify(result.projectMilestone);
+  const updated = await result.projectMilestone;
+  if (!updated) {
+    throw new Error("Failed to update project milestone");
+  }
+
+  return serializeMilestone(updated);
 });
 
 export const confirmation = withAccessToken(linear)(async ({ milestoneId }: Input) => {

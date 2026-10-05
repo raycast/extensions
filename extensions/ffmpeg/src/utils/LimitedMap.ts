@@ -9,7 +9,7 @@ export class LimitedMap<K, V> extends Map<K, V> {
   set(key: K, value: V): this {
     if (this.size >= this.limit) {
       // Delete the first key-value pair
-      this.delete(this.keys().next().value);
+      this.delete(this.keys().next().value as K);
     }
     super.set(key, value);
     return this;

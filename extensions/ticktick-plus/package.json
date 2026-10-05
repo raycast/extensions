@@ -1,0 +1,361 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ticktick-plus",
+  "title": "TickTick+",
+  "description": "Manage TickTick tasks, projects, habits, and focus sessions from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "ysrazsingh",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "enableAlerts",
+      "title": "Enable Alerts",
+      "description": "Show overdue/urgent task alerts in the menu bar and background checks",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    },
+    {
+      "name": "alertOverdue",
+      "title": "Alert Overdue Tasks",
+      "description": "Notify when tasks are past their due date",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    },
+    {
+      "name": "alertUrgent",
+      "title": "Alert Urgent Tasks",
+      "description": "Notify for high-priority (red) tasks",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable"
+    }
+  ],
+  "commands": [
+    {
+      "name": "today",
+      "title": "Today",
+      "subtitle": "TickTick",
+      "description": "View tasks due today",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "TickTick",
+      "description": "View tasks in your inbox",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "next7days",
+      "title": "Next 7 Days",
+      "subtitle": "TickTick",
+      "description": "View upcoming tasks for the next 7 days",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "TickTick",
+      "description": "Browse tasks by project",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "eisenhower",
+      "title": "Eisenhower Matrix",
+      "subtitle": "TickTick",
+      "description": "View tasks by urgency and importance",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "habits",
+      "title": "Habits",
+      "subtitle": "TickTick",
+      "description": "Track and check in your habits",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro",
+      "subtitle": "TickTick",
+      "description": "Focus timer with TickTick integration",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search all your TickTick tasks",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "quick-add",
+      "title": "Create Task",
+      "subtitle": "TickTick",
+      "description": "Create a task in TickTick",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Task title",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "overdue",
+      "title": "Overdue",
+      "subtitle": "TickTick",
+      "description": "View overdue tasks",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "TickTick",
+      "description": "Browse tasks by tag",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "completed",
+      "title": "Completed",
+      "subtitle": "TickTick",
+      "description": "View recently completed tasks",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "filters",
+      "title": "Smart Lists",
+      "subtitle": "TickTick",
+      "description": "View tasks from your TickTick smart lists / filters",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "TickTick",
+      "description": "Create, rename, archive, or delete projects",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "profile",
+      "title": "Profile",
+      "subtitle": "TickTick",
+      "description": "Account overview and productivity stats",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "TickTick",
+      "description": "TickTick status in your menu bar — timer, overdue count, quick actions",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "background-check",
+      "title": "Background Alerts",
+      "subtitle": "TickTick",
+      "description": "Checks for overdue tasks and pomodoro completion in the background",
+      "mode": "no-view",
+      "interval": "5m",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "logout",
+      "title": "Disconnect TickTick Account",
+      "subtitle": "TickTick",
+      "description": "Remove stored OAuth tokens and re-authenticate",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create one or more TickTick tasks with optional project, due date, priority, tags, and notes"
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Update or reschedule TickTick tasks (title, due date, priority, tags, notes, project)"
+    },
+    {
+      "name": "complete-tasks",
+      "title": "Complete Tasks",
+      "description": "Mark one or more TickTick tasks as complete"
+    },
+    {
+      "name": "uncomplete-tasks",
+      "title": "Uncomplete Tasks",
+      "description": "Reopen completed TickTick tasks"
+    },
+    {
+      "name": "delete-tasks",
+      "title": "Delete Tasks",
+      "description": "Permanently delete TickTick tasks"
+    },
+    {
+      "name": "move-tasks",
+      "title": "Move Tasks",
+      "description": "Move TickTick tasks to another project"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search active TickTick tasks by title, notes, tags, or project"
+    },
+    {
+      "name": "get-task",
+      "title": "Get Task",
+      "description": "Fetch a single TickTick task including subtasks"
+    },
+    {
+      "name": "list-habits",
+      "title": "List Habits",
+      "description": "List TickTick habits and today's check-in status"
+    },
+    {
+      "name": "checkin-habits",
+      "title": "Check in Habits",
+      "description": "Check in one or more TickTick habits"
+    },
+    {
+      "name": "uncheckin-habits",
+      "title": "Uncheck Habits",
+      "description": "Undo TickTick habit check-ins"
+    },
+    {
+      "name": "start-pomodoro",
+      "title": "Start Pomodoro",
+      "description": "Start a Pomodoro focus session, optionally linked to a task"
+    },
+    {
+      "name": "pause-pomodoro",
+      "title": "Pause Pomodoro",
+      "description": "Pause the running Pomodoro timer"
+    },
+    {
+      "name": "resume-pomodoro",
+      "title": "Resume Pomodoro",
+      "description": "Resume a paused Pomodoro timer"
+    },
+    {
+      "name": "reset-pomodoro",
+      "title": "Reset Pomodoro",
+      "description": "Reset the Pomodoro timer and drop the current session"
+    },
+    {
+      "name": "get-pomodoro-status",
+      "title": "Pomodoro Status",
+      "description": "Get the current Pomodoro timer status"
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List TickTick projects and Inbox"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new TickTick project/list"
+    },
+    {
+      "name": "update-project",
+      "title": "Update Project",
+      "description": "Rename a TickTick project or change its color"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a TickTick project"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List TickTick tags"
+    },
+    {
+      "name": "list-filters",
+      "title": "List Smart Lists",
+      "description": "List TickTick smart lists / filters"
+    },
+    {
+      "name": "get-filter-tasks",
+      "title": "Get Smart List Tasks",
+      "description": "Get tasks matching a TickTick smart list / filter"
+    },
+    {
+      "name": "list-comments",
+      "title": "List Comments",
+      "description": "List comments on a TickTick task"
+    },
+    {
+      "name": "add-comment",
+      "title": "Add Comment",
+      "description": "Add a comment to a TickTick task"
+    },
+    {
+      "name": "delete-comment",
+      "title": "Delete Comment",
+      "description": "Delete a comment from a TickTick task"
+    },
+    {
+      "name": "get-profile",
+      "title": "Get Profile",
+      "description": "Get TickTick account profile, stats, and workspace overview"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

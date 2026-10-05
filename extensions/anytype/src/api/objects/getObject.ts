@@ -1,7 +1,7 @@
 import { mapObject } from "../../mappers/objects";
 import { mapType } from "../../mappers/types";
 import { BodyFormat, RawSpaceObjectWithBody, SpaceObjectWithBody } from "../../models";
-import { apiEndpoints, apiFetch, getIconWithFallback } from "../../utils";
+import { apiEndpoints, apiFetch, getIconWithFallback, getNameWithFallback } from "../../utils";
 
 export async function getObject(
   spaceId: string,
@@ -37,7 +37,7 @@ export async function getObjectWithoutMappedProperties(
   return {
     ...object,
     icon,
-    name: object.name?.trim() || "Untitled",
+    name: getNameWithFallback(object.name),
     type: await mapType(object.type),
     properties: [], // performance optimization
     markdown: "", // performance optimization

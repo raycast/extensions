@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { useWindowInfo } from "./useWindowInfo";
+import { isTimeoutError, TIMEOUT_ERROR_MESSAGE, TIMEOUT_ERROR_TOAST_TITLE } from "../utils/timeout";
 
 export function useCurrentWindowSize() {
   const { getWindowInfo } = useWindowInfo();
@@ -24,6 +25,15 @@ export function useCurrentWindowSize() {
       });
     } catch (error) {
       console.error("Error getting window size:", error);
+
+      if (isTimeoutError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: TIMEOUT_ERROR_TOAST_TITLE,
+          message: TIMEOUT_ERROR_MESSAGE,
+        });
+        return;
+      }
 
       // Check if the error is related to no focused window
       const errorStr = String(error);

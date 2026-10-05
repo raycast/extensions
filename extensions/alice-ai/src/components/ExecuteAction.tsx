@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
-import { ChatCompletionChunk, ChatCompletionMessageParam } from "openai/resources";
-import { Stream } from "openai/streaming";
+import { streamText } from "ai";
+import type { CoreMessage } from "ai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCost } from "../hooks";
-import openai, { getModelName } from "../lib/OpenAI";
+import { getModel, getModelName } from "../lib/OpenAI";
 import { useHistoryState } from "../store/history";
 import { Action as StoreAction } from "../types";
 
@@ -12,12 +12,57 @@ interface Props {
   prompt: string;
 }
 
+interface UsageShape {
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  promptTokens?: number | null;
+  completionTokens?: number | null;
+  raw?: Record<string, unknown>;
+}
+
+function estimateTokenCount(text: string): number {
+  // Lightweight fallback approximation for GPT tokenization.
+  return Math.max(1, Math.round(text.length / 4));
+}
+
+function toValidNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function normalizeUsage(usage: UsageShape): UsageShape {
+  const inputTokens = toValidNumber(usage.inputTokens) ?? toValidNumber(usage.promptTokens);
+  const outputTokens = toValidNumber(usage.outputTokens) ?? toValidNumber(usage.completionTokens);
+  const totalTokens = toValidNumber(usage.totalTokens);
+
+  return {
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    raw: usage.raw,
+  };
+}
+
+function readUsageFromRaw(raw: Record<string, unknown> | undefined): Pick<UsageShape, "inputTokens" | "outputTokens" | "totalTokens"> {
+  if (!raw) {
+    return {};
+  }
+
+  const inputTokens = (raw.inputTokens ?? raw.promptTokens ?? raw.prompt_tokens) as number | undefined;
+  const outputTokens = (raw.outputTokens ?? raw.completionTokens ?? raw.completion_tokens) as number | undefined;
+  const totalTokens = (raw.totalTokens ?? raw.total_tokens) as number | undefined;
+
+  return { inputTokens, outputTokens, totalTokens };
+}
+
 export default function ExecuteAction({ action, prompt }: Props) {
   const addHistoryItem = useHistoryState((state) => state.addItem);
   const generateLock = useRef<boolean>(false);
+  const hasStartedRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [error, setError] = useState<string>("");
-  const [stream, setStream] = useState<Stream<ChatCompletionChunk>>();
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [result, setResult] = useState<string>("");
 
   const [inputTokens, setInputTokens] = useState<number>(0);
@@ -35,7 +80,10 @@ export default function ExecuteAction({ action, prompt }: Props) {
     setError("");
     setResult("");
 
-    const messages: ChatCompletionMessageParam[] = [
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const messages: CoreMessage[] = [
       {
         role: "system",
         content: action.systemPrompt,
@@ -47,53 +95,92 @@ export default function ExecuteAction({ action, prompt }: Props) {
     ];
 
     try {
-      const stream = await openai.chat.completions.create({
-        model: action.model,
-        messages: messages,
+      setIsStreaming(true);
+
+      let usageFromFinish: UsageShape | undefined;
+      let finishPartUsage: UsageShape | undefined;
+      const response = streamText({
+        model: getModel(action.model),
+        messages,
         temperature: parseFloat(action.temperature),
-        max_tokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
-        stream: true,
-        stream_options: {
-          include_usage: true,
+        maxTokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
+        abortSignal: controller.signal,
+        onFinish: (event) => {
+          const finishEvent = event as { usage?: UsageShape; totalUsage?: UsageShape };
+          usageFromFinish = (finishEvent.totalUsage ?? finishEvent.usage) as UsageShape | undefined;
         },
       });
 
-      setStream(stream);
+      let generatedText = "";
+      for await (const part of response.fullStream) {
+        const streamPart = part as {
+          type?: string;
+          text?: string;
+          textDelta?: string;
+          totalUsage?: UsageShape;
+        };
 
-      for await (const message of stream) {
-        if (message.choices.length > 0) {
-          const content = message.choices[0].delta?.content || "";
-
-          setResult((prev) => prev + content);
+        if (streamPart.type === "text") {
+          const textChunk = streamPart.text ?? "";
+          generatedText += textChunk;
+          setResult((prev) => prev + textChunk);
         }
 
-        if (message.usage) {
-          setInputTokens(message.usage.prompt_tokens);
-          setOutputTokens(message.usage.completion_tokens);
-          setTotalTokens(message.usage.total_tokens);
+        if (streamPart.type === "text-delta") {
+          const textChunk = streamPart.textDelta ?? "";
+          generatedText += textChunk;
+          setResult((prev) => prev + textChunk);
+        }
+
+        if (streamPart.type === "finish") {
+          finishPartUsage = streamPart.totalUsage;
         }
       }
+
+      const usageSource = response as unknown as {
+        totalUsage?: Promise<{ inputTokens?: number; outputTokens?: number; totalTokens?: number }>;
+        usage?: Promise<{ inputTokens?: number; outputTokens?: number; totalTokens?: number }>;
+      };
+      const usage = normalizeUsage(
+        (finishPartUsage ?? usageFromFinish ?? (await usageSource.totalUsage) ?? (await usageSource.usage) ?? {}) as UsageShape,
+      );
+      const rawUsage = readUsageFromRaw(usage.raw);
+      const total = usage.totalTokens ?? rawUsage.totalTokens ?? 0;
+
+      let input = usage.inputTokens ?? rawUsage.inputTokens ?? 0;
+      let output = usage.outputTokens ?? rawUsage.outputTokens ?? 0;
+
+      if (total > 0 && input === 0 && output === 0) {
+        output = Math.min(total, estimateTokenCount(generatedText));
+        input = Math.max(0, total - output);
+      }
+
+      setInputTokens(input);
+      setOutputTokens(output);
+      setTotalTokens(total || rawUsage.totalTokens || input + output);
     } catch (e) {
       const error = e as Error;
-      setError(`## ⚠️ Error Encountered\n### ${error.message}`);
+      if (error.name !== "AbortError") {
+        setError(`## ⚠️ Error Encountered\n### ${error.message}`);
+      }
     } finally {
-      setStream(undefined);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
       generateLock.current = false;
     }
   }, [action, prompt]);
 
   useEffect(() => {
-    generateResponse();
+    if (hasStartedRef.current) {
+      return;
+    }
 
-    return () => {
-      if (stream) {
-        stream.controller.abort();
-      }
-    };
-  }, []);
+    hasStartedRef.current = true;
+    generateResponse();
+  }, [generateResponse]);
 
   useEffect(() => {
-    if (!stream && error.length === 0 && result.length > 0) {
+    if (!isStreaming && error.length === 0 && result.length > 0) {
       addHistoryItem({
         action: action!,
         timestamp: Date.now(),
@@ -106,7 +193,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
         },
       });
     }
-  }, [result, stream]);
+  }, [result, isStreaming]);
 
   let markdown = result;
   if (error.length > 0) {
@@ -119,7 +206,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
 
   return (
     <Detail
-      isLoading={stream !== undefined}
+      isLoading={isStreaming}
       markdown={markdown}
       navigationTitle={action.name}
       metadata={
@@ -135,10 +222,10 @@ export default function ExecuteAction({ action, prompt }: Props) {
       }
       actions={
         <ActionPanel>
-          {stream && <Action title="Stop generating..." icon={Icon.Stop} onAction={() => stream.controller.abort()} />}
+          {isStreaming && <Action title="Stop Generating…" icon={Icon.Stop} onAction={() => abortControllerRef.current?.abort()} />}
           <Action.CopyToClipboard title="Copy Result" content={result} />
           <Action.Paste title="Paste Result" content={result} />
-          {!stream && (
+          {!isStreaming && (
             <Action title="Regenerate" onAction={() => generateResponse()} icon={Icon.Redo} shortcut={Keyboard.Shortcut.Common.Refresh} />
           )}
         </ActionPanel>

@@ -1,12 +1,11 @@
-import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, open, showToast, Toast } from "@raycast/api";
-import { cache, deleteCache, downloadPicture } from "../utils/common-utils";
+import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
+import { cache, deleteCache, downloadPicture, openWallpaperFolder } from "../utils/common-utils";
 import PreviewRaycastWallpaper from "../preview-raycast-wallpaper";
 import { CacheKey, RAYCAST_WALLPAPER } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
 import { AppearancedWallpaper, RaycastWallpaperWithInfo } from "../types/types";
-import { setWallpaper } from "../utils/applescript-utils";
-import { picturesDirectory } from "../types/preferences";
+import { setWallpaper } from "../utils/platform-utils";
 import ActionStyle = Alert.ActionStyle;
 
 export function ActionOnRaycastWallpaper(props: {
@@ -18,7 +17,7 @@ export function ActionOnRaycastWallpaper(props: {
   const { index, raycastWallpapers, setRefresh, setSelectedItem } = props;
   const wallpaper = raycastWallpapers[index];
 
-  const actionAppearanceIcon = wallpaper.appearance == "light" ? Icon.Moon : Icon.Moon;
+  const actionAppearanceIcon = wallpaper.appearance == "light" ? Icon.Moon : Icon.Sun;
   const actionAppearanceTitle = wallpaper.appearance == "light" ? "Dark" : "Light";
   return (
     <ActionPanel>
@@ -40,9 +39,7 @@ export function ActionOnRaycastWallpaper(props: {
         icon={Icon.Finder}
         title={"Open Wallpaper Folder"}
         shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
-        onAction={async () => {
-          await open(picturesDirectory);
-        }}
+        onAction={openWallpaperFolder}
       />
 
       <ActionPanel.Section>
@@ -146,13 +143,13 @@ export function ActionOnRaycastWallpaper(props: {
             const options: Alert.Options = {
               icon: Icon.Trash,
               title: "Clear Picture Cache",
-              message: "Next time you enter the command, the pictures will be re-cached.",
+              message: "Wallpapers will be downloaded again when you set or download them.",
               primaryAction: {
                 title: "Confirm",
                 style: ActionStyle.Destructive,
-                onAction: () => {
-                  deleteCache();
-                  showToast(Toast.Style.Success, "Clear cache success!");
+                onAction: async () => {
+                  await deleteCache();
+                  await showToast(Toast.Style.Success, "Clear cache success!");
                 },
               },
             };

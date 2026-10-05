@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
 import { WebhookChannelModel } from "../interface/webhookModel";
 import { composeMessage } from "./sendMessage";
 import { removeWebhook } from "../api/webhookStorage";

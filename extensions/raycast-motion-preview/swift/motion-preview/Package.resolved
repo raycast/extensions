@@ -1,13 +1,13 @@
 {
-  "originHash" : "2102aab0c27741c0685602a71aa0da9cbde9b5fea5b2b5103cae347d608f0b3d",
+  "originHash" : "57f9947a55ea7b440d52ee0056a0dede7d187eb26b2f5b5bdfd0a3ce9c71d102",
   "pins" : [
     {
       "identity" : "extensions-swift-tools",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/raycast/extensions-swift-tools",
       "state" : {
-        "revision" : "72d4ac7bc5cc7e3fdf04fdce416b593ddfec8c00",
-        "version" : "1.0.4"
+        "revision" : "6e4c03232a3d713bc88940664a44e6bde6194900",
+        "version" : "1.0.5"
       }
     },
     {

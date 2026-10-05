@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { findFFmpegPath, checkFFmpegVersion } from "../utils/ffmpeg";
 import { useFFmpegInstaller } from "../hooks/useFFmpegInstaller";
 import fs from "fs";
+import { showFailureToast } from "@raycast/utils";
 
 interface HelloPageProps {
   onContinue: () => void;
@@ -82,16 +83,14 @@ export function HelloPage({ onContinue, lostFFmpegMessage }: HelloPageProps) {
         await LocalStorage.setItem("hasSeenHelloPage", "true");
         onContinue();
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "System FFmpeg not found",
           message: "Could not find system FFmpeg. Please try download option.",
         });
       }
     } catch (error) {
       console.error("Error setting up system FFmpeg:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Setup failed",
         message: "Could not setup system FFmpeg. Please try again.",
       });
@@ -158,16 +157,14 @@ export function HelloPage({ onContinue, lostFFmpegMessage }: HelloPageProps) {
         await LocalStorage.setItem("hasSeenHelloPage", "true");
         onContinue();
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Installation failed",
           message: "Could not install FFmpeg automatically. Please try specifying a custom path.",
         });
       }
     } catch (error) {
       console.error("Error during FFmpeg installation:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(String(error), {
         title: "Installation failed",
         message: "Could not install FFmpeg. Please try again or specify a custom path.",
       });
@@ -322,23 +319,19 @@ Enjoy using the converter!
 
           {/* Show additional context for lost FFmpeg scenario */}
           {isLostFFmpegScenario && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Specify Custom FFmpeg Path" icon={Icon.Gear} onAction={handleSpecifyCustomPath} />
           )}
 
           {/* Always show all three options */}
           {ffmpegStatus?.systemFound && primaryAction.title !== "Continue (Use System FFmpeg)" && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Continue (Use System FFmpeg)" icon={Icon.Checkmark} onAction={handleContinueWithSystem} />
           )}
 
           {primaryAction.title !== "Continue (Download FFmpeg)" && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Continue (Download FFmpeg)" icon={Icon.Download} onAction={handleDownloadFFmpeg} />
           )}
 
           {!isLostFFmpegScenario && !ffmpegStatus?.customValid && !ffmpegStatus?.customPath && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action title="Specify Custom FFmpeg Path" icon={Icon.Gear} onAction={handleSpecifyCustomPath} />
           )}
         </ActionPanel>

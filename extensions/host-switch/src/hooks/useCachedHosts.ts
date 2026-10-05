@@ -23,8 +23,8 @@ export function useCachedHosts() {
                 ...acc,
                 [key]: s[key],
               },
-        {}
-      )
+        {},
+      ),
     );
 
   return {

@@ -1,11 +1,12 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
 import * as tls from "tls";
-import { CertListView } from "./views/CertListView";
+import { CertificateView } from "./views/CertificateView";
 
 export default function Command() {
   const [certificate, setCertificate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCertificateChain, setShowCertificateChain] = useState(true);
   const handleSubmit = async (values: { url: string }) => {
     setCertificate(null);
     setIsLoading(true);
@@ -29,15 +30,38 @@ export default function Command() {
       const options = {
         host: parsedUrl.hostname,
         port: parsedUrl.port ? Number(parsedUrl.port) : 443,
+        servername: parsedUrl.hostname,
         rejectUnauthorized: false,
       };
 
       const socket = tls.connect(options, () => {
-        const cert = socket.getPeerCertificate();
+        const cert = socket.getPeerCertificate(showCertificateChain);
         if (cert) {
-          const raw = cert.raw;
-          const pem = `-----BEGIN CERTIFICATE-----\n${raw.toString("base64")}\n-----END CERTIFICATE-----`;
-          setCertificate(pem);
+          if (showCertificateChain && "issuerCertificate" in cert) {
+            // Handle certificate chain
+            const certChain: string[] = [];
+            let currentCert: tls.DetailedPeerCertificate = cert as tls.DetailedPeerCertificate;
+
+            while (currentCert && currentCert.raw) {
+              const pem = `-----BEGIN CERTIFICATE-----\n${currentCert.raw.toString("base64")}\n-----END CERTIFICATE-----`;
+              certChain.push(pem);
+              currentCert = currentCert.issuerCertificate;
+              // Avoid infinite loops by checking if we've reached self-signed root
+              if (
+                currentCert === cert ||
+                (currentCert && currentCert.fingerprint === currentCert.issuerCertificate?.fingerprint)
+              ) {
+                break;
+              }
+            }
+
+            setCertificate(certChain.join("\n\n"));
+          } else {
+            // Handle single certificate
+            const raw = cert.raw;
+            const pem = `-----BEGIN CERTIFICATE-----\n${raw.toString("base64")}\n-----END CERTIFICATE-----`;
+            setCertificate(pem);
+          }
         } else {
           showToast({
             style: Toast.Style.Failure,
@@ -78,7 +102,7 @@ export default function Command() {
               <Action.Push
                 icon={Icon.BulletPoints}
                 title="Show Certificate"
-                target={<CertListView certText={certificate} />}
+                target={<CertificateView certText={certificate} />}
               />
             </>
           )}
@@ -87,6 +111,12 @@ export default function Command() {
       }
     >
       <Form.TextField id="url" title="URL" placeholder="Enter URL (e.g., github.com)" />
+      <Form.Checkbox
+        id="showCertificateChain"
+        label="Show Certificate Chain"
+        value={showCertificateChain}
+        onChange={setShowCertificateChain}
+      />
       {certificate && <Form.TextArea id="certificate" title="Certificate" value={certificate} />}
     </Form>
   );

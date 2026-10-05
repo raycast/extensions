@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fan-control",
+  "title": "Fan Control",
+  "description": "View and control your Mac's fan RPM (Apple Silicon) via smctl.",
+  "icon": "icon.png",
+  "author": "samuelbelo",
+  "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "fans",
+      "title": "Control Fans",
+      "subtitle": "Fan Control",
+      "description": "List fans with live RPM and set manual speed or a profile.",
+      "mode": "view"
+    },
+    {
+      "name": "set-fan-speed",
+      "title": "Set Fan Speed",
+      "subtitle": "Fan Control",
+      "description": "Set a manual RPM target for all fans.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "rpm",
+          "type": "text",
+          "placeholder": "RPM (e.g. 4000)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "fans-auto",
+      "title": "Set Fans to Auto",
+      "subtitle": "Fan Control",
+      "description": "Return fan control to macOS (automatic mode).",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "smctlPath",
+      "type": "textfield",
+      "title": "Smctl Path",
+      "description": "Full path to the smctl binary. Leave empty to auto-detect (Homebrew locations).",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/smctl"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

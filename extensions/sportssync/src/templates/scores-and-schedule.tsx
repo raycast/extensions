@@ -3,6 +3,10 @@ import getScoresAndSchedule from "../utils/getSchedule";
 import sportInfo from "../utils/getSportInfo";
 import getCountryCode from "../utils/getF1RaceFlag";
 import Plays from "../views/playbyplay";
+import Baseball from "../views/boxscore/baseball";
+import Basketball from "../views/boxscore/basketball";
+import Football from "../views/boxscore/football";
+import Hockey from "../views/boxscore/hockey";
 import TeamDetail from "../views/teamDetail";
 
 interface DayItems {
@@ -170,6 +174,22 @@ export default function DisplayScoresAndSchedule() {
         }
         actions={
           <ActionPanel>
+            {currentLeague === "mlb" && currentSport === "baseball" && game?.status?.type?.state === "in" && (
+              <Action.Push title="View Box Score" icon={Icon.Building} target={<Baseball gameId={game.id} />} />
+            )}
+
+            {currentSport === "basketball" && game?.status?.type?.state === "in" && (
+              <Action.Push title="View Box Score" icon={Icon.Building} target={<Basketball gameId={game.id} />} />
+            )}
+
+            {currentSport === "football" && game?.status?.type?.state === "in" && (
+              <Action.Push title="View Box Score" icon={Icon.Building} target={<Football gameId={game.id} />} />
+            )}
+
+            {currentLeague === "nhl" && currentSport === "hockey" && game?.status?.type?.state === "in" && (
+              <Action.Push title="View Box Score" icon={Icon.Building} target={<Hockey gameId={game.id} />} />
+            )}
+
             {currentLeague !== "f1" &&
               currentSport !== "soccer" &&
               game?.competitions?.[0]?.status?.type?.state === "in" && (

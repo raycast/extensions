@@ -21,7 +21,7 @@ const useBookmarks = (selectedProfileId: string) => {
       setBookmarks(bookmarks);
       setFolders(Array.from(folders.values()));
       setLoading(false);
-    } catch (e) {
+    } catch {
       showToast(Toast.Style.Failure, "Error loading bookmarks", "Be sure to run Orion at least once.");
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ function parseBookmarks(items: OrionFavoriteItem[], folders: Map<string, string>
         uuid: oBookmark.id,
         title: oBookmark.title,
         // We've filtered out bookmarks without url by this point
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         url: oBookmark.url!,
         folders: folder ? [folder] : [],
         dateAdded: oBookmark.dateAdded,

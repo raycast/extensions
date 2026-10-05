@@ -1,5 +1,12 @@
 # Fix Link Embeds Changelog
 
+## [Update Embed Proxies] - 2026-07-16
+
+- Replace the Reddit proxy with `redditez` and support Reddit share links.
+- Fix the Reddit preference toggle.
+- Add Bluesky and Instagram Reels support.
+- Refresh the TikTok proxy.
+
 ## [Update] - 2024-09-18
 
 Changed `tiktxk` to `vxtiktok` as the previous proxy service stopped working.

@@ -1,5 +1,4 @@
 import { Action, Image, Keyboard, popToRoot } from "@raycast/api";
-import React from "react";
 import { getPreferPopToRootPreference, getPrimaryActionPreference, PrimaryAction } from "../common";
 
 export function GitLabOpenInBrowserAction(props: {
@@ -7,43 +6,37 @@ export function GitLabOpenInBrowserAction(props: {
   title?: string | undefined;
   shortcut?: Keyboard.Shortcut | undefined;
   icon?: Image.ImageLike;
-}): JSX.Element {
-  const afterOpen = async () => {
-    if (getPreferPopToRootPreference()) {
-      await popToRoot();
-    }
-  };
+}) {
   return (
     <Action.OpenInBrowser
       url={props.url}
       title={props.title}
-      shortcut={props.shortcut}
-      onOpen={afterOpen}
+      shortcut={props.shortcut ?? { modifiers: ["cmd"], key: "o" }}
+      onOpen={async () => {
+        if (getPreferPopToRootPreference()) {
+          await popToRoot();
+        }
+      }}
       icon={props.icon}
     />
   );
 }
 
-export function DefaultActions(props: {
-  action?: JSX.Element | undefined | null;
-  webAction?: JSX.Element | undefined | null;
-}): JSX.Element | null {
-  const action = props.action;
-  const webAction = props.webAction;
-  if (action || webAction) {
+export function DefaultActions(props: { action?: React.ReactNode; webAction?: React.ReactNode }) {
+  if (props.action || props.webAction) {
     if (getPrimaryActionPreference() === PrimaryAction.Detail) {
       return (
-        <React.Fragment>
-          {action}
-          {webAction}
-        </React.Fragment>
+        <>
+          {props.action}
+          {props.webAction}
+        </>
       );
     } else {
       return (
-        <React.Fragment>
-          {webAction}
-          {action}
-        </React.Fragment>
+        <>
+          {props.webAction}
+          {props.action}
+        </>
       );
     }
   }

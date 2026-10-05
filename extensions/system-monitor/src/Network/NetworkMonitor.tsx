@@ -1,55 +1,89 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 
 import { Actions } from "../components/Actions";
+import { bytesPerSecond } from "../lib/rate";
 import { formatBytes, isObjectEmpty } from "../utils";
 import { getNetworkData, getTopProcess } from "./NetworkUtils";
 
-export default function NetworkMonitor() {
+// Floor the sampling window so clock jitter between two nearly simultaneous
+// samples cannot inflate the derived rate.
+const MIN_ELAPSED_MS = 100;
+
+export default function NetworkMonitor({ isActive = false }: { isActive?: boolean }) {
   const prevProcess = useRef<{ [key: string]: number[] }>({});
-  const { data, isLoading, revalidate } = usePromise(async () => {
-    const currProcess = await getNetworkData();
-    let upload = 0;
-    let download = 0;
-    let processList: [string, number, number][] = [];
+  const prevSampleTime = useRef<number | null>(null);
+  const isActiveRef = useRef(isActive);
 
-    if (!isObjectEmpty(prevProcess.current)) {
-      for (const key in currProcess) {
-        let down = currProcess[key][0] - (key in prevProcess.current ? prevProcess.current[key][0] : 0);
+  useEffect(() => {
+    isActiveRef.current = isActive;
+    if (!isActive) {
+      prevProcess.current = {};
+      prevSampleTime.current = null;
+    }
+  }, [isActive]);
 
-        if (down < 0) {
-          down = 0;
+  const { data, isLoading, revalidate } = usePromise(
+    async () => {
+      const currProcess = await getNetworkData();
+
+      // nettop blocks for seconds; if the tab was deselected while it ran,
+      // discard the sample so stale counters never survive a deactivation reset.
+      if (!isActiveRef.current) {
+        return undefined;
+      }
+      // nettop blocks for one sample interval (multiple seconds on recent
+      // macOS), so rates are derived from the measured time between samples.
+      const now = Date.now();
+      const elapsedMs = prevSampleTime.current ? Math.max(now - prevSampleTime.current, MIN_ELAPSED_MS) : 0;
+      let upload = 0;
+      let download = 0;
+      let processList: [string, number, number][] = [];
+
+      if (!isObjectEmpty(prevProcess.current)) {
+        for (const key in currProcess) {
+          const prev = prevProcess.current[key];
+
+          // nettop counters are cumulative over a process's lifetime, so a
+          // process first seen in this sample has no baseline to subtract.
+          // Counting it would report its entire history as one interval's
+          // traffic, spiking the aggregate rate.
+          if (prev === undefined) {
+            continue;
+          }
+
+          const down = bytesPerSecond(currProcess[key][0] - prev[0], elapsedMs);
+          const up = bytesPerSecond(currProcess[key][1] - prev[1], elapsedMs);
+
+          download += down;
+          upload += up;
+          // Keys carry nettop's ".pid" suffix for identity; strip it for display.
+          processList.push([key.replace(/\.\d+$/, ""), down, up]);
         }
 
-        let up = currProcess[key][1] - (key in prevProcess.current ? prevProcess.current[key][1] : 0);
-
-        if (up < 0) {
-          up = 0;
-        }
-
-        download += down;
-        upload += up;
-
-        if (key in prevProcess.current) {
-          processList.push([key, down, up]);
-        }
+        processList = getTopProcess(processList);
       }
 
-      processList = getTopProcess(processList);
+      prevProcess.current = currProcess;
+      prevSampleTime.current = now;
+
+      return {
+        upload,
+        download,
+        processList,
+      };
+    },
+    [],
+    { execute: isActive },
+  );
+
+  useInterval(() => {
+    if (isActive && !isLoading) {
+      revalidate();
     }
-
-    prevProcess.current = currProcess;
-
-    return {
-      upload,
-      download,
-      processList,
-    };
-  });
-
-  useInterval(revalidate, 1000);
+  }, 1000);
 
   return (
     <List.Item
@@ -58,12 +92,16 @@ export default function NetworkMonitor() {
       icon={Icon.Network}
       accessories={[
         {
-          text: data ? `↓ ${formatBytes(data.download)}/s ↑ ${formatBytes(data.upload)}/s` : "Loading…",
+          text: data
+            ? `↓ ${formatBytes(data.download)}/s ↑ ${formatBytes(data.upload)}/s`
+            : isActive
+              ? "Loading…"
+              : "—",
         },
       ]}
       detail={
         <List.Item.Detail
-          isLoading={isLoading}
+          isLoading={isLoading && !data}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label

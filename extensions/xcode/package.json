@@ -9,7 +9,6 @@
   "contributors": [
     "qeude",
     "oliep",
-    "kiliankoe",
     "3llomi",
     "ridemountainpig"
   ],
@@ -682,7 +681,7 @@
     "plist": "^3.0.6",
     "tildify": "^3.0.0",
     "untildify": "^4.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@types/dedent": "^0.7.0",
@@ -702,5 +701,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

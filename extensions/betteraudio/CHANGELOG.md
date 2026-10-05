@@ -1,0 +1,19 @@
+# Changelog
+
+## [Fix] - 2026-10-01
+
+- Fixed `Manage Apps` crashing with `TypeError: n?.get is not a function` when loaded from cache: the app path lookup is now a plain record (which survives the cache's JSON round-trip) instead of a `Map`.
+
+## [Initial Release] - 2026-05-21
+
+### Added
+
+- Initial BetterAudio integration for Raycast via the `betteraudio` CLI.
+- 17 Raycast commands covering system volume, device switching, per-app audio control, media controls, Bluetooth device status, profiles, panel toggle, and extension status.
+- `Manage Apps` command for per-app volume, mute, EQ, and device routing.
+- `List Devices` and `Cycle Output Device` commands for output device management.
+- Volume commands for setting volume, stepping volume up/down, toggling mute, and toggling silent mode.
+- Media commands for now playing, play/pause, next track, and previous track.
+- `Apply Profile`, `Bluetooth Devices`, `Status`, and `Toggle Panel` commands.
+- Persistent `Menu Bar` command with periodic refresh.
+- Extension preference for overriding the BetterAudio CLI path when auto-detection is not enough.

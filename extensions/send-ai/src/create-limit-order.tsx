@@ -97,7 +97,7 @@ function CreateLimitOrder() {
         {
           inputMint: tokenAddress,
         },
-        true,
+        false,
         1000 * 60,
       );
 
@@ -123,6 +123,9 @@ function CreateLimitOrder() {
 
   const handleCreateLimitOrder = useCallback(
     async (values: LimitOrderRequest) => {
+      if (isLoading) {
+        return;
+      }
       try {
         setIsLoading(true);
 

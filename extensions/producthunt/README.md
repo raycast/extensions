@@ -1,42 +1,26 @@
 # Product Hunt for Raycast
 
-Browse and discover the latest products on Product Hunt directly from Raycast.
+Browse and discover the latest products on Product Hunt directly from Raycast, powered by Product Hunt's official API.
 
 ## Features
 
-- View today's featured product launches
-- See detailed product information including descriptions, votes, and comments
-- Browse product galleries with image and video support
-- Navigate through product details, makers, and topics
-- View previous launches of products
-- Copy product links in various formats
-- Open products directly in your browser
+- View today's featured product launches with votes, comments, makers, and topics
+- See detailed product information including descriptions and galleries
+- When signed in: your upvote state (▲ / △) on each launch, review star ratings, daily/weekly/monthly/yearly rank, maker-reply counts, and topic follower counts
+- Open launches directly in your browser
+- Works without setup via a limited public feed of recent launches, or sign in with Product Hunt to unlock full data
 
-## Commands
+## Sign in with Product Hunt
 
-- **View Today's Featured Products** - Browse the latest products featured on Product Hunt's homepage
+By default the extension shows a **limited public feed** of recent launches (names, taglines, and links only). To see today's true featured set and unlock votes, comments, makers, thumbnails, review ratings, ranks, and your own upvotes, **sign in with Product Hunt**:
 
-## Tools
+1. Open **View Today's Featured Products**.
+2. Run the **Sign in to Product Hunt** action (in the toast, the empty view, or an item's **Account** section).
+3. Approve access in your browser. One sign-in unlocks everything.
 
-- **Get Today's Featured Products** - AI command to quickly fetch the latest products from Product Hunt
+The extension uses Product Hunt's [official OAuth (PKCE) flow](https://api.producthunt.com/v2/docs#pkce) — nothing to copy, and no secret is stored on your machine. Sign out any time from an item's **Account** section. If a sign-in is ever rejected, use **Sign in Again**.
 
-## How to Use
+## Notes
 
-1. Launch Raycast and select "View Today's Featured Products"
-2. Browse through the list of today's featured products
-3. Click on a product to view detailed information
-4. Use the action menu to:
-   - Open the product in your browser
-   - Copy the product link
-   - View the product gallery
-   - Explore related topics
-   - Learn about the makers
-
-## Keyboard Shortcuts
-
-- `↑/↓` - Navigate between products
-- `→` or `Return` - View product details
-- `⌘+[` - Return to featured products list
-- `⌘+G` - View product gallery (when available)
-- `⌘+L` - Copy product link
-- `⌘+⇧+P` - View previous launches (when available)
+- When signed in, the "today" boundary follows Product Hunt's Pacific launch day, so the list matches the site. Signed out, the public feed shows the most recent launches (which may span more than one day).
+- Results are briefly cached to stay within Product Hunt's API rate limits; use **Refresh** to force-fetch.

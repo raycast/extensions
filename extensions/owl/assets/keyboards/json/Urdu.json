@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "۱",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "۲",
+        "upper": "٫"
+    },
+    "Digit3": {
+        "lower": "۳",
+        "upper": "؍"
+    },
+    "Digit4": {
+        "lower": "۴",
+        "upper": "ء"
+    },
+    "Digit5": {
+        "lower": "۵",
+        "upper": "ي"
+    },
+    "Digit6": {
+        "lower": "۶",
+        "upper": "ﷺ"
+    },
+    "Digit7": {
+        "lower": "۷",
+        "upper": "ٴ"
+    },
+    "Digit8": {
+        "lower": "۸",
+        "upper": "ٰ"
+    },
+    "Digit9": {
+        "lower": "۹",
+        "upper": ")"
+    },
+    "Digit0": {
+        "lower": "۰",
+        "upper": "("
+    },
+    "Minus": {
+        "lower": "أ",
+        "upper": "ّ"
+    },
+    "Equal": {
+        "lower": "ؤ",
+        "upper": "ۂ"
+    },
+    "KeyQ": {
+        "lower": "ق",
+        "upper": "ْ"
+    },
+    "KeyW": {
+        "lower": "و",
+        "upper": "ؐ"
+    },
+    "KeyE": {
+        "lower": "ع",
+        "upper": "ؑ"
+    },
+    "KeyR": {
+        "lower": "ر",
+        "upper": "ڑ"
+    },
+    "KeyT": {
+        "lower": "ت",
+        "upper": "ٹ"
+    },
+    "KeyY": {
+        "lower": "ے",
+        "upper": "؁"
+    },
+    "KeyU": {
+        "lower": "ئ",
+        "upper": "ٗ"
+    },
+    "KeyI": {
+        "lower": "ی",
+        "upper": "ٰ"
+    },
+    "KeyO": {
+        "lower": "ہ",
+        "upper": "ة"
+    },
+    "KeyP": {
+        "lower": "پ",
+        "upper": "ُ"
+    },
+    "BracketLeft": {
+        "lower": "[",
+        "upper": "‘"
+    },
+    "BracketRight": {
+        "lower": "]",
+        "upper": "’"
+    },
+    "KeyA": {
+        "lower": "ا",
+        "upper": "ٓ"
+    },
+    "KeyS": {
+        "lower": "س",
+        "upper": "ص"
+    },
+    "KeyD": {
+        "lower": "د",
+        "upper": "ڈ"
+    },
+    "KeyF": {
+        "lower": "ف",
+        "upper": "ٖ"
+    },
+    "KeyG": {
+        "lower": "گ",
+        "upper": "غ"
+    },
+    "KeyH": {
+        "lower": "ھ",
+        "upper": "ح"
+    },
+    "KeyJ": {
+        "lower": "ج",
+        "upper": "ض"
+    },
+    "KeyK": {
+        "lower": "ک",
+        "upper": "خ"
+    },
+    "KeyL": {
+        "lower": "ل",
+        "upper": "ؒ"
+    },
+    "Semicolon": {
+        "lower": "؛",
+        "upper": ":"
+    },
+    "Quote": {
+        "lower": ".",
+        "upper": "\""
+    },
+    "Backquote": {
+        "lower": "ٍ",
+        "upper": "ً"
+    },
+    "Backslash": {
+        "lower": "؎",
+        "upper": "ؔ"
+    },
+    "KeyZ": {
+        "lower": "ز",
+        "upper": "ذ"
+    },
+    "KeyX": {
+        "lower": "ش",
+        "upper": "ژ"
+    },
+    "KeyC": {
+        "lower": "چ",
+        "upper": "ث"
+    },
+    "KeyV": {
+        "lower": "ط",
+        "upper": "ظ"
+    },
+    "KeyB": {
+        "lower": "ب",
+        "upper": "ؓ"
+    },
+    "KeyN": {
+        "lower": "ن",
+        "upper": "ں"
+    },
+    "KeyM": {
+        "lower": "م",
+        "upper": "آ"
+    },
+    "Comma": {
+        "lower": "،",
+        "upper": "ِ"
+    },
+    "Period": {
+        "lower": "۔",
+        "upper": "َ"
+    },
+    "Slash": {
+        "lower": "ْ",
+        "upper": "؟"
+    }
+}

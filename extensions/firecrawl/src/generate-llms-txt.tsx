@@ -23,7 +23,7 @@ export default function Command() {
     setIsLoading(true);
     try {
       const maxUrls = Math.min(parseInt(values.maxUrls) || 10, 100);
-      const result = await firecrawl.generateLLMsText(values.url, {
+      const result = await firecrawl.v1.generateLLMsText(values.url, {
         showFullText: values.showFullText,
         maxUrls,
       });

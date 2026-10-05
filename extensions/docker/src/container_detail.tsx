@@ -64,9 +64,13 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo?.State.Running === true && (
             <Action
               title="Stop Container"
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+              shortcut={{
+                macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
+                windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+              }}
               onAction={withToast({
                 action: () => stopContainer(containerInfo),
+                onStart: () => `Stopping container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} stopped`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -76,9 +80,13 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
             <Action
               title="Restart Container"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ['opt'], key: 'r' }}
+              shortcut={{
+                macOS: { modifiers: ['opt'], key: 'r' },
+                windows: { modifiers: ['alt'], key: 'r' },
+              }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
+                onStart: () => `Restarting container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} restarted`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -87,9 +95,13 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo?.State.Running === false && (
             <Action
               title="Start Container"
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+              shortcut={{
+                macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
+                windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+              }}
               onAction={withToast({
                 action: () => startContainer(containerInfo),
+                onStart: () => `Starting container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} started`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -107,6 +119,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                   await removeContainer(containerInfo);
                   pop();
                 },
+                onStart: () => `Removing container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -124,6 +137,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                   await stopAndRemoveContainer(containerInfo);
                   pop();
                 },
+                onStart: () => `Stopping and removing container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} stopped and removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}

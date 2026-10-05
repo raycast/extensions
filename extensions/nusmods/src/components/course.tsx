@@ -1,56 +1,24 @@
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import * as z from "@zod/mini";
-import { useCallback } from "react";
-import { API_BASE_URL, WEBSITE_BASE_URL } from "../utils/constants";
+import * as z from "zod/mini";
 import { generateMarkdown } from "../utils/markdown";
-import { CourseDetailsSchema, CourseSummary } from "../utils/nusmods";
+import {
+  CourseDetails,
+  CourseDetailsSchema,
+  CourseSummary,
+  getModuleDetailApiUrl,
+  getModuleWebUrl,
+} from "../utils/nusmods";
+import { ReviewList } from "./review";
 
 const CourseDetail: React.FC<{
   moduleCode: string;
   acadYear: string;
 }> = (props) => {
-  const parseResponse = useCallback(async (res: Response) => {
-    if (!res.ok) {
-      console.error("Failed to fetch course details:", res.status, res.statusText);
-      showToast({
-        title: "Failed to fetch course details",
-        message: "Please try again later.",
-        style: Toast.Style.Failure,
-      });
-      return null;
-    }
-
-    const data = await res.json();
-    if (!data) {
-      console.error("Failed to unmarshal course details");
-      showToast({
-        title: "Failed to unmarshal course details",
-        message: "Please try again later.",
-        style: Toast.Style.Failure,
-      });
-      return null;
-    }
-
-    const parseResult = await CourseDetailsSchema.safeParseAsync(data);
-    if (!parseResult.success) {
-      console.error(z.prettifyError(parseResult.error));
-      showToast({
-        title: "Validation error",
-        message: "Unexpected course details data received from NUSMods API, please report this issue.",
-        style: Toast.Style.Failure,
-      });
-      return null;
-    }
-
-    return parseResult.data;
-  }, []);
-
-  const { isLoading, data, error } = useFetch(`${API_BASE_URL}/${props.acadYear}/modules/${props.moduleCode}.json`, {
-    parseResponse,
+  const nusModsUrl = getModuleWebUrl(props.moduleCode);
+  const { isLoading, data, error } = useFetch(getModuleDetailApiUrl(props.acadYear, props.moduleCode), {
+    parseResponse: parseCourseDetailsResponse,
   });
-
-  const nusModsUrl = `${WEBSITE_BASE_URL}/courses/${props.moduleCode}`;
 
   return (
     <Detail
@@ -58,9 +26,22 @@ const CourseDetail: React.FC<{
       navigationTitle={props.moduleCode}
       markdown={error || !data ? "Unable to load course details." : generateMarkdown(data)}
       actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={nusModsUrl} />
-        </ActionPanel>
+        !data ? undefined : (
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open in NUSMods" url={nusModsUrl} />
+            <Action.Push
+              title="View Reviews & Comments"
+              icon={Icon.SpeechBubble}
+              target={<ReviewList courseDetail={data} />}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Module Code"
+              content={data.moduleCode}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          </ActionPanel>
+        )
       }
       metadata={
         error || !data ? undefined : (
@@ -83,6 +64,8 @@ const CourseDetail: React.FC<{
             )}
             <Detail.Metadata.Separator />
             <Detail.Metadata.Link title="Open in NUSMods" target={nusModsUrl} text="NUSMods" />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Reviews" text="Press ⌘R to view" icon={{ source: Icon.SpeechBubble }} />
           </Detail.Metadata>
         )
       }
@@ -122,3 +105,39 @@ export const CourseSummaryList: React.FC<{
     ))
   );
 };
+
+async function parseCourseDetailsResponse(res: Response): Promise<CourseDetails | null> {
+  if (!res.ok) {
+    console.error("Failed to fetch course details:", res.status, res.statusText);
+    showToast({
+      title: "Failed to fetch course details",
+      message: "Please try again later.",
+      style: Toast.Style.Failure,
+    });
+    return null;
+  }
+
+  const data = await res.json();
+  if (!data) {
+    console.error("Failed to unmarshal course details");
+    showToast({
+      title: "Failed to unmarshal course details",
+      message: "Please try again later.",
+      style: Toast.Style.Failure,
+    });
+    return null;
+  }
+
+  const parseResult = await CourseDetailsSchema.safeParseAsync(data);
+  if (!parseResult.success) {
+    console.error(z.prettifyError(parseResult.error));
+    showToast({
+      title: "Validation error",
+      message: "Unexpected course details data received from NUSMods API, please report this issue.",
+      style: Toast.Style.Failure,
+    });
+    return null;
+  }
+
+  return parseResult.data;
+}

@@ -98,7 +98,7 @@
       "subtitle": "Laravel Herd",
       "description": "Opens the database of your most recent site.",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "open-recent-site-tinker",
@@ -114,7 +114,7 @@
       "subtitle": "Laravel Herd",
       "description": "Opens the Log Viewer for your most recent site.",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "open-docs",
@@ -157,5 +157,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

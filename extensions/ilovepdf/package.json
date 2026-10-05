@@ -170,7 +170,7 @@
     }
   ],
   "dependencies": {
-    "@ilovepdf/ilovepdf-nodejs": "^0.2.5",
+    "@ilovepdf/ilovepdf-nodejs": "^0.3.1",
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.15.0",
     "magic-bytes.js": "^1.10.0"

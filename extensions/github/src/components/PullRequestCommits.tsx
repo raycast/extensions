@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
-import { useMemo } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestCommitFieldsFragment } from "../generated/graphql";
@@ -16,36 +15,36 @@ type PullRequestCommitsProps = {
 export default function PullRequestCommits({ pullRequest }: PullRequestCommitsProps) {
   const { github } = getGitHubClient();
 
-  const { data, isLoading } = useCachedPromise(
-    async (pullRequest) => {
-      const commits = await github.pullRequestCommits({ nodeId: pullRequest.id });
-      return commits.node as PullRequestCommitFieldsFragment;
-    },
+  const { data, isLoading, pagination } = useCachedPromise(
+    (pullRequest) =>
+      async ({ cursor }) => {
+        const result = await github.pullRequestCommits({
+          nodeId: pullRequest.id,
+          numberOfItems: 25,
+          before: cursor,
+        });
+        const pullRequestWithCommits = result.node as PullRequestCommitFieldsFragment;
+        const commits = pullRequestWithCommits.commits.nodes?.filter((node) => node != null) ?? [];
+        commits.sort((a, b) => {
+          const dateA = a.commit.authoredDate;
+          const dateB = b.commit.authoredDate;
+          return compareDesc(new Date(dateA), new Date(dateB));
+        });
+
+        return {
+          data: commits,
+          hasMore: pullRequestWithCommits.commits.pageInfo.hasPreviousPage,
+          cursor: pullRequestWithCommits.commits.pageInfo.startCursor ?? undefined,
+        };
+      },
     [pullRequest],
   );
 
-  const sortedCommits = useMemo(() => {
-    const commits = data?.commits?.nodes;
-
-    if (commits) {
-      commits.sort((a, b) => {
-        const dateA = a?.commit?.authoredDate;
-        const dateB = b?.commit?.authoredDate;
-
-        return dateA && dateB ? compareDesc(new Date(dateA), new Date(dateB)) : 0;
-      });
-    }
-
-    return commits;
-  }, [data]);
+  const commits = [...new Map((data ?? []).map((node) => [node.commit.id, node])).values()];
 
   return (
-    <List navigationTitle={`#${pullRequest.number} Commits`} isLoading={isLoading}>
-      {sortedCommits?.map((node) => {
-        if (!node) {
-          return null;
-        }
-
+    <List navigationTitle={`#${pullRequest.number} Commits`} isLoading={isLoading} pagination={pagination}>
+      {commits.map((node) => {
         const commit = node.commit;
         const date = new Date(commit.authoredDate);
 

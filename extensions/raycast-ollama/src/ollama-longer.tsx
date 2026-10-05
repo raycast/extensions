@@ -2,13 +2,12 @@ import { getPreferenceValues } from "@raycast/api";
 import { Creativity } from "./lib/enum";
 import { OllamaApiModelCapability } from "./lib/ollama/enum";
 import { CommandAnswer } from "./lib/settings/enum";
-import { Preferences } from "./lib/types";
 import { AnswerView } from "./lib/ui/AnswerView/main";
 
-const pref = getPreferenceValues<Preferences>();
+const pref = getPreferenceValues<Preferences.OllamaLonger>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-export default function Command(): JSX.Element {
+export default function Command(): React.JSX.Element {
   const c = CommandAnswer.LONGER;
   const p = `Act as a professional content writer tasked with expanding a client's text while maintaining its essence and style. (replyWithRewrittenText)
 
@@ -29,6 +28,7 @@ Expanded text:`;
       prompt={p}
       creativity={Creativity.Low}
       capabilities={[OllamaApiModelCapability.COMPLETION]}
+      autoReplace={pref.ollamaAutoReplace}
     />
   );
 }

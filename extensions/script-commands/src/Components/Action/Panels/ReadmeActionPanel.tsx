@@ -6,7 +6,7 @@ import { ActionPanel, OpenInBrowserAction } from "@raycast/api";
 
 import { readmeNormalURL } from "@urls";
 
-import { ShortcutConstants } from "@constants";
+import { ShortcutConstants } from "Const";
 
 type Props = {
   group: CompactGroup;

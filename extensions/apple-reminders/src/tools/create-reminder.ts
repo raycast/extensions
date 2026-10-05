@@ -1,6 +1,8 @@
+import type { Tool } from "@raycast/api";
 import { createReminder } from "swift:../../swift/AppleReminders";
 
-import { Frequency } from "../create-reminder";
+import type { Frequency } from "../create-reminder";
+import { getRecurrenceConfirmationInfo, normalizeReminderToolInput } from "../helpers/reminder-tools";
 
 type Input = {
   /**
@@ -12,13 +14,17 @@ type Input = {
    */
   notes?: string;
   /**
-   * The due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user didn't include a specific time, assume it's a full day reminder.
+   * Optional due date. Only include this when the user explicitly asks for a date, day, time, or schedule, such as "today", "tomorrow", "tonight", "this weekend", "next week", "in 3 days", "end of day", or an explicit clock time. Omit this for title-only, Inbox, Backlog, or generic capture reminders. Must include a calendar date when present. Use YYYY-MM-DD for full-day reminders or ISO with time (YYYY-MM-DDTHH:mm:ss.sssZ). Time-only values (e.g. "10:00:00") are invalid and will fail. When the user mentions a time-of-day word with a date or day, use sensible defaults for that timeframe (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user includes a date but didn't include a specific time, assume it's a full day reminder.
    */
   dueDate?: string;
   /**
-   * The priority level. Only pick the value from this list: "low", "medium", "high". Use the "high" priority if the task text specifies a word such as "urgent", "important", or an exclamation mark.
+   * Optional priority level. Only include this when the user explicitly asks for a priority or uses wording such as "urgent", "important", or an exclamation mark. Never default unspecified reminders to "low". Only pick the value from this list: "low", "medium", "high".
    */
-  priority?: string;
+  priority?: "low" | "medium" | "high";
+  /**
+   * Optional tags for the reminder. A comma-separated or space-separated list of tags (e.g. "work, urgent" or "#work #urgent").
+   */
+  tags?: string;
   /**
    * The list ID to add the reminder to. Note that the user can prepend the "#" or "@" symbols to list names, for example, "#work" or "@work".
    */
@@ -36,11 +42,17 @@ type Input = {
    */
   radius?: number;
   /**
+   * Optional URL / link attached to the reminder.
+   */
+  url?: string;
+  /**
    * The recurrence settings.
+   * Only include this when the user explicitly asks for a repeating reminder (for example: "every day", "weekly", "monthly", "yearly", "weekdays", or "weekends").
+   * Omit this for normal one-off reminders, including title-only, Inbox, Backlog, or generic capture reminders.
    */
   recurrence?: {
     /**
-     * Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".
+     * Recurrence frequency. Only pick the value from this list: "daily", "weekdays", "weekends", "weekly", "monthly", "yearly".
      */
     frequency: Frequency;
     /**
@@ -54,11 +66,17 @@ type Input = {
   };
 };
 
-export default async function (input: Input) {
-  if (input.dueDate && input.dueDate.includes("T")) {
-    input.dueDate = new Date(input.dueDate).toISOString();
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.recurrence) {
+    return undefined;
   }
 
-  const reminder = await createReminder(input);
-  return reminder;
+  return {
+    message: `Create a recurring reminder for "${input.title}"?`,
+    info: getRecurrenceConfirmationInfo(input.recurrence, input.dueDate),
+  };
+};
+
+export default async function (input: Input) {
+  return createReminder(normalizeReminderToolInput(input));
 }

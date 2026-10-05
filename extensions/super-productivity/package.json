@@ -1,0 +1,203 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "super-productivity",
+  "engines": {
+    "node": ">=20"
+  },
+  "description": "Manage Super Productivity tasks, projects, tags, and time tracking from Raycast.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.9"
+  },
+  "icon": "icon.png",
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Base URL for the Super Productivity Local REST API",
+      "type": "textfield",
+      "required": false,
+      "default": "http://127.0.0.1:3876",
+      "placeholder": "http://127.0.0.1:3876"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Access Token for the Super Productivity Local REST API (optional)",
+      "type": "password",
+      "required": false,
+      "placeholder": "xXX...XXX"
+    }
+  ],
+  "commands": [
+    {
+      "mode": "menu-bar",
+      "name": "menu-bar",
+      "title": "Show Task in Menu Bar",
+      "description": "Show currently tracked task and elapsed time in the menu bar",
+      "subtitle": "Super Productivity",
+      "interval": "1m"
+    },
+    {
+      "mode": "view",
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "Browse, search, and manage tasks across projects",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "tasks",
+        "list",
+        "search",
+        "manage",
+        "all",
+        "focus",
+        "pomodoro",
+        "auto-focus"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-today",
+      "title": "Today's Tasks",
+      "description": "View and manage tasks in Super Productivity's Today list",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "today",
+        "daily",
+        "agenda",
+        "plan"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Quickly create a new task with project and tags",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "new",
+        "add",
+        "todo",
+        "make"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "current-task",
+      "title": "Current Task",
+      "description": "View, start, and stop task tracking",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "now",
+        "active",
+        "tracking",
+        "timer",
+        "stop",
+        "focus",
+        "pomodoro",
+        "auto-focus"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "quick-add",
+      "title": "Quick Add Task",
+      "description": "Create a task from natural language — +project #tag @tomorrow 30m",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "add",
+        "new",
+        "create",
+        "fast",
+        "quick"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-scheduled",
+      "title": "Scheduled Tasks",
+      "description": "View tasks grouped by due date — overdue, today, tomorrow, this week, and later",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "due",
+        "calendar",
+        "upcoming",
+        "deadline",
+        "schedule"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-archived",
+      "title": "Archived Tasks",
+      "description": "Browse archived tasks and restore them",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "archive",
+        "restore",
+        "history",
+        "trash",
+        "recover"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-tags",
+      "title": "Manage Tags",
+      "description": "Create, view, and delete tags for organizing tasks",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "label",
+        "category",
+        "organize",
+        "hashtag"
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-projects",
+      "title": "Browse Projects",
+      "description": "Browse projects and view their tasks",
+      "subtitle": "Super Productivity",
+      "keywords": [
+        "projects",
+        "browse",
+        "folder",
+        "backlog"
+      ]
+    }
+  ],
+  "title": "Super Productivity",
+  "author": "pvnkmnk",
+  "contributors": ["xmok",
+    "Man17"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}

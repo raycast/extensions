@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-highlights",
+  "title": "YouTube Highlights",
+  "description": "Capture and manage highlights from YouTube videos with timestamps",
+  "icon": "extension-icon-big.png",
+  "author": "itskofio",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-highlight",
+      "title": "Create Highlight",
+      "description": "Capture a highlight from the active YouTube video",
+      "mode": "view"
+    },
+    {
+      "name": "search-videos",
+      "title": "Search Videos",
+      "description": "Search highlights grouped by video",
+      "mode": "view"
+    },
+    {
+      "name": "view-highlights",
+      "title": "View Recent Highlights",
+      "description": "View all highlights in reverse chronological order",
+      "mode": "view"
+    },
+    {
+      "name": "sign-in",
+      "title": "Sign In",
+      "description": "Sign in to your account",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Backup / Sync",
+      "description": "Manage highlight synchronization",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "highlightDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Highlight Duration",
+      "description": "Duration in seconds to capture before the current time (default: 30)",
+      "default": "30"
+    },
+    {
+      "name": "checkArc",
+      "type": "checkbox",
+      "required": false,
+      "label": "Enable Arc Browser",
+      "description": "Check for YouTube videos in Arc",
+      "default": true
+    },
+    {
+      "name": "showNoteInput",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show note input after highlight",
+      "description": "Prompt for a note after creating a highlight",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.17.0",
+    "jwt-decode": "^4.0.0",
+    "run-applescript": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "dev:clean": "pkill -f \"ray develop\" || true && npm run dev",
+    "dev:probe": "pkill -f \"ray develop\" || true && DEBUG_PROBE_MODE=true DEBUG_PROBE_TIMEOUT=15000 npm run dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

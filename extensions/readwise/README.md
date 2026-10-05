@@ -1,11 +1,18 @@
 # Readwise
 
-Raycast extension to search and browser your [Readwise library](https://readwise.io/).
+Raycast extension to search and browse your [Readwise library](https://readwise.io/).
 
 ## Features
 
 - Search recent Highlights
 - Search recent entries of your Readwise Library (books, articles, ...)
+- Ask Readwise in Raycast AI to browse your library and summarize saved highlights and notes.
+
+## Ask Readwise
+
+Open **Ask Readwise** in Raycast, or mention `@readwise` in AI Chat. Requires Raycast Pro
+and your Readwise API token. For example, ask "Summarize my highlights from Deep Work"
+or "Show the articles in my library".
 
 ## Configuration
 

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { ArtistObject } from "../helpers/spotify.api";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
@@ -7,6 +7,7 @@ import { TracksList } from "./TracksList";
 import { FooterAction } from "./FooterAction";
 import { StartRadioAction } from "./StartRadioAction";
 import { PlayAction } from "./PlayAction";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type ArtistActionPanelProps = {
   title: string;
@@ -26,6 +27,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
           icon={Icon.AppWindowGrid3x3}
           title="Show Albums"
           target={<AlbumsGrid albums={albums} title={artist.name} />}
+          shortcut={ShowContent}
         />
       )}
       {artistTopTracksData && (
@@ -33,6 +35,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
           icon={Icon.List}
           title="Show Popular Songs"
           target={<TracksList tracks={artistTopTracksData.tracks} />}
+          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         />
       )}
       <StartRadioAction artistId={artist.id} />

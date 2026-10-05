@@ -1,0 +1,287 @@
+   -    \    |    /    -    \    |    /    -    \                                                                                                                         Name                                  Id                              Version     Match    Source
+--------------------------------------------------------------------------------------------------
+My Git                                9NLVK2SL2SSP                    Unknown              msstore
+Git                                   Git.Git                         2.54.0               winget
+Git                                   Git.Git.PreRelease              2.52.0-rc2           winget
+Git                                   Microsoft.Git                   2.54.0.0.2           winget
+GitTop                                AmarBego.GitTop                 0.5.3       Tag: git winget
+OffGitx64                             Andrea.OffGitx64                1.0.0       Tag: git winget
+RepoZ                                 AndreasWascher.RepoZ            5.5         Tag: git winget
+Araxis Merge                          Araxis.Merge                    2025.1      Tag: git winget
+Sourcetree                            Atlassian.Sourcetree            3.4.31      Tag: git winget
+GitKraken                             Axosoft.GitKraken               12.2.0      Tag: git winget
+Betterleaks                           Betterleaks.Betterleaks         1.4.1       Tag: git winget
+Keeply                                Boy1690.Keeply                  1.0.13      Tag: git winget
+Pier-X                                Chenqi92.PierX                  0.5.3       Tag: git winget
+Commitly                              Commitly.Commitly               1.1.2       Tag: git winget
+DirectCompare                         DirectCompare.DirectCompare     1.09.0      Tag: git winget
+中文Git                               DuckStudio.ChineseGit           3.4         Tag: git winget
+Flutter GitUI                         FlutterGitUI.FlutterGitUI       0.1.0       Tag: git winget
+Fork - a fast and friendly git client Fork.Fork                       2.20.1      Tag: git winget
+GLab                                  GLab.GLab                       1.102.0     Tag: git winget
+Git Credential Manager (User)         Git.GCM                         2.8.0       Tag: git winget
+MinGit                                Git.MinGit                      2.54.0      Tag: git winget
+BusyBox-based MinGit                  Git.MinGit.BusyBox              2.52.0      Tag: git winget
+GitButler                             GitButler.GitButler             0.20.0      Tag: git winget
+Git Extensions                        GitExtensionsTeam.GitExtensions 6.0.5.18375 Tag: git winget
+GitHub Desktop                        GitHub.GitHubDesktop            3.5.12      Tag: git winget
+GitHub Desktop Beta                   GitHub.GitHubDesktop.Beta       3.5.5-beta2 Tag: git winget
+Git LFS                               GitHub.GitLFS                   3.7.1       Tag: git winget
+GitHub CLI                            GitHub.cli                      2.93.0      Tag: git winget
+git-sizer                             GitHub.git-sizer                1.5.0       Tag: git winget
+smimesign                             GitHub.smimesign                0.2.0       Tag: git winget
+GitTools GitVersion                   GitTools.GitVersion             6.7.0       Tag: git winget
+GitTower GitFlowNext                  GitTower.GitFlowNext            1.0.0       Tag: git winget
+Gitleaks                              Gitleaks.Gitleaks               8.30.1      Tag: git winget
+EnsoAI                                J3n5en.EnsoAI                   0.2.42      Tag: git winget
+jreleaser                             JReleaser.jreleaser             1.24.0      Tag: git winget
+Oh My Posh                            JanDeDobbeleer.OhMyPosh         29.14.0     Tag: git winget
+lazygit                               JesseDuffield.lazygit           0.62.2      Tag: git winget
+GitClient (EAP)                       JetBrains.GitClient.EAP         253.7267    Tag: git winget
+JetBrains Space                       JetBrains.Space                 2023.1.7    Tag: git winget
+Qit                                   Kaminolabs.Qit                  1.0.0       Tag: git winget
+TGit                                  MarkJamesHoward.TGit            1.2.0       Tag: git winget
+Gittyup                               Murmele.Gittyup                 1.4.0       Tag: git winget
+gitty                                 Omibranch.Gitty                 2.2.1       Tag: git winget
+gitch                                 Orzazade.Gitch                  1.2.1       Tag: git winget
+GitBlade                              Pirinel.GitBlade                00.00.8.9   Tag: git winget
+ChunkyMonkey                          Pwlot.ChunkyMonkey              0.7.0       Tag: git winget
+copia-cli                             Qubernetic.copia-cli            1.1.2       Tag: git winget
+RelaGit                               Rela.RelaGit                    0.16.9      Tag: git winget
+aicommit                              RussMckendrick.Aicommit         0.0.8       Tag: git winget
+Tower                                 SaaSGroup.Tower                 12.1.557    Tag: git winget
+PullWatch                             ShipDigital.PullWatch           1.8.1       Tag: git winget
+gitui                                 StephanDilly.gitui              0.28.1      Tag: git winget
+Sublime Merge                         SublimeHQ.SublimeMerge          2125        Tag: git winget
+Sublime Merge (Dev)                   SublimeHQ.SublimeMerge.Dev      2057        Tag: git winget
+Talisman                              Thoughtworks.Talisman           1.37.0      Tag: git winget
+GitFiend                              TobySuggate.GitFiend            0.45.3      Tag: git winget
+TortoiseGit                           TortoiseGit.TortoiseGit         2.18.0.1    Tag: git winget
+TortoiseSVN                           TortoiseSVN.TortoiseSVN         1.14.9.297… Tag: git winget
+GitSwitchBranch                       VadimKholodilo.GitSwitchBranch  1.1.0       Tag: git winget
+Agent Git                             Xidicone.AgentGit               1.88        Tag: git winget
+GitPulse                              XxDoomsdayxX.GitPulse           1.0.1       Tag: git winget
+Gource                                acaudwell.Gource                0.53        Tag: git winget
+GitQL                                 amrdeveloper.gitql              0.43.0      Tag: git winget
+soft-serve                            charmbracelet.soft-serve        0.11.6      Tag: git winget
+Clarity Deck                          choioki.ClarityDeck             1.0.4       Tag: git winget
+delta                                 dandavison.delta                0.19.2      Tag: git winget
+Bitbucket CLI                         dlbroadfoot.bb                  2.87.1      Tag: git winget
+dev-sidecar                           docmirror.dev-sidecar           2.0.2       Tag: git winget
+Lefthook                              evilmartians.lefthook           2.1.9       Tag: git winget
+Paket                                 fsprojects.Paket                10.3.1      Tag: git winget
+git-cola                              git-cola.git-cola               4.18.2      Tag: git winget
+git-fire                              git-fire.git-fire               0.4.0       Tag: git winget
+git-rain                              git-rain.git-rain               0.9.2       Tag: git winget
+git-remote-gittuf                     gittuf.git-remote-gittuf        0.14.1      Tag: git winget
+gittuf                                gittuf.gittuf                   0.14.1      Tag: git winget
+Worktree Manager                      guoyongchang.WorktreeManager    0.20260601… Tag: git winget
+git-credential-azure                  hickford.git-credential-azure   0.3.1       Tag: git winget
+git-credential-oauth                  hickford.git-credential-oauth   0.17.2      Tag: git winget
+repo2page                             imsncht.repo2page               1.0.7       Tag: git winget
+Prek                                  j178.Prek                       0.4.4       Tag: git winget
+jj                                    jj-vcs.jj                       0.42.0      Tag: git winget
+BlastMerge                            ktsu.BlastMerge                 1.0.21      Tag: git winget
+worktrunk                             max-sixty.worktrunk             v0.56.0     Tag: git winget
+onefetch                              o2sh.onefetch                   2.27.1      Tag: git winget
+git-cliff                             orhun.git-cliff                 2.13.1      Tag: git winget
+GitHub Desktop Plus                   polrivero.GitHubDesktopPlus     3.5.12-r0   Tag: git winget
+git-age                               prskr.git-age                   0.3.0       Tag: git winget
+SourceGit                             sourcegit-scm.SourceGit         2026.11     Tag: git winget
+Git Repository Manager                thedangander.GitRepoManager     1.0.0       Tag: git winget
+wt                                    timvw.wt                        0.1.29      Tag: git winget
+git-absorb                            tummychow.git-absorb            0.9.0       Tag: git winget
+GitType                               unhappychoice.gittype           0.10.0      Tag: git winget
+gitwink                               var-gg.gitwink                  0.5.0       Tag: git winget
+ghq                                   x-motemen.ghq                   1.8.0       Tag: git winget
+GitNote                               zhaopengme.gitnote              3.1.0       Tag: git winget
+git-recall                            Ammaar.git-recall               1.0.0                winget
+AtomCode                              AtomGit.AtomCode                4.23.3               winget
+Fundels                               CartamundiDigital.Fundels       3.2.8                winget
+FastGithub                            CoolPlayLin.FastGithub          2.1.4                winget
+MaxTo                                 DigitalCreations.MaxTo          2.2.1                winget
+DD-TV                                 DigitalDevices.DD-TV            1.15.0.0             winget
+Soulframe                             DigitalExtremes.Soulframe       Preludes-1…          winget
+Warframe                              DigitalExtremes.Warframe        1.0.0                winget
+Resolution Suggester                  DigitalForcesCorp.ResolutionSu… 1.0.0                winget
+doctl                                 DigitalOcean.Doctl              1.160.1              winget
+Tropy                                 DigitalScholar.Tropy            1.17.3               winget
+Zotero                                DigitalScholar.Zotero           9.0.4                winget
+Papers                                DigitalScience.Papers           4.37.2395            winget
+Duplicate Cleaner Free 4              DigitalVolcanoSoftware.Duplica… 4.1.2                winget
+Duplicate Cleaner Pro 4               DigitalVolcanoSoftware.Duplica… 4.1.4                winget
+Duplicate Cleaner Pro 5               DigitalVolcanoSoftware.Duplica… 5.27.0.0             winget
+Hash Tool                             DigitalVolcanoSoftware.HashTool 64.2.0.0             winget
+TaskCanvas                            DigitalVolcanoSoftware.TaskCan… 1.4                  winget
+TextCrawler Free                      DigitalVolcanoSoftware.TextCra… 3.1.2                winget
+TextCrawler Pro                       DigitalVolcanoSoftware.TextCra… 3.1.3                winget
+DQViewer                              DigiteqAutomotive.DQViewer      4.4                  winget
+GitHub 标签管理器                     DuckStudio.GitHubLabelsManager  1.13                 winget
+GitHubView                            DuckStudio.GitHubView           1.0.6                winget
+GitHubView (Nightly)                  DuckStudio.GitHubView.Nightly   2025.12.14…          winget
+Git for Windows SDK                   Git.SDK                         1.0.8                winget
+GitAhead                              GitAhead.GitAhead               2.7.1                winget
+Atom                                  GitHub.Atom                     1.60.0               winget
+Atom Beta                             GitHub.Atom.Beta                1.61.0-bet…          winget
+classroom-assistant                   GitHub.ClassroomAssistant       2.0.4                winget
+Copilot CLI                           GitHub.Copilot                  v1.0.60              winget
+Copilot CLI (Preview)                 GitHub.Copilot.Prerelease       v1.0.60-0            winget
+Copilot modernization agent           GitHub.Copilot.modernization.a… 1.0.15               winget
+GitHub Copilot                        GitHub.CopilotApp               0.2.28               winget
+hub                                   GitHub.hub                      2.14.2               winget
+GitKraken CLI                         GitKraken.cli                   3.1.64               winget
+GitMastery                            GitMastery.GitMastery           7.8.2                winget
+Gitea Runner                          Gitea.Runner                    1.0.8                winget
+tea                                   Gitea.tea                       0.14.1               winget
+Gitify                                Gitify.Gitify                   6.20.0               winget
+GitLab Runner                         Gitlab.Runner                   19.0.1               winget
+Git-Xet                               HuggingFace.Git-Xet             0.2.1                winget
+GitFlow                               Kubis1982.GitFlow               2.0.0                winget
+AnimeBack                             LeGitHubDeTai.AnimeBack         8.0.9                winget
+Lingdys 4                             LingitAS.Lingdys4               4.5.151.0            winget
+Logitech Camera Settings              Logitech.CameraSettings         2.12.20.0            winget
+Logitech Gamepad F710 Connection Uti… Logitech.F710ConnectUtility     2.15.264             winget
+Logitech G HUB                        Logitech.GHUB                   2026.3.880…          winget
+Logitech Gaming Software              Logitech.LGS                    9.04.49              winget
+Logi Bolt                             Logitech.LogiBolt               1.2.6024.0           winget
+Logi Tune                             Logitech.LogiTune               3.13.138.0           winget
+MIXLINE                               Logitech.MIXLINE                1.1.64.9364          winget
+MyHarmony                             Logitech.MyHarmony              1.0.308              winget
+Logitech Onboard Memory Manager       Logitech.OnboardMemoryManager   2.6.1749             winget
+Logitech Options                      Logitech.Options                10.26.14             winget
+Logi Options+                         Logitech.OptionsPlus            2.3.879545           winget
+Logitech Presentation                 Logitech.Presentation           2.10.34              winget
+Logitech SetPoint                     Logitech.SetPoint               6.90.66              winget
+Logitech Solar App                    Logitech.Solar                  1.20.28              winget
+Logitech Sync                         Logitech.Sync                   3.9.322              winget
+Logitech Unifying Software            Logitech.UnifyingSoftware       2.52.33              winget
+GitHub extension for Command Palette  Microsoft.CmdPalGitHubExtension 0.103.178.0          winget
+GVFS                                  Microsoft.VFSforGit             1.0.26014.1          winget
+Reduce Audio Latency                  MiniantGit.REAL                 0.2.0                winget
+Spriggit                              MutagenModding.Spriggit         0.38.8               winget
+ISY Linker                            NorconsultDigital.ISYLinker     12.1.0.0             winget
+Gitflow-helper                        NovaeMX.gitflow-helper          0.6.6                winget
+Igitt                                 Nstr.Igitt                      v0.1.13              winget
+OptiSigns Digital Signage             OptiSigns.OptiSignsDigitalSign… 5.6.33               winget
+GitSearcher                           Parresia.GitSearcher            0.1.0                winget
+Escrituração Digital ECF              ReceitaFederaldoBrasil.Escritu… 12.1.6               winget
+Escrituração Digital EFD-Contribuiçõ… ReceitaFederaldoBrasil.Escritu… 6.1.2                winget
+GITSTART                              Shinokada.Gitstart              1.1.0                winget
+Squigit OCR                           SquigitOrg.SquigitOCR           0.1.0                winget
+Squigit STT                           SquigitOrg.SquigitSTT           0.1.0                winget
+GitHubReleaseNotes                    StefHeyenrath.GitHubReleaseNot… 1.0.10.1             winget
+SmartGit                              Syntevo.SmartGit                26.1.038             winget
+Snagit 2020                           TechSmith.Snagit.2020           20.1.8               winget
+Snagit 2021                           TechSmith.Snagit.2021           21.4.7               winget
+Snagit 2022                           TechSmith.Snagit.2022           22.1.7               winget
+Snagit 2023                           TechSmith.Snagit.2023           23.2.7               winget
+Snagit 2024                           TechSmith.Snagit.2024           24.3.7               winget
+Snagit 2025                           TechSmith.Snagit.2025           25.4.1               winget
+Snagit 2026                           TechSmith.Snagit.2026           26.2.2               winget
+Fusion Digital Power Designer         TexasInstruments.FusionDigital… 7.10.1               winget
+Kitfox                                WesternDigital.Kitfox           1.1.1.1              winget
+WD Security                           WesternDigital.Security         2.1.4.358            winget
+WimyGit                               Wimysoft.WimyGit                1.3.1                winget
+WimyGitNightly                        Wimysoft.WimyGit.Nightly        2.99.8               winget
+Gitmun                                cst8t.gitmun                    0.7.1                winget
+gitsqlite                             danielsiegl.gitsqlite           0.9.1                winget
+poke-cli                              digitalghost-dev.poke-cli       1.9.0                winget
+Thermal                               gitthermal.thermal              0.0.4                winget
+gitg                                  gnome.gitg                      41.0                 winget
+git-get                               grdl.git-get                    0.6.1                winget
+ingitdb                               ingitdb.ingitdb                 0.40.1               winget
+Upgit                                 pluveto.Upgit                   0.2.18               winget
+Dragit                                sireliah.dragit                 0.7.1                winget
+Git Tangle                            taygunsavas.git-tangle          1.0.3                winget
+听IT资源社区                          tingit.rc                       1.0.7.829            winget
+git-grab                              wezm.git-grab                   3.0.0                winget
+regit                                 woaitsAryan.regit               0.4.2                winget
+GitHub Store                          zed.rainxch.githubstore         1.6.2                winget
+WSJT-X: Digital Modes for Weak Signa… JoeTaylor.WSJT-X                3.0.1                winget
+DORIS (Digital Open Rule Integrated … WorldHealthOrganization.DORIS   1.1.7                winget
+GitHub Doctor                         tekumara.gh-doctor              0.3.0                winget
+IPVTest                               Vipre.IPVTest                   1.0.0.0     Command… winget
+rust-secrets                          edenian-prince.rust-secrets     0.4.1       Command… winget
+Adobe DNG Converter                   Adobe.DNGConverter              18.3.2      Tag: di… winget
+AI Consumption Tracker                AlexanderBrandt.AIConsumptionT… 2.3.4       Tag: gi… winget
+copilot_here                          GordonBeeming.CopilotHere       2026.05.21… Tag: gi… winget
+gh-usage                              Kukisama.gh-usage               1.1.0       Tag: gi… winget
+APM – Agent Package Manager           Microsoft.APM                   0.18.0      Tag: gi… winget
+shelfctl                              BlackwellSystems.shelfctl       0.4.5       Tag: gi… winget
+WSL Manager                           Bostrot.WSLManager              1.11.0      Tag: gi… winget
+ghx                                   BrunoBorges.ghx                 1.5.2       Tag: gi… winget
+DRA                                   CosimoMatteini.DRA              0.10.2      Tag: gi… winget
+Lepton                                CosmoX.Lepton                   1.10.0      Tag: gi… winget
+Dyad                                  Dyad.Dyad                       1.3.0       Tag: gi… winget
+ETT-Admin                             EliWeitzman.ETT-Admin           1.3         Tag: gi… winget
+hookwarden                            Hookwarden.Hookwarden           0.3.1       Tag: gi… winget
+Cacher                                PenguinLabs.Cacher              2.43.2      Tag: gi… winget
+Actions Monitor                       Summit.ActionsMonitor           2026.04.24… Tag: gi… winget
+Eget                                  ZacharyYedidia.Eget             1.3.4       Tag: gi… winget
+ghr                                   cataggar.ghr                    0.5.1       Tag: gi… winget
+MarkRight                             dvcrn.markright                 1.0.0       Tag: gi… winget
+easy-install                          easy-install.easy-install       1.3.8       Tag: gi… winget
+grp                                   feraxhp.grp                     0.13.0      Tag: gi… winget
+Squad Center                          jmanuelcorral.SquadCenter       0.3.1       Tag: gi… winget
+act                                   nektos.act                      0.2.89      Tag: gi… winget
+ghtkn                                 suzuki-shunsuke.ghtkn           0.2.5       Tag: gi… winget
+Bitbucket Server                      Atlassian.Bitbucket             7.21.23     Tag: gi… winget
+百度语音输入                          Baidu.BaiduSpeechInput          2.0.0.33    Tag: lo… winget
+CloudShow Launcher                    BinaryFortress.CloudShow        6.8.0.0     Tag: di… winget
+Dragonframe                           DZEDSystems.Dragonframe         2026.01.5   Tag: di… winget
+NVC VHDL Simulator                    NickGasson.NVC                  1.21.0      Tag: di… winget
+Logisim-evolution                     logisim-evolution.logisim-evol… 4.0.0       Tag: di… winget
+Bit4id - Firma4ng-InfoCamere          Bit4id.Firma4ng.InfoCamere      1.6.20      Tag: fi… winget
+bit4id InfoCamere Sign Desktop        Bit4id.SignDesktop.InfoCamere   1.0.31      Tag: fi… winget
+Master Signer Agent                   MasterSigner.Agent              1.1.2       Tag: di… winget
+DigiDoc4 Client                       RIA.DigiDoc4                    4.10.0      Tag: di… winget
+eID software                          RIA.eIDsoftware                 25.10.23.8… Tag: di… winget
+RipGrep GNU                           BurntSushi.ripgrep.GNU          15.1.0      Tag: gi… winget
+RipGrep MSVC                          BurntSushi.ripgrep.MSVC         15.1.0      Tag: gi… winget
+scaf                                  TerraFaster.scaf                2.0.1       Tag: gi… winget
+dbxignore                             kiloscheffer.dbxignore          1.0.6       Tag: gi… winget
+REAPER                                Cockos.REAPER                   7.74        Tag: di… winget
+LMMS                                  LMMS.LMMS                       1.2.2       Tag: di… winget
+Renoise                               Renoise.Renoise                 3.4.4       Tag: di… winget
+YY调音台                              YY.YYAudio                      1.23.4.0    Tag: di… winget
+DAWG                                  dawg.dawg                       0.2.3       Tag: di… winget
+Corsair iCUE5 Software                Corsair.iCUE.5                  5.46.67     Tag: co… winget
+Dolt                                  DoltHub.Dolt                    2.1.4       Tag: gi… winget
+Pin Action                            DuckStudio.PinAction            1.0.1       Tag: gi… winget
+Gridea                                EryouHao.Gridea                 0.9.3       Tag: gi… winget
+BankID säkerhetsprogram               FinancialID.BankID              7.17.100.2… Tag: di… winget
+Flux                                  FluxCD.Flux                     2.8.8       Tag: gi… winget
+cfgd                                  TJSmith.cfgd                    0.4.0       Tag: gi… winget
+kunobi                                kunobi-ninja.kunobi             1.2.0       Tag: gi… winget
+Kunobi (Unstable)                     kunobi-ninja.kunobi.Unstable    1.3.0-rc.1  Tag: gi… winget
+ash                                   warmdev.ash                     2.1.0       Tag: gi… winget
+Selebrow                              SelebrowProject.Selebrow        1.5.2       Tag: gi… winget
+Cobalt SSG                            cobalt-org.cobalt               0.20.4      Tag: gi… winget
+Ferium                                GorillaDevs.Ferium              4.7.1       Tag: gi… winget
+VEC DigiLib                           LAVANJV.vecdigilib              1.0.0       Tag: di… winget
+HeadsetControl-GUI                    LeoKlaus.HeadsetControl-GUI     0.22.4      Tag: Lo… winget
+MIDI Feature Enablement Checker for … Microsoft.MIDI.FeatureEnableme… 1.1         Tag: mu… winget
+Onkyo X-ME11 DSP Software             Onkyo.X-ME11DSPSoftware         6.8.7       Tag: di… winget
+SatDump                               SatDump.SatDump                 1.2.2       Tag: di… winget
+OpenHantek6022                        OpenHantek.OpenHantek6022       3.4.0       Tag: di… winget
+OrcaSVN                               OrcaSVN.OrcaSVN                 0.3.1       Tag: gi… winget
+TtxFromTS                             OrryVerducci.TtxFromTS          2.0         Tag: di… winget
+WinDV                                 PetrMourek.WinDV                1.2.3       Tag: fi… winget
+Pickit                                PicHit.Pickit                   1.3.1       Tag: di… winget
+ArtHub                                Tencent.ArtHub                  1.20.1      Tag: di… winget
+ChanSort                              PredatH0r.ChanSort              2025-03-08  Tag: di… winget
+ProgTV 3                              Prog.ProgTV.3                   3.9.7.0     Tag: di… winget
+RescueTime                            RescueTime.DesktopApp           3.2.12.3    Tag: di… winget
+Secure Exchanges Outlook Area Sign F… SecureExchanges.SEOASF          2026.03.241 Tag: di… winget
+WK Radar                              WK.WKRadar                      7.20.0      Tag: Ba… winget
+FileQL                                amrdeveloper.fileql             0.10.0      Tag: gi… winget
+direnv                                direnv.direnv                   2.37.1      Tag: gi… winget
+Journey to the Center of Hawkthorne   hawkthorne.JourneyToTheCenterO… 1.1.0       Tag: di… winget
+score                                 ossia.score                     3.8.2       Tag: di… winget
+actionlint                            rhysd.actionlint                1.7.12      Tag: gi… winget
+pinact                                suzuki-shunsuke.pinact          4.1.0       Tag: gi… winget
+zizmor                                zizmor.zizmor                   1.25.2      Tag: gi… winget
+radioconda                            ryanvolz.radioconda             2025.03.14  Tag: di… winget
+PS3 Media Server                      shagrath.PS3MediaServer         1.90.1      Tag: di… winget
+SoX_ng                                sox_ng.sox_ng                   14.7.1.2    Tag: di… winget
+xploview                              xploview.xploview               3.3.31      Tag: di… winget

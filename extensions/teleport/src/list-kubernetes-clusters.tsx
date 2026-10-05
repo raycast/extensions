@@ -40,26 +40,29 @@ function ListPods(props: { name: string }) {
   const { data, isLoading } = kubernetesClustersPodsList(props.name);
   const [searchText, setSearchText] = useState("");
   const { list, toggleFavorite } = useFavorite<string>("kubernetes-pods");
-  const results = useMemo(() => JSON.parse(data || "{}").items || [], [data]).reduce((acc: any, item: Pod) => {
-    if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
+  const results = useMemo(() => JSON.parse(data || "{}").items || [], [data]).reduce(
+    (acc: Record<string, Pod[]>, item: Pod) => {
+      if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
+        return acc;
+      }
+
+      if (list.has(item.metadata.name)) {
+        acc["favorites"] ? acc["favorites"].push(item) : (acc["favorites"] = [item]);
+        return acc;
+      }
+
+      const namespace = item.metadata.namespace;
+      acc[namespace] ? acc[namespace].push(item) : (acc[namespace] = [item]);
+
       return acc;
-    }
-
-    if (list.has(item.metadata.name)) {
-      acc["favorites"] ? acc["favorites"].push(item) : (acc["favorites"] = [item]);
-      return acc;
-    }
-
-    const namespace = item.metadata.namespace;
-    acc[namespace] ? acc[namespace].push(item) : (acc[namespace] = [item]);
-
-    return acc;
-  }, {});
+    },
+    {}
+  );
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
-      {Object.entries(results)
-        .sort(([namespaceA]: [string, any], [namespaceB]: [string, any]) => {
+      {(Object.entries(results) as [string, Pod[]][])
+        .sort(([namespaceA]: [string, Pod[]], [namespaceB]: [string, Pod[]]) => {
           if (namespaceA === "favorites") {
             return -1;
           }
@@ -70,7 +73,7 @@ function ListPods(props: { name: string }) {
 
           return namespaceA.localeCompare(namespaceB);
         })
-        .map(([namespace, group]: [string, any]) => {
+        .map(([namespace, group]: [string, Pod[]]) => {
           return (
             <List.Section title={capitalize(namespace)} key={namespace}>
               {group

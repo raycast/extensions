@@ -1,15 +1,26 @@
 import { Icon, Color, List, ActionPanel, Action } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
 import fromNow from "../../utils/time";
-import { Deployment, DeploymentState } from "../../types";
+import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
-import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
+import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL, parseVercelResponse } from "../../vercel";
+import {
+  getDeploymentId,
+  getCommitDeploymentBranch,
+  getCommitMessage,
+  isDeploymentCancellable,
+  runCancelDeployment,
+  CANCEL_DEPLOYMENT_ACTION,
+  CANCEL_DEPLOYMENT_SHORTCUT,
+} from "../../deployment";
+import { getDeploymentOwnerSlug } from "../../utils/deployment-owner";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
   const { user, teams, selectedTeam } = useVercel();
-  const url = getFetchDeploymentsURL(selectedTeam, projectId);
+  const team = teams?.find((team: Team) => team.id === selectedTeam);
+  const url = getFetchDeploymentsURL(selectedTeam, projectId, 100, team?.slug);
 
   const {
     isLoading,
@@ -17,6 +28,12 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate,
   } = useFetch(url, {
     headers: FetchHeaders,
+    // Allow executing when a selectedTeam is stored even if `teams` failed to load.
+    execute: Boolean(user && (teams || selectedTeam)),
+    parseResponse: parseVercelResponse<{ deployments: Deployment[] }>,
+    failureToastOptions: {
+      title: "Failed to fetch deployments",
+    },
     mapResult(result: { deployments: Deployment[] }) {
       return {
         data: result.deployments,
@@ -29,7 +46,6 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate();
   };
 
-  const team = teams?.find((team) => team.id === selectedTeam);
   return (
     <List
       throttle
@@ -59,20 +75,40 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
                     url={getDeploymentURL(
-                      team?.slug || user.username,
+                      getDeploymentOwnerSlug({ deployment, team, username: user.username }) || user.username,
                       deployment.name,
-                      /* @ts-expect-error Property id does not exist on type Deployment */
-                      deployment.id || deployment.uid,
+                      getDeploymentId(deployment),
                     )}
                     icon={Icon.Link}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                      Windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                    }}
+                  />
+                )}
+                {isDeploymentCancellable(deployment) && (
+                  <Action
+                    title={CANCEL_DEPLOYMENT_ACTION.title}
+                    icon={Icon.Stop}
+                    style={Action.Style.Destructive}
+                    shortcut={CANCEL_DEPLOYMENT_SHORTCUT}
+                    onAction={() =>
+                      runCancelDeployment({
+                        deployment,
+                        teamId: selectedTeam || undefined,
+                        onSuccess: revalidate,
+                      })
+                    }
                   />
                 )}
                 <Action.CopyToClipboard
                   title={`Copy URL`}
                   content={`https://${deployment.url}`}
                   icon={Icon.CopyClipboard}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+                    Windows: { modifiers: ["ctrl", "opt"], key: "c" },
+                  }}
                 />
               </ActionPanel>
             }
@@ -95,26 +131,13 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
 
 export default DeploymentsList;
 
-const getCommitMessage = (deployment: Deployment) => {
-  // TODO: determine others
-  if (deployment.meta.githubCommitMessage) {
-    return deployment.meta.githubCommitMessage;
-  }
-  return "No commit message";
-};
-
-const getCommitDeploymentBranch = (deployment: Deployment) => {
-  // TODO: support other providers beside GitHub
-  return deployment.meta.githubCommitRef ?? null;
-};
-
-const StateIcon = (state?: DeploymentState) => {
+export const StateIcon = (state?: DeploymentState) => {
   switch (state) {
     case "READY":
       return { source: Icon.Dot, tintColor: Color.Green };
     case "BUILDING":
     case "INITIALIZING":
-      return { source: Icon.Dot, tintColor: Color.Blue };
+      return { source: Icon.Dot, tintColor: Color.Orange };
     case "FAILED":
       return { source: Icon.Dot, tintColor: Color.Red };
     case "CANCELED":

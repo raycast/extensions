@@ -1,5 +1,48 @@
 # Safari Changelog
 
+## [New Command] - 2026-09-17
+
+- Add a `New Private Window` command that opens a new private window of the selected Safari browser. Requires Accessibility access for Raycast, as the window is opened through Safari's File menu.
+
+## [New Command] - 2026-09-16
+
+- Add `Reopen Last Session` command to relaunch Safari and reopen all windows from the last session — for when you accidentally hit ⌘Q. Requires Accessibility access for Raycast, as the session is restored through Safari's History menu.
+
+## [New Command] - 2026-09-09
+
+- Add a `New Window` command that opens a new window of the selected Safari browser.
+
+## [Fix] - 2026-08-12
+
+- Handle large Safari bookmark libraries without parser limit errors.
+
+## [Fix] - 2026-08-12
+
+- Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
+- Avoid querying iCloud tabs when they are disabled.
+- Handle `blob:` tab favicons without invalid URL errors.
+
+## [New Command] - 2026-07-24
+
+- Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
+- Replace `pinyin` with the much lighter `pinyin-pro` to fix commands crashing against the extension memory limit (bundle size reduced from ~28 MB to ~6 MB per command).
+
+## [Bugfix] - 2026-05-22
+
+- Clarify the Full Disk Access requirement when Safari history cannot be opened.
+
+## [Fix] - 2026-05-06
+
+- Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
+
+## [Fix] - 2026-04-28
+
+- Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
+
+## [Performance] - 2026-01-12
+
+- Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 
+
 ## [Update] - 2025-06-19
 
 - Fixes for `Search Tabs` command:

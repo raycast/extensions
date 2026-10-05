@@ -27,7 +27,9 @@ export default function EntitiesMenuCommand() {
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Entities">
-        {entities?.map((m) => <StateMenubarItem key={m.entity_id} state={m} />)}
+        {entities?.map((m) => (
+          <StateMenubarItem key={m.entity_id} state={m} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <RUIMenuBarExtra.ConfigureCommand />

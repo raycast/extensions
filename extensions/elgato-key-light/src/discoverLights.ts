@@ -13,7 +13,9 @@ export default async function Command() {
     }
 
     const lights = KeyLight.keyLights;
-    const lightNames = lights.map((light) => light.service.name).join(", ");
+    const lightNames = lights
+      .map((light) => `${light.service.displayName || light.service.name} (${light.service.referer.address})`)
+      .join(", ");
     await showToast({
       style: Toast.Style.Success,
       title: `Found ${lights.length} Key Light${lights.length > 1 ? "s" : ""}`,

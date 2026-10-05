@@ -5,6 +5,9 @@
   "description": "Search from the Apple Developer documentations",
   "icon": "apple-developer-docs.png",
   "author": "cali",
+  "contributors": [
+    "2369233838"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -35,6 +38,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsc --project tsconfig.json --outDir .test-dist --noEmit false && node --test test/appleSearch.test.js",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

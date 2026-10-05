@@ -35,7 +35,12 @@ export interface RunModel {
   };
 }
 
-export interface Preferences {
-  dbtCloudAPIToken: string;
-  dbtCloudAcountID: string;
+export interface dbtV2Response<T = null> {
+  status: {
+    code: number;
+    is_success: boolean;
+    user_message: string | null;
+    developer_message: string | null;
+  };
+  data: T;
 }

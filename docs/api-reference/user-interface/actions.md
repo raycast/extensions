@@ -384,7 +384,7 @@ export default function Command() {
         quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
         actions={
           <ActionPanel>
-            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            <Action.ToggleQuickLook />
           </ActionPanel>
         }
       />

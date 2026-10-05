@@ -1,17 +1,14 @@
-import { Action } from "@raycast/api";
+import { Action, getPreferenceValues } from "@raycast/api";
+import { getNotificationLevel } from "../lib/events";
 import { getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
-  /**
-   * The ID of the event to delete.
-   */
+  /** Event ID from search-events or get-event. An instance ID deletes only that occurrence; a series ID deletes the series. */
   eventId: string;
-  /**
-   * The ID of the calendar where the event is located.
-   * @default "primary"
-   * @remarks If not provided, the event will be deleted from the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
-   */
+  /** Calendar containing the event. Defaults to "primary". */
   calendarId?: string;
+  /** Guest notification level. Defaults to the extension preference. */
+  notificationLevel?: "all" | "externalOnly" | "none";
 };
 
 export const confirmation = withGoogleAPIs(async (input: Input) => {
@@ -25,8 +22,22 @@ export const confirmation = withGoogleAPIs(async (input: Input) => {
 });
 
 const tool = async (input: Input) => {
+  const preferences = getPreferenceValues<Preferences>();
   const calendar = getCalendarClient();
-  await calendar.events.delete({ calendarId: input.calendarId ?? "primary", eventId: input.eventId });
+  const calendarId = input.calendarId ?? "primary";
+  const event = await calendar.events.get({ calendarId, eventId: input.eventId });
+  await calendar.events.delete({
+    calendarId,
+    eventId: input.eventId,
+    sendUpdates: getNotificationLevel(input, preferences.sendInvitations),
+  });
+  return {
+    deleted: true,
+    id: input.eventId,
+    calendarId,
+    title: event.data.summary,
+    recurringEventId: event.data.recurringEventId,
+  };
 };
 
 export default withGoogleAPIs(tool);

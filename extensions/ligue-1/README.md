@@ -1,11 +1,17 @@
 <p align="center">
-  <img src="assets/icon.png" height="128">
+  <h1 align="center">Ligue 1</h1>
 </p>
 
-View all the latest news about Ligue 1 McDonald's (calendar, results, ranking, video...) and all live games in [Raycast](https://raycast.com/)
+Staying up-to-date with the latest scores, and fixtures from the French top-flight football league in [Raycast](https://raycast.com/)
 
 ![Example](./metadata/ligue-1-1.png)
 
+Access information on:
+
+- **Tables:** View the current standings and league positions.
+- **Fixtures & Results:** Check upcoming match schedules and results.
+- **Clubs:** Find detailed information about individual teams, including players, coaches, and statistics.
+
 ## Issues
 
-[Track here](https://github.com/anhthang/raycast-ligue-1/issues) or create an issue.
+Report bugs or suggest improvements by creating an issue [here](https://github.com/anhthang/raycast-ligue-1/issues).

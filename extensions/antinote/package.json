@@ -26,10 +26,31 @@
       ]
     },
     {
+      "name": "timer",
+      "title": "Execute Timer Command",
+      "subtitle": "Antinote (beta)",
+      "description": "Executes a timer command. This feature is only available in Antinote v2.* (beta)",
+      "mode": "view"
+    },
+    {
+      "name": "new-note-from-selection",
+      "title": "Create New Note from Selection",
+      "subtitle": "Antinote",
+      "description": "Creates a new note with selected text",
+      "mode": "no-view"
+    },
+    {
       "name": "search-notes",
       "title": "Search Notes",
       "subtitle": "Antinote",
       "description": "Search through existing notes",
+      "mode": "view"
+    },
+    {
+      "name": "search-slotted-notes",
+      "title": "Search Slotted Notes",
+      "subtitle": "Antinote (beta)",
+      "description": "Search through existing slotted notes. This feature requires Antinote v2.* (beta)",
       "mode": "view"
     },
     {
@@ -38,6 +59,26 @@
       "subtitle": "Antinote",
       "description": "Pins / unpins Antinote window on top",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preferBeta",
+      "type": "dropdown",
+      "title": "Antinote Version to Use",
+      "description": "Prefer Beta: If available, the Antinote extension will communicate with the beta version of Antinote. Always use stable version: Regardless of whether the beta is installed or not, only the stable version will be used with the Antinote extension.",
+      "default": "true",
+      "required": false,
+      "data": [
+        {
+          "title": "Prefer beta (v2.*)",
+          "value": "true"
+        },
+        {
+          "title": "Always use stable version (1.*)",
+          "value": "false"
+        }
+      ]
     }
   ],
   "dependencies": {

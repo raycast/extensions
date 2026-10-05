@@ -1,4 +1,6 @@
-export function getCurrentDateTimeForTz(tz: string): string {
+import { getDateWithOffset } from "./getDateWithOffset";
+
+export function getCurrentDateTimeForTz(tz: string, offsetHrs?: number): string {
   const formatter = new Intl.DateTimeFormat(["en"], {
     timeZone: tz,
     day: "numeric",
@@ -8,5 +10,7 @@ export function getCurrentDateTimeForTz(tz: string): string {
     minute: "numeric",
     second: "numeric",
   });
-  return formatter.format(new Date());
+
+  const date = getDateWithOffset(offsetHrs);
+  return formatter.format(date);
 }

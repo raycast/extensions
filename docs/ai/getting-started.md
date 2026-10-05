@@ -6,13 +6,13 @@ description: This guide explains how to use AI inside extensions.
 
 There are two ways to leverage the power of AI inside your extensions.
 
-{% hint style="info" %}
-To use AI APIs or AI Extensions, you need to subscribe to [Raycast Pro](https://raycast.com/pro).
+{% hint style="info" %} To use AI APIs or AI Extensions, you need to subscribe to [Raycast Pro](https://raycast.com/pro).
+
 {% endhint %}
 
 ## AI APIs
 
-Use our [AI APIs](../api-reference/ai.md) to generate content such as summaries, translations, and more. For example, the [Notion extension](https://raycast.com/notion/notion) uses `AI.ask(...)` as part of it's Quick Capture command to generate a summary of a website.
+Use our [AI APIs](../api-reference/ai.md) to generate content such as summaries, translations, and more. For example, the [Notion extension](https://raycast.com/notion/notion) uses `AI.ask(...)` as part of its Quick Capture command to generate a summary of a website.
 
 ## AI Extensions
 

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "p00f",
+  "title": "P00f - Ephemeral Clipboard",
+  "description": "Create zero-knowledge, ephemeral p00f links from Raycast.",
+  "type": "module",
+  "icon": "icon.png",
+  "author": "miguel_caetano_dias",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Security",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "p00f",
+    "poof",
+    "zero-knowledge",
+    "ephemeral",
+    "encrypt",
+    "clipboard",
+    "secret",
+    "whisper",
+    "self-destruct",
+    "temporary",
+    "link",
+    "pastebin"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcdays94/p00f.git",
+    "directory": "packages/raycast"
+  },
+  "homepage": "https://p00f.me",
+  "commands": [
+    {
+      "name": "create-poof",
+      "title": "Create Poof",
+      "description": "Create a p00f link from text.",
+      "mode": "view"
+    },
+    {
+      "name": "poof-selection",
+      "title": "Poof Selection",
+      "description": "Create a p00f link from the selected text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "poof-clipboard",
+      "title": "Poof Clipboard",
+      "description": "Create a p00f link from clipboard text, one copied file, or a clipboard image such as a screenshot.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "base",
+      "title": "p00f Base URL",
+      "description": "Hosted p00f service or a self-hosted base URL.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://p00f.me"
+    },
+    {
+      "name": "defaultTtl",
+      "title": "Default TTL",
+      "description": "Default time-to-live for quick Poofs.",
+      "type": "dropdown",
+      "required": true,
+      "default": "300000",
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "60000"
+        },
+        {
+          "title": "5 minutes",
+          "value": "300000"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600000"
+        },
+        {
+          "title": "1 day",
+          "value": "86400000"
+        },
+        {
+          "title": "7 days",
+          "value": "604800000"
+        },
+        {
+          "title": "30 days",
+          "value": "2592000000"
+        }
+      ]
+    },
+    {
+      "name": "defaultReveals",
+      "title": "Default Reveal Budget",
+      "description": "Default number of Reveals before a Poof burns.",
+      "type": "dropdown",
+      "required": true,
+      "default": "1",
+      "data": [
+        {
+          "title": "1 Reveal",
+          "value": "1"
+        },
+        {
+          "title": "3 Reveals",
+          "value": "3"
+        },
+        {
+          "title": "10 Reveals",
+          "value": "10"
+        },
+        {
+          "title": "Unlimited until TTL",
+          "value": "-1"
+        }
+      ]
+    },
+    {
+      "name": "defaultRevealAnchored",
+      "title": "Reveal-Anchored TTL",
+      "description": "Start the timer on first Reveal by default.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Start the timer on first Reveal"
+    },
+    {
+      "name": "defaultAllowViewerDelete",
+      "title": "Viewer Delete",
+      "description": "Let the viewer delete the Poof by default.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Let the viewer delete it"
+    },
+    {
+      "name": "defaultRequireTurnstile",
+      "title": "Reveal Captcha",
+      "description": "Require recipients to solve a browser captcha before Reveal by default.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Require captcha on Reveal"
+    },
+    {
+      "name": "openInBrowserAfterCreate",
+      "title": "Open After Create",
+      "description": "Open newly created Poof links in the browser.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Open link in browser after create"
+    },
+    {
+      "name": "pasteAfterCreate",
+      "title": "Paste After Create",
+      "description": "Paste the created Link into the frontmost app after copying it.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Paste Link into frontmost app"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "check": "npm run build && npm run lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@p00f/core": "^0.3.0",
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
+}

@@ -15,9 +15,8 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Chats } from "./hook/AIChat.types";
-import { currentDate } from "./hook/utils";
-import { ChatCompletionMessageParam } from "openai/resources";
-import { Stream } from "openai/streaming";
+import { allModels, currentDate } from "./hook/utils";
+import { buildAgentRequest, runAgent, targetLabel, Turn } from "./hook/agent";
 
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Perplexity";
@@ -102,7 +101,7 @@ export default function Chat() {
         answer: "",
         creationDate: new Date().toISOString(),
         finished: false,
-        modelName: model,
+        modelName: targetLabel(model, allModels),
       });
       return data;
     });
@@ -110,39 +109,27 @@ export default function Chat() {
     try {
       setIsLoading(true);
       const currentChat = getChat(chatData.currentChat);
-      const messages = currentChat.messages.slice(0, 15).flatMap((x) => [
+      const turns = currentChat.messages.slice(0, 15).flatMap((x) => [
         // Slice() to send the last 15 messages
         { role: "assistant", content: x.answer.substring(0, 3_000) }, // Only send the first 3,000 characters of each assistant response
         { role: "user", content: x.prompt },
-      ]) as ChatCompletionMessageParam[];
-      messages.push({
-        role: "system",
-        content: `Be a helpful chatbot that provides clear, concise, and accurate information to users, ensuring that your responses are directly address their questions. Current date is ${currentDate}.`,
-      });
-      messages.reverse();
+      ]) as Turn[];
+      turns.reverse();
 
-      const response = await openai.chat.completions.create({
-        model: model,
-        messages: [...messages, { role: "user", content: query }],
-        stream: enable_streaming,
-      });
-
-      let answer = "";
-      if (response instanceof Stream) {
-        for await (const message of response) {
-          answer += message.choices[0].delta.content || "";
+      await runAgent(
+        openai,
+        buildAgentRequest({
+          target: model,
+          instructions: `Be a helpful chatbot that provides clear, concise, and accurate information to users, ensuring that your responses are directly address their questions. Current date is ${currentDate}.`,
+          turns: [...turns, { role: "user", content: query }],
+          stream: enable_streaming,
+        }),
+        (answer) =>
           updateChatData((data) => {
             getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
             return data;
-          });
-        }
-      } else {
-        answer = response.choices[0]?.message?.content ?? "";
-        updateChatData((data) => {
-          getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
-          return data;
-        });
-      }
+          }),
+      );
 
       updateChatData((data) => {
         getChat(chatData.currentChat, data.chats).messages[0].finished = true;
@@ -291,33 +278,24 @@ export default function Chat() {
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           setIsLoading(true);
           const currentChat = getChat(newData.currentChat, newData.chats);
-          const messages = currentChat.messages.map((x) => ({
+          const turns = currentChat.messages.map((x) => ({
             role: "user",
             content: x.prompt,
-          })) as ChatCompletionMessageParam[];
+          })) as Turn[];
 
-          const response = await openai.chat.completions.create({
-            model: model,
-            messages: [...messages, { role: "user", content: currentChat.messages[0].prompt }],
-            stream: enable_streaming,
-          });
-
-          let answer = "";
-          if (response instanceof Stream) {
-            for await (const message of response) {
-              answer += message.choices[0].delta.content || "";
+          await runAgent(
+            openai,
+            buildAgentRequest({
+              target: model,
+              turns: [...turns, { role: "user", content: currentChat.messages[0].prompt }],
+              stream: enable_streaming,
+            }),
+            (answer) =>
               updateChatData((newChatData) => {
                 getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
                 return newChatData;
-              });
-            }
-          } else {
-            answer = response.choices[0]?.message?.content ?? "";
-            updateChatData((newChatData) => {
-              getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
-              return newChatData;
-            });
-          }
+              }),
+          );
 
           updateChatData((newChatData) => {
             getChat(newData.currentChat, newChatData.chats).messages[0].finished = true;
@@ -336,7 +314,7 @@ export default function Chat() {
             {
               name: "New Chat",
               creationDate: new Date(),
-              modelName: model,
+              modelName: targetLabel(model, allModels),
               messages: [],
             },
           ],

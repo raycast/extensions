@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { RunModel } from "./types";
+import { JSX } from "react";
 
 interface JobRunsListItemProps {
   result: RunModel;
@@ -16,12 +17,12 @@ export const JobRunsListItem = ({ result }: JobRunsListItemProps): JSX.Element =
         item.status_humanized === "Success"
           ? "🎉"
           : item.status_humanized === "Error"
-          ? "❌"
-          : item.status_humanized === "Running"
-          ? "🏃"
-          : item.status_humanized === "Queued"
-          ? "🕒"
-          : ""
+            ? "❌"
+            : item.status_humanized === "Running"
+              ? "🏃"
+              : item.status_humanized === "Queued"
+                ? "🕒"
+                : ""
       }`}
       actions={
         <ActionPanel>

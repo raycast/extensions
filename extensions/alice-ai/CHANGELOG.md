@@ -1,6 +1,18 @@
 # Changelog
 
+## [AI SDK, Multi-Provider & Model Updates] - 2026-04-12
+
+- Internal: Migrated model integration from `openai` SDK to `ai` SDK with provider routing.
+- Improvement: Restored live streaming responses and improved final usage/token extraction compatibility in Raycast runtime.
+- Feat: Added Google Gemini provider support with a dedicated `Gemini API Key` setting.
+- Feat: Added Gemini models: `gemini-3-flash-preview`, `gemini-3-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`.
+- Feat: Added OpenAI GPT-5.4 models: `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`.
+- Improvement: `OpenAI API Key` and `Gemini API Key` are now optional in settings and validated at model usage time with explicit errors.
+- Improvement: Removed deprecated models `gpt-3.5-turbo` and `gpt-4-turbo`; defaults now use `gpt-4o-mini`.
+- Internal: Added data migration to automatically map legacy model selections to supported defaults.
+
 ## [New Models] - 2024-08-27
+
 - Feat: Added `gpt-4o` and `gpt-4o-mini` models.
 - Improvement: Default actions now use the `gpt-4o-mini` model, and the prompts have been updated to be consistent with the new model.
 - Internal: Removed the gpt-tokens package and replaced it with tokenization from the OpenAI API, calculating costs based on OpenAI's pricing.
@@ -17,7 +29,6 @@
 - Feat: Add Favorites section.
 - Feat: Add Action colors.
 - Internal: Refactor store structure and backup mechanism. Add store versioning.
-
 
 ## [Fixes and New Additions] - 2024-04-11
 

@@ -1,3 +1,5 @@
+import { springToCSSLinear } from "./spring-to-linear";
+
 const BEZIER_VALUES = (type: string) => {
   switch (type) {
     case "easeInOutSine":
@@ -88,22 +90,66 @@ export const FIGMA = (type: string) => {
   return `${BEZIER_VALUES(type)}`;
 };
 
-export const FRAMER = (type: string) => {
+export const MOTION = (type: string) => {
   return type;
 };
 
-export const FRAMER_CUSTOM = (type: string) => {
+export const MOTION_CUSTOM = (type: string) => {
   return `cubicBezier(${BEZIER_VALUES(type)});`;
 };
 
-export const CUSTOM_CSS = (easing: string) => {
-  return `cubic-bezier(${easing});`;
+export const SPRING_PRESETS = {
+  gentle: { stiffness: "100", damping: "10", mass: "1" },
+  wobbly: { stiffness: "180", damping: "12", mass: "1" },
+  stiff: { stiffness: "210", damping: "20", mass: "1" },
+  slow: { stiffness: "280", damping: "60", mass: "1" },
+  molasses: { stiffness: "170", damping: "26", mass: "1" },
+  bouncy: { stiffness: "300", damping: "20", mass: "1" },
+  default: { stiffness: "550", damping: "30", mass: "1.2" },
 };
 
-export const CUSTOM_FIGMA = (easing: string) => {
-  return `${easing}`;
+export const CUSTOM_CSS = (
+  easing: string | { stiffness: string; damping: string; mass: string },
+  type: string,
+): string => {
+  if (type === "spring") {
+    if (typeof easing === "object") {
+      return springToCSSLinear({
+        stiffness: Number(easing.stiffness),
+        damping: Number(easing.damping),
+        mass: Number(easing.mass),
+      });
+    }
+    return `linear(${easing});`;
+  }
+  return `cubic-bezier(${easing})`;
 };
 
-export const CUSTOM_FRAMER = (easing: string) => {
+export const CUSTOM_FIGMA = (
+  easing: string | { stiffness: string; damping: string; mass: string },
+  type: string,
+): string => {
+  if (type === "spring") {
+    if (typeof easing === "object") {
+      return `mass: ${easing.mass}, stiffness: ${easing.stiffness}, damping: ${easing.damping}`;
+    }
+    return easing;
+  }
+  if (typeof easing === "string") {
+    return easing.replace("stiffness", "s").replace("damping", "d").replace("mass", "m");
+  }
+  return JSON.stringify(easing);
+};
+
+export const CUSTOM_MOTION = (
+  easing: string | { stiffness: string; damping: string; mass: string },
+  type: string,
+): string => {
+  if (type === "spring") {
+    if (typeof easing === "object") {
+      return `mass: ${easing.mass}, stiffness: ${easing.stiffness}, damping: ${easing.damping}`;
+    }
+    return easing;
+  }
   return `cubicBezier(${easing});`;
 };

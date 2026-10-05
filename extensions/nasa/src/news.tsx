@@ -1,11 +1,14 @@
-import { List } from "@raycast/api";
-import { ENDPOINTS } from "./constants/prefrences";
-import { useFetch } from "@raycast/utils";
-import Parser from "rss-parser";
 import { useState } from "react";
-import NewsListDetail from "./componenets/newsListDetail";
-import { NewsItem } from "./types/news";
-import ErrorDetail from "./componenets/error";
+
+import { List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+import Parser from "rss-parser";
+
+import { NewsItem } from "@/types";
+import { ENDPOINTS } from "@/constants/preferences";
+import ErrorDetail from "@/components/error";
+import NewsListDetail from "@/components/newsListDetail";
 
 const parser = new Parser();
 

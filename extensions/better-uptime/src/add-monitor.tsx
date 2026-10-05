@@ -17,7 +17,7 @@ interface AddMonitorFormValues {
   monitor_type: string;
 }
 
-export default function Command(): JSX.Element {
+export default function AddMonitorCommand() {
   const preferences = getPreferenceValues<Preferences>();
   const [monitorType, setMonitorType] = useState("status");
   const { handleSubmit } = useForm<AddMonitorFormValues>({

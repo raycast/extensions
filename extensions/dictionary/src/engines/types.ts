@@ -9,7 +9,7 @@ export interface EngineHookProps<R, T> {
   baseUrl: string;
   fallbackSearch?: boolean;
   getDetailEngine?: EngineHookProps<object, object>;
-  getUrl: (query: string) => RequestInfo;
+  getUrl: (query: string) => string;
   getOpts?: (query: string, to: LanguageCode, apiKey?: string, from?: LanguageCode) => RequestInit;
   parseTTS?: (query: string, transCode: LanguageCode, data: R) => Promise<[string, string?]>;
   parseData: (data: R) => DefsBody<T>;

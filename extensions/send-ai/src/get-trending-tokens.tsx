@@ -109,10 +109,10 @@ const GetTrendingTokens = () => {
     loadTrendingTokens();
   }, []);
 
-  async function loadTrendingTokens() {
+  async function loadTrendingTokens(isReload: boolean = false) {
     try {
       setIsLoading(true);
-      const result = await executeAction("getTrendingTokens", {}, true, 1000 * 60 * 5);
+      const result = await executeAction("getTrendingTokens", {}, !isReload, 1000 * 60 * 5);
       setTokens(result.data as Token[]);
     } catch (error) {
       console.error(error);
@@ -158,7 +158,7 @@ const GetTrendingTokens = () => {
               <Action.Push title="Buy" target={<BuyTokenForm arguments={{ outputMint: token.address }} />} />
               {!selectedToken && <Action title="Show Details" onAction={() => setSelectedToken(token)} />}
               <Action title="Hide Details" onAction={() => setSelectedToken(null)} />
-              <Action title="Refresh" onAction={loadTrendingTokens} />
+              <Action title="Refresh" onAction={() => loadTrendingTokens(true)} />
             </ActionPanel>
           }
         />

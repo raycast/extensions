@@ -1,3 +1,7 @@
+import type { components } from "@octokit/openapi-types";
+
+export type TreeType = components["schemas"]["git-tree"]["tree"][number];
+
 export interface TopicType {
   name: string;
   sha: string;
@@ -5,10 +9,4 @@ export interface TopicType {
   path: string;
   filepath: string;
   title: string;
-}
-
-export interface TreeType {
-  path: string;
-  type: string;
-  sha: string;
 }

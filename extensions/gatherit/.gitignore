@@ -1,0 +1,9 @@
+node_modules
+dist
+.raycast-swift-build
+.swiftpm
+raycast-env.d.ts
+*.log
+# Raycast requires npm (package-lock.json) and rejects pnpm lockfiles
+# ("pnpm is not supported"). Manage this package with npm; never commit this.
+pnpm-lock.yaml

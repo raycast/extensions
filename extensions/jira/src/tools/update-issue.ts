@@ -11,74 +11,20 @@ type Input = {
   /** The ID or key of the issue to update */
   issueIdOrKey: string;
 
-  /**
-   * Direct field updates - use this for simple value replacements.
-   * Fields specified here cannot also be in the 'update' property.
-   * @example
-   * ```typescript
-   * // Simple update of summary and due date
-   * fields: {
-   *   summary: "New title",
-   *   duedate: "2024-03-15"
-   * }
-   * ```
-   */
-  fields?: {
-    /** The title/summary of the issue */
-    summary?: string;
-    /** The description of the issue in markdown format */
-    description?: string;
-    /** The due date of the issue in ISO date format (e.g., '2023-12-31') */
-    duedate?: string;
-  };
+  /** The new title/summary of the issue */
+  summary?: string;
 
-  /**
-   * Field updates that require multiple operations.
-   * Fields specified here cannot also be in the 'fields' property.
-   * @example
-   * ```typescript
-   * update: {
-   *   labels: [
-   *     { add: "important" },
-   *     { add: "urgent" },
-   *     { remove: "backlog" }
-   *   ],
-   *   summary: [
-   *     { set: "[URGENT] Bug in payment system" }
-   *   ],
-   *   description: [
-   *     { set: "# Issue Description\n\nThis is a critical bug..." }
-   *   ],
-   *   duedate: [
-   *     { set: "2024-03-15" }
-   *   ]
-   * }
-   * ```
-   */
-  update?: {
-    /** Labels to add or remove */
-    labels?: Array<{
-      /** Add a label */
-      add?: string;
-      /** Remove a label */
-      remove?: string;
-    }>;
-    /** Summary updates */
-    summary?: Array<{
-      /** Set a new summary */
-      set: string;
-    }>;
-    /** Description updates */
-    description?: Array<{
-      /** Set a new description in markdown format */
-      set: string;
-    }>;
-    /** Due date updates */
-    duedate?: Array<{
-      /** Set a new due date in ISO date format */
-      set: string;
-    }>;
-  };
+  /** The new description of the issue in markdown format */
+  description?: string;
+
+  /** The new due date of the issue in ISO date format (e.g., '2023-12-31') */
+  dueDate?: string;
+
+  /** Comma-separated list of labels to add to the issue */
+  addLabels?: string;
+
+  /** Comma-separated list of labels to remove from the issue */
+  removeLabels?: string;
 
   /** The confirmation object to be displayed to the user */
   confirmation: {
@@ -88,89 +34,42 @@ type Input = {
 
 /**
  * Update a Jira issue's fields and properties
- * @example
- * ```typescript
- * // Example 1: Simple field updates
- * {
- *   issueIdOrKey: "ABC-123",
- *   fields: {
- *     summary: "New title",
- *     description: "# New Description\n\nUpdated content",
- *     duedate: "2024-03-15"
- *   }
- * }
- *
- * // Example 2: Complex updates with multiple operations
- * {
- *   issueIdOrKey: "ABC-123",
- *   update: {
- *     labels: [
- *       { add: "important" },
- *       { add: "urgent" },
- *       { remove: "backlog" }
- *     ],
- *     summary: [
- *       { set: "[URGENT] Bug in payment system" }
- *     ],
- *     description: [
- *       { set: "# Critical Issue\n\nThis needs immediate attention" }
- *     ]
- *   }
- * }
- * ```
  */
 export default withAccessToken(jira)(async function (input: Input) {
-  const { issueIdOrKey, fields = {}, update = {} } = input;
+  const { issueIdOrKey, summary, description, dueDate, addLabels, removeLabels } = input;
 
-  const body: { fields?: Record<string, unknown>; update?: Record<string, unknown[]> } = {};
+  const body: { update: Record<string, unknown[]> } = { update: {} };
 
-  // Handle direct field updates
-  if (Object.keys(fields).length > 0) {
-    body.fields = {};
+  if (summary) {
+    body.update.summary = [{ set: summary }];
+  }
 
-    if (fields.summary) {
-      body.fields.summary = fields.summary;
+  if (description) {
+    body.update.description = [{ set: markdownToAdf(description) }];
+  }
+
+  if (dueDate) {
+    body.update.duedate = [{ set: dueDate }];
+  }
+
+  if (addLabels || removeLabels) {
+    body.update.labels = [];
+    if (addLabels) {
+      addLabels
+        .split(",")
+        .map((l) => l.trim())
+        .forEach((label) => body.update.labels.push({ add: label }));
     }
-
-    if (fields.description) {
-      body.fields.description = markdownToAdf(fields.description);
-    }
-
-    if (fields.duedate) {
-      body.fields.duedate = fields.duedate;
+    if (removeLabels) {
+      removeLabels
+        .split(",")
+        .map((l) => l.trim())
+        .forEach((label) => body.update.labels.push({ remove: label }));
     }
   }
 
-  // Handle update operations
-  if (Object.keys(update).length > 0) {
-    body.update = {};
-
-    if (update.labels?.length) {
-      body.update.labels = update.labels
-        .filter((label) => label.add || label.remove)
-        .map((label) => ({
-          add: label.add,
-          remove: label.remove,
-        }));
-    }
-
-    if (update.summary?.length) {
-      body.update.summary = update.summary.map((op) => ({
-        set: op.set,
-      }));
-    }
-
-    if (update.description?.length) {
-      body.update.description = update.description.map((op) => ({
-        set: markdownToAdf(op.set),
-      }));
-    }
-
-    if (update.duedate?.length) {
-      body.update.duedate = update.duedate.map((op) => ({
-        set: op.set,
-      }));
-    }
+  if (Object.keys(body.update).length === 0) {
+    throw new Error("No updates provided");
   }
 
   return updateIssue(issueIdOrKey, body);
@@ -182,35 +81,24 @@ export const confirmation = withAccessToken(jira)(async (input: Input) => {
     { name: "Key", value: input.issueIdOrKey },
   ];
 
-  // Add new values info (from either fields or update)
-  if (input.fields?.summary || input.update?.summary) {
-    info.push({
-      name: "New Summary",
-      value: input.fields?.summary || input.update?.summary?.[0].set || "",
-    });
+  if (input.summary) {
+    info.push({ name: "New Summary", value: input.summary });
   }
 
-  if (input.fields?.description || input.update?.description) {
-    info.push({
-      name: "New Description",
-      value: input.fields?.description || input.update?.description?.[0].set || "",
-    });
+  if (input.description) {
+    info.push({ name: "New Description", value: input.description });
   }
 
-  if (input.fields?.duedate || input.update?.duedate) {
-    info.push({
-      name: "New Due Date",
-      value: input.fields?.duedate || input.update?.duedate?.[0].set || "",
-    });
+  if (input.dueDate) {
+    info.push({ name: "New Due Date", value: input.dueDate });
   }
 
-  if (input.update?.labels) {
-    const additions = input.update.labels.filter((l) => l.add).map((l) => l.add);
-    const removals = input.update.labels.filter((l) => l.remove).map((l) => l.remove);
-    info.push({
-      name: "Label Changes",
-      value: [...additions.map((label) => `+${label}`), ...removals.map((label) => `-${label}`)].join(", "),
-    });
+  if (input.addLabels) {
+    info.push({ name: "Adding Labels", value: input.addLabels });
+  }
+
+  if (input.removeLabels) {
+    info.push({ name: "Removing Labels", value: input.removeLabels });
   }
 
   return { info };

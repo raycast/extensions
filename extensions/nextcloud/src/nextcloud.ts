@@ -1,8 +1,6 @@
-import { environment, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { XMLParser } from "fast-xml-parser";
-import fetch, { AbortError } from "node-fetch";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { getPreferences } from "./preferences";
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, BASE_URL } from "./config";
 type Fetcher<R> = (signal: AbortSignal) => Promise<R>;
@@ -52,7 +50,7 @@ export function useQuery<R>(fetcher: Fetcher<R>, deps: React.DependencyList = []
           isLoading: false,
         }));
 
-        if (error instanceof AbortError) {
+        if ((error as Error).name === "AbortError") {
           return;
         }
 
@@ -61,7 +59,7 @@ export function useQuery<R>(fetcher: Fetcher<R>, deps: React.DependencyList = []
         showToast({ style: Toast.Style.Failure, title: "API request failed", message: String(error) });
       }
     },
-    [cancelRef, setState, fetcher]
+    [cancelRef, setState, fetcher],
   );
 
   useEffect(() => {
@@ -91,14 +89,11 @@ export async function webdavRequest({
   base?: string;
   method: string;
 }) {
-  const { hostname, username, password } = getPreferences();
-
-  const response = await fetch(`https://${hostname}/remote.php/dav/${encodeURI(base)}`, {
+  const response = await fetch(`${BASE_URL}/remote.php/dav/${encodeURI(base)}`, {
     method,
     headers: {
-      "User-Agent": `Raycast/${environment.raycastVersion}`,
+      ...API_HEADERS,
       "Content-Type": "text/xml",
-      Authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
     },
     body,
     signal,
@@ -108,6 +103,7 @@ export async function webdavRequest({
   const parser = new XMLParser();
   const dom = parser.parse(responseBody);
   if (!("d:multistatus" in dom)) {
+    if (dom["d:error"]?.["s:message"]) throw new Error(dom["d:error"]["s:message"]);
     throw new Error("Invalid response: " + responseBody);
   }
 

@@ -48,6 +48,10 @@ export class LanguageAdaptor {
     }
   }
 
+  hasHandlers() {
+    return this.langHandlers.size > 0;
+  }
+
   registerLang(lang: string, handler: LanguageHandler) {
     if (this.langHandlers.has(lang)) {
       return;

@@ -1,30 +1,24 @@
-import { useState } from "react";
-import { LoggedMonth } from "./domain/loggedDay/LoggedMonth";
-import { List } from "@raycast/api";
-import { getLoggedMonthsUseCaseFactory } from "./factories/getLoggedMonthsUseCaseFactory";
-import { getDailyLogsForMonthUseCaseFactory } from "./factories/getDailyLogsForMonthUseCaseFactory";
-import { useAI } from "@raycast/utils";
+import { monthSummaryPrompt } from "./ai/prompts";
+import { PeriodSummaryList } from "./components/PeriodSummaryList";
+import { useLogsData } from "./components/useLogsData";
+import { getLoggedMonthsUseCaseFactory } from "./factories/useCases";
+import { toDateKey } from "./shared/dates";
 
 export default function Command() {
-  const [items] = useState<LoggedMonth[]>(getLoggedMonthsUseCaseFactory().execute());
+  const { data: months = [], isLoading } = useLogsData(() => getLoggedMonthsUseCaseFactory().execute(), []);
 
   return (
-    <List isShowingDetail>
-      {items.map((item) => (
-        <List.Item key={item.date.toISOString()} title={item.title} detail={<Detail date={item.date} />} />
-      ))}
-    </List>
+    <PeriodSummaryList
+      isLoading={isLoading}
+      emptyTitle="No logged months yet"
+      periods={months.map((month) => ({
+        key: toDateKey(month.date),
+        title: month.title,
+        from: month.date,
+        to: month.lastDay,
+      }))}
+      reportTitle={(period) => `Summary of ${period.title}`}
+      prompt={(period, logs, instructions) => monthSummaryPrompt(period.from, logs, instructions)}
+    />
   );
-
-  function Detail(props: { date: Date }) {
-    const dailyLogs = getDailyLogsForMonthUseCaseFactory().execute(props.date);
-    const monthTitle = props.date.toLocaleDateString("en-US", { month: "long" });
-    const { isLoading, data } = useAI(
-      dailyLogs.reduce((acc, item) => {
-        return acc + `${item.title}\n`;
-      }, `Was I productive? Make a quick summary gruping the core things I've worked on whole month of ${monthTitle}, ${props.date.getFullYear()}, based on this list:\n\n`)
-    );
-
-    return <List.Item.Detail isLoading={isLoading} markdown={data} />;
-  }
 }

@@ -1,11 +1,14 @@
 import {
+  Action,
+  ActionPanel,
   Color,
+  Detail,
   getPreferenceValues,
   Grid,
   Icon,
   openCommandPreferences,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { IconActions } from "./components/icon-actions.tsx";
 import { search } from "./helpers/api.ts";
 import { Store } from "./helpers/store.ts";
@@ -20,35 +23,41 @@ export default function SearchIconsCommand() {
 
   const { debouncedValue: searchText, setValue } = useDebounce("", 400);
 
-  const { isLoading, data, pagination } = useCachedPromise(
+  const { isLoading, data, pagination, error } = useCachedPromise(
     (searchText: string) => async (options: { page: number }) => {
-      try {
-        const response = await search(
-          preferences.apiKey,
-          options.page,
-          searchText,
-        );
+      const response = await search(
+        preferences.apiKey,
+        options.page,
+        searchText,
+      );
 
-        return {
-          data: response.hits,
-          hasMore: response.page < response.totalPages,
-        };
-      } catch (error) {
-        showFailureToast(error, {
-          title: "Could not load icons",
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: () => openCommandPreferences(),
-          },
-        });
-        return { data: [], hasMore: false };
-      }
+      return {
+        data: response.hits,
+        hasMore: response.page < response.totalPages,
+      };
     },
     [searchText],
     {
       keepPreviousData: true,
     },
   );
+
+  if (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return (
+      <Detail
+        markdown={`# Error Loading Icons\n\n${errorMessage}`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Preferences"
+              onAction={openCommandPreferences}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
     <Grid

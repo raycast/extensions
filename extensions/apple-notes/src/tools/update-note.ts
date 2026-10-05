@@ -1,7 +1,8 @@
 import { setNoteBody } from "../api/applescript";
+import { resolveAppleNoteId } from "../helpers";
 
 type Input = {
-  /** The ID of the note to get the content of */
+  /** The note identifier. Use the "id" value from search-notes when possible. */
   noteId: string;
   /**
    * The content of the note to create, formatted as HTML, so that it can be pasted into Apple Notes.
@@ -26,6 +27,7 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  const note = await setNoteBody(input.noteId, input.content);
+  const noteId = await resolveAppleNoteId(input.noteId);
+  const note = await setNoteBody(noteId, input.content);
   return note;
 }

@@ -1,6 +1,5 @@
-import { SingleNote } from "@hackmd/api/dist/type";
-import { AxiosResponse } from "axios";
-import { Action, Tool } from "@raycast/api";
+import type { AxiosResponse } from "axios";
+import { Action, type Tool } from "@raycast/api";
 import api from "../lib/api";
 
 type UpdateNoteArgs = {
@@ -20,11 +19,11 @@ type UpdateNoteArgs = {
   /**
    * Updated read permission level
    */
-  readPermission?: SingleNote["readPermission"];
+  readPermission?: "owner" | "signed_in" | "guest";
   /**
    * Updated write permission level
    */
-  writePermission?: SingleNote["writePermission"];
+  writePermission?: "owner" | "signed_in" | "guest";
 };
 
 export const confirmation: Tool.Confirmation<UpdateNoteArgs> = async (input) => {
@@ -52,9 +51,8 @@ export default async function tool(args: UpdateNoteArgs): Promise<AxiosResponse>
 
   // If teamPath is provided, update a team note, otherwise update a personal note
   if (teamPath) {
-    return api.updateTeamNote(teamPath, noteId, updateData);
-  } else {
-    // workaround for type mismatch
-    return api.updateNote(noteId, updateData) as unknown as AxiosResponse;
+    return api.updateTeamNote(teamPath, noteId, updateData as Parameters<typeof api.updateTeamNote>[2]);
   }
+  // workaround for type mismatch
+  return api.updateNote(noteId, updateData as Parameters<typeof api.updateNote>[1]) as unknown as AxiosResponse;
 }

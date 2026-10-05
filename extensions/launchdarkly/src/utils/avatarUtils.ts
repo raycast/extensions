@@ -1,8 +1,13 @@
-import { LDMaintainer } from "../types";
+interface NamedMember {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
 
-export const getFullName = (maintainer: LDMaintainer): string => {
-  if (maintainer.firstName || maintainer.lastName) {
-    return `${maintainer.firstName ?? ""} ${maintainer.lastName ?? ""}`.trim();
+/** "First Last", falling back to the email and finally an empty string. */
+export const getFullName = (member: NamedMember): string => {
+  if (member.firstName || member.lastName) {
+    return `${member.firstName ?? ""} ${member.lastName ?? ""}`.trim();
   }
-  return maintainer.email;
+  return member.email ?? "";
 };

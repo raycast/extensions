@@ -1,5 +1,5 @@
 import { Cache, Clipboard, MenuBarExtra, open, openCommandPreferences, updateCommandMetadata } from "@raycast/api";
-import { OPEN_METEO } from "./utils/axios-utils";
+import { OPEN_METEO, isValidWeatherResponse } from "./utils/axios-utils";
 import { CacheKey, getDateIcon, getMenuItem, getUnits, isoToDateTime, isoToTime, timeHour } from "./utils/common-utils";
 import { getMenuIcon, getWeatherIcon } from "./utils/icon-utils";
 import {
@@ -22,14 +22,24 @@ export default function MenubarWeather() {
   const { data: weatherData, isLoading } = useLatestWeather(kLocation);
 
   const weather: OpenMeteoWeather | undefined = useMemo(() => {
-    if (!weatherData) {
-      const cache = new Cache();
-      const cacheStr = cache.get(CacheKey.LATEST_WEATHER);
-      if (cacheStr) {
-        return JSON.parse(cacheStr) as OpenMeteoWeather;
+    // useCachedPromise with keepPreviousData can hand back stale data, so
+    // validate it before use and only then fall back to the cached payload.
+    if (isValidWeatherResponse(weatherData)) {
+      return weatherData;
+    }
+    const cache = new Cache();
+    const cacheStr = cache.get(CacheKey.LATEST_WEATHER);
+    if (cacheStr) {
+      try {
+        const cachedWeather = JSON.parse(cacheStr) as unknown;
+        if (isValidWeatherResponse(cachedWeather)) {
+          return cachedWeather;
+        }
+      } catch {
+        // Ignore a corrupt cache entry.
       }
     }
-    return weatherData;
+    return undefined;
   }, [weatherData]);
 
   const menuItems: string[] = useMemo(() => {

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bang-dream-screenshot-search",
+  "title": "BanG Dream! Screenshot Search",
+  "description": "Search and copy dialogue screenshots from MyGO!!!!! and Ave Mujica.",
+  "icon": "icon.png",
+  "author": "luke_lin",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "keywords": [
+    "bang dream",
+    "mygo",
+    "ave mujica",
+    "anime",
+    "screenshot",
+    "reaction image",
+    "meme"
+  ],
+  "commands": [
+    {
+      "name": "search-screenshots",
+      "title": "Search Screenshots",
+      "subtitle": "BanG Dream!",
+      "description": "Search BanG Dream! dialogue screenshots and copy images to the clipboard.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "sync-data": "node scripts/sync-data.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

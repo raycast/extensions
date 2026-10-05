@@ -1,5 +1,13 @@
 # OpenAI Generator Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Maintenance] - 2026-03-16
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [AbortController fix] - 2023-08-10
 
 - Updated the API calls to OpenAI to use AbortController signals

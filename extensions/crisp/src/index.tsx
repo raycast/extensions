@@ -49,12 +49,48 @@ Do you already have installed the Crisp plugin? This extension works by installi
 
 `;
 
+type ConversationItem = {
+  site?: {
+    domain: string;
+  };
+  conversation: {
+    session_id: string;
+    website_id: string;
+    last_message: string;
+    updated_at: number;
+    unread?: {
+      operator: number;
+      visitor: number;
+    };
+    meta: {
+      nickname: string;
+      email: string;
+      device?: {
+        geolocation?: {
+          country: string;
+        };
+      };
+      segments?: string[];
+    };
+  };
+};
+
+type ConversationsResponse =
+  | {
+      ok: boolean;
+      conversations: ConversationItem[];
+    }
+  | {
+      ok: false;
+      conversations: undefined;
+    };
+
 export function Command() {
   const {
     data,
     isLoading: isFetching,
     isValidating,
-  } = useSWR(["conversations"], async () => {
+  } = useSWR(["conversations"], async (): Promise<ConversationsResponse> => {
     const { session } = await getSupabaseWithSession();
     if (!session) {
       return {
@@ -73,7 +109,7 @@ export function Command() {
       throw new Error(await res.text());
     }
 
-    const json = res.json();
+    const json = (await res.json()) as ConversationsResponse;
 
     return json;
   });
@@ -109,7 +145,7 @@ export function Command() {
         return (
           <List.Item
             key={i}
-            title={getFlagEmoji(country) + "  " + nickname}
+            title={getFlagEmoji(country ?? "") + "  " + nickname}
             subtitle={conversation?.last_message || ""}
             icon={icon}
             keywords={[

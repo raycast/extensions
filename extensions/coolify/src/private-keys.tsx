@@ -4,6 +4,7 @@ import { PrivateKey } from "./lib/types";
 import useCoolify from "./lib/use-coolify";
 import { isValidCoolifyUrl } from "./lib/utils";
 import { useState } from "react";
+import OpenInCoolify from "./lib/components/open-in-coolify";
 
 export default function PrivateKeys() {
   if (!isValidCoolifyUrl()) return <InvalidUrl />;
@@ -30,6 +31,8 @@ export default function PrivateKeys() {
                   onAction={() => setIsShowingDetail((prev) => !prev)}
                 />
                 <Action.CopyToClipboard title="Copy Private Key to Clipboard" content={key.private_key} />
+                <Action.CopyToClipboard title="Copy Public Key to Clipboard" content={key.public_key} />
+                <OpenInCoolify url={`private-key/${key.id}`} />
               </ActionPanel>
             }
           />

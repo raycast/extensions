@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { updateType } from "../../api";
 import { useProperties } from "../../hooks";
 import {
@@ -34,14 +34,20 @@ interface UpdateTypeFormProps {
 
 export function UpdateTypeForm({ spaceId, type, mutateTypes }: UpdateTypeFormProps) {
   const { pop } = useNavigation();
-  const [loading, setLoading] = useState(false);
-  const { properties } = useProperties(spaceId);
+  const [isLoading, setIsLoading] = useState(false);
+  const { properties, propertiesError, isLoadingProperties } = useProperties(spaceId);
+
+  useEffect(() => {
+    if (propertiesError) {
+      showFailureToast(propertiesError, { title: "Failed to load properties" });
+    }
+  }, [propertiesError]);
 
   const initialValues: UpdateTypeFormValues = {
     name: type.name,
     plural_name: type.plural_name,
-    iconName: type.icon.format === IconFormat.Icon ? type.icon.name : IconName.Document,
-    iconColor: type.icon.format === IconFormat.Icon ? type.icon.color : Color.Grey,
+    iconName: type.icon?.format === IconFormat.Icon ? type.icon.name : IconName.Document,
+    iconColor: type.icon?.format === IconFormat.Icon ? type.icon.color : Color.Grey,
     layout: type.layout,
     properties: type.properties?.map((p) => p.key) || [],
     key: type.key,
@@ -50,7 +56,7 @@ export function UpdateTypeForm({ spaceId, type, mutateTypes }: UpdateTypeFormPro
   const { handleSubmit, itemProps } = useForm<UpdateTypeFormValues>({
     initialValues,
     onSubmit: async (values) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         await showToast({ style: Toast.Style.Animated, title: "Updating type..." });
 
@@ -84,7 +90,7 @@ export function UpdateTypeForm({ spaceId, type, mutateTypes }: UpdateTypeFormPro
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update type" });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     validation: {
@@ -102,7 +108,7 @@ export function UpdateTypeForm({ spaceId, type, mutateTypes }: UpdateTypeFormPro
   return (
     <Form
       navigationTitle="Edit Type"
-      isLoading={loading}
+      isLoading={isLoading || isLoadingProperties}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />

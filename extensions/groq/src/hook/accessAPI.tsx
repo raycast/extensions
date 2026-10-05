@@ -1,36 +1,37 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
 import { Stream } from "openai/streaming";
-import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
-import { ResultViewProps } from "./ResultView.types";
+import {
+  allModels,
+  countToken,
+  estimatePrice,
+  formatUserMessage,
+  isThinkingModel,
+  buildSystemPrompt,
+  buildUserPrompt,
+} from "./utils";
+import { ResultViewProps, Metrics } from "./ResultView.types";
 import { OpenAIError } from "openai";
-
-const formatUserMessage = (message: string): string =>
-  message
-    .split("\n")
-    .map((line) => `>${line}`)
-    .join("\n");
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<Metrics>({
     promptTokens: 0,
     responseTokens: 0,
-    cumulativeTokens: 0,
-    cumulativeCost: 0,
     model: model_override === "global" ? global_model : model_override,
     temp: temperature ?? 0.7,
   });
 
-  async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
-    const fullSysPrompt = `Current date: ${currentDate}.\n\n${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
+  // Memoized chat response function
+  const getChatResponse = useCallback(async (sysPrompt: string, selectedText: string, model: string, temp: number) => {
+    const fullSysPrompt = buildSystemPrompt(sysPrompt);
+    const userPrompt = buildUserPrompt(user_extra_msg, selectedText);
     try {
-      const response = await openai.chat.completions.create({
-        model,
+      const res = await openai.chat.completions.create({
+        model: model,
         messages: [
           { role: "system", content: fullSysPrompt },
           { role: "user", content: userPrompt },
@@ -39,79 +40,113 @@ export default function ResultView(props: ResultViewProps) {
         stream: enable_streaming,
       });
       setMetrics((m) => ({ ...m, promptTokens: countToken(fullSysPrompt + userPrompt) }));
-      return response;
+      return res;
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
       setLoading(false);
       setResponse(`## ⚠️ API Error\n\`\`\`${(error as Error).message}\`\`\``);
-      return;
     }
-  }
+  }, []);
 
-  async function getResult(newModel?: string, newTemp?: number) {
-    const startTime = Date.now();
-    const toast = await showToast(Toast.Style.Animated, toast_title);
+  const getResult = useCallback(
+    async (newModel?: string, newTemp?: number) => {
+      setLoading(true);
+      const toast = await showToast(Toast.Style.Animated, toast_title);
+      const startTime = Date.now();
 
-    try {
-      let selectedText = selected_text;
-      if (selectedText === undefined) {
-        try {
-          selectedText = await getSelectedText();
-        } catch (error) {
-          console.log(error);
-          await showToast({ style: Toast.Style.Failure, title: "Error" });
-          setLoading(false);
-          setResponse(
-            "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again.",
-          );
-          return;
+      try {
+        let selectedText = selected_text;
+        if (selectedText === undefined) {
+          try {
+            selectedText = await getSelectedText();
+          } catch (error) {
+            console.log(error);
+            await showToast({ style: Toast.Style.Failure, title: "Error" });
+            setLoading(false);
+            setResponse(
+              "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again.",
+            );
+            return;
+          }
         }
-      }
 
-      const model = newModel || metrics.model;
-      const temp = newTemp ?? metrics.temp;
-      setMetrics((m) => ({ ...m, model, temp }));
-      const response = await getChatResponse(sys_prompt, selectedText, model, temp);
-      if (!response) return;
+        const model = newModel || metrics.model;
+        const temp = newTemp ?? metrics.temp;
+        setMetrics((m) => ({ ...m, model: model, temp: temp }));
+        const response = await getChatResponse(sys_prompt, selectedText, model, temp);
+        if (!response) return;
 
-      let responseContent = "";
-      const updateResponse = (part: string) => {
-        responseContent += part;
-        setResponse(responseContent);
-        setMetrics((m) => ({ ...m, responseTokens: countToken(responseContent) }));
-      };
+        const closingTag = "</think>";
+        const closingLen = closingTag.length;
 
-      if (response instanceof Stream) {
-        for await (const part of response) {
-          updateResponse(part.choices[0]?.delta?.content ?? "");
+        let startedOutput = !isThinkingModel(model);
+        let searchBuffer = ""; // rolling buffer to detect closingTag across chunk boundaries
+
+        const processChunk = (part: string) => {
+          if (!part) return;
+
+          // count tokens
+          setMetrics((m) => ({ ...m, responseTokens: m.responseTokens + countToken(part) }));
+
+          if (!startedOutput) {
+            const combined = searchBuffer + part;
+            const idx = combined.indexOf(closingTag);
+            if (idx !== -1) {
+              startedOutput = true;
+              const after = combined.slice(idx + closingLen);
+              setResponse(after);
+              searchBuffer = "";
+            } else {
+              setResponse((prev) => prev + part);
+              // detect closingTag across chunk boundaries
+              const keep = Math.min(combined.length, closingLen - 1);
+              searchBuffer = combined.slice(combined.length - keep);
+            }
+            return;
+          }
+
+          // past closingTag or non-thinking model -> append directly
+          setResponse((prev) => prev + part);
+        };
+
+        if (response instanceof Stream) {
+          for await (const part of response) {
+            processChunk(part.choices[0]?.delta?.content ?? "");
+          }
+        } else {
+          const whole = response.choices[0]?.message?.content ?? "";
+          // count tokens
+          setMetrics((m) => ({ ...m, responseTokens: m.responseTokens + countToken(whole) }));
+
+          if (isThinkingModel(model)) {
+            const idx = whole.indexOf(closingTag);
+            const visible = idx === -1 ? "" : whole.slice(idx + closingLen);
+            setResponse(visible);
+          } else {
+            setResponse(whole);
+          }
         }
-      } else {
-        updateResponse(response.choices[0]?.message?.content ?? "");
-      }
 
-      const duration = (Date.now() - startTime) / 1000;
-      toast.style = Toast.Style.Success;
-      toast.title = `Finished in ${duration.toFixed(1)}s`;
-
-      setMetrics((m) => ({
-        ...m,
-        cumulativeTokens: m.cumulativeTokens + m.promptTokens + m.responseTokens,
-        cumulativeCost: m.cumulativeCost + estimatePrice(m.promptTokens, m.responseTokens, model),
-      }));
-    } catch (error) {
-      if (error instanceof OpenAIError) {
-        setResponse(`## ⚠️ API Error\n\`\`\`${error.message}\`\`\``);
-      } else {
-        setResponse("⚠️ Unexpected error. Please check your input and connection.");
+        const duration = (Date.now() - startTime) / 1000;
+        toast.style = Toast.Style.Success;
+        toast.title = `Finished in ${duration.toFixed(1)}s`;
+      } catch (error) {
+        if (error instanceof OpenAIError) {
+          setResponse(`## ⚠️ API Error\n\`\`\`${error.message}\`\`\``);
+        } else {
+          setResponse("⚠️ Unexpected error. Please check your input and connection.");
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }
+    },
+    [metrics.model, metrics.temp],
+  );
 
   function handleRetry(options: { newModel?: string; newTemp?: number }) {
     setResponse("");
     setLoading(true);
+    setMetrics((m) => ({ ...m, responseTokens: 0 }));
     getResult(options.newModel, options.newTemp);
   }
 
@@ -119,28 +154,21 @@ export default function ResultView(props: ResultViewProps) {
     getResult();
   }, []);
 
-  const markdownSegments = [];
+  let markdown = "";
   if (user_extra_msg) {
-    markdownSegments.push(formatUserMessage(user_extra_msg) + "\n\n");
+    markdown += formatUserMessage(user_extra_msg) + "\n\n";
   }
-  if (metrics.model.includes("deepseek") || metrics.model.includes("qwen-qwq")) {
-    const splitResponse = response.split("</think>");
-    const thinkSegment = splitResponse[0].replace("<think>", "");
-    markdownSegments.push("Thinking:\n ```" + thinkSegment + "```");
-    markdownSegments.push(splitResponse[1]);
-  } else {
-    markdownSegments.push(response);
-  }
+  markdown += response;
 
   return (
     <Detail
       isLoading={loading}
-      markdown={markdownSegments.join("")}
+      markdown={markdown}
       actions={
         !loading && (
           <ActionPanel title="Actions">
-            <Action.CopyToClipboard title="Copy Results" content={response} />
-            <Action.Paste title="Paste Results" content={response} />
+            <Action.CopyToClipboard title="Copy Results" content={response.trim()} />
+            <Action.Paste title="Paste Results" content={response.trim()} />
             <Action
               title="Retry"
               icon={Icon.Repeat}
@@ -152,7 +180,7 @@ export default function ResultView(props: ResultViewProps) {
               icon={Icon.ArrowNe}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             >
-              {changeModels
+              {allModels
                 .filter((m) => m.id !== metrics.model && m.id !== "global")
                 .map((m) => (
                   <Action
@@ -194,7 +222,7 @@ export default function ResultView(props: ResultViewProps) {
       metadata={
         show_metadata && (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Model" text={changeModels.filter((m) => m.id === metrics.model)[0].name} />
+            <Detail.Metadata.Label title="Model" text={allModels.filter((m) => m.id === metrics.model)[0].name} />
             <Detail.Metadata.Label title="Temperature" text={metrics.temp.toFixed(2)} />
             <Detail.Metadata.Label title="Prompt Tokens" text={metrics.promptTokens.toString()} />
             <Detail.Metadata.Label title="Response Tokens" text={metrics.responseTokens.toString()} />
@@ -207,9 +235,6 @@ export default function ResultView(props: ResultViewProps) {
               title="Total Cost"
               text={`${estimatePrice(metrics.promptTokens, metrics.responseTokens, metrics.model).toFixed(4)}¢`}
             />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Cumulative Tokens" text={metrics.cumulativeTokens.toString()} />
-            <Detail.Metadata.Label title="Cumulative Cost" text={`${metrics.cumulativeCost.toFixed(4)}¢`} />
           </Detail.Metadata>
         )
       }

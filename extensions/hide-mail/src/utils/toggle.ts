@@ -1,5 +1,4 @@
 import { getApiKey } from "./key";
-import fetch, { Response } from "node-fetch";
 import { showToast, Toast } from "@raycast/api";
 import { API_URL, getHeaders } from "../config";
 

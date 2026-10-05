@@ -129,150 +129,13 @@ A user can use multiple AI Extensions in a conversation. Therefore, you should m
 
 Evals are a way to test your AI extension. Think of them as integrations tests. They are defined in the [`package.json` file](../information/manifest.md) under the `ai` key. They are also used as suggested prompts for the user to learn how to make the most out of your AI Extension.
 
-## Structure
-
-An eval consists of the following parts:
-
-- `input` is a text prompt that you expect from users of your AI Extension. It should include `@` mention the name of your extension (`name` from `package.json`).
-- `mocks` – mocked results of tool calls. It is required to give AI the context, i.e. if you write an eval for `@todo-list What are my todos?` you need to provide the actual list in `get-todos` mock.
-- `expected` – array of expectations, similar to `expect` statements in unit / integration tests.
-- `usedAsExample` – if true, the eval will be used as an example prompt for the user. True by default.
-
-## Expectations
-
-Expectations are used to check if the AI response matches the expected behavior. You have different options to choose from:
-
-- `includes`: Check that AI response includes some substring (case-insensitive), for example `{"includes": "added" }`
-- `matches`: Check that AI response matches some regexp, for example check if response contains a Markdown link `{ "matches": "\\[([^\\]]+)\\]\\(([^\\s\\)]+)(?:\\s+\"([^\"]+)\")?\\)" }`
-- `meetsCriteria`: Check that AI response meets some plain-text criteria (validated using AI). Useful when AI varies the response and it is hard to match it using `includes` or `matches`. Example: `{ "meetsCriteria": "Tells that label with this name doesn't exist" }`
-- `callsTool`: Check that during the request AI called some tool included from your AI extension. There are two forms:
-  - Short form to check if AI tool with specific name was called. Example: `{ "callsTool": "get-todos" }`
-  - Long form to check tool arguments: `{ callsTool: { name: "name", arguments: { arg1: matcher, arg2: matcher } } }`. Matches could be complex and combine any supported rules:
-    - `eq` (used by default for any value that is not object or array)
-    - `includes`
-    - `matches`
-    - `and` (used by default if array is used)
-    - `or`
-    - `not`
-
-#### Example
-
-{% tabs %}
-{% tab title="Simple Expectation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "greet",
-              "arguments": {
-                "name": "thomas"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Nested Expectations" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "create-comment",
-              "arguments": {
-                "issueId": "ISS-1",
-                "body": {
-                  "includes": "waiting for design"
-                }
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Nested Expectations With Dot Notation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "callsTool": {
-              "name": "greet",
-              "arguments": {
-                "user.name": "thomas"
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% tab title="Negative Expectation" %}
-
-```json
-{
-  "ai": {
-    "evals": [
-      {
-        "expected": [
-          {
-            "not": {
-              "callsTool": "create-issue"
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-{% endtab %}
-{% endtabs %}
+See [Evals](evals.md) to write your first eval and learn about the format, supported expectations, and suggested prompts.
 
 ## AI File
 
-If your instructions or evals start getting too long and clutter your `package.json` file, you can move them to a separate file. It can be either a `ai.json`, `ai.yaml`, or `ai.json5` file in the root of your extension next to the `package.json` file.
-
-The structure of the AI file is the same as in the `package.json` file.
+Your instructions or evals can start to become rather long and clutter your `package.json` file, for this reason, we recommend you to use a `ai.yaml` file in the root of your extension next to the `package.json` file.
 
 {% tabs %}
-{% tab title="ai.json" %}
-
-```json
-{
-  "instructions": "When you don't know the user's first name, ask for it."
-}
-```
-
-{% endtab %}
-
 {% tab title="ai.yaml" %}
 
 ```yaml
@@ -281,17 +144,4 @@ instructions: |
 ```
 
 {% endtab %}
-
-{% tab title="ai.json5" %}
-
-```json5
-{
-  instructions: "When you don't know the user's first name, ask for it.",
-}
-```
-{% endtab %}
 {% endtabs %}
-
-{% hint style="info" %}
-The AI file is optional. If you don't provide it, Raycast will use the instructions and evals from the `package.json` file. We found that [`yaml`](https://yaml.org/) and [`json5`](https://json5.org/) can be more readable for long instructions.
-{% endhint %}

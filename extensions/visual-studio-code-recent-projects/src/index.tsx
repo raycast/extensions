@@ -1,11 +1,21 @@
-import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Color,
+  Grid,
+  Icon,
+  open,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { runAppleScript, runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
-import { runAppleScriptSync } from "run-applescript";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { RemoveMethods, useRecentEntries } from "./db";
+import { RemoveMethods, useRecentEntries } from "./lib/db";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -14,32 +24,39 @@ import {
   ListOrGridEmptyView,
   ListOrGridItem,
   ListOrGridSection,
-} from "./grid-or-list";
-import { getBuildScheme } from "./lib/vscode";
-import { usePinnedEntries } from "./pinned";
+} from "./lib/grid-or-list";
+import { getBuildScheme, getVSCodeCLI } from "./lib/vscode";
+import { usePinnedEntries } from "./lib/pinned";
 import {
   build,
-  bundleIdentifier,
   closeOtherWindows,
   gitBranchColor,
   keepSectionOrder,
   layout,
+  openInNewTerminalTab,
   showGitBranch,
   terminalApp,
-} from "./preferences";
-import { EntryLike, EntryType, PinMethods } from "./types";
+} from "./lib/preferences";
+import { EntryLike, EntryType, PinMethods } from "./lib/types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
+  getErrorMessage,
   isFileEntry,
   isFolderEntry,
+  isMac,
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
+  isWin,
   isWorkspaceEntry,
-} from "./utils";
+  uppercaseWindowsDriveLetter,
+} from "./lib/utils";
+import { Shortcut } from "./lib/shortcuts";
 import { getEditorApplication } from "./utils/editor";
+import { execFilePromise } from "./utils/exec";
 import { getGitBranch } from "./utils/git";
+import { OpenInShell } from "./lib/actions";
 
 export default function Command() {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -75,7 +92,14 @@ export default function Command() {
     >
       <ListOrGridSection title="Pinned Projects">
         {pinnedEntries.filter(filterEntriesByType(type)).map((entry: EntryLike, index: number) => (
-          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} {...removeMethods} />
+          <EntryItem
+            key={`pinned-${index}`}
+            entry={entry}
+            pinned={true}
+            index={index}
+            {...pinnedMethods}
+            {...removeMethods}
+          />
         ))}
       </ListOrGridSection>
       <ListOrGridSection title="Recent Projects">
@@ -83,12 +107,20 @@ export default function Command() {
           ?.filter(filterUnpinnedEntries(pinnedEntries))
           ?.filter(filterEntriesByType(type))
           .map((entry: EntryLike, index: number) => (
-            <EntryItem key={index} entry={entry} {...pinnedMethods} {...removeMethods} />
+            <EntryItem key={index} entry={entry} index={index} {...pinnedMethods} {...removeMethods} />
           ))}
       </ListOrGridSection>
     </ListOrGrid>
   );
 }
+
+const entryTypeIcons: Partial<Record<EntryType, Icon>> = {
+  [EntryType.Workspaces]: Icon.Code,
+  [EntryType.Folders]: Icon.Folder,
+  [EntryType.RemoteFolders]: Icon.Globe,
+  [EntryType.RemoteWorkspace]: Icon.Cloud,
+  [EntryType.Files]: Icon.Document,
+};
 
 function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
   return (
@@ -98,20 +130,20 @@ function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
       storeValue
       onChange={(value) => props.onChange(value as EntryType)}
     >
-      <ListOrGridDropdownItem title="All Types" value="All Types" />
+      <ListOrGridDropdownItem title="All Types" value="All Types" icon={Icon.BulletPoints} />
       <ListOrGridDropdownSection>
         {Object.values(EntryType)
           .filter((key) => key !== "All Types")
           .sort()
           .map((key) => (
-            <ListOrGridDropdownItem key={key} title={key} value={key} />
+            <ListOrGridDropdownItem key={key} title={key} value={key} icon={entryTypeIcons[key]} />
           ))}
       </ListOrGridDropdownSection>
     </ListOrGridDropdown>
   );
 }
 
-function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & RemoveMethods) {
+function EntryItem(props: { entry: EntryLike; pinned?: boolean; index: number } & PinMethods & RemoveMethods) {
   if (isWorkspaceEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.workspace.configPath} />;
   } else if (isFolderEntry(props.entry)) {
@@ -143,15 +175,63 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
   }
 }
 
+function isWindowsTerminalApp(app: Application): boolean {
+  const name = app?.windowsAppId;
+  if (name === "Microsoft.WindowsTerminal_8wekyb3d8bbwe") return true;
+  return app.path.split(/[/\\]/).pop()?.toLowerCase() === "wt.exe";
+}
+
+async function openFolderInTerminal(terminal: Application, directory: string, newTab: boolean) {
+  // Opening a folder in Windows Terminal via file association always starts
+  // cmd; launching wt.exe directly respects the user's default profile.
+  if (isWin && isWindowsTerminalApp(terminal)) {
+    const args = newTab ? ["new-tab", "-d", directory] : ["-d", directory];
+    await execFilePromise("wt.exe", args);
+    return;
+  }
+  if (isMac && newTab && isAppleTerminalApp(terminal)) {
+    await openMacTerminalNewTab(directory);
+    return;
+  }
+  await open(directory, terminal);
+}
+
+function isAppleTerminalApp(app: Application): boolean {
+  if (app.bundleId === "com.apple.Terminal") return true;
+  return app.name.toLowerCase() === "terminal";
+}
+
+async function openMacTerminalNewTab(directory: string) {
+  const escapedDir = directory.replace(/'/g, `'\\''`);
+  await runAppleScript(`
+    tell application "Terminal"
+      activate
+      if (count of windows) = 0 then
+        do script "cd '${escapedDir}' && clear"
+      else
+        tell application "System Events" to keystroke "t" using command down
+        delay 0.3
+        do script "cd '${escapedDir}' && clear" in selected tab of front window
+      end if
+    end tell
+  `);
+}
+
 function LocalItem(
-  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean; index: number } & PinMethods &
+    RemoveMethods,
 ) {
   const name = decodeURIComponent(basename(props.uri));
-  const path = fileURLToPath(props.uri);
+  const path = uppercaseWindowsDriveLetter(fileURLToPath(props.uri));
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
   const [gitBranch, setGitBranch] = useState<string | null>(null);
+  // Stagger branch lookups down the list so dozens of git resolutions don't
+  // land at once and stall the action panel until they all settle. Top items
+  // resolve first; later ones trickle in (capped). Cached paths resolve
+  // instantly regardless of their slot.
+  const fetchDelay = 150 + Math.min(props.index * 60, 1200);
 
   const { data: editorApp } = usePromise(async () => {
     return getEditorApplication(build);
@@ -166,25 +246,42 @@ function LocalItem(
         if (mounted) {
           setGitBranch(branch);
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - they're already handled in getGitBranch
       }
     }
 
-    fetchGitBranch();
+    if (showGitBranch) {
+      // Defer past first paint so the list (and Ctrl+K) stays responsive
+      // while git processes resolve.
+      const timer = setTimeout(fetchGitBranch, fetchDelay);
+      return () => {
+        mounted = false;
+        clearTimeout(timer);
+      };
+    }
     return () => {
       mounted = false;
     };
-  }, [path, name]);
+  }, [path, name, fetchDelay]);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
   const getAction = (revert = false) => {
-    return () => {
+    return async () => {
       if (closeOtherWindows !== revert) {
-        runAppleScriptSync(`
+        if (isWin) {
+          await runPowerShellScript(`
+        $AppName = "${build}"
+
+        while (Get-Process -Name $AppName -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle}) {
+          Get-Process -Name $AppName | Where-Object {$_.MainWindowTitle} | Select-Object -First 1 | ForEach-Object {$_.CloseMainWindow()}
+        }
+          `);
+        } else {
+          await runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists
@@ -193,8 +290,10 @@ function LocalItem(
           end tell
         end tell
         `);
+        }
       }
-      open(props.uri, bundleIdentifier);
+
+      open(isWin ? path : props.uri, editorApp);
     };
   };
 
@@ -217,7 +316,7 @@ function LocalItem(
 
   return (
     <ListOrGridItem
-      id={props.pinned ? path : undefined}
+      id={path}
       title={name}
       subtitle={displaySubtitle}
       icon={{ fileIcon: path }}
@@ -232,34 +331,31 @@ function LocalItem(
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction()}
             />
-            <Action.ShowInFinder path={path} />
+            <OpenInShell path={path} shortcut={Shortcut.RevealInFileManager} />
             <Action
               title={getTitle(true)}
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction(true)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={Shortcut.AlternateOpen}
             />
-            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenWith path={path} shortcut={Shortcut.Open} />
             {isFolderEntry(props.entry) && terminalApp && (
               <Action
                 title={`Open with ${terminalApp.name}`}
                 icon={{ fileIcon: terminalApp.path }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                onAction={() =>
-                  open(path, terminalApp).catch(() =>
-                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
-                  )
-                }
+                shortcut={Shortcut.OpenInTerminal}
+                onAction={() => {
+                  if (!terminalApp) return;
+                  openFolderInTerminal(terminalApp, path, openInNewTerminalTab).catch(() =>
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`),
+                  );
+                }}
               />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            <Action.CopyToClipboard
-              title="Copy Path"
-              content={prettyPath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-            />
+            <Action.CopyToClipboard title="Copy Name" content={name} shortcut={Shortcut.Copy} />
+            <Action.CopyToClipboard title="Copy Path" content={prettyPath} shortcut={Shortcut.CopySecondary} />
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
@@ -270,12 +366,21 @@ function LocalItem(
 }
 
 function RemoteItem(
-  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean; index: number } & PinMethods &
+    RemoveMethods,
 ) {
-  const remotePath = decodeURI(basename(props.uri));
+  const remoteDisplay = getRemoteDisplay(props.entry, props.uri, props.subtitle);
+  const remoteIconPath = getRemoteFileIconPath(props.uri, getEntryRemoteAuthority(props.entry));
   const scheme = getBuildScheme();
 
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
+
+  let keywords: string[] = [];
+  if (isRemoteEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  } else if (isRemoteWorkspaceEntry(props.entry)) {
+    keywords = props.entry.remoteAuthority.split("+");
+  }
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -293,36 +398,164 @@ function RemoteItem(
     return url.toString();
   };
 
+  const openRemoteInWindows = async (revert = false) => {
+    try {
+      const cli = getVSCodeCLI();
+      const reuseWindow = closeOtherWindows !== revert;
+
+      if (isRemoteWorkspaceEntry(props.entry)) {
+        cli.openFileURISync(props.uri, reuseWindow);
+        return;
+      }
+
+      cli.openFolderURISync(props.uri, reuseWindow);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to open in ${build}`,
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
   return (
     <ListOrGridItem
-      id={props.pinned ? remotePath : undefined}
-      title={remotePath}
-      subtitle={props.subtitle || "/"}
-      icon="remote.svg"
-      content="remote.svg"
+      id={props.uri}
+      title={remoteDisplay.title}
+      subtitle={remoteDisplay.subtitle}
+      icon={remoteIconPath ? { fileIcon: remoteIconPath } : Icon.Folder}
+      content={remoteIconPath ? { fileIcon: remoteIconPath } : Icon.Folder}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl(uri)} />
-            <Action.OpenInBrowser
-              title={getTitle(true)}
-              icon="action-icon.png"
-              url={getUrl(uri, true)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            />
+            {isWin ? (
+              <>
+                <Action title={getTitle()} icon="action-icon.png" onAction={() => openRemoteInWindows()} />
+                <Action
+                  title={getTitle(true)}
+                  icon="action-icon.png"
+                  onAction={() => openRemoteInWindows(true)}
+                  shortcut={Shortcut.AlternateOpen}
+                />
+              </>
+            ) : (
+              <>
+                <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl(uri)} />
+                <Action.OpenInBrowser
+                  title={getTitle(true)}
+                  icon="action-icon.png"
+                  url={getUrl(uri, true)}
+                  shortcut={Shortcut.AlternateOpen}
+                />
+              </>
+            )}
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
-          />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
   );
+}
+
+function getRemoteDisplay(entry: EntryLike, uri: string, subtitle?: string) {
+  const fallbackTitle = getRemoteBasename(uri);
+
+  if (subtitle) {
+    return {
+      title: fallbackTitle,
+      subtitle,
+    };
+  }
+
+  const remoteAuthority = getEntryRemoteAuthority(entry);
+
+  try {
+    const remoteUri = new URL(uri);
+    const remotePath = decodeURIComponent(remoteUri.pathname);
+    const remoteName = basename(remotePath);
+    const remoteParentPath = dirname(remotePath);
+
+    return {
+      title: remoteAuthority ? `${remoteName} [${formatRemoteAuthority(remoteAuthority)}]` : remoteName,
+      subtitle: formatRemotePath(remoteParentPath, remoteAuthority),
+    };
+  } catch {
+    return {
+      title: remoteAuthority ? `${fallbackTitle} [${formatRemoteAuthority(remoteAuthority)}]` : fallbackTitle,
+      subtitle: "/",
+    };
+  }
+}
+
+function getRemoteBasename(uri: string) {
+  try {
+    return decodeURI(basename(uri));
+  } catch {
+    return basename(uri);
+  }
+}
+
+function getEntryRemoteAuthority(entry: EntryLike) {
+  if (isRemoteEntry(entry)) {
+    return entry.remoteAuthority;
+  }
+
+  if (isRemoteWorkspaceEntry(entry)) {
+    return entry.remoteAuthority;
+  }
+
+  return undefined;
+}
+
+function formatRemoteAuthority(remoteAuthority: string) {
+  if (remoteAuthority.startsWith("wsl+")) {
+    return `WSL: ${capitalizeLabel(remoteAuthority.slice(4))}`;
+  }
+
+  if (remoteAuthority.startsWith("ssh-remote+")) {
+    return `SSH: ${remoteAuthority.slice("ssh-remote+".length)}`;
+  }
+
+  return remoteAuthority;
+}
+
+function formatRemotePath(remotePath: string, remoteAuthority?: string) {
+  if (remoteAuthority?.startsWith("wsl+")) {
+    const match = remotePath.match(/^\/home\/[^/]+/);
+    const homePrefix = match?.[0];
+
+    if (homePrefix && remotePath === homePrefix) {
+      return "~";
+    }
+
+    if (homePrefix && remotePath.startsWith(`${homePrefix}/`)) {
+      return remotePath.replace(homePrefix, "~");
+    }
+  }
+
+  return remotePath || "/";
+}
+
+function capitalizeLabel(value: string) {
+  return value.length > 0 ? value[0].toUpperCase() + value.slice(1) : value;
+}
+
+function getRemoteFileIconPath(uri: string, remoteAuthority: string | undefined) {
+  if (!isWin || !remoteAuthority?.startsWith("wsl+")) {
+    return undefined;
+  }
+
+  try {
+    const remoteUri = new URL(uri);
+    const distro = decodeURIComponent(remoteAuthority.slice(4));
+    const remotePath = decodeURIComponent(remoteUri.pathname).replace(/\//g, "\\");
+    return `\\\\wsl.localhost\\${distro}${remotePath}`;
+  } catch {
+    return undefined;
+  }
 }
 
 function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
@@ -333,7 +566,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       <Action
         title="Pin Entry"
         icon={Icon.Pin}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={Shortcut.Pin}
         onAction={async () => {
           props.pin(props.entry);
           await showToast({ title: "Pinned entry" });
@@ -344,7 +577,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
     <ActionPanel.Section>
       <Action
         title="Unpin Entry"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={Shortcut.Pin}
         icon={Icon.PinDisabled}
         onAction={async () => {
           props.unpin(props.entry);
@@ -354,7 +587,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("left") && (
         <Action
           title="Move Left in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowLeft" }}
+          shortcut={Shortcut.MoveLeft}
           icon={Icon.ArrowLeft}
           onAction={async () => {
             props.moveUp(props.entry);
@@ -365,7 +598,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("up") && (
         <Action
           title="Move up in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+          shortcut={Shortcut.MoveUp}
           icon={Icon.ArrowUp}
           onAction={async () => {
             props.moveUp(props.entry);
@@ -376,7 +609,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("right") && (
         <Action
           title="Move Right in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowRight" }}
+          shortcut={Shortcut.MoveRight}
           icon={Icon.ArrowRight}
           onAction={async () => {
             props.moveDown(props.entry);
@@ -387,7 +620,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       {movements.includes("down") && (
         <Action
           title="Move Down in Pinned Entries"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+          shortcut={Shortcut.MoveDown}
           icon={Icon.ArrowDown}
           onAction={async () => {
             props.moveDown(props.entry);
@@ -398,7 +631,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       <Action
         title="Unpin All Entries"
         icon={Icon.PinDisabled}
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+        shortcut={Shortcut.UnpinAll}
         style={Action.Style.Destructive}
         onAction={async () => {
           props.unpinAll();
@@ -417,15 +650,14 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
         title="Remove from Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Shortcut.Remove}
       />
-
       <Action
         icon={Icon.Trash}
         title="Remove All Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeAllEntries()}
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+        shortcut={Shortcut.RemoveAll}
       />
     </ActionPanel.Section>
   );

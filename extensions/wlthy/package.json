@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wlthy",
+  "title": "Wlthy",
+  "description": "See your net worth, day and month change, and allocation from your wlthy wealth account — read-only, without leaving your keyboard.",
+  "icon": "wlthy-icon.png",
+  "author": "alirbaba",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "wlthy API key",
+      "description": "A read-only REST key you create in wlthy → Settings → API & MCP. Starts with wlthy_rest_. It can only read your ledger — it cannot move money or change anything.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "instanceUrl",
+      "title": "wlthy URL",
+      "description": "Only change this for a white-label / self-hosted wlthy instance. Leave as-is for the standard app.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://wlthy.io"
+    }
+  ],
+  "commands": [
+    {
+      "name": "net-worth",
+      "title": "Net Worth",
+      "description": "Show your total net worth with today's and this month's change.",
+      "mode": "view"
+    },
+    {
+      "name": "allocation",
+      "title": "Allocation",
+      "description": "Break your wealth down by asset class, currency, geography or sector.",
+      "mode": "view"
+    },
+    {
+      "name": "by-country",
+      "title": "By Country",
+      "description": "See your net worth by country, with leverage (assets vs debt) per country.",
+      "mode": "view"
+    },
+    {
+      "name": "assets",
+      "title": "Assets",
+      "description": "Search every holding, sorted by value.",
+      "mode": "view"
+    },
+    {
+      "name": "debts",
+      "title": "Debts",
+      "description": "See what you owe, sorted by balance.",
+      "mode": "view"
+    },
+    {
+      "name": "net-worth-menu-bar",
+      "title": "Net Worth in Menu Bar",
+      "description": "Keep your net worth glanceable in the macOS menu bar. Refreshes hourly.",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

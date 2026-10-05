@@ -44,10 +44,9 @@ export default function ChordGrid({ rootNote, chords, isLoading = false }: Chord
   return (
     <Grid
       isLoading={isLoading}
-      enableFiltering={true}
       searchBarPlaceholder="Filter chords by names"
       navigationTitle="Search Chords"
-      itemSize={Grid.ItemSize.Large}
+      columns={3}
     >
       <Grid.Section title={rootNote.getChromaticName()}>{gridItems}</Grid.Section>
     </Grid>

@@ -1,6 +1,7 @@
 import { connect, type PeerCertificate } from "node:tls";
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Fragment } from "react";
+import { CheckItemActions } from "./components/CheckItemActions";
 import { WebCheckComponentProps } from "./utils/types";
 import { useCheckDetail } from "./utils/useCheckDetail";
 
@@ -9,29 +10,27 @@ export function SSLCheck({ url, enabled }: WebCheckComponentProps) {
 
   const extKeyUsage = data?.ext_key_usage?.map((oid) => OID_MAP[oid]) ?? [];
 
+  const flattenStringOrArray = (value: string | string[] | undefined): string => {
+    if (value === undefined) return "";
+    return Array.isArray(value) ? value.join(", ") : value;
+  };
+
   const items: [string, string][] = data
     ? [
-        ["Subject", data.subject.CN],
-        ["Issuer", data.issuer.O],
-        ["Expires", data.valid_to],
-        ["Renews", data.valid_from],
-        ["Serial Number", data.serialNumber],
-        ["Fingerprint (SHA256)", data.fingerprint256],
-        ["Fingerprint (SHA512)", data.fingerprint512],
+        ["Subject", flattenStringOrArray(data.subject.CN)],
+        ["Issuer", flattenStringOrArray(data.issuer.O)],
+        ["Expires", data.valid_to ?? ""],
+        ["Renews", data.valid_from ?? ""],
+        ["Serial Number", data.serialNumber ?? ""],
+        ["Fingerprint (SHA256)", data.fingerprint256 ?? ""],
+        ["Fingerprint (SHA512)", data.fingerprint512 ?? ""],
       ]
     : [];
 
   return (
     <List.Item
       title="SSL Certificate"
-      actions={
-        <ActionPanel>
-          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
-          {items.map(([key, value]) => (
-            <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
-          ))}
-        </ActionPanel>
-      }
+      actions={<CheckItemActions info={INFO} items={items} />}
       detail={
         <List.Item.Detail
           isLoading={isLoading}

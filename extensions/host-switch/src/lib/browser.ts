@@ -1,7 +1,7 @@
 import { Application } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
-export type BrowserIds = "company.thebrowser.Browser" | "com.apple.Safari" | "com.google.Chrome";
+export type BrowserIds = "company.thebrowser.Browser" | "com.apple.Safari" | "com.google.Chrome" | "com.brave.Browser";
 
 export interface IBrowser {
   getCurrentTabUrl(): Promise<string | undefined>;
@@ -147,6 +147,7 @@ export function getBrowser(application?: Application) {
         instances[browserId] = new Arc(application.name);
         break;
       case "com.google.Chrome":
+      case "com.brave.Browser":
         instances[browserId] = new Chrome(application.name);
         break;
     }

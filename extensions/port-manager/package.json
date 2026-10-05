@@ -13,13 +13,17 @@
   "contributors": [
     "Sheraff",
     "ridemountainpig",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv",
+    "MaaxGr",
+    "tony.nguyen",
+    "alexi.build"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "kill-listening-process",
-      "title": "Kill Process Listening On",
+      "title": "Kill Process Listening on",
       "description": "Kill the process listening on a given port",
       "mode": "no-view",
       "arguments": [
@@ -66,7 +70,7 @@
               "value": "showDetails"
             },
             {
-              "title": "Show In Finder",
+              "title": "Show in Finder",
               "value": "showInFinder"
             },
             {
@@ -96,13 +100,50 @@
       "interval": "1m"
     }
   ],
+  "tools": [
+    {
+      "name": "kill-process-on-port",
+      "title": "Kill Process on Port",
+      "description": "Kill the process listening on a TCP port and verify that it exits"
+    },
+    {
+      "name": "list-open-ports",
+      "title": "List Open Ports",
+      "description": "List TCP listeners with their ports, addresses, exposure, process details, and named port labels"
+    },
+    {
+      "name": "kill-open-port-process",
+      "title": "Kill Open Port Process",
+      "description": "Kill a listed TCP listener by its PID, all processes with its name, or its parent; always pass the listener's PID"
+    },
+    {
+      "name": "list-named-ports",
+      "title": "List Named Ports",
+      "description": "List saved names for TCP ports"
+    },
+    {
+      "name": "create-named-port",
+      "title": "Create Named Port",
+      "description": "Save a name for a TCP port that does not have one yet"
+    },
+    {
+      "name": "update-named-port",
+      "title": "Update Named Port",
+      "description": "Change the saved name of an existing named TCP port"
+    },
+    {
+      "name": "delete-named-port",
+      "title": "Delete Named Port",
+      "description": "Remove a saved TCP port name"
+    }
+  ],
   "preferences": [
     {
       "name": "killSignal",
-      "description": "The signal used to kill the process",
+      "description": "The signal used to kill the process on macOS. Windows always terminates with taskkill.",
       "type": "dropdown",
       "required": false,
-      "default": "select",
+      "default": "ask",
       "title": "Kill Signal",
       "data": [
         {
@@ -121,23 +162,32 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
-    "@raycast/utils": "^1.9.1",
-    "nanoid": "^4.0.2"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "nanoid": "^6.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

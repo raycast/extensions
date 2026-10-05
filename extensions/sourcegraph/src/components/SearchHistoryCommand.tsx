@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { DateTime } from "luxon";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { SearchHistory } from "../searchHistory";
 import { instanceName, LinkBuilder, Sourcegraph } from "../sourcegraph";

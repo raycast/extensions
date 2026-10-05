@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { VPCGW } from '@scaleway/sdk'
+import type { Vpcgwv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getGatewayStatusIcon } from './status'
 
 type GatewayProps = {
-  gateway: VPCGW.v1.Gateway
+  gateway: Vpcgwv1.Gateway
 }
 
 export const GatewayDetail = ({ gateway }: GatewayProps) => (

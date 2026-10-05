@@ -1,6 +1,28 @@
 # Docker Changelog
 
+## [Docker Context Support] - 2026-09-22
+
+- Use the endpoint of the current Docker CLI context (`docker context use`) when no socket path is configured, so alternative runtimes such as Colima, OrbStack, Rancher Desktop, Podman and Lima work out of the box like they do with the `docker` CLI. TLS certificates and `SkipTLSVerify` stored with the context are applied for remote `tcp://` endpoints.
+- Honor the `DOCKER_HOST`, `DOCKER_CERT_PATH` and `DOCKER_TLS_VERIFY` environment variables when set.
+- Accept `unix://`, `npipe://`, `tcp://`, `http://` and `https://` prefixed values in the "Socket path" preference.
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Windows Support] - 2025-10-30
+
+- Added Windows support for the Docker extension
+- Updated keyboard shortcuts to be platform-specific (Cmd on macOS, Ctrl on Windows)
+- Platform-specific default socket paths (macOS: `/var/run/docker.sock`, Windows: `//./pipe/docker_engine`)
+- Updated dependencies to latest Raycast API version
+
+## [Feature] - 2025-09-08
+
+- Show loading toasts while container actions are running.
+
 ## [Improvement] - 2025-06-15
+
 - Group containers by state in the container list view
 
 ## [Feature] - 2025-06-10

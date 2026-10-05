@@ -28,7 +28,7 @@ declare global {
         /** email address for public profile. Nullable. */
         public_email: string;
         /** whether this user's photo should be shown on the public leader board */
-        photo_public: boolean;
+        is_photo_public: boolean;
         /** user's timezone in Country/Region format */
         timezone: string | null;
         /** time of most recent heartbeat received in ISO 8601 format */
@@ -297,7 +297,7 @@ declare global {
       /** whether this user's email should be shown publicly on leader boards */
       is_email_public: boolean;
       /** whether this user's photo should be shown publicly on leader boards */
-      photo_public: boolean;
+      is_photo_public: boolean;
       /** user's public photo */
       photo: string;
     }

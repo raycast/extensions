@@ -8,8 +8,10 @@ Supported:
 2. Baidu Search
 3. Bing Search
 4. Netease Music
-5. Youtube
-6. Instagram
+5. Bilibili
+6. Youtube
+7. Spotify
+8. Instagram
 
 ## Example
 

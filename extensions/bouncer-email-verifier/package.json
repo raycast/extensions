@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bouncer-email-verifier",
+  "title": "Bouncer Deliverability",
+  "description": "Check whether an email address is deliverable, or whether a domain can receive mail, with Bouncer",
+  "icon": "icon.png",
+  "author": "eKamran",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "email",
+    "verification",
+    "deliverability",
+    "bouncer",
+    "domain",
+    "mx"
+  ],
+  "commands": [
+    {
+      "name": "verify-email",
+      "title": "Verify Deliverability",
+      "subtitle": "Bouncer",
+      "description": "Check whether an email address is deliverable, or whether a domain can receive mail, with Bouncer",
+      "mode": "view",
+      "icon": "icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Email or domain",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "email",
+        "address",
+        "domain",
+        "mx",
+        "smtp",
+        "bounce",
+        "catch-all",
+        "validate"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "verify-email",
+      "title": "Verify Email",
+      "description": "Verify a single email address with Bouncer. Returns Bouncer's status (deliverable, risky, undeliverable or unknown), its reason code, a score out of 100, the mail provider and MX record, and every domain and account signal with the value Bouncer reported for it. Does not include a send-or-suppress recommendation. Spends one Bouncer credit per address."
+    },
+    {
+      "name": "verify-domain",
+      "title": "Verify Domain",
+      "description": "Check a domain with Bouncer. Bouncer's domain endpoint returns no status or score \u2014 only the mail record it found, the provider, and whether the domain is catch-all, disposable, free or toxic. Use this when asked about a domain rather than a specific mailbox. Spends one Bouncer credit."
+    },
+    {
+      "name": "get-credits",
+      "title": "Get Bouncer Credits",
+      "description": "Get the number of Bouncer verification credits remaining on the account. Does not spend a credit."
+    }
+  ],
+  "ai": {
+    "instructions": "- Each verify-email or verify-domain call spends one Bouncer credit. Verify only what the user asked about, and never re-verify something you already have a result for in this conversation.\n- Report what Bouncer returned. These tools deliberately do not include a send-or-suppress recommendation, so do not present one as though it came from Bouncer; if the user asks whether to send, say the judgement is theirs and give them the fields it rests on.\n- A signal value of \"Unknown\" means Bouncer could not determine it. Never report it as \"No\", and never treat it as evidence either way.\n- The roleAddress and freeProvider signals are heuristics over the local part and the domain, and they misfire on personal addresses such as mail@ or contact@. Report them as observations, not defects.\n- The domain endpoint returns no status or score, only the fields listed. Do not infer whether a domain can receive mail beyond what those fields say.\n- When didYouMean is returned, surface the suggested correction and offer to verify it instead.\n- If a call fails because the account is out of credits, say so plainly and stop; do not retry.",
+    "evals": [
+      {
+        "input": "@bouncer-email-verifier is jane@example.com deliverable?",
+        "mocks": {
+          "verify-email": {
+            "email": "jane@example.com",
+            "status": "deliverable",
+            "score": 100,
+            "statusLabel": "Deliverable"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "verify-email"
+          }
+        ]
+      },
+      {
+        "input": "@bouncer-email-verifier does example.com have a working mail server?",
+        "mocks": {
+          "verify-domain": {
+            "domain": "example.com",
+            "provider": "google.com",
+            "dnsType": "MX"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "verify-domain"
+          }
+        ]
+      },
+      {
+        "input": "@bouncer-email-verifier how many verification credits do I have left?",
+        "mocks": {
+          "get-credits": {
+            "credits": 1000,
+            "creditsSpent": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-credits"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Bouncer API Key",
+      "description": "Stored securely by Raycast and used for Bouncer requests."
+    },
+    {
+      "name": "saveHistory",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "History",
+      "label": "Save verification history",
+      "description": "Keeps the last 50 results on this device so you can reopen them without spending another credit. Turn this off to stop recording the addresses and domains you check."
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
+  }
+}

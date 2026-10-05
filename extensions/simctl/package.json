@@ -41,5 +41,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4"
+  }
 }

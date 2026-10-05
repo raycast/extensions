@@ -117,9 +117,10 @@ function usePreferences() {
   });
 
   useEffect(() => {
-    getPreferenceFormData().then((newState) => {
+    (async () => {
+      const newState = await getPreferenceFormData();
       setState({ isLoading: false, ...newState });
-    });
+    })();
   }, []);
 
   const onChangeLanguage = useCallback(async (newValue: string) => {
@@ -135,9 +136,10 @@ function usePreferences() {
   }, []);
 
   const onChangeReferenceFormat = useCallback(async (newValue: string) => {
-    await setPreferredReferenceFormat(newValue);
-    const newState = await getPreferenceFormData();
-    setState({ isLoading: false, ...newState });
+    setPreferredReferenceFormat(newValue);
+    setState((currentState) => {
+      return { ...currentState, isLoading: false, currentReferenceFormat: newValue };
+    });
   }, []);
 
   const onChangeVerseNumbersSetting = useCallback(async (newValue: boolean) => {

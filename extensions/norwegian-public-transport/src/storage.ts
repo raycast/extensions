@@ -6,7 +6,7 @@ enum StorageKeys {
   savedQuayLines = "@PublicTransport/SavedQuayLines/v1",
 
   /**
-   * @deprecated Use preferredFeatures instead
+   * @deprecated Use savedFeatures instead
    */
   preferredFeatures = "@PublicTransport/PreferredFeatures/v1",
 }

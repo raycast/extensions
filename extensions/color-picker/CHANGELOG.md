@@ -1,5 +1,58 @@
 # Color Picker Changelog
 
+## [Enable Ask AI Raycast Command] - 2026-09-27
+
+- Register the seven existing color tools with Raycast AI
+- Enable the Ask Color Picker entry in Raycast search
+
+## [Fix Color Picking and Conversion] - 2026-09-25
+
+- Stop showing an error after picking a color when the optional menu bar command is disabled or unavailable
+- Allow typing or pasting colors directly into Convert Color, with inline feedback for invalid input
+- Fix showing color names after picking when using formats such as P3, OKLCH, or HEX No Prefix
+
+## [Fix] - 2026-09-10
+
+- Fix color swatches rendering as a grey square when the color format preference is set to a format that is not a valid CSS color, such as `HEX No Prefix`
+- Fix the `OKLCH` format dropping the alpha channel and producing a `NaN` hue for black, white and gray
+
+## [Favorite Colors & AI Tools] - 2026-08-29
+
+- Add a `Favorite Colors` command to view and use saved favorites
+- Add AI tools to convert, name, save, list, contrast-check, generate scales, and format palettes
+
+## [Fix] - 2026-06-20
+
+- Fix the `Color Wheel` command showing an oversized, clipped wheel by replacing the preview asset and rendering it at a smaller height
+
+## [Favorites] - 2026-05-18
+
+- Add favorites to the `Organize Colors` command
+- Add actions to reorder favorite colors
+
+## [Multi-Color Selection] - 2026-04-27
+
+- Add a Single/Multi select mode toggle to the search bar of `Organize Colors` and `Generate Colors`
+- In multi-select mode, switch to a list view with a checkmark prefix on selected colors
+- Copy selected colors as JSON, CSS Classes, or CSS Variables from the action panel
+- Selection persists when switching between modes
+
+## [Windows: Enhancement] - 2026-02-13
+
+- Add ability to cancel color picker with Esc key
+- Fix typos
+
+## [Windows Support] - 2026-02-12
+
+- Added Eyedropper and color extractor for Windows using Rust
+- Updated Dependencies
+- Organized folder structure
+
+## [Bugfix & Maintenance] - 2025-08-13
+
+- Fix the incorrect subtitle content in the `Convert Color` command
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2025-06-05
 
 - Add a new callback return value `formattedColor` to return the color in the user's preferred format

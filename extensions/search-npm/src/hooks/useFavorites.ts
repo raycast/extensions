@@ -1,19 +1,19 @@
-import { useCachedState } from '@raycast/utils'
-import { useEffect } from 'react'
-import type { Package } from '../model/npmResponse.model'
-import { getFavorites } from '../utils/favorite-storage'
+import { useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import type { Package } from "@/model/npmResponse.model";
+import { getFavorites } from "@/utils/favorite-storage";
 
 export const useFavorites = (): [Package[], () => Promise<void>] => {
-  const [favorites, setFavorites] = useCachedState<Package[]>('favorites', [])
+  const [favorites, setFavorites] = useCachedState<Package[]>("favorites", []);
 
   const fetchFavorites = async () => {
-    const favoriteItems = await getFavorites()
-    setFavorites(favoriteItems)
-  }
+    const favoriteItems = await getFavorites();
+    setFavorites(favoriteItems);
+  };
 
   useEffect(() => {
-    fetchFavorites()
-  }, [])
+    fetchFavorites();
+  }, []);
 
-  return [favorites, fetchFavorites]
-}
+  return [favorites, fetchFavorites];
+};

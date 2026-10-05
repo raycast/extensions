@@ -11,7 +11,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import {
   AddReminderArgs,
@@ -20,6 +20,7 @@ import {
   Reminder,
   SyncData,
   Task,
+  TaskUpdateSyncedContext,
   UpdateTaskArgs,
   addTask,
   addReminder as apiAddReminder,
@@ -36,13 +37,21 @@ import { getRemainingLabels, getTaskLabels } from "../helpers/labels";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
-import { displayReminderName } from "../helpers/reminders";
+import { displayReminderName, hasAtTaskTimeRelativeReminder } from "../helpers/reminders";
+import {
+  buildDynamicRepeatOptions,
+  filterRepeatPresets,
+  isHourlyDueString,
+  repeatDuePayload,
+  rescheduleDuePayload,
+} from "../helpers/repeat";
 import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
 import CreateViewActions from "./CreateViewActions";
+import LazySubmenu from "./LazySubmenu";
 import OpenInTodoist from "./OpenInTodoist";
 import Project from "./Project";
 import RefreshAction from "./RefreshAction";
@@ -73,12 +82,65 @@ export default function TaskActions({
   const { pop } = useNavigation();
   const { useConfetti } = getPreferenceValues<Preferences>();
 
-  const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
+  const { focusedTask, focusTask, unfocusTask } = useFocusedTask({ data, setData });
+  const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
 
   const projects = data?.projects;
   const comments = data?.notes;
   const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+  const [repeatSearchText, setRepeatSearchText] = useState("");
+
+  /**
+   * Wrapper around sync `updateTask`: returns whether Todoist returned an item row that we merged into cache.
+   * The optional callback runs only in that success path — use it so "at time of task" reminders follow real due updates.
+   */
+  async function updateTask(
+    payload: UpdateTaskArgs,
+    onSynced?: (ctx: TaskUpdateSyncedContext) => void,
+  ): Promise<boolean> {
+    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
+
+    try {
+      const merged = await apiUpdateTask(payload, { data, setData }, onSynced);
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
+      await refreshMenuBarCommand();
+      return merged;
+    } catch (error) {
+      await showFailureToast(error, { title: "Unable to update task" });
+      return false;
+    }
+  }
+
+  /** Ensures Todoist relative reminder offset 0 when user sets a timed due / hourly repeat and none exists yet. */
+  async function ensureAtTaskTimeReminder(itemId: string, syncReminders?: Reminder[]) {
+    // Sync batches are incremental; empty `[]` means "no reminder deltas" — still check merged cache via `data.reminders`.
+    const hasAtTimeInCache = hasAtTaskTimeRelativeReminder(data?.reminders, itemId);
+    if (hasAtTaskTimeRelativeReminder(syncReminders, itemId) || hasAtTimeInCache) return;
+    try {
+      await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
+    } catch (error) {
+      if (hasAtTimeInCache && syncReminders !== undefined && `${error}`.includes("Bad Request")) return;
+      await showFailureToast(error, { title: "Unable to add reminder" });
+    }
+  }
+
+  async function setRecurrence(recurrence?: string) {
+    let syncReminders: Reminder[] | undefined;
+    let updatedTask: Task | undefined;
+    if (
+      !(await updateTask({ id: task.id, due: repeatDuePayload(currentTask, recurrence) }, (ctx) => {
+        syncReminders = ctx.syncReminders;
+        updatedTask = ctx.updatedTask;
+      }))
+    )
+      return;
+    if (isHourlyDueString(recurrence) && updatedTask?.due?.date?.includes("T")) {
+      await ensureAtTaskTimeReminder(task.id, syncReminders);
+    }
+  }
+
+  const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];
 
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
@@ -100,22 +162,10 @@ export default function TaskActions({
     }
     if (useConfetti) {
       try {
-        await open("raycast://extensions/raycast/raycast/confetti");
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
       } catch (error) {
         await showFailureToast(error, { title: "Unable to show celebration" });
       }
-    }
-  }
-
-  async function updateTask(payload: UpdateTaskArgs) {
-    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
-
-    try {
-      await apiUpdateTask(payload, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Task updated" });
-      await refreshMenuBarCommand();
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task" });
     }
   }
 
@@ -251,19 +301,43 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action.PickDate
+        <ActionPanel.Submenu
           title="Schedule Task"
-          type={Action.PickDate.Type.DateTime}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onChange={(date) =>
-            updateTask({
-              id: task.id,
-              due: date
-                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no date" },
-            })
-          }
-        />
+        >
+          <Action.PickDate
+            title="Pick Date"
+            type={Action.PickDate.Type.DateTime}
+            onChange={async (date) => {
+              const due = date
+                ? rescheduleDuePayload(currentTask, {
+                    date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString(),
+                  })
+                : { string: "no date" };
+              let syncReminders: Reminder[] | undefined;
+              const merged = await updateTask({ id: task.id, due }, (ctx) => {
+                syncReminders = ctx.syncReminders;
+              });
+              if (!merged) return;
+              if (date && !Action.PickDate.isFullDay(date)) await ensureAtTaskTimeReminder(task.id, syncReminders);
+            }}
+          />
+          <ActionPanel.Submenu
+            title="Set Repeat"
+            icon={Icon.Repeat}
+            filtering={false}
+            onOpen={() => setRepeatSearchText("")}
+            onSearchTextChange={setRepeatSearchText}
+          >
+            {(!repeatSearchText.trim() || repeatSearchText.toLowerCase().includes("no repeat")) && (
+              <Action title="No Repeat" icon={Icon.XMarkCircle} onAction={() => setRecurrence()} />
+            )}
+            {repeatOptions.map(({ key, title, icon, recurrence }) => (
+              <Action key={key} title={title} icon={icon} onAction={() => setRecurrence(recurrence)} />
+            ))}
+          </ActionPanel.Submenu>
+        </ActionPanel.Submenu>
 
         {data?.user?.premium_status !== "not_premium" ? (
           <Action.PickDate
@@ -310,53 +384,57 @@ export default function TaskActions({
             />
 
             {locations && locations.length > 0 ? (
-              <ActionPanel.Submenu
+              <LazySubmenu
                 title="Add Location Reminder"
                 icon={Icon.Pin}
                 shortcut={{ modifiers: ["opt", "shift"], key: "r" }}
               >
-                <ActionPanel.Section title="Arriving">
-                  {locations.map((location) => {
-                    return (
-                      <Action
-                        key={`arriving-${location[0]}`}
-                        title={location[0]}
-                        onAction={() =>
-                          addReminder({
-                            type: "location",
-                            item_id: task.id,
-                            loc_trigger: "on_enter",
-                            name: location[0],
-                            loc_lat: location[1],
-                            loc_long: location[2],
-                          })
-                        }
-                      />
-                    );
-                  })}
-                </ActionPanel.Section>
+                {() => (
+                  <>
+                    <ActionPanel.Section title="Arriving">
+                      {locations.map((location) => {
+                        return (
+                          <Action
+                            key={`arriving-${location[0]}`}
+                            title={location[0]}
+                            onAction={() =>
+                              addReminder({
+                                type: "location",
+                                item_id: task.id,
+                                loc_trigger: "on_enter",
+                                name: location[0],
+                                loc_lat: location[1],
+                                loc_long: location[2],
+                              })
+                            }
+                          />
+                        );
+                      })}
+                    </ActionPanel.Section>
 
-                <ActionPanel.Section title="Leaving">
-                  {locations.map((location) => {
-                    return (
-                      <Action
-                        key={`leaving-${location[0]}`}
-                        title={location[0]}
-                        onAction={() =>
-                          addReminder({
-                            type: "location",
-                            item_id: task.id,
-                            loc_trigger: "on_leave",
-                            name: location[0],
-                            loc_lat: location[1],
-                            loc_long: location[2],
-                          })
-                        }
-                      />
-                    );
-                  })}
-                </ActionPanel.Section>
-              </ActionPanel.Submenu>
+                    <ActionPanel.Section title="Leaving">
+                      {locations.map((location) => {
+                        return (
+                          <Action
+                            key={`leaving-${location[0]}`}
+                            title={location[0]}
+                            onAction={() =>
+                              addReminder({
+                                type: "location",
+                                item_id: task.id,
+                                loc_trigger: "on_leave",
+                                name: location[0],
+                                loc_lat: location[1],
+                                loc_long: location[2],
+                              })
+                            }
+                          />
+                        );
+                      })}
+                    </ActionPanel.Section>
+                  </>
+                )}
+              </LazySubmenu>
             ) : null}
 
             {reminders.length === 1 ? (
@@ -390,53 +468,57 @@ export default function TaskActions({
         ) : null}
 
         {projects ? (
-          <ActionPanel.Submenu
+          <LazySubmenu
             icon={Icon.List}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             title="Move Task to Project"
           >
-            {projects.map((project) => {
-              const sections = data.sections?.filter((section) => section.project_id === project.id);
+            {() =>
+              projects.map((project) => {
+                const sections = data.sections?.filter((section) => section.project_id === project.id);
 
-              return (
-                <Fragment key={project.id}>
-                  <Action
-                    title={project.name}
-                    icon={getProjectIcon(project)}
-                    onAction={() => moveTask({ id: task.id, project_id: project.id })}
-                  />
+                return (
+                  <Fragment key={project.id}>
+                    <Action
+                      title={project.name}
+                      icon={getProjectIcon(project)}
+                      onAction={() => moveTask({ id: task.id, project_id: project.id })}
+                    />
 
-                  {sections && sections.length > 0
-                    ? sections.map((section) => {
-                        return (
-                          <Action
-                            key={section.id}
-                            title={section.name}
-                            icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
-                            onAction={() => moveTask({ id: task.id, section_id: section.id })}
-                          />
-                        );
-                      })
-                    : null}
-                </Fragment>
-              );
-            })}
-          </ActionPanel.Submenu>
+                    {sections && sections.length > 0
+                      ? sections.map((section) => {
+                          return (
+                            <Action
+                              key={section.id}
+                              title={section.name}
+                              icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+                              onAction={() => moveTask({ id: task.id, section_id: section.id })}
+                            />
+                          );
+                        })
+                      : null}
+                  </Fragment>
+                );
+              })
+            }
+          </LazySubmenu>
         ) : null}
 
         {remainingLabels && remainingLabels.length > 0 ? (
-          <ActionPanel.Submenu title="Add Label" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}>
-            {remainingLabels.map((label) => {
-              return (
-                <Action
-                  key={label.id}
-                  title={label.name}
-                  icon={{ source: Icon.Tag, tintColor: label.color }}
-                  onAction={() => updateTask({ id: task.id, labels: [...task.labels, label.name] })}
-                />
-              );
-            })}
-          </ActionPanel.Submenu>
+          <LazySubmenu title="Add Label" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}>
+            {() =>
+              remainingLabels.map((label) => {
+                return (
+                  <Action
+                    key={label.id}
+                    title={label.name}
+                    icon={{ source: Icon.Tag, tintColor: label.color }}
+                    onAction={() => updateTask({ id: task.id, labels: [...task.labels, label.name] })}
+                  />
+                );
+              })
+            }
+          </LazySubmenu>
         ) : null}
 
         {taskLabels && taskLabels.length > 0 ? (
@@ -464,45 +546,45 @@ export default function TaskActions({
         ) : null}
 
         {data?.items && data?.items.length > 0 ? (
-          <ActionPanel.Submenu
+          <LazySubmenu
             icon={Icon.PlusTopRightSquare}
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
             title="Set Parent Task"
           >
-            {data.items.map((item) => {
-              if (item.id === task.id) {
-                return null;
-              }
+            {() =>
+              data.items.map((item) => {
+                if (item.id === task.id) {
+                  return null;
+                }
 
-              return (
-                <Action
-                  key={item.id}
-                  title={item.content}
-                  icon={getPriorityIcon(item)}
-                  onAction={() => moveTask({ id: task.id, parent_id: item.id })}
-                />
-              );
-            })}
-          </ActionPanel.Submenu>
+                return (
+                  <Action
+                    key={item.id}
+                    title={item.content}
+                    icon={getPriorityIcon(item)}
+                    onAction={() => moveTask({ id: task.id, parent_id: item.id })}
+                  />
+                );
+              })
+            }
+          </LazySubmenu>
         ) : null}
 
         {collaborators && collaborators.length > 0 ? (
-          <ActionPanel.Submenu
-            icon={Icon.AddPerson}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            title="Assign to"
-          >
-            {collaborators.map((collaborator) => {
-              return (
-                <Action
-                  key={collaborator.id}
-                  icon={getCollaboratorIcon(collaborator)}
-                  title={collaborator.full_name}
-                  onAction={() => updateTask({ id: task.id, responsible_uid: collaborator.id })}
-                />
-              );
-            })}
-          </ActionPanel.Submenu>
+          <LazySubmenu icon={Icon.AddPerson} shortcut={{ modifiers: ["cmd", "shift"], key: "a" }} title="Assign to">
+            {() =>
+              collaborators.map((collaborator) => {
+                return (
+                  <Action
+                    key={collaborator.id}
+                    icon={getCollaboratorIcon(collaborator)}
+                    title={collaborator.full_name}
+                    onAction={() => updateTask({ id: task.id, responsible_uid: collaborator.id })}
+                  />
+                );
+              })
+            }
+          </LazySubmenu>
         ) : null}
 
         <Action
@@ -646,7 +728,7 @@ export default function TaskActions({
         </ActionPanel.Section>
       ) : null}
 
-      <RefreshAction />
+      <RefreshAction setData={setData} />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
-import tenor from "../models/tenor";
+import klipy from "../models/klipy";
 import finergifs from "../models/finergifs";
 import dedupe from "../lib/dedupe";
 
@@ -12,8 +12,8 @@ export async function getAPIByServiceName(service: ServiceName) {
       return await giphy();
     case GIF_SERVICE.GIPHY_CLIPS:
       return await giphy("videos");
-    case GIF_SERVICE.TENOR:
-      return await tenor();
+    case GIF_SERVICE.KLIPY:
+      return await klipy();
     case GIF_SERVICE.FINER_GIFS:
       return finergifs();
     case GIF_SERVICE.FAVORITES:
@@ -48,7 +48,11 @@ export default function useSearchAPI({ term, service, limit = 10 }: UseSearchAPI
           ? await api.search(term, { limit, next: cursor, offset: page * limit })
           : await api.trending({ limit, next: cursor, offset: page * limit });
 
-        return { data: dedupe(results), hasMore: next !== "", cursor: next };
+        return {
+          data: dedupe(results),
+          hasMore: next === undefined ? results.length === limit : next !== "",
+          cursor: next,
+        };
       },
     [term, service],
     { keepPreviousData: true },

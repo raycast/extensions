@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "rafael_garcia",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "0xdhrv"
   ],
   "categories": [
     "Media"
@@ -24,31 +25,48 @@
           "name": "title",
           "placeholder": "Title",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-movies",
+      "title": "Search Letterboxd Movies",
+      "description": "Search Letterboxd for public movie results, including ratings, runtimes, genres, rankings, and Letterboxd, IMDb, and TMDB links. This tool is read-only."
+    },
+    {
+      "name": "get-movie-details",
+      "title": "Get Letterboxd Movie Details",
+      "description": "Get public details for a Letterboxd film path returned by Search Letterboxd Movies, including its synopsis, cast, production companies, release information, rating, and popular review excerpts. This tool is read-only."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.66.1",
-    "@raycast/utils": "^1.11.1",
-    "cheerio": "^1.0.0-rc.12",
-    "got": "^12.6.0",
-    "node-html-markdown": "^1.3.0"
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0",
+    "cheerio": "^1.2.0",
+    "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "3.2.4",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.0",
+    "prettier": "3.9.6",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsx --test src/**/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

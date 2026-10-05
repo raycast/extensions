@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { List, Icon, ActionPanel, Action, Toast, showToast } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Toast, showToast, launchCommand, LaunchType } from "@raycast/api";
 import { useLinks } from "./hooks/useLinks";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
@@ -9,6 +9,7 @@ import { LinkItem } from "./components/LinkItem";
 import { useState } from "react";
 import { LinkDetail } from "./components/LinkDetail";
 import { useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default function LinkListView() {
   const { links, isLoading: isLinksLoading, refreshLinks, cleanCache } = useLinks();
@@ -91,6 +92,25 @@ export default function LinkListView() {
           title={t.noLinks || "No Links"}
           description={t.createLinkDescription || "Create a new short link"}
           icon={Icon.Link}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Plus}
+                title="Create Link"
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "createLink",
+                      extensionName: "raycast-sink",
+                      type: LaunchType.UserInitiated,
+                    });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Failed to launch Create Link command" });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
         />
       </List>
     );

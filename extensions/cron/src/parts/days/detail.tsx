@@ -16,11 +16,17 @@ function getCurrentTime(): string {
 }
 
 async function getHolidays(year: number, countryCode: string): Promise<unknown[]> {
+  // Nager.Date returns 404 for unknown country codes and 204 (empty body) for
+  // unsupported countries — treat anything but a JSON 200 as "no holidays".
   const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`);
-  if (!response.ok) {
-    throw new Error(`Error fetching holidays: ${response.statusText}`);
+  if (response.status !== 200) {
+    return [];
   }
-  return (await response.json()) as unknown[];
+  try {
+    return (await response.json()) as unknown[];
+  } catch {
+    return [];
+  }
 }
 
 export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) {
@@ -34,8 +40,17 @@ export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) 
       const loc = await getCurrentLocation();
       setLocation(`${loc.city}, ${loc.countryCode}`);
 
-      const holidays = await getHolidays(currentYear, loc.countryCode);
-      setHolidays(holidays as { name: unknown; date: string }[]);
+      if (loc.countryCode === "Unknown") {
+        setHolidays([]);
+        return;
+      }
+
+      try {
+        const holidays = await getHolidays(currentYear, loc.countryCode);
+        setHolidays(holidays as { name: unknown; date: string }[]);
+      } catch {
+        setHolidays([]);
+      }
     }
     fetchLocationAndHolidays();
   }, [day, currentMonth, currentYear]);
@@ -48,7 +63,8 @@ export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) 
     return () => clearInterval(intervalId);
   }, []);
 
-  const DATE = `${currentYear}-${currentMonth}-${day}`;
+  // Nager.Date returns zero-padded dates (e.g. 2026-08-06)
+  const DATE = `${currentYear}-${String(currentMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   const filteredHolidays = holidays.filter((holiday) => holiday.date === DATE);
 
@@ -74,7 +90,7 @@ ${filteredHolidays.map((holiday) => `| ${holiday.name} |`).join("\n")}
   const svgImage = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="${SVG_WIDTH}" height="${SVG_HEIGHT}" viewBox="0 0 ${SVG_WIDTH} ${SVG_HEIGHT}">
     <g transform="translate(0,0)">
       <rect width="${SVG_WIDTH}" height="${SVG_HEIGHT}" stroke="#fff" stroke-width="2" fill="#fff" rx="12" opacity="0.03"></rect>
-      <text x="${SVG_WIDTH / 2}" y="${SVG_HEIGHT / 2 + 4}" fill="#fff" font-family="sans-serif" alignment-baseline="middle" font-size="24" stroke-width="0" stroke="#000" text-anchor="middle">${formattedDate}</text>
+      <text x="${SVG_WIDTH / 2}" y="${SVG_HEIGHT / 2 + 12}" fill="#8E8E93" font-family="sans-serif" font-size="24" text-anchor="middle">${formattedDate}</text>
     </g>
     </svg>
   `;

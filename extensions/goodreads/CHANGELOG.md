@@ -1,5 +1,28 @@
 # goodreads Changelog
 
+## [Copy Cover URL in Book Details] - 2026-06-27
+
+- Add `Copy` to book details (ref: [Issue #28910](https://github.com/raycast/extensions/issues/28910))
+- chore: update deps
+- update: many `shortcut` to be cross-platform
+
+## [Bugfix] - 2026-05-21
+
+- Restore book search results.
+
+## [Windows Support] - 2026-03-01
+
+- Add Windows platform support
+
+## [Security Fixes] - 2026-01-23
+
+- Fix security vulnerabilities in dependencies
+
+## [Recently Viewed Feature] - 2025-08-06
+
+- Add recently viewed book functionality
+- Improve caching and data retrieval logic
+
 ## [UI improvement] - 2023-08-10
 
 - Add histogram visualization for ratings

@@ -64,12 +64,12 @@ function GetPopularArt() {
                   icon={Icon.Download}
                 />
                 <Action
-                  title="Download Landscape 4K"
+                  title="Download Landscape 4k"
                   onAction={() => saveImage({ url: artwork.full_url, id: artwork.username, mode: "landscape" })}
                   icon={Icon.Download}
                 />
                 <Action
-                  title="Download Portrait 4K"
+                  title="Download Portrait 4k"
                   onAction={() => saveImage({ url: artwork.full_url, id: artwork.username, mode: "portrait" })}
                   icon={Icon.Download}
                 />

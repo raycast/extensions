@@ -1,47 +1,38 @@
-import { useMemo } from "react";
 import { List } from "@raycast/api";
-import type { BranchInfo } from "../../utils/branch.js";
 import { useRepo } from "../../hooks/useRepo.js";
 
 interface Props {
-  branch?: BranchInfo;
+  name?: string;
+  ahead?: number;
+  behind?: number;
+  upstream?: string;
 }
 
-export function GitStatusEmpty({ branch }: Props) {
+export function GitStatusEmpty({ name, ahead, behind, upstream }: Props) {
   const repo = useRepo();
+  if (!repo) {
+    return <List.EmptyView title="Please select a repo" />;
+  }
 
-  const title = useMemo(() => {
-    if (repo && branch) {
-      return `On branch ${branch.name}`;
-    }
+  return <List.EmptyView title={`On branch ${name}`} description={description(ahead, behind, upstream)} />;
+}
 
-    return "Please select a repo";
-  }, [branch, repo]);
+function description(ahead?: number, behind?: number, upstream?: string): string {
+  if (ahead && behind) {
+    return `Ahead of '${upstream}' by ${ahead}, and behind by ${behind} commits`;
+  }
 
-  const description = useMemo(() => {
-    if (!repo || !branch) {
-      return;
-    }
+  if (ahead && !behind) {
+    return `Ahead of '${upstream}' by ${ahead} commits.`;
+  }
 
-    const { ahead, behind, upstream } = branch;
-    if (upstream) {
-      if (ahead && behind) {
-        return `Ahead of '${upstream}' by ${ahead}, and behind by ${behind} commits`;
-      }
+  if (!ahead && behind) {
+    return `Behind '${upstream}' by ${behind} commits.`;
+  }
 
-      if (ahead && !behind) {
-        return `Ahead of '${upstream}' by ${ahead} commits.`;
-      }
+  if (upstream) {
+    return `Up to date with ${upstream}`;
+  }
 
-      if (!ahead && behind) {
-        return `Behind '${upstream}' by ${behind} commits.`;
-      }
-
-      return `Up to date with ${upstream}`;
-    }
-
-    return "Nothing to commit, working tree clean";
-  }, [branch, repo]);
-
-  return <List.EmptyView title={title} description={description} />;
+  return "Nothing to commit, working tree clean";
 }

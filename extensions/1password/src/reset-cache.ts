@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+
 import { op } from "./v8/utils";
 
 export default async function resetCache() {

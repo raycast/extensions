@@ -1,8 +1,37 @@
 # svgl Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2026-07-06
+
+- Fix URL encoding in the "Request SVG Logo" form — form values with special characters no longer break the generated GitHub issue URL.
+- Fix HTTP error handling in SVG fetching — a failed fetch (e.g. 404) now throws an error instead of silently caching bad content.
+- Fix misleading wordmark action titles — renamed "Copy SVG Wordmark File" to "Copy SVG Wordmark Text" to reflect the actual behavior.
+- Fix shadcn/ui registry slug generation — titles with accents or punctuation are now properly normalized before building the install command.
+- Fix cache parsing — corrupted cache entries are now cleared and refetched instead of crashing the command.
+- Fix `Svg` type to match the SVGL API — `wordmark` and `brandUrl` are now optional fields.
+- Fix Windows-safe filenames — characters invalid on Windows (`:`, `?`, `"`, etc.) are sanitized before writing the temp SVG file.
+- Add platform-specific keyboard shortcuts — action shortcuts now define separate `macOS` and `Windows` bindings.
+- Add stable `Grid.Item` keys — grid items now use `svg.id`-based keys instead of array indices for more reliable focus behavior.
+- Improve wordmark actions visibility — wordmark action sections are now hidden for SVGs that have no wordmark.
+
+## [Feature] - 2026-04-06
+
+- Added Copy as Astro Component action
+
+## [Add shadcn/ui Registry Features] - 2025-09-29
+
+- Add the action `Copy shadcn/ui Registry Install Command` to copy the install command to the clipboard.
+- Add the command `Setup shadcn/ui Registry` to copy the `svgl` registry JSON to the clipboard and open docs.
+- Add the preference `Default Package Manager` to choose `pnpm`, `npm`, `yarn`, or `bun` for the install command.
+- Add the default action option `Copy shadcn Registry`.
+
+## [Update] - 2025-08-08
+
+- Add the script to prefix the SVG IDs to avoid conflicts with other SVGs.
+
+## [✨ AI Enhancements] - 2025-04-02
 
 AI Tools to:
+
 - Get SVG Logo
 - Get SVG Component
 
@@ -12,7 +41,7 @@ AI Tools to:
 
 ## [Update] - 2025-02-21
 
-- Updated the SVG logo request form.  
+- Updated the SVG logo request form.
 - Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
 - Added the action `Copy SVG File` to copy the SVG as a file to the clipboard.
 

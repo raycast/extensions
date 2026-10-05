@@ -1,15 +1,13 @@
+import type { JSX } from "react";
 import { List } from "@raycast/api";
+import { DeviceOnlineFilterType } from "../utils/filters";
 
-export enum DeviceOnlineFilterType {
-  all = "all",
-  Online = "Online",
-  Offline = "Offline",
-}
+export { DeviceOnlineFilterType };
 
 export function DeviceOnlineFilterDropdown(props: { onSelect: (value: DeviceOnlineFilterType) => void }): JSX.Element {
   return (
     <List.Dropdown
-      tooltip="Filter by formula or cask"
+      tooltip="Filter devices"
       onChange={(value) => {
         props.onSelect(value as DeviceOnlineFilterType);
       }}
@@ -18,16 +16,16 @@ export function DeviceOnlineFilterDropdown(props: { onSelect: (value: DeviceOnli
       <List.Dropdown.Item value={DeviceOnlineFilterType.all} title="All" />
       <List.Dropdown.Item value={DeviceOnlineFilterType.Online} title="Online" />
       <List.Dropdown.Item value={DeviceOnlineFilterType.Offline} title="Offline" />
+      <List.Dropdown.Item value={DeviceOnlineFilterType.On} title="On" />
+      <List.Dropdown.Item value={DeviceOnlineFilterType.Off} title="Off" />
     </List.Dropdown>
   );
 }
 
 export function placeholder(filter: DeviceOnlineFilterType): string {
-  return `Search ${
-    filter === DeviceOnlineFilterType.all
-      ? "Online & Offline"
-      : filter === DeviceOnlineFilterType.Online
-      ? "Online"
-      : "Offline"
-  } by name`;
+  if (filter === DeviceOnlineFilterType.On) return "Search On devices/switches by name";
+  if (filter === DeviceOnlineFilterType.Off) return "Search Off devices/switches by name";
+  if (filter === DeviceOnlineFilterType.Online) return "Search Online by name";
+  if (filter === DeviceOnlineFilterType.Offline) return "Search Offline by name";
+  return "Search Online & Offline by name";
 }

@@ -1,16 +1,25 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import { FocusText, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
-import { getCurrentInterval, isPaused, duration, preferences, progress } from "./lib/intervals";
+import { FocusText, IntervalTitles, LongBreakText, ShortBreakText, TimeStoppedPlaceholder } from "./lib/constants";
+import {
+  getCurrentInterval,
+  getNextIntervalType,
+  isPaused,
+  duration,
+  preferences,
+  progress,
+  resetInterval,
+} from "./lib/intervals";
 import { secondsToTime } from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
-import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
+import { OAuthService, usePromise } from "@raycast/utils";
 import {
   slackContinueInterval,
   slackCreateInterval,
   slackPauseInterval,
   slackResetInterval,
   slackRestartInterval,
+  slackSkipInterval,
 } from "./lib/slack/slackIntervals";
 
 const IconTint: Color.Dynamic = {
@@ -23,11 +32,11 @@ const slackClient = OAuthService.slack({
   scope: "users.profile:write dnd:write",
 });
 
-export default withAccessToken(slackClient)(TogglePomodoroTimer);
-
-export function TogglePomodoroTimer() {
+export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
-  const { token } = getAccessToken();
+  const { isLoading, data: tokenSet, revalidate } = usePromise(async () => slackClient.client.getTokens(), []);
+
+  const token = tokenSet && !tokenSet.isExpired() ? tokenSet.accessToken : undefined;
 
   if (currentInterval && progress(currentInterval) >= 100) {
     try {
@@ -42,28 +51,65 @@ export function TogglePomodoroTimer() {
   }
 
   async function onStart(type: IntervalType) {
+    if (!token) {
+      return;
+    }
     const interval = await slackCreateInterval(type, token);
     setCurrentInterval(interval);
   }
 
   async function onPause() {
+    if (!token) {
+      return;
+    }
     const interval = await slackPauseInterval(token);
     setCurrentInterval(interval);
   }
 
   async function onContinue() {
+    if (!token) {
+      return;
+    }
     const interval = await slackContinueInterval(token);
     setCurrentInterval(interval);
   }
 
   async function onReset() {
+    if (!token) {
+      return;
+    }
     await slackResetInterval(token);
     setCurrentInterval(undefined);
   }
 
   async function onRestart() {
+    if (!token) {
+      return;
+    }
     await slackRestartInterval(token);
     setCurrentInterval(getCurrentInterval());
+  }
+
+  async function onSkip() {
+    if (!token) {
+      return;
+    }
+    await slackSkipInterval(token);
+    setCurrentInterval(getCurrentInterval());
+  }
+
+  async function onSignIn() {
+    try {
+      await slackClient.authorize();
+      revalidate();
+    } catch (error) {
+      console.error("Failed to authorize Slack:", error);
+    }
+  }
+
+  function onResetWithoutSlack() {
+    resetInterval();
+    setCurrentInterval(undefined);
   }
 
   let icon: Image.ImageLike;
@@ -76,8 +122,25 @@ export function TogglePomodoroTimer() {
   const stopedPlaceholder = preferences.hideTimeWhenStopped ? undefined : TimeStoppedPlaceholder;
   const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : stopedPlaceholder;
 
+  if (!isLoading && !token) {
+    return (
+      <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
+        {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={TimeStoppedPlaceholder} />}
+        {currentInterval ? (
+          <MenuBarExtra.Item title="Reset Timer" icon={Icon.Stop} onAction={onResetWithoutSlack} />
+        ) : null}
+        <MenuBarExtra.Item title="Sign in to Slack" icon={Icon.Lock} onAction={onSignIn} />
+      </MenuBarExtra>
+    );
+  }
+
   return (
-    <MenuBarExtra icon={icon} title={preferences.enableTimeOnMenuBar ? title : undefined} tooltip={"Pomodoro"}>
+    <MenuBarExtra
+      icon={icon}
+      title={preferences.enableTimeOnMenuBar ? title : undefined}
+      tooltip={"Pomodoro"}
+      isLoading={isLoading}
+    >
       {preferences.enableTimeOnMenuBar ? null : <MenuBarExtra.Item icon="⏰" title={TimeStoppedPlaceholder} />}
       {currentInterval ? (
         <>
@@ -85,28 +148,35 @@ export function TogglePomodoroTimer() {
             <MenuBarExtra.Item
               title="Continue"
               icon={Icon.Play}
-              onAction={async () => onContinue()}
+              onAction={onContinue}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           ) : (
             <MenuBarExtra.Item
               title="Pause"
               icon={Icon.Pause}
-              onAction={async () => onPause()}
+              onAction={onPause}
               shortcut={{ modifiers: ["cmd"], key: "p" }}
             />
           )}
           <MenuBarExtra.Item
             title="Reset"
             icon={Icon.Stop}
-            onAction={async () => onReset()}
+            onAction={onReset}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <MenuBarExtra.Item
             title="Restart Current"
             icon={Icon.Repeat}
-            onAction={async () => onRestart()}
+            onAction={onRestart}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
+          />
+          <MenuBarExtra.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            onAction={onSkip}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         </>
       ) : (
@@ -115,21 +185,21 @@ export function TogglePomodoroTimer() {
             title={FocusText}
             subtitle={`${preferences.focusIntervalDuration}:00`}
             icon={`🎯`}
-            onAction={async () => await onStart("focus")}
+            onAction={() => onStart("focus")}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <MenuBarExtra.Item
             title={ShortBreakText}
             subtitle={`${preferences.shortBreakIntervalDuration}:00`}
             icon={`🧘‍♂️`}
-            onAction={async () => await onStart("short-break")}
+            onAction={() => onStart("short-break")}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <MenuBarExtra.Item
             title={LongBreakText}
             subtitle={`${preferences.longBreakIntervalDuration}:00`}
             icon={`🚶`}
-            onAction={async () => await onStart("long-break")}
+            onAction={() => onStart("long-break")}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
         </>

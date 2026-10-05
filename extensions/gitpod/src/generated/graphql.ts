@@ -1,5 +1,4 @@
 import { GraphQLClient } from "graphql-request";
-import * as Dom from "graphql-request/dist/types.dom";
 import gql from "graphql-tag";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -31530,7 +31529,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
   return {
     searchCreatedIssues(
       variables: SearchCreatedIssuesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchCreatedIssuesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31544,7 +31543,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     repositoryCollaboratorsForIssues(
       variables: RepositoryCollaboratorsForIssuesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RepositoryCollaboratorsForIssuesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31558,7 +31557,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     repositoryProjectsForIssues(
       variables: RepositoryProjectsForIssuesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RepositoryProjectsForIssuesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31572,7 +31571,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchOpenIssues(
       variables: SearchOpenIssuesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchOpenIssuesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31586,7 +31585,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     issueDetails(
       variables: IssueDetailsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<IssueDetailsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31600,7 +31599,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchIssues(
       variables: SearchIssuesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchIssuesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31614,7 +31613,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     closeIssue(
       variables: CloseIssueMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<CloseIssueMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31628,7 +31627,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     reopenIssue(
       variables: ReopenIssueMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ReopenIssueMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31642,7 +31641,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     changeIssueAssignees(
       variables: ChangeIssueAssigneesMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ChangeIssueAssigneesMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31656,7 +31655,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     changeIssueMilestone(
       variables: ChangeIssueMilestoneMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ChangeIssueMilestoneMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31670,7 +31669,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     addIssueToProject(
       variables: AddIssueToProjectMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<AddIssueToProjectMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31684,7 +31683,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     createIssue(
       variables: CreateIssueMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<CreateIssueMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31698,7 +31697,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     myPullRequests(
       variables: MyPullRequestsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<MyPullRequestsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31712,7 +31711,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchPullRequests(
       variables: SearchPullRequestsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchPullRequestsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31726,7 +31725,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     pullRequestDetails(
       variables: PullRequestDetailsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<PullRequestDetailsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31740,7 +31739,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     repositoryCollaboratorsForPullRequests(
       variables: RepositoryCollaboratorsForPullRequestsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RepositoryCollaboratorsForPullRequestsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31755,7 +31754,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     repositoryProjectsForPullRequests(
       variables: RepositoryProjectsForPullRequestsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RepositoryProjectsForPullRequestsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31769,7 +31768,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     pullRequestCommits(
       variables: PullRequestCommitsQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<PullRequestCommitsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31783,7 +31782,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     closePullRequest(
       variables: ClosePullRequestMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ClosePullRequestMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31797,7 +31796,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     reopenPullRequest(
       variables: ReopenPullRequestMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ReopenPullRequestMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31811,7 +31810,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     addPullRequestReview(
       variables: AddPullRequestReviewMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<AddPullRequestReviewMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31825,7 +31824,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     changePullRequestAssignees(
       variables: ChangePullRequestAssigneesMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ChangePullRequestAssigneesMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31839,7 +31838,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     changePullRequestMilestone(
       variables: ChangePullRequestMilestoneMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<ChangePullRequestMilestoneMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31853,7 +31852,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     addPullRequestToProject(
       variables: AddPullRequestToProjectMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<AddPullRequestToProjectMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31867,7 +31866,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     requestReview(
       variables: RequestReviewMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RequestReviewMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31881,7 +31880,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     mergePullRequest(
       variables: MergePullRequestMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<MergePullRequestMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31895,7 +31894,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     createPullRequest(
       variables: CreatePullRequestMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<CreatePullRequestMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31909,7 +31908,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     initPullRequest(
       variables: InitPullRequestMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<InitPullRequestMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31923,7 +31922,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchRepositories(
       variables: SearchRepositoriesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchRepositoriesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31937,7 +31936,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     searchTemplateRepositories(
       variables: SearchTemplateRepositoriesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<SearchTemplateRepositoriesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31951,7 +31950,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getExistingRepoBranches(
       variables: GetExistingRepoBranchesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<GetExistingRepoBranchesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31965,7 +31964,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     milestonesForRepository(
       variables: MilestonesForRepositoryQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<MilestonesForRepositoryQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31979,7 +31978,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     isRepositoryGitpodified(
       variables: IsRepositoryGitpodifiedQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<IsRepositoryGitpodifiedQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -31993,7 +31992,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     dataForRepository(
       variables: DataForRepositoryQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<DataForRepositoryQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -32007,7 +32006,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     repositoryReleases(
       variables: RepositoryReleasesQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RepositoryReleasesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -32019,10 +32018,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
         "query"
       );
     },
-    addStar(
-      variables: AddStarMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
-    ): Promise<AddStarMutation> {
+    addStar(variables: AddStarMutationVariables, requestHeaders?: RequestInit["headers"]): Promise<AddStarMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
           client.request<AddStarMutation>(AddStarDocument, variables, { ...requestHeaders, ...wrappedRequestHeaders }),
@@ -32032,7 +32028,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     removeStar(
       variables: RemoveStarMutationVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
+      requestHeaders?: RequestInit["headers"]
     ): Promise<RemoveStarMutation> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -32044,10 +32040,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
         "mutation"
       );
     },
-    getViewer(
-      variables?: GetViewerQueryVariables,
-      requestHeaders?: Dom.RequestInit["headers"]
-    ): Promise<GetViewerQuery> {
+    getViewer(variables?: GetViewerQueryVariables, requestHeaders?: RequestInit["headers"]): Promise<GetViewerQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
           client.request<GetViewerQuery>(GetViewerDocument, variables, { ...requestHeaders, ...wrappedRequestHeaders }),

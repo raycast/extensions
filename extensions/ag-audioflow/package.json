@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ag-audioflow",
+  "title": "AG AudioFlow",
+  "description": "Professional audio editing and processing suite with advanced features",
+  "icon": "icon.png",
+  "author": "adigold1",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-audio",
+      "title": "Convert Audio Format",
+      "description": "Convert audio files between different formats (WAV, MP3, AAC, etc.)",
+      "mode": "view"
+    },
+    {
+      "name": "trim-silence",
+      "title": "Trim Silence",
+      "description": "Remove silence from the beginning and end of audio files",
+      "mode": "view"
+    },
+    {
+      "name": "add-fade",
+      "title": "Add Fade Effects",
+      "description": "Add fade in and fade out effects to audio tracks",
+      "mode": "view"
+    },
+    {
+      "name": "normalize-audio",
+      "title": "Normalize Audio",
+      "description": "Normalize audio levels for consistent volume",
+      "mode": "view"
+    },
+    {
+      "name": "adjust-volume",
+      "title": "Adjust Volume",
+      "description": "Increase or decrease audio volume with precise dB control",
+      "mode": "view"
+    },
+    {
+      "name": "batch-process",
+      "title": "Process Audio Batch",
+      "description": "Process multiple audio files with the same operations",
+      "mode": "view"
+    },
+    {
+      "name": "audio-info",
+      "title": "Get Audio Info",
+      "description": "Get detailed information about audio files",
+      "mode": "view"
+    },
+    {
+      "name": "split-stereo",
+      "title": "Split Stereo to Mono",
+      "description": "Split stereo audio into separate left and right mono files",
+      "mode": "view"
+    },
+    {
+      "name": "stereo-to-mono",
+      "title": "Convert Stereo to Mono",
+      "description": "Convert stereo audio to single mono channel",
+      "mode": "view"
+    },
+    {
+      "name": "adjust-speed",
+      "title": "Adjust Audio Speed",
+      "description": "Speed up or slow down audio with percentage control",
+      "mode": "view"
+    },
+    {
+      "name": "setup-ffmpeg",
+      "title": "Setup Ffmpeg",
+      "description": "Check FFmpeg installation and get setup instructions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^2.2.0",
+    "fluent-ffmpeg": "^2.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

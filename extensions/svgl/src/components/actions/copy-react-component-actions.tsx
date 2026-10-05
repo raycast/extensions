@@ -19,8 +19,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
           title="Copy TSX Component"
           onAction={() => handleAction(svg.route as string, svg.title, true)}
           shortcut={{
-            modifiers: ["cmd"],
-            key: "t",
+            macOS: { modifiers: ["cmd"], key: "t" },
+            Windows: { modifiers: ["ctrl"], key: "t" },
           }}
         />
 
@@ -29,8 +29,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
           title="Copy JSX Component"
           onAction={() => handleAction(svg.route as string, svg.title, false)}
           shortcut={{
-            modifiers: ["cmd"],
-            key: "j",
+            macOS: { modifiers: ["cmd"], key: "j" },
+            Windows: { modifiers: ["ctrl"], key: "j" },
           }}
         />
       </>
@@ -44,8 +44,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
         title="Copy Light TSX Component"
         onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, true)}
         shortcut={{
-          modifiers: ["cmd"],
-          key: "t",
+          macOS: { modifiers: ["cmd"], key: "t" },
+          Windows: { modifiers: ["ctrl"], key: "t" },
         }}
       />
 
@@ -54,8 +54,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
         title="Copy Dark TSX Component"
         onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, true)}
         shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "t",
+          macOS: { modifiers: ["cmd", "shift"], key: "t" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "t" },
         }}
       />
 
@@ -64,8 +64,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
         title="Copy Light JSX Component"
         onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, false)}
         shortcut={{
-          modifiers: ["cmd"],
-          key: "j",
+          macOS: { modifiers: ["cmd"], key: "j" },
+          Windows: { modifiers: ["ctrl"], key: "j" },
         }}
       />
 
@@ -74,8 +74,8 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
         title="Copy Dark JSX Component"
         onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, false)}
         shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "j",
+          macOS: { modifiers: ["cmd", "shift"], key: "j" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "j" },
         }}
       />
     </>

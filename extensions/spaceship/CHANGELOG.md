@@ -1,5 +1,15 @@
 # Spaceship Changelog
 
+## [Check Domain Availability] - 2025-11-25
+
+- New command to check if a domain is available
+
+## [Domain + NS Enhancements + Windows Support] - 2025-09-29
+
+- View Lifecycle State of "Domain"
+- Change "Nameservers" of "Domain"
+- Add "Windows" Support
+
 ## [Enhancements] - 2025-07-07
 
 - In "Domains"

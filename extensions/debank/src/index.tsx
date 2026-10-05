@@ -60,7 +60,7 @@ export default function Command() {
                         addFavoriteAddress(address, identifier);
                         pop();
                       }}
-                    />
+                    />,
                   );
                 }}
               />
@@ -222,7 +222,7 @@ function formatTokenList(tokens?: Token[]) {
   return (
     tokens
       ?.map(
-        (token) => `${token.amount.toLocaleString("en-US", { maximumFractionDigits: 2 })} ${token.optimized_symbol}`
+        (token) => `${token.amount.toLocaleString("en-US", { maximumFractionDigits: 2 })} ${token.optimized_symbol}`,
       )
       .join(", ") || ""
   );

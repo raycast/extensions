@@ -1,6 +1,4 @@
-import { isNotionClientError } from "@notionhq/client";
-import { showToast, Toast } from "@raycast/api";
-
+import { showNotionError } from "./errors";
 import { standardize } from "./standardize";
 
 import { NotionObject, Page } from ".";
@@ -11,23 +9,14 @@ export function isNotNullOrUndefined<T>(input: null | undefined | T): input is T
 
 export function handleError<T>(err: unknown, title: string, returnValue: T): T {
   console.error(err);
-  if (isNotionClientError(err)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: err.message,
-    });
-  } else {
-    showToast({
-      style: Toast.Style.Failure,
-      title,
-    });
-  }
+  void showNotionError(err, title);
   return returnValue;
 }
 
 export function pageMapper(notionPage: NotionObject): Page {
   const page: Page = {
-    ...notionPage,
+    object: notionPage.object === "page" ? "page" : "database",
+    id: notionPage.id,
     title: "Untitled",
     properties: {},
     created_by:
@@ -50,13 +39,13 @@ export function pageMapper(notionPage: NotionObject): Page {
     for (const key in notionPage.properties) {
       const property = notionPage.properties[key];
       page.properties[key] = standardize(property, "value");
-      if (property.type === "title" && property.title[0]?.plain_text) {
-        page.title = property.title[0].plain_text;
+      if (property.type === "title") {
+        page.title = property.title.map((text) => text.plain_text).join("") || "Untitled";
       }
     }
 
-  if ("title" in notionPage && notionPage.title[0]?.plain_text) {
-    page.title = notionPage.title[0]?.plain_text;
+  if ("title" in notionPage) {
+    page.title = notionPage.title.map((text) => text.plain_text).join("") || "Untitled";
   }
 
   return page;

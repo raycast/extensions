@@ -1,0 +1,52 @@
+# Changelog
+
+## [Check Selected Text] - 2026-09-02
+
+### Added
+- New "Check Selected Text" command: checks the text selected in any application, lists every correction it found, and replaces the selection once they have been reviewed
+- Corrections start out applied and are switched off one at a time, or given a different replacement where LanguageTool offers more than one
+- The result stays in view and is rewritten as corrections are toggled, with the correction in focus marked in place; hovering it shows the word it replaced
+- The checking language can be chosen when auto-detection gets it wrong, and the choice is remembered between runs
+
+## [Apply All Preferences in Check Text Instant] - 2026-08-26
+
+### Fixed
+- Check Text Instant now sends Mother Tongue, Preferred Variants, Enabled Rules, Enabled Categories, Disabled Categories and Enable Only Specified Rules, the six preferences it was silently leaving out. They are extension-wide preferences and Check Text already applied all of them.
+
+## [Fix Premium Accounts] - 2026-08-15
+
+### Fixed
+- Authenticated requests now go to the Premium API host. Filling in Username/Email and API Key previously made every check fail with "Credentials provided, but server isn't configured to support this", because the credentials were sent to the free endpoint, which rejects them.
+
+## [1.1.0] - 2025-12-19
+
+### Improved
+- Check Text Instant now prioritizes selected text over clipboard content for better workflow integration
+- Newline preservation: When LanguageTool API includes newlines in match intervals, they are now preserved in corrected text
+- Smart replacement adjustment: Trailing spaces in replacements are automatically replaced with newlines when the original text ends with a newline
+- Match filtering: Invalid matches (with empty or whitespace-only replacements) are filtered out before display
+- Display normalization: Both original text and replacements in metadata are normalized for cleaner display (newlines removed)
+
+### Changed
+- Improved code organization and readability in text correction utilities
+
+## [Initial Version] - 2025-12-15
+
+- Interactive form with text checking and detailed results
+- Instant clipboard check and paste (background mode)
+- Support for 30+ languages with auto-detection
+- Frecency-based language sorting (most used appear first)
+- Persistent language preference (remembers your choice)
+- Advanced options: Check Level (Default/Picky), Mother Tongue (false friends detection), Preferred Variants, Enabled/Disabled Rules, Enabled/Disabled Categories
+- Automatic Premium account integration with username and API key
+- Detailed results view with language, character count, and processing time metadata
+- Apply corrections individually or all at once
+- Keyboard shortcuts for quick actions (Apply All & Paste, Reset, Copy)
+- Reset corrections functionality
+- Copy and paste corrected text actions
+- Comprehensive documentation with README and Advanced Options guide
+- Clean architecture with separation of concerns (Components, Hooks, Services, Utils)
+- Custom React hooks for text corrections state management
+- Centralized API service with Premium support
+- Reusable pure functions for text processing
+- Full TypeScript type safety

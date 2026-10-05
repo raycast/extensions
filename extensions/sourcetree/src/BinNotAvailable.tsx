@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, openCommandPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { JSX } from "react";
 
 interface BinNotAvailableProps {
   bin: string;
@@ -17,7 +18,7 @@ export function BinNotAvailable({ bin }: BinNotAvailableProps): JSX.Element {
       markdown={message.join("\n\n")}
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

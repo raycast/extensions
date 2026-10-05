@@ -12,6 +12,7 @@ import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
 import { Light } from "./lib/types";
 import HueClient from "./lib/HueClient";
+import { logError } from "./helpers/errors";
 
 export default async function ToggleAllLights() {
   try {
@@ -59,7 +60,7 @@ export default async function ToggleAllLights() {
       throw error;
     }
 
-    console.error(error.message);
+    logError(error);
     showHUD(error.message).then();
   } finally {
     if (environment.launchType === "userInitiated") {

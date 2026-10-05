@@ -1,10 +1,10 @@
 import { Form, ActionPanel, Action, Icon, popToRoot, showToast, useNavigation, Toast } from "@raycast/api";
 import { exportNotes, getTintColor } from "../utils/utils";
-import fs from "fs";
+import fs from "node:fs";
 import { useAtom } from "jotai";
 import { notesAtom } from "../services/atoms";
 
-const ExportForm = () => {
+export default function ExportForm() {
   const [notes] = useAtom(notesAtom);
   const { pop } = useNavigation();
 
@@ -47,6 +47,4 @@ const ExportForm = () => {
       />
     </Form>
   );
-};
-
-export default ExportForm;
+}

@@ -122,4 +122,11 @@ describe('convertDurationsToSeconds', () => {
     expect(convertDurationsToSeconds('3.0h')).toBeCloseTo(10800)
     expect(convertDurationsToSeconds('5.5h')).toBeCloseTo(19800)
   })
+  it('should return whole seconds for decimal hours', () => {
+    expect(convertDurationsToSeconds('0,7')).toBe(2520)
+    expect(Number.isInteger(convertDurationsToSeconds('1.23'))).toBe(true)
+  })
+  it('should reject invalid separators', () => {
+    expect(() => convertDurationsToSeconds('1|5')).toThrow('Invalid duration format')
+  })
 })

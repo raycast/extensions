@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useClipboard } from "raycast-hooks";
-import { CertListView } from "./views/CertListView";
+import { CertificateView } from "./views/CertificateView";
 import { showFailureToast } from "@raycast/utils";
 
 // Main Raycast Command Component
@@ -16,5 +16,5 @@ export default function Command() {
     return <List />;
   }
 
-  return <CertListView certText={clipboardText} />;
+  return <CertificateView certText={clipboardText} />;
 }

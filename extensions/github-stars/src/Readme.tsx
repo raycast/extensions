@@ -7,7 +7,7 @@ interface ReadmeProps {
   repo: string;
 }
 
-export const Readme = ({ user, repo }: ReadmeProps): JSX.Element => {
+export const Readme = ({ user, repo }: ReadmeProps) => {
   const [readme, setReadme] = useState<string>("");
   useEffect(() => {
     fetchReadme(user, repo).then((response: string) => setReadme(response));

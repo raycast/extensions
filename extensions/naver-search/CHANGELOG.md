@@ -1,5 +1,9 @@
 # Naver Search Changelog
 
+## [Add Feature] - 2025-08-22
+
+* Search Selected Word: Search for the selected word on the [Naver](https://naver.com).
+
 ## [Bugfix] - 2024-05-17
 
 * Fix Search Korean-English Dictionary `Not Found` error: Update Naver dictionary API endpoint.

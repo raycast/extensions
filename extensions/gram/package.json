@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gram",
+  "title": "Gram",
+  "description": "The easiest way to use Gram on Mac. Access projects and manage extensions from the comfort of Raycast.",
+  "icon": "icon.png",
+  "author": "justyt65",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Opens a new Gram window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open",
+      "title": "Open in Gram",
+      "subtitle": "Current Finder selection",
+      "description": "Opens the currently selected Finder item in Gram",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search & Open Recent Projects",
+      "description": "Search and open recent projects in Gram",
+      "mode": "view"
+    },
+    {
+      "name": "manage-extensions",
+      "title": "Manage Gram Extensions",
+      "description": "Search, download, view and manage extensions for Gram",
+      "mode": "view"
+    },
+    {
+      "name": "background-update",
+      "title": "Update Extensions in the Background",
+      "description": "Silently updates Gram extensions in the background.",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Gram",
+      "description": "Select which build of Gram to use",
+      "data": [
+        {
+          "value": "Gram",
+          "title": "Gram"
+        },
+        {
+          "value": "Gram Dev",
+          "title": "Gram Dev"
+        }
+      ]
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "projectIconStyle",
+      "type": "dropdown",
+      "title": "Visual Customization",
+      "required": false,
+      "default": "icon",
+      "description": "Choose how project icons are displayed",
+      "data": [
+        {
+          "value": "icon",
+          "title": "Icons"
+        },
+        {
+          "value": "colored-dot",
+          "title": "Colored Dots"
+        }
+      ]
+    },
+    {
+      "name": "showOpenStatus",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Open Status",
+      "default": true,
+      "description": "Display an 'Open' tag for projects currently open in Gram"
+    },
+    {
+      "name": "autoUpdateInterval",
+      "type": "dropdown",
+      "title": "Auto-Update Frequency",
+      "description": "How often should extensions be updated automatically?",
+      "default": "manual",
+      "required": true,
+      "data": [
+        {
+          "title": "Disabled (Manual Only)",
+          "value": "manual"
+        },
+        {
+          "title": "Check Every Hour",
+          "value": "1h"
+        },
+        {
+          "title": "Check Every Day",
+          "value": "1d"
+        },
+        {
+          "title": "Check Every Week",
+          "value": "7d"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "color-hash": "^2.0.2",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/color-hash": "^2.0.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "<6.1.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest --reporter=verbose",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,12 +1,18 @@
+import type { Tool } from "@raycast/api";
 import { updateReminder } from "swift:../../swift/AppleReminders";
 
-import { Frequency } from "../create-reminder";
+import type { Frequency } from "../create-reminder";
+import { getRecurrenceConfirmationInfo, normalizeReminderToolInput } from "../helpers/reminder-tools";
 
 type Input = {
   /**
    * The ID of the reminder to update.
    */
   reminderId: string;
+  /**
+   * The ID of the list to move the reminder to.
+   */
+  listId?: string;
   /**
    * The new title of the reminder.
    */
@@ -24,15 +30,24 @@ type Input = {
    */
   priority?: "high" | "medium" | "low";
   /**
+   * The new tags for the reminder. A comma-separated or space-separated list of tags (e.g. "work, urgent" or "#work #urgent").
+   */
+  tags?: string;
+  /**
    * Whether the reminder is completed.
    */
   isCompleted?: boolean;
   /**
+   * The new URL / link attached to the reminder.
+   */
+  url?: string;
+  /**
    * The recurrence settings.
+   * Only include this when the user explicitly asks to add or change recurrence.
    */
   recurrence?: {
     /**
-     * Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".
+     * Recurrence frequency. Only pick the value from this list: "daily", "weekdays", "weekends", "weekly", "monthly", "yearly".
      */
     frequency: Frequency;
     /**
@@ -46,11 +61,20 @@ type Input = {
   };
 };
 
-export default async function (input: Input) {
-  if (input.dueDate && input.dueDate.includes("T")) {
-    input.dueDate = new Date(input.dueDate).toISOString();
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.recurrence) {
+    return undefined;
   }
 
-  const reminder = await updateReminder(input);
-  return reminder;
+  return {
+    message: "Apply recurrence changes to this reminder?",
+    info: [
+      { name: "Reminder ID", value: input.reminderId },
+      ...getRecurrenceConfirmationInfo(input.recurrence, input.dueDate),
+    ],
+  };
+};
+
+export default async function (input: Input) {
+  return updateReminder(normalizeReminderToolInput(input));
 }

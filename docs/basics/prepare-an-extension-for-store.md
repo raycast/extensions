@@ -12,9 +12,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use your **Raycast** account username in the `author` field
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
+  - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
-- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions-guidelines) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -77,8 +78,9 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
 - Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- For instructions shown directly beside the required preferences form, add an optional [`help.md` file](../api-reference/preferences.md#help-for-required-preferences) at the root of your extension. Use it to explain setup steps such as obtaining an API token. When help content is provided, the form displays it in place of the "About this Extension" link.
 
-![Onboarding button linking to the README file](../.gitbook/assets/required-preference.webp)
+![Onboarding button linking to the README file](../.gitbook/assets/required-preferences-2.webp)
 
 ## Categories
 
@@ -144,6 +146,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Do not include screenshots of other applications - keep the focus entirely on your extension within Raycast
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
 ## Version History

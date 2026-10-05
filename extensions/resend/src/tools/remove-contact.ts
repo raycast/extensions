@@ -1,34 +1,33 @@
-import { Tool } from "@raycast/api";
-import { resend } from "../lib/resend";
+import { Action, Tool } from "@raycast/api";
+import { getResend, withResend } from "../lib/oauth";
+import { unwrapResponse } from "./utils";
 
 type Input = {
   /**
-   * The ID of the audience that contains the contact.
-   * This is required to identify which audience the contact belongs to.
-   * You can get this ID by using the list-audiences tool first.
+   * Legacy audience ID used to scope removal. Usually unnecessary.
    */
-  audienceId: string;
+  audienceId?: string;
 
   /**
    * The name of the audience.
    * This is used for confirmation purposes only.
    * You can get this from the list-audiences tool first.
    */
-  audienceName: string;
+  audienceName?: string;
 
   /**
    * The ID of the contact to remove.
-   * This is required to identify which contact to delete.
+   * Either this or contactEmail is required to identify which contact to delete.
    * You can get this ID by using the list-contacts tool first.
    */
-  contactId: string;
+  contactId?: string;
 
   /**
    * The email of the contact to remove.
-   * This is used for confirmation purposes only.
+   * This can identify the contact when contactId is unavailable and is displayed in the confirmation.
    * You can get this email by using the list-contacts tool first.
    */
-  contactEmail: string;
+  contactEmail?: string;
 
   /**
    * The first name of the contact to remove.
@@ -45,14 +44,15 @@ type Input = {
   contactLastName?: string;
 };
 
-/**
- * In order to remove a contact, an audience ID is required.
- * If a contact exists in multiple audiences, you must ask the user to specify which audience to remove the contact from. But only asks for the audiences that the contact is in. You must first get the list of audiences that the contact is in using the list-contacts tool.
- */
 const tool = async (input: Input) => {
+  if (!input.contactId && !input.contactEmail) {
+    throw new Error("Provide contactId or contactEmail to identify the contact");
+  }
+
+  const resend = getResend();
   const { data, error } = await resend.contacts.remove({
-    audienceId: input.audienceId,
-    id: input.contactId,
+    ...(input.audienceId ? { audienceId: input.audienceId } : {}),
+    ...(input.contactId ? { id: input.contactId } : { email: input.contactEmail as string }),
   });
 
   if (error) {
@@ -62,26 +62,42 @@ const tool = async (input: Input) => {
   return data;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
+const confirmRemoval: Tool.Confirmation<Input> = async (input: Input) => {
   const infoItems = [];
+  const contact = input.contactId
+    ? unwrapResponse(
+        await getResend().contacts.get({
+          id: input.contactId,
+          ...(input.audienceId ? { audienceId: input.audienceId } : {}),
+        }),
+        "retrieve contact for removal confirmation",
+      )
+    : undefined;
 
-  infoItems.push({ name: "Audience", value: input.audienceName });
+  if (input.audienceName) infoItems.push({ name: "Audience", value: input.audienceName });
 
-  if (input.contactFirstName) {
-    infoItems.push({ name: "First Name", value: input.contactFirstName });
+  const firstName = contact ? contact.first_name : input.contactFirstName;
+  if (firstName) {
+    infoItems.push({ name: "First Name", value: firstName });
   }
 
-  if (input.contactLastName) {
-    infoItems.push({ name: "Last Name", value: input.contactLastName });
+  const lastName = contact ? contact.last_name : input.contactLastName;
+  if (lastName) {
+    infoItems.push({ name: "Last Name", value: lastName });
   }
 
-  infoItems.push({ name: "Contact Email", value: input.contactEmail });
+  const email = contact?.email || input.contactEmail;
+  if (email) infoItems.push({ name: "Contact Email", value: email });
+  if (input.contactId) infoItems.push({ name: "Contact ID", value: input.contactId });
 
   return {
+    style: Action.Style.Destructive,
     title: "Remove Contact",
     message: "Are you sure you want to remove this contact? This action cannot be undone.",
     info: infoItems,
   };
 };
 
-export default tool;
+export const confirmation: Tool.Confirmation<Input> = withResend(confirmRemoval);
+
+export default withResend(tool);

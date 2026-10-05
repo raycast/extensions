@@ -4,20 +4,84 @@
 
 # Dokploy
 
-This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each instance you can:
+This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhere with Total Freedom and Ease_. With this extension, for each **instance** you can:
 
-- View Projects
-    - View Services
+- View Projects (sorted by frecency, with each project's tags; search by tag name or Filter by Tag)
+    - View Services (sorted by frecency)
         - Create Application
         - Create Database
+        - Create From Template (browse Dokploy's public template registry, bookmark favorites, deploy with one action)
+            - Preview (which domains, environment variables and file mounts the template creates)
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Service Logs (Compose stacks pick a container first)
+            - Start / Stop Following
+            - Select / Change Container (Compose stacks)
+        - View Deployments (Applications and Compose stacks)
+            - View Build Logs
+            - Roll Back
+            - Cancel / Delete
+            - Stop Running Builds / Cancel Queued Deployments
+        - View Environment
+            - Edit Variables
+            - Copy Environment File
+        - View Domains (Applications and Compose stacks)
+            - Open Domain
+            - Copy URL
+            - Enable / Disable Domain
+            - Delete Domain
+            - Add Domain
+        - View Backups (Databases and Compose stacks)
+            - Add Backup
+            - Edit Backup
+            - Run Backup Now
+            - Delete Backup
+        - View Schedules (Applications and Compose stacks)
+            - Add Schedule
+            - Edit Schedule
+            - Run Now
+            - View Runs
+            - Delete Schedule
+        - Open Website (Applications and Compose stacks)
+        - Open in Dokploy
+        - Copy Connection String / Copy Password (Databases)
         - Delete Service
-    - View Docker (Containers)
+    - Edit Tags (add or remove a project's tags, Create Tag)
+    - Open in Dokploy (projects and environments)
+    - View Docker (Containers, sorted by frecency)
         - View Docker Config
+        - Restart / Start / Stop / Kill Container
+        - Browse Files (running containers, read-only)
+        - Remove Container
+        - Docker Cleanup (disk usage, clean stopped containers/unused images/unused volumes/build cache, full prune)
+        - Docker Events (recent events on the server, 5 minutes to 24 hours)
+    - View S3 Destinations
+        - Delete S3 Destination
     - View Users
+- Deploy Service
+    - Search for a service by name across every configured instance, without opening `Instances` first. Shows each match's environment and status, sorted by frecency.
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
+        - Open Website (Applications and Compose stacks)
+        - Open in Dokploy
+- Deployments
+    - See the most recent deployment of every deployed Application and Compose stack across every configured instance, sorted by recency.
+        - View Deployments (full history: Roll Back, Cancel, Delete, Stop Running Builds, Cancel Queued Deployments)
+        - Deploy / Redeploy / Rebuild Service
+        - Start / Stop / Reload Service
+        - View Logs
+        - Open Website
+        - Open in Dokploy (the service's Deployments tab)
+- Server Health (menu bar)
+    - See disk/memory/container status for every configured instance from the menu bar, with the icon tinting red when any instance's disk usage crosses a configurable threshold.
+- AI Tools (read-only): List Instances, List Projects, List Services, Get Service, Get Service Logs, List Deployments, Get Deployment Logs
+- AI Tools (ask you to confirm first): Deploy Service, Control Service (Start / Stop / Reload)
 
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/dokploy) OR `install` via Raycast Store
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 2. **Configure**:
 
@@ -28,6 +92,16 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
     - Name: This can be anything you want
     - Instance URL: The URL of your Dokploy instance with port
     - API Key: `Follow` instruction from [Dokploy API | Dokploy](https://docs.dokploy.com/docs/api#authentication)
+
+    Instances can later be edited or deleted from the same list. Use the instance dropdown in the
+    search bar of Projects, Docker, S3 Destinations, or Users to switch to a different configured
+    instance without going back to Instances.
+
+## 🧪 Tested On
+
+Extension tested on following versions:
+
+1. Version **v0.24.4**
 
 ---
 

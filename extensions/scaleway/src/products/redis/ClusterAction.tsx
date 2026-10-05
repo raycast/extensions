@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { Redis } from '@scaleway/sdk'
+import type { Redisv1 } from '@scaleway/sdk'
 import { getClusterUrl } from './urls'
 
 type ClusterActionProps = {
-  cluster: Redis.v1.Cluster
+  cluster: Redisv1.Cluster
   toggleIsDetailOpen: () => void
 }
 

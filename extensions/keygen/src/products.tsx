@@ -27,6 +27,7 @@ export default function Products() {
             icon={Icon.Dot}
             title={product.id.slice(0, 8)}
             subtitle={product.attributes.name}
+            keywords={[product.attributes.name]}
             detail={
               <List.Item.Detail
                 metadata={

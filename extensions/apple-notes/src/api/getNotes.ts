@@ -1,51 +1,64 @@
-import { homedir } from "os";
-import { resolve } from "path";
-
 import { executeSQL } from "@raycast/utils";
 
-import { getOpenNoteURL } from "../helpers";
+import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
-type Link = {
-  id: string;
-  text: string | null;
-  url: string | null;
-  notePk: number;
-};
+// SQLite's LOWER()/LIKE only fold ASCII case and never strip accents, so "cafe" wouldn't match
+// "Café" in SQL. This is the authoritative, fully Unicode-aware check applied in JS; the SQL-side
+// filter below only folds the common Latin accents, as a bound on how much data JS has to look at.
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
-type Backlink = {
-  id: string;
-  title: string;
-  url: string;
-};
+// Common Latin accented characters mapped to their base letter, used to build a SQL expression
+// that approximates normalizeForSearch well enough to prefilter and bound the query in SQL.
+const SQL_DIACRITIC_REPLACEMENTS: [string, string][] = [
+  ["àáâãäå", "a"],
+  ["èéêë", "e"],
+  ["ìíîï", "i"],
+  ["òóôõö", "o"],
+  ["ùúûü", "u"],
+  ["ýÿ", "y"],
+  ["ñ", "n"],
+  ["ç", "c"],
+];
 
-type Tag = {
-  id: string;
-  text: string | null;
-  notePk: number;
-};
+function foldSqlColumn(column: string): string {
+  const withDiacriticsFolded = SQL_DIACRITIC_REPLACEMENTS.reduce((expr, [accentedChars, base]) => {
+    return [...accentedChars, ...accentedChars.toUpperCase()].reduce(
+      (inner, accentedChar) => `REPLACE(${inner}, '${accentedChar}', '${base}')`,
+      expr,
+    );
+  }, column);
+  return `LOWER(${withDiacriticsFolded})`;
+}
 
-type NoteItem = {
-  id: string;
-  pk: number;
-  UUID: string;
-  title: string;
-  modifiedAt?: Date;
-  folder: string;
-  snippet: string;
-  account: string;
-  invitationLink: string | null;
-  links: Link[];
-  backlinks: Backlink[];
-  tags: Tag[];
-  locked: boolean;
-  pinned: boolean;
-  checklist: boolean;
-  checklistInProgress: boolean;
-};
+export async function getNotes(
+  maxQueryResults: number,
+  filterByTags: string[] = [],
+  searchText?: string,
+  exactTitleMatch = false,
+) {
+  const trimmedSearchText = searchText?.trim();
+  const foldedSearchText = trimmedSearchText ? escapeSQLString(normalizeForSearch(trimmedSearchText)) : "";
+  // SQLite's LOWER() only folds ASCII case, so a SQL-side fold can't be trusted to find exact
+  // matches that differ only by case in non-Latin scripts (e.g. "Привет" vs "ПРИВЕТ"). For those,
+  // skip the SQL filter and let the JS-side normalizeForSearch check below do the real matching.
+  const hasNonAsciiSearchText = trimmedSearchText
+    ? [...trimmedSearchText].some((char) => char.charCodeAt(0) > 127)
+    : false;
+  let searchFilter = "";
+  if (trimmedSearchText && exactTitleMatch && !hasNonAsciiSearchText) {
+    searchFilter = ` AND ${foldSqlColumn("TRIM(note.ztitle1)")} = '${foldedSearchText}'`;
+  } else if (trimmedSearchText && !exactTitleMatch) {
+    searchFilter = ` AND (
+      ${foldSqlColumn("note.ztitle1")} LIKE '%${foldedSearchText}%' OR
+      ${foldSqlColumn("note.zsnippet")} LIKE '%${foldedSearchText}%'
+    )`;
+  }
 
-const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
-
-export async function getNotes(maxQueryResults: number, filterByTags: string[] = []) {
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -73,6 +86,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
         note.z_pk IS NOT NULL AND
         note.zmarkedfordeletion != 1 AND
         folder.zmarkedfordeletion != 1
+        ${searchFilter}
     ORDER BY
         note.zmodificationdate1 DESC
     LIMIT ${maxQueryResults}
@@ -81,7 +95,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
   const data = await executeSQL<NoteItem>(NOTES_DB, query);
 
   if (!data || data.length === 0) {
-    return { pinnedNotes: [], unpinnedNotes: [], deletedNotes: [], allNotes: [] };
+    return [];
   }
 
   let invitations: { invitationLink: string | null; noteId: string }[] = [];
@@ -148,7 +162,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
 
   let notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
-    const noteLinks = links?.filter((link) => link.notePk == note.pk);
+    const noteLinks = links?.filter((link) => link.notePk === note.pk);
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
@@ -164,7 +178,7 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
       }
     });
 
-    const noteTags = tags?.filter((tag) => tag.notePk == note.pk);
+    const noteTags = tags?.filter((tag) => tag.notePk === note.pk);
 
     return {
       ...note,
@@ -181,6 +195,19 @@ export async function getNotes(maxQueryResults: number, filterByTags: string[] =
       const noteTags = note.tags.map((t) => t.text);
       return filterByTags.every((tag) => noteTags.includes(`#${tag.replace("#", "")}`));
     });
+  }
+
+  if (trimmedSearchText) {
+    const normalizedQuery = normalizeForSearch(trimmedSearchText);
+    notesWithAdditionalFields = notesWithAdditionalFields.filter((note) =>
+      exactTitleMatch
+        ? normalizeForSearch(note.title.trim()) === normalizedQuery
+        : normalizeForSearch(note.title).includes(normalizedQuery) ||
+          normalizeForSearch(note.snippet).includes(normalizedQuery),
+    );
+    if (exactTitleMatch) {
+      notesWithAdditionalFields = notesWithAdditionalFields.slice(0, maxQueryResults);
+    }
   }
 
   return notesWithAdditionalFields;

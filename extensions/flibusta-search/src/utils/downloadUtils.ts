@@ -43,7 +43,7 @@ export async function downloadFile(url: string, filename: string): Promise<strin
 
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        errorMessage = `Server error: ${error.response.status}`;
+        errorMessage = `Server error: ${error.response.status} ${error.response.statusText}`;
       } else if (error.request) {
         errorMessage = "No response received from server";
       } else {

@@ -19,7 +19,7 @@ interface SuggestionsResult {
 
 const toResult = (result: ApiSuggestionsResult): SuggestionsResult => {
   return {
-    id: "result" + result.query,
+    id: "suggestion" + result.query,
     query: result.query,
   };
 };
@@ -52,7 +52,9 @@ export default function useSuggestions(query: string, execute: boolean) {
   });
 
   const filteredResults = useMemo(() => {
-    return data?.results.filter((result) => result.query !== trimmedQuery).map(toResult) ?? [];
+    // Remove the current query from the suggestion results, as this item will be added
+    // as the first item in the results immediately after the query has changed.
+    return data?.results.filter((result) => result.query !== trimmedQuery).map(toResult) ?? fallback;
   }, [data]);
 
   const results = useMemo(() => {
@@ -67,5 +69,5 @@ export default function useSuggestions(query: string, execute: boolean) {
     ];
   }, [trimmedQuery, filteredResults, execute]);
 
-  return { isLoading, results };
+  return { isLoadingSuggestions: isLoading, suggestionsResults: results };
 }

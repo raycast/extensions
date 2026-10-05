@@ -8,7 +8,8 @@
   "contributors": [
     "charlie_deets",
     "PaperCloud",
-    "ViGeng"
+    "ViGeng",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -73,12 +74,8 @@
       "type": "dropdown",
       "description": "Default size of favicon",
       "required": false,
-      "default": "128",
+      "default": "32",
       "data": [
-        {
-          "value": "16",
-          "title": "16x16"
-        },
         {
           "value": "32",
           "title": "32x32"
@@ -86,37 +83,28 @@
         {
           "value": "64",
           "title": "64x64"
-        },
-        {
-          "value": "128",
-          "title": "128x128"
-        },
-        {
-          "value": "256",
-          "title": "256x256"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
     "image-downloader": "^4.3.0",
     "is-url": "^1.2.4",
-    "nanoid": "^5.1.2",
-    "tempfile": "^4.0.0"
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/is-url": "^1.2.30",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^8.25.0",
-    "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^8.57.1",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/is-url": "^1.2.32",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -124,5 +112,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

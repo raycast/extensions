@@ -40,7 +40,7 @@ export default function Command() {
                 return;
               }
 
-              open("raycast://extensions/raycast/raycast/confetti");
+              open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
               LocalStorage.setItem("celebrated-at-count", currentCount);
             });
           }

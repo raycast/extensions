@@ -5,7 +5,6 @@ import {
   List,
   closeMainWindow,
   environment,
-  Application,
   Action,
   Keyboard,
   getPreferenceValues,
@@ -18,15 +17,7 @@ import { homedir } from "os";
 import { useMemo, useState } from "react";
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
-import gh = require("parse-github-url");
-
-interface Preferences {
-  paths: string;
-  includeWorkspaces: boolean;
-  editorApp: Application;
-  editorAppAlt: Application;
-  terminalApp: Application;
-}
+import { parseGitRemote } from "./git-remote";
 
 interface Remote {
   url: string;
@@ -48,8 +39,9 @@ class Project {
   constructor(path: string) {
     this.fullPath = path;
     this.displayPath = path;
-    if (path.startsWith(homedir())) {
-      this.displayPath = path.replace(homedir(), "~");
+    const home = homedir().replaceAll("\\", "/");
+    if (path.startsWith(home)) {
+      this.displayPath = path.replace(home, "~");
     }
     const parts = path.split("/");
     this.name = parts[parts.length - 1];
@@ -60,12 +52,11 @@ class Project {
     if (gitConfig.remote != null) {
       for (const remoteName in gitConfig.remote) {
         const config = gitConfig.remote[remoteName] as Remote;
-        const parsed = gh(config.url);
-        if (parsed?.host && parsed?.repo) {
+        const parsed = parseGitRemote(config.url);
+        if (parsed) {
           repos = repos.concat({
             name: remoteName,
-            host: parsed?.host,
-            url: `https://${parsed?.host}/${parsed?.repo}`,
+            ...parsed,
           });
         }
       }
@@ -99,7 +90,7 @@ function searchProjects(query?: string): {
   projects: ProjectList;
 } {
   const projectList = useMemo(() => {
-    const projectPaths = getPreferenceValues<Preferences>()
+    const projectPaths = getPreferenceValues<Preferences.Index>()
       .paths.split(",")
       .map((s) => s.trim());
     const projects = projectPaths
@@ -112,7 +103,7 @@ function searchProjects(query?: string): {
       .filter(
         (path) =>
           statSync(path)?.isDirectory() ||
-          (getPreferenceValues<Preferences>().includeWorkspaces &&
+          (getPreferenceValues<Preferences.Index>().includeWorkspaces &&
             statSync(path)?.isFile() &&
             path.endsWith(".code-workspace")),
       )
@@ -156,15 +147,25 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function open(app: string, path: string) {
-  spawn("open", ["-a", app, path], { env: {} });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { NODE_ENV, ...filteredEnv } = process.env;
+  if (process.platform === "win32") {
+    spawn("cmd", ["/c", "start", "", app, path], {
+      detached: true,
+      stdio: "ignore",
+      env: filteredEnv,
+    }).unref();
+  } else {
+    spawn("open", ["-a", app, path], { env: {} });
+  }
 }
 
 export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
-  const editorApp = getPreferenceValues<Preferences>().editorApp;
-  const editorAppAlt = getPreferenceValues<Preferences>().editorAppAlt;
-  const terminalApp = getPreferenceValues<Preferences>().terminalApp;
+  const editorApp = getPreferenceValues<Preferences.Index>().editorApp!;
+  const editorAppAlt = getPreferenceValues<Preferences.Index>().editorAppAlt;
+  const terminalApp = getPreferenceValues<Preferences.Index>().terminalApp!;
 
   return (
     <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
@@ -250,7 +251,7 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
               <Action.ShowInFinder
-                title={"Open in Finder"}
+                title={process.platform === "win32" ? "Open in File Explorer" : "Open in Finder"}
                 key="finder"
                 onShow={() => updateFrecency(searchQuery, project)}
                 path={project.fullPath}

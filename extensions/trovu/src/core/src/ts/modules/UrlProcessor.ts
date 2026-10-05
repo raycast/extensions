@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-
 /** @module UrlProcessor */
 import CityType from "./type/city";
 import DateType from "./type/date";

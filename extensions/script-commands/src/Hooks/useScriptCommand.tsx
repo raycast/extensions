@@ -10,7 +10,7 @@ import { Filter, State } from "@types";
 
 import { iconDarkURLFor, iconLightURLFor, languageURL, sourceCodeNormalURL } from "@urls";
 
-import { IconConstants } from "@constants";
+import { IconConstants } from "Const";
 
 type ScriptCommandState = {
   commandState: State;

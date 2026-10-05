@@ -2,6 +2,12 @@
 
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
 
+{% hint style="info" %}
+
+Menubar commands aren't available on Windows.
+
+{% endhint %}
+
 ## Getting Started
 
 If you don't have an extension yet, follow the [getting started](../basics/getting-started.md) guide and then return to this page.
@@ -73,9 +79,7 @@ Your root search should look similar to:
 
 ![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.webp)
 
-Running it once should activate it to:
-
-![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.webp)
+Running the command activates its menu bar item. Run it again to refresh the item.
 
 ## Lifecycle
 

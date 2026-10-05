@@ -1,5 +1,26 @@
 # Shortcuts Search Changelog
 
+## [Windows Support and Account Shortcuts] - 2026-10-04
+
+- Support Windows app detection, platform keymaps, and verified shortcut execution
+- Add Ctrl/Alt/Shift/Win and target-layout punctuation input with focus checks
+- Add Windows browser window/address capture and page-change cancellation
+- Preserve account shortcuts/favorites and add Windows CI coverage
+- Merge signed-in custom applications and shortcuts into existing commands
+- Add All Apps, My Apps, and Favorites filters to the application list
+- Add application and shortcut favorite actions without separate personal-data commands
+- Sync custom Windows app IDs/process names and choose between matching shortcut collections
+- Prefer Windows app IDs over stale process names, exclude conflicting IDs, and offer matching macOS collections
+- Ignore non-executable Windows app-ID duplicates when resolving a unique executable
+- Copy the current Windows app ID or executable process name for custom app setup
+
+## [Update] - 2025-12-25
+
+- Add support for platform-specific keymaps
+- Add application icons support
+- Fix shortcut runner
+- Improve shortcut formatting and display
+
 ## [Update] - 2024-09-18
 
 - Add command to show shortcuts for the frontmost web page

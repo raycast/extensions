@@ -1,21 +1,39 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { getReferencesMatchingName } from "youversion-suggest";
 import { getPreferredLanguage, getPreferredVersion } from "./preferences";
 import ReferenceActions from "./reference-actions";
 import { BibleReference } from "./types";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [query, setQuery] = useState("");
+
+  const { data: results = [], isLoading } = useCachedPromise(
+    async (searchText: string) => {
+      if (!searchText.trim()) return [];
+      return getReferencesMatchingName(searchText, {
+        language: await getPreferredLanguage(),
+        fallbackVersion: await getPreferredVersion(),
+      });
+    },
+    [query],
+    {
+      keepPreviousData: true,
+      failureToastOptions: {
+        title: "Could not perform search",
+      },
+    },
+  );
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
+      isLoading={isLoading}
+      onSearchTextChange={setQuery}
       searchBarPlaceholder="Type the name of a chapter, verse, or range or verses..."
     >
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult: BibleReference) => (
+      <List.Section title="Results" subtitle={results.length + ""}>
+        {results.map((searchResult: BibleReference) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
         ))}
       </List.Section>
@@ -30,51 +48,4 @@ function SearchListItem({ searchResult }: { searchResult: BibleReference }) {
       actions={<ReferenceActions searchResult={searchResult} />}
     />
   );
-}
-
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-
-  const search = useCallback(
-    async function search(searchText: string) {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await getReferencesMatchingName(searchText, {
-          language: await getPreferredLanguage(),
-          fallbackVersion: await getPreferredVersion(),
-        });
-        setState((oldState) => ({
-          ...oldState,
-          results: results,
-          isLoading: false,
-        }));
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-
-        console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
-      }
-    },
-    [setState],
-  );
-
-  useEffect(() => {
-    search("");
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-interface SearchState {
-  results: BibleReference[];
-  isLoading: boolean;
 }

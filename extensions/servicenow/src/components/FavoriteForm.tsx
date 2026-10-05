@@ -18,7 +18,32 @@ const findFavoriteById = (data: Favorite[], targetId: string): Favorite | undefi
     undefined as Favorite | undefined,
   );
 
-export default function FavoriteForm({ favorite, favoriteId, add, groupId, revalidate }: SetInstanceFormProps) {
+export default function FavoriteForm(props: SetInstanceFormProps) {
+  const { favorite, favoriteId } = props;
+  const { favorites, isLoading } = useFavorites();
+
+  if (!favoriteId || favorite) {
+    return <FavoriteFormInner {...props} />;
+  }
+
+  const resolved = findFavoriteById(favorites || [], favoriteId);
+
+  if (!resolved && isLoading) {
+    return <Form isLoading navigationTitle="Manage Favorites - Edit" />;
+  }
+
+  if (!resolved) {
+    return (
+      <Form navigationTitle="Manage Favorites - Edit">
+        <Form.Description text="This favorite could not be found. It may have been deleted." />
+      </Form>
+    );
+  }
+
+  return <FavoriteFormInner {...props} favorite={resolved} />;
+}
+
+function FavoriteFormInner({ favorite, add, groupId, revalidate }: SetInstanceFormProps) {
   const { pop } = useNavigation();
   const {
     addUrlToFavorites,
@@ -27,12 +52,7 @@ export default function FavoriteForm({ favorite, favoriteId, add, groupId, reval
     addFavoritesGroup,
     removeFromFavorites,
     favoritesGroups,
-    favorites,
   } = useFavorites();
-
-  if (favoriteId) {
-    favorite = findFavoriteById(favorites || [], favoriteId);
-  }
 
   const isGroup = favorite?.group || add == "group";
 

@@ -1,13 +1,18 @@
 # Selfh.st Icons Changelog
 
-All notable changes to this project will be documented in this file.
+## [1.1.0] - 2026-01-19
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- Add Windows Support
+- Update dependencies
+
+## [1.0.1] - 2026-01-17
+
+- Fix icons not loading (ref: [Issue #24545](https://github.com/raycast/extensions/issues/24545))
 
 ## [1.0.0] - 2025-05-09
 
 ### Added
+
 - Initial release of the Selfh.st Icons Raycast extension
 - Search functionality for finding icons in the selfh.st collection
 - Grid-based icon preview interface

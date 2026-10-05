@@ -95,7 +95,6 @@ export default function CreateProject() {
     popToRoot();
   }
 
-  // 获取选中预设的详情
   const selectedPreset = presets.find((p) => p.name === selected);
 
   return (

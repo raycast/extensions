@@ -1,7 +1,7 @@
 import { Alert, Icon, closeMainWindow, confirmAlert, trash, showToast, popToRoot } from "@raycast/api";
 
 import { runAppleScript } from "run-applescript";
-import { SpotlightSearchResult } from "./types";
+import { PinnedFolder, SpotlightSearchResult } from "./types";
 import path from "path";
 
 const safeSearchScope = (searchScope: string | undefined) => {
@@ -67,6 +67,10 @@ const folderName = (result: SpotlightSearchResult) => {
   return path.basename(result.path) || "Untitled";
 };
 
+const pinnedFolderName = (result: PinnedFolder) => {
+  return result.customName?.trim() || folderName(result);
+};
+
 const enclosingFolderName = (result: SpotlightSearchResult) => {
   return [...result.path.split("/")]
     .filter((_, pathPartIndex) => pathPartIndex < [...result.path.split("/")].length - 1)
@@ -129,6 +133,7 @@ const fixDoubleConcat = (text: string): string => {
 export {
   safeSearchScope,
   folderName,
+  pinnedFolderName,
   enclosingFolderName,
   showFolderInfoInFinder,
   copyFolderToClipboard,

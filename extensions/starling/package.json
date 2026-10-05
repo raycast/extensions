@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "starling",
+  "title": "Starling",
+  "description": "Securely manage Starling accounts with your own personal access token",
+  "icon": "extension-icon.png",
+  "author": "lemikeone",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "description": "To access your own Starling account: 1) Sign in to https://developer.starlingbank.com/login 2) Open Personal Access 3) Link your Starling account 4) Create a token with all permissions except payee:create, pay-local:create, and standing-order:create 5) Copy the token and paste it here.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Paste your personal access token here"
+    },
+    {
+      "name": "useDemoData",
+      "title": "Use Demo Data",
+      "description": "Show fictional sample data for screenshots and avoid Starling API calls",
+      "type": "checkbox",
+      "label": "Enable demo mode with safe sample data",
+      "required": false,
+      "default": false
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Starling",
+      "description": "View accounts, balances, and a quick Starling overview",
+      "mode": "view",
+      "keywords": [
+        "accounts",
+        "balance",
+        "overview",
+        "starling"
+      ]
+    },
+    {
+      "name": "transactions",
+      "title": "Transactions",
+      "subtitle": "Starling",
+      "description": "Browse and search transactions across your accounts",
+      "mode": "view",
+      "keywords": [
+        "feed",
+        "payments",
+        "history"
+      ]
+    },
+    {
+      "name": "spaces",
+      "title": "Spaces",
+      "subtitle": "Starling",
+      "description": "View spaces and savings spaces by account",
+      "mode": "view",
+      "keywords": [
+        "categories",
+        "pots"
+      ]
+    },
+    {
+      "name": "payees",
+      "title": "Payees",
+      "subtitle": "Starling",
+      "description": "View your payees and payee accounts",
+      "mode": "view",
+      "keywords": [
+        "beneficiaries",
+        "contacts"
+      ]
+    },
+    {
+      "name": "cards",
+      "title": "Cards",
+      "subtitle": "Starling",
+      "description": "View cards and toggle selected controls",
+      "mode": "view",
+      "keywords": [
+        "debit",
+        "lock",
+        "controls"
+      ]
+    },
+    {
+      "name": "mandates",
+      "title": "Direct Debit Mandates",
+      "subtitle": "Starling",
+      "description": "View and cancel direct debit mandates",
+      "mode": "view",
+      "keywords": [
+        "direct debit",
+        "subscriptions"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

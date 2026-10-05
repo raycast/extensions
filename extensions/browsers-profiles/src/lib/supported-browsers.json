@@ -36,6 +36,13 @@
       "icon": "brave.png"
     },
     {
+      "app": "Brave Origin",
+      "type": "CHROMIUM",
+      "title": "Brave Origin",
+      "path": "/Library/Application Support/BraveSoftware/Brave-Origin",
+      "icon": "brave-origin.png"
+    },
+    {
       "app": "Microsoft Edge",
       "type": "CHROMIUM",
       "title": "Microsoft Edge",
@@ -55,6 +62,27 @@
       "title": "Microsoft Edge Canary",
       "path": "/Library/Application Support/Microsoft Edge Canary",
       "icon": "edge-canary.png"
+    },
+    {
+      "app": "Helium",
+      "type": "CHROMIUM",
+      "title": "Helium",
+      "path": "/Library/Application Support/net.imput.helium",
+      "icon": "helium.png"
+    },
+    {
+      "app": "Arc",
+      "type": "CHROMIUM",
+      "title": "Arc",
+      "path": "/Library/Application Support/Arc/User Data",
+      "icon": "arc.png"
+    },
+    {
+      "app": "Vivaldi",
+      "type": "CHROMIUM",
+      "title": "Vivaldi",
+      "path": "/Library/Application Support/Vivaldi",
+      "icon": "vivaldi.png"
     }
   ],
   "firefox": [

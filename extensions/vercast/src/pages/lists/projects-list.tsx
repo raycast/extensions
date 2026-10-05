@@ -1,5 +1,5 @@
 import { ActionPanel, open, Icon, List, useNavigation, Action, showToast, Toast } from "@raycast/api";
-import { Project } from "../../types";
+import { Project, Team } from "../../types";
 import fromNow from "../../utils/time";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import useVercel from "../../hooks/use-vercel-info";
@@ -34,6 +34,12 @@ const ProjectListSection = () => {
 
   const { push } = useNavigation();
 
+  const getVercelProjectUrl = (projectName: string) => {
+    const teamSlug = teams?.find((team: Team) => team.id === selectedTeam)?.slug;
+    const ownerSlug = teamSlug || user?.username;
+    return `https://vercel.com/${ownerSlug}/${projectName}`;
+  };
+
   return (
     <List
       searchBarPlaceholder="Search Projects..."
@@ -65,7 +71,7 @@ const ProjectListSection = () => {
                         username={user?.username}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         deployment={project.latestDeployments[0] as any}
-                        selectedTeam={teams?.find((team) => team.id === selectedTeam)}
+                        selectedTeam={teams?.find((team: Team) => team.id === selectedTeam)}
                       />,
                     );
                   } else {
@@ -90,6 +96,15 @@ const ProjectListSection = () => {
                 icon={Icon.ArrowRight}
                 onAction={async () => {
                   push(<EnvironmentVariables team={selectedTeam} project={project} />);
+                }}
+              />
+              <Action.OpenInBrowser
+                title="Visit on Vercel"
+                url={getVercelProjectUrl(project.name)}
+                icon={Icon.Globe}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "opt"], key: "v" },
                 }}
               />
             </ActionPanel>

@@ -6,6 +6,15 @@
 
 This is a Raycast extension for [Wave](https://www.waveapps.com/). It allows you to view your Wave Businesses and their associated Invoices, Customers and even some Customer Statements 👀.
 
+## 📜 Disclaimer
+
+As of _May 23, 2025_:
+> Users can only grant access to businesses that have an active Pro or Wave Advisor subscription with Wave.
+
+([Link to relevant part in OAuth Guide](https://developer.waveapps.com/hc/en-us/articles/360019493652-OAuth-Guide#:~:text=Please%20note%3A%20Users%20can%20only%20grant%20access%20to%20businesses%20that%20have%20an%20active%20Pro%20or%20Wave%20Advisor%20subscription%20with%20Wave.))
+
+For users on Free Plan, please follow step 3 i.e. **Use Access Token**
+
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/wave) OR `install` via Raycast Store
@@ -16,7 +25,7 @@ This is a Raycast extension for [Wave](https://www.waveapps.com/). It allows you
 
     b. `Click` to **Sign in with Wave** when prompted
 
-    c. `Log In` (if not already) and `Allow` the application access (at the moment we only use "read-only" permissions)
+    c. `Log In` (if not already) and `Allow` the application access
 
     d. `Enjoy` the extension!
 
@@ -46,7 +55,8 @@ This is a Raycast extension for [Wave](https://www.waveapps.com/). It allows you
 ## 🗒️ NOTES
 
 - If you enter `Access Token` in `Preferences` this will take precedence over OAuth but you can switch to OAuth by deleting the token from Preferences
-- This extension is using Raycast's own [PKCE proxy](https://oauth.raycast.com/) so security is ensuerd.
+- This extension is using Raycast's own [PKCE proxy](https://oauth.raycast.com/) so security is ensured.
+- When you `create` an invoice via the extension, it will automatically be marked as `DRAFT` and you can then edit it as needed.
 
 ## 🖼️ Media
 

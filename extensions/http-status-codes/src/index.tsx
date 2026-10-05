@@ -3,7 +3,7 @@ import { Code } from "./types";
 import http from "http";
 import { copyFile, getCodeDocsUrl, getCodeGroupDescription, statusCodeToColor } from "./utils";
 
-const typeOfPerson = getPreferenceValues<ExtensionPreferences>().typeOfPerson;
+const typeOfPerson = getPreferenceValues<Preferences>().typeOfPerson;
 
 export default function Command() {
   const codeGroups = Object.entries(http.STATUS_CODES).reduce(

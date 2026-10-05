@@ -8,7 +8,7 @@ export type preferences = {
 export type postValues = {
   name: string;
   idList: string;
-  due?: Date;
+  due?: Date | null;
   desc?: string;
   idMember?: string[];
 };

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 export default class DateType {
-  static parse(str, env) {
+  static parse(str: string, env: AnyObject) {
     const now = new Date();
     let date, matches;
 

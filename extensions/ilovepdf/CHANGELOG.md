@@ -1,5 +1,9 @@
 # iLovePDF Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Add a feature to select files from Finder] - 2024-11-21
 
 ## [Add Validate PDF/A Command] - 2024-07-18

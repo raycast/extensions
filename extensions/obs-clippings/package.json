@@ -5,7 +5,11 @@
   "description": "Creates a new (opionated) clipping in Obsidian. Optionally includes the page content with an AI summary",
   "icon": "command-icon.png",
   "author": "trevware",
-  "categories": ["Productivity", "Applications", "Web"],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -60,5 +64,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

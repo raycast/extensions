@@ -1,16 +1,16 @@
-import { updateTodo, TodoParams } from '../api';
+import { updateTodo } from '../api';
+import { UpdateTodoParams } from '../types';
 
 type Input = {
-  /** The todo id to update */
+  /** The to-do id to update */
   todoId: string;
   /** The parameters to update */
-  todoParams: TodoParams;
+  todoParams: UpdateTodoParams;
 };
 
 export default async function ({ todoId, todoParams }: Input) {
   try {
-    const todo = await updateTodo(todoId, todoParams);
-    return todo;
+    await updateTodo(todoId, todoParams);
   } catch (error) {
     if (error instanceof Error && error.message === 'unauthorized') {
       return {

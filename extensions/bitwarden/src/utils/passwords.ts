@@ -5,7 +5,19 @@ import { DEFAULT_PASSWORD_OPTIONS, REPROMPT_HASH_SALT } from "~/constants/passwo
 import { PasswordGeneratorOptions } from "~/types/passwords";
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
-  return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
+  return Object.entries(options).flatMap(
+    ([arg, value]: [string, PasswordGeneratorOptions[keyof PasswordGeneratorOptions]]) => {
+      switch (typeof value) {
+        case "boolean":
+          if (value) return [`--${arg}`];
+          return [];
+        case "string":
+          return [`--${arg}`, value];
+        default:
+          return [];
+      }
+    }
+  );
 }
 
 export function hashMasterPasswordForReprompting(password: string): Promise<string> {

@@ -14,6 +14,7 @@ evals:
           name: search-emails
           arguments:
             search: raycast hackathon
+            includeTrash: false
   - input: "@mail when is my meeting with john smith?"
     mocks:
       search-emails:
@@ -46,3 +47,78 @@ evals:
             to:
               - john@example.com
           name: send-email
+  - input: "@mail move the email from amazon about shipping to trash"
+    mocks:
+      search-emails:
+        - id: "101"
+          from: shipment-tracking@amazon.com
+          subject: Your package has shipped
+          summary: Your order is on the way and will arrive tomorrow.
+      move-to-trash:
+        message: 1 Email moved to Trash
+        emails:
+          - id: "101"
+            subject: Your package has shipped
+            from: shipment-tracking@amazon.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: amazon
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageId: "101"
+  - input: "@mail find the security alert email in trash"
+    mocks:
+      search-emails:
+        - id: "6551"
+          from: no-reply@accounts.google.com
+          subject: Security alert
+          summary: A new sign-in on Mac
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: security alert
+            includeTrash: true
+  - input: "@mail move all github notification emails about failed builds to trash"
+    mocks:
+      search-emails:
+        - id: "201"
+          from: notifications@github.com
+          subject: Build failed for raycast/extensions
+          summary: The build failed on main.
+        - id: "202"
+          from: notifications@github.com
+          subject: CI failed for mail extension
+          summary: The workflow completed with failures.
+      move-to-trash:
+        message: 2 Emails moved to Trash
+        emails:
+          - id: "201"
+            subject: Build failed for raycast/extensions
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+          - id: "202"
+            subject: CI failed for mail extension
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: github
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageIds:
+              - "201"
+              - "202"

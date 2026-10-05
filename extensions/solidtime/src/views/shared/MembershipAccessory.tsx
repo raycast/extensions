@@ -10,7 +10,7 @@ export default function MembershipAccessory() {
     <List.Dropdown
       tooltip="Organization"
       value={ctx.membership?.id}
-      isLoading
+      isLoading={memberships.isLoading}
       onChange={(id) => {
         const membership = memberships.data?.find((m) => m.id === id);
         if (membership) ctx.setMembership(membership);

@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 
+import { RevalidateList } from "../helpers";
 import { getWorkflowStatus } from "../helpers/workflow";
 import { WorkflowRunsResponse } from "../workflow-runs";
 
@@ -11,7 +11,7 @@ export type WorkflowRun = WorkflowRunsResponse["data"]["workflow_runs"][0];
 type WorkflowRunListItemProps = {
   workflowRun: WorkflowRun;
   repository: string;
-  mutateList: MutatePromise<WorkflowRunsResponse | undefined>;
+  mutateList: RevalidateList;
 };
 
 export function WorkflowRunListItem({ workflowRun, repository, mutateList }: WorkflowRunListItemProps) {

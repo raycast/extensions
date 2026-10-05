@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default async () => {
   const script = `
@@ -8,6 +9,9 @@ export default async () => {
       end if
   
       tell application "Terminal"
+      if (count of windows) is 0 then
+          error "No Terminal window open"
+      end if
       do script "open -a Finder ./" in first window
       end tell
   `;
@@ -16,6 +20,6 @@ export default async () => {
     const result = await runAppleScript(script);
     await showToast(Toast.Style.Success, "Done", result);
   } catch (err) {
-    await showToast(Toast.Style.Failure, "Something went wrong");
+    await showFailureToast(err);
   }
 };

@@ -16,7 +16,8 @@
     "yvysunu",
     "pernielsentikaer",
     "dianne_mcewan",
-    "stphstph"
+    "stphstph",
+    "bendrucker"
   ],
   "platforms": [
     "macOS",
@@ -354,6 +355,20 @@
         }
       ],
       "required": true
+    },
+    {
+      "name": "strava_client_id",
+      "title": "Strava Client ID",
+      "description": "Required for Strava features. Create a personal app at strava.com/settings/api (paid Strava subscription required). Set Authorization Callback Domain to raycast.com, enter both credentials, then reopen a command to sign in.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "strava_client_secret",
+      "title": "Strava Client Secret",
+      "description": "The secret from your personal Strava API app. Enter it with your Client ID, then sign in through Strava.",
+      "type": "password",
+      "required": true
     }
   ],
   "dependencies": {
@@ -376,6 +391,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs"
   }
 }

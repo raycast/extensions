@@ -5,6 +5,7 @@ import { ScreenInfo } from "../types";
 import { CachedItem, createCacheItem, isCacheValid, HOUR_IN_MS } from "../utils/storageUtils";
 import { getScreensInfo, getActiveWindowScreenInfo } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
+import { isTimeoutError, TIMEOUT_ERROR_MESSAGE, TIMEOUT_ERROR_TOAST_TITLE, withTimeout } from "../utils/timeout";
 
 // Cache keys
 const SCREENS_INFO_CACHE_KEY = "screens-info-cache";
@@ -58,36 +59,47 @@ export function useScreenInfo() {
   /**
    * Get all screen information using Swift
    */
-  const getAllScreensInfo = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const getAllScreensInfo = useCallback(
+    async (options: { showErrorToast?: boolean } = {}) => {
+      const shouldShowErrorToast = options.showErrorToast ?? true;
 
-    try {
-      // Check if cache is valid for 24 hours
-      if (cachedScreens && isCacheValid(cachedScreens, CACHE_DURATION)) {
-        setScreens(cachedScreens.value);
-        return cachedScreens.value;
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Check if cache is valid for 24 hours
+        if (cachedScreens && isCacheValid(cachedScreens, CACHE_DURATION)) {
+          setScreens(cachedScreens.value);
+          return cachedScreens.value;
+        }
+
+        // Get screen info via Swift
+        const screenInfoList = await withTimeout(getScreensInfo(), "Get screens info");
+        setScreens(screenInfoList);
+
+        // Update cache
+        const newCache = createCacheItem(screenInfoList);
+        setCachedScreens(newCache);
+        await LocalStorage.setItem(SCREENS_INFO_CACHE_KEY, JSON.stringify(newCache));
+
+        return screenInfoList;
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        setError(new Error(errorMsg));
+        if (shouldShowErrorToast) {
+          await showFailureToast(isTimeoutError(err) ? TIMEOUT_ERROR_MESSAGE : errorMsg, {
+            title: isTimeoutError(err) ? TIMEOUT_ERROR_TOAST_TITLE : "Failed to get screens info",
+          });
+        } else {
+          logError("Failed to preload screens info:", errorMsg);
+        }
+        return [];
+      } finally {
+        setIsLoading(false);
       }
-
-      // Get screen info via Swift
-      const screenInfoList = await getScreensInfo();
-      setScreens(screenInfoList);
-
-      // Update cache
-      const newCache = createCacheItem(screenInfoList);
-      setCachedScreens(newCache);
-      await LocalStorage.setItem(SCREENS_INFO_CACHE_KEY, JSON.stringify(newCache));
-
-      return screenInfoList;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(new Error(errorMsg));
-      await showFailureToast(errorMsg, { title: "Failed to get screens info" });
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cachedScreens]);
+    },
+    [cachedScreens],
+  );
 
   /**
    * Get the screen information and dimensions of the currently active window
@@ -99,7 +111,7 @@ export function useScreenInfo() {
 
     try {
       // Always get fresh data from Swift API
-      const windowScreenInfo = await getActiveWindowScreenInfo();
+      const windowScreenInfo = await withTimeout(getActiveWindowScreenInfo(), "Get active window screen info");
       log("Active window screen info:", windowScreenInfo);
 
       if (!windowScreenInfo) {
@@ -143,7 +155,9 @@ export function useScreenInfo() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       setError(new Error(errorMsg));
-      await showFailureToast(errorMsg, { title: "Failed to get active window screen info" });
+      await showFailureToast(isTimeoutError(err) ? TIMEOUT_ERROR_MESSAGE : errorMsg, {
+        title: isTimeoutError(err) ? TIMEOUT_ERROR_TOAST_TITLE : "Failed to get active window screen info",
+      });
       throw err;
     } finally {
       setIsLoading(false);
@@ -154,20 +168,8 @@ export function useScreenInfo() {
    * Refresh all screen information
    */
   const refreshScreenInfo = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await getAllScreensInfo();
-      return true;
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(new Error(errorMsg));
-      await showFailureToast(errorMsg, { title: "Failed to refresh screens info" });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+    const screenInfoList = await getAllScreensInfo({ showErrorToast: true });
+    return screenInfoList.length > 0;
   }, [getAllScreensInfo]);
 
   // Additional functionality for developer mode
@@ -192,7 +194,7 @@ export function useScreenInfo() {
       // Only preload screen info in dev mode, with cleanup
       if (process.env.NODE_ENV === "development") {
         let mounted = true;
-        getAllScreensInfo().then(() => {
+        getAllScreensInfo({ showErrorToast: false }).then(() => {
           if (mounted) {
             isInitialized = true;
             log("Screen information initialized, cache valid for 24 hours");

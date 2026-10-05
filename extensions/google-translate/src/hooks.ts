@@ -2,7 +2,7 @@ import { getPreferenceValues, getSelectedText } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import React from "react";
 import { LanguageCode } from "./languages";
-import { LanguageCodeSet, TranslatePreferences } from "./types";
+import { LanguageCodeSet } from "./types";
 import { AUTO_DETECT } from "./simple-translate";
 
 type _LegacySingleLanguageCodeSet = {
@@ -20,7 +20,7 @@ const unifyLegacyLanguageSet = (legacy: _StoredLanguageCodeSet): LanguageCodeSet
 };
 
 export const usePreferences = () => {
-  return React.useMemo(() => getPreferenceValues<TranslatePreferences>(), []);
+  return React.useMemo(() => getPreferenceValues<Preferences.Translate>(), []);
 };
 
 export const useTextState = () => {
@@ -51,8 +51,8 @@ export const useSelectedLanguagesSet = () => {
   const [selectedLanguageSet, setSelectedLanguageSet] = useCachedState<_StoredLanguageCodeSet>(
     "selectedLanguageSet",
     unifyLegacyLanguageSet({
-      langFrom: preferences.lang1,
-      langTo: preferences.lang2,
+      langFrom: preferences.langFrom,
+      langTo: preferences.lang1,
     }),
   );
 
@@ -61,7 +61,10 @@ export const useSelectedLanguagesSet = () => {
 
 export const usePreferencesLanguageSet = () => {
   const preferences = usePreferences();
-  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: [preferences.lang2] };
+  const preferencesLanguageSet: LanguageCodeSet = {
+    langFrom: preferences.langFrom,
+    langTo: [preferences.lang1, preferences.lang2],
+  };
   return preferencesLanguageSet;
 };
 

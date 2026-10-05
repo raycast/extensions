@@ -18,12 +18,16 @@ export default function Command() {
     setState((previous) => ({ ...previous, snippets: orderedSnippets, filteredSnippets: filteredSnippets }));
   };
 
-  // Fetch primary action preference
+  // Fetch primary action and pasteContentScope preference
   useEffect(() => {
     const fetch = async () => {
       const preferences = await getPreferenceValues();
-      const primaryAction = preferences["primaryAction"];
-      setState((previous) => ({ ...previous, primaryAction: primaryAction }));
+      setState((previous) => ({
+        ...previous,
+        primaryAction: preferences["primaryAction"],
+        pasteContentScope: preferences["pasteContentScope"] ?? "pasteScopeFull",
+        hideFolderInList: preferences["hideFolderInList"] ?? false,
+      }));
     };
     fetch();
   }, []);
@@ -183,7 +187,9 @@ export default function Command() {
               id={i.id}
               key={i.id}
               title={i.name}
-              accessories={[{ icon: Icon.Folder, text: i.folder && i.folder !== "." ? i.folder : "" }]}
+              accessories={
+                !state.hideFolderInList && i.folder && i.folder !== "." ? [{ icon: Icon.Folder, text: i.folder }] : []
+              }
               keywords={[i.folder, ...i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))]}
               icon={Icon.Document}
               detail={<SnippetContent snippet={i} />}
@@ -193,6 +199,7 @@ export default function Command() {
                     handleAction={handleAction}
                     snippet={i}
                     primaryAction={state.primaryAction ?? ""}
+                    pasteContentScope={state.pasteContentScope ?? "pasteScopeFull"}
                     reloadSnippets={fetchData}
                     paths={state.paths ?? []}
                   />

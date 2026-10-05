@@ -1,5 +1,78 @@
 # Brand Icons Changelog
 
+## [Bugfix] - 2026-09-16
+
+- Fix `ENOENT` errors when copying icons from an incompletely downloaded asset pack (e.g. interrupted download on Windows); the pack is now re-downloaded automatically
+
+## [Enhancement] - 2026-07-04
+
+- Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-05-27
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2026-04-08
+
+- Fix `raycast-tint-color` value
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2026-03-07
+
+- We reached 3400+ icons!
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-01
+
+- Add support for changing copy action to paste
+- Bump all dependencies to the latest
+
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-11-03
+
+- Fix typos
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-10-13
+
+- Fix useEffect dependencies
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-08-12
+
+- Add support for creating social badges through cross-extension
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-08-04
+
+- Handle error when reading a non-existent file in `makeCopyToDownload`
+- Fix `titleToSlug` logics for legacy Simple Icons versions
+- Bump all dependencies to the latest
+
+## [Bugfix & Enhancement] - 2025-07-29
+
+- Fix a bug which cannot update icon packs
+- Add a field `file` to cross-extension callback values
+- Add a new preference option for loading history versions
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-07-15
+
+- Use [pacote](https://npmjs.com/pacote) for downloading and extracting icons
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-06-20
 
 - We reached 3300+ icons!

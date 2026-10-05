@@ -68,7 +68,7 @@ export default function ManageCategoriesCommand() {
   function generateDeepLink(id: string): string {
     const context = { categoryId: id };
     const encodedContext = encodeURIComponent(JSON.stringify(context));
-    return `raycast://extensions/sriramHQ/quick-quit/execute-quit?context=${encodedContext}`;
+    return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/sriramHQ/quick-quit/execute-quit?context=${encodedContext}`;
   }
 
   return (
@@ -98,7 +98,7 @@ export default function ManageCategoriesCommand() {
                 <Action
                   title="Manage Quicklinks"
                   icon={Icon.Cog}
-                  onAction={() => open("raycast://extensions/raycast/raycast/search-quicklinks")}
+                  onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/search-quicklinks`)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
                 />
                 <ActionPanel.Section>

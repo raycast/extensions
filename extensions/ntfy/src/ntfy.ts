@@ -85,7 +85,7 @@ const parseMessage = async (
 
 export default async function main(props: { arguments: Arguments.Ntfy }) {
   try {
-    const { defaultTopic, cache, defaultServer } = getPreferenceValues<Preferences>();
+    const { defaultTopic, cache, defaultServer, access_token } = getPreferenceValues<Preferences>();
     const topic = props.arguments.topic || defaultTopic;
 
     if (!topic) throw new Error('No topic provided');
@@ -97,6 +97,7 @@ export default async function main(props: { arguments: Arguments.Ntfy }) {
       headers: {
         'Content-Type': 'application/json',
         ...(cache ? {} : { Cache: 'no-cache' }),
+        ...(access_token ? { Authorization: `Bearer ${access_token}` } : {}),
         ...headers,
       },
       body: JSON.stringify(body),

@@ -15,9 +15,8 @@ export function QueryWorldGridLayout() {
   const [region, setRegion] = useState<string>("");
 
   const { data: allTimezonesData, isLoading: allTimezonesLoading } = useAllTimezones();
-  const timezones = useMemo(() => {
-    return allTimezonesData || [];
-  }, [allTimezonesData]);
+
+  const timezones = Array.isArray(allTimezonesData) ? allTimezonesData : [];
 
   const { data: starTimezonesData, isLoading: starTimezonesLoading, mutate: starTimezonesMutate } = useStarTimezones();
 
@@ -25,9 +24,7 @@ export function QueryWorldGridLayout() {
     await starTimezonesMutate();
   };
 
-  const starTimezones = useMemo(() => {
-    return starTimezonesData || [];
-  }, [starTimezonesData]);
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
 
   const { data: currentTimeData } = useCurrentTime(region);
   const currentTime = useMemo(() => {

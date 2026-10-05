@@ -1,7 +1,7 @@
-import { clearLocalStorage, getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { fetcher, validateToken } from "./utils";
-import { DataValues } from "./types";
+import { fetcher, resolveWorkspaceId, validateToken } from "./utils";
+import { DataValues, User } from "./types";
 
 interface ConfigProps {
   config: DataValues;
@@ -15,14 +15,14 @@ export default function useConfig(): ConfigProps {
 
   useEffect(() => {
     if (!isValidToken) {
-      clearLocalStorage();
+      LocalStorage.clear();
       return;
     }
 
     async function getStorage() {
-      const name = await getLocalStorageItem("name");
-      const userId = await getLocalStorageItem("userId");
-      const workspaceId = await getLocalStorageItem("workspaceId");
+      const name = await LocalStorage.getItem<string>("name");
+      const userId = await LocalStorage.getItem<string>("userId");
+      const workspaceId = await LocalStorage.getItem<string>("workspaceId");
 
       if (userId && workspaceId && name) {
         setData({ userId, workspaceId, name });
@@ -30,21 +30,42 @@ export default function useConfig(): ConfigProps {
       }
 
       async function fetchUser() {
-        showToast(ToastStyle.Animated, "Loading…");
+        showToast(Toast.Style.Animated, "Loading…");
 
         const { data, error } = await fetcher(`/user`);
 
         if (data) {
-          setLocalStorageItem("userId", data.id);
-          setLocalStorageItem("workspaceId", data.defaultWorkspace);
-          setLocalStorageItem("name", data.name);
-          setData({ userId: data.id, workspaceId: data.defaultWorkspace, name: data.name });
-          showToast(ToastStyle.Success, "Clockify is ready");
+          const user = data as User;
+
+          // setItem cannot store undefined, so an unresolved workspace means workspaceId never
+          // lands in LocalStorage, the guard above fails on every mount, and every request goes to
+          // /workspaces/undefined/...
+          const { workspaceId, error: workspaceError } = await resolveWorkspaceId(user);
+
+          if (!workspaceError && !workspaceId) {
+            showToast(Toast.Style.Failure, "No Clockify workspace found for this API key");
+            return;
+          }
+
+          if (!workspaceId) {
+            showToast(Toast.Style.Failure, "Could not load Clockify workspaces", workspaceError?.toString());
+            return;
+          }
+
+          // Await these, and write them one at a time rather than with Promise.all: consumers read
+          // the ids back out of LocalStorage as soon as config is published, and concurrent writes
+          // can be lost — leaving workspaceId absent while userId and name land.
+          await LocalStorage.setItem("userId", user.id);
+          await LocalStorage.setItem("workspaceId", workspaceId);
+          await LocalStorage.setItem("name", user.name);
+
+          setData({ userId: user.id, workspaceId, name: user.name });
+          showToast(Toast.Style.Success, "Clockify is ready");
         } else if (error === "Unauthorized") {
-          showToast(ToastStyle.Failure, "Invalid API Key detected");
+          showToast(Toast.Style.Failure, "Invalid API Key detected");
           setIsValidToken(false);
         } else {
-          showToast(ToastStyle.Failure, "An error ccurred");
+          showToast(Toast.Style.Failure, "An error occurred");
         }
       }
 

@@ -1,19 +1,28 @@
-import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 import { logScript } from "./logger";
 import { ScriptError } from "./models";
 
-function toScriptError(e: unknown): ScriptError {
-  return e as ScriptError;
+function toScriptError(error: unknown, command: string): ScriptError {
+  const cause = error instanceof Error ? error : new Error(String(error));
+  return Object.assign(cause, { shortMessage: cause.message, command, failed: true });
 }
 
-export const runScript = (command: string) =>
-  TE.tryCatch(() => pipe(command, logScript, runAppleScript), toScriptError);
+export const runScript = (command: string, timeout = 10_000) =>
+  TE.tryCatch(
+    () => runAppleScript(logScript(command), [], { timeout }),
+    (error) => toScriptError(error, command),
+  );
 
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
+
+export const escapeAppleScriptString = (value: string) =>
+  value
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
 
 /**
  * Transforms an object to a querystring concatened in apple-script.
@@ -36,5 +45,10 @@ export const createQueryString = <T extends object>(obj: T): string => {
 export const parseQueryString =
   <T>() =>
   (query: string): T => {
-    return Object.fromEntries(query.split("$BREAK").map((item) => item.split("="))) as unknown as T;
+    return Object.fromEntries(
+      query.split("$BREAK").flatMap((item) => {
+        const separator = item.indexOf("=");
+        return separator < 0 ? [] : [[item.slice(0, separator), item.slice(separator + 1)]];
+      }),
+    ) as T;
   };

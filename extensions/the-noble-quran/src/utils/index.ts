@@ -4,7 +4,7 @@ import { FavoriteAyah, Surah } from "../types";
 export const addAyahToFavorites = async (ayah: FavoriteAyah) =>
   await LocalStorage.setItem(
     "favorites",
-    JSON.stringify([...JSON.parse((await LocalStorage.getItem("favorites")) || "[]"), ayah])
+    JSON.stringify([...JSON.parse((await LocalStorage.getItem("favorites")) || "[]"), ayah]),
   );
 
 export const removeAyahFromFavorites = async (ayah: FavoriteAyah) =>
@@ -12,9 +12,10 @@ export const removeAyahFromFavorites = async (ayah: FavoriteAyah) =>
     "favorites",
     JSON.stringify(
       JSON.parse((await LocalStorage.getItem("favorites")) || "[]").filter(
-        (favorite: FavoriteAyah) => favorite.ayahNumber !== ayah.ayahNumber || favorite.surahNumber !== ayah.surahNumber
-      )
-    )
+        (favorite: FavoriteAyah) =>
+          favorite.ayahNumber !== ayah.ayahNumber || favorite.surahNumber !== ayah.surahNumber,
+      ),
+    ),
   );
 
 export const filterSurahs = (surahs: Surah[] | null | undefined, searchText: string): Surah[] | undefined => {
@@ -25,7 +26,7 @@ export const filterSurahs = (surahs: Surah[] | null | undefined, searchText: str
   const filteredSurahs = surahs.filter(
     (surah) =>
       surah.englishName.toLowerCase().includes(searchText.toLowerCase()) ||
-      surah.number.toString().includes(searchText.toLowerCase())
+      surah.number.toString().includes(searchText.toLowerCase()),
   );
 
   return filteredSurahs;

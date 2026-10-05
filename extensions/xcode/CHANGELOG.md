@@ -1,5 +1,17 @@
 # Xcode Changelog
 
+## [Simulator Appearance & Device Hub Support] - 2026-09-24
+
+- Added "Toggle Dark/Light Mode" action for booted simulators (⌘D).
+- Updated `launchSimulatorApplication` to open Device Hub on Xcode 27+, falling back to Simulator.app.
+- Added "Booted" section at the top of the simulator list for quick access to running simulators.
+- Added "Recently Used" section showing the 5 most recently booted simulators, sorted by last usage.
+- Sort simulator groups by newest runtime first (e.g. iOS 27 before iOS 26).
+
+## [Xcode 26 Assets] - 2025-09-15
+
+- Updated assets to match Xcode 26 
+
 ## [AI Tools & Improved Search Recent Projects] - 2025-06-16
 
 - Added AI tools to search for your recent Xcode projects, Swift packages, boot and shutdown simulators, and more.
@@ -11,7 +23,7 @@
 - Added "Delete" action to the "Manage Simulators" command.
 - Updated Raycast Store screenshots.
 
-## [Fix open URL] -  2025-04-25
+## [Fix open URL] - 2025-04-25
 
 - Fix the open URL in Simulator command to support URLs with query parameters.
 

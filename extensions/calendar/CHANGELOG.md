@@ -1,5 +1,9 @@
 # Calendar Changelog
 
+## [Windows Support] - 2025-11-26
+
+- Add Windows support
+
 ## [Enhancement] - 2024-02-09
 
 - Allowed view mode switching: "compact" for the old-style layout and "wide" for the new table-based layout

@@ -2,6 +2,14 @@ import { Clipboard, Toast, closeMainWindow, showHUD, showToast } from "@raycast/
 import { fetchSvg } from "./fetch";
 import { parseSvgContent } from "./parse-svg";
 
+const showComponentFetchError = async (title: string, error: unknown) => {
+  await showToast({
+    style: Toast.Style.Failure,
+    title,
+    message: error instanceof Error ? error.message : undefined,
+  });
+};
+
 const vueAndSvelteComponentTemplate = async (lang: string, url: string, framework: "Vue" | "Svelte") => {
   const svg = await fetchSvg(url);
 
@@ -86,18 +94,35 @@ export const generateAngularComponentAndCopy = async (url: string, componentName
     showHUD(`Copied Angular component to clipboard`);
     closeMainWindow();
   } catch (error) {
-    if (error instanceof Error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to fetch angular component`,
-        message: error.message,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to fetch angular component`,
-      });
-    }
+    await showComponentFetchError(`Failed to fetch angular component`, error);
+    return;
+  }
+};
+
+export const generateAstroComponentAndCopy = async (url: string) => {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: `Fetching Astro component`,
+  });
+
+  try {
+    const svg = await fetchSvg(url);
+    const component = svg
+      .replace(/\s*(width|height)="[^"]*"/gi, "")
+      .replace(/\s*(width|height)='[^']*'/gi, "")
+      .replace(/\s*(width|height)=\{[^}]*\}/gi, "")
+      .replace(/<svg([^>]*)>/i, (_, attrs) => {
+        const cleanedAttrs = attrs.replace(/\s*\{?\.\.\.Astro\.props\}?\s*/i, "");
+        return `<svg ${cleanedAttrs} {...Astro.props}>`;
+      })
+      .trim();
+
+    await toast.hide();
+    Clipboard.copy(component);
+    showHUD(`Copied Astro component to clipboard`);
+    closeMainWindow();
+  } catch (error) {
+    await showComponentFetchError(`Failed to fetch astro component`, error);
     return;
   }
 };

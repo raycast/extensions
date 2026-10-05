@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wol",
-  "title": "WOL",
+  "title": "Wake-On-LAN",
   "description": "Simple wake on lan",
   "icon": "command-icon.png",
   "author": "Lemon",
+  "contributors": [
+    "sanjevidev"
+  ],
   "categories": [
     "System"
   ],
@@ -35,5 +38,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
   }
 }

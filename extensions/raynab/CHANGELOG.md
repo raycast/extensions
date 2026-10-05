@@ -1,5 +1,28 @@
 # Raynab Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Security: Refresh Lockfile] - 2026-03-27
+
+### 🔧 Technical Updates
+- Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.
+
+## [Fixed Invalid Date Error in Transaction Form] - 2026-01-19
+
+### 🐞 Bug Fixes
+- Fixed `RangeError: Invalid time value` error that occurred when creating transactions
+- Replaced unreliable `new Date(new Date().toLocaleDateString())` pattern with `new Date()` to avoid locale-dependent date parsing issues
+- Resolves startup errors caused by invalid Date objects when calling `toISOString()`
+
+## [Fixed Currency Format Validation in Transaction Forms] - 2025-08-04
+
+### 🐞 Bug Fixes
+- Fixed transaction amount validation to properly handle different currency formats (e.g., European "1.234,56" vs US "1,234.56")
+- Amount validation now respects YNAB budget currency settings for decimal and group separators
+- Resolves issue where users with non-US currency formats couldn't enter amounts in their preferred format
+
 ## [Improved Category Search & Fixed Budget Details] - 2025-05-30
 
 ### ✨ New Features

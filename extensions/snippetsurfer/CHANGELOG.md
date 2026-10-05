@@ -1,5 +1,12 @@
 # SnippetSurfer Changelog
 
+## [Enhancements] - 2026-08-07
+- Add "Hide Folder in List" preference to hide the folder path next to each snippet, giving long snippet names more room.
+
+## [Enhancements] - 2026-04-22
+- Add "Paste first code block" preference to copy/paste only the first code block from a snippet instead of the full content.
+- Fix nested code fence rendering in README.
+
 ## [Enhancements] - 2024-09-21
 - Improve UI for empty folders.
 - Improve UI for root folders.
@@ -15,13 +22,11 @@
 - Handle metadata with tab characters, replacing them with spaces to prevent parsing errors.
 
 ## [Enhancements] - 2024-02-29
-
 - Support tags for metadata
 - Support filtering by tags
 - Add the ability to select multiple snippet folders.
 
 ## [Enhancements] - 2024-02-25
-
 - Added more actions to the action panel
 - Better error handling
 - Support yaml files

@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 
 // Hooks
 import useTopAlbums from "./hooks/useTopAlbums";
@@ -21,11 +12,11 @@ const LastFm: React.FC = () => {
   const { loading, error, albums } = useTopAlbums({ username, apikey, period, limit });
 
   if (error !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+    showToast({ style: Toast.Style.Failure, title: "Something went wrong.", message: String(error) });
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search songs...">
+    <List isLoading={loading} searchBarPlaceholder="Search albums...">
       <List.Section title="Results">
         {albums.map((a, idx) => {
           const album = a as Album;
@@ -39,16 +30,14 @@ const LastFm: React.FC = () => {
               icon={image}
               title={album.name}
               subtitle={name ? `by ${name}` : undefined}
-              accessoryTitle={album.playcount ? `${album.playcount} plays` : undefined}
-              accessoryIcon={album.playcount ? Icon.Star : undefined}
+              accessories={album.playcount ? [{ text: `${album.playcount} plays`, icon: Icon.Star }] : []}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={album.url} title="Open on Last.fm" />
-                  {url && <OpenInBrowserAction url={url} title="Open Artist Page on Last.fm" />}
-
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={album.url} />
-                  <CopyToClipboardAction title="Copy Album Name to Clipboard" content={album.name} />
-                  {name && <CopyToClipboardAction title="Copy Artist Name to Clipboard" content={name} />}
+                  <Action.OpenInBrowser url={album.url} title="Open on Last.fm" />
+                  {url && <Action.OpenInBrowser url={url} title="Open Artist Page on Last.fm" />}
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={album.url} />
+                  <Action.CopyToClipboard title="Copy Album Name to Clipboard" content={album.name} />
+                  {name && <Action.CopyToClipboard title="Copy Artist Name to Clipboard" content={name} />}
                 </ActionPanel>
               }
             />

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-radios",
+  "title": "Quick Radios",
+  "description": "Manage Windows Wi-Fi from Raycast: scan, connect, share via QR, and inspect connection details.",
+  "icon": "icon.png",
+  "keywords": [
+    "wifi",
+    "wi-fi",
+    "wlan",
+    "wireless",
+    "network",
+    "hotspot",
+    "internet",
+    "qr code"
+  ],
+  "author": "tejas911",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "wifi",
+      "title": "Manage Wi-Fi",
+      "description": "View status, connect to networks, and manage Wi-Fi.",
+      "keywords": [
+        "wifi",
+        "wlan",
+        "wireless",
+        "network",
+        "connect"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "toggle-wifi",
+      "title": "Toggle Wi-Fi",
+      "description": "Instantly turn Wi-Fi on or off.",
+      "keywords": [
+        "wifi",
+        "wlan",
+        "wireless",
+        "radio"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --experimental-strip-types tests/session-data-test.mjs",
+    "test:integration:windows": "node --experimental-strip-types tests/windows-integration-test.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,12 +1,13 @@
-import { HistoryEntry, Tab } from "../types/interfaces";
+import { HistoryEntry, Tab, Workspace, WorkspaceColor, workspaceHexMap } from "../types/interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
-import { List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { EdgeActions } from ".";
 
 export class EdgeListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
+  public static Workspace = WorkspaceItem;
 }
 
 function HistoryItem({
@@ -38,5 +39,52 @@ function TabListItem(props: { tab: Tab }) {
       actions={<EdgeActions.TabList tab={props.tab} />}
       icon={props.tab.googleFavicon()}
     />
+  );
+}
+
+function WorkspaceItem({ workspace, profile }: { workspace: Workspace; profile: string }) {
+  const getIconColor = (workspaceColor: WorkspaceColor) => {
+    return workspaceHexMap[workspaceColor] || workspaceHexMap[WorkspaceColor.Transparent];
+  };
+
+  const getAccessories = () => {
+    return [
+      ...(workspace.shared
+        ? [
+            {
+              tag: {
+                value: "Shared",
+                color: Color.Magenta,
+              },
+              icon: Icon.TwoPeople,
+            },
+          ]
+        : []),
+      ...(workspace.accent
+        ? [
+            {
+              tag: {
+                value: "Open",
+                color: Color.Green,
+              },
+              icon: Icon.ArrowNe,
+            },
+          ]
+        : []),
+    ];
+  };
+
+  return (
+    <List.Item
+      key={`${profile}-${workspace.id}`}
+      title={workspace.name}
+      subtitle={workspace.menuSubtitle}
+      icon={{
+        source: Icon.Map,
+        tintColor: getIconColor(workspace.color),
+      }}
+      accessories={getAccessories()}
+      actions={<EdgeActions.Workspace workspace={workspace} profile={profile} />}
+    ></List.Item>
   );
 }

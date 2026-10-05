@@ -1,31 +1,25 @@
-import { List, Icon, Image, Color, ActionPanel, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import SeasonDropdown from "./components/season_dropdown";
+import { Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { getTable } from "./api";
-import { Standing } from "./types";
+import SeasonDropdown from "./components/season_dropdown";
 
 export default function GetTables() {
-  const [table, setTable] = useState<Standing[]>();
   const [competition, setCompetition] = useState<string>("");
-  const [showStats, setShowStats] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (competition) {
-      setTable(undefined);
-      getTable(competition).then((data) => {
-        setTable(data);
-      });
-    }
-  }, [competition]);
+  const { data: table, isLoading } = usePromise(
+    async (competition) => (competition ? await getTable(competition) : []),
+    [competition],
+  );
 
   return (
     <List
       throttle
-      isLoading={!table}
+      isLoading={isLoading}
       searchBarAccessory={
         <SeasonDropdown selected={competition} onSelect={setCompetition} />
       }
-      isShowingDetail={showStats}
+      isShowingDetail={true}
     >
       {table?.map((team) => {
         let icon: Image.ImageLike = {
@@ -51,25 +45,12 @@ export default function GetTables() {
               color: Color.PrimaryText,
               value: team.points.toString(),
             },
-            icon,
             tooltip: "Points",
           },
+          {
+            icon,
+          },
         ];
-
-        if (!showStats) {
-          accessories.unshift(
-            {
-              icon: Icon.SoccerBall,
-              text: team.played.toString(),
-              tooltip: "Played",
-            },
-            {
-              icon: Icon.Goal,
-              text: `${team.forGoals} - ${team.againstGoals}`,
-              tooltip: "Goals For - Goals Against",
-            },
-          );
-        }
 
         return (
           <List.Item
@@ -83,11 +64,6 @@ export default function GetTables() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Stats" />
-                    {/* <List.Item.Detail.Metadata.Label
-                      title="Previous Position"
-                      text={team.previous_position}
-                    /> */}
                     <List.Item.Detail.Metadata.Label
                       title="Played"
                       text={team.played.toString()}
@@ -104,6 +80,7 @@ export default function GetTables() {
                       title="Lost"
                       text={team.losses.toString()}
                     />
+                    <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Goals For"
                       text={team.forGoals.toString()}
@@ -116,20 +93,28 @@ export default function GetTables() {
                       title="Goal Difference"
                       text={team.goalsDifference.toString()}
                     />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.TagList title="Form">
+                      {team.seasonResults.map((result, idx) => {
+                        let color = Color.SecondaryText;
+                        if (result.resultLetter === "l") {
+                          color = Color.Red;
+                        } else if (result.resultLetter === "w") {
+                          color = Color.Green;
+                        }
+
+                        return (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={idx}
+                            text={result.resultLetter.toUpperCase()}
+                            color={color}
+                          />
+                        );
+                      })}
+                    </List.Item.Detail.Metadata.TagList>
                   </List.Item.Detail.Metadata>
                 }
               />
-            }
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Show Stats"
-                  icon={Icon.Sidebar}
-                  onAction={() => {
-                    setShowStats(!showStats);
-                  }}
-                />
-              </ActionPanel>
             }
           />
         );
