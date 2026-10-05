@@ -15,7 +15,7 @@ export function getPictureFilename(wallpaper: RaycastWallpaper, platform = proce
     .join("")
     .replace(/[. ]+$/, "");
   const extension = needsConversion(wallpaper.url, platform)
-    ? ".jpg"
+    ? ".png"
     : path.extname(new URL(wallpaper.url).pathname).toLowerCase() || ".png";
   return `${title || "Wallpaper"}${extension}`;
 }
@@ -34,5 +34,7 @@ export function resolvePicturesDirectory(directory: string | undefined) {
 
 export async function preparePicture(buffer: Buffer, url: string, platform = process.platform) {
   if (!needsConversion(url, platform)) return buffer;
-  return Buffer.from(await convert({ buffer, format: "JPEG", quality: 1 }));
+  // PNG, not JPEG: the JPEG encoder builds its output in a JS array, which exceeds the 100 MB
+  // extension heap for a full-resolution wallpaper. The PNG encoder compresses outside the heap.
+  return Buffer.from(await convert({ buffer, format: "PNG" }));
 }
