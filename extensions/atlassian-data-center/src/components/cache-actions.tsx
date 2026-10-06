@@ -28,7 +28,7 @@ export default function CacheActions() {
     const confirmed = await confirmAlert({
       title: "Clear All Cache",
       message:
-        "This will clear all caches for Atlassian Data Center, including avatar cache and user settings. This action cannot be undone.",
+        "This will clear all caches for Atlassian extension, including avatar cache and user settings. This action cannot be undone.",
       icon: Icon.Warning,
       primaryAction: {
         title: "Clear All",
