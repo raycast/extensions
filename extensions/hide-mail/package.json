@@ -81,7 +81,7 @@
       "type": "textfield",
       "required": false,
       "title": "HideMail Host",
-      "description": "Only change this to use a different HideMail server",
+      "description": "Only change this to use a different HideMail server. Always uses HTTPS",
       "default": "https://hidemail.app",
       "placeholder": "https://hidemail.app"
     }

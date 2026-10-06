@@ -12,18 +12,9 @@ export const getHost = (): string => {
     return DEFAULT_HOST;
   }
 
-  const url = new URL(/^https?:\/\//.test(host) ? host : `https://${host}`);
-
-  // The API key is sent as a bearer token, so plain HTTP is only allowed for local development hosts
-  if (url.protocol === "http:" && !isLocalHostname(url.hostname)) {
-    url.protocol = "https:";
-  }
-
-  return url.origin;
+  // The API key is sent as a bearer token, so always use HTTPS whatever scheme was entered
+  return new URL(`https://${host.replace(/^https?:\/\//i, "")}`).origin;
 };
-
-const isLocalHostname = (hostname: string): boolean =>
-  ["localhost", "127.0.0.1", "[::1]"].includes(hostname) || /\.(test|localhost)$/.test(hostname);
 
 export const getApiUrl = (): string => `${getHost()}/api/v1`;
 
