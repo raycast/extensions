@@ -186,7 +186,13 @@ export default function Command() {
           <Action
             title="Open Scheduled Posts"
             icon={Icon.Calendar}
-            onAction={() => launchCommand({ name: "scheduled-posts", type: LaunchType.UserInitiated })}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: "scheduled-posts", type: LaunchType.UserInitiated });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not open Scheduled Posts" });
+              }
+            }}
           />
           <Action.OpenInBrowser title="Manage Connected Accounts" url={urls.manageProfiles} />
         </ActionPanel>

@@ -6,6 +6,10 @@
   "icon": "extension-icon.png",
   "author": "juan_carlos_cavero_gracia",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity",
     "Media",
@@ -252,6 +256,42 @@
           },
           {
             "meetsCriteria": "The answer says the Instagram upload failed because the media was too short and the TikTok upload succeeded."
+          }
+        ]
+      },
+      {
+        "input": "@upload-post did the post with request id req_123 go live?",
+        "mocks": {
+          "get-upload-status": {
+            "request_id": "req_123",
+            "status": "completed",
+            "completed": 2,
+            "total": 2,
+            "results": [
+              {
+                "platform": "x",
+                "success": true,
+                "post_url": "https://x.com/acme/status/1"
+              },
+              {
+                "platform": "linkedin",
+                "success": true,
+                "post_url": "https://www.linkedin.com/feed/update/urn:li:share:1"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-upload-status",
+              "arguments": {
+                "requestId": "req_123"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "The answer says the post was published on X and LinkedIn and shares the post URLs."
           }
         ]
       }
