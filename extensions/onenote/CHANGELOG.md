@@ -7,6 +7,8 @@
 - Show the actual loading error and offer a retry instead of reporting every failure as a missing installation.
 - Publish completed search databases atomically so overlapping or interrupted rebuilds preserve working searches.
 - Retry a failed full-text index on the next launch without waiting for a notebook change.
+- Treat dollar sequences in searches literally instead of expanding them into SQL fragments.
+- Show notebooks and sections before recent notes when browsing grouped results.
 
 ## [Fix search memory usage] - 2026-05-20
 

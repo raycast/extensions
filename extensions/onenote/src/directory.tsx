@@ -19,7 +19,10 @@ export function getListItems(
   const [limit, setLimit] = useState(PAGE_SIZE);
   const { data, isLoading, permissionView } = useSQL<OneNoteItem>(
     databasePath,
-    `${query.replace("ORDER BY", `${searchCondition(searchText, fullTextIndexed)} ORDER BY`)} LIMIT ${limit};`
+    `${query.replace(
+      "ORDER BY",
+      () => `${searchCondition(searchText, fullTextIndexed)} ORDER BY ${sort === 1 ? "Type DESC, " : ""}`
+    )} LIMIT ${limit};`
   );
   const results = data;
 
@@ -29,6 +32,7 @@ export function getListItems(
 
   const onSortChange = (newSort: string) => {
     setSort(Number(newSort));
+    setLimit(PAGE_SIZE);
   };
 
   const context = getAncestorsStr(elt, " > ", true);

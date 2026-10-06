@@ -9,8 +9,8 @@ const { promisify } = require("node:util");
 const run = promisify(execFile);
 const extensionPath = path.resolve(__dirname, "..");
 
-function loadSource(name, mocks) {
-  const filename = path.join(extensionPath, "src", `${name}.ts`);
+function loadSource(name, mocks, extension = "ts") {
+  const filename = path.join(extensionPath, "src", `${name}.${extension}`);
   const compiled = new Module(filename, module);
   compiled.filename = filename;
   compiled.paths = module.paths;
@@ -20,6 +20,7 @@ function loadSource(name, mocks) {
     ts.transpile(require("node:fs").readFileSync(filename, "utf8"), {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2021,
+      jsx: ts.JsxEmit.ReactJSX,
     }),
     filename
   );
@@ -51,7 +52,10 @@ async function createFixture(options = {}) {
           "INSERT INTO Entities (Type, GOID, GUID, ParentGOID, LastModifiedTime, RecentTime, Title) VALUES (?, ?, ?, ?, ?, ?, ?)",
           [1, `synthetic-${i}`, `guid-${i}`, "synthetic-section", i, i, `Synthetic note ${i}`]
         );
-        db.run("INSERT INTO PageElements VALUES (?, ?)", [i, "x".repeat(1200) + " needle photography"]);
+        db.run("INSERT INTO PageElements VALUES (?, ?)", [
+          i,
+          "x".repeat(1200) + (options.contentSuffix ?? " needle photography"),
+        ]);
       }
       await fs.writeFile(indexFile, Buffer.from(db.export()));
     } finally {
@@ -103,4 +107,4 @@ async function createFixture(options = {}) {
   };
 }
 
-module.exports = { createFixture };
+module.exports = { createFixture, loadSource };
