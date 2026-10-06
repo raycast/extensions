@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Search Fragments MCP Server] - {PR_MERGE_DATE}
+## [Add Search Fragments MCP Server] - 2026-10-06
 
 - Add Search Fragments to the community registry: resolves half-remembered books, films, songs and people into a cited answer, a shortlist or an explicit no, and checks specific factual claims against current web sources. Raycast connects directly to the remote Streamable HTTP server at https://searchfragments.com/api/mcp, with no sign-in and no API key.
 
