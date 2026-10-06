@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+} from "@raycast/api";
 import React from "react";
 import {
   DateFormatPreference,
@@ -207,7 +215,7 @@ export function TaskDetail({
               title="Delete Task"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={() => onDelete(task)}
             />
           )}
@@ -215,7 +223,7 @@ export function TaskDetail({
             <ActionPanel.Submenu
               title="Delete Recurring Task…"
               icon={Icon.Trash}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             >
               <Action
                 title="Delete Only This Occurrence"

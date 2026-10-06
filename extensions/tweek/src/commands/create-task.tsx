@@ -21,11 +21,12 @@ export default function CreateTaskCommand() {
       toast.style = Toast.Style.Success;
       toast.title = "Task Created";
       toast.message = input.text;
+      return true;
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to Create Task";
       toast.message = err instanceof Error ? err.message : "Unknown error";
-      throw err;
+      return false;
     }
   };
 
@@ -35,19 +36,28 @@ export default function CreateTaskCommand() {
       title: `Creating ${inputs.length} tasks...`,
     });
 
-    const result = await bulk_create_tasks(inputs);
-    if (inputs[0]?.calendarId) {
-      invalidateTaskCache(inputs[0].calendarId);
-    }
+    try {
+      const result = await bulk_create_tasks(inputs);
+      if (inputs[0]?.calendarId) {
+        invalidateTaskCache(inputs[0].calendarId);
+      }
 
-    toast.style =
-      result.failed.length > 0 ? Toast.Style.Failure : Toast.Style.Success;
-    toast.title = `Created ${result.succeeded.length}/${inputs.length} tasks`;
+      toast.style =
+        result.failed.length > 0 ? Toast.Style.Failure : Toast.Style.Success;
+      toast.title = `Created ${result.succeeded.length}/${inputs.length} tasks`;
+      return result.failed.length === 0;
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to Create Tasks";
+      toast.message = err instanceof Error ? err.message : "Unknown error";
+      return false;
+    }
   };
 
   return (
     <TaskForm
       mode="create"
+      isPushed={false}
       calendars={calendars}
       defaultCalendarId={activeCalendarId}
       customColors={customColors}

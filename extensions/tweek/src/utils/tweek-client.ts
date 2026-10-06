@@ -11,7 +11,7 @@ import {
   UpdateTaskInput,
   UpdateType,
 } from "../types";
-import { getUserTimezone } from "./date-utils";
+import { getTodayISO, getUserTimezone, parseVirtualTaskId } from "./date-utils";
 
 const REST_BASE_URL = "https://tweek.so/api/v1";
 const MAX_BATCH_SIZE = 50;
@@ -130,6 +130,15 @@ async function fetchWithRetry<T>(
       }
 
       if (!response.ok) {
+        if (response.status === 429) {
+          const quotaErr = new TweekApiError(
+            "Tweek monthly read/write quota reached. Check Profile → API Settings in Tweek.",
+            { status: 429 },
+          );
+          // Do not retry monthly quota exhaustion
+          throw quotaErr;
+        }
+
         const errorMessage =
           (parsed as { message?: string; error?: string })?.message ||
           (parsed as { error?: string })?.error ||
@@ -140,12 +149,8 @@ async function fetchWithRetry<T>(
           isUnauthorized: response.status === 401 || response.status === 403,
         });
 
-        // Do not retry client errors (4xx), except 429 Too Many Requests
-        if (
-          response.status >= 400 &&
-          response.status < 500 &&
-          response.status !== 429
-        ) {
+        // Do not retry client errors (4xx)
+        if (response.status >= 400 && response.status < 500) {
           throw apiErr;
         }
         lastError = apiErr;
@@ -157,8 +162,7 @@ async function fetchWithRetry<T>(
       if (
         err instanceof TweekApiError &&
         err.status >= 400 &&
-        err.status < 500 &&
-        err.status !== 429
+        err.status < 500
       ) {
         throw err;
       }
@@ -341,7 +345,7 @@ export async function create_task(
   if (input.listId) {
     payload.listId = input.listId;
   } else {
-    payload.date = input.date ?? new Date().toISOString().slice(0, 10);
+    payload.date = input.date ?? getTodayISO();
   }
 
   if (input.color && input.color !== "blank") {
@@ -434,51 +438,54 @@ export async function update_task(
 
   // Cross-calendar migration support since Tweek PATCH fixes calendarId
   if (calendarId && originalCalendarId && calendarId !== originalCalendarId) {
-    let existingTask: TweekTask | null = null;
-    try {
-      existingTask = await get_task(taskId, apiKey);
-    } catch {
-      existingTask = null;
+    const existingTask = await get_task(taskId, apiKey);
+    if (!existingTask) {
+      throw new Error(
+        `Cannot move task across calendars: task "${taskId}" could not be retrieved.`,
+      );
     }
+
+    const isRecurring = Boolean(
+      parseVirtualTaskId(taskId).isVirtual ||
+      (typeof existingTask.freq === "number" && existingTask.freq > 0),
+    );
 
     const created = await create_task(
       {
         calendarId,
-        text: patchFields.text ?? existingTask?.text ?? "Untitled Task",
-        done: patchFields.done ?? existingTask?.done ?? false,
+        text: patchFields.text ?? existingTask.text,
+        done: patchFields.done ?? existingTask.done ?? false,
         date:
-          patchFields.date !== undefined
-            ? patchFields.date
-            : existingTask?.date,
+          patchFields.date !== undefined ? patchFields.date : existingTask.date,
         listId:
           patchFields.listId !== undefined
             ? patchFields.listId
-            : existingTask?.listId,
+            : existingTask.listId,
         color:
           patchFields.color !== undefined
             ? patchFields.color
-            : existingTask?.color,
+            : existingTask.color,
         note:
-          patchFields.note !== undefined
-            ? patchFields.note
-            : existingTask?.note,
+          patchFields.note !== undefined ? patchFields.note : existingTask.note,
         checklist:
           patchFields.checklist !== undefined
             ? patchFields.checklist
-            : (existingTask?.checklist ?? undefined),
+            : (existingTask.checklist ?? undefined),
         freq:
-          patchFields.freq !== undefined
-            ? patchFields.freq
-            : existingTask?.freq,
+          patchFields.freq !== undefined ? patchFields.freq : existingTask.freq,
         dtStart:
           patchFields.dtStart !== undefined
             ? patchFields.dtStart
-            : existingTask?.dtStart,
+            : existingTask.dtStart,
       },
       apiKey,
     );
 
-    await delete_task(taskId, updateType || "only_this", apiKey);
+    // For recurring tasks, delete with all_linked so the series is not duplicated in the old calendar
+    const deletionScope: UpdateType = isRecurring
+      ? "all_linked"
+      : updateType || "only_this";
+    await delete_task(taskId, deletionScope, apiKey);
     return { id: created.id, updated: true };
   }
 

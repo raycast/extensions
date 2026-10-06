@@ -96,3 +96,18 @@ export class Cache {
     this.map.clear();
   }
 }
+
+export const Keyboard = {
+  Shortcut: {
+    Common: {
+      New: { modifiers: ["cmd"], key: "n" },
+      Edit: { modifiers: ["cmd"], key: "e" },
+      Remove: { modifiers: ["cmd"], key: "d" },
+      Refresh: { modifiers: ["cmd"], key: "r" },
+    },
+  },
+};
+
+export async function popToRoot() {
+  return;
+}

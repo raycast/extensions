@@ -11,6 +11,7 @@ interface CacheEnvelope<T> {
 
 const memoryStore = new Map<string, string>();
 let raycastCache: Cache | null = null;
+const KEYS_INDEX_KEY = "__task_cache_keys__";
 
 function getCacheInstance(): Cache | null {
   if (raycastCache) return raycastCache;
@@ -19,6 +20,45 @@ function getCacheInstance(): Cache | null {
     return raycastCache;
   } catch {
     return null;
+  }
+}
+
+function getTrackedKeys(): string[] {
+  const rc = getCacheInstance();
+  if (!rc) return Array.from(memoryStore.keys());
+  try {
+    const raw = rc.get(KEYS_INDEX_KEY);
+    if (!raw) return Array.from(memoryStore.keys());
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return Array.from(memoryStore.keys());
+  }
+}
+
+function trackKey(key: string): void {
+  const rc = getCacheInstance();
+  if (!rc) return;
+  try {
+    const current = getTrackedKeys();
+    if (!current.includes(key)) {
+      current.push(key);
+      rc.set(KEYS_INDEX_KEY, JSON.stringify(current));
+    }
+  } catch {
+    // Ignore cache tracking failure
+  }
+}
+
+function untrackKeys(removedKeys: Set<string>): void {
+  const rc = getCacheInstance();
+  if (!rc) return;
+  try {
+    const current = getTrackedKeys();
+    const updated = current.filter((k) => !removedKeys.has(k));
+    rc.set(KEYS_INDEX_KEY, JSON.stringify(updated));
+  } catch {
+    // Ignore cache index update failure
   }
 }
 
@@ -43,6 +83,7 @@ function writeRawCache<T>(key: string, data: T): void {
   const rc = getCacheInstance();
   if (rc) {
     rc.set(key, serialized);
+    trackKey(key);
   }
 }
 
@@ -107,11 +148,27 @@ export function setCachedTasks(
 
 export function invalidateTaskCache(calendarId?: string): void {
   const prefix = calendarId ? `tasks_${calendarId}_` : "tasks_";
+  const removedKeys = new Set<string>();
+
+  // 1. In-memory store
   for (const k of Array.from(memoryStore.keys())) {
     if (k.startsWith(prefix)) {
       memoryStore.delete(k);
-      getCacheInstance()?.remove(k);
+      removedKeys.add(k);
     }
+  }
+
+  // 2. Persistent Raycast Cache across all processes
+  const rc = getCacheInstance();
+  if (rc) {
+    const tracked = getTrackedKeys();
+    for (const k of tracked) {
+      if (k.startsWith(prefix)) {
+        rc.remove(k);
+        removedKeys.add(k);
+      }
+    }
+    untrackKeys(removedKeys);
   }
 }
 

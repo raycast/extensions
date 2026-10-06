@@ -4,6 +4,7 @@ import {
   Form,
   getPreferenceValues,
   Icon,
+  popToRoot,
   useNavigation,
 } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
@@ -24,6 +25,8 @@ import {
 
 export interface TaskFormProps {
   mode: "create" | "edit";
+  isPushed?: boolean;
+  navigationTitle?: string;
   initialTask?: TweekTask;
   initialTitle?: string;
   calendars: TweekCalendar[];
@@ -40,6 +43,8 @@ export interface TaskFormProps {
 
 export function TaskForm({
   mode,
+  isPushed = false,
+  navigationTitle,
   initialTask,
   initialTitle = "",
   calendars,
@@ -51,6 +56,12 @@ export function TaskForm({
 }: TaskFormProps) {
   const { pop } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
+
+  const isRecurring = Boolean(
+    initialTask &&
+    (isRecurringTask(initialTask) ||
+      (typeof initialTask.freq === "number" && initialTask.freq > 0)),
+  );
 
   const [title, setTitle] = useState<string>(initialTask?.text || initialTitle);
   const [titleError, setTitleError] = useState<string | undefined>();
@@ -110,6 +121,14 @@ export function TaskForm({
   const [isBulkMode, setIsBulkMode] = useState<boolean>(false);
   const [updateType, setUpdateType] = useState<UpdateType>("only_this");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const resetForm = () => {
+    setTitle("");
+    setTitleError(undefined);
+    setNote("");
+    setSubtasksText("");
+    setIsBulkMode(false);
+  };
 
   const recurring = initialTask ? isRecurringTask(initialTask) : false;
 
@@ -217,7 +236,18 @@ export function TaskForm({
         );
       }
 
-      pop();
+      if (isPushed) {
+        pop();
+      } else {
+        resetForm();
+        try {
+          await popToRoot();
+        } catch {
+          // If popToRoot cannot be performed, form is already reset to prevent double-submission
+        }
+      }
+    } catch {
+      // Errors handled gracefully without unhandled rejection
     } finally {
       setIsSubmitting(false);
     }
@@ -226,9 +256,7 @@ export function TaskForm({
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle={
-        mode === "create" ? "Create Tweek Task" : `Edit: ${initialTask?.text}`
-      }
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -287,7 +315,13 @@ export function TaskForm({
         id="calendarId"
         title="Calendar"
         value={selectedCalendarId}
+        info={
+          mode === "edit" && isRecurring
+            ? "Recurring tasks cannot be moved across calendars"
+            : undefined
+        }
         onChange={(calId) => {
+          if (mode === "edit" && isRecurring) return;
           setSelectedCalendarId(calId);
           const cal = calendars.find((c) => c.id === calId);
           if (cal?.lists?.[0]) {
@@ -297,14 +331,26 @@ export function TaskForm({
           }
         }}
       >
-        {calendars.map((cal) => (
+        {mode === "edit" && isRecurring ? (
           <Form.Dropdown.Item
-            key={cal.id}
-            value={cal.id}
-            title={`${cal.name}${cal.isDefault ? " (Default)" : ""}`}
+            key={selectedCalendarId}
+            value={selectedCalendarId}
+            title={
+              calendars.find((c) => c.id === selectedCalendarId)?.name ||
+              "Current Calendar"
+            }
             icon={Icon.Calendar}
           />
-        ))}
+        ) : (
+          calendars.map((cal) => (
+            <Form.Dropdown.Item
+              key={cal.id}
+              value={cal.id}
+              title={`${cal.name}${cal.isDefault ? " (Default)" : ""}`}
+              icon={Icon.Calendar}
+            />
+          ))
+        )}
       </Form.Dropdown>
 
       <Form.Dropdown

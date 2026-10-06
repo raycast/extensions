@@ -10,6 +10,7 @@ import {
 import { TaskFilterState, TweekTask } from "../types";
 import {
   formatTaskDate,
+  getTodayISO,
   getWeekBoundsISO,
   isOverdue,
   parseQuickAddInput,
@@ -383,5 +384,49 @@ describe("tweek-client MCP & REST operations", () => {
       "test_key",
     );
     expect(updateRes.succeeded).toHaveLength(2);
+  });
+
+  it("handles 429 monthly quota exhaustion without retrying", async () => {
+    let attempts = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        attempts++;
+        return new Response(JSON.stringify({ message: "Too many requests" }), {
+          status: 429,
+        });
+      }),
+    );
+
+    await expect(list_calendars("test_key")).rejects.toThrow(
+      /monthly read\/write quota reached/,
+    );
+    expect(attempts).toBe(1); // Did not retry
+  });
+
+  it("uses local getTodayISO when create_task has no date", async () => {
+    let postedBody: Record<string, unknown> | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+        if (init?.body && typeof init.body === "string") {
+          postedBody = JSON.parse(init.body);
+        }
+        return new Response(JSON.stringify({ id: "task_today" }), {
+          status: 200,
+        });
+      }),
+    );
+
+    await create_task(
+      {
+        calendarId: "cal_1",
+        text: "Today task",
+      },
+      "test_key",
+    );
+
+    expect(postedBody).not.toBeNull();
+    expect(postedBody!.date).toBe(getTodayISO());
   });
 });

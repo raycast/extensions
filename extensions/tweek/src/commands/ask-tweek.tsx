@@ -99,7 +99,6 @@ Respond concisely in helpful Markdown (use the same language as the user's quest
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle="Ask Tweek AI (@tweek)"
       markdown={
         answer ||
         `⏳ *Fetching your live Tweek schedule and asking Raycast AI...*\n\n> **Prompt:** ${initialPrompt}`

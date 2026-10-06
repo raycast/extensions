@@ -9,6 +9,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "ai": {
     "instructions": "You are the Tweek Task Manager AI assistant (@tweek). Use `get-calendars` to discover the user's calendars and Someday lists, and `get-tasks` to inspect Today's, This Week's, Overdue, or Someday tasks before modifying tasks. When creating tasks with `create-task`, support relative dates ('today', 'tomorrow', 'someday') or YYYY-MM-DD and Tweek color badges ('blank', 'pink', 'yellowish', 'cornflower', 'mango', 'greenish', 'lilac', 'grey', 'black'). For recurring occurrences (`<taskId>_yyyyMMdd`), ask or default to `only_this` unless the user specifies `this_and_future` or `all_linked`.",
     "evals": [
@@ -33,6 +36,68 @@
         "expected": [
           {
             "callsTool": "get-tasks"
+          }
+        ]
+      },
+      {
+        "input": "@tweek Add a task to buy groceries tomorrow with a pink badge",
+        "mocks": {
+          "create-task": {
+            "success": true,
+            "taskId": "task_new_1",
+            "text": "Buy groceries",
+            "date": "2026-09-27",
+            "color": "pink"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-task"
+          }
+        ]
+      },
+      {
+        "input": "@tweek Reschedule task t1 to next Monday and change note to Urgent",
+        "mocks": {
+          "update-task": {
+            "success": true,
+            "taskId": "t1",
+            "updated": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "update-task"
+          }
+        ]
+      },
+      {
+        "input": "@tweek Mark task t1 as completed",
+        "mocks": {
+          "complete-task": {
+            "success": true,
+            "taskId": "t1",
+            "done": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "complete-task"
+          }
+        ]
+      },
+      {
+        "input": "@tweek Delete task t1",
+        "mocks": {
+          "delete-task": {
+            "success": true,
+            "taskId": "t1",
+            "deleted": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "delete-task"
           }
         ]
       }
@@ -81,13 +146,13 @@
     {
       "name": "ask-tweek",
       "title": "Ask Tweek",
-      "subtitle": "Tweek AI (@tweek)",
+      "subtitle": "Tweek",
       "description": "Ask Raycast AI about your Tweek schedule, overdue tasks, or daily priorities.",
       "mode": "view",
       "arguments": [
         {
           "name": "prompt",
-          "placeholder": "Bugün ve bu hafta hangi görevlerim var?",
+          "placeholder": "What's on my plate this week?",
           "type": "text",
           "required": false
         }
@@ -143,14 +208,6 @@
       "title": "Tweek Personal API Key / Access Token",
       "description": "Generate your Personal API Key in Tweek → Profile → API Settings.",
       "placeholder": "twk_live_..."
-    },
-    {
-      "name": "mcpEndpoint",
-      "type": "textfield",
-      "required": false,
-      "title": "Tweek MCP Endpoint (Optional)",
-      "description": "Optional MCP Server URL (defaults to https://tweek.so/mcp when using MCP transport, or https://tweek.so/api/v1 for REST).",
-      "default": "https://tweek.so/mcp"
     },
     {
       "name": "defaultCalendar",

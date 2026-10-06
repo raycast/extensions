@@ -64,13 +64,10 @@ export function useTasks({
       if (!calendarId) return;
       const fetchId = ++latestFetchIdRef.current;
 
-      if (!forceRefresh) {
-        const cached = getCachedTasks(calendarId, cacheScope, false);
-        if (cached) {
-          setTasks(cached.tasks);
-          setIsOffline(false);
-          return;
-        }
+      const cached = getCachedTasks(calendarId, cacheScope, true);
+      if (cached && !forceRefresh) {
+        setTasks(cached.tasks);
+        setIsOffline(false);
       }
 
       setIsLoading(true);

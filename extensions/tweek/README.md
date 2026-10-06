@@ -32,14 +32,9 @@ A full-featured Raycast extension for [Tweek Calendar & Task Management](https:/
 
 ## Setup & Installation
 
-1. Open **Tweek** (`https://tweek.so`) → **Profile** → **API Settings** → **Personal API Keys** and generate a Personal API Key.
-2. Install dependencies and start the Raycast development server:
-   ```bash
-   cd extensions/tweek
-   npm install
-   npm run dev
-   ```
-3. When prompted in Raycast, paste your **Tweek Personal API Key** (`X-API-Key`).
+1. Log into your [Tweek](https://tweek.so) account in your browser.
+2. Go to **Profile** → **API Settings** → **Personal API Keys** and generate a new key.
+3. Open any Tweek command in Raycast and paste your **Personal API Key** into the extension preferences when prompted.
 
 ## Keyboard Shortcuts
 
@@ -48,7 +43,7 @@ A full-featured Raycast extension for [Tweek Calendar & Task Management](https:/
 | Complete / Toggle Task | `Enter` |
 | Edit Selected Task | `⌘ + E` |
 | Create New Task | `⌘ + N` |
-| Delete Task (with confirmation) | `⌘ + D` |
+| Delete Task (with confirmation) | `⌘ + ⌫` |
 | Toggle Split Markdown Detail | `⌘ + I` |
 | Open Full Markdown View | `⌘ + P` |
 | Copy Task Description | `⌘ + Shift + C` |

@@ -84,11 +84,6 @@ export default function SearchTasksCommand() {
 
   return (
     <TaskList
-      navigationTitle={
-        activeCalendar
-          ? `Search Tweek Tasks — ${activeCalendar.name}`
-          : "Search Tweek Tasks"
-      }
       calendars={calendars}
       activeCalendarId={activeCalendarId}
       activeCalendar={activeCalendar}

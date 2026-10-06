@@ -4,6 +4,7 @@ import {
   Color,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   useNavigation,
 } from "@raycast/api";
@@ -43,7 +44,7 @@ import { TaskDetail, TaskItemDetailPane } from "./TaskDetail";
 import { TaskForm } from "./TaskForm";
 
 export interface TaskListProps {
-  navigationTitle: string;
+  navigationTitle?: string;
   calendars: TweekCalendar[];
   activeCalendarId: string;
   activeCalendar?: TweekCalendar;
@@ -176,6 +177,8 @@ export function TaskList({
     push(
       <TaskForm
         mode="create"
+        isPushed={true}
+        navigationTitle="Create Tweek Task"
         initialTitle={initialTitle}
         calendars={calendars}
         defaultCalendarId={activeCalendarId}
@@ -190,6 +193,8 @@ export function TaskList({
     push(
       <TaskForm
         mode="edit"
+        isPushed={true}
+        navigationTitle={task.text ? `Edit: ${task.text}` : "Edit Task"}
         initialTask={task}
         calendars={calendars}
         defaultCalendarId={activeCalendarId}
@@ -288,7 +293,11 @@ export function TaskList({
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       navigationTitle={
-        isOffline ? `${navigationTitle} (Offline Cache)` : navigationTitle
+        navigationTitle
+          ? isOffline
+            ? `${navigationTitle} (Offline Cache)`
+            : navigationTitle
+          : undefined
       }
       searchText={filter.searchText}
       onSearchTextChange={(text) => onUpdateFilter({ searchText: text })}
@@ -381,7 +390,7 @@ export function TaskList({
                   title={`Delete ${selectedTaskIds.size} Selected Tasks`}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={onBulkDelete}
                 />
                 <Action
@@ -399,7 +408,11 @@ export function TaskList({
         <List.Section
           key={section.id}
           title={section.title}
-          subtitle={`${section.tasks.length}`}
+          subtitle={
+            isOffline
+              ? `${section.tasks.length} (Offline Cache)`
+              : `${section.tasks.length}`
+          }
         >
           {section.tasks.map((task) => {
             const recurring = isRecurringTask(task);
@@ -436,13 +449,13 @@ export function TaskList({
                       <Action
                         title="Edit Task"
                         icon={Icon.Pencil}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                         onAction={() => openEditModal(task)}
                       />
                       <Action
                         title="Create New Task"
                         icon={Icon.Plus}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        shortcut={Keyboard.Shortcut.Common.New}
                         onAction={() => openCreateModal()}
                       />
                       {!recurring ? (
@@ -450,14 +463,14 @@ export function TaskList({
                           title="Delete Task"
                           icon={Icon.Trash}
                           style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                           onAction={() => onDeleteTask(task)}
                         />
                       ) : (
                         <ActionPanel.Submenu
                           title="Delete Recurring Task…"
                           icon={Icon.Trash}
-                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
                         >
                           <Action
                             title="Delete Only This Occurrence (only_this)"
@@ -596,7 +609,7 @@ export function TaskList({
                       <Action
                         title="Refresh Tasks & Cache"
                         icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
                         onAction={onRefresh}
                       />
                     </ActionPanel.Section>
@@ -625,7 +638,7 @@ export function TaskList({
                 <Action
                   title="Open Detailed Create Form…"
                   icon={Icon.AppWindowList}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => openCreateModal(filter.searchText.trim())}
                 />
               </ActionPanel>
@@ -655,7 +668,7 @@ export function TaskList({
               <Action
                 title="Create New Task"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={() => openCreateModal(filter.searchText.trim())}
               />
               <Action
@@ -666,7 +679,7 @@ export function TaskList({
               <Action
                 title="Refresh from Tweek"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={onRefresh}
               />
             </ActionPanel>

@@ -72,11 +72,6 @@ export default function DashboardCommand() {
 
   return (
     <TaskList
-      navigationTitle={
-        activeCalendar
-          ? `Tweek Dashboard — ${activeCalendar.name}`
-          : "Tweek Dashboard"
-      }
       calendars={calendars}
       activeCalendarId={activeCalendarId}
       activeCalendar={activeCalendar}
