@@ -294,6 +294,14 @@ describe("flow", () => {
     expect(parseFlow("720p > 1080p > 4K")).toEqual(["720p", "1080p", "4K"]);
     expect(parseFlow("Free > 5GB > Paid")).toEqual(["Free", "5GB", "Paid"]);
   });
+  it("keeps two comparisons in one step together", () => {
+    expect(parseFlow("Check RAM > 5GB and disk > 10GB")).toEqual(["Check RAM > 5GB and disk > 10GB"]);
+    expect(parseFlow("Start\nRetry if errors > 3 or latency > 200 ms\nShip")).toEqual([
+      "Start",
+      "Retry if errors > 3 or latency > 200 ms",
+      "Ship",
+    ]);
+  });
   it("keeps a bare > as a comparison when the line uses another arrow", () => {
     expect(parseFlow("Plan -> Check count > 0 > Ship")).toEqual(["Plan", "Check count > 0", "Ship"]);
     expect(parseFlow("Retry -> Wait > 30s > Fail")).toEqual(["Retry", "Wait > 30s", "Fail"]);

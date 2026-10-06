@@ -10,10 +10,15 @@ import { displayWidth, padCenter, splitLines } from "./width";
 const QUANTITY = String.raw`[-+]?[$€£]?\.?\d[\d,.]*\s?(?:%|[kKMGTP]i?B|[kKMG]|ms|s|sec|min|h|hrs?|d|days?|px|x)?`;
 const ARROW = String.raw`\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*`;
 const SEPARATOR = new RegExp(String.raw`${ARROW}|\s+>\s+(?!${QUANTITY}(?![\p{L}\d]))`, "u");
-// Two or more bare `>` and no other arrow is a chain (`HD > 4K > 8K`), so every `>` splits. A line
-// that uses `->` keeps its bare `>` as comparisons (`Plan -> Check count > 0 -> Ship`).
+// Two or more bare `>` and no other arrow is a chain (`HD > 4K > 8K`), so every `>` splits. Not when
+// a quantity runs on into more words (`RAM > 5GB and disk > 10GB`): that's a condition. A line that
+// uses `->` keeps its bare `>` as comparisons (`Plan -> Check count > 0 -> Ship`).
 const CHAIN = new RegExp(String.raw`${ARROW}|\s+>\s+`, "u");
-const isChain = (line: string) => (line.match(/\s>\s/g) ?? []).length > 1 && !new RegExp(ARROW, "u").test(line);
+const CONDITION = new RegExp(String.raw`^${QUANTITY}(?![\p{L}\d])\s+\S`, "u");
+const isChain = (line: string) => {
+  const pieces = line.split(/\s+>\s+/);
+  return pieces.length > 2 && !new RegExp(ARROW, "u").test(line) && !pieces.some((p) => CONDITION.test(p));
+};
 
 /** Steps come from `A > B -> C → D` on one line, or one step per line (which can chain too). */
 export function parseFlow(input: string): string[] {
