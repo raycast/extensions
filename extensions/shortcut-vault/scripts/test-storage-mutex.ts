@@ -237,6 +237,77 @@ async function run() {
     assert.equal(raceContender3Result, "c3-success");
     assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after both contenders finish");
 
+    // 11. A paused/stale command whose lock was reclaimed cannot overwrite or remove the replacement lock
+    const pausedMutex = new CrossProcessMutex(lockDir, 2000);
+    const replacementMutex = new CrossProcessMutex(lockDir, 2000);
+
+    let pausedTaskStarted = false;
+    let resumePausedTask: (() => void) | undefined;
+    const pausedHoldPromise = new Promise<void>((resolve) => {
+      resumePausedTask = resolve;
+    });
+
+    const pausedPromise = pausedMutex.runExclusive(async () => {
+      pausedTaskStarted = true;
+      await pausedHoldPromise;
+      return "paused-finished";
+    });
+
+    while (!pausedTaskStarted) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    // Age the lock file timestamp to simulate being paused past STALE_THRESHOLD_MS
+    const staleTime = Date.now() - 30000;
+    const currentPidContent = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8");
+    const currentToken = currentPidContent.split(":")[2];
+    fs.writeFileSync(path.join(lockDir, "pid.txt"), `${process.pid}:${staleTime}:${currentToken}`);
+
+    // Command 2 detects stale lock, breaks it, and acquires a replacement lock
+    const replacementResult = await replacementMutex.runExclusive(async () => {
+      assert.ok(fs.existsSync(lockDir), "Replacement lock directory must exist");
+      return "replacement-success";
+    });
+    assert.equal(replacementResult, "replacement-success");
+
+    // Command 3 acquires and holds an active replacement lock
+    const liveLockMutex = new CrossProcessMutex(lockDir, 2000);
+    let liveLockHolding = false;
+    let releaseLiveLock: (() => void) | undefined;
+    const liveHoldPromise = new Promise<void>((resolve) => {
+      releaseLiveLock = resolve;
+    });
+
+    const livePromise = liveLockMutex.runExclusive(async () => {
+      liveLockHolding = true;
+      await liveHoldPromise;
+      return "live-success";
+    });
+
+    while (!liveLockHolding) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    const liveToken = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").split(":")[2];
+
+    // Command 1 unpauses and completes its task
+    resumePausedTask?.();
+    await assert.rejects(
+      pausedPromise,
+      /Cross-process storage lock was lost/,
+      "Paused command must detect lock loss and reject",
+    );
+
+    // Verify Command 3's live replacement lock was NOT removed or overwritten by Command 1
+    assert.ok(fs.existsSync(lockDir), "Live replacement lock directory must remain intact");
+    const postPidContent = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8");
+    assert.equal(postPidContent.split(":")[2], liveToken, "Live replacement lock token must not be overwritten");
+
+    // Release Command 3's lock
+    releaseLiveLock?.();
+    assert.equal(await livePromise, "live-success");
+    assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after live command finishes");
+
     console.log("storage mutex tests passed");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
