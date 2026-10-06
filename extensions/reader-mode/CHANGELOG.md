@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Choose a Summary Model] - {PR_MERGE_DATE}
+## [Choose a Summary Model] - 2026-10-06
 
 ### Added
 
