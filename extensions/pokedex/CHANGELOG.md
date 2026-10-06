@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [PokéMart & GO] - {PR_MERGE_DATE}
+## [PokéMart & GO] - 2026-10-06
 
 - Added **Prices** to the Items command, showing buy/sell values for each item.
 - Added **Base Stats** to Pokémon form details, so alternate forms now display their own stat spreads.
