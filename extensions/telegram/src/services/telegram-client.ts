@@ -146,21 +146,21 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 async function clearAuthentication(client: TelegramClient): Promise<void> {
-  await withClientState(async () => {
+  const discarded = await withClientState(async () => {
     // A late failure from an old client must not discard a newer login.
-    if (clientInstance !== client) return;
-    await Promise.all([
-      LocalStorage.removeItem(SESSION_KEY),
-      LocalStorage.removeItem(USER_ID_KEY),
-      LocalStorage.removeItem(PHONE_CODE_HASH_KEY),
-    ]);
+    if (clientInstance !== client) return false;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+    await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
     clientInstance = null;
-    try {
-      await client.destroy();
-    } catch (error) {
-      console.error("Failed to disconnect invalid Telegram session:", error);
-    }
+    return true;
   });
+  // A slow disconnect must not delay a fresh login or hold the state queue.
+  if (discarded) {
+    void client.destroy().catch((error) => {
+      console.error("Failed to disconnect invalid Telegram session:", error);
+    });
+  }
 }
 
 async function withCurrentClient<T>(client: TelegramClient, operation: () => Promise<T>): Promise<T> {

@@ -274,6 +274,34 @@ describe("overlapping requests", () => {
     expect(mocks.storage.get("telegram_user_id")).toBe("42");
   });
 
+  it("recovers a rejected connection without waiting for the old client to disconnect", async () => {
+    const s = await service();
+    await s.getClient(config);
+    const old = client();
+    old.connect.mockRejectedValue(rpcError("AUTH_KEY_UNREGISTERED"));
+    const disconnecting = deferred();
+    const disconnected = deferred();
+    old.destroy.mockImplementation(() => {
+      disconnecting.resolve();
+      return disconnected.promise;
+    });
+    let needsCode = false;
+    const recovery = s.authenticate(config).then((result) => {
+      needsCode = result.needsCode;
+      return result;
+    });
+    await disconnecting.promise;
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    try {
+      expect(needsCode).toBe(true);
+      expect(mocks.clients).toHaveLength(2);
+      expect(client().sendCode).toHaveBeenCalledOnce();
+    } finally {
+      disconnected.resolve();
+      await recovery;
+    }
+  });
+
   it("does not destroy a replacement client when an older sign-in fails late", async () => {
     const s = await service();
     await s.getClient(config);
