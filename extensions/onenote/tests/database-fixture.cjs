@@ -3,11 +3,13 @@ const path = require("node:path");
 const os = require("node:os");
 const Module = require("node:module");
 const ts = require("typescript");
-const { execFile } = require("node:child_process");
+const { execFile, spawnSync } = require("node:child_process");
 const { promisify } = require("node:util");
 
 const run = promisify(execFile);
 const extensionPath = path.resolve(__dirname, "..");
+const sqliteSupportsTrigram = () =>
+  spawnSync("sqlite3", [":memory:", "CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram');"]).status === 0;
 
 function loadSource(name, mocks, extension = "ts") {
   const filename = path.join(extensionPath, "src", `${name}.${extension}`);
@@ -66,7 +68,18 @@ async function createFixture(options = {}) {
   const storage = new Map();
   let indexCalls = 0;
   const search = loadSource("search", {});
+  const executeFile = async (command, args) => {
+    const call = args[0] === ":memory:" ? 0 : args[0] === "-readonly" ? -1 : ++indexCalls;
+    const execute = () => run(command, args);
+    return options.execute ? options.execute({ call, args, execute }) : execute();
+  };
+  const execFileMock = (command, args, callback) => {
+    executeFile(command, args).then((result) => callback(null, result?.stdout ?? "", result?.stderr ?? ""), callback);
+  };
+  // Match execFile's custom promisifier, which returns both stdout and stderr.
+  execFileMock[promisify.custom] = executeFile;
   const database = loadSource("database", {
+    ...(options.nativeSQLite ? { "node:sqlite": options.nativeSQLite } : {}),
     "./search": search,
     "@raycast/api": {
       environment: { supportPath: support, assetsPath: path.join(extensionPath, "assets") },
@@ -75,21 +88,20 @@ async function createFixture(options = {}) {
         setItem: async (key, value) => storage.set(key, value),
       },
       Cache: class {
-        clear() {}
-        set() {}
+        clear() {
+          storage.clear();
+        }
+        set(key, value) {
+          storage.set(key, value);
+        }
+        get(key) {
+          return storage.get(key);
+        }
       },
     },
     os: { ...os, homedir: () => home },
     "fs/promises": { ...fs, ...options.filesystem },
-    child_process: {
-      execFile(command, args, callback) {
-        const call = ++indexCalls;
-        const execute = () => run(command, args);
-        Promise.resolve()
-          .then(() => (options.execute ? options.execute({ call, args, execute }) : execute()))
-          .then((result) => callback(null, result?.stdout ?? "", result?.stderr ?? ""), callback);
-      },
-    },
+    child_process: { execFile: execFileMock },
   });
 
   return {
@@ -100,11 +112,46 @@ async function createFixture(options = {}) {
     support,
     indexFile,
     SQL,
+    storage,
     indexCalls: () => indexCalls,
-    query: async (state, sql) =>
-      (await run("sqlite3", [state.databasePath ?? database.ONENOTE_MERGED_DB, sql])).stdout.trim(),
+    query: async (state, sql) => {
+      const filename = state.databasePath ?? database.ONENOTE_MERGED_DB;
+      if (state.fullTextIndexed) return (await run("sqlite3", [filename, sql])).stdout.trim();
+      const db = new SQL.Database(await fs.readFile(filename));
+      try {
+        return (db.exec(sql)[0]?.values ?? []).map((row) => row.join("|")).join("\n");
+      } finally {
+        db.close();
+      }
+    },
     cleanup: () => fs.rm(root, { recursive: true, force: true }),
   };
 }
 
-module.exports = { createFixture, loadSource };
+function directoryQuery() {
+  let query;
+  const jsx = (type, props) => ({ type, props });
+  const state = [0, "", 100];
+  const directory = loadSource(
+    "directory",
+    {
+      "./search": loadSource("search", {}),
+      "./types": loadSource("types", {}),
+      "./utils": { getAncestorsStr: () => "" },
+      "@raycast/api": { List: {}, ActionPanel: {}, Action: {}, Icon: {} },
+      "@raycast/utils": {
+        useSQL: (_path, sql) => {
+          query = sql;
+          return { data: [] };
+        },
+      },
+      react: { useState: () => [state.shift(), () => {}] },
+      "react/jsx-runtime": { jsx, jsxs: jsx },
+    },
+    "tsx"
+  );
+  directory.Directory({ databasePath: "/synthetic.db", fullTextIndexed: false });
+  return query;
+}
+
+module.exports = { createFixture, loadSource, sqliteSupportsTrigram, directoryQuery };

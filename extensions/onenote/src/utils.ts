@@ -1,4 +1,4 @@
-import { closeMainWindow, Color, Icon, LocalStorage, Cache } from "@raycast/api";
+import { closeMainWindow, Color, Icon, LocalStorage } from "@raycast/api";
 import { exec } from "child_process";
 import { GROUP, NOTEBOOK, OneNoteItem, PAGE, SECTION } from "./types";
 import dateFormat from "dateformat";
@@ -60,10 +60,11 @@ export function getAncestorsStr(item: OneNoteItem | undefined, separator: string
   // TODO BUG HERE: WEIRD ORDER WITH NESTED SECTION GROUPS
   if (item == undefined) return "";
   const gpGOIDs: string[] = split_grandparents(item);
-  const ancestors: string[] = gpGOIDs.map((x) => getCachedTitle(x));
+  const titles: Record<string, string | null> = JSON.parse(item.GrandparentTitles ?? "{}");
+  const ancestors = gpGOIDs.map((id) => titles[id] ?? "");
   if (item.ParentGOID) ancestors.push(getParentTitle(item));
   if (includeSelf) ancestors.push(item.Title);
-  return ancestors.join(separator);
+  return ancestors.filter(Boolean).join(separator);
 }
 
 export function parseDatetime(datetime: number): string {
@@ -114,12 +115,6 @@ export function split_grandparents(item: OneNoteItem) {
   return newIds;
 }
 
-export function getCachedTitle(GOID: string): string {
-  const cache = new Cache();
-  return String(cache.get(GOID));
-}
-
 export function getParentTitle(item: OneNoteItem): string {
-  if (item.ParentGOID) return getCachedTitle(item.ParentGOID);
-  else return "";
+  return item.ParentTitle ?? "";
 }

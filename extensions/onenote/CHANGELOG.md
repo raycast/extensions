@@ -9,6 +9,8 @@
 - Retry a failed full-text index on the next launch without waiting for a notebook change.
 - Treat dollar sequences in searches literally instead of expanding them into SQL fragments.
 - Show notebooks and sections before recent notes when browsing grouped results.
+- Keep parent and ancestor labels consistent with the database each view is reading.
+- Reuse unchanged fallback databases without loading their full contents into memory for an index retry.
 
 ## [Fix search memory usage] - 2026-05-20
 

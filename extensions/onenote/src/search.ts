@@ -2,7 +2,7 @@ import { readdir } from "fs/promises";
 import { resolve } from "path";
 
 // Bump when the merged database layout or search normalization changes so existing databases are rebuilt.
-export const DATABASE_SCHEMA_VERSION = 5;
+export const DATABASE_SCHEMA_VERSION = 6;
 
 // Terms shorter than this cannot be looked up in a trigram index.
 const MIN_INDEXED_TERM_LENGTH = 3;

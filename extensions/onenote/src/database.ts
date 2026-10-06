@@ -1,6 +1,6 @@
-import { environment, Cache } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { execFile } from "child_process";
-import { statSync, writeFileSync } from "fs";
+import { constants, statSync, writeFileSync } from "fs";
 import {
   DEDUPE_ENTITIES_SQL,
   findSearchIndexes,
@@ -9,7 +9,7 @@ import {
   BUILD_FULL_TEXT_INDEX_SQL,
   IndexFile,
 } from "./search";
-import { mkdtemp, readdir, readFile, rename, rm } from "fs/promises";
+import { access, copyFile, mkdtemp, readdir, readFile, rename, rm } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
 import { promisify } from "util";
@@ -23,9 +23,6 @@ export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenot
 const UNINDEXED_DB = resolve(environment.supportPath, "merged-onenote-data-unindexed.db");
 
 export const create_or_update_db = async (force_update = false) => {
-  if (!SQL) {
-    SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
-  }
   await cleanupInterruptedRebuilds();
 
   const ALL_DB: Database[] = [];
@@ -55,18 +52,29 @@ export const create_or_update_db = async (force_update = false) => {
   }
 
   if (!force_update) {
-    const indexed = await readMergedDatabase(ONENOTE_MERGED_DB, signature, true);
-    if (indexed) {
-      indexed.close();
+    if (await isCurrentDatabase(ONENOTE_MERGED_DB, signature, true)) {
       return { databasePath: ONENOTE_MERGED_DB, fullTextIndexed: true };
     }
   }
 
   // A fallback database can be reused for an index retry without re-merging the source files.
-  let db = force_update ? undefined : await readMergedDatabase(UNINDEXED_DB, signature, false);
+  const reuseFallback = !force_update && (await isCurrentDatabase(UNINDEXED_DB, signature, false));
+  if (reuseFallback && !(await supportsFullTextIndex())) {
+    return { databasePath: UNINDEXED_DB, fullTextIndexed: false };
+  }
+  let db: Database | undefined;
   let temporaryDirectory: string | undefined;
   try {
-    if (!db) {
+    // Build on a private file on the same filesystem; only a completed database is published.
+    temporaryDirectory = await mkdtemp(resolve(environment.supportPath, `onenote-rebuild-${process.pid}-`));
+    const temporaryDatabase = resolve(temporaryDirectory, "merged.db");
+    if (reuseFallback) {
+      // Use a filesystem clone/copy instead of importing and exporting the entire cache through WASM.
+      await copyFile(UNINDEXED_DB, temporaryDatabase, constants.COPYFILE_FICLONE);
+    } else {
+      if (!SQL) {
+        SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
+      }
       // Load OneNote databases:
       for (const db_file of ALL_DB_PATHS) {
         const file = await readFile(db_file);
@@ -121,36 +129,24 @@ export const create_or_update_db = async (force_update = false) => {
       );
       db.exec(
         "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
-     CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);"
+     CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);\
+     CREATE INDEX Entities_Type_RecentTime ON Entities (Type DESC, RecentTime DESC);"
       );
       // The signature travels with the database instead of separate, racy LocalStorage writes.
       db.run("CREATE TABLE ExtensionMetadata (Signature TEXT NOT NULL)");
       db.run("INSERT INTO ExtensionMetadata VALUES (?)", [signature]);
+      writeFileSync(temporaryDatabase, Buffer.from(db.export()));
+      for (const source of ALL_DB) source.close();
+      ALL_DB.length = 0;
+      db.close();
+      db = undefined;
     }
-
-    const results = db.exec("SELECT DISTINCT GOID, Title FROM Entities WHERE Type > 1");
-
-    // Build on a private file on the same filesystem; only a completed database is published.
-    temporaryDirectory = await mkdtemp(resolve(environment.supportPath, `onenote-rebuild-${process.pid}-`));
-    const temporaryDatabase = resolve(temporaryDirectory, "merged.db");
-    writeFileSync(temporaryDatabase, Buffer.from(db.export()));
-    for (const _db of ALL_DB) {
-      _db.close();
-    }
-    ALL_DB.length = 0;
-    db.close();
-    db = undefined;
 
     const fullTextIndexed = await buildFullTextIndex(temporaryDatabase);
     // Keep indexed and fallback files separate so another invocation cannot remove the FTS table
     // from a path an already-open view is querying. Atomic rename also survives interrupted builds.
     const databasePath = fullTextIndexed ? ONENOTE_MERGED_DB : UNINDEXED_DB;
     await rename(temporaryDatabase, databasePath);
-    const cache = new Cache();
-    cache.clear();
-    for (const result of results[0]?.values ?? []) {
-      cache.set(result[0] as string, result[1] as string);
-    }
     return { databasePath, fullTextIndexed };
   } finally {
     for (const source of ALL_DB) source.close();
@@ -173,25 +169,43 @@ async function cleanupInterruptedRebuilds() {
   }
 }
 
-async function readMergedDatabase(path: string, signature: string, fullTextIndexed: boolean) {
-  let buffer: Buffer;
+const METADATA_SQL =
+  "SELECT Signature, EXISTS(SELECT 1 FROM sqlite_master WHERE name = 'EntitiesFts') AS HasIndex FROM ExtensionMetadata LIMIT 1";
+
+async function isCurrentDatabase(path: string, signature: string, fullTextIndexed: boolean) {
   try {
-    buffer = await readFile(path);
+    await access(path, constants.R_OK);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
     throw error;
   }
-  let db: Database | undefined;
+  let metadata: { Signature: string; HasIndex: number } | undefined;
+  let db: import("node:sqlite").DatabaseSync | undefined;
   try {
-    db = new SQL.Database(buffer);
-    const savedSignature = db.exec("SELECT Signature FROM ExtensionMetadata")[0]?.values[0]?.[0];
-    const hasIndex = db.exec("SELECT 1 FROM sqlite_master WHERE name = 'EntitiesFts'").length > 0;
-    if (savedSignature === signature && (!fullTextIndexed || hasIndex)) return db;
+    const { DatabaseSync } = await import("node:sqlite");
+    db = new DatabaseSync(path, { readOnly: true });
+    metadata = db.prepare(METADATA_SQL).get() as typeof metadata;
   } catch {
-    // Rebuild legacy or incomplete databases rather than trusting cached index state.
+    // Older Raycast runtimes can query the small metadata row with system SQLite instead.
+    try {
+      const { stdout } = await execFileAsync("sqlite3", ["-readonly", "-json", path, METADATA_SQL]);
+      metadata = JSON.parse(stdout)[0];
+    } catch {
+      // Rebuild legacy or incomplete databases rather than trusting cached index state.
+    }
+  } finally {
+    db?.close();
   }
-  db?.close();
-  return undefined;
+  return metadata?.Signature === signature && (!fullTextIndexed || Boolean(metadata.HasIndex));
+}
+
+async function supportsFullTextIndex() {
+  try {
+    await execFileAsync("sqlite3", [":memory:", "CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram');"]);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Runs out of process so the index is streamed to disk instead of held in memory. Falls back to unindexed search
