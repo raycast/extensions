@@ -253,6 +253,8 @@ const MISSING_RETRY_MS = 24 * 60 * 60 * 1000;
 const FAILED_RETRY_MS = 15 * 60 * 1000;
 const MISSING_PREFIX = "missing:";
 const FAILED_PREFIX = "failed:";
+/** When Refresh was last used. Misses recorded by a load that started earlier are ignored. */
+const RETRY_AFTER_KEY = "__retry-after";
 
 type ReadingTimeResult = number | "missing" | "failed";
 
@@ -278,26 +280,26 @@ function isReadingTime(cached?: string): cached is string {
 
 /** True when a cached miss or failure is recent enough that the page should not be checked yet. */
 function isWaitingToRetry(cached: string): boolean {
+  const retryAfter = Number(readingTimeCache.get(RETRY_AFTER_KEY) ?? 0);
   for (const [prefix, retryMs] of [
     [MISSING_PREFIX, MISSING_RETRY_MS],
     [FAILED_PREFIX, FAILED_RETRY_MS],
   ] as const) {
     if (cached.startsWith(prefix)) {
-      return Date.now() - Number(cached.slice(prefix.length)) < retryMs;
+      const loadStartedAt = Number(cached.slice(prefix.length));
+      return loadStartedAt >= retryAfter && Date.now() - loadStartedAt < retryMs;
     }
   }
   return false;
 }
 
 /**
- * Forgets cached misses and failures, so the next `getReadingTimes` call checks
- * those pages again. Used by Refresh. Clearing the cache (instead of passing a
- * flag to one call) keeps the retry in effect for whichever load runs next.
+ * Makes the next `getReadingTimes` call check pages without a reading time
+ * again. Used by Refresh. Misses are stamped with the time their load started,
+ * so misses written later by a load that was already running are ignored too.
  */
-export function forgetMissingReadingTimes(entries: Entry[]): void {
-  for (const entry of entries) {
-    if (!isReadingTime(readingTimeCache.get(entry.id))) readingTimeCache.remove(entry.id);
-  }
+export function retryMissingReadingTimes(): void {
+  readingTimeCache.set(RETRY_AFTER_KEY, String(Date.now()));
 }
 
 /**
@@ -306,6 +308,7 @@ export function forgetMissingReadingTimes(entries: Entry[]): void {
  * wait before the next check.
  */
 export async function getReadingTimes(entries: Entry[]): Promise<Record<string, number>> {
+  const startedAt = Date.now();
   const times: Record<string, number> = {};
   const pending: Entry[] = [];
   for (const entry of entries) {
@@ -327,7 +330,7 @@ export async function getReadingTimes(entries: Entry[]): Promise<Record<string, 
         readingTimeCache.set(id, String(result));
       } else if (!isReadingTime(readingTimeCache.get(id))) {
         // A slower, overlapping check must not replace a reading time that another check found.
-        readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${Date.now()}`);
+        readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${startedAt}`);
       }
     });
   }

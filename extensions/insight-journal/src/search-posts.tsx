@@ -4,7 +4,7 @@ import { EntryBrowser } from "./entry-browser";
 import {
   Entry,
   fetchPosts,
-  forgetMissingReadingTimes,
+  retryMissingReadingTimes,
   getReadingTimes,
   getSavedIds,
   getUnseenPosts,
@@ -40,7 +40,7 @@ export default function Command() {
   // Refresh re-checks pages that had no reading time. A changed post list reloads reading
   // times on its own; an unchanged one does not, so that case reloads them here.
   async function refresh() {
-    forgetMissingReadingTimes(posts);
+    retryMissingReadingTimes();
     try {
       const reloaded = await revalidate();
       if (JSON.stringify(reloaded) === JSON.stringify(posts)) {
