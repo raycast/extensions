@@ -6,12 +6,19 @@ import { AuthEmptyView, isAuthError, showError } from "./components/errors";
 import { Course, fetchCourses, setCourseFavourite } from "./lib/courses";
 import { getLanguage } from "./lib/prefs";
 
-type Filter = "all" | "inprogress" | "past" | "favourites";
+type Filter = "all" | "inprogress" | "upcoming" | "past" | "favourites";
+
+/** A course that has not started yet (no end date in the past and not currently in progress). */
+function isUpcoming(course: Course): boolean {
+  return !course.inProgress && !course.hasEnded;
+}
 
 function matchesFilter(course: Course, filter: Filter): boolean {
   switch (filter) {
     case "inprogress":
       return course.inProgress;
+    case "upcoming":
+      return isUpcoming(course);
     case "past":
       return course.hasEnded;
     case "favourites":
@@ -40,7 +47,8 @@ export default function SearchCourses() {
   }
 
   const courses = (data ?? []).filter((course) => matchesFilter(course, filter));
-  const current = courses.filter((course) => !course.hasEnded);
+  const inProgress = courses.filter((course) => course.inProgress);
+  const upcoming = courses.filter(isUpcoming);
   const past = courses.filter((course) => course.hasEnded);
 
   function renderCourse(course: Course) {
@@ -96,6 +104,7 @@ export default function SearchCourses() {
         <List.Dropdown tooltip="Filter courses" storeValue onChange={(value) => setFilter(value as Filter)}>
           <List.Dropdown.Item title="All Courses" value="all" />
           <List.Dropdown.Item title="In Progress" value="inprogress" />
+          <List.Dropdown.Item title="Upcoming" value="upcoming" />
           <List.Dropdown.Item title="Past" value="past" />
           <List.Dropdown.Item title="Favourites" value="favourites" />
         </List.Dropdown>
@@ -111,8 +120,11 @@ export default function SearchCourses() {
         />
       ) : (
         <>
-          <List.Section title="In Progress" subtitle={`${current.length}`}>
-            {current.map(renderCourse)}
+          <List.Section title="In Progress" subtitle={`${inProgress.length}`}>
+            {inProgress.map(renderCourse)}
+          </List.Section>
+          <List.Section title="Upcoming" subtitle={`${upcoming.length}`}>
+            {upcoming.map(renderCourse)}
           </List.Section>
           <List.Section title="Past" subtitle={`${past.length}`}>
             {past.map(renderCourse)}
