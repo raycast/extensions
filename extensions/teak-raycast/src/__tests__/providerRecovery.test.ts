@@ -1,13 +1,19 @@
 import { afterEach, expect, mock, test } from "bun:test";
 import { createRaycastApiMock } from "./raycastApiMock";
+
 const getPreferenceValuesMock = mock(() => ({ apiKey: "" }));
+let savedToken: string | undefined;
 const authorizeMock = mock(() => Promise.resolve("old-access"));
 mock.module("@raycast/api", () =>
   createRaycastApiMock(false, {
     getPreferenceValues: getPreferenceValuesMock,
     oauthClient: class {
       getTokens() {
-        return Promise.resolve(undefined);
+        return Promise.resolve(
+          savedToken
+            ? { accessToken: savedToken, isExpired: () => false }
+            : undefined,
+        );
       }
       removeTokens() {
         return Promise.resolve();
@@ -44,7 +50,7 @@ const withDiscovery = (
     const mode = provider();
     const issuer =
       mode === "workos"
-        ? "https://api.workos.com"
+        ? "https://scholarly-hay-77.authkit.app"
         : "https://app.teakvault.com";
     let metadata: unknown;
     if (url.includes("oauth-protected-resource")) {
@@ -93,6 +99,7 @@ test("a401 provider flip reauthorizes with the newly discovered issuer", async (
   let mode = "betterauth";
   const exchanges: Array<{ url: string; body: URLSearchParams }> = [];
   const seenTokens: string[] = [];
+  let discoveryRounds = 0;
   const discovered = withDiscovery(
     mock((_input: RequestInfo | URL, init?: RequestInit) => {
       seenTokens.push(new Headers(init?.headers).get("authorization") ?? "");
@@ -105,6 +112,9 @@ test("a401 provider flip reauthorizes with the newly discovered issuer", async (
     () => mode,
   );
   globalThis.fetch = ((input, init) => {
+    if (String(input).includes("teak-oauth-clients")) {
+      discoveryRounds++;
+    }
     if (String(input).endsWith("/token")) {
       exchanges.push({
         url: String(input),
@@ -119,9 +129,34 @@ test("a401 provider flip reauthorizes with the newly discovered issuer", async (
   await searchCards({ limit: 1 });
   expect(exchanges.map(({ url }) => url)).toEqual([
     "https://app.teakvault.com/token",
-    "https://api.workos.com/token",
+    "https://scholarly-hay-77.authkit.app/token",
   ]);
   expect(exchanges[1].body.get("client_id")).toBe("client_raycast_workos");
   expect(exchanges[1].body.get("resource")).toBe("https://teakvault.com/api");
   expect(seenTokens).toEqual(["Bearer old-access", "Bearer new-access"]);
+  expect(discoveryRounds).toBe(2);
+});
+
+test("no-view OAuth401 does not force extra discovery or browser sign-in", async () => {
+  savedToken = "stored-access";
+  let discoveryRounds = 0;
+  const oldBrowserCount = authorizeMock.mock.calls.length;
+  const discovered = withDiscovery(
+    () => Promise.resolve(createCardsResponse(401)) as ReturnType<typeof fetch>,
+  );
+  globalThis.fetch = ((input, init) => {
+    if (String(input).includes("teak-oauth-clients")) {
+      discoveryRounds++;
+    }
+    return discovered(input, init);
+  }) as typeof fetch;
+  try {
+    await expect(searchCards({}, { interactive: false })).rejects.toMatchObject(
+      { code: "INVALID_API_KEY" },
+    );
+    expect(discoveryRounds).toBe(1);
+    expect(authorizeMock.mock.calls.length).toBe(oldBrowserCount);
+  } finally {
+    savedToken = undefined;
+  }
 });

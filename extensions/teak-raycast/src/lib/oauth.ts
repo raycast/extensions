@@ -1,4 +1,4 @@
-import { environment, OAuth } from "@raycast/api";
+import { environment, LocalStorage, OAuth } from "@raycast/api";
 import { type AuthDiscovery, discoverAuthServer } from "teak-sdk";
 import { getApiBaseUrl, getAppBaseUrl } from "./constants";
 
@@ -8,6 +8,8 @@ export class TeakDiscoveryError extends Error {
     this.name = "TeakDiscoveryError";
   }
 }
+
+class TeakSessionExpiredError extends Error {}
 
 interface Provider {
   auth: AuthDiscovery;
@@ -26,6 +28,126 @@ const audience = (auth: AuthDiscovery): Record<string, string> =>
     ? { resource: new URL("/api", auth.resource).href }
     : {};
 
+interface SavedProvider {
+  apiBaseUrl: string;
+  clientId: string;
+  issuer: string;
+  providerId: string;
+  revocationEndpoint?: string;
+}
+const registryPrefix = () =>
+  `teak.oauth.provider:${encodeURIComponent(getApiBaseUrl())}:`;
+const nativeClient = (providerId: string) =>
+  new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.Web,
+    providerName: "Teak",
+    providerId,
+    providerIcon: "icon.png",
+    description: "Connect your Teak account to save and search cards.",
+  });
+function savedProvider(auth: AuthDiscovery): SavedProvider {
+  const legacy =
+    !environment.isDevelopment &&
+    auth.primary === "betterauth" &&
+    auth.issuer === "https://app.teakvault.com" &&
+    auth.clients.raycast === "teak-raycast";
+  return {
+    apiBaseUrl: getApiBaseUrl(),
+    providerId: legacy ? "teak" : `teak:${providerKey(auth)}`,
+    issuer: auth.issuer,
+    clientId: auth.clients.raycast,
+    revocationEndpoint:
+      auth.primary === "betterauth" ? auth.revocationEndpoint : undefined,
+  };
+}
+function validateSavedProvider(raw: unknown): SavedProvider {
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    !("apiBaseUrl" in raw) ||
+    raw.apiBaseUrl !== getApiBaseUrl() ||
+    !("providerId" in raw) ||
+    typeof raw.providerId !== "string" ||
+    !("issuer" in raw) ||
+    typeof raw.issuer !== "string" ||
+    !("clientId" in raw) ||
+    typeof raw.clientId !== "string" ||
+    !raw.clientId ||
+    ("revocationEndpoint" in raw && typeof raw.revocationEndpoint !== "string")
+  ) {
+    throw new Error("Invalid saved Teak connection");
+  }
+  const issuer = new URL(raw.issuer);
+  const endpoint =
+    "revocationEndpoint" in raw
+      ? new URL(String(raw.revocationEndpoint))
+      : undefined;
+  const legacy = raw.providerId === "teak";
+  const expected = legacy
+    ? "teak"
+    : `teak:${raw.apiBaseUrl}|${raw.issuer}|${raw.clientId}`;
+  const knownWorkosIssuer = environment.isDevelopment
+    ? "https://optimistic-metaphor-12-reminiscent-kangaroo-59.authkit.app"
+    : "https://scholarly-hay-77.authkit.app";
+  const workos = raw.clientId.startsWith("client_");
+  if (workos && (raw.issuer !== knownWorkosIssuer || endpoint !== undefined)) {
+    throw new Error("Saved WorkOS connection does not match this deployment");
+  }
+  if (
+    !workos &&
+    (raw.clientId !== "teak-raycast" ||
+      raw.issuer !== getAppBaseUrl() ||
+      endpoint?.href !==
+        `${getApiBaseUrl().replace(/\/v1$/, "")}/api/oauth/revoke`)
+  ) {
+    throw new Error(
+      "Saved Better Auth connection does not match this deployment",
+    );
+  }
+
+  if (
+    raw.providerId !== expected ||
+    issuer.username ||
+    issuer.password ||
+    issuer.search ||
+    issuer.hash ||
+    endpoint?.username ||
+    endpoint?.password ||
+    endpoint?.search ||
+    endpoint?.hash ||
+    (legacy &&
+      (environment.isDevelopment ||
+        raw.issuer !== "https://app.teakvault.com" ||
+        raw.clientId !== "teak-raycast")) ||
+    (issuer.protocol !== "https:" &&
+      !(
+        environment.isDevelopment &&
+        issuer.origin === new URL(getAppBaseUrl()).origin
+      )) ||
+    (endpoint &&
+      endpoint.origin !== issuer.origin &&
+      endpoint.origin !== new URL(getApiBaseUrl()).origin)
+  ) {
+    throw new Error("Invalid saved Teak connection");
+  }
+  // Endpoint origin and native namespace share the persisted issuer/client pin:
+  // tampering with that pin cannot retrieve another issuer's Keychain tokens.
+  return {
+    apiBaseUrl: raw.apiBaseUrl,
+    providerId: raw.providerId,
+    issuer: raw.issuer,
+    clientId: raw.clientId,
+    revocationEndpoint: endpoint?.href,
+  };
+}
+async function rememberProvider(auth: AuthDiscovery) {
+  const record = savedProvider(auth);
+  // AuthKit Connect disconnects through Teak, never an inferred provider URL.
+  await LocalStorage.setItem(
+    `${registryPrefix()}${record.providerId}`,
+    JSON.stringify(record),
+  );
+}
 async function getProvider(forceRefresh = false): Promise<Provider> {
   let auth: AuthDiscovery;
   try {
@@ -37,25 +159,14 @@ async function getProvider(forceRefresh = false): Promise<Provider> {
   const cached = providers.get(key);
   if (cached) {
     cached.auth = auth;
+    await rememberProvider(auth);
     return cached;
   }
-  // Preserve pre-migration production credentials; dev and WorkOS never share
-  // their native credential namespace with another deployment or provider.
-  const legacy =
-    !environment.isDevelopment &&
-    auth.primary === "betterauth" &&
-    auth.issuer === "https://app.teakvault.com" &&
-    auth.clients.raycast === "teak-raycast";
   const provider = {
     auth,
-    client: new OAuth.PKCEClient({
-      redirectMethod: OAuth.RedirectMethod.Web,
-      providerName: "Teak",
-      providerId: legacy ? "teak" : `teak:${key}`,
-      providerIcon: "icon.png",
-      description: "Connect your Teak account to save and search cards.",
-    }),
+    client: nativeClient(savedProvider(auth).providerId),
   };
+  await rememberProvider(auth);
   providers.set(key, provider);
   return provider;
 }
@@ -85,7 +196,10 @@ async function exchange(
     signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
-    throw new Error("Teak sign-in expired. Sign in again.");
+    if (response.status === 429 || response.status >= 500) {
+      throw new TeakDiscoveryError();
+    }
+    throw new TeakSessionExpiredError("Teak sign-in expired. Sign in again.");
   }
   const reader = response.body?.getReader();
   if (!reader) {
@@ -210,10 +324,6 @@ export function reauthorizeTeak(): Promise<string> {
   return inFlightReauthorize;
 }
 
-export async function refreshTeakAuthConfiguration(): Promise<void> {
-  await refetchAfterFailure();
-}
-
 export function signOutTeak(): Promise<void> {
   if (!inFlightSignOut) {
     inFlightSignOut = revokeStoredSession().finally(() => {
@@ -229,38 +339,80 @@ async function revokeStoredSession(): Promise<void> {
     inFlightStoredToken,
     inFlightReauthorize,
   ]);
-  // Revoke every namespace encountered by this command, including credentials
-  // from the previous provider when a flip occurred during a failed refresh.
   await getProvider();
-  for (const provider of providers.values()) {
-    const tokens = await provider.client.getTokens();
-    const token = tokens?.refreshToken || tokens?.accessToken;
+  const saved = await LocalStorage.allItems();
+  const records = new Map<string, SavedProvider>();
+  if (!environment.isDevelopment) {
+    records.set("teak", {
+      apiBaseUrl: getApiBaseUrl(),
+      providerId: "teak",
+      issuer: "https://app.teakvault.com",
+      clientId: "teak-raycast",
+      revocationEndpoint: "https://teakvault.com/api/api/oauth/revoke",
+    });
+  }
+  const entries = Object.entries(saved).filter(([key]) =>
+    key.startsWith(registryPrefix()),
+  );
+  if (entries.length > 64) {
+    throw new Error(
+      "Too many saved Teak connections; Sign Out could not finish.",
+    );
+  }
+  for (const [, value] of entries) {
+    if (typeof value !== "string" || value.length > 8192) {
+      throw new Error("Invalid saved Teak connection");
+    }
+    const record = validateSavedProvider(JSON.parse(value));
+    records.set(record.providerId, record);
+  }
+  for (const record of records.values()) {
+    const client = nativeClient(record.providerId);
+    const tokens = await client.getTokens();
+    const workos = record.clientId.startsWith("client_");
+    const token = workos
+      ? tokens?.accessToken
+      : tokens?.refreshToken || tokens?.accessToken;
+    if (tokens && !token) {
+      throw new Error("Your credentials are still saved. Try Sign Out again.");
+    }
     if (token) {
       try {
-        if (!provider.auth.revocationEndpoint) {
+        // The disconnect endpoint accepts signed expired access JWTs only for
+        // revocation. It never grants access, and refresh secrets stay local.
+        const endpoint = workos
+          ? `${getApiBaseUrl()}/oauth/disconnect`
+          : record.revocationEndpoint;
+        if (!endpoint) {
           throw new Error("Revocation is unavailable");
         }
-        const response = await fetch(provider.auth.revocationEndpoint, {
+        const response = await fetch(endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            client_id: provider.auth.clients.raycast,
-            token,
-          }),
+          headers: workos
+            ? { Authorization: `Bearer ${token}` }
+            : { "Content-Type": "application/x-www-form-urlencoded" },
+          ...(workos
+            ? {}
+            : {
+                body: new URLSearchParams({
+                  client_id: record.clientId,
+                  token,
+                }),
+              }),
           redirect: "error",
           signal: AbortSignal.timeout(10_000),
         });
-        if (!response.ok) {
+        if (workos ? response.status !== 204 : !response.ok) {
           throw new Error("Revocation failed");
         }
       } catch {
-        await refetchAfterFailure();
         throw new Error(
           "Your credentials are still saved. Check your connection and try Sign Out again.",
         );
       }
     }
-    await provider.client.removeTokens();
+    await client.removeTokens();
+    await LocalStorage.removeItem(`${registryPrefix()}${record.providerId}`);
   }
 }
 
@@ -305,8 +457,14 @@ async function resolveStoredTeakAccessToken(): Promise<string | null> {
       { grant_type: "refresh_token", refresh_token: tokens.refreshToken },
       tokens.refreshToken,
     );
-  } catch {
-    await refetchAfterFailure();
-    return null;
+  } catch (error) {
+    const refreshed = await getProvider(true);
+    if (providerKey(refreshed.auth) !== providerKey(provider.auth)) {
+      return null;
+    }
+    if (error instanceof TeakSessionExpiredError) {
+      return null;
+    }
+    throw new TeakDiscoveryError();
   }
 }

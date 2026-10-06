@@ -5,7 +5,7 @@ import {
   getRecoveryHint,
   getUserFacingErrorMessage,
 } from "./api";
-import { getStoredTeakAccessToken } from "./oauth";
+import { getStoredTeakAccessToken, TeakDiscoveryError } from "./oauth";
 import { getPreferences } from "./preferences";
 
 const URL_INLINE_PATTERN = /(https?:\/\/[^\s]+)/i;
@@ -22,7 +22,20 @@ export const ensureCredentialsForNoViewCommand = async (): Promise<boolean> => {
     return true;
   }
 
-  const token = await getStoredTeakAccessToken();
+  let token: string | null;
+  try {
+    token = await getStoredTeakAccessToken();
+  } catch (error) {
+    if (!(error instanceof TeakDiscoveryError)) {
+      throw error;
+    }
+    await showToast({
+      title: "Unable to reach Teak",
+      message: "Check your connection and try again.",
+      style: Toast.Style.Failure,
+    });
+    return false;
+  }
   if (token) {
     return true;
   }

@@ -509,9 +509,10 @@ describe("raycast request handling", () => {
       }) as unknown as typeof fetch,
     );
     globalThis.fetch = ((input, init) => {
-      if (String(input).includes("oauth-protected-resource"))
+      if (String(input).includes("oauth-protected-resource")) {
         discoveryReads += 1;
-      if (discoveryReads >= 3 && String(input).includes(".well-known")) {
+      }
+      if (discoveryReads >= 2 && String(input).includes(".well-known")) {
         return Promise.resolve(new Response(null, { status: 503 }));
       }
       return discovered(input, init);
