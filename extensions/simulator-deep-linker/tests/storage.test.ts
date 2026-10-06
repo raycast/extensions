@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lstat, mkdtemp, mkdir, readFile, rm, symlink, utimes, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, unlink, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -283,6 +283,110 @@ test("does not take a recovery claim from a live claimant", async (t) => {
 
   assert.equal((await lstat(lockPath)).isSymbolicLink(), true);
   assert.equal((await lstat(candidatePath)).isDirectory(), true);
+});
+
+test("competing recoveries serialize mutations without moving another claimant's live claim", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const abandonedPID = 2_147_483_647;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  const configuration: StorageConfiguration = {
+    storagePath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+
+  await Promise.all(
+    Array.from({ length: 12 }, (_, index) =>
+      addDeepLink(configuration, {
+        title: `Recovered ${index}`,
+        urlString: `demoapp://recovered/${index}`,
+        group: "",
+        tags: [],
+        isFavorite: false,
+      }),
+    ),
+  );
+
+  const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
+  assert.equal(links.length, 12);
+  assert.equal(new Set(links.map((link) => link.urlString)).size, 12);
+  assert.deepEqual(
+    (await readdir(directory)).filter((entry) => entry.includes(".simulator-deep-linker.lock")),
+    [],
+  );
+});
+
+test("an unsuccessful recovery removes its own claim from a directory lock", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const choosingToken = "11111111-1111-4111-8111-111111111111";
+  const abandonedPID = 2_147_483_647;
+  const choosingPath = path.join(lockPath, `.recovery-claim.choosing.${choosingToken}`);
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(
+    choosingPath,
+    `${JSON.stringify({
+      schemaVersion: 1,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: choosingToken,
+      claimantPid: process.pid,
+    })}\n`,
+  );
+
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
+  );
+  assert.deepEqual((await readdir(lockPath)).sort(), ["owner", `.recovery-claim.choosing.${choosingToken}`].sort());
+
+  await unlink(choosingPath);
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+});
+
+test("does not move or replace another recovery contender's live claim", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const claimantToken = "22222222-2222-4222-8222-222222222222";
+  const abandonedPID = 2_147_483_647;
+  const claimPath = path.join(lockPath, `.recovery-claim.claim.${claimantToken}`);
+  const claim = {
+    schemaVersion: 2,
+    ownerToken: "abandoned-writer",
+    ownerPid: abandonedPID,
+    claimantToken,
+    claimantPid: process.pid,
+    ticket: 1,
+  };
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(claimPath, `${JSON.stringify(claim)}\n`);
+
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
+  );
+
+  assert.equal(await readFile(claimPath, "utf8"), `${JSON.stringify(claim)}\n`);
+  assert.deepEqual((await readdir(lockPath)).sort(), ["owner", `.recovery-claim.claim.${claimantToken}`].sort());
 });
 
 test("does not reclaim an ownerless lock that could still belong to a writer", async (t) => {

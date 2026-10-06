@@ -180,6 +180,8 @@ export async function deleteDeepLink(configuration: StorageConfiguration, id: st
 const storageLockRetryMilliseconds = 25;
 const storageLockTimeoutMilliseconds = 10_000;
 const storageRecoveryClaimName = ".recovery-claim";
+const storageRecoveryClaimPrefix = `${storageRecoveryClaimName}.claim.`;
+const storageRecoveryChoosingPrefix = `${storageRecoveryClaimName}.choosing.`;
 
 type StorageLockOptions = {
   retryMilliseconds?: number;
@@ -193,18 +195,20 @@ type StorageLockOwner = {
 };
 
 type StorageRecoveryClaim = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   ownerToken: string;
   ownerPid: number;
   claimantToken: string;
   claimantPid: number;
+  ticket: number;
 };
 
 type StorageRecoveryLease = {
   claim: StorageRecoveryClaim;
   claimPath: string;
-  canReleaseSafely: boolean;
 };
+
+type LegacyStorageRecoveryClaim = Omit<StorageRecoveryClaim, "schemaVersion" | "ticket"> & { schemaVersion: 1 };
 
 export async function withStorageLock<T>(
   storagePath: string,
@@ -399,69 +403,176 @@ async function acquireStorageRecoveryClaim(
 ): Promise<StorageRecoveryLease | undefined> {
   const lockTargetPath = await realpath(lockPath).catch(() => undefined);
   if (!lockTargetPath) return undefined;
-  const canReleaseSafely = await lstat(lockPath)
-    .then((value) => value.isSymbolicLink())
-    .catch(() => false);
-  const claimPath = path.join(lockTargetPath, storageRecoveryClaimName);
-  const claim: StorageRecoveryClaim = {
+  if (await hasLiveOrUnverifiableLegacyRecoveryClaim(lockTargetPath, owner)) return undefined;
+
+  const claimantToken = randomUUID();
+  const choosingPath = path.join(lockTargetPath, `${storageRecoveryChoosingPrefix}${claimantToken}`);
+  const claimPath = path.join(lockTargetPath, `${storageRecoveryClaimPrefix}${claimantToken}`);
+  const choosingClaim: LegacyStorageRecoveryClaim = {
     schemaVersion: 1,
     ownerToken: owner.token,
     ownerPid: owner.pid,
-    claimantToken: randomUUID(),
+    claimantToken,
     claimantPid: process.pid,
   };
+  let publishedClaim = false;
+  let returningLease = false;
 
   try {
-    await writeStorageRecoveryClaim(claimPath, claim);
-    return { claim, claimPath, canReleaseSafely };
-  } catch (error) {
-    if (isNodeError(error, "ENOENT")) return undefined;
-    if (!isNodeError(error, "EEXIST")) throw error;
-  }
+    // Publishing a choosing record before inspecting tickets is the Lamport bakery doorway: a contender cannot enter
+    // while another contender may still publish an equal-priority claim that would sort ahead of it.
+    await publishRecoveryRecord(choosingPath, choosingClaim);
+    const existingClaims = await readRecoveryClaims(lockTargetPath, owner);
+    const ticket = existingClaims.reduce((maximum, entry) => Math.max(maximum, entry.claim.ticket), 0) + 1;
+    const claim: StorageRecoveryClaim = {
+      schemaVersion: 2,
+      ownerToken: owner.token,
+      ownerPid: owner.pid,
+      claimantToken,
+      claimantPid: process.pid,
+      ticket,
+    };
+    await publishRecoveryRecord(claimPath, claim);
+    publishedClaim = true;
+    await unlink(choosingPath);
 
-  const abandonedClaim = await readStorageRecoveryClaim(claimPath).catch(() => undefined);
-  if (
-    !abandonedClaim ||
-    abandonedClaim.ownerToken !== owner.token ||
-    abandonedClaim.ownerPid !== owner.pid ||
-    isProcessAlive(abandonedClaim.claimantPid)
-  ) {
-    return undefined;
-  }
+    const choosingEntries = await readRecoveryChoosingRecords(lockTargetPath, owner);
+    if (choosingEntries.some((entry) => isProcessAlive(entry.claimantPid))) return undefined;
+    await Promise.all(choosingEntries.map((entry) => unlink(entry.path).catch(() => undefined)));
 
-  const takeoverPath = path.join(lockTargetPath, `${storageRecoveryClaimName}.takeover.${claim.claimantToken}`);
-  try {
-    await rename(claimPath, takeoverPath);
+    const contenders = await readRecoveryClaims(lockTargetPath, owner);
+    const liveContenders: Array<{ claim: StorageRecoveryClaim; path: string }> = [];
+    for (const contender of contenders) {
+      if (isProcessAlive(contender.claim.claimantPid)) liveContenders.push(contender);
+      else await unlink(contender.path).catch(() => undefined);
+    }
+    liveContenders.sort((left, right) => compareStorageRecoveryClaims(left.claim, right.claim));
+    if (!sameStorageRecoveryClaim(liveContenders[0]?.claim, claim)) return undefined;
+    returningLease = true;
+    return { claim, claimPath };
   } catch (error) {
     if (isNodeError(error, "ENOENT")) return undefined;
     throw error;
+  } finally {
+    await unlink(choosingPath).catch(() => undefined);
+    // A returned lease owns this unique path; every other exit cleans it so failed verification cannot poison a
+    // directory lock in the current process.
+    if (publishedClaim && !returningLease) await unlink(claimPath).catch(() => undefined);
   }
-
-  const claimedAbandonedClaim = await readStorageRecoveryClaim(takeoverPath).catch(() => undefined);
-  if (!sameStorageRecoveryClaim(claimedAbandonedClaim, abandonedClaim)) return undefined;
-
-  try {
-    await writeStorageRecoveryClaim(claimPath, claim);
-  } catch (error) {
-    await unlink(takeoverPath).catch(() => undefined);
-    if (isNodeError(error, "EEXIST") || isNodeError(error, "ENOENT")) return undefined;
-    throw error;
-  }
-  await unlink(takeoverPath).catch(() => undefined);
-  return { claim, claimPath, canReleaseSafely };
 }
 
 async function releaseStorageRecoveryClaim(lease: StorageRecoveryLease): Promise<void> {
-  if (!lease.canReleaseSafely) return;
   const currentClaim = await readStorageRecoveryClaim(lease.claimPath).catch(() => undefined);
   if (sameStorageRecoveryClaim(currentClaim, lease.claim)) await unlink(lease.claimPath).catch(() => undefined);
 }
 
-async function writeStorageRecoveryClaim(claimPath: string, claim: StorageRecoveryClaim): Promise<void> {
-  await writeFile(claimPath, `${JSON.stringify(claim)}\n`, { encoding: "utf8", flag: "wx" });
+async function hasLiveOrUnverifiableLegacyRecoveryClaim(
+  lockTargetPath: string,
+  owner: StorageLockOwner,
+): Promise<boolean> {
+  const entries = await readdir(lockTargetPath);
+  const legacyNames = entries.filter(
+    (entry) => entry === storageRecoveryClaimName || entry.startsWith(`${storageRecoveryClaimName}.takeover.`),
+  );
+  for (const entry of legacyNames) {
+    const claim = await readLegacyStorageRecoveryClaim(path.join(lockTargetPath, entry)).catch(() => undefined);
+    if (!claim || claim.ownerToken !== owner.token || claim.ownerPid !== owner.pid) return true;
+    if (isProcessAlive(claim.claimantPid)) return true;
+  }
+  return false;
+}
+
+async function readRecoveryClaims(
+  lockTargetPath: string,
+  owner: StorageLockOwner,
+): Promise<Array<{ claim: StorageRecoveryClaim; path: string }>> {
+  const result: Array<{ claim: StorageRecoveryClaim; path: string }> = [];
+  for (const entry of await readdir(lockTargetPath)) {
+    if (!entry.startsWith(storageRecoveryClaimPrefix)) continue;
+    const entryToken = entry.slice(storageRecoveryClaimPrefix.length);
+    if (!isUUID(entryToken)) continue;
+    const claimPath = path.join(lockTargetPath, entry);
+    let claim: StorageRecoveryClaim | undefined;
+    try {
+      claim = await readStorageRecoveryClaim(claimPath);
+    } catch (error) {
+      if (isNodeError(error, "ENOENT")) continue;
+      throw new Error("Could not verify a storage recovery claim; the storage lock was left intact.");
+    }
+    if (!claim || claim.ownerToken !== owner.token || claim.ownerPid !== owner.pid) {
+      throw new Error("Could not verify a storage recovery claim; the storage lock was left intact.");
+    }
+    if (claim.claimantToken.toLowerCase() !== entryToken.toLowerCase()) {
+      throw new Error("Could not verify a storage recovery claim; the storage lock was left intact.");
+    }
+    result.push({ claim, path: claimPath });
+  }
+  return result;
+}
+
+async function readRecoveryChoosingRecords(
+  lockTargetPath: string,
+  owner: StorageLockOwner,
+): Promise<Array<LegacyStorageRecoveryClaim & { path: string }>> {
+  const result: Array<LegacyStorageRecoveryClaim & { path: string }> = [];
+  for (const entry of await readdir(lockTargetPath)) {
+    if (!entry.startsWith(storageRecoveryChoosingPrefix)) continue;
+    const entryToken = entry.slice(storageRecoveryChoosingPrefix.length);
+    if (!isUUID(entryToken)) continue;
+    const choosingPath = path.join(lockTargetPath, entry);
+    let claim: LegacyStorageRecoveryClaim | undefined;
+    try {
+      claim = await readLegacyStorageRecoveryClaim(choosingPath);
+    } catch (error) {
+      if (isNodeError(error, "ENOENT")) continue;
+      throw new Error("Could not verify a storage recovery contender; the storage lock was left intact.");
+    }
+    if (!claim || claim.ownerToken !== owner.token || claim.ownerPid !== owner.pid) {
+      throw new Error("Could not verify a storage recovery contender; the storage lock was left intact.");
+    }
+    if (claim.claimantToken.toLowerCase() !== entryToken.toLowerCase()) {
+      throw new Error("Could not verify a storage recovery contender; the storage lock was left intact.");
+    }
+    result.push({ ...claim, path: choosingPath });
+  }
+  return result;
+}
+
+async function publishRecoveryRecord(
+  claimPath: string,
+  claim: StorageRecoveryClaim | LegacyStorageRecoveryClaim,
+): Promise<void> {
+  const temporaryPath = `${claimPath}.tmp.${randomUUID()}`;
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(claim)}\n`, { encoding: "utf8", flag: "wx" });
+    await rename(temporaryPath, claimPath);
+  } catch (error) {
+    await unlink(temporaryPath).catch(() => undefined);
+    throw error;
+  }
 }
 
 async function readStorageRecoveryClaim(claimPath: string): Promise<StorageRecoveryClaim | undefined> {
+  const parsed: unknown = JSON.parse(await readFile(claimPath, "utf8"));
+  if (
+    !isRecord(parsed) ||
+    parsed.schemaVersion !== 2 ||
+    typeof parsed.ownerToken !== "string" ||
+    !parsed.ownerToken ||
+    !isPositivePID(parsed.ownerPid) ||
+    typeof parsed.claimantToken !== "string" ||
+    !parsed.claimantToken ||
+    !isPositivePID(parsed.claimantPid) ||
+    typeof parsed.ticket !== "number" ||
+    !Number.isSafeInteger(parsed.ticket) ||
+    parsed.ticket <= 0
+  ) {
+    return undefined;
+  }
+  return parsed as StorageRecoveryClaim;
+}
+
+async function readLegacyStorageRecoveryClaim(claimPath: string): Promise<LegacyStorageRecoveryClaim | undefined> {
   const parsed: unknown = JSON.parse(await readFile(claimPath, "utf8"));
   if (
     !isRecord(parsed) ||
@@ -475,7 +586,7 @@ async function readStorageRecoveryClaim(claimPath: string): Promise<StorageRecov
   ) {
     return undefined;
   }
-  return parsed as StorageRecoveryClaim;
+  return parsed as LegacyStorageRecoveryClaim;
 }
 
 function sameStorageRecoveryClaim(
@@ -492,15 +603,21 @@ function sameStorageRecoveryClaim(
   );
 }
 
+function compareStorageRecoveryClaims(left: StorageRecoveryClaim, right: StorageRecoveryClaim): number {
+  if (left.ticket !== right.ticket) return left.ticket - right.ticket;
+  const leftToken = left.claimantToken.toLowerCase();
+  const rightToken = right.claimantToken.toLowerCase();
+  return leftToken < rightToken ? -1 : leftToken > rightToken ? 1 : 0;
+}
+
 async function removeClaimedStorageLock(claimedLockPath: string, claimedOwnerPath: string): Promise<void> {
   const lockTargetPath = await realpath(claimedLockPath);
   const isSymbolicLock = (await lstat(claimedLockPath)).isSymbolicLink();
   await unlink(claimedOwnerPath);
-  await unlink(path.join(claimedLockPath, storageRecoveryClaimName)).catch((error) => {
-    if (!isNodeError(error, "ENOENT")) throw error;
-  });
   for (const entry of await readdir(claimedLockPath)) {
-    if (entry.startsWith(`${storageRecoveryClaimName}.takeover.`)) await unlink(path.join(claimedLockPath, entry));
+    if (entry === storageRecoveryClaimName || entry.startsWith(`${storageRecoveryClaimName}.`)) {
+      await unlink(path.join(claimedLockPath, entry));
+    }
   }
   if (isSymbolicLock) {
     await rmdir(lockTargetPath);
