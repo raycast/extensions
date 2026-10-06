@@ -88,7 +88,7 @@ export default function Authenticate() {
         isLoading={isSubmitting}
         actions={
           <ActionPanel>
-            <Action.SubmitForm icon={Icon.QrCode} title="Log in" onSubmit={startQrAuth} />
+            <Action.SubmitForm icon={Icon.ArrowRight} title="Log in" onSubmit={startQrAuth} />
             <Action.OpenInBrowser
               title="Get API Credentials"
               url="https://my.telegram.org/apps"
