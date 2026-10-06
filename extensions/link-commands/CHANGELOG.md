@@ -7,6 +7,22 @@
 - **Environment** on the create form only scopes the subtitle (`Linear · @work`) — it no longer prefixes the filename, so a work command is `linear.sprint-board.sh` whether it is scoped or not. The subtitle is searched too, so typing `@work` still finds them.
 - Picking a **Directory** under a `work` folder ticks **Environment** to Work, and picking any other directory unticks it back to None — until the control is changed by hand, which stops the syncing.
 
+## [Name row in detail] - 2026-10-05
+
+### Fixed
+
+- The detail pane now shows the command's full name at the top of the metadata, because the narrowed list column truncates long titles.
+
+## [Readable brand suggestion] - 2026-10-05
+
+### Added
+
+- Opt-in **Titles → Start titles with the site** preference, off by default: for `http(s)` targets the written title becomes `<host> · <name>` — `claude.ai · Usage` — or just the host when the name is empty or is only the brand. Folders, surface routers and already-prefixed names are untouched, the create form previews the written title, and filenames still derive from the bare name so nothing already created moves.
+
+### Fixed
+
+- The **Package** suggestion on the create form now uses the site's own name where the page states one — `https://sendtestemail.com/` suggests `SendTestEmail` rather than the bare domain label — falling back to the capitalised domain when the page cannot be read. File names and icon folders still use the lowercase form, so only the displayed subtitle changes and nothing already created moves.
+
 ## [Raycast 2 Deeplink Fix] - 2026-10-01
 
 ### Fixed

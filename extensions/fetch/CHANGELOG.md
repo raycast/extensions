@@ -1,5 +1,18 @@
 # Fetch Changelog
 
+## [Cleaner Failures] - 2026-10-05
+
+- A download that fails before receiving any data (an access-denied link, say) no longer leaves a stray `.part.state` file in your download folder.
+- A server that answers without sending the file no longer produces one. "Accepted, not ready yet" (HTTP 202) fails with a message to try again later, and a "no content" or unrequested partial response fails instead of being saved as the finished file.
+- Resuming a download whose file changed on the server no longer saves the old version; the download fails, and retrying it starts fresh.
+- The Stall Timeout preference now says what it measures: seconds below 1 KiB/s.
+- Retry Download and Download Again appear in Download History again. Entries recorded before this update can't get them back.
+- Pressing Return on an in-progress batch download copies its URL instead of canceling it, and while filenames resolve, Return opens the download folder instead of canceling the batch.
+- Retry Download, and a range pattern handed off to Download Batch, show an error if Raycast can't open the command, instead of silently doing nothing.
+- Download progress keeps updating if the system clock changes mid-download.
+- US spelling throughout: "Canceled".
+- Shorter description for the Strict Redaction preference.
+
 ## [Initial Version] - 2026-09-24
 
 - **Download** — download a single file from a URL argument or the clipboard, with live progress in a toast and Show in Finder on completion. Transfers run in a background process that outlives the command, so closing Raycast doesn't cancel them. Filenames resolve from `Content-Disposition` when the server sends it, and gain the correct extension from the content type when the URL doesn't have one.

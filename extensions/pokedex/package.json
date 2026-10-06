@@ -7,8 +7,10 @@
   "author": "anhthang",
   "contributors": [
     "miguel-felix1",
-    "DanBennett",
     "ridemountainpig"
+  ],
+  "pastContributors": [
+    "DanBennett"
   ],
   "license": "MIT",
   "categories": [
@@ -243,6 +245,10 @@
         {
           "title": "Scarlet & Violet Sprites",
           "value": "sv"
+        },
+        {
+          "title": "Pokémon GO",
+          "value": "go"
         }
       ]
     },
@@ -257,9 +263,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.10",
-    "@raycast/utils": "^2.2.3",
-    "axios": "^1.13.6",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "axios": "^1.20.0",
     "json2md": "^2.0.3",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
@@ -275,10 +281,9 @@
     "@types/lodash.orderby": "^4.6.9",
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
-    "@types/react": "^19.2.14",
-    "eslint": "^10.0.3",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "@types/react": "^19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9"
   },
   "scripts": {
     "build": "ray build",

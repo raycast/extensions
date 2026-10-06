@@ -6,6 +6,7 @@ import { ConnectionEmptyView } from "./components/ConnectionEmptyView";
 import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { destinationIcon } from "./lib/format";
+import { primaryShortcut } from "./lib/platform";
 
 export default function Command() {
   const {
@@ -58,7 +59,7 @@ export default function Command() {
               <Action.Push
                 title="Upload Files"
                 icon={Icon.Upload}
-                shortcut={{ modifiers: ["cmd"], key: "u" }}
+                shortcut={primaryShortcut("u")}
                 target={<UploadForm destinationId={destination.id} />}
               />
               {destination.publicBaseURL && (

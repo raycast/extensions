@@ -4,10 +4,10 @@ import { showErrorToast } from "../helpers/toastable-error";
 import { getOrCreateBookmarksPath } from "../helpers/vault-path";
 
 type Props = { children: React.ReactNode };
-export default function VaultInspector({ children }: Props): JSX.Element {
+export default function VaultInspector({ children }: Props): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const toastRef = useRef<Toast>();
+  const toastRef = useRef<Toast | undefined>(undefined);
 
   useEffect(() => {
     const fetch = async () => {

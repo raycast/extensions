@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -39,6 +39,7 @@ Track usage across your AI coding agents in one place.
 | **MinimaxCN**   | MinimaxCN API (国内版)      |     ✓      |    —     |    ✓    |       —       | Set `MINIMAX_CN_API_KEY` env var, or paste token in preferences                                                                                                                  |
 | **OpenCode Go** | OpenCode API                |     ✓      |    ✓     |    —    |       —       | Select OpenCode Go when running `opencode auth login`, or paste your subscribed account's API key into the OpenCode Go API Key preference. The manual preference takes priority. |
 | **OpenRouter**  | OpenRouter credits API      |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `openrouter`, set `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or paste an API key                                                                                        |
+| **Raycast**     | Raycast website credits API |     ✓      |    —     |    —    |       —       | Paste the `__raycast_session` cookie from https://www.raycast.com/settings in preferences                                                                                        |
 | **z.ai (GLM)**  | Zhipu API                   |     ✓      |    ✓     |    ✓    |       ✓       | Paste token, use OpenCode `zai-coding-plan`, or set `ZAI_API_KEY`/`GLM_API_KEY` env var                                                                                          |
 
 **Legend:**
@@ -79,6 +80,10 @@ Agent Usage shows the credits you have left on OpenRouter. Create a key from [Op
 Manual preferences take priority, followed by OpenCode and environment variables.
 
 Which balance is shown depends on the key type. A **provisioning key** can read the account ledger (`/api/v1/credits`), so the row shows account-wide credits purchased minus credits used. A regular **inference key** cannot read that ledger, so Agent Usage falls back to the key endpoint (`/api/v1/key`) and shows that key's own spending cap instead — or `$X.XX used` when the key has no cap.
+
+### Raycast Credentials
+
+Agent Usage shows your remaining Raycast AI credits, plan, and next renewal date. Sign in at [Raycast Settings](https://www.raycast.com/settings), copy the `__raycast_session` cookie value from your browser's developer tools, and paste it into the **Raycast Session Cookie** extension preference. A full Cookie header containing it also works.
 
 ## OpenCode Active Indicator
 

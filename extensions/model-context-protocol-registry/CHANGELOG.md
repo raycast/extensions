@@ -1,5 +1,45 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Caly MCP Server] - 2026-10-06
+
+- Add Caly, a remote MCP server from Devino Solutions for scheduling, to the official registry. It is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.
+
+## [Add DropTheHassle MCP Server] - 2026-10-05
+
+- Add DropTheHassle to the official registry: your AI puts the site it built online on a live HTTPS link, checks domain availability with the registry, and manages your sites (new version or rollback, link rename, domains, share image and favicon, certificate and visitor checks). Hosted remote Streamable HTTP server at https://dropthehassle.com/mcp through `mcp-remote`; publishing and domain checks need no sign-in, managing sites uses OAuth 2.1 sign-in with dynamic client registration.
+
+## [Add LinkMCP MCP Server] - 2026-10-05
+
+- Add LinkMCP to the community registry: use your own LinkedIn account from your AI assistant (profiles and companies, people, job and Sales Navigator search, LinkedIn inbox, posts, comments and reactions, connection requests, your own analytics, work email and mobile finding). Hosted remote Streamable HTTP server at https://app.linkmcp.io/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Connecting a LinkedIn account needs a paid plan. Not affiliated with LinkedIn.
+
+## [Add Zihin MCP Server] - 2026-10-05
+
+- Add Zihin to the official registry: build and operate AI agents on the Zihin platform (agents, personas, tools, triggers, budgets, human approvals, run inspection) and chat with them. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.
+
+## [Add Truthifi MCP Server] - 2026-10-05
+
+- Add Truthifi to the official registry: one verified household record for your AI (accounts, activity, holdings, fees, performance, cash flow and the Truthifi Score with its findings) from 18,000+ institutions. Hosted remote Streamable HTTP server at https://api.truthifi.com/mcp through `mcp-remote`; OAuth sign-in with dynamic client registration, no API key. It can't move money or place trades.
+
+## [Add Chirpie MCP Server] - 2026-10-05
+
+- Add Chirpie to the official registry: the publishing connector for AI agents. Post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, with media, drafts, post analytics and comment replies. Hosted remote server at `https://chirpie.ai/mcp` through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.
+
+## [Add MAQAMI Travel MCP Server] - 2026-10-05
+
+- Add MAQAMI Travel to the official registry: official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation. Raycast connects directly to the remote Streamable HTTP server at https://mcp.maqami.co/, with no sign-in and no API key.
+
+## [Add handoff MCP Server] - 2026-10-05
+
+- Add handoff to the official registry: coordination for autonomous agent swarms. Agents discover funded projects, form teams, plan goals and tasks, message end-to-end encrypted, and get paid when the requester verifies the work. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key.
+
+## [Add VoiceMoat MCP Server] - 2026-10-05
+
+- Add VoiceMoat to the official registry: the personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics, and publish or schedule posts after a preview. Hosted remote Streamable HTTP server at https://app.voicemoat.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Requires a paid VoiceMoat Pro or Enterprise plan.
+
+## [Add Clipwright MCP Server] - 2026-10-04
+
+- Add Clipwright to the official registry: UGC-style video ads without filming. Tell your assistant what the video should say and get a vertical clip of a realistic actor saying it, or a faceless video from a script or a short brief, with the price shown before anything renders. Local stdio server through `npx -y -p @clipwright/mcp-server clipwright-mcp`; needs a Clipwright API key in `CLIPWRIGHT_API_KEY`.
+
 ## [Add Desearch MCP Server] - 2026-10-03
 
 - Add Desearch to the official registry: AI search, X search and web search for AI agents, plus page extraction and X data tools. Local stdio server `desearch-mcp-server` (MIT) through `npx` with 15 tools; bring your own Desearch API key from console.desearch.ai/api-keys, set as `DESEARCH_API_KEY`.

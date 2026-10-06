@@ -17,6 +17,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
   const agents: Array<{ id: AgentId; rowId: string }> = [
     { id: "zai", rowId: "zai-1" },
     { id: "synthetic", rowId: "synthetic-1" },
+    { id: "raycast", rowId: "raycast" },
     { id: "openrouter", rowId: "openrouter" },
     { id: "opencode-go", rowId: "opencode-go" },
     { id: "minimax", rowId: "minimax" },
@@ -56,6 +57,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
       "minimax",
       "opencode-go",
       "openrouter",
+      "raycast",
       "synthetic-1",
       "zai-1",
     ],

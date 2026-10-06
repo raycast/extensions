@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
 import { releaseReservation } from "@chrismessina/raycast-downloader/paths";
 import { showError } from "@chrismessina/raycast-kit";
-import { Clipboard, launchCommand, LaunchProps, LaunchType } from "@raycast/api";
+import { Clipboard, LaunchProps, LaunchType } from "@raycast/api";
 import { downloadFile, shouldReleaseReservation } from "./lib/downloader";
 import { addToHistory } from "./lib/history";
+import { launchOrShowError } from "./lib/launch";
 import { logDebug, logInfo } from "./lib/logger";
 import { getPreferences } from "./lib/preferences";
 import {
@@ -69,11 +70,14 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     // Expand the range and pass to batch download
     const expandedUrls = expandRangeUrl(url);
 
-    await launchCommand({
-      name: "download-batch",
-      type: LaunchType.UserInitiated,
-      context: { urls: expandedUrls, outputDirectory: preferences.outputDirectory },
-    });
+    await launchOrShowError(
+      {
+        name: "download-batch",
+        type: LaunchType.UserInitiated,
+        context: { urls: expandedUrls, outputDirectory: preferences.outputDirectory },
+      },
+      "Could Not Start Batch Download",
+    );
     return;
   }
 
