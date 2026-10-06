@@ -52,23 +52,29 @@ describe("useOpenTarget", () => {
     expect(showToast).not.toHaveBeenCalled();
   });
 
-  it("opens the matched workspace", async () => {
+  it("opens the matched workspace and allows a different destination", async () => {
     const open = vi.fn(async () => undefined);
-
-    await renderHook({
+    const options = {
       requestedWorkspace: "Alpha",
       workspaces,
       status: { isLoading: false, failed: false },
       open,
-    });
+    };
+
+    await renderHook(options);
 
     expect(open).toHaveBeenCalledTimes(1);
     expect(open).toHaveBeenCalledWith("Alpha");
+
+    await renderHook({ ...options, requestedWorkspace: "Beta" });
+
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(open).toHaveBeenLastCalledWith("Beta");
     expect(showToast).not.toHaveBeenCalled();
     expect(showFailureToast).not.toHaveBeenCalled();
   });
 
-  it.each([new Error("Open failed"), "Open failed"])("reports opening failures (%s)", async (error) => {
+  it.each([new Error("Open failed"), "Open failed"])("reports opening failures without retrying (%s)", async (error) => {
     const open = vi.fn(async () => {
       throw error;
     });
@@ -79,14 +85,25 @@ describe("useOpenTarget", () => {
       status: { isLoading: false, failed: false },
       open,
     });
+    await renderHook({
+      requestedWorkspace: "Alpha",
+      workspaces: workspaces.map((workspace) => ({ ...workspace })),
+      status: { isLoading: false, failed: false },
+      open,
+    });
 
+    expect(open).toHaveBeenCalledTimes(1);
     expect(showFailureToast).toHaveBeenCalledTimes(1);
     expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to Open Workspace" });
     expect(showToast).not.toHaveBeenCalled();
   });
 
-  it("does not reopen on a rerender when dependencies are unchanged", async () => {
-    const open = vi.fn(async () => undefined);
+  it("does not reopen when workspace or callback identities change", async () => {
+    let finishOpen: () => void = () => undefined;
+    const pending = new Promise<void>((resolve) => {
+      finishOpen = resolve;
+    });
+    const open = vi.fn(() => pending);
     const options = {
       requestedWorkspace: "Alpha",
       workspaces,
@@ -96,8 +113,25 @@ describe("useOpenTarget", () => {
 
     await renderHook(options);
     await renderHook(options);
+    const refreshed = { ...options, workspaces: workspaces.map((workspace) => ({ ...workspace })) };
+    await renderHook(refreshed);
+
+    const nextOpen = vi.fn(() => pending);
+    await renderHook({ ...refreshed, open: nextOpen });
 
     expect(open).toHaveBeenCalledTimes(1);
+    expect(nextOpen).not.toHaveBeenCalled();
+
+    finishOpen();
+    await pending;
+    await renderHook({
+      ...refreshed,
+      workspaces: workspaces.map((workspace) => ({ ...workspace })),
+      open: nextOpen,
+    });
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(nextOpen).not.toHaveBeenCalled();
     expect(showToast).not.toHaveBeenCalled();
   });
 

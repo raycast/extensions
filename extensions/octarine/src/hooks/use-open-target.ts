@@ -16,6 +16,7 @@ export function useOpenTarget({ requestedWorkspace, workspaces, status, open }: 
   const workspace = findWorkspaceByName(workspaces, requestedWorkspace);
   const workspaceNotFound = Boolean(requestedWorkspace) && !status.isLoading && !status.failed && !workspace;
   const lastToast = useRef("");
+  const lastOpen = useRef("");
 
   useEffect(() => {
     if (!workspaceNotFound || lastToast.current === requestedWorkspace) {
@@ -30,10 +31,11 @@ export function useOpenTarget({ requestedWorkspace, workspaces, status, open }: 
   }, [workspaceNotFound, requestedWorkspace]);
 
   useEffect(() => {
-    if (!workspace) {
+    if (!workspace || lastOpen.current === workspace.path) {
       return;
     }
 
+    lastOpen.current = workspace.path;
     void open(workspace.name).catch((error) => {
       console.error("Failed to open workspace", error);
       void showFailureToast(error, { title: "Failed to Open Workspace" });
