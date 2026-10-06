@@ -5,6 +5,7 @@
 - List Cursor windows across all macOS Spaces and switch to their Space when focusing a window
 - Batch Window menu reads to keep active workspace discovery fast
 - Discover the Window menu regardless of Cursor's language and pass window titles as script arguments
+- Focus the selected window when multiple Cursor windows share the same title
 
 ## [New Feature] - 2026-06-15
 

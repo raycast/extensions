@@ -33,6 +33,7 @@ const WINDOW_MENU_SCRIPT = `
 `;
 
 interface CursorWindow {
+  windowIndex: number;
   rawTitle: string;
   fileName: string;
   workspaceName: string;
@@ -44,11 +45,12 @@ function stripAppSuffix(title: string): string {
   return title.replace(/ — Cursor$/, "");
 }
 
-function parseWindowTitle(rawTitle: string): CursorWindow {
+function parseWindowTitle(rawTitle: string, windowIndex: number): CursorWindow {
   const displayTitle = stripAppSuffix(rawTitle);
   const parts = displayTitle.split(" — ");
   if (parts.length >= 2) {
     return {
+      windowIndex,
       rawTitle,
       fileName: parts[0].trim(),
       workspaceName: parts.slice(1).join(" — ").trim(),
@@ -57,6 +59,7 @@ function parseWindowTitle(rawTitle: string): CursorWindow {
     };
   }
   return {
+    windowIndex,
     rawTitle,
     fileName: "",
     workspaceName: displayTitle.trim(),
@@ -69,14 +72,31 @@ function buildFocusScript(): string {
   return `
     on run argv
       set windowTitle to item 1 of argv
+      set windowIndex to item 2 of argv as integer
       tell application "Cursor" to activate
       set {windowMenuIndex, identifiers} to my getWindowMenuData()
       if windowMenuIndex is 0 then error "No open Cursor windows found"
+      -- Count only window entries: native utility items may change between reads.
+      set currentWindowIndex to 0
+      set menuItemIndex to 0
+      repeat with i from 1 to count identifiers
+        if item i of identifiers contains "makeKeyAndOrderFront:" then
+          set currentWindowIndex to currentWindowIndex + 1
+          if currentWindowIndex is windowIndex then
+            set menuItemIndex to i as integer
+            exit repeat
+          end if
+        end if
+      end repeat
+      if menuItemIndex is 0 then error "Window list changed. Refresh and try again."
       tell application "System Events"
         tell process "Cursor"
+          -- Keep an indexed reference; resolving it would turn it into a name-based reference.
+          set windowMenuItem to a reference to menu item menuItemIndex of menu 1 of menu bar item windowMenuIndex of menu bar 1
+          if name of windowMenuItem is not windowTitle then error "Window list changed. Refresh and try again."
           set frontmost to true
           -- Selecting the native Window menu entry switches to its Space as well.
-          click (first menu item of menu 1 of menu bar item windowMenuIndex of menu bar 1 whose name is windowTitle and value of attribute "AXIdentifier" is "makeKeyAndOrderFront:")
+          click windowMenuItem
         end tell
       end tell
     end run
@@ -99,9 +119,12 @@ function getActiveWindowsScript(): string {
     end tell
     -- Filter the fetched values locally, outside the System Events tell block.
     set output to ""
+    set windowIndex to 0
     repeat with i from 1 to count windowNames
       if item i of identifiers contains "makeKeyAndOrderFront:" then
-        set output to output & item i of windowNames & linefeed
+        -- Keep the window-entry position so identical titles select distinct windows.
+        set windowIndex to windowIndex + 1
+        set output to output & windowIndex & tab & item i of windowNames & linefeed
       end if
     end repeat
     return output
@@ -156,11 +179,13 @@ function useActiveWindows() {
         runAppleScript(getActiveWindowsScript()),
         getRecentEntriesMap(),
       ]);
-      const titles = scriptResult
+      const parsed = scriptResult
         .split("\n")
-        .map((t: string) => t.trim())
-        .filter((t: string) => t.length > 0);
-      const parsed = titles.map(parseWindowTitle);
+        .filter((entry: string) => entry.length > 0)
+        .map((entry: string) => {
+          const separator = entry.indexOf("\t");
+          return parseWindowTitle(entry.slice(separator + 1), Number(entry.slice(0, separator)));
+        });
       const enriched = await Promise.all(
         parsed.map(async (win) => {
           const candidates = recentEntries.get(win.workspaceName) ?? [];
@@ -194,7 +219,7 @@ export default function ActiveWorkspaces() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search active workspaces...">
       <List.EmptyView title="No Active Workspaces" description="Open a Cursor window to see it listed here." />
-      {windows.map((window, index) => {
+      {windows.map((window) => {
         const accessories: List.Item.Accessory[] = [];
         if (window.fileName) {
           accessories.push({ text: window.fileName, tooltip: `Open file: ${window.fileName}` });
@@ -213,7 +238,7 @@ export default function ActiveWorkspaces() {
         const icon = window.workspacePath ? { fileIcon: window.workspacePath } : "cursor-icon.png";
         return (
           <List.Item
-            key={`${window.rawTitle}-${index}`}
+            key={window.windowIndex}
             title={window.workspaceName}
             subtitle={subtitle}
             icon={icon}
@@ -226,7 +251,7 @@ export default function ActiveWorkspaces() {
                   onAction={async () => {
                     try {
                       await closeMainWindow();
-                      await runAppleScript(buildFocusScript(), [window.rawTitle]);
+                      await runAppleScript(buildFocusScript(), [window.rawTitle, String(window.windowIndex)]);
                     } catch (error) {
                       await showToast({
                         title: "Failed to focus window",
