@@ -2078,4 +2078,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://intel.miningbridge.in/api/mcp"],
     },
   },
+  {
+    name: "aitho",
+    title: "Aitho",
+    description:
+      "Rehearse and deliver presentations with your own slides: create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.",
+    icon: "https://aitho.app/icon-512.png",
+    homepage: "https://aitho.app",
+    remoteUrl: "https://present.aitho.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://present.aitho.app/mcp"],
+    },
+  },
 ];
