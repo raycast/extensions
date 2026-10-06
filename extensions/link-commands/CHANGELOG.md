@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Work Toggle Subtitle Only] - {PR_MERGE_DATE}
+## [Work Toggle Subtitle Only] - 2026-10-06
 
 ### Changed
 
