@@ -1968,6 +1968,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "search-fragments",
+    title: "Search Fragments",
+    description:
+      "Resolves half-remembered books, films, songs and people into a cited answer, a shortlist or an explicit no. Built to decline rather than guess. Also checks specific factual claims against current web sources. Remote Streamable HTTP server at https://searchfragments.com/api/mcp; no sign-in, no API key.",
+    icon: "https://searchfragments.com/icon-512.png",
+    homepage: "https://searchfragments.com",
+    remoteUrl: "https://searchfragments.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://searchfragments.com/api/mcp"],
+    },
+  },
+  {
     name: "serato-dj",
     title: "Serato DJ",
     description:
