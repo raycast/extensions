@@ -1,5 +1,10 @@
 # Proton Mail Changelog
 
+## [Bridge Connection Errors] - {PR_MERGE_DATE}
+
+- When Proton Mail Bridge isn't running, show it with actions to open Bridge and try again, instead of an empty folder and a connection error
+- When Bridge rejects the username or password, explain which password to use, with an action to open the extension preferences
+
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
 - "Delete" now moves emails to Trash ("Move to Trash"). In Trash and Drafts it becomes "Delete Permanently", with a confirmation

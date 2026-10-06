@@ -42,12 +42,42 @@ function createClient(): ImapFlow {
   });
 }
 
+export type BridgeErrorReason = "not-running" | "authentication";
+
+// Raised when Bridge can't be reached or rejects the credentials, so the list can say what to do
+// instead of showing an empty folder
+export class BridgeError extends Error {
+  constructor(readonly reason: BridgeErrorReason) {
+    super(
+      reason === "not-running"
+        ? "Proton Mail Bridge isn't running"
+        : "Proton Mail Bridge rejected the username or password",
+    );
+    this.name = "BridgeError";
+  }
+}
+
+function toBridgeError(error: unknown): BridgeError | undefined {
+  const { code, authenticationFailed } = (error ?? {}) as { code?: string; authenticationFailed?: boolean };
+  // Nothing listens on Bridge's port when it isn't running
+  if (code === "ECONNREFUSED") return new BridgeError("not-running");
+  if (authenticationFailed) return new BridgeError("authentication");
+  return undefined;
+}
+
+export function bridgeErrorReason(error: unknown): BridgeErrorReason | undefined {
+  return error instanceof Error && error.name === "BridgeError" ? (error as BridgeError).reason : undefined;
+}
+
 async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promise<T> {
   const client = createClient();
   try {
     await client.connect();
     return await operation(client);
   } catch (error) {
+    const bridgeError = toBridgeError(error);
+    if (bridgeError) throw bridgeError;
+
     const prefs = getPreferenceValues<Preferences>();
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(

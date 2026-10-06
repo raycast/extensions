@@ -28,10 +28,12 @@ import {
   deletesPermanently,
   archiveEmail,
   disconnectClient,
+  bridgeErrorReason,
 } from "./imap-client";
 import { Email, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
 import { AttachmentList } from "./attachment-list";
+import { BridgeErrorView } from "./bridge-error";
 
 interface CommandArguments {
   folder?: string;
@@ -133,9 +135,15 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     data: folders,
     isLoading: foldersLoading,
     error: foldersError,
-  } = useCachedPromise(async () => {
-    return await listFolders();
-  }, []);
+    revalidate: revalidateFolders,
+  } = useCachedPromise(
+    async () => {
+      return await listFolders();
+    },
+    [],
+    // Errors are shown below, not as the default "Failed to fetch latest data" toast
+    { onError: () => undefined },
+  );
   const permanentDelete = deletesPermanently(selectedFolder, folders || []);
 
   // Fetch emails for selected folder
@@ -152,6 +160,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     [selectedFolder, filter],
     {
       keepPreviousData: true,
+      onError: () => undefined,
     },
   );
 
@@ -204,9 +213,16 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     };
   }, []);
 
+  // Bridge not running or rejecting the credentials gets its own screen instead of an empty folder
+  const bridgeError = bridgeErrorReason(emailsError) ?? bridgeErrorReason(foldersError);
+  const retry = () => {
+    revalidateFolders();
+    revalidateEmails();
+  };
+
   // Handle errors
   useEffect(() => {
-    if (foldersError || emailsError) {
+    if ((foldersError || emailsError) && !bridgeError) {
       const error = foldersError || emailsError;
       showToast({
         style: Toast.Style.Failure,
@@ -214,7 +230,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         message: error?.message || "Failed to connect to Proton Mail Bridge",
       });
     }
-  }, [foldersError, emailsError]);
+  }, [foldersError, emailsError, bridgeError]);
 
   const handleFolderChange = useCallback((newFolder: string) => {
     setSelectedFolder(newFolder);
@@ -250,7 +266,9 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         }
       }}
     >
-      {loadedEmails && loadedEmails.length > 0 ? (
+      {bridgeError ? (
+        <BridgeErrorView reason={bridgeError} onRetry={retry} />
+      ) : loadedEmails && loadedEmails.length > 0 ? (
         loadedEmails.map((email, index) => (
           <EmailListItem
             key={email.uid}
