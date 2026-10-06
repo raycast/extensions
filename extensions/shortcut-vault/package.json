@@ -16,28 +16,28 @@
     {
       "name": "search-shortcuts",
       "title": "Search Shortcuts",
-      "description": "Search default and custom shortcuts.",
+      "description": "Search, filter, and copy default and custom keyboard shortcuts.",
       "mode": "view",
       "icon": "icon.png"
     },
     {
       "name": "add-shortcut",
       "title": "Add Shortcut",
-      "description": "Save a custom shortcut.",
+      "description": "Create and save a new custom shortcut.",
       "mode": "view",
       "icon": "icon.png"
     },
     {
       "name": "export-shortcuts",
       "title": "Export Shortcuts",
-      "description": "Export custom shortcuts as JSON.",
+      "description": "Export custom shortcuts to a JSON backup or clipboard.",
       "mode": "view",
       "icon": "icon.png"
     },
     {
       "name": "import-shortcuts",
       "title": "Import Shortcuts",
-      "description": "Import custom shortcuts from JSON.",
+      "description": "Import and restore custom shortcuts from a JSON file.",
       "mode": "view",
       "icon": "icon.png"
     }

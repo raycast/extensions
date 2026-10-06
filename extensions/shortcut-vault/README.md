@@ -31,14 +31,14 @@ Shortcut Vault includes verified default shortcut databases for 18 popular macOS
 ## Commands
 
 ### Search Shortcuts
-The primary search and management experience. Combines bundled default shortcuts and your personal custom shortcuts into a unified list.
+Search, filter, and copy default and custom keyboard shortcuts. Combines bundled default shortcuts and your personal custom shortcuts into a unified list.
 - Press **Enter** on any result to copy the shortcut keys immediately.
 - Use the filter dropdown (`Accessory`) to narrow by **Source** (Default, Custom), **Scope** (Global, App, Webapp), or **Owner App**.
 - Manage custom shortcuts directly from the list: **Edit**, **Duplicate (`⌘D`)**, or **Delete (`⌘Backspace`)**.
 - Press **`⌘N`** to quickly add a new custom shortcut.
 
 ### Add Shortcut
-Save a new custom shortcut with:
+Create and save a new custom shortcut with:
 - Command name
 - Interactive modifier selectors (`⌘`, `⌥`, `⌃`, `⇧`, `fn`)
 - Key name (with live preview)
@@ -47,10 +47,10 @@ Save a new custom shortcut with:
 - Context notes
 
 ### Export Shortcuts
-Export custom shortcuts to a versioned JSON file or copy the JSON payload directly to your clipboard.
+Export custom shortcuts to a JSON backup or clipboard. Allows downloading a clean `.json` file or copying directly for quick sharing.
 
 ### Import Shortcuts
-Import custom shortcuts from a Shortcut Vault JSON file. Validates format, version, schema, and URLs before saving.
+Import and restore custom shortcuts from a JSON file. Validates format, version, schema, and URLs before saving.
 
 ---
 
