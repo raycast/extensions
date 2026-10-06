@@ -140,6 +140,11 @@ class ImageStyleTests(unittest.TestCase):
         extension_dir.mkdir(parents=True, exist_ok=True)
         (extension_dir / "package.json").write_text(json.dumps({"platforms": platforms}))
 
+    @staticmethod
+    def write_commands_manifest(extension_dir: Path, commands: list[dict[str, object]]) -> None:
+        extension_dir.mkdir(parents=True, exist_ok=True)
+        (extension_dir / "package.json").write_text(json.dumps({"commands": commands}))
+
     def test_background_fingerprint_distinguishes_wallpapers(self) -> None:
         first = checker._background_fingerprint(Image.new("RGB", (400, 250), "#202020"))
         same = checker._background_fingerprint(Image.new("RGB", (400, 250), "#202020"))
@@ -246,6 +251,94 @@ class ImageStyleTests(unittest.TestCase):
                 cwd=repo_root,
                 check=False,
             )
+
+    def test_manifest_command_modes_are_extracted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            extension_dir = Path(temp_dir) / "example"
+            self.write_commands_manifest(
+                extension_dir,
+                [
+                    {"name": "one", "mode": "menu-bar"},
+                    {"name": "two", "mode": "view"},
+                    {"name": "ignored"},
+                    "not-a-command",
+                ],
+            )
+
+            self.assertEqual(
+                checker.extension_command_modes(extension_dir),
+                ("menu-bar", "view"),
+            )
+            self.assertTrue(checker.extension_has_menu_bar_command(extension_dir))
+
+    def test_run_passes_menu_bar_flag_per_extension(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            validator = repo_root / "scripts" / "check_raycast_images.py"
+            validator.parent.mkdir()
+            validator.touch()
+
+            extension_dir = repo_root / "extensions" / "menu-bar-ext"
+            self.write_commands_manifest(extension_dir, [{"name": "x", "mode": "menu-bar"}])
+            screenshots = [extension_dir / "metadata" / f"{index}.png" for index in range(2)]
+
+            with (
+                mock.patch.object(
+                    checker,
+                    "validate_extension_structure",
+                    return_value=(screenshots, []),
+                ),
+                mock.patch.object(checker, "validate_image_dimensions", return_value=[]),
+                mock.patch.object(checker, "validate_image_set", return_value=[]),
+                mock.patch.object(checker.subprocess, "run") as run_validator,
+            ):
+                run_validator.return_value.returncode = 0
+                result = checker.run(repo_root, [extension_dir])
+
+            self.assertEqual(result, 0)
+            run_validator.assert_called_once_with(
+                [
+                    sys.executable,
+                    str(validator),
+                    "--has-menu-bar-command",
+                    *(str(screenshot) for screenshot in screenshots),
+                ],
+                cwd=repo_root,
+                check=False,
+            )
+
+    def test_menu_bar_screenshot_fixture_gets_specific_message(self) -> None:
+        fixture = Path(__file__).resolve().parent / "fixtures" / "raycash-1-demo.png"
+        issues = framing_checker.validate(
+            str(fixture),
+            has_menu_bar_command=True,
+        )
+
+        self.assertEqual(issues, [framing_checker.MENU_BAR_SCREENSHOT_MESSAGE])
+
+    def test_edge_touching_image_without_menu_bar_command_gets_general_message(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            image_path = Path(temp_dir) / "edge-touching.png"
+            array = np.zeros((checker.EXPECTED_SIZE[1], checker.EXPECTED_SIZE[0], 3), dtype=np.uint8)
+            array[:, : array.shape[1] // 2] = 0
+            array[:, array.shape[1] // 2 :] = 255
+            Image.fromarray(array, "RGB").save(image_path)
+
+            issues = framing_checker.validate(
+                str(image_path),
+                has_menu_bar_command=False,
+            )
+
+        self.assertEqual(issues, [framing_checker.NO_RAYCAST_WINDOW_MESSAGE])
+
+    def test_valid_window_capture_still_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            image_path = Path(temp_dir) / "valid.png"
+            array = np.full((1250, 2000, 3), 8, dtype=np.uint8)
+            array[150:1100, 250:1750] = 30
+            Image.fromarray(array, "RGB").save(image_path)
+
+            self.assertEqual(framing_checker.validate(str(image_path)), [])
 
 
 if __name__ == "__main__":
