@@ -183,14 +183,20 @@ export default function Command() {
                   <Action
                     title="Open in Form"
                     icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "return" },
+                      Windows: { modifiers: ["ctrl"], key: "s" },
+                    }}
                     onAction={() => openFromSaved(webhook)}
                   />
                   <Action
                     title="Delete Saved Webhook"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "d" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
                     onAction={() => handleDeleteSaved(webhook.id, webhook.name)}
                   />
                 </ActionPanel>
@@ -234,14 +240,20 @@ export default function Command() {
                     <Action
                       title="Edit in Form"
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "return" },
+                        Windows: { modifiers: ["ctrl"], key: "s" },
+                      }}
                       onAction={() => openFromHistory(entry)}
                     />
                     <Action
                       title="Delete Entry"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "d" },
+                        Windows: { modifiers: ["ctrl"], key: "d" },
+                      }}
                       onAction={() => handleDeleteHistory(entry.id)}
                     />
                     <Action
@@ -249,8 +261,8 @@ export default function Command() {
                       icon={Icon.XMarkCircle}
                       style={Action.Style.Destructive}
                       shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "d",
+                        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
                       }}
                       onAction={handleClearHistory}
                     />

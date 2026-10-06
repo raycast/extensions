@@ -11,6 +11,7 @@
 - Saved webhooks: ⌘↵ now opens the webhook in the form
 - Delete shortcut is now ⌘D for saved webhooks and history entries
 - Clear all history shortcut is now ⌘⇧D
+- Windows shortcuts: Ctrl+S opens in form, Ctrl+D deletes, Ctrl+Shift+D clears all history
 
 ## [Initial Version] - 2026-05-06
 
