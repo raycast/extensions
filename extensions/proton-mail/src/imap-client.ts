@@ -123,33 +123,14 @@ export async function fetchEmails(
         return [];
       }
 
-      // Build search query based on filter
-      let searchQuery: { all?: boolean; seen?: boolean } = { all: true };
-      if (filter === "unread") {
-        searchQuery = { seen: false };
-      } else if (filter === "read") {
-        searchQuery = { seen: true };
-      }
-
-      // Search for messages
-      const searchResult = await client.search(searchQuery, { uid: true });
-      if (!searchResult || searchResult.length === 0) {
-        return [];
-      }
-
-      // UIDs follow the order messages were added to the mailbox (Bridge sync, moves), not their date,
-      // so sort on the internal date before picking the page
-      const datedUids: { uid: number; time: number }[] = [];
-      for await (const message of client.fetch(searchResult, { uid: true, internalDate: true }, { uid: true })) {
-        const time = message.internalDate ? new Date(message.internalDate).getTime() : 0;
-        datedUids.push({ uid: message.uid, time: Number.isNaN(time) ? 0 : time });
-      }
-      datedUids.sort((a, b) => b.time - a.time || b.uid - a.uid);
-      let sortedUids = datedUids.map(({ uid }) => uid);
+      // Load More reuses the order computed for the first page instead of fetching every date again
+      const order = await getFolderOrder(client, folderPath, filter, offset === 0);
+      let pageSource = order.uids;
       if (filter === "attachment") {
-        sortedUids = await findUidsWithAttachments(client, sortedUids, offset + limit);
+        await scanForAttachments(client, order, offset + limit);
+        pageSource = order.attachmentMatches;
       }
-      const limitedUids = sortedUids.slice(offset, offset + limit);
+      const limitedUids = pageSource.slice(offset, offset + limit);
       if (limitedUids.length === 0) {
         return [];
       }
@@ -161,6 +142,7 @@ export async function fetchEmails(
         {
           uid: true,
           flags: true,
+          internalDate: true,
           envelope: true,
           bodyStructure: true,
           source: { maxLength: 10000 }, // Fetch partial source for preview
@@ -177,7 +159,8 @@ export async function fetchEmails(
           from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
           to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
           cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-          date: envelope?.date || new Date(),
+          // Same date as the page order: Bridge's internal date is the Proton message time the web app shows
+          date: toDate(message.internalDate) ?? envelope?.date ?? new Date(),
           flags: Array.from(message.flags ?? []),
           hasAttachment,
           preview: extractPreview(message.source),
@@ -187,30 +170,76 @@ export async function fetchEmails(
         emails.push(email);
       }
 
-      // Sort by date descending
-      return emails.sort((a, b) => b.date.getTime() - a.date.getTime());
+      // Sort by date descending, like the page order
+      return emails.sort((a, b) => b.date.getTime() - a.date.getTime() || b.uid - a.uid);
     } finally {
       lock.release();
     }
   });
 }
 
-// IMAP has no standard search key for attachments, so scan body structures newest first,
-// in chunks, until there are enough matches to fill the requested page
-async function findUidsWithAttachments(client: ImapFlow, sortedUids: number[], needed: number): Promise<number[]> {
-  const CHUNK_SIZE = 100;
-  const matches: number[] = [];
+function toDate(value: Date | string | undefined): Date | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
 
-  for (let start = 0; start < sortedUids.length && matches.length < needed; start += CHUNK_SIZE) {
-    const chunk = sortedUids.slice(start, start + CHUNK_SIZE);
+// UIDs of a folder (for one filter) sorted newest first, plus how far the attachment scan has gone
+interface FolderOrder {
+  uids: number[];
+  attachmentMatches: number[];
+  scanned: number;
+}
+
+const folderOrders = new Map<string, FolderOrder>();
+
+async function getFolderOrder(
+  client: ImapFlow,
+  folderPath: string,
+  filter: "unread" | "read" | "attachment" | undefined,
+  fresh: boolean,
+): Promise<FolderOrder> {
+  const key = `${folderPath}\u0000${filter ?? "all"}`;
+  const cached = folderOrders.get(key);
+  if (cached && !fresh) return cached;
+
+  let searchQuery: { all?: boolean; seen?: boolean } = { all: true };
+  if (filter === "unread") {
+    searchQuery = { seen: false };
+  } else if (filter === "read") {
+    searchQuery = { seen: true };
+  }
+  const searchResult = (await client.search(searchQuery, { uid: true })) || [];
+
+  // UIDs follow the order messages were added to the mailbox (Bridge sync, moves), not their date,
+  // so sort on the internal date before picking pages
+  const datedUids: { uid: number; time: number }[] = [];
+  if (searchResult.length > 0) {
+    for await (const message of client.fetch(searchResult, { uid: true, internalDate: true }, { uid: true })) {
+      datedUids.push({ uid: message.uid, time: toDate(message.internalDate)?.getTime() ?? 0 });
+    }
+  }
+  datedUids.sort((a, b) => b.time - a.time || b.uid - a.uid);
+
+  const order = { uids: datedUids.map(({ uid }) => uid), attachmentMatches: [], scanned: 0 };
+  folderOrders.set(key, order);
+  return order;
+}
+
+// IMAP has no standard search key for attachments, so scan body structures newest first, in chunks,
+// until there are enough matches to fill the requested page. The scan resumes where the last page stopped.
+async function scanForAttachments(client: ImapFlow, order: FolderOrder, needed: number): Promise<void> {
+  const CHUNK_SIZE = 100;
+
+  while (order.attachmentMatches.length < needed && order.scanned < order.uids.length) {
+    const chunk = order.uids.slice(order.scanned, order.scanned + CHUNK_SIZE);
     const withAttachment = new Set<number>();
     for await (const message of client.fetch(chunk, { uid: true, bodyStructure: true }, { uid: true })) {
       if (checkHasAttachment(message.bodyStructure)) withAttachment.add(message.uid);
     }
-    matches.push(...chunk.filter((uid) => withAttachment.has(uid)));
+    order.attachmentMatches.push(...chunk.filter((uid) => withAttachment.has(uid)));
+    order.scanned += chunk.length;
   }
-
-  return matches;
 }
 
 function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: unknown[] } | undefined): boolean {
