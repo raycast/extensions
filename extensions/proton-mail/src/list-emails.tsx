@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -61,6 +61,10 @@ export default function Command(props?: LaunchProps<{ arguments: CommandArgument
   }
 
   return <EmailList initialFolder={folder} initialFilter={filter as EmailFilter} />;
+}
+
+function listViewKey(folder: string, filter: EmailFilter, searchText: string): string {
+  return [folder, filter, searchText.trim()].join("\u0000");
 }
 
 interface EmailListProps {
@@ -129,6 +133,12 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
 
+  // Identifies what the list shows, so results that come back after the search (or folder, or filter)
+  // changed are ignored instead of being mixed into the new results
+  const viewKey = listViewKey(selectedFolder, filter, searchText);
+  const viewKeyRef = useRef(viewKey);
+  viewKeyRef.current = viewKey;
+
   // Fetch folders
   const {
     data: folders,
@@ -141,14 +151,21 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
 
   // Fetch emails for selected folder
   const {
-    data: emails,
+    data: firstPage,
     isLoading: emailsLoading,
     error: emailsError,
     revalidate: revalidateEmails,
   } = useCachedPromise(
     async (folder: string, emailFilter: EmailFilter, query: string) => {
       const filterParam = emailFilter === "all" ? undefined : emailFilter;
-      return await fetchEmails(folder, pageSize, filterParam as "unread" | "read" | "attachment" | undefined, 0, query);
+      const emails = await fetchEmails(
+        folder,
+        pageSize,
+        filterParam as "unread" | "read" | "attachment" | undefined,
+        0,
+        query,
+      );
+      return { key: listViewKey(folder, emailFilter, query), emails };
     },
     [selectedFolder, filter, searchText],
     {
@@ -163,18 +180,20 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     setLoadedEmails([]);
   }, [selectedFolder, filter, searchText]);
 
-  // Update loaded emails when initial fetch completes
+  // Update loaded emails when initial fetch completes. keepPreviousData keeps the previous search's page
+  // around while the new one loads, so only use a page that belongs to the current view.
   useEffect(() => {
-    if (emails && currentPage === 1) {
-      setLoadedEmails(emails);
-      setHasMore(emails.length >= pageSize);
+    if (firstPage?.key === viewKey && currentPage === 1) {
+      setLoadedEmails(firstPage.emails);
+      setHasMore(firstPage.emails.length >= pageSize);
     }
-  }, [emails, currentPage, pageSize]);
+  }, [firstPage, viewKey, currentPage, pageSize]);
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
 
     setIsLoadingMore(true);
+    const requestKey = viewKey;
     try {
       const filterParam = filter === "all" ? undefined : filter;
       const offset = currentPage * pageSize;
@@ -185,6 +204,9 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
         offset,
         searchText,
       );
+
+      // The search changed while this page was loading: it belongs to the old results
+      if (viewKeyRef.current !== requestKey) return;
 
       if (moreEmails.length < pageSize) {
         setHasMore(false);
@@ -197,7 +219,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder, searchText]);
+  }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder, searchText, viewKey]);
 
   // Cleanup on unmount
   useEffect(() => {
