@@ -22,14 +22,17 @@ export default function Command() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [saved, setSaved] = useState<SavedWebhook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const [h, s] = await Promise.all([getHistory(), getSaved()]);
       setHistory(h);
       setSaved(s);
+      setLoadError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      setLoadError(message);
       await showToast({ style: Toast.Style.Failure, title: "Failed to load webhooks", message });
     } finally {
       setIsLoading(false);
@@ -77,36 +80,65 @@ export default function Command() {
 
   const handleSendSaved = async (webhook: SavedWebhook) => {
     const { request } = webhook;
+    if (request.bodyMode === "raw" && request.rawJson.trim()) {
+      try {
+        JSON.parse(request.rawJson);
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid JSON in body",
+          message: "Open the webhook in the form to fix its raw JSON",
+        });
+        return;
+      }
+    }
+
     const toast = await showToast({ style: Toast.Style.Animated, title: `Sending "${webhook.name}"…` });
+    let result: Awaited<ReturnType<typeof sendWebhook>> | undefined;
+    let errorMessage: string | undefined;
     try {
-      const result = await sendWebhook(request);
+      result = await sendWebhook(request);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+
+    let historyFailed = false;
+    try {
       await addHistory({
         id: generateId(),
         timestamp: Date.now(),
         request,
-        responseStatus: result.status,
-        responseBody: result.body,
-        responseTime: result.responseTime,
+        ...(result
+          ? { responseStatus: result.status, responseBody: result.body, responseTime: result.responseTime }
+          : { error: errorMessage }),
       });
-      await toast.hide();
-      await refresh();
-      push(
-        <ResponseView
-          status={result.status}
-          body={result.body}
-          responseTime={result.responseTime}
-          request={request}
-          onEditInForm={() => openFromSaved(webhook)}
-        />,
-      );
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      await addHistory({ id: generateId(), timestamp: Date.now(), request, error: message });
-      await refresh();
+    } catch {
+      historyFailed = true;
+    }
+    await refresh();
+
+    if (!result) {
       toast.style = Toast.Style.Failure;
       toast.title = "Request failed";
-      toast.message = message;
+      toast.message = errorMessage;
+      return;
     }
+
+    if (historyFailed) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Sent, but couldn't save to history";
+    } else {
+      await toast.hide();
+    }
+    push(
+      <ResponseView
+        status={result.status}
+        body={result.body}
+        responseTime={result.responseTime}
+        request={request}
+        onEditInForm={() => openFromSaved(webhook)}
+      />,
+    );
   };
 
   const handleDeleteHistory = async (id: string) => {
@@ -275,7 +307,19 @@ export default function Command() {
       )}
 
       {/* ── Empty states ── */}
-      {!isLoading && saved.length === 0 && history.length === 0 && (
+      {!isLoading && loadError && saved.length === 0 && history.length === 0 && (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Couldn't load webhooks"
+          description={`${loadError}\nYour saved webhooks may still exist. Try again.`}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refresh} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isLoading && !loadError && saved.length === 0 && history.length === 0 && (
         <List.EmptyView
           icon={Icon.ArrowRight}
           title="No webhooks yet"

@@ -107,6 +107,8 @@ export async function sendWebhook(
 
   const start = Date.now();
   let response: Response;
+  let responseTime: number;
+  let responseBody = "";
   try {
     response = await fetch(request.url, {
       method: request.method,
@@ -114,22 +116,20 @@ export async function sendWebhook(
       body,
       signal: controller.signal,
     });
+    responseTime = Date.now() - start;
+    try {
+      responseBody = formatJson(await response.text());
+    } catch (err) {
+      if (controller.signal.aborted) throw err;
+      responseBody = "(no body)";
+    }
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
+    if (controller.signal.aborted) {
       throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
     }
     throw err;
   } finally {
     clearTimeout(timeoutId);
-  }
-
-  const responseTime = Date.now() - start;
-  let responseBody = "";
-  try {
-    const text = await response.text();
-    responseBody = formatJson(text);
-  } catch {
-    responseBody = "(no body)";
   }
 
   return { status: response.status, body: responseBody, responseTime };

@@ -1,6 +1,6 @@
 # Webhook Sender Changelog
 
-## [Quick Send & Shortcuts] - {PR_MERGED}
+## [Quick Send & Shortcuts] - {PR_MERGE_DATE}
 
 ### Added
 
