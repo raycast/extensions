@@ -10,6 +10,8 @@ export type OllamaModel = {
   model: string;
   size: number;
   modified_at?: string;
+  remote_model?: string;
+  remote_host?: string;
   details?: {
     parameter_size?: string;
     quantization_level?: string;
@@ -117,11 +119,14 @@ export function filterLocalModels(models: OllamaModel[]): OllamaModel[] {
   return models
     .filter((model) => {
       const name = model.name.toLowerCase();
+      const isCloudModel =
+        /(?:^|[:-])cloud$/.test(name) ||
+        Boolean(model.remote_model || model.remote_host);
       const isEmbeddingModel =
         /(?:^|[-_:/])(embed|embedding|all-minilm|bge|mxbai)(?:[-_:/]|$)/i.test(
           name,
         );
-      return model.size > 0 && !name.endsWith(":cloud") && !isEmbeddingModel;
+      return model.size > 0 && !isCloudModel && !isEmbeddingModel;
     })
     .sort(
       (first, second) =>
