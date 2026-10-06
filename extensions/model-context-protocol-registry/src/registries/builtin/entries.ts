@@ -2065,4 +2065,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
     },
   },
+  {
+    name: "miningbridge",
+    title: "MiningBridge Intelligence",
+    description:
+      "Critical-mineral and rare-earth trade intelligence: commodity snapshots, UN Comtrade trade flows, supplier screening, supply-risk scores, evidence search and MiningBridge market reports. Nine read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with your MiningBridge account (dynamic client registration and PKCE), no API key to paste. Free plan with headline figures; paid plans add full reports. Figures are screening magnitudes, not investment advice.",
+    icon: "https://intel.miningbridge.in/icon.png",
+    homepage: "https://intel.miningbridge.in/connect",
+    remoteUrl: "https://intel.miningbridge.in/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://intel.miningbridge.in/api/mcp"],
+    },
+  },
 ];
