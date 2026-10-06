@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { sharedVaultTooltip, withSharing } from "./vault-sharing";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { VaultSharing } from "./types";
 
 test("the tooltip says who shared the vault, with the user's role on vaults shared with them", () => {
@@ -13,39 +13,34 @@ test("the tooltip says who shared the vault, with the user's role on vaults shar
   assert.equal(sharedVaultTooltip({ role: "viewer", isShared: true }), "Shared with you · Viewer");
 });
 
-test("vaults get their sharing, or keep what was known before when it's missing", () => {
-  const vaults = [
-    { shareId: "personal", name: "Personal" },
-    { shareId: "work", name: "Work" },
-    { shareId: "family", name: "Family" },
-  ];
-  const previous = [
-    { shareId: "work", name: "Work", role: "owner" as const, isShared: true },
-    { shareId: "family", name: "Family", role: "viewer" as const, isShared: true },
-  ];
-  const sharing = new Map<string, VaultSharing>([
+test("listed sharing keeps what was saved only where members couldn't be counted, for the same role", () => {
+  const saved = {
+    work: { role: "owner", isShared: true },
+    family: { role: "viewer", isShared: true },
+    deleted: { role: "owner", isShared: true },
+  } satisfies Record<string, VaultSharing>;
+  const fresh = new Map<string, VaultSharing>([
     ["personal", { role: "owner", isShared: false }],
-    // The members of this vault couldn't be counted.
+    // The members of these two vaults couldn't be counted; the user now owns the second one.
     ["work", { role: "owner" }],
+    ["family", { role: "owner" }],
   ]);
 
-  assert.deepEqual(withSharing(vaults, sharing, previous), [
-    { shareId: "personal", name: "Personal", role: "owner", isShared: false },
-    { shareId: "work", name: "Work", role: "owner", isShared: true },
-    { shareId: "family", name: "Family", role: "viewer", isShared: true },
-  ]);
-  assert.deepEqual(withSharing(vaults, undefined, previous), [
-    { shareId: "personal", name: "Personal", role: undefined, isShared: undefined },
-    ...previous,
-  ]);
+  assert.deepEqual(mergeSharing(fresh, saved), {
+    personal: { role: "owner", isShared: false },
+    work: { role: "owner", isShared: true },
+    family: { role: "owner", isShared: undefined },
+  });
 });
 
-test("a vault whose role changed doesn't keep whether it was shared", () => {
-  const previous = [{ shareId: "family", name: "Family", role: "viewer" as const, isShared: true }];
-  // The user now owns the vault, and its members couldn't be counted.
-  const sharing = new Map<string, VaultSharing>([["family", { role: "owner" }]]);
+test("vaults get their sharing when it's known", () => {
+  const vaults = [
+    { shareId: "personal", name: "Personal" },
+    { shareId: "family", name: "Family" },
+  ];
 
-  const [family] = withSharing([{ shareId: "family", name: "Family" }], sharing, previous);
-  assert.deepEqual(family, { shareId: "family", name: "Family", role: "owner", isShared: undefined });
-  assert.equal(sharedVaultTooltip(family), undefined);
+  assert.deepEqual(withSharing(vaults, { family: { role: "viewer", isShared: true } }), [
+    { shareId: "personal", name: "Personal" },
+    { shareId: "family", name: "Family", role: "viewer", isShared: true },
+  ]);
 });

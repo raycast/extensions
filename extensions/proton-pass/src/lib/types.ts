@@ -21,6 +21,9 @@ export interface VaultSharing {
   isShared?: boolean;
 }
 
+/** How each vault is shared, by share ID, as saved by List Vaults. */
+export type SavedSharing = Record<string, VaultSharing>;
+
 export interface Item {
   shareId: string;
   itemId: string;

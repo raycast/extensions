@@ -10,7 +10,6 @@ import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
-import { withSharing } from "./vault-sharing";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -192,14 +191,9 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
       // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
       if (isComplete && isLatest()) {
-        await listingSaves.save(listing, async () => {
-          // pass-cli's vault list has no sharing: the saved vaults keep what List Vaults found.
-          const saved = await getCachedVaults();
-          await Promise.all([
-            setCachedItems(nextItems, true),
-            setCachedVaults(withSharing(freshVaults, undefined, saved?.data)),
-          ]);
-        });
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
+        );
       }
       if (!isLatest()) return;
       if (failures.length > 0) {

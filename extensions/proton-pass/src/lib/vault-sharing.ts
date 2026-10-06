@@ -1,19 +1,21 @@
-import { Vault, VaultSharing } from "./types";
+import { SavedSharing, Vault, VaultSharing } from "./types";
 
 /**
- * Adds how each vault is shared. A vault missing from `sharing`, or whose sharing isn't fully known, keeps what
- * `previous` knew, e.g. the cached vaults when sharing couldn't be listed, or when pass-cli's vault list is saved.
+ * Sharing to show and save after listing it: a vault whose members couldn't be counted keeps whether it was
+ * shared, unless the user's role on it changed since. Vaults that are gone are dropped.
  */
-export function withSharing(vaults: Vault[], sharing: Map<string, VaultSharing> | undefined, previous: Vault[] = []) {
-  const known = new Map(previous.map((vault) => [vault.shareId, vault]));
-  return vaults.map((vault): Vault => {
-    const fresh = sharing?.get(vault.shareId);
-    const before = known.get(vault.shareId);
-    const role = fresh?.role ?? vault.role ?? before?.role;
-    // Whether a vault is shared was found for a role: after a role change, it's unknown until counted again.
-    const isShared = fresh?.isShared ?? vault.isShared ?? (before?.role === role ? before?.isShared : undefined);
-    return { ...vault, role, isShared };
-  });
+export function mergeSharing(fresh: Map<string, VaultSharing>, saved: SavedSharing = {}): SavedSharing {
+  return Object.fromEntries(
+    Array.from(fresh, ([shareId, { role, isShared }]) => {
+      const before = saved[shareId];
+      return [shareId, { role, isShared: isShared ?? (before?.role === role ? before.isShared : undefined) }];
+    }),
+  );
+}
+
+/** Adds how each vault is shared, when known. */
+export function withSharing(vaults: Vault[], sharing: SavedSharing): Vault[] {
+  return vaults.map((vault) => ({ ...vault, ...sharing[vault.shareId] }));
 }
 
 /** Tooltip of the icon marking a shared vault, or undefined when the vault isn't known to be shared. */
