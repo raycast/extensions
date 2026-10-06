@@ -8,10 +8,11 @@
 
 ### Changed
 
-- Saved webhooks: ⌘↵ now opens the webhook in the form
-- Delete shortcut is now ⌘D for saved webhooks and history entries
-- Clear all history shortcut is now ⌘⇧D
-- Windows shortcuts: Ctrl+S opens in form, Ctrl+D deletes, Ctrl+Shift+D clears all history
+- Open in Form and Edit in Form now use the common Edit shortcut (⌘E / Ctrl+E)
+- Delete for saved webhooks, history entries and form fields now uses the common Remove shortcut (Ctrl+X)
+- Clear all history now uses the common Remove All shortcut (Ctrl+Shift+X)
+- Form and response shortcuts now work on both macOS and Windows: Save, Add Field, Copy Response (⌘⇧C / Ctrl+Shift+C), Copy Request Body (⌘⌥C / Ctrl+Alt+C)
+- Saving a webhook now checks that raw JSON is valid
 
 ## [Initial Version] - 2026-05-06
 

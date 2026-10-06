@@ -4,13 +4,14 @@ import {
   Alert,
   Color,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HistoryEntry, SavedWebhook } from "./types";
 import { addHistory, clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
 import { WebhookForm } from "./WebhookForm";
@@ -22,6 +23,7 @@ export default function Command() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [saved, setSaved] = useState<SavedWebhook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isSending = useRef(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -79,6 +81,7 @@ export default function Command() {
   };
 
   const handleSendSaved = async (webhook: SavedWebhook) => {
+    if (isSending.current) return;
     const { request } = webhook;
     if (request.bodyMode === "raw" && request.rawJson.trim()) {
       try {
@@ -93,52 +96,57 @@ export default function Command() {
       }
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Sending "${webhook.name}"…` });
-    let result: Awaited<ReturnType<typeof sendWebhook>> | undefined;
-    let errorMessage: string | undefined;
+    isSending.current = true;
     try {
-      result = await sendWebhook(request);
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-    }
+      const toast = await showToast({ style: Toast.Style.Animated, title: `Sending "${webhook.name}"…` });
+      let result: Awaited<ReturnType<typeof sendWebhook>> | undefined;
+      let errorMessage: string | undefined;
+      try {
+        result = await sendWebhook(request);
+      } catch (err) {
+        errorMessage = err instanceof Error ? err.message : String(err);
+      }
 
-    let historyFailed = false;
-    try {
-      await addHistory({
-        id: generateId(),
-        timestamp: Date.now(),
-        request,
-        ...(result
-          ? { responseStatus: result.status, responseBody: result.body, responseTime: result.responseTime }
-          : { error: errorMessage }),
-      });
-    } catch {
-      historyFailed = true;
-    }
-    await refresh();
+      let historyFailed = false;
+      try {
+        await addHistory({
+          id: generateId(),
+          timestamp: Date.now(),
+          request,
+          ...(result
+            ? { responseStatus: result.status, responseBody: result.body, responseTime: result.responseTime }
+            : { error: errorMessage }),
+        });
+      } catch {
+        historyFailed = true;
+      }
+      await refresh();
 
-    if (!result) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Request failed";
-      toast.message = errorMessage;
-      return;
-    }
+      if (!result) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Request failed";
+        toast.message = errorMessage;
+        return;
+      }
 
-    if (historyFailed) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Sent, but couldn't save to history";
-    } else {
-      await toast.hide();
+      if (historyFailed) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Sent, but couldn't save to history";
+      } else {
+        await toast.hide();
+      }
+      push(
+        <ResponseView
+          status={result.status}
+          body={result.body}
+          responseTime={result.responseTime}
+          request={request}
+          onEditInForm={() => openFromSaved(webhook)}
+        />,
+      );
+    } finally {
+      isSending.current = false;
     }
-    push(
-      <ResponseView
-        status={result.status}
-        body={result.body}
-        responseTime={result.responseTime}
-        request={request}
-        onEditInForm={() => openFromSaved(webhook)}
-      />,
-    );
   };
 
   const handleDeleteHistory = async (id: string) => {
@@ -215,20 +223,14 @@ export default function Command() {
                   <Action
                     title="Open in Form"
                     icon={Icon.Pencil}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "return" },
-                      Windows: { modifiers: ["ctrl"], key: "s" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     onAction={() => openFromSaved(webhook)}
                   />
                   <Action
                     title="Delete Saved Webhook"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "d" },
-                      Windows: { modifiers: ["ctrl"], key: "d" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => handleDeleteSaved(webhook.id, webhook.name)}
                   />
                 </ActionPanel>
@@ -272,30 +274,21 @@ export default function Command() {
                     <Action
                       title="Edit in Form"
                       icon={Icon.Pencil}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "return" },
-                        Windows: { modifiers: ["ctrl"], key: "s" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                       onAction={() => openFromHistory(entry)}
                     />
                     <Action
                       title="Delete Entry"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "d" },
-                        Windows: { modifiers: ["ctrl"], key: "d" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => handleDeleteHistory(entry.id)}
                     />
                     <Action
                       title="Clear All History"
                       icon={Icon.XMarkCircle}
                       style={Action.Style.Destructive}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
                       onAction={handleClearHistory}
                     />
                   </ActionPanel>
