@@ -1,0 +1,15 @@
+{
+  "source": "native/JSONEditor.swift",
+  "sourceSha256": "b7a15193778d5923a15954da84b0d80dd8c5487dfca52a344d6165b4c350efc0",
+  "executableSha256": "95e1e55a8c5e77aaddf72c7184ff594c53205e85f16463695769456e08054811",
+  "editorSha256": "eab9d423c04d6cf28d257cbf85ec495d0515fc1ccff4099bca6c205b303af308",
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "minimumMacOS": "13.0",
+  "sdk": "26.0",
+  "compiler": "Apple Swift version 6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)",
+  "signing": "ad-hoc",
+  "rebuild": "npm ci && npm run build:editor"
+}
