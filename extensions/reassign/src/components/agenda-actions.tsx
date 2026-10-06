@@ -102,10 +102,16 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
 async function callBatch(ops: WriteOp[]): Promise<BatchReceipt> {
   const result = await writeEvents(ops);
   if (!result.ok) throw result;
-  // A 2xx with a rejected row must roll back the optimistic update, so throw
-  // an ApiError the caller already handles.
+  // A 2xx can still carry a rejected row. It is a failure only when no write
+  // landed. The contract marks a failed read-back of a landed row as `internal`,
+  // and a receipt with an `undoToken` or an `ok` row represents a landed write.
   const failed = batchFailure(result.data);
-  if (failed) throw rowError(failed);
+  if (failed) {
+    const landed =
+      !!result.data.undoToken ||
+      !!result.data.results?.some((row) => row.status === "ok" || row.error?.code === "internal");
+    if (!landed) throw rowError(failed);
+  }
   return result.data;
 }
 

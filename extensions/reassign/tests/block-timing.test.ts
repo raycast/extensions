@@ -56,6 +56,19 @@ it("rejects reversed ranges, date-only ends, invalid durations and overlong bloc
 it.each(["1h30", "1 hour 30 minutes", "1h 30m", "90 minutes"])("accepts readable duration %s", (duration) => {
   expect(resolveBlockTiming({ start, end: null, duration })).toMatchObject({ kind: "exact", minutes: 90 });
 });
+// The Duration field reads "1h 30" as 90 min. The capture fix for "1h 12 issues" must not drop these minutes.
+it.each([
+  ["1h 30", 90],
+  ["1 hour 30", 90],
+  ["2h 15", 135],
+  ["1hr 45", 105],
+  ["1h 30.", 90],
+  ["1h30", 90],
+  ["90m", 90],
+  ["2 hours", 120],
+])("keeps the minutes of the Duration field value %s", (duration, minutes) => {
+  expect(resolveBlockTiming({ start, end: null, duration })).toMatchObject({ kind: "exact", minutes });
+});
 it("refuses a block shorter than the 5-minute server minimum", () => {
   expect(() => resolveBlockTiming({ start, end: null, duration: "4m" })).toThrow(/at least 5 minutes/);
   expect(resolveBlockTiming({ start, end: null, duration: "5m" })).toMatchObject({ kind: "exact", minutes: 5 });

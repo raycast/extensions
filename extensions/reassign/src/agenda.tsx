@@ -154,7 +154,11 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
   const todayIso = data?.ok ? nowWallClock(data.data.now).date : todayISO();
   const dayLabel = relativeDayLabel(date, todayIso);
 
-  if (data && !data.ok) return refusalView(data, revalidate);
+  // Act on the last settled verdict: a cached refusal on mount can be stale, and a
+  // shown refusal stays mounted during its own revalidate, so ReauthView does not sign in again.
+  const refused = useRef(false);
+  if (!isLoading) refused.current = Boolean(data && !data.ok);
+  if (data && !data.ok && refused.current) return refusalView(data, revalidate);
 
   const model = data?.ok ? buildTodayModel(data.data, date) : null;
 
@@ -389,7 +393,11 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
   });
   const { calendars, defaultId: defaultCalendarId } = useCalendars();
 
-  if (data && !data.ok) return refusalView(data, revalidate);
+  // Act on the last settled verdict: a cached refusal on mount can be stale, and a
+  // shown refusal stays mounted during its own revalidate, so ReauthView does not sign in again.
+  const refused = useRef(false);
+  if (!isLoading) refused.current = Boolean(data && !data.ok);
+  if (data && !data.ok && refused.current) return refusalView(data, revalidate);
 
   const todayIso = data?.ok ? data.todayIso : todayISO();
   const days = data?.ok ? data.days : [];

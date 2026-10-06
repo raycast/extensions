@@ -104,8 +104,16 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // A stalled socket must still not hang the toast.
 const REQUEST_TIMEOUT_MS = 65_000;
 
-/** Core request with token, 401-refresh-once, 503-retry-once, 429-no-retry. */
-async function request<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<ApiResult<T>> {
+/**
+ * Core request with token, 401-refresh-once, 503-retry-once, 429-no-retry.
+ * A POST counts as a write unless the caller sets `writes: false` (a preview).
+ */
+async function request<T>(
+  method: "GET" | "POST",
+  path: string,
+  body?: unknown,
+  { writes = method === "POST" }: { writes?: boolean } = {},
+): Promise<ApiResult<T>> {
   let token: string;
   try {
     token = await getAccessToken();
@@ -129,7 +137,7 @@ async function request<T>(method: "GET" | "POST", path: string, body?: unknown):
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
     } catch (error) {
-      return fetchFailure(method, error);
+      return fetchFailure(writes, error);
     }
 
     // 401 → refresh the token once, then retry once.
@@ -144,12 +152,12 @@ async function request<T>(method: "GET" | "POST", path: string, body?: unknown):
     }
 
     if (response.ok) {
-      // The timeout also covers the body read. A POST that fails here has landed.
+      // The timeout also covers the body read. A write that fails here has landed.
       let text: string;
       try {
         text = await response.text();
       } catch (error) {
-        return fetchFailure(method, error);
+        return bodyReadFailure(writes, error);
       }
       const data = parseJson(text);
       // Only a 204 has no body. An empty or non-JSON 2xx (a proxy or a captive
@@ -179,14 +187,26 @@ async function request<T>(method: "GET" | "POST", path: string, body?: unknown):
   }
 }
 
-/** A fetch or body read that failed. A timed-out write can have landed, so never retry it. */
-function fetchFailure(method: "GET" | "POST", error: unknown): ApiError {
-  if (error instanceof Error && error.name === "TimeoutError") {
-    const landed =
-      method === "POST" ? " The change can have been saved. Check it before you try again." : " Try again.";
-    return { ok: false, code: "network", message: `Reassign did not answer in time.${landed}` };
+const MAY_HAVE_SAVED = " The change can have been saved. Check it before you try again.";
+
+const isTimeout = (error: unknown) => error instanceof Error && error.name === "TimeoutError";
+
+/** The initial fetch threw. The request may not have reached the server, so only a timed-out write warns. */
+function fetchFailure(writes: boolean, error: unknown): ApiError {
+  if (isTimeout(error)) {
+    return {
+      ok: false,
+      code: "network",
+      message: `Reassign did not answer in time.${writes ? MAY_HAVE_SAVED : " Try again."}`,
+    };
   }
   return { ok: false, code: "network", message: asMessage(error) };
+}
+
+/** A body read on an OK response that failed. 2xx headers arrived, so a write has landed: always warn. */
+function bodyReadFailure(writes: boolean, error: unknown): ApiError {
+  if (!writes || isTimeout(error)) return fetchFailure(writes, error);
+  return { ok: false, code: "network", message: asMessage(error) + MAY_HAVE_SAVED };
 }
 
 /** Map a getAccessToken failure. A busy session lock is local, not a network fault. */
@@ -374,7 +394,9 @@ export interface PlanRequest extends Pick<EventFields, "calendarId" | "mirrorCal
 }
 
 export function planSchedule(requests: PlanRequest[]): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>("POST", PATHS.schedulePlan, { requests });
+  // Only `autoCommitBest: false` is a sure preview. An unset flag can book, so it keeps the warning.
+  const writes = requests.some((r) => r.autoCommitBest !== false);
+  return request<Record<string, unknown>>("POST", PATHS.schedulePlan, { requests }, { writes });
 }
 
 export function confirmSchedule(
@@ -436,5 +458,5 @@ export function sendFeedback(message: string, kind: FeedbackKind = "other"): Pro
 
 /** Ask Reassign AI for a preview only. Saving uses the normal reviewed form. */
 export function previewBlock(input: string): Promise<ApiResult<import("./ai-draft").AiPreview>> {
-  return request("POST", "/command", { input, mode: "line", apply: false });
+  return request("POST", "/command", { input, mode: "line", apply: false }, { writes: false });
 }

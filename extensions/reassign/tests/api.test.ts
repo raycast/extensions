@@ -11,6 +11,7 @@ import {
   getSchedule,
   getScheduleWithBacklog,
   planSchedule,
+  previewBlock,
   rebaseOnSeries,
   sendFeedback,
   writeEvents,
@@ -294,4 +295,93 @@ it("reports a body-read timeout on a POST as a possible save", async () => {
     code: "network",
     message: "Reassign did not answer in time. The change can have been saved. Check it before you try again.",
   });
+});
+
+// 2xx headers arrived, so the write landed even if the body stream then drops with a
+// non-timeout transport error (a socket close, a TLS truncation). Surface the warning so a
+// manual retry of a non-idempotent create/shift does not silently double the write.
+it("reports a non-timeout body-read failure on a POST as a possible save", async () => {
+  const body = new ReadableStream({
+    start(controller) {
+      controller.error(new Error("The socket connection was closed."));
+    },
+  });
+  fetchMock.mockResolvedValue(new Response(body, { status: 200 }));
+  expect(await writeEvents([{ op: "create", start: "2026-09-21T09:00", end: "2026-09-21T10:00", name: "x" }])).toEqual({
+    ok: false,
+    code: "network",
+    message: "The socket connection was closed. The change can have been saved. Check it before you try again.",
+  });
+});
+
+// A read has no write to land, so a non-timeout body-read failure stays the raw error.
+it("does not warn about a save on a non-timeout body-read failure on a GET", async () => {
+  const body = new ReadableStream({
+    start(controller) {
+      controller.error(new Error("The socket connection was closed."));
+    },
+  });
+  fetchMock.mockResolvedValue(new Response(body, { status: 200 }));
+  expect(await getSchedule("2026-09-21")).toEqual({
+    ok: false,
+    code: "network",
+    message: "The socket connection was closed.",
+  });
+});
+
+// An initial fetch that throws has not delivered response headers, so a plain write is
+// treated as not landed unless it timed out (where the request can already be in flight).
+it("does not warn about a save on a non-timeout initial-fetch throw on a POST", async () => {
+  fetchMock.mockRejectedValueOnce(new Error("The socket connection was closed."));
+  expect(await writeEvents([{ op: "create", start: "2026-09-21T09:00", end: "2026-09-21T10:00", name: "x" }])).toEqual({
+    ok: false,
+    code: "network",
+    message: "The socket connection was closed.",
+  });
+});
+
+const timeoutError = () => Object.assign(new Error("The operation timed out."), { name: "TimeoutError" });
+const failedBody = (error: Error) =>
+  new Response(
+    new ReadableStream({
+      start(controller) {
+        controller.error(error);
+      },
+    }),
+    { status: 200 },
+  );
+const failures: [string, () => void, string][] = [
+  ["a fetch timeout", () => fetchMock.mockRejectedValue(timeoutError()), "Reassign did not answer in time."],
+  [
+    "a body-read timeout",
+    () => fetchMock.mockImplementation(async () => failedBody(timeoutError())),
+    "Reassign did not answer in time.",
+  ],
+  [
+    "a body-read socket close",
+    () => fetchMock.mockImplementation(async () => failedBody(new Error("The socket connection was closed."))),
+    "The socket connection was closed.",
+  ],
+];
+const preview = { name: "Focus", durationMinutes: 60, requestId: "a", autoCommitBest: false };
+
+// A preview changes nothing on the server, so "can have been saved" is false there.
+it.each(failures)("does not warn about a save on %s for a preview", async (_label, fail, base) => {
+  fail();
+  const message = base.endsWith("in time.") ? `${base} Try again.` : base;
+  expect(await planSchedule([preview])).toEqual({ ok: false, code: "network", message });
+  expect(await previewBlock("deep work tomorrow 9am")).toEqual({ ok: false, code: "network", message });
+  // No new retry: one fetch for each call.
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+});
+
+// An unset or true autoCommitBest can book a slot, so the plan keeps the warning.
+it.each(failures)("warns about a save on %s for a plan that can book", async (_label, fail, base) => {
+  fail();
+  const message = `${base} The change can have been saved. Check it before you try again.`;
+  for (const autoCommitBest of [undefined, true]) {
+    const plans = [preview, { ...preview, requestId: "b", autoCommitBest }];
+    expect(await planSchedule(plans)).toEqual({ ok: false, code: "network", message });
+  }
+  expect(fetchMock).toHaveBeenCalledTimes(2);
 });

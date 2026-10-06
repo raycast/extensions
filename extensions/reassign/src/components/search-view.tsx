@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SearchEvent, searchEvents } from "../lib/api";
 import { needsSignIn } from "../lib/envelope";
 import { datePart, formatRange, relativeDayLabel, todayISO } from "../lib/format";
@@ -35,7 +35,12 @@ export function SearchView(props: { initialQuery?: string }) {
   const fresh = data && data.query === query ? data.result : undefined;
   const failure = fresh && !fresh.ok ? fresh : undefined;
   // Only a sign-in or Pro refusal leaves the search. Other errors keep the query editable.
-  if (failure && (needsSignIn(failure.code) || failure.code === "permission")) return refusalView(failure, revalidate);
+  const gate = failure && (needsSignIn(failure.code) || failure.code === "permission") ? failure : undefined;
+  // Act on the last settled verdict. A cached refusal on mount can be stale, and a
+  // shown gate must stay mounted during its own revalidate, or ReauthView signs in again.
+  const refused = useRef(false);
+  if (!isLoading) refused.current = Boolean(gate);
+  if (gate && refused.current) return refusalView(gate, revalidate);
 
   const events = query.length === 0 || !data?.result?.ok ? [] : data.result.data.events;
   // `fresh` is undefined until the *current* query has a settled result, and

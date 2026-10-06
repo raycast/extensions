@@ -100,6 +100,40 @@ it.each([
   },
 );
 
+// A spaced bare integer before more words is part of the title, not minutes.
+it.each([
+  ["review 1h 12 issues", "review 12 issues", 60],
+  ["review 2h 3 PRs", "review 3 PRs", 120],
+  ["review 1h 12 issues tomorrow", "review 12 issues", 60],
+])("keeps a title integer after the duration for %s", (input, name, durationMinutes) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "flexible", name, durationMinutes });
+});
+
+// At the end of the text or before a date or time, the integer stays minutes.
+it.each([
+  ["gym 1h 30", "gym", 90, false],
+  ["gym 1h 30.", "gym", 90, false],
+  ["gym 1h 30 tomorrow", "gym", 90, true],
+  ["gym 1h 30 in the evening", "gym", 90, false],
+  ["gym 1h 30m", "gym", 90, false],
+  ["focus 1h30.", "focus", 90, false],
+  ["sync 1h 5m", "sync", 65, false],
+  ["run 1h5", "run", 65, false],
+  ["write 1h 30 min", "write", 90, false],
+  ["writing tomorrow for 90m", "writing", 90, true],
+])("keeps the minutes for %s", (input, name, durationMinutes, dateExplicit) => {
+  expect(parseCapture(input, ref)).toMatchObject({ kind: "flexible", name, durationMinutes, dateExplicit });
+});
+
+it("keeps the minutes before a clock time", () => {
+  expect(parseCapture("gym 1h 30 at 6pm", ref)).toMatchObject({
+    kind: "exact",
+    name: "gym",
+    start: "18:00",
+    durationMinutes: 90,
+  });
+});
+
 // Single-digit minutes stay part of the duration ("1h 5m" is 65 min, not 60).
 it("keeps single-digit minutes in a flexible capture", () => {
   expect(parseCapture("lunch 1h 5m", ref)).toMatchObject({ kind: "flexible", name: "lunch", durationMinutes: 65 });

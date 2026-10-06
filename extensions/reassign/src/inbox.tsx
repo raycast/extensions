@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, launchCommand, LaunchType, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AgendaNavActions } from "./components/agenda-actions";
 import { BacklogScheduleForm } from "./components/backlog-schedule-form";
 import { refusalView } from "./components/states";
@@ -38,7 +38,11 @@ function Command() {
     return result.ok;
   }
 
-  if (data && !data.ok) return refusalView(data, revalidate);
+  // Act on the last settled verdict: a cached refusal on mount can be stale, and a
+  // shown refusal stays mounted during its own revalidate, so ReauthView does not sign in again.
+  const refused = useRef(false);
+  if (!isLoading) refused.current = Boolean(data && !data.ok);
+  if (data && !data.ok && refused.current) return refusalView(data, revalidate);
 
   const todayIso = data?.ok ? nowWallClock(data.data.now).date : todayISO();
   const areas = data?.ok ? (data.data.areas ?? []) : [];

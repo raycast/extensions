@@ -591,6 +591,80 @@ function renderAgendaMutations(revalidate: () => void) {
   return useAgendaMutations({ revalidate });
 }
 
+// callBatch (the agenda batch handler) mirrors runMutation's `landed` rule: a
+// 2xx batch whose writes landed is a success even when a read-back row comes
+// back `error / internal`. Before the fix, callBatch threw on any rejected
+// row, so `apply`'s success/Undo branch was unreachable for a landed write and
+// the user saw a failure toast with no Undo affordance for that mutation.
+it("a landed agenda write with a failed read-back row keeps success and Undo", async () => {
+  const revalidate = vi.fn();
+  let hooks = renderAgendaMutations(revalidate);
+  const readBack = { index: 0, status: "error", error: { code: "internal", message: "Read-back failed" } };
+  mock.result = { ok: true, data: { results: [readBack], undoToken: "u1" } };
+  expect(await hooks.mutate("Saving", "Saved", [{ op: "update", id: "id", name: "new" }])).toBe(true);
+  hooks = renderAgendaMutations(revalidate);
+  expect(hooks.lastUndoToken).toBe("u1");
+  expect(mock.toast).toMatchObject({ style: "success", title: "Saved" });
+  expect((mock.toast as { primaryAction?: unknown }).primaryAction).toBeDefined();
+  expect(mock.undo).not.toHaveBeenCalled();
+});
+
+it("an ok row alongside an error row counts as a landed agenda write", async () => {
+  const revalidate = vi.fn();
+  const hooks = renderAgendaMutations(revalidate);
+  mock.result = { ok: true, data: { results: [okRow, { ...errorRow, index: 1 }] } };
+  expect(await hooks.mutate("Shifting", "Shifted", [{ op: "shift", id: "id", byMinutes: 15 }])).toBe(true);
+  expect(mock.toast).toMatchObject({ style: "success", title: "Shifted" });
+  expect((mock.toast as { primaryAction?: unknown }).primaryAction).toBeUndefined();
+  expect(revalidate).toHaveBeenCalledTimes(1);
+});
+
+it("a failed read-back row with no undo receipt still counts as landed on the agenda path", async () => {
+  const revalidate = vi.fn();
+  const hooks = renderAgendaMutations(revalidate);
+  const readBack = { index: 0, status: "error", error: { code: "internal", message: "Read-back failed" } };
+  mock.result = { ok: true, data: { results: [readBack] } };
+  expect(await hooks.mutate("Saving", "Saved", [{ op: "update", id: "id", name: "new" }])).toBe(true);
+  expect(mock.toast).toMatchObject({ style: "success", title: "Saved" });
+  expect((mock.toast as { primaryAction?: unknown }).primaryAction).toBeUndefined();
+});
+
+it("a true no-op rejection still rolls the agenda mutation back to a failure", async () => {
+  const revalidate = vi.fn();
+  const hooks = renderAgendaMutations(revalidate);
+  mock.result = { ok: true, data: { results: [errorRow] } };
+  expect(await hooks.mutate("Moving", "Moved", [{ op: "update", id: "id", start: "09:00" }])).toBe(false);
+  expect(mock.toast).toMatchObject({
+    style: "failure",
+    title: "That time is already taken",
+    message: "Time occupied",
+  });
+  expect((mock.toast as { primaryAction?: unknown }).primaryAction).toBeUndefined();
+  expect(revalidate).toHaveBeenCalledTimes(1);
+});
+
+it("the edit form pops after a landed write with a failed read-back row", async () => {
+  const revalidate = vi.fn();
+  const hooks = useAgendaMutations({ revalidate });
+  const tree = EditForm({
+    event,
+    areas: [],
+    activityTypes: [],
+    onSubmit: (op) => hooks.mutate("Saving…", "Saved changes", [op]),
+  });
+  const readBack = { index: 0, status: "error", error: { code: "internal", message: "Read-back failed" } };
+  mock.result = { ok: true, data: { results: [readBack], undoToken: "u1" } };
+  await tree.props.actions.props.children.props.onSubmit({
+    name: "work",
+    end: new Date(2026, 8, 22, 1),
+    notes: "",
+    areaId: "",
+    activityTypeId: "",
+  });
+  expect(mock.pop).toHaveBeenCalledTimes(1);
+  expect(mock.toast).toMatchObject({ style: "success", title: "Saved changes" });
+});
+
 it.each(["toast", "panel"])("keeps both Undo actions after a stale refusal from the %s", async (from) => {
   const revalidate = vi.fn();
   let hooks = renderAgendaMutations(revalidate);

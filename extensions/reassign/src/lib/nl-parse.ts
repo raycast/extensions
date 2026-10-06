@@ -41,10 +41,10 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   const hasRecurrence = /\b(every|daily|weekly|weekdays?|each)\b/i.test(input);
   let remaining = ` ${input} `;
 
-  const duration = parseDuration(remaining);
+  const duration = captureDuration(remaining, ref);
   // Chrono reads any bare duration ("3h") as an offset from now, so strip each
   // token that parseDuration reads. The first one still sets the minutes.
-  for (let d = duration; d; d = parseDuration(remaining)) remaining = remaining.replace(d.match, " ");
+  for (let d = duration; d; d = captureDuration(remaining, ref)) remaining = remaining.replace(d.match, " ");
 
   let date: string | undefined;
   let dateExplicit = false;
@@ -123,6 +123,18 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   // Keep a named date on an otherwise timeless capture ("lunch tomorrow"), so
   // the caller can offer to pick a time instead of dropping the day.
   return withPreview({ kind: "unschedulable", name, date, dateExplicit, hasRecurrence }, today);
+}
+
+/** Read a duration, but keep a spaced bare integer ("1h 12 issues") in the title. */
+function captureDuration(text: string, ref: Date): ReturnType<typeof parseDuration> {
+  const d = parseDuration(text);
+  if (!d || !/\s\d+\s*$/.test(d.match)) return d;
+  // The Add form keeps "1h 30" as 90 min. In capture text, the integer is minutes only at the end or before a
+  // date or time ("gym 1h 30 tomorrow"). Before other words, it is part of the title.
+  const rest = text.slice(text.indexOf(d.match) + d.match.length).replace(/^[\s.,;:!?]+/, "");
+  const next = rest && chrono.parse(rest, ref, { forwardDate: true })[0];
+  if (!rest || (next && /^(in\s+the\s+)?$/i.test(rest.slice(0, next.index)))) return d;
+  return parseDuration(d.match.replace(/\s+\d+\s*$/, ""));
 }
 
 /** Give chrono clock tokens while retaining offsets into the original title. */
