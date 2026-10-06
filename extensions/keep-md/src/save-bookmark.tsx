@@ -17,18 +17,24 @@ export default function Command() {
   const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
   const urlEdited = useRef(false);
-  const savedId = useRef<string | null>(null);
+  const urlRef = useRef("");
+  const urlRevision = useRef(0);
+  const savingRef = useRef(false);
+  const savedBookmark = useRef<{ url: string; id: string } | null>(null);
 
   useEffect(() => {
     Clipboard.readText()
       .then((text) => {
-        if (!urlEdited.current && text && /^https?:\/\//i.test(text.trim()))
+        if (!urlEdited.current && text && /^https?:\/\//i.test(text.trim())) {
+          urlRef.current = text.trim();
           setUrl(text.trim());
+        }
       })
       .catch(() => undefined);
   }, []);
 
   async function submit() {
+    if (savingRef.current) return;
     let parsed: URL;
     try {
       parsed = new URL(url.trim());
@@ -56,16 +62,24 @@ export default function Command() {
           }
         : {}),
     };
+    const targetUrl = parsed.toString();
+    const revision = urlRevision.current;
+    const isCurrent = () => revision === urlRevision.current;
+    savingRef.current = true;
     setSaving(true);
     try {
-      const saved = savedId.current
-        ? { id: savedId.current }
-        : await saveBookmark(parsed.toString());
-      savedId.current = saved.id;
+      const existing = savedBookmark.current;
+      const saved =
+        existing?.url === targetUrl
+          ? { id: existing.id }
+          : await saveBookmark(targetUrl);
+      if (!isCurrent()) return;
+      savedBookmark.current = { url: targetUrl, id: saved.id };
       if (Object.keys(metadata).length > 0) {
         try {
           await updateBookmark(saved.id, metadata);
         } catch (error) {
+          if (!isCurrent()) return;
           await showToast({
             style: Toast.Style.Failure,
             title: "Bookmark saved, but details were not updated",
@@ -74,18 +88,21 @@ export default function Command() {
           return;
         }
       }
+      if (!isCurrent()) return;
       await showToast({
         style: Toast.Style.Success,
         title: "Saved to Keep.md",
       });
-      pop();
+      if (isCurrent()) pop();
     } catch (error) {
+      if (!isCurrent()) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not save bookmark",
         message: String(error),
       });
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -106,7 +123,11 @@ export default function Command() {
         value={url}
         onChange={(value) => {
           urlEdited.current = true;
-          savedId.current = null;
+          if (value !== urlRef.current) {
+            urlRevision.current += 1;
+            savedBookmark.current = null;
+          }
+          urlRef.current = value;
           setUrl(value);
         }}
       />
