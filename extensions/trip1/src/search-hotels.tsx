@@ -21,7 +21,11 @@ function startOfDay(date: Date): Date {
 }
 
 function formatPrice(price: number, currency: string): string {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(price);
+  try {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(price);
+  } catch {
+    return `${price.toFixed(2)} ${currency}`;
+  }
 }
 
 function Results({ params }: { params: SearchParams }) {
@@ -86,7 +90,7 @@ export default function Command() {
   const { push } = useNavigation();
   const today = startOfDay(new Date());
 
-  const { handleSubmit, itemProps, values } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values, setValidationError } = useForm<FormValues>({
     initialValues: { checkIn: addDays(today, 14), checkOut: addDays(today, 16), sortBy: "relevance" },
     validation: {
       destination: (value) => (value?.trim() ? undefined : "Enter a destination"),
@@ -100,7 +104,7 @@ export default function Command() {
       const checkIn = startOfDay(form.checkIn as Date);
       const checkOut = startOfDay(form.checkOut as Date);
       if (checkOut <= checkIn) {
-        showFailureToast(new Error("Check-out must be after check-in"), { title: "Invalid dates" });
+        setValidationError("checkOut", "Check-out must be after check-in");
         return;
       }
       push(
