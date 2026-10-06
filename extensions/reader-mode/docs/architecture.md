@@ -262,7 +262,7 @@ Structured logging using `@chrismessina/raycast-logger` with component-specific 
 - **aiLog** — AI summarization events
 - **archiveLog** — Paywall bypass operations
 
-See [logger-integration.md](./logger-integration.md) for detailed logging conventions.
+See [Logging](../CONTRIBUTING.md#logging) in `CONTRIBUTING.md` for logging conventions.
 
 ## Data Types (`src/types/`)
 
@@ -367,6 +367,6 @@ All errors are logged appropriately and surfaced to users with actionable next s
 
 - [Content Extraction](./content-extraction.md) — Detailed extraction pipeline
 - [Configuration](./configuration.md) — AI models and prompts
-- [Logger Integration](./logger-integration.md) — Logging conventions
+- [Logging](../CONTRIBUTING.md#logging) — Logging conventions
 - [Paywall Hopper](./paywall-hopper.md) — Archive service integration
 - [Known Issues](./known-issues.md) — Rendering quirks and workarounds

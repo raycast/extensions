@@ -32,7 +32,7 @@ export async function rewriteArticleTitle(originalTitle: string, url: string): P
 
   try {
     const rewritten = await AI.ask(TITLE_REWRITE_PROMPT + originalTitle, {
-      model: AI.Model["OpenAI_GPT-5.1_Instant"],
+      model: AI.Model["OpenAI_GPT-5.5_Instant"],
       creativity: "low",
     });
 
