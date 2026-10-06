@@ -119,8 +119,9 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
               icon={Icon.Folder}
               actions={
                 <ActionPanel>
-                  {uploadHere(p)}
+                  {/* Same keys as Subfolders: ↵ opens, ⌘↵ uploads. */}
                   {open(p)}
+                  {uploadHere(p)}
                 </ActionPanel>
               }
             />
