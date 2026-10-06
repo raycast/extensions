@@ -1,5 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { getCmuxErrorView } from "./cli";
 import { listSurfaces, SurfaceList } from "./surfaces";
 
 export default function Command() {
@@ -8,7 +9,7 @@ export default function Command() {
   if (error) {
     return (
       <List isLoading={false}>
-        <List.EmptyView icon={Icon.ExclamationMark} title="cmux is not running" description={error.message} />
+        <List.EmptyView icon={Icon.ExclamationMark} {...getCmuxErrorView(error)} />
       </List>
     );
   }

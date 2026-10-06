@@ -1,6 +1,6 @@
 import { ActionPanel, Action, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { execFileAsync, getErrorMessage, openCmuxApp } from "./cli";
+import { execFileAsync, getCmuxErrorView, getErrorMessage, openCmuxApp } from "./cli";
 import { Surface, SurfaceList } from "./surfaces";
 
 interface Workspace {
@@ -246,7 +246,7 @@ export default function Command() {
   if (error) {
     return (
       <List isLoading={false}>
-        <List.EmptyView icon={Icon.ExclamationMark} title="cmux is not running" description={error.message} />
+        <List.EmptyView icon={Icon.ExclamationMark} {...getCmuxErrorView(error)} />
       </List>
     );
   }
