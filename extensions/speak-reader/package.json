@@ -102,6 +102,15 @@
           "value": "en-US-EmmaMultilingualNeural"
         }
       ]
+    },
+    {
+      "name": "tableHeaders",
+      "title": "Tables",
+      "label": "Read column names with every cell",
+      "description": "On: each cell is read as \"Column: value\". Off: column names are read once at the start of a table, then each cell is read with a short pause, like a full stop.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

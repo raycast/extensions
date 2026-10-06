@@ -29,7 +29,10 @@ enum EdgeTTS {
     private static let chromiumFullVersion = "143.0.3650.75"
     private static var chromiumMajor: String { String(chromiumFullVersion.split(separator: ".")[0]) }
     private static let endpoint = "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1"
-    private static let timeout: UInt64 = 30
+    /// Give up on a request if the service goes quiet for this long (it streams continuously while working).
+    private static let idleTimeout: TimeInterval = 15
+    /// Hard cap per request: a base allowance plus extra time for longer text.
+    private static func maxDuration(for text: String) -> TimeInterval { 30 + Double(text.utf16.count) / 15 }
 
     private static let lock = NSLock()
     private static var _clockSkew: Double = 0
@@ -137,9 +140,20 @@ enum EdgeTTS {
         socket.maximumMessageSize = 16 * 1024 * 1024
         socket.resume()
 
+        // Only cancel a request that has stalled. Long text can legitimately take a while,
+        // and cutting it off mid-stream just wastes the work and forces a retry.
+        let activity = Activity()
+        let limit = maxDuration(for: text)
         let watchdog = Task {
-            try? await Task.sleep(nanoseconds: timeout * 1_000_000_000)
-            if !Task.isCancelled { socket.cancel(with: .goingAway, reason: nil) }
+            let begun = Date()
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                if Task.isCancelled { return }
+                if activity.idleFor > idleTimeout || Date().timeIntervalSince(begun) > limit {
+                    socket.cancel(with: .goingAway, reason: nil)
+                    return
+                }
+            }
         }
         defer {
             watchdog.cancel()
@@ -148,7 +162,7 @@ enum EdgeTTS {
 
         return try await withTaskCancellationHandler {
             do {
-                return try await run(socket, text: text, voice: voice, rate: rate)
+                return try await run(socket, text: text, voice: voice, rate: rate, activity: activity)
             } catch {
                 adjustClockSkew(from: socket.response)
                 throw error
@@ -166,7 +180,8 @@ enum EdgeTTS {
         clockSkew += server.timeIntervalSince1970 - (Date().timeIntervalSince1970 + clockSkew)
     }
 
-    private static func run(_ socket: URLSessionWebSocketTask, text: String, voice: String, rate: String) async throws -> (Data, [Boundary]) {
+    private static func run(_ socket: URLSessionWebSocketTask, text: String, voice: String, rate: String,
+                            activity: Activity) async throws -> (Data, [Boundary]) {
         let config = "X-Timestamp:\(timestamp())\r\n"
             + "Content-Type:application/json; charset=utf-8\r\n"
             + "Path:speech.config\r\n\r\n"
@@ -191,7 +206,9 @@ enum EdgeTTS {
         var bounds: [Boundary] = []
         receiving: while true {
             try Task.checkCancellation()
-            switch try await socket.receive() {
+            let message = try await socket.receive()
+            activity.touch()
+            switch message {
             case let .string(message):
                 guard let split = message.range(of: "\r\n\r\n") else { continue }
                 let head = headers(String(message[..<split.lowerBound]))
@@ -240,9 +257,20 @@ enum EdgeTTS {
 // then "done" (or "error"). The reader polls these files, so playback can start while later
 // chunks are still being made. Offsets are UTF-16 positions in the display text.
 
-private let kLimits = [90, 160, 300, 550, 900]
-private let kMaxChunk = 1200
-private let kParallel = 3
+// Smaller chunks finish quickly (about 10s for 600 characters), so a slow or failed request
+// only holds up a short stretch, and four at once stays well ahead of playback.
+private let kLimits = [90, 160, 300, 450]
+private let kMaxChunk = 600
+private let kParallel = 4
+private let kAttempts = 5
+
+/// Tracks when a request last heard from the service.
+private final class Activity: @unchecked Sendable {
+    private let lock = NSLock()
+    private var last = Date()
+    func touch() { lock.lock(); last = Date(); lock.unlock() }
+    var idleFor: TimeInterval { lock.lock(); defer { lock.unlock() }; return Date().timeIntervalSince(last) }
+}
 
 private struct Piece {
     let offset: Int  // in the chunk's speech text
@@ -343,14 +371,16 @@ final class SpeechGenerator: @unchecked Sendable {
     private func make(_ n: Int, _ group: [SpeechUnit]) async throws {
         let (speech, pieces) = assemble(group)
         var result: (Data, [Boundary])?
-        for attempt in 0..<3 {
+        for attempt in 0..<kAttempts {
             try Task.checkCancellation()
             do {
                 result = try await EdgeTTS.synthesize(speech, voice: voice, rate: rate)
                 break
             } catch {
-                if Task.isCancelled || attempt == 2 { throw error }
-                try await Task.sleep(nanoseconds: UInt64(600_000_000 * (attempt + 1))) // network hiccup: retry
+                if Task.isCancelled || attempt == kAttempts - 1 { throw error }
+                // Network hiccup: back off a little more each time (0.6s, 1.2s, 2.4s, 4s).
+                let delay = min(0.6 * pow(2, Double(attempt)), 4)
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             }
         }
         guard let (audio, bounds) = result else { throw EdgeTTSError.noAudio }

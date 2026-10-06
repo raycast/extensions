@@ -371,7 +371,9 @@ private func leadingWhitespace(_ s: String) -> Int {
 }
 
 enum MarkdownPrep {
-    static func build(_ input: String) -> PreparedDoc {
+    /// - Parameter repeatTableHeaders: read each cell as "Column: value". When false, column names
+    ///   are read once at the start of the table and cells are separated by a full-stop pause.
+    static func build(_ input: String, repeatTableHeaders: Bool = true) -> PreparedDoc {
         let text = input.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
         let lines = text.components(separatedBy: "\n")
         let d = Doc()
@@ -453,7 +455,17 @@ enum MarkdownPrep {
                 let hcells = cells(0, header, true)
                 let ha = hcells[0].0
                 let hb = hcells[hcells.count - 1].0 + hcells[hcells.count - 1].1.len
-                d.unit(ha, max(hb, ha + 1), [.text("Table, \(plural(rows.count, "row")).", ha)])
+                var hsegs: [Seg] = [.text("Table, \(plural(rows.count, "row")).", ha)]
+                if !repeatTableHeaders {
+                    // Say the column names once, up front.
+                    let named = hcells.filter { !$0.1.isBlank }
+                    for (j, (a, t)) in named.enumerated() {
+                        if j == 0 { hsegs.append(.text(" Columns: ", a)) }
+                        hsegs.append(.slice(a, a + t.len))
+                        hsegs.append(.text(j == named.count - 1 ? "." : ", ", a + t.len))
+                    }
+                }
+                d.unit(ha, max(hb, ha + 1), hsegs)
                 d.block += 1
                 for (r, row) in rows.enumerated() {
                     let cs = cells(r + 1, row, false)
@@ -462,9 +474,13 @@ enum MarkdownPrep {
                     for (j, item) in filled.enumerated() {
                         let (c, (a, t)) = (item.offset, item.element)
                         let h = hcells[c].1.trimmed
-                        if !h.isEmpty && h.lowercased() != t.trimmed.lowercased() { segs.append(.text(h + ": ", a)) }
+                        if repeatTableHeaders && !h.isEmpty && h.lowercased() != t.trimmed.lowercased() {
+                            segs.append(.text(h + ": ", a))
+                        }
                         segs.append(.slice(a, a + t.len))
-                        segs.append(.text(j == filled.count - 1 ? "." : ", ", a + t.len))
+                        // Without column names, a full stop gives each cell its own clear pause.
+                        let sep = j == filled.count - 1 || !repeatTableHeaders ? "." : ","
+                        segs.append(.text(TERMINAL.test(t) ? " " : sep + " ", a + t.len))
                     }
                     if !segs.isEmpty {
                         d.unit(cs[0].0, cs[cs.count - 1].0 + cs[cs.count - 1].1.len, segs)

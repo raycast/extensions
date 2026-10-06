@@ -52,9 +52,9 @@ export async function speak(text: string): Promise<void> {
   const file = path.join(dir, `text-${Date.now()}.txt`);
   fs.writeFileSync(file, text, { encoding: "utf8", mode: 0o600 });
 
-  const { voice } = getPreferenceValues<Preferences>();
+  const { voice, tableHeaders } = getPreferenceValues<Preferences>();
   try {
-    await openReader(file, voice || "auto", "+0%");
+    await openReader(file, voice || "auto", "+0%", tableHeaders ?? false);
   } catch (error) {
     fs.rmSync(file, { force: true });
     throw error;

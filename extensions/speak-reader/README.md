@@ -3,30 +3,30 @@
 Read any text aloud with natural-sounding neural voices in a small floating glass reader. Free, with no account or API key needed.
 
 - **Word-by-word highlighting.** Click any word to jump there.
-- **Markdown aware.** Headings, lists, tables, code blocks and quotes are displayed properly and read sensibly. For example, tables are read as "Name: Bob, Age: 30", and code blocks are announced rather than read symbol by symbol.
+- **Markdown aware.** Headings, lists, tables, code blocks and quotes are displayed properly and read sensibly. For example, a table's column names are read once and each cell gets a short pause (or turn on **Tables** in the extension's settings to hear "Name: Bob, Age: 30" for every row), and code blocks are announced rather than read symbol by symbol.
 - **Voices and controls.** Choose from 13 English voices (Australian, British, Irish, New Zealand and American). Speed, text size, copy and "read from start" are in the reader's ⋯ menu.
 - **Stays out of the way.** The reader floats in the top-left corner above your other windows.
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
+| Command             | What it does                                                 |
+| ------------------- | ------------------------------------------------------------ |
 | Speak Selected Text | Reads the selected text. Run it again while reading to stop. |
-| Speak Clipboard | Reads the text on your clipboard. |
-| Stop Speaking | Closes the reader. |
+| Speak Clipboard     | Reads the text on your clipboard.                            |
+| Stop Speaking       | Closes the reader.                                           |
 
 Tip: give **Speak Selected Text** a hotkey (for example ⌃⌥S) in Raycast Settings → Extensions, so you can select text anywhere and press one key to hear it.
 
 ## Reader shortcuts
 
-| Key | Action |
-| --- | --- |
-| Space | Play / pause |
-| ← / → | Previous / next sentence |
-| S | Change speed |
-| ⌘+ / ⌘− / ⌘0 | Text size |
-| ⌘C | Copy the text |
-| Esc or ⌘W | Close |
+| Key          | Action                   |
+| ------------ | ------------------------ |
+| Space        | Play / pause             |
+| ← / →        | Previous / next sentence |
+| S            | Change speed             |
+| ⌘+ / ⌘− / ⌘0 | Text size                |
+| ⌘C           | Copy the text            |
+| Esc or ⌘W    | Close                    |
 
 ## Privacy and voices
 

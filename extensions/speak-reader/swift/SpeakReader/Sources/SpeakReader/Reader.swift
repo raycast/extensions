@@ -275,6 +275,8 @@ final class Controller: NSObject, NSWindowDelegate {
     var pendingSeek: Int?
     /// Set when the text has nothing speakable, so the window closes instead of waiting forever.
     var nothingToRead = false
+    /// How many times in a row reading has picked up again after the voice service dropped out.
+    var autoRetries = 0
 
     var curWord = NSRange(location: NSNotFound, length: 0)
     var curSentence = NSRange(location: NSNotFound, length: 0)
@@ -304,7 +306,7 @@ final class Controller: NSObject, NSWindowDelegate {
     var flashText = ""
     var flashUntil = Date.distantPast
 
-    init(textPath: String, voice: String, rate: String, deleteInput: Bool) {
+    init(textPath: String, voice: String, rate: String, tableHeaders: Bool, deleteInput: Bool) {
         self.textPath = textPath
         self.deleteInput = deleteInput
         // "auto" = the voice last picked in the reader's menu.
@@ -321,7 +323,7 @@ final class Controller: NSObject, NSWindowDelegate {
 
         rawText = (try? String(contentsOfFile: textPath, encoding: .utf8)) ?? ""
         // Markdown → clean display text + formatting + speech units.
-        let doc = MarkdownPrep.build(rawText)
+        let doc = MarkdownPrep.build(rawText, repeatTableHeaders: tableHeaders)
         text = doc.display
         ns = doc.display as NSString
         styles = doc.styles.map {
@@ -923,10 +925,15 @@ final class Controller: NSObject, NSWindowDelegate {
             chunks.append(Chunk(url: mp3, words: words, duration: dur,
                                 textStart: obj["start"] as? Int ?? 0, textEnd: obj["end"] as? Int ?? ns.length))
 
+            autoRetries = 0
+
             if started && queuedThrough == n - 1 {
+                // If playback had caught up and run dry, the player must be told to start again:
+                // its rate can still read as "playing" even though there was nothing left to play.
+                let ranDry = player.currentItem == nil
                 player.insert(makeItem(n), after: nil)
                 queuedThrough = n
-                if wantsPlay && !finished && player.rate == 0 { player.playImmediately(atRate: speed) }
+                if wantsPlay && !finished && (ranDry || player.rate == 0) { player.playImmediately(atRate: speed) }
             }
         }
         if !genDone && fm.fileExists(atPath: genDir.appendingPathComponent("done").path) { genDone = true }
@@ -1007,6 +1014,19 @@ final class Controller: NSObject, NSWindowDelegate {
             started = true
             enqueue(from: 0, at: 0)
             if wantsPlay { player.playImmediately(atRate: speed) }
+        }
+        // Playback ran dry but newer audio is ready (e.g. it wasn't queued): queue it and carry on.
+        if started && !finished && pendingSeek == nil && player.currentItem == nil && lastChunk + 1 < chunks.count {
+            enqueue(from: lastChunk + 1, at: 0)
+            if wantsPlay { player.playImmediately(atRate: speed) }
+        }
+        // The voice service dropped out mid-read: once the audio that did arrive has played,
+        // pick up again from where it stopped instead of sitting there.
+        if started && !finished && genError && wantsPlay && player.currentItem == nil && autoRetries < 3,
+           let resume = chunks.last?.textEnd, resume < ns.length {
+            autoRetries += 1
+            restartGeneration(from: resume)
+            flash("Reconnecting…")
         }
         // Nothing speakable (e.g. only a divider line): say so and close rather than spin forever.
         if !started && chunks.isEmpty && genDone && !genError && !nothingToRead {
@@ -1208,10 +1228,11 @@ private var activeController: Controller?
 private var termSource: DispatchSourceSignal?
 
 /// Shows the reader window and runs until it's closed (then the process exits).
-func runReader(textPath: String, voice: String, rate: String, deleteInput: Bool) {
+func runReader(textPath: String, voice: String, rate: String, tableHeaders: Bool = true, deleteInput: Bool) {
     let app = NSApplication.shared
     app.setActivationPolicy(.accessory)
-    let controller = Controller(textPath: textPath, voice: voice, rate: rate, deleteInput: deleteInput)
+    let controller = Controller(textPath: textPath, voice: voice, rate: rate, tableHeaders: tableHeaders,
+                                deleteInput: deleteInput)
     activeController = controller
     // "Stop Speaking" sends SIGTERM: fade out and clean up instead of dying mid-sentence.
     signal(SIGTERM, SIG_IGN)

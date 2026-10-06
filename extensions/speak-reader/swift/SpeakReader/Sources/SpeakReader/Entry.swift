@@ -18,13 +18,13 @@ enum ReaderError: LocalizedError {
 ///
 /// The window runs in its own detached copy of this program (via `showReader`), so the
 /// Raycast command can finish immediately while reading continues in the background.
-@raycast func speak(textFile: String, voice: String, rate: String) throws {
+@raycast func speak(textFile: String, voice: String, rate: String, tableHeaders: Bool) throws {
     let executable = Bundle.main.executablePath ?? CommandLine.arguments[0]
     let encoder = JSONEncoder()
     func json(_ value: some Encodable) -> String {
         String(decoding: (try? encoder.encode(value)) ?? Data("\"\"".utf8), as: UTF8.self)
     }
-    let args = [executable, "showReader", json(textFile), json(voice), json(rate)]
+    let args = [executable, "showReader", json(textFile), json(voice), json(rate), json(tableHeaders)]
 
     var attributes: posix_spawnattr_t?
     posix_spawnattr_init(&attributes)
@@ -48,6 +48,6 @@ enum ReaderError: LocalizedError {
 }
 
 /// Runs the reader window (called by `speak` in a separate process). Exits when the window closes.
-@raycast func showReader(textFile: String, voice: String, rate: String) {
-    runReader(textPath: textFile, voice: voice, rate: rate, deleteInput: true)
+@raycast func showReader(textFile: String, voice: String, rate: String, tableHeaders: Bool) {
+    runReader(textPath: textFile, voice: voice, rate: rate, tableHeaders: tableHeaders, deleteInput: true)
 }
