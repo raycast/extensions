@@ -8,38 +8,16 @@ export default function Command() {
   const [amount, setAmount] = useState("1062");
 
   async function handleGenerate() {
-    const changeOrderNotice = `===============================================================
-FORMAL CONTRACT AMENDMENT & STATUTORY NOTICE
-Uniform Commercial Code (UCC § 2-209) — Valid Modification
-===============================================================
-TO: ${client}
-FROM: ScopeLock AI Autonomous Defense Engine
-DATE: ${new Date().toISOString().split("T")[0]}
+    const today = new Date();
+    const localDate = ;
 
-NOTICE OF CONTRACT VARIANCE:
-The engineering tasks requested ("${varianceTitle}") constitute a material expansion of the baseline Statement of Work (SOW).
-
-Under UCC § 2-209, modifications that introduce unbudgeted engineering hours require formal bilateral consideration or written ratification.
-
-- Additional Estimated Effort: ${hours} billable hours
-- Commercial Variance Amount: $${amount} USD
-
-ACTION REQUIRED:
-Engineering commits on this branch are paused. Please authorize and execute the formal Change Order ratification below:
-
-👉 SECURE CHANGE ORDER RATIFICATION PORTAL:
-https://ahirwardhanmanti83-bit.github.io/scopelock-ai/?unlock=co
-
-BENEFICIARY CLEARING:
-Payoneer Direct: ahirwardhanmanti83@gmail.com
-Patreon Suite: https://patreon.com/c/scopelock
-===============================================================`;
+    const changeOrderNotice = ;
 
     await Clipboard.copy(changeOrderNotice);
     await showToast({
       style: Toast.Style.Success,
       title: "UCC § 2-209 Change Order Copied!",
-      message: `Bilateral variance notice prepared for ${client}`,
+      message: ,
     });
   }
 
@@ -49,11 +27,11 @@ Patreon Suite: https://patreon.com/c/scopelock
         <ActionPanel>
           <Action.SubmitForm title="Generate & Copy Change Order Notice" onSubmit={handleGenerate} />
           <Action.OpenInBrowser
-            title="Unlock Direct Legal Ratification ($3 Instant)"
+            title="Unlock Direct Legal Ratification ( Instant)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/?unlock=instant"
           />
           <Action.OpenInBrowser
-            title="Agency Enterprise SOW Defense ($199/mo)"
+            title="Agency Enterprise SOW Defense (99/mo)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/agency-enterprise.html"
           />
         </ActionPanel>
