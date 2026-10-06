@@ -7,17 +7,17 @@ import { getChatMessages } from "../services/telegram-client";
 import { getConfig, ensureAuthenticated } from "../utils/auth";
 import { handleTelegramError } from "../utils/errors";
 
-interface Arguments {
+type Input = {
   chatId: string;
   query: string;
   limit?: number;
-}
+};
 
 interface Preferences {
   openRouterApiKey?: string;
 }
 
-export default async function AnalyzeMessages(args: Arguments) {
+export default async function AnalyzeMessages(args: Input) {
   try {
     const { chatId, query } = args;
     let limit = args.limit ?? 20;
