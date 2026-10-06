@@ -54,10 +54,19 @@ export function looksLikeHL7(text: string): boolean {
   return /^(MSH|FHS|BHS)[^A-Za-z0-9\s]/m.test(text.trimStart());
 }
 
-/** Parses text that holds one or more HL7 v2 messages. A new message starts at every MSH segment. */
-export function parseHL7(text: string): Message[] {
-  const messages: Message[] = [];
-  let current: Message | undefined;
+/** One message as segment lines, before the fields are parsed. */
+export interface RawMessage {
+  delimiters: Delimiters;
+  lines: { line: string; number: number }[];
+}
+
+/**
+ * Splits the text into messages without parsing fields. A new message starts at every MSH segment.
+ * A parsed batch takes about 45× its size in memory, past Raycast's 100 MB heap → parse per message.
+ */
+export function splitHL7(text: string): RawMessage[] {
+  const messages: RawMessage[] = [];
+  let current: RawMessage | undefined;
   let delimiters = DEFAULT_DELIMITERS;
 
   text.split(/\r\n|\r|\n/).forEach((rawLine, index) => {
@@ -73,13 +82,27 @@ export function parseHL7(text: string): Message[] {
       return;
     }
     if (name === "MSH" || !current) {
-      current = { delimiters, segments: [] };
+      current = { delimiters, lines: [] };
       messages.push(current);
     }
-    current.segments.push(parseSegment(line, index + 1, delimiters));
+    current.lines.push({ line, number: index + 1 });
   });
 
   return messages;
+}
+
+export function parseMessage({ delimiters, lines }: RawMessage): Message {
+  return { delimiters, segments: lines.map(({ line, number }) => parseSegment(line, number, delimiters)) };
+}
+
+/** The message's segments, joined with the HL7 segment separator. */
+export function rawText(message: RawMessage): string {
+  return message.lines.map((l) => l.line).join("\r");
+}
+
+/** Parses every message in the text. For a batch, prefer `splitHL7` + `parseMessage`. */
+export function parseHL7(text: string): Message[] {
+  return splitHL7(text).map(parseMessage);
 }
 
 function readDelimiters(line: string): Delimiters {

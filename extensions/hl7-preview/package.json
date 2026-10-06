@@ -27,12 +27,13 @@
       "required": false,
       "default": false,
       "title": "Past Views",
-      "label": "Keep past views",
+      "label": "Keep Past Views",
       "description": "Keep a copy of each opened message, patient data included, in Raycast's local encrypted storage, so it can be reopened and searched by patient. Off by default."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.2"
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

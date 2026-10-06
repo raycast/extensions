@@ -2,7 +2,17 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { expect } from "./expect.ts";
-import { component, decodeBuffer, field, formatTimestamp, parseHL7, unescape } from "../src/hl7.ts";
+import {
+  component,
+  decodeBuffer,
+  field,
+  formatTimestamp,
+  parseHL7,
+  parseMessage,
+  rawText,
+  splitHL7,
+  unescape,
+} from "../src/hl7.ts";
 import { material, messageMarkdown, messageSummary, patientOf, segmentMarkdown } from "../src/render.ts";
 
 const fixture = (name: string) => decodeBuffer(readFileSync(join(import.meta.dirname, "fixtures", name)));
@@ -52,6 +62,13 @@ describe("parseHL7", () => {
       ["MSH", "PID"],
       ["MSH", "PID"],
     ]);
+  });
+
+  it("splits a batch into raw messages that parse one at a time", () => {
+    const batch = "FHS|^~\\&|A\rMSH|^~\\&|A\rPID|1\rMSH|^~\\&|B\rPID|2\rMSH|^~\\&|C\rPID|3\rFTS|1";
+    const raws = splitHL7(batch);
+    expect(raws.map(rawText)).toEqual(["MSH|^~\\&|A\rPID|1", "MSH|^~\\&|B\rPID|2", "MSH|^~\\&|C\rPID|3"]);
+    expect(component(parseMessage(raws[2]).segments[1], 1)).toBe("3");
   });
 
   it("uses custom delimiters", () => {

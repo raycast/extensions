@@ -7,7 +7,7 @@ Preview HL7 v2 messages in Raycast, with named segments, fields and components.
 1. Run **Preview HL7**. It always opens on the paste screen.
 2. Press `⌘V` to paste a copied `.hl7` file, a file path, or a raw message.
 
-The paste screen lists the other ways in:
+`⌘K` lists the other ways in:
 
 - `⌘⇧H` past views, searchable by patient name
 - `⌘⇧L` choose a file
@@ -15,7 +15,7 @@ The paste screen lists the other ways in:
 
 Past views are off by default, because they hold patient data. Turn on **Keep Past Views** in
 the extension preferences to keep the last 50 views, with a copy of each message in Raycast's
-local encrypted storage, so a view reopens as it was seen. **Open Current File** (`⌘↵`) reads the file as it is now.
+local encrypted storage, so a view reopens as it was seen. Turning it off again removes the stored views. **Open Current File** (`⌘↵`) reads the file as it is now.
 **Clear History** (`⌃⇧X`) removes all stored views.
 
 The message shows as one document that you scroll with the mouse or the arrow keys:
@@ -25,6 +25,11 @@ The message shows as one document that you scroll with the mouse or the arrow ke
 3. Each order with its material, its results, flags, reference ranges and notes.
 4. Every segment, with each field's HL7 v2.5 name, its components and the meaning of common
    coded values.
+
+A file with several messages, such as a batch, opens as a list with one row per message. The
+selected message shows on the right. More rows load as you scroll. The search bar finds messages by
+patient name, patient ID, date of birth, message type or control ID. **Copy All Messages** and
+**Copy All as JSON** copy every message in the file.
 
 ## Shortcuts
 
@@ -36,6 +41,7 @@ The message shows as one document that you scroll with the mouse or the arrow ke
 - `⌘⇧R` show the raw message
 - `⌘⇧F` copy one field
 - `⌘⇧C` copy the message, `⌘⇧J` copy it as JSON
+- `⌘⌥⇧C` copy all messages, `⌘⌥⇧J` copy all as JSON
 
 ## Develop
 

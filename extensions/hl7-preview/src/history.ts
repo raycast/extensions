@@ -1,13 +1,13 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createHash } from "node:crypto";
-import { parseHL7 } from "./hl7.ts";
+import { parseMessage, splitHL7 } from "./hl7.ts";
 import { messageSummary, patientOf } from "./render.ts";
 import { type Source, readSource } from "./sources.ts";
 
 /**
  * A previous view. It keeps a copy of the message text, so it reopens as it was seen even when
  * the file has moved or changed since. Stored in Raycast's local encrypted storage, and only when
- * the user turns on the "Keep past views" preference, as it holds patient data.
+ * the user turns on the "Keep Past Views" preference, as it holds patient data.
  */
 export interface HistoryEntry {
   key: string;
@@ -27,7 +27,12 @@ const MAX_ENTRIES = 50;
 /** Larger inputs are not kept as a copy; they reopen from their file only. */
 const MAX_TEXT_LENGTH = 500_000;
 
+/** Preference off → deletes the stored views (patient data). */
 export async function loadHistory(): Promise<HistoryEntry[]> {
+  if (!isKeepingPastViews()) {
+    await LocalStorage.removeItem(STORAGE_KEY);
+    return [];
+  }
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return [];
   try {
@@ -45,10 +50,7 @@ export function isKeepingPastViews(): boolean {
   return getPreferenceValues<Preferences>().keepPastViews === true;
 }
 
-/**
- * Every change to the history runs through this queue, one after another, each on the latest
- * stored list. So a slow save can never restore a removed entry or drop a newer one.
- */
+// Serial write queue: each change runs on the latest list, so a slow save can't restore or drop entries.
 let queue: Promise<void> = Promise.resolve();
 
 function update(change: (entries: HistoryEntry[]) => HistoryEntry[]): Promise<void> {
@@ -61,7 +63,7 @@ function update(change: (entries: HistoryEntry[]) => HistoryEntry[]): Promise<vo
   return queue;
 }
 
-function entryKey(source: Source): string {
+export function entryKey(source: Source): string {
   return source.path ? `file:${source.path}` : `text:${createHash("sha1").update(source.text).digest("hex")}`;
 }
 
@@ -70,8 +72,13 @@ function unique(values: string[]): string[] {
 }
 
 export function toEntry(source: Source): HistoryEntry {
-  const messages = parseHL7(source.text);
-  const patients = messages.map(patientOf);
+  const patients: ReturnType<typeof patientOf>[] = [];
+  const summaries: string[] = [];
+  for (const raw of splitHL7(source.text)) {
+    const message = parseMessage(raw);
+    patients.push(patientOf(message));
+    summaries.push(messageSummary(message));
+  }
   return {
     key: entryKey(source),
     name: source.name,
@@ -79,12 +86,12 @@ export function toEntry(source: Source): HistoryEntry {
     text: source.text.length <= MAX_TEXT_LENGTH ? source.text : "",
     patient: unique(patients.map((p) => p.name)).join(", "),
     keywords: unique(patients.flatMap((p) => [p.id, p.born])),
-    summary: unique(messages.map(messageSummary)).join(", "),
+    summary: unique(summaries).join(", "),
     openedAt: Date.now(),
   };
 }
 
-/** Moves the sources to the top of the history, when the user keeps past views. */
+/** Moves the sources to the top. No-op unless Keep Past Views is on. */
 export async function remember(sources: Source[]): Promise<void> {
   if (!isKeepingPastViews()) return;
   // A pasted message too large to copy could never reopen, so it is not kept.
