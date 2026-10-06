@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Icon } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { Activity } from "../types";
@@ -43,8 +43,16 @@ export const ActivityTimerEdit: React.FC<ActivityTimerEditProps> = ({ activity, 
         return;
       }
       const success = await editActivity({ description: values.description, hours: parseHours(time) }, activity.id);
-      if (isRunning) {
-        await toggleActivity(activity.id, true);
+      // Keep the form open on a failed restart, or the stopped timer goes unnoticed.
+      if (isRunning && (await toggleActivity(activity.id, true)) !== true) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title:
+            success === true
+              ? "Time saved, but the timer did not restart"
+              : "Time not saved, and the timer did not restart",
+        });
+        return;
       }
       if (success === true) {
         await onSubmitted();
