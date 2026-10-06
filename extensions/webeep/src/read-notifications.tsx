@@ -40,7 +40,7 @@ export default function ReadNotifications() {
                   : { source: Icon.Bell, tintColor: Color.Blue }
               }
               keywords={[notification.preview, notification.kind]}
-              accessories={[{ date: notification.created }]}
+              accessories={[{ date: new Date(notification.created) }]}
               detail={<List.Item.Detail markdown={markdownFor(notification)} />}
               actions={
                 <ActionPanel>

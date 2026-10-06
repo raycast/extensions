@@ -24,6 +24,24 @@ export function decodeEntities(text: string): string {
   });
 }
 
+/**
+ * Rewrites a Moodle `webservice/pluginfile.php` URL (as embedded in forum, notification and event
+ * HTML bodies) to the regular browser `pluginfile.php` URL, dropping the `token` and `forcedownload`
+ * query params so the user's web-service token never reaches the detail pane, the clipboard or the browser.
+ */
+export function browserPluginfileUrl(href: string): string {
+  if (!/\/webservice\/pluginfile\.php/i.test(href)) return href;
+  try {
+    const url = new URL(href);
+    url.pathname = url.pathname.replace(/^\/webservice\/pluginfile\.php/, "/pluginfile.php");
+    url.searchParams.delete("token");
+    url.searchParams.delete("forcedownload");
+    return url.toString();
+  } catch {
+    return href.replace("/webservice/pluginfile.php", "/pluginfile.php");
+  }
+}
+
 /** Converts a fragment of Moodle HTML into readable Markdown (links, emphasis, lists, paragraphs). */
 export function htmlToMarkdown(html: string): string {
   let out = html
@@ -40,7 +58,8 @@ export function htmlToMarkdown(html: string): string {
     .replace(/<(em|i)\b[^>]*>([\s\S]*?)<\/\1>/gi, "*$2*")
     .replace(/<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, label: string) => {
       const text = label.replace(/<[^>]+>/g, "").trim();
-      return text ? `[${text}](${href})` : href;
+      const url = browserPluginfileUrl(decodeEntities(href));
+      return text ? `[${text}](${url})` : url;
     })
     .replace(/<img\b[^>]*alt="([^"]*)"[^>]*>/gi, "$1")
     .replace(/<[^>]+>/g, "");

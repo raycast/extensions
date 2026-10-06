@@ -23,7 +23,7 @@ async function fetchMaterials(lang: Lang): Promise<MaterialsIndex> {
     }),
   );
   reportPartialFailures(errors, values.length, (failed) => showPartialFailure(failed));
-  const files = values.flat().sort((a, b) => (b.file.modified?.getTime() ?? 0) - (a.file.modified?.getTime() ?? 0));
+  const files = values.flat().sort((a, b) => (b.file.modified ?? 0) - (a.file.modified ?? 0));
   return { courses, files };
 }
 

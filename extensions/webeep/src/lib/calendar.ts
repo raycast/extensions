@@ -22,8 +22,9 @@ export interface CalendarEvent {
   id: number;
   name: string;
   description: string;
-  start: Date;
-  end?: Date;
+  /** Epoch milliseconds (stored as a number so it survives useCachedPromise JSON caching). */
+  start: number;
+  end?: number;
   eventType: string;
   moduleName?: string;
   url?: string;
@@ -39,8 +40,8 @@ export function toCalendarEvent(raw: RawEvent, lang: Lang): CalendarEvent {
     id: raw.id,
     name: htmlToText(resolveMlang(raw.name, lang)),
     description: raw.description ? htmlToMarkdown(raw.description) : "",
-    start: new Date(raw.timestart * 1000),
-    end: raw.timeduration ? new Date((raw.timestart + raw.timeduration) * 1000) : undefined,
+    start: raw.timestart * 1000,
+    end: raw.timeduration ? (raw.timestart + raw.timeduration) * 1000 : undefined,
     eventType: raw.eventtype,
     moduleName: raw.modulename || undefined,
     url: raw.url || raw.viewurl || undefined,
@@ -61,7 +62,7 @@ export function mergeEvents(lists: RawEvent[][], lang: Lang): CalendarEvent[] {
     seen.add(raw.id);
     merged.push(toCalendarEvent(raw, lang));
   }
-  return merged.sort((a, b) => a.start.getTime() - b.start.getTime());
+  return merged.sort((a, b) => a.start - b.start);
 }
 
 /** Dashboard "upcoming" view plus action events (deadlines without a lookahead limit). */

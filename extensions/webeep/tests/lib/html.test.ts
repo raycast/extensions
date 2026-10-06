@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeEntities, htmlToMarkdown, htmlToText } from "../../src/lib/html";
+import { browserPluginfileUrl, decodeEntities, htmlToMarkdown, htmlToText } from "../../src/lib/html";
 
 describe("decodeEntities", () => {
   it("decodes named, decimal and hex entities", () => {
@@ -36,5 +36,28 @@ describe("htmlToMarkdown", () => {
 describe("htmlToText", () => {
   it("strips tags and squashes whitespace", () => {
     expect(htmlToText("<p>Hello\n   <b>world</b>&nbsp;!</p>")).toBe("Hello world !");
+  });
+});
+
+describe("browserPluginfileUrl", () => {
+  it("rewrites webservice pluginfile URLs and strips the token and forcedownload", () => {
+    expect(
+      browserPluginfileUrl(
+        "https://webeep.polimi.it/webservice/pluginfile.php/1/mod_forum/post/9/notes.pdf?token=SECRET&forcedownload=1",
+      ),
+    ).toBe("https://webeep.polimi.it/pluginfile.php/1/mod_forum/post/9/notes.pdf");
+  });
+
+  it("leaves non-webservice URLs untouched", () => {
+    expect(browserPluginfileUrl("https://example.com/page?x=1")).toBe("https://example.com/page?x=1");
+  });
+
+  it("is applied to links inside markdown bodies, so tokens never leak into the detail pane", () => {
+    const md = htmlToMarkdown(
+      '<p>See <a href="https://webeep.polimi.it/webservice/pluginfile.php/1/a.pdf?token=SECRET">the file</a>.</p>',
+    );
+    expect(md).toBe("See [the file](https://webeep.polimi.it/pluginfile.php/1/a.pdf).");
+    expect(md).not.toContain("SECRET");
+    expect(md).not.toContain("webservice");
   });
 });

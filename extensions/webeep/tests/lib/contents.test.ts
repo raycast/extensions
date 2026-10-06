@@ -36,7 +36,7 @@ describe("collectFiles", () => {
       sectionName: "Introduction",
       courseId: 42,
     });
-    expect(files[0].modified?.getTime()).toBe(1789200000 * 1000);
+    expect(files[0].modified).toBe(1789200000 * 1000);
     expect(files[1].id).toBe("2001:/lab/lab-setup.zip");
   });
 });

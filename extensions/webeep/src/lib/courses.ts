@@ -31,8 +31,11 @@ export interface Course {
   isFavourite: boolean;
   hidden: boolean;
   inProgress: boolean;
-  startDate: Date;
-  endDate?: Date;
+  /** True only when the course has an end date in the past. */
+  hasEnded: boolean;
+  /** Epoch milliseconds. */
+  startDate: number;
+  endDate?: number;
 }
 
 export interface ParsedCourseName {
@@ -63,8 +66,12 @@ export function parseCourseName(fullName: string): ParsedCourseName {
 export function isInProgress(raw: Pick<RawCourse, "startdate" | "enddate">, now = Date.now()): boolean {
   const nowSeconds = Math.floor(now / 1000);
   const started = !raw.startdate || raw.startdate <= nowSeconds;
-  const ended = raw.enddate > 0 && raw.enddate < nowSeconds;
-  return started && !ended;
+  return started && !hasCourseEnded(raw, now);
+}
+
+/** A course has ended only when it has a non-zero end date in the past. */
+export function hasCourseEnded(raw: Pick<RawCourse, "enddate">, now = Date.now()): boolean {
+  return raw.enddate > 0 && raw.enddate < Math.floor(now / 1000);
 }
 
 export function toCourse(raw: RawCourse, lang: Lang, now = Date.now()): Course {
@@ -82,8 +89,9 @@ export function toCourse(raw: RawCourse, lang: Lang, now = Date.now()): Course {
     isFavourite: Boolean(raw.isfavourite),
     hidden: Boolean(raw.hidden),
     inProgress: isInProgress(raw, now),
-    startDate: new Date(raw.startdate * 1000),
-    endDate: raw.enddate ? new Date(raw.enddate * 1000) : undefined,
+    hasEnded: hasCourseEnded(raw, now),
+    startDate: raw.startdate * 1000,
+    endDate: raw.enddate ? raw.enddate * 1000 : undefined,
   };
 }
 

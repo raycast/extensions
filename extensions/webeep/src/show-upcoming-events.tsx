@@ -8,7 +8,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 function bucket(event: CalendarEvent, now: Date): string {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const diff = event.start.getTime() - startOfToday;
+  const diff = event.start - startOfToday;
   if (diff < 0) return "Overdue";
   if (diff < DAY) return "Today";
   if (diff < 2 * DAY) return "Tomorrow";
@@ -21,8 +21,8 @@ const ORDER = ["Overdue", "Today", "Tomorrow", "This Week", "This Month", "Later
 
 function markdownFor(event: CalendarEvent): string {
   const when = event.end
-    ? `${event.start.toLocaleString()} – ${event.end.toLocaleTimeString()}`
-    : event.start.toLocaleString();
+    ? `${new Date(event.start).toLocaleString()} – ${new Date(event.end).toLocaleTimeString()}`
+    : new Date(event.start).toLocaleString();
   return [`## ${event.name}`, `**${when}**`, event.courseName ?? "", event.description].filter(Boolean).join("\n\n");
 }
 
@@ -62,7 +62,7 @@ export default function ShowUpcomingEvents() {
                       : Icon.Calendar
                 }
                 keywords={[event.courseName ?? "", event.eventType, event.moduleName ?? ""]}
-                accessories={[{ date: event.start }]}
+                accessories={[{ date: new Date(event.start) }]}
                 detail={<List.Item.Detail markdown={markdownFor(event)} />}
                 actions={
                   <ActionPanel>

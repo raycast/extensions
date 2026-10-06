@@ -34,7 +34,8 @@ export interface Announcement {
   message: string;
   preview: string;
   author: string;
-  created: Date;
+  /** Epoch milliseconds. */
+  created: number;
   url: string;
   courseId: number;
   courseName: string;
@@ -69,7 +70,7 @@ export function toAnnouncement(raw: RawDiscussion, course: Pick<Course, "id" | "
     message: htmlToMarkdown(raw.message),
     preview: htmlToText(raw.message).slice(0, 120),
     author: raw.userfullname,
-    created: new Date((raw.created || raw.timemodified) * 1000),
+    created: (raw.created || raw.timemodified) * 1000,
     url: `${BASE_URL}/mod/forum/discuss.php?d=${raw.discussion}`,
     courseId: course.id,
     courseName: course.name,
@@ -111,5 +112,5 @@ export async function fetchAnnouncements(
     }),
   );
   reportPartialFailures(errors, values.length, options.onPartialFailure);
-  return values.flat().sort((a, b) => b.created.getTime() - a.created.getTime());
+  return values.flat().sort((a, b) => b.created - a.created);
 }

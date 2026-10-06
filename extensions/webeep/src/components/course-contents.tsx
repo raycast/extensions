@@ -33,7 +33,7 @@ export function FileItem({ file, course, subtitle }: { file: CourseFile; course?
       subtitle={subtitle}
       icon={fileIcon(file.name, file.mimetype)}
       keywords={[file.moduleName, file.sectionName]}
-      accessories={[{ text: formatBytes(file.size) }, ...(file.modified ? [{ date: file.modified }] : [])]}
+      accessories={[{ text: formatBytes(file.size) }, ...(file.modified ? [{ date: new Date(file.modified) }] : [])]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -63,7 +63,7 @@ function ModuleItem({ module, course }: { module: CourseModule; course: Course }
   const accessories: List.Item.Accessory[] = [];
   if (module.modname === "folder") accessories.push({ text: `${module.files.length} files` });
   if (singleFile) accessories.push({ text: formatBytes(singleFile.size) });
-  if (singleFile?.modified) accessories.push({ date: singleFile.modified });
+  if (singleFile?.modified) accessories.push({ date: new Date(singleFile.modified) });
   if (module.externalUrl) accessories.push({ icon: Icon.Globe, tooltip: module.externalUrl });
 
   return (

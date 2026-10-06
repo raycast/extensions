@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isInProgress, parseCourseName, sortCourses, toCourse } from "../../src/lib/courses";
+import { hasCourseEnded, isInProgress, parseCourseName, sortCourses, toCourse } from "../../src/lib/courses";
 
 const NOW = Date.UTC(2026, 8, 16);
 
@@ -82,5 +82,30 @@ describe("toCourse / sortCourses", () => {
       toCourse(raw(4, "088983 - OPERATIONS RESEARCH (W) [2026-27]", 0, true), "en", NOW),
     ]);
     expect(sorted.map((c) => c.id)).toEqual([4, 3, 2, 1]);
+  });
+});
+
+describe("hasCourseEnded", () => {
+  it("is true only for a course with a past end date", () => {
+    expect(hasCourseEnded({ enddate: 1725055200 }, NOW)).toBe(true);
+    expect(hasCourseEnded({ enddate: 0 }, NOW)).toBe(false);
+    expect(hasCourseEnded({ enddate: Math.floor(NOW / 1000) + 86400 }, NOW)).toBe(false);
+  });
+
+  it("keeps a not-yet-started future course out of the ended bucket", () => {
+    const future = toCourse(
+      {
+        id: 9,
+        fullname: "099999 - FUTURE COURSE (X) [2027-28]",
+        shortname: "FUTURE",
+        startdate: Math.floor(NOW / 1000) + 30 * 86400,
+        enddate: 0,
+        viewurl: "https://webeep.polimi.it/course/view.php?id=9",
+      },
+      "en",
+      NOW,
+    );
+    expect(future.inProgress).toBe(false);
+    expect(future.hasEnded).toBe(false);
   });
 });

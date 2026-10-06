@@ -23,7 +23,8 @@ export interface WebeepNotification {
   preview: string;
   url?: string;
   urlName?: string;
-  created: Date;
+  /** Epoch milliseconds. */
+  created: number;
   read: boolean;
   kind: string;
 }
@@ -38,7 +39,7 @@ export function toNotification(raw: RawNotification): WebeepNotification {
     preview: preview.slice(0, 120),
     url: raw.contexturl || undefined,
     urlName: raw.contexturlname || undefined,
-    created: new Date(raw.timecreated * 1000),
+    created: raw.timecreated * 1000,
     read: Boolean(raw.read),
     kind: raw.eventtype || raw.component || "notification",
   };

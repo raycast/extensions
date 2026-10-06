@@ -58,7 +58,8 @@ export interface CourseFile {
   downloadUrl: string;
   size: number;
   mimetype?: string;
-  modified?: Date;
+  /** Epoch milliseconds. */
+  modified?: number;
   moduleName: string;
   sectionName: string;
   courseId: number;
@@ -113,7 +114,7 @@ function toModule(raw: RawModule, sectionName: string, courseId: number, lang: L
       downloadUrl: c.fileurl as string,
       size: c.filesize ?? 0,
       mimetype: c.mimetype,
-      modified: c.timemodified ? new Date(c.timemodified * 1000) : undefined,
+      modified: c.timemodified ? c.timemodified * 1000 : undefined,
       moduleName: name,
       sectionName,
       courseId,

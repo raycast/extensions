@@ -13,7 +13,7 @@ function matchesFilter(course: Course, filter: Filter): boolean {
     case "inprogress":
       return course.inProgress;
     case "past":
-      return !course.inProgress;
+      return course.hasEnded;
     case "favourites":
       return course.isFavourite;
     default:
@@ -40,8 +40,8 @@ export default function SearchCourses() {
   }
 
   const courses = (data ?? []).filter((course) => matchesFilter(course, filter));
-  const inProgress = courses.filter((course) => course.inProgress);
-  const past = courses.filter((course) => !course.inProgress);
+  const current = courses.filter((course) => !course.hasEnded);
+  const past = courses.filter((course) => course.hasEnded);
 
   function renderCourse(course: Course) {
     const accessories: List.Item.Accessory[] = [];
@@ -111,8 +111,8 @@ export default function SearchCourses() {
         />
       ) : (
         <>
-          <List.Section title="In Progress" subtitle={`${inProgress.length}`}>
-            {inProgress.map(renderCourse)}
+          <List.Section title="In Progress" subtitle={`${current.length}`}>
+            {current.map(renderCourse)}
           </List.Section>
           <List.Section title="Past" subtitle={`${past.length}`}>
             {past.map(renderCourse)}

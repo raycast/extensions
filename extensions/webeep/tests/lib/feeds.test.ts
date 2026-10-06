@@ -82,7 +82,7 @@ describe("calendar", () => {
   it("maps a raw event", () => {
     const event = toCalendarEvent(raw(1, 1702072800), "en");
     expect(event.name).toBe("Submission");
-    expect(event.end?.getTime()).toBe((1702072800 + 3600) * 1000);
+    expect(event.end).toBe((1702072800 + 3600) * 1000);
     expect(event.courseName).toBe("059429 - HCI (X) [2023-24]");
     expect(event.actionName).toBe("Add submission");
   });

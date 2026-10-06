@@ -47,7 +47,7 @@ export default function ReadAnnouncements() {
             subtitle={announcement.courseName}
             icon={Icon.Megaphone}
             keywords={[announcement.author, announcement.courseName, announcement.preview]}
-            accessories={[{ date: announcement.created }]}
+            accessories={[{ date: new Date(announcement.created) }]}
             detail={
               <List.Item.Detail
                 markdown={markdownFor(announcement)}
@@ -55,7 +55,10 @@ export default function ReadAnnouncements() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Course" text={announcement.courseName} />
                     <List.Item.Detail.Metadata.Label title="Author" text={announcement.author} />
-                    <List.Item.Detail.Metadata.Label title="Posted" text={announcement.created.toLocaleString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Posted"
+                      text={new Date(announcement.created).toLocaleString()}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
