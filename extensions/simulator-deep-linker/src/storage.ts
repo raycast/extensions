@@ -360,7 +360,10 @@ async function recoverLegacyTransitionLock(lockPath: string): Promise<void> {
   }
 
   const transitionNames = entries.filter((entry) => entry.startsWith(".recovery.") || entry.startsWith(".release."));
-  if (transitionNames.length !== 1 || entries.length !== 1) return;
+  const unexpectedNames = entries.filter(
+    (entry) => !transitionNames.includes(entry) && !isStorageRecoveryArtifactName(entry),
+  );
+  if (transitionNames.length !== 1 || unexpectedNames.length !== 0) return;
 
   const transitionPath = path.join(lockPath, transitionNames[0]);
   const transitionOwner = await readStorageLockOwner(transitionPath).catch(() => undefined);
@@ -611,20 +614,48 @@ function compareStorageRecoveryClaims(left: StorageRecoveryClaim, right: Storage
 }
 
 async function removeClaimedStorageLock(claimedLockPath: string, claimedOwnerPath: string): Promise<void> {
-  const lockTargetPath = await realpath(claimedLockPath);
-  const isSymbolicLock = (await lstat(claimedLockPath)).isSymbolicLink();
-  await unlink(claimedOwnerPath);
-  for (const entry of await readdir(claimedLockPath)) {
-    if (entry === storageRecoveryClaimName || entry.startsWith(`${storageRecoveryClaimName}.`)) {
-      await unlink(path.join(claimedLockPath, entry));
+  let cleanupPath: string;
+  let claimedOwnerCleanupPath: string;
+  try {
+    const isSymbolicLock = (await lstat(claimedLockPath)).isSymbolicLink();
+    cleanupPath = isSymbolicLock ? await realpath(claimedLockPath) : claimedLockPath;
+    claimedOwnerCleanupPath = path.join(cleanupPath, path.relative(claimedLockPath, claimedOwnerPath));
+    if (isSymbolicLock) await unlink(claimedLockPath);
+  } catch {
+    return;
+  }
+
+  // The public lock has already been moved to a unique path (and a symlink has been unlinked above). Cleanup can no
+  // longer affect mutual exclusion, so races with losing recovery contenders must not turn a successful save into a
+  // reported failure. Repeated best-effort passes also collect temp records published from an in-flight doorway.
+  await unlink(claimedOwnerCleanupPath).catch(() => undefined);
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const entries = await readdir(cleanupPath).catch(() => undefined);
+    if (!entries) return;
+    await Promise.all(
+      entries
+        .filter(isStorageRecoveryArtifactName)
+        .map((entry) => unlink(path.join(cleanupPath, entry)).catch(() => undefined)),
+    );
+    const remainingEntries = await readdir(cleanupPath).catch(() => undefined);
+    if (!remainingEntries) return;
+    if (remainingEntries.length === 0) {
+      try {
+        await rmdir(cleanupPath);
+        return;
+      } catch (error) {
+        if (isNodeError(error, "ENOENT")) return;
+        if (!isNodeError(error, "ENOTEMPTY")) return;
+      }
+    } else if (remainingEntries.some((entry) => !isStorageRecoveryArtifactName(entry))) {
+      return;
     }
+    await delay(1);
   }
-  if (isSymbolicLock) {
-    await rmdir(lockTargetPath);
-    await unlink(claimedLockPath);
-  } else {
-    await rmdir(claimedLockPath);
-  }
+}
+
+function isStorageRecoveryArtifactName(entry: string): boolean {
+  return entry === storageRecoveryClaimName || entry.startsWith(`${storageRecoveryClaimName}.`);
 }
 
 async function readStorageLockOwner(ownerPath: string): Promise<StorageLockOwner | undefined> {

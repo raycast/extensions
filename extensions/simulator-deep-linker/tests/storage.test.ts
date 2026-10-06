@@ -389,6 +389,51 @@ test("does not move or replace another recovery contender's live claim", async (
   assert.deepEqual((await readdir(lockPath)).sort(), ["owner", `.recovery-claim.claim.${claimantToken}`].sort());
 });
 
+test("recovers a legacy transition lock with records left by dead recovery claimants", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const abandonedPID = 2_147_483_647;
+  const transitionName = ".release.abandoned-writer";
+  const choosingToken = "33333333-3333-4333-8333-333333333333";
+  const claimToken = "44444444-4444-4444-8444-444444444444";
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, transitionName),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: abandonedPID })}\n`,
+  );
+  await writeFile(
+    path.join(lockPath, `.recovery-claim.choosing.${choosingToken}`),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: choosingToken,
+      claimantPid: abandonedPID,
+    })}\n`,
+  );
+  await writeFile(
+    path.join(lockPath, `.recovery-claim.claim.${claimToken}`),
+    `${JSON.stringify({
+      schemaVersion: 2,
+      ownerToken: "abandoned-writer",
+      ownerPid: abandonedPID,
+      claimantToken: claimToken,
+      claimantPid: abandonedPID,
+      ticket: 1,
+    })}\n`,
+  );
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+  assert.deepEqual(
+    (await readdir(directory)).filter((entry) => entry.includes(".simulator-deep-linker.lock")),
+    [],
+  );
+});
+
 test("does not reclaim an ownerless lock that could still belong to a writer", async (t) => {
   const directory = await temporaryDirectory(t);
   const storagePath = path.join(directory, "deeplinks.json");
