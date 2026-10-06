@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -75,6 +75,12 @@ export function run<T>(args: string[], timeoutMs = 30_000): Promise<T> {
 }
 
 export const getStatus = () => run<Status>(["status"]);
+
+/** Reads the status synchronously, so a menu bar command can render the right state on its first frame. */
+export function getStatusSync(): Status {
+  const out = execFileSync(mictapePath(), ["status", "--json"], { timeout: 5_000, encoding: "utf8" });
+  return JSON.parse(out) as Status;
+}
 export const getDestinations = () => run<Destination[]>(["destinations"]);
 export const getConfig = () => run<ConfigInfo>(["config"]);
 export const addDestination = (rule: DestinationRule) =>

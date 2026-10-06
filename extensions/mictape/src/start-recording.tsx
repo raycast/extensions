@@ -45,7 +45,7 @@ const labelKey = (destination: Destination) => `last-label:${destination.path}`;
 async function suggestLabel(destination: Destination): Promise<string> {
   const last = await LocalStorage.getItem<string>(labelKey(destination));
   if (!last) return "";
-  return /^\d+$/.test(last) ? String(Number(last) + 1) : last;
+  return /^\d+$/.test(last) ? String(BigInt(last) + 1n).padStart(last.length, "0") : last;
 }
 
 async function refreshMenuBar() {
@@ -184,7 +184,7 @@ export default function Command() {
           description="Add a folder to record into in Recording Settings."
           actions={
             <ActionPanel>
-              <Action.Push title="Open Recording Settings" icon={Icon.Gear} target={<Settings />} />
+              <Action.Push title="Open Recording Settings" icon={Icon.Gear} target={<Settings />} onPop={revalidate} />
             </ActionPanel>
           }
         />

@@ -12,6 +12,7 @@ This extension drives the [`mictape`](https://github.com/t4kamuna/mictape) comma
 git clone https://github.com/t4kamuna/mictape.git
 cd mictape
 swift build -c release
+mkdir -p ~/.local/bin
 install -m 755 .build/release/mictape ~/.local/bin/mictape
 ```
 
