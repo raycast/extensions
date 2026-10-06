@@ -66,6 +66,14 @@
       "placeholder": "https://argocd."
     },
     {
+      "name": "commentAuthor",
+      "title": "CI Comment Author",
+      "description": "Optional. GitHub login of the account that posts the preview URL, e.g. your CI bot. Only its comments are trusted. If empty, only comments from repository owners, members and collaborators are used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "platform-handler"
+    },
+    {
       "name": "personalAccessToken",
       "title": "Personal Access Token",
       "description": "Optional. Use a GitHub token instead of signing in with OAuth, e.g. when your organization restricts third-party OAuth apps. Needs read access to pull requests; authorize it for SSO if required.",
