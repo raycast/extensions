@@ -10,9 +10,11 @@
 - Discover added and removed services when refreshing, and remove redundant menu bar status checks.
 - Preserve temporarily missing favorites and protect saved choices from concurrent refreshes and edits.
 - Keep favorites attached to their service when macOS network order changes, preserve manual favorite order, and fix duplicate or hidden-service entries.
+- Retain legacy numeric favorite records without guessing their VPN; favorites from older versions need to be selected again.
+- Save favorites and their order together, and append favorites with missing saved positions when repairing older data.
 - Include disabled VPN configurations and physical services such as Wi-Fi, Bluetooth PAN, and Thunderbolt Bridge when non-VPN filtering is turned off.
 - Retry menu bar refresh signals after busy or interrupted refreshes, but wait for the scheduled refresh after a failure. Explain when a manual refresh cannot run.
-- Repair tied favorite positions so migrated favorites can be reordered, and keep setup guidance out of empty search results.
+- Repair tied favorite positions so favorites can be reordered, and keep setup guidance out of empty search results.
 - Show setup guidance when filtering hides all services, and keep refresh errors visible alongside previously loaded statuses.
 - Recover from malformed saved data and temporary status-check failures.
 

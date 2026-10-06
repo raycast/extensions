@@ -20,7 +20,7 @@ Connecting and disconnecting labels mean macOS has been asked to change the conn
 
 ## Favorites and filtering
 
-Favorites retain their manual order regardless of connection status. They are saved by service name so changing the network service order in macOS does not move a favorite to a different VPN. Existing favorites are migrated using the network order when their services are listed. Saved entries for temporarily absent services are retained. Renaming a service requires selecting it and adding it to favorites again.
+Favorites retain their manual order regardless of connection status. They are saved by service name so changing the network service order in macOS does not move a favorite to a different VPN. Saved entries for temporarily absent services are retained. Favorites from older versions used only numeric network positions, which cannot reliably identify their original VPNs. Those records are retained without assigning them to current services; add those VPNs to favorites again after updating. Renaming a service also requires adding it to favorites again.
 
 **Filter Services** hides unavailable and non-VPN entries by default. Turn it off to see other network services, including disabled VPN configurations. Unavailable services cannot be connected from the extension.
 

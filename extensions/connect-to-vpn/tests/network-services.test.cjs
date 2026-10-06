@@ -65,8 +65,11 @@ test("discovers disabled VPNs, quoted names and physical interfaces with one bat
   assert.equal(ctx.calls.length, 2);
 });
 
-test("migrates numeric favorites once and preserves identity after network reordering", async () => {
-  const ctx = setup({ "network-service-favorites": '{"1":true}', "network-service-favorites-order": '{"1":4}' });
+test("named favorites preserve identity after network reordering", async () => {
+  const ctx = setup({
+    "network-service-favorites": '{"service:Work VPN":true}',
+    "network-service-favorites-order": '{"service:Work VPN":4}',
+  });
   ctx.output.order = serviceOrder([
     [1, "Work VPN"],
     [2, "Home VPN"],
@@ -76,7 +79,7 @@ test("migrates numeric favorites once and preserves identity after network reord
   const favs = await ctx.network.loadFavorites();
   const order = await ctx.network.loadFavoriteOrder();
   assert.deepEqual(favs, { "service:Work VPN": true });
-  assert.deepEqual(order, { "service:Work VPN": 0 });
+  assert.deepEqual(order, { "service:Work VPN": 4 });
   ctx.output.order = serviceOrder([
     [1, "Home VPN"],
     [2, "Work VPN"],
@@ -84,6 +87,34 @@ test("migrates numeric favorites once and preserves identity after network reord
   const services = await ctx.network.getNetworkServices();
   assert.equal(services["service:Work VPN"].favorite, true);
   assert.equal(services["service:Home VPN"].favorite, false);
+});
+
+test("legacy favorites never attach to a VPN reusing a numeric position across discovery and refresh", async (t) => {
+  const ctx = setup({ "network-service-favorites": '{"1":true}', "network-service-favorites-order": '{"1":4}' });
+  ctx.output.order = serviceOrder([]);
+  ctx.output.statuses = "";
+  const current = await mount(ctx, t);
+  ctx.output.order = serviceOrder([[1, "Different VPN"]]);
+  ctx.output.statuses = vpnList([["Different VPN"]]);
+  await act(async () => current().refreshServices());
+  assert.equal(current().favoriteServices.length, 0);
+  assert.equal(current().otherServices[0].name, "Different VPN");
+  ctx.output.order = serviceOrder([
+    [1, "Different VPN"],
+    [2, "Original VPN"],
+  ]);
+  ctx.output.statuses = vpnList([["Different VPN"], ["Original VPN"]]);
+  await act(async () => current().refreshServices());
+  assert.equal(current().favoriteServices.length, 0);
+  assert.equal(current().otherServices.length, 2);
+  assert.deepEqual(await ctx.network.loadFavorites(), { 1: true });
+  assert.deepEqual(await ctx.network.loadFavoriteOrder(), { 1: 4 });
+  await act(async () => current().addToFavorites(current().otherServices.find((s) => s.name === "Original VPN")));
+  assert.deepEqual(
+    current().favoriteServices.map((s) => s.name),
+    ["Original VPN"],
+  );
+  assert.deepEqual(await ctx.network.loadFavorites(), { 1: true, "service:Original VPN": true });
 });
 
 test("unsupported fallback status is invalid rather than connectable", async () => {
@@ -348,16 +379,17 @@ test("background menu bar loads once, uses an adaptive icon, and refreshes on si
   assert.equal(ctx.launches.length, 0);
 });
 
-for (const legacy of [true, false]) {
-  test(`favorites with missing or duplicate ${legacy ? "legacy" : "stable"} positions can move after migration`, async (t) => {
-    const id = (n, name) => (legacy ? String(n) : `service:${name}`);
+for (const missing of [true, false]) {
+  test(`favorites with ${missing ? "missing" : "duplicate"} positions retain known order and can move after repair`, async (t) => {
     const ctx = setup({
       "network-service-favorites": JSON.stringify({
-        [id(1, "One")]: true,
-        [id(2, "Two")]: true,
-        [id(3, "Three")]: true,
+        "service:One": true,
+        "service:Two": true,
+        "service:Three": true,
       }),
-      "network-service-favorites-order": JSON.stringify({ [id(3, "Three")]: 0 }),
+      "network-service-favorites-order": JSON.stringify(
+        missing ? { "service:Three": 0 } : { "service:One": 0, "service:Two": 0, "service:Three": 0 },
+      ),
     });
     ctx.output.order = serviceOrder([
       [1, "One"],
@@ -370,17 +402,26 @@ for (const legacy of [true, false]) {
       current().favoriteServices.map((s) => s.order),
       [0, 1, 2],
     );
+    const names = missing ? ["Three", "One", "Two"] : ["One", "Two", "Three"];
+    assert.deepEqual(
+      current().favoriteServices.map((s) => s.name),
+      names,
+    );
+    const moved = [names[1], names[0], names[2]];
     await act(async () => current().moveFavoriteUp(current().favoriteServices[1]));
     assert.deepEqual(
       current().favoriteServices.map((s) => s.name),
-      ["Two", "One", "Three"],
+      moved,
     );
     await act(async () => current().refreshServices());
     assert.deepEqual(
       current().favoriteServices.map((s) => s.name),
-      ["Two", "One", "Three"],
+      moved,
     );
-    assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 1, "service:Two": 0, "service:Three": 2 });
+    assert.deepEqual(
+      await ctx.network.loadFavoriteOrder(),
+      Object.fromEntries(moved.map((name, index) => [`service:${name}`, index])),
+    );
   });
 }
 
@@ -523,11 +564,10 @@ for (const hideInvalidDevices of [false, true]) {
 
 test("a late discovery cannot undo a favorite removal or discard an absent favorite", async (t) => {
   const ctx = setup({
-    "network-service-favorites": '{"service:Work VPN":true,"service:Absent":true}',
-    "network-service-favorites-order": '{"service:Work VPN":0,"service:Absent":1}',
+    "network-service-favorites": '{"1":true,"service:Work VPN":true,"service:Absent":true}',
+    "network-service-favorites-order": '{"1":4,"service:Work VPN":0,"service:Absent":1}',
   });
   const current = await mount(ctx, t);
-  ctx.storage.set("network-service-favorites", '{"1":true,"service:Work VPN":true,"service:Absent":true}');
   let finish, refresh;
   ctx.output.onRead = (callback) => {
     finish = callback;
@@ -540,9 +580,47 @@ test("a late discovery cannot undo a favorite removal or discard an absent favor
     finish(null, ctx.output.statuses);
     assert.equal(await refresh, "superseded");
   });
-  assert.deepEqual(await ctx.network.loadFavorites(), { "service:Absent": true });
+  assert.deepEqual(await ctx.network.loadFavorites(), { 1: true, "service:Absent": true });
   ctx.output.onRead = undefined;
   await act(async () => current().refreshServices());
   assert.equal(current().favoriteServices.length, 0);
-  assert.deepEqual(await ctx.network.loadFavorites(), { "service:Absent": true });
+  assert.deepEqual(await ctx.network.loadFavorites(), { 1: true, "service:Absent": true });
+});
+
+test("a failed add leaves manual order intact through refresh and a successful retry", async (t) => {
+  const ctx = setup({
+    "network-service-favorites": '{"service:One":true,"service:Two":true}',
+    "network-service-favorites-order": '{"service:One":0,"service:Two":1}',
+  });
+  ctx.output.order = serviceOrder([
+    [1, "One"],
+    [2, "Two"],
+    [3, "Three"],
+  ]);
+  ctx.output.statuses = vpnList([["One"], ["Two"], ["Three"]]);
+  const current = await mount(ctx, t);
+  const setItem = ctx.api.LocalStorage.setItem;
+  ctx.api.LocalStorage.setItem = async () => {
+    throw new Error("save failed");
+  };
+  await act(async () => current().addToFavorites(current().otherServices[0]));
+  assert.match(current().error.message, /save failed/);
+  assert.deepEqual(
+    current().favoriteServices.map((s) => s.name),
+    ["One", "Two"],
+  );
+  ctx.api.LocalStorage.setItem = setItem;
+  await act(async () => current().refreshServices());
+  assert.equal(current().error, undefined);
+  assert.deepEqual(
+    current().favoriteServices.map((s) => s.name),
+    ["One", "Two"],
+  );
+  assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Two": 1 });
+  await act(async () => current().addToFavorites(current().otherServices[0]));
+  assert.deepEqual(
+    current().favoriteServices.map((s) => s.name),
+    ["One", "Two", "Three"],
+  );
+  assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Two": 1, "service:Three": 2 });
 });

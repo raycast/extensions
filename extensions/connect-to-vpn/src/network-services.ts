@@ -12,7 +12,6 @@ type Preferences = {
 
 export type NetworkService = {
   id: string;
-  legacyId?: string;
   name: string;
   hardwarePort: string;
   device: string;
@@ -76,7 +75,7 @@ export const getNetworkServices = async () => {
     services.map(async (service) => ({ ...service, status: await currentStatus(service, vpnStatuses) })),
   );
   // Discovery does not hold the metadata lock. Once it finishes, use the latest saved edits.
-  const { favorites, order } = await updateFavoriteMetadata(services);
+  const { favorites, order } = await updateFavoriteMetadata();
   return Object.fromEntries(
     serviceStatuses.map((service) => [
       service.id,
@@ -266,10 +265,10 @@ export function useNetworkServices() {
     }
   };
 
-  const editFavorites = async (change: Parameters<typeof updateFavoriteMetadata>[1]) => {
+  const editFavorites = async (change: Parameters<typeof updateFavoriteMetadata>[0]) => {
     revision.current += 1;
     try {
-      const { favorites, order } = await updateFavoriteMetadata(Object.values(networkServices), change);
+      const { favorites, order } = await updateFavoriteMetadata(change);
       setNetworkServices((current) =>
         Object.fromEntries(
           Object.entries(current).map(([id, service]) => [
@@ -500,11 +499,10 @@ const currentStatus = async (
   return showPPPoEStatus(service.name);
 };
 
-const parseServices = (text: string): (NetworkService & { legacyId: string })[] => {
+const parseServices = (text: string): NetworkService[] => {
   const regex = /^\((\d+|\*)\) +([^\r\n]+)\r?\n\(Hardware Port: (.*?), Device: (.*?)\)\r?$/gm;
   return Array.from(text.matchAll(regex)).map((item) => ({
     id: `service:${item[2]}`,
-    legacyId: item[1],
     name: item[2],
     hardwarePort: item[3],
     device: item[4],
