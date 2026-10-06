@@ -2,12 +2,12 @@ import { Detail, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchTypes } from "../../api";
 import { PokemonType, Type } from "../../types";
-import { calculateEffectiveness } from "../../utils";
+import { calculateStrengths } from "../../utils";
 
-export default function WeaknessMetadata(props: {
+export default function StrengthMetadata(props: {
   type?: string;
   types: PokemonType[];
-  allTypes?: Type[];
+  allTypes: Type[];
   showNeutral?: boolean;
 }) {
   const TagListComponent =
@@ -22,17 +22,15 @@ export default function WeaknessMetadata(props: {
 
   const allTypes = props.allTypes ?? fetchedTypes ?? [];
 
-  const { weak, normal, resistant, immune } = calculateEffectiveness(
-    props.types,
-    allTypes,
-  );
+  const { superEffective, normal, notVeryEffective, noEffect } =
+    calculateStrengths(props.types, allTypes);
 
   const tagList = [];
 
-  if (weak.length) {
+  if (superEffective.length) {
     tagList.push(
-      <TagListComponent title="Weaknesses" key="weak">
-        {weak.map((props, index) => (
+      <TagListComponent title="Super Effective" key="super-effective">
+        {superEffective.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
@@ -49,20 +47,20 @@ export default function WeaknessMetadata(props: {
     );
   }
 
-  if (immune.length) {
+  if (noEffect.length) {
     tagList.push(
-      <TagListComponent title="Immunities" key="immune">
-        {immune.map((props, index) => (
+      <TagListComponent title="No Effect" key="no-effect">
+        {noEffect.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
     );
   }
 
-  if (resistant.length) {
+  if (notVeryEffective.length) {
     tagList.push(
-      <TagListComponent title="Resistances" key="resistant">
-        {resistant.map((props, index) => (
+      <TagListComponent title="Not Very Effective" key="not-very-effective">
+        {notVeryEffective.map((props, index) => (
           <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
