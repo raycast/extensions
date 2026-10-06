@@ -143,20 +143,24 @@ export default function PokeItems(props: { arguments: { search?: string } }) {
                   }
                   actions={
                     item &&
-                    item.itemflavortexts &&
-                    item.itemflavortexts.length > 0 && (
+                    ((item.itemflavortexts &&
+                      item.itemflavortexts.length > 0) ||
+                      (item.itemprices && item.itemprices.length > 0)) && (
                       <ActionPanel>
                         <ActionPanel.Section title="Information">
-                          <Action.Push
-                            title="Descriptions"
-                            icon={Icon.List}
-                            target={
-                              <Descriptions
-                                name={itemName}
-                                entries={item.itemflavortexts}
+                          {item.itemflavortexts &&
+                            item.itemflavortexts.length > 0 && (
+                              <Action.Push
+                                title="Descriptions"
+                                icon={Icon.List}
+                                target={
+                                  <Descriptions
+                                    name={itemName}
+                                    entries={item.itemflavortexts}
+                                  />
+                                }
                               />
-                            }
-                          />
+                            )}
                           {item.itemprices && item.itemprices.length > 0 && (
                             <Action.Push
                               title="Price"

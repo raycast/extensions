@@ -8,6 +8,7 @@ export default function StrengthMetadata(props: {
   type?: string;
   types: PokemonType[];
   allTypes: Type[];
+  showNeutral?: boolean;
 }) {
   const TagListComponent =
     props.type === "detail"
@@ -36,7 +37,7 @@ export default function StrengthMetadata(props: {
     );
   }
 
-  if (normal.length) {
+  if (props.showNeutral && normal.length) {
     tagList.push(
       <TagListComponent title="Normal" key="normal">
         {normal.map((props, index) => (

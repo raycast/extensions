@@ -43,6 +43,7 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
                       type="detail"
                       types={[{ type }]}
                       allTypes={types}
+                      showNeutral
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
@@ -53,6 +54,7 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
                       type="detail"
                       types={[{ type }]}
                       allTypes={types}
+                      showNeutral
                     />
                   </List.Item.Detail.Metadata>
                 }
