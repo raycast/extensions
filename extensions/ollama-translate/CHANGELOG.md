@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-06
 
 - Translate text with local Ollama models while preserving meaning, tone, and formatting.
 - Choose automatic detection or a specific source language and remember language pairs.
