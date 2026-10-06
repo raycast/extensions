@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Caly MCP Server] - {PR_MERGE_DATE}
+## [Add Caly MCP Server] - 2026-10-06
 
 - Add Caly, a remote MCP server from Devino Solutions for scheduling, to the official registry. It is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.
 
