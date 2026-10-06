@@ -1,8 +1,21 @@
 import { execFile } from "child_process";
+import { homedir } from "os";
+
+// Installing the cmux CLI into PATH is optional, but the app always bundles it,
+// so fall back to the bundled copy after any user-installed one.
+const bundledCliPaths = [
+  "/Applications/cmux.app/Contents/Resources/bin",
+  `${homedir()}/Applications/cmux.app/Contents/Resources/bin`,
+];
 
 const expandedEnv = {
   ...process.env,
-  PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH ?? "/usr/bin:/bin:/usr/sbin:/sbin"}`,
+  PATH: [
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    process.env.PATH ?? "/usr/bin:/bin:/usr/sbin:/sbin",
+    ...bundledCliPaths,
+  ].join(":"),
 };
 
 export function execFileAsync(command: string, args: string[]): Promise<string> {

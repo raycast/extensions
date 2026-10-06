@@ -1,5 +1,10 @@
 # cmux
 
+## [Fix CLI lookup without PATH install] - {PR_MERGE_DATE}
+
+- Fall back to the cmux CLI bundled in `cmux.app` when it isn't installed into PATH, fixing `spawn cmux ENOENT`
+- Document that cmux's Socket Control Mode must be set to Automation mode for Raycast to connect
+
 ## [Improved workspace search] - 2026-05-27
 
 - Added workspace metadata from `cmux tree --all --json` for better matching
