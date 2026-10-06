@@ -6,6 +6,7 @@ export interface MutexOptions {
   acquireTimeoutMs?: number;
   onBeforeReclaimForTesting?: () => void | Promise<void>;
   onBeforeRenameForTesting?: () => void | Promise<void>;
+  onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
 }
 
 interface StaleLockSnapshot {
@@ -22,6 +23,7 @@ export class CrossProcessMutex {
   private readonly acquireTimeoutMs: number;
   private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
   private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
+  private readonly onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
   private static readonly HEARTBEAT_INTERVAL_MS = 1000;
   private static readonly STALE_THRESHOLD_MS = 6000;
   private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 10000;
@@ -36,6 +38,7 @@ export class CrossProcessMutex {
       this.acquireTimeoutMs = options?.acquireTimeoutMs ?? CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS;
       this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
       this.onBeforeRenameForTesting = options?.onBeforeRenameForTesting;
+      this.onBeforeWriteLockContentForTesting = options?.onBeforeWriteLockContentForTesting;
     }
   }
 
@@ -59,6 +62,9 @@ export class CrossProcessMutex {
         try {
           const dirStat = fs.statSync(this.lockDir);
           createdDirIno = dirStat.ino;
+          if (this.onBeforeWriteLockContentForTesting) {
+            await this.onBeforeWriteLockContentForTesting();
+          }
           this.writeLockContent(token, createdDirIno);
         } catch (writeErr) {
           if (createdDirIno !== undefined) {
@@ -85,11 +91,29 @@ export class CrossProcessMutex {
           }
         }
 
+        const currentStat = fs.statSync(this.lockDir);
+        if (currentStat.ino !== createdDirIno) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
+        if (!fs.existsSync(this.lockFile)) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
+        const currentLockContent = fs.readFileSync(this.lockFile, "utf-8");
+        const parts = currentLockContent.split(":");
+        if (parts[0] !== String(process.pid) || parts[2] !== token) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
+        }
+
         acquired = true;
         acquiredDirIno = createdDirIno;
         break;
       } catch (e: unknown) {
-        const err = e as { code?: string };
+        const err = e as { code?: string; message?: string };
         if (err.code === "EEXIST") {
           if (await this.tryBreakStaleLock()) {
             continue;
@@ -98,17 +122,14 @@ export class CrossProcessMutex {
         } else if (err.code === "ENOENT") {
           fs.mkdirSync(path.dirname(this.lockDir), { recursive: true });
           continue;
+        } else if (err.message?.includes("Lock directory") || err.message?.includes("Lock file")) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          continue;
         } else {
           throw err;
         }
       }
     }
-
-    if (!acquired || acquiredDirIno === undefined) {
-      throw new Error("Could not acquire cross-process storage lock. Please try again.");
-    }
-
-    let lockLost = false;
 
     const isOwnershipValid = (): boolean => {
       try {
@@ -124,6 +145,12 @@ export class CrossProcessMutex {
       }
     };
 
+    if (!acquired || acquiredDirIno === undefined || !isOwnershipValid()) {
+      throw new Error("Could not acquire cross-process storage lock. Please try again.");
+    }
+
+    let lockLost = false;
+
     const heartbeat = setInterval(() => {
       if (!isOwnershipValid()) {
         lockLost = true;
@@ -133,11 +160,15 @@ export class CrossProcessMutex {
       try {
         this.writeLockContent(token, acquiredDirIno);
       } catch {
-        // Ignore heartbeat write errors; the lock dir may have been removed
+        lockLost = true;
+        clearInterval(heartbeat);
       }
     }, CrossProcessMutex.HEARTBEAT_INTERVAL_MS);
 
     try {
+      if (!isOwnershipValid()) {
+        throw new Error("Cross-process storage lock was lost before operation started. Please retry.");
+      }
       const result = await task();
       if (lockLost || !isOwnershipValid()) {
         throw new Error("Cross-process storage lock was lost while operation was running. Please retry.");
@@ -187,13 +218,19 @@ export class CrossProcessMutex {
 
   private writeLockContent(token: string, expectedDirIno?: number): void {
     if (expectedDirIno !== undefined) {
-      if (!fs.existsSync(this.lockDir)) return;
+      if (!fs.existsSync(this.lockDir)) {
+        throw new Error("Lock directory does not exist.");
+      }
       const stat = fs.statSync(this.lockDir);
-      if (stat.ino !== expectedDirIno) return;
+      if (stat.ino !== expectedDirIno) {
+        throw new Error("Lock directory was replaced during acquisition.");
+      }
       if (fs.existsSync(this.lockFile)) {
         const content = fs.readFileSync(this.lockFile, "utf-8");
         const parts = content.split(":");
-        if (parts[2] && parts[2] !== token) return;
+        if (parts[2] && parts[2] !== token) {
+          throw new Error("Lock file was replaced by another contender.");
+        }
       }
     }
     const tmpFile = path.join(
@@ -208,7 +245,7 @@ export class CrossProcessMutex {
         } catch {
           // Ignore unlink errors
         }
-        return;
+        throw new Error("Lock directory was replaced while writing lock content.");
       }
     }
     fs.renameSync(tmpFile, this.lockFile);

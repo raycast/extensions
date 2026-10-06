@@ -308,6 +308,84 @@ async function run() {
     assert.equal(await livePromise, "live-success");
     assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after live command finishes");
 
+    // 12. Pausing after creating lock directory but before writing pid.txt allows another command
+    // to reclaim the directory, and prevents the paused command from running its task concurrently
+    let pauseBeforeWriteTriggered = false;
+    let resumePausedContender: (() => void) | undefined;
+    const pauseBeforeWritePromise = new Promise<void>((resolve) => {
+      resumePausedContender = resolve;
+    });
+
+    const contenderPausedBeforeWrite = new CrossProcessMutex(lockDir, {
+      acquireTimeoutMs: 1500,
+      onBeforeWriteLockContentForTesting: async () => {
+        pauseBeforeWriteTriggered = true;
+        await pauseBeforeWritePromise;
+      },
+    });
+
+    let contenderPausedTaskRan = false;
+    const contenderPausedPromise = contenderPausedBeforeWrite.runExclusive(async () => {
+      contenderPausedTaskRan = true;
+      return "paused-should-not-run";
+    });
+
+    // Wait until Contender 1 created the lock directory and paused before writing pid.txt
+    while (!pauseBeforeWriteTriggered) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    assert.ok(fs.existsSync(lockDir), "Lock directory must exist before writing pid.txt");
+    assert.ok(!fs.existsSync(path.join(lockDir, "pid.txt")), "pid.txt must not exist yet");
+
+    // Age the incomplete lock directory past STALE_THRESHOLD_MS (>6s)
+    const agedTime = new Date(Date.now() - 30000);
+    fs.utimesSync(lockDir, agedTime, agedTime);
+
+    // Command 2 starts, sees aged incomplete directory, reclaims it, and acquires its own lock
+    const liveHolder = new CrossProcessMutex(lockDir, 2000);
+    let liveHolderHolding = false;
+    let releaseLiveHolder: (() => void) | undefined;
+    const liveHolderPromise = new Promise<void>((resolve) => {
+      releaseLiveHolder = resolve;
+    });
+
+    const liveTaskPromise = liveHolder.runExclusive(async () => {
+      liveHolderHolding = true;
+      await liveHolderPromise;
+      return "live-holder-done";
+    });
+
+    while (!liveHolderHolding) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    assert.ok(fs.existsSync(path.join(lockDir, "pid.txt")), "Live holder must have written its pid.txt");
+    const liveHolderToken = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").split(":")[2];
+
+    // Wait past contenderPausedBeforeWrite's acquireTimeoutMs (1500ms)
+    await new Promise((r) => setTimeout(r, 1600));
+
+    // Now resume Contender 1
+    resumePausedContender?.();
+
+    // Contender 1 must reject and its task must NEVER have run
+    await assert.rejects(
+      contenderPausedPromise,
+      /Could not acquire cross-process storage lock/,
+      "Paused contender whose lock directory was reclaimed must reject",
+    );
+    assert.equal(contenderPausedTaskRan, false, "Paused contender's task must never have executed");
+
+    // Verify live holder's lock was untouched
+    assert.ok(fs.existsSync(lockDir), "Live holder's lock directory must remain intact");
+    const postReclaimToken = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").split(":")[2];
+    assert.equal(postReclaimToken, liveHolderToken, "Live holder's token must not be overwritten");
+
+    // Finish live holder
+    releaseLiveHolder?.();
+    assert.equal(await liveTaskPromise, "live-holder-done");
+    assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after live holder finishes");
+
     console.log("storage mutex tests passed");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
