@@ -2,7 +2,7 @@
 
 ## [Faster Actions] - {PR_MERGE_DATE}
 
-- Reuse a single connection to Bridge for the whole command instead of reconnecting for every action
+- Keep the connections to Bridge open for the whole command instead of reconnecting for every action: one for loading lists, one for opening emails and actions, so clicks never wait for the list
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 

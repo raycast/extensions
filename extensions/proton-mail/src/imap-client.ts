@@ -42,35 +42,54 @@ function createClient(): ImapFlow {
   });
 }
 
-// One connection for the whole command: every action used to open (and log out of) its own connection
-// to Bridge, which made each click wait for a new TLS handshake and login.
-// imapflow queues commands and mailbox locks, so concurrent operations can share it.
-let sharedClient: ImapFlow | null = null;
-let connecting: Promise<ImapFlow> | null = null;
+// Every action used to open (and log out of) its own connection to Bridge, so each click waited for a new
+// TLS handshake and login. Keep the connections open for the whole command instead: one for loading lists,
+// one for what the user clicks (opening an email, marking it read, moving it). imapflow serializes commands and
+// mailbox locks on a connection, so with a single one, opening an email had to wait for a list fetch to finish.
+type Channel = "list" | "actions";
 
-async function getClient(): Promise<ImapFlow> {
-  if (sharedClient?.usable) return sharedClient;
-  if (!connecting) {
-    connecting = (async () => {
+interface ChannelState {
+  client: ImapFlow | null;
+  connecting: Promise<ImapFlow> | null;
+}
+
+const channels: Record<Channel, ChannelState> = {
+  list: { client: null, connecting: null },
+  actions: { client: null, connecting: null },
+};
+
+// Bumped by disconnectClient(), so a connection that finishes after the command closed logs itself out
+let generation = 0;
+
+async function getClient(channel: Channel): Promise<ImapFlow> {
+  const state = channels[channel];
+  if (state.client?.usable) return state.client;
+  if (!state.connecting) {
+    const startedIn = generation;
+    state.connecting = (async () => {
       const client = createClient();
       // Without a listener, a dropped connection would crash the command; the next call reconnects instead
       client.on("error", () => {});
       client.on("close", () => {
-        if (sharedClient === client) sharedClient = null;
+        if (state.client === client) state.client = null;
       });
       await client.connect();
-      sharedClient = client;
+      if (startedIn !== generation) {
+        await client.logout().catch(() => undefined);
+        throw new Error("Connection closed");
+      }
+      state.client = client;
       return client;
     })().finally(() => {
-      connecting = null;
+      state.connecting = null;
     });
   }
-  return connecting;
+  return state.connecting;
 }
 
-async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promise<T> {
+async function withClient<T>(operation: (client: ImapFlow) => Promise<T>, channel: Channel = "actions"): Promise<T> {
   try {
-    return await operation(await getClient());
+    return await operation(await getClient(channel));
   } catch (error) {
     const prefs = getPreferenceValues<Preferences>();
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -81,15 +100,16 @@ async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promi
 }
 
 export async function disconnectClient(): Promise<void> {
-  const client = sharedClient;
-  sharedClient = null;
-  if (client) {
-    try {
-      await client.logout();
-    } catch {
-      // Ignore logout errors
-    }
-  }
+  generation += 1;
+  await Promise.all(
+    Object.values(channels).map(async (state) => {
+      const client = state.client;
+      state.client = null;
+      if (client) {
+        await client.logout().catch(() => undefined);
+      }
+    }),
+  );
 }
 
 export async function listFolders(): Promise<Folder[]> {
@@ -121,7 +141,7 @@ export async function listFolders(): Promise<Folder[]> {
 
       return a.name.localeCompare(b.name);
     });
-  });
+  }, "list");
 }
 
 function parseAddresses(addresses: { name?: string; address?: string }[] | undefined): EmailAddress[] {
@@ -212,7 +232,7 @@ export async function fetchEmails(
     } finally {
       lock.release();
     }
-  });
+  }, "list");
 }
 
 function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: unknown[] } | undefined): boolean {
