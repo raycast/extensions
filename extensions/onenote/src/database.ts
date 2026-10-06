@@ -1,4 +1,4 @@
-import { environment, LocalStorage, Cache } from "@raycast/api";
+import { environment, Cache } from "@raycast/api";
 import { execFile } from "child_process";
 import { statSync, writeFileSync } from "fs";
 import {
@@ -9,7 +9,7 @@ import {
   BUILD_FULL_TEXT_INDEX_SQL,
   IndexFile,
 } from "./search";
-import { readdir, readFile } from "fs/promises";
+import { mkdtemp, readdir, readFile, rename, rm } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
 import { promisify } from "util";
@@ -17,20 +17,16 @@ import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 
 let SQL: SqlJsStatic;
 
-const SIGNATURE_KEY = "onenote-db-signature";
-const FULL_TEXT_INDEXED_KEY = "onenote-db-full-text-indexed";
-
 const execFileAsync = promisify(execFile);
 
 export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
+const UNINDEXED_DB = resolve(environment.supportPath, "merged-onenote-data-unindexed.db");
 
 export const create_or_update_db = async (force_update = false) => {
   if (!SQL) {
     SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
   }
-
-  const lastSignature = await LocalStorage.getItem<string>(SIGNATURE_KEY);
-  let NEEDUPDATE = force_update;
+  await cleanupInterruptedRebuilds();
 
   const ALL_DB: Database[] = [];
   const ALL_DB_NAMES: string[] = [];
@@ -58,46 +54,45 @@ export const create_or_update_db = async (force_update = false) => {
     );
   }
 
-  if (signature !== lastSignature) {
-    NEEDUPDATE = true;
+  if (!force_update) {
+    const indexed = await readMergedDatabase(ONENOTE_MERGED_DB, signature, true);
+    if (indexed) {
+      indexed.close();
+      return { databasePath: ONENOTE_MERGED_DB, fullTextIndexed: true };
+    }
   }
 
+  // A fallback database can be reused for an index retry without re-merging the source files.
+  let db = force_update ? undefined : await readMergedDatabase(UNINDEXED_DB, signature, false);
+  let temporaryDirectory: string | undefined;
   try {
-    await readFile(ONENOTE_MERGED_DB);
-  } catch (error) {
-    NEEDUPDATE = true;
-  }
+    if (!db) {
+      // Load OneNote databases:
+      for (const db_file of ALL_DB_PATHS) {
+        const file = await readFile(db_file);
+        const db_t = new SQL.Database(file);
+        ALL_DB.push(db_t);
+        // TO RETRIEVE DBNAME :
+        // (instead of db_t.filename: which works but raise error)
+        const dbname = db_t.exec("select file from pragma_database_list where name='main';")[0].values[0][0];
+        ALL_DB_NAMES.push(dbname as string);
+      }
 
-  if (NEEDUPDATE == false) {
-    return { fullTextIndexed: (await LocalStorage.getItem<boolean>(FULL_TEXT_INDEXED_KEY)) === true };
-  }
+      // Create main database:
+      db = new SQL.Database();
+      db.exec(CREATE_TABLE_SQL);
+      db.create_function("normalize_search_text", (text: unknown) => normalizeSearchText(String(text ?? "")));
 
-  // Load OneNote databases:
-  for (const db_file of ALL_DB_PATHS) {
-    const file = await readFile(db_file);
-    const db_t = new SQL.Database(file);
-    ALL_DB.push(db_t);
-    // TO RETRIEVE DBNAME :
-    // (instead of db_t.filename: which works but raise error)
-    const dbname = db_t.exec("select file from pragma_database_list where name='main';")[0].values[0][0];
-    ALL_DB_NAMES.push(dbname as string);
-  }
+      // Attach "official" OneNote databases:
+      for (const index in ALL_DB_NAMES) {
+        db.run(`ATTACH '${ALL_DB_NAMES[index]}' as db${index}`);
+      }
 
-  // Create main database:
-  const db = new SQL.Database();
-  db.exec(CREATE_TABLE_SQL);
-  db.create_function("normalize_search_text", (text: unknown) => normalizeSearchText(String(text ?? "")));
-
-  // Attach "official" OneNote databases:
-  for (const index in ALL_DB_NAMES) {
-    db.run(`ATTACH '${ALL_DB_NAMES[index]}' as db${index}`);
-  }
-
-  // Insert databases:
-  for (const index in ALL_DB) {
-    // POPULATE NOTES + FULL NOTE CONTENT:
-    db.run(
-      "INSERT INTO Entities (\
+      // Insert databases:
+      for (const index in ALL_DB) {
+        // POPULATE NOTES + FULL NOTE CONTENT:
+        db.run(
+          "INSERT INTO Entities (\
               Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, \
               ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, \
               PinTime, Color, Title, EnterpriseIdentity, Content)\
@@ -105,56 +100,105 @@ export const create_or_update_db = async (force_update = false) => {
               E.ContentRID, E.RootRevGenCount, E.LastModifiedTime, E.RecentTime, \
               E.PinTime, E.Color, E.Title, E.EnterpriseIdentity, \
               (select group_concat(text, '\n\n') FROM db" +
-        index +
-        ".PageElements as PE2 WHERE PE2.EntityRowId = E.rowid) \
+            index +
+            ".PageElements as PE2 WHERE PE2.EntityRowId = E.rowid) \
               FROM db" +
-        index +
-        ".Entities as E;"
-    );
-  }
+            index +
+            ".Entities as E;"
+        );
+      }
 
-  // Needed by the de-duplication below and by note lookups.
-  db.run("CREATE INDEX Entities_GOID ON Entities (GOID)");
+      // Needed by the de-duplication below and by note lookups.
+      db.run("CREATE INDEX Entities_GOID ON Entities (GOID)");
 
-  // The same note can exist in several indexes (e.g. old and current versions): keep the most recently
-  // modified copy, preferring the one from the most recently updated index on ties.
-  db.run(DEDUPE_ENTITIES_SQL);
+      // The same note can exist in several indexes (e.g. old and current versions): keep the most recently
+      // modified copy, preferring the one from the most recently updated index on ties.
+      db.run(DEDUPE_ENTITIES_SQL);
 
-  // One normalized title + content text per note; the trigram index is built over it after the file is saved.
-  db.run(
-    "UPDATE Entities SET SearchText = normalize_search_text(coalesce(Title, '') || char(10) || coalesce(Content, ''))"
-  );
-  db.exec(
-    "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
+      // One normalized title + content text per note; the trigram index is built over it after the file is saved.
+      db.run(
+        "UPDATE Entities SET SearchText = normalize_search_text(coalesce(Title, '') || char(10) || coalesce(Content, ''))"
+      );
+      db.exec(
+        "CREATE INDEX Entities_ParentGOID_RecentTime ON Entities (ParentGOID, RecentTime DESC);\
      CREATE INDEX Entities_RecentTime ON Entities (RecentTime DESC);"
-  );
+      );
+      // The signature travels with the database instead of separate, racy LocalStorage writes.
+      db.run("CREATE TABLE ExtensionMetadata (Signature TEXT NOT NULL)");
+      db.run("INSERT INTO ExtensionMetadata VALUES (?)", [signature]);
+    }
 
-  // CACHING PARENTS' TITLE :
-  const results = db.exec("SELECT DISTINCT GOID, Title FROM Entities WHERE Type > 1");
-  const cache = new Cache();
-  cache.clear();
-  for (const result of results[0]?.values ?? []) {
-    cache.set(result[0] as string, result[1] as string);
+    const results = db.exec("SELECT DISTINCT GOID, Title FROM Entities WHERE Type > 1");
+
+    // Build on a private file on the same filesystem; only a completed database is published.
+    temporaryDirectory = await mkdtemp(resolve(environment.supportPath, `onenote-rebuild-${process.pid}-`));
+    const temporaryDatabase = resolve(temporaryDirectory, "merged.db");
+    writeFileSync(temporaryDatabase, Buffer.from(db.export()));
+    for (const _db of ALL_DB) {
+      _db.close();
+    }
+    ALL_DB.length = 0;
+    db.close();
+    db = undefined;
+
+    const fullTextIndexed = await buildFullTextIndex(temporaryDatabase);
+    // Keep indexed and fallback files separate so another invocation cannot remove the FTS table
+    // from a path an already-open view is querying. Atomic rename also survives interrupted builds.
+    const databasePath = fullTextIndexed ? ONENOTE_MERGED_DB : UNINDEXED_DB;
+    await rename(temporaryDatabase, databasePath);
+    const cache = new Cache();
+    cache.clear();
+    for (const result of results[0]?.values ?? []) {
+      cache.set(result[0] as string, result[1] as string);
+    }
+    return { databasePath, fullTextIndexed };
+  } finally {
+    for (const source of ALL_DB) source.close();
+    db?.close();
+    if (temporaryDirectory) await rm(temporaryDirectory, { recursive: true, force: true });
   }
-
-  // WRITE DB TO FILE, then release the in-memory databases before SQLite builds the index on disk
-  writeFileSync(ONENOTE_MERGED_DB, Buffer.from(db.export()));
-  for (const _db of ALL_DB) {
-    _db.close();
-  }
-  db.close();
-
-  const fullTextIndexed = await buildFullTextIndex();
-  await LocalStorage.setItem(FULL_TEXT_INDEXED_KEY, fullTextIndexed);
-  await LocalStorage.setItem(SIGNATURE_KEY, signature);
-  return { fullTextIndexed };
 };
+
+async function cleanupInterruptedRebuilds() {
+  for (const directory of await readdir(environment.supportPath, { withFileTypes: true })) {
+    const owner = /^onenote-rebuild-(\d+)-/.exec(directory.name);
+    if (!directory.isDirectory() || !owner) continue;
+    try {
+      process.kill(Number(owner[1]), 0);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ESRCH") {
+        await rm(resolve(environment.supportPath, directory.name), { recursive: true, force: true });
+      }
+    }
+  }
+}
+
+async function readMergedDatabase(path: string, signature: string, fullTextIndexed: boolean) {
+  let buffer: Buffer;
+  try {
+    buffer = await readFile(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+  let db: Database | undefined;
+  try {
+    db = new SQL.Database(buffer);
+    const savedSignature = db.exec("SELECT Signature FROM ExtensionMetadata")[0]?.values[0]?.[0];
+    const hasIndex = db.exec("SELECT 1 FROM sqlite_master WHERE name = 'EntitiesFts'").length > 0;
+    if (savedSignature === signature && (!fullTextIndexed || hasIndex)) return db;
+  } catch {
+    // Rebuild legacy or incomplete databases rather than trusting cached index state.
+  }
+  db?.close();
+  return undefined;
+}
 
 // Runs out of process so the index is streamed to disk instead of held in memory. Falls back to unindexed search
 // when the system SQLite lacks FTS5 or the trigram tokenizer.
-async function buildFullTextIndex() {
+async function buildFullTextIndex(databasePath: string) {
   try {
-    await execFileAsync("sqlite3", [ONENOTE_MERGED_DB, BUILD_FULL_TEXT_INDEX_SQL]);
+    await execFileAsync("sqlite3", [databasePath, BUILD_FULL_TEXT_INDEX_SQL]);
     return true;
   } catch (error) {
     console.warn("Could not build the full-text search index; falling back to unindexed search.", error);
