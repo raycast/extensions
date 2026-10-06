@@ -1235,3 +1235,53 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(retriedEmpty.description, "Offline retry");
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
+
+test("Check Again in Search Items loads with a spinner, without the ended session's vaults", async () => {
+  const harness = hookHarness();
+  const vault = { shareId: "vault", name: "Personal" };
+  let isLoggedIn = false;
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      listVaultsAndItems: async () => {
+        if (!isLoggedIn) throw new PassCliError("Session ended", "not_authenticated");
+        return { vaults: [vault], items: [item], failedVaults: [] };
+      },
+    },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], timestamp: 0, isStale: true }),
+      getCachedVaults: async () => ({ data: [vault], timestamp: 0, isStale: true }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const notLoggedIn = render();
+  assert.equal(typeof notLoggedIn.props.onCheckAgain, "function");
+
+  isLoggedIn = true;
+  const checking = (notLoggedIn.props.onCheckAgain as () => Promise<void>)();
+  const list = render();
+  assert.equal(list.props.isLoading, true);
+  assert.equal(((list.props.searchBarAccessory as Element).props.vaults as unknown[]).length, 0);
+
+  await checking;
+  assert.deepEqual(render().props.items, [item]);
+});

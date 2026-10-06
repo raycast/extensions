@@ -107,6 +107,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   async function loadItems() {
     const isLatest = loads.start();
     setError(null);
+    // Loading from the start: after Check Again, the empty list would otherwise show "No Items Found" meanwhile.
+    setIsLoading(true);
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
@@ -143,7 +145,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       }
     }
 
-    setIsLoading(true);
     try {
       if (initialVault && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
@@ -186,8 +187,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
       const message = err instanceof Error ? err.message : "An unknown error occurred";
-      // Items belong to the session that listed them: once it has ended, they must not show up again.
-      if (type === "not_authenticated") updateItems([]);
+      // Items and vaults belong to the session that listed them: once it has ended, they must not show up again.
+      if (type === "not_authenticated") {
+        updateItems([]);
+        setVaults([]);
+      }
       if (itemsRef.current.length === 0) {
         setError({ type, message });
       } else {
