@@ -7,20 +7,22 @@ export default function Command() {
   const [client, setClient] = useState("Acme Digital Corp");
   const [features, setFeatures] = useState("Custom OAuth Integration\nAutomated Webhook Alerts\nExport CSV");
 
-  const parsedHours = parseFloat(hours) || 0;
-  const parsedRate = parseFloat(rate) || 0;
-  const totalBleed = parsedHours * parsedRate;
-
   async function handleSubmit() {
-    if (parsedHours <= 0 || parsedRate <= 0) {
+    const cleanHours = hours.replace(/,/g, "").trim();
+    const cleanRate = rate.replace(/,/g, "").trim();
+    const parsedHours = Number(cleanHours);
+    const parsedRate = Number(cleanRate);
+
+    if (!Number.isFinite(parsedHours) || parsedHours <= 0 || !Number.isFinite(parsedRate) || parsedRate <= 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid Input",
-        message: "Please enter valid positive numbers for hours and rate.",
+        message: "Please enter positive finite numbers for hours and rate.",
       });
       return;
     }
 
+    const totalBleed = parsedHours * parsedRate;
     const formattedAmount = totalBleed.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     const featureList = features
       .split(/[\r\n,]+/)
