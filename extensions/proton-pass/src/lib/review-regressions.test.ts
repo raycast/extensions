@@ -311,7 +311,6 @@ test("a failed full load keeps early vault items visible and offers a working Re
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
-    "./vault-sharing": vaultSharing,
   });
   const render = () => {
     return harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" } });
@@ -461,7 +460,6 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       "./item-list": {},
       "./refresh": refresh,
       "./item-counts": itemCounts,
-      "./vault-sharing": vaultSharing,
     });
     const render = () => harness.render(SearchItemsView, { initialVault: vault });
     render();
@@ -518,7 +516,6 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
-    "./vault-sharing": vaultSharing,
   });
   const render = () => harness.render(SearchItemsView, {});
   render();
@@ -1269,7 +1266,6 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
-    "./vault-sharing": vaultSharing,
   });
   const render = () => harness.render(SearchItemsView, { initialVault: vault });
   render();
@@ -1306,13 +1302,12 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
-    "./vault-sharing": vaultSharing,
     ...services,
   });
   return { harness, SearchItemsView };
 }
 
-test("List Vaults saves vaults and items together, from complete listings only", async () => {
+test("List Vaults saves sharing on its own, and vaults with items from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };
   const saved: string[] = [];
@@ -1329,7 +1324,7 @@ test("List Vaults saves vaults and items together, from complete listings only",
       getPreferenceValues: () => ({}),
     },
     "./lib/pass-cli": {
-      listVaultSharing: async () => new Map(),
+      listVaultSharing: async () => new Map([["vault", { role: "owner", isShared: true }]]),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
         items: [item],
@@ -1342,6 +1337,10 @@ test("List Vaults saves vaults and items together, from complete listings only",
     "./lib/cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => {
+        saved.push("sharing");
+      },
       setCachedItems: async () => {
         saved.push("items");
       },
@@ -1359,43 +1358,12 @@ test("List Vaults saves vaults and items together, from complete listings only",
   load();
   await new Promise(setImmediate);
   // Saved without its items, the vault that failed would count 0 items on the next open.
-  assert.deepEqual(saved, []);
+  assert.deepEqual(saved, ["sharing"]);
 
   failing = false;
   load();
   await new Promise(setImmediate);
-  assert.deepEqual(saved.sort(), ["items", "vaults"]);
-});
-
-test("Search Items keeps the vaults' sharing when it saves pass-cli's vault list", async () => {
-  let savedVaults: unknown;
-  const { harness, SearchItemsView } = searchItemsFixture({
-    "./pass-cli": {
-      listVaultsAndItems: async () => ({
-        vaults: [{ shareId: "vault", name: "Personal" }],
-        items: [item],
-        failedVaults: [],
-      }),
-    },
-    "./cache": {
-      getCachedItems: async () => null,
-      getCachedVaults: async () => ({
-        data: [{ shareId: "vault", name: "Personal", role: "owner", isShared: true }],
-        timestamp: 0,
-        isStale: true,
-      }),
-      setCachedItems: async () => undefined,
-      setCachedVaults: async (vaults: unknown) => {
-        savedVaults = vaults;
-      },
-    },
-  });
-  harness.render(SearchItemsView, {});
-  harness.effects.forEach((effect) => effect());
-  await new Promise(setImmediate);
-  assert.deepEqual(JSON.parse(JSON.stringify(savedVaults)), [
-    { shareId: "vault", name: "Personal", role: "owner", isShared: true },
-  ]);
+  assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
 test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {

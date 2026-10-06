@@ -4,11 +4,18 @@ import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
-import { getCachedItems, getCachedVaults, setCachedItems, setCachedVaults } from "./lib/cache";
+import {
+  getCachedItems,
+  getCachedSharing,
+  getCachedVaults,
+  setCachedItems,
+  setCachedSharing,
+  setCachedVaults,
+} from "./lib/cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
 import { listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
-import { sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
 
 /** Marks shared vaults, whether you shared them or they were shared with you. */
 function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
@@ -32,14 +39,19 @@ export default function Command() {
   async function loadVaults() {
     setError(null);
 
-    const [cachedVaults, cachedItems] = await Promise.all([getCachedVaults(), getCachedItems()]);
+    const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
+      getCachedVaults(),
+      getCachedItems(),
+      getCachedSharing(),
+    ]);
     if (cachedVaults && !hasLoadedFromCache.current) {
-      setVaults(cachedVaults.data);
+      setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       // The items cache only holds complete listings, so every cached vault gets a count.
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
-      if (!cachedVaults.isStale && !backgroundRefreshEnabled) {
+      // Search Items renews the vaults it saves, but only List Vaults lists sharing, so its age counts too.
+      if (!cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled) {
         setIsLoading(false);
         return;
       }
@@ -48,15 +60,17 @@ export default function Command() {
     try {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
       const listing = listingSaves.start();
-      const [{ vaults: listedVaults, items, failedVaults }, sharing] = await Promise.all([
+      const [{ vaults: freshVaults, items, failedVaults }, freshSharing] = await Promise.all([
         listVaultsAndItems(),
-        // Sharing only adds an icon: when it can't be listed, the vaults keep what the cache knew.
+        // Sharing only adds an icon: when it can't be listed, the saved sharing stays.
         listVaultSharing().catch(() => undefined),
       ]);
-      const freshVaults = withSharing(listedVaults, sharing, cachedVaults?.data);
-      setVaults(freshVaults);
+      const sharing = freshSharing ? mergeSharing(freshSharing, cachedSharing?.data) : (cachedSharing?.data ?? {});
+      setVaults(withSharing(freshVaults, sharing));
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      // Sharing is saved on its own, so it stays up to date even when some items can't be listed.
+      if (freshSharing) await setCachedSharing(sharing);
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
       // items would count 0 items. Saves follow the order listings started, also across Search Items.
       if (failed.size === 0) {
