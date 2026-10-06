@@ -163,8 +163,6 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
             }
           />
         )}
-        {get("IPv6 IP address") && <InfoItem icon={Icon.Globe} title="IPv6 Address" value={get("IPv6 IP address")!} />}
-        {get("IPv6 Router") && <InfoItem icon={Icon.Wifi} title="IPv6 Router" value={get("IPv6 Router")!} />}
         {get("MAC Address") && <InfoItem icon={Icon.Fingerprint} title="MAC Address" value={get("MAC Address")!} />}
         {get("Wi-Fi ID") && <InfoItem icon={Icon.Wifi} title="Wi-Fi ID" value={get("Wi-Fi ID")!} />}
         {get("Ethernet Address") && (
