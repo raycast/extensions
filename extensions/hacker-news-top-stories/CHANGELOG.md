@@ -3,6 +3,7 @@
 ## [Remove Mark as Read Tool] - {PR_MERGE_DATE}
 
 Removes the Raycast AI tool for marking stories as read.
+Asked to mark stories read, Raycast AI now points you to the menu bar instead.
 
 ## [Raycast AI Tools] - 2026-10-05
 
