@@ -1,6 +1,6 @@
 import { closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
 
-import { openHostbeam } from "./hostbeam";
+import { NOT_INSTALLED, openHostbeam } from "./hostbeam";
 
 /** Beam what is selected in Finder.
  *
@@ -21,5 +21,5 @@ export default async function main() {
     return;
   }
   await closeMainWindow();
-  await openHostbeam(files);
+  if (!(await openHostbeam(files))) await showHUD(NOT_INSTALLED);
 }

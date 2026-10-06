@@ -26,15 +26,26 @@ export const BUNDLE_ID = "com.hostbeam.app";
 
 const run = promisify(execFile);
 
-/** Bring Hostbeam up, handing it `files` if there are any.
+/** Bring Hostbeam up, handing it `files` if there are any. False when macOS
+ *  has no app with that id: Hostbeam was removed, and its config — which is
+ *  all the commands read — left behind.
  *
  *  Plain `open`, not the scheme, so it needs no permission from the app. By
  *  bundle id, not by name: a build sitting in a downloads folder must not be
  *  able to answer for the installed app.
  */
-export async function openHostbeam(files: string[] = []): Promise<void> {
-  await run("open", ["-b", BUNDLE_ID, ...files]);
+export async function openHostbeam(files: string[] = []): Promise<boolean> {
+  try {
+    await run("open", ["-b", BUNDLE_ID, ...files]);
+    return true;
+  } catch {
+    return false;
+  }
 }
+
+/** Said when `openHostbeam` finds no app. A HUD, since Raycast's window is
+ *  already closed by then — the popover needs the focus. */
+export const NOT_INSTALLED = "Hostbeam is not installed on this Mac";
 
 export interface RecentBeam {
   id: string;

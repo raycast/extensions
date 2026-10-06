@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 
 import {
+  NOT_INSTALLED,
   fileName,
   groupRecent,
   openHostbeam,
@@ -107,7 +108,7 @@ function Row({
               // Raycast's window first: the popover closes when it loses
               // focus, and an open Raycast would take it straight back.
               await closeMainWindow();
-              await openHostbeam();
+              if (!(await openHostbeam())) await showHUD(NOT_INSTALLED);
             }}
           />
         </ActionPanel>
