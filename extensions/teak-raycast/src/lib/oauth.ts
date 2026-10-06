@@ -1,51 +1,150 @@
-import { OAuth } from "@raycast/api";
-import { OAuthService } from "@raycast/utils";
-import {
-  getApiBaseUrl,
-  getAppBaseUrl,
-  getOAuthTokenBaseUrl,
-} from "./constants";
+import { environment, OAuth } from "@raycast/api";
+import { type AuthDiscovery, discoverAuthServer } from "teak-sdk";
+import { getApiBaseUrl, getAppBaseUrl } from "./constants";
 
-// Teak's authorization server (Better Auth `mcp` plugin) exposes the OAuth
-// endpoints on the web origin. `teak-raycast` is registered server-side as a
-// trusted public client (PKCE, no secret), so the browser sign-in flow needs no
-// manual key entry. OAuthService handles token storage and automatic refresh.
-//
-// `authorize` runs in the browser and must hit the web origin so the session
-// cookie authenticates the request. The `token`/refresh exchange is a
-// server-to-server POST that only needs to reach Better Auth, so it targets the
-// token base URL directly with no redirect in between (see
-// getOAuthTokenBaseUrl).
-const authorizeUrl = `${getAppBaseUrl()}/api/auth/mcp/authorize`;
-const tokenUrl = `${getOAuthTokenBaseUrl()}/api/auth/mcp/token`;
+export class TeakDiscoveryError extends Error {
+  constructor() {
+    super("Unable to reach Teak. Check your connection and retry.");
+    this.name = "TeakDiscoveryError";
+  }
+}
 
-const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: "Teak",
-  providerId: "teak",
-  providerIcon: "icon.png",
-  description: "Connect your Teak account to save and search cards.",
-});
+interface Provider {
+  auth: AuthDiscovery;
+  client: OAuth.PKCEClient;
+}
+const providers = new Map<string, Provider>();
+const discovery = (forceRefresh = false) =>
+  discoverAuthServer(getApiBaseUrl(), {
+    forceRefresh,
+    ...(environment.isDevelopment ? { localIssuer: getAppBaseUrl() } : {}),
+  });
+const providerKey = (auth: AuthDiscovery) =>
+  `${getApiBaseUrl()}|${auth.issuer}|${auth.clients.raycast}`;
+const audience = (auth: AuthDiscovery): Record<string, string> =>
+  auth.primary === "workos"
+    ? { resource: new URL("/api", auth.resource).href }
+    : {};
 
-export const teakOAuth = new OAuthService({
-  client,
-  clientId: "teak-raycast",
-  scope: "profile email offline_access",
-  authorizeUrl,
-  tokenUrl,
-  refreshTokenUrl: tokenUrl,
-  // OAuth 2.1 token endpoint expects form-encoded bodies.
-  bodyEncoding: "url-encoded",
-});
+async function getProvider(forceRefresh = false): Promise<Provider> {
+  let auth: AuthDiscovery;
+  try {
+    auth = await discovery(forceRefresh);
+  } catch {
+    throw new TeakDiscoveryError();
+  }
+  const key = providerKey(auth);
+  const cached = providers.get(key);
+  if (cached) {
+    cached.auth = auth;
+    return cached;
+  }
+  // Preserve pre-migration production credentials; dev and WorkOS never share
+  // their native credential namespace with another deployment or provider.
+  const legacy =
+    !environment.isDevelopment &&
+    auth.primary === "betterauth" &&
+    auth.issuer === "https://app.teakvault.com" &&
+    auth.clients.raycast === "teak-raycast";
+  const provider = {
+    auth,
+    client: new OAuth.PKCEClient({
+      redirectMethod: OAuth.RedirectMethod.Web,
+      providerName: "Teak",
+      providerId: legacy ? "teak" : `teak:${key}`,
+      providerIcon: "icon.png",
+      description: "Connect your Teak account to save and search cards.",
+    }),
+  };
+  providers.set(key, provider);
+  return provider;
+}
 
-// Dedupe concurrent authorize() calls. Raycast dev mode can invoke effects
-// twice (strict-mode style); without this, two authorization requests would be
-// started with two different `state` values, and the browser callback for the
-// first would fail Raycast's state check against the second ("OAuth state
-// mismatch"). All callers share a single in-flight authorization (one `state`).
+async function refetchAfterFailure() {
+  try {
+    await discovery(true);
+  } catch {
+    // Keep the original failure; failed discovery never selects a fallback.
+  }
+}
+
+async function exchange(
+  provider: Provider,
+  params: Record<string, string>,
+  previousRefresh?: string,
+) {
+  const response = await fetch(provider.auth.tokenEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: provider.auth.clients.raycast,
+      ...audience(provider.auth),
+      ...params,
+    }),
+    redirect: "error",
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) {
+    throw new Error("Teak sign-in expired. Sign in again.");
+  }
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("Invalid Teak sign-in response.");
+  }
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytes = 0;
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) {
+        break;
+      }
+      bytes += chunk.value.byteLength;
+      if (bytes > 64 * 1024) {
+        await reader.cancel();
+        throw new Error("Teak sign-in response is too large.");
+      }
+      text += decoder.decode(chunk.value, { stream: true });
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text + decoder.decode());
+  } catch {
+    throw new Error("Invalid Teak sign-in response.");
+  }
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    !("access_token" in raw) ||
+    typeof raw.access_token !== "string" ||
+    !raw.access_token ||
+    !("expires_in" in raw) ||
+    typeof raw.expires_in !== "number" ||
+    !Number.isFinite(raw.expires_in) ||
+    raw.expires_in <= 0 ||
+    ("refresh_token" in raw &&
+      (typeof raw.refresh_token !== "string" || !raw.refresh_token))
+  ) {
+    throw new Error("Invalid Teak sign-in response.");
+  }
+  const refreshToken =
+    "refresh_token" in raw ? String(raw.refresh_token) : previousRefresh;
+  await provider.client.setTokens({
+    accessToken: raw.access_token,
+    expiresIn: raw.expires_in,
+    refreshToken,
+  });
+  return raw.access_token;
+}
+
 let inFlightAuthorize: Promise<string> | null = null;
 let inFlightStoredToken: Promise<string | null> | null = null;
 let inFlightSignOut: Promise<void> | null = null;
+let inFlightReauthorize: Promise<string> | null = null;
 
 export function authorizeTeak(): Promise<string> {
   if (inFlightSignOut) {
@@ -54,22 +153,65 @@ export function authorizeTeak(): Promise<string> {
     );
   }
   if (!inFlightAuthorize) {
-    inFlightAuthorize = teakOAuth.authorize().finally(() => {
+    inFlightAuthorize = authorize().finally(() => {
       inFlightAuthorize = null;
     });
   }
   return inFlightAuthorize;
 }
 
-// Force a brand-new authorization: drop stored tokens and any in-flight guard,
-// then re-authorize. Used after a 401 when the current token is rejected.
-export async function reauthorizeTeak(): Promise<string> {
-  if (inFlightSignOut) {
-    throw new Error("Teak sign-out is in progress. Try again.");
+async function authorize(): Promise<string> {
+  // The same refresh guard is used by background and interactive commands.
+  const stored = await getStoredTeakAccessToken();
+  if (stored) {
+    return stored;
   }
-  await teakOAuth.client.removeTokens();
-  inFlightAuthorize = null;
-  return authorizeTeak();
+  const provider = await getProvider();
+  try {
+    const request = await provider.client.authorizationRequest({
+      endpoint: provider.auth.authorizationEndpoint,
+      clientId: provider.auth.clients.raycast,
+      scope:
+        provider.auth.primary === "workos"
+          ? "openid profile email offline_access"
+          : "profile email offline_access",
+      extraParameters: audience(provider.auth),
+    });
+    const { authorizationCode } = await provider.client.authorize(request);
+    return await exchange(provider, {
+      grant_type: "authorization_code",
+      code: authorizationCode,
+      code_verifier: request.codeVerifier,
+      redirect_uri: request.redirectURI,
+    });
+  } catch (error) {
+    await refetchAfterFailure();
+    throw error;
+  }
+}
+
+export function reauthorizeTeak(): Promise<string> {
+  if (inFlightSignOut) {
+    return Promise.reject(
+      new Error("Teak sign-out is in progress. Try again."),
+    );
+  }
+  if (!inFlightReauthorize) {
+    inFlightReauthorize = (async () => {
+      await Promise.allSettled([inFlightAuthorize, inFlightStoredToken]);
+      const provider = await getProvider();
+      await getProvider(true);
+      await provider.client.removeTokens();
+      return authorizeTeak();
+    })().finally(() => {
+      inFlightReauthorize = null;
+    });
+  }
+  return inFlightReauthorize;
+}
+
+export async function refreshTeakAuthConfiguration(): Promise<void> {
+  await refetchAfterFailure();
 }
 
 export function signOutTeak(): Promise<void> {
@@ -82,58 +224,57 @@ export function signOutTeak(): Promise<void> {
 }
 
 async function revokeStoredSession(): Promise<void> {
-  // A refresh may rotate both credentials. Revoke its final stored result,
-  // and prevent new authorizations from restoring tokens after sign-out.
-  await Promise.allSettled([inFlightAuthorize, inFlightStoredToken]);
-  const tokenSet = await teakOAuth.client.getTokens();
-  const token = tokenSet?.refreshToken || tokenSet?.accessToken;
-  if (token) {
-    try {
-      const response = await fetch(
-        `${getApiBaseUrl().replace(/\/v1$/, "")}/api/oauth/revoke`,
-        {
+  await Promise.allSettled([
+    inFlightAuthorize,
+    inFlightStoredToken,
+    inFlightReauthorize,
+  ]);
+  // Revoke every namespace encountered by this command, including credentials
+  // from the previous provider when a flip occurred during a failed refresh.
+  await getProvider();
+  for (const provider of providers.values()) {
+    const tokens = await provider.client.getTokens();
+    const token = tokens?.refreshToken || tokens?.accessToken;
+    if (token) {
+      try {
+        if (!provider.auth.revocationEndpoint) {
+          throw new Error("Revocation is unavailable");
+        }
+        const response = await fetch(provider.auth.revocationEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            client_id: "teak-raycast",
+            client_id: provider.auth.clients.raycast,
             token,
-          }).toString(),
+          }),
           redirect: "error",
           signal: AbortSignal.timeout(10_000),
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Revocation failed");
+        });
+        if (!response.ok) {
+          throw new Error("Revocation failed");
+        }
+      } catch {
+        await refetchAfterFailure();
+        throw new Error(
+          "Your credentials are still saved. Check your connection and try Sign Out again.",
+        );
       }
-    } catch {
-      throw new Error(
-        "Your credentials are still saved. Check your connection and try Sign Out again.",
-      );
     }
+    await provider.client.removeTokens();
   }
-  await teakOAuth.client.removeTokens();
 }
 
-// Non-interactive check for an existing stored session. Unlike authorizeTeak(),
-// this NEVER opens the browser sign-in overlay — it only reports whether we
-// already hold a usable (or refreshable) token. Used to gate views so merely
-// opening a command does not trigger sign-in as a side effect; the visible
-// "Sign in with Browser" action remains the explicit entry point.
 export async function hasStoredTeakSession(): Promise<boolean> {
-  const tokenSet = await client.getTokens();
-  if (!tokenSet?.accessToken) {
+  if (inFlightSignOut) {
     return false;
   }
-  // A non-expired access token is usable as-is; an expired one is still fine
-  // when a refresh token exists, since the request path refreshes on demand.
-  return !tokenSet.isExpired() || Boolean(tokenSet.refreshToken);
+  const provider = await getProvider();
+  const tokens = await provider.client.getTokens();
+  return Boolean(
+    tokens?.accessToken && (!tokens.isExpired() || tokens.refreshToken),
+  );
 }
 
-// Resolve a usable access token WITHOUT ever launching the interactive sign-in
-// overlay. When the stored access token is expired, attempt a silent refresh
-// with the stored refresh token. Returns null when there is no stored token or
-// the refresh fails (stale/revoked) — callers then prompt the user to sign in
-// explicitly rather than popping the browser overlay from a background command.
 export function getStoredTeakAccessToken(): Promise<string | null> {
   if (inFlightSignOut) {
     return Promise.resolve(null);
@@ -147,51 +288,25 @@ export function getStoredTeakAccessToken(): Promise<string | null> {
 }
 
 async function resolveStoredTeakAccessToken(): Promise<string | null> {
-  const tokenSet = await client.getTokens();
-  if (!tokenSet?.accessToken) {
+  const provider = await getProvider();
+  const tokens = await provider.client.getTokens();
+  if (!tokens?.accessToken) {
     return null;
   }
-  if (!tokenSet.isExpired()) {
-    return tokenSet.accessToken;
+  if (!tokens.isExpired()) {
+    return tokens.accessToken;
   }
-  if (!tokenSet.refreshToken) {
+  if (!tokens.refreshToken) {
     return null;
   }
-
   try {
-    const body = new URLSearchParams({
-      client_id: teakOAuth.clientId,
-      grant_type: "refresh_token",
-      refresh_token: tokenSet.refreshToken,
-    });
-    const response = await fetch(tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) {
-      return null;
-    }
-    const parsed = (await response.json()) as {
-      access_token?: unknown;
-      refresh_token?: unknown;
-      expires_in?: unknown;
-    };
-    if (typeof parsed.access_token !== "string" || !parsed.access_token) {
-      return null;
-    }
-    await client.setTokens({
-      accessToken: parsed.access_token,
-      expiresIn:
-        typeof parsed.expires_in === "number" ? parsed.expires_in : undefined,
-      refreshToken:
-        typeof parsed.refresh_token === "string"
-          ? parsed.refresh_token
-          : tokenSet.refreshToken,
-    });
-    return parsed.access_token;
+    return await exchange(
+      provider,
+      { grant_type: "refresh_token", refresh_token: tokens.refreshToken },
+      tokens.refreshToken,
+    );
   } catch {
+    await refetchAfterFailure();
     return null;
   }
 }

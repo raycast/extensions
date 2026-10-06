@@ -1,5 +1,6 @@
 interface RaycastApiMockOverrides {
   getPreferenceValues?: () => unknown;
+  oauthClient?: new (...args: unknown[]) => unknown;
 }
 
 export const createRaycastApiMock = (
@@ -9,7 +10,7 @@ export const createRaycastApiMock = (
   environment: { isDevelopment },
   getPreferenceValues: overrides.getPreferenceValues ?? (() => ({})),
   OAuth: {
-    PKCEClient: class {},
+    PKCEClient: overrides.oauthClient ?? class {},
     RedirectMethod: { App: "app", AppURI: "appURI", Web: "web" },
   },
 });

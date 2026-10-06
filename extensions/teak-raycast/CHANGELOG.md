@@ -1,5 +1,10 @@
 # Changelog
 
+## [Reliable account connections] - {PR_MERGE_DATE}
+
+- Sign-in follows Teak’s current authentication provider automatically.
+- Account connections recover after authentication changes.
+
 ## [Reliable search and favorites] - 2026-09-16
 
 - Search, favorites, and AI tools now use Teak's current card listing API

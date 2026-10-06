@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teak-raycast",
-  "version": "1.0.70",
+  "version": "1.0.79",
   "private": true,
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
   "categories": [
@@ -15,7 +15,7 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "publish": "ray publish",
-    "test": "bun test src/__tests__ --coverage --dots",
+    "test": "bun test src/__tests__ --isolate --coverage --dots",
     "typecheck": "tsc --noEmit"
   },
   "overrides": {
@@ -24,13 +24,17 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0"
+    "@raycast/utils": "^2.3.0",
+    "teak-sdk": "1.0.79"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/react": "19.2.18",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.66.0"
+    "typescript-eslint": "^8.66.0",
+    "@happy-dom/global-registrator": "20.14.5",
+    "react-dom": "19.2.8",
+    "react": "19.2.8"
   },
   "icon": "icon.png",
   "ai": {
