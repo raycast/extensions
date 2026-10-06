@@ -39,6 +39,11 @@ test("detects structured YAML and preserves its large integer", () => {
   assert.match(formatJson(value.value), /9007199254740993123/);
   assert.match(toYaml(value.value), /9007199254740993123/);
 });
+test("YAML conversion rejects lossy decimals but preserves exact decimals and large integers", () => {
+  assert.throws(() => toYaml(parseInput('{"value":0.1234567890123456789}').value), /precision/);
+  assert.match(toYaml(parseInput('{"value":0.125,"id":9007199254740993123}').value), /0.125/);
+  assert.match(toYaml(parseInput('{"value":0.125,"id":9007199254740993123}').value), /9007199254740993123/);
+});
 test("rejects malformed JSON, YAML cycles and duplicate keys", () => {
   assert.throws(() => parseInput('{"bad": }'), /parsing failed/);
   assert.throws(() => parseInput("x: &x\n  recursive: *x"), /circular reference/);

@@ -211,9 +211,9 @@ function guarded(action: () => void) {
     message(error instanceof Error ? error.message : String(error), true);
   }
 }
-function replaceInput(text: string, name: string, clean: boolean) {
+function replaceInput(text: string, name: string, force: boolean) {
   if (
-    !clean &&
+    !force &&
     source.state.doc.toString() !== baseline &&
     !confirm("Replace the current input? Unsaved edits will be lost.")
   )
@@ -223,7 +223,7 @@ function replaceInput(text: string, name: string, clean: boolean) {
   } catch {
     /* Keep invalid input editable. */
   }
-  baseline = clean ? text : baseline;
+  baseline = text;
   replace(source, text);
   element("input-name").textContent = name;
   void refresh();
@@ -247,7 +247,6 @@ element("paste").onclick = () => send({ action: "paste" });
 element("copy").onclick = () => {
   if (result !== undefined) {
     if (outputFormat.value === "json") {
-      autoFormatSource();
       send({ action: "copy", text: formatJson(sorted ? sortKeys(result) : result, Number(indentSelect.value)) });
     } else send({ action: "copy", text: output });
   }

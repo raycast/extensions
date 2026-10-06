@@ -1,11 +1,15 @@
 import { readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { MAX_INPUT_BYTES } from "./json";
 
 export async function readInput(input: string): Promise<{ text: string; label: string }> {
   const trimmed = input.trim();
-  const path = trimmed.startsWith("~/") ? `${homedir()}/${trimmed.slice(2)}` : trimmed;
-  if (!path.startsWith("/") || path.includes("\n")) return { text: input, label: "Text" };
+  if (trimmed.startsWith("/*") || trimmed.startsWith("//")) return { text: input, label: "Text" };
+  const fileUrl = trimmed.startsWith("file://");
+  const decoded = fileUrl ? fileURLToPath(trimmed) : trimmed;
+  const path = decoded.startsWith("~/") ? `${homedir()}/${decoded.slice(2)}` : decoded;
+  if (!path.startsWith("/") || (!fileUrl && path.includes("\n"))) return { text: input, label: "Text" };
   const info = await stat(path).catch(() => null);
   if (!info) throw new Error("The file does not exist. Check the path or paste JSON directly.");
   if (!info.isFile()) throw new Error("Choose a file instead of a directory.");

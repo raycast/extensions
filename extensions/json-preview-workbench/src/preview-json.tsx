@@ -34,7 +34,7 @@ import { transform } from "./lib/query";
 
 function ValueActions({ value, path, input }: { value: JsonValue; path: string; input: string }) {
   const { push } = useNavigation();
-  const indent = Number(getPreferenceValues<{ indent?: string }>().indent ?? "2");
+  const indent = Number(getPreferenceValues<Preferences>().indent ?? "2");
   const formatted = formatJson(value, indent);
   return (
     <ActionPanel>

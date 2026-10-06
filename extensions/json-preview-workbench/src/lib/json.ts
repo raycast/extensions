@@ -149,6 +149,7 @@ function plainForConversion(value: JsonValue): unknown {
     const numeric = Number(value.value);
     if (/^-?\d+$/.test(value.value) && !Number.isSafeInteger(numeric)) return BigInt(value.value);
     if (!Number.isFinite(numeric)) throw new Error("A number is outside the target format range. Export as JSON.");
+    if (!isSafeNumber(value.value)) throw new Error("Conversion would lose numeric precision. Export as JSON.");
     return numeric;
   }
   if (Array.isArray(value)) return value.map(plainForConversion);
@@ -162,7 +163,7 @@ export function toYaml(value: JsonValue): string {
 }
 
 export function toXml(value: JsonValue): string {
-  if (hasUnsafeNumbers(value)) throw new Error("XML conversion may lose numeric precision. Export as JSON or YAML.");
+  if (hasUnsafeNumbers(value)) throw new Error("XML conversion may lose numeric precision. Export as JSON.");
   return new XMLBuilder({ format: true, ignoreAttributes: false }).build({ root: plainForConversion(value) });
 }
 

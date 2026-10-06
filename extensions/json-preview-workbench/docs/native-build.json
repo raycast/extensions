@@ -1,8 +1,8 @@
 {
   "source": "native/JSONEditor.swift",
   "sourceSha256": "b7a15193778d5923a15954da84b0d80dd8c5487dfca52a344d6165b4c350efc0",
-  "executableSha256": "95e1e55a8c5e77aaddf72c7184ff594c53205e85f16463695769456e08054811",
-  "editorSha256": "eab9d423c04d6cf28d257cbf85ec495d0515fc1ccff4099bca6c205b303af308",
+  "executableSha256": "b130e333e16eeacb8cb2e91d38d4d9115bf72c5c9fbd3c822596e05c95868e51",
+  "editorSha256": "9c85ed407785a5815b3638601a2cb22cb7d7dfa2ca493a2441c84cf7295a0ba5",
   "architectures": [
     "arm64",
     "x86_64"

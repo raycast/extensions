@@ -88,13 +88,6 @@
     "lint:source": "eslint src editor tests && prettier --check src editor tests scripts/build-editor.mjs package.json tsconfig.json eslint.config.js"
   },
   "dependencies": {
-    "@codemirror/commands": "latest",
-    "@codemirror/lang-json": "latest",
-    "@codemirror/language": "latest",
-    "@codemirror/search": "latest",
-    "@codemirror/state": "latest",
-    "@codemirror/view": "latest",
-    "@lezer/highlight": "latest",
     "@jitl/quickjs-singlefile-browser-release-sync": "^0.32.0",
     "@raycast/api": "latest",
     "fast-xml-parser": "latest",
@@ -111,7 +104,14 @@
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "tsx": "latest",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "@codemirror/commands": "latest",
+    "@codemirror/lang-json": "latest",
+    "@codemirror/language": "latest",
+    "@codemirror/search": "latest",
+    "@codemirror/state": "latest",
+    "@codemirror/view": "latest",
+    "@lezer/highlight": "latest"
   },
   "keywords": [
     "json",
