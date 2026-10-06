@@ -1,6 +1,6 @@
 # Tweek Task Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-06
 
 - **Dashboard Command**: View Today's tasks, Upcoming weekly schedule, Overdue tasks, and Someday lists with instant Calendar switcher.
 - **Raycast AI Integration (`@tweek` & `Ask Tweek`)**: Native AI tools (`get-calendars`, `get-tasks`, `create-task`, `update-task`, `complete-task`, `delete-task`) and `Ask Tweek` command.
