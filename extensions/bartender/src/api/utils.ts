@@ -44,6 +44,9 @@ export type BartenderApp = {
 // Setapp ships the app as plain "Bartender", whose version is read from its Info.plist.
 const BARTENDER_APP_NAMES = ["Bartender 7", "Bartender 6", "Bartender", "Bartender 5"];
 
+// Used when the version can't be determined; assumes a current install rather than an old one.
+const FALLBACK_MAJOR_VERSION = 7;
+
 async function readMajorVersion(appPath: string, appName: string): Promise<number> {
   try {
     const { stdout } = await execa("plutil", [
@@ -62,10 +65,10 @@ async function readMajorVersion(appPath: string, appName: string): Promise<numbe
     console.error(`Error reading Bartender version from ${appPath}:`, error);
   }
   const versionInName = parseInt(appName.replace("Bartender", "").trim(), 10);
-  return isNaN(versionInName) ? 5 : versionInName;
+  return isNaN(versionInName) ? FALLBACK_MAJOR_VERSION : versionInName;
 }
 
-async function findBartenderApp(): Promise<BartenderApp> {
+async function findBartenderAppInStandardLocations(): Promise<BartenderApp | undefined> {
   const homeDir = os.homedir();
   const directories = [
     "/Applications",
@@ -82,17 +85,40 @@ async function findBartenderApp(): Promise<BartenderApp> {
       }
     }
   }
-  throw new BartenderNotInstalledError();
+  return undefined;
 }
 
-let bartenderApp: Promise<BartenderApp> | undefined;
+// Finds installs elsewhere (e.g. an external drive or a custom folder) through Spotlight.
+// The wildcard covers the Setapp build, which has a different bundle identifier suffix.
+async function findBartenderAppWithSpotlight(): Promise<BartenderApp | undefined> {
+  try {
+    const { stdout } = await execa("mdfind", ['kMDItemCFBundleIdentifier == "com.surteesstudios.Bartender*"']);
+    const apps = await Promise.all(
+      stdout
+        .split("\n")
+        .filter((appPath) => appPath.endsWith(".app") && path.basename(appPath).startsWith("Bartender"))
+        .map(async (appPath) => {
+          const name = path.basename(appPath, ".app");
+          return { name, majorVersion: await readMajorVersion(appPath, name) };
+        }),
+    );
+    return apps.sort((a, b) => b.majorVersion - a.majorVersion)[0];
+  } catch (error) {
+    console.error("Error searching for Bartender with Spotlight:", error);
+    return undefined;
+  }
+}
 
-/** Finds the installed Bartender app (and its version). Throws BartenderNotInstalledError if there is none. */
-export function getBartenderApp(): Promise<BartenderApp> {
-  bartenderApp ??= findBartenderApp();
-  // Don't cache failures, so installing Bartender while a command is open works
-  bartenderApp.catch(() => (bartenderApp = undefined));
-  return bartenderApp;
+/**
+ * Finds the installed Bartender app (and its version). Throws BartenderNotInstalledError if there is none.
+ * Deliberately not cached, so installing or upgrading Bartender while Raycast is open is picked up.
+ */
+export async function getBartenderApp(): Promise<BartenderApp> {
+  const app = (await findBartenderAppInStandardLocations()) ?? (await findBartenderAppWithSpotlight());
+  if (!app) {
+    throw new BartenderNotInstalledError();
+  }
+  return app;
 }
 
 export async function getTellApplication(): Promise<string> {
