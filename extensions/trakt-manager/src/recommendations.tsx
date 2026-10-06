@@ -10,6 +10,7 @@ import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
+import { closeTopDetail } from "./lib/detail-stack";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { hideRecommendation, markFirstEpisodeWatched } from "./lib/media-mutations";
 import { useWatchlistState } from "./lib/use-watchlist-ids";
@@ -311,6 +312,22 @@ export default function Command() {
                           icon={Icon.Clock}
                           shortcut={Keyboard.Shortcut.Common.Duplicate}
                           onAction={() => handleMovieAction(movie, addMovieToHistory, "Movie added to history")}
+                        />
+                        <Action
+                          title="Not Interested"
+                          icon={Icon.EyeDisabled}
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={() =>
+                            handleMovieAction(
+                              movie,
+                              async (item) => {
+                                await hideMovieRecommendation(item);
+                                closeTopDetail();
+                              },
+                              "Movie removed from recommendations",
+                            )
+                          }
                         />
                       </ActionPanel.Section>
                       <ActionPanel.Section>
