@@ -27,6 +27,7 @@ instructions: |
   - When a tool returns a `warning` or a `message` about a year that could not be honoured, surface it to the user instead of presenting the fallback as an exact match.
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
   - For "what should I watch next?", "what can I finish tonight?" or "where was I?", use `get-up-next`: it is Trakt's Continue Watching. Shows in progress come back in `data` with their next episode, movies paused mid-playback in `movies` with `progressPercent` and `minutesLeft`. Pass `type: "shows"` or `type: "movies"` when the user asks for only one kind.
+  - When `get-up-next` returns a `warning`, one of its two lists could not be loaded: tell the user, and never conclude that the missing list is empty.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
   - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.

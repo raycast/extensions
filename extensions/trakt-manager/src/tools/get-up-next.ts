@@ -1,5 +1,6 @@
 import { withPagination } from "../lib/schema";
 import { CompactPausedMovie, CompactUpNextItem, toCompactPausedMovie, toCompactUpNext } from "./compact-media";
+import { mergeContinueWatchingHalves } from "./continue-watching";
 import { confirmHasMore } from "./page-lookahead";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
@@ -32,6 +33,8 @@ type Output = {
    * a show has no next episode or a movie was never started.
    */
   exhaustive: false;
+  /** Set when one half of an "all" request failed: the other half is still returned. */
+  warning?: string;
 };
 
 const requestShows = (page: number, limit: number) =>
@@ -76,8 +79,6 @@ async function fetchPausedMovies(page: number, limit: number) {
   return { items: paginated.data.map(toCompactPausedMovie), hasMore };
 }
 
-const NONE = { items: [], hasMore: false };
-
 /**
  * Get the user's Continue Watching list on Trakt: the next unwatched episode of each show in progress
  * (season, number, title, first aired date, progress) and the movies paused mid-playback
@@ -87,10 +88,13 @@ export default async function tool(input: Input): Promise<Output> {
   const { type = "all", page = 1, limit = 20 } = input;
   const safeLimit = Math.min(Math.max(limit, 1), 50);
 
-  const [shows, movies] = await Promise.all([
-    type === "movies" ? NONE : fetchShows(page, safeLimit),
-    type === "shows" ? NONE : fetchPausedMovies(page, safeLimit),
+  const none = { items: [], hasMore: false };
+  // With "all", one failed half must not hide the other: shows are what most callers ask for.
+  const [showsResult, moviesResult] = await Promise.allSettled([
+    type === "movies" ? none : fetchShows(page, safeLimit),
+    type === "shows" ? none : fetchPausedMovies(page, safeLimit),
   ]);
+  const { shows, movies, warning } = mergeContinueWatchingHalves(type, showsResult, moviesResult);
 
   return {
     data: shows.items,
@@ -98,5 +102,6 @@ export default async function tool(input: Input): Promise<Output> {
     page,
     hasMore: shows.hasMore || movies.hasMore,
     exhaustive: false,
+    ...(warning && { warning }),
   };
 }

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { toCompactPausedMovie } from "./compact-media";
+import { MOVIES_FAILED_WARNING, SHOWS_FAILED_WARNING, mergeContinueWatchingHalves } from "./continue-watching";
 import { confirmHasMore } from "./page-lookahead";
 
 function headers(page: number, pageCount: number, limit = 20) {
@@ -95,4 +96,51 @@ test("a paused movie without runtime has no minutes left", () => {
     movie: { title: "Untitled", ids: { trakt: 1, imdb: "" } },
   };
   assert.equal(toCompactPausedMovie(entry).minutesLeft, undefined);
+});
+
+const showsHalf = { items: ["Severance"], hasMore: false };
+const moviesHalf = { items: ["Inception"], hasMore: true };
+const ok = <T>(value: T): PromiseFulfilledResult<T> => ({ status: "fulfilled", value });
+const failed = (reason: Error): PromiseRejectedResult => ({ status: "rejected", reason });
+const showsError = new Error("shows failed");
+const moviesError = new Error("movies failed");
+
+test("all: failed paused movies still return the shows with a movies warning", () => {
+  assert.deepEqual(mergeContinueWatchingHalves("all", ok(showsHalf), failed(moviesError)), {
+    shows: showsHalf,
+    movies: { items: [], hasMore: false },
+    warning: MOVIES_FAILED_WARNING,
+  });
+});
+
+test("all: failed shows still return the paused movies with a shows warning", () => {
+  assert.deepEqual(mergeContinueWatchingHalves("all", failed(showsError), ok(moviesHalf)), {
+    shows: { items: [], hasMore: false },
+    movies: moviesHalf,
+    warning: SHOWS_FAILED_WARNING,
+  });
+});
+
+test("all: both halves failing throws the shows error", () => {
+  assert.throws(() => mergeContinueWatchingHalves("all", failed(showsError), failed(moviesError)), showsError);
+});
+
+test("movies: a failed movies request throws", () => {
+  assert.throws(
+    () => mergeContinueWatchingHalves("movies", ok({ items: [], hasMore: false }), failed(moviesError)),
+    moviesError,
+  );
+});
+
+test("shows: a failed shows request throws", () => {
+  assert.throws(
+    () => mergeContinueWatchingHalves("shows", failed(showsError), ok({ items: [], hasMore: false })),
+    showsError,
+  );
+});
+
+test("all: both halves loaded has no warning", () => {
+  const merged = mergeContinueWatchingHalves("all", ok(showsHalf), ok(moviesHalf));
+  assert.deepEqual(merged, { shows: showsHalf, movies: moviesHalf });
+  assert.equal("warning" in merged, false);
 });
