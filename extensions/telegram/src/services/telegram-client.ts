@@ -8,7 +8,23 @@ import * as path from "path";
 import QRCode from "qrcode";
 
 const QR_CODE_TIMEOUT = 30000;
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+function sleepWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    };
+
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
 
 const SESSION_KEY = "telegram_session";
 const AUTH_SESSION_KEY = "telegram_auth_session";
@@ -299,12 +315,7 @@ export async function authenticateWithQr(
         break;
       }
 
-      await Promise.race([
-        sleep(QR_CODE_TIMEOUT),
-        new Promise<void>((resolve) => {
-          abortSignal?.addEventListener("abort", () => resolve(), { once: true });
-        }),
-      ]);
+      await sleepWithAbort(QR_CODE_TIMEOUT, abortSignal);
     }
   })();
 
@@ -337,15 +348,13 @@ export async function authenticateWithQr(
 
   client.addEventHandler(onUpdate, rawEvent);
 
+  let onAbortHandler: (() => void) | undefined;
   const abortPromise = new Promise<AuthenticationResult>((resolve) => {
-    abortSignal?.addEventListener(
-      "abort",
-      () => {
-        isScanningComplete = true;
-        resolve({ needsPassword: false });
-      },
-      { once: true },
-    );
+    onAbortHandler = () => {
+      isScanningComplete = true;
+      resolve({ needsPassword: false });
+    };
+    abortSignal?.addEventListener("abort", onAbortHandler, { once: true });
   });
 
   try {
@@ -353,6 +362,9 @@ export async function authenticateWithQr(
   } finally {
     isScanningComplete = true;
     client.removeEventHandler(onUpdate, rawEvent);
+    if (onAbortHandler) {
+      abortSignal?.removeEventListener("abort", onAbortHandler);
+    }
   }
 }
 
