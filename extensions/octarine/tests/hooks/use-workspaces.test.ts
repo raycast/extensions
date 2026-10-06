@@ -18,18 +18,22 @@ beforeEach(() => {
 });
 
 describe("useWorkspaces", () => {
-  it("keeps valid workspaces and reports invalid roots", async () => {
+  it.each([false, true])("keeps valid workspaces and reports invalid roots (refresh: %s)", async (refresh) => {
     getWorkspaces.mockResolvedValue([
       { name: "Alpha", path: "/tmp/alpha" },
       { name: "Ignored", path: "/tmp/ignored", ignored: true },
       { name: "Missing", path: "/tmp/missing", invalid: true },
     ]);
 
-    useWorkspaces();
+    useWorkspaces({ refresh });
     const load = usePromise.mock.calls[0][0] as (refresh: boolean) => Promise<unknown>;
+    const options = usePromise.mock.calls[0][2] as { onData?: () => void };
 
-    await expect(load(false)).resolves.toEqual([{ name: "Alpha", path: "/tmp/alpha" }]);
-    expect(getWorkspaces).toHaveBeenCalledWith({ refresh: false });
+    await expect(load(refresh)).resolves.toEqual([{ name: "Alpha", path: "/tmp/alpha" }]);
+    options.onData?.();
+
+    expect(getWorkspaces).toHaveBeenCalledWith({ refresh });
+    expect(showToast).toHaveBeenCalledTimes(1);
     expect(showToast).toHaveBeenCalledWith({
       style: Toast.Style.Failure,
       title: "Invalid workspace root paths",
@@ -37,13 +41,17 @@ describe("useWorkspaces", () => {
     });
   });
 
-  it("reports an empty visible workspace list", async () => {
+  it.each([false, true])("reports an empty visible workspace list (refresh: %s)", async (refresh) => {
     getWorkspaces.mockResolvedValue([{ name: "Ignored", path: "/tmp/ignored", ignored: true }]);
 
-    useWorkspaces();
+    useWorkspaces({ refresh });
     const load = usePromise.mock.calls[0][0] as (refresh: boolean) => Promise<unknown>;
+    const options = usePromise.mock.calls[0][2] as { onData?: () => void };
 
-    await expect(load(false)).resolves.toEqual([]);
+    await expect(load(refresh)).resolves.toEqual([]);
+    options.onData?.();
+
+    expect(showToast).toHaveBeenCalledTimes(1);
     expect(showToast).toHaveBeenCalledWith({
       style: Toast.Style.Failure,
       title: "No workspaces found",
@@ -72,15 +80,11 @@ describe("useWorkspaces", () => {
     getWorkspaces.mockResolvedValue([{ name: "Alpha", path: "/tmp/alpha" }]);
 
     useWorkspaces({ refresh: true });
-    const [load, args, options] = usePromise.mock.calls[0] as [
-      (refresh: boolean) => Promise<unknown>,
-      boolean[],
-      { onData: () => void },
-    ];
+    const [load, args] = usePromise.mock.calls[0] as [(refresh: boolean) => Promise<unknown>, boolean[]];
     await load(args[0]);
-    options.onData();
 
     expect(getWorkspaces).toHaveBeenCalledWith({ refresh: true });
+    expect(showToast).toHaveBeenCalledTimes(1);
     expect(showToast).toHaveBeenCalledWith({ style: Toast.Style.Success, title: "Workspaces refreshed" });
   });
 });

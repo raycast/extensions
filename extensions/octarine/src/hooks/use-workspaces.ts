@@ -46,6 +46,11 @@ export function useWorkspaces(options: Options = {}): Result {
           title: "No workspaces found",
           message: "Check root paths in preferences",
         });
+      } else if (refresh) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Workspaces refreshed",
+        });
       }
 
       return visible;
@@ -58,14 +63,6 @@ export function useWorkspaces(options: Options = {}): Result {
           title: "Failed to load workspaces",
           message: "Try again. If it keeps failing, report the error.",
         });
-      },
-      onData: () => {
-        if (refresh) {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Workspaces refreshed",
-          });
-        }
       },
     },
   );
