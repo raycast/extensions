@@ -1,5 +1,5 @@
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDailySearch, prioritizeExactDateMatches } from "@commands/open-daily-desk-note/lib/daily-search";
 import type { WorkspaceSection } from "@type/notes";
 import type { IndexedNote } from "@type/notes";
@@ -70,19 +70,28 @@ describe("createDailySearch", () => {
 });
 
 describe("prioritizeExactDateMatches", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-06T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("moves exact date matches to the front and counts them", () => {
     const sections: WorkspaceSection[] = [
       {
         name: "Work",
         path: "/tmp/work",
-        notes: [dailyNote("2026-05-20", "May 20, 2026"), dailyNote("2024-05-02", "May 2, 2024")],
+        notes: [dailyNote("2024-05-02", "May 2, 2024"), dailyNote("2026-05-02", "May 2, 2026")],
       },
     ];
 
     const result = prioritizeExactDateMatches(sections, { kind: "month-day", month: 5, day: 2 });
 
     expect(result.hasExactMatch).toBe(true);
-    expect(result.sections[0].notes.map((note) => note.path)).toEqual(["Daily/2024-05-02.md", "Daily/2026-05-20.md"]);
+    expect(result.sections[0].notes.map((note) => note.path)).toEqual(["Daily/2026-05-02.md", "Daily/2024-05-02.md"]);
   });
 
   it("keeps the original order when there is no exact match", () => {
@@ -102,13 +111,30 @@ describe("prioritizeExactDateMatches", () => {
       {
         name: "Personal",
         path: "/tmp/personal",
-        notes: [dailyNote("2023-05-02", "May 2, 2023"), dailyNote("2026-05-20", "May 20, 2026")],
+        notes: [dailyNote("2026-05-20", "May 20, 2026"), dailyNote("2023-05-02", "May 2, 2023")],
       },
     ];
 
     const result = prioritizeExactDateMatches(sections, { kind: "month-day", month: 5, day: 2 });
 
     expect(result.hasExactMatch).toBe(true);
-    expect(result.sections[1].notes.map((note) => note.path)).toEqual(["Daily/2023-05-02.md", "Daily/2026-05-20.md"]);
+    expect(result.sections[1].notes.map((note) => note.path)).toEqual(["Daily/2026-05-20.md", "Daily/2023-05-02.md"]);
+  });
+
+  it.each([
+    { searchText: "2026-03-26", stem: "2026-W13", query: { kind: "date", iso: "2026-03-26" }, hasExactMatch: false },
+    { searchText: "2026-W13", stem: "2026-03-26", query: { kind: "week", week: "2026-W13" }, hasExactMatch: false },
+    { searchText: "jan 15", stem: "2023-01-15", query: { kind: "month-day", month: 1, day: 15 }, hasExactMatch: false },
+    { searchText: "2026-W13", stem: "2026-W13", query: { kind: "week", week: "2026-W13" }, hasExactMatch: true },
+  ] as const)("checks the exact filename for $searchText with $stem", ({ searchText, stem, query, hasExactMatch }) => {
+    const note = dailyNote(stem, stem);
+    const sections: WorkspaceSection[] = [{ name: "Work", path: workspace.path, notes: [note] }];
+
+    expect(matches(note, searchText)).toBe(true);
+
+    const result = prioritizeExactDateMatches(sections, query);
+
+    expect(result.hasExactMatch).toBe(hasExactMatch);
+    expect(result.sections).toEqual(sections);
   });
 });

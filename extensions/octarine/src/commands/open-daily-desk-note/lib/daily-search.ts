@@ -1,4 +1,4 @@
-import { matchesDateQuery, resolveDateQuery, type DateQuery } from "@lib/daily-desk";
+import { dailyNoteStem, matchesDateQuery, resolveDateQuery, toDailyStem, type DateQuery } from "@lib/daily-desk";
 import { createSearchMatcher } from "@lib/search";
 import type { IndexedNote, WorkspaceSection } from "@type/notes";
 
@@ -38,6 +38,7 @@ export function prioritizeExactDateMatches(
   sections: WorkspaceSection[],
   query: DateQuery,
 ): { sections: WorkspaceSection[]; hasExactMatch: boolean } {
+  const dateStem = toDailyStem(query);
   let hasExactMatch = false;
 
   const prioritized = sections.map((section) => {
@@ -45,7 +46,7 @@ export function prioritizeExactDateMatches(
     const related: IndexedNote[] = [];
 
     for (const note of section.notes) {
-      if (matchesDateQuery(query, note.path)) {
+      if (dailyNoteStem(note.path) === dateStem) {
         exact.push(note);
       } else {
         related.push(note);
