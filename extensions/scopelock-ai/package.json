@@ -1,5 +1,5 @@
 {
-  "": "https://www.raycast.com/schemas/extension.json",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scopelock-ai",
   "title": "ScopeLock AI - Scope Creep & Change Orders",
   "description": "Autonomous scope creep auditor and statutory UCC § 2-209 legal change order generator for freelance developers and software engineering studios.",
@@ -32,8 +32,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.16.0"
+    "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
