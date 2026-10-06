@@ -3,6 +3,15 @@
   "name": "ascii-kit",
   "title": "ASCII Kit",
   "description": "Box-drawing glyphs, diagram templates and a live-preview composer for text diagrams in PRs, Slack and docs.",
+  "keywords": [
+    "ascii",
+    "diagram",
+    "box drawing",
+    "tree",
+    "table",
+    "flowchart",
+    "unicode"
+  ],
   "icon": "icon.png",
   "author": "villem",
   "categories": [
@@ -41,10 +50,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "test": "vitest run",
-    "snippets": "tsx scripts/gen-snippets.ts",
-    "examples": "tsx scripts/examples.ts",
-    "render-fonts": "swift scripts/render-fonts.swift",
-    "readme": "tsx scripts/gen-readme.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -57,7 +62,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^10.11.0",
     "prettier": "^3.9.9",
-    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.2"
   }

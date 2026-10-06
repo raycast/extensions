@@ -3,7 +3,6 @@
   "display": "Node 22",
   "include": [
     "src/**/*",
-    "scripts/**/*",
     "raycast-env.d.ts"
   ],
   "compilerOptions": {

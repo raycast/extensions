@@ -8,14 +8,19 @@ import { displayWidth, padCenter, splitLines } from "./width";
 // `count > 0` and `Storage > 5GB` stay whole, `Draft > Review` and `Setup > 2FA` split. It's a guess:
 // an arrow in a flow and a comparison in a step look the same.
 const QUANTITY = String.raw`[-+]?[$€£]?\.?\d[\d,.]*\s?(?:%|[kKMGTP]i?B|[kKMG]|ms|s|sec|min|h|hrs?|d|days?|px|x)?`;
-const SEPARATOR = new RegExp(String.raw`\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*|\s+>\s+(?!${QUANTITY}(?![\p{L}\d]))`, "u");
+const ARROW = String.raw`\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*`;
+const SEPARATOR = new RegExp(String.raw`${ARROW}|\s+>\s+(?!${QUANTITY}(?![\p{L}\d]))`, "u");
+// Two or more bare `>` and no other arrow is a chain (`HD > 4K > 8K`), so every `>` splits. A line
+// that uses `->` keeps its bare `>` as comparisons (`Plan -> Check count > 0 -> Ship`).
+const CHAIN = new RegExp(String.raw`${ARROW}|\s+>\s+`, "u");
+const isChain = (line: string) => (line.match(/\s>\s/g) ?? []).length > 1 && !new RegExp(ARROW, "u").test(line);
 
 /** Steps come from `A > B -> C → D` on one line, or one step per line (which can chain too). */
 export function parseFlow(input: string): string[] {
   const lines = splitLines(input)
     .map((l) => l.trim())
     .filter(Boolean);
-  const parts = lines.flatMap((l) => l.split(SEPARATOR));
+  const parts = lines.flatMap((l) => l.split(isChain(l) ? CHAIN : SEPARATOR));
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 

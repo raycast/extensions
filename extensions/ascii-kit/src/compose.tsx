@@ -52,12 +52,17 @@ export default function Command() {
   return <Compose input={data.text} source={data.source} />;
 }
 
+// Only pushed views get a title: the root command already shows its own. Typed input is always pushed.
+function pushedTitle(source: Source): string | undefined {
+  return source === "typed" ? "Compose · typed input" : undefined;
+}
+
 function Compose({ input, source }: { input: string; source: Source }) {
   const { push } = useNavigation();
   const tooLarge = inputTooLarge(input);
   if (!tooLarge) return <Previews input={input} source={source} />;
   return (
-    <List navigationTitle={`Compose · from ${source}`}>
+    <List navigationTitle={pushedTitle(source)}>
       <List.EmptyView
         icon={Icon.Warning}
         title="Too long to preview"
@@ -88,7 +93,7 @@ function Previews({ input, source }: { input: string; source: Source }) {
   const drawn = useMemo(() => new Map(FORMATS.map((f) => [f.id, drawFormat(f, input)])), [input]);
 
   return (
-    <List isShowingDetail navigationTitle={`Compose · from ${source}`} searchBarPlaceholder="Filter formats…">
+    <List isShowingDetail navigationTitle={pushedTitle(source)} searchBarPlaceholder="Filter formats…">
       {kinds.map((kind, i) => (
         <List.Section key={kind} title={i === 0 ? `Suggested · ${KIND_TITLES[kind]}` : KIND_TITLES[kind]}>
           {FORMATS.filter((f) => f.kind === kind).map((f) => {
@@ -154,7 +159,7 @@ function TypeInput({ initial = "", readError }: { initial?: string; readError?: 
   const editing = initial.trim() !== "";
   return (
     <Form
-      navigationTitle={editing ? "Compose · edit input" : "Compose · type input"}
+      navigationTitle={editing ? "Compose · edit input" : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm

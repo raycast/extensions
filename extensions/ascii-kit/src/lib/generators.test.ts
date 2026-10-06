@@ -23,6 +23,10 @@ describe("width", () => {
   it("flags text-default emoji only", () => {
     expect(riskyGlyphs("⚠ ok ✓ ├── ▶ ☑ ✅")).toEqual(["⚠", "▶", "☑"]);
   });
+  it("doesn't flag glyphs without an emoji form, on any Unicode version", () => {
+    expect(riskyGlyphs("★ ☐ ☒ ✓ 1 # *")).toEqual([]);
+    expect(riskyGlyphs("☆ ★ ⭐")).toEqual([]);
+  });
   it("expands tabs to stops by display column", () => {
     expect(expandTabs("ab\tx")).toBe("ab  x");
     expect(expandTabs("名前\tx")).toBe("名前    x");
@@ -284,6 +288,15 @@ describe("flow", () => {
       "Latency > 200 ms",
       "Alert",
     ]);
+  });
+  it("splits every bare > in a chain, even before numbers", () => {
+    expect(parseFlow("HD > 4K > 8K")).toEqual(["HD", "4K", "8K"]);
+    expect(parseFlow("720p > 1080p > 4K")).toEqual(["720p", "1080p", "4K"]);
+    expect(parseFlow("Free > 5GB > Paid")).toEqual(["Free", "5GB", "Paid"]);
+  });
+  it("keeps a bare > as a comparison when the line uses another arrow", () => {
+    expect(parseFlow("Plan -> Check count > 0 > Ship")).toEqual(["Plan", "Check count > 0", "Ship"]);
+    expect(parseFlow("Retry -> Wait > 30s > Fail")).toEqual(["Retry", "Wait > 30s", "Fail"]);
   });
   it("renders inline, across and down", () => {
     expect(renderFlowInline("Draft > Review > Merged")).toBe("Draft → Review → Merged");

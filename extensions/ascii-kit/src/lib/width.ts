@@ -71,6 +71,11 @@ export function padCenter(text: string, width: number, fill = " "): string {
   return fill.repeat(left) + text + fill.repeat(gap - left);
 }
 
+// \p{Emoji} marks characters that have an emoji form. Not \p{Extended_Pictographic}: Unicode 17
+// dropped ★ ☐ ☒ from it, so its answer changed with the Node version. Digits, # and * are Emoji only
+// as keycap bases.
+const hasEmojiForm = (g: string) => /\p{Emoji}/u.test(g) && !/^[\d#*]$/.test(g);
+
 /**
  * Glyphs whose width depends on the renderer: text-default emoji (⚠ ☑ ✔ ▶) that some apps and
  * fonts draw as 2-column emoji, which breaks alignment. Returned de-duplicated, in input order.
@@ -78,7 +83,7 @@ export function padCenter(text: string, width: number, fill = " "): string {
 export function riskyGlyphs(text: string): string[] {
   const found = new Set<string>();
   for (const g of graphemes(text)) {
-    if (graphemeWidth(g) === 1 && /\p{Extended_Pictographic}/u.test(g)) found.add(g);
+    if (graphemeWidth(g) === 1 && hasEmojiForm(g)) found.add(g);
   }
   return [...found];
 }
