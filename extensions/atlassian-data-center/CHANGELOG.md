@@ -1,6 +1,6 @@
 # Atlassian Changelog
 
-## [v1.0.2] - {PR_MERGE_DATE}
+## [v1.0.2] - 2026-10-06
 
 - Rename extension to Atlassian
 - Update Action Keybindings on Windows
