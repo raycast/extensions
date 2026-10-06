@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import { useEffect, useMemo, useState } from "react";
 import {
   Action,
@@ -10,6 +11,7 @@ import {
   List,
   LocalStorage,
   getFrontmostApplication,
+  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -19,7 +21,7 @@ import { parse, rank, remember, rememberIn, type Recents } from "./lib/recents";
 import { readTier } from "./lib/tier";
 import { Locked } from "./lib/locked";
 import { showSheet, showShortcuts } from "./lib/keysi";
-import { atLeast, installedVersion, SHEET_URL_SINCE } from "./lib/version";
+import { atLeast, installedVersion, keysiURLHandler, SHEET_URL_SINCE } from "./lib/version";
 
 /** Where the recent list lives. Namespaced so a future key can't collide. */
 const RECENTS_KEY = "recent-shortcuts";
@@ -54,8 +56,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const sheets = useMemo<Sheet[]>(() => (tier.unlocked ? loadSheets(builtinSheetDirs()) : []), [tier.unlocked]);
   const shortcuts = useMemo(() => flatten(sheets), [sheets]);
   // Offered only when the installed Keysi knows `keysi://sheet` — an older
-  // one ignores it, and an action that does nothing reads as broken.
-  const canShowSheet = useMemo(() => atLeast(installedVersion(builtinSheetDirs()), SHEET_URL_SINCE), []);
+  // one ignores it, and an action that does nothing reads as broken. Worked
+  // out after the first render: asking macOS for the URL handler takes ~0.2s.
+  const [canShowSheet, setCanShowSheet] = useState(false);
+  useEffect(() => {
+    setCanShowSheet(atLeast(installedVersion(builtinSheetDirs(), keysiURLHandler()), SHEET_URL_SINCE));
+  }, []);
 
   useEffect(() => {
     if (!tier.unlocked) return;
@@ -86,8 +92,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           description="Keysi ships sheets for Vim, tmux, Figma, Slack and more. If it's installed somewhere other than Applications, point this extension at it in the extension's settings."
           actions={
             <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               <Action.OpenInBrowser title="Open Keysi.io" url="https://keysi.io" icon={Icon.Globe} />
-              <Action.ShowInFinder title="Open Your Sheets Folder" path={USER_SHEETS_DIR} />
+              {/* Only once Keysi has made it: Finder can't show a folder that isn't there. */}
+              {existsSync(USER_SHEETS_DIR) ? (
+                <Action.ShowInFinder title="Open Your Sheets Folder" path={USER_SHEETS_DIR} />
+              ) : null}
             </ActionPanel>
           }
         />

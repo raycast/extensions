@@ -39,7 +39,9 @@ const shippedIds = () =>
 
 test("reads the fixture sheets", () => {
   assert.deepEqual(
-    readSheetsIn(FIXTURES).map((s) => s.id).sort(),
+    readSheetsIn(FIXTURES)
+      .map((s) => s.id)
+      .sort(),
     ["tmux", "vim"],
   );
 });
@@ -111,6 +113,19 @@ test("a sheet named with a bare string resolves", () => {
 test("fixture row ids are unique", () => {
   const rows = flatten(readSheetsIn(FIXTURES));
   assert.equal(new Set(rows.map((r) => r.id)).size, rows.length);
+});
+
+test("the same title with different keys is two rows; an exact repeat is one", () => {
+  const item = (keys: string) => ({ title: "Save", keys });
+  const sheet = {
+    id: "dup",
+    name: "Dup",
+    groups: [{ title: "File", items: [item("⌘S"), item("Ctrl-S"), item("⌘S")] }],
+  };
+  assert.deepEqual(
+    flatten([sheet]).map((r) => r.keys),
+    ["⌘S", "Ctrl-S"],
+  );
 });
 
 test("a user sheet shadows a built-in of the same id", () => {
@@ -228,7 +243,10 @@ test("resolve on an empty map is empty rather than undefined", () => {
  */
 test("rows carry the file they came from", { skip }, () => {
   const rows = flatten(readSheetsIn(REPO_SHEETS));
-  assert.ok(rows.every((r) => r.sourcePath?.endsWith(".json")), "a row lost its source file");
+  assert.ok(
+    rows.every((r) => r.sourcePath?.endsWith(".json")),
+    "a row lost its source file",
+  );
   const vim = rows.find((r) => r.sheetId === "vim");
   assert.ok(vim?.sourcePath?.endsWith("vim.json"), vim?.sourcePath);
 });

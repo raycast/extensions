@@ -42,7 +42,8 @@ produced it (⌘⇧F) — which is the fastest way to fix a sheet you wrote.
 
 **Show Sheet in Keysi** uses `keysi://sheet`, which Keysi 1.0.24 added; an
 older Keysi ignores it silently. So the action is only offered when the
-installed `Keysi.app`'s `Info.plist` says 1.0.24 or later — the extension
+`Info.plist` of the `Keysi.app` macOS opens `keysi://` links with says 1.0.24
+or later (with two copies installed, that is the one that matters) — the extension
 ships on Raycast's schedule and routinely meets an older app.
 
 ## Why it's split in two

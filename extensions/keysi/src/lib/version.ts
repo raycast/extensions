@@ -1,3 +1,4 @@
+import { execFileSync } from "child_process";
 import { readFileSync } from "fs";
 
 /**
@@ -16,16 +17,49 @@ export const SHEET_URL_SINCE = "1.0.24";
 export const FREE_SHOW_SINCE = "1.0.21";
 
 /**
+ * The app macOS sends `keysi://` URLs to, or `undefined` if it can't say.
+ *
+ * With two copies of Keysi installed, the one Launch Services picks for the
+ * scheme is the one every command here actually talks to, and it need not
+ * be the one the sheet directories point at. Asked through JXA because that
+ * is the only route to `NSWorkspace` from a Raycast extension; ~0.2s.
+ */
+export function keysiURLHandler(): string | undefined {
+  try {
+    const path = execFileSync(
+      "/usr/bin/osascript",
+      [
+        "-l",
+        "JavaScript",
+        "-e",
+        "ObjC.import('AppKit'); var u = $.NSWorkspace.sharedWorkspace.URLForApplicationToOpenURL($.NSURL.URLWithString('keysi://show')); u.isNil() ? '' : u.path.js",
+      ],
+      { encoding: "utf8", timeout: 2000 },
+    ).trim();
+    return path.length > 0 ? path : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * The installed version, read from the first bundle that has one.
  *
- * Takes the `BuiltinSheets` directories `builtinSheetDirs()` already
- * resolves, so the Keysi Application preference covers this too; that one
- * comes last there and is checked first here. `undefined` when no bundle is
- * found, which callers treat as "don't offer what might not work".
+ * `handlerApp` — the `keysiURLHandler()` result — is checked first, since it
+ * is the copy that receives the URL. Then the `BuiltinSheets` directories
+ * `builtinSheetDirs()` already resolves, so the Keysi Application preference
+ * covers this too; that one comes last there and is checked first here.
+ * `undefined` when no bundle is found, which callers treat as "don't offer
+ * what might not work".
  */
-export function installedVersion(sheetDirs: string[]): string | undefined {
-  for (const dir of [...sheetDirs].reverse()) {
-    const plist = dir.replace(/\/Contents\/Resources\/BuiltinSheets\/?$/, "/Contents/Info.plist");
+export function installedVersion(sheetDirs: string[], handlerApp?: string): string | undefined {
+  const plists = [
+    ...(handlerApp ? [`${handlerApp.replace(/\/+$/, "")}/Contents/Info.plist`] : []),
+    ...[...sheetDirs]
+      .reverse()
+      .map((dir) => dir.replace(/\/Contents\/Resources\/BuiltinSheets\/?$/, "/Contents/Info.plist")),
+  ];
+  for (const plist of plists) {
     try {
       // Xcode writes this Info.plist as XML; a binary one simply doesn't match.
       const match = readFileSync(plist, "utf8").match(

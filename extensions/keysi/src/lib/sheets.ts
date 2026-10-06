@@ -219,13 +219,16 @@ export function flatten(sheets: Sheet[]): Shortcut[] {
         if (!isObject(item)) continue;
         const title = resolve(item.title);
         if (!title) continue;
-        const id = `${sheet.id}›${groupTitle}›${title}`;
+        const keys = typeof item.keys === "string" ? item.keys : "";
+        // Keys are part of the identity: the same command listed twice with
+        // different bindings is two rows. Only an exact repeat is dropped.
+        const id = `${sheet.id}›${groupTitle}›${title}›${keys}`;
         if (seen.has(id)) continue;
         seen.add(id);
         rows.push({
           id,
           title,
-          keys: typeof item.keys === "string" ? item.keys : "",
+          keys,
           sheetId: sheet.id,
           sheetName,
           group: groupTitle,

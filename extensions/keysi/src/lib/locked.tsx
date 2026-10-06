@@ -4,11 +4,11 @@ import type { TierStatus } from "./tier";
 
 const PRO_MARKDOWN = `# Keysi Pro
 
-Keysi's Raycast commands are part of **Keysi Pro** — a one-time purchase, not a subscription.
+Searching cheat sheets, Practice and Progress from Raycast are part of **Keysi Pro** — a one-time purchase, not a subscription. **Show Shortcuts** is free.
 
 Keysi itself is free, with no time limit. Hold ⌘ to see every shortcut of the app you're in, click any row to run it, write your own cheat sheets, search them — none of that costs anything, none of it is affected by this, and anything free today stays free.
 
-What Pro adds is reaching Keysi from *somewhere else*: this extension, Shortcuts, Spotlight actions, and the coaching that notices which shortcuts you keep missing.
+What Pro adds is reaching Keysi from *somewhere else* — this extension, Shortcuts, Spotlight actions — and the coaching that notices which shortcuts you keep missing. Showing an app's shortcuts from any of them stays free.
 
 Every install includes 14 days of Pro.
 
@@ -86,7 +86,7 @@ export async function showLockedToast(status: TierStatus): Promise<void> {
     style: Toast.Style.Failure,
     title: status.known ? "Keysi Pro required" : "Keysi isn't set up yet",
     message: status.known
-      ? "Raycast commands are part of Keysi Pro, a one-time purchase. Keysi itself stays free."
+      ? "Practice and Progress from Raycast are part of Keysi Pro, a one-time purchase. Show Shortcuts stays free."
       : "Install Keysi from keysi.io and open it once.",
     primaryAction: status.known
       ? {

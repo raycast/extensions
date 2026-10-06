@@ -23,6 +23,11 @@ test("the last directory (the preference) wins over the defaults", () => {
   assert.equal(installedVersion([bundle("1.0.20"), bundle("1.0.25")]), "1.0.25");
 });
 
+test("the copy that receives keysi:// wins over the sheet directories", () => {
+  const handler = bundle("1.0.20").replace(/\/Contents\/Resources\/BuiltinSheets$/, "");
+  assert.equal(installedVersion([bundle("1.0.25")], handler), "1.0.20");
+});
+
 test("no bundle means no version", () => {
   assert.equal(installedVersion([join(tmpdir(), "nowhere", "Contents", "Resources", "BuiltinSheets")]), undefined);
 });

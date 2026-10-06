@@ -1,7 +1,7 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { showShortcuts } from "./lib/keysi";
 import { builtinSheetDirs } from "./lib/prefs";
-import { atLeast, FREE_SHOW_SINCE, installedVersion } from "./lib/version";
+import { atLeast, FREE_SHOW_SINCE, installedVersion, keysiURLHandler } from "./lib/version";
 
 /**
  * Show Shortcuts.
@@ -19,9 +19,10 @@ import { atLeast, FREE_SHOW_SINCE, installedVersion } from "./lib/version";
  */
 export default async function Command(props: LaunchProps<{ arguments: Arguments.ShowShortcuts }>) {
   const query = (props.fallbackText ?? props.arguments?.query ?? "").trim();
-  const version = installedVersion(builtinSheetDirs());
+  // Opened first, so the ~0.2s version lookup never delays the panel.
+  await showShortcuts(query.length > 0 ? query : undefined);
+  const version = installedVersion(builtinSheetDirs(), keysiURLHandler());
   if (version && !atLeast(version, FREE_SHOW_SINCE)) {
     await showHUD(`Show Shortcuts is free from Keysi ${FREE_SHOW_SINCE} — use Check for Updates… in Keysi's menu`);
   }
-  await showShortcuts(query.length > 0 ? query : undefined);
 }
