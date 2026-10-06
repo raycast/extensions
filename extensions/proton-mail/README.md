@@ -6,13 +6,13 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
 
 - **Email List View** - Browse emails with subject, sender, date, and read/unread status
 - **Email Detail View** - Read full email content in a detail pane
-- **Folder Navigation** - Switch between Inbox, Sent, Drafts, Archive, Trash, and custom folders/labels
+- **Mailboxes** - Browse Inbox, Sent, Drafts, Archive, Trash, your folders (with their subfolders) and labels, with email and unread counts
 - **Filtering** - Filter emails by All, Unread, Read, or Has Attachment
 - **Compose Email** - Write new emails or Reply, Reply All, and Forward
 - **Pagination** - Load more emails as needed with configurable page size
 - **Attachments** - Download individual attachments or all at once
 - **Quicklinks** - Save current folder/filter view as a Raycast quicklink
-- **Open in Proton Mail** - Jump to the email in Proton Mail web interface (uses search as a workaround since direct email links aren't available)
+- **Open in Proton Mail** - Open the email in the Proton Mail web app
 - **Expanded Email View** - Read emails in full-screen with metadata sidebar
 - **Demo Mode** - Anonymize email data for screenshots and demos
 - **Email Actions**:
@@ -55,12 +55,9 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
 
 ## Filtering
 
-The extension provides a single dropdown that combines:
+The command opens on your inbox. Press Esc (or ⌘[ "Back") to go back to the Mailboxes screen, which lists your mailboxes, folders and labels with their email and unread counts. Opening a folder shows its subfolders above its emails.
 
-- **Folder selection** (Inbox, Sent, Drafts, etc.)
-- **Status filters** (All, Unread, Read, Has Attachment)
-
-Select a folder first, then use the filter section to narrow down emails.
+The dropdown next to the search bar filters the current folder: All, Unread, Read or Has Attachment.
 
 ## Pagination
 
@@ -113,3 +110,4 @@ Toggle it off with the same shortcut when done.
 | Toggle Demo Mode | ⇧⌘D |
 | Copy as Markdown | ⇧⌘M |
 | Compose New Email | ⌘N |
+| Back (to the parent folder or Mailboxes) | ⌘[ |

@@ -99,7 +99,7 @@ function Mailboxes({ initialFolder, initialFilter }: { initialFolder?: string; i
     }
   }, [error]);
 
-  const { mailboxes, userFolders } = groupFolders(folders || []);
+  const { mailboxes, userFolders, labels } = groupFolders(folders || []);
   const renderFolder = (folder: Folder) => (
     <FolderListItem key={folder.path} folder={folder} onOpen={() => openFolder(folder.path)} onRefresh={revalidate} />
   );
@@ -108,6 +108,7 @@ function Mailboxes({ initialFolder, initialFilter }: { initialFolder?: string; i
     <List isLoading={isLoading} navigationTitle="Mailboxes" searchBarPlaceholder="Filter mailboxes...">
       <List.Section title="Mailboxes">{mailboxes.map(renderFolder)}</List.Section>
       <List.Section title="Folders">{userFolders.map(renderFolder)}</List.Section>
+      <List.Section title="Labels">{labels.map(renderFolder)}</List.Section>
     </List>
   );
 }
@@ -143,6 +144,7 @@ function FolderListItem({
 
   return (
     <List.Item
+      id={`folder:${folder.path}`}
       title={folderDisplayName(folder.path)}
       icon={getFolderIcon(folder)}
       accessories={accessories}
@@ -161,23 +163,17 @@ function FolderListItem({
             onAction={onRefresh}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
-          {onBack && <BackToFoldersAction onBack={onBack} />}
+          {onBack && <BackAction onBack={onBack} />}
         </ActionPanel>
       }
     />
   );
 }
 
-// Esc already goes back, but the action makes it discoverable in ⌘K
-function BackToFoldersAction({ onBack }: { onBack: () => void }) {
-  return (
-    <Action
-      title="Back to Folders"
-      icon={Icon.ArrowLeft}
-      onAction={onBack}
-      shortcut={{ modifiers: ["cmd"], key: "[" }}
-    />
-  );
+// Esc already goes back one level (to the parent folder, then Mailboxes), but the action makes it
+// discoverable in ⌘K
+function BackAction({ onBack }: { onBack: () => void }) {
+  return <Action title="Back" icon={Icon.ArrowLeft} onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "[" }} />;
 }
 
 function folderSegments(folder: Folder): string[] {
@@ -193,16 +189,19 @@ function childFolders(folders: Folder[], parentPath: string): Folder[] {
   });
 }
 
-// System mailboxes, plus the first level of the user's folders. Bridge nests them under "Folders/" and
-// labels under "Labels/"; on other servers, top-level folders simply show up as mailboxes.
-function groupFolders(folders: Folder[]): { mailboxes: Folder[]; userFolders: Folder[] } {
+// System mailboxes, plus the first level of the user's folders and labels, which Bridge nests under
+// "Folders/" and "Labels/". On other servers, top-level folders simply show up as mailboxes.
+function groupFolders(folders: Folder[]): { mailboxes: Folder[]; userFolders: Folder[]; labels: Folder[] } {
   const selectable = folders.filter((folder) => !hasFlag(folder.flags, "\\Noselect"));
+  const firstLevelOf = (container: string) =>
+    selectable.filter((folder) => {
+      const parts = folderSegments(folder);
+      return parts.length === 2 && parts[0] === container;
+    });
   return {
     mailboxes: selectable.filter((folder) => folderSegments(folder).length === 1),
-    userFolders: selectable.filter((folder) => {
-      const parts = folderSegments(folder);
-      return parts.length === 2 && parts[0] === "Folders";
-    }),
+    userFolders: firstLevelOf("Folders"),
+    labels: firstLevelOf("Labels"),
   };
 }
 
@@ -358,12 +357,9 @@ function EmailList({ folder: selectedFolder, initialFilter }: EmailListProps) {
       searchBarPlaceholder="Search emails..."
       searchBarAccessory={<FilterDropdown filter={filter} onFilterChange={setFilter} />}
       onSelectionChange={(id) => {
-        if (id) {
-          const uid = parseInt(id, 10);
-          if (!isNaN(uid)) {
-            setSelectedEmailUid(uid);
-          }
-        }
+        const uid = id ? parseInt(id, 10) : NaN;
+        // Subfolder rows aren't emails: clear the selection so the previous email's detail doesn't stay open
+        setSelectedEmailUid(isNaN(uid) ? null : uid);
       }}
     >
       {subfolders.length > 0 && (
@@ -372,7 +368,7 @@ function EmailList({ folder: selectedFolder, initialFilter }: EmailListProps) {
             <FolderListItem
               key={folder.path}
               folder={folder}
-              onOpen={() => push(<EmailList folder={folder.path} />, revalidateFolders)}
+              onOpen={() => push(<EmailList folder={folder.path} initialFilter={filter} />, revalidateFolders)}
               onRefresh={revalidateFolders}
               onBack={pop}
             />
@@ -403,7 +399,7 @@ function EmailList({ folder: selectedFolder, initialFilter }: EmailListProps) {
           description={`No emails found in ${folderDisplayName(selectedFolder)}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
           actions={
             <ActionPanel>
-              <BackToFoldersAction onBack={pop} />
+              <BackAction onBack={pop} />
             </ActionPanel>
           }
         />
@@ -449,6 +445,7 @@ function getFolderIcon(folder: Folder): Icon {
     case "\\All":
       return Icon.Tray;
     default:
+      if (folder.delimiter && folder.path.startsWith(`Labels${folder.delimiter}`)) return Icon.Tag;
       // Bridge doesn't flag every system mailbox with a special-use attribute
       switch (folder.path.toLowerCase()) {
         case "inbox":
@@ -1180,7 +1177,7 @@ function EmailActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Navigation">
-        <BackToFoldersAction onBack={pop} />
+        <BackAction onBack={pop} />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Quicklinks">
