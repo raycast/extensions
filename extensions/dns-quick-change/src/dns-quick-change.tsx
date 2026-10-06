@@ -163,6 +163,8 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
             }
           />
         )}
+        {get("IPv6 IP address") && <InfoItem icon={Icon.Globe} title="IPv6 Address" value={get("IPv6 IP address")!} />}
+        {get("IPv6 Router") && <InfoItem icon={Icon.Wifi} title="IPv6 Router" value={get("IPv6 Router")!} />}
         {get("MAC Address") && <InfoItem icon={Icon.Fingerprint} title="MAC Address" value={get("MAC Address")!} />}
         {get("Wi-Fi ID") && <InfoItem icon={Icon.Wifi} title="Wi-Fi ID" value={get("Wi-Fi ID")!} />}
         {get("Ethernet Address") && (
@@ -209,8 +211,12 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
     if (/[=\s]/.test(value)) return "Name cannot contain spaces or '='";
     const trimmed = value.trim();
     // Disallow existing name unless editing and keeping the same name
-    if ((!isEditing || trimmed !== existing?.name) && getPreset(trimmed)) {
-      return `Preset "${trimmed}" already exists`;
+    try {
+      if ((!isEditing || trimmed !== existing?.name) && getPreset(trimmed)) {
+        return `Preset "${trimmed}" already exists`;
+      }
+    } catch (error) {
+      return error instanceof Error ? error.message : "Could not read saved presets";
     }
     return undefined;
   }
@@ -238,16 +244,38 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
       // Save new/renamed preset first before deleting old one to prevent data loss if write fails
       addPreset(trimmedName, trimmedServers, trimmedDescription);
       if (isEditing && existing && existing.name !== trimmedName) {
+        const oldName = existing.name;
         try {
-          deletePreset(existing.name);
+          deletePreset(oldName);
         } catch (cleanupErr) {
           console.error("Failed to delete old preset during rename:", cleanupErr);
+          onSaved();
+          const detail = cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr);
           await showToast({
             style: Toast.Style.Failure,
-            title: `Saved "${trimmedName}", but failed to remove "${existing.name}"`,
-            message: cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr),
+            title: `Could not remove "${oldName}"`,
+            message: `"${trimmedName}" was saved. ${detail}`,
+            primaryAction: {
+              title: "Remove Old Preset",
+              onAction: async () => {
+                try {
+                  deletePreset(oldName);
+                  onSaved();
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: `Removed "${oldName}"`,
+                  });
+                } catch (retryErr) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: `Could not remove "${oldName}"`,
+                    message: retryErr instanceof Error ? retryErr.message : String(retryErr),
+                  });
+                }
+              },
+            },
           });
-          onSaved();
+          pop();
           return;
         }
       }
@@ -306,6 +334,7 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
 
 export default function Command() {
   const [presets, setPresets] = useState<DNSPreset[]>([]);
+  const [presetsError, setPresetsError] = useState<string | undefined>();
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
   const [networkService, setNetworkService] = useState<string>(NETWORK_SERVICE);
   const [networkInterface, setNetworkInterface] = useState<string>(NETWORK_INTERFACE);
@@ -340,43 +369,51 @@ export default function Command() {
     return detected;
   }
 
-  async function ensureActiveService(): Promise<string> {
+  async function ensureActiveService(): Promise<{ service: string; device: string }> {
     if (isServiceResolved && networkService) {
-      return networkService;
+      return { service: networkService, device: networkInterface };
     }
     const resolved = await resolveService();
     setNetworkService(resolved.service);
     setNetworkInterface(resolved.device);
     setIsServiceResolved(true);
-    return resolved.service;
+    return resolved;
   }
 
-  async function refresh(targetService?: string) {
+  async function refresh(resolved?: { service: string; device: string }) {
     const currentId = ++requestIdRef.current;
     setIsLoading(true);
     try {
-      let serviceToUse = targetService;
+      let target = resolved;
 
-      if (!serviceToUse) {
+      if (!target) {
         if (isServiceResolved && networkService) {
-          serviceToUse = networkService;
+          target = { service: networkService, device: networkInterface };
         } else {
-          const resolved = await resolveService();
-          serviceToUse = resolved.service;
+          const detected = await resolveService();
+          target = detected;
           if (currentId === requestIdRef.current) {
-            setNetworkService(resolved.service);
-            setNetworkInterface(resolved.device);
+            setNetworkService(detected.service);
+            setNetworkInterface(detected.device);
             setIsServiceResolved(true);
           }
         }
       }
 
-      const [loadedPresets, loadedInfo] = await Promise.all([
-        Promise.resolve(getPresets()),
-        getNetworkInfo(serviceToUse),
-      ]);
+      let loadedPresets: DNSPreset[] = [];
+      let presetLoadError: string | undefined;
+      try {
+        loadedPresets = getPresets();
+      } catch (error) {
+        presetLoadError = error instanceof Error ? error.message : String(error);
+      }
+      const loadedInfo = await getNetworkInfo(target.service);
       if (currentId === requestIdRef.current) {
+        setNetworkService(target.service);
+        setNetworkInterface(target.device);
+        setIsServiceResolved(true);
         setPresets(loadedPresets);
+        setPresetsError(presetLoadError);
         setNetworkInfo(loadedInfo);
       }
     } catch (error) {
@@ -402,16 +439,21 @@ export default function Command() {
       setIsLoading(true);
       try {
         const { service, device } = await resolveService();
+        let loadedPresets: DNSPreset[] = [];
+        let presetLoadError: string | undefined;
+        try {
+          loadedPresets = getPresets();
+        } catch (error) {
+          presetLoadError = error instanceof Error ? error.message : String(error);
+        }
+        const loadedInfo = await getNetworkInfo(service);
+
         if (!isCancelled && currentId === requestIdRef.current) {
           setNetworkService(service);
           setNetworkInterface(device);
           setIsServiceResolved(true);
-        }
-
-        const [loadedPresets, loadedInfo] = await Promise.all([Promise.resolve(getPresets()), getNetworkInfo(service)]);
-
-        if (!isCancelled && currentId === requestIdRef.current) {
           setPresets(loadedPresets);
+          setPresetsError(presetLoadError);
           setNetworkInfo(loadedInfo);
         }
       } catch (error) {
@@ -443,7 +485,7 @@ export default function Command() {
         title: `Setting DNS to ${preset.name}...`,
       });
       const activeService = await ensureActiveService();
-      await setDNSFromPreset(preset.name, activeService);
+      await setDNSFromPreset(preset.name, activeService.service);
       await showToast({
         style: Toast.Style.Success,
         title: `DNS set to ${preset.name}`,
@@ -466,7 +508,7 @@ export default function Command() {
         title: "Resetting DNS to DHCP...",
       });
       const activeService = await ensureActiveService();
-      await resetDNS(activeService);
+      await resetDNS(activeService.service);
       await showToast({
         style: Toast.Style.Success,
         title: "DNS reset to DHCP",
@@ -510,8 +552,15 @@ export default function Command() {
   }
 
   const activeDNSText = networkInfo?.activeDNS.length ? networkInfo.activeDNS.join(", ") : "None detected";
-  const dnsSourceTag = networkInfo?.isUnknown ? "Unknown" : networkInfo?.isDHCP ? "DHCP" : "Manual";
-  const dnsSourceColor = networkInfo?.isUnknown ? Color.SecondaryText : networkInfo?.isDHCP ? Color.Blue : Color.Orange;
+  const dnsSourceTag = !networkInfo
+    ? "Detecting"
+    : networkInfo.isUnknown
+      ? "Unknown"
+      : networkInfo.isDHCP
+        ? "DHCP"
+        : "Manual";
+  const dnsSourceColor =
+    !networkInfo || networkInfo.isUnknown ? Color.SecondaryText : networkInfo.isDHCP ? Color.Blue : Color.Orange;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search presets or IP addresses...">
@@ -526,7 +575,7 @@ export default function Command() {
               icon={Icon.Plus}
               target={<AddEditPresetForm onSaved={() => refresh()} />}
             />
-            <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />
+            {isServiceResolved && <Action title="Reset to DHCP" icon={Icon.XMarkCircle} onAction={handleReset} />}
           </ActionPanel>
         }
       />
@@ -535,29 +584,31 @@ export default function Command() {
       <List.Section title="Current Connection">
         <List.Item
           icon={{
-            source: networkInfo?.isDHCP ? Icon.Globe : Icon.Lock,
+            source: !networkInfo ? Icon.CircleProgress : networkInfo.isDHCP ? Icon.Globe : Icon.Lock,
             tintColor: dnsSourceColor,
           }}
           title="Active Network Service"
           subtitle={networkInfo?.service ?? "Detecting..."}
           accessories={[
-            { text: activeDNSText },
+            ...(networkInfo ? [{ text: activeDNSText }] : []),
             {
               tag: {
                 value: dnsSourceTag,
                 color: dnsSourceColor,
               },
             },
-            ...(networkInterface ? [{ tag: networkInterface }] : []),
+            ...(isServiceResolved && networkInterface ? [{ tag: networkInterface }] : []),
           ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Network Details">
-                <Action.Push
-                  title="Show Network Details"
-                  icon={Icon.Info}
-                  target={<NetworkDetailsView service={networkService} device={networkInterface} />}
-                />
+                {isServiceResolved && (
+                  <Action.Push
+                    title="Show Network Details"
+                    icon={Icon.Info}
+                    target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                  />
+                )}
                 <Action.CopyToClipboard
                   title="Copy Active DNS"
                   content={activeDNSText}
@@ -565,12 +616,14 @@ export default function Command() {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section title="Network Controls">
-                <Action
-                  title="Reset to DHCP"
-                  icon={Icon.XMarkCircle}
-                  onAction={handleReset}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
+                {isServiceResolved && (
+                  <Action
+                    title="Reset to DHCP"
+                    icon={Icon.XMarkCircle}
+                    onAction={handleReset}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
+                )}
                 <Action
                   title="Refresh Network Info"
                   icon={Icon.ArrowClockwise}
@@ -600,25 +653,34 @@ export default function Command() {
             </ActionPanel>
           }
         />
-        <List.Item
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Orange }}
-          title="Reset to DHCP"
-          subtitle="Remove manual DNS and use automatic settings"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Reset to DHCP"
-                icon={Icon.XMarkCircle}
-                onAction={handleReset}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel>
-          }
-        />
+        {isServiceResolved && (
+          <List.Item
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Orange }}
+            title="Reset to DHCP"
+            subtitle="Remove manual DNS and use automatic settings"
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Reset to DHCP"
+                  icon={Icon.XMarkCircle}
+                  onAction={handleReset}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
       </List.Section>
 
       {/* Presets List */}
       <List.Section title="DNS Presets">
+        {presetsError && (
+          <List.Item
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title="Could not read saved presets"
+            subtitle={presetsError}
+          />
+        )}
         {presets.map((preset) => {
           const serverArray = preset.servers.split(",").map((s) => s.trim());
           const isActive =
@@ -649,11 +711,13 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Apply">
-                    <Action
-                      title={`Set DNS to ${preset.name}`}
-                      icon={Icon.Network}
-                      onAction={() => handleSetPreset(preset)}
-                    />
+                    {isServiceResolved && (
+                      <Action
+                        title={`Set DNS to ${preset.name}`}
+                        icon={Icon.Network}
+                        onAction={() => handleSetPreset(preset)}
+                      />
+                    )}
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Copy">
                     <Action.CopyToClipboard
@@ -689,18 +753,22 @@ export default function Command() {
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Network">
-                    <Action.Push
-                      title="Show Network Details"
-                      icon={Icon.Info}
-                      target={<NetworkDetailsView service={networkService} device={networkInterface} />}
-                      shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    />
-                    <Action
-                      title="Reset to DHCP"
-                      icon={Icon.XMarkCircle}
-                      onAction={handleReset}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
+                    {isServiceResolved && (
+                      <Action.Push
+                        title="Show Network Details"
+                        icon={Icon.Info}
+                        target={<NetworkDetailsView service={networkService} device={networkInterface} />}
+                        shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      />
+                    )}
+                    {isServiceResolved && (
+                      <Action
+                        title="Reset to DHCP"
+                        icon={Icon.XMarkCircle}
+                        onAction={handleReset}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                    )}
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}

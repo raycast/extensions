@@ -5,6 +5,7 @@ All notable changes to the DNS Quick Change extension will be documented in this
 ## [Modernization & Asynchronous Refactoring] - {PR_MERGE_DATE}
 
 ### Added
+
 - Fully asynchronous network execution across all system tools (`networksetup`, `scutil`, `route`, `ifconfig`, `osascript`) using `execFileAsync`, keeping the Raycast UI responsive
 - Command execution timeout (8 seconds) to prevent hanging processes
 - Robust fallback when the default route is a virtual VPN tunnel (`utun*`), automatically selecting active physical adapters
@@ -16,12 +17,14 @@ All notable changes to the DNS Quick Change extension will be documented in this
 - Comprehensive 43-test unit test suite covering async operations, parsers, and error recovery
 
 ### Changed
+
 - Upgraded `@raycast/api` to `^2.6.2` for Raycast 2.0 and macOS 27 compatibility
 - Added `typecheck` and `test` scripts to `package.json`
 
 ## [Initial Release] - 2026-06-01
 
 ### Added
+
 - Quick DNS preset switching with one-key activation
 - Create, edit, and delete DNS presets with validation
 - Preset descriptions for better organization and context
@@ -36,6 +39,7 @@ All notable changes to the DNS Quick Change extension will be documented in this
 - 4 high-quality screenshots demonstrating core features
 
 ### Security
+
 - Re-validation of all IP addresses at runtime to prevent shell injection from manually-edited preset files
 - Strict IP regex and range validation (0-255) before any shell command execution
 - Validate preset names at parse-time to reject malformed or malicious names in `~/.dns_presets`
@@ -44,11 +48,13 @@ All notable changes to the DNS Quick Change extension will be documented in this
 - Defense-in-depth approach: validation at write-time (form), parse-time (loading presets), and apply-time (execution)
 
 ### Performance
+
 - Asynchronous network service detection deferred to `useEffect` to prevent startup blocking
 - Network details loading moved to `useEffect` to prevent UI freezing when viewing details
 - Module-level constants use placeholders that are updated asynchronously
 
 ### Code Quality
+
 - Using auto-generated `Preferences` type from Raycast's `raycast-env.d.ts` for type safety
 - Removed unused `@raycast/utils` dependency
 - Proper Title Case for acronyms ("DNS Quick Change", "DHCP")

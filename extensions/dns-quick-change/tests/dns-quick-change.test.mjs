@@ -245,6 +245,15 @@ destination: default
     assert.deepStrictEqual(selected, { service: "Wi-Fi", device: "en0" });
   });
 
+  test("follows the active-adapter order when Ethernet is listed before Wi-Fi", () => {
+    const services = [
+      { service: "Ethernet", device: "en1" },
+      { service: "Wi-Fi", device: "en0" },
+    ];
+    const selected = selectActiveNetworkService(services, "utun3", ["en0", "en1"]);
+    assert.deepStrictEqual(selected, { service: "Wi-Fi", device: "en0" });
+  });
+
   test("parses active devices from scutil --nwi", () => {
     const sampleNwi = `Network information
 
@@ -355,6 +364,44 @@ describe("Async Network Operations & Error Handling", () => {
         return { stdout: "interface: en0\n" };
       }
       return { stdout: "(1) Wi-Fi\n(Hardware Port: Wi-Fi, Device: en0)\n" };
+    };
+    const active = await getActiveNetworkService(mockExec);
+    assert.deepStrictEqual(active, { service: "Wi-Fi", device: "en0" });
+  });
+
+  test("getActiveNetworkService uses the underlying adapter when a VPN owns the default route", async () => {
+    const services = `(1) Ethernet
+(Hardware Port: Ethernet, Device: en1)
+
+(2) Wi-Fi
+(Hardware Port: Wi-Fi, Device: en0)
+`;
+    const mockExec = async (cmd) => {
+      if (cmd.includes("route")) return { stdout: "interface: utun3\n" };
+      if (cmd.includes("scutil")) return { stdout: "Network interfaces: utun3 en0 en1\n" };
+      return { stdout: services };
+    };
+    const active = await getActiveNetworkService(mockExec);
+    assert.deepStrictEqual(active, { service: "Wi-Fi", device: "en0" });
+  });
+
+  test("getActiveNetworkService skips an inactive adapter listed ahead of the active one", async () => {
+    const services = `(1) Ethernet
+(Hardware Port: Ethernet, Device: en1)
+
+(2) Wi-Fi
+(Hardware Port: Wi-Fi, Device: en0)
+`;
+    const mockExec = async (cmd, args = []) => {
+      if (cmd.includes("route")) return { stdout: "interface: utun3\n" };
+      if (cmd.includes("scutil")) return { stdout: "Network interfaces: utun3\n" };
+      if (cmd.includes("ifconfig")) {
+        if (args[0] === "en1") {
+          return { stdout: "status: inactive\n\tinet 169.254.1.20 netmask 0xffff0000\n" };
+        }
+        return { stdout: "status: active\n\tinet 192.168.1.20 netmask 0xffffff00\n" };
+      }
+      return { stdout: services };
     };
     const active = await getActiveNetworkService(mockExec);
     assert.deepStrictEqual(active, { service: "Wi-Fi", device: "en0" });

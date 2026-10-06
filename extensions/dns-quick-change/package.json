@@ -35,10 +35,18 @@
     }
   ],
   "screenshots": [
-    { "path": "metadata/extension-screenshot-1.png" },
-    { "path": "metadata/extension-screenshot-2.png" },
-    { "path": "metadata/extension-screenshot-3.png" },
-    { "path": "metadata/extension-screenshot-4.png" }
+    {
+      "path": "metadata/extension-screenshot-1.png"
+    },
+    {
+      "path": "metadata/extension-screenshot-2.png"
+    },
+    {
+      "path": "metadata/extension-screenshot-3.png"
+    },
+    {
+      "path": "metadata/extension-screenshot-4.png"
+    }
   ],
   "preferences": [
     {

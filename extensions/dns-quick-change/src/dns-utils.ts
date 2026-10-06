@@ -124,11 +124,14 @@ export function selectActiveNetworkService(
     }
   }
 
-  // If active devices are known from connectivity checks, pick the matching physical service
+  // Prefer scutil's interface order. The underlying adapter is listed before other
+  // connected devices, which may appear earlier in the network service list.
   if (activeDevices && activeDevices.length > 0) {
-    const activeMatch = services.find((entry) => activeDevices.includes(entry.device));
-    if (activeMatch) {
-      return activeMatch;
+    for (const device of activeDevices) {
+      const activeMatch = services.find((entry) => entry.device === device);
+      if (activeMatch) {
+        return activeMatch;
+      }
     }
   }
 
@@ -207,7 +210,14 @@ export async function getActiveNetworkService(
           encoding: "utf-8",
           timeout: 2000,
         });
-        if (/status:\s*active/i.test(ifconfigOut) || /\binet\s+\d/.test(ifconfigOut)) {
+        // An unplugged adapter can still hold a link-local address. Require an active
+        // link, or a routable address, before treating it as the one in use.
+        if (/status:\s*inactive/i.test(ifconfigOut)) {
+          continue;
+        }
+        const hasActiveStatus = /status:\s*active/i.test(ifconfigOut);
+        const hasRoutableInet = /\binet\s+(?!169\.254\.)\d/.test(ifconfigOut);
+        if (hasActiveStatus || hasRoutableInet) {
           activeDevices.push(service.device);
           break;
         }
@@ -324,12 +334,14 @@ export function parsePresetLine(line: string): DNSPreset | null {
  * Initialize presets file if it doesn't exist.
  */
 export function initializePresets(): void {
-  if (!fs.existsSync(PRESETS_FILE)) {
-    try {
-      fs.writeFileSync(PRESETS_FILE, DEFAULT_PRESETS, { mode: 0o600 });
-    } catch (error) {
-      console.error("Error creating default presets file:", error);
-    }
+  if (fs.existsSync(PRESETS_FILE)) return;
+
+  try {
+    fs.writeFileSync(PRESETS_FILE, DEFAULT_PRESETS, { mode: 0o600 });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Error creating default presets file:", error);
+    throw new Error(`Could not create DNS presets file ${PRESETS_FILE}: ${detail}`);
   }
 }
 
@@ -339,18 +351,27 @@ export function initializePresets(): void {
 export function getPresets(): DNSPreset[] {
   initializePresets();
 
-  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-  const presets: DNSPreset[] = [];
-  const lines = content.split(/\r?\n/);
+  try {
+    const content = fs.readFileSync(PRESETS_FILE, "utf-8");
+    const presets: DNSPreset[] = [];
+    const lines = content.split(/\r?\n/);
 
-  for (const line of lines) {
-    const preset = parsePresetLine(line);
-    if (preset) {
-      presets.push(preset);
+    for (const line of lines) {
+      const preset = parsePresetLine(line);
+      if (preset) {
+        presets.push(preset);
+      }
     }
-  }
 
-  return presets;
+    return presets;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+      return [];
+    }
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Error reading presets file:", error);
+    throw new Error(`Could not read saved DNS presets from ${PRESETS_FILE}: ${detail}`);
+  }
 }
 
 /**
