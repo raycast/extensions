@@ -156,12 +156,20 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
 
 // Product cards often link both the image and the title, so without images the alt text repeats the title
 function dropRepeatedBlocks(markdown: string): string {
-  const withoutUrls = (block: string) => block.replace(/\]\([^)]*\)/g, "]").trim();
+  // Compare links by page, ignoring tracking parameters, so two links to different pages are both kept
+  const linkTarget = (url: string) => {
+    try {
+      const { origin, pathname } = new URL(url);
+      return origin + pathname;
+    } catch {
+      return url;
+    }
+  };
+  const normalize = (block: string) =>
+    block.replace(/\]\(([^)]*)\)/g, (_match, url: string) => `](${linkTarget(url)})`).trim();
   return markdown
     .split("\n\n")
-    .filter(
-      (block, index, blocks) => index === 0 || !block.trim() || withoutUrls(block) !== withoutUrls(blocks[index - 1]),
-    )
+    .filter((block, index, blocks) => index === 0 || !block.trim() || normalize(block) !== normalize(blocks[index - 1]))
     .join("\n\n");
 }
 
