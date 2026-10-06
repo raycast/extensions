@@ -1,5 +1,12 @@
 import { LaunchProps, Toast, closeMainWindow, open, showToast } from "@raycast/api";
-import { SnapsetNotInstalledError, SnapsetTooOldError, WEBSITE, findSnapset, listLayouts, request } from "./snapset";
+import {
+  SnapsetNotInstalledError,
+  SnapsetTooOldError,
+  WEBSITE,
+  findSnapset,
+  listLayouts,
+  requestOrReport,
+} from "./snapset";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SaveLayout }>) {
   const name = props.arguments.name?.trim() ?? "";
@@ -9,8 +16,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     // one would ignore the request without a word.
     await listLayouts(app);
     await closeMainWindow({ clearRootSearch: true });
-    // Snapset confirms on screen itself, so no HUD here — it would say the same thing twice.
-    await request(app, "save", name ? { name } : {});
+    // Snapset confirms on screen itself, so no HUD on success — it would say the same thing twice.
+    await requestOrReport(app, "save", name ? { name } : {});
   } catch (error) {
     if (error instanceof SnapsetNotInstalledError) {
       await showToast({

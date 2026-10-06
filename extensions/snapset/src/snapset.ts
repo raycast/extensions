@@ -1,4 +1,4 @@
-import { Application, Color, Icon, Image, getApplications, open } from "@raycast/api";
+import { Application, Color, Icon, Image, getApplications, open, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -57,9 +57,17 @@ export async function findSnapset(): Promise<Application> {
  * "launch the app" and would start a second copy next to the running one.
  */
 export async function listLayouts(app: Application): Promise<Listing> {
-  const { stdout } = await execFileAsync(`${app.path}/Contents/MacOS/Snapset`, ["--list", "--json"], {
-    timeout: 10_000,
-  });
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync(`${app.path}/Contents/MacOS/Snapset`, ["--list", "--json"], {
+      timeout: 10_000,
+    }));
+  } catch (error) {
+    // An exit status means Snapset ran and turned the arguments down — a version that does
+    // not know them. Anything else (a timeout, a missing file) is a real failure.
+    if (typeof (error as { code?: unknown }).code === "number") throw new SnapsetTooOldError();
+    throw error;
+  }
   try {
     const listing = JSON.parse(stdout) as Listing;
     if (!Array.isArray(listing.layouts)) throw new SnapsetTooOldError();
@@ -74,8 +82,28 @@ export async function listLayouts(app: Application): Promise<Listing> {
  * windows happens inside Snapset, so Raycast needs no Accessibility permission.
  */
 export async function request(app: Application, action: "apply" | "save", query: Record<string, string> = {}) {
-  const params = new URLSearchParams(query).toString();
+  // Percent-encoded, not URLSearchParams: that writes spaces as "+", and Snapset reads the
+  // query the RFC 3986 way, where "+" is a plus sign — "Deep Work" would be saved as "Deep+Work".
+  const params = Object.entries(query)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join("&");
   await open(`snapset://${action}${params ? `?${params}` : ""}`, app.path);
+}
+
+/**
+ * `request` for actions that close Raycast first: a failure can no longer be shown in the
+ * window, so it is said in a HUD instead of being lost.
+ */
+export async function requestOrReport(app: Application, action: "apply" | "save", query: Record<string, string> = {}) {
+  try {
+    await request(app, action, query);
+  } catch {
+    await showHUD(
+      action === "apply"
+        ? "Could not reach Snapset — the layout was not applied"
+        : "Could not reach Snapset — nothing was saved",
+    );
+  }
 }
 
 const ACCENTS: Record<string, Color | string> = {

@@ -9,7 +9,7 @@ import {
   findSnapset,
   layoutIcon,
   listLayouts,
-  request,
+  requestOrReport,
 } from "./snapset";
 
 export default function Command() {
@@ -76,7 +76,7 @@ function LayoutItem({ app, layout, searchText }: { app: Application; layout: Lay
               // Out of the way first: Raycast's window would otherwise sit on top of the
               // arrangement while Snapset puts it in place.
               await closeMainWindow({ clearRootSearch: true });
-              await request(app, "apply", { id: layout.id });
+              await requestOrReport(app, "apply", { id: layout.id });
             }}
           />
           <SaveAction app={app} name={searchText} />
@@ -104,7 +104,7 @@ function SaveAction({ app, name }: { app: Application; name: string }) {
       shortcut={Keyboard.Shortcut.Common.Save}
       onAction={async () => {
         await closeMainWindow({ clearRootSearch: true });
-        await request(app, "save", trimmed ? { name: trimmed } : {});
+        await requestOrReport(app, "save", trimmed ? { name: trimmed } : {});
       }}
     />
   );
