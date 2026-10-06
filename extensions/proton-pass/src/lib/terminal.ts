@@ -1,6 +1,8 @@
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { terminalLoginScript } from "./core/terminal-login";
+import { getCliPath } from "./pass-cli";
 
 const execFileAsync = promisify(execFile);
 
@@ -18,15 +20,6 @@ function validateCliPath(cliPath: string): string {
   return cliPath;
 }
 
-export function escapeAppleScriptString(str: string): string {
-  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-function buildTerminalLoginScript(cliPath: string): string {
-  const escapedCliPath = escapeAppleScriptString(cliPath);
-  return `tell application "Terminal" to do script "${escapedCliPath} login"`;
-}
-
 export async function openTerminalForLogin(): Promise<void> {
   if (process.platform !== "darwin") {
     await showToast({
@@ -37,12 +30,10 @@ export async function openTerminalForLogin(): Promise<void> {
     return;
   }
 
-  const preferences = getPreferenceValues<{ cliPath?: string }>();
-  const rawCliPath = preferences.cliPath || "pass-cli";
-  const cliPath = validateCliPath(rawCliPath);
-
   try {
-    await execFileAsync("osascript", ["-e", buildTerminalLoginScript(cliPath)]);
+    // The same pass-cli as every other call of the extension, not whichever one the shell's PATH finds.
+    const cliPath = validateCliPath(await getCliPath());
+    await execFileAsync("osascript", ["-e", terminalLoginScript(cliPath)]);
     await showToast({
       style: Toast.Style.Success,
       title: "Terminal opened",

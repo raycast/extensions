@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [Login Fixes] - {PR_MERGE_DATE}
+
+- Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
+- Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
+
 ## [Smoother List Scrolling] - 2026-10-05
 
 - The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker

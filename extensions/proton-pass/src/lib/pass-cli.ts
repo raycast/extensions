@@ -51,7 +51,8 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
-async function getCliPath(): Promise<string> {
+/** The pass-cli the extension runs: the CLI Path preference when set, otherwise the one it installed. */
+export async function getCliPath(): Promise<string> {
   return getConfiguredCliPath() ?? ensureCli();
 }
 
