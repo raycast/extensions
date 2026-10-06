@@ -1,6 +1,6 @@
 # HideMail - Email Relay Service Changelog
 
-## [Windows Support, Notes and Filters] - {PR_MERGE_DATE}
+## [Windows Support, Notes and Filters] - 2026-10-06
 
 - `Quick Create Random Email Alias` accepts an optional note argument
 - `List All Emails`: edit an alias note, filter by active/inactive, show creation date, toggle a details panel, open the dashboard and refresh
