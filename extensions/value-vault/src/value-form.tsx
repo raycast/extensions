@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ValueEntry, detectType, parseValueType, VALUE_TYPE_OPTIONS } from "./types";
 
 interface FormValues {
@@ -17,13 +17,7 @@ interface Props {
   onSuccess?: () => void;
 }
 
-export default function ValueForm({
-  initialValues,
-  navigationTitle,
-  submitTitle,
-  onSubmit,
-  onSuccess,
-}: Props) {
+export default function ValueForm({ initialValues, navigationTitle, submitTitle, onSubmit, onSuccess }: Props) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
@@ -59,11 +53,17 @@ export default function ValueForm({
 
   const detectedType = values.value ? detectType(values.value) : null;
 
+  // Auto-detection runs until the user picks a type by hand, and never
+  // rewrites a value that hasn't been edited (e.g. a saved type on the edit form).
+  const initialValueRef = useRef(initialValues.value);
+  const [typeTouched, setTypeTouched] = useState(false);
+
   useEffect(() => {
+    if (typeTouched || values.value === initialValueRef.current) return;
     if (detectedType && detectedType !== parseValueType(values.type)) {
       itemProps.type.onChange?.(detectedType);
     }
-  }, [detectedType, values.type]);
+  }, [values.value, values.type, typeTouched, detectedType, itemProps.type]);
 
   return (
     <Form
@@ -75,19 +75,17 @@ export default function ValueForm({
       navigationTitle={navigationTitle}
     >
       <Form.TextField title="Label" placeholder="My label" autoFocus {...itemProps.label} />
-      <Form.TextArea
-        title="Value"
-        placeholder="Paste or type the value to store..."
-        {...itemProps.value}
-      />
+      <Form.TextArea title="Value" placeholder="Paste or type the value to store..." {...itemProps.value} />
       <Form.Dropdown
         title="Type"
         info={
-          detectedType && detectedType !== parseValueType(values.type)
-            ? `Detected type: ${detectedType}`
-            : undefined
+          detectedType && detectedType !== parseValueType(values.type) ? `Detected type: ${detectedType}` : undefined
         }
         {...itemProps.type}
+        onChange={(newValue) => {
+          setTypeTouched(true);
+          itemProps.type.onChange?.(newValue);
+        }}
       >
         {VALUE_TYPE_OPTIONS.map((opt) => (
           <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.label} />

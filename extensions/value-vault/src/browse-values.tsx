@@ -107,11 +107,7 @@ export default function Command(props: LaunchProps<{ arguments: { query?: string
       }
     >
       {sortedEntries.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.Box}
-          title="No values yet"
-          description="Press ⌘N to add your first value."
-        />
+        <List.EmptyView icon={Icon.Box} title="No values yet" description="Press ⌘N to add your first value." />
       ) : (
         sortedEntries.map((entry) => (
           <ValueListItem

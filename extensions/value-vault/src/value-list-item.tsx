@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Clipboard, Icon, List, showHUD } from "@raycast/api";
-import { useCallback } from "react";
+import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, showHUD, showToast, Toast } from "@raycast/api";
+import { useCallback, useState } from "react";
 import { ValueEntry } from "./types";
-import { formatRelativeTime, truncateValue } from "./utils";
+import { formatRelativeTime, getErrorMessage, truncateValue } from "./utils";
 import EditValueForm from "./edit-value";
 
 /** Metadata for each value type: icon, color, and display name. */
@@ -52,41 +52,61 @@ interface ValueListItemProps {
 
 export function ValueListItem({ entry, onDelete, onDuplicate, onUpdate }: ValueListItemProps) {
   const meta = TYPE_META[entry.type];
+  // Previews stay masked until explicitly revealed; the flag is session-only
+  // so a revealed secret never persists into the next Raycast launch.
+  const [revealed, setRevealed] = useState(false);
 
-  const handleCopy = useCallback(() => {
-    Clipboard.copy(entry.value);
-    showHUD("Copied!");
+  const handleCopy = useCallback(async () => {
+    try {
+      await Clipboard.copy(entry.value);
+      await showHUD("Copied!");
+    } catch (e) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to copy value", message: getErrorMessage(e) });
+    }
   }, [entry.value]);
 
-  const handlePaste = useCallback(() => {
-    Clipboard.paste(entry.value);
-    showHUD("Pasted!");
+  const handlePaste = useCallback(async () => {
+    try {
+      await Clipboard.paste(entry.value);
+      await showHUD("Pasted!");
+    } catch (e) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to paste value", message: getErrorMessage(e) });
+    }
   }, [entry.value]);
 
-  const handleCopyAsJson = useCallback(() => {
-    const json = JSON.stringify(
-      { label: entry.label, value: entry.value, type: entry.type },
-      null,
-      2,
-    );
-    Clipboard.copy(json);
-    showHUD("Copied as JSON!");
+  const handleCopyAsJson = useCallback(async () => {
+    try {
+      const json = JSON.stringify({ label: entry.label, value: entry.value, type: entry.type }, null, 2);
+      await Clipboard.copy(json);
+      await showHUD("Copied as JSON!");
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to copy as JSON",
+        message: getErrorMessage(e),
+      });
+    }
   }, [entry.label, entry.value, entry.type]);
+
+  const handleToggleReveal = useCallback(() => setRevealed((prev) => !prev), []);
 
   return (
     <List.Item
       key={entry.id}
       title={entry.label}
-      subtitle={truncateValue(entry.value)}
+      subtitle={revealed ? truncateValue(entry.value) : "••••••••"}
       icon={{ source: meta.icon, tintColor: meta.color }}
-      accessories={[
-        { tag: { value: meta.name, color: meta.color } },
-        { text: formatRelativeTime(entry.updatedAt) },
-      ]}
+      accessories={[{ tag: { value: meta.name, color: meta.color } }, { text: formatRelativeTime(entry.updatedAt) }]}
       keywords={generateKeywords(entry.value)}
       actions={
         <ActionPanel>
           <Action icon={Icon.Clipboard} title="Copy Value" onAction={handleCopy} />
+          <Action
+            icon={Icon.Eye}
+            title={revealed ? "Hide Value" : "Show Value"}
+            shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+            onAction={handleToggleReveal}
+          />
           <Action
             icon={Icon.Terminal}
             title="Paste Value"

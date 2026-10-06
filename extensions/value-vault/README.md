@@ -8,11 +8,12 @@ Value Vault is a personal value store for Raycast. It solves the common problem 
 
 ### Browse Values
 
-Search all your saved values with Raycast's built-in fuzzy filtering. Each entry shows its label, a truncated preview of the value, its type badge, and a relative timestamp.
+Search all your saved values with Raycast's built-in fuzzy filtering. Each entry shows its label, a masked preview of the value (revealable), its type badge, and a relative timestamp.
 
 | Action | Shortcut | Description |
 |--------|----------|-------------|
 | Copy Value | `↵` | Copies the value to your clipboard |
+| Show / Hide Value | `⌘Y` | Reveals or re-masks the value preview |
 | Paste Value | `⌘↵` | Pastes the value into the frontmost app |
 | Copy as JSON | `⌘⇧C` | Copies `{label, value, type}` as JSON |
 | Edit Value | `⌘E` | Opens the edit form |
@@ -51,8 +52,8 @@ Search for **Value Vault** in the Raycast Store and install with one click.
 ```bash
 git clone https://github.com/seppealaerts/value-vault.ringtail.dev.git
 cd value-vault.ringtail.dev
-pnpm install
-pnpm build
+npm install
+npm run build
 ```
 
 Then in Raycast:
@@ -63,5 +64,5 @@ Then in Raycast:
 For development with hot-reload:
 
 ```bash
-pnpm dev
+npm run dev
 ```

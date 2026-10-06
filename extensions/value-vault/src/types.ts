@@ -22,7 +22,7 @@ export function detectType(value: string): ValueType {
   const trimmed = value.trim();
   if (trimmed.length === 0) return "string";
 
-  if (/^https?:\/\/[^\s]+$/.test(trimmed)) {
+  if (/^https?:\/\/[^\s]+$/i.test(trimmed)) {
     return "url";
   }
 

@@ -1,14 +1,15 @@
 import { LocalStorage } from "@raycast/api";
 import { ValueEntry, ValueType } from "./types";
 
-const STORAGE_KEY = "entries";
+const LEGACY_KEY = "entries";
+const ENTRY_PREFIX = "entry:";
 
-let storageLock: Promise<void> = Promise.resolve();
+function keyFor(id: string): string {
+  return `${ENTRY_PREFIX}${id}`;
+}
 
 function isValidValueType(type: unknown): type is ValueType {
-  return (
-    typeof type === "string" && ["string", "number", "url", "email", "json", "color"].includes(type)
-  );
+  return typeof type === "string" && ["string", "number", "url", "email", "json", "color"].includes(type);
 }
 
 function isValidEntry(entry: unknown): entry is ValueEntry {
@@ -24,81 +25,74 @@ function isValidEntry(entry: unknown): entry is ValueEntry {
   );
 }
 
-/**
- * Retrieve all stored value entries from LocalStorage.
- * Returns an empty array if nothing is stored or if the data is corrupted.
- * Filters out entries that do not match the expected ValueEntry shape.
- */
-export async function getAllEntries(): Promise<ValueEntry[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  if (!raw) return [];
-
+function parseEntry(raw: unknown): ValueEntry | null {
+  if (typeof raw !== "string") return null;
   try {
     const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isValidEntry);
+    return isValidEntry(parsed) ? parsed : null;
   } catch {
-    return [];
+    return null;
   }
 }
 
 /**
- * Queue an async operation behind a shared lock to prevent race conditions
- * during concurrent read-modify-write cycles on LocalStorage.
+ * One-time migration from the original single-array format.
+ * Each legacy entry is fanned out to its own key; concurrent runs
+ * converge because they write identical content.
  */
-async function withLock<T>(operation: () => Promise<T>): Promise<T> {
-  // Swallow prior failures: a rejected lock must not deadlock every later write.
-  const release = storageLock.then(
-    () => {},
-    () => {},
-  );
-  let resolveLock: () => void;
-  storageLock = new Promise((resolve) => {
-    resolveLock = resolve;
-  });
-  await release;
+async function migrateLegacyStorage(): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(LEGACY_KEY);
+  if (!raw) return;
   try {
-    return await operation();
-  } finally {
-    resolveLock!();
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) {
+        if (isValidEntry(item)) {
+          await LocalStorage.setItem(keyFor(item.id), JSON.stringify(item));
+        }
+      }
+    }
+  } catch {
+    // Corrupted legacy data is unrecoverable; drop it like the old reader did.
   }
+  await LocalStorage.removeItem(LEGACY_KEY);
 }
 
 /**
- * Append a new entry to the stored list.
- * This operation is atomic and serialized behind a lock.
+ * Retrieve all stored value entries.
+ * Entries live under individual keys, so concurrent writers in separate
+ * command processes cannot clobber each other the way a shared array could.
+ */
+export async function getAllEntries(): Promise<ValueEntry[]> {
+  await migrateLegacyStorage();
+  const items = await LocalStorage.allItems();
+  const entries: ValueEntry[] = [];
+  for (const [key, raw] of Object.entries(items)) {
+    if (!key.startsWith(ENTRY_PREFIX)) continue;
+    const entry = parseEntry(raw);
+    if (entry) entries.push(entry);
+  }
+  return entries;
+}
+
+/**
+ * Persist a new entry under its own key. Last writer wins per entry;
+ * entries never share a key, so saves cannot erase each other.
  */
 export async function saveEntry(entry: ValueEntry): Promise<void> {
-  await withLock(async () => {
-    const entries = await getAllEntries();
-    entries.push(entry);
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  });
+  await LocalStorage.setItem(keyFor(entry.id), JSON.stringify(entry));
 }
 
 /**
- * Update an existing entry in place, matching by id.
- * This operation is atomic and serialized behind a lock.
+ * Overwrite the stored entry with this id, or create it if absent.
  */
 export async function updateEntry(updated: ValueEntry): Promise<void> {
-  await withLock(async () => {
-    const entries = await getAllEntries();
-    const idx = entries.findIndex((e) => e.id === updated.id);
-    if (idx !== -1) {
-      entries[idx] = updated;
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    }
-  });
+  await LocalStorage.setItem(keyFor(updated.id), JSON.stringify(updated));
 }
 
 /**
- * Remove an entry from storage by its id.
- * This operation is atomic and serialized behind a lock.
+ * Remove the entry with this id. Missing entries are a no-op.
  */
 export async function deleteEntry(id: string): Promise<void> {
-  await withLock(async () => {
-    const entries = await getAllEntries();
-    const filtered = entries.filter((e) => e.id !== id);
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-  });
+  await LocalStorage.removeItem(keyFor(id));
 }
