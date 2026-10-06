@@ -32,8 +32,7 @@ MENU_BAR_SCREENSHOT_MESSAGE = (
     "capture the extension with Raycast Window Capture (Save to Metadata) instead."
 )
 NO_RAYCAST_WINDOW_MESSAGE = (
-    "Content touches the image edges / no Raycast window detected. "
-    "Capture the extension with Raycast Window Capture (Save to Metadata) instead."
+    "Content touches the image edges / no Raycast window detected."
 )
 
 MIN_PLAUSIBLE_PAD = 0.02
