@@ -12,10 +12,10 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { HistoryEntry, SavedWebhook } from "./types";
-import { clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
+import { addHistory, clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
 import { WebhookForm } from "./WebhookForm";
 import { ResponseView } from "./ResponseView";
-import { relativeTime, statusColor, truncateUrl } from "./utils";
+import { generateId, relativeTime, sendWebhook, statusColor, truncateUrl } from "./utils";
 
 export default function Command() {
   const { push } = useNavigation();
@@ -24,10 +24,16 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const [h, s] = await Promise.all([getHistory(), getSaved()]);
-    setHistory(h);
-    setSaved(s);
-    setIsLoading(false);
+    try {
+      const [h, s] = await Promise.all([getHistory(), getSaved()]);
+      setHistory(h);
+      setSaved(s);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await showToast({ style: Toast.Style.Failure, title: "Failed to load webhooks", message });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -67,6 +73,40 @@ export default function Command() {
         onSent={refresh}
       />,
     );
+  };
+
+  const handleSendSaved = async (webhook: SavedWebhook) => {
+    const { request } = webhook;
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Sending "${webhook.name}"…` });
+    try {
+      const result = await sendWebhook(request);
+      await addHistory({
+        id: generateId(),
+        timestamp: Date.now(),
+        request,
+        responseStatus: result.status,
+        responseBody: result.body,
+        responseTime: result.responseTime,
+      });
+      await toast.hide();
+      await refresh();
+      push(
+        <ResponseView
+          status={result.status}
+          body={result.body}
+          responseTime={result.responseTime}
+          request={request}
+          onEditInForm={() => openFromSaved(webhook)}
+        />,
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await addHistory({ id: generateId(), timestamp: Date.now(), request, error: message });
+      await refresh();
+      toast.style = Toast.Style.Failure;
+      toast.title = "Request failed";
+      toast.message = message;
+    }
   };
 
   const handleDeleteHistory = async (id: string) => {
@@ -139,12 +179,18 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action title="Open in Form" icon={Icon.Pencil} onAction={() => openFromSaved(webhook)} />
+                  <Action title="Send Webhook" icon={Icon.ArrowRight} onAction={() => handleSendSaved(webhook)} />
+                  <Action
+                    title="Open in Form"
+                    icon={Icon.Pencil}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    onAction={() => openFromSaved(webhook)}
+                  />
                   <Action
                     title="Delete Saved Webhook"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={() => handleDeleteSaved(webhook.id, webhook.name)}
                   />
                 </ActionPanel>
@@ -195,7 +241,7 @@ export default function Command() {
                       title="Delete Entry"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
                       onAction={() => handleDeleteHistory(entry.id)}
                     />
                     <Action
@@ -204,7 +250,7 @@ export default function Command() {
                       style={Action.Style.Destructive}
                       shortcut={{
                         modifiers: ["cmd", "shift"],
-                        key: "backspace",
+                        key: "d",
                       }}
                       onAction={handleClearHistory}
                     />
