@@ -14,6 +14,7 @@
 - Use the final redirected download page as the referrer when fetching its book link.
 - Validate book responses and checksums before saving, including downloads to a chosen folder.
 - Reject disguised HTML error fragments when downloading other book formats without a usable checksum.
+- Allow text books to begin with literal markup while preserving HTTP, content-type, and checksum validation.
 - Show search errors for unavailable mirrors and ignore cancelled searches.
 - Fetch and cache book covers with the required referrer so they display in Raycast.
 - Restrict cover URLs and redirects to allowed HTTPS mirrors and reject private or reserved network destinations.

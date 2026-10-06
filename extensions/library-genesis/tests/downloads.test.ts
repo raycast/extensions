@@ -64,6 +64,7 @@ const makeServer = (healthy: boolean) =>
       } else if (mode === "empty") response.end();
       else if (mode === "sniff") {
         const data = sniffFixtures.get(url.searchParams.get("fixture") ?? "")!;
+        response.setHeader("content-type", url.searchParams.get("type") ?? "application/octet-stream");
         // Split even the BOM or opening tag across response chunks.
         response.write(data.subarray(0, 2));
         setTimeout(() => response.end(data.subarray(2)), 2);
@@ -196,7 +197,7 @@ test("HTML fragments labeled as binary are rejected for other formats without us
   ];
   for (const [i, page] of pages.entries()) {
     sniffFixtures.set(`html-${i}`, Buffer.from(page));
-    for (const extension of ["mobi", "azw3", "djvu", "fb2", "rtf", "txt", "zip"]) {
+    for (const extension of ["mobi", "azw3", "djvu", "fb2", "rtf", "zip"]) {
       for (const md5 of [undefined, "unusable-checksum"]) {
         await assert.rejects(
           downloadBookFile(`${baseUrl}/book?case=sniff&fixture=html-${i}`, path(), {
@@ -237,6 +238,80 @@ test("HTML detection preserves binary books, ordinary text, and XML book roots",
     assert.deepEqual(await readFile(destination), content);
   }
   assert.ok(!(await readdir(directory)).some((name) => name.endsWith(".part")));
+});
+
+test("text books beginning with literal markup are preserved with or without usable checksums", async () => {
+  const examples = [
+    '<script>alert("example")</script>\nA JavaScript tutorial.',
+    '<meta charset="utf-8">\nAn HTML tutorial.',
+    '\uFEFF <!-- example -->\n<ScRiPt>alert("example")</ScRiPt>',
+    "<!DOCTYPE html>\n<html>An example document</html>",
+    `<script>${"example\n".repeat(600)}</script>`,
+  ];
+  for (const [i, example] of examples.entries()) {
+    const content = Buffer.from(example);
+    sniffFixtures.set(`text-${i}`, content);
+    const checksum = createHash("md5").update(content).digest("hex").toUpperCase();
+    for (const extension of ["txt", "TXT"]) {
+      for (const md5 of [checksum, undefined, "unusable-checksum"]) {
+        for (const type of ["text/plain", "application/octet-stream"]) {
+          const destination = path();
+          await downloadBookFile(`${baseUrl}/book?case=sniff&fixture=text-${i}&type=${type}`, destination, {
+            referer: baseUrl,
+            extension,
+            md5,
+          });
+          assert.deepEqual(await readFile(destination), content);
+        }
+      }
+    }
+  }
+  assert.ok(!(await readdir(directory)).some((name) => name.endsWith(".part")));
+});
+
+test("text books beginning with markup still require a matching catalog checksum", async () => {
+  const original = await readdir(directory);
+  for (const [i, content] of [
+    Buffer.from('<meta charset="utf-8">'),
+    Buffer.from(`<script>${"x".repeat(4096)}</script>`),
+  ].entries()) {
+    sniffFixtures.set(`text-mismatch-${i}`, content);
+    await assert.rejects(
+      downloadBookFile(`${baseUrl}/book?case=sniff&fixture=text-mismatch-${i}`, path(), {
+        referer: baseUrl,
+        extension: "txt",
+        md5: "0".repeat(32),
+      }),
+      /does not match the book's checksum/,
+    );
+    assert.deepEqual(await readdir(directory), original);
+  }
+});
+
+test("text downloads still reject HTTP errors, empty bodies and declared HTML responses", async () => {
+  const original = await readdir(directory);
+  for (const mode of ["status", "empty", "html"]) {
+    await assert.rejects(
+      downloadBookFile(`${baseUrl}/book?case=${mode}`, path(), { referer: baseUrl, extension: "txt" }),
+    );
+    assert.deepEqual(await readdir(directory), original);
+  }
+  sniffFixtures.set("text-declared-html", html);
+  for (const type of ["text/html", "application/xhtml+xml"]) {
+    await assert.rejects(
+      downloadBookFile(
+        `${baseUrl}/book?case=sniff&fixture=text-declared-html&type=${encodeURIComponent(type)}`,
+        path(),
+        {
+          referer: baseUrl,
+          extension: "txt",
+          md5: createHash("md5").update(html).digest("hex"),
+        },
+      ),
+      /HTML page instead of a book/,
+    );
+    assert.deepEqual(await readdir(directory), original);
+  }
 });
 
 test("checksum mismatches remove the partial file, and PDF signatures are validated", async () => {

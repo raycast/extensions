@@ -51,6 +51,9 @@ const HTML_ELEMENTS = new Set(
 
 const validateFile = (prefix: Buffer, extension: string) => {
   if (!prefix.length) throw new Error("The server returned an empty book file.");
+  const format = extension.toLowerCase();
+  // Plain text can start with any literal markup. HTTP, MIME and checksum checks still apply.
+  if (format === "txt") return;
   const text = prefix
     .toString("utf8")
     .replace(/^\uFEFF/, "")
@@ -60,10 +63,10 @@ const validateFile = (prefix: Buffer, extension: string) => {
   if (/^<!doctype\s+html\b/i.test(text) || (rootTag && HTML_ELEMENTS.has(rootTag))) {
     throw new Error("The server returned an HTML page instead of a book.");
   }
-  if (extension.toLowerCase() === "epub" && !prefix.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
+  if (format === "epub" && !prefix.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
     throw new Error("The server did not return an EPUB file.");
   }
-  if (extension.toLowerCase() === "pdf" && !prefix.includes(Buffer.from("%PDF-"))) {
+  if (format === "pdf" && !prefix.includes(Buffer.from("%PDF-"))) {
     throw new Error("The server did not return a PDF file.");
   }
 };
