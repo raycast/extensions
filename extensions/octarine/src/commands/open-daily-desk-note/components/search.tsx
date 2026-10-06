@@ -43,7 +43,7 @@ export function DailyDeskSearch({ requestedWorkspace }: SearchProps) {
   const { push } = useNavigation();
   const preferences = openDailyDeskNotePreferences();
   const { isLoading, query, workspace, results, actions } = useDailyDeskSearch({
-    requestedWorkspace,
+    requestedWorkspace: requestedWorkspace || preferences.defaultWorkspace,
     useLastWorkspaceEnabled: preferences.useLastWorkspace,
   });
   const viewActions = createSearchActions({ push, workspace, query, actions });
