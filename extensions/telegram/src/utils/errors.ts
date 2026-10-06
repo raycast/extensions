@@ -40,12 +40,20 @@ export function getTelegramErrorMessage(error: unknown): string {
     return "Incorrect 2-Step Verification password. Please try again.";
   }
 
-  if (errorText.includes("PHONE_CODE_INVALID")) {
-    return "The verification code is invalid. Please check the code and try again.";
+  if (errorText.includes("API_ID_INVALID")) {
+    return "Invalid API ID or API Hash. Please verify your credentials from https://my.telegram.org/apps in preferences.";
   }
 
-  if (errorText.includes("PHONE_CODE_EXPIRED")) {
-    return "The verification code has expired. Request a new code and try again.";
+  if (errorText.includes("AUTH_TOKEN_EXPIRED")) {
+    return "The QR code has expired. Please reload to generate a new QR code.";
+  }
+
+  if (errorText.includes("AUTH_TOKEN_INVALID")) {
+    return "The QR code is invalid. Please reload to generate a new QR code.";
+  }
+
+  if (errorText.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
+    return "This QR code has already been used. Please reload to generate a new QR code.";
   }
 
   const floodWaitMessage = formatFloodWaitMessage(errorText);

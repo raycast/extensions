@@ -14,3 +14,27 @@ export const LocalStorage = {
   setItem: async () => {},
   removeItem: async () => {},
 };
+
+let preferencesMock: Record<string, unknown> = {};
+
+export function __setPreferencesMock(prefs: Record<string, unknown>) {
+  preferencesMock = prefs;
+}
+
+export function getPreferenceValues<T = Record<string, unknown>>(): T {
+  return preferencesMock as T;
+}
+
+export const Toast = {
+  Style: {
+    Success: "success",
+    Failure: "failure",
+    Animated: "animated",
+  },
+};
+
+export const showToast = async () => ({
+  style: "",
+  title: "",
+  message: "",
+});
