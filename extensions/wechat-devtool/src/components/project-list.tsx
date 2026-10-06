@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color, Keyboard } from "@raycast/api";
 
 import ConfigureProjects from "@/configure-projects";
 import { ReadmeView } from "@/pages";
@@ -112,7 +112,7 @@ export default function ProjectList({
                 title="Refresh Project List"
                 icon={Icon.ArrowClockwise}
                 onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
               {actionPanelExtra}
@@ -149,7 +149,7 @@ export default function ProjectList({
                 title="Refresh Project List"
                 icon={Icon.ArrowClockwise}
                 onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
               {actionPanelExtra}
@@ -207,13 +207,13 @@ export default function ProjectList({
                 <Action.CopyToClipboard
                   title="Copy Project Path"
                   content={project.path}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  shortcut={Keyboard.Shortcut.Common.CopyPath}
                 />
                 <Action
                   title="Refresh Project List"
                   icon={Icon.ArrowClockwise}
                   onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
                 <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
                 {actionPanelExtra}
