@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { Cache, environment, getPreferenceValues } from "@raycast/api";
 import { download, DriveNode } from "./cli";
+import { deleteIndexData } from "./index";
 
 const OPEN_CACHE = join(environment.supportPath, "open");
 /** Decrypted copies opened from Raycast are kept this long, so reopening is instant, then deleted. */
@@ -144,10 +145,14 @@ async function exists(p: string): Promise<boolean> {
  * decrypted copies. Used on logout so nothing of the previous account stays on the Mac.
  */
 export async function clearLocalData(): Promise<void> {
+  // First, so that no index build running elsewhere can write the previous account's data back.
+  await deleteIndexData();
   const cache = new Cache();
   cache.clear();
   // useCachedPromise keeps folder listings in namespaced caches next to the default one.
   await rm(cache.storageDirectory, { recursive: true, force: true });
   const entries = await readdir(environment.supportPath).catch(() => [] as string[]);
-  await Promise.all(entries.map((e) => rm(join(environment.supportPath, e), { recursive: true, force: true })));
+  await Promise.all(
+    entries.map((e) => rm(join(environment.supportPath, e), { recursive: true, force: true, maxRetries: 5 })),
+  );
 }

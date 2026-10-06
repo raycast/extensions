@@ -73,6 +73,22 @@ interface CrawlState {
   failedFolders: string[];
 }
 
+/**
+ * Deletes the index for logout. The directory is first renamed, which is atomic: from that moment a
+ * build still running elsewhere cannot complete any write (its paths no longer exist), whereas a
+ * plain recursive delete could race with a file the build creates while the delete is in progress.
+ */
+export async function deleteIndexData(): Promise<void> {
+  const doomed = `${INDEX_DIR}.deleted-${randomUUID()}`;
+  try {
+    await rename(INDEX_DIR, doomed);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  await rm(doomed, { recursive: true, force: true, maxRetries: 5 });
+}
+
 let migrated = false;
 
 /**
