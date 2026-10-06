@@ -37,7 +37,7 @@ export function FileActions({ file }: { file: CourseFile }) {
         shortcut={Keyboard.Shortcut.Common.Open}
         onAction={() => download(file, true)}
       />
-      <Action.OpenInBrowser title="Open in Browser" url={browserUrl} shortcut={{ modifiers: ["cmd"], key: "return" }} />
+      <Action.OpenInBrowser title="Open in Browser" url={browserUrl} />
       <Action.CopyToClipboard title="Copy Link" content={browserUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </>
   );

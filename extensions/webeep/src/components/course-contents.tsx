@@ -86,7 +86,7 @@ function ModuleItem({ module, course }: { module: CourseModule; course: Course }
             {singleFile ? <FileActions file={singleFile} /> : null}
             {module.externalUrl ? <Action.OpenInBrowser title="Open Link" url={module.externalUrl} /> : null}
             {module.url && !singleFile ? <Action.OpenInBrowser title="Open in Browser" url={module.url} /> : null}
-            {module.url ? (
+            {module.url && !singleFile ? (
               <Action.CopyToClipboard
                 title="Copy Link"
                 content={module.externalUrl ?? module.url}
