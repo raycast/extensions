@@ -7,15 +7,17 @@ export default function Command() {
   const [hours, setHours] = useState("8.5");
   const [amount, setAmount] = useState("1062");
 
-  const parsedHours = parseFloat(hours) || 0;
-  const parsedAmount = parseFloat(amount) || 0;
-
   async function handleGenerate() {
-    if (parsedHours <= 0 || parsedAmount <= 0) {
+    const cleanHours = hours.replace(/,/g, "").trim();
+    const cleanAmount = amount.replace(/,/g, "").trim();
+    const parsedHours = Number(cleanHours);
+    const parsedAmount = Number(cleanAmount);
+
+    if (!Number.isFinite(parsedHours) || parsedHours <= 0 || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid Input",
-        message: "Please enter valid numbers for hours and amount.",
+        message: "Please enter positive finite numbers for hours and amount.",
       });
       return;
     }
