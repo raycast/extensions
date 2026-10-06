@@ -624,3 +624,34 @@ test("a failed add leaves manual order intact through refresh and a successful r
   );
   assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Two": 1, "service:Three": 2 });
 });
+
+test("visible favorites move past hidden neighbors without changing their saved positions", async (t) => {
+  const ctx = setup({
+    "network-service-favorites": '{"service:One":true,"service:Hidden":true,"service:Two":true}',
+    "network-service-favorites-order": '{"service:One":0,"service:Hidden":1,"service:Two":2}',
+  });
+  ctx.output.order = serviceOrder([
+    [1, "One"],
+    ["*", "Hidden"],
+    [2, "Two"],
+  ]);
+  ctx.output.statuses = vpnList([["One"], ["Two"]]);
+  let hide = true;
+  ctx.api.getPreferenceValues = () => ({ hideInvalidDevices: hide, sortBy: "ascService" });
+  const current = await mount(ctx, t);
+  const names = () => current().favoriteServices.map((s) => s.name);
+  assert.deepEqual(names(), ["One", "Two"]);
+  await act(async () => current().moveFavoriteUp(current().favoriteServices[1]));
+  assert.deepEqual(names(), ["Two", "One"]);
+  assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 2, "service:Hidden": 1, "service:Two": 0 });
+  await act(async () => current().refreshServices());
+  assert.deepEqual(names(), ["Two", "One"]);
+  await act(async () => current().moveFavoriteDown(current().favoriteServices[0]));
+  assert.deepEqual(names(), ["One", "Two"]);
+  hide = false;
+  await act(async () => current().refreshServices());
+  assert.deepEqual(names(), ["One", "Hidden", "Two"]);
+  await act(async () => current().moveFavoriteUp(current().favoriteServices[2]));
+  assert.deepEqual(names(), ["One", "Two", "Hidden"]);
+  assert.deepEqual(await ctx.network.loadFavoriteOrder(), { "service:One": 0, "service:Hidden": 2, "service:Two": 1 });
+});

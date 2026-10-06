@@ -302,7 +302,7 @@ export function useNetworkServices() {
   const moveFavorite = ({ service, direction }: { service: NetworkService; direction: "up" | "down" }) =>
     editFavorites(({ favorites, order }) => {
       const ids = Object.keys(networkServices)
-        .filter((id) => favorites[id])
+        .filter((id) => favorites[id] && (!hideInvalidDevices || networkServices[id].status !== "invalid"))
         .sort((a, b) => order[a] - order[b]);
       const index = ids.indexOf(service.id);
       const adjacent = index + (direction === "up" ? -1 : 1);
