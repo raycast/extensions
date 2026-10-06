@@ -12,8 +12,6 @@ This is a Raycast extension for tracking attendance. With this extension you can
 
 1. **Install extension**: run `npm install`, then `npm run dev` from this project directory to load it locally in Raycast.
 
-<a title="Install tally Raycast Extension" href="https://www.raycast.com/xmok/tally"><img src="https://www.raycast.com/xmok/tally/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
-
 2. Open **Template** to create a roster template, then use **Check In** to add attendance entries.
 
 ---

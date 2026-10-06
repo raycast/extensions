@@ -74,7 +74,10 @@ function TemplateForm({ data, save, isSaving }: { data: Store; save: SaveStore; 
       const changed = selected === "create-new" || normalizedTime !== getDefaultTimeIn(store, id);
       return changed ? setTemplateTimeIn(next, id, normalizedTime) : next;
     }, "Template Saved");
-    if (saved) setSelected(id);
+    if (saved) {
+      delete drafts.current[selected];
+      setSelected(id);
+    }
   }
   return (
     <Form
@@ -92,12 +95,12 @@ function TemplateForm({ data, save, isSaving }: { data: Store; save: SaveStore; 
         onChange={async (id) => {
           drafts.current[selected] = { body, heading, notes, defaultTimeIn };
           if (id === "create-new") {
-            drafts.current[id] = { body: DEFAULT_BODY, heading: "", notes: "", defaultTimeIn: "" };
+            const draft = drafts.current[id] ?? { body: DEFAULT_BODY, heading: "", notes: "", defaultTimeIn: "" };
             setSelected(id);
-            setBody(DEFAULT_BODY);
-            setHeading("");
-            setNotes("");
-            setDefaultTimeIn("");
+            setBody(draft.body);
+            setHeading(draft.heading);
+            setNotes(draft.notes);
+            setDefaultTimeIn(draft.defaultTimeIn);
             return;
           }
           if (await save((store) => ({ ...store, selectedTemplateId: id }), "Template Selected")) {

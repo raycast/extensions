@@ -52,3 +52,11 @@ test("rejects invalid backups, duplicate identities, broken references, and time
   }
   assert.throws(() => importBackup("invalid JSON"));
 });
+
+test("rejects a present entry with a departure but accepts a clocked-out entry", () => {
+  const store = fixture();
+  store.entries[0].timeOut = "5:00 PM";
+  assert.throws(() => importBackup(exportBackup(store)), /present entry cannot have a time out/);
+  store.entries[0].status = "clocked_out";
+  assert.equal(importBackup(exportBackup(store)).entries[0].timeOut, "5:00 PM");
+});

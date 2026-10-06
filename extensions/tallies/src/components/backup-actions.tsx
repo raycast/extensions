@@ -14,16 +14,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { exportBackup, importBackup } from "../lib/backup";
-import { reportError, type SaveStore } from "../lib/storage";
-import type { Store } from "../lib/types";
+import { readStore, reportError, type SaveStore } from "../lib/storage";
 
-function ExportForm({ data }: { data: Store }) {
+function ExportForm() {
   const { pop } = useNavigation();
   async function submit({ folders }: { folders: string[] }) {
     try {
       if (folders.length !== 1) throw new Error("Choose a destination folder.");
       const path = join(folders[0], `tally-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
-      await writeFile(path, exportBackup(data), { flag: "wx", mode: 0o600 });
+      await writeFile(path, exportBackup(await readStore()), { flag: "wx", mode: 0o600 });
       await showToast({ style: Toast.Style.Success, title: "Backup Saved", message: path });
       try {
         await Clipboard.copy({ file: path });
@@ -94,10 +93,10 @@ function ImportForm({ save }: { save: SaveStore }) {
     </Form>
   );
 }
-export function BackupActions({ data, save }: { data: Store; save: SaveStore }) {
+export function BackupActions({ save }: { save: SaveStore }) {
   return (
     <ActionPanel.Section title="Move Between Computers">
-      <Action.Push title="Export Backup" icon={Icon.Download} target={<ExportForm data={data} />} />
+      <Action.Push title="Export Backup" icon={Icon.Download} target={<ExportForm />} />
       <Action.Push title="Import Backup" icon={Icon.Upload} target={<ImportForm save={save} />} />
     </ActionPanel.Section>
   );

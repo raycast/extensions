@@ -50,6 +50,7 @@ export function importBackup(raw: string): Store {
     if (!ids.has(templateId)) throw new Error("An entry refers to a missing template.");
     const timeOut = normalizeTime(string(e.timeOut));
     if (e.status === "clocked_out" && !timeOut) throw new Error("A clocked-out entry needs a time out.");
+    if (e.status === "present" && timeOut) throw new Error("A present entry cannot have a time out.");
     return {
       id: string(e.id),
       login: string(e.login),

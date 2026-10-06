@@ -156,7 +156,7 @@ function AttendanceActions({ data, save, entry }: { data: Store; save: SaveStore
           />
         )}
       </ActionPanel.Section>
-      <BackupActions data={data} save={save} />
+      <BackupActions save={save} />
       <ActionPanel.Section title="Delete Entries">
         {entry && (
           <Action
@@ -204,7 +204,7 @@ export default function AttendanceCommand() {
           <List.Dropdown
             id="attendance-template"
             tooltip="Select Template"
-            defaultValue={data.selectedTemplateId}
+            value={data.selectedTemplateId}
             onChange={async (id) => {
               if (id !== data.selectedTemplateId) {
                 if (await save((store) => ({ ...store, selectedTemplateId: id }), "Template Selected")) {
