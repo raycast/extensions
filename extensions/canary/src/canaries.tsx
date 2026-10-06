@@ -31,7 +31,7 @@ interface PullRequest {
 }
 
 interface GqlComment {
-  author: { login: string } | null;
+  author: { login: string; __typename: string } | null;
   authorAssociation: string;
   body: string;
 }
@@ -53,7 +53,7 @@ interface GqlPr {
 }
 
 const COMMENT_FIELDS = `
-fragment CommentFields on IssueComment { author { login } authorAssociation body }`;
+fragment CommentFields on IssueComment { author { login __typename } authorAssociation body }`;
 
 const PRS_QUERY = `
 query($q: String!, $after: String) {
@@ -250,12 +250,14 @@ async function toPullRequest(
   };
 }
 
-// Anyone can comment on a public PR, so only comments from the configured CI account (or, when unset, repository
-// maintainers) may supply a URL that Enter opens.
+// Anyone can comment on a public PR, so only comments from the configured CI account (or, when unset, bot accounts and
+// repository maintainers) may supply a URL that Enter opens.
 function trustedBy(commentAuthor: string): (comment: GqlComment) => boolean {
   const login = normalizeLogin(commentAuthor);
   return (comment) =>
-    login ? normalizeLogin(comment.author?.login ?? "") === login : TRUSTED_ASSOCIATIONS.has(comment.authorAssociation);
+    login
+      ? normalizeLogin(comment.author?.login ?? "") === login
+      : comment.author?.__typename === "Bot" || TRUSTED_ASSOCIATIONS.has(comment.authorAssociation);
 }
 
 function normalizeLogin(login: string): string {

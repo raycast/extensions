@@ -68,7 +68,7 @@
     {
       "name": "commentAuthor",
       "title": "CI Comment Author",
-      "description": "Optional. GitHub login of the account that posts the preview URL, e.g. your CI bot. Only its comments are trusted. If empty, only comments from repository owners, members and collaborators are used.",
+      "description": "Optional. GitHub login of the account that posts the preview URL, e.g. your CI bot. Only its comments are trusted. If empty, comments from bot accounts and from repository owners, members and collaborators are used.",
       "type": "textfield",
       "required": false,
       "placeholder": "platform-handler"
