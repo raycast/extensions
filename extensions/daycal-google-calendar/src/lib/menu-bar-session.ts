@@ -23,7 +23,10 @@ export async function invalidateMenuBarSession(): Promise<void> {
     await launchCommand({
       name: "menu-bar",
       type: LaunchType.Background,
-      context: { refreshMode: "full", sessionRevision: menuBarSessionRevision() },
+      context: {
+        refreshMode: "full",
+        sessionRevision: menuBarSessionRevision(),
+      },
     });
   } catch {
     // Menu bar disabled: the cleared cache is enough.

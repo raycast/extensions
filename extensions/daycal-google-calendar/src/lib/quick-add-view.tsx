@@ -106,12 +106,7 @@ export function QuickAddView({
   }, [setupComplete]);
 
   if (setupComplete === null) {
-    return (
-      <Detail
-        isLoading
-        markdown="Loading DayCal…"
-      />
-    );
+    return <Detail isLoading markdown="Loading DayCal…" />;
   }
 
   if (!setupComplete) {
