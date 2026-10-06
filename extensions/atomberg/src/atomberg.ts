@@ -100,7 +100,15 @@ export function hasLight(fan: Fan): boolean {
   return fan.led !== undefined;
 }
 
-export class AtombergError extends Error {}
+export class AtombergError extends Error {
+  /** HTTP status the call came back with, when it got that far. */
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.status = status;
+  }
+}
 
 interface Envelope<T> {
   status?: string;
@@ -127,22 +135,22 @@ async function request<T>(path: string, bearer: string, method = "GET", body?: C
   }
 
   if (response.status === 403) {
-    throw new AtombergError("Access denied — is Developer Mode still enabled in the Atomberg app?");
+    throw new AtombergError("Access denied — is Developer Mode still enabled in the Atomberg app?", 403);
   }
   if (response.status === 429) {
-    throw new AtombergError("Rate limited by Atomberg (the API allows roughly 100 calls a day).");
+    throw new AtombergError("Rate limited by Atomberg (the API allows roughly 100 calls a day).", 429);
   }
 
   let payload: Envelope<T>;
   try {
     payload = (await response.json()) as Envelope<T>;
   } catch {
-    throw new AtombergError(`Atomberg returned an unreadable response (HTTP ${response.status}).`);
+    throw new AtombergError(`Atomberg returned an unreadable response (HTTP ${response.status}).`, response.status);
   }
 
   if (payload.status !== "Success") {
     const detail = typeof payload.message === "string" ? payload.message : `HTTP ${response.status}`;
-    throw new AtombergError(detail);
+    throw new AtombergError(detail, response.status);
   }
   return payload.message as T;
 }
@@ -182,7 +190,12 @@ async function authed<T>(path: string, method = "GET", body?: Command | object):
   try {
     return await request<T>(path, token, method, body);
   } catch (error) {
-    if (error instanceof AtombergError && /expired|unauthor/i.test(error.message)) {
+    // Keyed on the 401 rather than on how the body happens to be worded: a
+    // rejected token phrased any other way would otherwise stay cached, and be
+    // reused on every later call until its `exp` finally passes.
+    const rejected =
+      error instanceof AtombergError && (error.status === 401 || /expired|unauthor/i.test(error.message));
+    if (rejected) {
       return request<T>(path, await accessToken(true), method, body);
     }
     throw error;
@@ -239,6 +252,16 @@ export async function loadFans(forceRefresh = false, account = accountFingerprin
       last_recorded_color: state?.last_recorded_color,
     };
   });
+}
+
+/**
+ * Drop the cached device list so the next load re-fetches it.
+ *
+ * Cheaper than mutating through a fresh `loadFans`, which would make the hook
+ * revalidate afterwards and pay for the state call twice.
+ */
+export function forgetDevices(): void {
+  cache.remove(DEVICES_KEY);
 }
 
 export async function sendCommand(deviceId: string, command: Command): Promise<void> {

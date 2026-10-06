@@ -21,6 +21,7 @@ import {
   SPEEDS,
   TIMERS,
   clearStoredData,
+  forgetDevices,
   hasLight,
   loadFans,
   sendCommand,
@@ -175,6 +176,17 @@ export default function Fans() {
   }
 
   /**
+   * Re-read the device list.
+   *
+   * Dropping the cache and revalidating costs one load; mutating through a
+   * fresh `loadFans` would make the hook revalidate afterwards and pay twice.
+   */
+  function resync() {
+    forgetDevices();
+    revalidate();
+  }
+
+  /**
    * Clear what the extension stored, then hand the user to preferences — a
    * Raycast extension can read its preferences but not write them, so the API
    * key and refresh token have to be deleted there.
@@ -242,7 +254,7 @@ export default function Fans() {
         }
         actions={
           <ActionPanel>
-            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => mutate(loadFans(true))} />
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={resync} />
             {accountActions}
           </ActionPanel>
         }
@@ -361,7 +373,7 @@ export default function Fans() {
                   title="Resync Device List"
                   icon={Icon.Repeat}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  onAction={() => mutate(loadFans(true))}
+                  onAction={resync}
                 />
               </ActionPanel.Section>
 
