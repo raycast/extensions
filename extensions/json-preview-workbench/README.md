@@ -12,6 +12,12 @@ macOS 13 or later and Raycast. The extension includes an Apple Silicon / Intel u
 
 Both commands accept optional JSON text or an absolute file path. Otherwise they read selected text first, then the clipboard. Selection lookup can be disabled in extension preferences.
 
+## Open from Raycast
+
+Search for **Open JSON Editor** to launch the dedicated editor window.
+
+![Open JSON Editor command in Raycast](media/editor-command-entry.png)
+
 ## Editor
 
 - A single pane until a transform is entered; clearing the expression restores the single pane.
