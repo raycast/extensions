@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -21,9 +22,9 @@ export class CrossProcessMutex {
   private readonly acquireTimeoutMs: number;
   private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
   private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
-  private static readonly HEARTBEAT_INTERVAL_MS = 2000;
-  private static readonly STALE_THRESHOLD_MS = 15000;
-  private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 5000;
+  private static readonly HEARTBEAT_INTERVAL_MS = 1000;
+  private static readonly STALE_THRESHOLD_MS = 3000;
+  private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 8000;
 
   constructor(lockDir: string, options?: number | MutexOptions) {
     this.lockDir = lockDir;
@@ -39,6 +40,7 @@ export class CrossProcessMutex {
   }
 
   async runExclusive<T>(task: () => Promise<T>): Promise<T> {
+    const token = crypto.randomUUID();
     const start = Date.now();
     let acquired = false;
 
@@ -56,7 +58,7 @@ export class CrossProcessMutex {
         try {
           const dirStat = fs.statSync(this.lockDir);
           createdDirIno = dirStat.ino;
-          this.writeLockContent();
+          this.writeLockContent(token);
         } catch (writeErr) {
           if (createdDirIno !== undefined) {
             await this.tryReclaimStaleLockDir({
@@ -106,7 +108,7 @@ export class CrossProcessMutex {
 
     const heartbeat = setInterval(() => {
       try {
-        this.writeLockContent();
+        this.writeLockContent(token);
       } catch {
         // Ignore heartbeat write errors; the lock dir may have been removed
       }
@@ -116,11 +118,11 @@ export class CrossProcessMutex {
       return await task();
     } finally {
       clearInterval(heartbeat);
-      await this.releaseIfOwned();
+      await this.releaseIfOwned(token);
     }
   }
 
-  private async releaseIfOwned(): Promise<void> {
+  private async releaseIfOwned(token: string): Promise<void> {
     try {
       if (!fs.existsSync(this.lockDir)) {
         return;
@@ -131,9 +133,11 @@ export class CrossProcessMutex {
       const dirStat = fs.statSync(this.lockDir);
       const fileStat = fs.statSync(this.lockFile);
       const content = fs.readFileSync(this.lockFile, "utf-8");
-      const ownerPid = parseInt(content.split(":")[0] ?? "", 10);
-      if (ownerPid !== process.pid) {
-        // Lock was reclaimed by another process — do not touch it
+      const parts = content.split(":");
+      const ownerPid = parseInt(parts[0] ?? "", 10);
+      const lockToken = parts[2] ?? "";
+      if (ownerPid !== process.pid || lockToken !== token) {
+        // Lock was reclaimed by another worker/process — do not touch it
         return;
       }
       const snapshot: StaleLockSnapshot = {
@@ -148,12 +152,12 @@ export class CrossProcessMutex {
     }
   }
 
-  private writeLockContent(): void {
+  private writeLockContent(token: string): void {
     const tmpFile = path.join(
       this.lockDir,
       `.pid.tmp.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
     );
-    fs.writeFileSync(tmpFile, `${process.pid}:${Date.now()}`);
+    fs.writeFileSync(tmpFile, `${process.pid}:${Date.now()}:${token}`);
     fs.renameSync(tmpFile, this.lockFile);
   }
 
@@ -217,27 +221,22 @@ export class CrossProcessMutex {
         return false;
       }
 
-      // Timestamp is stale — verify the holder process is actually dead before breaking
-      if (!this.isProcessAlive(pid)) {
-        try {
-          const dirStat = fs.statSync(this.lockDir);
-          const fileStat = fs.statSync(this.lockFile);
-          const snapshot: StaleLockSnapshot = {
-            dirIno: dirStat.ino,
-            hasFile: true,
-            fileIno: fileStat.ino,
-            content,
-          };
-          if (this.onBeforeReclaimForTesting) {
-            await this.onBeforeReclaimForTesting();
-          }
-          return await this.tryReclaimStaleLockDir(snapshot);
-        } catch {
-          return false;
+      try {
+        const dirStat = fs.statSync(this.lockDir);
+        const fileStat = fs.statSync(this.lockFile);
+        const snapshot: StaleLockSnapshot = {
+          dirIno: dirStat.ino,
+          hasFile: true,
+          fileIno: fileStat.ino,
+          content,
+        };
+        if (this.onBeforeReclaimForTesting) {
+          await this.onBeforeReclaimForTesting();
         }
+        return await this.tryReclaimStaleLockDir(snapshot);
+      } catch {
+        return false;
       }
-
-      return false;
     } catch {
       // Could not read the lock file (e.g. race: holder just released) — retry acquire
       return false;
@@ -374,15 +373,6 @@ export class CrossProcessMutex {
         }
       }
 
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private isProcessAlive(pid: number): boolean {
-    try {
-      process.kill(pid, 0);
       return true;
     } catch {
       return false;

@@ -40,13 +40,30 @@ async function run() {
 
     // 4. Stale lock recovery for non-existent PID
     fs.mkdirSync(lockDir, { recursive: true });
-    // Write an old timestamp (>15s ago) with an impossible PID (999999999)
+    // Write an old timestamp (>3s ago) with an impossible PID (999999999)
     const oldTimestamp = Date.now() - 30000;
     fs.writeFileSync(path.join(lockDir, "pid.txt"), `999999999:${oldTimestamp}`);
 
     const recoveredResult = await mutex.runExclusive(async () => "recovered");
     assert.equal(recoveredResult, "recovered");
     assert.ok(!fs.existsSync(lockDir), "Stale lock should have been broken and cleaned up");
+
+    // 4b. Stale lock recovery for SAME process PID (e.g. worker thread crash in Raycast Node process)
+    fs.mkdirSync(lockDir, { recursive: true });
+    const oldSamePidTimestamp = Date.now() - 30000;
+    fs.writeFileSync(path.join(lockDir, "pid.txt"), `${process.pid}:${oldSamePidTimestamp}:crashed-token`);
+
+    const samePidRecovered = await mutex.runExclusive(async () => "same-pid-recovered");
+    assert.equal(samePidRecovered, "same-pid-recovered");
+    assert.ok(!fs.existsSync(lockDir), "Stale lock with same PID should have been broken and cleaned up");
+
+    // 4c. Token ownership prevents mismatched release from removing active lock
+    fs.mkdirSync(lockDir, { recursive: true });
+    fs.writeFileSync(path.join(lockDir, "pid.txt"), `${process.pid}:${Date.now()}:active-token`);
+    await (mutex as unknown as { releaseIfOwned: (token: string) => Promise<void> }).releaseIfOwned("mismatched-token");
+    assert.ok(fs.existsSync(lockDir), "Lock should not be removed when token does not match");
+    assert.ok(fs.existsSync(path.join(lockDir, "pid.txt")), "pid.txt should remain when token does not match");
+    fs.rmSync(lockDir, { recursive: true, force: true });
 
     // 5. Short timeout fails when lock cannot be acquired
     const shortMutex = new CrossProcessMutex(lockDir, 200);

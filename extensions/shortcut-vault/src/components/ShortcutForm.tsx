@@ -260,6 +260,7 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
         title="Notes"
         placeholder="Optional context, caveats, or where this shortcut is configured."
         value={values.notes}
+        error={errors.notes}
         onChange={(notes) => setValues((current) => ({ ...current, notes }))}
         ref={notesRef}
       />

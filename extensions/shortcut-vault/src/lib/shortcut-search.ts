@@ -3,6 +3,18 @@ import { OWNER_TYPE_LABELS, SCOPE_LABELS, SOURCE_LABELS } from "./labels";
 
 const searchIndexCache = new WeakMap<Shortcut, string[]>();
 
+const SEARCH_TERM_ALIASES: Record<string, string[]> = {
+  del: ["del", "delete", "backspace"],
+  esc: ["esc", "escape"],
+  escape: ["escape", "esc"],
+  return: ["return", "enter"],
+  enter: ["enter", "return"],
+};
+
+function getSearchTermVariants(term: string): string[] {
+  return SEARCH_TERM_ALIASES[term] ?? [term];
+}
+
 export function searchShortcuts(shortcuts: Shortcut[], query: string): Shortcut[] {
   const terms = tokenizeSearchQuery(query);
 
@@ -12,7 +24,10 @@ export function searchShortcuts(shortcuts: Shortcut[], query: string): Shortcut[
 
   return shortcuts.filter((shortcut) => {
     const index = getShortcutSearchIndex(shortcut);
-    return terms.every((term) => index.some((value) => matchesSearchTerm(value, term)));
+    return terms.every((term) => {
+      const variants = getSearchTermVariants(term);
+      return variants.some((variant) => index.some((value) => matchesSearchTerm(value, variant)));
+    });
   });
 }
 
@@ -101,12 +116,6 @@ function normalizeSearchValue(value: string): string {
     .replace(/\bcontrol\b/g, "control")
     .replace(/\bshift\b/g, "shift")
     .replace(/\bfn\b/g, "fn")
-    .replace(/\besc\b/g, "esc escape")
-    .replace(/\bescape\b/g, "esc escape")
-    .replace(/\breturn\b/g, "return enter")
-    .replace(/\benter\b/g, "return enter")
-    .replace(/\bdel\b/g, "delete backspace")
-    .replace(/\bbackspace\b/g, "delete backspace")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim()
     .replace(/\s+/g, " ");
