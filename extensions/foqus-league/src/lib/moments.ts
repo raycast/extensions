@@ -13,14 +13,14 @@ const LEDGER_SIZE = 100;
 
 export const DAILY_GOAL_LINES = [
   "🎯 Nice job reaching your daily goal!",
-  "🎯 Daily goal complete! Keep it up!",
-  "🎯 Goal complete! Can you do it again tomorrow?",
+  "🎯 You hit your daily goal!",
+  "🎯 Congrats on reaching your daily goal!",
 ];
 
 export const reminderLines = (streak: number) => [
   `🔥 A quick session saves your ${streak} day streak!`,
   `🔥 One session before midnight keeps your ${streak} day streak going.`,
-  `🔥 Time for a session! Your ${streak} day streak is waiting.`,
+  `🔥 Time for a session to keep your ${streak} day streak!`,
 ];
 
 function forDay<T>(lines: T[], day: string): T {
@@ -39,7 +39,7 @@ export function moments(stats: Stats, dailyGoal: number, tiers: Tier[], now: Dat
   if (stats.todayMinutes > 0 && STREAK_MILESTONES.includes(streak)) {
     out.push({
       key: `streak:${today}:${streak}`,
-      text: streak < 30 ? `🔥 ${streak} day streak! Keep it up!` : `🔥 Congrats on reaching a ${streak} day streak!`,
+      text: streak < 30 ? `🔥 Your streak just hit ${streak} days!` : `🔥 Congrats on reaching a ${streak} day streak!`,
       short: `🔥 ${streak} day streak!`,
     });
   }
@@ -55,12 +55,12 @@ export function moments(stats: Stats, dailyGoal: number, tiers: Tier[], now: Dat
   if (week.filter((d) => d.minutes >= dailyGoal).length >= 5) {
     out.push({
       key: `perfect:${weekKey}`,
-      text: "⭐ Way to earn your perfect week! Can you keep it next week?",
+      text: "⭐ You earned a perfect week!",
       short: "⭐ Perfect week",
     });
   }
-  if (stats.lastWeekMinutes > 0 && stats.weekMinutes > stats.lastWeekMinutes) {
-    out.push({ key: `beat:${weekKey}`, text: "🏁 You beat last week! Keep the lead!", short: "🏁 Beat last week" });
+  if (stats.weekMinutes > stats.lastWeekMinutes) {
+    out.push({ key: `beat:${weekKey}`, text: "🏁 You're ahead of last week!", short: "🏁 Beat last week" });
   }
   if (stats.todayMinutes >= dailyGoal) {
     out.push({ key: `day:${today}`, text: forDay(DAILY_GOAL_LINES, today), short: "🎯 Daily goal" });

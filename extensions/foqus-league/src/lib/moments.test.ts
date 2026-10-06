@@ -24,12 +24,14 @@ const keys = (now: Date, sessions: Session[]) => momentsAt(now, sessions).map((m
 
 const WED = new Date(2026, 8, 30, 12);
 
+const UNBEATEN_LAST_WEEK = [on(8, 21, 700), on(8, 23, 700)];
+
 test("reaching the daily goal is announced once that day", () => {
-  const [day] = momentsAt(WED, [on(8, 30, 60)]);
+  const [day] = momentsAt(WED, [...UNBEATEN_LAST_WEEK, on(8, 30, 60)]);
   assert.equal(day.key, "day:2026-09-30");
   assert.equal(day.short, "🎯 Daily goal");
   assert.ok(DAILY_GOAL_LINES.includes(day.text));
-  assert.deepEqual(keys(WED, [on(8, 30, 59)]), []);
+  assert.deepEqual(keys(WED, [...UNBEATEN_LAST_WEEK, on(8, 30, 59)]), []);
 });
 
 test("a league is announced once per week and tier, with its own glyph", () => {
@@ -56,7 +58,7 @@ test("jumping two tiers claims the skipped one quietly, so dropping back to it i
 });
 
 test("a sync that runs past midnight credits the day its stats describe, not the new one", () => {
-  const stats = computeStats([on(8, 30, 60)], {
+  const stats = computeStats([...UNBEATEN_LAST_WEEK, on(8, 30, 60)], {
     weekStartsOn: 1,
     calendarWeeks: CALENDAR_WEEKS,
     now: new Date(2026, 8, 30, 23, 59),
@@ -68,8 +70,8 @@ test("a sync that runs past midnight credits the day its stats describe, not the
 test("each HUD speaks to you with your own numbers", () => {
   const texts = (now: Date, sessions: Session[]) => momentsAt(now, sessions).map((m) => m.text);
   assert.ok(texts(WED, [on(8, 28, 1200), on(8, 29, 1200)]).includes("💎 You've been promoted to the Diamond league!"));
-  assert.ok(texts(WED, [on(8, 22, 90), on(8, 29, 91)]).includes("🏁 You beat last week! Keep the lead!"));
-  assert.ok(texts(WED, [on(8, 28, 5), on(8, 29, 5), on(8, 30, 5)]).includes("🔥 3 day streak! Keep it up!"));
+  assert.ok(texts(WED, [on(8, 22, 90), on(8, 29, 91)]).includes("🏁 You're ahead of last week!"));
+  assert.ok(texts(WED, [on(8, 28, 5), on(8, 29, 5), on(8, 30, 5)]).includes("🔥 Your streak just hit 3 days!"));
 });
 
 test("a perfect week needs five days at the daily goal within this week", () => {
@@ -80,10 +82,10 @@ test("a perfect week needs five days at the daily goal within this week", () => 
   assert.ok(!keys(sat, [...four, on(8, 27, 60)]).includes("perfect:2026-09-28"), "last Sunday is last week");
 });
 
-test("beating last week counts only when last week had focus to beat", () => {
+test("beating last week needs more focus than last week, matching the board quest", () => {
   assert.ok(keys(WED, [on(8, 22, 30), on(8, 29, 31)]).includes("beat:2026-09-28"));
   assert.ok(!keys(WED, [on(8, 22, 30), on(8, 29, 30)]).includes("beat:2026-09-28"));
-  assert.ok(!keys(WED, [on(8, 29, 31)]).some((k) => k.startsWith("beat:")));
+  assert.ok(keys(WED, [on(8, 29, 31)]).includes("beat:2026-09-28"), "an empty last week is beaten by any focus");
 });
 
 test("a streak milestone lands on the day it is reached", () => {
@@ -97,14 +99,18 @@ test("a streak milestone lands on the day it is reached", () => {
 });
 
 test("the evening reminder comes when one session would extend a streak", () => {
-  const streak = [on(8, 28, 5), on(8, 29, 5)];
+  const streak = [...UNBEATEN_LAST_WEEK, on(8, 28, 5), on(8, 29, 5)];
   const evening = new Date(2026, 8, 30, REMINDER_HOUR, 5);
   const [nudge] = momentsAt(evening, streak);
   assert.equal(nudge.key, "nudge:2026-09-30");
   assert.equal(nudge.reminder, true);
   assert.ok(reminderLines(2).includes(nudge.text), nudge.text);
   assert.deepEqual(keys(new Date(2026, 8, 30, REMINDER_HOUR - 1, 55), streak), [], "not before the evening");
-  assert.deepEqual(keys(evening, [on(8, 29, 5)]), [], "a single day is not a streak worth a reminder");
+  assert.deepEqual(
+    keys(evening, [...UNBEATEN_LAST_WEEK, on(8, 29, 5)]),
+    [],
+    "a single day is not a streak worth a reminder",
+  );
   assert.ok(!keys(evening, [...streak, on(8, 30, 5)]).includes("nudge:2026-09-30"), "not once today counts");
 });
 
@@ -133,7 +139,15 @@ test("the ledger keeps only the newest hundred keys", () => {
 
 test("one moment speaks to you in full; several share one line of short forms", () => {
   const sat = new Date(2026, 9, 3, 12);
-  const week = [on(8, 28, 60), on(8, 29, 60), on(8, 30, 60), on(9, 1, 60), on(9, 2, 60), on(9, 3, 900)];
+  const week = [
+    ...UNBEATEN_LAST_WEEK,
+    on(8, 28, 60),
+    on(8, 29, 60),
+    on(8, 30, 60),
+    on(9, 1, 60),
+    on(9, 2, 60),
+    on(9, 3, 900),
+  ];
   const due = momentsAt(sat, week).filter((m) => !m.quiet);
   assert.ok(DAILY_GOAL_LINES.includes(hudText(due.slice(-1))));
   assert.equal(hudText(due), "🥇 Promoted to Gold league  ·  ⭐ Perfect week  ·  🎯 Daily goal");
@@ -158,6 +172,8 @@ test("the daily lines take turns, so you never see the same one two days running
 test("a big streak gets a congratulation, and a streak leads a shared HUD", () => {
   const thirty = Array.from({ length: 30 }, (_, i) => on(8, i + 1, 5));
   assert.ok(momentsAt(WED, thirty).some((m) => m.text === "🔥 Congrats on reaching a 30 day streak!"));
-  const shared = momentsAt(WED, [on(8, 28, 5), on(8, 29, 5), on(8, 30, 60)]).filter((m) => !m.quiet);
+  const shared = momentsAt(WED, [...UNBEATEN_LAST_WEEK, on(8, 28, 5), on(8, 29, 5), on(8, 30, 60)]).filter(
+    (m) => !m.quiet,
+  );
   assert.equal(hudText(shared), "🔥 3 day streak!  ·  🎯 Daily goal");
 });
