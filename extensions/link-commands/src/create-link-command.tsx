@@ -22,6 +22,14 @@ import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
 import { fetchSiteName } from "./lib/fetch-site-name";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import {
+  directoryEnvironmentAction,
+  hoistShouldOverride,
+  initialEnvironmentSource,
+  isWorkPath,
+  resolveAutoEnvironment,
+  type EnvironmentSource,
+} from "./lib/work-directory";
 import { formatTitle } from "./lib/format-title";
 import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
@@ -122,8 +130,11 @@ const Command = () => {
   const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
   const { title } = titleState;
   const [target, setTarget] = useState("");
-  const [environment, setEnvironment] = useState("");
-  const [newEnvironment, setNewEnvironment] = useState("");
+  const [environment, setEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? NEW_VALUE : ""));
+  const [newEnvironment, setNewEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? "work" : ""));
+  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSource>(() =>
+    initialEnvironmentSource(directories[0] ?? ""),
+  );
   const [packageName, setPackageName] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -201,6 +212,20 @@ const Command = () => {
 
   useEffect(() => setTitleState((state) => titleSuggested(state, titleSuggestion)), [titleSuggestion]);
 
+  // The form starts before discovery finishes, so an auto Work has no match yet and goes through
+  // "New…"; once the facets arrive holding it, the dropdown selects the existing entry instead of
+  // keeping the extra field.
+  useEffect(() => {
+    const resolved = resolveAutoEnvironment(
+      environmentSource,
+      environment,
+      newEnvironment,
+      facets.environments,
+      NEW_VALUE,
+    );
+    if (resolved) setEnvironment(resolved);
+  }, [environmentSource, environment, newEnvironment, facets.environments]);
+
   // A field left empty falls back to the suggestion, so Enter while the field is still focused and empty
   // creates the same command tabbing away would.
   const effectiveTitle = title.trim() || titleSuggestion || "";
@@ -246,14 +271,33 @@ const Command = () => {
     setTyped(value);
   };
 
+  // The directory drives Environment only while its value is still the directory's own guess; a
+  // scope the person set, typed or hoisted, stops the syncing.
+  const handleDirectoryChange = (next: string) => {
+    setDirectory(next);
+
+    const action = directoryEnvironmentAction(environmentSource, isWorkPath(next), chosenEnvironment);
+    if (action === "keep") return;
+
+    if (action === "set-work") {
+      selectOrCreate("work", facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("auto");
+    } else {
+      setEnvironment("");
+      setNewEnvironment("");
+      setEnvironmentSource(null);
+    }
+  };
+
   /**
    * Package is the one field that drives the filename, and a sigil typed into it is someone reaching for a
    * control that already exists a few rows away. Left alone, `Linear · @work` becomes a brand by that
-   * literal name: it slugs to `linear-work.` rather than the `work.linear.` the convention specifies, and
+   * literal name: it slugs to `linear-work.` instead of keeping the scope on the subtitle, and
    * the list reads it back as part of the brand rather than as a scope.
    *
    * The sigil therefore always leaves the brand. Where it lands defers to the user: a control they have
-   * already set is never overridden, and a conflicting sigil is reported as dropped instead. On blur rather
+   * already set by hand is never overridden — an automatically chosen scope gives way to what they
+   * typed — and a conflicting sigil is reported as dropped instead. On blur rather
    * than on change, because `@w` already matches and a per-keystroke hoist would swallow the token as it
    * was being typed.
    */
@@ -265,12 +309,14 @@ const Command = () => {
 
     // Tested against the resolved value, not the raw control: "New…" holds a sentinel that is truthy while
     // its text field is still empty, so reading the control directly would call an unset field set and
-    // report the sigil dropped rather than moving it.
-    if (fields.environment && chosenEnvironment)
-      notes.push(`dropped @${fields.environment}, Environment is already set`);
-    if (fields.environment && !chosenEnvironment) {
+    // report the sigil dropped rather than moving it. An auto scope never blocks: it was the
+    // directory's guess, so the typed scope takes the control and counts as a user choice.
+    if (fields.environment && hoistShouldOverride(chosenEnvironment, environmentSource)) {
       selectOrCreate(fields.environment, facets.environments, setEnvironment, setNewEnvironment);
+      setEnvironmentSource("user");
       notes.push(`moved @${fields.environment} to Environment`);
+    } else if (fields.environment) {
+      notes.push(`dropped @${fields.environment}, Environment is already set`);
     }
 
     if (fields.category && chosenCategory) notes.push(`dropped #${fields.category}, Category is already set`);
@@ -376,7 +422,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
 
       <Form.Separator />
 
-      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={setDirectory}>
+      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={handleDirectoryChange}>
         {directories.map((entry) => (
           <Form.Dropdown.Item key={entry} title={collapseHome(entry)} value={entry} />
         ))}
@@ -385,9 +431,12 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       <Form.Dropdown
         id="environment"
         title="Environment"
-        info='Adds " · @work" to the subtitle and prefixes the filename with "work.", so the command gets its own section in the list and can be filtered on. The title stays the name alone.'
+        info='Adds " · @work" to the subtitle, so the command gets its own section in the list and can be filtered on. The title stays the name alone, and the filename stays brand.detail.sh however the environment is set. Picking a directory under a work folder ticks this to Work, and picking any other directory unticks it back to None — until it is changed by hand, which stops the syncing.'
         value={environment}
-        onChange={setEnvironment}
+        onChange={(next) => {
+          setEnvironment(next);
+          setEnvironmentSource("user");
+        }}
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.environments.map((entry) => (
@@ -402,7 +451,10 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           title="New Environment"
           placeholder="work"
           value={newEnvironment}
-          onChange={setNewEnvironment}
+          onChange={(next) => {
+            setNewEnvironment(next);
+            setEnvironmentSource("user");
+          }}
         />
       ) : null}
 
