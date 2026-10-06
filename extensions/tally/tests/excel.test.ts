@@ -36,6 +36,11 @@ test("HTML escapes content and TSV quotes tabs, newlines, and quotes within cell
   assert.equal(excelClipboard([]).text, "Login\tName\tTime in\tTime out");
 });
 
+test("TSV protects spreadsheet formula prefixes in pasted values", () => {
+  const entry = newEntry("=2+2", "@mention", template, "");
+  assert.ok(excelClipboard([entry]).text.includes("'=2+2\t'@mention"));
+});
+
 test("heading and notes are saved with new entries and rendered above the existing table body", () => {
   const custom = {
     ...template,

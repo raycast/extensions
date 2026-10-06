@@ -18,7 +18,7 @@ import { EntryForm } from "./components/entry-form";
 import { TimeInForm } from "./components/time-in-form";
 import { renderNote, timeOutLabel } from "./lib/markdown";
 import { defaultTimeIn, deleteEntry, replaceTemplateEntries, templateEntries, templateName } from "./lib/roster";
-import { reportError, useStore, type SaveStore } from "./lib/storage";
+import { rememberSelectedTemplate, reportError, useStore, type SaveStore } from "./lib/storage";
 import { timeFromDate } from "./lib/time";
 import type { Entry, Store } from "./lib/types";
 
@@ -107,7 +107,7 @@ function AttendanceActions({ data, save, entry }: { data: Store; save: SaveStore
             icon={Icon.Person}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "n" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+              windows: { modifiers: ["ctrl", "shift"], key: "n" },
             }}
             onAction={async () => {
               await save(
@@ -200,11 +200,14 @@ export default function AttendanceCommand() {
       searchBarAccessory={
         data ? (
           <List.Dropdown
+            id="attendance-template"
             tooltip="Select Template"
             value={data.selectedTemplateId}
             onChange={async (id) => {
-              if (id !== data.selectedTemplateId)
+              if (id !== data.selectedTemplateId) {
+                rememberSelectedTemplate(id);
                 await save((store) => ({ ...store, selectedTemplateId: id }), "Template Selected");
+              }
             }}
           >
             {data.templates.map((template) => (

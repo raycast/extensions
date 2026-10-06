@@ -6,7 +6,10 @@ function escapeHtml(value: string): string {
 }
 
 function tsvCell(value: string): string {
-  return /[\t\r\n"]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  // Keep pasted values as text in spreadsheet apps instead of allowing a name
+  // beginning with a formula character to execute as a formula.
+  const safeValue = /^[=+\-@]/.test(value) ? `'${value}` : value;
+  return /[\t\r\n"]/.test(safeValue) ? `"${safeValue.replace(/"/g, '""')}"` : safeValue;
 }
 
 /** Rich table for Excel; TSV fallback for applications that paste plain text. */

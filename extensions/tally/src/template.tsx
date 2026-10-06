@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { normalizeTime } from "./lib/time";
 import { defaultTimeIn as getDefaultTimeIn, setTemplateTimeIn, templateName } from "./lib/roster";
 import { DEFAULT_BODY, type Store } from "./lib/types";
@@ -19,11 +19,24 @@ export default function TemplateCommand() {
   return <TemplateForm data={data} save={save} isSaving={isSaving} />;
 }
 function TemplateForm({ data, save, isSaving }: { data: Store; save: SaveStore; isSaving: boolean }) {
+  type Draft = { body: string; heading: string; notes: string; defaultTimeIn: string };
   const [selected, setSelected] = useState(data.selectedTemplateId);
   const [body, setBody] = useState(data.templates.find((item) => item.id === selected)?.body ?? DEFAULT_BODY);
   const [heading, setHeading] = useState(data.templates.find((item) => item.id === selected)?.heading ?? "");
   const [notes, setNotes] = useState(data.templates.find((item) => item.id === selected)?.notes ?? "");
   const [defaultTimeIn, setDefaultTimeIn] = useState(getDefaultTimeIn(data, selected));
+  const drafts = useRef<Record<string, Draft>>({});
+  function loadDraft(id: string): Draft {
+    const draft = drafts.current[id];
+    if (draft) return draft;
+    const template = data.templates.find((item) => item.id === id);
+    return {
+      body: template?.body ?? DEFAULT_BODY,
+      heading: template?.heading ?? "",
+      notes: template?.notes ?? "",
+      defaultTimeIn: getDefaultTimeIn(data, id),
+    };
+  }
   async function submit() {
     let normalizedTime: string;
     try {
@@ -77,7 +90,9 @@ function TemplateForm({ data, save, isSaving }: { data: Store; save: SaveStore; 
         title="Template"
         value={selected}
         onChange={async (id) => {
+          drafts.current[selected] = { body, heading, notes, defaultTimeIn };
           if (id === "create-new") {
+            drafts.current[id] = { body: DEFAULT_BODY, heading: "", notes: "", defaultTimeIn: "" };
             setSelected(id);
             setBody(DEFAULT_BODY);
             setHeading("");
@@ -86,11 +101,12 @@ function TemplateForm({ data, save, isSaving }: { data: Store; save: SaveStore; 
             return;
           }
           if (await save((store) => ({ ...store, selectedTemplateId: id }), "Template Selected")) {
+            const draft = loadDraft(id);
             setSelected(id);
-            setDefaultTimeIn(getDefaultTimeIn(data, id));
-            setHeading(data.templates.find((item) => item.id === id)?.heading ?? "");
-            setNotes(data.templates.find((item) => item.id === id)?.notes ?? "");
-            setBody(data.templates.find((item) => item.id === id)?.body ?? DEFAULT_BODY);
+            setDefaultTimeIn(draft.defaultTimeIn);
+            setHeading(draft.heading);
+            setNotes(draft.notes);
+            setBody(draft.body);
           }
         }}
       >
