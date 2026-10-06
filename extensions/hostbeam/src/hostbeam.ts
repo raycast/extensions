@@ -6,9 +6,9 @@
 // without the extension having to know anything about SSH.
 
 import { execFile, execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { promisify } from "node:util";
 
 /** The app's durable store — the same file Preferences writes. */
@@ -26,26 +26,36 @@ export const BUNDLE_ID = "com.hostbeam.app";
 
 const run = promisify(execFile);
 
-/** Bring Hostbeam up, handing it `files` if there are any. False when macOS
- *  has no app with that id: Hostbeam was removed, and its config — which is
- *  all the commands read — left behind.
+/** Bring Hostbeam up, handing it `files` if there are any. Null when it did;
+ *  otherwise what to tell the user, in a HUD — Raycast's window is already
+ *  closed by then, since the popover needs the focus.
+ *
+ *  `open` fails for more than one reason, so each is named: Hostbeam removed
+ *  with its config left behind (which is all the commands read), or a file
+ *  that moved between being selected and being handed over — saying "not
+ *  installed" for that one sent people looking for the wrong problem.
  *
  *  Plain `open`, not the scheme, so it needs no permission from the app. By
  *  bundle id, not by name: a build sitting in a downloads folder must not be
  *  able to answer for the installed app.
  */
-export async function openHostbeam(files: string[] = []): Promise<boolean> {
+export async function openHostbeam(
+  files: string[] = [],
+): Promise<string | null> {
   try {
     await run("open", ["-b", BUNDLE_ID, ...files]);
-    return true;
-  } catch {
-    return false;
+    return null;
+  } catch (e) {
+    if (installedVersion() === null)
+      return "Hostbeam is not installed on this Mac";
+    const gone = files.find((f) => !existsSync(f));
+    if (gone) return `${basename(gone)} is no longer there`;
+    const why = String((e as { stderr?: unknown }).stderr ?? "")
+      .trim()
+      .split("\n")[0];
+    return why || "Hostbeam could not be opened";
   }
 }
-
-/** Said when `openHostbeam` finds no app. A HUD, since Raycast's window is
- *  already closed by then — the popover needs the focus. */
-export const NOT_INSTALLED = "Hostbeam is not installed on this Mac";
 
 export interface RecentBeam {
   id: string;
