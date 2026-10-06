@@ -103,11 +103,12 @@ Toggle it off with the same shortcut when done.
 | Forward | ⌘F |
 | Mark Read/Unread | ⇧⌘U |
 | Archive | ⌘E |
-| Delete | ⌘⌫ |
+| Move to Trash (Delete Permanently in Trash and Drafts) | ⌘⌫ |
 | Copy Subject | ⌘C |
 | Copy Sender | ⇧⌘C |
 | Save as Quicklink | ⇧⌘S |
-| Download Attachments | ⌘D |
+| Download Attachments | ⇧⌘A |
+| Show/Hide Preview | ⌘D |
 | Load More Emails | ⌘L |
 | Expand Email | ⌘↩ |
 | Toggle Demo Mode | ⇧⌘D |

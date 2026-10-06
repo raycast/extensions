@@ -253,7 +253,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     >
       {loadedEmails && loadedEmails.length > 0 ? (
         groupByDay(loadedEmails).map((section) => (
-          <List.Section key={section.title} title={section.title}>
+          <List.Section key={section.key} title={section.title}>
             {section.emails.map(({ email, index }) => (
               <EmailListItem
                 key={email.uid}
@@ -286,24 +286,32 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
 }
 
 // Sections like Mail: Today, Yesterday, then one per month
-function groupByDay(emails: Email[]): { title: string; emails: { email: Email; index: number }[] }[] {
+function groupByDay(emails: Email[]): { key: string; title: string; emails: { email: Email; index: number }[] }[] {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  const startOfTomorrow = new Date(startOfToday);
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
-  const sections: { title: string; emails: { email: Email; index: number }[] }[] = [];
-  emails.forEach((email, index) => {
-    const date = new Date(email.date);
+  // Load More appends pages as they come, so sort the whole list to keep each heading in one place
+  const sorted = emails
+    .map((email, index) => ({ email, index, date: new Date(email.date) }))
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  const sections: { key: string; title: string; emails: { email: Email; index: number }[] }[] = [];
+  for (const { email, index, date } of sorted) {
     let title: string;
-    if (date >= startOfToday) title = "Today";
-    else if (date >= startOfYesterday) title = "Yesterday";
+    if (date >= startOfToday && date < startOfTomorrow) title = "Today";
+    else if (date >= startOfYesterday && date < startOfToday) title = "Yesterday";
+    // Future-dated emails (wrong sender clock) go under their month rather than "Today"
     else title = date.toLocaleDateString(undefined, { month: "long", year: "numeric" });
 
     const last = sections[sections.length - 1];
     if (last?.title === title) last.emails.push({ email, index });
-    else sections.push({ title, emails: [{ email, index }] });
-  });
+    // A future-dated email can share its month with older ones, so key sections by their first email
+    else sections.push({ key: `${title}-${email.uid}`, title, emails: [{ email, index }] });
+  }
   return sections;
 }
 
