@@ -20,26 +20,45 @@ const LEGACY_CLICK_TYPE_TERM = {
   optRight: "option right click",
 } as const;
 
-function buildAppleScript(app: BartenderApp, menuBarId: string, actionType: ActionType): string {
+function buildAppleScripts(app: BartenderApp, menuBarId: string, actionType: ActionType): string[] {
   const prefix = `tell application "${app.name}" to`;
   const id = JSON.stringify(menuBarId);
 
   if (actionType === "activate") {
-    return `${prefix} activate ${id}`;
+    return [`${prefix} activate ${id}`];
   }
 
   if (actionType === "show") {
-    return `${prefix} show ${id}`;
+    return [`${prefix} show ${id}`];
   }
 
-  const clickType = app.majorVersion >= 7 ? `"${CLICK_TYPE_CODE[actionType]}"` : LEGACY_CLICK_TYPE_TERM[actionType];
-  return `${prefix} show ${id} and ${clickType}`;
+  const withCode = `${prefix} show ${id} and "${CLICK_TYPE_CODE[actionType]}"`;
+  const withTerm = `${prefix} show ${id} and ${LEGACY_CLICK_TYPE_TERM[actionType]}`;
+
+  if (app.majorVersion === undefined) {
+    // Unknown version: try the older wording first, which Bartender 7 only rejects (at compile time) for option right click
+    return [withTerm, withCode];
+  }
+  return [app.majorVersion >= 7 ? withCode : withTerm];
+}
+
+function isAppleScriptSyntaxError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("(-2740)");
 }
 
 export async function performMenuBarAction(menuBarId: string, actionType: ActionType): Promise<Result<void>> {
   try {
-    const script = buildAppleScript(await getBartenderApp(), menuBarId, actionType);
-    await runAppleScript(script);
+    const scripts = buildAppleScripts(await getBartenderApp(), menuBarId, actionType);
+    for (const [index, script] of scripts.entries()) {
+      try {
+        await runAppleScript(script);
+        break;
+      } catch (error) {
+        if (index === scripts.length - 1 || !isAppleScriptSyntaxError(error)) {
+          throw error;
+        }
+      }
+    }
     return { status: "success" };
   } catch (error) {
     return createResultFromAppleScriptError(error, `Failed to ${CLICK_TYPE_DISPLAY_NAME[actionType]} menu bar item`);
