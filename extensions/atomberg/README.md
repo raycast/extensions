@@ -79,17 +79,22 @@ your Mac and the fan need internet. The extension talks to four endpoints:
 The access token is a JWT; its `exp` claim is read (without verifying the signature) to decide
 when to refresh, so a token is reused until it actually expires.
 
-Light, brightness and colour commands only do anything on fans that have a light — the `I1`,
-`I5`, `M1`, `S1` and `S2` series.
+Not every Atomberg fan has a light. The API omits `led` from the state of fans that don't
+have one, and the light controls are shown only for fans that report it, rather than being
+matched against a hard-coded model list.
 
 ## Logging out
 
 `⌘⇧X` clears the cached access token and device list, then opens preferences. A Raycast
 extension can read its preferences but not write them, so the **API Key** and **Refresh
-Token** fields have to be emptied by hand in the pane that opens.
+Token** fields have to be emptied by hand in the pane that opens — until they are, opening a
+command simply signs back in.
 
 That only removes the keys from this Mac. To revoke them properly, turn off **Developer
 Options** in the Atomberg Home app, which invalidates the refresh token everywhere.
+
+Replacing the credentials with a different account's is safe: cached data is tagged with a
+hash of the credentials that produced it and is discarded as soon as they change.
 
 ## Development
 

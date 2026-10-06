@@ -20,6 +20,7 @@ import {
   SPEEDS,
   TIMERS,
   clearStoredData,
+  hasLight,
   loadFans,
   sendCommand,
   timerForHours,
@@ -82,11 +83,13 @@ function Metadata({ fan, onPower, onSpeed }: MetadataProps) {
         icon={fan.sleep_mode ? Icon.Moon : undefined}
         text={fan.sleep_mode ? "On" : "Off"}
       />
-      <List.Item.Detail.Metadata.Label
-        title="Light"
-        icon={fan.led ? Icon.LightBulb : undefined}
-        text={fan.led ? "On" : "Off"}
-      />
+      {hasLight(fan) && (
+        <List.Item.Detail.Metadata.Label
+          title="Light"
+          icon={fan.led ? Icon.LightBulb : undefined}
+          text={fan.led ? "On" : "Off"}
+        />
+      )}
       <List.Item.Detail.Metadata.Label
         title="Timer"
         icon={timer && timer.value !== 0 ? Icon.Clock : undefined}
@@ -169,7 +172,7 @@ export default function Fans() {
     const confirmed = await confirmAlert({
       title: "Log Out of Atomberg?",
       message:
-        "Clears the cached access token and device list, then opens preferences so you can delete your API key and refresh token.",
+        "Clears the cached access token and device list, then opens preferences. You are not logged out until you delete the API key and refresh token there — otherwise opening a command signs straight back in.",
       icon: Icon.Logout,
       primaryAction: { title: "Log Out", style: Alert.ActionStyle.Destructive },
     });
@@ -178,8 +181,8 @@ export default function Fans() {
     await mutate(clearStoredData(), { optimisticUpdate: () => [], shouldRevalidateAfter: false });
     await showToast({
       style: Toast.Style.Success,
-      title: "Logged Out",
-      message: "Now delete the API key and refresh token in preferences.",
+      title: "Cached Data Cleared",
+      message: "Delete the API key and refresh token in preferences to finish logging out.",
     });
     await openExtensionPreferences();
   }
@@ -308,12 +311,16 @@ export default function Fans() {
                     )
                   }
                 />
-                <Action
-                  title={fan.led ? "Turn off Light" : "Turn on Light"}
-                  icon={Icon.LightBulb}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
-                  onAction={() => apply(fan, { led: !fan.led }, { led: !fan.led }, fan.led ? "Light off" : "Light on")}
-                />
+                {hasLight(fan) && (
+                  <Action
+                    title={fan.led ? "Turn off Light" : "Turn on Light"}
+                    icon={Icon.LightBulb}
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    onAction={() =>
+                      apply(fan, { led: !fan.led }, { led: !fan.led }, fan.led ? "Light off" : "Light on")
+                    }
+                  />
+                )}
                 <ActionPanel.Submenu title="Set Timer" icon={Icon.Clock} shortcut={{ modifiers: ["cmd"], key: "t" }}>
                   {TIMERS.map((timer) => (
                     <Action

@@ -8,7 +8,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Command, Fan, SPEEDS, TIMERS, loadFans, sendCommand } from "./atomberg";
+import { Command, Fan, SPEEDS, TIMERS, hasLight, loadFans, sendCommand } from "./atomberg";
 
 function clampSpeed(speed: number): number {
   return Math.min(Math.max(Math.round(speed) || 1, 1), SPEEDS.length);
@@ -97,11 +97,13 @@ export default function FanMenu() {
                   )
                 }
               />
-              <MenuBarExtra.Item
-                title={fan.led ? "Turn Off Light" : "Turn On Light"}
-                icon={Icon.LightBulb}
-                onAction={() => apply(fan, { led: !fan.led }, { led: !fan.led }, `Light ${fan.led ? "off" : "on"}`)}
-              />
+              {hasLight(fan) && (
+                <MenuBarExtra.Item
+                  title={fan.led ? "Turn Off Light" : "Turn On Light"}
+                  icon={Icon.LightBulb}
+                  onAction={() => apply(fan, { led: !fan.led }, { led: !fan.led }, `Light ${fan.led ? "off" : "on"}`)}
+                />
+              )}
               <MenuBarExtra.Section title="Timer">
                 {TIMERS.map((timer) => (
                   <MenuBarExtra.Item

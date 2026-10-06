@@ -1,13 +1,10 @@
 import { Cache, LocalStorage, getPreferenceValues } from "@raycast/api";
+import { createHash } from "node:crypto";
 
 const BASE = "https://api.developer.atomberg-iot.com";
 const TOKEN_KEY = "access-token";
 const DEVICES_KEY = "devices";
-
-interface Preferences {
-  apiKey: string;
-  refreshToken: string;
-}
+const ACCOUNT_KEY = "account-fingerprint";
 
 /** A fan as returned by /v1/get_list_of_devices. */
 export interface Device {
@@ -65,6 +62,42 @@ export function timerForHours(hours: number | undefined): number {
 
 /** The device list changes rarely, so it survives between launches. */
 const cache = new Cache();
+
+/**
+ * A stable fingerprint of the current credentials. Hashed rather than stored
+ * verbatim, so the keys themselves stay in the keychain.
+ */
+function accountFingerprint(): string {
+  const { apiKey, refreshToken } = getPreferenceValues<Preferences>();
+  return createHash("sha256").update(`${apiKey}\u0000${refreshToken}`).digest("hex").slice(0, 16);
+}
+
+/**
+ * Drop anything cached under different credentials.
+ *
+ * Editing the API key or refresh token in preferences would otherwise leave a
+ * still-valid access token and the previous account's device list in place, and
+ * the new account would list — and control — the old account's fans.
+ */
+async function ensureCurrentAccount(): Promise<void> {
+  const current = accountFingerprint();
+  if ((await LocalStorage.getItem<string>(ACCOUNT_KEY)) === current) return;
+
+  await LocalStorage.removeItem(TOKEN_KEY);
+  cache.remove(DEVICES_KEY);
+  await LocalStorage.setItem(ACCOUNT_KEY, current);
+}
+
+/**
+ * Whether to offer light controls for a fan.
+ *
+ * Not every Atomberg fan has a light, and the API omits `led` from the state of
+ * those that don't. Keying off the response rather than a hard-coded model list
+ * means the control only shows up where it actually does something.
+ */
+export function hasLight(fan: Fan): boolean {
+  return fan.led !== undefined;
+}
 
 export class AtombergError extends Error {}
 
@@ -174,6 +207,7 @@ async function listDevices(forceRefresh: boolean): Promise<Device[]> {
  * cached yet — the developer API is limited to about 100 calls a day.
  */
 export async function loadFans(forceRefresh = false): Promise<Fan[]> {
+  await ensureCurrentAccount();
   const devices = await listDevices(forceRefresh);
   const { device_state } = await authed<{ device_state: DeviceState[] }>("/v1/get_device_state?device_id=all");
 
@@ -196,6 +230,7 @@ export async function loadFans(forceRefresh = false): Promise<Fan[]> {
 }
 
 export async function sendCommand(deviceId: string, command: Command): Promise<void> {
+  await ensureCurrentAccount();
   await authed("/v1/send_command", "POST", { device_id: deviceId, command });
 }
 
