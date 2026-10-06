@@ -274,7 +274,6 @@ export default function Command() {
                   <Action.Push
                     title="Show Surfaces"
                     icon={Icon.List}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
                     target={
                       <WorkspaceSurfacesList
                         workspaceRef={workspace.ref}
