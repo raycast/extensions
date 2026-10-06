@@ -4,7 +4,7 @@ import { createResultFromAppleScriptError, getTellApplication } from "./utils";
 
 export async function fetchMenuBarIdsFromBartender(): Promise<Result<string[]>> {
   try {
-    const script = `${getTellApplication()} to list menu bar items`;
+    const script = `${await getTellApplication()} to list menu bar items`;
     const result = await runAppleScript(script);
     return { status: "success", data: result.split("\n").filter((item) => item.trim().length > 0) };
   } catch (error) {
