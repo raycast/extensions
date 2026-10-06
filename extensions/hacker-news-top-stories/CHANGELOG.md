@@ -1,6 +1,6 @@
 # Hacker News Top Stories Changelog
 
-## [Remove Mark as Read Tool] - {PR_MERGE_DATE}
+## [Remove Mark as Read Tool] - 2026-10-06
 
 Removes the Raycast AI tool for marking stories as read.
 
