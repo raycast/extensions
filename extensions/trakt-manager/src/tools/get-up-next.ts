@@ -1,76 +1,102 @@
-import { scanPageComplete, withPagination } from "../lib/schema";
-import { CompactUpNextItem, toCompactUpNext } from "./compact-media";
+import { withPagination } from "../lib/schema";
+import { CompactPausedMovie, CompactUpNextItem, toCompactPausedMovie, toCompactUpNext } from "./compact-media";
+import { confirmHasMore } from "./page-lookahead";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
-   * The page number for paginated results. Defaults to 1.
+   * What to include: "shows" (next episode of each show in progress), "movies" (movies paused
+   * mid-playback), or "all" for both, like Trakt's Continue Watching. Defaults to "all".
+   */
+  type?: "all" | "shows" | "movies";
+  /**
+   * The page number for paginated results. Defaults to 1. Applies to shows and movies separately.
    */
   page?: number;
   /**
-   * Number of up-next items to retrieve (default: 20, max: 50).
+   * Number of items to retrieve per media type (default: 20, max: 50).
    */
   limit?: number;
 };
 
 type Output = {
+  /** Shows in progress with their next episode. Empty when `type` is "movies". */
   data: CompactUpNextItem[];
+  /** Movies paused mid-playback. Empty when `type` is "shows". */
+  movies: CompactPausedMovie[];
   page: number;
+  /** True when shows or movies have another page. */
   hasMore: boolean;
   /**
    * Always false: this is a browse page, not a lookup. Absence from it does not mean
-   * a show has no next episode.
+   * a show has no next episode or a movie was never started.
    */
   exhaustive: false;
 };
 
-/**
- * Get the next unwatched episodes for TV shows you are currently watching on Trakt.
- * For each show, returns the next episode number, season, title, first aired date, and overall progress.
- */
-export default async function tool(input: Input): Promise<Output> {
-  const { page = 1, limit = 20 } = input;
-  const safeLimit = Math.min(Math.max(limit, 1), 50);
-
-  const response = await executeToolCall(
+const requestShows = (page: number, limit: number) =>
+  executeToolCall(
     (signal) =>
       toolTraktClient.shows.getUpNextNitroShows({
-        query: {
-          page,
-          limit: safeLimit,
-          intent: "continue",
-        },
+        query: { page, limit, intent: "continue" },
         fetchOptions: { signal },
       }),
     "Failed to fetch up-next shows",
   );
 
-  const paginated = withPagination(response);
+const requestPausedMovies = (page: number, limit: number) =>
+  executeToolCall(
+    (signal) =>
+      toolTraktClient.movies.getPlaybackMovies({
+        query: { page, limit, extended: "full" },
+        fetchOptions: { signal },
+      }),
+    "Failed to fetch paused movies",
+  );
 
-  // up_next_nitro sends a fixed page count (trakt/trakt-api#926), so a full page does not prove
-  // there is a next one: when this page is full, look at the next page before promising more.
-  let hasMore = !scanPageComplete(paginated.data.length, paginated.pagination, safeLimit);
-  if (hasMore) {
-    // Only a hint: a failed lookahead must not discard the page already fetched, so keep "maybe more".
-    try {
-      const next = await executeToolCall(
-        (signal) =>
-          toolTraktClient.shows.getUpNextNitroShows({
-            query: { page: page + 1, limit: safeLimit, intent: "continue" },
-            fetchOptions: { signal },
-          }),
-        "Failed to fetch up-next shows",
-      );
-      hasMore = Array.isArray(next.body) && next.body.length > 0;
-    } catch {
-      hasMore = true;
-    }
-  }
+async function fetchShows(page: number, limit: number) {
+  const paginated = withPagination(await requestShows(page, limit));
+  const hasMore = await confirmHasMore(paginated.data.length, paginated.pagination, limit, async () => {
+    const next = await requestShows(page + 1, limit);
+    return Array.isArray(next.body) ? next.body.length : 0;
+  });
+
+  return { items: paginated.data.map(toCompactUpNext), hasMore };
+}
+
+// Playback is paginated only on request ("Pagination Optional"): `page` and `limit` are always sent,
+// and the next page is looked at the same way as for shows rather than trusting a full page.
+async function fetchPausedMovies(page: number, limit: number) {
+  const paginated = withPagination(await requestPausedMovies(page, limit));
+  const hasMore = await confirmHasMore(paginated.data.length, paginated.pagination, limit, async () => {
+    const next = await requestPausedMovies(page + 1, limit);
+    return Array.isArray(next.body) ? next.body.length : 0;
+  });
+
+  return { items: paginated.data.map(toCompactPausedMovie), hasMore };
+}
+
+const NONE = { items: [], hasMore: false };
+
+/**
+ * Get the user's Continue Watching list on Trakt: the next unwatched episode of each show in progress
+ * (season, number, title, first aired date, progress) and the movies paused mid-playback
+ * (progress percentage, minutes left, paused date).
+ */
+export default async function tool(input: Input): Promise<Output> {
+  const { type = "all", page = 1, limit = 20 } = input;
+  const safeLimit = Math.min(Math.max(limit, 1), 50);
+
+  const [shows, movies] = await Promise.all([
+    type === "movies" ? NONE : fetchShows(page, safeLimit),
+    type === "shows" ? NONE : fetchPausedMovies(page, safeLimit),
+  ]);
 
   return {
-    data: paginated.data.map(toCompactUpNext),
+    data: shows.items,
+    movies: movies.items,
     page,
-    hasMore,
+    hasMore: shows.hasMore || movies.hasMore,
     exhaustive: false,
   };
 }

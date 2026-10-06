@@ -1,5 +1,15 @@
 # Trakt Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+
+- **"Not Interested" on Recommendations** stops Trakt from recommending a movie or show again, and removes it from the grid.
+
+### Changed
+
+- The Continue Watching AI tool (formerly "Get up Next Episodes") also returns the movies you paused mid-playback, with how far you got and the minutes left, so Raycast AI sees the same list as the Continue Watching command. It can be limited to shows or movies.
+
 ## [Update] - 2026-10-01
 
 ### Added

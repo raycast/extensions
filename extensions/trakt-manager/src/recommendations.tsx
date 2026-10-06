@@ -11,7 +11,7 @@ import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
-import { markFirstEpisodeWatched } from "./lib/media-mutations";
+import { hideRecommendation, markFirstEpisodeWatched } from "./lib/media-mutations";
 import { useWatchlistState } from "./lib/use-watchlist-ids";
 import { TraktMediaType, TraktMovieBaseItem, TraktShowBaseItem, withPagination } from "./lib/schema";
 
@@ -202,6 +202,18 @@ export default function Command() {
     [],
   );
 
+  const hideMovieRecommendation = useCallback(
+    (movie: TraktMovieBaseItem) =>
+      hideRecommendation(traktClient, "movie", movie.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
+
+  const hideShowRecommendation = useCallback(
+    (show: TraktShowBaseItem) =>
+      hideRecommendation(traktClient, "show", show.ids.trakt, { signal: abortable.current?.signal }),
+    [],
+  );
+
   const handleMovieAction = useCallback(
     async (movie: TraktMovieBaseItem, action: (movie: TraktMovieBaseItem) => Promise<void>, message: string) => {
       setActionLoading(true);
@@ -348,6 +360,13 @@ export default function Command() {
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
             />
+            <Action
+              title="Not Interested"
+              icon={Icon.EyeDisabled}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() => handleMovieAction(item, hideMovieRecommendation, "Movie removed from recommendations")}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       )}
@@ -409,6 +428,13 @@ export default function Command() {
               icon={Icon.Clock}
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleShowAction(item, addShowToHistory, "Show added to history")}
+            />
+            <Action
+              title="Not Interested"
+              icon={Icon.EyeDisabled}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              onAction={() => handleShowAction(item, hideShowRecommendation, "Show removed from recommendations")}
             />
           </ActionPanel.Section>
         </ActionPanel>
