@@ -1,10 +1,27 @@
 import { runAppleScript } from "@raycast/utils";
 import { CLICK_TYPE_DISPLAY_NAME } from "../constants";
 import { ActionType, Result } from "../types";
-import { createResultFromAppleScriptError, getTellApplication } from "./utils";
+import { BartenderApp, createResultFromAppleScriptError, getBartenderApp } from "./utils";
 
-function buildAppleScript(menuBarId: string, actionType: ActionType): string {
-  const prefix = `${getTellApplication()} to`;
+// Bartender 7 takes the click type as a four-character code string. Its AppleScript dictionary spells
+// "option right click" as "optionright click", so the codes are more reliable than the terminology.
+const CLICK_TYPE_CODE = {
+  left: "lclk",
+  right: "rclk",
+  optLeft: "locl",
+  optRight: "rocl",
+} as const;
+
+// Bartender 5 and 6 use the terms from their dictionaries
+const LEGACY_CLICK_TYPE_TERM = {
+  left: "left click",
+  right: "right click",
+  optLeft: "option left click",
+  optRight: "option right click",
+} as const;
+
+function buildAppleScript(app: BartenderApp, menuBarId: string, actionType: ActionType): string {
+  const prefix = `tell application "${app.name}" to`;
   const id = JSON.stringify(menuBarId);
 
   if (actionType === "activate") {
@@ -15,29 +32,13 @@ function buildAppleScript(menuBarId: string, actionType: ActionType): string {
     return `${prefix} show ${id}`;
   }
 
-  let clickCommand = "";
-  switch (actionType) {
-    case "left":
-      clickCommand = "left click";
-      break;
-    case "right":
-      clickCommand = "right click";
-      break;
-    case "optLeft":
-      clickCommand = "option left click";
-      break;
-    case "optRight":
-      clickCommand = "option right click";
-      break;
-    default:
-      return actionType satisfies never;
-  }
-  return `${prefix} show ${id} and ${clickCommand}`;
+  const clickType = app.majorVersion >= 7 ? `"${CLICK_TYPE_CODE[actionType]}"` : LEGACY_CLICK_TYPE_TERM[actionType];
+  return `${prefix} show ${id} and ${clickType}`;
 }
 
 export async function performMenuBarAction(menuBarId: string, actionType: ActionType): Promise<Result<void>> {
   try {
-    const script = buildAppleScript(menuBarId, actionType);
+    const script = buildAppleScript(await getBartenderApp(), menuBarId, actionType);
     await runAppleScript(script);
     return { status: "success" };
   } catch (error) {
