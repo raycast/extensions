@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  createListingSaves,
   createRequestTracker,
   createSerialQueue,
   failedVaultsTitle,
@@ -93,4 +94,22 @@ test("a failed listing with nothing to show is a failure, not an empty account",
   // Get TOTP only shows items with a 2FA code.
   const withoutCodes = getRefreshResult([item("vault-3", "c")], [], failures, (candidate) => candidate.hasTotp);
   assert.equal(withoutCodes.failureMessage, "timeout");
+});
+
+test("a listing that started before the one saved last isn't saved", async () => {
+  const saves = createListingSaves();
+  const written: string[] = [];
+  const older = saves.start();
+  const newer = saves.start();
+
+  assert.equal(await saves.save(newer, async () => written.push("newer")), true);
+  assert.equal(await saves.save(older, async () => written.push("older")), false);
+  assert.deepEqual(written, ["newer"]);
+
+  // In start order, each listing replaces the previous one.
+  const next = saves.start();
+  const last = saves.start();
+  assert.equal(await saves.save(next, async () => written.push("next")), true);
+  assert.equal(await saves.save(last, async () => written.push("last")), true);
+  assert.deepEqual(written, ["newer", "next", "last"]);
 });
