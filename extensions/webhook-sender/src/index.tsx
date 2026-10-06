@@ -24,10 +24,16 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const [h, s] = await Promise.all([getHistory(), getSaved()]);
-    setHistory(h);
-    setSaved(s);
-    setIsLoading(false);
+    try {
+      const [h, s] = await Promise.all([getHistory(), getSaved()]);
+      setHistory(h);
+      setSaved(s);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      await showToast({ style: Toast.Style.Failure, title: "Failed to load webhooks", message });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
