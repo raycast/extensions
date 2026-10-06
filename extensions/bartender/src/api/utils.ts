@@ -102,22 +102,39 @@ async function findBartenderAppsWithSpotlight(): Promise<BartenderCandidate[]> {
   }
 }
 
+// Executable paths of everything running, used to tell which installed copy the user is actually using
+async function listRunningExecutablePaths(): Promise<string[]> {
+  try {
+    const { stdout } = await execa("ps", ["-axo", "comm="]);
+    return stdout.split("\n").filter((line) => line.includes("Bartender"));
+  } catch (error) {
+    console.error("Error listing running processes:", error);
+    return [];
+  }
+}
+
 /**
- * Finds the installed Bartender app (and its version), preferring the newest if several are installed.
+ * Finds the installed Bartender app (and its version).
+ * If several are installed, prefers the one that is running, then the newest.
  * Throws BartenderNotInstalledError if there is none.
  * Deliberately not cached, so installing or upgrading Bartender while Raycast is open is picked up.
  */
 export async function getBartenderApp(): Promise<BartenderApp> {
-  const [standard, spotlight] = await Promise.all([
+  const [standard, spotlight, running] = await Promise.all([
     findBartenderAppsInStandardLocations(),
     findBartenderAppsWithSpotlight(),
+    listRunningExecutablePaths(),
   ]);
 
   const candidates = [...standard, ...spotlight].filter(
     (candidate, index, all) => all.findIndex((other) => other.appPath === candidate.appPath) === index,
   );
-  // Apps with an unknown version rank last
-  candidates.sort((a, b) => (b.majorVersion ?? 0) - (a.majorVersion ?? 0));
+  const isRunning = (candidate: BartenderCandidate) =>
+    running.some((executablePath) => executablePath.startsWith(`${candidate.appPath}/`));
+  // Apps with an unknown version rank last among those that aren't running
+  candidates.sort(
+    (a, b) => Number(isRunning(b)) - Number(isRunning(a)) || (b.majorVersion ?? 0) - (a.majorVersion ?? 0),
+  );
 
   if (candidates.length === 0) {
     throw new BartenderNotInstalledError();
