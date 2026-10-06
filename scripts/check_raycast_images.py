@@ -31,13 +31,19 @@ MENU_BAR_SCREENSHOT_MESSAGE = (
     "This looks like a menu bar screenshot. Menu bar screenshots aren't supported in metadata; "
     "capture the extension with Raycast Window Capture (Save to Metadata) instead."
 )
+MAYBE_MENU_BAR_SCREENSHOT_MESSAGE = (
+    "No Raycast window detected. This may be a menu bar screenshot. Menu bar screenshots aren't supported in metadata; "
+    "capture the extension with Raycast Window Capture (Save to Metadata) instead."
+)
 NO_RAYCAST_WINDOW_MESSAGE = (
     "Content touches the image edges / no Raycast window detected."
 )
 
 MIN_PLAUSIBLE_PAD = 0.02
 MAX_PLAUSIBLE_PAD = 0.30
-MIN_PLAUSIBLE_AREA_FRAC = 0.30
+EDGE_SCAN_BAND = 6
+EDGE_GRAD_THRESHOLD = 25
+EDGE_GRAD_FRACTION = 0.015
 
 
 def load_image(path_or_url: str) -> Image.Image:
@@ -105,8 +111,36 @@ def _store_bbox_is_plausible(top: int, left: int, bottom: int, right: int, h: in
         return False
     if any(pad > MAX_PLAUSIBLE_PAD for pad in pads):
         return False
-    area_frac = ((bottom - top) * (right - left)) / (h * w)
-    return area_frac >= MIN_PLAUSIBLE_AREA_FRAC
+    return True
+
+
+def _content_touches_edges(arr: np.ndarray) -> bool:
+    """Heuristic: menu bar screenshots often have sharp UI edges on the image border."""
+    h, w = arr.shape[:2]
+    if h < 4 or w < 4:
+        return True
+
+    band = max(1, min(EDGE_SCAN_BAND, h - 2, w - 2))
+    source = arr.astype(np.int16)
+    grad_x = np.max(np.abs(np.diff(source, axis=1)), axis=2)
+    grad_y = np.max(np.abs(np.diff(source, axis=0)), axis=2)
+
+    # grad_x is (h, w-1), grad_y is (h-1, w)
+    top_frac = float(np.mean(grad_y[:band, :] > EDGE_GRAD_THRESHOLD))
+    bottom_frac = float(np.mean(grad_y[-band:, :] > EDGE_GRAD_THRESHOLD))
+    left_frac = float(np.mean(grad_x[:, :band] > EDGE_GRAD_THRESHOLD))
+    right_frac = float(np.mean(grad_x[:, -band:] > EDGE_GRAD_THRESHOLD))
+    return max(top_frac, bottom_frac, left_frac, right_frac) >= EDGE_GRAD_FRACTION
+
+
+def _detection_failure_message(arr: np.ndarray, *, has_menu_bar_command: bool) -> str:
+    if not has_menu_bar_command:
+        return NO_RAYCAST_WINDOW_MESSAGE
+    return (
+        MENU_BAR_SCREENSHOT_MESSAGE
+        if _content_touches_edges(arr)
+        else MAYBE_MENU_BAR_SCREENSHOT_MESSAGE
+    )
 
 
 def _find_capture_frame_bbox(
@@ -491,7 +525,7 @@ def validate(
 
     bbox = find_window_bbox(arr, tol=tol, verbose=verbose)
     if bbox is None:
-        message = MENU_BAR_SCREENSHOT_MESSAGE if has_menu_bar_command else NO_RAYCAST_WINDOW_MESSAGE
+        message = _detection_failure_message(arr, has_menu_bar_command=has_menu_bar_command)
         issues.append(message)
         print(f"  {FAIL} {message}")
         return issues
@@ -511,7 +545,7 @@ def validate(
         )
 
     if not _store_bbox_is_plausible(top, left, bottom, right, h, w):
-        message = MENU_BAR_SCREENSHOT_MESSAGE if has_menu_bar_command else NO_RAYCAST_WINDOW_MESSAGE
+        message = _detection_failure_message(arr, has_menu_bar_command=has_menu_bar_command)
         issues.append(message)
         print(f"  {FAIL} {message}")
         return issues

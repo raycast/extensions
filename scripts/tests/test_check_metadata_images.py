@@ -309,6 +309,14 @@ class ImageStyleTests(unittest.TestCase):
 
     def test_menu_bar_screenshot_fixture_gets_specific_message(self) -> None:
         fixture = Path(__file__).resolve().parent / "fixtures" / "raycash-1-demo.png"
+        array = np.asarray(Image.open(fixture).convert("RGB"))
+        bbox = framing_checker.find_window_bbox(array)
+        self.assertIsNotNone(bbox)
+        top, left, bottom, right = bbox
+        self.assertFalse(
+            framing_checker._store_bbox_is_plausible(top, left, bottom, right, array.shape[0], array.shape[1])
+        )
+
         issues = framing_checker.validate(
             str(fixture),
             has_menu_bar_command=True,
@@ -330,6 +338,18 @@ class ImageStyleTests(unittest.TestCase):
             )
 
         self.assertEqual(issues, [framing_checker.NO_RAYCAST_WINDOW_MESSAGE])
+
+    def test_non_edge_touching_detection_failure_with_menu_bar_command_is_softened(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            image_path = Path(temp_dir) / "solid.png"
+            Image.new("RGB", checker.EXPECTED_SIZE, "#101010").save(image_path)
+
+            issues = framing_checker.validate(
+                str(image_path),
+                has_menu_bar_command=True,
+            )
+
+        self.assertEqual(issues, [framing_checker.MAYBE_MENU_BAR_SCREENSHOT_MESSAGE])
 
     def test_valid_window_capture_still_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
