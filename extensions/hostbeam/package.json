@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hostbeam",
   "title": "Hostbeam",
-  "description": "Beam the screenshot on your clipboard to a remote host over SSH, and get the paste-ready path back.",
+  "description": "Control the Hostbeam Mac app — beam the screenshot on your clipboard to a remote host and get the paste-ready path back.",
   "icon": "icon.png",
   "author": "PunkABeat",
   "categories": [

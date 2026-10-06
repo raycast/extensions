@@ -1,11 +1,6 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
 import { closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
 
-import { BUNDLE_ID } from "./hostbeam";
-
-const run = promisify(execFile);
+import { openHostbeam } from "./hostbeam";
 
 /** Beam what is selected in Finder.
  *
@@ -26,7 +21,5 @@ export default async function main() {
     return;
   }
   await closeMainWindow();
-  // By bundle id, not by name: a build sitting in a downloads folder must not
-  // be able to answer for the installed app.
-  await run("open", ["-b", BUNDLE_ID, ...files]);
+  await openHostbeam(files);
 }

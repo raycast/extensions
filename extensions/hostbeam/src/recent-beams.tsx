@@ -8,15 +8,14 @@ import {
   Icon,
   List,
   environment,
-  open,
   showHUD,
   Keyboard,
 } from "@raycast/api";
 
 import {
-  BUNDLE_ID,
   fileName,
   groupRecent,
+  openHostbeam,
   readConfig,
   sentenceFor,
   type HostbeamConfig,
@@ -103,7 +102,7 @@ function Row({
             title="Open Hostbeam"
             icon={Icon.AppWindow}
             shortcut={Keyboard.Shortcut.Common.Open}
-            onAction={() => open("", BUNDLE_ID)}
+            onAction={() => openHostbeam()}
           />
         </ActionPanel>
       }

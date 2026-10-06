@@ -5,10 +5,11 @@
 // last beams (with their thumbnails), and `hostbeam://beam` starts a beam
 // without the extension having to know anything about SSH.
 
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 
 /** The app's durable store — the same file Preferences writes. */
 export const CONFIG_PATH = join(
@@ -22,6 +23,18 @@ export const CONFIG_PATH = join(
 /** The app's bundle id, used instead of its name so a stray build elsewhere
  *  on disk cannot answer for it. */
 export const BUNDLE_ID = "com.hostbeam.app";
+
+const run = promisify(execFile);
+
+/** Bring Hostbeam up, handing it `files` if there are any.
+ *
+ *  Plain `open`, not the scheme, so it needs no permission from the app. By
+ *  bundle id, not by name: a build sitting in a downloads folder must not be
+ *  able to answer for the installed app.
+ */
+export async function openHostbeam(files: string[] = []): Promise<void> {
+  await run("open", ["-b", BUNDLE_ID, ...files]);
+}
 
 export interface RecentBeam {
   id: string;

@@ -77,14 +77,7 @@ export default function Command() {
   const list = hosts(config);
   const allowed = config?.settings?.allowUrlBeam ?? true;
   return (
-    <List
-      searchBarPlaceholder="Switch the host beams go to"
-      // Said before anything is tried, since the list reads fine either way
-      // and a row that is going to refuse should look like one.
-      navigationTitle={
-        allowed ? undefined : "Hostbeam is not accepting commands"
-      }
-    >
+    <List searchBarPlaceholder="Switch the host beams go to">
       {list.length === 0 ? (
         <List.EmptyView
           icon={Icon.Desktop}
@@ -96,28 +89,37 @@ export default function Command() {
           }
         />
       ) : (
-        list.map((host) => (
-          <List.Item
-            key={host.id}
-            icon={host.current ? Icon.CheckCircle : Icon.Circle}
-            title={host.name}
-            subtitle={host.current ? "current" : undefined}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Switch to This Host"
-                  icon={Icon.Switch}
-                  onAction={() => switchTo(host, false)}
-                />
-                <Action
-                  title="Switch and Beam Clipboard"
-                  icon={Icon.Upload}
-                  onAction={() => switchTo(host, true)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+        // Said before anything is tried, since the list reads fine either way
+        // and a row that is going to refuse should look like one. It goes in
+        // the section header: the Store keeps the root's title for the
+        // command's own name.
+        <List.Section
+          title={allowed ? undefined : "Hosts"}
+          subtitle={allowed ? undefined : "Hostbeam is not accepting commands"}
+        >
+          {list.map((host) => (
+            <List.Item
+              key={host.id}
+              icon={host.current ? Icon.CheckCircle : Icon.Circle}
+              title={host.name}
+              subtitle={host.current ? "current" : undefined}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Switch to This Host"
+                    icon={Icon.Switch}
+                    onAction={() => switchTo(host, false)}
+                  />
+                  <Action
+                    title="Switch and Beam Clipboard"
+                    icon={Icon.Upload}
+                    onAction={() => switchTo(host, true)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );
