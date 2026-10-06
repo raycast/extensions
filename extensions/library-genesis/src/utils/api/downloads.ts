@@ -1,11 +1,10 @@
 import { createHash, randomUUID } from "node:crypto";
-import { createWriteStream } from "node:fs";
-import { link, rm } from "node:fs/promises";
+import { link, open, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Agent } from "undici";
 
-import { getUrlFromDownloadPage } from ".";
+import { getDownloadLinkFromPage } from ".";
 import { mirror } from "./mirrors";
 import { LIBGEN_USER_AGENT } from "./request";
 
@@ -18,13 +17,47 @@ type DownloadOptions = {
   timeoutMs?: number;
 };
 
+class LocalDownloadError extends Error {
+  readonly code?: string;
+
+  constructor(cause: unknown) {
+    super(`Could not save the book: ${cause instanceof Error ? cause.message : String(cause)}`, { cause });
+    this.name = "LocalDownloadError";
+    this.code = cause instanceof Error ? (cause as NodeJS.ErrnoException).code : undefined;
+  }
+}
+
+// Mark failures at the filesystem operation that produced them.
+const localFileOperation = async <T>(operation: () => Promise<T>): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw error;
+    throw new LocalDownloadError(error);
+  }
+};
+
+// Recognize HTML fragments too: error pages need not start with <html> or a doctype.
+const HTML_ELEMENTS = new Set(
+  `a abbr acronym address applet area article aside audio b base basefont bdi bdo bgsound big blink blockquote
+   body br button canvas caption center cite code col colgroup content data datalist dd del details dfn dialog
+   dir div dl dt em embed fieldset figcaption figure font footer form frame frameset h1 h2 h3 h4 h5 h6 head
+   header hgroup hr html i iframe image img input ins kbd label legend li link main map mark marquee menu
+   menuitem meta meter nav nobr noembed noframes noscript object ol optgroup option output p param picture
+   plaintext portal pre progress q rb rp rt rtc ruby s samp script search section select shadow slot small
+   source span strike strong style sub summary sup table tbody td template textarea tfoot th thead time
+   title tr track tt u ul var video wbr xmp`.split(/\s+/),
+);
+
 const validateFile = (prefix: Buffer, extension: string) => {
   if (!prefix.length) throw new Error("The server returned an empty book file.");
   const text = prefix
     .toString("utf8")
     .replace(/^\uFEFF/, "")
-    .trimStart();
-  if (/^<(?:!doctype\s+html|html\b|head\b|body\b|title\b|div\b|h1\b)/i.test(text)) {
+    // Ignore leading comments and XML declarations without rejecting XML books.
+    .replace(/^(?:\s|<!--[\s\S]*?-->|<\?xml\b[\s\S]*?\?>)+/i, "");
+  const rootTag = /^<([a-z][a-z0-9:-]*)(?=[\s/>])/i.exec(text)?.[1].toLowerCase();
+  if (/^<!doctype\s+html\b/i.test(text) || (rootTag && HTML_ELEMENTS.has(rootTag))) {
     throw new Error("The server returned an HTML page instead of a book.");
   }
   if (extension.toLowerCase() === "epub" && !prefix.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
@@ -104,7 +137,21 @@ export async function downloadBookFile(url: string, destination: string, options
         reader.releaseLock();
       }
     }
-    await pipeline(chunks(), createWriteStream(temporary, { flags: "wx" }), { signal: controller.signal });
+    await pipeline(
+      chunks(),
+      async (source) => {
+        const file = await localFileOperation(() => open(temporary, "wx"));
+        try {
+          for await (const chunk of source) {
+            controller.signal.throwIfAborted();
+            await localFileOperation(() => file.writeFile(chunk, { signal: controller.signal }));
+          }
+        } finally {
+          await localFileOperation(() => file.close());
+        }
+      },
+      { signal: controller.signal },
+    );
     const length = response.headers.get("content-length");
     if (length && !response.headers.get("content-encoding") && bytes !== Number(length)) {
       throw new Error("The book download was incomplete.");
@@ -115,7 +162,7 @@ export async function downloadBookFile(url: string, destination: string, options
     }
     controller.signal.throwIfAborted();
     // link is atomic and refuses to overwrite an existing book.
-    await link(temporary, destination);
+    await localFileOperation(() => link(temporary, destination));
   } catch (error) {
     if (timedOut && !options.signal?.aborted) throw new Error("The book download timed out. Try another mirror.");
     throw error;
@@ -123,7 +170,7 @@ export async function downloadBookFile(url: string, destination: string, options
     clearTimeout(timeout);
     options.signal?.removeEventListener("abort", abort);
     await dispatcher?.destroy();
-    await rm(temporary, { force: true });
+    await localFileOperation(() => rm(temporary, { force: true }));
   }
 }
 
@@ -138,15 +185,13 @@ export async function downloadBookFromMirrors(
   while (true) {
     options.signal?.throwIfAborted();
     try {
-      const url = await getUrlFromDownloadPage(page.toString(), options.signal);
-      await downloadBookFile(url, destination, { ...options, referer: page.toString() });
+      const { url, referer } = await getDownloadLinkFromPage(page.toString(), options.signal);
+      await downloadBookFile(url, destination, { ...options, referer });
       return;
     } catch (error) {
       options.signal?.throwIfAborted();
       // Local filesystem failures cannot be repaired by selecting another mirror.
-      if (
-        ["EACCES", "EPERM", "ENOSPC", "EEXIST", "ENOENT", "EROFS"].includes((error as NodeJS.ErrnoException).code ?? "")
-      ) {
+      if (error instanceof LocalDownloadError) {
         throw error;
       }
       lastError = error;

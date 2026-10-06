@@ -1,6 +1,6 @@
 import fse from "fs-extra";
 
-import { Toast, getPreferenceValues, open, showHUD, showInFinder, showToast } from "@raycast/api";
+import { Toast, getPreferenceValues, open, showInFinder, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 import type { BookEntry } from "@/types";
@@ -9,6 +9,7 @@ import type { LibgenPreferences } from "@/types";
 import { downloadBookFromMirrors } from "./api/downloads";
 import { parseLowerCaseArray } from "./common";
 import { languages } from "./constants";
+import { pickBookDownloadDirectory } from "./folder-picker";
 import { showActionToast, showFailureToast } from "./toast";
 
 export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLanguages: string) => {
@@ -149,15 +150,16 @@ export async function downloadBookToDefaultDirectory(downloadPage: string, book:
 }
 
 export async function downloadBookToLocation(downloadPage: string, book: BookEntry) {
-  await showToast(Toast.Style.Animated, "Please pick a folder...");
+  const toast = await showToast(Toast.Style.Animated, "Please pick a folder...");
+  let directory: string | undefined;
   try {
-    const directory = await runAppleScript(`
-      set outputFolder to choose folder with prompt "Please select an output folder:"
-      return POSIX path of outputFolder
-    `);
-    await downloadBookToDefaultDirectory(downloadPage, book, directory.trim());
+    directory = await pickBookDownloadDirectory(runAppleScript);
   } catch (err) {
-    console.error(err);
-    await showHUD("Download Failed. Try with a different download gateway.");
+    await showFailureToast("Could Not Choose Folder", err as Error);
+    return;
+  } finally {
+    await toast.hide();
   }
+  if (!directory) return;
+  await downloadBookToDefaultDirectory(downloadPage, book, directory);
 }

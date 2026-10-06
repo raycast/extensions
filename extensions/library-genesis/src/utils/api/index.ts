@@ -71,7 +71,10 @@ export const getLibgenSearchResults = async (
   return parse(data, libgenUrl);
 };
 
-export const getUrlFromDownloadPage = async (downloadUrl: string, signal?: AbortSignal): Promise<string> => {
+export const getDownloadLinkFromPage = async (
+  downloadUrl: string,
+  signal?: AbortSignal,
+): Promise<{ url: string; referer: string }> => {
   const document = await fetchLibgenDocument(downloadUrl, signal);
 
   const $ = load(document.content);
@@ -82,5 +85,5 @@ export const getUrlFromDownloadPage = async (downloadUrl: string, signal?: Abort
 
   const url = new URL(href, document.url);
   if (!["http:", "https:"].includes(url.protocol)) throw new Error("The download page returned an invalid GET link.");
-  return url.toString();
+  return { url: url.toString(), referer: document.url };
 };

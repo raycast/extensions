@@ -9,12 +9,17 @@
 - Share active mirror probes across simultaneous requests while preserving independent cancellation.
 - Recheck saved mirrors before reuse and replace unavailable mirrors with a working alternative.
 - Retry failed book downloads on validated mirrors using fresh download links.
+- Report local file failures directly without retrying other mirrors, including overlong destination filenames.
+- Treat a cancelled save-folder dialog as a quiet exit and report genuine folder-picker errors separately.
+- Use the final redirected download page as the referrer when fetching its book link.
 - Validate book responses and checksums before saving, including downloads to a chosen folder.
+- Reject disguised HTML error fragments when downloading other book formats without a usable checksum.
 - Show search errors for unavailable mirrors and ignore cancelled searches.
 - Fetch and cache book covers with the required referrer so they display in Raycast.
 - Restrict cover URLs and redirects to allowed HTTPS mirrors and reject private or reserved network destinations.
 - Limit cover downloads and cached images to 5 MiB, checking both declared and streamed response sizes.
 - Bound the cover cache to 100 MiB and 500 images, evict least recently used covers, and clean up expired images and abandoned temporary files.
+- Keep covers used by active searches until those searches change or close, without exceeding cache limits for new downloads.
 - Display full-resolution covers at a proportional preview size, falling back to thumbnails when needed.
 - Batch cover updates and keep book row identities and the detail pane stable while results load.
 

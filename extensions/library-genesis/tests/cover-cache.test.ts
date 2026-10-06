@@ -8,11 +8,13 @@ import type { TestContext } from "node:test";
 
 import {
   COVER_CACHE_MAX_AGE_MS,
+  CoverCacheFullError,
   MAX_CACHED_COVERS,
   MAX_COVER_BYTES,
   MAX_COVER_CACHE_BYTES,
 } from "../src/utils/api/cover-cache";
-import { getCachedBookCover } from "../src/utils/api/covers";
+import { getCachedBookCover, getCachedFullSizeBookCover, retainBookCoverCache } from "../src/utils/api/covers";
+import { type BookCover, loadBookCovers } from "../src/utils/book-covers";
 
 const image = Buffer.from("/9j/2Q==", "base64");
 const url = (name: string) => `https://libgen.li/covers/${name}.jpg`;
@@ -134,4 +136,94 @@ test("a cancelled cache write does not block later requests", async (context) =>
   );
   const path = await getCachedBookCover(url("after-cancel"), directory);
   assert.deepEqual(await readFile(path), image);
+});
+
+test("active covers survive byte pressure while later full-size covers fall back to a smaller thumbnail", async (context) => {
+  const { directory, cache, seed, entries } = await fixture(context);
+  const urls = Array.from({ length: 20 }, (_, i) => url(`active-${i}`));
+  const release = retainBookCoverCache([...urls, url("later_small")], directory);
+  context.after(release);
+  const paths = [];
+  for (let i = 0; i < urls.length; i++) {
+    paths.push(await seed(`active-${i}`, i === 19 ? MAX_COVER_BYTES - 4096 : MAX_COVER_BYTES, 100000));
+  }
+  for (let i = 0; i < urls.length; i++) assert.equal(await getCachedBookCover(urls[i], directory), paths[i]);
+  const large = Buffer.alloc(MAX_COVER_BYTES, 42);
+  context.mock.method(
+    globalThis,
+    "fetch",
+    async (input: URL) =>
+      new Response(input.pathname.endsWith("_small.jpg") ? image : large, {
+        headers: { "Content-Type": "image/jpeg" },
+      }),
+  );
+  const thumbnail = await getCachedFullSizeBookCover(url("later_small"), directory);
+  assert.equal(thumbnail, join(cache, filename("later_small")));
+  assert.deepEqual(await readFile(thumbnail), image);
+  for (const path of paths) assert.ok((await stat(path)).size > 0);
+  assert.ok((await entries()).bytes <= MAX_COVER_CACHE_BYTES);
+  await assert.rejects(getCachedBookCover(url("cannot-fit"), directory), CoverCacheFullError);
+  for (const path of paths) assert.ok((await stat(path)).size > 0);
+  assert.ok(!(await readdir(cache)).some((name) => name.endsWith(".tmp")));
+  const oldest = new Date(Date.now() - 100000);
+  await utimes(paths[0], oldest, oldest);
+  await release();
+  // Once the page closes, its old files can be evicted to admit another cover.
+  await getCachedBookCover(url("after-close"), directory);
+  await assert.rejects(stat(paths[0]), { code: "ENOENT" });
+  assert.ok((await entries()).bytes <= MAX_COVER_CACHE_BYTES);
+});
+
+test("a search exceeding the file limit keeps every published cover readable until released", async (context) => {
+  const { directory, cache, seed, entries } = await fixture(context);
+  const urls = Array.from({ length: MAX_CACHED_COVERS + 1 }, (_, i) => url(`search-${i}`));
+  const release = retainBookCoverCache(urls, directory);
+  context.after(release);
+  for (let i = 0; i < MAX_CACHED_COVERS; i++) await seed(`search-${i}`);
+  let published: Record<string, BookCover> = {};
+  await loadBookCovers(
+    urls,
+    async (url, signal) => ({
+      path: await getCachedFullSizeBookCover(url, directory, signal),
+      width: 160,
+      height: 240,
+    }),
+    (covers) => {
+      published = covers;
+    },
+  );
+  const displayed = Object.values(published).filter((cover) => cover.path);
+  assert.equal(displayed.length, MAX_CACHED_COVERS);
+  for (const cover of displayed) assert.deepEqual(await readFile(cover.path!), image);
+  assert.equal(published[urls.at(-1)!].path, undefined);
+  assert.equal(published[urls.at(-1)!].loading, false);
+  assert.equal((await entries()).count, MAX_CACHED_COVERS);
+  assert.ok(!(await readdir(cache)).some((name) => name.endsWith(".tmp")));
+  await release();
+  const next = await getCachedBookCover(url("next-search"), directory);
+  assert.deepEqual(await readFile(next), image);
+  assert.equal((await entries()).count, MAX_CACHED_COVERS);
+});
+
+test("overlapping searches retain shared covers until both release, including repeated cleanup", async (context) => {
+  const { directory, seed, entries, requests } = await fixture(context);
+  const shared = await seed("shared", image.length, COVER_CACHE_MAX_AGE_MS + 10000);
+  for (let i = 1; i < MAX_CACHED_COVERS; i++) await seed(`other-${i}`);
+  const releaseFirst = retainBookCoverCache([url("shared")], directory);
+  const releaseSecond = retainBookCoverCache([url("shared")], directory);
+  context.after(releaseFirst);
+  context.after(releaseSecond);
+  assert.equal(await getCachedBookCover(url("shared"), directory), shared);
+  assert.equal(requests(), 0, "age cleanup must not remove a retained valid cover");
+  // Make the shared image the LRU candidate to prove retention, rather than recency, protects it.
+  const old = new Date(Date.now() - 100000);
+  await utimes(shared, old, old);
+  await releaseFirst();
+  await releaseFirst();
+  await getCachedBookCover(url("new-while-shared"), directory);
+  assert.deepEqual(await readFile(shared), image);
+  await releaseSecond();
+  await getCachedBookCover(url("new-after-release"), directory);
+  await assert.rejects(stat(shared), { code: "ENOENT" });
+  assert.equal((await entries()).count, MAX_CACHED_COVERS);
 });

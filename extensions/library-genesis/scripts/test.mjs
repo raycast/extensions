@@ -15,6 +15,7 @@ try {
     "tests/cover-security.test.ts",
     "tests/cover-size.test.ts",
     "tests/cover-cache.test.ts",
+    "tests/folder-picker.test.ts",
   ];
   const config = ts.readConfigFile(join(projectRoot, "tsconfig.json"), ts.sys.readFile);
   if (config.error) throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, "\n"));

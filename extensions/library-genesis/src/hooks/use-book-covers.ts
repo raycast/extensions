@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { environment, getPreferenceValues } from "@raycast/api";
 
 import type { BookEntry, LibgenPreferences } from "@/types";
-import { getCachedFullSizeBookCover } from "@/utils/api/covers";
+import { getCachedFullSizeBookCover, retainBookCoverCache } from "@/utils/api/covers";
 import { type BookCover, loadBookCovers } from "@/utils/book-covers";
 import { getCoverPreviewSize } from "@/utils/cover-preview";
 
@@ -14,8 +14,10 @@ export const useBookCovers = (books: BookEntry[]) => {
 
   useEffect(() => {
     const controller = new AbortController();
+    const urls = JSON.parse(source) as string[];
+    const releaseCovers = retainBookCoverCache(urls, environment.supportPath, preferredLibgenMirror);
     void loadBookCovers(
-      JSON.parse(source) as string[],
+      urls,
       async (url, signal) => {
         const path = await getCachedFullSizeBookCover(url, environment.supportPath, signal, preferredLibgenMirror);
         const size = await getCoverPreviewSize(path, signal).catch(() => ({ width: 160, height: 240 }));
@@ -26,7 +28,10 @@ export const useBookCovers = (books: BookEntry[]) => {
       },
       controller.signal,
     );
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      void releaseCovers().catch(() => {});
+    };
   }, [source, preferredLibgenMirror]);
 
   return state?.source === source ? state.covers : undefined;

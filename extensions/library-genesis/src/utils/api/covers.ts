@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { extname, join } from "node:path";
 
-import { MAX_COVER_BYTES, getCachedCoverFile, saveCoverFile } from "./cover-cache";
+import { MAX_COVER_BYTES, getCachedCoverFile, retainCoverCacheFiles, saveCoverFile } from "./cover-cache";
 import { CoverSecurityError, coverDispatcher, validateCoverUrl } from "./cover-security";
 import { LIBGEN_USER_AGENT } from "./request";
 
@@ -75,6 +75,32 @@ export const getFullSizeCoverUrl = (coverUrl: string): string => {
   return url.toString();
 };
 
+const getCoverFilename = (url: URL): string => {
+  const extension = extname(url.pathname).toLowerCase();
+  const imageExtension = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(extension) ? extension : ".jpg";
+  return `${createHash("sha256").update(url.toString()).digest("hex")}${imageExtension}`;
+};
+
+export const retainBookCoverCache = (
+  coverUrls: string[],
+  cacheDirectory: string,
+  preferredMirror?: string,
+): (() => Promise<void>) => {
+  const filenames: string[] = [];
+  for (const value of new Set(coverUrls)) {
+    try {
+      const url = validateCoverUrl(value, preferredMirror);
+      filenames.push(
+        getCoverFilename(url),
+        getCoverFilename(validateCoverUrl(getFullSizeCoverUrl(value), preferredMirror)),
+      );
+    } catch {
+      // Invalid or missing covers are rejected by the loader and need no cache protection.
+    }
+  }
+  return retainCoverCacheFiles(join(cacheDirectory, "covers"), filenames);
+};
+
 export const getCachedBookCover = async (
   coverUrl: string,
   cacheDirectory: string,
@@ -93,10 +119,8 @@ export const getCachedBookCover = async (
 
   try {
     signal?.throwIfAborted();
-    const extension = extname(url.pathname).toLowerCase();
-    const imageExtension = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(extension) ? extension : ".jpg";
     const directory = join(cacheDirectory, "covers");
-    const filename = `${createHash("sha256").update(url.toString()).digest("hex")}${imageExtension}`;
+    const filename = getCoverFilename(url);
     const path = join(directory, filename);
     if (await getCachedCoverFile(directory, filename, signal)) return path;
 
