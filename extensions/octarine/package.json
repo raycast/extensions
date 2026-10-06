@@ -42,6 +42,7 @@
     {
       "name": "open-workspace",
       "title": "Open Workspace",
+      "subtitle": "Octarine",
       "description": "Open a workspace in Octarine",
       "mode": "view",
       "arguments": [
@@ -57,6 +58,7 @@
     {
       "name": "search-notes",
       "title": "Search Notes",
+      "subtitle": "Octarine",
       "description": "Search notes across Octarine workspaces",
       "mode": "view",
       "preferences": [
@@ -101,6 +103,7 @@
     {
       "name": "search-attachments",
       "title": "Search Attachments",
+      "subtitle": "Octarine",
       "description": "Search attachments across Octarine workspaces",
       "mode": "view",
       "preferences": [
@@ -144,6 +147,7 @@
     {
       "name": "open-daily-desk-note",
       "title": "Open Daily Desk Note",
+      "subtitle": "Octarine",
       "description": "Find and open Daily Desk notes by date",
       "mode": "view",
       "arguments": [
