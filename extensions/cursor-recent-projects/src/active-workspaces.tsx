@@ -76,18 +76,26 @@ function buildFocusScript(): string {
       tell application "Cursor" to activate
       set {windowMenuIndex, identifiers} to my getWindowMenuData()
       if windowMenuIndex is 0 then error "No open Cursor windows found"
+      tell application "System Events" to tell process "Cursor"
+        set windowNames to name of every menu item of menu 1 of menu bar item windowMenuIndex of menu bar 1
+      end tell
       -- Count only window entries: native utility items may change between reads.
       set currentWindowIndex to 0
       set menuItemIndex to 0
+      set titleMatchIndex to 0
+      set titleMatchCount to 0
       repeat with i from 1 to count identifiers
         if item i of identifiers contains "makeKeyAndOrderFront:" then
           set currentWindowIndex to currentWindowIndex + 1
-          if currentWindowIndex is windowIndex then
-            set menuItemIndex to i as integer
-            exit repeat
+          if item i of windowNames is windowTitle then
+            set titleMatchIndex to i as integer
+            set titleMatchCount to titleMatchCount + 1
+            if currentWindowIndex is windowIndex then set menuItemIndex to i as integer
           end if
         end if
       end repeat
+      -- Recover a shifted position only for a unique title; duplicates need their saved position.
+      if menuItemIndex is 0 and titleMatchCount is 1 then set menuItemIndex to titleMatchIndex
       if menuItemIndex is 0 then error "Window list changed. Refresh and try again."
       tell application "System Events"
         tell process "Cursor"
