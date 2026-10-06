@@ -1,6 +1,6 @@
 # WeChat DevTool Changelog
 
-## [1.4.1] - {PR_MERGE_DATE}
+## [1.4.1] - 2026-10-06
 
 - Update Action Keybindings on Windows
 - Update dependencies
