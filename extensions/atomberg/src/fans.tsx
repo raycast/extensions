@@ -104,7 +104,7 @@ function Metadata({ fan, onPower, onSpeed }: MetadataProps) {
 }
 
 export default function Fans() {
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+  const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
     // The fingerprint sits in the argument list so the cached fan list is keyed
     // per account: changing credentials can no longer flash up the previous
     // account's fans before the reload lands.
@@ -116,7 +116,10 @@ export default function Fans() {
     },
   );
 
-  const fans = data ?? [];
+  // A failed load must not leave fans on screen. The cached list outlives both
+  // a logout and a credential change, so showing it after an error would claim
+  // an account is signed in when it isn't.
+  const fans = error ? [] : (data ?? []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = fans.find((fan) => fan.device_id === selectedId) ?? fans[0];
 
@@ -229,9 +232,13 @@ export default function Fans() {
     >
       <List.EmptyView
         icon={Icon.Wind}
-        title={isLoading ? "Loading your fans…" : "No fans found"}
+        title={isLoading ? "Loading your fans…" : error ? "Couldn't load your fans" : "No fans found"}
         description={
-          isLoading ? undefined : "This Atomberg account has no smart fans paired, or Developer Mode is off in the app."
+          isLoading
+            ? undefined
+            : error
+              ? describe(error)
+              : "This Atomberg account has no smart fans paired, or Developer Mode is off in the app."
         }
         actions={
           <ActionPanel>

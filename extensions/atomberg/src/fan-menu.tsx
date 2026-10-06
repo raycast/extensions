@@ -15,7 +15,7 @@ function clampSpeed(speed: number): number {
 }
 
 export default function FanMenu() {
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+  const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
     // The fingerprint sits in the argument list so the cached fan list is keyed
     // per account: changing credentials can no longer flash up the previous
     // account's fans before the reload lands.
@@ -26,7 +26,10 @@ export default function FanMenu() {
     },
   );
 
-  const fans = data ?? [];
+  // A failed load must not leave fans on screen. The cached list outlives both
+  // a logout and a credential change, so showing it after an error would claim
+  // an account is signed in when it isn't.
+  const fans = error ? [] : (data ?? []);
   const running = fans.filter((fan) => fan.power).length;
 
   /**
@@ -53,7 +56,9 @@ export default function FanMenu() {
       isLoading={isLoading}
       tooltip={fans.length === 0 ? "Atomberg" : `${running} of ${fans.length} running`}
     >
-      {fans.length === 0 && !isLoading && <MenuBarExtra.Item title="No fans found" icon={Icon.Warning} />}
+      {fans.length === 0 && !isLoading && (
+        <MenuBarExtra.Item title={error ? "Couldn't load your fans" : "No fans found"} icon={Icon.Warning} />
+      )}
 
       {fans.map((fan) => {
         const speed = clampSpeed(fan.last_recorded_speed);
