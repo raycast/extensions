@@ -1,6 +1,6 @@
 # Bartender Changelog
 
-## [Bartender 7 support] - {PR_MERGE_DATE}
+## [Bartender 7 support] - 2026-10-06
 
 - Added support for Bartender 7, including its new menu bar item IDs and click commands.
 - Fixed "Open Search Overlay" and "Search Menu Bar Apps" failing when "Bartender 5" isn't installed.
