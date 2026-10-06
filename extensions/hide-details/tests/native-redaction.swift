@@ -114,7 +114,8 @@ for style in [Style.pixelate, .blur] {
   }
 }
 
-for text in ["Card 4111 1111 1111 1111 Exp 12/29", "Card 4111111111111111 Ref 123456", "4111-1111-1111-1111 12/29"] {
+for text in ["Card 4111 1111 1111 1111 Exp 12/29", "Card 4111111111111111 Ref 123456", "4111-1111-1111-1111 12/29",
+             "4111.1111.1111.1111", "Card 4111 . 1111 . 1111 . 1111 Exp 12/29", "3782.822463.10005", "4222.2222.2222.2"] {
   let result = numericDetections(text)
   require(result.hasCard && !result.hasPhone, "missed card or classified its fragments as phone in \(text)")
 }
@@ -128,6 +129,8 @@ require(!numericDetections("0000 0000 0000 0000").hasCard, "placeholder card cla
 require(!numericDetections("41111111111111111").hasPhone, "a long numeric run must not be split into phone fragments")
 require(!numericDetections("4111 1111 1111 1112").hasCard, "invalid Luhn checksum classified")
 require(!numericDetections("4111 1111 1111 1112").hasPhone, "invalid card fragments classified as phone")
+require(!numericDetections("4111.1111.1111.1112").hasCard, "invalid dotted card checksum classified")
+require(!numericDetections("4111.1111.1111.1112").hasPhone, "invalid dotted card fragments classified as phone")
 require(!numericDetections("192.168.10.20 123").hasPhone, "IPv4 fragments combined into phone")
 for text in ["192.168.10.20 4155550123", "4155550123 192.168.10.20", "4155550123 192. 168. 10. 20", "192 . 168 . 10 . 20 4155550123"] {
   let result = numericDetections(text)

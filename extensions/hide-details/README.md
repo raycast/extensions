@@ -32,7 +32,7 @@ Use **Scan Current Clipboard Again** to retry with your saved preferences. Use *
 
 ## Review results
 
-The **Redacted Image** row shows the output and the number of distinct masked regions. Each detection row shows the same image and offers **Copy Redacted Image**. One OCR line can match more than one category. These appear as separate detections but share one masked region.
+The **Redacted Image** row shows the output and the number of distinct masked regions. Detection labels mask the recognized text so it stays hidden while screen sharing. Each detection row shows the same image and offers **Copy Redacted Image**. One OCR line can match more than one category. These appear as separate detections but share one masked region.
 
 The **OCR** and **Face** percentages describe recognition confidence. They do not measure whether every sensitive detail was found. Turn off **Show OCR Confidence** in extension preferences to hide the OCR percentages. **Custom word match** identifies a literal rule from Always Hide These Words.
 
@@ -143,7 +143,7 @@ npm run build
 
 Use `npm run build:swift` to rebuild only the native helper. Run `npm run publish` to compile the helper and start Raycast's publishing flow.
 
-`npm test` rebuilds the universal Swift helper before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, cards and phones beside other numbers, face detection, small text, preference validation, and scan cleanup. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, and protection against stale copies without replacing your clipboard.
+`npm test` rebuilds the universal Swift helper before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, dotted cards with only card detection enabled, cards and phones beside other numbers, masked review labels, face detection, small text, preference validation, and scan cleanup. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, restoration after rejected writes, and protection against stale copies without replacing your clipboard.
 
 ## License
 

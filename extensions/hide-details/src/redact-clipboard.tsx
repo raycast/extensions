@@ -136,7 +136,7 @@ export default function Command() {
             key={`${hit.kind}-${i}`}
             icon={kindIcon[hit.kind]}
             title={hit.kind === "custom" ? "Custom Regex" : hit.kind}
-            subtitle={hit.text}
+            subtitle={hit.kind === "face" ? "Face masked" : "••••••••"}
             accessories={
               hit.confidenceSource === "ocr" && !showOCRConfidence
                 ? []

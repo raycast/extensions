@@ -373,6 +373,103 @@ do {
 } catch ClipboardError.unreadableOutput {}
 precondition(pasteboard.changeCount == newerGeneration)
 
+final class FailingPasteboard: ClipboardPasteboard {
+  let backing: NSPasteboard
+  var partialWrite = false
+  var newerCopy = false
+  var failRestore = false
+  var changeDuringSnapshot = false
+  var unreadableSnapshot = false
+  init(_ backing: NSPasteboard) { self.backing = backing }
+  var changeCount: Int { backing.changeCount }
+  var pasteboardItems: [NSPasteboardItem]? {
+    let items = backing.pasteboardItems
+    if changeDuringSnapshot {
+      backing.clearContents()
+      precondition(backing.setString("newer clipboard", forType: .string))
+    }
+    return unreadableSnapshot ? nil : items
+  }
+  func clearContents() -> Int { backing.clearContents() }
+  func setData(_ data: Data?, forType type: NSPasteboard.PasteboardType) -> Bool {
+    if partialWrite { precondition(backing.setData(data, forType: type)) }
+    if newerCopy {
+      backing.clearContents()
+      precondition(backing.setString("newer clipboard", forType: .string))
+    }
+    return false
+  }
+  func writeObjects(_ objects: [NSPasteboardWriting]) -> Bool {
+    !failRestore && backing.writeObjects(objects)
+  }
+}
+
+let failing = FailingPasteboard(pasteboard)
+for partialWrite in [false, true] {
+  let first = NSPasteboardItem()
+  precondition(first.setData(tiff, forType: .tiff))
+  precondition(first.setString("original text", forType: .string))
+  let second = NSPasteboardItem()
+  let customType = NSPasteboard.PasteboardType("com.hide-details.test")
+  let customData = Data([0, 1, 2, 255])
+  precondition(second.setData(customData, forType: customType))
+  pasteboard.clearContents()
+  precondition(pasteboard.writeObjects([first, second]))
+  failing.partialWrite = partialWrite
+  do {
+    try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+    preconditionFailure("A rejected write must fail")
+  } catch ClipboardError.writeFailed {}
+  let restored = pasteboard.pasteboardItems!
+  precondition(restored.count == 2)
+  precondition(Set(restored[0].types) == Set([.tiff, .string]))
+  precondition(restored[0].data(forType: .tiff) == tiff)
+  precondition(restored[0].string(forType: .string) == "original text")
+  precondition(restored[1].types == [customType])
+  precondition(restored[1].data(forType: customType) == customData)
+}
+failing.partialWrite = false
+pasteboard.clearContents()
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("A rejected write on an empty clipboard must fail")
+} catch ClipboardError.writeFailed {}
+precondition(pasteboard.pasteboardItems?.isEmpty == true)
+
+precondition(pasteboard.setString("original text", forType: .string))
+failing.newerCopy = true
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("A concurrent copy must fail")
+} catch ClipboardError.changed {}
+precondition(pasteboard.string(forType: .string) == "newer clipboard")
+failing.newerCopy = false
+
+failing.changeDuringSnapshot = true
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("A concurrent copy during snapshot must fail")
+} catch ClipboardError.changed {}
+precondition(pasteboard.string(forType: .string) == "newer clipboard")
+failing.changeDuringSnapshot = false
+
+failing.unreadableSnapshot = true
+let beforeUnreadable = pasteboard.changeCount
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("An unreadable snapshot must fail before clearing")
+} catch ClipboardError.snapshotFailed {}
+precondition(pasteboard.changeCount == beforeUnreadable)
+precondition(pasteboard.string(forType: .string) == "newer clipboard")
+failing.unreadableSnapshot = false
+
+failing.failRestore = true
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("A rejected restoration must report its failure")
+} catch ClipboardError.restoreFailed {}
+failing.failRestore = false
+
 try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: pasteboard)
 precondition(pasteboard.data(forType: .png) == png)
 let copiedGeneration = pasteboard.changeCount
@@ -409,8 +506,18 @@ print("PNG/TIFF read, no-image errors, stale-copy preservation, invalid-output p
   },
 );
 
-test("review preview uses real line breaks and replacement disposes the previous output", async () => {
-  const wrapper = await harness();
+test("review masks all detection labels, uses real line breaks, and disposes replaced output", async () => {
+  const privateHits = ["email", "phone", "card", "secret", "ip", "name", "face", "custom"].map((kind) => ({
+    ...hit,
+    kind,
+    text: `${kind}: sensitive OCR text 4111.1111.1111.1111`,
+  }));
+  const wrapper = await harness({
+    native: async (args) => {
+      await writeFile(args[1], png);
+      return JSON.stringify({ hits: privateHits, regionCount: 1, output: args[1], clipboardChangeCount: 17 });
+    },
+  });
   const preferences = {};
   let mount;
   let hookIndex = 0;
@@ -471,6 +578,12 @@ test("review preview uses real line breaks and replacement disposes the previous
   assert.ok(!preview.props.detail.props.markdown.includes(String.raw`\n`));
   assert.ok(preview.props.detail.props.markdown.includes(first.output));
   const hitRow = tree.props.children[1].props.children[0];
+  for (const row of tree.props.children[1].props.children) {
+    assert.ok(["••••••••", "Face masked"].includes(row.props.subtitle), "detection label is masked");
+  }
+  for (const privateHit of privateHits) {
+    assert.ok(!JSON.stringify(tree).includes(privateHit.text), "OCR text never enters rendered props");
+  }
   assert.ok(hitRow.props.actions, "detection row offers Copy action");
   assert.equal(hitRow.props.accessories[0].text, "OCR 90%");
   preferences.showOCRConfidence = false;

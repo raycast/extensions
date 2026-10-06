@@ -8,6 +8,7 @@
 - Scan clear screenshots with Fast text recognition and retry the current clipboard with Accurate OCR for small or difficult text.
 - Detect sensitive text even when OCR inserts spaces into email addresses, token prefixes, or custom words.
 - Add custom regex rules for internal IDs, invoice numbers, and other text patterns in both redaction commands.
-- Detect cards beside expiry dates, phones beside ticket numbers or IPv4 addresses, and adjacent phone numbers.
+- Detect cards with dot separators or beside expiry dates, phones beside ticket numbers or IPv4 addresses, and adjacent phone numbers.
 - Avoid reporting digits inside secret keys as phone or card numbers, and optionally hide OCR confidence percentages in the review list.
-- Keep previews independent, process clipboard input in memory, clean temporary output, and preserve newer clipboard content during automatic processing.
+- Mask recognized text in detection labels while reviewing images during screen sharing.
+- Keep previews independent, process clipboard input in memory, clean temporary output, restore clipboard content after rejected image writes, and preserve newer clipboard content during automatic processing.

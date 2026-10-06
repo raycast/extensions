@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -237,7 +237,30 @@ for (const recognition of ["fast", "accurate"]) {
         .length,
       0,
     );
-    assert.equal(report.regionCount, 5);
+    assert.equal(report.regionCount, 6);
+  });
+
+  test(`${recognition} OCR masks dotted cards with only the card category enabled`, () => {
+    const output = path.join(directory, `dotted-card-${sequence++}.png`);
+    const report = JSON.parse(
+      execFileSync(
+        path.join(root, "assets/hide-details"),
+        [numericInput, output, "blackout", "4", "card", "", recognition],
+        { encoding: "utf8", timeout: 90_000 },
+      ),
+    );
+    assert.ok(report.hits.every((hit) => hit.kind === "card"));
+    assert.ok(report.hits.some((hit) => hit.text.replaceAll(/\s/g, "").includes("4111.1111.1111.1111")));
+    const reportFile = path.join(directory, `dotted-card-${sequence++}.json`);
+    writeFileSync(reportFile, JSON.stringify(report));
+    execFileSync("xcrun", [
+      "swift",
+      "-module-cache-path",
+      path.join(directory, "module-cache"),
+      path.join(root, "tests/check-blackout.swift"),
+      output,
+      reportFile,
+    ]);
   });
 }
 

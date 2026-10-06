@@ -28,15 +28,6 @@ export type Report = {
 
 export type Scan = Readonly<Report>;
 
-type Preferences = {
-  recognition?: "fast" | "accurate";
-  style?: "pixelate" | "blur" | "blackout";
-  categories?: string;
-  extraWords?: string;
-  customRegex?: string;
-  padding?: string;
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

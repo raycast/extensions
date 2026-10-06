@@ -155,7 +155,7 @@ struct NumericDetections {
 func numericDetections(_ text: String) -> NumericDetections {
   let source = text as NSString
   let fullRange = NSRange(location: 0, length: source.length)
-  let runExpression = try! NSRegularExpression(pattern: "(?<![0-9])[0-9]+(?:[ \\t-]+[0-9]+)*(?![0-9])")
+  let runExpression = try! NSRegularExpression(pattern: "(?<![0-9])[0-9]+(?:[ \\t.-]+[0-9]+)*(?![0-9])")
   let groupExpression = try! NSRegularExpression(pattern: "[0-9]+")
   let ipv4Expression = try! NSRegularExpression(pattern: "(?<![0-9])(?:[0-9]{1,3}[ \\t]*\\.[ \\t]*){3}[0-9]{1,3}(?![0-9])")
   let ipv4Ranges = ipv4Expression.matches(in: text, range: fullRange).compactMap { match -> NSRange? in
