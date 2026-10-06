@@ -12,7 +12,6 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState } from "react";
 import { EditNoteForm } from "./components/edit-note-form";
 import { getWebUrl } from "./config";
 import { InvalidApiKeyError, showInvalidApiKeyToast } from "./utils/invalid-key";
@@ -20,6 +19,17 @@ import { Alias, listAllAliases } from "./utils/list";
 import { toggleAlias } from "./utils/toggle";
 
 type StatusFilter = "all" | "active" | "inactive";
+
+/**
+ * Part of the cache key: bump it whenever the cached `Alias` shape changes, so data
+ * cached by an older version is not read back in the wrong shape
+ */
+const ALIAS_CACHE_VERSION = 2;
+
+const fetchAliases = (cacheVersion: number) => {
+  void cacheVersion;
+  return listAllAliases();
+};
 
 const matchesFilter = (alias: Alias, filter: StatusFilter) => {
   if (filter === "active") {
@@ -57,14 +67,14 @@ const AliasDetail = ({ alias }: { alias: Alias }) => (
 );
 
 const ListEmails = () => {
-  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [filter, setFilter] = useCachedState<StatusFilter>("alias-status-filter", "all");
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-alias-details", false);
 
   const {
     isLoading,
     data: aliases,
     revalidate,
-  } = useCachedPromise(listAllAliases, [], {
+  } = useCachedPromise(fetchAliases, [ALIAS_CACHE_VERSION], {
     initialData: [],
     onError: async (error) => {
       if (error instanceof InvalidApiKeyError) {
@@ -109,11 +119,7 @@ const ListEmails = () => {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by status"
-          storeValue={true}
-          onChange={(value) => setFilter(value as StatusFilter)}
-        >
+        <List.Dropdown tooltip="Filter by status" value={filter} onChange={(value) => setFilter(value as StatusFilter)}>
           <List.Dropdown.Item title="All Aliases" value="all" />
           <List.Dropdown.Item title="Active" value="active" icon={Icon.Envelope} />
           <List.Dropdown.Item title="Inactive" value="inactive" icon={Icon.LightBulbOff} />
