@@ -6,6 +6,7 @@ import {
   ActionPanel,
   Clipboard,
   Icon,
+  closeMainWindow,
   List,
   environment,
   showHUD,
@@ -102,7 +103,12 @@ function Row({
             title="Open Hostbeam"
             icon={Icon.AppWindow}
             shortcut={Keyboard.Shortcut.Common.Open}
-            onAction={() => openHostbeam()}
+            onAction={async () => {
+              // Raycast's window first: the popover closes when it loses
+              // focus, and an open Raycast would take it straight back.
+              await closeMainWindow();
+              await openHostbeam();
+            }}
           />
         </ActionPanel>
       }
