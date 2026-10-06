@@ -1,6 +1,6 @@
 # OneNote Changelog
 
-## [Fix note search and loading errors] - {PR_MERGE_DATE}
+## [Fix note search and loading errors] - 2026-10-06
 
 - Search note content as well as titles, including text beyond the preview.
 - Find local search indexes in UUID macOS containers and different OneNote version folders.
