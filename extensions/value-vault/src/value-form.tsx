@@ -56,10 +56,19 @@ export default function ValueForm({ initialValues, navigationTitle, submitTitle,
   // Auto-detection runs until the user picks a type by hand, and never
   // rewrites a value that hasn't been edited (e.g. a saved type on the edit form).
   const initialValueRef = useRef(initialValues.value);
+  const initialTypeRef = useRef(initialValues.type);
   const [typeTouched, setTypeTouched] = useState(false);
 
   useEffect(() => {
-    if (typeTouched || values.value === initialValueRef.current) return;
+    if (typeTouched) return;
+    if (values.value === initialValueRef.current) {
+      // Text restored to its original: put back the saved type instead of
+      // leaving whatever detection guessed mid-edit.
+      if (parseValueType(values.type) !== parseValueType(initialTypeRef.current)) {
+        itemProps.type.onChange?.(initialTypeRef.current);
+      }
+      return;
+    }
     if (detectedType && detectedType !== parseValueType(values.type)) {
       itemProps.type.onChange?.(detectedType);
     }
