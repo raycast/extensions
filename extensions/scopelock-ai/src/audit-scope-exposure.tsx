@@ -10,31 +10,23 @@ export default function Command() {
   const totalBleed = (parseFloat(hours) || 0) * (parseFloat(rate) || 0);
 
   async function handleSubmit() {
-    const report = `===============================================================
-🛡️ SCOPELOCK AI — STATUTORY SCOPE CREEP AUDIT REPORT
-Uniform Commercial Code (UCC § 2-209) Enforceable Variance
-===============================================================
+    const formattedAmount = totalBleed.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    const featureList = features
+      .split(/[,
+]+/)
+      .map(f => f.trim())
+      .filter(Boolean)
+      .map(f => )
+      .join("
+");
 
-CLIENT: ${client}
-UNBILLED FEATURES DETECTED:
-- ${features.split(",").map(f => f.trim()).join("\n- ")}
-
-ESTIMATED VARIANCE: ${hours} hours @ $${rate}/hr
-TOTAL UNBILLED AMOUNT: $${totalBleed.toLocaleString()} USD
-
-LEGAL STATUS: Uncontracted scope variance. Work is paused under UCC § 2-209 pending formal signed Change Order.
-
-👉 INSTANT RATIFICATION & EXECUTION ($3 USD / $199 PRO):
-Web: https://ahirwardhanmanti83-bit.github.io/scopelock-ai/?unlock=instant
-Patreon: https://patreon.com/c/scopelock
-Payoneer Direct: ahirwardhanmanti83@gmail.com
-===============================================================`;
+    const report = ;
 
     await Clipboard.copy(report);
     await showToast({
       style: Toast.Style.Success,
       title: "Audit Report Copied!",
-      message: `Total unbilled variance: $${totalBleed.toLocaleString()} USD`,
+      message: ,
     });
   }
 
@@ -44,11 +36,11 @@ Payoneer Direct: ahirwardhanmanti83@gmail.com
         <ActionPanel>
           <Action.SubmitForm title="Copy Legal Audit Report" onSubmit={handleSubmit} />
           <Action.OpenInBrowser
-            title="Unlock Statutory Enforcement ($3 Instant / $199 Pro)"
+            title="Unlock Statutory Enforcement ( Instant / 99 Pro)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/?unlock=instant"
           />
           <Action.OpenInBrowser
-            title="Agency Enterprise Shield ($199/mo)"
+            title="Agency Enterprise Shield (99/mo)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/agency-enterprise.html"
           />
         </ActionPanel>
