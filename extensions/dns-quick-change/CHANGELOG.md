@@ -2,7 +2,7 @@
 
 All notable changes to the DNS Quick Change extension will be documented in this file.
 
-## [Modernization & Asynchronous Refactoring] - {PR_MERGE_DATE}
+## [Modernization & Asynchronous Refactoring] - 2026-10-06
 
 ### Added
 
