@@ -78,7 +78,7 @@ export const getStatus = () => run<Status>(["status"]);
 
 /** Reads the status synchronously, so a menu bar command can render the right state on its first frame. */
 export function getStatusSync(): Status {
-  const out = execFileSync(mictapePath(), ["status", "--json"], { timeout: 5_000, encoding: "utf8" });
+  const out = execFileSync(mictapePath(), ["status", "--json"], { timeout: 1_500, encoding: "utf8" });
   return JSON.parse(out) as Status;
 }
 export const getDestinations = () => run<Destination[]>(["destinations"]);

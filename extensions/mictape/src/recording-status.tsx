@@ -50,7 +50,11 @@ export default function Command() {
           } catch (e) {
             await showError("Could not stop recording", e);
           }
-          await launchCommand({ name: "recording-status", type: LaunchType.Background });
+          try {
+            await launchCommand({ name: "recording-status", type: LaunchType.Background });
+          } catch {
+            // The next interval refreshes the menu bar anyway.
+          }
         }}
       />
       <MenuBarExtra.Item title="Show in Finder" icon={Icon.Finder} onAction={() => open(dirname(path))} />
