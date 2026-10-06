@@ -8,16 +8,23 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Command, Fan, SPEEDS, TIMERS, hasLight, loadFans, sendCommand } from "./atomberg";
+import { Command, Fan, SPEEDS, TIMERS, accountFingerprint, hasLight, loadFans, sendCommand } from "./atomberg";
 
 function clampSpeed(speed: number): number {
   return Math.min(Math.max(Math.round(speed) || 1, 1), SPEEDS.length);
 }
 
 export default function FanMenu() {
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(loadFans, [false], {
-    initialData: [] as Fan[],
-  });
+  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+    // The fingerprint sits in the argument list so the cached fan list is keyed
+    // per account: changing credentials can no longer flash up the previous
+    // account's fans before the reload lands.
+    (forceRefresh: boolean, account: string) => loadFans(forceRefresh, account),
+    [false, accountFingerprint()],
+    {
+      initialData: [] as Fan[],
+    },
+  );
 
   const fans = data ?? [];
   const running = fans.filter((fan) => fan.power).length;

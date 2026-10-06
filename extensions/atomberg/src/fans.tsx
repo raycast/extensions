@@ -15,6 +15,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   AtombergError,
+  accountFingerprint,
   Command,
   Fan,
   SPEEDS,
@@ -103,10 +104,17 @@ function Metadata({ fan, onPower, onSpeed }: MetadataProps) {
 }
 
 export default function Fans() {
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(loadFans, [false], {
-    initialData: [] as Fan[],
-    failureToastOptions: { title: "Couldn't load your fans" },
-  });
+  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+    // The fingerprint sits in the argument list so the cached fan list is keyed
+    // per account: changing credentials can no longer flash up the previous
+    // account's fans before the reload lands.
+    (forceRefresh: boolean, account: string) => loadFans(forceRefresh, account),
+    [false, accountFingerprint()],
+    {
+      initialData: [] as Fan[],
+      failureToastOptions: { title: "Couldn't load your fans" },
+    },
+  );
 
   const fans = data ?? [];
   const [selectedId, setSelectedId] = useState<string | null>(null);

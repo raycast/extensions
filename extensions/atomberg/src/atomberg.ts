@@ -67,7 +67,7 @@ const cache = new Cache();
  * A stable fingerprint of the current credentials. Hashed rather than stored
  * verbatim, so the keys themselves stay in the keychain.
  */
-function accountFingerprint(): string {
+export function accountFingerprint(): string {
   const { apiKey, refreshToken } = getPreferenceValues<Preferences>();
   return createHash("sha256").update(`${apiKey}\u0000${refreshToken}`).digest("hex").slice(0, 16);
 }
@@ -79,13 +79,14 @@ function accountFingerprint(): string {
  * still-valid access token and the previous account's device list in place, and
  * the new account would list — and control — the old account's fans.
  */
-async function ensureCurrentAccount(): Promise<void> {
+async function ensureCurrentAccount(): Promise<boolean> {
   const current = accountFingerprint();
-  if ((await LocalStorage.getItem<string>(ACCOUNT_KEY)) === current) return;
+  if ((await LocalStorage.getItem<string>(ACCOUNT_KEY)) === current) return false;
 
   await LocalStorage.removeItem(TOKEN_KEY);
   cache.remove(DEVICES_KEY);
   await LocalStorage.setItem(ACCOUNT_KEY, current);
+  return true;
 }
 
 /**
@@ -173,8 +174,13 @@ async function accessToken(forceRefresh = false): Promise<string> {
 
 /** Authenticated call that retries once with a fresh token if the cached one was rejected. */
 async function authed<T>(path: string, method = "GET", body?: Command | object): Promise<T> {
+  // Fetched outside the try: a failure here means the refresh token itself was
+  // rejected, and asking for another one would spend a second call to no end.
+  // Only a token that the API refuses is worth retrying.
+  const token = await accessToken();
+
   try {
-    return await request<T>(path, await accessToken(), method, body);
+    return await request<T>(path, token, method, body);
   } catch (error) {
     if (error instanceof AtombergError && /expired|unauthor/i.test(error.message)) {
       return request<T>(path, await accessToken(true), method, body);
@@ -206,8 +212,14 @@ async function listDevices(forceRefresh: boolean): Promise<Device[]> {
  * One call for the states, plus one for the device list only when it isn't
  * cached yet — the developer API is limited to about 100 calls a day.
  */
-export async function loadFans(forceRefresh = false): Promise<Fan[]> {
+export async function loadFans(forceRefresh = false, account = accountFingerprint()): Promise<Fan[]> {
   await ensureCurrentAccount();
+
+  if (account !== accountFingerprint()) {
+    // The credentials changed between the caller reading them and this running.
+    throw new AtombergError("Credentials changed. Reopen the command to load this account's fans.");
+  }
+
   const devices = await listDevices(forceRefresh);
   const { device_state } = await authed<{ device_state: DeviceState[] }>("/v1/get_device_state?device_id=all");
 
@@ -230,7 +242,12 @@ export async function loadFans(forceRefresh = false): Promise<Fan[]> {
 }
 
 export async function sendCommand(deviceId: string, command: Command): Promise<void> {
-  await ensureCurrentAccount();
+  if (await ensureCurrentAccount()) {
+    // A command rendered before the credentials changed is still showing the
+    // previous account's fans, whose ids mean nothing under the new ones.
+    throw new AtombergError("Credentials changed. Reopen the command to load this account's fans.");
+  }
+
   await authed("/v1/send_command", "POST", { device_id: deviceId, command });
 }
 
