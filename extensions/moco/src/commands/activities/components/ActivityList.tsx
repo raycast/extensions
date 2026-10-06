@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ActivityListItem } from "./ActivityListItem";
-import { fetchUser } from "../../user/api";
+import { getCurrentUser } from "../../../utils/refresh";
 import { fetchActivities } from "../api";
 import { Activity } from "../types";
 import { ActivityStart } from "./ActivityStart";
@@ -13,7 +13,7 @@ export enum Actions {
 
 // Loads the activities of the current user: today, or the last 7 days when filtered by project.
 const loadActivities = async (projectID: number | null, lookbackDays: number): Promise<Activity[]> => {
-  const user = await fetchUser();
+  const user = await getCurrentUser();
   return fetchActivities(projectID, lookbackDays, user.id);
 };
 

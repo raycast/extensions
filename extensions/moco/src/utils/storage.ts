@@ -1,7 +1,9 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { createHash } from "crypto";
 import { Project } from "../commands/projects/types";
 import { User } from "../commands/user/types";
 import { Activity } from "../commands/activities/types";
+import { Preferences } from "../types";
 
 export enum StatusType {
   favorite = "favorite",
@@ -38,18 +40,24 @@ export const getAllStatus = async (kind: StatusKind): Promise<Map<number, Status
   return statuses;
 };
 
-export const storeUser = async (user: User) => {
-  return LocalStorage.setItem("user", JSON.stringify(user));
+// Identifies the account in the preferences without storing the API key.
+const accountKey = (): string => {
+  const { url_prefix, apikey } = getPreferenceValues<Preferences>();
+  return createHash("sha256").update(`${url_prefix}:${apikey}`).digest("hex");
 };
 
+export const storeUser = async (user: User) => {
+  return LocalStorage.setItem("user", JSON.stringify({ account: accountKey(), user }));
+};
+
+// The cached user, or undefined after the account in the preferences changed.
 export const getUser = async (): Promise<User | undefined> => {
-  return LocalStorage.getItem("user").then((user) => {
-    if (user === undefined) {
-      return undefined;
-    } else {
-      return JSON.parse(user.toString());
-    }
-  });
+  const stored = await LocalStorage.getItem<string>("user");
+  if (stored === undefined) {
+    return undefined;
+  }
+  const { account, user } = JSON.parse(stored);
+  return account === accountKey() ? user : undefined;
 };
 
 export const storeTodaysActivities = async (activities: Activity[]) => {

@@ -2,24 +2,35 @@ import { closeMainWindow, launchCommand, LaunchType, popToRoot } from "@raycast/
 import { fetchActivities } from "../commands/activities/api";
 import { Activity } from "../commands/activities/types";
 import { fetchUser } from "../commands/user/api";
+import { User } from "../commands/user/types";
 import { fetchProjects } from "../commands/projects/api";
 import { Project } from "../commands/projects/types";
 import { getUser, removeLegacyStatusKeys, storeProjects, storeTodaysActivities, storeUser } from "./storage";
 
+// The user only changes with the account in the preferences, so the cached user is reused until then.
+export const getCurrentUser = async (): Promise<User> => {
+  const cached = await getUser();
+  if (cached !== undefined) {
+    return cached;
+  }
+  const user = await fetchUser();
+  await storeUser(user);
+  return user;
+};
+
 // Loads today's activities of the current user from the API and writes them to the cache.
 export const refreshTodaysActivities = async (): Promise<Activity[]> => {
-  const user = (await getUser()) ?? (await fetchUser());
+  const user = await getCurrentUser();
   const activities = await fetchActivities(null, 0, user.id);
   await storeTodaysActivities(activities);
   return activities;
 };
 
-// Loads user, today's activities and assigned projects from the API and writes them to the cache.
+// Loads today's activities and assigned projects from the API and writes them to the cache.
 // The menu bar calls it on its background runs, so the cache is at most one interval old.
 export const refreshCache = async (): Promise<{ activities: Activity[]; projects: Project[] }> => {
   const [activities, projects] = await Promise.all([
-    fetchUser().then(async (user) => {
-      await storeUser(user);
+    getCurrentUser().then(async (user) => {
       // Only the current user's activities. Without user_id MOCO returns the activities of all users.
       const activities = await fetchActivities(null, 0, user.id);
       await storeTodaysActivities(activities);
