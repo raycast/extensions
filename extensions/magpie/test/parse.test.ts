@@ -268,6 +268,104 @@ test("parseUsage falls back when a row is not a table line", () => {
   assert.equal(broken.ok, false);
 });
 
+test("parseUsage reads local session usage when the gateway has no calls", () => {
+  const usage = parseUsage(fixture("usage-0.1.1088.txt"));
+  assert.ok(usage.ok && !usage.empty);
+  assert.equal(usage.source, "local");
+  assert.equal(usage.tokens, "39.7K");
+  assert.equal(usage.calls, 4);
+  assert.equal(usage.price, "≈$0.095");
+  assert.equal(usage.agents[0].name, "Codex");
+  assert.equal(usage.models[0].name, "local session/gpt-6.1-sol");
+  assert.equal(usage.sessions[0].name, "Codex  sess-local-example");
+  assert.equal(usage.path, "/Users/me/.config/magpie/usage.jsonl");
+  assert.equal(usage.local, undefined);
+});
+
+test("parseUsage separates gateway and local totals, rows and breakdowns", () => {
+  const local = fixture("usage-0.1.1088.txt").split("\n").slice(1).join("\n");
+  const usage = parseUsage(fixture("usage-0.1.671.txt") + local);
+  assert.ok(usage.ok && !usage.empty);
+  assert.equal(usage.source, "gateway");
+  assert.equal(usage.tokens, "2");
+  assert.equal(usage.calls, 3);
+  assert.equal(usage.agents.length, 2);
+  assert.equal(usage.models.length, 2);
+  assert.equal(usage.extras.length, 2);
+  assert.equal(usage.sessions.length, 1);
+  assert.equal(usage.local?.source, "local");
+  assert.equal(usage.local?.tokens, "39.7K");
+  assert.equal(usage.local?.calls, 4);
+  assert.equal(usage.local?.models.length, 1);
+  assert.equal(usage.local?.sessions.length, 1);
+  assert.match(usage.breakdown, /^in 2 /);
+  assert.match(usage.local?.breakdown ?? "", /^in 38.8K /);
+});
+
+test("parseUsage accepts the new gateway-only empty output", () => {
+  const usage = parseUsage(
+    "no calls through magpie today\n  /Users/me/.config/magpie/usage.jsonl\n",
+  );
+  assert.ok(usage.ok && usage.empty);
+  assert.equal(usage.path, "/Users/me/.config/magpie/usage.jsonl");
+});
+
+test("parseUsage rejects malformed rows and local reports", () => {
+  for (const line of [
+    "  Codex  1K  1 call  no price",
+    "  unexpected heading",
+    "Codex 100% 1K 1 call no price",
+  ]) {
+    const usage = parseUsage(
+      `1 token today · 1 call · no price\n  agents\n${line}\n`,
+    );
+    assert.equal(usage.ok, false, line);
+  }
+  const broken = fixture("usage-0.1.1088.txt").replace(
+    "39.7K tokens",
+    "unknown total",
+  );
+  assert.equal(parseUsage(broken).ok, false);
+});
+
+test("parseAccounts reads 0.1.1088 plugin quotas, reset counters and vendor errors", () => {
+  const accounts = parseAccounts(fixture("accounts-0.1.1088.json"));
+  assert.equal(accounts.length, 4);
+  assert.deepEqual(accounts[0].windows[0], {
+    name: "5 hours",
+    used: 2,
+    remaining: 98,
+    resetsAt: "2026-10-07T02:52:28+08:00",
+    display: undefined,
+  });
+  assert.equal(accounts[0].plan, "team");
+  assert.equal(accounts[0].active, true);
+  assert.equal(accounts[0].on, true);
+  assert.deepEqual(accounts[0].resets, {
+    count: 2,
+    until: "2026-10-22T20:45:36.116738Z",
+  });
+  assert.match(accounts[2].error ?? "", /This client is no longer supported/);
+  assert.deepEqual(accounts[2].windows, []);
+  assert.equal(accounts[3].agent, "grok-plugin");
+  assert.equal(accounts[3].windows[0].remaining, 99);
+});
+
+test("parseQuotas reads the 0.1.1088 subscription shape", () => {
+  const quotas = parseQuotas(fixture("quota-0.1.1088.json"));
+  assert.equal(quotas.length, 2);
+  assert.equal(quotas[0].provider, "codex");
+  assert.equal(quotas[0].kind, "subscription");
+  assert.equal(quotas[0].windows[1].used, 11);
+  assert.equal(quotas[0].windows[1].remaining, 89);
+  assert.deepEqual(quotas[0].resets, {
+    count: 2,
+    until: "2026-10-22T20:45:36.116738Z",
+  });
+  assert.equal(quotas[1].provider, "grok-plugin");
+  assert.equal(quotas[1].windows[0].resetsAt, "2026-10-09T01:43:44.099Z");
+});
+
 test("parseAccounts reads the quota JSON", () => {
   const accounts = parseAccounts(fixture("accounts.json"));
   assert.equal(accounts.length, 3);

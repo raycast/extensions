@@ -1,0 +1,51 @@
+[
+  {
+    "provider": "codex",
+    "name": "Codex",
+    "kind": "subscription",
+    "plan": "team",
+    "user": "ada@example.com · Team",
+    "windows": [
+      {
+        "name": "5 hours",
+        "used": 2,
+        "remaining": 98,
+        "resetsAt": "2026-10-07T02:52:28+08:00"
+      },
+      {
+        "name": "7 days",
+        "used": 11,
+        "remaining": 89,
+        "resetsAt": "2026-10-10T21:54:29+08:00"
+      }
+    ],
+    "readAt": "2026-10-06T21:53:01.040461+08:00",
+    "resets": {
+      "count": 2,
+      "until": "2026-10-22T20:45:36.116738Z",
+      "each": [
+        {
+          "until": "2026-10-22T20:45:36.116738Z"
+        },
+        {
+          "until": "2026-10-29T19:16:34.471659Z"
+        }
+      ]
+    }
+  },
+  {
+    "provider": "grok-plugin",
+    "name": "Grok (SuperGrok)",
+    "kind": "subscription",
+    "user": "grace@example.com",
+    "windows": [
+      {
+        "name": "7 days",
+        "used": 1,
+        "remaining": 99,
+        "resetsAt": "2026-10-09T01:43:44.099Z"
+      }
+    ],
+    "readAt": "2026-10-06T21:53:00.579941+08:00"
+  }
+]

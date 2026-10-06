@@ -43,6 +43,9 @@ export type UsageReport =
       ok: true;
       empty: false;
       raw: string;
+      /** Requests through the gateway or read from local agent sessions. */
+      source?: "gateway" | "local";
+      local?: Extract<UsageReport, { ok: true; empty: false }>;
       tokens: string;
       period: string;
       calls: number;
@@ -242,15 +245,41 @@ export function parseProfiles(text: string): {
   return { empty: profiles.length === 0, profiles };
 }
 
+const LOCAL_USAGE_HEADER =
+  "not through magpie · the agents' own requests, read from their session files";
+
 export function parseUsage(text: string): UsageReport {
+  const raw = text.trimEnd();
+  const blocks = text.split(LOCAL_USAGE_HEADER);
+  if (blocks.length > 2) return { ok: false, raw };
+  const gateway = parseUsageTable(blocks[0]);
+  if (!gateway.ok) return { ok: false, raw };
+  if (blocks.length === 1) {
+    return gateway.empty ? gateway : { ...gateway, source: "gateway" };
+  }
+
+  const local = parseUsageTable(blocks[1]);
+  if (!local.ok || local.empty) return { ok: false, raw };
+  const localReport = { ...local, source: "local" as const };
+  if (gateway.empty) return { ...localReport, raw };
+  return {
+    ...gateway,
+    raw,
+    path: gateway.path ?? local.path,
+    source: "gateway",
+    local: localReport,
+  };
+}
+
+function parseUsageTable(text: string): UsageReport {
   const raw = text.replace(/\s+$/, "");
   const lines = text.split(/\r?\n/);
   if (lines.some((line) => line.startsWith("no calls"))) {
     return { ok: true, empty: true, raw, path: usagePath(lines) };
   }
 
-  const head = lines.find((line) => line.includes(" tokens "));
-  const headline = head?.match(/^(\S+) tokens (.+?) · (\d+) calls? · (.+)$/);
+  const head = lines.find((line) => / tokens? /.test(line));
+  const headline = head?.match(/^(\S+) tokens? (.+?) · (\d+) calls? · (.+)$/);
   if (!headline) return { ok: false, raw };
 
   const breakdown = lines.find((line) => /^\s+in /.test(line))?.trim() ?? "";
@@ -273,7 +302,12 @@ export function parseUsage(text: string): UsageReport {
       sessionNote = sessionHeader[1]?.trim();
       continue;
     }
-    if (!section || !line.startsWith("  ")) continue;
+    if (trimmed === "upstream provider keys" || trimmed === "accounts") {
+      section = "extra";
+      extras.push({ title: trimmed, rows: [] });
+      continue;
+    }
+    if (!section || !trimmed) continue;
     if (
       trimmed.startsWith("/") ||
       trimmed.startsWith("~") ||
@@ -295,11 +329,8 @@ export function parseUsage(text: string): UsageReport {
       bucket.push(row);
       continue;
     }
-    // Newer reports insert indented headers (provider keys, accounts) between
-    // the known tables. A line with a percent sign is still a broken row.
-    if (trimmed.includes("%")) return { ok: false, raw };
-    section = "extra";
-    extras.push({ title: trimmed, rows: [] });
+    // Unknown lines must not silently become section headings or hide rows.
+    return { ok: false, raw };
   }
 
   return {

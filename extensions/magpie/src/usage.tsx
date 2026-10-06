@@ -79,15 +79,38 @@ function UsageSections({
   usage: Extract<UsageReport, { ok: true; empty: false }>;
   onReload: () => void;
 }) {
-  const detail = ["```", usage.breakdown, usage.path ?? "", "```"]
+  return (
+    <>
+      <UsageTables usage={usage} onReload={onReload} />
+      {usage.local ? (
+        <UsageTables usage={usage.local} onReload={onReload} />
+      ) : null}
+    </>
+  );
+}
+
+function UsageTables({
+  usage,
+  onReload,
+}: {
+  usage: Extract<UsageReport, { ok: true; empty: false }>;
+  onReload: () => void;
+}) {
+  const source = usage.source === "local" ? "Local sessions" : "Through Magpie";
+  const summary = `${usage.tokens} tokens · ${usage.period} · ${usage.calls} calls · ${usage.price}`;
+  const detail = [
+    source,
+    summary,
+    "```",
+    usage.breakdown,
+    usage.path ?? "",
+    "```",
+  ]
     .filter(Boolean)
     .join("\n");
   return (
     <>
-      <List.Section
-        title="Agents"
-        subtitle={`${usage.tokens} tokens · ${usage.period}`}
-      >
+      <List.Section title={`${source} · Agents`} subtitle={summary}>
         {usage.agents.map((row) => (
           <UsageItem
             key={`agent-${row.name}`}
@@ -97,7 +120,7 @@ function UsageSections({
           />
         ))}
       </List.Section>
-      <List.Section title="Models">
+      <List.Section title={`${source} · Models`} subtitle={summary}>
         {usage.models.map((row) => (
           <UsageItem
             key={`model-${row.name}`}
@@ -108,7 +131,11 @@ function UsageSections({
         ))}
       </List.Section>
       {usage.extras.map((section) => (
-        <List.Section key={section.title} title={sectionTitle(section.title)}>
+        <List.Section
+          key={section.title}
+          title={`${source} · ${sectionTitle(section.title)}`}
+          subtitle={summary}
+        >
           {section.rows.map((row) => (
             <UsageItem
               key={`${section.title}-${row.name}`}
@@ -121,9 +148,8 @@ function UsageSections({
       ))}
       {usage.sessions.length > 0 ? (
         <List.Section
-          title={
-            usage.sessionNote ? `Sessions · ${usage.sessionNote}` : "Sessions"
-          }
+          title={`${source} · Sessions${usage.sessionNote ? ` · ${usage.sessionNote}` : ""}`}
+          subtitle={summary}
         >
           {usage.sessions.map((row) => (
             <UsageItem

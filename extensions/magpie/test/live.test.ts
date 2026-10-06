@@ -81,19 +81,7 @@ test(
     const saved = parseProfiles(profiles);
     assert.equal(typeof saved.empty, "boolean");
 
-    const report = parseUsage(usage);
-    assert.equal(report.ok, true);
-    if (report.ok && !report.empty) {
-      assert.ok(
-        report.models.every(
-          (row) => !/\b[0-9a-f]{8}-[0-9a-f]{4}-/.test(row.name),
-        ),
-        "session ids leaked into model rows",
-      );
-      if (/sessions(?:\s+·|\s*$)/m.test(usage)) {
-        assert.ok(report.sessions.length > 0);
-      }
-    }
+    assertUsage(usage);
 
     const rows = parseAccounts(accounts);
     assert.ok(Array.isArray(rows));
@@ -119,3 +107,36 @@ test(
     }
   },
 );
+
+function assertUsage(stdout: string) {
+  const report = parseUsage(stdout);
+  assert.equal(report.ok, true, "could not parse live usage output");
+  const hasTotal = /^\S+ tokens? .+ · \d+ calls? · /m.test(stdout);
+  assert.equal(report.ok && !report.empty, hasTotal);
+  if (!report.ok || report.empty) return;
+  const tables = [report, ...(report.local ? [report.local] : [])];
+  for (const table of tables) {
+    assert.ok(table.agents.length > 0);
+    assert.ok(table.models.length > 0);
+    if (/^\s*sessions(?:\s+·|\s*$)/m.test(table.raw)) {
+      assert.ok(table.sessions.length > 0, "session table was lost");
+    }
+    assert.ok(
+      table.models.every((row) => !/\b[0-9a-f]{8}-[0-9a-f]{4}-/.test(row.name)),
+      "session ids leaked into model rows",
+    );
+  }
+  if (stdout.includes("not through magpie ·")) {
+    assert.ok(tables.some((table) => table.source === "local"));
+  }
+}
+
+for (const period of ["today", "30d", "all"]) {
+  test(
+    `live usage ${period} parses`,
+    { skip: live ? false : "magpie is not installed" },
+    async () => {
+      assertUsage(await magpie(bin, ["usage", period]));
+    },
+  );
+}
