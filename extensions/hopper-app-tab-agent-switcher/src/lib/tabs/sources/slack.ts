@@ -153,13 +153,23 @@ export function conversationLink(ref: Ref): string {
   return `slack://channel?team=${encodeURIComponent(ref.team)}&id=${encodeURIComponent(ref.id)}`;
 }
 
+/**
+ * Workspaces from the data folder written most recently. Both builds' folders can hold state (moved from the direct
+ * download to the App Store build, or back): the other one is a stale install's, not merged in.
+ */
 async function readWorkspaces(platform: Platform): Promise<{ workspaces: Workspace[]; blobs: number }> {
+  let best: Workspace[] = [];
+  let blobs = 0;
   for (const dir of DATA_DIRS) {
-    const blobs = await platform.readIndexedDbBlobs(`${platform.homeDir()}/${dir}/${BLOBS}`, FIELDS, MAX_BLOB);
-    if (blobs.length > 0) return { workspaces: latestWorkspaces(blobs), blobs: blobs.length };
+    const read = await platform.readIndexedDbBlobs(`${platform.homeDir()}/${dir}/${BLOBS}`, FIELDS, MAX_BLOB);
+    blobs += read.length;
+    const workspaces = latestWorkspaces(read);
+    if (newest(workspaces) > newest(best)) best = workspaces;
   }
-  return { workspaces: [], blobs: 0 };
+  return { workspaces: best, blobs };
 }
+
+const newest = (workspaces: Workspace[]) => Math.max(0, ...workspaces.map((w) => w.modified));
 
 export const slack: TabSource<Ref> = {
   id: "slack",

@@ -54,6 +54,7 @@ export function parse(app: App, out: string): Tab<Ref>[] {
 
 export const chromium: TabSource<Ref> = {
   id: "chromium",
+  readsWithoutAccessibility: true,
   bundleIds: [
     "com.google.Chrome",
     "com.google.Chrome.beta",

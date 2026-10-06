@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { FIELD as F, RECORD as R } from "../../src/lib/tabs/applescript.ts";
 import { describeError, loadTabs, orderTabs, selectTab } from "../../src/lib/tabs/load.ts";
 import type { Tab } from "../../src/lib/tabs/model.ts";
-import { sourceFor } from "../../src/lib/tabs/registry.ts";
+import { readsWithoutAccessibility, sourceFor } from "../../src/lib/tabs/registry.ts";
 import { app, fakePlatform } from "../fake-platform.ts";
 
 const chrome = app("com.google.Chrome", "Google Chrome");
@@ -92,4 +92,10 @@ test("describes common failures", () => {
     ),
     "Mail got an error: nope (-1)",
   );
+});
+
+test("only AppleScript-only sources read completely without Accessibility (Recently Closed)", () => {
+  assert.equal(readsWithoutAccessibility("com.google.Chrome"), true);
+  assert.equal(readsWithoutAccessibility("com.apple.Safari"), false); // private windows are told apart by Accessibility
+  assert.equal(readsWithoutAccessibility("com.example.Unknown"), false);
 });

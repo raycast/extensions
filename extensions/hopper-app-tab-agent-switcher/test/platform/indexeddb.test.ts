@@ -31,6 +31,9 @@ test("Snappy: literals and overlapping back-references", () => {
   assert.equal(text(snappyDecompress(Uint8Array.from([9, 0x08, 97, 98, 99, 0x09, 0x03]))), "abcabcabc");
   assert.throws(() => snappyDecompress(Uint8Array.from([9, 0x08, 97, 98, 99])), /short/);
   assert.throws(() => snappyDecompress(Uint8Array.from([4, 0x09, 0x05])), /out of bounds/);
+  // A declared length over the cap throws before anything that size is allocated.
+  assert.throws(() => snappyDecompress(Uint8Array.from([0xff, 0xff, 0xff, 0xff, 0x0f, 0x00, 97])), /over/);
+  assert.throws(() => snappyDecompress(Uint8Array.from([9, 0x08, 97, 98, 99, 0x09, 0x03]), 8), /over/);
 });
 
 test("IndexedDB blob: unwraps Chromium's Snappy and Blink's header, reads V8 wire 16 as 15", () => {

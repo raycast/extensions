@@ -24,8 +24,8 @@ func readMenuItems(bundleId: String, identifiers: [String]) -> [MenuItem] {
   }
 }
 
-/// Presses the item with `identifier` at `index` among those items while it has `title`, else the first titled
-/// `title`. Apps enable such items only while they're frontmost with a window (Notes' recent notes), and a disabled
+/// Presses the item with `identifier` at `index` among those items while it has `title`, else the one titled
+/// `title` if only one is (with several, a moved item can't be told apart: nothing is pressed). Apps enable such items only while they're frontmost with a window (Notes' recent notes), and a disabled
 /// item ignores AXPress: then the app is brought to the front and the item waited for, up to 2s (Notes takes ~1s).
 /// False if not found, if the app has no window to bring forward, or if the item stays disabled.
 func pressMenuItem(bundleId: String, identifier: String, title: String, index: Int) -> Bool {
@@ -34,7 +34,8 @@ func pressMenuItem(bundleId: String, identifier: String, title: String, index: I
   func find() -> AXUIElement? {
     let items = menuItems(app, [identifier])
     if index >= 0, index < items.count, string(items[index], kAXTitleAttribute) == title { return items[index] }
-    return items.first { string($0, kAXTitleAttribute) == title }
+    let titled = items.filter { string($0, kAXTitleAttribute) == title }
+    return titled.count == 1 ? titled[0] : nil
   }
   guard var item = find() else { return false }
   if !bool(item, kAXEnabledAttribute) {

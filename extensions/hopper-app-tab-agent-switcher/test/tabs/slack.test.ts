@@ -142,3 +142,14 @@ test("Slack: the App Store build's folder is read when the direct download's has
   assert.equal((await slack.list(slackApp, platform)).length, 5);
   assert.equal(dirs.length, 2);
 });
+
+test("Slack: with both builds' folders holding state, the most recently written one is read, not merged", async () => {
+  const stale = blob("TOLD", "Old Co", 1000, [{ id: "C9", name: "legacy", is_channel: true, is_member: true }]);
+  const platform = fakePlatform({
+    windows: async () => [],
+    readIndexedDbBlobs: async (dir) => (dir.includes("Containers") ? [acme] : [stale]),
+  });
+  const tabs = await slack.list(slackApp, platform);
+  assert.equal(tabs.length, 5);
+  assert.ok(tabs.every((t) => t.detail === "Acme"));
+});

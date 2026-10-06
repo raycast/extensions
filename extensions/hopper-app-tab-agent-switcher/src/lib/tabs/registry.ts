@@ -44,6 +44,11 @@ export function sourceFor(app: App): TabSource {
   return byBundleId.get(app.bundleId) ?? FALLBACK;
 }
 
+/** Whether a read of this app's tabs is complete without Accessibility (TabSource.readsWithoutAccessibility). */
+export function readsWithoutAccessibility(bundleId: string): boolean {
+  return (byBundleId.get(bundleId) ?? FALLBACK).readsWithoutAccessibility === true;
+}
+
 export function sourceById(id: string): TabSource | undefined {
   return byId.get(id);
 }

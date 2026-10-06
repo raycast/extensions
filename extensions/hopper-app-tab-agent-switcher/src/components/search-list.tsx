@@ -26,6 +26,7 @@ import {
 } from "../lib/tabs/history";
 import { linkFor, loadTabs, selectTab } from "../lib/tabs/load";
 import type { App, Tab, TabKind } from "../lib/tabs/model";
+import { readsWithoutAccessibility } from "../lib/tabs/registry";
 import { adjacentSection, searchTabs } from "../lib/tabs/search";
 import type { ListedAgent } from "../lib/agents/load";
 import { STATUS_TITLE } from "../lib/agents/status";
@@ -53,11 +54,13 @@ async function load(scope: Scope) {
   const apps = scope === "current" ? recent.slice(0, 1) : recent;
   const result = await loadTabs(apps, macosPlatform);
   // Only apps this read speaks for can have closed tabs: all of them (running or not) for Search, the current app
-  // for Search Current App, never an app that failed to read. Without Accessibility some sources see nothing,
-  // which must not look like everything closed.
+  // for Search Current App, never an app that failed to read. Without Accessibility most sources see nothing,
+  // which must not look like everything closed; those reading by AppleScript alone (Chromium) still count.
   const failed = new Set(result.failures.map((f) => f.app.bundleId));
   const covered = (bundleId: string) =>
-    result.accessibility && !failed.has(bundleId) && (scope === "all" || bundleId === recent[0]?.bundleId);
+    (result.accessibility || readsWithoutAccessibility(bundleId)) &&
+    !failed.has(bundleId) &&
+    (scope === "all" || bundleId === recent[0]?.bundleId);
   const [closed, bookmarks] = await Promise.all([
     recordHistory(macosPlatform, result.tabs, covered, Date.now()),
     loadBookmarks(macosPlatform),

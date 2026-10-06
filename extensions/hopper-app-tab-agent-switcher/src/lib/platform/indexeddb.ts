@@ -11,8 +11,14 @@
 const NEWEST_WIRE = 16;
 const NODE_WIRE = 15;
 
-/** Raw (unframed) Snappy: a varint length, then literals and back-references. Throws on malformed input. */
-export function snappyDecompress(input: Uint8Array): Uint8Array {
+/** Largest value decompressed: Slack's state is ~430 KB; the length is read from the file before allocating. */
+const MAX_DECOMPRESSED = 32 * 1024 * 1024;
+
+/**
+ * Raw (unframed) Snappy: a varint length, then literals and back-references. Throws on malformed input, or when the
+ * declared length is over `maxLength` (checked before allocating, so a bad file can't exhaust the heap).
+ */
+export function snappyDecompress(input: Uint8Array, maxLength = MAX_DECOMPRESSED): Uint8Array {
   let pos = 0;
   let length = 0;
   for (let shift = 0; ; shift += 7) {
@@ -21,6 +27,7 @@ export function snappyDecompress(input: Uint8Array): Uint8Array {
     length += (byte & 0x7f) * 2 ** shift;
     if (!(byte & 0x80)) break;
   }
+  if (length > maxLength) throw new Error(`snappy: ${length} bytes, over ${maxLength}`);
   const out = new Uint8Array(length);
   let o = 0;
   const readLE = (bytes: number) => {

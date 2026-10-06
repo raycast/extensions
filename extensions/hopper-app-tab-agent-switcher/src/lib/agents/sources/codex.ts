@@ -203,19 +203,15 @@ export const codex: AgentSource = {
     if (rows.length > 0 && threads.length === 0) {
       platform.reportError(new Error("Codex threads have no id"), "agents: codex threads");
     }
-    // Each tail becomes its status as soon as it's read: up to 50 tails of 256 KB held together would take a big
-    // share of the extension's 100 MB JS heap (docs/PERFORMANCE.md).
-    const statuses = new Map(
-      await Promise.all(
-        threads.map(
-          async (t) =>
-            [
-              t.id,
-              statusOf(t.rollout ? await platform.readTail(t.rollout, TAIL_BYTES).catch(noTail(platform)) : ""),
-            ] as const,
-        ),
-      ),
-    );
+    // One at a time, each tail becoming its status as soon as it's read: read in parallel, up to 50 tails of 256 KB
+    // would be held together, a big share of the extension's 100 MB JS heap (docs/PERFORMANCE.md).
+    const statuses = new Map<string, AgentStatus>();
+    for (const t of threads) {
+      statuses.set(
+        t.id,
+        statusOf(t.rollout ? await platform.readTail(t.rollout, TAIL_BYTES).catch(noTail(platform)) : ""),
+      );
+    }
     return toAgents(threads, statuses, processes, appRunning);
   },
 };

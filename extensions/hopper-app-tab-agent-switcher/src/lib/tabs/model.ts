@@ -70,6 +70,11 @@ export interface TabSource<Ref = unknown> {
   id: string;
   /** Apps this source handles. The windows source is the fallback for all others (see registry.ts). */
   bundleIds: readonly string[];
+  /**
+   * True when `list` sees every tab without Accessibility (AppleScript alone, private windows included): without it,
+   * its apps' closed tabs still count as closed (Recently Closed). Others may see nothing then.
+   */
+  readsWithoutAccessibility?: boolean;
   /** Tabs of one app, in the app's own order. */
   list(app: App, platform: Platform): Promise<Tab<Ref>[]>;
   /**
