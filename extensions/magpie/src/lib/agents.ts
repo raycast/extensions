@@ -1,5 +1,5 @@
 /**
- * Display name → CLI id, matched to `magpie agents` / the unknown-agent hint in 0.1.408.
+ * Display name → CLI id, matched to `magpie agents` and the agent-specific model listings.
  * Names magpie adds later stay visible but cannot be switched until they are listed here.
  */
 export const AGENTS: { name: string; id: string }[] = [
@@ -10,6 +10,9 @@ export const AGENTS: { name: string; id: string }[] = [
   { name: "Pi", id: "pi" },
   { name: "Goose", id: "goose" },
   { name: "Cursor", id: "cursor" },
+  { name: "Zed", id: "zed" },
+  { name: "VS Code", id: "vscode" },
+  { name: "Droid", id: "droid" },
   { name: "Copilot CLI", id: "copilot" },
   { name: "Crush", id: "crush" },
   { name: "DeepSeek Harness", id: "dsh" },

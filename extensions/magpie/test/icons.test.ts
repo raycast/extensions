@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { test } from "node:test";
 
-import { AGENTS } from "../src/lib/agents";
+import { AGENTS, agentId } from "../src/lib/agents";
 import { agentIcon, modelIcon } from "../src/lib/icons";
 
 test("agent icons follow magpie's own logo names", () => {
@@ -13,6 +13,12 @@ test("agent icons follow magpie's own logo names", () => {
   assert.equal(agentIcon("qoder-cn")?.file, "agents/qoder.svg");
   assert.equal(agentIcon("workbuddy")?.mono, false);
   assert.equal(agentIcon("cline")?.mono, true);
+  assert.equal(agentIcon(agentId("Zed"))?.file, "agents/zed.svg");
+  assert.equal(agentIcon(agentId("Zed"))?.mono, true);
+  assert.equal(agentIcon(agentId("VS Code"))?.file, "agents/vscode.svg");
+  assert.equal(agentIcon(agentId("VS Code"))?.mono, false);
+  assert.equal(agentId("Droid"), "droid");
+  assert.equal(agentIcon(agentId("Droid"))?.file, "agents/factory.svg");
   assert.equal(agentIcon("missing"), undefined);
 });
 
