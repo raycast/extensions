@@ -4,6 +4,7 @@
 
 - Search note content as well as titles, including text beyond the preview.
 - Find local search indexes in UUID macOS containers and different OneNote version folders.
+- Open pages by their GUID without requiring the named-container account cache.
 - Show the actual loading error and offer a retry instead of reporting every failure as a missing installation.
 - Publish completed search databases atomically so overlapping or interrupted rebuilds preserve working searches.
 - Retry a failed full-text index on the next launch without waiting for a notebook change.

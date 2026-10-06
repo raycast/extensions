@@ -47,9 +47,8 @@ export async function openNote(item: OneNoteItem) {
 }
 
 async function getUrl(item: OneNoteItem) {
-  const userid: string = await get_user_uid();
-
   if (item.Type == PAGE) return `onenote:#page-id=${item.GUID}`;
+  const userid: string = await get_user_uid();
   if (item.Type == SECTION)
     return `onenote:https://d.docs.live.net/${userid}/Documents/${getAncestorsStr(item, "/", true)}.one`;
   if (item.Type == GROUP)
