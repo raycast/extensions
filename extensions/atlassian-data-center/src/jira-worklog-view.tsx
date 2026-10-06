@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 
 import { withQuery, CacheActions } from "@/components";
 import { JiraWorklogForm } from "@/pages";
@@ -90,7 +90,10 @@ function JiraWorklogView() {
                       title="Create Worklog"
                       target={<JiraWorklogForm issueKey={item.issueKey} onUpdate={refetchWithToast} />}
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                      }}
                     />
                     <Action.Push
                       title="Edit Worklog"
@@ -102,18 +105,21 @@ function JiraWorklogView() {
                         />
                       }
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                      }}
                     />
                     <Action
                       title="Copy JQL"
                       icon={Icon.CopyClipboard}
                       onAction={() => copyJQL()}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={refetchWithToast}
                     />
                     <CacheActions />
