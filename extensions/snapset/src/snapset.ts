@@ -63,9 +63,11 @@ export async function listLayouts(app: Application): Promise<Listing> {
       timeout: 10_000,
     }));
   } catch (error) {
-    // An exit status means Snapset ran and turned the arguments down — a version that does
-    // not know them. Anything else (a timeout, a missing file) is a real failure.
-    if (typeof (error as { code?: unknown }).code === "number") throw new SnapsetTooOldError();
+    // Snapset answers an argument it does not know with "unknown option: …" (exit status 2),
+    // which is how a version without the JSON listing would turn it down. Any other failure
+    // is a real one and is shown as it is, not as advice to update.
+    const stderr = String((error as { stderr?: unknown }).stderr ?? "");
+    if (stderr.includes("unknown option")) throw new SnapsetTooOldError();
     throw error;
   }
   try {
