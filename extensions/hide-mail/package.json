@@ -22,7 +22,15 @@
       "title": "Quick Create Random Email Alias",
       "subtitle": "HideMail",
       "description": "Generate and copy a random private email alias to clipboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "note",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "create",
@@ -65,11 +73,21 @@
       "type": "password",
       "required": true,
       "title": "HideMail API Key",
-      "description": "Generate from our web-site - https://hidemail.app/user/api-tokens",
+      "description": "Create a token at https://hidemail.app/user/api-tokens and paste it here",
       "placeholder": "API Key"
+    },
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": false,
+      "title": "HideMail Host",
+      "description": "Only change this to use a different HideMail server",
+      "default": "https://hidemail.app",
+      "placeholder": "https://hidemail.app"
     }
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
