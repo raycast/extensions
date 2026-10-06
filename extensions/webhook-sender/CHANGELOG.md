@@ -1,5 +1,17 @@
 # Webhook Sender Changelog
 
+## [Quick Send & Shortcuts] - {PR_MERGED}
+
+### Added
+
+- Send a saved webhook directly with Enter, then view the response
+
+### Changed
+
+- Saved webhooks: ⌘↵ now opens the webhook in the form
+- Delete shortcut is now ⌘D for saved webhooks and history entries
+- Clear all history shortcut is now ⌘⇧D
+
 ## [Initial Version] - 2026-05-06
 
 ### Added
