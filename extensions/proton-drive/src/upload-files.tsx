@@ -133,6 +133,8 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
 }
 
 async function doUpload(files: string[], parentPath: string) {
+  // The Finder selection is read asynchronously: never start an empty upload.
+  if (files.length === 0) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: `Uploading ${files.length} item(s)…` });
   try {
     const result = await upload(files, parentPath);

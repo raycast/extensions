@@ -5,13 +5,18 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { DriveNode, joinPath, listFolder, ROOT } from "./cli";
 import { isDemo } from "./demo";
 
+/**
+ * Index files live in their own directory, created only when a build starts. Writes never recreate it,
+ * so once logout deletes it, a build still running elsewhere can no longer write anything back.
+ */
+const INDEX_DIR = join(environment.supportPath, "index");
 /** Demo mode keeps its own index, so demo and real data never mix. */
-const dataFile = (name: string) => join(environment.supportPath, isDemo() ? `demo-${name}` : name);
+const dataFile = (name: string) => join(INDEX_DIR, isDemo() ? `demo-${name}` : name);
 const indexFile = () => dataFile("index-v2.json");
 const crawlFile = () => dataFile("crawl-v2.json");
-/** Files of the first, much larger index format: parsing them alone could exceed Raycast's heap. */
-const LEGACY_FILES = ["index.json", "crawl.json"].map((f) => join(environment.supportPath, f));
-const LOCK_FILE = join(environment.supportPath, "index.lock");
+const LOCK_FILE = join(INDEX_DIR, "index.lock");
+/** Where earlier versions kept these files, directly in the support directory. */
+const legacyFile = (name: string) => join(environment.supportPath, name);
 /** A running build touches its lock every LOCK_HEARTBEAT; one untouched for LOCK_TTL is abandoned. */
 const LOCK_TTL = 3 * 60_000;
 const LOCK_HEARTBEAT = 30_000;
@@ -68,8 +73,34 @@ interface CrawlState {
   failedFolders: string[];
 }
 
+let migrated = false;
+
+/**
+ * Moves index files from the support directory into INDEX_DIR, and drops the first index format
+ * (its files were large enough that parsing them alone could exceed Raycast's memory limit).
+ */
+async function migrateLegacyFiles() {
+  if (migrated) return;
+  migrated = true;
+  await Promise.all(["index.json", "crawl.json", "index.lock"].map((f) => rm(legacyFile(f), { force: true })));
+  const current = ["index-v2.json", "crawl-v2.json", "demo-index-v2.json", "demo-crawl-v2.json"];
+  const present = (
+    await Promise.all(
+      current.map((f) =>
+        stat(legacyFile(f)).then(
+          () => f,
+          () => undefined,
+        ),
+      ),
+    )
+  ).filter((f): f is string => Boolean(f));
+  if (present.length === 0) return;
+  await mkdir(INDEX_DIR, { recursive: true, mode: 0o700 });
+  await Promise.all(present.map((f) => rename(legacyFile(f), join(INDEX_DIR, f)).catch(() => undefined)));
+}
+
 export async function readIndex(): Promise<DriveIndex | undefined> {
-  await Promise.all(LEGACY_FILES.map((f) => rm(f, { force: true })));
+  await migrateLegacyFiles();
   const index = await readJson<DriveIndex>(indexFile());
   return index?.format === FORMAT ? index : undefined;
 }
@@ -161,7 +192,9 @@ async function ownsLock(token: string): Promise<boolean> {
 export async function buildIndex(
   onProgress?: (foldersDone: number, foldersLeft: number, partial: DriveIndex) => void,
 ): Promise<DriveIndex> {
-  await mkdir(environment.supportPath, { recursive: true, mode: 0o700 });
+  await migrateLegacyFiles();
+  // The only place the index directory is created (see INDEX_DIR).
+  await mkdir(INDEX_DIR, { recursive: true, mode: 0o700 });
   const token = await acquireLock();
   // Keep the lock fresh even while a slow listing holds up checkpoints.
   const heartbeat = setInterval(() => {
@@ -172,10 +205,16 @@ export async function buildIndex(
   }, LOCK_HEARTBEAT);
   const previous = await readIndex();
   const publishPartial = !previous || previous.partial === true;
-  /** Every write first checks the lock is still ours, so a logout in between is never undone. */
+  /**
+   * Writes only while the lock is ours. If logout deletes INDEX_DIR after this check, the write itself
+   * fails (the directory is gone), so the previous account's data is never written back.
+   */
   const guardedWrite = async (path: string, value: unknown) => {
     if (!(await ownsLock(token))) throw new IndexAbortedError("Indexing stopped");
-    await writeJson(path, value);
+    await writeJson(path, value, token).catch((error) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new IndexAbortedError("Indexing stopped");
+      throw error;
+    });
   };
 
   try {
@@ -274,8 +313,9 @@ async function readJson<T>(path: string): Promise<T | undefined> {
   }
 }
 
-async function writeJson(path: string, value: unknown) {
-  const tmp = `${path}.tmp`;
+/** Atomic write; `writer` keeps temporary files of concurrent writers apart. */
+async function writeJson(path: string, value: unknown, writer: string) {
+  const tmp = `${path}.${writer.replace(/\W/g, "")}.tmp`;
   // Item names are stored in clear here: readable by this macOS user only.
   await writeFile(tmp, JSON.stringify(value), { mode: 0o600 });
   await rename(tmp, path);

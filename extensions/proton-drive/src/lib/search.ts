@@ -3,7 +3,8 @@ import { DriveIndex, entryToNode } from "./index";
 
 const MAX_RESULTS = 200;
 
-const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+/** Case- and accent-insensitive form: "Santé" and "sante" compare equal. */
+const fold = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 /**
  * Every query word must appear in the name or the folder path (accent- and case-insensitive).

@@ -69,11 +69,20 @@ export async function downloadToDownloads(node: DriveNode): Promise<string> {
   const destDir = (downloadDirectory || "~/Downloads").replace(/^~(?=\/|$)/, homedir());
   const tmp = await downloadToTemp(node);
   const target = await reservePath(destDir, basename(tmp), (await stat(tmp)).isDirectory());
-  await move(tmp, target);
+  try {
+    await move(tmp, target);
+  } catch (error) {
+    // Don't leave the empty placeholder behind in the user's folder.
+    await rm(target, { recursive: true, force: true });
+    throw error;
+  }
   return target;
 }
 
-/** Deletes decrypted copies older than a day, and leftovers of interrupted downloads. */
+/**
+ * Deletes decrypted copies older than a day, and leftovers of interrupted downloads. A day is also
+ * well beyond any download still in progress, whose temporary folder must not be removed under it.
+ */
 export async function pruneOpenCache(): Promise<void> {
   const prune = async (parent: string, match: (name: string) => boolean, maxAgeMs: number) => {
     const entries = await readdir(parent).catch(() => [] as string[]);
@@ -86,7 +95,7 @@ export async function pruneOpenCache(): Promise<void> {
     );
   };
   await prune(OPEN_CACHE, () => true, OPEN_CACHE_TTL);
-  await prune(environment.supportPath, (n) => n.startsWith("dl-"), 3600_000);
+  await prune(environment.supportPath, (n) => n.startsWith("dl-"), OPEN_CACHE_TTL);
 }
 
 async function move(from: string, to: string): Promise<void> {

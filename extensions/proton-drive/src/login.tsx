@@ -23,7 +23,10 @@ import { isDemo, setDemo } from "./lib/demo";
 import { showError } from "./lib/errors";
 
 type AuthState =
-  { status: "authenticated" } | { status: "logged-out"; detail: string } | { status: "no-cli"; detail: string };
+  | { status: "authenticated" }
+  | { status: "logged-out"; detail: string }
+  | { status: "no-cli"; detail: string }
+  | { status: "error"; message: string };
 
 /** Listing the top-level sections is the cheapest call that needs a valid session. */
 async function checkAuth(): Promise<AuthState> {
@@ -37,7 +40,9 @@ async function checkAuth(): Promise<AuthState> {
     await run(["filesystem", "list", "--json", "/"], 60_000);
     return { status: "authenticated" };
   } catch (error) {
-    return { status: "logged-out", detail: error instanceof CliError ? error.stderr : String(error) };
+    // Only a missing session means "not signed in"; a network error or a CLI crash is shown as such.
+    if (error instanceof CliError && error.signedOut) return { status: "logged-out", detail: error.stderr };
+    return { status: "error", message: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -164,6 +169,19 @@ export default function Command() {
               <Action title="Login" icon={Icon.Key} onAction={login} />
               <Action title="Login in Terminal (Fallback)" icon={Icon.Terminal} onAction={loginInTerminal} />
               {refresh}
+            </ActionPanel>
+          }
+        />
+      )}
+      {data?.status === "error" && (
+        <List.Item
+          title="Could not check the session"
+          subtitle={data.message}
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          actions={
+            <ActionPanel>
+              {refresh}
+              <Action title="Login" icon={Icon.Key} onAction={login} />
             </ActionPanel>
           }
         />

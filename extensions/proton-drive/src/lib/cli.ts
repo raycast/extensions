@@ -43,6 +43,8 @@ export class CliError extends Error {
   constructor(
     message: string,
     readonly stderr: string,
+    /** The CLI has no valid session: the user needs to log in. */
+    readonly signedOut = false,
   ) {
     super(message);
   }
@@ -95,6 +97,7 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
               : error.signal
                 ? `The CLI was stopped (${error.signal}).`
                 : errorLine(detail) || `Exit code ${error.code}`,
+            loggedOut,
           ),
         );
         return;
@@ -172,7 +175,7 @@ export async function listFolder(path: string): Promise<DriveNode[]> {
   const args = ["filesystem", "list", "--json", path];
   // Listing is read-only: retry once, the CLI occasionally crashes for no lasting reason.
   const out = await run(args).catch((error) => {
-    if (error instanceof CliError && error.message === "Not signed in to Proton Drive") throw error;
+    if (error instanceof CliError && error.signedOut) throw error;
     return run(args);
   });
   const raw = JSON.parse(out) as RawNode[];
