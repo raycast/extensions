@@ -32,13 +32,19 @@ export function decodeEntities(text: string): string {
 export function browserPluginfileUrl(href: string): string {
   if (!/\/webservice\/pluginfile\.php/i.test(href)) return href;
   try {
-    const url = new URL(href);
+    // A base lets relative hrefs (e.g. "/webservice/pluginfile.php/…?token=…") resolve too, so the
+    // token is always stripped instead of surviving on a relative URL that `new URL(href)` would reject.
+    const url = new URL(href, "https://webeep.polimi.it");
     url.pathname = url.pathname.replace(/^\/webservice\/pluginfile\.php/, "/pluginfile.php");
     url.searchParams.delete("token");
     url.searchParams.delete("forcedownload");
     return url.toString();
   } catch {
-    return href.replace("/webservice/pluginfile.php", "/pluginfile.php");
+    return href
+      .replace("/webservice/pluginfile.php", "/pluginfile.php")
+      .replace(/([?&])(?:token|forcedownload)=[^&]*/gi, "$1")
+      .replace(/[?&]+$/, "")
+      .replace(/([?&])&+/g, "$1");
   }
 }
 

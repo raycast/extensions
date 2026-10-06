@@ -52,6 +52,13 @@ describe("browserPluginfileUrl", () => {
     expect(browserPluginfileUrl("https://example.com/page?x=1")).toBe("https://example.com/page?x=1");
   });
 
+  it("strips the token from a relative webservice URL (base-resolved, no leak)", () => {
+    const out = browserPluginfileUrl("/webservice/pluginfile.php/1/a.pdf?token=SECRET&forcedownload=1");
+    expect(out).toBe("https://webeep.polimi.it/pluginfile.php/1/a.pdf");
+    expect(out).not.toContain("SECRET");
+    expect(out).not.toContain("token");
+  });
+
   it("is applied to links inside markdown bodies, so tokens never leak into the detail pane", () => {
     const md = htmlToMarkdown(
       '<p>See <a href="https://webeep.polimi.it/webservice/pluginfile.php/1/a.pdf?token=SECRET">the file</a>.</p>',
