@@ -1,13 +1,14 @@
 import { Toast, showToast } from "@raycast/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getWorkspaces, usePromise } = vi.hoisted(() => ({
+const { getWorkspaces, showFailureToast, usePromise } = vi.hoisted(() => ({
   getWorkspaces: vi.fn(),
+  showFailureToast: vi.fn(),
   usePromise: vi.fn(),
 }));
 
 vi.mock("@lib/workspaces", () => ({ getWorkspaces }));
-vi.mock("@raycast/utils", () => ({ usePromise }));
+vi.mock("@raycast/utils", () => ({ showFailureToast, usePromise }));
 
 import { useWorkspaces } from "@hooks/use-workspaces";
 
@@ -51,15 +52,20 @@ describe("useWorkspaces", () => {
   });
 
   it("reports loading failures without treating them as missing workspaces", async () => {
+    const error = new Error("Scan failed");
     const revalidate = vi.fn();
-    usePromise.mockReturnValue({ data: undefined, error: new Error("Scan failed"), isLoading: false, revalidate });
+    usePromise.mockReturnValue({ data: undefined, error, isLoading: false, revalidate });
 
     const result = useWorkspaces();
-    const options = usePromise.mock.calls[0][2] as { onError: () => Promise<void> };
-    await options.onError();
+    const options = usePromise.mock.calls[0][2] as { onError: (error: Error) => Promise<void> };
+    await options.onError(error);
 
     expect(result).toEqual({ workspaces: [], status: { isLoading: false, failed: true }, revalidate });
-    expect(showToast).toHaveBeenCalledWith({ style: Toast.Style.Failure, title: "Failed to load workspaces" });
+    expect(showFailureToast).toHaveBeenCalledWith(error, {
+      title: "Failed to load workspaces",
+      message: "Try again. If it keeps failing, report the error.",
+    });
+    expect(showToast).not.toHaveBeenCalled();
   });
 
   it("refreshes the scan and reports success after data arrives", async () => {

@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import type { Workspace } from "@type/octarine";
 import { getWorkspaces } from "@lib/workspaces";
 
@@ -53,10 +53,10 @@ export function useWorkspaces(options: Options = {}): Result {
     [refresh],
     {
       execute: enabled,
-      onError: async () => {
-        await showToast({
-          style: Toast.Style.Failure,
+      onError: async (error) => {
+        await showFailureToast(error, {
           title: "Failed to load workspaces",
+          message: "Try again. If it keeps failing, report the error.",
         });
       },
       onData: () => {
