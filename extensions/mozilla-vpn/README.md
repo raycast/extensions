@@ -20,7 +20,7 @@ The extension now includes AI capabilities that let you control your VPN using n
 - `"Connect to VPN"` - Connect using your last configuration
 - `"Connect to Germany"` - Connect to a random server in Germany  
 - `"Connect to Seattle, USA"` - Connect to a specific city
-- `"Disconnect VPN"` / `"Turn off VPN"` - Disconnect immediately
+- `"Disconnect VPN"` / `"Turn off VPN"` - Disconnect after a quick confirmation
 - `"Change server to London, UK"` - Switch server without connecting
 
 #### 📊 **Status & Information**

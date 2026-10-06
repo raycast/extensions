@@ -29,6 +29,8 @@ export default function Command() {
   const [ipLoading, setIpLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const lastFetchedServerRef = useRef<string>('');
+  const ipRequestIdRef = useRef(0);
+  const ipAbortControllerRef = useRef<AbortController | null>(null);
 
   // Refresh VPN status
   const refreshStatus = useCallback(
@@ -53,21 +55,29 @@ export default function Command() {
               serverKey !== lastFetchedServerRef.current ||
               isMissingOrFailedIP)
           ) {
+            ipAbortControllerRef.current?.abort();
+            const controller = new AbortController();
+            ipAbortControllerRef.current = controller;
+            const requestId = ++ipRequestIdRef.current;
+
             try {
               setIpLoading(true);
-              const ipInfo = await fetchCurrentIPInfo();
-              setCurrentIPInfo(ipInfo);
-              if (ipInfo) {
-                lastFetchedServerRef.current = serverKey;
-              } else {
-                lastFetchedServerRef.current = '';
+              const ipInfo = await fetchCurrentIPInfo(controller.signal);
+              // Discard the result if a newer IP lookup has superseded this one
+              if (ipRequestIdRef.current === requestId) {
+                setCurrentIPInfo(ipInfo);
+                lastFetchedServerRef.current = ipInfo ? serverKey : '';
               }
             } catch (error) {
-              console.error('Error fetching IP:', error);
-              setCurrentIPInfo(null);
-              lastFetchedServerRef.current = '';
+              if (ipRequestIdRef.current === requestId) {
+                console.error('Error fetching IP:', error);
+                setCurrentIPInfo(null);
+                lastFetchedServerRef.current = '';
+              }
             } finally {
-              setIpLoading(false);
+              if (ipRequestIdRef.current === requestId) {
+                setIpLoading(false);
+              }
             }
           }
         } else {
