@@ -6,6 +6,7 @@ import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedItems, getCachedVaults, setCachedItems, setCachedVaults } from "./lib/cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
+import { listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
 import { sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
 
@@ -46,17 +47,23 @@ export default function Command() {
 
     try {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
-      const [listing, sharing] = await Promise.all([
+      const listing = listingSaves.start();
+      const [{ vaults: listedVaults, items, failedVaults }, sharing] = await Promise.all([
         listVaultsAndItems(),
         // Sharing only adds an icon: when it can't be listed, the vaults keep what the cache knew.
         listVaultSharing().catch(() => undefined),
       ]);
-      const { items, failedVaults } = listing;
-      const freshVaults = withSharing(listing.vaults, sharing, cachedVaults?.data);
+      const freshVaults = withSharing(listedVaults, sharing, cachedVaults?.data);
       setVaults(freshVaults);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
-      await Promise.all([setCachedVaults(freshVaults), failed.size === 0 ? setCachedItems(items, true) : undefined]);
+      // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
+      // items would count 0 items. Saves follow the order listings started, also across Search Items.
+      if (failed.size === 0) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
+        );
+      }
     } catch (err: unknown) {
       // The counts of an ended session must not show up again.
       if (err instanceof PassCliError && err.type === "not_authenticated") setItemCounts(new Map());

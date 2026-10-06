@@ -9,7 +9,8 @@ import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
-import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./refresh";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
+import { withSharing } from "./vault-sharing";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -63,8 +64,7 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
         {vaults.map((vault) => (
           <List.Dropdown.Item
             key={vault.shareId}
-            // A vault opened from List Vaults brings its count, until the listing gives one.
-            title={titleWithCount(vault.name, itemCounts.get(vault.shareId) ?? vault.itemCount)}
+            title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
             value={vault.shareId}
             icon={Icon.Folder}
           />
@@ -78,7 +78,10 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
 export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
-  const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
+  // A vault opened from List Vaults brings its count, kept if its own listing fails.
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(
+    new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
+  );
   const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
@@ -117,7 +120,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
   const loads = useMemo(createRequestTracker, []);
-  const cacheWrites = useMemo(createSerialQueue, []);
 
   async function loadItems() {
     const isLatest = loads.start();
@@ -172,6 +174,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         if (vaultItems.length > 0) updateItems(vaultItems);
       }
 
+      const listing = listingSaves.start();
       const { vaults: freshVaults, items: freshItems, failedVaults: failures } = await listVaultsAndItems();
       if (!isLatest()) return;
       setFailedVaults(failures);
@@ -187,10 +190,15 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
-      // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
-      if (isComplete) {
-        await cacheWrites.run(async () => {
-          if (isLatest()) await Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]);
+      // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
+      if (isComplete && isLatest()) {
+        await listingSaves.save(listing, async () => {
+          // pass-cli's vault list has no sharing: the saved vaults keep what List Vaults found.
+          const saved = await getCachedVaults();
+          await Promise.all([
+            setCachedItems(nextItems, true),
+            setCachedVaults(withSharing(freshVaults, undefined, saved?.data)),
+          ]);
         });
       }
       if (!isLatest()) return;

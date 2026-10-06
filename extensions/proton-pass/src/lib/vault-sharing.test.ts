@@ -39,3 +39,13 @@ test("vaults get their sharing, or keep what was known before when it's missing"
     ...previous,
   ]);
 });
+
+test("a vault whose role changed doesn't keep whether it was shared", () => {
+  const previous = [{ shareId: "family", name: "Family", role: "viewer" as const, isShared: true }];
+  // The user now owns the vault, and its members couldn't be counted.
+  const sharing = new Map<string, VaultSharing>([["family", { role: "owner" }]]);
+
+  const [family] = withSharing([{ shareId: "family", name: "Family" }], sharing, previous);
+  assert.deepEqual(family, { shareId: "family", name: "Family", role: "owner", isShared: undefined });
+  assert.equal(sharedVaultTooltip(family), undefined);
+});

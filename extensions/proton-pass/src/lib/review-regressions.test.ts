@@ -6,6 +6,7 @@ import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import * as refresh from "./refresh";
 import * as itemCounts from "./item-counts";
+import * as vaultSharing from "./vault-sharing";
 import * as format from "./format";
 import * as shortcuts from "./shortcuts";
 import * as fillSequence from "./fill-sequence";
@@ -255,8 +256,9 @@ function hookHarness() {
         const index = cell(initial);
         return [
           slots[index],
+          // Like React, an updater function receives the current value.
           (value: unknown) => {
-            slots[index] = value;
+            slots[index] = typeof value === "function" ? value(slots[index]) : value;
           },
         ];
       },
@@ -309,6 +311,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
+    "./vault-sharing": vaultSharing,
   });
   const render = () => {
     return harness.render(SearchItemsView, { initialVault: { shareId: "vault", name: "Personal" } });
@@ -458,6 +461,7 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       "./item-list": {},
       "./refresh": refresh,
       "./item-counts": itemCounts,
+      "./vault-sharing": vaultSharing,
     });
     const render = () => harness.render(SearchItemsView, { initialVault: vault });
     render();
@@ -514,6 +518,7 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
+    "./vault-sharing": vaultSharing,
   });
   const render = () => harness.render(SearchItemsView, {});
   render();
@@ -1264,6 +1269,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     "./item-list": {},
     "./refresh": refresh,
     "./item-counts": itemCounts,
+    "./vault-sharing": vaultSharing,
   });
   const render = () => harness.render(SearchItemsView, { initialVault: vault });
   render();
@@ -1279,4 +1285,138 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   const retriedEmpty = render().props.emptyView as typeof empty;
   assert.equal(retriedEmpty.description, "Offline retry");
   assert.equal(typeof retriedEmpty.onRetry, "function");
+});
+
+function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown }) {
+  const harness = hookHarness();
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./types": { PassCliError },
+    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+    "./item-counts": itemCounts,
+    "./vault-sharing": vaultSharing,
+    ...services,
+  });
+  return { harness, SearchItemsView };
+}
+
+test("List Vaults saves vaults and items together, from complete listings only", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  const added = { shareId: "added", name: "Added" };
+  const saved: string[] = [];
+  let failing = true;
+  const harness = hookHarness();
+  const { default: Command } = loadView("../list-vaults.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": {
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [personal, added],
+        items: [item],
+        failedVaults: failing ? [{ vault: added, message: "Offline" }] : [],
+      }),
+    },
+    "./lib/types": { PassCliError },
+    "./lib/search-items-view": {},
+    "./lib/login-view": {},
+    "./lib/cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      setCachedItems: async () => {
+        saved.push("items");
+      },
+      setCachedVaults: async () => {
+        saved.push("vaults");
+      },
+    },
+    "./lib/item-counts": itemCounts,
+    "./lib/refresh": refresh,
+    "./lib/shortcuts": shortcuts,
+    "./lib/vault-sharing": vaultSharing,
+  });
+  harness.render(Command, {});
+  const [load] = harness.effects;
+  load();
+  await new Promise(setImmediate);
+  // Saved without its items, the vault that failed would count 0 items on the next open.
+  assert.deepEqual(saved, []);
+
+  failing = false;
+  load();
+  await new Promise(setImmediate);
+  assert.deepEqual(saved.sort(), ["items", "vaults"]);
+});
+
+test("Search Items keeps the vaults' sharing when it saves pass-cli's vault list", async () => {
+  let savedVaults: unknown;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      listVaultsAndItems: async () => ({
+        vaults: [{ shareId: "vault", name: "Personal" }],
+        items: [item],
+        failedVaults: [],
+      }),
+    },
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => ({
+        data: [{ shareId: "vault", name: "Personal", role: "owner", isShared: true }],
+        timestamp: 0,
+        isStale: true,
+      }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async (vaults: unknown) => {
+        savedVaults = vaults;
+      },
+    },
+  });
+  harness.render(SearchItemsView, {});
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.deepEqual(JSON.parse(JSON.stringify(savedVaults)), [
+    { shareId: "vault", name: "Personal", role: "owner", isShared: true },
+  ]);
+});
+
+test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
+  const failed = { shareId: "vault", name: "Personal" };
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      listItems: async () => {
+        throw new PassCliError("Offline", "network_error");
+      },
+      listVaultsAndItems: async () => ({
+        vaults: [failed, { shareId: "other", name: "Work" }],
+        items: [{ ...item, shareId: "other" }],
+        failedVaults: [{ vault: failed, message: "Offline" }],
+      }),
+    },
+    "./cache": { getCachedItems: async () => null, getCachedVaults: async () => null },
+  });
+  const render = () => harness.render(SearchItemsView, { initialVault: { ...failed, itemCount: 7 } });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const dropdown = render().props.searchBarAccessory as Element;
+  assert.deepEqual(Object.fromEntries(dropdown.props.itemCounts as Map<string, number>), { vault: 7, other: 1 });
 });
