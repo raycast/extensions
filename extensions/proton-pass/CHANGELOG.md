@@ -6,6 +6,15 @@
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
 - List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
 
+## [Smoother List Scrolling] - 2026-10-05
+
+- The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
+
+## [Password Generator Defaults] - 2026-10-05
+
+- Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
+- Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen

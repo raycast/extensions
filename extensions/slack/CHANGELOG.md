@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Archive Channels AI Tool] - 2026-10-05
+
+- Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
+
 ## [Fix Unread Messages configuration] - 2026-09-25
 
 - Fix selected conversations in the Unread Messages configuration sometimes being lost

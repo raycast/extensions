@@ -94,9 +94,9 @@ export default function DownloadCommand() {
         alwaysProxy: preferences.alwaysProxy,
         disableMetadata: preferences.disableMetadata,
         youtubeHLS: preferences.youtubeHLS,
-        twitterGif: preferences.twitterGif,
+        convertGif: preferences.twitterGif,
         tiktokFullAudio: preferences.tiktokFullAudio,
-        tiktokH265: preferences.tiktokH265,
+        allowH265: preferences.tiktokH265,
       };
 
       fetch(preferences.apiInstanceUrl, {

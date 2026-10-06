@@ -11,5 +11,13 @@ export function matchesHostname(pattern: string, hostname: string): boolean {
     const suffix = pattern.slice(1); // ".zendesk.com"
     return hostname.endsWith(suffix) && hostname.length > suffix.length;
   }
-  return pattern === hostname;
+  // Treat www as an alias only for catalog lookup; keep captured URLs and hosts intact for execution guards.
+  return pattern === hostname || (hostname.startsWith("www.") && pattern === hostname.slice(4));
+}
+
+export function findHostnameMatch<T extends { hostname?: string }>(apps: T[], hostname: string): T | undefined {
+  return (
+    apps.find((app) => app.hostname === hostname) ??
+    apps.find((app) => app.hostname !== undefined && matchesHostname(app.hostname, hostname))
+  );
 }

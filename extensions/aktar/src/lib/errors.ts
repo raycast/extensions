@@ -1,9 +1,25 @@
-import { launchCommand, LaunchType, open, showToast, Toast } from "@raycast/api";
+import { Application, launchCommand, LaunchType, open, showToast, Toast } from "@raycast/api";
 import { AktarError } from "../api/client";
 import { isExpiryNotSetUp } from "./expiry";
 
-export const AKTAR_BUNDLE_ID = "com.getaktar.mac";
+const AKTAR_BUNDLE_ID = "com.getaktar.mac";
+/** Aktar for Windows from the Microsoft Store (MSIX package family). */
+const AKTAR_STORE_PACKAGE = "MertTopuz.Aktar_";
+/** Aktar for Windows from the installer on GitHub (its app identifier). */
+const AKTAR_WINDOWS_ID = "com.getaktar.windows";
 export const AKTAR_DOWNLOAD_URL = "https://getaktar.com";
+
+/**
+ * Whether `application` is Aktar: by bundle ID on macOS; on Windows by the
+ * Store package or the installer's app ID, or else by name, since the app
+ * ID Raycast reports for an app that isn't packaged can vary.
+ */
+export function isAktar(application: Application) {
+  if (application.bundleId) return application.bundleId === AKTAR_BUNDLE_ID;
+  const appId = application.windowsAppId ?? "";
+  if (appId.startsWith(AKTAR_STORE_PACKAGE) || appId.toLowerCase() === AKTAR_WINDOWS_ID) return true;
+  return application.name === "Aktar";
+}
 
 export function describeConnectionError(error: AktarError) {
   switch (error.kind) {

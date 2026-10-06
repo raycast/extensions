@@ -107,9 +107,9 @@ describe("buildScript", () => {
     expect(contents).not.toContain("@raycast.title @work");
   });
 
-  it("derives the filename from scope, brand and detail", () => {
-    expect(buildScript(draft).filename).toBe("work.linear.sprint-board.sh");
-    expect(scriptFilename(draft)).toBe("work.linear.sprint-board.sh");
+  it("derives the filename from brand and detail, never the scope", () => {
+    expect(buildScript(draft).filename).toBe("linear.sprint-board.sh");
+    expect(scriptFilename(draft)).toBe("linear.sprint-board.sh");
   });
 
   it("round-trips: what the writer emits, the reader recovers", () => {

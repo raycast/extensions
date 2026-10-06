@@ -1,70 +1,55 @@
-import { getSelectedFinderItems, Clipboard, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, popToRoot, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import path from "path";
-import fs from "fs";
-import { createFont, FontEditor, TTF } from "fonteditor-core";
-import fontverter from "fontverter";
+import { useEffect, useState } from "react";
+import { FontFileSelection } from "./components/font-file-selection";
+import { generateFontFaceCss } from "./lib/fonts";
 
-export default async function Command() {
-  try {
-    const items = await getSelectedFinderItems();
-    if (items.length === 0) {
-      await showFailureToast("No file selected", { message: "Please select a font file in Finder" });
-      return;
+export default function Command() {
+  return (
+    <FontFileSelection>
+      {(filePath, chooseAnotherFile) => <GenerateCss filePath={filePath} chooseAnotherFile={chooseAnotherFile} />}
+    </FontFileSelection>
+  );
+}
+
+function GenerateCss(props: { filePath: string; chooseAnotherFile: () => void }) {
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    let active = true;
+    async function copyCss() {
+      try {
+        const css = await generateFontFaceCss(props.filePath);
+        if (!active) return;
+        await Clipboard.copy(css);
+        await showHUD("CSS copied to clipboard");
+        await popToRoot();
+      } catch (error) {
+        if (!active) return;
+        setError(error instanceof Error ? error.message : String(error));
+        await showFailureToast(error, { title: "Failed to generate CSS" });
+      }
     }
+    void copyCss();
+    return () => {
+      active = false;
+    };
+  }, [props.filePath]);
 
-    const filePath = items[0].path;
-    const ext = path.extname(filePath).slice(1).toLowerCase();
-    const fileName = path.basename(filePath);
-    const fontFamily = path.basename(filePath, path.extname(filePath));
-
-    if (!["ttf", "woff", "woff2", "eot", "otf"].includes(ext)) {
-      await showFailureToast("Unsupported format", { message: "Selected file is not a supported font format" });
-      return;
-    }
-
-    let buffer = fs.readFileSync(filePath);
-
-    if (ext === "woff2") {
-      buffer = await fontverter.convert(buffer, "sfnt");
-    }
-
-    const inputType = ext === "woff2" ? "ttf" : ext;
-    const font = createFont(buffer, {
-      type: inputType as FontEditor.FontType,
-      hinting: true,
-      kerning: true,
-    });
-
-    const fontObj = font.get();
-    const os2 = fontObj["OS/2"] as TTF.OS2;
-    const head = fontObj.head as TTF.Head;
-    const name = fontObj.name as TTF.Name;
-
-    let fontWeight = "normal";
-    if (os2?.usWeightClass) {
-      fontWeight = os2.usWeightClass.toString();
-    }
-
-    let fontStyle = "normal";
-    // Check macStyle bit 1 (italic)
-    if (head?.macStyle && head.macStyle & 2) {
-      fontStyle = "italic";
-    } else if (name?.fontSubFamily?.toLowerCase().includes("italic")) {
-      fontStyle = "italic";
-    }
-
-    const css = `@font-face {
-  font-family: '${name?.fontFamily || fontFamily}';
-  src: url('${fileName}') format('${ext}');
-  font-weight: ${fontWeight};
-  font-style: ${fontStyle};
-  font-display: swap;
-}`;
-
-    await Clipboard.copy(css);
-    await showHUD("CSS copied to clipboard");
-  } catch (error) {
-    await showFailureToast(error, { title: "Failed to generate CSS" });
-  }
+  return (
+    <List
+      isLoading={!error}
+      actions={
+        <ActionPanel>
+          <Action title="Choose Another Font" icon={Icon.Document} onAction={props.chooseAnotherFile} />
+        </ActionPanel>
+      }
+    >
+      <List.EmptyView
+        icon={error ? Icon.Warning : Icon.Text}
+        title={error ? "Could Not Generate CSS" : "Generating CSS"}
+        description={error}
+      />
+    </List>
+  );
 }

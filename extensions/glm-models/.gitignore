@@ -12,3 +12,5 @@ dist/
 AGENTS.md
 .zcode/
 .zcodeignore
+
+.claude/

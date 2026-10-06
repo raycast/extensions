@@ -11,6 +11,7 @@
     "src/lib/core/**/*.ts",
     "src/lib/fill-sequence*.ts",
     "src/lib/format*.ts",
+    "src/lib/generator-defaults*.ts",
     "src/lib/item-counts*.ts",
     "src/lib/item-panel*.ts",
     "src/lib/key-press*.ts",
