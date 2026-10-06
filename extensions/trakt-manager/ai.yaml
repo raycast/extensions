@@ -11,13 +11,13 @@ instructions: |
   - If a tool reports `exhaustive: false`, say the result is inconclusive rather than presenting it as a fact.
 
   CRITICAL - Anti-Looping & Efficiency Rules:
-  - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-ratings`, `get-up-next`) page after page to find an item. For watchlist, history and ratings, use the `query` parameter. `get-up-next` has no query — it is only a browse list (`exhaustive: false`); never conclude a show is absent from it.
+  - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-ratings`, `get-up-next`) page after page to find an item. For watchlist, history and ratings, use the `query` parameter. `get-up-next` has no query — it is only a browse list (`exhaustive: false`); never conclude a show or movie is absent from it.
   - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). That scan pages through the watchlist locally and stops at a page cap — it is not a server-side title search. Trust a negative ONLY when `exhaustive` is true. `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no. A year miss (Dune 1989 asked, Dune 2021 present) is not a confirmed absence.
   - To check what score you gave to a title (e.g. "Quelle note ai-je mise à Severance ?"), call `get-ratings` with the `query` parameter (e.g. `query: "Severance"`). `rated` / `userRating` cover that exact title only; entries that merely contain it come back in `ratings`, so mention them instead of answering with a flat no. Never conclude "never rated" from a browse page.
   - When several releases share a title, pass `year` on `get-ratings` the same way you do on `get-history`. A response that names another year is not a never-rated. Do not pass `rating` to hide other scores: the tool still reports the real score if it differs.
   - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"` or `"episodes"`. A bare ID with `type: "all"` is refused because those namespaces overlap. Season IDs cannot be looked up; use `query` with `type: "seasons"`.
   - When retrying a lookup with a `traktId` from `search-movies` or `search-shows`, always pass `type: "movies"` or `type: "shows"` to match the tool that produced the ID. Never send a bare `traktId` with the default `type: "all"`.
-  - When the user asks to simply see their watchlist, watch history, or ratings, fetch only page 1 and summarize it. Mention the total item count and offer the next page instead of querying page after page.
+  - When the user asks to simply see their watchlist, watch history, ratings, or Continue Watching (`get-up-next`), fetch only page 1 and summarize it. Mention the total item count when the tool gives one (`get-up-next` does not: say more items exist when `hasMore` is true) and offer the next page instead of querying page after page.
 
   Media Resolution & Lookups:
   - When the user refers to a movie or TV show by name, search for it first using `search-movies` or `search-shows` to obtain accurate metadata and the exact `traktId`.
@@ -26,6 +26,8 @@ instructions: |
   - Never paginate a search to "look further": Trakt serves one capped page per query, and asking for page 2 returns page 1 again. Refine the title or pass a `year` instead.
   - When a tool returns a `warning` or a `message` about a year that could not be honoured, surface it to the user instead of presenting the fallback as an exact match.
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
+  - For "what should I watch next?", "what can I finish tonight?" or "where was I?", use `get-up-next`: it is Trakt's Continue Watching. Shows in progress come back in `data` with their next episode, movies paused mid-playback in `movies` with `progressPercent` and `minutesLeft`. Pass `type: "shows"` or `type: "movies"` when the user asks for only one kind.
+  - When `get-up-next` returns a `warning`, one of its two lists could not be loaded: tell the user, and never conclude that the missing list is empty.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
   - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
@@ -83,11 +85,66 @@ evals:
               season: 2
               number: 1
               title: "Hello Ms. Cobel"
+        movies: []
+        page: 1
         hasMore: false
         exhaustive: false
     expected:
       - callsTool:
           name: "get-up-next"
+
+  # Continue Watching covers paused movies too, not only shows.
+  - input: "@trakt-manager what can I finish tonight?"
+    mocks:
+      get-up-next:
+        data: []
+        movies:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+            progressPercent: 62
+            minutesLeft: 56
+            pausedAt: "2026-10-04T21:40:00.000Z"
+        page: 1
+        hasMore: false
+        exhaustive: false
+    expected:
+      - callsTool:
+          name: "get-up-next"
+
+  - input: "@trakt-manager which movies did I pause halfway?"
+    mocks:
+      get-up-next:
+        data: []
+        movies:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+            progressPercent: 62
+            minutesLeft: 56
+            pausedAt: "2026-10-04T21:40:00.000Z"
+        page: 1
+        hasMore: false
+        exhaustive: false
+    expected:
+      - callsTool:
+          name: "get-up-next"
+          arguments:
+            type: movies
+
+  - input: "@trakt-manager recommend me some shows"
+    mocks:
+      get-recommendations:
+        shows:
+          - traktId: 158024
+            title: "Slow Horses"
+            year: 2022
+        totalRecommendations: 1
+    expected:
+      - callsTool:
+          name: "get-recommendations"
+          arguments:
+            type: shows
 
   - input: "@trakt-manager when did I watch Inception?"
     mocks:
@@ -307,6 +364,16 @@ evals:
         matchesForTitle: 1
         truncated: false
         hasMore: false
+      get-watchlist:
+        found: false
+        inWatchlist: false
+        exhaustive: true
+        message: '"Inception" is not in your watchlist.'
+        hasMore: false
+      add-to-watchlist:
+        success: true
+        alreadyPresent: false
+        message: '"Inception" (2010) has been successfully added to your Trakt watchlist.'
     expected:
       - callsTool:
           name: "search-movies"
@@ -323,11 +390,56 @@ evals:
         matchesForTitle: 1
         truncated: false
         hasMore: false
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: false
+        wasWatched: false
+        message: 'Confirmed: no watch event exists for "Inception" (2010). This result is exhaustive, do not assume otherwise.'
+        checked:
+          - type: "movie"
+            title: "Inception"
+            year: 2010
+            traktId: 16662
+            watched: false
+            plays: 0
+        history: []
+        hasMore: false
+      mark-movie-watched:
+        success: true
+        message: '"Inception" (2010) has been successfully marked as watched in your Trakt history.'
     expected:
       - callsTool:
           name: "search-movies"
           arguments:
             title: "Inception"
+
+  # An episode write needs the show's ID, the season and the episode, not a title.
+  - input: "@trakt-manager mark Severance S02E03 as watched"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      mark-episode-watched:
+        success: true
+        message: 'Severance (2022) S02E03 has been successfully marked as watched in your Trakt history.'
+        episodeTraktId: 3959823
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "mark-episode-watched"
+          arguments:
+            showTraktId: 154784
+            seasonNumber: 2
+            episodeNumber: 3
 
   - input: "@trakt-manager rate Severance 9 out of 10"
     mocks:
@@ -339,6 +451,17 @@ evals:
         matchesForTitle: 1
         truncated: false
         hasMore: false
+      get-ratings:
+        found: false
+        rated: false
+        exhaustive: true
+        message: 'No rating found for "Severance".'
+        ratings: []
+        hasMore: false
+      rate-media:
+        success: true
+        message: 'Successfully rated "Severance" (2022) 9/10 on Trakt.'
+        rating: 9
     expected:
       - callsTool:
           name: "search-shows"
@@ -371,6 +494,14 @@ evals:
   # Membership must be checked by the tool over every item, not read off a page of items.
   - input: "@trakt-manager is Parasite on my Oscars 2026 list?"
     mocks:
+      search-movies:
+        data:
+          - traktId: 329862
+            title: "Parasite"
+            year: 2019
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
       get-lists:
         found: true
         inList: true
