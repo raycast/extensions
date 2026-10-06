@@ -2,11 +2,12 @@ import { Toast, showToast } from "@raycast/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Workspace } from "@type/octarine";
 
-const { usePromise } = vi.hoisted(() => ({
+const { showFailureToast, usePromise } = vi.hoisted(() => ({
+  showFailureToast: vi.fn(),
   usePromise: vi.fn(),
 }));
 
-vi.mock("@raycast/utils", () => ({ usePromise }));
+vi.mock("@raycast/utils", () => ({ showFailureToast, usePromise }));
 vi.mock("react", () => ({ useCallback: (callback: unknown) => callback }));
 
 import { useLastWorkspace } from "@commands/open-daily-desk-note/hooks/use-last-workspace";
@@ -56,18 +57,17 @@ describe("useLastWorkspace", () => {
   });
 
   it("reports failures when clearing the last workspace", async () => {
+    const error = new Error("Clear failed");
     const mutate = vi.fn(async () => {
-      throw new Error("Clear failed");
+      throw error;
     });
     usePromise.mockReturnValue({ data: "work", isLoading: false, mutate });
 
     const result = useLastWorkspace({ workspaces });
     await result.clear();
 
-    expect(showToast).toHaveBeenCalledWith({
-      style: Toast.Style.Failure,
-      title: "Failed to Clear Last Workspace",
-      message: "Clear failed",
-    });
+    expect(showFailureToast).toHaveBeenCalledTimes(1);
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to Clear Last Workspace" });
+    expect(showToast).not.toHaveBeenCalled();
   });
 });

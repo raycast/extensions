@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import type { Workspace } from "@type/octarine";
 import { clearLastWorkspace, getLastWorkspace, resolveLastWorkspace, saveLastWorkspace } from "../lib/last-workspace";
 
@@ -54,11 +54,7 @@ export function useLastWorkspace({ workspaces, enabled = true }: Options): Resul
       });
     } catch (error) {
       console.error("Failed to clear last workspace", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Clear Last Workspace",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Failed to Clear Last Workspace" });
     }
   }, [mutate]);
 

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useOpenTarget } from "@hooks/use-open-target";
 import type { LoadStatus } from "@hooks/use-workspaces";
 import { openDailyDeskNote } from "@lib/octarine";
@@ -32,11 +32,7 @@ export function useOpenDailyNote({
         );
       } catch (error) {
         console.error("Failed to open Daily Desk note", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Open Daily Desk Note",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: "Failed to Open Daily Desk Note" });
       }
     },
     [onWorkspaceOpened],

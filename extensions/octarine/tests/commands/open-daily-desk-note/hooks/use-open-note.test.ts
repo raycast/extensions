@@ -1,10 +1,12 @@
 import { Toast, open, popToRoot, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Workspace } from "@type/octarine";
 import { HookRuntime } from "../../../helpers/hooks";
 
 let activeRuntime = new HookRuntime();
 
+vi.mock("@raycast/utils", () => ({ showFailureToast: vi.fn() }));
 vi.mock("react", () => ({
   useCallback: (callback: unknown, deps?: readonly unknown[]) => activeRuntime.useCallback(callback, deps),
   useEffect: (effect: () => void | (() => void), deps?: readonly unknown[]) => activeRuntime.useEffect(effect, deps),
@@ -21,6 +23,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  vi.clearAllMocks();
   activeRuntime = new HookRuntime();
 });
 
@@ -132,7 +135,8 @@ describe("useOpenDailyNote", () => {
 
   it("reports opening failures without remembering the workspace", async () => {
     const rememberWorkspace = vi.fn(async () => undefined);
-    vi.mocked(open).mockRejectedValueOnce(new Error("Open failed"));
+    const error = new Error("Open failed");
+    vi.mocked(open).mockRejectedValueOnce(error);
     const openDailyNote = await renderHook({
       date: "",
       requestedWorkspace: "",
@@ -143,11 +147,9 @@ describe("useOpenDailyNote", () => {
 
     await openDailyNote("2026-03-26", "Alpha");
     expect(rememberWorkspace).not.toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledWith({
-      style: Toast.Style.Failure,
-      title: "Failed to Open Daily Desk Note",
-      message: "Open failed",
-    });
+    expect(showFailureToast).toHaveBeenCalledTimes(1);
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to Open Daily Desk Note" });
+    expect(showToast).not.toHaveBeenCalled();
   });
 
   it("shows the workspace-not-found toast once for a missing workspace", async () => {

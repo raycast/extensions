@@ -1,4 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import type { Workspace } from "@type/octarine";
 import { findWorkspaceByName } from "@lib/workspaces";
@@ -35,11 +36,7 @@ export function useOpenTarget({ requestedWorkspace, workspaces, status, open }: 
 
     void open(workspace.name).catch((error) => {
       console.error("Failed to open workspace", error);
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Open Workspace",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      void showFailureToast(error, { title: "Failed to Open Workspace" });
     });
   }, [workspace, open]);
 }

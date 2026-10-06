@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNoteSections } from "@hooks/use-note-sections";
 import { toDailyStem, type DateQuery } from "@lib/daily-desk";
@@ -58,11 +58,7 @@ export function useDailyNotes({
       keepPreviousData: true,
       onError: async (error) => {
         console.error("Failed to scan Daily Desk notes", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Scan Daily Desk Notes",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: "Failed to Scan Daily Desk Notes" });
       },
       onData: () => {
         if (refresh) {

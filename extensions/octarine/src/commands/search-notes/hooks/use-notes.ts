@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { useNoteSections } from "@hooks/use-note-sections";
 import { extensionPreferences } from "@lib/preferences";
@@ -60,11 +60,7 @@ export function useNotes({
       keepPreviousData: true,
       onError: async (error) => {
         console.error(`Failed to scan Octarine notes`, error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: `Failed to Scan Notes`,
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: `Failed to Scan Notes` });
       },
       onData: () => {
         if (refresh) {

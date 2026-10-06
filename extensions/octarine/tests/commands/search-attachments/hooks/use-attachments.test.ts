@@ -3,13 +3,14 @@ import { setMockPreferences } from "../../../__mocks__/@raycast/api";
 import type { IndexedAttachment } from "@type/attachments";
 import type { Workspace } from "@type/octarine";
 
-const { getAttachments, useCachedPromise, useLoadingToast } = vi.hoisted(() => ({
+const { getAttachments, showFailureToast, useCachedPromise, useLoadingToast } = vi.hoisted(() => ({
   getAttachments: vi.fn(),
+  showFailureToast: vi.fn(),
   useCachedPromise: vi.fn(),
   useLoadingToast: vi.fn(),
 }));
 
-vi.mock("@raycast/utils", () => ({ useCachedPromise }));
+vi.mock("@raycast/utils", () => ({ showFailureToast, useCachedPromise }));
 vi.mock("@commands/search-attachments/lib/attachments", () => ({ getAttachments }));
 vi.mock("@commands/search-attachments/hooks/use-loading-toast", () => ({ useLoadingToast }));
 vi.mock("react", () => ({ useMemo: (factory: () => unknown) => factory() }));
@@ -70,6 +71,17 @@ describe("useAttachments", () => {
     expect(getAttachments).toHaveBeenCalledWith([alpha, beta], excludedExtensions, excludedDirectories, {
       refresh: false,
     });
+  });
+
+  it("reports scan failures with the original error and scan title", async () => {
+    renderAttachments([]);
+    const { onError } = useCachedPromise.mock.calls[0][2];
+    const error = new Error("Scan failed");
+
+    await onError(error);
+
+    expect(showFailureToast).toHaveBeenCalledTimes(1);
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to scan attachments" });
   });
 
   it("builds a unique sorted extension dropdown", () => {

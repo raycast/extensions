@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { extensionPreferences } from "@lib/preferences";
 import { querySearchText } from "@lib/search";
@@ -104,11 +104,7 @@ export function useAttachments({
       initialData: [] satisfies IndexedAttachment[],
       keepPreviousData: true,
       onError: async (error) => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to scan attachments",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await showFailureToast(error, { title: "Failed to scan attachments" });
       },
       onData: () => {
         if (refresh) {

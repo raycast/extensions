@@ -1,10 +1,12 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { HookRuntime } from "../helpers/hooks";
 import type { Workspace } from "@type/octarine";
 
 let activeRuntime = new HookRuntime();
 
+vi.mock("@raycast/utils", () => ({ showFailureToast: vi.fn() }));
 vi.mock("react", () => ({
   useEffect: (effect: () => void | (() => void), deps?: readonly unknown[]) => activeRuntime.useEffect(effect, deps),
   useRef: <T>(initialValue: T) => activeRuntime.useRef(initialValue),
@@ -19,6 +21,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  vi.clearAllMocks();
   activeRuntime = new HookRuntime();
 });
 
@@ -62,11 +65,12 @@ describe("useOpenTarget", () => {
     expect(open).toHaveBeenCalledTimes(1);
     expect(open).toHaveBeenCalledWith("Alpha");
     expect(showToast).not.toHaveBeenCalled();
+    expect(showFailureToast).not.toHaveBeenCalled();
   });
 
-  it("reports failures when opening the matched workspace", async () => {
+  it.each([new Error("Open failed"), "Open failed"])("reports opening failures (%s)", async (error) => {
     const open = vi.fn(async () => {
-      throw new Error("Open failed");
+      throw error;
     });
 
     await renderHook({
@@ -76,11 +80,9 @@ describe("useOpenTarget", () => {
       open,
     });
 
-    expect(showToast).toHaveBeenCalledWith({
-      style: Toast.Style.Failure,
-      title: "Failed to Open Workspace",
-      message: "Open failed",
-    });
+    expect(showFailureToast).toHaveBeenCalledTimes(1);
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to Open Workspace" });
+    expect(showToast).not.toHaveBeenCalled();
   });
 
   it("does not reopen on a rerender when dependencies are unchanged", async () => {

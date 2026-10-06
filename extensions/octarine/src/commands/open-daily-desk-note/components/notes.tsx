@@ -6,9 +6,8 @@ import {
   List,
   openCommandPreferences,
   openExtensionPreferences,
-  Toast,
-  showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { ReactNode } from "react";
 import { dailyNoteStem } from "@lib/daily-desk";
 import { openNote } from "@lib/octarine";
@@ -52,11 +51,7 @@ export function DailyNoteItem({
       await openNote(note.path, note.folder.workspace.name, () => onWorkspaceOpened(note.folder.workspace.name));
     } catch (error) {
       console.error("Failed to open note", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Open Note",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Failed to Open Note" });
     }
   };
 

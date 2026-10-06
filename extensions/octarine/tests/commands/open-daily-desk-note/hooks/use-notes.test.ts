@@ -2,14 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Workspace } from "@type/octarine";
 import { setMockPreferences } from "../../../__mocks__/@raycast/api";
 
-const { getDailyNotes, setSelectedWorkspace, useCachedPromise, useNoteSections } = vi.hoisted(() => ({
+const { getDailyNotes, setSelectedWorkspace, showFailureToast, useCachedPromise, useNoteSections } = vi.hoisted(() => ({
   getDailyNotes: vi.fn(),
   setSelectedWorkspace: vi.fn(),
+  showFailureToast: vi.fn(),
   useCachedPromise: vi.fn(),
   useNoteSections: vi.fn(),
 }));
 
-vi.mock("@raycast/utils", () => ({ useCachedPromise }));
+vi.mock("@raycast/utils", () => ({ showFailureToast, useCachedPromise }));
 vi.mock("@lib/notes", () => ({ getDailyNotes }));
 vi.mock("@hooks/use-note-sections", () => ({ useNoteSections }));
 vi.mock("react", () => ({
@@ -55,6 +56,17 @@ describe("useDailyNotes", () => {
     await load(false, workspaces, '["archive","templates"]');
 
     expect(getDailyNotes).toHaveBeenCalledWith(workspaces, new Set(["archive", "templates"]), { refresh: false });
+  });
+
+  it("reports scan failures with the original error and scan title", async () => {
+    useDailyNotes({ workspaces, requestedWorkspace: "", searchText: "" });
+    const { onError } = useCachedPromise.mock.calls[0][2];
+    const error = new Error("Scan failed");
+
+    await onError(error);
+
+    expect(showFailureToast).toHaveBeenCalledTimes(1);
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Failed to Scan Daily Desk Notes" });
   });
 
   it("includes workspaces without Daily notes in the dropdown", () => {
