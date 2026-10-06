@@ -29,14 +29,6 @@ import {
   translateWithOllama,
 } from "../lib/ollama";
 
-type Preferences = {
-  ollamaUrl: string;
-  defaultModel?: string;
-  autoTranslate: boolean;
-  debounceDelay: string;
-  keepAlive: string;
-};
-
 type TranslatorProps = {
   initialText?: string;
   initialTextLoading?: boolean;

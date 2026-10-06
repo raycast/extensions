@@ -58,7 +58,8 @@ Use **Choose Local Model…** in the Action Panel to change models. The selected
 | Translate now        | `↵` before a result exists    |
 | Copy translation     | `↵` when a result is selected |
 | Double-check meaning | `⌘ ⇧ R`                       |
-| Swap languages       | `⌘ ⇧ S`                       |
+| Copy source text     | `⌘ ⇧ C`                       |
+| Swap languages       | `⌘ D`                         |
 | Paste source text    | `⌘ ⇧ V`                       |
 | Clear                | `⌘ ⇧ ⌫`                       |
 | Refresh local models | `⌘ R`                         |
