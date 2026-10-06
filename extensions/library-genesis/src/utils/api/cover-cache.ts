@@ -23,6 +23,16 @@ export class CoverCacheFullError extends Error {
 const isRetained = (directory: string, filename: string): boolean =>
   (retainedFiles.get(directory)?.get(filename) ?? 0) > 0;
 
+const isInvalidCover = (
+  directory: string,
+  filename: string,
+  file: { size: number; mtimeMs: number },
+  now = Date.now(),
+): boolean =>
+  file.size === 0 ||
+  file.size > MAX_COVER_BYTES ||
+  (!isRetained(directory, filename) && now - file.mtimeMs > COVER_CACHE_MAX_AGE_MS);
+
 // Register the whole search before loading, so eviction cannot race an existing cache hit.
 export const retainCoverCacheFiles = (directory: string, filenames: string[]): (() => Promise<void>) => {
   const names = [...new Set(filenames)];
@@ -76,11 +86,7 @@ const pruneCache = async (directory: string, reservedBytes = 0, reservedFiles = 
     const file = await stat(path);
     if (temporary) {
       if (now - file.mtimeMs > TEMPORARY_MAX_AGE_MS) await rm(path, { force: true });
-    } else if (
-      file.size === 0 ||
-      file.size > MAX_COVER_BYTES ||
-      (!isRetained(directory, entry.name) && now - file.mtimeMs > COVER_CACHE_MAX_AGE_MS)
-    ) {
+    } else if (isInvalidCover(directory, entry.name, file, now)) {
       await rm(path, { force: true });
     } else {
       covers.push({ path, filename: entry.name, size: file.size, modified: file.mtimeMs });
@@ -107,11 +113,7 @@ const findCachedCover = async (directory: string, filename: string): Promise<boo
     throw error;
   });
   if (!file?.isFile()) return false;
-  if (
-    file.size === 0 ||
-    file.size > MAX_COVER_BYTES ||
-    (!isRetained(directory, filename) && Date.now() - file.mtimeMs > COVER_CACHE_MAX_AGE_MS)
-  ) {
+  if (isInvalidCover(directory, filename, file)) {
     await rm(path, { force: true });
     return false;
   }

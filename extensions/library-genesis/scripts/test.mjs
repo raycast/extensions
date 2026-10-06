@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtemp, rm, symlink } from "node:fs/promises";
+import { mkdtemp, readdir, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,15 +8,10 @@ import ts from "typescript";
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const directory = await mkdtemp(join(tmpdir(), "library-genesis-tests-"));
 try {
-  const testFiles = [
-    "tests/api.test.ts",
-    "tests/downloads.test.ts",
-    "tests/ui-updates.test.ts",
-    "tests/cover-security.test.ts",
-    "tests/cover-size.test.ts",
-    "tests/cover-cache.test.ts",
-    "tests/folder-picker.test.ts",
-  ];
+  const testFiles = (await readdir(join(projectRoot, "tests"), { withFileTypes: true }))
+    .filter((file) => file.isFile() && file.name.endsWith(".test.ts"))
+    .map((file) => `tests/${file.name}`)
+    .sort();
   const config = ts.readConfigFile(join(projectRoot, "tsconfig.json"), ts.sys.readFile);
   if (config.error) throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, "\n"));
   const { options, errors } = ts.parseJsonConfigFileContent(config.config, ts.sys, projectRoot);

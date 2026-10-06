@@ -68,11 +68,10 @@ const fetchCover = async (initialUrl: URL, signal: AbortSignal, preferredMirror?
   throw new Error("The cover redirect could not be followed.");
 };
 
-export const getFullSizeCoverUrl = (coverUrl: string): string => {
-  if (coverUrl === "N/A") return coverUrl;
-  const url = new URL(coverUrl);
+const getFullSizeCoverUrl = (coverUrl: URL): URL => {
+  const url = new URL(coverUrl.toString());
   url.pathname = url.pathname.replace(/_small(\.(?:jpe?g|png|gif|webp))$/i, "$1");
-  return url.toString();
+  return url;
 };
 
 const getCoverFilename = (url: URL): string => {
@@ -90,10 +89,7 @@ export const retainBookCoverCache = (
   for (const value of new Set(coverUrls)) {
     try {
       const url = validateCoverUrl(value, preferredMirror);
-      filenames.push(
-        getCoverFilename(url),
-        getCoverFilename(validateCoverUrl(getFullSizeCoverUrl(value), preferredMirror)),
-      );
+      filenames.push(getCoverFilename(url), getCoverFilename(getFullSizeCoverUrl(url)));
     } catch {
       // Invalid or missing covers are rejected by the loader and need no cache protection.
     }
@@ -148,14 +144,14 @@ export const getCachedFullSizeBookCover = async (
   signal?: AbortSignal,
   preferredMirror?: string,
 ): Promise<string> => {
-  validateCoverUrl(coverUrl, preferredMirror);
-  const fullSizeUrl = getFullSizeCoverUrl(coverUrl);
+  const url = validateCoverUrl(coverUrl, preferredMirror);
+  const fullSizeUrl = getFullSizeCoverUrl(url).toString();
   try {
     return await getCachedBookCover(fullSizeUrl, cacheDirectory, signal, preferredMirror);
   } catch (error) {
     if (
       signal?.aborted ||
-      fullSizeUrl === coverUrl ||
+      fullSizeUrl === url.toString() ||
       error instanceof CoverSecurityError ||
       (error as Error & { cause?: unknown }).cause instanceof CoverSecurityError
     )
