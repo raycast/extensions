@@ -25,14 +25,14 @@ export async function readClipboardInput(file?: string, text = ""): Promise<stri
   try {
     return (await readInput(file)).text;
   } catch (error) {
-    let filename = basename(file);
+    let path = file;
     try {
-      if (file.startsWith("file://")) filename = basename(fileURLToPath(file));
+      if (file.startsWith("file://")) path = fileURLToPath(file);
     } catch {
       // A malformed file URL can still accompany a separate clipboard document.
     }
     const trimmed = text.trim();
-    if (!trimmed || trimmed === file || trimmed === filename) throw error;
+    if (!trimmed || trimmed === file || trimmed === path || trimmed === basename(path)) throw error;
     try {
       parseInput(text);
     } catch {
