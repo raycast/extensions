@@ -1,6 +1,7 @@
 import { AI, showHUD } from "@raycast/api";
 import {
   getPreferences,
+  loadModelMetadata,
   platformTitle,
   probeModelsEndpoint,
 } from "./lib/catalog";
@@ -17,6 +18,12 @@ export default async function Command() {
     bypassCache: true,
   });
   try {
+    if (probe.ok) {
+      // Bust the models.dev metadata cache before realigning Raycast's list,
+      // so ids that are new since the last discovery get real titles and
+      // context windows on the poll that follows.
+      await loadModelMetadata(platform, { bypassCache: true });
+    }
     await AI.refreshModels();
     if (probe.ok) {
       await showHUD(

@@ -5,6 +5,15 @@
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
 
+## [Smoother List Scrolling] - 2026-10-05
+
+- The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
+
+## [Password Generator Defaults] - 2026-10-05
+
+- Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
+- Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen

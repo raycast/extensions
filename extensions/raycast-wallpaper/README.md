@@ -8,7 +8,7 @@ Set Raycast official wallpapers as desktop wallpaper.
 
 ## Windows
 
-HEIC wallpapers are converted to full-resolution JPEGs before setting or downloading them. The first use takes a few seconds; subsequent uses reuse the converted image. macOS keeps the original HEIC files.
+HEIC wallpapers are converted to full-resolution PNGs before setting or downloading them. The first use takes a few seconds; subsequent uses reuse the converted image. macOS keeps the original HEIC files.
 
 ## Downloads and cache
 

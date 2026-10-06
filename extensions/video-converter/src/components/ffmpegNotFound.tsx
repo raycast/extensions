@@ -1,54 +1,31 @@
-import { Detail, ActionPanel, Action, open, Icon } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 
 export default function FfmpegMissing() {
-  const brewCmd = "brew install ffmpeg";
-
+  const windows = process.platform === "win32";
+  const command = windows ? "winget install --id Gyan.FFmpeg --exact" : "brew install ffmpeg";
   return (
     <Detail
-      markdown={`
-# 🎥 FFmpeg Not Found
+      markdown={`# FFmpeg or ffprobe Not Found
 
-Raycast couldn't locate **FFmpeg** on your system. FFmpeg is required for video conversion.
+Video conversion requires both **FFmpeg** and **ffprobe**.
 
-## 🔧 Installation Options
+## Install on ${windows ? "Windows" : "macOS"}
 
-### Option 1: Using Homebrew (Recommended)
-\`\`\`bash
-${brewCmd}
+Run in ${windows ? "PowerShell" : "Terminal"}:
+
+\`\`\`sh
+${command}
 \`\`\`
 
-### Option 2: Manual Installation
-1. Download FFmpeg from [ffmpeg.org](https://ffmpeg.org/download.html)
-2. Extract the archive
-3. Add FFmpeg to your system PATH
+Alternatively, download a full build from [FFmpeg Downloads](https://ffmpeg.org/download.html), extract it, and add the folder containing **${windows ? "ffmpeg.exe and ffprobe.exe" : "ffmpeg and ffprobe"}** to PATH.
 
-## ℹ️ About FFmpeg
-FFmpeg is a powerful command-line tool for processing video and audio files. It's used by this extension to:
-- Convert videos between different formats
-- Adjust video quality and size
-- Replace audio tracks
-- Apply hardware acceleration
+Use a build with libx264, libx265, libvpx and libopus. For custom locations, set FFMPEG_PATH and FFPROBE_PATH to the full executable paths.
 
-## 🚀 After Installation
-After installing FFmpeg, please restart Raycast to ensure the extension can detect it.
-      `}
+Restart Raycast after installation or changing PATH.`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Homebrew Command" content={brewCmd} icon={Icon.Clipboard} />
-
-          <Action
-            title="Run in Terminal"
-            onAction={() => open(`terminal:///${encodeURIComponent(brewCmd)}`)}
-            icon={Icon.Terminal}
-          />
-
-          <Action.OpenInBrowser title="Homebrew Installation Guide" url="https://brew.sh/" icon={Icon.Globe} />
-
-          <Action.OpenInBrowser
-            title="Ffmpeg Documentation"
-            url="https://ffmpeg.org/documentation.html"
-            icon={Icon.Book}
-          />
+          <Action.CopyToClipboard title="Copy Installation Command" content={command} icon={Icon.Clipboard} />
+          <Action.OpenInBrowser title="Ffmpeg Downloads" url="https://ffmpeg.org/download.html" />
         </ActionPanel>
       }
     />

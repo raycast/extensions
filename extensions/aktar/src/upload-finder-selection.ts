@@ -1,13 +1,14 @@
 import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
 import { expiryWarning, preferredExpiry } from "./lib/expiry";
 import { batchSummary, onlyFiles, uploadPaths } from "./lib/upload";
+import { FILE_MANAGER } from "./lib/platform";
 
 export default async function Command() {
   let paths: string[];
   try {
     paths = (await getSelectedFinderItems()).map((item) => item.path);
   } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Select files in Finder first" });
+    await showToast({ style: Toast.Style.Failure, title: `Select files in ${FILE_MANAGER} first` });
     return;
   }
 
@@ -16,7 +17,7 @@ export default async function Command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Nothing to upload",
-      message: paths.length > 0 ? "Folders can't be uploaded, only files." : "Select files in Finder first.",
+      message: paths.length > 0 ? "Folders can't be uploaded, only files." : `Select files in ${FILE_MANAGER} first.`,
     });
     return;
   }

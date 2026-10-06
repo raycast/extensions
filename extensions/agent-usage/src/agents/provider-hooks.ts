@@ -52,6 +52,8 @@ import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { resolveOpenRouterApiKey } from "../openrouter/auth.ts";
 import { fetchOpenRouterUsage } from "../openrouter/fetcher.ts";
 import type { OpenRouterError, OpenRouterUsage } from "../openrouter/types.ts";
+import { fetchRaycastUsage, normalizeRaycastCookieHeader } from "../raycast/fetcher.ts";
+import type { RaycastError, RaycastUsage } from "../raycast/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
@@ -83,6 +85,7 @@ type SharedPrefs = {
   minimaxcnApiToken?: string;
   opencodegoApiKey?: string;
   openrouterApiKey?: string;
+  raycastCookieHeader?: string;
 };
 
 function prefValue(key: keyof SharedPrefs): string {
@@ -316,6 +319,24 @@ export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterErr
       };
     }
     return fetchOpenRouterUsage(apiKey);
+  },
+});
+
+export const useRaycastUsage = createUsageHook<RaycastUsage, RaycastError>({
+  agentId: "raycast",
+  resolveAuthKey: async () => normalizeRaycastCookieHeader(prefValue("raycastCookieHeader")) ?? "",
+  fetcher: async (cookieHeader) => {
+    if (!cookieHeader) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "Raycast session not configured. Sign in at raycast.com/settings, then paste the __raycast_session cookie in extension settings (Cmd+,).",
+        },
+      };
+    }
+    return fetchRaycastUsage(cookieHeader);
   },
 });
 

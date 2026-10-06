@@ -1,5 +1,10 @@
 # Excel Formula Beautifier Changelog
 
+## [Raycast 2 Support] - 2026-10-05
+
+- Upgrade to Raycast API 2.x so the extension loads in Raycast 2 on macOS and Windows
+- Use platform-aware keyboard shortcuts
+
 ## [General Improvements & Fixes] - 2025-11-17
 
 - Fix issue with strings being parsed as part of formulas

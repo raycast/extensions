@@ -11,8 +11,8 @@ type CobaltRequest = {
   alwaysProxy?: boolean;
   disableMetadata?: boolean;
   tiktokFullAudio?: boolean;
-  tiktokH265?: boolean;
-  twitterGif?: boolean;
+  allowH265?: boolean;
+  convertGif?: boolean;
   youtubeHLS?: boolean;
 };
 

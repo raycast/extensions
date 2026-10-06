@@ -60,7 +60,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       return;
     }
 
-    let cancelled = false;
+    let canceled = false;
 
     // Reset API key validation so a previously-invalid key doesn't block
     // fresh attempts after the user updates their key in preferences
@@ -71,7 +71,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
     // Subscribe to cache updates
     const unsubscribe = cacheManager.subscribe((meetings) => {
-      if (cancelled) return;
+      if (canceled) return;
       logger.log(`[useCachedMeetings] Received cache update: ${meetings.length} meetings`);
       setCachedMeetings(meetings);
       setIsLoading(false);
@@ -79,7 +79,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
     // Subscribe to background fetch state
     const unsubscribeFetching = cacheManager.subscribeFetching((fetching) => {
-      if (cancelled) return;
+      if (canceled) return;
       setIsFetchingBackground(fetching);
     });
 
@@ -88,7 +88,7 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
       try {
         setIsLoading(true);
         const cached = await cacheManager.loadCache();
-        if (cancelled) return;
+        if (canceled) return;
         setCachedMeetings(cached);
 
         const cacheAge = cacheManager.getCacheAgeMinutes();
@@ -104,17 +104,17 @@ export function useCachedMeetings(options: UseCachedMeetingsOptions = {}): UseCa
 
         setHasMore(cacheManager.hasMore());
       } catch (err) {
-        if (cancelled) return;
+        if (canceled) return;
         logger.error("[useCachedMeetings] Error loading cache:", err);
         setError(toError(err));
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!canceled) setIsLoading(false);
       }
     })();
 
     // Cleanup: unsubscribe on unmount and prevent stale state updates
     return () => {
-      cancelled = true;
+      canceled = true;
       logger.log("[useCachedMeetings] Unsubscribing from cache manager");
       unsubscribe();
       unsubscribeFetching();

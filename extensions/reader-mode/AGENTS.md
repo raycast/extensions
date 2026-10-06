@@ -81,6 +81,10 @@ Need to completely restructure content?
 5. **Adding a paywall pattern without a test**
    - `paywall-detector.ts` scores evidence and runs on every site. A new signal that tips the balance can create false positives (which fire a slow bypass waterfall on good articles). Add a fixture or synthetic case, and confirm the innocent-page tests stay green.
 
+6. **Changing the summary models in one place only**
+   - The models are listed twice: `SUMMARY_MODELS` in `src/config/ai.ts` (the "Regenerate with Model…" menu) and the `summaryModel` dropdown in `package.json`. Edit both; a test fails when they disagree.
+   - Use `AI.Model` keys that are not marked `@deprecated` in `node_modules/@raycast/api/types/index.d.ts`. A stored key Raycast later removes falls back to the default model instead of failing.
+
 ## File Structure
 
 ```text

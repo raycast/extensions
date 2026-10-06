@@ -12,7 +12,7 @@ export function getPositionReturn(position: Position) {
   const unrealizedPL =
     quantity >= 0 && position.longOpenProfitLoss != null
       ? position.longOpenProfitLoss
-      : costBasis != null
+      : position.marketValue != null && costBasis != null
         ? position.marketValue - costBasis
         : undefined;
   const unrealizedPLPct =

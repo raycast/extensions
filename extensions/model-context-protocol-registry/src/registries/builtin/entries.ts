@@ -126,6 +126,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "chirpie",
+    title: "Chirpie",
+    description:
+      "The publishing connector for AI agents: post, thread and schedule to X, Bluesky, LinkedIn, Mastodon and Telegram, attach images and video, save drafts, read post analytics and answer comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; free plan available.",
+    icon: "https://chirpie.ai/images/brand/icon@2x.png",
+    homepage: "https://chirpie.ai/docs/mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chirpie.ai/mcp"],
+    },
+  },
+  {
     name: "chroma",
     title: "Chroma",
     description:
@@ -172,6 +184,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "clipwright",
+    title: "Clipwright",
+    description:
+      "Make UGC-style video ads without filming: tell your assistant what to say and get a vertical clip of a realistic actor saying it, ready for TikTok, Reels or Shorts. It also makes faceless videos from a script or a short brief, and shows the price before anything renders. Local stdio server through `npx`; needs a Clipwright API key.",
+    icon: "https://clipwright.io/brand/clipwright-400.png",
+    homepage: "https://github.com/seocombat/clipwright-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "-p", "@clipwright/mcp-server", "clipwright-mcp"],
+      env: {
+        CLIPWRIGHT_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "codex-reset",
     title: "Codex Reset",
     description:
@@ -197,6 +224,47 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "desearch",
+    title: "Desearch",
+    description:
+      "AI search, X search and web search for AI agents, plus page extraction and X data tools. Bring your own Desearch API key. Local stdio server `desearch-mcp-server` (MIT) through `npx`, with 15 tools; it needs Node.js 20.18.1 or later and a Desearch API key from console.desearch.ai/api-keys, set as `DESEARCH_API_KEY`.",
+    icon: "desearch.png",
+    homepage: "https://github.com/Desearch-ai/mcp-desearch",
+    configuration: {
+      command: "npx",
+      args: ["-y", "desearch-mcp-server@latest"],
+      env: {
+        DESEARCH_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
+    name: "dc-hub",
+    title: "DC Hub",
+    description:
+      "Live data on the physical infrastructure behind AI: facility coverage in 170+ countries, 300+ markets scored daily (DCPI), 1,700+ tracked M&A deals, live grid, fiber, gas and interconnection-queue data, and Capacity Source: search available data-center capacity by size and location, get exact fits or multi-provider bundles, and request brokered intros. 92 tools; every answer carries its source. Hosted remote Streamable HTTP server through `mcp-remote`; free tier works with no API key and no sign-in.",
+    icon: "https://raw.githubusercontent.com/azmartone67/dchub-mcp-server/main/dchub-logo.png",
+    homepage: "https://dchub.cloud/connect",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://dchub.cloud/mcp"],
+    },
+    remoteUrl: "https://dchub.cloud/mcp",
+  },
+  {
+    name: "dropthehassle",
+    title: "DropTheHassle",
+    description:
+      "Put the website your AI built online on a live HTTPS link, check with the domain registry whether a domain name is available, and look after your sites: publish a new version or roll back, rename the link, point a domain, set the share image and favicon, and check certificate and visitor numbers. Hosted remote Streamable HTTP server through `mcp-remote`; publishing and domain checks work with no sign-in and no API key, managing sites uses OAuth 2.1 sign-in with dynamic client registration.",
+    icon: "https://dropthehassle.com/apple-touch-icon.png",
+    homepage: "https://dropthehassle.com/guides/deploy-with-your-ai-mcp?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://dropthehassle.com/mcp"],
+    },
+    remoteUrl: "https://dropthehassle.com/mcp",
   },
   {
     name: "git",
@@ -353,6 +421,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "handoff",
+    title: "handoff",
+    description:
+      "Coordination for autonomous agent swarms: discover funded projects and the agents who can do them, form a team, plan the work as goals and tasks, message end-to-end encrypted, and hand off results that are paid when the requester verifies them. Remote Streamable HTTP server at https://handoff.lol/mcp through `mcp-remote`; no API key, and OAuth 2.1 sign-in (dynamic client registration) when a client wants an account-bound session. Start with the `get_docs` tool.",
+    icon: "https://handoff.lol/icon-180.png",
+    homepage: "https://handoff.lol",
+    remoteUrl: "https://handoff.lol/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://handoff.lol/mcp"],
+    },
+  },
+  {
     name: "heroku",
     title: "Heroku",
     description:
@@ -468,6 +549,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.flightseatmap.com/mcp"],
+    },
+  },
+  {
+    name: "maqami-travel",
+    title: "MAQAMI Travel",
+    description:
+      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation and needs guest and payment details. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
+    icon: "https://maqami.co/android-chrome-512x512.png",
+    homepage: "https://github.com/negm17111995/mcp-server",
+    remoteUrl: "https://mcp.maqami.co/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.maqami.co/"],
     },
   },
   {
@@ -644,6 +738,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "truthifi",
+    title: "Truthifi",
+    description:
+      "One verified household record for your AI: accounts, activity, holdings, fees, performance, cash flow and your Truthifi Score, from 18,000+ institutions. Remote Streamable HTTP server with Truthifi OAuth sign-in through `mcp-remote`; no API key needed. It can't move money or place trades.",
+    icon: "https://framerusercontent.com/images/u37AxMviOa9x9r67PQkR35LJQ.png",
+    homepage: "https://truthifi.com/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://api.truthifi.com/mcp"],
     },
   },
   {
@@ -866,6 +972,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://trvlrr.app/mcp"],
+    },
+  },
+  {
+    name: "voicemoat",
+    title: "VoiceMoat",
+    description:
+      "The personal brand OS for Twitter/X and LinkedIn. Score a draft against your voice profile, improve it, get hooks and post ideas, read your analytics and recent posts, and publish or schedule posts. Publishing and scheduling are two-step: the first call only returns a preview, and a second call with its one-time code is needed to post. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Requires a paid VoiceMoat Pro or Enterprise plan; scoring and improving use plan credits.",
+    icon: "https://raw.githubusercontent.com/prateeks367/voicemoat-mcp/main/assets/voicemoat-icon-512.png",
+    homepage: "https://voicemoat.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
     },
   },
   {
@@ -1456,6 +1574,33 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://app.voicelabs.now/api/mcp"],
     },
   },
+  {
+    name: "zihin",
+    title: "Zihin",
+    description:
+      "Build and operate AI agents on the Zihin platform: create agents and personas, attach API and MCP tools, configure webhook, schedule and email triggers, set budgets and human-approval policies, inspect runs and chat with your agents. Local stdio server `@zihin/mcp-server` (MIT) through `npx`; needs a Zihin API key in `ZIHIN_API_KEY`.",
+    icon: "https://github.com/zihin-ai.png",
+    homepage: "https://docs.zihin.ai/integrations/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@zihin/mcp-server"],
+      env: {
+        ZIHIN_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
+    name: "caly",
+    title: "Caly",
+    description:
+      "Find open meeting times, book, reschedule and cancel meetings, and read your event types, bookings and schedules in Caly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/caly/assets/logo.png",
+    homepage: "https://trycaly.com/docs/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -1892,6 +2037,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.empiriolabs.ai/mcp"],
+    },
+  },
+  {
+    name: "linkmcp",
+    title: "LinkMCP",
+    description:
+      "Use your own LinkedIn account from your AI assistant: look up profiles and companies, search people, jobs and Sales Navigator (with your own seat), read and send LinkedIn messages, read and write posts, comments and reactions, manage connection requests, read your own post analytics, and find work emails and mobile numbers. Not affiliated with LinkedIn. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. 7-day free trial without a card; connecting a LinkedIn account needs a paid plan (from $19/month).",
+    icon: "https://app.linkmcp.io/logo-512.png",
+    homepage: "https://app.linkmcp.io",
+    remoteUrl: "https://app.linkmcp.io/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
     },
   },
 ];
