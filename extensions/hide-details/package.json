@@ -128,13 +128,12 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "build:swift": "node scripts/build-swift.mjs",
-    "build": "npm run build:swift && ray build",
-    "dev": "npm run build:swift && ray develop",
+    "build": "ray build",
+    "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build:swift && node --test tests/*.test.mjs",
-    "publish": "npm run build:swift && ray publish"
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "publish": "ray publish"
   }
 }

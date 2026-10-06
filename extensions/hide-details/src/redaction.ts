@@ -1,11 +1,9 @@
-import { environment, getPreferenceValues } from "@raycast/api";
-import { execFile } from "child_process";
+import { getPreferenceValues } from "@raycast/api";
 import { lstat, mkdir, mkdtemp, open, readdir, rm } from "fs/promises";
 import { tmpdir } from "os";
 import path from "path";
-import { promisify } from "util";
+import { copyRedactedImage, redactImage } from "swift:../swift/hide-details";
 
-const exec = promisify(execFile);
 const categories = ["email", "phone", "card", "secret", "ip", "name", "face"] as const;
 const kinds = [...categories, "custom"] as const;
 const expiry = 24 * 60 * 60 * 1000;
@@ -151,12 +149,9 @@ async function cleanExpired(directory: string) {
   );
 }
 
-async function runHelper(args: string[]) {
+async function runNative<T>(operation: () => Promise<T>): Promise<T> {
   try {
-    return await exec(path.join(environment.assetsPath, "hide-details"), args, {
-      timeout: 120_000,
-      maxBuffer: 8 * 1024 * 1024,
-    });
+    return await operation();
   } catch (error) {
     if (isRecord(error) && typeof error.stderr === "string" && error.stderr.trim()) {
       throw new Error(error.stderr.trim());
@@ -188,18 +183,20 @@ export async function redactClipboard(options: { recognition?: "fast" | "accurat
   const directory = await mkdtemp(path.join(base, `run-${process.pid}-`));
   const output = path.join(directory, "out.png");
   try {
-    const { stdout } = await runHelper([
-      "--clipboard",
-      output,
-      style,
-      padding,
-      selection,
-      prefs.extraWords || "",
-      recognition,
-      prefs.customRegex || "",
-    ]);
+    const report = await runNative(() =>
+      redactImage(
+        output,
+        style,
+        padding,
+        selection,
+        prefs.extraWords || "",
+        recognition,
+        prefs.customRegex || "",
+        null,
+      ),
+    );
     const { width, height } = await imageDimensions(output);
-    const scan = parseReport(JSON.parse(stdout) as unknown, output, width, height);
+    const scan = parseReport(report, output, width, height);
     ownedDirectories.set(scan, directory);
     return scan;
   } catch (error) {
@@ -210,9 +207,9 @@ export async function redactClipboard(options: { recognition?: "fast" | "accurat
 
 export async function copyRedacted(scan: Scan, options: { requireOriginalClipboard?: boolean } = {}) {
   if (!ownedDirectories.has(scan)) throw new Error("This preview has expired. Scan the current clipboard again.");
-  const args = ["--copy-clipboard", scan.output];
-  if (options.requireOriginalClipboard) args.push(String(scan.clipboardChangeCount));
-  await runHelper(args);
+  await runNative(() =>
+    copyRedactedImage(scan.output, options.requireOriginalClipboard ? scan.clipboardChangeCount : null),
+  );
 }
 
 export async function disposeScan(scan: Scan) {

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { callSwift, redactImage } from "./swift.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const directory = mkdtempSync(path.join(tmpdir(), "hide-details-test-"));
@@ -32,7 +33,7 @@ before(() => {
     "swiftc",
     "-module-cache-path",
     path.join(directory, "module-cache"),
-    path.join(root, "swift/CustomRegex.swift"),
+    path.join(root, "swift/hide-details/Sources/CustomRegex.swift"),
     path.join(directory, "main.swift"),
     "-o",
     path.join(directory, "test-custom-regex"),
@@ -40,6 +41,29 @@ before(() => {
 });
 
 after(() => rmSync(directory, { recursive: true, force: true }));
+
+test("Swift copy binding reports unreadable output without changing the clipboard", () => {
+  assert.throws(
+    () => callSwift("copyRedactedImage", path.join(directory, "missing.png"), null),
+    (error) => {
+      assert.equal(error.status, 1);
+      assert.match(error.stderr, /Could not read the redacted image/);
+      assert.equal(error.stdout, "");
+      return true;
+    },
+  );
+});
+
+test("Swift copy binding rejects negative clipboard generations before copying", () => {
+  assert.throws(
+    () => callSwift("copyRedactedImage", path.join(directory, "missing.png"), -1),
+    (error) => {
+      assert.equal(error.status, 1);
+      assert.match(error.stderr, /Invalid clipboard change count/);
+      return true;
+    },
+  );
+});
 
 function redact({
   recognition,
@@ -49,12 +73,16 @@ function redact({
   customRegex,
 } = {}) {
   const output = path.join(directory, `output-${sequence++}.png`);
-  const args = [input, output, style, padding, categories, "ProjectNebula"];
-  if (recognition || customRegex !== undefined) args.push(recognition ?? "fast");
-  if (customRegex !== undefined) args.push(customRegex);
-  const report = JSON.parse(
-    execFileSync(path.join(root, "assets/hide-details"), args, { encoding: "utf8", timeout: 90_000 }),
-  );
+  const report = redactImage({
+    inputPath: input,
+    outputPath: output,
+    style,
+    padding,
+    categories,
+    extraWords: "ProjectNebula",
+    recognition,
+    customRegex,
+  });
   assert.equal(report.output, output);
   assert.ok(Number.isSafeInteger(report.regionCount) && report.regionCount >= 0);
   for (const hit of report.hits) {
@@ -148,13 +176,14 @@ test("invalid custom regex fails before reading the image or creating output", (
   const output = path.join(directory, "invalid-regex.png");
   assert.throws(
     () =>
-      execFileSync(
-        path.join(root, "assets/hide-details"),
-        [path.join(directory, "missing.png"), output, "blackout", "4", "", "", "fast", "["],
-        { encoding: "utf8", stdio: "pipe", timeout: 5_000 },
-      ),
+      redactImage({
+        inputPath: path.join(directory, "missing.png"),
+        outputPath: output,
+        categories: "",
+        customRegex: "[",
+      }),
     (error) => {
-      assert.equal(error.status, 2);
+      assert.equal(error.status, 1);
       assert.match(error.stderr, /Invalid Custom Regex/);
       assert.equal(error.stdout, "");
       return true;
@@ -176,22 +205,9 @@ for (const [field, value, message] of [
     const output = path.join(directory, `invalid-${sequence++}.png`);
     const options = { style: "blackout", padding: "4", categories: "", recognition: "fast", [field]: value };
     assert.throws(
-      () =>
-        execFileSync(
-          path.join(root, "assets/hide-details"),
-          [
-            path.join(directory, "missing.png"),
-            output,
-            options.style,
-            options.padding,
-            options.categories,
-            "",
-            options.recognition,
-          ],
-          { encoding: "utf8", stdio: "pipe", timeout: 5_000 },
-        ),
+      () => redactImage({ inputPath: path.join(directory, "missing.png"), outputPath: output, ...options }),
       (error) => {
-        assert.equal(error.status, 2);
+        assert.equal(error.status, 1);
         assert.match(error.stderr, message);
         assert.equal(error.stdout, "");
         return true;
@@ -204,13 +220,7 @@ for (const [field, value, message] of [
 for (const recognition of ["fast", "accurate"]) {
   test(`${recognition} OCR detects numbers beside expiry and ticket digits`, () => {
     const output = path.join(directory, `numeric-output-${sequence++}.png`);
-    const report = JSON.parse(
-      execFileSync(
-        path.join(root, "assets/hide-details"),
-        [numericInput, output, "blackout", "4", "card,phone", "", recognition],
-        { encoding: "utf8", timeout: 90_000 },
-      ),
-    );
+    const report = redactImage({ inputPath: numericInput, outputPath: output, categories: "card,phone", recognition });
     assert.ok(
       report.hits.some((hit) => hit.kind === "card" && hit.text.includes("Exp")),
       "missing card beside expiry",
@@ -242,13 +252,7 @@ for (const recognition of ["fast", "accurate"]) {
 
   test(`${recognition} OCR masks dotted cards with only the card category enabled`, () => {
     const output = path.join(directory, `dotted-card-${sequence++}.png`);
-    const report = JSON.parse(
-      execFileSync(
-        path.join(root, "assets/hide-details"),
-        [numericInput, output, "blackout", "4", "card", "", recognition],
-        { encoding: "utf8", timeout: 90_000 },
-      ),
-    );
+    const report = redactImage({ inputPath: numericInput, outputPath: output, categories: "card", recognition });
     assert.ok(report.hits.every((hit) => hit.kind === "card"));
     assert.ok(report.hits.some((hit) => hit.text.replaceAll(/\s/g, "").includes("4111.1111.1111.1111")));
     const reportFile = path.join(directory, `dotted-card-${sequence++}.json`);

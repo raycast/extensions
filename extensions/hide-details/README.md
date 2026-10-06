@@ -38,6 +38,8 @@ The **OCR** and **Face** percentages describe recognition confidence. They do no
 
 A result with no detections can still be copied, but it has no added masks. Check the preview before sharing. If copying fails, the preview remains available so you can retry **Copy Redacted Image**.
 
+Copying saves readable clipboard data in memory for recovery if the image write fails. Unavailable clipboard formats do not block copying the finished image. If a failed write cannot be fully recovered, the error asks you to copy the original again.
+
 ## What it detects
 
 - Email addresses and phone numbers.
@@ -115,13 +117,7 @@ The output is a flattened PNG with no editable layers.
 
 ## Development
 
-Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and the Xcode Command Line Tools.
-
-Install the command line tools if needed:
-
-```bash
-xcode-select --install
-```
+Requires macOS 14 or newer, Raycast, Node.js 22.22.2 or newer, and Xcode with Swift 6.3 or newer for the Swift build plugins.
 
 Install dependencies and start development from the project directory:
 
@@ -130,20 +126,20 @@ npm ci
 npm run dev
 ```
 
-The development command compiles the Swift helper for Apple Silicon and Intel, signs the combined binary, and bundles it in `assets/hide-details`. Restart `npm run dev` after changing Swift code.
+Native code lives in the Swift package at `swift/hide-details`. TypeScript calls its `@raycast` functions through `swift:../swift/hide-details` imports, using the same integration as Color Picker. Raycast compiles and packages the native code during development and builds. Generated native assets and build caches are ignored by Git.
 
 To validate and build the extension:
 
 ```bash
 npm run lint
+npm run build
 npm run typecheck
 npm test
-npm run build
 ```
 
-Use `npm run build:swift` to rebuild only the native helper. Run `npm run publish` to compile the helper and start Raycast's publishing flow.
+Run `npm run publish` to build the extension and start Raycast's publishing flow. No manual native build or checked-in executable is required.
 
-`npm test` rebuilds the universal Swift helper before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, dotted cards with only card detection enabled, cards and phones beside other numbers, masked review labels, face detection, small text, preference validation, and scan cleanup. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, restoration after rejected writes, and protection against stale copies without replacing your clipboard.
+`npm test` builds the extension and its Swift bindings before running the regression suite. The tests cover mask pixels and crop direction, Fast and Accurate OCR, dotted cards with only card detection enabled, cards and phones beside other numbers, masked review labels, face detection, small text, preference validation, and scan cleanup. Native clipboard tests use an isolated pasteboard and check PNG/TIFF input, copied output, restoration after rejected writes, and protection against stale copies without replacing your clipboard.
 
 ## License
 

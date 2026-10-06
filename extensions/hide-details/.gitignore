@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-/.build
+.build/
 /.fallow
 
 # Raycast specific files

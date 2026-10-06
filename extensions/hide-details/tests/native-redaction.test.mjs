@@ -18,7 +18,7 @@ test("native masks replace intended pixels and numeric candidates classify indep
         "swiftc",
         "-module-cache-path",
         path.join(directory, "module-cache"),
-        path.join(root, "swift/Redaction.swift"),
+        path.join(root, "swift/hide-details/Sources/Redaction.swift"),
         path.join(directory, "main.swift"),
         "-o",
         executable,

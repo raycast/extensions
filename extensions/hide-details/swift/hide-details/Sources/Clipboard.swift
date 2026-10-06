@@ -15,7 +15,6 @@ enum ClipboardError: LocalizedError {
   case noImage
   case changed
   case unreadableOutput
-  case snapshotFailed
   case writeFailed
   case restoreFailed
 
@@ -27,12 +26,10 @@ enum ClipboardError: LocalizedError {
       return "The clipboard changed while scanning. The newer clipboard was kept. Scan the current clipboard again."
     case .unreadableOutput:
       return "Could not read the redacted image. Scan the current clipboard again."
-    case .snapshotFailed:
-      return "Could not preserve the current clipboard. It was left unchanged. Try copying again."
     case .writeFailed:
       return "Could not copy the redacted image. Try copying it again."
     case .restoreFailed:
-      return "Could not copy the redacted image or restore the previous clipboard. Copy the original again."
+      return "Could not copy the redacted image or fully restore the previous clipboard. Copy the original again."
     }
   }
 }
@@ -64,16 +61,18 @@ func copyClipboardImage(outputURL: URL, expectedChangeCount: Int?, pasteboard: C
         representation.cgImage != nil else { throw ClipboardError.unreadableOutput }
   let originalChangeCount = pasteboard.changeCount
   if let expectedChangeCount, originalChangeCount != expectedChangeCount { throw ClipboardError.changed }
-  guard let items = pasteboard.pasteboardItems else { throw ClipboardError.snapshotFailed }
-  // Materialize every representation before clearing; pasteboard-backed items cannot be reused afterward.
-  let originals = try items.map { item in
+  let items = pasteboard.pasteboardItems
+  var backupComplete = items != nil
+  // Save readable representations before clearing. Unavailable formats must not block a new copy.
+  let originals = (items ?? []).compactMap { item -> NSPasteboardItem? in
     let saved = NSPasteboardItem()
     for type in item.types {
       guard let originalData = item.data(forType: type), saved.setData(originalData, forType: type) else {
-        throw ClipboardError.snapshotFailed
+        backupComplete = false
+        continue
       }
     }
-    return saved
+    return saved.types.isEmpty ? nil : saved
   }
   guard pasteboard.changeCount == originalChangeCount else { throw ClipboardError.changed }
   let clearedChangeCount = pasteboard.clearContents()
@@ -84,5 +83,6 @@ func copyClipboardImage(outputURL: URL, expectedChangeCount: Int?, pasteboard: C
   let restoreChangeCount = pasteboard.clearContents()
   guard pasteboard.changeCount == restoreChangeCount else { throw ClipboardError.changed }
   guard originals.isEmpty || pasteboard.writeObjects(originals) else { throw ClipboardError.restoreFailed }
+  guard backupComplete else { throw ClipboardError.restoreFailed }
   throw ClipboardError.writeFailed
 }

@@ -11,4 +11,6 @@
 - Detect cards with dot separators or beside expiry dates, phones beside ticket numbers or IPv4 addresses, and adjacent phone numbers.
 - Avoid reporting digits inside secret keys as phone or card numbers, and optionally hide OCR confidence percentages in the review list.
 - Mask recognized text in detection labels while reviewing images during screen sharing.
-- Keep previews independent, process clipboard input in memory, clean temporary output, restore clipboard content after rejected image writes, and preserve newer clipboard content during automatic processing.
+- Copy finished images even when the previous clipboard advertises unavailable formats.
+- Build and package native code through Raycast's Swift integration without a checked-in executable.
+- Keep previews independent, process clipboard input in memory, clean temporary output, restore readable clipboard content after rejected image writes, and preserve newer clipboard content during automatic processing.

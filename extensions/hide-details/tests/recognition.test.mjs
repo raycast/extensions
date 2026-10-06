@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { redactImage } from "./swift.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const directory = mkdtempSync(path.join(tmpdir(), "hide-details-recognition-"));
@@ -20,14 +21,9 @@ after(() => rmSync(directory, { recursive: true, force: true }));
 
 function redact(input, name, categories, recognition, customRegex = "") {
   const output = path.join(directory, `${name}.png`);
-  const stdout = execFileSync(
-    path.join(root, "assets/hide-details"),
-    [input, output, "blackout", "4", categories, "", recognition, customRegex],
-    { encoding: "utf8", timeout: 90_000 },
-  );
-  const report = JSON.parse(stdout);
+  const report = redactImage({ inputPath: input, outputPath: output, categories, recognition, customRegex });
   const reportFile = path.join(directory, `${name}.json`);
-  writeFileSync(reportFile, stdout);
+  writeFileSync(reportFile, JSON.stringify(report));
   swift(path.join(root, "tests/check-blackout.swift"), [output, reportFile]);
   return report;
 }

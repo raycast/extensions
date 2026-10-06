@@ -53,36 +53,19 @@ async function harness({ preferences = {}, native } = {}) {
   const directory = path.join(temporary, String(sequence++));
   await mkdir(directory);
   const calls = [];
-  const api = {
-    environment: { assetsPath: "/bundled/assets" },
-    getPreferenceValues: () => preferences,
+  const invoke = async (operation, args) => {
+    calls.push({ operation, args });
+    if (native) return native(args, operation);
+    if (operation === "copyRedactedImage") return;
+    await writeFile(args[0], png);
+    return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
   };
   const source = await loadSource("src/redaction.ts", {
-    "@raycast/api": api,
+    "@raycast/api": { getPreferenceValues: () => preferences },
     os: { tmpdir: () => directory },
-    util: {
-      promisify:
-        (fn) =>
-        (...args) =>
-          new Promise((resolve, reject) => {
-            fn(...args, (error, stdout, stderr) => (error ? reject(error) : resolve({ stdout, stderr })));
-          }),
-    },
-    child_process: {
-      execFile(file, args, options, callback) {
-        calls.push({ file, args, options });
-        Promise.resolve()
-          .then(async () => {
-            if (native) return native(args);
-            if (args[0] === "--copy-clipboard") return "";
-            await writeFile(args[1], png);
-            return JSON.stringify({ hits: [hit], regionCount: 1, output: args[1], clipboardChangeCount: 17 });
-          })
-          .then(
-            (stdout) => callback(null, stdout, ""),
-            (error) => callback(error, "", error.stderr ?? ""),
-          );
-      },
+    "swift:../swift/hide-details": {
+      redactImage: (...args) => invoke("redactImage", args),
+      copyRedactedImage: (...args) => invoke("copyRedactedImage", args),
     },
   });
   return {
@@ -111,7 +94,8 @@ test("overlapping reviews own distinct outputs and cleanup cannot delete another
   assert.deepEqual((await wrapper.outputs()).length, 2);
   assert.deepEqual(await readdir(path.dirname(first.output)), ["out.png"]);
   await wrapper.copyRedacted(first);
-  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), ["--copy-clipboard", first.output]);
+  assert.equal(wrapper.calls.at(-1).operation, "copyRedactedImage");
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [first.output, null]);
   await wrapper.disposeScan(first);
   await wrapper.disposeScan(first);
   await absent(first.output);
@@ -124,20 +108,22 @@ test("overlapping reviews own distinct outputs and cleanup cannot delete another
 test("automatic copy guards source generation while review copy explicitly replaces clipboard", async () => {
   const wrapper = await harness();
   const scan = await wrapper.redactClipboard({ recognition: "accurate" });
-  assert.equal(wrapper.calls[0].args[2], "blackout");
-  assert.equal(wrapper.calls[0].args[6], "accurate");
+  assert.equal(wrapper.calls[0].operation, "redactImage");
+  assert.equal(wrapper.calls[0].args[7], null);
+  assert.equal(wrapper.calls[0].args[1], "blackout");
+  assert.equal(wrapper.calls[0].args[5], "accurate");
   await wrapper.copyRedacted(scan, { requireOriginalClipboard: true });
-  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), ["--copy-clipboard", scan.output, "17"]);
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, 17]);
   await wrapper.copyRedacted(scan);
-  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), ["--copy-clipboard", scan.output]);
+  assert.deepEqual(Array.from(wrapper.calls.at(-1).args), [scan.output, null]);
   await wrapper.disposeScan(scan);
 });
 
 test("a valid scan without detections retains its own output", async () => {
   const wrapper = await harness({
     native: async (args) => {
-      await writeFile(args[1], png);
-      return JSON.stringify({ hits: [], regionCount: 0, output: args[1], clipboardChangeCount: 0 });
+      await writeFile(args[0], png);
+      return { hits: [], regionCount: 0, output: args[0], clipboardChangeCount: 0 };
     },
   });
   const scan = await wrapper.redactClipboard();
@@ -161,8 +147,8 @@ for (const [description, change] of [
   test(`invalid helper report cleans owned output for ${description}`, async () => {
     const wrapper = await harness({
       native: async (args) => {
-        await writeFile(args[1], png);
-        return JSON.stringify(change({ hits: [hit], regionCount: 1, output: args[1], clipboardChangeCount: 17 }));
+        await writeFile(args[0], png);
+        return change({ hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 });
       },
     });
     await assert.rejects(wrapper.redactClipboard(), /invalid result/);
@@ -170,15 +156,15 @@ for (const [description, change] of [
   });
 }
 
-test("malformed JSON, missing output, bad PNG, and helper failures clean invocation directories", async () => {
-  for (const behavior of ["json", "missing", "png", "failure"]) {
+test("invalid native results, missing output, bad PNG, and bridge failures clean invocation directories", async () => {
+  for (const behavior of ["result", "missing", "png", "failure"]) {
     const wrapper = await harness({
       native: async (args) => {
-        if (behavior === "missing") return "{}";
-        await writeFile(args[1], behavior === "png" ? Buffer.alloc(24) : png);
+        if (behavior === "missing") return {};
+        await writeFile(args[0], behavior === "png" ? Buffer.alloc(24) : png);
         if (behavior === "failure")
           throw Object.assign(new Error("process failed"), { stderr: "Readable native error" });
-        return "not JSON";
+        return "not a report";
       },
     });
     await assert.rejects(wrapper.redactClipboard());
@@ -204,13 +190,13 @@ test("invalid preferences fail before reading the clipboard or creating output",
 test("copy failures surface native error while retaining the review for retry", async () => {
   let failCopy = true;
   const wrapper = await harness({
-    native: async (args) => {
-      if (args[0] === "--copy-clipboard") {
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") {
         if (failCopy) throw Object.assign(new Error("process failed"), { stderr: "Clipboard write failed" });
         return "";
       }
-      await writeFile(args[1], png);
-      return JSON.stringify({ hits: [hit], regionCount: 1, output: args[1], clipboardChangeCount: 17 });
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
   });
   const scan = await wrapper.redactClipboard();
@@ -247,15 +233,15 @@ test("expiry removes only old dead-owner runs and exact legacy regular files", a
 
 test("immediate command cleans output after a guarded clipboard change failure", async () => {
   const wrapper = await harness({
-    native: async (args) => {
-      if (args[0] === "--copy-clipboard") {
-        assert.equal(args[2], "17");
+    native: async (args, operation) => {
+      if (operation === "copyRedactedImage") {
+        assert.equal(args[1], 17);
         throw Object.assign(new Error("process failed"), {
           stderr: "The clipboard changed. The newer clipboard was kept.",
         });
       }
-      await writeFile(args[1], png);
-      return JSON.stringify({ hits: [hit], regionCount: 1, output: args[1], clipboardChangeCount: 17 });
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
   });
   const toasts = [];
@@ -285,8 +271,8 @@ test("unmount disposes a scan that finishes after the review closes", async () =
     native: async (args) => {
       started();
       await nativeFinished;
-      await writeFile(args[1], png);
-      return JSON.stringify({ hits: [hit], regionCount: 1, output: args[1], clipboardChangeCount: 17 });
+      await writeFile(args[0], png);
+      return { hits: [hit], regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
   });
   let mount;
@@ -375,11 +361,13 @@ precondition(pasteboard.changeCount == newerGeneration)
 
 final class FailingPasteboard: ClipboardPasteboard {
   let backing: NSPasteboard
+  var acceptWrite = false
   var partialWrite = false
   var newerCopy = false
   var failRestore = false
   var changeDuringSnapshot = false
   var unreadableSnapshot = false
+  var snapshotItems: [NSPasteboardItem]?
   init(_ backing: NSPasteboard) { self.backing = backing }
   var changeCount: Int { backing.changeCount }
   var pasteboardItems: [NSPasteboardItem]? {
@@ -388,7 +376,7 @@ final class FailingPasteboard: ClipboardPasteboard {
       backing.clearContents()
       precondition(backing.setString("newer clipboard", forType: .string))
     }
-    return unreadableSnapshot ? nil : items
+    return unreadableSnapshot ? nil : (snapshotItems ?? items)
   }
   func clearContents() -> Int { backing.clearContents() }
   func setData(_ data: Data?, forType type: NSPasteboard.PasteboardType) -> Bool {
@@ -397,7 +385,7 @@ final class FailingPasteboard: ClipboardPasteboard {
       backing.clearContents()
       precondition(backing.setString("newer clipboard", forType: .string))
     }
-    return false
+    return acceptWrite && backing.setData(data, forType: type)
   }
   func writeObjects(_ objects: [NSPasteboardWriting]) -> Bool {
     !failRestore && backing.writeObjects(objects)
@@ -453,16 +441,53 @@ do {
 precondition(pasteboard.string(forType: .string) == "newer clipboard")
 failing.changeDuringSnapshot = false
 
-failing.unreadableSnapshot = true
-let beforeUnreadable = pasteboard.changeCount
+final class UnreadableItem: NSPasteboardItem {
+  static let unavailableType = NSPasteboard.PasteboardType("com.hide-details.unavailable")
+  override func data(forType type: NSPasteboard.PasteboardType) -> Data? {
+    type == Self.unavailableType ? nil : super.data(forType: type)
+  }
+}
+let mixedItem = UnreadableItem()
+precondition(mixedItem.setData(tiff, forType: .tiff))
+precondition(mixedItem.setString("readable original", forType: .string))
+precondition(mixedItem.setData(Data([1]), forType: UnreadableItem.unavailableType))
+let unreadableItem = UnreadableItem()
+precondition(unreadableItem.setData(Data([2]), forType: UnreadableItem.unavailableType))
+let lastItem = NSPasteboardItem()
+precondition(lastItem.setString("last original", forType: .string))
+failing.snapshotItems = [mixedItem, unreadableItem, lastItem]
 do {
   try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
-  preconditionFailure("An unreadable snapshot must fail before clearing")
-} catch ClipboardError.snapshotFailed {}
-precondition(pasteboard.changeCount == beforeUnreadable)
-precondition(pasteboard.string(forType: .string) == "newer clipboard")
+  preconditionFailure("A rejected write with an incomplete backup must report incomplete recovery")
+} catch ClipboardError.restoreFailed {}
+let readableRestored = pasteboard.pasteboardItems!
+precondition(readableRestored.count == 2)
+precondition(readableRestored[0].data(forType: .tiff) == tiff)
+precondition(readableRestored[0].string(forType: .string) == "readable original")
+precondition(readableRestored[1].string(forType: .string) == "last original")
+precondition(!readableRestored[0].types.contains(UnreadableItem.unavailableType))
+failing.acceptWrite = true
+for guarded in [false, true] {
+  let expectedChangeCount = guarded ? pasteboard.changeCount : nil
+  try copyClipboardImage(outputURL: output, expectedChangeCount: expectedChangeCount, pasteboard: failing)
+  precondition(pasteboard.data(forType: .png) == png)
+  precondition(pasteboard.pasteboardItems?.count == 1)
+  precondition(pasteboard.string(forType: .string) == nil)
+  precondition(!(pasteboard.types ?? []).contains(UnreadableItem.unavailableType))
+}
+failing.snapshotItems = nil
+
+failing.unreadableSnapshot = true
+try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+precondition(pasteboard.data(forType: .png) == png)
+failing.acceptWrite = false
+do {
+  try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
+  preconditionFailure("A rejected write without a backup must report incomplete recovery")
+} catch ClipboardError.restoreFailed {}
 failing.unreadableSnapshot = false
 
+precondition(pasteboard.setString("original text", forType: .string))
 failing.failRestore = true
 do {
   try copyClipboardImage(outputURL: output, expectedChangeCount: nil, pasteboard: failing)
@@ -486,7 +511,7 @@ print("PNG/TIFF read, no-image errors, stale-copy preservation, invalid-output p
         "swiftc",
         "-module-cache-path",
         path.join(directory, "module-cache"),
-        fileURLToPath(new URL("swift/Clipboard.swift", root)),
+        fileURLToPath(new URL("swift/hide-details/Sources/Clipboard.swift", root)),
         main,
         "-o",
         binary,
@@ -514,8 +539,8 @@ test("review masks all detection labels, uses real line breaks, and disposes rep
   }));
   const wrapper = await harness({
     native: async (args) => {
-      await writeFile(args[1], png);
-      return JSON.stringify({ hits: privateHits, regionCount: 1, output: args[1], clipboardChangeCount: 17 });
+      await writeFile(args[0], png);
+      return { hits: privateHits, regionCount: 1, output: args[0], clipboardChangeCount: 17 };
     },
   });
   const preferences = {};

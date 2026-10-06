@@ -21,34 +21,33 @@ struct Configuration {
   var customRegex: CustomRegex?
 }
 
-func parseConfiguration(_ arguments: [String]) throws -> Configuration {
-  guard (7...9).contains(arguments.count) else {
-    throw RedactionError(message: "Usage: hide-details <input|--clipboard> <output> <style> <padding> <categories> <extra words> [fast|accurate] [custom regex]")
-  }
-  guard let style = Style(rawValue: arguments[3]) else {
+func parseConfiguration(
+  inputPath: String?, outputPath: String, style: String, padding: String,
+  categories: String, extraWords: String, recognition: String, customRegex: String
+) throws -> Configuration {
+  guard let style = Style(rawValue: style) else {
     throw RedactionError(message: "Invalid redaction style. Choose blackout, blur, or pixelate.")
   }
-  guard let padding = Double(arguments[4]), padding.isFinite, (0...1000).contains(padding) else {
+  guard let padding = Double(padding), padding.isFinite, (0...1000).contains(padding) else {
     throw RedactionError(message: "Invalid padding. Enter a number from 0 to 1000 in extension preferences.")
   }
-  let categories = Set(arguments[5].split(separator: ",", omittingEmptySubsequences: false)
+  let categories = Set(categories.split(separator: ",", omittingEmptySubsequences: false)
     .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
     .filter { !$0.isEmpty })
   let unknown = categories.subtracting(["email", "phone", "card", "secret", "ip", "name", "face"])
   guard unknown.isEmpty else {
     throw RedactionError(message: "Unknown category: \(unknown.sorted().joined(separator: ", ")). Use email, phone, card, secret, ip, name, or face.")
   }
-  let recognitionName = arguments.count > 7 ? arguments[7] : "fast"
-  guard ["fast", "accurate"].contains(recognitionName) else {
+  guard ["fast", "accurate"].contains(recognition) else {
     throw RedactionError(message: "Invalid text recognition. Choose fast or accurate.")
   }
-  let regex = arguments.count > 8 && !arguments[8].isEmpty ? try CustomRegex(pattern: arguments[8]) : nil
+  let regex = customRegex.isEmpty ? nil : try CustomRegex(pattern: customRegex)
   return Configuration(
-    inputURL: arguments[1] == "--clipboard" ? nil : URL(fileURLWithPath: arguments[1]),
-    outputURL: URL(fileURLWithPath: arguments[2]), style: style, padding: CGFloat(padding),
+    inputURL: inputPath.map { URL(fileURLWithPath: $0) },
+    outputURL: URL(fileURLWithPath: outputPath), style: style, padding: CGFloat(padding),
     categories: categories,
-    extraWords: arguments[6].split(separator: ",").map { $0.filter { !$0.isWhitespace } }.filter { $0.count >= 2 },
-    recognition: recognitionName == "accurate" ? .accurate : .fast,
+    extraWords: extraWords.split(separator: ",").map { $0.filter { !$0.isWhitespace } }.filter { $0.count >= 2 },
+    recognition: recognition == "accurate" ? .accurate : .fast,
     customRegex: regex
   )
 }
@@ -147,36 +146,4 @@ func redact(_ configuration: Configuration) throws -> Report {
   try png.write(to: configuration.outputURL, options: .atomic)
   return Report(hits: hits, regionCount: regions.count, output: configuration.outputURL.path,
                 clipboardChangeCount: clipboardChangeCount)
-}
-
-let arguments = CommandLine.arguments
-if arguments.count > 1, arguments[1] == "--copy-clipboard" {
-  guard (3...4).contains(arguments.count),
-        arguments.count == 3 || (Int(arguments[3]).map { $0 >= 0 } == true) else {
-    fputs("Usage: hide-details --copy-clipboard <output.png> [expected clipboard change count]\n", stderr)
-    exit(2)
-  }
-  do {
-    try copyClipboardImage(outputURL: URL(fileURLWithPath: arguments[2]),
-                           expectedChangeCount: arguments.count > 3 ? Int(arguments[3]) : nil)
-  } catch {
-    fputs("\(error.localizedDescription)\n", stderr)
-    exit(1)
-  }
-  exit(0)
-}
-
-let configuration: Configuration
-do {
-  configuration = try parseConfiguration(arguments)
-} catch {
-  fputs("\(error.localizedDescription)\n", stderr)
-  exit(2)
-}
-do {
-  let report = try redact(configuration)
-  FileHandle.standardOutput.write(try JSONEncoder().encode(report))
-} catch {
-  fputs("\(error.localizedDescription)\n", stderr)
-  exit(error is CustomRegexError ? 2 : 1)
 }
