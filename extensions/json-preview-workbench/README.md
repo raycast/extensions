@@ -57,11 +57,11 @@ The committed assets are sufficient to develop or build the Raycast commands. Af
 
 ```sh
 npm run build:editor
+npm run build
 npm test
 npm run typecheck
 npm run lint
 npm run lint:source
-npm run build
 ```
 
 See [native build provenance](docs/native-build.md) for the universal binary build and verification steps. `npm run build` runs the standard Raycast distribution build using committed assets. `npm run build:all` also rebuilds the native helper.

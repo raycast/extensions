@@ -5,7 +5,7 @@ Date: 2026-10-06. Host: macOS on Apple Silicon.
 ## Store Submission Build
 
 - Confirmed the current Raycast account handle `tang_xiangrun` in Account settings.
-- 24 automated tests, TypeScript, Raycast manifest / icon lint, all-source ESLint / Prettier, and distribution build passed. Tests cover format detection, numeric precision, object / bracket transforms, isolated runtimes, timeouts, and recovery, including failed / unresponsive native launches and stale handoff cleanup.
+- 25 automated tests, TypeScript, Raycast manifest / icon lint, all-source ESLint / Prettier, and distribution build passed. Tests cover format detection, numeric precision, object / bracket transforms, isolated runtimes, timeouts, and recovery, including failed / unresponsive native launches and stale handoff cleanup.
 - The helper includes arm64 and x86_64 slices targeting macOS 13+. `lipo -archs` and `codesign --verify --deep --strict` passed. The Intel slice was compiled but has not been exercised on physical Intel hardware.
 - Imported the project into Raycast and used the validated distribution output for desktop testing. The public `examples/demo.json` fixture opened in the installed editor, with automatic formatting and a single panel. A JavaScript filter revealed a second panel and returned the expected active user's name.
 - Verified the pin switch in the native window: enabling it changed the actual system window layer to 3; reopening the app preserved the enabled preference; disabling it restored layer 0. The preference was restored to off after testing.
@@ -18,8 +18,9 @@ Date: 2026-10-06. Host: macOS on Apple Silicon.
 - Browser interaction checks confirmed that both accepted Open and Paste inputs establish a clean baseline. Copying a JSON5 input produced formatted JSON while retaining the original input and its comment.
 - Rebuilt and launched the universal native helper with a synthetic input; it consumed and removed the handoff and displayed the expected formatted JSON in WKWebView.
 - Added regression coverage for percent-encoded `file://` paths, slash-prefixed JSON5 comments, and precision-safe YAML conversion. Large YAML integers remain exact; lossy decimals report an error instead of rounding.
+- Clipboard-file failures fall back only to a separate, valid document. Filename-only and invalid text retain the useful file error, including filenames that happen to be valid JSON numbers. A clean build without the generated `raycast-env.d.ts` regenerated preference types before passing TypeScript and lint checks; CI now uses the same order.
 - Moved editor-only CodeMirror dependencies to development dependencies and adopted Raycast's generated preference types.
-- Native Raycast tree browsing still displays the public fixture after installing the rebuilt distribution. Store screenshots in `metadata/` remain pending: Raycast's Capture Window tool requests Screen Recording permission, which is currently not enabled. The existing `media/` screenshots are documentation images, not store metadata.
+- Native Raycast tree browsing still displays the public fixture after installing the rebuilt distribution. Store screenshots in `metadata/` remain pending. The Capture Window workflow requires Screen Recording permission and an invocation from the active extension view. The existing `media/` screenshots are documentation images, not store metadata.
 
 ## Earlier Development Checks
 

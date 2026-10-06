@@ -3,7 +3,7 @@ import { mkdir, writeFile, access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { readInput } from "./input";
+import { readInput, readClipboardInput } from "./input";
 import { clearStaleHandoffs, runWithHandoff } from "./handoff";
 
 export async function initialInput(argument?: string): Promise<string> {
@@ -14,14 +14,7 @@ export async function initialInput(argument?: string): Promise<string> {
     if (selected.trim()) return selected;
   }
   const clipboard = await Clipboard.read();
-  if (clipboard.file) {
-    try {
-      return (await readInput(clipboard.file)).text;
-    } catch (error) {
-      if (!clipboard.text?.trim()) throw error;
-    }
-  }
-  return clipboard.text ?? "";
+  return readClipboardInput(clipboard.file, clipboard.text);
 }
 
 export async function launchEditor(text: string): Promise<void> {
