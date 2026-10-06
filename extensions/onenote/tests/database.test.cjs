@@ -323,6 +323,54 @@ test("fallback searches work without system SQLite and unchanged launches avoid 
   }
 });
 
+test("large-library lists resolve only each note's indexed ancestor IDs", async () => {
+  const fixture = await createFixture({
+    execute: () => {
+      throw new Error("Synthetic unindexed fixture");
+    },
+  });
+  try {
+    const source = new fixture.SQL.Database(await fs.readFile(fixture.indexFile));
+    try {
+      const insert = source.prepare(
+        "INSERT INTO Entities (Type, GOID, GUID, Title, RecentTime) VALUES (2, ?, ?, ?, 0)"
+      );
+      for (let index = 0; index < 5000; index++)
+        insert.run([`unrelated-${index}`, `guid-${index}`, `Unrelated section ${index}`]);
+      insert.free();
+      source.run(
+        "INSERT INTO Entities (Type, GOID, GUID, Title) VALUES (4, '{notebook}{1}', 'notebook-guid', 'Synthetic notebook'), (3, '{group}{1}', 'group-guid', 'Synthetic group'), (2, 'synthetic-section', 'section-guid', 'Synthetic section')"
+      );
+      source.run("UPDATE Entities SET GrandparentGOIDs = '{notebook}{1}{group}{1}' WHERE Type = 1");
+      await fs.writeFile(fixture.indexFile, Buffer.from(source.export()));
+    } finally {
+      source.close();
+    }
+    const state = await fixture.create_or_update_db();
+    const db = new fixture.SQL.Database(await fs.readFile(state.databasePath));
+    try {
+      const query = directoryQuery();
+      const plan = db
+        .exec(`EXPLAIN QUERY PLAN ${query}`)[0]
+        .values.map((row) => row[3])
+        .join("\n");
+      assert.match(plan, /SEARCH Ancestor USING INDEX Entities_GOID \(GOID=\?\)/);
+      assert.doesNotMatch(plan, /SCAN Ancestor|SEARCH Ancestor.*\(Type/);
+      const result = db.exec(query)[0];
+      const row = result.values.find((row) => row[result.columns.indexOf("GOID")] === "synthetic-1");
+      assert.equal(row[result.columns.indexOf("ParentTitle")], "Synthetic section");
+      assert.deepEqual(JSON.parse(row[result.columns.indexOf("GrandparentTitles")]), {
+        "{notebook}{1}": "Synthetic notebook",
+        "{group}{1}": "Synthetic group",
+      });
+    } finally {
+      db.close();
+    }
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
 test("ancestor labels come from each database version rather than a shared cache", indexedOnly, async () => {
   const fixture = await createFixture({
     execute: ({ call, execute }) => {
@@ -345,6 +393,7 @@ test("ancestor labels come from each database version rather than a shared cache
     source.close();
     const fallback = await fixture.create_or_update_db(true);
     const utils = loadSource("utils", {
+      "./search": fixture.search,
       "@raycast/api": {
         Cache: class {
           get(id) {

@@ -8,6 +8,7 @@ import {
   normalizeSearchText,
   BUILD_FULL_TEXT_INDEX_SQL,
   IndexFile,
+  splitGrandparentIds,
 } from "./search";
 import { access, copyFile, mkdtemp, readdir, readFile, rename, rm } from "fs/promises";
 import { homedir } from "os";
@@ -122,6 +123,24 @@ export const create_or_update_db = async (force_update = false) => {
       // The same note can exist in several indexes (e.g. old and current versions): keep the most recently
       // modified copy, preferring the one from the most recently updated index on ties.
       db.run(DEDUPE_ENTITIES_SQL);
+
+      // Resolve only a note's own ancestors by indexed IDs when lists are read.
+      db.run(
+        "CREATE TABLE EntityAncestors (EntityGOID TEXT NOT NULL, AncestorGOID TEXT NOT NULL, PRIMARY KEY (EntityGOID, AncestorGOID))"
+      );
+      const ancestors = db.prepare("SELECT GOID, GrandparentGOIDs FROM Entities WHERE GrandparentGOIDs IS NOT NULL");
+      const insertAncestor = db.prepare("INSERT OR IGNORE INTO EntityAncestors VALUES (?, ?)");
+      try {
+        while (ancestors.step()) {
+          const row = ancestors.getAsObject();
+          for (const id of splitGrandparentIds(row.GrandparentGOIDs as string)) {
+            insertAncestor.run([row.GOID, id]);
+          }
+        }
+      } finally {
+        ancestors.free();
+        insertAncestor.free();
+      }
 
       // One normalized title + content text per note; the trigram index is built over it after the file is saved.
       db.run(

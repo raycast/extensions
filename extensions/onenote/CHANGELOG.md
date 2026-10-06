@@ -10,6 +10,7 @@
 - Treat dollar sequences in searches literally instead of expanding them into SQL fragments.
 - Show notebooks and sections before recent notes when browsing grouped results.
 - Keep parent and ancestor labels consistent with the database each view is reading.
+- Look up ancestor labels by indexed IDs so large libraries avoid a folder scan for every result.
 - Reuse unchanged fallback databases without loading their full contents into memory for an index retry.
 
 ## [Fix search memory usage] - 2026-05-20

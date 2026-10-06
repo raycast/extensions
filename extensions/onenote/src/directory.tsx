@@ -88,8 +88,9 @@ export function getListItems(
 const LIST_COLUMNS =
   "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, PinTime, Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content, " +
   "(SELECT Title FROM Entities AS Parent WHERE Parent.GOID = Entities.ParentGOID LIMIT 1) AS ParentTitle, " +
-  "(SELECT json_group_object(Ancestor.GOID, Ancestor.Title) FROM Entities AS Ancestor " +
-  "WHERE Ancestor.Type > 1 AND instr(Entities.GrandparentGOIDs, Ancestor.GOID) > 0) AS GrandparentTitles";
+  "(SELECT json_group_object(Ancestor.GOID, Ancestor.Title) FROM EntityAncestors AS Link " +
+  "CROSS JOIN Entities AS Ancestor WHERE Link.EntityGOID = Entities.GOID " +
+  "AND Ancestor.GOID = Link.AncestorGOID AND Ancestor.Type > 1) AS GrandparentTitles";
 
 function quoteSql(value: string) {
   return value.replaceAll("'", "''");

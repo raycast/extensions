@@ -2,7 +2,16 @@ import { readdir } from "fs/promises";
 import { resolve } from "path";
 
 // Bump when the merged database layout or search normalization changes so existing databases are rebuilt.
-export const DATABASE_SCHEMA_VERSION = 6;
+export const DATABASE_SCHEMA_VERSION = 7;
+
+export function splitGrandparentIds(value: string | null | undefined): string[] {
+  const parts = value?.split("}") ?? [];
+  const ids: string[] = [];
+  for (let index = 0; index < parts.length - 1; index += 2) {
+    ids.push(`${parts[index]}}${parts[index + 1]}}`);
+  }
+  return ids;
+}
 
 // Terms shorter than this cannot be looked up in a trigram index.
 const MIN_INDEXED_TERM_LENGTH = 3;

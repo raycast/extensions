@@ -6,6 +6,7 @@ import { readdirSync } from "fs";
 import { runAppleScript } from "run-applescript";
 import { resolve } from "path";
 import { homedir } from "os";
+import { splitGrandparentIds } from "./search";
 
 const ONENOTE_USER_INFO_CACHE = resolve(
   homedir(),
@@ -105,14 +106,7 @@ async function get_user_uid(): Promise<string> {
 }
 
 export function split_grandparents(item: OneNoteItem) {
-  const parts = item.GrandparentGOIDs?.split("}");
-  const newIds = [];
-  let i = 0;
-  while (i < parts?.length - 1) {
-    newIds.push(`${parts[i]}}${parts[i + 1]}}`);
-    i += 2;
-  }
-  return newIds;
+  return splitGrandparentIds(item.GrandparentGOIDs);
 }
 
 export function getParentTitle(item: OneNoteItem): string {
