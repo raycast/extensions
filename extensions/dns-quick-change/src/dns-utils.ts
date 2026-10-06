@@ -339,23 +339,18 @@ export function initializePresets(): void {
 export function getPresets(): DNSPreset[] {
   initializePresets();
 
-  try {
-    const content = fs.readFileSync(PRESETS_FILE, "utf-8");
-    const presets: DNSPreset[] = [];
-    const lines = content.split(/\r?\n/);
+  const content = fs.readFileSync(PRESETS_FILE, "utf-8");
+  const presets: DNSPreset[] = [];
+  const lines = content.split(/\r?\n/);
 
-    for (const line of lines) {
-      const preset = parsePresetLine(line);
-      if (preset) {
-        presets.push(preset);
-      }
+  for (const line of lines) {
+    const preset = parsePresetLine(line);
+    if (preset) {
+      presets.push(preset);
     }
-
-    return presets;
-  } catch (error) {
-    console.error("Error reading presets file:", error);
-    return [];
   }
+
+  return presets;
 }
 
 /**

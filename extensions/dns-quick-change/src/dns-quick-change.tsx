@@ -76,7 +76,11 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
 
   // Helper to safely pull a value from the networksetup -getinfo output
   const get = (key: string): string | undefined => {
-    return details[key] && details[key].trim() !== "" ? details[key].trim() : undefined;
+    const val = details[key]?.trim();
+    if (!val || val.toLowerCase() === "none") {
+      return undefined;
+    }
+    return val;
   };
 
   const InfoItem = ({
@@ -141,7 +145,7 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
         {activeDNS && <InfoItem icon={Icon.Network} title="Active DNS Servers" value={activeDNS} />}
       </List.Section>
 
-      {/* Network Configuration Section */}
+      {/* Interface Details Section */}
       <List.Section title="Interface Details">
         <InfoItem icon={Icon.ComputerChip} title="Network Service" value={service} />
         {device && <InfoItem icon={Icon.HardDrive} title="BSD Device" value={device} />}
@@ -160,7 +164,33 @@ function NetworkDetailsView({ service, device }: { service: string; device: stri
           />
         )}
         {get("MAC Address") && <InfoItem icon={Icon.Fingerprint} title="MAC Address" value={get("MAC Address")!} />}
+        {get("Wi-Fi ID") && <InfoItem icon={Icon.Wifi} title="Wi-Fi ID" value={get("Wi-Fi ID")!} />}
+        {get("Ethernet Address") && (
+          <InfoItem icon={Icon.Link} title="Ethernet Address" value={get("Ethernet Address")!} />
+        )}
       </List.Section>
+
+      {/* IPv6 Section */}
+      {(get("IPv6") || get("IPv6 IP address") || get("IPv6 Router")) && (
+        <List.Section title="IPv6">
+          {get("IPv6") && <InfoItem icon={Icon.Network} title="IPv6 Configuration" value={get("IPv6")!} />}
+          {get("IPv6 IP address") && (
+            <InfoItem icon={Icon.Globe} title="IPv6 Address" value={get("IPv6 IP address")!} />
+          )}
+          {get("IPv6 Router") && (
+            <InfoItem
+              icon={Icon.Wifi}
+              title="IPv6 Router"
+              value={get("IPv6 Router")!}
+              extraActions={
+                net.isIP(get("IPv6 Router")!) ? (
+                  <Action.OpenInBrowser title="Open Router in Browser" url={`http://[${get("IPv6 Router")}]`} />
+                ) : undefined
+              }
+            />
+          )}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -212,6 +242,13 @@ function AddEditPresetForm({ existing, onSaved }: { existing?: DNSPreset; onSave
           deletePreset(existing.name);
         } catch (cleanupErr) {
           console.error("Failed to delete old preset during rename:", cleanupErr);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `Saved "${trimmedName}", but failed to remove "${existing.name}"`,
+            message: cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr),
+          });
+          onSaved();
+          return;
         }
       }
       await showToast({
@@ -318,7 +355,22 @@ export default function Command() {
     const currentId = ++requestIdRef.current;
     setIsLoading(true);
     try {
-      const serviceToUse = targetService ?? (isServiceResolved ? networkService : (await resolveService()).service);
+      let serviceToUse = targetService;
+
+      if (!serviceToUse) {
+        if (isServiceResolved && networkService) {
+          serviceToUse = networkService;
+        } else {
+          const resolved = await resolveService();
+          serviceToUse = resolved.service;
+          if (currentId === requestIdRef.current) {
+            setNetworkService(resolved.service);
+            setNetworkInterface(resolved.device);
+            setIsServiceResolved(true);
+          }
+        }
+      }
+
       const [loadedPresets, loadedInfo] = await Promise.all([
         Promise.resolve(getPresets()),
         getNetworkInfo(serviceToUse),
