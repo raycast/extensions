@@ -10,7 +10,7 @@ import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createMovieMarkdown, createMovieMetadata } from "./lib/detail-helpers";
-import { closeTopDetail } from "./lib/detail-stack";
+import { captureTopDetail } from "./lib/detail-stack";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { hideRecommendation, markFirstEpisodeWatched } from "./lib/media-mutations";
 import { useWatchlistState } from "./lib/use-watchlist-ids";
@@ -318,16 +318,17 @@ export default function Command() {
                           icon={Icon.EyeDisabled}
                           style={Action.Style.Destructive}
                           shortcut={Keyboard.Shortcut.Common.Remove}
-                          onAction={() =>
+                          onAction={() => {
+                            const closeThisDetail = captureTopDetail();
                             handleMovieAction(
                               movie,
                               async (item) => {
                                 await hideMovieRecommendation(item);
-                                closeTopDetail();
+                                closeThisDetail();
                               },
                               "Movie removed from recommendations",
-                            )
-                          }
+                            );
+                          }}
                         />
                       </ActionPanel.Section>
                       <ActionPanel.Section>
