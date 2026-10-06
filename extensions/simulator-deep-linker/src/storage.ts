@@ -602,7 +602,8 @@ function sameStorageRecoveryClaim(
     left.ownerToken === right.ownerToken &&
     left.ownerPid === right.ownerPid &&
     left.claimantToken === right.claimantToken &&
-    left.claimantPid === right.claimantPid,
+    left.claimantPid === right.claimantPid &&
+    left.ticket === right.ticket,
   );
 }
 

@@ -1,15 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createLatestRequestGuard, fallbackTarget, normalizeTarget, targetForPlatform } from "../src/target-utils.js";
-
-test("accepts results only from the latest discovery request", () => {
-  const guard = createLatestRequestGuard();
-  const isFirstRequestLatest = guard.begin();
-  const isSecondRequestLatest = guard.begin();
-
-  assert.equal(isFirstRequestLatest(), false);
-  assert.equal(isSecondRequestLatest(), true);
-});
+import { fallbackTarget, normalizeTarget, targetForPlatform } from "../src/target-utils.js";
 
 test("keeps the booted selector exclusive to iOS Simulator", () => {
   assert.equal(normalizeTarget("ios", " booted "), "booted");

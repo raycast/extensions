@@ -39,13 +39,8 @@ import {
   preferredEnvironmentID,
   resolveDeepLink,
 } from "./deep-link-utils.js";
-import {
-  TargetSelection,
-  createLatestRequestGuard,
-  fallbackTarget,
-  normalizeTarget,
-  targetForPlatform,
-} from "./target-utils.js";
+import { TargetSelection, fallbackTarget, normalizeTarget, targetForPlatform } from "./target-utils.js";
+import { createLatestRequestGuard } from "./request-utils.js";
 
 const executeFile = promisify(execFile);
 const commandOptions = { timeout: 60_000, maxBuffer: 1024 * 1024 } as const;
@@ -82,16 +77,22 @@ export default function SearchDeepLinks() {
   });
   const storageLoadRequests = useRef(createLatestRequestGuard());
   const activeStorageFile = useRef(preferences.storageFile);
+  const activeDefaultEnvironment = useRef(preferences.defaultEnvironment);
   const hasLoadedEnvironmentSelection = useRef(false);
   const targetDiscoveryRequests = useRef(createLatestRequestGuard());
   const activePlatform = useRef(preferences.platform);
   activeStorageFile.current = preferences.storageFile;
+  activeDefaultEnvironment.current = preferences.defaultEnvironment;
   activePlatform.current = preferences.platform;
 
   async function load() {
     const requestedStorageFile = preferences.storageFile;
+    const requestedDefaultEnvironment = preferences.defaultEnvironment;
     const isLatestRequest = storageLoadRequests.current.begin();
-    const shouldApplyResult = () => isLatestRequest() && activeStorageFile.current === requestedStorageFile;
+    const shouldApplyResult = () =>
+      isLatestRequest() &&
+      activeStorageFile.current === requestedStorageFile &&
+      activeDefaultEnvironment.current === requestedDefaultEnvironment;
     setIsLoading(true);
     setError(undefined);
     try {
@@ -109,7 +110,7 @@ export default function SearchDeepLinks() {
         (currentEnvironmentID) =>
           environmentIDAfterLoad(
             decodedEnvironments,
-            preferences.defaultEnvironment,
+            requestedDefaultEnvironment,
             currentEnvironmentID,
             applyDefaultEnvironment,
           ) ?? decodedEnvironments[0].id,
@@ -126,7 +127,7 @@ export default function SearchDeepLinks() {
   useEffect(() => {
     hasLoadedEnvironmentSelection.current = false;
     void load();
-  }, [preferences.storageFile]);
+  }, [preferences.storageFile, preferences.defaultEnvironment]);
 
   async function loadTargetDevices(showFailure = false) {
     const requestedPlatform = preferences.platform;

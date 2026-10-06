@@ -9,7 +9,8 @@ import {
   popToRoot,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createLatestRequestGuard } from "./request-utils.js";
 import { StorageConfiguration, addDeepLink, resolveStorageConfiguration } from "./storage.js";
 
 type FormValues = {
@@ -26,21 +27,30 @@ export default function AddDeepLink() {
   const [storageError, setStorageError] = useState<string>();
   const [urlError, setURLError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
+  const storageLoadRequests = useRef(createLatestRequestGuard());
+  const activeStorageFile = useRef(preferences.storageFile);
+  activeStorageFile.current = preferences.storageFile;
 
   useEffect(() => {
     void loadConfiguration();
   }, [preferences.storageFile]);
 
   async function loadConfiguration() {
+    const requestedStorageFile = preferences.storageFile;
+    const isLatestRequest = storageLoadRequests.current.begin();
+    const shouldApplyResult = () => isLatestRequest() && activeStorageFile.current === requestedStorageFile;
     setIsLoading(true);
     setStorageError(undefined);
     try {
-      setConfiguration(await resolveStorageConfiguration(preferences.storageFile));
+      const resolvedConfiguration = await resolveStorageConfiguration(requestedStorageFile);
+      if (!shouldApplyResult()) return;
+      setConfiguration(resolvedConfiguration);
     } catch (error) {
+      if (!shouldApplyResult()) return;
       setConfiguration(undefined);
       setStorageError(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsLoading(false);
+      if (shouldApplyResult()) setIsLoading(false);
     }
   }
 
