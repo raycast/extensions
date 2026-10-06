@@ -1,4 +1,4 @@
-import { TelegramClient, Rich } from "teleproto";
+import { TelegramClient, Rich, events } from "teleproto";
 import { StringSession } from "teleproto/sessions";
 import { LocalStorage, environment } from "@raycast/api";
 import { Api } from "teleproto/tl";
@@ -6,6 +6,9 @@ import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
 import QRCode from "qrcode";
+
+const QR_CODE_TIMEOUT = 30000;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const SESSION_KEY = "telegram_session";
 const AUTH_SESSION_KEY = "telegram_auth_session";
@@ -195,31 +198,119 @@ export async function authenticateWithQr(
     return completeAuthentication(client);
   }
 
-  try {
-    await client.signInUserWithQrCode(
-      {
-        apiId: config.apiId,
-        apiHash: config.apiHash,
-      },
-      {
-        qrCode: async ({ token }) => {
-          const base64Url = Buffer.from(token).toString("base64url");
+  const { abortSignal } = callbacks;
+  if (abortSignal?.aborted) {
+    return { needsPassword: false };
+  }
+
+  let isScanningComplete = false;
+  const stopped = () => isScanningComplete || !!abortSignal?.aborted;
+
+  const inputPromise = (async () => {
+    while (!stopped()) {
+      try {
+        const result = await client.invoke(
+          new Api.auth.ExportLoginToken({
+            apiId: config.apiId,
+            apiHash: config.apiHash,
+            exceptIds: [],
+          }),
+        );
+
+        if (result instanceof Api.auth.LoginToken) {
+          const base64Url = Buffer.from(result.token).toString("base64url");
           const tgUrl = `tg://login?token=${base64Url}`;
           const dataUrl = await QRCode.toDataURL(tgUrl, {
             margin: 1,
             width: 200,
           });
+          if (stopped()) break;
           await callbacks.onQrCode({ tgUrl, dataUrl });
-        },
-        onError: async () => false,
-        abortSignal: callbacks.abortSignal,
-      },
+        }
+      } catch (err) {
+        if (stopped()) break;
+        throw err;
+      }
+
+      await Promise.race([
+        sleep(QR_CODE_TIMEOUT),
+        new Promise<void>((resolve) => {
+          abortSignal?.addEventListener("abort", () => resolve(), { once: true });
+        }),
+      ]);
+    }
+  })();
+
+  const rawEvent = new events.Raw({});
+  let resolveUpdate: () => void;
+  const updatePromise = new Promise<void>((resolve) => {
+    resolveUpdate = resolve;
+  });
+
+  const onUpdate = (update: unknown) => {
+    if (update instanceof Api.UpdateLoginToken) {
+      resolveUpdate?.();
+    }
+  };
+
+  client.addEventHandler(onUpdate, rawEvent);
+
+  const abortPromise = new Promise<void>((_, reject) => {
+    abortSignal?.addEventListener("abort", () => reject(new Error("AUTH_USER_CANCEL")), {
+      once: true,
+    });
+  });
+
+  try {
+    await Promise.race([updatePromise, inputPromise, abortPromise]);
+  } catch (error) {
+    if (abortSignal?.aborted) {
+      return { needsPassword: false };
+    }
+    throw error;
+  } finally {
+    isScanningComplete = true;
+    client.removeEventHandler(onUpdate, rawEvent);
+  }
+
+  if (abortSignal?.aborted) {
+    return { needsPassword: false };
+  }
+
+  try {
+    const result2 = await client.invoke(
+      new Api.auth.ExportLoginToken({
+        apiId: config.apiId,
+        apiHash: config.apiHash,
+        exceptIds: [],
+      }),
     );
 
-    return completeAuthentication(client);
+    if (result2 instanceof Api.auth.LoginTokenSuccess && result2.authorization instanceof Api.auth.Authorization) {
+      return completeAuthentication(client);
+    }
+
+    if (result2 instanceof Api.auth.LoginTokenMigrateTo) {
+      await (client as unknown as { _switchDC: (dcId: number) => Promise<void> })._switchDC(result2.dcId);
+      const migratedResult = await client.invoke(
+        new Api.auth.ImportLoginToken({
+          token: result2.token,
+        }),
+      );
+      if (
+        migratedResult instanceof Api.auth.LoginTokenSuccess &&
+        migratedResult.authorization instanceof Api.auth.Authorization
+      ) {
+        return completeAuthentication(client);
+      }
+    }
+
+    throw new Error(`Unexpected login token result: ${(result2 as { className?: string })?.className || "unknown"}`);
   } catch (err: unknown) {
-    const errorText = err instanceof Error ? err.message : String(err);
-    if (errorText.toUpperCase().includes("SESSION_PASSWORD_NEEDED")) {
+    const errorText =
+      err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
+    const upper = errorText.toUpperCase();
+    if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
       await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
       return { needsPassword: true };
     }

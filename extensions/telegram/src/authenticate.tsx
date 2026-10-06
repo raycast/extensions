@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Form, Detail, ActionPanel, Action, popToRoot, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import dedent from "dedent";
@@ -12,7 +12,8 @@ export default function Authenticate() {
   const [authStep, setAuthStep] = useState<"qr" | "password" | "setup">("qr");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrInfo, setQrInfo] = useState<{ tgUrl: string; dataUrl: string } | null>(null);
-  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const passwordForm = useForm<AuthPasswordFormValues>({
     onSubmit: async (values) => {
@@ -41,33 +42,42 @@ export default function Authenticate() {
       return;
     }
 
-    abortController?.abort();
+    abortControllerRef.current?.abort();
     const controller = new AbortController();
-    setAbortController(controller);
+    abortControllerRef.current = controller;
     setQrInfo(null);
+    setError(null);
     setIsSubmitting(true);
     setAuthStep("qr");
 
     try {
       const result = await handleQrAuthFlow({
         onQrCode: (data) => {
+          if (controller.signal.aborted) return;
           setQrInfo(data);
           setIsSubmitting(false);
         },
         abortSignal: controller.signal,
       });
 
+      if (controller.signal.aborted) {
+        return;
+      }
+
       if (result.success) {
         await popToRoot();
       } else if (result.needsPassword) {
         setAuthStep("password");
       }
-    } catch {
-      // Toast handled in handleQrAuthFlow
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      setError(err instanceof Error ? err.message : "Failed to generate QR code");
     } finally {
-      setIsSubmitting(false);
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false);
+      }
     }
-  }, [abortController]);
+  }, []);
 
   useEffect(() => {
     try {
@@ -78,9 +88,9 @@ export default function Authenticate() {
     }
 
     return () => {
-      abortController?.abort();
+      abortControllerRef.current?.abort();
     };
-  }, []);
+  }, [startQrAuth]);
 
   if (authStep === "setup") {
     return (
@@ -138,21 +148,29 @@ export default function Authenticate() {
     );
   }
 
-  const markdown = qrInfo
+  const markdown = error
     ? dedent`
-      ### Scan with Telegram: **Settings > Devices > Link Desktop Device**
+      ### Failed to Load QR Code
 
-      ![Telegram Login QR Code](${qrInfo.dataUrl})
+      ${error}
+
+      Press **⌘+R** to reload, or check your API credentials in preferences (**⌘+,**).
     `
-    : dedent`
-      ### Generating QR Code...
+    : qrInfo
+      ? dedent`
+        ### Scan with Telegram: **Settings > Devices > Link Desktop Device**
 
-      Connecting to Telegram servers...
-    `;
+        ![Telegram Login QR Code](${qrInfo.dataUrl})
+      `
+      : dedent`
+        ### Generating QR Code...
+
+        Connecting to Telegram servers...
+      `;
 
   return (
     <Detail
-      isLoading={isSubmitting || !qrInfo}
+      isLoading={isSubmitting || (!qrInfo && !error)}
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -168,7 +186,7 @@ export default function Authenticate() {
             icon={Icon.Gear}
             shortcut={{ modifiers: ["cmd"], key: "," }}
             onAction={() => {
-              abortController?.abort();
+              abortControllerRef.current?.abort();
               setAuthStep("setup");
             }}
           />
