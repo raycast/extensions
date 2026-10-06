@@ -21,6 +21,7 @@ import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
+import { isWorkPath } from "./lib/work-directory";
 import { suggestTitle, titleEdited, titleSuggested, type TitleState } from "./lib/suggest-title";
 
 /** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
@@ -120,8 +121,9 @@ const Command = () => {
   const [titleState, setTitleState] = useState<TitleState>({ title: "", suggestion: "", touched: false });
   const { title } = titleState;
   const [target, setTarget] = useState("");
-  const [environment, setEnvironment] = useState("");
-  const [newEnvironment, setNewEnvironment] = useState("");
+  const [environment, setEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? NEW_VALUE : ""));
+  const [newEnvironment, setNewEnvironment] = useState(() => (isWorkPath(directories[0] ?? "") ? "work" : ""));
+  const [environmentTouched, setEnvironmentTouched] = useState(false);
   const [packageName, setPackageName] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -201,9 +203,27 @@ const Command = () => {
   };
 
   /**
+   * Picking a work directory ticks Environment to Work, and picking any other directory unticks it
+   * back to None — until the Environment control is changed by hand, which stops the syncing for
+   * the rest of the form. Unticking only ever clears a Work value, so a scope typed through Package
+   * is left alone.
+   */
+  const handleDirectoryChange = (next: string) => {
+    setDirectory(next);
+    if (environmentTouched) return;
+
+    if (isWorkPath(next)) {
+      selectOrCreate("work", facets.environments, setEnvironment, setNewEnvironment);
+    } else if (chosenEnvironment === "work") {
+      setEnvironment("");
+      setNewEnvironment("");
+    }
+  };
+
+  /**
    * Package is the one field that drives the filename, and a sigil typed into it is someone reaching for a
    * control that already exists a few rows away. Left alone, `Linear · @work` becomes a brand by that
-   * literal name: it slugs to `linear-work.` rather than the `work.linear.` the convention specifies, and
+   * literal name: it slugs to `linear-work.` instead of keeping the scope on the subtitle, and
    * the list reads it back as part of the brand rather than as a scope.
    *
    * The sigil therefore always leaves the brand. Where it lands defers to the user: a control they have
@@ -323,7 +343,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
 
       <Form.Separator />
 
-      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={setDirectory}>
+      <Form.Dropdown id="directory" title="Directory" value={directory} onChange={handleDirectoryChange}>
         {directories.map((entry) => (
           <Form.Dropdown.Item key={entry} title={collapseHome(entry)} value={entry} />
         ))}
@@ -332,9 +352,12 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
       <Form.Dropdown
         id="environment"
         title="Environment"
-        info='Adds " · @work" to the subtitle and prefixes the filename with "work.", so the command gets its own section in the list and can be filtered on. The title stays the name alone.'
+        info='Adds " · @work" to the subtitle, so the command gets its own section in the list and can be filtered on. The title stays the name alone, and the filename stays brand.detail.sh however the environment is set. Picking a directory under a work folder ticks this to Work, and picking any other directory unticks it back to None — until it is changed by hand, which stops the syncing.'
         value={environment}
-        onChange={setEnvironment}
+        onChange={(next) => {
+          setEnvironment(next);
+          setEnvironmentTouched(true);
+        }}
       >
         <Form.Dropdown.Item title="None" value="" />
         {facets.environments.map((entry) => (
@@ -349,7 +372,10 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           title="New Environment"
           placeholder="work"
           value={newEnvironment}
-          onChange={setNewEnvironment}
+          onChange={(next) => {
+            setNewEnvironment(next);
+            setEnvironmentTouched(true);
+          }}
         />
       ) : null}
 

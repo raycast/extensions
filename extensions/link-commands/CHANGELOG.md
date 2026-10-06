@@ -1,5 +1,12 @@
 # Link Commands Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **Environment** on the create form only scopes the subtitle (`Linear · @work`) — it no longer prefixes the filename, so a work command is `linear.sprint-board.sh` whether it is scoped or not. The subtitle is searched too, so typing `@work` still finds them.
+- Picking a **Directory** under a `work` folder ticks **Environment** to Work, and picking any other directory unticks it back to None — until the control is changed by hand, which stops the syncing.
+
 ## [Raycast 2 Deeplink Fix] - 2026-10-01
 
 ### Fixed
