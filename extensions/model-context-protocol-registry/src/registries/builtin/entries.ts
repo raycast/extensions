@@ -1589,6 +1589,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       },
     },
   },
+  {
+    name: "caly",
+    title: "Caly",
+    description:
+      "Find open meeting times, book, reschedule and cancel meetings, and read your event types, bookings and schedules in Caly. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/DevinoSolutions/mcp-servers/main/caly/assets/logo.png",
+    homepage: "https://trycaly.com/docs/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.trycaly.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
