@@ -278,6 +278,12 @@ function isReadingTime(cached?: string): cached is string {
   return cached !== undefined && /^\d+$/.test(cached);
 }
 
+/** The start time of the load that recorded a cached miss or failure, or 0 for anything else. */
+function missStartedAt(cached?: string): number {
+  const match = cached?.match(/^(?:missing|failed):(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+
 /** True when a cached miss or failure is recent enough that the page should not be checked yet. */
 function isWaitingToRetry(cached: string): boolean {
   const retryAfter = Number(readingTimeCache.get(RETRY_AFTER_KEY) ?? 0);
@@ -328,9 +334,13 @@ export async function getReadingTimes(entries: Entry[]): Promise<Record<string, 
       if (typeof result === "number") {
         times[id] = result;
         readingTimeCache.set(id, String(result));
-      } else if (!isReadingTime(readingTimeCache.get(id))) {
-        // A slower, overlapping check must not replace a reading time that another check found.
-        readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${startedAt}`);
+      } else {
+        // A slower, overlapping check must not replace a reading time another check found,
+        // or a miss recorded by a check that started later.
+        const current = readingTimeCache.get(id);
+        if (!isReadingTime(current) && missStartedAt(current) <= startedAt) {
+          readingTimeCache.set(id, `${result === "missing" ? MISSING_PREFIX : FAILED_PREFIX}${startedAt}`);
+        }
       }
     });
   }
