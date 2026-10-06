@@ -1,6 +1,6 @@
 # RMB Converter Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-10-06
 
 - Update dependencies
 
