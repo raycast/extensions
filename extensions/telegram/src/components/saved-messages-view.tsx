@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { List, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getConfig, ensureAuthenticated } from "../utils/auth";
+import { getConfig, requireAuthenticated, showTelegramError } from "../utils/auth";
 import { groupMessagesByDate } from "../utils/message";
 import { getSavedMessages } from "../services/telegram-client";
 import { useDetailToggle } from "../hooks/use-detail-toggle";
 import { SavedMessageListItem } from "./saved-message-list-item";
+
+import { isTelegramAuthenticationError } from "../utils/errors";
+import { AuthenticationRequired } from "./authentication-required";
 
 const SHOW_DETAIL_KEY = "view_saved_messages_show_detail";
 
@@ -14,15 +17,13 @@ export function SavedMessagesView() {
   const [isShowingDetail, handleToggleDetail] = useDetailToggle(SHOW_DETAIL_KEY);
 
   const {
+    error,
     data: messages,
     isLoading,
     revalidate,
   } = useCachedPromise(
     async (query: string) => {
-      const authenticated = await ensureAuthenticated();
-      if (!authenticated) {
-        return [];
-      }
+      await requireAuthenticated();
 
       const config = getConfig();
       return await getSavedMessages({ config, limit: 50, searchQuery: query || undefined });
@@ -30,6 +31,7 @@ export function SavedMessagesView() {
     [searchText],
     {
       initialData: [],
+      onError: showTelegramError,
     },
   );
 
@@ -43,7 +45,9 @@ export function SavedMessagesView() {
       isShowingDetail={isShowingDetail}
       throttle
     >
-      {messages.length === 0 && !isLoading ? (
+      {isTelegramAuthenticationError(error) ? (
+        <AuthenticationRequired />
+      ) : messages.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Message}
           title="No Saved Messages"

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { sendMessage } from "../services/telegram-client";
-import { getConfig, ensureAuthenticated } from "../utils/auth";
+import { getConfig, requireAuthenticated, showTelegramError } from "../utils/auth";
 
 interface SendMessageFormValues {
   message: string;
@@ -46,11 +46,7 @@ export function useSendMessage({ chatId, onBeforeSubmit, onSuccess }: UseSendMes
           await popToRoot();
         }
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Send Message",
-          message: error instanceof Error ? error.message : "Unknown error occurred",
-        });
+        await showTelegramError(error);
       } finally {
         setIsSubmitting(false);
       }
@@ -82,10 +78,7 @@ async function handleSendMessage({
   message: string;
   files: string[];
 }): Promise<void> {
-  const authenticated = await ensureAuthenticated();
-  if (!authenticated) {
-    return;
-  }
+  await requireAuthenticated();
 
   const config = getConfig();
 
