@@ -12,10 +12,12 @@ reaching for its hotkey.
 | **Practice Shortcuts** | Opens Practice Mode. |
 | **Show Progress** | Opens Keysi's recap of the shortcuts you've learned. |
 
-All four are part of Keysi Pro. Every install of Keysi includes 14 days of
-it, and Keysi itself — the hold-⌘ overlay, click-to-run, custom sheets,
-search — stays free with or without this extension. See
-[Why the commands are Pro](#why-the-commands-are-pro).
+**Show Shortcuts is free** with Keysi 1.0.21 or later (an older Keysi still
+asks for Pro, and the command tells you to update). It opens Keysi's own
+overlay, which is free however you reach it. The other three are part of
+Keysi Pro. Every install of Keysi includes 14 days of it, and Keysi itself — the hold-⌘ overlay,
+click-to-run, custom sheets, search — stays free with or without this
+extension. See [Why the commands are Pro](#why-the-commands-are-pro).
 
 ## Searching
 
@@ -33,10 +35,15 @@ Rows are grouped by sheet. Two things reorder them:
   opening it in Keysi remembers it on this Mac. Once there is a query, the
   section goes away rather than showing the same row twice.
 
-Each row can copy its keys (↵), copy the command name (⌘⇧N), copy the pair as
+Each row can copy its keys (↵), copy the command name (⌘⇧.), copy the pair as
 a Markdown bullet (⌘⇧C), open the row in Keysi's panel (so you can *run* it),
-or reveal the sheet file that produced it (⌘⇧F) — which is the fastest way to
-fix a sheet you wrote.
+show its whole sheet in Keysi's settings (⌘O), or reveal the sheet file that
+produced it (⌘⇧F) — which is the fastest way to fix a sheet you wrote.
+
+**Show Sheet in Keysi** uses `keysi://sheet`, which Keysi 1.0.24 added; an
+older Keysi ignores it silently. So the action is only offered when the
+installed `Keysi.app`'s `Info.plist` says 1.0.24 or later — the extension
+ships on Raycast's schedule and routinely meets an older app.
 
 ## Why it's split in two
 
@@ -92,10 +99,11 @@ statement in the place that enforces it.
 How that is enforced is worth being exact about, because this extension is
 open source and anything it checks is visible and removable:
 
-- **The three commands that drive the app are refused by the app.** Keysi
+- **The two paid commands that drive the app are refused by the app.** Keysi
   checks the entitlement itself when it handles `keysi://`, so the check in
   here is the *explanation*, not the lock — without it the only feedback
-  would be Keysi's Settings window appearing for no stated reason.
+  would be Keysi's Settings window appearing for no stated reason. Show
+  Shortcuts has no check, here or in Keysi: it is free.
 - **Search Cheat Sheets is the exception, and is a hint.** It never talks to
   Keysi — that is what makes it work with the app closed — so Keysi has no
   opportunity to refuse it. It reads
@@ -113,13 +121,14 @@ open source and anything it checks is visible and removable:
 ```bash
 npm install
 npm run dev     # live-reload into Raycast
-npm test        # node --test, run against the repo's real sheet files
+npm test        # node --test, no Raycast needed
 npm run lint
 ```
 
-The tests deliberately run against `Keysi/Resources/BuiltinSheets` rather
-than fixtures: the sheet format is defined by Keysi's Swift side, and these
-exist to catch it drifting away from what this extension expects.
+The reader is tested against committed fixtures in `test/fixtures/`, so the
+suite passes once vendored into `raycast/extensions`. A few tests also read
+Keysi's real `Keysi/Resources/BuiltinSheets` to catch the Swift-side format
+drifting; they skip when that directory isn't there.
 
 ## Publishing
 

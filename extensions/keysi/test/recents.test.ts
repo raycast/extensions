@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MAX_RECENTS, parse, rank, remember } from "../src/lib/recents.ts";
+import { MAX_RECENTS, parse, rank, remember, rememberIn } from "../src/lib/recents.ts";
 
 test("parse tolerates an empty store", () => {
   assert.deepEqual(parse(undefined), {});
@@ -57,4 +57,15 @@ test("rank drops ids that no longer exist", () => {
 
 test("rank honours its limit", () => {
   assert.deepEqual(rank({ a: 1, b: 2, c: 3 }, new Set(["a", "b", "c"]), 2), ["c", "b"]);
+});
+
+/**
+ * The command saves on top of a fresh read of the store. Saving its
+ * in-memory list instead, before the initial async read had landed, wrote a
+ * one-entry list over the user's whole history.
+ */
+test("rememberIn adds to what is stored rather than replacing it", () => {
+  const stored = JSON.stringify({ a: 1000, b: 2000 });
+  assert.deepEqual(rememberIn(stored, "c", 3000), { a: 1000, b: 2000, c: 3000 });
+  assert.deepEqual(rememberIn(undefined, "c", 3000), { c: 3000 });
 });

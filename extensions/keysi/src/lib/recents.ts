@@ -51,6 +51,16 @@ export function remember(recents: Recents, id: string, now: number = Date.now())
 }
 
 /**
+ * Adds `id` to whatever is stored now, as opposed to whatever this command
+ * happened to have loaded. The command reads the store asynchronously, so a
+ * row used before that read lands would otherwise save a one-entry list
+ * over the user's whole history.
+ */
+export function rememberIn(raw: string | undefined, id: string, now: number = Date.now()): Recents {
+  return remember(parse(raw), id, now);
+}
+
+/**
  * The remembered ids, most recent first.
  *
  * Recency, not frequency: in a launcher the thing you want is almost always

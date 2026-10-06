@@ -15,17 +15,18 @@ import {
 } from "@raycast/api";
 import { flatten, loadSheets, matching, USER_SHEETS_DIR, type Sheet, type Shortcut } from "./lib/sheets";
 import { builtinSheetDirs } from "./lib/prefs";
-import { parse, rank, remember, type Recents } from "./lib/recents";
+import { parse, rank, remember, rememberIn, type Recents } from "./lib/recents";
 import { readTier } from "./lib/tier";
 import { Locked } from "./lib/locked";
-import { showShortcuts } from "./lib/keysi";
+import { showSheet, showShortcuts } from "./lib/keysi";
+import { atLeast, installedVersion, SHEET_URL_SINCE } from "./lib/version";
 
 /** Where the recent list lives. Namespaced so a future key can't collide. */
 const RECENTS_KEY = "recent-shortcuts";
 
 /**
- * Search across every cheat sheet — the bundled Vim, tmux, Figma and Slack
- * ones, plus anything the user wrote.
+ * Search across every cheat sheet — the ones bundled with Keysi, plus
+ * anything the user wrote.
  *
  * Reads the sheet JSON straight off disk rather than asking the app. Those
  * files are the source of truth, they are static, and they are the half of
@@ -52,6 +53,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   const sheets = useMemo<Sheet[]>(() => (tier.unlocked ? loadSheets(builtinSheetDirs()) : []), [tier.unlocked]);
   const shortcuts = useMemo(() => flatten(sheets), [sheets]);
+  // Offered only when the installed Keysi knows `keysi://sheet` — an older
+  // one ignores it, and an action that does nothing reads as broken.
+  const canShowSheet = useMemo(() => atLeast(installedVersion(builtinSheetDirs()), SHEET_URL_SINCE), []);
 
   useEffect(() => {
     if (!tier.unlocked) return;
@@ -61,8 +65,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     getFrontmostApplication()
       .then(setFrontmost)
       .catch(() => undefined);
+    // Merged under anything already used this session, which is newer.
     LocalStorage.getItem<string>(RECENTS_KEY)
-      .then((raw) => setRecents(parse(raw)))
+      .then((raw) => setRecents((used) => ({ ...parse(raw), ...used })))
       .catch(() => undefined);
   }, [tier.unlocked]);
 
@@ -76,7 +81,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No cheat sheets found"
-          description="Keysi ships sheets for Vim, tmux, Figma and Slack. If it's installed somewhere other than Applications, point this extension at it in the command's settings."
+          // No count, and no full list: the app adds sheets as content, and a
+          // hard-coded "four" was wrong by six before anyone noticed.
+          description="Keysi ships sheets for Vim, tmux, Figma, Slack and more. If it's installed somewhere other than Applications, point this extension at it in the extension's settings."
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Keysi.io" url="https://keysi.io" icon={Icon.Globe} />
@@ -94,12 +101,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
    * Not awaited by the caller: the useful thing — the copy, the panel —
    * already happened, and Raycast usually closes the window right after. A
    * dropped write costs one position in a list.
+   *
+   * Saves on top of a fresh read of the store, not the in-memory list: that
+   * list is empty until the initial read lands, and saving it then wiped
+   * every recent the user had.
    */
   async function markUsed(id: string) {
-    const next = remember(recents, id);
-    setRecents(next);
+    setRecents((current) => remember(current, id));
     try {
-      await LocalStorage.setItem(RECENTS_KEY, JSON.stringify(next));
+      const stored = await LocalStorage.getItem<string>(RECENTS_KEY);
+      await LocalStorage.setItem(RECENTS_KEY, JSON.stringify(rememberIn(stored, id)));
     } catch {
       // A recent list that fails to persist is not worth interrupting for.
     }
@@ -164,6 +175,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                 showShortcuts(shortcut.title);
               }}
             />
+            {canShowSheet ? (
+              <Action
+                title="Show Sheet in Keysi"
+                icon={Icon.Sidebar}
+                shortcut={Keyboard.Shortcut.Common.Open}
+                onAction={() => {
+                  void markUsed(shortcut.id);
+                  showSheet(shortcut.sheetId);
+                }}
+              />
+            ) : null}
             <Action.CopyToClipboard
               title="Copy Command Name"
               content={shortcut.title}
@@ -208,7 +230,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
         return (
           <List.Section
             key={sheetId}
-            title={rows[0]?.sheetName ?? sheetId}
+            title={rows[0]?.sheetName || sheetId}
             // Says why this section is first, rather than leaving the order
             // looking arbitrary.
             subtitle={

@@ -176,23 +176,34 @@ test("any screenshot present is 2000x1250", async (t) => {
 });
 
 /**
- * Every command is part of Keysi Pro, and every command has to say so
- * before it does anything.
+ * The commands that are free, named here so that being free is a decision.
+ * `show-shortcuts` opens Keysi's overlay, which is free however it is
+ * reached, and Keysi does not refuse `keysi://show` (`KeysiURLCommand`).
+ */
+const FREE_COMMANDS = new Set(["show-shortcuts"]);
+
+/**
+ * Every Pro command has to say so before it does anything, and a free one
+ * must not lock itself.
  *
  * A source check rather than a behavioural one, because the thing that goes
  * wrong is not a broken gate — it is a *new command* added next to the
- * others without one. Three of the four are refused by the app as well, so
- * the check they carry is the explanation rather than the lock; the fourth,
- * `search-sheets`, never talks to Keysi at all, which is exactly why it
- * cannot be the one that forgets.
+ * others without one. The paid commands that drive the app are refused by
+ * the app as well, so the check they carry is the explanation rather than
+ * the lock; `search-sheets` never talks to Keysi at all, which is exactly
+ * why it cannot be the one that forgets.
  */
-test("every command checks the tier before doing anything", () => {
+test("every Pro command checks the tier before doing anything", () => {
   for (const command of commands) {
     const path = [`${command.name}.tsx`, `${command.name}.ts`]
       .map((file) => join(ROOT, "src", file))
       .find((candidate) => existsSync(candidate));
     assert.ok(path, `no src file for command "${command.name}"`);
     const source = readFileSync(path, "utf8");
+    if (FREE_COMMANDS.has(command.name)) {
+      assert.doesNotMatch(source, /readTier\(/, `${command.name} is free but reads the tier`);
+      continue;
+    }
     assert.match(source, /readTier\(/, `${command.name} never reads the tier`);
     assert.match(
       source,

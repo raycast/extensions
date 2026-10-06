@@ -32,6 +32,12 @@ async function run(command: string, params?: Record<string, string>): Promise<vo
 /** Opens Keysi's panel for whichever app the user was in before Raycast. */
 export const showShortcuts = (query?: string) => (query ? run("show", { q: query }) : run("show"));
 
+/**
+ * Settings ▸ Shortcuts with this sheet picked out. Keysi 1.0.24 and later
+ * only — gate on `SHEET_URL_SINCE`, because an older app ignores it.
+ */
+export const showSheet = (id: string) => run("sheet", { id });
+
 export const startPractice = () => run("practice");
 
 export const showProgress = () => run("progress");

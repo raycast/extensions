@@ -114,6 +114,18 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Whether a value decodes as Keysi's `LocalizedText`: any string, empty
+ * included, or a non-empty map of strings. Present and well-typed is all the
+ * Swift decoder asks; it does not ask for non-empty text.
+ */
+function isLocalizedText(value: unknown): boolean {
+  if (typeof value === "string") return true;
+  if (!isObject(value)) return false;
+  const values = Object.values(value);
+  return values.length > 0 && values.every((v) => typeof v === "string");
+}
+
+/**
  * Whether a parsed file has the shape `flatten` and `matching` rely on.
  *
  * The same fields Keysi's `CustomSheet` decoder requires — an id, a name,
@@ -122,23 +134,25 @@ function isObject(value: unknown): value is Record<string, unknown> {
  * instead of reaching `flatten` and taking the whole list down with it.
  * `match` is the exception: it is required in Swift, but here a sheet
  * without one simply never floats to the top, which costs nothing.
+ *
+ * And no stricter than Keysi either: an empty title (a spacer item, say) is
+ * fine there, so it is fine here. Rejecting it threw away the whole sheet;
+ * `flatten` already drops just the blank row.
  */
 export function isSheet(value: unknown): value is Sheet {
   if (!isObject(value)) return false;
   if (typeof value.id !== "string" || value.id.length === 0) return false;
-  if (!resolve(value.name as LocalizedText)) return false;
+  if (!isLocalizedText(value.name)) return false;
   if (value.match !== undefined && !isObject(value.match)) return false;
   if (!Array.isArray(value.groups)) return false;
   return value.groups.every(
     (group) =>
       isObject(group) &&
-      resolve(group.title as LocalizedText) !== "" &&
+      isLocalizedText(group.title) &&
       Array.isArray(group.items) &&
       group.items.every(
         (item) =>
-          isObject(item) &&
-          resolve(item.title as LocalizedText) !== "" &&
-          (item.keys === undefined || typeof item.keys === "string"),
+          isObject(item) && isLocalizedText(item.title) && (item.keys === undefined || typeof item.keys === "string"),
       ),
   );
 }

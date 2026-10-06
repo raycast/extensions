@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { existsSync, readdirSync } from "node:fs";
-import { flatten, loadSheets, readSheetsIn, resolve } from "../src/lib/sheets.ts";
+import { flatten, isSheet, loadSheets, readSheetsIn, resolve } from "../src/lib/sheets.ts";
 
 /**
  * Two sources, deliberately.
@@ -63,6 +63,26 @@ test("a sheet missing a required field is skipped like malformed JSON", () => {
     ["fine"],
   );
   assert.equal(flatten(readSheetsIn(dir)).length, 1);
+});
+
+/**
+ * Keysi's decoder accepts an empty title, so a sheet with one spacer item
+ * must not vanish here. Only the blank row goes, in `flatten`.
+ */
+test("an empty title is accepted as Keysi accepts it", () => {
+  const sheet = {
+    id: "spacer",
+    name: { en: "Spacer", de: "" },
+    groups: [{ title: "", items: [{ title: "" }, { title: "Do thing", keys: "x" }] }],
+  };
+  assert.ok(isSheet(sheet));
+  assert.deepEqual(
+    flatten([sheet as never]).map((r) => r.title),
+    ["Do thing"],
+  );
+  // Still refused: what Keysi's decoder refuses.
+  assert.ok(!isSheet({ ...sheet, name: {} }));
+  assert.ok(!isSheet({ ...sheet, groups: [{ items: [{ title: "x" }] }] }));
 });
 
 test("flatten survives sheets that bypassed the reader", () => {
