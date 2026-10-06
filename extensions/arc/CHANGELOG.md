@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fix] - 2026-10-06
+
+- Fixed keyboard navigation in `Search Tabs` jumping over History straight to Suggestions while history was still loading. The tab sections now stay mounted during history search so the list keeps its selection anchor.
+
 ## [Fix] - 2026-09-14
 
 - Fixed `Search Tabs` becoming slow with many tabs by batching the AppleScript calls used to look up each tab's Space name, instead of issuing one call per tab.
