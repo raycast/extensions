@@ -5,8 +5,6 @@
   "description": "Save and restore complete Mac workspaces, including apps, windows, macOS Spaces, browser tabs, and Finder folders",
   "icon": "icon.png",
   "author": "seiya_nishi",
-  "owner": "snapset",
-  "access": "public",
   "categories": [
     "Productivity",
     "System"
