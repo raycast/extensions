@@ -10,19 +10,20 @@ import {
 import noteActions from '../api/noteActions';
 import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
-import { useEffect, useMemo, useRef } from 'react';
-import { CreateCardFormValues, FieldRef, ShortcutDictionary } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import { CreateCardFormValues } from '../types';
 import modelActions from '../api/modelActions';
 import React from 'react';
 import { isValidFileType, transformSubmittedData } from '../util';
 import useErrorHandling from '../hooks/useErrorHandling';
+import { mergeNoteTags } from '../helpers/noteTags';
+
+type AddNoteFormValues = CreateCardFormValues & { newTags: string };
 
 interface Props {
   deckName?: string;
 }
 export default function AddCardAction({ deckName }: Props) {
-  const { handleError, errorMarkdown } = useErrorHandling();
-
   const {
     data: decks,
     isLoading: decksLoading,
@@ -39,180 +40,220 @@ export default function AddCardAction({ deckName }: Props) {
     error: tagsError,
   } = useCachedPromise(noteActions.getTags);
 
-  const tagsCardRef = useRef<Form.TagPicker>(null);
-  const fieldRefs = useRef<Record<string, FieldRef>>({});
-
-  const shortcuts = useMemo((): ShortcutDictionary => {
-    return {
-      clearForm: { modifiers: ['cmd'], key: 'x' },
-    };
-  }, []);
-
+  const { handleError, errorMarkdown } = useErrorHandling(decksError || modelsError || tagsError);
+  const submitting = useRef(false);
+  const latestValues = useRef<AddNoteFormValues | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { allow_empty_card_fields } = getPreferenceValues<Preferences.AddCard>();
 
   const { handleSubmit, itemProps, values, reset, focus, setValidationError } =
-    useForm<CreateCardFormValues>({
+    useForm<AddNoteFormValues>({
       initialValues: {
-        deckName: deckName,
+        deckName: deckName || '',
         modelName: '',
         tags: [],
+        newTags: '',
       },
-      onSubmit: async values => {
-        if (!models || modelsLoading || modelsError) return;
-        try {
-          const fieldNames = models
-            .find(model => values.modelName === model.name)!
-            .flds.map(fld => fld.name);
-
-          const createCardRequestBody = transformSubmittedData(values, fieldNames);
-
-          // Validate card fields
-          if (!allow_empty_card_fields) {
-            for (const fieldName of fieldNames) {
-              const fieldValue = values[`field_${fieldName}`];
-              if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
-                setValidationError(`field_${fieldName}`, `${fieldName} is required`);
-                return;
-              }
-            }
+      onSubmit: async submittedValues => {
+        if (submitting.current) return false;
+        if (decksLoading || modelsLoading || tagsLoading || !decks || !models) {
+          await showToast({ style: Toast.Style.Failure, title: 'Wait for Anki to finish loading' });
+          return false;
+        }
+        if (!decks.some(deck => deck.name === submittedValues.deckName)) {
+          setValidationError('deckName', 'Select a deck');
+          return false;
+        }
+        const model = models.find(model => model.name === submittedValues.modelName);
+        if (!model || !model.flds.length) {
+          setValidationError('modelName', 'Select a note type with fields');
+          return false;
+        }
+        const fieldNames = [...model.flds].sort((a, b) => a.ord - b.ord).map(field => field.name);
+        for (const fieldName of fieldNames) {
+          const invalidFiles = (submittedValues[`file_${fieldName}`] || []).filter(
+            file => !isValidFileType(file)
+          );
+          if (invalidFiles.length) {
+            setValidationError(
+              `file_${fieldName}`,
+              `Unsupported files: ${invalidFiles.join(', ')}`
+            );
+            return false;
           }
+        }
+        const firstField = fieldNames[0];
+        if (
+          !allow_empty_card_fields &&
+          !submittedValues[`field_${firstField}`]?.trim() &&
+          !submittedValues[`file_${firstField}`]?.length
+        ) {
+          setValidationError(
+            `field_${firstField}`,
+            'Enter text or attach a file to the first field'
+          );
+          return false;
+        }
 
-          await noteActions.addNote(createCardRequestBody);
-
-          showToast({
+        submitting.current = true;
+        setIsSubmitting(true);
+        const submittedDraft = latestValues.current;
+        try {
+          await noteActions.addNote(
+            transformSubmittedData(
+              {
+                ...submittedValues,
+                tags: mergeNoteTags(submittedValues.tags, submittedValues.newTags),
+              },
+              fieldNames
+            )
+          );
+          await showToast({
             style: Toast.Style.Success,
-            title: `Added new card to deck: ${values.deckName}`,
+            title: `Added note to ${submittedValues.deckName}`,
           });
-
-          handleClearForm();
-
+          if (latestValues.current === submittedDraft) {
+            resetFields(submittedValues);
+            focus(`field_${firstField}`);
+          }
           return true;
         } catch (error) {
           handleError(error);
+          return false;
+        } finally {
+          submitting.current = false;
+          setIsSubmitting(false);
         }
       },
     });
+  latestValues.current = values;
+
+  function resetFields(
+    selection: Pick<AddNoteFormValues, 'deckName' | 'modelName' | 'tags' | 'newTags'>
+  ) {
+    const model = models?.find(model => model.name === selection.modelName);
+    reset({
+      deckName: selection.deckName,
+      modelName: selection.modelName,
+      tags: selection.tags,
+      newTags: selection.newTags,
+      ...Object.fromEntries(
+        (model?.flds || []).flatMap(field => [
+          [`field_${field.name}`, ''],
+          [`file_${field.name}`, []],
+        ])
+      ),
+    });
+  }
 
   useEffect(() => {
     const error = decksError || tagsError || modelsError;
-    if (!error) return;
-    handleError(error);
+    if (error) handleError(error);
   }, [decksError, tagsError, modelsError]);
 
+  useEffect(() => {
+    if (
+      models &&
+      !modelsLoading &&
+      !modelsError &&
+      values.modelName &&
+      !models.some(model => model.name === values.modelName)
+    ) {
+      resetFields({ ...values, modelName: '' });
+      setValidationError('modelName', 'This note type is unavailable. Select another note type.');
+    }
+  }, [models, modelsLoading, modelsError, values.modelName]);
+
+  const selectedModel = models?.find(model => model.name === values.modelName);
+  const fields = [...(selectedModel?.flds || [])].sort((a, b) => a.ord - b.ord);
+
   const handleClearForm = () => {
-    reset();
-    tagsCardRef.current?.reset();
-    Object.values(fieldRefs.current).forEach(ref => {
-      if (ref.current && ref.current.reset) {
-        ref.current.reset();
+    if (submitting.current) return;
+    resetFields(values);
+    focus(fields.length ? `field_${fields[0].name}` : 'modelName');
+  };
+
+  return decksError || tagsError || modelsError ? (
+    <Detail markdown={errorMarkdown} />
+  ) : (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Add Note" onSubmit={handleSubmit} />
+          <Action
+            title="Clear Form"
+            shortcut={{ modifiers: ['cmd'], key: 'x' }}
+            onAction={handleClearForm}
+          />
+        </ActionPanel>
       }
-    });
+      navigationTitle="Add Note"
+      isLoading={decksLoading || modelsLoading || tagsLoading || isSubmitting}
+    >
+      <Form.Dropdown {...itemProps.deckName} title="Deck" storeValue isLoading={decksLoading}>
+        <Form.Dropdown.Item title="Select a Deck" value="" />
+        {decks?.map(deck => (
+          <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
+        ))}
+      </Form.Dropdown>
 
-    // Focus on the first field
-    focus('deckName');
-  };
+      <Form.Dropdown
+        {...itemProps.modelName}
+        title="Note Type"
+        storeValue
+        isLoading={modelsLoading}
+        onChange={modelName => {
+          if (modelName !== values.modelName) resetFields({ ...values, modelName });
+        }}
+      >
+        <Form.Dropdown.Item title="Select a Note Type" value="" />
+        {models?.map(model => (
+          <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
+        ))}
+      </Form.Dropdown>
 
-  const handleFileChange = (fieldName: string, files: string[]) => {
-    const invalidFiles = files.filter(file => !isValidFileType(file));
-    if (invalidFiles.length > 0) {
-      setValidationError(
-        `file_${fieldName}`,
-        `Invalid file type(s) selected: ${invalidFiles.join(', ')}`
-      );
-    } else {
-      setValidationError(`file_${fieldName}`, undefined);
-    }
-  };
+      {fields.map((field, index) => (
+        <React.Fragment key={field.name}>
+          <Form.TextArea
+            {...itemProps[`field_${field.name}`]}
+            title={field.name}
+            placeholder={field.description || `Enter ${field.name}`}
+            info={
+              index === 0
+                ? 'The first field needs text or media. Anki validates the note type.'
+                : 'Optional'
+            }
+          />
+          <Form.FilePicker
+            {...itemProps[`file_${field.name}`]}
+            title={`${field.name} Files`}
+            allowMultipleSelection
+            onChange={files => {
+              itemProps[`file_${field.name}`].onChange?.(files);
+              const invalidFiles = files.filter(file => !isValidFileType(file));
+              setValidationError(
+                `file_${field.name}`,
+                invalidFiles.length ? `Unsupported files: ${invalidFiles.join(', ')}` : undefined
+              );
+              if (files.length && !invalidFiles.length) {
+                setValidationError(`field_${field.name}`, undefined);
+              }
+            }}
+          />
+        </React.Fragment>
+      ))}
 
-  const fields = useMemo(() => {
-    if (modelsLoading || modelsError || !models || !values.modelName) return null;
-
-    const selectedModel = models.find(model => model.name === values.modelName);
-
-    if (!selectedModel) {
-      throw new Error(`Model "${values.modelName}" not found`);
-    }
-
-    const { flds } = selectedModel;
-
-    return (
-      <>
-        {flds.map(field => {
-          const textAreaRef = React.createRef<Form.TextArea>();
-          const filePickerRef = React.createRef<Form.FilePicker>();
-          fieldRefs.current[`field_${field.name}`] = textAreaRef;
-          fieldRefs.current[`file_${field.name}`] = filePickerRef;
-
-          return (
-            <React.Fragment key={field.name}>
-              <Form.TextArea
-                {...itemProps[`field_${field.name}`]}
-                title={field.name}
-                placeholder={field.description || `Enter ${field.name}`}
-                ref={textAreaRef}
-              />
-              <Form.FilePicker
-                {...itemProps[`file_${field.name}`]}
-                title={`${field.name} files`}
-                allowMultipleSelection
-                onChange={files => handleFileChange(field.name, files)}
-                ref={filePickerRef}
-              />
-            </React.Fragment>
-          );
-        })}
-      </>
-    );
-  }, [models, modelsLoading, modelsError, values.modelName, itemProps]);
-
-  return (
-    <>
-      {decksError || tagsError || modelsError ? (
-        <Detail markdown={errorMarkdown} />
-      ) : (
-        <Form
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm title="Add Card" onSubmit={handleSubmit} />
-              <Action
-                title="Clear Form"
-                shortcut={shortcuts.clearForm}
-                onAction={handleClearForm}
-              />
-            </ActionPanel>
-          }
-          navigationTitle="Add Card"
-          isLoading={decksLoading || modelsLoading || tagsLoading}
-        >
-          <Form.Dropdown
-            {...itemProps.deckName}
-            title="Deck"
-            storeValue={true}
-            isLoading={decksLoading}
-          >
-            {decks?.map(deck => (
-              <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
-            ))}
-          </Form.Dropdown>
-
-          <Form.Dropdown
-            {...itemProps.modelName}
-            title="Model"
-            storeValue={true}
-            isLoading={modelsLoading}
-          >
-            {models?.map(model => (
-              <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
-            ))}
-          </Form.Dropdown>
-
-          {fields}
-
-          <Form.TagPicker {...itemProps.tags} title="Tags" ref={tagsCardRef}>
-            {tags?.map(tag => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
-          </Form.TagPicker>
-        </Form>
-      )}
-    </>
+      <Form.TagPicker {...itemProps.tags} title="Tags">
+        {tags?.map(tag => (
+          <Form.TagPicker.Item key={tag} value={tag} title={tag} />
+        ))}
+      </Form.TagPicker>
+      <Form.TextField
+        {...itemProps.newTags}
+        title="New Tags"
+        placeholder="biology chapter::one"
+        info="Separate tags with spaces. Use :: for nested tags."
+      />
+    </Form>
   );
 }

@@ -1,5 +1,6 @@
+import { AnkiError, AnkiUncertainError } from '../error/AnkiError';
 import { getPreferenceValues } from '@raycast/api';
-import { AddNoteParams, Note, UpdateNoteParams } from '../types';
+import { AddNoteParams, EditNoteParams, Note, UpdateNoteParams } from '../types';
 import { delay } from '../util';
 import { ankiReq } from './ankiClient';
 
@@ -26,13 +27,13 @@ export default {
     });
     return notesInfo;
   },
-  addNote: async (params: AddNoteParams): Promise<void> => {
+  addNote: async (params: AddNoteParams): Promise<number> => {
     const { allow_dup_cards, dup_scope } = getPreferenceValues<Preferences>();
-    await ankiReq('addNote', {
+    return await ankiReq('addNote', {
       note: {
         ...params,
         options: {
-          allowDuplicate: allow_dup_cards,
+          allowDuplicate: allow_dup_cards ?? false,
           duplicateScope: dup_scope,
         },
       },
@@ -45,6 +46,20 @@ export default {
   getTags: async (): Promise<string[] | undefined> => {
     const tags: string[] = await ankiReq('getTags');
     return tags;
+  },
+  updateNote: async (params: EditNoteParams): Promise<void> => {
+    try {
+      await ankiReq('updateNote', { note: params });
+    } catch (error) {
+      if (error instanceof AnkiError && !(error instanceof AnkiUncertainError)) {
+        throw new AnkiError(
+          `Anki could not finish updating this note. Some changes may have been saved. Check the note in Anki before retrying. ${error.message}`,
+          'updateNote',
+          error
+        );
+      }
+      throw error;
+    }
   },
   updateNoteFields: async (params: UpdateNoteParams): Promise<void> => {
     await ankiReq('updateNoteFields', { note: params });
