@@ -7,17 +7,50 @@ export default function Command() {
   const [hours, setHours] = useState("8.5");
   const [amount, setAmount] = useState("1062");
 
-  async function handleGenerate() {
-    const today = new Date();
-    const localDate = ;
+  const parsedHours = parseFloat(hours) || 0;
+  const parsedAmount = parseFloat(amount) || 0;
 
-    const changeOrderNotice = ;
+  async function handleGenerate() {
+    if (parsedHours <= 0 || parsedAmount <= 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid Input",
+        message: "Please enter valid numbers for hours and amount.",
+      });
+      return;
+    }
+
+    const today = new Date();
+    const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const formattedAmount = parsedAmount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+    const changeOrderNotice = [
+      "===============================================================",
+      "FORMAL CONTRACT AMENDMENT & STATUTORY NOTICE",
+      "Uniform Commercial Code (UCC § 2-209) — Valid Modification",
+      "===============================================================",
+      `TO: ${client}`,
+      "FROM: ScopeLock AI Autonomous Defense Engine",
+      `DATE: ${localDate}`,
+      "",
+      "NOTICE OF CONTRACT VARIANCE:",
+      `The engineering tasks requested ("${varianceTitle}") constitute a material expansion of the baseline Statement of Work (SOW).`,
+      "",
+      "Under UCC § 2-209, modifications that introduce unbudgeted engineering hours require formal bilateral consideration or written ratification.",
+      "",
+      `- Additional Estimated Effort: ${parsedHours} billable hours`,
+      `- Commercial Variance Amount: $${formattedAmount} USD`,
+      "",
+      "ACTION REQUIRED:",
+      "Engineering commits on this branch are paused. Please authorize and execute the formal Change Order ratification.",
+      "===============================================================",
+    ].join("\n");
 
     await Clipboard.copy(changeOrderNotice);
     await showToast({
       style: Toast.Style.Success,
       title: "UCC § 2-209 Change Order Copied!",
-      message: ,
+      message: `Bilateral variance notice prepared for ${client}`,
     });
   }
 
@@ -27,11 +60,11 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Generate & Copy Change Order Notice" onSubmit={handleGenerate} />
           <Action.OpenInBrowser
-            title="Unlock Direct Legal Ratification ( Instant)"
+            title="Unlock Direct Legal Ratification ($3 Instant)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/?unlock=instant"
           />
           <Action.OpenInBrowser
-            title="Agency Enterprise SOW Defense (99/mo)"
+            title="Agency Enterprise SOW Defense ($199/mo)"
             url="https://ahirwardhanmanti83-bit.github.io/scopelock-ai/agency-enterprise.html"
           />
         </ActionPanel>
