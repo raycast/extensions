@@ -24,6 +24,17 @@ time is subtracted, so walking away from your desk does not inflate the numbers.
 is recorded separately rather than discarded, so the report can show time at the machine
 alongside time actually working.
 
+## Getting started
+
+Raycast leaves background commands off after a Store install, so nothing is recorded until
+you do one of these:
+
+- Open **Collect Usage** once from Raycast root search, or
+- Enable **Collect Usage** in the extension's preferences.
+
+Data appears a few minutes later. Until then, Usage Report and Daily Usage say that
+tracking is off and offer a shortcut to the preferences.
+
 ## Screenshots
 
 <table>
@@ -74,11 +85,11 @@ rather than having to trust the total.
 
 ## Commands
 
-| Command | Runs |
-| --- | --- |
-| Collect Usage | Automatically, every minute in the background |
-| Usage Report | When you open it |
-| Daily Usage | When you open it |
+| Command       | Runs                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| Collect Usage | Automatically, every minute in the background, once enabled (see [Getting started](#getting-started)) |
+| Usage Report  | When you open it                                                                                      |
+| Daily Usage   | When you open it                                                                                      |
 
 Disabling **Collect Usage** stops all tracking.
 

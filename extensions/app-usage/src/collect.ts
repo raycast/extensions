@@ -31,11 +31,12 @@ function parseRetentionDays(raw?: string): number {
 }
 
 export default async function collect(): Promise<void> {
-  // Raycast lists every command in root search, including this one. A manual run
-  // would write a timestamp out of sequence and corrupt the next interval, so
-  // explain and bail instead.
+  // Raycast lists every command in root search, including this one, and opening
+  // it once is how a Store install switches its background refresh on. A manual
+  // run would write a timestamp out of sequence and corrupt the next interval, so
+  // confirm and bail instead.
   if (environment.launchType !== LaunchType.Background) {
-    await showHUD("App Usage records automatically in the background");
+    await showHUD("Tracking is on. App Usage records in the background every minute");
     return;
   }
 
@@ -44,11 +45,7 @@ export default async function collect(): Promise<void> {
   const store = createStore(environment.supportPath);
 
   const now = Date.now();
-  const [frontmost, idleSeconds, state] = await Promise.all([
-    getFrontmostApplication().catch(() => null),
-    getIdleSeconds(),
-    store.readState(),
-  ]);
+  const [frontmost, idleSeconds] = await Promise.all([getFrontmostApplication().catch(() => null), getIdleSeconds()]);
 
   let current: AppRef | null = null;
   if (frontmost) {
@@ -62,22 +59,30 @@ export default async function collect(): Promise<void> {
     }
   }
 
-  // The saved app passed the exclusion list as it stood last tick. If the user has
-  // since excluded it, the window it opened must not be recorded either.
-  const previous =
-    state && state.lastKey !== "" && isExcluded(excluded, state.lastName, state.lastKey)
-      ? { ...state, lastKey: "", lastName: "" }
-      : state;
+  // Read, record and write under the lock the erase action also takes, so a clear
+  // cannot land between this tick reading the files and writing them back. If it
+  // is held, skip: the next tick's window is clamped to cover this minute, or
+  // starts fresh if the holder was a clear.
+  await store.ifUnlocked(async () => {
+    const state = await store.readState();
 
-  const { slice, nextState } = tick(now, current, idleSeconds, previous, { maxGapMs: MAX_GAP_MS });
+    // The saved app passed the exclusion list as it stood last tick. If the user has
+    // since excluded it, the window it opened must not be recorded either.
+    const previous =
+      state && state.lastKey !== "" && isExcluded(excluded, state.lastName, state.lastKey)
+        ? { ...state, lastKey: "", lastName: "" }
+        : state;
 
-  if (slice) {
-    await store.record(slice);
-  }
-  await store.writeState(nextState);
+    const { slice, nextState } = tick(now, current, idleSeconds, previous, { maxGapMs: MAX_GAP_MS });
 
-  // Prune once a day, on the first tick after the local date rolls over.
-  if (state && localDateKey(state.lastAt) !== localDateKey(now)) {
-    await store.prune(parseRetentionDays(preferences.retentionDays), now);
-  }
+    if (slice) {
+      await store.record(slice);
+    }
+    await store.writeState(nextState);
+
+    // Prune once a day, on the first tick after the local date rolls over.
+    if (state && localDateKey(state.lastAt) !== localDateKey(now)) {
+      await store.prune(parseRetentionDays(preferences.retentionDays), now);
+    }
+  });
 }

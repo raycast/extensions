@@ -42,6 +42,9 @@ function cacheFile(cacheDir: string, bundleId: string, size: number): string {
   return path.join(cacheDir, `${bundleId.replace(/[^A-Za-z0-9._-]/g, "_")}@${size}.png`);
 }
 
+/** Conversions still running, so a clear can wait for them rather than be undone by one. */
+const inFlight = new Set<Promise<string | null>>();
+
 /**
  * Render an application's icon to a PNG and return its path.
  *
@@ -54,12 +57,15 @@ function cacheFile(cacheDir: string, bundleId: string, size: number): string {
  * Returns null rather than throwing: a missing icon should cost the heading its
  * image, not break the panel.
  */
-export async function appIconPng(
-  appPath: string,
-  bundleId: string,
-  cacheDir: string,
-  size = 512,
-): Promise<string | null> {
+export function appIconPng(appPath: string, bundleId: string, cacheDir: string, size = 512): Promise<string | null> {
+  const conversion = convert(appPath, bundleId, cacheDir, size);
+  inFlight.add(conversion);
+  const settle = () => inFlight.delete(conversion);
+  conversion.then(settle, settle);
+  return conversion;
+}
+
+async function convert(appPath: string, bundleId: string, cacheDir: string, size: number): Promise<string | null> {
   const out = cacheFile(cacheDir, bundleId, size);
 
   try {
@@ -83,5 +89,7 @@ export async function appIconPng(
 
 /** Remove every cached icon. Nothing here is user data, but it is still ours to clean up. */
 export async function clearIconCache(cacheDir: string): Promise<void> {
+  // A conversion already under way would write its PNG back after the delete.
+  while (inFlight.size > 0) await Promise.allSettled([...inFlight]);
   await fs.rm(cacheDir, { recursive: true, force: true });
 }

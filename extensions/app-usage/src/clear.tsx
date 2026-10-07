@@ -19,7 +19,11 @@ export function ClearDataAction({ onCleared }: { onCleared: () => void }) {
       await clearIconCache(iconCacheDir());
       await showToast({ style: Toast.Style.Success, title: "Usage data cleared" });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could not clear usage data", message: String(error) });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not clear usage data",
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
     onCleared();
   }

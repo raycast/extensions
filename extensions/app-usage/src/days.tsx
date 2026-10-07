@@ -17,6 +17,7 @@ import {
 import { ClearDataAction } from "./clear";
 import { createStore } from "./core/store";
 import { iconFor, loadIconPaths } from "./icons";
+import { loadCollecting, TrackingOffEmptyView } from "./tracking";
 
 /** How far back the list reaches. One row per day, newest first. */
 const RANGE: RangeId = "last7";
@@ -30,20 +31,33 @@ interface Day {
   report: Report;
 }
 
-async function load(): Promise<Day[]> {
+interface Loaded {
+  days: Day[];
+  /** False until Collect Usage has run recently, e.g. on a fresh Store install. */
+  collecting: boolean;
+}
+
+async function load(): Promise<Loaded> {
   const store = createStore(environment.supportPath);
   const now = Date.now();
 
-  const days = await Promise.all(
-    rangeDates(RANGE, now).map(async (date) => ({
-      date,
-      title: dayTitle(date, now),
-      report: buildReport([{ date, file: await store.readDay(date) }]),
-    })),
-  );
+  const [days, collecting] = await Promise.all([
+    Promise.all(
+      rangeDates(RANGE, now).map(async (date) => ({
+        date,
+        title: dayTitle(date, now),
+        report: buildReport([{ date, file: await store.readDay(date) }]),
+      })),
+    ),
+    loadCollecting(),
+  ]);
 
   // Newest first: today is what you came to look at.
-  return days.reverse();
+  return { days: days.reverse(), collecting };
+}
+
+function isTracked(report: Report): boolean {
+  return report.totalSeconds > 0 || report.idleSeconds > 0;
 }
 
 /** That day's applications as a list, where an icon can sit left of its name. */
@@ -106,75 +120,86 @@ export default function DailyUsage() {
   const { data, isLoading, revalidate } = usePromise(load);
   const { data: iconPaths } = usePromise(loadIconPaths);
 
-  const days = data ?? [];
+  const days = data?.days ?? [];
+  // A week of "Not tracked" rows would not say why. With nothing recorded and the
+  // collector not running, explain how to turn tracking on instead.
+  const trackingOff = data !== undefined && !data.collecting && !days.some((day) => isTracked(day.report));
 
   return (
-    <List isLoading={isLoading} isShowingDetail={showingDetail && days.length > 0} searchBarPlaceholder="Filter days">
-      <List.Section title="Last 7 Days">
-        {days.map((day) => {
-          const { report } = day;
-          const tracked = report.totalSeconds > 0 || report.idleSeconds > 0;
-          const top = report.rows[0];
-          const profile = hourProfiles(report);
+    <List
+      isLoading={isLoading}
+      isShowingDetail={showingDetail && days.length > 0 && !trackingOff}
+      searchBarPlaceholder="Filter days"
+    >
+      {trackingOff ? (
+        <TrackingOffEmptyView onCleared={revalidate} />
+      ) : (
+        <List.Section title="Last 7 Days">
+          {days.map((day) => {
+            const { report } = day;
+            const tracked = isTracked(report);
+            const top = report.rows[0];
+            const profile = hourProfiles(report);
 
-          return (
-            <List.Item
-              key={day.date}
-              icon={top ? iconFor(top.key, iconPaths) : Icon.Calendar}
-              title={day.title}
-              subtitle={tracked ? (top?.name ?? "Idle") : "Not tracked"}
-              accessories={
-                showingDetail
-                  ? undefined
-                  : [
-                      {
-                        text: {
-                          value: tracked ? formatDuration(report.totalSeconds) : "—",
-                          color: tracked ? Color.PrimaryText : Color.SecondaryText,
+            return (
+              <List.Item
+                key={day.date}
+                icon={top ? iconFor(top.key, iconPaths) : Icon.Calendar}
+                title={day.title}
+                subtitle={tracked ? (top?.name ?? "Idle") : "Not tracked"}
+                accessories={
+                  showingDetail
+                    ? undefined
+                    : [
+                        {
+                          text: {
+                            value: tracked ? formatDuration(report.totalSeconds) : "—",
+                            color: tracked ? Color.PrimaryText : Color.SecondaryText,
+                          },
                         },
-                      },
-                    ]
-              }
-              detail={
-                <List.Item.Detail
-                  markdown={
-                    tracked
-                      ? dayChartMarkdown(profile, { appearance: environment.appearance })
-                      : "_Nothing was recorded on this day._"
-                  }
-                  metadata={<DayMetadata day={day} iconPaths={iconPaths} />}
-                />
-              }
-              actions={
-                <ActionPanel>
-                  {report.rows.length > 0 ? (
-                    <Action.Push
-                      title="Show Applications"
-                      icon={Icon.AppWindowList}
-                      target={<DayApps day={day} iconPaths={iconPaths} />}
+                      ]
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={
+                      tracked
+                        ? dayChartMarkdown(profile, { appearance: environment.appearance })
+                        : "_Nothing was recorded on this day._"
+                    }
+                    metadata={<DayMetadata day={day} iconPaths={iconPaths} />}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    {report.rows.length > 0 ? (
+                      <Action.Push
+                        title="Show Applications"
+                        icon={Icon.AppWindowList}
+                        target={<DayApps day={day} iconPaths={iconPaths} />}
+                      />
+                    ) : null}
+                    <Action
+                      title={showingDetail ? "Hide Details" : "Show Details"}
+                      icon={Icon.Sidebar}
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      onAction={() => setShowingDetail((value) => !value)}
                     />
-                  ) : null}
-                  <Action
-                    title={showingDetail ? "Hide Details" : "Show Details"}
-                    icon={Icon.Sidebar}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    onAction={() => setShowingDetail((value) => !value)}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={() => revalidate()}
-                  />
-                  <ActionPanel.Section>
-                    <ClearDataAction onCleared={revalidate} />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={() => revalidate()}
+                    />
+                    <ActionPanel.Section>
+                      <ClearDataAction onCleared={revalidate} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }

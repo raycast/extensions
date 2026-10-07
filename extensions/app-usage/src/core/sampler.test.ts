@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { tick } from "./sampler";
+import { isCollecting, tick } from "./sampler";
 import type { AppRef, SamplerState } from "./types";
 
 const MINUTE = 60_000;
@@ -46,6 +46,12 @@ describe("tick", () => {
     const { slice } = tick(T, chrome, 20, stateAt(T - MINUTE), OPTS);
     assert.equal(slice?.app?.seconds, 40);
     assert.equal(slice?.idleSeconds, 20);
+  });
+
+  it("never turns a one-minute window into 61 seconds through rounding", () => {
+    // 29.5s active and 30.5s idle each round up on their own.
+    const { slice } = tick(T, chrome, 30.5, stateAt(T - MINUTE), OPTS);
+    assert.equal((slice?.app?.seconds ?? 0) + (slice?.idleSeconds ?? 0), 60);
   });
 
   it("never reports more idle than the window itself", () => {
@@ -99,5 +105,22 @@ describe("tick", () => {
   it("writes nothing for a window too short to round to a second", () => {
     const { slice } = tick(T, chrome, 0, stateAt(T - 400), OPTS);
     assert.equal(slice, null);
+  });
+});
+
+describe("isCollecting", () => {
+  const STALE = 5 * MINUTE;
+
+  it("is false before the collector has ever run, as after a Store install", () => {
+    assert.equal(isCollecting(null, T, STALE), false);
+  });
+
+  it("is true while ticks keep arriving", () => {
+    assert.equal(isCollecting(stateAt(T - MINUTE), T, STALE), true);
+    assert.equal(isCollecting(stateAt(T - STALE), T, STALE), true);
+  });
+
+  it("is false once the last tick has gone stale", () => {
+    assert.equal(isCollecting(stateAt(T - STALE - 1), T, STALE), false);
   });
 });

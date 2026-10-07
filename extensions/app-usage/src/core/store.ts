@@ -1,10 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import type { DayFile, DaySlice, SamplerState } from "./types";
 
 const HOURS_IN_DAY = 24;
 const DAY_FILE_PATTERN = /^(\d{4}-\d{2}-\d{2})\.json$/;
+/** A tick takes milliseconds. A lock this old was left by a holder that crashed. */
+const LOCK_STALE_MS = 30_000;
+/** How long an erase waits for a tick in progress before giving up. */
+const LOCK_WAIT_MS = 5_000;
+const LOCK_POLL_MS = 50;
 
 /** YYYY-MM-DD in local time. Not UTC: days must line up with the user's day. */
 export function localDateKey(epochMs: number): string {
@@ -80,6 +86,7 @@ function emptyHours(): number[] {
 export function createStore(root: string) {
   const stateFile = path.join(root, "state.json");
   const daysDir = path.join(root, "days");
+  const lockDir = path.join(root, "lock");
   const dayFile = (date: string) => path.join(daysDir, `${date}.json`);
 
   /**
@@ -206,11 +213,73 @@ export function createStore(root: string) {
 
   /** Erase everything this extension has stored. */
   async function clear(): Promise<void> {
-    await fs.rm(daysDir, { recursive: true, force: true });
-    await fs.rm(stateFile, { force: true });
+    const deadline = Date.now() + LOCK_WAIT_MS;
+    while (!(await tryLock())) {
+      if (Date.now() >= deadline) throw new Error("A sample is being recorded. Try again in a moment.");
+      await delay(LOCK_POLL_MS);
+    }
+    try {
+      await fs.rm(daysDir, { recursive: true, force: true });
+      await fs.rm(stateFile, { force: true });
+    } finally {
+      await unlock();
+    }
   }
 
-  return { readState, writeState, readDay, record, listDays, prune, clear, paths: { root, stateFile, daysDir } };
+  /**
+   * Cross-process lock between the collector and the erase action, which run in
+   * separate processes. Without it, a tick that read the files just before a
+   * clear writes them back just after it, and the erase is silently undone.
+   *
+   * mkdir is atomic, so whoever creates the directory holds the lock.
+   */
+  async function tryLock(): Promise<boolean> {
+    await fs.mkdir(root, { recursive: true });
+    try {
+      await fs.mkdir(lockDir);
+      return true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+
+    // Held. Break it only if its holder must have crashed.
+    try {
+      const { mtimeMs } = await fs.stat(lockDir);
+      if (Date.now() - mtimeMs < LOCK_STALE_MS) return false;
+      await fs.rm(lockDir, { recursive: true, force: true });
+      await fs.mkdir(lockDir);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function unlock(): Promise<void> {
+    await fs.rm(lockDir, { recursive: true, force: true });
+  }
+
+  /** Run `fn` holding the lock, or return false at once if someone else holds it. */
+  async function ifUnlocked(fn: () => Promise<void>): Promise<boolean> {
+    if (!(await tryLock())) return false;
+    try {
+      await fn();
+    } finally {
+      await unlock();
+    }
+    return true;
+  }
+
+  return {
+    readState,
+    writeState,
+    readDay,
+    record,
+    listDays,
+    prune,
+    clear,
+    ifUnlocked,
+    paths: { root, stateFile, daysDir },
+  };
 }
 
 export type Store = ReturnType<typeof createStore>;

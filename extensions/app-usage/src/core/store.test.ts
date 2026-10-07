@@ -226,6 +226,71 @@ describe("store", () => {
     assert.ok(!rootFiles.some((f) => f.endsWith(".tmp")));
   });
 
+  it("lets a clear win against a sample that read the files before it", async () => {
+    const store = createStore(path.join(root, "clear-race-case"));
+    await store.record({ at: AT, app: { key: "com.a", name: "A", seconds: 10 }, idleSeconds: 0 });
+    await store.writeState({ v: 1, lastAt: AT, lastKey: "com.a", lastName: "A" });
+
+    let locked!: () => void;
+    let release!: () => void;
+    const holding = new Promise<void>((resolve) => (locked = resolve));
+    const gate = new Promise<void>((resolve) => (release = resolve));
+
+    const sample = store.ifUnlocked(async () => {
+      const state = await store.readState();
+      locked();
+      await gate;
+      // Writes back what it read before the clear started.
+      await store.record({ at: AT, app: { key: "com.a", name: "A", seconds: 60 }, idleSeconds: 0 });
+      if (state) await store.writeState(state);
+    });
+
+    await holding;
+    const cleared = store.clear();
+    release();
+    await Promise.all([sample, cleared]);
+
+    assert.deepEqual(await store.listDays(), []);
+    assert.equal(await store.readState(), null);
+  });
+
+  it("makes a sample skip its turn while the lock is held", async () => {
+    const store = createStore(path.join(root, "lock-busy-case"));
+    let locked!: () => void;
+    let release!: () => void;
+    const holding = new Promise<void>((resolve) => (locked = resolve));
+    const gate = new Promise<void>((resolve) => (release = resolve));
+
+    const first = store.ifUnlocked(async () => {
+      locked();
+      await gate;
+    });
+    await holding;
+
+    let ran = false;
+    assert.equal(
+      await store.ifUnlocked(async () => {
+        ran = true;
+      }),
+      false,
+    );
+    assert.equal(ran, false);
+
+    release();
+    assert.equal(await first, true);
+    assert.equal(await store.ifUnlocked(async () => {}), true, "the lock is released afterwards");
+  });
+
+  it("breaks a lock left behind by a crash", async () => {
+    const dir = path.join(root, "stale-lock-case");
+    const store = createStore(dir);
+    await fs.mkdir(path.join(dir, "lock"), { recursive: true });
+    const old = new Date(Date.now() - 60_000);
+    await fs.utimes(path.join(dir, "lock"), old, old);
+
+    assert.equal(await store.ifUnlocked(async () => {}), true);
+  });
+
   it("erases everything on clear", async () => {
     const store = createStore(path.join(root, "clear-case"));
     await store.record({ at: AT, app: { key: "com.a", name: "A", seconds: 10 }, idleSeconds: 0 });

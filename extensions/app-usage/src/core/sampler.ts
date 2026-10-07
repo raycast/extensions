@@ -58,10 +58,12 @@ export function tick(
   // This handles a user who wandered off partway through, not just one who was
   // away for the whole window.
   const idleMs = Math.min(Math.max(0, idleSeconds) * 1000, elapsedMs);
-  const activeMs = elapsedMs - idleMs;
 
-  const activeSeconds = Math.round(activeMs / 1000);
-  const idleWindowSeconds = Math.round(idleMs / 1000);
+  // Round the window once and derive active time from it. Rounding the two parts
+  // separately can turn 29.5s + 30.5s into 30 + 31, a 61-second minute.
+  const windowSeconds = Math.round(elapsedMs / 1000);
+  const idleWindowSeconds = Math.min(Math.round(idleMs / 1000), windowSeconds);
+  const activeSeconds = windowSeconds - idleWindowSeconds;
 
   // Nothing worth a write: a sub-second window, or arithmetic that cancelled out.
   if (activeSeconds <= 0 && idleWindowSeconds <= 0) {
@@ -76,4 +78,15 @@ export function tick(
     },
     nextState,
   };
+}
+
+/**
+ * Whether Collect Usage is running in the background.
+ *
+ * A Store install leaves its background refresh off until the command is opened
+ * once or enabled in preferences. Until then no tick runs, so the state file is
+ * missing, or goes stale if tracking is switched off later.
+ */
+export function isCollecting(state: SamplerState | null, now: number, staleAfterMs: number): boolean {
+  return state !== null && now - state.lastAt <= staleAfterMs;
 }

@@ -25,11 +25,14 @@ import { appIconPng } from "./core/appicon";
 import { createStore, type Store } from "./core/store";
 import { ClearDataAction } from "./clear";
 import { iconCacheDir, iconFor, loadIconPaths } from "./icons";
+import { loadCollecting, TrackingOffEmptyView } from "./tracking";
 
 interface Loaded {
   report: Report;
   /** The preceding week, for the "is this normal?" comparison. Null for multi-day ranges. */
   baseline: Report | null;
+  /** False until Collect Usage has run recently, e.g. on a fresh Store install. */
+  collecting: boolean;
 }
 
 function readDays(store: Store, dates: string[]): Promise<RangeDay[]> {
@@ -43,14 +46,16 @@ async function load(range: RangeId): Promise<Loaded> {
   const dates = rangeDates(range, now);
   const baseline = baselineDates(range, now);
 
-  const [days, baselineDaysRead] = await Promise.all([
+  const [days, baselineDaysRead, collecting] = await Promise.all([
     readDays(store, dates),
     baseline ? readDays(store, baseline) : Promise.resolve(null),
+    loadCollecting(),
   ]);
 
   return {
     report: buildReport(days),
     baseline: baselineDaysRead ? buildReport(baselineDaysRead) : null,
+    collecting,
   };
 }
 
@@ -107,7 +112,7 @@ export default function UsageReport() {
   const { data: iconPaths } = usePromise(loadIconPaths);
   const { data: heroIconPath } = usePromise(heroIcon, [selectedKey, iconPaths]);
 
-  const loaded: Loaded = data ?? { report: EMPTY_REPORT, baseline: null };
+  const loaded: Loaded = data ?? { report: EMPTY_REPORT, baseline: null, collecting: true };
   const { report } = loaded;
   const hasRows = report.rows.length > 0;
   // Idle with no app time is still a tracked range, not an empty one.
@@ -131,7 +136,9 @@ export default function UsageReport() {
         </List.Dropdown>
       }
     >
-      {!hasRows && !isLoading ? (
+      {!hasRows && !isLoading && !loaded.collecting ? (
+        <TrackingOffEmptyView onCleared={revalidate} />
+      ) : !hasRows && !isLoading ? (
         <List.EmptyView
           icon={idleOnly ? Icon.Moon : Icon.Clock}
           title={idleOnly ? "Only idle time recorded" : "Nothing recorded yet"}
