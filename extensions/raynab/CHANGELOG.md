@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Optional Payee] - {PR_MERGE_DATE}
+## [Optional Payee] - 2026-10-07
 
 ### ✨ New Features
 
