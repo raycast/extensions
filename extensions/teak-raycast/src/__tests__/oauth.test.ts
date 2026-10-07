@@ -27,9 +27,18 @@ const posts: Array<{
   authorization: string | null;
 }> = [];
 const originalFetch = globalThis.fetch;
+const toasts: Array<{ title: string; message?: string }> = [];
 
 mock.module("@raycast/api", () => ({
   environment: { isDevelopment: false },
+  getPreferenceValues: () => ({ apiKey: "" }),
+  Action: Object.assign(() => null, { Style: { Destructive: "destructive" } }),
+  Icon: { Logout: "logout" },
+  Toast: { Style: { Failure: "failure", Success: "success" } },
+  showToast: (toast: { title: string; message?: string }) => {
+    toasts.push(toast);
+    return Promise.resolve();
+  },
   LocalStorage: raycastLocalStorageMock,
   OAuth: {
     RedirectMethod: { Web: "web" },
@@ -157,6 +166,7 @@ beforeEach(async () => {
   }
   stores.clear();
   requests.length = 0;
+  toasts.length = 0;
   posts.length = 0;
   browserCount = 0;
   mode = "betterauth";
@@ -340,7 +350,7 @@ test("tampered historical endpoints never receive saved credentials", async () =
   globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
   const restarted = await import(`../lib/oauth?tamper=${crypto.randomUUID()}`);
   try {
-    await expect(restarted.signOutTeak()).rejects.toThrow("deployment");
+    await expect(restarted.signOutTeak()).rejects.toThrow("metadata");
     expect(posts.length).toBe(0);
     expect(stores.size).toBe(1);
   } finally {
@@ -407,5 +417,258 @@ test.each([401, 503, 200])(
     );
     expect(stores.get(key)?.refreshToken).toBe("refresh-new");
     expect(browserCount).toBe(0);
+  },
+);
+
+test.each([204, 503])(
+  "expired first logout refreshes its exact namespace once and retains rotation on failure (%i)",
+  async (status) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    stores.set(key, {
+      accessToken: "signed-expired-access",
+      refreshToken: "saved-refresh",
+      isExpired: () => true,
+    });
+    posts.length = 0;
+    browserCount = 0;
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/oauth/disconnect")) {
+        return new Response(null, {
+          status:
+            new Headers(init?.headers).get("Authorization") ===
+            "Bearer signed-expired-access"
+              ? 401
+              : status,
+        });
+      }
+      return transport(input, init);
+    }) as typeof fetch;
+    if (status === 204) {
+      await oauth.signOutTeak();
+      expect(stores.size).toBe(0);
+    } else {
+      await expect(oauth.signOutTeak()).rejects.toThrow(
+        "credentials are still saved",
+      );
+      expect(stores.get(key)?.refreshToken).toBe("refresh-new");
+    }
+    const refreshes = posts.filter(
+      (post) => post.body.get("grant_type") === "refresh_token",
+    );
+    expect(refreshes).toHaveLength(1);
+    expect(refreshes[0].url).toBe(
+      "https://scholarly-hay-77.authkit.app/oauth2/token",
+    );
+    expect(refreshes[0].body.get("client_id")).toBe("client_raycast_dev");
+    expect(refreshes[0].body.get("refresh_token")).toBe("saved-refresh");
+    expect(refreshes[0].body.get("resource")).toBe("https://teakvault.com/api");
+    expect(browserCount).toBe(0);
+  },
+);
+
+test("WorkOS reauthorization refreshes its saved grant without browser replacement", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  browserCount = 0;
+  posts.length = 0;
+  expect(await oauth.reauthorizeTeak()).toBe("access-new");
+  expect(
+    posts.filter((post) => post.body.get("grant_type") === "refresh_token"),
+  ).toHaveLength(1);
+  expect(
+    posts.filter((post) => post.url.endsWith("/oauth/disconnect")),
+  ).toHaveLength(0);
+  expect(browserCount).toBe(0);
+});
+test("WorkOS reauthorization without refresh preserves the grant and requests explicit logout", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  stores.set(key, { accessToken: "saved-access", isExpired: () => false });
+  browserCount = 0;
+  await expect(oauth.reauthorizeTeak()).rejects.toThrow(
+    "Sign Out before reconnecting",
+  );
+  expect(stores.get(key)?.accessToken).toBe("saved-access");
+  expect(browserCount).toBe(0);
+});
+
+test("background reads join WorkOS reauthorization rotation", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  stores.set(key, {
+    accessToken: "prior-access",
+    refreshToken: "prior-refresh",
+    isExpired: () => false,
+  });
+  let notify = () => {};
+  let release = () => {};
+  const started = new Promise<void>((resolve) => {
+    notify = resolve;
+  });
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  posts.length = 0;
+  globalThis.fetch = (async (input, init) => {
+    if (String(input).includes("teak-oauth-clients")) {
+      notify();
+      await held;
+    }
+    return transport(input, init);
+  }) as typeof fetch;
+  const renewal = oauth.reauthorizeTeak();
+  await started;
+  const background = oauth.getStoredTeakAccessToken();
+  release();
+  expect(await renewal).toBe("access-new");
+  expect(await background).toBe("access-new");
+  expect(
+    posts.filter((post) => post.body.get("grant_type") === "refresh_token"),
+  ).toHaveLength(1);
+});
+
+test("corrupt registry metadata cannot block valid logout or clear foreign tokens", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  const prefix =
+    "teak.oauth.provider:" +
+    encodeURIComponent("https://teakvault.com/api/v1") +
+    ":";
+  const corruptKey = prefix + "corrupt";
+  await raycastLocalStorageMock.setItem(corruptKey, "{invalid");
+  stores.set("foreign-provider", {
+    accessToken: "foreign-secret",
+    isExpired: () => false,
+  });
+  posts.length = 0;
+  await expect(oauth.signOutTeak()).rejects.toThrow("metadata");
+  expect(stores.has(key)).toBe(false);
+  expect(stores.has("foreign-provider")).toBe(true);
+  expect(await raycastLocalStorageMock.getItem(corruptKey)).toBeUndefined();
+  expect(
+    posts.filter((post) => post.url.endsWith("/oauth/disconnect")),
+  ).toHaveLength(1);
+});
+test.each([
+  "invalid_grant",
+  "invalid_client",
+  "unknown",
+  "malformed",
+  "outage",
+  "network",
+  "oversized",
+])(
+  "logout clears only definitive refresh invalid_grant (%s)",
+  async (failure) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    stores.set("foreign-provider", {
+      accessToken: "foreign-secret",
+      isExpired: () => false,
+    });
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/oauth/disconnect"))
+        return new Response(null, { status: 401 });
+      if (String(input).endsWith("/oauth2/token")) {
+        if (failure === "network") throw new Error("Network unavailable");
+        if (failure === "oversized")
+          return json(
+            { error: "invalid_grant", extra: "x".repeat(70 * 1024) },
+            400,
+          );
+        if (failure === "malformed") return new Response("{", { status: 400 });
+        if (failure === "outage") return json({ error: "invalid_grant" }, 503);
+        return json({ error: failure }, 400);
+      }
+      return transport(input, init);
+    }) as typeof fetch;
+    if (failure === "invalid_grant") {
+      expect(await oauth.signOutTeak()).toBe("local-only");
+      expect(stores.has(key)).toBe(false);
+      globalThis.fetch = transport;
+      browserCount = 0;
+      await oauth.authorizeTeak();
+      expect(browserCount).toBe(1);
+    } else {
+      await expect(oauth.signOutTeak()).rejects.toThrow(
+        "credentials are still saved",
+      );
+      expect(stores.has(key)).toBe(true);
+    }
+    expect(stores.has("foreign-provider")).toBe(true);
+  },
+);
+
+test("local-only Sign Out action warns that other installations may remain connected", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  globalThis.fetch = (async (input, init) => {
+    if (String(input).endsWith("/oauth/disconnect"))
+      return new Response(null, { status: 401 });
+    if (String(input).endsWith("/oauth2/token"))
+      return json({ error: "invalid_grant" }, 400);
+    return transport(input, init);
+  }) as typeof fetch;
+  const { SignOutAction } = await import("../components/SignOutAction");
+  let signedOut = false;
+  const action = SignOutAction({
+    onSignedOut: () => {
+      signedOut = true;
+    },
+  });
+  if (!action) throw new Error("Missing Sign Out action");
+  await action.props.onAction();
+  expect(toasts).toEqual([
+    {
+      style: "success",
+      title: "Signed out on this Mac",
+      message: "Other installations may still be connected.",
+    },
+  ]);
+  expect(signedOut).toBe(true);
+  expect(stores.size).toBe(0);
+});
+
+test.each([400, 401])(
+  "malformed HTTP %i refresh replies request sign-in without forgetting credentials",
+  async (status) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    const saved = {
+      accessToken: "expired",
+      refreshToken: "saved-refresh",
+      isExpired: () => true,
+    };
+    stores.set(key, saved);
+    for (const body of [null, "", "not-json", "x".repeat(70 * 1024)]) {
+      globalThis.fetch = (async (input, init) => {
+        if (
+          String(input).endsWith("/oauth2/token") &&
+          new URLSearchParams(String(init?.body)).get("grant_type") ===
+            "refresh_token"
+        )
+          return new Response(body, { status });
+        if (String(input).endsWith("/oauth/disconnect"))
+          return new Response(null, { status: 401 });
+        return transport(input, init);
+      }) as typeof fetch;
+      expect(await oauth.getStoredTeakAccessToken()).toBeNull();
+      expect(stores.get(key)).toBe(saved);
+      expect(browserCount).toBe(1);
+      await expect(oauth.signOutTeak()).rejects.toThrow(
+        "credentials are still saved",
+      );
+      expect(stores.get(key)).toBe(saved);
+    }
+    expect(await oauth.authorizeTeak()).toBe("access-new");
+    expect(browserCount).toBe(2);
+    expect(stores.get(key)?.refreshToken).toBe("refresh-new");
   },
 );

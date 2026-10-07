@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teak-raycast",
-  "version": "1.0.79",
+  "version": "1.0.80",
   "private": true,
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
   "categories": [
