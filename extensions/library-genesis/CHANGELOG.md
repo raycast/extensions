@@ -1,6 +1,6 @@
 # Library Genesis Changelog
 
-## [Fix Search Requests and Mirror Checks] - {PR_MERGE_DATE}
+## [Fix Search Requests and Mirror Checks] - 2026-10-07
 
 - Use an extension-specific user agent so mirrors return search results instead of placeholder pages.
 - Validate actual search responses when testing and choosing mirrors.
