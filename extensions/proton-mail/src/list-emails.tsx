@@ -722,14 +722,6 @@ function ExpandedEmailView({
               onAction={handleOpenInProtonMail}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
-            {body?.html && (
-              <Action
-                title="Open Original in Browser"
-                icon={Icon.Window}
-                onAction={() => openOriginalInBrowser(folder, email)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-              />
-            )}
             {email.hasAttachment && (
               <Action
                 title="Download Attachments"
@@ -798,6 +790,18 @@ function ExpandedEmailView({
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             />
           </ActionPanel.Section>
+
+          {/* New actions go last so existing ones keep their positions */}
+          {body?.html && (
+            <ActionPanel.Section title="Original">
+              <Action
+                title="Open Original in Browser"
+                icon={Icon.Window}
+                onAction={() => openOriginalInBrowser(folder, email)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
@@ -980,12 +984,6 @@ function EmailActions({
           onAction={handleOpenInProtonMail}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
-        <Action
-          title="Open Original in Browser"
-          icon={Icon.Window}
-          onAction={() => openOriginalInBrowser(folder, email)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        />
         {email.hasAttachment && (
           <Action
             title="Download Attachments"
@@ -1079,6 +1077,16 @@ function EmailActions({
           />
         </ActionPanel.Section>
       )}
+
+      {/* New actions go last so existing ones keep their positions */}
+      <ActionPanel.Section title="Original">
+        <Action
+          title="Open Original in Browser"
+          icon={Icon.Window}
+          onAction={() => openOriginalInBrowser(folder, email)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

@@ -5,8 +5,9 @@ export interface EmailMarkdownOptions {
   images: boolean;
 }
 
-// Widest image we let Raycast render, in points
+// Largest image we let Raycast render, in points
 const MAX_IMAGE_WIDTH = 560;
+const MAX_IMAGE_HEIGHT = 400;
 // Images at or below this size are treated as icons (social links, spacers) and dropped
 const ICON_SIZE = 48;
 // Longer alt texts are image descriptions, not link names
@@ -56,6 +57,8 @@ function isHidden(node: HtmlElement): boolean {
 function readDimension(node: HtmlElement, name: "width" | "height"): number | undefined {
   const fromStyle = getStyle(node).match(new RegExp(`(?:^|;)${name}:(\\d+(?:\\.\\d+)?)px`));
   const raw = fromStyle?.[1] ?? node.getAttribute(name) ?? "";
+  // Only pixel sizes: a percentage like width="100%" says nothing about the image itself
+  if (!/^\s*\d+(?:\.\d+)?\s*(?:px)?\s*$/i.test(raw)) return undefined;
   const value = parseFloat(raw);
   return Number.isFinite(value) && value > 0 ? value : undefined;
 }
@@ -102,7 +105,11 @@ function imageMarkdown(node: HtmlElement, options: EmailMarkdownOptions): string
     if (height !== undefined) {
       sizedSrc += `&raycast-height=${Math.round((height * renderedWidth) / width)}`;
     }
+  } else if (height !== undefined) {
+    const separator = sizedSrc.includes("?") ? "&" : "?";
+    sizedSrc += `${separator}raycast-height=${Math.round(Math.min(height, MAX_IMAGE_HEIGHT))}`;
   }
+  // Without any size, Raycast shows the image at its natural size, scaled down to fit the pane
   return `![${alt}](${sizedSrc})`;
 }
 
@@ -139,10 +146,11 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
 
       let label = content.replace(/\s+/g, " ").trim();
       if (!label) {
-        // Image-only link (logo, social icon) shown without images: fall back to the alt text
+        // Image-only link (logo, button, social icon) shown without images: fall back to the alt text.
+        // Short alts name the target; long ones describe the picture, so keep the link under its site name.
         const alt = (element.querySelector("img")?.getAttribute("alt") || "").replace(/\s+/g, " ").trim();
-        // Short alts name the target (logo, social network); long ones describe the picture
-        if (alt.length <= MAX_ALT_LABEL_LENGTH) label = alt;
+        if (alt.length > MAX_ALT_LABEL_LENGTH) label = shortUrlLabel(href);
+        else label = alt;
       }
       if (!label) return "";
       if (looksLikeUrl(label)) label = shortUrlLabel(href);
@@ -167,9 +175,16 @@ function dropRepeatedBlocks(markdown: string): string {
   };
   const normalize = (block: string) =>
     block.replace(/\]\(([^)]*)\)/g, (_match, url: string) => `](${linkTarget(url)})`).trim();
+  // Only blocks made of a single link (the image link and title link of a card), so a paragraph
+  // the sender repeats on purpose is kept
+  const isLinkOnly = (block: string) => /^\[[^\n]*\]\([^)\s]*\)$/.test(block.trim());
   return markdown
     .split("\n\n")
-    .filter((block, index, blocks) => index === 0 || !block.trim() || normalize(block) !== normalize(blocks[index - 1]))
+    .filter((block, index, blocks) => {
+      const previous = blocks[index - 1];
+      if (index === 0 || !isLinkOnly(block) || !isLinkOnly(previous)) return true;
+      return normalize(block) !== normalize(previous);
+    })
     .join("\n\n");
 }
 
