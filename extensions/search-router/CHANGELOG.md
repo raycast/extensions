@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-10-07
 
 - Add a configurable first-token search engine prefix, including support for bare triggers while reserving `@` for site searches
 
