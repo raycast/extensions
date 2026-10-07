@@ -111,6 +111,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "boim",
+    title: "BOIM (보임)",
+    description:
+      "Korean business directory for AI agents: find businesses across all industries in Korea (2.7M) by region and industry, public-procurement vendor cards (75,000+) built from Public Procurement Service data, and open public bids from KONEPS, Defense e-Procurement, LH, K-water and Nuri-jangteo. Read-only. Remote Streamable HTTP server at https://boim.io/api/mcp; no sign-in and no API key for the free tier, which shows up to 5 results per tool plus a link to the full public list.",
+    icon: "https://raw.githubusercontent.com/kikiyop1101/boim-mcp/main/assets/logo.png",
+    homepage: "https://github.com/kikiyop1101/boim-mcp",
+    remoteUrl: "https://boim.io/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://boim.io/api/mcp"],
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:

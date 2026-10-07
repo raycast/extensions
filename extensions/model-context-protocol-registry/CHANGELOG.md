@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add BOIM MCP Server] - 2026-10-07
+
+- Add BOIM (보임) to the official registry: a Korean business directory for AI agents covering 2.7M businesses across all industries, 75,000+ public-procurement vendor cards and open public bids from KONEPS, Defense e-Procurement, LH, K-water and Nuri-jangteo. Read-only. Raycast connects directly to the remote Streamable HTTP server at https://boim.io/api/mcp, with no sign-in and no API key for the free tier (up to 5 results per tool).
+
 ## [Update Hermoso MCP Server] - 2026-10-07
 
 - Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
