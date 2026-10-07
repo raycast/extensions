@@ -72,7 +72,8 @@ Only `/my-files` is indexed; "Shared with me", Photos and the trash are not.
   from your Drive before they run, as it does for browser downloads.
 - Creating a public link always asks for confirmation first.
 - Logging out (Login to Proton Drive → Log Out) deletes all of it: index, cached listings and
-  opened files.
+  opened files. If the CLI session ends another way (`proton-drive auth logout`, expiry), the
+  extension deletes the same data as soon as the CLI reports it, and shows nothing from the Drive.
 
 ## Credits
 

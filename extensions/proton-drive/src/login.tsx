@@ -21,6 +21,7 @@ import { CliError, cliPath, run } from "./lib/cli";
 import { clearLocalData } from "./lib/files";
 import { isDemo, setDemo } from "./lib/demo";
 import { showError } from "./lib/errors";
+import { forgetLocalData } from "./lib/session";
 
 type AuthState =
   | { status: "authenticated" }
@@ -41,7 +42,11 @@ async function checkAuth(): Promise<AuthState> {
     return { status: "authenticated" };
   } catch (error) {
     // Only a missing session means "not signed in"; a network error or a CLI crash is shown as such.
-    if (error instanceof CliError && error.signedOut) return { status: "logged-out", detail: error.stderr };
+    if (error instanceof CliError && error.signedOut) {
+      // The session may have ended outside the extension: drop local data as Log Out would.
+      await forgetLocalData();
+      return { status: "logged-out", detail: error.stderr };
+    }
     return { status: "error", message: error instanceof Error ? error.message : String(error) };
   }
 }

@@ -4,12 +4,14 @@ import { useCachedPromise } from "@raycast/utils";
 import { DriveNode, listFolderCached } from "../lib/cli";
 import { isDemo } from "../lib/demo";
 import { showError } from "../lib/errors";
+import { forgetLocalData, isSignedOut } from "../lib/session";
 import { searchIndex, searchNodes } from "../lib/search";
 import { SORT_ORDERS, SortOrder, sortNodes } from "../lib/sort";
 import { useDriveIndex } from "../lib/useDriveIndex";
 import { useSelectedFolder } from "../lib/useSelectedFolder";
 import { displayPath } from "./NodeActions";
 import { NodeItem } from "./NodeItem";
+import { SignedOutView } from "./SignedOutView";
 
 const MAX_DRIVE_RESULTS = 100;
 
@@ -23,10 +25,19 @@ const MAX_DRIVE_RESULTS = 100;
 export function FolderView(props: { path: string; title?: string }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOrder>("name");
+  const [signedOut, setSignedOut] = useState(false);
   const { index, progress, refresh } = useDriveIndex();
   const demo = isDemo();
   const { data, isLoading, revalidate } = useCachedPromise(listFolderCached, [props.path, demo ? "demo" : "live"], {
-    onError: (error) => showError(error, "Could not list folder"),
+    onError: async (error) => {
+      if (isSignedOut(error)) {
+        // Never keep showing cached Drive content once the session is gone.
+        setSignedOut(true);
+        await forgetLocalData();
+      } else {
+        await showError(error, "Could not list folder");
+      }
+    },
   });
 
   const here = useMemo(() => {
@@ -57,6 +68,8 @@ export function FolderView(props: { path: string; title?: string }) {
       extraActions={indexActions}
     />
   );
+
+  if (signedOut) return <SignedOutView />;
 
   return (
     <List

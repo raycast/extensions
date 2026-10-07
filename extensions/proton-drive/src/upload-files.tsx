@@ -6,6 +6,8 @@ import { displayPath } from "./components/NodeActions";
 import { listFolderCached, ROOT, upload } from "./lib/cli";
 import { isDemo } from "./lib/demo";
 import { showError } from "./lib/errors";
+import { forgetLocalData, isSignedOut } from "./lib/session";
+import { SignedOutView } from "./components/SignedOutView";
 import { readIndex } from "./lib/index";
 import { sortNodes } from "./lib/sort";
 
@@ -43,8 +45,16 @@ export default function Command() {
 function FolderPicker(props: { path: string; files?: string[]; indexedFolders: string[] }) {
   const { path, files, indexedFolders } = props;
   const [query, setQuery] = useState("");
+  const [signedOut, setSignedOut] = useState(false);
   const { data, isLoading } = useCachedPromise(listFolderCached, [path, isDemo() ? "demo" : "live"], {
-    onError: (error) => showError(error, "Could not list folder"),
+    onError: async (error) => {
+      if (isSignedOut(error)) {
+        setSignedOut(true);
+        await forgetLocalData();
+      } else {
+        await showError(error, "Could not list folder");
+      }
+    },
   });
 
   const label = files?.length === 1 ? basename(files[0]) : `${files?.length ?? 0} items`;
@@ -77,6 +87,8 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
       target={<FolderPicker path={target} files={files} indexedFolders={indexedFolders} />}
     />
   );
+
+  if (signedOut) return <SignedOutView />;
 
   return (
     <List
