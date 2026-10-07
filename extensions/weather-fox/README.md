@@ -1,6 +1,8 @@
-# Weather
+# Weather Fox
 
-A visually rich weather extension for Raycast, powered by the free [Open-Meteo](https://open-meteo.com) API (no API key required).
+A visually rich weather extension for Raycast: animated SVG scenes, live precipitation radar, multiple cities, and Cast, the fox mascot who acts out your weather. No account or API key required.
+
+Data source: [Open-Meteo](https://open-meteo.com) (forecast, geocoding, air quality), [RainViewer](https://www.rainviewer.com) (radar), and the US National Weather Service (alerts).
 
 Works on macOS and Windows. Shortcuts below are written for macOS; on Windows read `⌘` and `⌃` as `Ctrl`, `⌥` as `Alt`, and `⇧` as `Shift` (so `⌘⇧C` is `Ctrl+Shift+C` and the radar's `⌃⌥=` is `Ctrl+Alt+=`), with one exception: the 7/16-day toggle is `Ctrl+Shift+D`, because `Ctrl+D` is Raycast's standard *Remove* shortcut on Windows. The menu bar command and the PNG image share actions are macOS-only; the radar GIF actions work on both.
 

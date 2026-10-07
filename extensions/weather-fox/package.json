@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "open-meteo-weather",
-  "title": "Weather",
-  "description": "Beautiful weather forecasts with dynamic visuals, powered by Open-Meteo.",
+  "name": "weather-fox",
+  "title": "Weather Fox",
+  "description": "Animated weather scenes, live radar, and a fox mascot — multi-city forecasts with no API key.",
   "icon": "weather-sun-icon.png",
   "author": "luarmr",
   "platforms": [
@@ -10,21 +10,22 @@
     "Windows"
   ],
   "categories": [
-    "Data"
+    "Data",
+    "Fun"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "weather",
       "title": "Weather",
-      "subtitle": "Forecast",
+      "subtitle": "Weather Fox",
       "description": "Current conditions, hourly and 7-day forecast with rich visuals.",
       "mode": "view"
     },
     {
       "name": "cast",
       "title": "Cast the Weather Fox",
-      "subtitle": "Weather",
+      "subtitle": "Weather Fox",
       "description": "Meet Cast — an animated fox acting out your current weather in his tiny world.",
       "mode": "view",
       "icon": "weather-fox-icon.png"
@@ -32,8 +33,8 @@
     {
       "name": "menubar",
       "title": "Weather in Menu Bar",
-      "subtitle": "Forecast",
-      "description": "Glanceable current conditions in the menu bar, refreshed every 30 minutes.",
+      "subtitle": "Weather Fox",
+      "description": "Current conditions, rain nowcast, air quality, and alerts for your saved cities, refreshed every 30 minutes.",
       "mode": "menu-bar",
       "interval": "30m"
     }
