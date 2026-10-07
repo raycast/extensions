@@ -341,6 +341,7 @@ export const loadLatestVersion = async () => {
   await showToast({
     style: Toast.Style.Animated,
     title: "Checking latest version",
+    message: releaseVersion,
   });
 
   const [left, right] = releaseVersion.split(":");

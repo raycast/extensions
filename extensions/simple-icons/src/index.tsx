@@ -72,6 +72,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       await showToast({
         style: Toast.Style.Success,
         title: `${icons.length} icons loaded`,
+        message: version,
       });
     };
     if (requestedVersion) {
@@ -206,7 +207,9 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.Separator />
-                              <Detail.Metadata.Link title="Source" target={icon.source} text={icon.source} />
+                              {icon.source && (
+                                <Detail.Metadata.Link title="Source" target={icon.source} text={icon.source} />
+                              )}
                               {icon.guidelines && (
                                 <Detail.Metadata.Link
                                   title="Guidelines"

@@ -1,7 +1,7 @@
 /* eslint @raycast/prefer-title-case: off */
 import process from "node:process";
 import { useEffect, useState } from "react";
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, openExtensionPreferences } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
@@ -86,6 +86,7 @@ export const CopyFontEntities = ({ icon }: ActionProps) => (
 
 export const Supports = () => (
   <>
+    <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
     <Action.Push icon={Icon.Paragraph} title="View Release Notes" target={<Releases />} />
     <Action.OpenInBrowser
       title="Request a New Icon"
