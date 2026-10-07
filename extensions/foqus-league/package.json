@@ -70,15 +70,15 @@
       "default": "today",
       "data": [
         {
-          "title": "Today's time",
+          "title": "Today's Time",
           "value": "today"
         },
         {
-          "title": "This week's time",
+          "title": "This Week's Time",
           "value": "week"
         },
         {
-          "title": "Current streak",
+          "title": "Current Streak",
           "value": "streak"
         }
       ],
