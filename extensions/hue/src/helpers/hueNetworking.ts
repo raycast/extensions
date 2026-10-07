@@ -31,17 +31,17 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 
       response.on("end", () => {
         if (response.statusCode !== 200) {
-          return reject(`Unexpected status code from MeetHue's public API: ${response.statusCode}`);
+          return reject(new Error(`Unexpected status code from MeetHue's public API: ${response.statusCode}`));
         }
 
         if (data === "") {
-          return reject("Could not find a Hue Bridge using MeetHue's public API");
+          return reject(new Error("Could not find a Hue Bridge using MeetHue's public API"));
         }
 
         const hueApiResults: HueApiService[] = JSON.parse(data);
 
         if (hueApiResults.length === 0) {
-          return reject("Could not find a Hue Bridge using MeetHue's public API");
+          return reject(new Error("Could not find a Hue Bridge using MeetHue's public API"));
         }
 
         const ipAddress = hueApiResults[0].internalipaddress;
@@ -54,11 +54,11 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 
     request.on("timeout", () => {
       request.destroy();
-      return reject("Timed out finding a Hue Bridge using MeetHue's public API");
+      return reject(new Error("Timed out finding a Hue Bridge using MeetHue's public API"));
     });
 
     request.on("error", (error) => {
-      return reject(`Could not find a Hue Bridge using MeetHue's public API ${error.message}`);
+      return reject(new Error(`Could not find a Hue Bridge using MeetHue's public API ${error.message}`));
     });
 
     request.end();
@@ -79,16 +79,16 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
       const id = service.txt?.bridgeid;
 
       console.info(`Discovered Hue Bridge using mDNS: ${ipAddress}, ${id}`);
-      return ipAddress ? resolve({ ipAddress, id }) : reject("Could not find a Hue Bridge using mDNS");
+      return ipAddress ? resolve({ ipAddress, id }) : reject(new Error("Could not find a Hue Bridge using mDNS"));
     });
 
     browser.on("down", () => {
-      return reject("Could not find a Hue Bridge using mDNS");
+      return reject(new Error("Could not find a Hue Bridge using mDNS"));
     });
 
     setTimeout(() => {
       browser.stop();
-      return reject("Could not find a Hue Bridge using mDNS");
+      return reject(new Error("Could not find a Hue Bridge using mDNS"));
     }, 10000);
   });
 }
@@ -109,14 +109,14 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
       },
       (response) => {
         if (response.statusCode !== 200) {
-          return reject(`Unexpected status code from Hue Bridge: ${response.statusCode}`);
+          return reject(new Error(`Unexpected status code from Hue Bridge: ${response.statusCode}`));
         }
 
         response.on("data", (data) => {
           const response: LinkResponse = JSON.parse(data.toString())[0];
           if (response.error?.description) {
             const errorDescription = response.error.description;
-            return reject(errorDescription.charAt(0).toUpperCase() + errorDescription.slice(1));
+            return reject(new Error(errorDescription.charAt(0).toUpperCase() + errorDescription.slice(1)));
           }
           if (response.success) {
             return resolve(response.success.username);

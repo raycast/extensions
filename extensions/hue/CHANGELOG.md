@@ -3,6 +3,8 @@
 ## [Optimistic scene updates] - {PR_MERGE_DATE}
 
 - Show the selected scene on its room immediately
+- Show the bridge's error message when changing a light, room or scene fails
+- Show connection errors in a HUD when toggling all lights fails
 
 ## [Improvements] - 2026-06-01
 

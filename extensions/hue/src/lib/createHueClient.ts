@@ -51,7 +51,7 @@ export default async function createHueClient(
     });
 
     session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
-      return reject("Connection timed out.");
+      return reject(new Error("Connection timed out."));
     });
 
     session.once("connect", () => {
@@ -65,9 +65,9 @@ export default async function createHueClient(
 
       stream.on("response", (response) => {
         if (response[":status"] === 403) {
-          return reject("Please check your username.");
+          return reject(new Error("Please check your username."));
         } else if (response[":status"] !== 200) {
-          return reject("Status code: " + response[":status"]);
+          return reject(new Error("Status code: " + response[":status"]));
         }
         return resolve(session);
       });

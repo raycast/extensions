@@ -152,7 +152,7 @@ export default class HueClient {
             if (errorMatch && errorMatch[0]) {
               const errorMessage = `Status ${response.headers[":status"]}: ${errorMatch[0]}`;
               logError(errorMessage);
-              return reject(errorMessage);
+              return reject(new Error(errorMessage));
             }
           }
 
@@ -161,7 +161,7 @@ export default class HueClient {
           if (response.data.errors != null && response.data.errors.length > 0) {
             const errorMessage = response.data.errors.map((error) => error.description).join(", ");
             console.error({ headers: response.headers, message: errorMessage });
-            return reject(errorMessage);
+            return reject(new Error(errorMessage));
           }
 
           return resolve(response);
