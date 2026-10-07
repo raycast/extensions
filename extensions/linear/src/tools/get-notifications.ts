@@ -64,7 +64,8 @@ function truncate(text: string, maxLength: number) {
 }
 
 const MAX_COMMENT_LENGTH = 500;
-const MAX_UNREAD_SCAN_PAGES = 3;
+// Typed as `number` on purpose: with the literal type `3`, Ray CLI 2.7.0 crashes while extracting this tool's schema ("generalized source shouldn't be assignable").
+const MAX_UNREAD_SCAN_PAGES: number = 3;
 
 const NOTIFICATIONS_QUERY = `
   query ($first: Int, $after: String) {
