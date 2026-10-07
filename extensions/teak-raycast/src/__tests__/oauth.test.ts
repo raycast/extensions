@@ -503,6 +503,197 @@ test("WorkOS reauthorization without refresh preserves the grant and requests ex
   expect(browserCount).toBe(0);
 });
 
+test.each([false, true])(
+  "access-only WorkOS token (expired=%s) requires Sign Out before fresh browser auth",
+  async (expired) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    const saved = {
+      accessToken: "access-only",
+      isExpired: () => expired,
+    };
+    stores.set(key, saved);
+    browserCount = 0;
+    posts.length = 0;
+    expect(await oauth.hasStoredTeakSession()).toBe(true);
+    if (expired) {
+      await expect(oauth.authorizeTeak()).rejects.toThrow(
+        "Sign Out before reconnecting",
+      );
+    } else {
+      const { request } = await import("../lib/api");
+      globalThis.fetch = (async (input, init) => {
+        if (String(input).endsWith("/cards")) {
+          return json({}, 401);
+        }
+        return transport(input, init);
+      }) as typeof fetch;
+      await expect(request("/cards", (payload) => payload)).rejects.toThrow(
+        "Sign Out before reconnecting",
+      );
+    }
+    expect(stores.get(key)).toBe(saved);
+    expect(browserCount).toBe(0);
+    expect(posts).toHaveLength(0);
+
+    disconnectStatus = 401;
+    expect(await oauth.signOutTeak()).toBe("local-only");
+    expect(stores.has(key)).toBe(false);
+    expect(posts).toHaveLength(1);
+    expect(posts[0].authorization).toBe("Bearer access-only");
+    expect(posts[0].body.has("refresh_token")).toBe(false);
+    expect(browserCount).toBe(0);
+
+    disconnectStatus = 204;
+    expect(await oauth.authorizeTeak()).toBe("access-new");
+    expect(browserCount).toBe(1);
+  },
+);
+
+test.each(["success", "server", "network"])(
+  "access-only WorkOS Sign Out handles %s disconnect without refresh",
+  async (outcome) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    const saved = { accessToken: "access-only", isExpired: () => false };
+    stores.set(key, saved);
+    posts.length = 0;
+    browserCount = 0;
+    if (outcome === "server") {
+      disconnectStatus = 503;
+    }
+    if (outcome === "network") {
+      globalThis.fetch = (async (input, init) => {
+        if (String(input).endsWith("/oauth/disconnect")) {
+          throw new Error("Network unavailable");
+        }
+        return transport(input, init);
+      }) as typeof fetch;
+    }
+    if (outcome === "success") {
+      expect(await oauth.signOutTeak()).toBe("disconnected");
+      expect(stores.has(key)).toBe(false);
+    } else {
+      await expect(oauth.signOutTeak()).rejects.toThrow(
+        "credentials are still saved",
+      );
+      expect(stores.get(key)).toBe(saved);
+    }
+    expect(posts.every((post) => !post.body.has("refresh_token"))).toBe(true);
+    expect(browserCount).toBe(0);
+  },
+);
+
+test.each([false, true])(
+  "refresh-only WorkOS credential renews and disconnects (read first=%s)",
+  async (readFirst) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    stores.set(key, {
+      accessToken: "",
+      refreshToken: "refresh-only",
+      isExpired: () => true,
+    });
+    posts.length = 0;
+    browserCount = 0;
+    expect(await oauth.hasStoredTeakSession()).toBe(true);
+    if (readFirst) {
+      expect(await oauth.getStoredTeakAccessToken()).toBe("access-new");
+      expect(stores.get(key)?.refreshToken).toBe("refresh-new");
+      expect(browserCount).toBe(0);
+    }
+    expect(await oauth.signOutTeak()).toBe("disconnected");
+    expect(posts.map((post) => post.url)).toEqual([
+      "https://scholarly-hay-77.authkit.app/oauth2/token",
+      "https://teakvault.com/api/v1/oauth/disconnect",
+    ]);
+    expect(posts[0].body.get("refresh_token")).toBe("refresh-only");
+    expect(posts[1].authorization).toBe("Bearer access-new");
+    expect(stores.has(key)).toBe(false);
+    expect(browserCount).toBe(0);
+  },
+);
+
+test("refresh-only historical WorkOS credential clears locally without sending its refresh token", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  stores.set(key, {
+    accessToken: "",
+    refreshToken: "historical-refresh-only",
+    isExpired: () => true,
+  });
+  mode = "betterauth";
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  const restarted = await import(
+    `../lib/oauth?historical-refresh-only=${crypto.randomUUID()}`
+  );
+  posts.length = 0;
+  browserCount = 0;
+  expect(await restarted.signOutTeak()).toBe("local-only");
+  expect(stores.has(key)).toBe(false);
+  expect(posts).toHaveLength(0);
+  expect(browserCount).toBe(0);
+});
+
+test.each(["unknown", "malformed", "network", "server"])(
+  "refresh-only WorkOS Sign Out retains credentials on %s refresh failure",
+  async (failure) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    const saved = {
+      accessToken: "",
+      refreshToken: "refresh-only",
+      isExpired: () => true,
+    };
+    stores.set(key, saved);
+    posts.length = 0;
+    browserCount = 0;
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/oauth2/token")) {
+        if (failure === "network") {
+          throw new Error("Network unavailable");
+        }
+        if (failure === "malformed") {
+          return new Response("{", { status: 400 });
+        }
+        return json(
+          { error: failure === "server" ? "invalid_grant" : "invalid_request" },
+          failure === "server" ? 503 : 400,
+        );
+      }
+      return transport(input, init);
+    }) as typeof fetch;
+    await expect(oauth.signOutTeak()).rejects.toThrow(
+      "credentials are still saved",
+    );
+    await expect(oauth.authorizeTeak()).rejects.toThrow();
+    expect(stores.get(key)).toBe(saved);
+    expect(browserCount).toBe(0);
+  },
+);
+
+test("empty WorkOS token state requires explicit local Sign Out before browser auth", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  stores.set(key, { accessToken: "", isExpired: () => true });
+  posts.length = 0;
+  browserCount = 0;
+  expect(await oauth.hasStoredTeakSession()).toBe(true);
+  await expect(oauth.authorizeTeak()).rejects.toThrow(
+    "Sign Out before reconnecting",
+  );
+  expect(await oauth.signOutTeak()).toBe("local-only");
+  expect(stores.has(key)).toBe(false);
+  expect(posts).toHaveLength(0);
+  expect(browserCount).toBe(0);
+});
+
 test("background reads join WorkOS reauthorization rotation", async () => {
   mode = "workos";
   await oauth.authorizeTeak();
