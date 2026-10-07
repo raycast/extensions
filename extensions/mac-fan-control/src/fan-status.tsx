@@ -1,0 +1,104 @@
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Toast,
+  showToast,
+  Keyboard,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import {
+  FanStatus,
+  average,
+  mode,
+  readStatus,
+  rpm,
+  setAutomatic,
+  setPercent,
+} from "macos-fan-control-client";
+
+function markdown(status: FanStatus | undefined): string {
+  if (!status) return "# Fan Status";
+  const rows = status.fans
+    .map(
+      (fan) =>
+        `| ${fan.index} | ${rpm(fan.actual)} | ${Math.round(fan.percent)}% | ${rpm(fan.target)} | ${Math.round(fan.minimum)}–${Math.round(fan.maximum)} | ${fan.forced ? "Forced" : "Auto"} |`,
+    )
+    .join("\n");
+  const temps = status.temperatures
+    ? `\n## Temperature\n\n| Group | Average | Sensors |\n| --- | --- | --- |\n| CPU | ${status.temperatures.cpu.toFixed(1)} °C | ${status.temperatures.cpuSensors} |\n| GPU | ${status.temperatures.gpu.toFixed(1)} °C | ${status.temperatures.gpuSensors} |\n`
+    : "";
+  return `# Fan Status\n\n| Fan | Actual | Load | Target | Range | Mode |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n${temps}`;
+}
+
+export default function Command() {
+  const { data, isLoading, revalidate } = useCachedPromise(readStatus, [true]);
+  const fans = data?.fans ?? [];
+
+  async function apply(action: () => Promise<string>, title: string) {
+    const toast = await showToast({ style: Toast.Style.Animated, title });
+    try {
+      await action();
+      toast.style = Toast.Style.Success;
+      toast.title = title;
+      revalidate();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = (error as Error).message;
+    }
+  }
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown(data)}
+      metadata={
+        data ? (
+          <Detail.Metadata>
+            <Detail.Metadata.TagList title="Mode">
+              <Detail.Metadata.TagList.Item
+                text={mode(fans)}
+                color={mode(fans) === "Forced" ? Color.Blue : Color.Green}
+              />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Label
+              title="Average"
+              text={`${Math.round(average(fans))}%`}
+            />
+            <Detail.Metadata.Label title="Fans" text={String(data.fanCount)} />
+            {data.temperatures ? (
+              <Detail.Metadata.Label
+                title="CPU / GPU"
+                text={`${data.temperatures.cpu.toFixed(1)} / ${data.temperatures.gpu.toFixed(1)} °C`}
+              />
+            ) : null}
+          </Detail.Metadata>
+        ) : null
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={revalidate}
+          />
+          <Action
+            title="Force Maximum"
+            icon={Icon.Bolt}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            onAction={() => apply(() => setPercent(100), "Fans at maximum")}
+          />
+          <Action
+            title="Restore Automatic"
+            icon={Icon.Repeat}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={() => apply(setAutomatic, "Fans on automatic")}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
