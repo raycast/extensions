@@ -60,7 +60,7 @@ function Home({ context }: { context: Context }) {
   ];
   return (
     <List
-      navigationTitle="RevenueCat"
+      navigationTitle="Dashboard"
       isShowingDetail
       isLoading={state.loading}
       searchBarAccessory={<ProjectDropdown context={context} />}
