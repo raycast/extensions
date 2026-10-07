@@ -111,6 +111,15 @@ export async function cancelBrowserLogin(): Promise<void> {
   if (!USE_MOCK_DATA) await cancelDetachedLogin(loginDir());
 }
 
+/**
+ * Ends the session, which pass-cli shares with the terminal, and clears the extension's cache. `force` only removes it
+ * from this computer, for when ending it on Proton's servers fails.
+ */
+export async function logout(force = false): Promise<void> {
+  if (!USE_MOCK_DATA) await (await getAdapter()).logout(force);
+  await clearCache();
+}
+
 export async function checkAuth(): Promise<boolean> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();

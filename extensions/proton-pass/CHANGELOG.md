@@ -6,6 +6,7 @@
 - pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
 - While the login runs, the screen says what's left: log in in the browser, then the login finishing, with Open Login Page Again and Cancel Login. Once logged in, it says so while the items load, instead of showing an empty list. A failed login says why
 - Get TOTP's Not Logged In screen can log in too
+- The Login command has a Logout action, after a confirmation, with Force Logout when ending the session on Proton's servers fails
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
 

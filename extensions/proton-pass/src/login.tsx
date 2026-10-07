@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { checkAuth } from "./lib/pass-cli";
+import { checkAuth, logout } from "./lib/pass-cli";
 import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { LoginScreen, useBrowserLogin } from "./lib/login-view";
 import { platformShortcut } from "./lib/shortcuts";
@@ -40,6 +40,31 @@ export default function Command() {
   }
 
   const login = useBrowserLogin(checkAgain);
+
+  async function logOut(force = false) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Logging Out" });
+    try {
+      await logout(force);
+      toast.style = Toast.Style.Success;
+      toast.title = "Logged Out";
+      setAuthState("not-authenticated");
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't Log Out";
+      toast.message = error instanceof Error ? error.message : String(error);
+      // Ending the session on Proton's servers can fail, e.g. offline: removing it from this computer still works.
+      if (!force) toast.primaryAction = { title: "Force Logout", onAction: () => void logOut(true) };
+    }
+  }
+
+  async function confirmLogOut() {
+    const confirmed = await confirmAlert({
+      title: "Log Out of Proton Pass?",
+      message: "pass-cli shares the session with the terminal, so it will need a new login there too.",
+      primaryAction: { title: "Log Out", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) await logOut();
+  }
 
   useEffect(() => {
     verifyAuth();
@@ -88,6 +113,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={login.start} />
+            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
             <Action.OpenInBrowser
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}

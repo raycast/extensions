@@ -20,6 +20,11 @@ export function passwordArgs(options: PasswordOptions): string[] {
   return args;
 }
 
+/** A forced logout only removes the local session, for when ending it on Proton's servers fails. */
+export function logoutArgs(force: boolean): string[] {
+  return force ? ["logout", "--force"] : ["logout"];
+}
+
 export function authCheckArgs(): string[] {
   return ["info"];
 }
@@ -78,6 +83,7 @@ function trimOrUndefined(value: unknown): string | undefined {
 export interface PassCliAdapter {
   generatePassword(options: PasswordOptions): Promise<string>;
   checkAuth(): Promise<boolean>;
+  logout(force: boolean): Promise<void>;
   listVaults(): Promise<Vault[]>;
   listItems(shareId: string, vaultName: string): Promise<Item[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
@@ -96,6 +102,9 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
 
   return {
     generatePassword: async (options) => run(passwordArgs(options)),
+    logout: async (force) => {
+      await run(logoutArgs(force));
+    },
     checkAuth: async () => {
       try {
         await run(authCheckArgs());
