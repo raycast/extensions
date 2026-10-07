@@ -19,7 +19,7 @@ import { BookmarkLink, getChromeBookmark, getChromeBookmarks, isBookmarkId } fro
 import { ChromeProfile, getChromeProfiles } from "./lib/chrome";
 import { openLink } from "./lib/open";
 import { quicklinkFor } from "./lib/quicklink";
-import { deleteProfileLink, getProfileLink, getProfileLinks, ProfileLink } from "./lib/storage";
+import { comparableUrl, deleteProfileLink, getProfileLink, getProfileLinks, ProfileLink } from "./lib/storage";
 
 interface LaunchContext {
   /** Set by quicklinks created with "Create Quicklink": open this link right away. */
@@ -117,10 +117,12 @@ function ProfileLinkList({ initialSearchText }: { initialSearchText?: string }) 
   const profileByDirectory = new Map(profiles?.map((p) => [p.directory, p]));
 
   // Hide bookmarks that are already saved as a link for the same profile.
-  const savedKeys = new Set((links ?? []).map((link) => `${link.profileDirectory}\n${link.url}`));
+  const savedKeys = new Set((links ?? []).map((link) => `${link.profileDirectory}\n${comparableUrl(link.url)}`));
   const allLinks: ListLink[] = [
     ...(links ?? []),
-    ...(showBookmarks ? (bookmarks ?? []) : []).filter((b) => !savedKeys.has(`${b.profileDirectory}\n${b.url}`)),
+    ...(showBookmarks ? (bookmarks ?? []) : []).filter(
+      (b) => !savedKeys.has(`${b.profileDirectory}\n${comparableUrl(b.url)}`),
+    ),
   ];
   const allTags = [...new Set(allLinks.flatMap((link) => link.tags ?? []))].sort((a, b) => a.localeCompare(b));
 

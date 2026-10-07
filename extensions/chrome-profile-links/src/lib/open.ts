@@ -1,4 +1,5 @@
-import { closeMainWindow, PopToRootType, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, PopToRootType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { openInChromeProfile } from "./chrome";
 
 /**
@@ -13,14 +14,14 @@ export async function openLink(
   try {
     await openInChromeProfile(url, profileDirectory);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to open Google Chrome",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to open Google Chrome" });
     return false;
   }
-  await onOpened?.();
+  try {
+    await onOpened?.();
+  } catch {
+    // The link is already open in Chrome: a failed frecency update must not keep Raycast open.
+  }
   await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   return true;
 }

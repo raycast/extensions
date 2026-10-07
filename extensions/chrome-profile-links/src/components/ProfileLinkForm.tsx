@@ -10,7 +10,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getActiveChromeTab, getChromeProfiles } from "../lib/chrome";
 import {
   addProfileLink,
@@ -109,15 +109,23 @@ export function ProfileLinkForm({ link, draft, onSaved }: Props) {
     },
   });
 
+  // The prefill below resolves later, so read the latest values through a ref instead of the first render's.
+  const latestValues = useRef(currentValues);
+  latestValues.current = currentValues;
+
   // Prefill from the active Chrome tab when creating a new link from scratch.
   useEffect(() => {
     if (!isPrefilling) return;
     getActiveChromeTab()
       .then((tab) => {
-        if (!tab || currentValues.url) return;
-        setValue("url", tab.url);
-        setValue("title", tab.title);
-        if (tab.profileDirectory) setValue("profileDirectory", tab.profileDirectory);
+        if (!tab) return;
+        // Never overwrite what the user typed while AppleScript was running.
+        const { url, title, profileDirectory } = latestValues.current;
+        if (!url) setValue("url", tab.url);
+        if (!url && !title) setValue("title", tab.title);
+        if (tab.profileDirectory && profileDirectory === ASK_EVERY_TIME) {
+          setValue("profileDirectory", tab.profileDirectory);
+        }
       })
       .catch(() => {
         // Chrome not running or automation permission denied: keep the form empty.

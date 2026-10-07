@@ -61,7 +61,11 @@ export function isValidUrl(input: string): boolean {
 
 export function defaultTitle(url: string): string {
   try {
-    return new URL(url).hostname.replace(/^www\./, "");
+    const parsed = new URL(url);
+    if (parsed.hostname) return parsed.hostname.replace(/^www\./, "");
+    // file: URLs have no host: use the file or folder name instead.
+    const name = parsed.pathname.split("/").filter(Boolean).pop();
+    return name ? decodeURIComponent(name) : url;
   } catch {
     return url;
   }
@@ -80,7 +84,7 @@ export function parseTags(input: string): string[] {
 }
 
 /** Treats "https://example.com" and "https://example.com/" as the same URL. */
-function comparableUrl(url: string): string {
+export function comparableUrl(url: string): string {
   return url.replace(/\/+$/, "").toLowerCase();
 }
 

@@ -11,10 +11,23 @@ interface Props {
 }
 
 export function ProfilePicker({ url, title, onOpen }: Props) {
-  const { data: profiles, isLoading } = usePromise(getChromeProfiles);
+  const {
+    data: profiles,
+    isLoading,
+    error,
+  } = usePromise(getChromeProfiles, [], {
+    failureToastOptions: { title: "Cannot read Chrome profiles" },
+  });
 
   return (
     <List isLoading={isLoading} navigationTitle={`Open ${title} with…`} searchBarPlaceholder="Choose a Chrome profile">
+      {!isLoading && !profiles?.length && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title={error ? "Cannot Read Chrome Profiles" : "No Chrome Profiles Found"}
+          description="Make sure Google Chrome is installed and has been opened at least once."
+        />
+      )}
       <List.Section title={title} subtitle={url}>
         {profiles?.map((profile) => (
           <List.Item
