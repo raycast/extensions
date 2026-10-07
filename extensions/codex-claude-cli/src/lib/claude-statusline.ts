@@ -12,7 +12,7 @@ import type { ProviderUsageState, UsageWindow } from "./usage";
 const staleAfterMilliseconds = 5 * 60 * 1_000;
 
 function bridgeOptions() {
-  const preferences = getPreferenceValues<{ claudeHome?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   return {
     claudeConfigDir: preferences.claudeHome,
     bridgeDirectory: join(environment.supportPath, "claude-statusline"),
