@@ -125,49 +125,28 @@ export async function fetchEmails(
 
       // Load More reuses the order computed for the first page instead of fetching every date again
       const order = await getFolderOrder(client, folderPath, filter, offset === 0);
-      let pageSource = order.uids;
-      if (filter === "attachment") {
-        await scanForAttachments(client, order, offset + limit);
-        pageSource = order.attachmentMatches;
-      }
-      const limitedUids = pageSource.slice(offset, offset + limit);
-      if (limitedUids.length === 0) {
-        return [];
-      }
-
+      const pageSource = () => (filter === "attachment" ? order.attachmentMatches : order.uids);
       const emails: Email[] = [];
 
-      for await (const message of client.fetch(
-        limitedUids,
-        {
-          uid: true,
-          flags: true,
-          internalDate: true,
-          envelope: true,
-          bodyStructure: true,
-          source: { maxLength: 10000 }, // Fetch partial source for preview
-          headers: ["x-pm-internal-id"],
-        },
-        { uid: true }, // Tell fetch to interpret limitedUids as UIDs, not sequence numbers
-      )) {
-        const hasAttachment = checkHasAttachment(message.bodyStructure);
-        const envelope = message.envelope;
-        const email: Email = {
-          uid: message.uid,
-          messageId: envelope?.messageId || "",
-          subject: envelope?.subject || "(No Subject)",
-          from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
-          to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
-          cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-          // Same date as the page order: Bridge's internal date is the Proton message time the web app shows
-          date: toDate(message.internalDate) ?? envelope?.date ?? new Date(),
-          flags: Array.from(message.flags ?? []),
-          hasAttachment,
-          preview: extractPreview(message.source),
-          protonId: extractProtonId(message.headers),
-        };
+      // Emails deleted or moved since the order was computed come back missing. Drop them from the order
+      // (they sit at or after `offset`, so earlier pages keep their positions) and fill the page with the next ones,
+      // so a short page doesn't look like the end of the folder.
+      for (;;) {
+        if (filter === "attachment") {
+          await scanForAttachments(client, order, offset + limit);
+        }
+        const wanted = pageSource().slice(offset + emails.length, offset + limit);
+        if (wanted.length === 0) break;
 
-        emails.push(email);
+        const fetched = await fetchEmailsByUid(client, wanted);
+        emails.push(...fetched);
+        const found = new Set(fetched.map((email) => email.uid));
+        const missing = new Set(wanted.filter((uid) => !found.has(uid)));
+        if (missing.size === 0) break;
+
+        order.scanned -= order.uids.slice(0, order.scanned).filter((uid) => missing.has(uid)).length;
+        order.uids = order.uids.filter((uid) => !missing.has(uid));
+        order.attachmentMatches = order.attachmentMatches.filter((uid) => !missing.has(uid));
       }
 
       // Sort by date descending, like the page order
@@ -176,6 +155,40 @@ export async function fetchEmails(
       lock.release();
     }
   });
+}
+
+async function fetchEmailsByUid(client: ImapFlow, uids: number[]): Promise<Email[]> {
+  const emails: Email[] = [];
+  for await (const message of client.fetch(
+    uids,
+    {
+      uid: true,
+      flags: true,
+      internalDate: true,
+      envelope: true,
+      bodyStructure: true,
+      source: { maxLength: 10000 }, // Fetch partial source for preview
+      headers: ["x-pm-internal-id"],
+    },
+    { uid: true }, // Tell fetch to interpret uids as UIDs, not sequence numbers
+  )) {
+    const envelope = message.envelope;
+    emails.push({
+      uid: message.uid,
+      messageId: envelope?.messageId || "",
+      subject: envelope?.subject || "(No Subject)",
+      from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
+      to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
+      cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
+      // Same date as the page order: Bridge's internal date is the Proton message time the web app shows
+      date: toDate(message.internalDate) ?? envelope?.date ?? new Date(),
+      flags: Array.from(message.flags ?? []),
+      hasAttachment: checkHasAttachment(message.bodyStructure),
+      preview: extractPreview(message.source),
+      protonId: extractProtonId(message.headers),
+    });
+  }
+  return emails;
 }
 
 function toDate(value: Date | string | undefined): Date | undefined {
