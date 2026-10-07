@@ -1,6 +1,6 @@
 # Synci Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-07
 
 - Support macOS and Windows with native platform shortcuts.
 - Search transactions grouped by mapped date, with account, booking-date, and status filters.
