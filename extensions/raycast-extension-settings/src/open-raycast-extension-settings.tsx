@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { runAppleScript, useFrecencySorting } from "@raycast/utils";
 import { useMemo } from "react";
-import { failureFromError, JUMP_SCRIPT, parseJumpOutput, reasonFor } from "./jump";
+import { failureFromError, JUMP_SCRIPT, JUMP_TIMEOUT_MS, parseJumpOutput, reasonFor } from "./jump";
 import { ExtensionKind, ExtensionRow, loadRows, rowKey, sharedTitles } from "./sources";
 
 const cache = new Cache();
@@ -31,7 +31,9 @@ async function openSettings(row: ExtensionRow, ambiguous: boolean) {
   let result;
   try {
     const args = ambiguous ? [row.title, "pick"] : [row.title];
-    result = parseJumpOutput(await runAppleScript(JUMP_SCRIPT, args, { language: "JavaScript", timeout: 20000 }));
+    result = parseJumpOutput(
+      await runAppleScript(JUMP_SCRIPT, args, { language: "JavaScript", timeout: JUMP_TIMEOUT_MS }),
+    );
   } catch (error) {
     result = failureFromError(error instanceof Error ? error.message : String(error));
   }
@@ -62,8 +64,15 @@ export default function Command() {
         <List.Item
           key={rowKey(row)}
           title={row.title}
-          // Rows sharing a title always show their author, so they can be told apart.
-          subtitle={showAuthor || shared.has(row.title.toLowerCase()) ? row.author : undefined}
+          // Rows sharing a title always show who made them (author, else owner, else install folder),
+          // so they can be told apart.
+          subtitle={
+            shared.has(row.title.toLowerCase())
+              ? (row.author ?? row.owner ?? row.id)
+              : showAuthor
+                ? row.author
+                : undefined
+          }
           icon={row.icon ? { source: row.icon } : Icon.Box}
           accessories={showOrigin ? [{ tag: KIND_TAG[row.kind] }] : []}
           actions={

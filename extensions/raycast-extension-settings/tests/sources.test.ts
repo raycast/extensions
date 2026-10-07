@@ -2,7 +2,14 @@ import { chmodSync, mkdirSync, mkdtempSync, utimesSync, writeFileSync } from "fs
 import { tmpdir } from "os";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { failureFromError, parseJumpOutput, reasonFor } from "../src/jump";
+import {
+  failureFromError,
+  JUMP_DEADLINE_MS,
+  JUMP_SCRIPT,
+  JUMP_TIMEOUT_MS,
+  parseJumpOutput,
+  reasonFor,
+} from "../src/jump";
 import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, rowKey, sharedTitles, TextCache } from "../src/sources";
 
 describe("parseBuiltIns", () => {
@@ -121,6 +128,8 @@ describe("jump results", () => {
     const denied = failureFromError("System Events got an error: osascript is not allowed assistive access. (-25211)");
     expect(denied).toEqual({ ok: false, code: "no-accessibility" });
     expect(parseJumpOutput("ambiguous")).toEqual({ ok: false, code: "ambiguous" });
+    expect(JUMP_SCRIPT).toContain(`Date.now() + ${JUMP_DEADLINE_MS}`);
+    expect(JUMP_TIMEOUT_MS - JUMP_DEADLINE_MS).toBeGreaterThanOrEqual(5000);
     expect(parseJumpOutput("something odd")).toEqual({ ok: false, code: "unknown", detail: "something odd" });
   });
 });

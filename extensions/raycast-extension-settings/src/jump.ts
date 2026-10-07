@@ -9,6 +9,11 @@
 // the matches on screen. Each failure returns a code that `reasonFor` turns into a sentence.
 export const SETTINGS_DEEPLINK = "raycast://extensions/raycast/raycast/settings";
 
+// The script stops pressing rows after JUMP_DEADLINE_MS; one more row takes at most 5 s, so the
+// caller's timeout leaves room to return a named failure instead of being cut off.
+export const JUMP_DEADLINE_MS = 20000;
+export const JUMP_TIMEOUT_MS = 30000;
+
 export type JumpFailure =
   "no-accessibility" | "settings-not-opened" | "no-search-box" | "no-result" | "wrong-page" | "ambiguous" | "unknown";
 
@@ -78,6 +83,7 @@ function headingText(win) {
 function run(argv) {
   const target = argv[0];
   const pick = argv[1] === "pick";
+  const deadline = Date.now() + ${JUMP_DEADLINE_MS};
   if (!$.AXIsProcessTrusted()) return "no-accessibility";
   const running = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("com.raycast.macos");
   if (running.count === 0) return "settings-not-opened";
@@ -117,7 +123,7 @@ function run(argv) {
   let seen = "";
   for (let i = 0; ; i++) {
     const rows = poll(2, hits) || [];
-    if (i >= rows.length) break;
+    if (i >= rows.length || Date.now() > deadline) break;
     const before = headingText(win);
     $.AXUIElementPerformAction(rows[i], ref("AXPress"));
     // Move on as soon as the page changes; wait the full 3 s only when the heading doesn't move.
