@@ -1,6 +1,6 @@
 # RevenueCat
 
-Explore your subscription business from Raycast. Check revenue and subscription metrics, find customers, inspect their subscriptions and event history, and browse your product catalog.
+Explore your RevenueCat data from Raycast. Check revenue and subscription metrics, find customers, inspect their subscriptions and event history, and browse your product catalog.
 
 ## Getting started
 
