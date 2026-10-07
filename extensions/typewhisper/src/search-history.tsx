@@ -12,7 +12,13 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { apiDelete, getBaseUrl, TypeWhisperError } from "./api";
+import {
+  apiDelete,
+  getAuthHeaders,
+  parseApiResponse,
+  getBaseUrl,
+  TypeWhisperError,
+} from "./api";
 import type { HistoryResponse } from "./types";
 
 const PAGE_SIZE = 50;
@@ -49,7 +55,11 @@ export default function Command() {
 
   const { isLoading, data, revalidate } = useFetch<HistoryResponse>(
     `${getBaseUrl()}/v1/history?${params.toString()}`,
-    { keepPreviousData: true },
+    {
+      headers: getAuthHeaders(),
+      parseResponse: parseApiResponse,
+      keepPreviousData: true,
+    },
   );
 
   async function deleteEntry(id: string) {
@@ -181,7 +191,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Raw Text"
                     content={entry.raw_text}
-                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    shortcut={Keyboard.Shortcut.Common.CopyName}
                   />
                 )}
                 {entry.app_url && (
