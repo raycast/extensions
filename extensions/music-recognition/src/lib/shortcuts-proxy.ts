@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const SHORTCUT_NAME = "RaycastShazam-v1.1";
 
@@ -271,7 +272,9 @@ async function readShortcutClipboard(previousClipboard: string | undefined) {
 
   if (content.file && /\.(txt|json)$/i.test(content.file) && parsePayload(content.text) === null) {
     try {
-      return await fs.readFile(content.file, "utf8");
+      // Raycast documents a plain path here, but tolerate a file:// URI too.
+      const filePath = content.file.startsWith("file://") ? fileURLToPath(content.file) : content.file;
+      return await fs.readFile(filePath, "utf8");
     } catch {
       // Fall through to the plain text.
     }
