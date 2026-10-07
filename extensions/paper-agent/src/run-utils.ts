@@ -6,7 +6,6 @@ import yaml from "js-yaml";
 import { applyPaperDirOverride } from "./config-utils";
 
 type YamlObject = Record<string, unknown>;
-
 interface Prefs {
   // common string prefs
   pythonPath?: string;
@@ -99,8 +98,8 @@ export function parseRequiredPositiveInt(
   if (!raw) {
     return { ok: false, message: `${fieldName} is required in extension Preferences.` };
   }
-  const n = parseInt(raw, 10);
-  if (Number.isNaN(n) || n < 1) {
+  const n = Number(raw);
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(n) || n < 1) {
     return { ok: false, message: `${fieldName} must be a positive integer.` };
   }
   return { ok: true, value: n };
@@ -274,7 +273,7 @@ export function buildRunEnv(prefs: Prefs): NodeJS.ProcessEnv {
   }
 
   const provider = (prefs.scholarProvider?.trim() ?? "").toLowerCase();
-  if (prefs.scholarEnabled && provider === "imap") {
+  if (prefs.scholarEnabled && (provider === "imap" || provider === "gmail")) {
     const imapEnvName = prefs.scholarImapPasswordEnv?.trim() || "IMAP_PASSWORD";
     assertValidEnvVarName(imapEnvName, "Scholar IMAP password env var");
     const imapPassword = stripAllWhitespace(prefs.scholarImapPassword);
@@ -293,7 +292,7 @@ export function buildScheduleSecrets(prefs: Prefs): Record<string, string> {
   }
 
   const provider = (prefs.scholarProvider?.trim() ?? "").toLowerCase();
-  if (prefs.scholarEnabled && provider === "imap") {
+  if (prefs.scholarEnabled && (provider === "imap" || provider === "gmail")) {
     const imapEnvName = prefs.scholarImapPasswordEnv?.trim() || "IMAP_PASSWORD";
     assertValidEnvVarName(imapEnvName, "Scholar IMAP password env var");
     const imapPassword = stripAllWhitespace(prefs.scholarImapPassword) || process.env[imapEnvName]?.trim() || "";
@@ -350,7 +349,7 @@ export function prepareRun(prefs: Prefs, options?: { persistConfigPath?: string 
     if (provider === "mbox" || provider === "eml_dir") {
       throw new Error(`Scholar provider '${provider}' requires local paths not exposed in Raycast Preferences.`);
     }
-    if (provider === "imap") {
+    if (provider === "imap" || provider === "gmail") {
       if (!(prefs.scholarImapHost?.trim() ?? "")) {
         throw new Error("Scholar IMAP host is required when Scholar provider is IMAP.");
       }
@@ -413,6 +412,17 @@ export function runViaRunner(options: {
     let stderr = "";
     let stdout = "";
     const runnerPath = path.join(options.agentRoot, "scripts", "run_paper_agent.sh");
+    if (!fs.existsSync(runnerPath)) {
+      resolve({
+        success: false,
+        stderr: "Paper Agent runner script is missing. Use a full core repository installation.",
+      });
+      return;
+    }
+    if (!fs.existsSync(options.pythonBin) || !fs.existsSync(options.configPath)) {
+      resolve({ success: false, stderr: "Python executable or run config is missing. Check extension preferences." });
+      return;
+    }
     const args = [
       runnerPath,
       "--mode",
