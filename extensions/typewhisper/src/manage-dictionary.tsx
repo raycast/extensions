@@ -9,8 +9,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { apiDeleteJson, apiGet, errorMessage, instanceCacheKey } from "./api";
+import { usePromise } from "@raycast/utils";
+import { apiDeleteJson, apiGet, errorMessage } from "./api";
 import { AddCorrectionForm, AddTermForm } from "./dictionary-forms";
 import type {
   DictionaryCorrection,
@@ -19,25 +19,11 @@ import type {
 } from "./types";
 
 export default function Command() {
-  const terms = useCachedPromise(
-    (instance: string) =>
-      apiGet<DictionaryTermsResponse>(
-        "/v1/dictionary/terms",
-        undefined,
-        instance,
-      ),
-    [instanceCacheKey()],
-    { keepPreviousData: true },
+  const terms = usePromise(() =>
+    apiGet<DictionaryTermsResponse>("/v1/dictionary/terms"),
   );
-  const corrections = useCachedPromise(
-    (instance: string) =>
-      apiGet<DictionaryCorrectionsResponse>(
-        "/v1/dictionary/corrections",
-        undefined,
-        instance,
-      ),
-    [instanceCacheKey()],
-    { keepPreviousData: true },
+  const corrections = usePromise(() =>
+    apiGet<DictionaryCorrectionsResponse>("/v1/dictionary/corrections"),
   );
 
   function refresh() {

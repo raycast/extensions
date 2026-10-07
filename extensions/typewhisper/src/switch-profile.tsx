@@ -8,14 +8,8 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import {
-  apiGet,
-  apiPut,
-  errorMessage,
-  instanceCacheKey,
-  TypeWhisperError,
-} from "./api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { apiGet, apiPut, errorMessage, TypeWhisperError } from "./api";
 import type { ProfilesResponse } from "./types";
 import {
   RunningDictationSection,
@@ -24,11 +18,8 @@ import {
 import { startDictationWithWorkflow } from "./workflow-dictation";
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useCachedPromise(
-    (instance: string) =>
-      apiGet<ProfilesResponse>("/v1/profiles", undefined, instance),
-    [instanceCacheKey()],
-    { keepPreviousData: true },
+  const { isLoading, data, revalidate } = usePromise(() =>
+    apiGet<ProfilesResponse>("/v1/profiles"),
   );
 
   async function toggleWorkflow(id: string, name: string) {

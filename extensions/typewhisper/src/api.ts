@@ -151,15 +151,6 @@ function candidateInstances(preferredPort?: number): DiscoveredInstance[] {
     : instances;
 }
 
-/**
- * Identifies the instance a command will talk to first. List views pass it to
- * their cached hooks, so a list cached from one TypeWhisper instance is not
- * shown for another.
- */
-export function instanceCacheKey(): string {
-  return String(commandInstancePort ?? candidateInstances()[0].port);
-}
-
 function isConnectionRefused(error: unknown): boolean {
   const cause = (error as { cause?: { code?: unknown } } | null)?.cause;
   return cause?.code === "ECONNREFUSED";
@@ -194,8 +185,6 @@ async function parseApiResponse<T>(
 
 interface RequestOptions {
   params?: Record<string, string>;
-  /** An `instanceCacheKey()` value; that instance is asked first. */
-  instance?: string;
   body?: unknown;
   timeoutMs?: number;
   timeoutMessage?: string;
@@ -209,12 +198,7 @@ async function request<T>(
   const isMultipart = options.body instanceof FormData;
   const hasJsonBody = options.body !== undefined && !isMultipart;
   const isBound = commandInstancePort !== undefined;
-  let candidates = candidateInstances(
-    commandInstancePort ??
-      (options.instance
-        ? (parsePort(options.instance) ?? undefined)
-        : undefined),
-  );
+  let candidates = candidateInstances(commandInstancePort);
   if (isBound) {
     const bound = candidates.find((i) => i.port === commandInstancePort);
     if (!bound) {
@@ -285,9 +269,8 @@ async function request<T>(
 export async function apiGet<T>(
   path: string,
   params?: Record<string, string>,
-  instance?: string,
 ): Promise<T> {
-  return request<T>("GET", path, { params, instance });
+  return request<T>("GET", path, { params });
 }
 
 export async function apiPost<T>(

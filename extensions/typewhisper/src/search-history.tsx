@@ -10,9 +10,9 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { apiDelete, apiGet, instanceCacheKey, TypeWhisperError } from "./api";
+import { apiDelete, apiGet, TypeWhisperError } from "./api";
 import type { HistoryResponse } from "./types";
 
 const PAGE_SIZE = 50;
@@ -47,15 +47,13 @@ export default function Command() {
     params.set("q", searchText.trim());
   }
 
-  const { isLoading, data, revalidate } = useCachedPromise(
-    (instance: string, query: string) =>
+  const { isLoading, data, revalidate } = usePromise(
+    (query: string) =>
       apiGet<HistoryResponse>(
         "/v1/history",
         Object.fromEntries(new URLSearchParams(query)),
-        instance,
       ),
-    [instanceCacheKey(), params.toString()],
-    { keepPreviousData: true },
+    [params.toString()],
   );
 
   async function deleteEntry(id: string) {
