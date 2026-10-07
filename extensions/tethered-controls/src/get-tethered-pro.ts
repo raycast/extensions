@@ -1,4 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { readStoredData } from "./read-stored-items";
 import { isTetheredRunning, sendToTethered } from "./send-to-tethered";
 
@@ -71,11 +72,6 @@ export default async function Command(): Promise<void> {
       message: "Try again or open Tethered to check the purchase state.",
     });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not contact Tethered",
-      message: detail,
-    });
+    await showFailureToast(error, { title: "Could not contact Tethered" });
   }
 }

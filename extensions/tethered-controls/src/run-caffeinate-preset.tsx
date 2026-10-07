@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { readStoredItems } from "./read-stored-items";
 import { runControl } from "./run-control";
@@ -32,11 +33,7 @@ export default function Command() {
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       setLoadError(detail);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load Caffeinate presets",
-        message: detail,
-      });
+      await showFailureToast(error, { title: "Could not load Caffeinate presets" });
     } finally {
       setIsLoading(false);
     }

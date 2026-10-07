@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readStoredData } from "./read-stored-items";
 import { sendToTethered } from "./send-to-tethered";
@@ -102,11 +103,7 @@ export default function Command() {
       if (sequence !== requestSequence.current) return;
       const detail = error instanceof Error ? error.message : String(error);
       setErrorMessage(detail);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not read Tethered status",
-        message: detail,
-      });
+      await showFailureToast(error, { title: "Could not read Tethered status" });
     } finally {
       if (sequence === requestSequence.current) setIsLoading(false);
     }

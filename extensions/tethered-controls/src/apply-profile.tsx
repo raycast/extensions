@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { runControl } from "./run-control";
 import { readStoredItems } from "./read-stored-items";
@@ -32,11 +33,7 @@ export default function Command() {
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       setLoadError(detail);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load Tethered profiles",
-        message: detail,
-      });
+      await showFailureToast(error, { title: "Could not load Tethered profiles" });
     } finally {
       setIsLoading(false);
     }
