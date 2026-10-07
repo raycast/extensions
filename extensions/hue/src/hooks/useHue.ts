@@ -40,13 +40,12 @@ export function useHue() {
 
     (async () => {
       try {
-        // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
-        // Since we’re using HTTP/2 we can just execute them sequentially, and it’s faster anyway.
-        setLights(await hueClient.getLights());
-        setGroupedLights(await hueClient.getGroupedLights());
-        setRooms(await hueClient.getRooms());
-        setZones(await hueClient.getZones());
-        setScenes(await hueClient.getScenes());
+        const resources = await hueClient.getResources();
+        setLights(resources.lights);
+        setGroupedLights(resources.groupedLights);
+        setRooms(resources.rooms);
+        setZones(resources.zones);
+        setScenes(resources.scenes);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         new Toast({

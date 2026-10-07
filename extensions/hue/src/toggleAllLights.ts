@@ -8,7 +8,6 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import createHueClient, { loadBridgeConfig } from "./lib/createHueClient";
-import { Light } from "./lib/types";
 import HueClient from "./lib/HueClient";
 import { logError } from "./helpers/errors";
 
@@ -17,40 +16,24 @@ export default async function ToggleAllLights() {
     const bridgeConfig = await loadBridgeConfig();
     if (bridgeConfig === undefined) throw Error("No Hue Bridge configured");
     const hueClient = await createHueClient(bridgeConfig);
-    const lights = await hueClient.getLights();
-    const onLights = lights.filter((light) => light.on.on);
 
     if (environment.launchType === "userInitiated") {
-      await toggleLightsAndNotifyUser(lights, onLights, hueClient);
+      await toggleLightsAndNotifyUser(hueClient);
     }
 
-    const updatedLights = await hueClient.getLights();
-    const updatedOnLights = updatedLights.filter((light) => light.on.on);
-    const groupedLights = await hueClient.getGroupedLights();
-    const zones = await hueClient.getZones();
-    const scenes = await hueClient.getScenes();
+    const resources = await hueClient.getResources();
+    const onLights = resources.lights.filter((light) => light.on.on);
 
     const cache = new Cache();
-    if (lights.length > 0) {
-      cache.set("lights", JSON.stringify(updatedLights));
-    }
-    if (groupedLights.length > 0) {
-      cache.set("groupedLights", JSON.stringify(groupedLights));
-    }
-    if (zones.length > 0) {
-      cache.set("zones", JSON.stringify(zones));
-    }
-    if (scenes.length > 0) {
-      cache.set("scenes", JSON.stringify(scenes));
-    }
+    for (const [key, items] of Object.entries(resources)) if (items.length > 0) cache.set(key, JSON.stringify(items));
 
     // Update command metadata
-    if (updatedOnLights.length === 0) {
+    if (onLights.length === 0) {
       updateCommandMetadata({ subtitle: "All lights are off" }).then();
-    } else if (updatedOnLights.length === lights.length) {
+    } else if (onLights.length === resources.lights.length) {
       updateCommandMetadata({ subtitle: "All lights are on" }).then();
     } else {
-      updateCommandMetadata({ subtitle: `${updatedOnLights.length} of ${lights.length} lights are on` }).then();
+      updateCommandMetadata({ subtitle: `${onLights.length} of ${resources.lights.length} lights are on` }).then();
     }
   } catch (error) {
     if (environment.launchType !== "userInitiated" || !(error instanceof Error)) {
@@ -66,7 +49,9 @@ export default async function ToggleAllLights() {
   }
 }
 
-async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hueClient: HueClient): Promise<void> {
+async function toggleLightsAndNotifyUser(hueClient: HueClient): Promise<void> {
+  const lights = await hueClient.getLights();
+  const onLights = lights.filter((light) => light.on.on);
   const { toggleAllLights } = getPreferenceValues<Preferences>();
   const toast = new Toast({
     style: Toast.Style.Animated,
