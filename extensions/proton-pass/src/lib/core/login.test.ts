@@ -138,6 +138,20 @@ test("failures say why without exposing the login payload", async () => {
   }
 });
 
+test("a login tells when pass-cli is saving the session after the browser login", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-finishing"), dir, 2_000);
+  const pid = savedPid(dir);
+  let status = await checkDetachedLogin(dir, loggedOut);
+  for (let tries = 0; status.state === "waiting" && !status.isFinishing && tries < 100; tries++) {
+    await sleep(20);
+    status = await checkDetachedLogin(dir, loggedOut);
+  }
+  assert.deepEqual(status, { state: "waiting", url: FAKE_LOGIN_URL, isFinishing: true });
+  await cancelDetachedLogin(dir);
+  await waitUntil(() => !isProcessRunning(pid));
+});
+
 test("a login says when something stopped pass-cli, rather than a vague failure", async () => {
   const dir = loginDir();
   await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
@@ -165,7 +179,11 @@ test("a running login is waiting for the browser, and canceling it stops pass-cl
   await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
   const pid = savedPid(dir);
 
-  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "waiting", url: FAKE_LOGIN_URL });
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), {
+    state: "waiting",
+    url: FAKE_LOGIN_URL,
+    isFinishing: false,
+  });
   await cancelDetachedLogin(dir);
   await waitUntil(() => !isProcessRunning(pid));
   assert.equal(isProcessRunning(pid), false);

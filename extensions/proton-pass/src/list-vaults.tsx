@@ -44,7 +44,8 @@ export default function Command() {
 
   async function loadVaults() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
     setIsLoading(true);
 
     const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
@@ -78,6 +79,7 @@ export default function Command() {
       if (!isLatest()) return;
       const sharing = freshSharing ? mergeSharing(freshSharing, cachedSharing?.data) : (cachedSharing?.data ?? {});
       setVaults(withSharing(freshVaults, sharing));
+      setError(null);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
       // Sharing is saved on its own, so it stays up to date even when some items can't be listed.

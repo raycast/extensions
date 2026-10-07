@@ -22,7 +22,8 @@ interface SavedLogin {
 
 export type BrowserLoginStatus =
   | { state: "none" }
-  | { state: "waiting"; url: string }
+  /** `isFinishing` once the browser login is done and pass-cli is saving the session. */
+  | { state: "waiting"; url: string; isFinishing: boolean }
   | { state: "succeeded" }
   | { state: "failed"; error: PassCliError };
 
@@ -77,6 +78,9 @@ async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
 
 /** The output holds the login URL and its payload, so the files go as soon as the login is over. */
 const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true });
+
+/** What pass-cli prints once the browser login is done, before saving the session. */
+const FINISHING_LINE = /web authentication complete/i;
 
 /** What pass-cli prints on the way, which explains no failure. */
 const PROGRESS_LINE = /^(please open the following url|waiting for authentication|web authentication complete)/i;
@@ -181,7 +185,10 @@ export async function checkDetachedLogin(
 
   const isRunning = isProcessRunning(saved.pid);
   const hasTimedOut = Date.now() - saved.startedAt > timeoutMs;
-  if (isRunning && !hasTimedOut) return { state: "waiting", url: saved.url };
+  if (isRunning && !hasTimedOut) {
+    const isFinishing = FINISHING_LINE.test(await readText(join(dir, OUTPUT_FILE)));
+    return { state: "waiting", url: saved.url, isFinishing };
+  }
 
   const [output, exitCode] = await Promise.all([
     readText(join(dir, OUTPUT_FILE)),

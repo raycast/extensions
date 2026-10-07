@@ -122,8 +122,9 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   async function loadItems() {
     const isLatest = loads.start();
-    setError(null);
-    // Loading from the start: after Check Again, the empty list would otherwise show "No Items Found" meanwhile.
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
     setIsLoading(true);
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
@@ -171,7 +172,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
           return []; // The full listing below reports the failure.
         });
         if (!isLatest()) return;
-        if (vaultItems.length > 0) updateItems(vaultItems);
+        if (vaultItems.length > 0) {
+          updateItems(vaultItems);
+          setError(null);
+        }
       }
 
       const listing = listingSaves.start();
@@ -185,6 +189,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       setItemCounts((previous) =>
         refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
       );
+      setError(null);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
       if (failureMessage) throw new Error(failureMessage);
