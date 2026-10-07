@@ -42,7 +42,7 @@ The extension never types keystrokes, so nothing can land in another app. It rea
 | Preference | Default | What it does |
 |---|---|---|
 | Development extensions | On | Include extensions you run with `ray develop` |
-| Authors | Off | Show each extension's author after its name |
+| Authors | Off | Show each extension's author after its name. Extensions that share a name always show their author. |
 | Origin tags | On | Show the Built-in, Store, or Dev tag |
 
 ## Troubleshooting
@@ -53,6 +53,7 @@ If a jump fails, a message says why:
 - **"Raycast Settings didn't open within 5 seconds"**: Raycast was busy. Try again.
 - **"Raycast Settings has no extension named …"**: the extension was uninstalled or renamed since the list loaded. Reopen the command.
 - **"Settings opened … instead"**: an app or another entry with the same name came up first. Settings stays open with the name searched, so pick the extension's row yourself.
+- **"More than one extension is named …"**: two or more installed extensions share the name. Settings stays open with the name searched, so pick yours.
 - **"Couldn't find the Settings search box"**: a Raycast update changed the Settings window. Please open an issue so the extension can be updated.
 
 ## Limits

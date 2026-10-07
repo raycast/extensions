@@ -6,6 +6,8 @@ export type ExtensionKind = "built-in" | "store" | "dev";
 
 export type ExtensionRow = {
   title: string;
+  /** Install folder name; installed extensions only. */
+  id?: string;
   kind: ExtensionKind;
   owner?: string;
   author?: string;
@@ -67,6 +69,7 @@ export function readInstalled(dir: string = INSTALLED_DIR): ExtensionRow[] {
       const icon = pkg.icon ? join(dir, id, "assets", pkg.icon) : undefined;
       rows.push({
         title: pkg.title,
+        id,
         kind: UUID.test(id) ? "store" : "dev",
         owner: pkg.owner ?? pkg.author,
         author: pkg.author,
@@ -89,9 +92,22 @@ export function mergeRows(builtIns: ExtensionRow[], installed: ExtensionRow[]): 
   );
 }
 
-// Stable identity for a row (list key and ranking), distinct even when titles match.
+// Stable identity for a row (list key and ranking): the install folder for installed extensions,
+// the title for built-ins, so rows stay distinct even when titles match.
 export function rowKey(row: ExtensionRow): string {
-  return `${row.kind}:${row.owner ?? ""}/${row.name ?? row.title}`;
+  return `${row.kind}:${row.id ?? row.title}`;
+}
+
+// Lowercased titles shared by more than one row. Settings search can't tell those rows apart.
+export function sharedTitles(rows: ExtensionRow[]): Set<string> {
+  const seen = new Set<string>();
+  const shared = new Set<string>();
+  for (const r of rows) {
+    const t = r.title.toLowerCase();
+    if (seen.has(t)) shared.add(t);
+    seen.add(t);
+  }
+  return shared;
 }
 
 // The subset of Raycast's `Cache` used here, so tests can pass a plain Map-backed stand-in.

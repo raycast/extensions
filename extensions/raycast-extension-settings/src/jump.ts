@@ -4,8 +4,9 @@
 // sends keystrokes, so nothing can land in another app and keyboard focus does not matter.
 // Steps: open Settings through its built-in command's deeplink, put the title in the search box,
 // press result rows titled exactly the extension's name, in order, until the page's one heading
-// reads that name (an app or AI entry of the same name can come first). Each failure returns a
-// code that `reasonFor` turns into a sentence.
+// reads that name (an app or AI entry of the same name can come first). When two extensions share
+// the title, the heading can't tell them apart, so "pick" mode stops after the search and leaves
+// the matches on screen. Each failure returns a code that `reasonFor` turns into a sentence.
 export const SETTINGS_DEEPLINK = "raycast://extensions/raycast/raycast/settings";
 
 export type JumpFailure =
@@ -13,7 +14,8 @@ export type JumpFailure =
 
 export type JumpResult = { ok: true } | { ok: false; code: JumpFailure; detail?: string };
 
-// JavaScript for Automation; the title arrives as argv, so it never needs escaping.
+// JavaScript for Automation; the title (and an optional "pick") arrive as argv, so they never need
+// escaping.
 export const JUMP_SCRIPT = `
 ObjC.import("AppKit");
 ObjC.bindFunction("AXUIElementCreateApplication", ["void *", ["int"]]);
@@ -75,6 +77,7 @@ function headingText(win) {
 
 function run(argv) {
   const target = argv[0];
+  const pick = argv[1] === "pick";
   if (!$.AXIsProcessTrusted()) return "no-accessibility";
   const running = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("com.raycast.macos");
   if (running.count === 0) return "settings-not-opened";
@@ -109,6 +112,7 @@ function run(argv) {
     return all.length ? all : null;
   };
   if (!poll(4, hits)) return "no-result";
+  if (pick) return "ambiguous";
 
   let seen = "";
   for (let i = 0; ; i++) {
@@ -139,7 +143,7 @@ export function parseJumpOutput(output: string): JumpResult {
   if (code.startsWith("wrong-page:")) {
     return { ok: false, code: "wrong-page", detail: code.slice("wrong-page:".length) || undefined };
   }
-  const known: JumpFailure[] = ["no-accessibility", "settings-not-opened", "no-search-box", "no-result"];
+  const known: JumpFailure[] = ["no-accessibility", "settings-not-opened", "no-search-box", "no-result", "ambiguous"];
   return known.includes(code as JumpFailure)
     ? { ok: false, code: code as JumpFailure }
     : { ok: false, code: "unknown", detail: code };
@@ -163,6 +167,8 @@ export function reasonFor(title: string, result: Exclude<JumpResult, { ok: true 
       return "Couldn't find the Settings search box";
     case "no-result":
       return `Raycast Settings has no extension named “${title}”`;
+    case "ambiguous":
+      return `More than one extension is named “${title}”. Pick yours in Settings`;
     case "wrong-page":
       return result.detail ? `Settings opened ${result.detail} instead` : `Settings opened, but not on ${title}'s page`;
     default:

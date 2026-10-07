@@ -3,7 +3,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { failureFromError, parseJumpOutput, reasonFor } from "../src/jump";
-import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, rowKey, TextCache } from "../src/sources";
+import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, rowKey, sharedTitles, TextCache } from "../src/sources";
 
 describe("parseBuiltIns", () => {
   it("reads built-in titles and drops the hidden ones", () => {
@@ -102,12 +102,13 @@ describe("mergeRows", () => {
     const merged = mergeRows(
       [],
       [
-        { title: "GitHub", kind: "store", owner: "raycast", name: "github" },
-        { title: "GitHub", kind: "store", owner: "someone", name: "github-lite" },
+        { title: "GitHub", kind: "store", id: "a", owner: "raycast", name: "github" },
+        { title: "GitHub", kind: "store", id: "b", owner: "raycast", name: "github" },
       ],
     );
     expect(merged).toHaveLength(2);
     expect(new Set(merged.map(rowKey)).size).toBe(2);
+    expect([...sharedTitles(merged)]).toEqual(["github"]);
   });
 });
 
@@ -119,6 +120,7 @@ describe("jump results", () => {
     if (!noResult.ok) expect(reasonFor("Nexus", noResult)).toBe("Raycast Settings has no extension named “Nexus”");
     const denied = failureFromError("System Events got an error: osascript is not allowed assistive access. (-25211)");
     expect(denied).toEqual({ ok: false, code: "no-accessibility" });
+    expect(parseJumpOutput("ambiguous")).toEqual({ ok: false, code: "ambiguous" });
     expect(parseJumpOutput("something odd")).toEqual({ ok: false, code: "unknown", detail: "something odd" });
   });
 });
