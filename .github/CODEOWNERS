@@ -2266,6 +2266,7 @@
 /extensions/qr-code-sharing                                         @francescopioparadiso
 /extensions/qrcode-generator                                        @Melvynx @hetommy @mathieudutour @pernielsentikaer @hetommy @MatteoGauthier @seewhy163 @ridemountainpig @dangkhoipro @stefan-imbesi @0xdhrv
 /extensions/qrcp                                                    @yohann84L @muhammadrizo-y
+/extensions/qrz-lookup                                              @DL5MN
 /extensions/quarantine-manager                                      @nurkamol
 /extensions/query-chatgpt                                           @cyxn
 /extensions/query-domains                                           @wawayes
@@ -2383,7 +2384,7 @@
 /extensions/raydocs                                                 @teziovsky @chrismessina
 /extensions/raydoom                                                 @Saketh-Chandra
 /extensions/raylog-markdown-tasks                                   @Dillon-McCardell
-/extensions/raynab                                                  @gogocharli @omarshahine @damian-duchnowski
+/extensions/raynab                                                  @gogocharli @omarshahine @damian-duchnowski @orellazri
 /extensions/raytaskwarrior                                          @AltamimiYasser @TimShilov @chromy
 /extensions/rayterm                                                 @EvanZhouDev
 /extensions/raytyping                                               @louishuyng

@@ -27,6 +27,25 @@
       "usedAsExample": true
     },
     {
+      "input": "@raynab add a $12 transaction to my Checking account",
+      "mocks": {
+        "add-transaction": {
+          "success": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "add-transaction",
+            "arguments": {
+              "amount": 12,
+              "account_name": "Checking"
+            }
+          }
+        }
+      ]
+    },
+    {
       "input": "@raynab add a transaction for $25.50 at Starbucks to my Checking account",
       "mocks": {
         "add-transaction": {

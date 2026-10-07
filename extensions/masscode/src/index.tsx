@@ -1,22 +1,25 @@
-import { List, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useMemo, useEffect } from "react";
-import type { Snippet } from "./types";
-import { MESSAGES } from "./constants";
+import { useMemo, useState } from "react";
+import type { Snippet, SnippetListEntry } from "./types";
 import { EXAMPLE_SNIPPETS } from "./constants/exampleData";
 import { transformSnippets } from "./utils/transformSnippets";
+import { API_HEADERS, API_URL, getErrorMessage, getFragmentValue, parseResponse, showApiError } from "./utils/api";
 import { useAppInstallation } from "./hooks/useAppInstallation";
 import { SnippetListItem } from "./components/SnippetListItem";
 
-const preferences = getPreferenceValues<Preferences>();
-const PORT = parseInt(preferences.port, 10) || 4321;
-const ENABLE_MOCK_DATA = preferences.enableMockData;
+const ENABLE_MOCK_DATA = getPreferenceValues<Preferences>().enableMockData;
 
 export default function Command() {
   const isInstalled = useAppInstallation(ENABLE_MOCK_DATA);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<{ snippetId: number; message: string } | null>(null);
 
-  const { data, isLoading, error } = useFetch<Snippet[]>(`http://localhost:${PORT}/snippets`, {
+  const { data, isLoading } = useFetch<SnippetListEntry[]>(`${API_URL}/snippets?isDeleted=0`, {
+    headers: API_HEADERS,
+    parseResponse,
     execute: !ENABLE_MOCK_DATA && isInstalled === true,
+    onError: showApiError,
   });
 
   const list = useMemo(() => {
@@ -25,20 +28,33 @@ export default function Command() {
     return transformSnippets(data);
   }, [data]);
 
-  useEffect(() => {
-    if (error && !ENABLE_MOCK_DATA) {
-      showToast(Toast.Style.Failure, MESSAGES.ERROR);
-    }
-  }, [error]);
+  const selected = list.find((item) => item.id === selectedId) ?? list[0];
+
+  const { data: selectedSnippet } = useFetch<Snippet>(`${API_URL}/snippets/${selected?.snippetId}`, {
+    headers: API_HEADERS,
+    parseResponse,
+    execute: !ENABLE_MOCK_DATA && selected !== undefined,
+    onData: () => setDetailError(null),
+    onError: (error) => {
+      if (selected) setDetailError({ snippetId: selected.snippetId, message: getErrorMessage(error) });
+      return showApiError(error);
+    },
+  });
 
   return (
     <List
       isLoading={!ENABLE_MOCK_DATA && (isInstalled === undefined || isLoading)}
       isShowingDetail
       searchBarPlaceholder="Type to search snippets"
+      onSelectionChange={setSelectedId}
     >
       {list.map((item) => (
-        <SnippetListItem key={item.id} item={item} />
+        <SnippetListItem
+          key={item.id}
+          item={item}
+          value={item === selected ? getFragmentValue(item, selectedSnippet) : item.value}
+          error={item === selected && detailError?.snippetId === item.snippetId ? detailError.message : undefined}
+        />
       ))}
     </List>
   );
