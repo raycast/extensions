@@ -54,6 +54,16 @@ export function normalizeHost(host: string): string {
   return host.trim().replace(/\.(?=(?::\d{1,5})?$)/, "");
 }
 
+// What to compare two hosts by, and to key a Set or Map of hosts with: a
+// hostname is case-insensitive, and absolute or not is not a difference.
+export function hostKey(host: string): string {
+  return normalizeHost(host).toLowerCase();
+}
+
+export function sameHost(a: string, b: string): boolean {
+  return hostKey(a) === hostKey(b);
+}
+
 // Each dot-separated label starts and ends alphanumeric, with hyphens allowed
 // inside. That rejects a half-typed address — "nas..local", "-nas" — which the
 // old pattern accepted and only failed much later, at mount time. An optional

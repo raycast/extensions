@@ -17,6 +17,7 @@ import {
   DiscoveredComputer,
   DiscoveredHost,
 } from "../lib/network-discovery";
+import { hostKey } from "../lib/share";
 
 export type DiscoveredSmbShare = { host: string; vol: string };
 
@@ -83,7 +84,7 @@ export function useNetworkDiscovery(options?: { auto?: boolean }): NetworkDiscov
     // silently when it already has a session and otherwise waits to be
     // browsed deliberately.
     function expandSmbHost(host: string, vouchedFor: boolean) {
-      const key = host.toLowerCase();
+      const key = hostKey(host);
       if (expandedHosts.current.has(key)) return;
       expandedHosts.current.add(key);
 

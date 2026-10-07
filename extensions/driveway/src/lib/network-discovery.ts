@@ -4,6 +4,7 @@ import * as https from "node:https";
 import * as http from "node:http";
 import * as os from "node:os";
 
+import { hostKey } from "./share";
 import type { Protocol } from "./share";
 
 export type DiscoveredHost = {
@@ -241,7 +242,7 @@ export function mergeDiscoveredHosts(...lists: DiscoveredHost[][]): DiscoveredHo
   const merged: DiscoveredHost[] = [];
   for (const list of lists) {
     for (const entry of list) {
-      const key = `${entry.host.toLowerCase()}:${entry.protocol}`;
+      const key = `${hostKey(entry.host)}:${entry.protocol}`;
       if (seen.has(key)) continue;
       seen.add(key);
       merged.push(entry);

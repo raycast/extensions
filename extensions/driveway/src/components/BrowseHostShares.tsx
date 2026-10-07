@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { listShares } from "../lib/smb-shares";
 import { VolumeUsage } from "../lib/disk-usage";
+import { sameHost } from "../lib/share";
 import type { ServerEntry } from "../lib/share";
 import type { MountLocation } from "../lib/mount";
 import { unmountShare } from "../lib/mount";
@@ -46,7 +47,7 @@ export function BrowseHostShares(props: {
   }, [credentials]);
 
   async function unmountAllOnHost() {
-    const hostMounted = props.mounted.filter((m) => m.host.toLowerCase() === props.server.host.toLowerCase());
+    const hostMounted = props.mounted.filter((m) => sameHost(m.host, props.server.host));
     if (!hostMounted.length) return;
     await Promise.all(
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),

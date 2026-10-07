@@ -15,7 +15,7 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ServerForm, ServerFormInput } from "./components/ServerForm";
-import { buildShare, PROTOCOL_LABELS, ServerEntry } from "./lib/share";
+import { buildShare, hostKey, PROTOCOL_LABELS, sameHost, ServerEntry } from "./lib/share";
 import { findMountedShare, openMountPoint, unmountShare, UnreachableError, connectShare } from "./lib/mount";
 import { errorText } from "./lib/errors";
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
@@ -90,7 +90,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   }, []);
 
   async function unmountAllOnHost(host: string) {
-    const hostMounted = mounted.filter((m) => m.host.toLowerCase() === host.toLowerCase());
+    const hostMounted = mounted.filter((m) => sameHost(m.host, host));
     if (!hostMounted.length) return;
     await Promise.all(
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
@@ -215,23 +215,20 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   );
 
   const savedKeys = new Set(
-    (servers ?? []).filter((s) => s.path?.trim()).map((s) => `${s.host.toLowerCase()}/${(s.path ?? "").toLowerCase()}`),
+    (servers ?? []).filter((s) => s.path?.trim()).map((s) => `${hostKey(s.host)}/${(s.path ?? "").toLowerCase()}`),
   );
 
   // All sources merge into one shape; only SMB hosts expand into shares.
   const smbByHost = new Map<string, string[]>();
   for (const { host, vol } of smbShares) {
-    if (savedKeys.has(`${host.toLowerCase()}/${vol.toLowerCase()}`)) continue;
+    if (savedKeys.has(`${hostKey(host)}/${vol.toLowerCase()}`)) continue;
     const existing = smbByHost.get(host) ?? [];
     existing.push(vol);
     smbByHost.set(host, existing);
   }
 
   const webdavNotSaved = webdavHosts.filter(
-    (h) =>
-      !(servers ?? []).some(
-        (s) => s.host.toLowerCase() === h.host.toLowerCase() && (s.protocol ?? "smb") === h.protocol,
-      ),
+    (h) => !(servers ?? []).some((s) => sameHost(s.host, h.host) && (s.protocol ?? "smb") === h.protocol),
   );
 
   // SMB hosts macOS holds no credential for. Listed at host level rather
@@ -239,28 +236,24 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   const expandedHostKeys = new Set([...smbByHost.keys()].map((h) => h.toLowerCase()));
   const smbHostsToBrowse = smbHostsNeedingCredentials.filter(
     (host) =>
-      !expandedHostKeys.has(host.toLowerCase()) &&
-      !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase() && (s.protocol ?? "smb") === "smb"),
+      !expandedHostKeys.has(hostKey(host)) &&
+      !(servers ?? []).some((s) => sameHost(s.host, host) && (s.protocol ?? "smb") === "smb"),
   );
 
   const sharingHosts = new Set(
-    [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map((h) => h.toLowerCase()),
+    [...smbByHost.keys(), ...smbHostsToBrowse, ...webdavHosts.map((h) => h.host)].map(hostKey),
   );
 
   // Machines that announced themselves but advertise no sharing service.
   // Finder lists these too; most still serve SMB once you open them.
   const computersNotKnown = computers.filter(
-    (c) =>
-      !sharingHosts.has(c.host.toLowerCase()) &&
-      !(servers ?? []).some((s) => s.host.toLowerCase() === c.host.toLowerCase()),
+    (c) => !sharingHosts.has(hostKey(c.host)) && !(servers ?? []).some((s) => sameHost(s.host, c.host)),
   );
 
   // Drop ping-only hosts already listed with a known protocol, or saved.
-  const protocolKnownHosts = new Set([...sharingHosts, ...computersNotKnown.map((c) => c.host.toLowerCase())]);
+  const protocolKnownHosts = new Set([...sharingHosts, ...computersNotKnown.map((c) => hostKey(c.host))]);
   const otherDevicesNotSaved = otherDevices.filter(
-    (host) =>
-      !protocolKnownHosts.has(host.toLowerCase()) &&
-      !(servers ?? []).some((s) => s.host.toLowerCase() === host.toLowerCase()),
+    (host) => !protocolKnownHosts.has(hostKey(host)) && !(servers ?? []).some((s) => sameHost(s.host, host)),
   );
 
   const hasDiscovered =
