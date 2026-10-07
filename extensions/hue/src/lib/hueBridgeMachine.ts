@@ -3,7 +3,7 @@ import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
-import createHueClient from "./createHueClient";
+import createHueClient, { loadBridgeConfig } from "./createHueClient";
 import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
@@ -106,33 +106,14 @@ export default function hueBridgeMachine() {
       loadingConfiguration: {
         invoke: {
           id: "loadingConfiguration",
-          src: fromPromise(async ({ input }: { input: HueContext }) => {
-            console.log("Loading configuration…");
-            const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
-
-            if (bridgeConfigString === undefined) {
-              return { bridgeConfig: undefined };
-            }
-
-            let bridgeConfig = JSON.parse(bridgeConfigString);
-
-            // Override bridge IP address and username if they are loaded from preferences
-            bridgeConfig = {
-              ...bridgeConfig,
-              ...(input.bridgeIpAddress ? { ipAddress: input.bridgeIpAddress } : {}),
-              ...(input.bridgeUsername ? { username: input.bridgeUsername } : {}),
-            };
-
-            return { bridgeConfig: bridgeConfig };
-          }),
-          input: ({ context }) => context,
+          src: fromPromise(loadBridgeConfig),
           onDone: [
             {
               target: "connecting",
               actions: assign({
-                bridgeConfig: ({ event }) => event.output.bridgeConfig,
+                bridgeConfig: ({ event }) => event.output,
               }),
-              guard: ({ event }) => event.output.bridgeConfig !== undefined,
+              guard: ({ event }) => event.output !== undefined,
             },
             {
               target: "linking",

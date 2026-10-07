@@ -3,22 +3,19 @@ import {
   closeMainWindow,
   environment,
   getPreferenceValues,
-  LocalStorage,
   showHUD,
   Toast,
   updateCommandMetadata,
 } from "@raycast/api";
-import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
-import createHueClient from "./lib/createHueClient";
+import createHueClient, { loadBridgeConfig } from "./lib/createHueClient";
 import { Light } from "./lib/types";
 import HueClient from "./lib/HueClient";
 import { logError } from "./helpers/errors";
 
 export default async function ToggleAllLights() {
   try {
-    const bridgeConfigString = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
-    if (bridgeConfigString === undefined) throw Error("No Hue Bridge configured");
-    const bridgeConfig = JSON.parse(bridgeConfigString);
+    const bridgeConfig = await loadBridgeConfig();
+    if (bridgeConfig === undefined) throw Error("No Hue Bridge configured");
     const hueClient = await createHueClient(bridgeConfig);
     const lights = await hueClient.getLights();
     const onLights = lights.filter((light) => light.on.on);

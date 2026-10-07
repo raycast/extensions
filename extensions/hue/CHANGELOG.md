@@ -7,6 +7,7 @@
 - Show connection errors in a HUD when toggling all lights fails
 - Fix live updates from the bridge stopping or skipping changes
 - Fix zones showing as off after turning off a room while other lights in them are on
+- Fix toggling all lights ignoring the manual bridge IP address and username preferences
 
 ## [Improvements] - 2026-06-01
 

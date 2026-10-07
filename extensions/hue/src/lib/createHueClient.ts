@@ -1,9 +1,10 @@
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
 import { BridgeConfig } from "./types";
 import dns from "dns";
 import HueClient from "./HueClient";
 import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
-import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
+import { BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(bridgeConfig: BridgeConfig) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
@@ -71,4 +72,16 @@ export default async function createHueClient(bridgeConfig: BridgeConfig) {
   });
 
   return new HueClient(bridgeConfig, http2Session);
+}
+
+// The bridge IP address and username preferences override the saved configuration
+export async function loadBridgeConfig(): Promise<BridgeConfig | undefined> {
+  const saved = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
+  if (saved === undefined) return undefined;
+  const { bridgeIpAddress, bridgeUsername } = getPreferenceValues<Preferences>();
+  return {
+    ...JSON.parse(saved),
+    ...(bridgeIpAddress && { ipAddress: bridgeIpAddress }),
+    ...(bridgeUsername && { username: bridgeUsername }),
+  };
 }
