@@ -277,7 +277,7 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
                   title="Remove Field"
                   value={fieldToRemove}
                   onChange={setFieldToRemove}
-                  info="Select a field then press ⌘⇧D to remove it"
+                  info="Select a field then press ⌃X (Ctrl+D on Windows) to remove it"
                 >
                   <Form.Dropdown.Item value="" title="— select field to remove —" />
                   {fields.map((f, idx) => (
@@ -291,7 +291,7 @@ export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName 
               )}
               <Form.Description
                 title=""
-                text={`⌘N  add field${fields.length > 1 ? "  ·  ⌘⇧D  remove selected field" : ""}`}
+                text={`⌘N  add field${fields.length > 1 ? "  ·  ⌃X  remove selected field" : ""}`}
               />
               {jsonPreview && <Form.Description title="JSON Preview" text={jsonPreview} />}
             </>

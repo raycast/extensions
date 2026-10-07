@@ -81,7 +81,14 @@ export default function Command() {
   };
 
   const handleSendSaved = async (webhook: SavedWebhook) => {
-    if (isSending.current) return;
+    if (isSending.current) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Another webhook is still sending",
+        message: `"${webhook.name}" was not sent. Try again once the current request finishes.`,
+      });
+      return;
+    }
     const { request } = webhook;
     if (request.bodyMode === "raw" && request.rawJson.trim()) {
       try {
@@ -186,21 +193,26 @@ export default function Command() {
     }
   };
 
+  const showLoadError = !isLoading && !!loadError && saved.length === 0 && history.length === 0;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search webhooks…">
       {/* ── New Webhook ── */}
-      <List.Section title="Actions">
-        <List.Item
-          title="Send New Webhook"
-          subtitle="Open the webhook form"
-          icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
-          actions={
-            <ActionPanel>
-              <Action title="Send New Webhook" icon={Icon.ArrowRight} onAction={openNewForm} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+      {/* Hidden on a failed load so the Retry EmptyView can show (it only renders when no items remain) */}
+      {!showLoadError && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Send New Webhook"
+            subtitle="Open the webhook form"
+            icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
+            actions={
+              <ActionPanel>
+                <Action title="Send New Webhook" icon={Icon.ArrowRight} onAction={openNewForm} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
 
       {/* ── Saved ── */}
       {saved.length > 0 && (
@@ -300,7 +312,7 @@ export default function Command() {
       )}
 
       {/* ── Empty states ── */}
-      {!isLoading && loadError && saved.length === 0 && history.length === 0 && (
+      {showLoadError && (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Couldn't load webhooks"
