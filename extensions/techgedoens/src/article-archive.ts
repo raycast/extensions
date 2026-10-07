@@ -1,4 +1,7 @@
 import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { Article, fetchArticleFeedPage } from "./articles";
 
 const ARTICLE_ARCHIVE_KEY = "article-archive-v1";
@@ -11,6 +14,10 @@ const MAX_ARCHIVE_ARTICLES = 2_000;
 const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
 const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
 const ARCHIVE_LIMIT_TITLE = "Article Archive Limit Reached";
+const ARCHIVE_UPDATE_LOCK_PATH = join(environment.supportPath, "article-archive-update.lock");
+const ARCHIVE_UPDATE_LOCK_RETRY_MS = 50;
+const ARCHIVE_UPDATE_LOCK_TIMEOUT_MS = 10_000;
+const ARCHIVE_UPDATE_LOCK_STALE_MS = 5 * 60_000;
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
@@ -62,43 +69,43 @@ export async function refreshArticleArchive(retention: ArticleRetention): Promis
 }
 
 export async function refreshArticleArchiveStrict(retention: ArticleRetention): Promise<ArchivedArticle[]> {
-  return runArchiveUpdate(() => performArticleArchiveRefresh(retention));
+  return performArticleArchiveRefresh(retention);
 }
 
 async function performArticleArchiveRefresh(retention: ArticleRetention): Promise<ArchivedArticle[]> {
   const storedArchive = await readStoredArchive();
   const existingArticles = storedArchive?.articles ?? [];
-  const shouldBackfill = !storedArchive || retentionRank[retention] > retentionRank[storedArchive.retention];
+  const shouldBackfill =
+    !storedArchive ||
+    retentionRank[retention] > retentionRank[storedArchive.retention] ||
+    Boolean(storedArchive.limitMessage);
   const backfillResult = shouldBackfill ? await fetchArticlesForRetention(retention, existingArticles) : undefined;
   const fetchedArticles = backfillResult?.articles ?? (await fetchArticlesUntilKnown(existingArticles));
 
-  // Article choices are also stored separately, so a refresh cannot revert a read or favorite change
-  // even if another Raycast command saves that change after this read and before the archive write.
-  const latestStoredArchive = await readStoredArchive();
-  const latestExistingArticles = latestStoredArchive?.articles ?? existingArticles;
-  const mergeResult = mergeArticlesWithinLimits(latestExistingArticles, fetchedArticles, retention);
-  const retainedArticles = mergeResult.articles;
-  const limitMessage =
-    backfillResult?.limitMessage ??
-    mergeResult.limitMessage ??
-    (storedArchive?.retention === retention ? storedArchive.limitMessage : undefined);
+  return runArchiveUpdate(async () => {
+    const latestStoredArchive = await readStoredArchive();
+    const latestExistingArticles = latestStoredArchive?.articles ?? existingArticles;
+    const mergeResult = mergeArticlesWithinLimits(latestExistingArticles, fetchedArticles, retention);
+    const retainedArticles = mergeResult.articles;
+    const limitMessage = backfillResult?.limitMessage ?? mergeResult.limitMessage;
 
-  await writeStoredArchive({
-    articles: retainedArticles,
-    limitMessage,
-    retention,
-    updatedAt: new Date().toISOString(),
-  });
-
-  if (limitMessage && environment.launchType === LaunchType.UserInitiated) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: ARCHIVE_LIMIT_TITLE,
-      message: limitMessage,
+    await writeStoredArchive({
+      articles: retainedArticles,
+      limitMessage,
+      retention,
+      updatedAt: new Date().toISOString(),
     });
-  }
 
-  return (await readStoredArchive())?.articles ?? retainedArticles;
+    if (limitMessage && environment.launchType === LaunchType.UserInitiated) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: ARCHIVE_LIMIT_TITLE,
+        message: limitMessage,
+      });
+    }
+
+    return (await readStoredArchive())?.articles ?? retainedArticles;
+  });
 }
 
 export async function readArticleArchive(): Promise<ArchivedArticle[]> {
@@ -219,12 +226,90 @@ async function updateArticleReadStatuses(
 }
 
 async function runArchiveUpdate<T>(update: () => Promise<T>): Promise<T> {
-  const queuedUpdate = archiveUpdateQueue.then(update, update);
+  const queuedUpdate = archiveUpdateQueue.then(
+    () => withArchiveUpdateLock(update),
+    () => withArchiveUpdateLock(update),
+  );
   archiveUpdateQueue = queuedUpdate.then(
     () => undefined,
     () => undefined,
   );
   return queuedUpdate;
+}
+
+async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
+  const owner = randomUUID();
+  const ownerPath = join(ARCHIVE_UPDATE_LOCK_PATH, "owner");
+  const startedAt = Date.now();
+
+  while (true) {
+    try {
+      await mkdir(ARCHIVE_UPDATE_LOCK_PATH);
+      try {
+        await writeFile(ownerPath, owner, "utf8");
+      } catch (error) {
+        await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
+        throw error;
+      }
+      break;
+    } catch (error) {
+      if (!isNodeError(error) || error.code !== "EEXIST") {
+        throw error;
+      }
+
+      await removeStaleArchiveUpdateLock();
+      if (Date.now() - startedAt >= ARCHIVE_UPDATE_LOCK_TIMEOUT_MS) {
+        throw new Error("The article archive is busy. Please try again in a moment.");
+      }
+      await wait(ARCHIVE_UPDATE_LOCK_RETRY_MS);
+    }
+  }
+
+  let updateFailed = false;
+  let updateError: unknown;
+  let updateResult: T | undefined;
+  try {
+    updateResult = await update();
+  } catch (error) {
+    updateFailed = true;
+    updateError = error;
+  }
+
+  try {
+    if ((await readFile(ownerPath, "utf8")) === owner) {
+      await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
+    }
+  } catch (error) {
+    if (!updateFailed && (!isNodeError(error) || error.code !== "ENOENT")) {
+      throw error;
+    }
+  }
+
+  if (updateFailed) {
+    throw updateError;
+  }
+  return updateResult as T;
+}
+
+async function removeStaleArchiveUpdateLock(): Promise<void> {
+  try {
+    const lockStats = await stat(ARCHIVE_UPDATE_LOCK_PATH);
+    if (Date.now() - lockStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
+      await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
+    }
+  } catch (error) {
+    if (!isNodeError(error) || error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}
+
+async function wait(milliseconds: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 async function fetchArticlesForRetention(
@@ -474,6 +559,7 @@ async function writeStoredArchive(archive: {
   } else {
     await LocalStorage.removeItem(ARTICLE_ARCHIVE_LIMIT_KEY);
   }
+  await pruneStoredArticleStatuses(new Set(archive.articles.map((article) => article.id)));
 }
 
 function toStoredArchivedArticle(article: ArchivedArticle): StoredArchivedArticle {
@@ -528,6 +614,24 @@ async function setStoredArticleStatuses(key: string, entries: [string, boolean][
     statuses[articleId] = status;
   }
   await LocalStorage.setItem(key, JSON.stringify(statuses));
+}
+
+async function pruneStoredArticleStatuses(activeArticleIds: Set<string>): Promise<void> {
+  await pruneArticleStatuses(ARTICLE_READ_STATUS_KEY, activeArticleIds);
+  await pruneArticleStatuses(ARTICLE_FAVORITE_STATUS_KEY, activeArticleIds);
+}
+
+async function pruneArticleStatuses(key: string, activeArticleIds: Set<string>): Promise<void> {
+  const statuses = await readStoredArticleStatuses(key);
+  const retainedStatuses = Object.fromEntries(
+    Object.entries(statuses).filter(([articleId]) => activeArticleIds.has(articleId)),
+  );
+
+  if (Object.keys(retainedStatuses).length === 0) {
+    await LocalStorage.removeItem(key);
+  } else if (Object.keys(retainedStatuses).length !== Object.keys(statuses).length) {
+    await LocalStorage.setItem(key, JSON.stringify(retainedStatuses));
+  }
 }
 
 function getSerializedByteLength(value: string): number {
