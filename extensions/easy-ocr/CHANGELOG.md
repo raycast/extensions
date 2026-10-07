@@ -1,5 +1,9 @@
 # Tesseract OCR Changelog
 
+## [Bug Fixes] - 2026-10-07
+
+- Fixed screenshot capture failing when the path contains spaces
+
 ## [Bug Fixes] - 2026-06-23
 
 - Kept the first OCR result when autodetected languages are not installed in Tesseract
