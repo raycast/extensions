@@ -6,6 +6,7 @@ import type { DictationStatusResponse } from "./types";
 import { stopDictation } from "./workflow-dictation";
 
 const POLL_INTERVAL_MS = 2000;
+const RETRY_INTERVAL_MS = 10000;
 
 /** Polls the dictation state while the view is open. */
 export function useDictationStatus() {
@@ -16,12 +17,13 @@ export function useDictationStatus() {
     { onError: () => {} },
   );
 
-  // Stop polling after a failure instead of retrying every 2 seconds.
+  // After a failure, keep checking at a slower pace so Stop Dictation comes
+  // back once TypeWhisper is reachable again, without a request every 2 s.
   useEffect(() => {
-    if (error) {
-      return;
-    }
-    const timer = setInterval(revalidate, POLL_INTERVAL_MS);
+    const timer = setInterval(
+      revalidate,
+      error ? RETRY_INTERVAL_MS : POLL_INTERVAL_MS,
+    );
     return () => clearInterval(timer);
   }, [error, revalidate]);
 

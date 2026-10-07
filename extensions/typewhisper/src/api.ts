@@ -111,38 +111,59 @@ function readInstance(directory: string): DiscoveredInstance | null {
   }
 }
 
-function discoverInstance(): DiscoveredInstance {
+function discoverInstances(): DiscoveredInstance[] {
   const instances = appSupportDirectories()
     .map(readInstance)
     .filter((instance): instance is DiscoveredInstance => instance !== null)
-    // A crashed app can leave its files behind. The newest file belongs to
-    // the instance that started its API server last.
+    // A crashed app can leave its files behind. The newest file usually
+    // belongs to the instance that started its API server last.
     .sort((a, b) => b.writtenAt - a.writtenAt);
 
   const prefs = getPreferenceValues<Preferences>();
   const overridePort = prefs.port ? parsePort(prefs.port.trim()) : null;
   if (overridePort) {
     const match = instances.find((instance) => instance.port === overridePort);
-    return { port: overridePort, token: match?.token, writtenAt: 0 };
+    return [{ port: overridePort, token: match?.token, writtenAt: 0 }];
   }
 
-  return instances[0] ?? { port: DEFAULT_PORT, writtenAt: 0 };
+  return instances.length > 0
+    ? instances
+    : [{ port: DEFAULT_PORT, writtenAt: 0 }];
 }
 
-export function getBaseUrl(): string {
-  return `http://127.0.0.1:${discoverInstance().port}`;
+let lastReachablePort: number | undefined;
+
+/** Discovered instances, the preferred or last reachable one first. */
+function candidateInstances(preferredPort?: number): DiscoveredInstance[] {
+  const instances = discoverInstances();
+  const first = preferredPort ?? lastReachablePort;
+  const index = instances.findIndex((i) => i.port === first);
+  return index > 0
+    ? [instances[index], ...instances.filter((_, i) => i !== index)]
+    : instances;
 }
 
-export function getAuthHeaders(): Record<string, string> {
-  const { token } = discoverInstance();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+/**
+ * Identifies the instance a command will talk to first. List views pass it to
+ * their cached hooks, so a list cached from one TypeWhisper instance is not
+ * shown for another.
+ */
+export function instanceCacheKey(): string {
+  return String(candidateInstances()[0].port);
 }
 
-// Shared by fetchJson and the useFetch views, so both show the same errors.
-export async function parseApiResponse<T>(response: Response): Promise<T> {
+function isConnectionRefused(error: unknown): boolean {
+  const cause = (error as { cause?: { code?: unknown } } | null)?.cause;
+  return cause?.code === "ECONNREFUSED";
+}
+
+async function parseApiResponse<T>(
+  response: Response,
+  sentToken: boolean,
+): Promise<T> {
   if (response.status === 401) {
     throw new TypeWhisperError(
-      getAuthHeaders().Authorization
+      sentToken
         ? "TypeWhisper rejected the API token. Restart TypeWhisper and try again."
         : "TypeWhisper requires an API token, but none was found. Update and restart TypeWhisper, then try again.",
       401,
@@ -163,28 +184,10 @@ export async function parseApiResponse<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-async function fetchJson<T>(
-  url: URL,
-  init: RequestInit,
-  timeoutMessage: string,
-): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(url.toString(), init);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new TypeWhisperError(timeoutMessage);
-    }
-    throw new TypeWhisperError(
-      "Cannot connect to TypeWhisper. Make sure the app is running and the API server is enabled in Settings > Advanced.",
-    );
-  }
-
-  return parseApiResponse<T>(response);
-}
-
 interface RequestOptions {
   params?: Record<string, string>;
+  /** An `instanceCacheKey()` value; that instance is asked first. */
+  instance?: string;
   body?: unknown;
   timeoutMs?: number;
   timeoutMessage?: string;
@@ -195,35 +198,65 @@ async function request<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const baseUrl = getBaseUrl();
-  const url = new URL(path, baseUrl);
-  if (options.params) {
-    for (const [key, value] of Object.entries(options.params)) {
+  const isMultipart = options.body instanceof FormData;
+  const hasJsonBody = options.body !== undefined && !isMultipart;
+  const candidates = candidateInstances(
+    options.instance ? (parsePort(options.instance) ?? undefined) : undefined,
+  );
+
+  for (const [index, instance] of candidates.entries()) {
+    const url = new URL(path, `http://127.0.0.1:${instance.port}`);
+    for (const [key, value] of Object.entries(options.params ?? {})) {
       url.searchParams.set(key, value);
     }
+
+    let response: Response;
+    try {
+      response = await fetch(url.toString(), {
+        method,
+        headers: {
+          ...(instance.token
+            ? { Authorization: `Bearer ${instance.token}` }
+            : {}),
+          ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+        },
+        body: isMultipart
+          ? (options.body as FormData)
+          : hasJsonBody
+            ? JSON.stringify(options.body)
+            : undefined,
+        signal: AbortSignal.timeout(options.timeoutMs ?? TIMEOUT_MS),
+      });
+    } catch (error) {
+      // A refused connection means nothing reached TypeWhisper, so trying the
+      // next instance cannot run a request twice.
+      if (isConnectionRefused(error) && index < candidates.length - 1) {
+        continue;
+      }
+      if (error instanceof DOMException && error.name === "TimeoutError") {
+        throw new TypeWhisperError(
+          options.timeoutMessage ??
+            "Request timed out. Is TypeWhisper running?",
+        );
+      }
+      throw new TypeWhisperError(
+        "Cannot connect to TypeWhisper. Make sure the app is running and the API server is enabled in Settings > Advanced.",
+      );
+    }
+
+    lastReachablePort = instance.port;
+    return parseApiResponse<T>(response, Boolean(instance.token));
   }
 
-  const hasBody = options.body !== undefined;
-  return fetchJson<T>(
-    url,
-    {
-      method,
-      headers: {
-        ...getAuthHeaders(),
-        ...(hasBody ? { "Content-Type": "application/json" } : {}),
-      },
-      body: hasBody ? JSON.stringify(options.body) : undefined,
-      signal: AbortSignal.timeout(options.timeoutMs ?? TIMEOUT_MS),
-    },
-    options.timeoutMessage ?? "Request timed out. Is TypeWhisper running?",
-  );
+  throw new TypeWhisperError("No TypeWhisper instance found.");
 }
 
 export async function apiGet<T>(
   path: string,
   params?: Record<string, string>,
+  instance?: string,
 ): Promise<T> {
-  return request<T>("GET", path, { params });
+  return request<T>("GET", path, { params, instance });
 }
 
 export async function apiPost<T>(
@@ -267,17 +300,9 @@ export async function apiPostMultipart<T>(
   path: string,
   formData: FormData,
 ): Promise<T> {
-  const baseUrl = getBaseUrl();
-  const url = new URL(path, baseUrl);
-
-  return fetchJson<T>(
-    url,
-    {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: formData,
-      signal: AbortSignal.timeout(60000),
-    },
-    "Transcription timed out.",
-  );
+  return request<T>("POST", path, {
+    body: formData,
+    timeoutMs: 60000,
+    timeoutMessage: "Transcription timed out.",
+  });
 }

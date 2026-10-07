@@ -12,6 +12,7 @@ import {
 import type { RecorderSessionResponse, TranscribeResponse } from "./types";
 
 const POLL_INTERVAL_MS = 2000;
+const RETRY_INTERVAL_MS = 10000;
 // Long recordings take a while to transcribe.
 const TRANSCRIBE_TIMEOUT_MS = 30 * 60 * 1000;
 
@@ -84,17 +85,37 @@ export default function Command() {
     // The view shows the error itself.
     { onError: () => {} },
   );
-  const [transcribedText, setTranscribedText] = useState<string>();
-  const [isTranscribing, setIsTranscribing] = useState(false);
+  // Keyed by recorder session, so a newer recording never shows an older
+  // transcript, even if that transcription finishes after the view refreshed.
+  const [transcribed, setTranscribed] = useState<{
+    sessionId: string;
+    text: string;
+  }>();
+  const [transcribingSessionId, setTranscribingSessionId] = useState<string>();
+  const transcribedText =
+    transcribed && transcribed.sessionId === data?.id
+      ? transcribed.text
+      : undefined;
+  const isTranscribing =
+    transcribingSessionId !== undefined && transcribingSessionId === data?.id;
+  // One transcription at a time: a second one could finish first and then be
+  // overwritten by the older one.
+  const isAnyTranscriptionRunning = transcribingSessionId !== undefined;
 
   const inProgress =
     data?.status === "recording" || data?.status === "finalizing";
 
+  // While the recording is still running or transcribing, refresh often;
+  // after a failed check, keep trying at a slower pace.
   useEffect(() => {
-    if (!inProgress || error) {
+    // A failed check clears `data`, so `inProgress` alone would stop retrying.
+    if (!inProgress && !error) {
       return;
     }
-    const timer = setInterval(revalidate, POLL_INTERVAL_MS);
+    const timer = setInterval(
+      revalidate,
+      error ? RETRY_INTERVAL_MS : POLL_INTERVAL_MS,
+    );
     return () => clearInterval(timer);
   }, [inProgress, error, revalidate]);
 
@@ -110,7 +131,7 @@ export default function Command() {
   }
 
   async function transcribe(sessionId: string, path: string) {
-    setIsTranscribing(true);
+    setTranscribingSessionId(sessionId);
     try {
       const result = await apiPost<TranscribeResponse>(
         "/v1/transcribe/local-file",
@@ -121,13 +142,15 @@ export default function Command() {
         },
       );
       await setRecorderTranscript(sessionId, result.text);
-      setTranscribedText(result.text);
+      setTranscribed({ sessionId, text: result.text });
     } catch (err) {
       await showFailureToast(errorMessage(err, "Failed to transcribe"), {
         title: "TypeWhisper",
       });
     } finally {
-      setIsTranscribing(false);
+      setTranscribingSessionId((current) =>
+        current === sessionId ? undefined : current,
+      );
     }
   }
 
@@ -147,7 +170,7 @@ export default function Command() {
           {data?.status === "recording" && (
             <Action title="Stop Recording" icon={Icon.Stop} onAction={stop} />
           )}
-          {canTranscribe && !isTranscribing && (
+          {canTranscribe && !isAnyTranscriptionRunning && (
             <Action
               title="Transcribe Recording"
               icon={Icon.Microphone}

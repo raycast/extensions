@@ -93,29 +93,45 @@ export function AddCorrectionForm(props: {
         replacement: values.replacement,
         caseSensitive: values.caseSensitive,
       });
-      // Corrections are keyed by their original text, so renaming one adds
-      // a new entry; remove the old one.
-      const previousOriginal = props.initialOriginal;
-      if (
-        previousOriginal !== undefined &&
-        previousOriginal.toLowerCase() !== original.toLowerCase()
-      ) {
-        await apiDeleteJson("/v1/dictionary/corrections", {
-          original: previousOriginal,
-        });
-      }
-      await showToast({
-        style: Toast.Style.Success,
-        title: isEditing ? "Correction updated" : "Correction added",
-      });
-      props.onAdded?.();
-      pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: errorMessage(error, "Failed to save correction"),
       });
+      return;
     }
+
+    // Corrections are keyed by their original text, so renaming one adds a
+    // new entry; remove the old one. The new entry is already saved, so a
+    // failure here must say which old entry is left over.
+    const previousOriginal = props.initialOriginal;
+    if (
+      previousOriginal !== undefined &&
+      previousOriginal.toLowerCase() !== original.toLowerCase()
+    ) {
+      try {
+        await apiDeleteJson("/v1/dictionary/corrections", {
+          original: previousOriginal,
+        });
+      } catch (error) {
+        props.onAdded?.();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Saved "${original}", but "${previousOriginal}" is still in the dictionary`,
+          message:
+            `Delete "${previousOriginal}" in Manage Dictionary. ${errorMessage(error, "")}`.trim(),
+        });
+        pop();
+        return;
+      }
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: isEditing ? "Correction updated" : "Correction added",
+    });
+    props.onAdded?.();
+    pop();
   }
 
   return (

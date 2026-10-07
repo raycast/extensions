@@ -10,7 +10,7 @@
 - Send the TypeWhisper API token with every request, read from the `api-discovery.json` file that TypeWhisper writes while its API server runs
 - Keep working with TypeWhisper versions that do not require a token
 - Read the discovery files on Windows from `%LOCALAPPDATA%`, including the current `TypeWhisper-WinUI` folders
-- Use the newest discovery file, so files left behind by an app that did not quit cleanly no longer point the extension at a dead port
+- Try the newest discovery file first and move on to the next TypeWhisper instance when that one is not running, so files left behind by an app that did not quit cleanly no longer point the extension at a dead port
 - Stop a running dictation from Dictate with Workflow and Manage Workflows, and a running recording from Show Last Recording
 - Find TypeWhisper from the Mac App Store, which keeps its files in its sandbox container
 - Find TypeWhisper and TypeWhisper Beta from the Microsoft Store, whose files Windows keeps in the package folder

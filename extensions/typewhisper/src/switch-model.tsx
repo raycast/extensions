@@ -8,14 +8,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import {
-  apiPost,
-  errorMessage,
-  getAuthHeaders,
-  parseApiResponse,
-  getBaseUrl,
-} from "./api";
+import { useCachedPromise } from "@raycast/utils";
+import { apiGet, apiPost, errorMessage, instanceCacheKey } from "./api";
 import type { ModelEntry, ModelsResponse } from "./types";
 
 // Loading can include a model download.
@@ -50,13 +44,11 @@ function accessoriesFor(model: ModelEntry): List.Item.Accessory[] {
 }
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch<ModelsResponse>(
-    `${getBaseUrl()}/v1/models`,
-    {
-      headers: getAuthHeaders(),
-      parseResponse: parseApiResponse,
-      keepPreviousData: true,
-    },
+  const { isLoading, data, revalidate } = useCachedPromise(
+    (instance: string) =>
+      apiGet<ModelsResponse>("/v1/models", undefined, instance),
+    [instanceCacheKey()],
+    { keepPreviousData: true },
   );
 
   async function selectModel(model: ModelEntry) {

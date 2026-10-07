@@ -8,13 +8,12 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
+  apiGet,
   apiPut,
   errorMessage,
-  getAuthHeaders,
-  parseApiResponse,
-  getBaseUrl,
+  instanceCacheKey,
   TypeWhisperError,
 } from "./api";
 import type { ProfilesResponse } from "./types";
@@ -25,13 +24,11 @@ import {
 import { startDictationWithWorkflow } from "./workflow-dictation";
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch<ProfilesResponse>(
-    `${getBaseUrl()}/v1/profiles`,
-    {
-      headers: getAuthHeaders(),
-      parseResponse: parseApiResponse,
-      keepPreviousData: true,
-    },
+  const { isLoading, data, revalidate } = useCachedPromise(
+    (instance: string) =>
+      apiGet<ProfilesResponse>("/v1/profiles", undefined, instance),
+    [instanceCacheKey()],
+    { keepPreviousData: true },
   );
 
   async function toggleWorkflow(id: string, name: string) {

@@ -10,15 +10,9 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import {
-  apiDelete,
-  getAuthHeaders,
-  parseApiResponse,
-  getBaseUrl,
-  TypeWhisperError,
-} from "./api";
+import { apiDelete, apiGet, instanceCacheKey, TypeWhisperError } from "./api";
 import type { HistoryResponse } from "./types";
 
 const PAGE_SIZE = 50;
@@ -53,13 +47,15 @@ export default function Command() {
     params.set("q", searchText.trim());
   }
 
-  const { isLoading, data, revalidate } = useFetch<HistoryResponse>(
-    `${getBaseUrl()}/v1/history?${params.toString()}`,
-    {
-      headers: getAuthHeaders(),
-      parseResponse: parseApiResponse,
-      keepPreviousData: true,
-    },
+  const { isLoading, data, revalidate } = useCachedPromise(
+    (instance: string, query: string) =>
+      apiGet<HistoryResponse>(
+        "/v1/history",
+        Object.fromEntries(new URLSearchParams(query)),
+        instance,
+      ),
+    [instanceCacheKey(), params.toString()],
+    { keepPreviousData: true },
   );
 
   async function deleteEntry(id: string) {
