@@ -13,9 +13,12 @@ import {
   setCachedVaults,
 } from "./lib/cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
-import { listingSaves } from "./lib/refresh";
+import { createListingSaves, listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
+
+/** Only List Vaults lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
+const sharingSaves = createListingSaves();
 
 /** Marks shared vaults, whether you shared them or they were shared with you. */
 function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
@@ -60,6 +63,7 @@ export default function Command() {
     try {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
       const listing = listingSaves.start();
+      const sharingListing = sharingSaves.start();
       const [{ vaults: freshVaults, items, failedVaults }, freshSharing] = await Promise.all([
         listVaultsAndItems(),
         // Sharing only adds an icon: when it can't be listed, the saved sharing stays.
@@ -70,7 +74,7 @@ export default function Command() {
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
       // Sharing is saved on its own, so it stays up to date even when some items can't be listed.
-      if (freshSharing) await setCachedSharing(sharing);
+      if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
       // items would count 0 items. Saves follow the order listings started, also across Search Items.
       if (failed.size === 0) {
