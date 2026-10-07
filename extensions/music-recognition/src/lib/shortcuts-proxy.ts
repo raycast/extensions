@@ -116,9 +116,34 @@ export async function isProxyShortcutInstalled() {
   return shortcuts.some((name) => name === SHORTCUT_NAME);
 }
 
+// The bundled shortcut builds its JSON by substituting values into a text template without escaping them, so a title
+// like `Happy (From "Despicable Me 2")` yields invalid JSON. Recover the fields from the known template layout.
+const TEMPLATE_PAYLOAD_PATTERN = new RegExp(
+  [
+    '^\\s*\\{\\s*"title"\\s*:\\s*"([\\s\\S]*?)"\\s*,',
+    '\\s*"artist"\\s*:\\s*"([\\s\\S]*?)"\\s*,',
+    '\\s*"url"\\s*:\\s*"([\\s\\S]*?)"\\s*,',
+    '\\s*"artworkBase64"\\s*:\\s*"([\\s\\S]*?)"\\s*,',
+    '\\s*"artworkMimeType"\\s*:\\s*"([\\s\\S]*?)"\\s*\\}\\s*$',
+  ].join(""),
+);
+
+function parseLooseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const match = TEMPLATE_PAYLOAD_PATTERN.exec(text);
+    if (!match) {
+      throw new Error("Not valid JSON");
+    }
+    const [, title, artist, url, artworkBase64, artworkMimeType] = match;
+    return { title, artist, url, artworkBase64, artworkMimeType };
+  }
+}
+
 function parsePayload(text: string): ShortcutProxyPayload | null {
   try {
-    const parsed = JSON.parse(text) as Partial<ShortcutProxyPayload> & LegacyStatuslessPayload;
+    const parsed = parseLooseJson(text) as Partial<ShortcutProxyPayload> & LegacyStatuslessPayload;
     if (!parsed || typeof parsed !== "object") {
       return null;
     }
@@ -230,6 +255,31 @@ async function writeArtworkFromBase64(payload: ShortcutProxySuccess) {
   } satisfies ShortcutProxySuccess;
 }
 
+const CLIPBOARD_SETTLE_TIMEOUT_MS = 4_000;
+const CLIPBOARD_POLL_INTERVAL_MS = 250;
+
+// Fallback for shortcuts that only write the Clipboard. Waits for Raycast to notice the change, and follows its
+// large-text placeholder to the file that holds the full text.
+async function readShortcutClipboard(previousClipboard: string | undefined) {
+  const deadline = Date.now() + CLIPBOARD_SETTLE_TIMEOUT_MS;
+  let content = await Clipboard.read();
+
+  while (content.text === previousClipboard && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, CLIPBOARD_POLL_INTERVAL_MS));
+    content = await Clipboard.read();
+  }
+
+  if (content.file && /\.(txt|json)$/i.test(content.file) && parsePayload(content.text) === null) {
+    try {
+      return await fs.readFile(content.file, "utf8");
+    } catch {
+      // Fall through to the plain text.
+    }
+  }
+
+  return content.text;
+}
+
 export async function runProxyShortcut(options?: { timeoutMs?: number; onStatus?: (message: string) => void }) {
   const timeoutMs = options?.timeoutMs ?? 30_000;
   options?.onStatus?.("Launching Shortcuts…");
@@ -255,24 +305,31 @@ export async function runProxyShortcut(options?: { timeoutMs?: number; onStatus?
     return { kind: "error", message, stderr } satisfies ShortcutRunResult;
   }
 
-  options?.onStatus?.("Reading result from Clipboard…");
-  const clipboardText = await Clipboard.readText();
-  if (!clipboardText) {
-    return {
-      kind: "error",
-      message: "The shortcut completed but did not put any text in the Clipboard.",
-    } satisfies ShortcutRunResult;
-  }
+  // The shortcut ends with an "Output" action that returns the same JSON it copies, so prefer stdout. Reading the
+  // Clipboard is unreliable for this payload: it embeds the artwork (about 1 MB), Raycast lags behind the real
+  // clipboard by over a second, and Raycast hands large text back as a `file-<hash>.txt` placeholder.
+  let payload = parsePayload(run.stdout.trim());
 
-  const payload = parsePayload(clipboardText);
   if (!payload) {
-    const sameClipboard = previousClipboard === clipboardText;
-    return {
-      kind: "error",
-      message: sameClipboard
-        ? "The shortcut did not write the expected JSON payload to the Clipboard."
-        : "Clipboard content is not valid proxy JSON. Check your shortcut output format.",
-    } satisfies ShortcutRunResult;
+    options?.onStatus?.("Reading result from Clipboard…");
+    const clipboardText = await readShortcutClipboard(previousClipboard);
+    if (!clipboardText) {
+      return {
+        kind: "error",
+        message: "The shortcut completed but did not put any text in the Clipboard.",
+      } satisfies ShortcutRunResult;
+    }
+
+    payload = parsePayload(clipboardText);
+    if (!payload) {
+      const sameClipboard = previousClipboard === clipboardText;
+      return {
+        kind: "error",
+        message: sameClipboard
+          ? "The shortcut did not write the expected JSON payload to the Clipboard."
+          : "Clipboard content is not valid proxy JSON. Check your shortcut output format.",
+      } satisfies ShortcutRunResult;
+    }
   }
 
   if (payload.status === "ok") {
