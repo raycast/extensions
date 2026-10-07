@@ -12,6 +12,7 @@ export class TeakDiscoveryError extends Error {
 class TeakSessionExpiredError extends Error {}
 class TeakRefreshRevokedError extends TeakSessionExpiredError {}
 class TeakHistoricalConnectionError extends Error {}
+class TeakRefreshClientRejectedError extends Error {}
 
 interface Provider {
   auth: AuthDiscovery;
@@ -263,10 +264,21 @@ async function exchange(
       (response.status === 400 || response.status === 401) &&
       raw !== null &&
       typeof raw === "object" &&
-      "error" in raw &&
-      raw.error === "invalid_grant"
+      "error" in raw
     ) {
-      throw new TeakRefreshRevokedError("Teak refresh credential was revoked.");
+      if (raw.error === "invalid_grant") {
+        throw new TeakRefreshRevokedError(
+          "Teak refresh credential was revoked.",
+        );
+      }
+      if (
+        raw.error === "invalid_client" ||
+        raw.error === "unauthorized_client"
+      ) {
+        // The client was rejected, not necessarily its remote grant revoked.
+        // Only explicit Sign Out may forget this local credential.
+        throw new TeakRefreshClientRejectedError("Teak client was rejected.");
+      }
     }
     throw bodyError("Teak token request was rejected. Try again.");
   }
@@ -515,14 +527,15 @@ async function revokeStoredSession(): Promise<SignOutResult> {
           throw new Error("Revocation failed");
         }
       } catch (error) {
-        // Only a definitive dead refresh grant or explicit historical-provider
-        // Sign Out permits local clearing. Neither claims remote revocation;
+        // A dead refresh grant, rejected client or historical-provider mismatch
+        // permits explicit local clearing. None claims remote revocation;
         // uncertain failures retain their credentials.
         if (
           !(
             workos &&
             (error instanceof TeakRefreshRevokedError ||
-              error instanceof TeakHistoricalConnectionError)
+              error instanceof TeakHistoricalConnectionError ||
+              error instanceof TeakRefreshClientRejectedError)
           )
         ) {
           throw new Error(

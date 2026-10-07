@@ -571,7 +571,7 @@ test.each([
   "network",
   "oversized",
 ])(
-  "logout clears only definitive refresh invalid_grant (%s)",
+  "logout clears definitive grant/client rejection and retains uncertain failures (%s)",
   async (failure) => {
     mode = "workos";
     await oauth.authorizeTeak();
@@ -596,7 +596,7 @@ test.each([
       }
       return transport(input, init);
     }) as typeof fetch;
-    if (failure === "invalid_grant") {
+    if (failure === "invalid_grant" || failure === "invalid_client") {
       expect(await oauth.signOutTeak()).toBe("local-only");
       expect(stores.has(key)).toBe(false);
       globalThis.fetch = transport;
@@ -659,7 +659,7 @@ test.each([400, 401])(
       null,
       "",
       "not-json",
-      '{"error":"invalid_client"}',
+      '{"error":"invalid_request"}',
       "x".repeat(70 * 1024),
     ]) {
       globalThis.fetch = (async (input, init) => {
@@ -750,6 +750,41 @@ test.each([
     expect(credentialReads).not.toContain(providerId);
     expect(stores.get(providerId)).toBe(saved);
     expect(posts).toHaveLength(0);
+    expect(browserCount).toBe(0);
+  },
+);
+
+test.each([
+  [400, "invalid_client"],
+  [401, "invalid_client"],
+  [400, "unauthorized_client"],
+  [401, "unauthorized_client"],
+])(
+  "refresh HTTP %i %s requires explicit local-only Sign Out",
+  async (status, error) => {
+    mode = "workos";
+    await oauth.authorizeTeak();
+    const key = Array.from(stores.keys())[0];
+    const saved = {
+      accessToken: "expired-client-access",
+      refreshToken: "saved-client-refresh",
+      isExpired: () => true,
+    };
+    stores.set(key, saved);
+    browserCount = 0;
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/oauth2/token"))
+        return json({ error }, Number(status));
+      if (String(input).endsWith("/oauth/disconnect"))
+        return new Response(null, { status: 401 });
+      return transport(input, init);
+    }) as typeof fetch;
+    await expect(oauth.getStoredTeakAccessToken()).rejects.toThrow();
+    await expect(oauth.authorizeTeak()).rejects.toThrow();
+    expect(stores.get(key)).toBe(saved);
+    expect(browserCount).toBe(0);
+    expect(await oauth.signOutTeak()).toBe("local-only");
+    expect(stores.has(key)).toBe(false);
     expect(browserCount).toBe(0);
   },
 );
