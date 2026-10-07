@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Aitho MCP Server] - {PR_MERGE_DATE}
+## [Add Aitho MCP Server] - 2026-10-07
 
 - Add Aitho to the community registry, for rehearsing and delivering presentations with your own slides. Create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.
 
