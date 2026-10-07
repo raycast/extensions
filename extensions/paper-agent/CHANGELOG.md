@@ -1,6 +1,6 @@
 # Paper Agent Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-10-07
 
 - Update to Raycast API 2.6.3 and Node.js 22.22.2 for development and CI.
 - Show core and library errors separately from empty results, with actions to open preferences and retry.
