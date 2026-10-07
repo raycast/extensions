@@ -34,12 +34,11 @@ function parseSkipMessage(output: string): string | undefined {
   return undefined;
 }
 
-const coreNotFoundMarkdown = `# Core not found
+const coreNotFoundMarkdown = `# Check Paper Agent setup
 
-Install Paper Agent core first, then set **Config File Path** and **Paper Directory** in extension Preferences.
+Check **Config File Path**, **Paper Directory**, and **Python Executable** in extension Preferences.
 
-- **Install:** [${CORE_INSTALL_URL}](${CORE_INSTALL_URL})
-- Or run the **bootstrap command** (use the Copy action below), then configure Preferences.
+If the core is not installed, use the [installation guide](${CORE_INSTALL_URL}) or copy the bootstrap command below.
 `;
 
 function RunPipelineView() {
