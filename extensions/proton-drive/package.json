@@ -32,7 +32,7 @@
       "name": "upload-files",
       "title": "Upload Files",
       "subtitle": "Proton Drive",
-      "description": "Upload the files selected in Finder to a Proton Drive folder",
+      "description": "Upload the Finder selection, or files you choose, to a Proton Drive folder",
       "mode": "view"
     },
     {

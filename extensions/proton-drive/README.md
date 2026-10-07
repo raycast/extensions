@@ -33,7 +33,7 @@ Named like the Proton Pass and Proton Mail extensions: an action as title, "Prot
 | Command | What it does |
 | --- | --- |
 | **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. |
-| **Upload Files** | Uploads the Finder selection to a folder you pick (existing files are renamed, folders merged). |
+| **Upload Files** | Uploads the Finder selection, or files you choose when nothing is selected, to a folder you pick (existing files are renamed, folders merged). |
 | **Login to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
 | **Refresh Search Index** | Rebuilds the index. Runs daily in the background only if enabled in preferences. |
 

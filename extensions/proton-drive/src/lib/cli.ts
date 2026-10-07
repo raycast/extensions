@@ -83,7 +83,12 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(bin, args, { maxBuffer: 256 * 1024 * 1024, timeout }, (error, stdout, stderr) => {
       if (error) {
-        const detail = (stderr || stdout || error.message).trim();
+        // Crashes can put only a banner on stderr and the actual message on stdout: keep both.
+        const detail =
+          [stderr, stdout]
+            .map((t) => t.trim())
+            .filter(Boolean)
+            .join("\n") || error.message;
         logFailure(args, error, detail);
         // The CLI says "You need to login first" (0.8.0); the other phrasings are kept as a safety net.
         const loggedOut =

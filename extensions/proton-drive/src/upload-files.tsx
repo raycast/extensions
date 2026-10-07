@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { basename } from "node:path";
-import { Action, ActionPanel, getSelectedFinderItems, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getSelectedFinderItems,
+  Icon,
+  List,
+  popToRoot,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { displayPath } from "./components/NodeActions";
 import { listFolderCached, ROOT, upload } from "./lib/cli";
@@ -23,19 +34,43 @@ export default function Command() {
     readIndex().then((index) => setIndexedFolders(index?.folders.slice(1) ?? []));
   }, []);
 
-  if (files && files.length === 0) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Finder}
-          title="No Finder selection"
-          description="Select files or folders in Finder, then run this command again."
-        />
-      </List>
-    );
-  }
+  // Nothing selected in Finder: let the user pick files or folders here instead.
+  if (files && files.length === 0) return <ChooseFiles indexedFolders={indexedFolders} />;
 
   return <FolderPicker path={ROOT} files={files} indexedFolders={indexedFolders} />;
+}
+
+function ChooseFiles(props: { indexedFolders: string[] }) {
+  const { push } = useNavigation();
+  const [error, setError] = useState<string>();
+
+  return (
+    <Form
+      navigationTitle="Upload Files"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Choose Destination"
+            icon={Icon.ArrowRight}
+            onSubmit={({ files }: { files: string[] }) => {
+              if (!files?.length) return setError("Choose at least one file or folder");
+              push(<FolderPicker path={ROOT} files={files} indexedFolders={props.indexedFolders} />);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Nothing is selected in Finder. Choose what to upload, then pick a Drive folder." />
+      <Form.FilePicker
+        id="files"
+        title="Files or Folders"
+        allowMultipleSelection
+        canChooseDirectories
+        error={error}
+        onChange={() => setError(undefined)}
+      />
+    </Form>
+  );
 }
 
 /**
