@@ -1366,6 +1366,58 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
+test("an older List Vaults load can't replace newer sharing", async () => {
+  const vault = { shareId: "vault", name: "Personal" };
+  const savedSharing: unknown[] = [];
+  const pending: ((sharing: Map<string, unknown>) => void)[] = [];
+  const harness = hookHarness();
+  const { default: Command } = loadView("../list-vaults.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": {
+      listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
+      listVaultsAndItems: async () => ({ vaults: [vault], items: [item], failedVaults: [] }),
+    },
+    "./lib/types": { PassCliError },
+    "./lib/search-items-view": {},
+    "./lib/login-view": {},
+    "./lib/cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async (sharing: unknown) => {
+        savedSharing.push(sharing);
+      },
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./lib/item-counts": itemCounts,
+    "./lib/refresh": refresh,
+    "./lib/shortcuts": shortcuts,
+    "./lib/vault-sharing": vaultSharing,
+  });
+  harness.render(Command, {});
+  const [load] = harness.effects;
+  load();
+  await new Promise(setImmediate);
+  load();
+  await new Promise(setImmediate);
+
+  // The newer load finishes first, then the older one.
+  pending[1](new Map([["vault", { role: "viewer", isShared: true }]]));
+  await new Promise(setImmediate);
+  pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
+  await new Promise(setImmediate);
+  assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
+});
+
 test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
   const failed = { shareId: "vault", name: "Personal" };
   const { harness, SearchItemsView } = searchItemsFixture({
