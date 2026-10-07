@@ -34,8 +34,11 @@ export default function Command() {
     readIndex().then((index) => setIndexedFolders(index?.folders.slice(1) ?? []));
   }, []);
 
+  // Until the Finder selection is known, show nothing: rendering the folder picker first and then
+  // switching to the file form made the wrong screen flash.
+  if (!files) return <List isLoading />;
   // Nothing selected in Finder: let the user pick files or folders here instead.
-  if (files && files.length === 0) return <ChooseFiles indexedFolders={indexedFolders} />;
+  if (files.length === 0) return <ChooseFiles indexedFolders={indexedFolders} />;
 
   return <FolderPicker path={ROOT} files={files} indexedFolders={indexedFolders} />;
 }
@@ -77,7 +80,7 @@ function ChooseFiles(props: { indexedFolders: string[] }) {
  * Destination picker: browse the Drive folder by folder (no index needed) and upload to the
  * current folder or to any subfolder. With the search index, typing also matches folders anywhere.
  */
-function FolderPicker(props: { path: string; files?: string[]; indexedFolders: string[] }) {
+function FolderPicker(props: { path: string; files: string[]; indexedFolders: string[] }) {
   const { path, files, indexedFolders } = props;
   const [query, setQuery] = useState("");
   const [signedOut, setSignedOut] = useState(false);
@@ -92,7 +95,7 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
     },
   });
 
-  const label = files?.length === 1 ? basename(files[0]) : `${files?.length ?? 0} items`;
+  const label = files.length === 1 ? basename(files[0]) : `${files.length} items`;
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   const matches = (p: string) => words.every((w) => p.toLowerCase().includes(w));
 
@@ -109,11 +112,7 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
   );
 
   const uploadHere = (target: string) => (
-    <Action
-      title={`Upload to ${displayPath(target)}`}
-      icon={Icon.Upload}
-      onAction={() => doUpload(files ?? [], target)}
-    />
+    <Action title={`Upload to ${displayPath(target)}`} icon={Icon.Upload} onAction={() => doUpload(files, target)} />
   );
   const open = (target: string) => (
     <Action.Push
@@ -127,7 +126,7 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
 
   return (
     <List
-      isLoading={!files || isLoading}
+      isLoading={isLoading}
       filtering={false}
       onSearchTextChange={setQuery}
       navigationTitle={`Upload ${label}`}
@@ -180,8 +179,6 @@ function FolderPicker(props: { path: string; files?: string[]; indexedFolders: s
 }
 
 async function doUpload(files: string[], parentPath: string) {
-  // The Finder selection is read asynchronously: never start an empty upload.
-  if (files.length === 0) return;
   const toast = await showToast({ style: Toast.Style.Animated, title: `Uploading ${files.length} item(s)…` });
   try {
     const result = await upload(files, parentPath);
