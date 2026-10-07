@@ -3,7 +3,10 @@ import {
   Icon,
   LaunchType,
   MenuBarExtra,
+  Toast,
   launchCommand,
+  showHUD,
+  showToast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -16,7 +19,17 @@ import {
 } from "macos-fan-control-client";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(readStatus, [true]);
+  // Failures are reported inside the menu; without this the default failure toast
+  // would reappear on every `interval` tick while the core is missing.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    readStatus,
+    [true],
+    {
+      onError: () => {
+        // Shown inline below instead.
+      },
+    },
+  );
   const fans = data?.fans ?? [];
   const fastest = fans.reduce(
     (highest, fan) => Math.max(highest, fan.actual),
@@ -24,20 +37,48 @@ export default function Command() {
   );
   const current = fans.length ? mode(fans) : "";
 
+  async function apply(action: () => Promise<string>, confirmation: string) {
+    try {
+      await action();
+      await showHUD(confirmation);
+      revalidate();
+    } catch (failure) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed",
+        message: (failure as Error).message,
+      });
+    }
+  }
+
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={{
         source: Icon.Gauge,
-        tintColor: current === "Forced" ? Color.Blue : Color.PrimaryText,
+        tintColor: error
+          ? Color.Red
+          : current === "Forced"
+            ? Color.Blue
+            : Color.PrimaryText,
       }}
       title={fans.length ? String(Math.round(fastest)) : undefined}
       tooltip={
-        fans.length
-          ? `${current} · ${Math.round(average(fans))}%`
-          : "Fan Control"
+        error
+          ? error.message
+          : fans.length
+            ? `${current} · ${Math.round(average(fans))}%`
+            : "Fan Control"
       }
     >
+      {error ? (
+        <MenuBarExtra.Section title="Fan Control Unavailable">
+          <MenuBarExtra.Item
+            title={error.message}
+            icon={Icon.ExclamationMark}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
       <MenuBarExtra.Section title={current}>
         {fans.map((fan) => (
           <MenuBarExtra.Item
@@ -63,18 +104,12 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Force Maximum"
           icon={Icon.Bolt}
-          onAction={async () => {
-            await setPercent(100);
-            revalidate();
-          }}
+          onAction={() => apply(() => setPercent(100), "Fans at maximum")}
         />
         <MenuBarExtra.Item
           title="Restore Automatic"
           icon={Icon.Repeat}
-          onAction={async () => {
-            await setAutomatic();
-            revalidate();
-          }}
+          onAction={() => apply(setAutomatic, "Fans on automatic")}
         />
         <MenuBarExtra.Item
           title="Set Fan Speed…"
