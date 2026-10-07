@@ -11,21 +11,5 @@ export function updateItems<T extends HasId>(items: T[], changes: Map<Id, Partia
   });
 }
 
-export function replaceItems<T extends HasId>(items: T[], replacements: Partial<T>[]): T[] {
-  return items.map((it) => {
-    const replacement = replacements.find((r) => r.id === it.id);
-    return !replacement ? it : { ...it, ...replacement };
-  });
-}
-
-export function mergeObjectsById<T extends HasId>(items: T[]): T[] {
-  return Object.values(
-    items.reduce<Record<Id, T>>((acc, obj) => {
-      acc[obj.id] = !acc[obj.id] ? obj : { ...acc[obj.id], ...obj };
-      return acc;
-    }, {}),
-  );
-}
-
 export const byName = (a: { metadata: { name: string } }, b: { metadata: { name: string } }) =>
   a.metadata.name.localeCompare(b.metadata.name);

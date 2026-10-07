@@ -1,19 +1,11 @@
 import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
-import React from "react";
-import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { BridgeConfig } from "./types";
 import dns from "dns";
 import HueClient from "./HueClient";
 import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
 import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
-export default async function createHueClient(
-  bridgeConfig: BridgeConfig,
-  setLights?: React.Dispatch<React.SetStateAction<Light[]>>,
-  setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-  setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
-  setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
-) {
+export default async function createHueClient(bridgeConfig: BridgeConfig) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
     console.log("Connecting to the Hue Bridge…");
 
@@ -78,5 +70,5 @@ export default async function createHueClient(
     });
   });
 
-  return new HueClient(bridgeConfig, http2Session, setLights, setGroupedLights, setRooms, setZones, setScenes);
+  return new HueClient(bridgeConfig, http2Session);
 }

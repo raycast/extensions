@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
-import { GroupedLight, Light, Room, Scene, Zone } from "../lib/types";
+import { GroupedLight, HasId, Id, Light, Room, Scene, Zone } from "../lib/types";
 import { useHueBridgeMachine } from "./useHueBridgeMachine";
+import { updateItems } from "../helpers/collections";
 import { Toast } from "@raycast/api";
 import Style = Toast.Style;
 
@@ -16,44 +17,52 @@ export function useHue() {
   const [zones, setZones] = useCachedState("zones", [] as Zone[]);
   const [scenes, setScenes] = useCachedState("scenes", [] as Scene[]);
 
-  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine(
-    setLights,
-    setGroupedLights,
-    setRooms,
-    setZones,
-    setScenes,
-  );
+  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine();
+  const { hueClient } = hueBridgeState.context;
 
   useEffect(() => {
-    if (hueBridgeState.context.hueClient !== undefined) {
-      (async () => {
-        if (hueBridgeState.context.hueClient === undefined) {
-          throw new Error("hueClient is undefined");
-        }
+    if (hueClient === undefined) return;
 
-        try {
-          // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
-          // Since we’re using HTTP/2 we can just execute them sequentially, and it’s faster anyway.
-          setLights(await hueBridgeState.context.hueClient.getLights());
-          setGroupedLights(await hueBridgeState.context.hueClient.getGroupedLights());
-          setRooms(await hueBridgeState.context.hueClient.getRooms());
-          setZones(await hueBridgeState.context.hueClient.getZones());
-          setScenes(await hueBridgeState.context.hueClient.getScenes());
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          new Toast({
-            title: "Error",
-            style: Style.Failure,
-            message,
-          })
-            .show()
-            .then();
+    const stopListening = hueClient.listenToEventSource((resources) => {
+      const apply = <T extends HasId>(type: string, setState: React.Dispatch<React.SetStateAction<T[]>>) => {
+        const changes = new Map<Id, Partial<T>>();
+        for (const resource of resources.filter((r) => r.type === type) as (Partial<T> & HasId)[]) {
+          changes.set(resource.id, { ...changes.get(resource.id), ...resource });
         }
+        if (changes.size > 0) setState((items) => updateItems(items, changes));
+      };
+      apply("light", setLights);
+      apply("grouped_light", setGroupedLights);
+      apply("room", setRooms);
+      apply("zone", setZones);
+      apply("scene", setScenes);
+    });
 
-        setIsLoading(false);
-      })();
-    }
-  }, [hueBridgeState.context.hueClient]);
+    (async () => {
+      try {
+        // Executing these in parallel causes the API to return an error as if one of the endpoints is not found.
+        // Since we’re using HTTP/2 we can just execute them sequentially, and it’s faster anyway.
+        setLights(await hueClient.getLights());
+        setGroupedLights(await hueClient.getGroupedLights());
+        setRooms(await hueClient.getRooms());
+        setZones(await hueClient.getZones());
+        setScenes(await hueClient.getScenes());
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        new Toast({
+          title: "Error",
+          style: Style.Failure,
+          message,
+        })
+          .show()
+          .then();
+      }
+
+      setIsLoading(false);
+    })();
+
+    return stopListening;
+  }, [hueClient]);
 
   return {
     hueBridgeState,

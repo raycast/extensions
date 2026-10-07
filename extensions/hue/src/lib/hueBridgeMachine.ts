@@ -2,8 +2,7 @@ import { AnyEventObject, assign, createMachine, fromPromise, StateValue } from "
 import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
-import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
-import React from "react";
+import { BridgeConfig } from "./types";
 import createHueClient from "./createHueClient";
 import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
@@ -35,13 +34,7 @@ export type HueContext = {
 /**
  * @see https://stately.ai/viz/5dacdcc5-0f75-4620-9330-3455876b2e50
  */
-export default function hueBridgeMachine(
-  setLights: React.Dispatch<React.SetStateAction<Light[]>>,
-  setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
-  setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
-  setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>,
-) {
+export default function hueBridgeMachine() {
   return createMachine({
     id: "manage-hue-bridge",
     initial: "loadingPreferences",
@@ -159,14 +152,7 @@ export default function hueBridgeMachine(
               throw Error("Bridge configuration is undefined when trying to connect");
             }
 
-            const hueClient = await createHueClient(
-              input.bridgeConfig,
-              setLights,
-              setGroupedLights,
-              setRooms,
-              setZones,
-              setScenes,
-            );
+            const hueClient = await createHueClient(input.bridgeConfig);
 
             new Toast({ title: "" }).hide().then();
 
@@ -280,14 +266,7 @@ export default function hueBridgeMachine(
 
             const bridgeConfig = await linkWithBridge(input.bridgeIpAddress, input.bridgeId, input.bridgeUsername);
 
-            const hueClient = await createHueClient(
-              bridgeConfig,
-              setLights,
-              setGroupedLights,
-              setRooms,
-              setZones,
-              setScenes,
-            );
+            const hueClient = await createHueClient(bridgeConfig);
 
             return { bridgeConfig, hueClient };
           }),
