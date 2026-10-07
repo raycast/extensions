@@ -1,6 +1,6 @@
 # massCode CHANGELOG
 
-## [Fix massCode v6 support] - {PR_MERGE_DATE}
+## [Fix massCode v6 support] - 2026-10-07
 
 - Add the API token preference required by massCode v5.11+.
 - Load fragment content on selection, since the snippet list no longer includes it.
