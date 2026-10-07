@@ -294,8 +294,15 @@ describe("flow", () => {
     expect(parseFlow("720p > 1080p > 4K")).toEqual(["720p", "1080p", "4K"]);
     expect(parseFlow("Free > 5GB > Paid")).toEqual(["Free", "5GB", "Paid"]);
   });
+  it("splits numbered and quantity-led steps in a chain", () => {
+    expect(parseFlow("1. Plan > 2. Do > 3. Publish")).toEqual(["1. Plan", "2. Do", "3. Publish"]);
+    expect(parseFlow("1) Plan > 2) Do")).toEqual(["1) Plan", "2) Do"]);
+    expect(parseFlow("Setup > 4K HDMI > Done")).toEqual(["Setup", "4K HDMI", "Done"]);
+    expect(parseFlow("4 eyes review > 2FA > Deploy")).toEqual(["4 eyes review", "2FA", "Deploy"]);
+  });
   it("keeps two comparisons in one step together", () => {
     expect(parseFlow("Check RAM > 5GB and disk > 10GB")).toEqual(["Check RAM > 5GB and disk > 10GB"]);
+    expect(parseFlow("Alert if CPU > 90% && mem > 80%")).toEqual(["Alert if CPU > 90% && mem > 80%"]);
     expect(parseFlow("Start\nRetry if errors > 3 or latency > 200 ms\nShip")).toEqual([
       "Start",
       "Retry if errors > 3 or latency > 200 ms",

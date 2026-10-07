@@ -5,19 +5,21 @@ import { displayWidth, padCenter, splitLines } from "./width";
 
 // ► and ▼ rather than ▶: ▶ has an emoji form that some renderers draw 2 columns wide.
 // A bare > only between spaces, and not before a number or a number with a unit: `x >= 5`, `<div>`,
-// `count > 0` and `Storage > 5GB` stay whole, `Draft > Review` and `Setup > 2FA` split. It's a guess:
-// an arrow in a flow and a comparison in a step look the same.
+// `count > 0` and `Storage > 5GB` stay whole, `Draft > Review` and `Setup > 2FA` split. A list number
+// (`2. Do`, `2) Do`) is a step, not a quantity. It's a guess: an arrow in a flow and a comparison in
+// a step look the same.
 const QUANTITY = String.raw`[-+]?[$€£]?\.?\d[\d,.]*\s?(?:%|[kKMGTP]i?B|[kKMG]|ms|s|sec|min|h|hrs?|d|days?|px|x)?`;
+const ORDINAL = String.raw`\d+[.)]\s`;
 const ARROW = String.raw`\s*(?:-+>|=+>|→|⇒|⟶|►|▶)\s*`;
-const SEPARATOR = new RegExp(String.raw`${ARROW}|\s+>\s+(?!${QUANTITY}(?![\p{L}\d]))`, "u");
-// Two or more bare `>` and no other arrow is a chain (`HD > 4K > 8K`), so every `>` splits. Not when
-// a quantity runs on into more words (`RAM > 5GB and disk > 10GB`): that's a condition. A line that
-// uses `->` keeps its bare `>` as comparisons (`Plan -> Check count > 0 -> Ship`).
+const SEPARATOR = new RegExp(String.raw`${ARROW}|\s+>\s+(?:(?=${ORDINAL})|(?!${QUANTITY}(?![\p{L}\d])))`, "u");
+// Two or more bare `>` and no other arrow is a chain (`HD > 4K > 8K`, `Setup > 4K HDMI > Done`), so
+// every `>` splits. Not when a quantity after a `>` joins another condition (`RAM > 5GB and disk >
+// 10GB`). A line that uses `->` keeps its bare `>` as comparisons (`Plan -> Check count > 0 -> Ship`).
 const CHAIN = new RegExp(String.raw`${ARROW}|\s+>\s+`, "u");
-const CONDITION = new RegExp(String.raw`^${QUANTITY}(?![\p{L}\d])\s+\S`, "u");
+const CONDITION = new RegExp(String.raw`^${QUANTITY}(?![\p{L}\d])\s+(?:and|or|&&|\|\|)\s`, "iu");
 const isChain = (line: string) => {
   const pieces = line.split(/\s+>\s+/);
-  return pieces.length > 2 && !new RegExp(ARROW, "u").test(line) && !pieces.some((p) => CONDITION.test(p));
+  return pieces.length > 2 && !new RegExp(ARROW, "u").test(line) && !pieces.slice(1).some((p) => CONDITION.test(p));
 };
 
 /** Steps come from `A > B -> C → D` on one line, or one step per line (which can chain too). */
