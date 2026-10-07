@@ -137,6 +137,19 @@ test("failures say why without exposing the login payload", async () => {
   }
 });
 
+test("a login says when something stopped pass-cli, rather than a vague failure", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+  const pid = savedPid(dir);
+  process.kill(pid, "SIGKILL");
+  await waitUntil(() => !isProcessRunning(pid));
+  await sleep(50);
+
+  const status = await checkDetachedLogin(dir, loggedOut);
+  assert.equal(status.state, "failed");
+  if (status.state === "failed") assert.match(status.error.message, /stopped \(SIGKILL\)/);
+});
+
 test("a running login is waiting for the browser, and canceling it stops pass-cli", async () => {
   const dir = loginDir();
   await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);

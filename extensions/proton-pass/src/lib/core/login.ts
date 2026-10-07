@@ -78,18 +78,28 @@ async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
 /** The output holds the login URL and its payload, so the files go as soon as the login is over. */
 const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true });
 
-/** Why the login failed, from pass-cli's output, leaving out the login URL and its payload. */
+/** What pass-cli prints on the way, which explains no failure. */
+const PROGRESS_LINE = /^(please open the following url|waiting for authentication|web authentication complete)/i;
+
+/**
+ * Why the login failed, in pass-cli's words, leaving out the login URL, its payload and email addresses. Without any,
+ * pass-cli was stopped from outside: it prints an error whenever the login itself fails.
+ */
 function loginFailure(output: string, cliPath: string): PassCliError {
   const details = output
     .split("\n")
-    .filter((line) => !/https?:\/\/|payload=/i.test(line))
+    .map((line) => line.trim())
+    .filter((line) => line && !/https?:\/\/|payload=/i.test(line) && !PROGRESS_LINE.test(line))
+    .map((line) => line.replace(/[^\s@]+@[^\s@]+/g, "<email>"))
     .join("\n");
+  if (!details) return new PassCliError("pass-cli was stopped before the login completed.", "unknown");
   const error = normalizeCliExecutionError(
     Object.assign(new Error("pass-cli login failed"), { stderr: details }),
     cliPath,
   );
   if (error.type === "not_authenticated") return new PassCliError("The login didn't complete. Try again.", error.type);
-  return error.type === "unknown" ? new PassCliError("pass-cli login failed.", "unknown") : error;
+  if (error.type !== "unknown") return error;
+  return new PassCliError(`pass-cli login failed: ${details.replace(/\s+/g, " ").slice(0, 300)}`, "unknown");
 }
 
 /**
@@ -124,10 +134,11 @@ export async function startDetachedLogin(
   child.unref();
   const pid = child.pid as number;
   ownLogins.set(pid, child);
-  // The exit code tells success from failure, if the extension is still running when pass-cli exits.
-  child.once("exit", (code) => {
+  // The exit code tells success from failure, if the extension is still running when pass-cli exits. A signal, in
+  // its place, tells that something stopped pass-cli.
+  child.once("exit", (code, signal) => {
     ownLogins.delete(pid);
-    void writeFile(join(dir, EXIT_CODE_FILE), String(code)).catch(() => undefined);
+    void writeFile(join(dir, EXIT_CODE_FILE), String(code ?? signal)).catch(() => undefined);
   });
 
   const startedAt = Date.now();
@@ -180,6 +191,10 @@ export async function checkDetachedLogin(
     // After this long, only a process started here is surely still pass-cli.
     ownLogins.get(saved.pid)?.kill();
     return { state: "failed", error: new PassCliError("The login timed out. Try again.", "timeout") };
+  }
+  if (/^SIG/.test(exitCode)) {
+    const error = new PassCliError(`pass-cli was stopped (${exitCode}) before the login completed.`, "unknown");
+    return { state: "failed", error };
   }
   const hasSucceeded = exitCode ? exitCode === "0" : await isLoggedIn();
   return hasSucceeded ? { state: "succeeded" } : { state: "failed", error: loginFailure(output, "pass-cli") };
