@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bose-noise-cancelling",
+  "title": "Bose Noise Cancelling",
+  "description": "Switch noise cancelling on Bose QuietComfort 35 II headphones",
+  "icon": "icon.png",
+  "author": "eric-ostholm",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Noise Cancelling",
+      "subtitle": "Bose",
+      "description": "Switch noise cancelling between high and off",
+      "mode": "no-view"
+    },
+    {
+      "name": "high",
+      "title": "Set Noise Cancelling to High",
+      "subtitle": "Bose",
+      "description": "Set noise cancelling to the strongest level",
+      "mode": "no-view"
+    },
+    {
+      "name": "low",
+      "title": "Set Noise Cancelling to Low",
+      "subtitle": "Bose",
+      "description": "Set noise cancelling to the low level",
+      "mode": "no-view"
+    },
+    {
+      "name": "off",
+      "title": "Turn off Noise Cancelling",
+      "subtitle": "Bose",
+      "description": "Turn noise cancelling off",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
