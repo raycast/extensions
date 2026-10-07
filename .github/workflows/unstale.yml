@@ -17,8 +17,11 @@ permissions:
 jobs:
   unstale:
     runs-on: ubuntu-latest
+    # Skip events caused by raycastbot itself, otherwise the stale comment it posts
+    # right after labelling would immediately trigger this job and strip the label again.
     if: >-
       github.repository == 'raycast/extensions' &&
+      github.actor != 'raycastbot' &&
       (
         contains(github.event.pull_request.labels.*.name, 'status: stalled') ||
         (github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'status: stalled'))
