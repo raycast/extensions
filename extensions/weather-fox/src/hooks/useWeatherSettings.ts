@@ -121,7 +121,10 @@ export function useWeatherSettings(): WeatherSettings {
       refreshMenuBar();
     },
     theme,
-    setTheme,
+    setTheme: (t) => {
+      setTheme(t);
+      refreshMenuBar(); // its Copy Forecast Image renders with the theme
+    },
     view,
     setView,
     forecastDays,

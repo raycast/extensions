@@ -103,15 +103,18 @@ async function rasterize(svg: string): Promise<{ png: string; dir: string }> {
 /**
  * Filename-safe form of a place-derived name. Geocoder strings can carry
  * control characters, leading dots, or be far longer than a filename allows.
+ * The extension is kept intact; only the stem is shortened.
  */
 function safeFileName(name: string): string {
-  const base = name
+  const dot = name.lastIndexOf(".");
+  const ext = dot > 0 ? name.slice(dot).replace(/[^\w.]+/g, "") : "";
+  const stem = (dot > 0 ? name.slice(0, dot) : name)
     .normalize("NFKD")
     .replace(/[^\w.-]+/g, "-")
     .replace(/^[.-]+/, "")
     .replace(/-+/g, "-")
-    .slice(0, 80);
-  return base || "weather";
+    .slice(0, 80 - ext.length);
+  return (stem || "weather") + ext;
 }
 
 /** Copy into ~/Downloads without overwriting; appends -2, -3, … on collisions. */

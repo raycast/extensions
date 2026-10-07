@@ -115,10 +115,79 @@ export function geocodeUrl(query: string): string {
   return `https://geocoding-api.open-meteo.com/v1/search?${params}`;
 }
 
+/** Postal abbreviations people type after a comma ("manchester, nh"), keyed by the region name the geocoder returns. */
+const REGION_ABBREVIATIONS: Record<string, string> = {
+  // United States
+  alabama: "al",
+  alaska: "ak",
+  arizona: "az",
+  arkansas: "ar",
+  california: "ca",
+  colorado: "co",
+  connecticut: "ct",
+  delaware: "de",
+  "district of columbia": "dc",
+  florida: "fl",
+  georgia: "ga",
+  hawaii: "hi",
+  idaho: "id",
+  illinois: "il",
+  indiana: "in",
+  iowa: "ia",
+  kansas: "ks",
+  kentucky: "ky",
+  louisiana: "la",
+  maine: "me",
+  maryland: "md",
+  massachusetts: "ma",
+  michigan: "mi",
+  minnesota: "mn",
+  mississippi: "ms",
+  missouri: "mo",
+  montana: "mt",
+  nebraska: "ne",
+  nevada: "nv",
+  "new hampshire": "nh",
+  "new jersey": "nj",
+  "new mexico": "nm",
+  "new york": "ny",
+  "north carolina": "nc",
+  "north dakota": "nd",
+  ohio: "oh",
+  oklahoma: "ok",
+  oregon: "or",
+  pennsylvania: "pa",
+  "rhode island": "ri",
+  "south carolina": "sc",
+  "south dakota": "sd",
+  tennessee: "tn",
+  texas: "tx",
+  utah: "ut",
+  vermont: "vt",
+  virginia: "va",
+  washington: "wa",
+  "west virginia": "wv",
+  wisconsin: "wi",
+  wyoming: "wy",
+  "puerto rico": "pr",
+  // Canada
+  alberta: "ab",
+  "british columbia": "bc",
+  manitoba: "mb",
+  "new brunswick": "nb",
+  "newfoundland and labrador": "nl",
+  "nova scotia": "ns",
+  ontario: "on",
+  "prince edward island": "pe",
+  quebec: "qc",
+  saskatchewan: "sk",
+};
+
 /**
  * Narrow results using the comma-separated qualifiers the user typed, e.g.
  * "noe valley, san francisco, california" keeps results whose region fields
- * match "san francisco" and "california".
+ * match "san francisco" and "california". A qualifier may also be a postal
+ * abbreviation of the region ("manchester, nh"), matched exactly.
  */
 export function filterGeoResults(results: GeoResult[], query: string): GeoResult[] {
   const qualifiers = query
@@ -132,7 +201,11 @@ export function filterGeoResults(results: GeoResult[], query: string): GeoResult
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    return qualifiers.every((q) => haystack.includes(q));
+    const abbreviations = [r.admin1, r.admin2]
+      .filter((s): s is string => Boolean(s))
+      .map((s) => REGION_ABBREVIATIONS[s.toLowerCase()])
+      .filter(Boolean);
+    return qualifiers.every((q) => haystack.includes(q) || abbreviations.includes(q));
   });
 }
 
