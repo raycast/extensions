@@ -10,6 +10,8 @@ const expectedArgs = {
   "login-bad-host": ["login"],
   "login-garbage": ["login"],
   "login-hang": ["login"],
+  "login-wait": ["login"],
+  "login-url-fail": ["login"],
   "login-fail": ["login"],
   "login-fail-unknown": ["login"],
   "malformed-json": ["vault", "list", "--output", "json"],
@@ -111,6 +113,22 @@ switch (mode) {
   case "login-hang":
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
+    break;
+  case "login-wait":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-url-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => {
+      console.error("Error: This operation requires an authenticated client");
+      process.exitCode = 1;
+    }, 50);
     break;
   case "login-fail":
     console.error("Error: This operation requires an authenticated client");

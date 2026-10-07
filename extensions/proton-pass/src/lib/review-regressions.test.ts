@@ -1274,14 +1274,63 @@ test("Check Again in Search Items loads with a spinner, without the ended sessio
   harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
   const notLoggedIn = render();
-  assert.equal(typeof notLoggedIn.props.onCheckAgain, "function");
+  assert.equal(typeof notLoggedIn.props.reload, "function");
 
   isLoggedIn = true;
-  const checking = (notLoggedIn.props.onCheckAgain as () => Promise<void>)();
+  const checking = (notLoggedIn.props.reload as () => Promise<void>)();
   const list = render();
   assert.equal(list.props.isLoading, true);
   assert.equal(((list.props.searchBarAccessory as Element).props.vaults as unknown[]).length, 0);
 
   await checking;
   assert.deepEqual(render().props.items, [item]);
+});
+
+test("Login with Browser shows what's left to do, then reloads once the login succeeded", async () => {
+  const harness = hookHarness();
+  const url = "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+  const statuses: unknown[] = [{ state: "none" }, { state: "succeeded" }];
+  let reloads = 0;
+  const { NotLoggedInView, LoginScreen } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => undefined,
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => url,
+      checkBrowserLogin: async () => statuses.shift(),
+      cancelBrowserLogin: async () => undefined,
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const screen = () => LoginScreen(harness.render(NotLoggedInView, { reload: () => reloads++ }).props);
+  // The empty view holds its actions in a prop rather than in its children.
+  const tree = (element: unknown): Element["props"][] =>
+    actions(element).flatMap((props) => [props, ...(props.actions ? tree(props.actions) : [])]);
+  const action = (title: string) => tree(screen()).find((props) => props.title === title);
+
+  screen();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  await (action("Login with Browser")?.onAction as () => Promise<void>)();
+
+  const emptyView = tree(screen()).find((props) => "description" in props);
+  assert.equal(emptyView?.title, "Finish Logging In in Your Browser");
+  assert.equal(action("Open Login Page Again")?.url, url);
+  assert.equal(reloads, 0);
+
+  // The view checks on the login while it waits.
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(reloads, 1);
 });

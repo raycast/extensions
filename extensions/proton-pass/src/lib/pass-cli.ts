@@ -1,16 +1,17 @@
 import { environment, getPreferenceValues, open } from "@raycast/api";
 import { homedir } from "node:os";
-import { delimiter } from "node:path";
+import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
 import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
-import { runBrowserLogin } from "./core/login";
+import { BrowserLoginStatus, cancelDetachedLogin, checkDetachedLogin, startDetachedLogin } from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
 import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
 const DEFAULT_CLI_COMMAND = "pass-cli";
-const LOGIN_TIMEOUT_MS = 10 * 60_000;
+/** How long pass-cli may take to print the login URL. */
+const LOGIN_URL_TIMEOUT_MS = 30_000;
 type CliPathPreferenceValues = { cliPath?: string };
 
 let mockCacheCleared = false;
@@ -66,22 +67,37 @@ async function getAdapter(): Promise<PassCliAdapter> {
   );
 }
 
-export async function loginWithBrowser(): Promise<void> {
+/** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
+const loginDir = () => join(environment.supportPath, "login");
+
+/**
+ * Starts a browser login and opens its page. The login keeps going if Raycast closes meanwhile: checkBrowserLogin()
+ * follows it. Returns the page's URL, or nothing when there's nothing to wait for.
+ */
+export async function startBrowserLogin(): Promise<string | undefined> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
-    return;
+    return undefined;
   }
 
   const cliPath = await getCliPath();
-  await runBrowserLogin(
-    { file: cliPath, args: [] },
-    {
-      openUrl: (url) => open(url),
-      timeoutMs: LOGIN_TIMEOUT_MS,
-    },
-  );
+  const url = await startDetachedLogin({ file: cliPath, args: [] }, loginDir(), LOGIN_URL_TIMEOUT_MS);
+  await open(url);
+  return url;
+}
+
+/** Where the browser login is: still waiting for the browser, logged in, or failed. */
+export async function checkBrowserLogin(): Promise<BrowserLoginStatus> {
+  if (USE_MOCK_DATA) return { state: "none" };
+
+  const status = await checkDetachedLogin(loginDir(), checkAuth);
   // The new session may belong to another account, so don't show the previous session's cached items.
-  await clearCache();
+  if (status.state === "succeeded") await clearCache();
+  return status;
+}
+
+export async function cancelBrowserLogin(): Promise<void> {
+  if (!USE_MOCK_DATA) await cancelDetachedLogin(loginDir());
 }
 
 export async function checkAuth(): Promise<boolean> {

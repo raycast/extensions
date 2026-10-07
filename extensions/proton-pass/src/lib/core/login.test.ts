@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
-import { resolve } from "node:path";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import test from "node:test";
-import { extractLoginUrl, runBrowserLogin } from "./login";
+import {
+  BrowserLoginStatus,
+  cancelDetachedLogin,
+  checkDetachedLogin,
+  extractLoginUrl,
+  isProcessRunning,
+  startDetachedLogin,
+} from "./login";
 import { PassCliError } from "../types";
 
 const LOGIN_URL = "https://account.proton.me/desktop/login?app=pass#payload=fake%2Fpayload%3Dwith-encoded-data";
@@ -12,6 +21,31 @@ function fakeCommand(mode: string) {
     file: process.execPath,
     args: [resolve(process.cwd(), "src/lib/testing/fake-pass-cli.mjs"), mode],
   };
+}
+
+const loginDir = () => join(mkdtempSync(join(tmpdir(), "pass-login-")), "login");
+const loggedOut = async () => false;
+const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
+async function waitUntil(condition: () => boolean): Promise<void> {
+  for (let tries = 0; !condition() && tries < 100; tries++) await sleep(20);
+}
+
+/** Checks the login until pass-cli has exited. */
+async function settle(dir: string, isLoggedIn = loggedOut): Promise<BrowserLoginStatus> {
+  for (let tries = 0; tries < 100; tries++) {
+    const status = await checkDetachedLogin(dir, isLoggedIn);
+    if (status.state !== "waiting") return status;
+    await sleep(20);
+  }
+  throw new Error("The login is still running");
+}
+
+const savedPid = (dir: string) => (JSON.parse(readFileSync(join(dir, "login.json"), "utf8")) as { pid: number }).pid;
+
+function assertNoPayload(error: unknown) {
+  assert.ok(error instanceof PassCliError);
+  assert.doesNotMatch(error.message, /payload|TOKEN|https?:/i);
 }
 
 test("extractLoginUrl returns the HTTPS Proton account URL from CLI output", () => {
@@ -43,88 +77,111 @@ test("extractLoginUrl rejects a Proton hostname on a nonstandard port", () => {
   assert.equal(extractLoginUrl("https://account.proton.me:444/desktop/login#payload=token"), null);
 });
 
-test("runBrowserLogin opens the Proton login URL once and resolves on success", async () => {
-  const opened: string[] = [];
-
-  await runBrowserLogin(fakeCommand("login-ok"), {
-    openUrl: async (url) => {
-      opened.push(url);
-    },
-    timeoutMs: 1_000,
-  });
-
-  assert.deepEqual(opened, [FAKE_LOGIN_URL]);
+test("isProcessRunning tells running processes from gone ones", () => {
+  assert.equal(isProcessRunning(process.pid), true);
+  assert.equal(isProcessRunning(999_999), false);
 });
 
-test("runBrowserLogin waits for a complete URL split across stdout chunks", async () => {
-  const opened: string[] = [];
+test("a login started on its own gives the Proton URL, then succeeds once pass-cli exits", async () => {
+  const dir = loginDir();
+  assert.equal(await startDetachedLogin(fakeCommand("login-ok"), dir, 2_000), FAKE_LOGIN_URL);
 
-  await runBrowserLogin(fakeCommand("login-split-url"), {
-    openUrl: async (url) => {
-      opened.push(url);
-    },
-    timeoutMs: 1_000,
-  });
+  assert.deepEqual(await settle(dir), { state: "succeeded" });
+  // The output held the login URL and its payload.
+  assert.equal(existsSync(dir), false);
+});
 
-  assert.deepEqual(opened, [FAKE_LOGIN_URL]);
+test("a login waits for a complete URL split across writes", async () => {
+  const dir = loginDir();
+  assert.equal(await startDetachedLogin(fakeCommand("login-split-url"), dir, 2_000), FAKE_LOGIN_URL);
+  assert.deepEqual(await settle(dir), { state: "succeeded" });
 });
 
 for (const mode of ["login-bad-host", "login-garbage"]) {
-  test(`runBrowserLogin never opens a URL for ${mode} output`, async () => {
-    const opened: string[] = [];
-
-    await runBrowserLogin(fakeCommand(mode), {
-      openUrl: async (url) => {
-        opened.push(url);
-      },
-      timeoutMs: 1_000,
-    });
-
-    assert.deepEqual(opened, []);
+  test(`a login fails to start when pass-cli exits without a Proton URL (${mode})`, async () => {
+    const dir = loginDir();
+    await assert.rejects(startDetachedLogin(fakeCommand(mode), dir, 2_000), PassCliError);
+    assert.equal(existsSync(dir), false);
   });
 }
 
-test("runBrowserLogin times out and kills a hanging child", async () => {
-  await assert.rejects(
-    runBrowserLogin(fakeCommand("login-hang"), {
-      openUrl: async () => undefined,
-      timeoutMs: 300,
-    }),
-    (error: unknown) => {
-      assert.ok(error instanceof PassCliError);
-      assert.equal(error.type, "timeout");
-      assert.doesNotMatch(error.message, /payload=|FAKE_PAYLOAD_TOKEN/);
-      return true;
-    },
-  );
+test("a login that pass-cli doesn't start in time is stopped", async () => {
+  const dir = loginDir();
+  await assert.rejects(startDetachedLogin(fakeCommand("login-hang"), dir, 300), (error: unknown) => {
+    assert.ok(error instanceof PassCliError);
+    assert.equal(error.type, "timeout");
+    return true;
+  });
+  assert.equal(existsSync(dir), false);
 });
 
-test("runBrowserLogin classifies CLI failure without exposing payload data", async () => {
-  await assert.rejects(
-    runBrowserLogin(fakeCommand("login-fail"), {
-      openUrl: async () => undefined,
-      timeoutMs: 1_000,
-    }),
-    (error: unknown) => {
-      assert.ok(error instanceof PassCliError);
-      assert.equal(error.type, "not_authenticated");
-      assert.doesNotMatch(error.message, /payload=|FAIL_PAYLOAD_TOKEN/);
-      return true;
-    },
-  );
+test("failures say why without exposing the login payload", async () => {
+  await assert.rejects(startDetachedLogin(fakeCommand("login-fail"), loginDir(), 2_000), (error: unknown) => {
+    assertNoPayload(error);
+    assert.equal((error as PassCliError).type, "not_authenticated");
+    return true;
+  });
+  await assert.rejects(startDetachedLogin(fakeCommand("login-fail-unknown"), loginDir(), 2_000), (error: unknown) => {
+    assertNoPayload(error);
+    assert.equal((error as PassCliError).type, "unknown");
+    return true;
+  });
+
+  const dir = loginDir();
+  assert.equal(await startDetachedLogin(fakeCommand("login-url-fail"), dir, 2_000), FAKE_LOGIN_URL);
+  const status = await settle(dir);
+  assert.equal(status.state, "failed");
+  if (status.state === "failed") {
+    assertNoPayload(status.error);
+    assert.equal(status.error.type, "not_authenticated");
+  }
 });
 
-test("runBrowserLogin redacts payload data from an unknown CLI failure", async () => {
-  await assert.rejects(
-    runBrowserLogin(fakeCommand("login-fail-unknown"), {
-      openUrl: async () => undefined,
-      timeoutMs: 1_000,
-    }),
-    (error: unknown) => {
-      assert.ok(error instanceof PassCliError);
-      assert.equal(error.type, "unknown");
-      assert.doesNotMatch(error.message, /payload=|UNKNOWN_PAYLOAD_TOKEN/);
-      return true;
-    },
-  );
+test("a running login is waiting for the browser, and canceling it stops pass-cli", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+  const pid = savedPid(dir);
+
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "waiting", url: FAKE_LOGIN_URL });
+  await cancelDetachedLogin(dir);
+  await waitUntil(() => !isProcessRunning(pid));
+  assert.equal(isProcessRunning(pid), false);
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "none" });
+});
+
+test("when the extension missed pass-cli's exit, the session tells whether the login succeeded", async () => {
+  for (const isLoggedIn of [true, false]) {
+    const dir = loginDir();
+    await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+    const pid = savedPid(dir);
+    process.kill(pid);
+    await waitUntil(() => !isProcessRunning(pid));
+    await sleep(50);
+    // As if Raycast had stopped the extension before pass-cli exited.
+    rmSync(join(dir, "exit-code.txt"), { force: true });
+
+    const status = await checkDetachedLogin(dir, async () => isLoggedIn);
+    assert.equal(status.state, isLoggedIn ? "succeeded" : "failed");
+  }
+});
+
+test("a login past the timeout fails while pass-cli still runs, and is forgotten once it's gone", async () => {
+  const running = loginDir();
+  await startDetachedLogin(fakeCommand("login-wait"), running, 2_000);
+  const pid = savedPid(running);
+  await sleep(5);
+
+  const status = await checkDetachedLogin(running, loggedOut, 0);
+  assert.equal(status.state, "failed");
+  if (status.state === "failed") assert.equal(status.error.type, "timeout");
+  // Started by this process, so it's still surely pass-cli and is stopped.
+  await waitUntil(() => !isProcessRunning(pid));
+  assert.equal(isProcessRunning(pid), false);
+
+  const ended = loginDir();
+  await startDetachedLogin(fakeCommand("login-ok"), ended, 2_000);
+  const endedPid = savedPid(ended);
+  await waitUntil(() => !isProcessRunning(endedPid));
+  await sleep(5);
+  assert.deepEqual(await checkDetachedLogin(ended, loggedOut, 0), { state: "none" });
 });

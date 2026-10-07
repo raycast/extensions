@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { listVaults } from "./lib/pass-cli";
 import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
-import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
+import { NotLoggedInView } from "./lib/login-view";
 import { getCachedVaults, setCachedVaults } from "./lib/cache";
 import { createRequestTracker } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
@@ -110,7 +110,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} onCheckAgain={loadVaults} />;
+    return <NotLoggedInView reload={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {
