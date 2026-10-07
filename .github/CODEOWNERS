@@ -153,6 +153,7 @@
 /extensions/asafamos-accessibility-scanner                          @asafamos
 /extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec @xmok @abcd-ca @nulltrope @0xdhrv
 /extensions/ascii-art-wallpaper                                     @theodaguier @alexibuild
+/extensions/ascii-kit                                               @villemikkola
 /extensions/asciimath-to-latex-converter                            @Nebow
 /extensions/aside                                                   @asifk987
 /extensions/asoiaf                                                  @xmok
@@ -988,7 +989,7 @@
 /extensions/framer-motion                                           @madebyankur
 /extensions/frankerfacez                                            @davidchalifoux
 /extensions/frc-programming                                         @helloGithub326
-/extensions/freeagent                                               @SteveEdson
+/extensions/freeagent                                               @SteveEdson @purplespider
 /extensions/freedns                                                 @xmok
 /extensions/freesound                                               @j3lte
 /extensions/freetogame                                              @alexibuild
@@ -1225,6 +1226,7 @@
 /extensions/horoscope                                               @xmok
 /extensions/host-io                                                 @xmok
 /extensions/host-switch                                             @ewgenius @xmok
+/extensions/hostbeam                                                @PunkAbeat
 /extensions/hostloc                                                 @J3n5en
 /extensions/hotcorner                                               @Makiclin
 /extensions/hotel-manager                                           @yicone
@@ -1923,6 +1925,7 @@
 /extensions/obsidian-smart-capture                                  @trillhause @Jimmy-b36
 /extensions/obsidian-tasks                                          @ozencb @ElFitaFlores @xmok @gg-amzn @itstongy
 /extensions/oci                                                     @xmok
+/extensions/octarine                                                @aerz
 /extensions/octoprint                                               @mSarheed
 /extensions/octopus-energy                                          @mike182uk
 /extensions/odesli                                                  @anned20 @0xdhrv
@@ -3092,6 +3095,7 @@
 /extensions/upcoming-holidays                                       @rodrigouroz @0xdhrv
 /extensions/update-clash-subscription                               @JakeLaoyu
 /extensions/uplabs                                                  @gebeto
+/extensions/upload-post                                             @mutonby
 /extensions/uploaderx                                               @SciSaif
 /extensions/uploadkit                                               @drumst0ck
 /extensions/uploadthing                                             @juliusmarminge @xmok @TakenMC
