@@ -7,6 +7,7 @@ interface Tokens {
   refreshToken?: string;
 }
 const stores = new Map<string, Tokens>();
+const credentialReads: string[] = [];
 const requests: Array<{
   endpoint: string;
   clientId: string;
@@ -15,6 +16,7 @@ const requests: Array<{
 }> = [];
 let browserCount = 0;
 let mode: "betterauth" | "workos" = "betterauth";
+let workosIssuer = "https://scholarly-hay-77.authkit.app";
 let tokenFailure = false;
 let tokenOutage = false;
 let malformedToken = false;
@@ -48,6 +50,7 @@ mock.module("@raycast/api", () => ({
         this.options = options;
       }
       getTokens() {
+        credentialReads.push(this.options.providerId);
         return Promise.resolve(stores.get(this.options.providerId));
       }
       removeTokens() {
@@ -85,10 +88,11 @@ const json = (value: unknown, status = 200) =>
 const transport = ((input: RequestInfo | URL, init?: RequestInit) => {
   const url = String(input);
   const issuer =
+    mode === "betterauth" ? "https://app.teakvault.com" : workosIssuer;
+  const client =
     mode === "betterauth"
-      ? "https://app.teakvault.com"
-      : "https://scholarly-hay-77.authkit.app";
-  const client = mode === "betterauth" ? "teak-raycast" : "client_raycast_dev";
+      ? "teak-raycast"
+      : "client_01M47GV3CYKFW0H78W0XYKGTM5";
   if (url.includes("oauth-protected-resource")) {
     return Promise.resolve(
       json({
@@ -165,11 +169,13 @@ beforeEach(async () => {
     await raycastLocalStorageMock.removeItem(key);
   }
   stores.clear();
+  credentialReads.length = 0;
   requests.length = 0;
   toasts.length = 0;
   posts.length = 0;
   browserCount = 0;
   mode = "betterauth";
+  workosIssuer = "https://scholarly-hay-77.authkit.app";
   tokenFailure = false;
   tokenOutage = false;
   malformedToken = false;
@@ -198,7 +204,7 @@ test("WorkOS binds PKCE and token exchange to the REST resource and dynamic clie
   expect(requests[0].endpoint).toBe(
     "https://scholarly-hay-77.authkit.app/authorize",
   );
-  expect(requests[0].clientId).toBe("client_raycast_dev");
+  expect(requests[0].clientId).toBe("client_01M47GV3CYKFW0H78W0XYKGTM5");
   expect(requests[0].scope).toBe("openid profile email offline_access");
   expect(requests[0].extraParameters.resource).toBe(
     "https://teakvault.com/api",
@@ -251,7 +257,7 @@ test("failed refresh refetches mode and never sends the old token to a new issue
     }
     return firstTransport(input, init);
   }) as typeof fetch;
-  expect(await oauth.getStoredTeakAccessToken()).toBeNull();
+  await expect(oauth.getStoredTeakAccessToken()).rejects.toThrow();
   expect(await oauth.hasStoredTeakSession()).toBe(false);
   expect(posts.map((post) => post.url)).toEqual([
     "https://app.teakvault.com/token",
@@ -461,7 +467,9 @@ test.each([204, 503])(
     expect(refreshes[0].url).toBe(
       "https://scholarly-hay-77.authkit.app/oauth2/token",
     );
-    expect(refreshes[0].body.get("client_id")).toBe("client_raycast_dev");
+    expect(refreshes[0].body.get("client_id")).toBe(
+      "client_01M47GV3CYKFW0H78W0XYKGTM5",
+    );
     expect(refreshes[0].body.get("refresh_token")).toBe("saved-refresh");
     expect(refreshes[0].body.get("resource")).toBe("https://teakvault.com/api");
     expect(browserCount).toBe(0);
@@ -636,7 +644,7 @@ test("local-only Sign Out action warns that other installations may remain conne
 });
 
 test.each([400, 401])(
-  "malformed HTTP %i refresh replies request sign-in without forgetting credentials",
+  "malformed HTTP %i refresh replies preserve credentials without browser replacement",
   async (status) => {
     mode = "workos";
     await oauth.authorizeTeak();
@@ -647,7 +655,13 @@ test.each([400, 401])(
       isExpired: () => true,
     };
     stores.set(key, saved);
-    for (const body of [null, "", "not-json", "x".repeat(70 * 1024)]) {
+    for (const body of [
+      null,
+      "",
+      "not-json",
+      '{"error":"invalid_client"}',
+      "x".repeat(70 * 1024),
+    ]) {
       globalThis.fetch = (async (input, init) => {
         if (
           String(input).endsWith("/oauth2/token") &&
@@ -659,7 +673,8 @@ test.each([400, 401])(
           return new Response(null, { status: 401 });
         return transport(input, init);
       }) as typeof fetch;
-      expect(await oauth.getStoredTeakAccessToken()).toBeNull();
+      await expect(oauth.getStoredTeakAccessToken()).rejects.toThrow();
+      await expect(oauth.authorizeTeak()).rejects.toThrow();
       expect(stores.get(key)).toBe(saved);
       expect(browserCount).toBe(1);
       await expect(oauth.signOutTeak()).rejects.toThrow(
@@ -667,8 +682,74 @@ test.each([400, 401])(
       );
       expect(stores.get(key)).toBe(saved);
     }
-    expect(await oauth.authorizeTeak()).toBe("access-new");
-    expect(browserCount).toBe(2);
-    expect(stores.get(key)?.refreshToken).toBe("refresh-new");
+    await expect(oauth.authorizeTeak()).rejects.toThrow();
+    expect(browserCount).toBe(1);
+    expect(stores.get(key)).toBe(saved);
+  },
+);
+
+test("current discovered replacement WorkOS issuer signs out its exact saved namespace", async () => {
+  mode = "workos";
+  workosIssuer = "https://replacement-teak.authkit.app";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  browserCount = 0;
+  posts.length = 0;
+  expect(await oauth.signOutTeak()).toBe("disconnected");
+  expect(stores.has(key)).toBe(false);
+  expect(posts).toHaveLength(1);
+  expect(posts[0].authorization).toBe("Bearer access-new");
+  expect(browserCount).toBe(0);
+});
+
+test("trusted historical WorkOS 401 clears locally without refreshing against the replacement provider", async () => {
+  mode = "workos";
+  await oauth.authorizeTeak();
+  const key = Array.from(stores.keys())[0];
+  stores.set(key, {
+    accessToken: "historical-expired",
+    refreshToken: "historical-refresh",
+    isExpired: () => true,
+  });
+  mode = "betterauth";
+  disconnectStatus = 401;
+  globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
+  const restarted = await import(
+    `../lib/oauth?historical-mismatch=${crypto.randomUUID()}`
+  );
+  posts.length = 0;
+  browserCount = 0;
+  expect(await restarted.signOutTeak()).toBe("local-only");
+  expect(stores.has(key)).toBe(false);
+  expect(posts).toHaveLength(1);
+  expect(posts[0].authorization).toBe("Bearer historical-expired");
+  expect(posts[0].body.has("refresh_token")).toBe(false);
+  expect(browserCount).toBe(0);
+});
+
+test.each([
+  ["https://attacker.authkit.app", "client_01M47GV3CYKFW0H78W0XYKGTM5"],
+  ["https://scholarly-hay-77.authkit.app", "client_attacker"],
+])(
+  "untrusted saved WorkOS pin %s never accesses its credential namespace",
+  async (issuer, clientId) => {
+    const apiBaseUrl = "https://teakvault.com/api/v1";
+    const providerId = `teak:${apiBaseUrl}|${issuer}|${clientId}`;
+    const key = `teak.oauth.provider:${encodeURIComponent(apiBaseUrl)}:${providerId}`;
+    const saved = {
+      accessToken: "untouched-access",
+      refreshToken: "untouched-refresh",
+      isExpired: () => true,
+    };
+    stores.set(providerId, saved);
+    await raycastLocalStorageMock.setItem(
+      key,
+      JSON.stringify({ apiBaseUrl, issuer, clientId, providerId }),
+    );
+    await expect(oauth.signOutTeak()).rejects.toThrow("metadata");
+    expect(credentialReads).not.toContain(providerId);
+    expect(stores.get(providerId)).toBe(saved);
+    expect(posts).toHaveLength(0);
+    expect(browserCount).toBe(0);
   },
 );

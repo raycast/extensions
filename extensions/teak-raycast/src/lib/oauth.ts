@@ -11,6 +11,7 @@ export class TeakDiscoveryError extends Error {
 
 class TeakSessionExpiredError extends Error {}
 class TeakRefreshRevokedError extends TeakSessionExpiredError {}
+class TeakHistoricalConnectionError extends Error {}
 
 interface Provider {
   auth: AuthDiscovery;
@@ -61,7 +62,10 @@ function savedProvider(auth: AuthDiscovery): SavedProvider {
       auth.primary === "betterauth" ? auth.revocationEndpoint : undefined,
   };
 }
-function validateSavedProvider(raw: unknown): SavedProvider {
+function validateSavedProvider(
+  raw: unknown,
+  current: AuthDiscovery,
+): SavedProvider {
   if (
     !raw ||
     typeof raw !== "object" ||
@@ -87,11 +91,31 @@ function validateSavedProvider(raw: unknown): SavedProvider {
   const expected = legacy
     ? "teak"
     : `teak:${raw.apiBaseUrl}|${raw.issuer}|${raw.clientId}`;
-  const knownWorkosIssuer = environment.isDevelopment
-    ? "https://optimistic-metaphor-12-reminiscent-kangaroo-59.authkit.app"
-    : "https://scholarly-hay-77.authkit.app";
+  const knownWorkos = environment.isDevelopment
+    ? {
+        apiBaseUrl: "https://reminiscent-kangaroo-59.convex.site/v1",
+        issuer:
+          "https://optimistic-metaphor-12-reminiscent-kangaroo-59.authkit.app",
+        clientId: "client_01M46CY5JTV80SYC820KWEGE3Z",
+      }
+    : {
+        apiBaseUrl: "https://teakvault.com/api/v1",
+        issuer: "https://scholarly-hay-77.authkit.app",
+        clientId: "client_01M47GV3CYKFW0H78W0XYKGTM5",
+      };
   const workos = raw.clientId.startsWith("client_");
-  if (workos && (raw.issuer !== knownWorkosIssuer || endpoint !== undefined)) {
+  const currentWorkos =
+    current.primary === "workos" &&
+    raw.issuer === current.issuer &&
+    raw.clientId === current.clients.raycast;
+  const historicalWorkos =
+    raw.apiBaseUrl === knownWorkos.apiBaseUrl &&
+    raw.issuer === knownWorkos.issuer &&
+    raw.clientId === knownWorkos.clientId;
+  if (
+    workos &&
+    (!(currentWorkos || historicalWorkos) || endpoint !== undefined)
+  ) {
     throw new Error("Saved WorkOS connection does not match this deployment");
   }
   if (
@@ -199,12 +223,11 @@ async function exchange(
   if (response.status === 429 || response.status >= 500) {
     throw new TeakDiscoveryError();
   }
-  // An HTTP rejection still requires sign-in even when its error body is
-  // unreadable. This does not prove revocation or permit local token deletion.
+  // Uncertain refresh failures must not trigger browser auth over saved tokens.
   const bodyError = (message: string) =>
-    response.ok
-      ? new Error(message)
-      : new TeakSessionExpiredError("Teak sign-in expired. Sign in again.");
+    !response.ok && params.grant_type !== "refresh_token"
+      ? new TeakSessionExpiredError("Teak sign-in expired. Sign in again.")
+      : new Error(message);
   const reader = response.body?.getReader();
   if (!reader) {
     throw bodyError("Invalid Teak sign-in response.");
@@ -245,7 +268,7 @@ async function exchange(
     ) {
       throw new TeakRefreshRevokedError("Teak refresh credential was revoked.");
     }
-    throw new TeakSessionExpiredError("Teak sign-in expired. Sign in again.");
+    throw bodyError("Teak token request was rejected. Try again.");
   }
   if (
     !raw ||
@@ -383,7 +406,7 @@ async function revokeStoredSession(): Promise<SignOutResult> {
     inFlightStoredToken,
     inFlightReauthorize,
   ]);
-  await getProvider();
+  const current = await getProvider();
   const saved = await LocalStorage.allItems();
   const records = new Map<string, SavedProvider>();
   if (!environment.isDevelopment) {
@@ -410,7 +433,7 @@ async function revokeStoredSession(): Promise<SignOutResult> {
       if (typeof value !== "string" || value.length > 8192) {
         throw new Error("Invalid saved Teak connection");
       }
-      const record = validateSavedProvider(JSON.parse(value));
+      const record = validateSavedProvider(JSON.parse(value), current.auth);
       if (key !== `${registryPrefix()}${record.providerId}`) {
         throw new Error("Saved connection namespace mismatch");
       }
@@ -460,13 +483,19 @@ async function revokeStoredSession(): Promise<SignOutResult> {
             signal: AbortSignal.timeout(10_000),
           });
         let response = await disconnect(token);
-        if (workos && response.status === 401 && tokens?.refreshToken) {
+        if (workos && response.status === 401) {
           const provider = await getProvider(true);
           if (
             providerKey(provider.auth) !==
             `${record.apiBaseUrl}|${record.issuer}|${record.clientId}`
           ) {
-            throw new Error("Saved connection belongs to another provider");
+            // This exact historical namespace is trusted, but refreshing it via
+            // the new provider would disclose credentials. Explicit Sign Out
+            // may clear it locally without claiming provider revocation.
+            throw new TeakHistoricalConnectionError();
+          }
+          if (!tokens?.refreshToken) {
+            throw new Error("Refresh credential is unavailable");
           }
           const renewed = await exchange(
             provider,
@@ -486,10 +515,16 @@ async function revokeStoredSession(): Promise<SignOutResult> {
           throw new Error("Revocation failed");
         }
       } catch (error) {
-        // The exact validated issuer rejected this refresh grant definitively.
-        // Clearing this namespace lets the person authorize again; other failures
-        // retain credentials because they do not prove remote invalidation.
-        if (!(workos && error instanceof TeakRefreshRevokedError)) {
+        // Only a definitive dead refresh grant or explicit historical-provider
+        // Sign Out permits local clearing. Neither claims remote revocation;
+        // uncertain failures retain their credentials.
+        if (
+          !(
+            workos &&
+            (error instanceof TeakRefreshRevokedError ||
+              error instanceof TeakHistoricalConnectionError)
+          )
+        ) {
           throw new Error(
             "Your credentials are still saved. Check your connection and try Sign Out again.",
           );
@@ -551,10 +586,7 @@ async function resolveStoredTeakAccessToken(): Promise<string | null> {
       tokens.refreshToken,
     );
   } catch (error) {
-    const refreshed = await getProvider(true);
-    if (providerKey(refreshed.auth) !== providerKey(provider.auth)) {
-      return null;
-    }
+    await refetchAfterFailure();
     if (error instanceof TeakSessionExpiredError) {
       return null;
     }

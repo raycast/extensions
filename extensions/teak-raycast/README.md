@@ -36,11 +36,11 @@ Prefer an API key? Open the extension preferences and paste a key from **Teak Se
 
 ## Troubleshooting
 
-- **Connection unavailable**: Check your connection and choose **Retry Connection**. Your saved sign-in stays available.
+- **Connection unavailable**: Check your connection and choose **Retry Connection**. Your saved sign-in stays available, including when a sign-in response cannot be read.
 - **Sign-in issues**: Open **Search Cards**, use **Sign Out**, then sign in again. If sign-out fails, your credentials stay saved so you can retry.
 - **Invalid key errors**: Update the API key in extension preferences using **Teak Settings → Security → API keys**.
 - **Rate limited errors**: wait briefly and retry.
 - **Network errors**: verify connectivity to `app.teakvault.com` and `teakvault.com/api`.
 
 To disconnect a connection from Teak, open **Settings → Security → Connected apps**.
-With WorkOS, a confirmed disconnect signs out Raycast across all its installations. Reconnecting can take about five minutes. If WorkOS already rejects your refresh credential, Raycast signs out only this Mac and tells you that other installations may remain connected. Manage those in **Settings → Security → Connected apps**.
+With WorkOS, a confirmed disconnect signs out Raycast across all its installations. Reconnecting can take about five minutes. If WorkOS rejects your saved sign-in, or Teak has switched away from its provider, Raycast signs out only this Mac and tells you that other installations may remain connected. Manage those in **Settings → Security → Connected apps**.
