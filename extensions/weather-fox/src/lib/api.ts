@@ -128,8 +128,11 @@ function initialsOf(name: string): string | undefined {
  * Narrow results using the comma-separated qualifiers the user typed, e.g.
  * "noe valley, san francisco, california" keeps results whose region fields
  * match "san francisco" and "california". A qualifier also matches the
- * initials of a multi-word region ("manchester, nh", "sydney, nsw"), which
- * works in any country without a table of abbreviations.
+ * initials of a multi-word state/province or country ("manchester, nh",
+ * "sydney, nsw", "london, uk"), which works in any country without a table of
+ * abbreviations. Counties (`admin2`/`admin3`) are deliberately excluded from
+ * the initials rule: two-word county names yield two-letter codes that collide
+ * with state abbreviations and would keep the wrong city.
  *
  * Qualifiers narrow, they never empty the list: when nothing matches (an
  * abbreviation we can't derive, a typo) the geocoder's population-ranked
@@ -144,9 +147,11 @@ export function filterGeoResults(results: GeoResult[], query: string): { results
     .filter((q) => q.length > 0);
   if (qualifiers.length === 0) return { results, relaxed: false };
   const narrowed = results.filter((r) => {
-    const regions = [r.admin1, r.admin2, r.admin3, r.country].filter((s): s is string => Boolean(s));
-    const haystack = [...regions, r.country_code, ...(r.postcodes ?? [])].filter(Boolean).join(" ").toLowerCase();
-    const initials = regions.map(initialsOf).filter(Boolean);
+    const haystack = [r.admin1, r.admin2, r.admin3, r.country, r.country_code, ...(r.postcodes ?? [])]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const initials = [r.admin1, r.country].filter((s): s is string => Boolean(s)).map(initialsOf);
     return qualifiers.every((q) => haystack.includes(q) || initials.includes(q));
   });
   return narrowed.length > 0 ? { results: narrowed, relaxed: false } : { results, relaxed: true };
