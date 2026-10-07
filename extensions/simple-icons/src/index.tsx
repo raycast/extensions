@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { setTimeout } from "node:timers/promises";
 import {
   Action,
   ActionPanel,
@@ -41,15 +40,15 @@ const itemDisplayColumns = {
 export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
-  const [icons, setIcons] = useState<IconData[]>([]);
+  const [iconPack, setIconPack] = useState<{ version: string; icons: IconData[] }>({ version: "", icons: [] });
+  const { version, icons } = iconPack;
   const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
-  const version = useVersion();
+  const requestedVersion = useVersion();
 
   useEffect(() => {
     const controller = new AbortController();
     const fetchIcons = async (version: string) => {
       setIsLoading(true);
-      setIcons([]);
 
       await showToast({
         style: Toast.Style.Animated,
@@ -57,45 +56,37 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       });
 
       if (controller.signal.aborted) return;
-      await cacheAssetPack(version, controller.signal).catch(async (error) => {
-        if (controller.signal.aborted) return;
-        await showFailureToast(error, { title: "Failed to cache asset pack" });
-        await setTimeout(1200);
-      });
+      await cacheAssetPack(version, controller.signal);
       if (controller.signal.aborted) return;
-      const json = await loadCachedJson(version).catch(() => {
-        return [];
-      });
+      const json = await loadCachedJson(version);
       if (controller.signal.aborted) return;
+      if (json.length === 0) throw new Error("Downloaded asset pack contains no icons");
       const icons = json.map((icon) => ({
         ...icon,
         slug: getIconSlug(icon, version),
       }));
 
-      setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
-      setIsLoading(false);
-
-      if (icons.length > 0) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: `${icons.length} icons loaded`,
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Unable to load icons",
-        });
-      }
-    };
-    if (version) {
-      fetchIcons(version).catch((error) => {
-        if (!controller.signal.aborted) showFailureToast(error, { title: "Failed to fetch icons" });
+      // Publish the icons and their file version together only after loading
+      // succeeds. A failed update leaves the working pack and actions intact.
+      setIconPack({ version, icons: shuffleOnStart ? arrayToShuffled(icons) : icons });
+      await showToast({
+        style: Toast.Style.Success,
+        title: `${icons.length} icons loaded`,
       });
+    };
+    if (requestedVersion) {
+      fetchIcons(requestedVersion)
+        .catch((error) => {
+          if (!controller.signal.aborted) showFailureToast(error, { title: "Failed to fetch icons" });
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setIsLoading(false);
+        });
     }
     return () => {
       controller.abort();
     };
-  }, [version]);
+  }, [requestedVersion]);
 
   const DefaultAction = actions[defaultDetailAction];
 

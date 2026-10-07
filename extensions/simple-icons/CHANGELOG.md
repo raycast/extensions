@@ -4,6 +4,7 @@
 
 - Check the selected icon package on every command launch and apply confirmed updates without restarting Raycast
 - Download the resolved package version to keep cached icon packs consistent
+- Keep the working icons and their version available if an update fails
 
 ## [Bugfix] - 2026-09-16
 
