@@ -927,6 +927,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "the-bridge",
+    title: "The Bridge",
+    description:
+      "Complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant: sign-in and sign-up pages, Google and Microsoft sign-in, magic links, passkeys, MFA and SSO; customer teams with email invites and roles; plans, prices and usage limits on Stripe; and feature flags per plan, customer or rule. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/thebridgedev/bridge-mcp/main/assets/logo-400.png",
+    homepage: "https://thebridge.dev/docs/ai-assistants/mcp/",
+    remoteUrl: "https://api.thebridge.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.thebridge.dev/mcp"],
+    },
+  },
+  {
     name: "thena",
     title: "Thena",
     description:

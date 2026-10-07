@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add The Bridge MCP Server] - {PR_MERGE_DATE}
+
+- Add The Bridge to the official registry: complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant. Remote Streamable HTTP server at https://api.thebridge.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
 ## [Update Hermoso MCP Server] - 2026-10-07
 
 - Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
