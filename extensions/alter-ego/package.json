@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alter-ego",
+  "title": "Alter Ego",
+  "description": "Run a different app or command per macOS user with one hotkey.",
+  "icon": "icon.png",
+  "author": "sedlacek-martin",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-for-current-user",
+      "title": "Run for Current User",
+      "description": "Do not run directly — launched automatically by your Alter Ego Quicklink.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "map",
+          "type": "text",
+          "required": true,
+          "placeholder": "auto-filled by your Quicklink"
+        }
+      ]
+    },
+    {
+      "name": "manage-alter-ego",
+      "title": "Manage Alter Ego",
+      "description": "Add, edit, or remove per-user mappings.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
