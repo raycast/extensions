@@ -1,6 +1,6 @@
 # Railway Changelog
 
-## [Services, Usage & Menu Bar] - {PR_MERGE_DATE}
+## [Services, Usage & Menu Bar] - 2026-10-07
 
 - Press Enter on a project to see its services with deployments, logs, variables, domains, and metrics
 - Redeploy, restart, or remove deployments without leaving Raycast
