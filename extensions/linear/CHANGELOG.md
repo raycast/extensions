@@ -1,5 +1,16 @@
 # Linear Changelog
 
+## [Simplify AI Tools] - 2026-10-07
+
+- Remove 17 older AI tools that overlapped with the newer `list-*`, `get-*`, and `save-*` tools, so Raycast AI picks the right tool more reliably.
+- **List Cycles**, **List Issue Statuses**, and **List Milestones** now work without a team or project and list across the workspace. **List Cycles** takes a team name, key, or ID.
+- **Get Status Updates** no longer requires `type`, and **Save Milestone** updates a milestone by ID without its project.
+- **Add Label** and **Remove Label** accept label names, and **Save Comment** can attach local files.
+- **Get Notifications** returns compact, paginated results and can return only unread notifications.
+- **List Issues** matches a status name such as "In Progress" across all teams when no team is given, instead of failing.
+- Fix **List Projects** and **List Releases** failing with "Argument Validation Error" when filtering by a status or stage name instead of an ID.
+- Clarify AI instructions and tool descriptions for choosing between the issue list, search, and filter tools.
+
 ## [Fix AI Tool Errors] - 2026-10-02
 
 - Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.

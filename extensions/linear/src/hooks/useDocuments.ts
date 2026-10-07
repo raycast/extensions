@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { getDocumentContent } from "../tools/get-document-content";
-import { DocumentEntity, getDocuments } from "../tools/get-documents";
+import { getDocumentContent } from "../api/getDocumentContent";
+import { DocumentEntity, getDocuments } from "../api/getDocuments";
 
 export function useDocuments(query: string = "", entity: DocumentEntity = { projectId: "" }) {
   const { data, error, isLoading, mutate } = useCachedPromise(getDocuments, [query, entity], {
