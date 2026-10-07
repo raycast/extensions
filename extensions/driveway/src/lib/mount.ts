@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import * as net from "node:net";
 import { promisify } from "node:util";
+import { normalizeHost } from "./share";
 import type { Protocol, Share } from "./share";
 
 const CONNECTION_TIMEOUT_MS = 2_000;
@@ -108,7 +109,7 @@ function normalize(host: string, path: string | undefined, family: MountFamily):
     .join("/");
 
   return {
-    host: host.trim().toLowerCase(),
+    host: normalizeHost(host).toLowerCase(),
     path: family === "smb" ? segments.toLowerCase() : segments,
   };
 }

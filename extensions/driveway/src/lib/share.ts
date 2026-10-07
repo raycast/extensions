@@ -46,21 +46,32 @@ export type Share = {
 // eslint-disable-next-line no-control-regex -- rejects control characters and Windows-reserved path characters
 const INVALID_PATH_SEGMENT = /[\x00-\x1f<>:"\\|?*]/;
 
+// A trailing dot makes a hostname absolute — "nas.example.com." is the same
+// machine as "nas.example.com" — so it is dropped rather than rejected. Every
+// place that compares hosts drops it too, or the same drive saved both ways
+// would count as two and neither would match the mount the other made.
+export function normalizeHost(host: string): string {
+  return host.trim().replace(/\.(?=(?::\d{1,5})?$)/, "");
+}
+
 // Each dot-separated label starts and ends alphanumeric, with hyphens allowed
-// inside. That rejects a half-typed address — "10.0.0.", "nas..local", "-nas"
-// — which the old pattern accepted and only failed much later, at mount time.
-// An optional ":port" is allowed, mainly for self-hosted WebDAV.
+// inside. That rejects a half-typed address — "nas..local", "-nas" — which the
+// old pattern accepted and only failed much later, at mount time. An optional
+// ":port" is allowed, mainly for self-hosted WebDAV.
 const HOST_LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?";
 export const HOST_PATTERN = new RegExp(`^${HOST_LABEL}(?:\\.${HOST_LABEL})*(?::\\d{1,5})?$`);
 
-// Four numeric labels can only be an IPv4 address, so hold them to one:
-// "10.0.0.999" passes the pattern above as a hostname but can never resolve.
 export function isValidHost(host: string): boolean {
-  if (!HOST_PATTERN.test(host)) return false;
+  const normalized = normalizeHost(host);
+  if (!HOST_PATTERN.test(normalized)) return false;
 
-  const octets = host.split(":")[0].split(".");
-  if (octets.length === 4 && octets.every((octet) => /^\d+$/.test(octet))) {
-    return octets.every((octet) => Number(octet) <= 255);
+  // Dotted numbers can only be an IPv4 address, so hold them to one: "10.0.0."
+  // and "10.0.0.999" both pass the pattern above as hostnames, and neither can
+  // ever resolve. A single number is left alone, since that is a label, not an
+  // address.
+  const octets = normalized.split(":")[0].split(".");
+  if (octets.length > 1 && octets.every((octet) => /^\d+$/.test(octet))) {
+    return octets.length === 4 && octets.every((octet) => Number(octet) <= 255);
   }
 
   return true;
@@ -78,7 +89,7 @@ function pathSegments(path: string): string[] {
 // credential, not part of what gets mounted.
 export function serverIdentity(entry: Pick<ServerEntry, "host" | "path" | "protocol">): string {
   const protocol = entry.protocol ?? "smb";
-  const host = entry.host.trim().toLowerCase();
+  const host = normalizeHost(entry.host).toLowerCase();
   // SMB share names are case-insensitive; WebDAV URL paths usually are not.
   const segments = pathSegments(entry.path ?? "");
   const path = (protocol === "smb" ? segments.map((segment) => segment.toLowerCase()) : segments).join("/");
@@ -88,7 +99,7 @@ export function serverIdentity(entry: Pick<ServerEntry, "host" | "path" | "proto
 
 export function buildShare(entry: ServerEntry): Share {
   const protocol = entry.protocol ?? "smb";
-  const host = entry.host.trim();
+  const host = normalizeHost(entry.host);
   const path = (entry.path ?? "").trim();
   const alias = entry.alias?.trim();
   const user = entry.user?.trim();
