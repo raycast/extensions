@@ -28,7 +28,11 @@ const MAX_ENTRIES = 50;
 const MAX_TEXT_LENGTH = 500_000;
 
 /** Preference off → deletes the stored views (patient data). */
-export async function loadHistory(): Promise<HistoryEntry[]> {
+export function loadHistory(): Promise<HistoryEntry[]> {
+  return enqueue(readHistory);
+}
+
+async function readHistory(): Promise<HistoryEntry[]> {
   if (!isKeepingPastViews()) {
     await LocalStorage.removeItem(STORAGE_KEY);
     return [];
@@ -50,17 +54,23 @@ export function isKeepingPastViews(): boolean {
   return getPreferenceValues<Preferences>().keepPastViews === true;
 }
 
-// Serial write queue: each change runs on the latest list, so a slow save can't restore or drop entries.
-let queue: Promise<void> = Promise.resolve();
+// One queue for every read and write: each change runs on the latest list, so a slow save can't
+// restore or drop entries, nor write views back after the preference is turned off.
+let queue: Promise<unknown> = Promise.resolve();
+
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task);
+  queue = run.catch(() => undefined);
+  return run;
+}
 
 function update(change: (entries: HistoryEntry[]) => HistoryEntry[]): Promise<void> {
-  queue = queue
-    .then(async () => {
-      const entries = change(await loadHistory());
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
-    })
-    .catch(() => undefined);
-  return queue;
+  return enqueue(async () => {
+    const entries = change(await readHistory());
+    // Checked again here: the preference can turn off while this save waits in the queue.
+    if (!isKeepingPastViews()) return;
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, MAX_ENTRIES)));
+  }).catch(() => undefined);
 }
 
 export function entryKey(source: Source): string {

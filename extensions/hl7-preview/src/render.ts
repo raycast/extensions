@@ -7,6 +7,11 @@ function clean(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
+/** `clean` per line: keeps the breaks from \.br\ and \.sp\ in notes and text results. */
+function cleanLines(value: string): string {
+  return value.split("\n").map(clean).filter(Boolean).join("\n");
+}
+
 function first(segments: Segment[], name: string): Segment | undefined {
   return segments.find((s) => s.name === name);
 }
@@ -43,7 +48,7 @@ function readable(f: Field | undefined): string {
   if (!f) return "";
   return f.repetitions
     .map((rep) =>
-      clean(
+      cleanLines(
         rep
           .map((comp) => comp.join(" & "))
           .filter(Boolean)

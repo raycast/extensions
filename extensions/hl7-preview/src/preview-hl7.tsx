@@ -244,6 +244,8 @@ function DocumentView({ initial }: { initial: Source[] }) {
     () => sources.flatMap((source) => splitHL7(source.text).map((raw) => ({ source, raw }))),
     [sources],
   );
+  const opened = useRef(0);
+  const listKey = useMemo(() => ++opened.current, [entries]);
   const single = useMemo(() => (entries.length === 1 ? parseMessage(entries[0].raw) : undefined), [entries]);
 
   const paste = async () => {
@@ -357,7 +359,9 @@ function DocumentView({ initial }: { initial: Source[] }) {
     </ActionPanel>
   );
 
-  if (entries.length > 1) return <MessageList entries={entries} title={title} markdown={markdown} actions={actions} />;
+  // The key resets search, scroll and selection when other sources open.
+  if (entries.length > 1)
+    return <MessageList key={listKey} entries={entries} title={title} markdown={markdown} actions={actions} />;
   return (
     <Detail
       navigationTitle={title}

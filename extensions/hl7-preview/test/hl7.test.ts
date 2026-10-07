@@ -71,6 +71,15 @@ describe("parseHL7", () => {
     expect(component(parseMessage(raws[2]).segments[1], 1)).toBe("3");
   });
 
+  it("keeps line breaks from \\.br\\ in notes", () => {
+    const [msg] = parseHL7(
+      "MSH|^~\\&\rOBR|1|||A^Test A\rOBX|1|TX|A^Test A||Line one\\.br\\Line two\rNTE|1||First\\.br\\Second",
+    );
+    const md = messageMarkdown(msg, { showSegments: false });
+    expect(md).toContain("Line one  \nLine two");
+    expect(md).toContain("First  \nSecond");
+  });
+
   it("uses custom delimiters", () => {
     const [msg] = parseHL7("MSH#*~\\&#APP\rPID#1##ID*X");
     expect(component(msg.segments[1], 3, 2)).toBe("X");
