@@ -333,9 +333,9 @@ test("item-list authentication failures clear saved session metadata on both lis
   let clears = 0;
   const vault = { shareId: "vault", name: "Personal" };
   const api = loadView("pass-cli.ts", {
-    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
     "node:os": { homedir: () => "/fixture" },
-    "node:path": { delimiter: ":" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": {
       clearCache: async () => {
         clears++;
@@ -350,7 +350,7 @@ test("item-list authentication failures clear saved session metadata on both lis
         },
       }),
     },
-    "./core/login": {},
+    "./core/login": { isDetachedLoginRunning: async () => false },
     "./mock-data": {},
     "./types": { PassCliError },
   }) as unknown as {
@@ -365,9 +365,9 @@ test("item-list authentication failures clear saved session metadata on both lis
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
   const counted: string[] = [];
   const api = loadView("pass-cli.ts", {
-    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
     "node:os": { homedir: () => "/fixture" },
-    "node:path": { delimiter: ":" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": {},
     "./cli": { ensureCli: async () => "/fixture-cli" },
     "./core/adapter": {
@@ -386,7 +386,7 @@ test("only the user's own vaults have their members counted, to know whether the
         },
       }),
     },
-    "./core/login": {},
+    "./core/login": { isDetachedLoginRunning: async () => false },
     "./mock-data": {},
     "./types": { PassCliError },
   }) as unknown as { listVaultSharing: () => Promise<Map<string, unknown>> };
@@ -1539,4 +1539,32 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   checkLogin();
   await new Promise(setImmediate);
   assert.equal(reloads, 1);
+});
+
+test("no pass-cli command starts while a browser login is saving its session", async () => {
+  let adapters = 0;
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": { clearCache: async () => undefined },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => {
+        adapters++;
+        return { listVaults: async () => [], checkAuth: async () => true };
+      },
+    },
+    "./core/login": { isDetachedLoginRunning: async () => true },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { listVaults: () => Promise<unknown>; checkAuth: () => Promise<boolean> };
+
+  // pass-cli could log out "for security" and delete the session being saved.
+  await assert.rejects(api.listVaults(), (error: unknown) => {
+    assert.equal((error as PassCliError).type, "not_authenticated");
+    return true;
+  });
+  await assert.rejects(api.checkAuth());
+  assert.equal(adapters, 0);
 });
