@@ -1,6 +1,6 @@
 # Mozilla VPN Connect Changelog
 
-## [AI Tools & Menu Bar] - {PR_MERGE_DATE}
+## [AI Tools & Menu Bar] - 2026-10-07
 
 - Added AI tool to connect, disconnect, check status/IP, list countries/cities/servers and change server
 - Added VPN Status menu bar command
