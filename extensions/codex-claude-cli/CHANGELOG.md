@@ -1,5 +1,16 @@
 # PromptCast Changelog
 
+## [Add quota monitoring] - {PR_MERGE_DATE}
+
+- Add visual gauges to the existing usage viewer.
+- Connect Claude Code's status line to read saved quota observations while preserving the existing status line.
+- Add quota-only monitoring without Claude usage subprocesses or chat-history discovery.
+- Support local JSON quota snapshots for other providers in the viewer and menu bar.
+- Exclude stale, failed, and expired readings from menu-bar percentages.
+- Show Codex's normal subscription windows and tolerate unavailable optional token statistics.
+- Honor configured CLI data folders when querying usage.
+- Update the Raycast SDK and vulnerable transitive dependencies.
+
 ## [Fix] - {PR_MERGE_DATE}
 
 - Add Raycast-verified node-pty native binaries so live sessions start.

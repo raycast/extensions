@@ -142,9 +142,21 @@ YOLO and `bypassPermissions` remove important safeguards. A CLI launched with ei
 
 ## Usage, MCPs, and Skills
 
-The usage viewer queries the local interfaces exposed by the installed CLIs and caches valid results for five minutes. The menu-bar command uses the original provider icons and can show Claude, Codex, the most restrictive provider, or both providers with a compact dual-logo mark. It independently configures the automatic/short-term/weekly limit, remaining/used percentage, and whether the bar shows the percentage, reset time, or both. Reset values are shown as compact text without clock glyphs, and the two providers use spacing instead of divider bars. Its menu also exposes compact submenus for favorite and live chats.
+The usage viewer shows a visual readout for each limit and caches CLI results for five minutes. Stale observations, failed reads, and limits whose reset has passed are excluded from the menu-bar percentage. Codex shows its normal subscription windows, using the durations actually reported by the app server. The menu-bar command uses the original provider icons and can show Claude, Codex, the most restrictive provider, or both providers with a compact dual-logo mark. It independently configures the automatic/short-term/weekly limit, remaining/used percentage, and whether the bar shows the percentage, reset time, or both. Reset values are shown as compact text without clock glyphs, and the two providers use spacing instead of divider bars. Its menu also exposes compact submenus for favorite and live chats.
 
 MCP management hides environment-variable values, headers, and tokens. Skills management reads user, project, plugin, and managed definitions and only writes settings supported by the corresponding CLI.
+
+### Monitor usage from your existing terminal
+
+1. Turn on **Quota-Only Monitoring** in the extension preferences.
+2. Open **View Claude and Codex Usage**, select Claude, then choose **Connect Claude Code**.
+3. Restart Claude Code and continue a conversation. Its next status-line update supplies the 5-hour and weekly limits.
+
+Your existing status line keeps working. **Disconnect Claude Code** restores it. The connection saves quota numbers and reset times locally; refreshing reads that observation without starting Claude. Claude Code 2.1.251 or later and a subscription that reports status-line limits are required. Readings become stale after five minutes without an update.
+
+Quota-only mode also hides the chat menus and skips history discovery in the usage commands. The existing chat commands remain available. With the setting off and Claude disconnected, PromptCast keeps its existing CLI usage lookup.
+
+For other providers, choose a local JSON file in **Custom Usage File**. [The snapshot format](docs/custom-usage.md) takes a provider name, observation time, and quota windows. Fresh snapshots appear in the viewer and menu bar automatically.
 
 ## Preferences
 
@@ -163,6 +175,7 @@ Conversation discovery, aliases, favorites, usage cache, and transcript renderin
 
 ```bash
 npm install
+npm test
 npm run lint
 npm run build
 npm run dev
