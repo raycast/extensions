@@ -8,6 +8,7 @@ import {
   showToast,
   Keyboard,
 } from "@raycast/api";
+import { useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
   FanStatus,
@@ -18,6 +19,10 @@ import {
   setAutomatic,
   setPercent,
 } from "macos-fan-control-client";
+
+// Reading the temperatures walks the whole SMC key index (~0.5 s), so poll on a
+// calmer cadence than the fans themselves change.
+const REFRESH_INTERVAL_MS = 5000;
 
 function markdown(status: FanStatus | undefined): string {
   if (!status) return "# Fan Status";
@@ -36,6 +41,11 @@ function markdown(status: FanStatus | undefined): string {
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(readStatus, [true]);
   const fans = data?.fans ?? [];
+
+  useEffect(() => {
+    const timer = setInterval(revalidate, REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
 
   async function apply(action: () => Promise<string>, title: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title });
@@ -83,6 +93,7 @@ export default function Command() {
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={revalidate}
           />
           <Action
@@ -94,7 +105,7 @@ export default function Command() {
           <Action
             title="Restore Automatic"
             icon={Icon.Repeat}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={() => apply(setAutomatic, "Fans on automatic")}
           />
         </ActionPanel>
