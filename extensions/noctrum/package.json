@@ -20,9 +20,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.8",
-    "@raycast/utils": "^1.17.0",
-    "ethers": "^6.13.0",
-    "eciesjs": "^0.4.0"
+    "eciesjs": "^0.4.0",
+    "ethers": "^6.13.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

@@ -8,7 +8,7 @@ import { privateTransfer } from "../lib/external-api";
 import { encryptRate } from "../lib/encryption";
 import { ethers } from "ethers";
 import { errorMessage } from "../lib/types";
-import { loadProgress, saveProgress, clearProgress } from "../lib/progress";
+import { loadProgress, saveProgress, clearProgress, runExclusive } from "../lib/progress";
 
 export function LendFormView({ wallet }: { wallet: WalletData }) {
   const [token, setToken] = useState<string>(COINS[0].address);
@@ -44,7 +44,14 @@ export function LendFormView({ wallet }: { wallet: WalletData }) {
 
   const selectedCoin = COINS.find((c) => c.address === token);
 
-  async function handleSubmit() {
+  // One submit at a time: a second press while the flow runs must not start another deposit or transfer.
+  function handleSubmit() {
+    runExclusive("lend-form", submit).catch((e) => {
+      showToast(Toast.Style.Failure, errorMessage(e));
+    });
+  }
+
+  async function submit() {
     if (!amount || !rate) {
       showToast(Toast.Style.Failure, "Fill all fields");
       return;

@@ -21,3 +21,17 @@ export async function saveProgress(key: string, progress: FlowProgress): Promise
 export async function clearProgress(key: string): Promise<void> {
   await LocalStorage.removeItem(PREFIX + key);
 }
+
+// Flows currently running in this Raycast process. A second submit of the same flow
+// (double press, or the same action from two views) is rejected instead of running in parallel.
+const running = new Set<string>();
+
+export async function runExclusive<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  if (running.has(key)) throw new Error("This action is already in progress");
+  running.add(key);
+  try {
+    return await fn();
+  } finally {
+    running.delete(key);
+  }
+}

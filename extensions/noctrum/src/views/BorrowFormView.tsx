@@ -8,7 +8,7 @@ import { privateTransfer } from "../lib/external-api";
 import { encryptRate } from "../lib/encryption";
 import { ethers } from "ethers";
 import { CollateralQuote, errorMessage } from "../lib/types";
-import { loadProgress, saveProgress, clearProgress } from "../lib/progress";
+import { loadProgress, saveProgress, clearProgress, runExclusive } from "../lib/progress";
 
 // Amount in wei, or null while the input is empty, partial ("1.") or not a positive number.
 function parseAmount(value: string): string | null {
@@ -54,7 +54,14 @@ export function BorrowFormView({ wallet }: { wallet: WalletData }) {
     };
   }, [quoteKey]);
 
-  async function handleSubmit() {
+  // One submit at a time: a second press while the flow runs must not start another deposit or transfer.
+  function handleSubmit() {
+    runExclusive("borrow-form", submit).catch((e) => {
+      showToast(Toast.Style.Failure, errorMessage(e));
+    });
+  }
+
+  async function submit() {
     if (!amountWei) {
       showToast(Toast.Style.Failure, "Enter a valid amount");
       return;
