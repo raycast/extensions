@@ -46,7 +46,7 @@ async function guessUrl(): Promise<string> {
   return "";
 }
 
-export default function SaveLink({ arguments: args }: LaunchProps<{ arguments: { url?: string } }>) {
+export default function SaveLink({ arguments: args }: LaunchProps<{ arguments: Arguments.SaveLink }>) {
   const argumentUrl = args?.url?.trim() ?? "";
   const [isPrefilling, setIsPrefilling] = useState(!argumentUrl);
   const { data: tags, isLoading: isLoadingTags } = useTags();
