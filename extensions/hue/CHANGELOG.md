@@ -1,5 +1,9 @@
 # Hue Changelog
 
+## [Optimistic scene updates] - {PR_MERGE_DATE}
+
+- Show the selected scene on its room immediately
+
 ## [Improvements] - 2026-06-01
 
 - Fix crash when setting a scene with certain light colors

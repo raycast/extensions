@@ -1,14 +1,13 @@
 import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
-import type { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
+import type { Group, Id, Light, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { SendHueMessage, useHue } from "./hooks/useHue";
-import HueClient from "./lib/HueClient";
+import { useHue } from "./hooks/useHue";
 import useGradients from "./hooks/useGradientUris";
 import React, { useMemo, useState } from "react";
 import { getColorsFromScene } from "./helpers/hueResources";
 
-import { getTransitionTimeInMs } from "./helpers/raycast";
+import { getTransitionTimeInMs, optimisticGroupUpdate } from "./helpers/raycast";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -16,7 +15,8 @@ const GRID_ITEM_WIDTH = 271;
 const GRID_ITEM_HEIGHT = 153;
 
 export default function SetScene(props: { group?: Group; useHue?: ReturnType<typeof useHue> }) {
-  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = props.useHue ?? useHue();
+  const useHueObject = props.useHue ?? useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHueObject;
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
@@ -56,8 +56,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
                   pop();
                 }
               }}
-              hueClient={hueBridgeState.context.hueClient}
-              sendHueMessage={sendHueMessage}
+              useHue={useHueObject}
             />
           ))}
         </Grid.Section>
@@ -79,8 +78,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
                 group={group}
                 scenes={groupScenes}
                 gradientUris={gradientUris}
-                hueClient={hueBridgeState.context.hueClient}
-                sendHueMessage={sendHueMessage}
+                useHue={useHueObject}
               />
             );
           });
@@ -95,8 +93,7 @@ function Group(props: {
   scenes: Scene[];
   gradientUris: PngUriCache;
   onSetScene?: () => void;
-  hueClient?: HueClient;
-  sendHueMessage: SendHueMessage;
+  useHue: ReturnType<typeof useHue>;
 }) {
   return (
     <Grid.Section key={props.group.id} title={props.group.metadata.name}>
@@ -108,8 +105,7 @@ function Group(props: {
             scene={scene}
             gradientUri={props.gradientUris.get(scene.id)}
             onSetScene={props.onSetScene}
-            hueClient={props.hueClient}
-            sendHueMessage={props.sendHueMessage}
+            useHue={props.useHue}
           />
         ),
       )}
@@ -122,8 +118,7 @@ function Scene(props: {
   group: Group;
   gradientUri: PngUri | undefined;
   onSetScene?: () => void;
-  sendHueMessage: SendHueMessage;
-  hueClient?: HueClient;
+  useHue: ReturnType<typeof useHue>;
 }) {
   const activeEmoji = !(props.scene.status?.active === "inactive") ? "💡 " : "";
   return (
@@ -137,12 +132,12 @@ function Scene(props: {
             group={props.group}
             scene={props.scene}
             onSet={() => {
-              handleSetScene(props.hueClient, props.group, props.scene).then();
+              handleSetScene(props.useHue, props.group, props.scene).then();
               props.onSetScene?.();
             }}
           />
           <ActionPanel.Section>
-            <UnlinkAction sendHueMessage={props.sendHueMessage} />
+            <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -154,18 +149,48 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
   return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
-async function handleSetScene(hueClient: HueClient | undefined, group: Group, scene: Scene) {
+async function handleSetScene(
+  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
+  group: Group,
+  scene: Scene,
+) {
   const toast = new Toast({ title: "" });
 
   try {
-    if (hueClient === undefined) throw new Error("Hue client not initialized.");
+    if (hueBridgeState.context.hueClient === undefined) throw new Error("Hue client not initialized.");
 
-    await hueClient.updateScene(scene, {
-      recall: {
-        action: "active",
-        duration: getTransitionTimeInMs(),
-      },
-    });
+    const changesToLights = new Map(
+      scene.actions.map(({ target, action }) => [
+        target.rid,
+        // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
+        (action.color
+          ? { ...action, color_temperature: { mirek: null, mirek_valid: false } }
+          : action) as Partial<Light>,
+      ]),
+    );
+    const changesToGroupedLights = new Map(
+      group.services
+        .filter((resource) => resource.rtype === "grouped_light")
+        .map((resource) => [resource.rid, { on: { on: scene.actions.some(({ action }) => action.on?.on) } }]),
+    );
+
+    const undoOptimisticUpdate = optimisticGroupUpdate(
+      changesToLights,
+      changesToGroupedLights,
+      setLights,
+      setGroupedLights,
+    );
+    await hueBridgeState.context.hueClient
+      .updateScene(scene, {
+        recall: {
+          action: "active",
+          duration: getTransitionTimeInMs(),
+        },
+      })
+      .catch((e: Error) => {
+        undoOptimisticUpdate();
+        throw e;
+      });
 
     toast.style = Style.Success;
     toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
