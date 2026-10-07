@@ -73,7 +73,7 @@ export default function Command() {
                 ? row.author
                 : undefined
           }
-          icon={row.icon ? { source: row.icon } : Icon.Box}
+          icon={row.icon ?? Icon.Box}
           accessories={showOrigin ? [{ tag: KIND_TAG[row.kind] }] : []}
           actions={
             <ActionPanel>

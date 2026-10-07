@@ -10,7 +10,18 @@ import {
   parseJumpOutput,
   reasonFor,
 } from "../src/jump";
-import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, rowKey, sharedTitles, TextCache } from "../src/sources";
+import {
+  builtInIcon,
+  indexIcons,
+  loadBuiltIns,
+  mergeRows,
+  parseBuiltIns,
+  RAYCAST_APP,
+  readInstalled,
+  rowKey,
+  sharedTitles,
+  TextCache,
+} from "../src/sources";
 
 describe("parseBuiltIns", () => {
   it("reads built-in titles and drops the hidden ones", () => {
@@ -19,6 +30,43 @@ describe("parseBuiltIns", () => {
       "y=$v({key:`raycast-debug`,title:`Debug`,description:`b`})" +
       "z=Q({key:`window-management`,title:`Window Management`,description:`c`})";
     expect(parseBuiltIns(bundle).map((r) => r.title)).toEqual(["Clipboard History", "Window Management"]);
+  });
+});
+
+describe("built-in icons", () => {
+  const icons = indexIcons([
+    "extension-browser-Czc4a0B0.png",
+    "extension-browser_large-ZSoY-xhC.png", // hash holding a dash
+    "extension-calendar_large-6WCzGo_w.png", // hash holding an underscore
+    "extension-calendar-BPZWhGnf.png", // small variant listed after the large one
+    "extension-applications-mac-BDInx8WQ.png",
+    "command-ai_large-BeuoFu8S.png",
+    "command-general-light_large-CPJ4oOT4.png",
+    "command-general-dark_large-BxgUa5Ru.png",
+    "extension-games-EV1S37BD.svg",
+    "logger-Cb355GaF.js",
+  ]);
+
+  it("indexes PNG icons by name, preferring the large variant", () => {
+    expect(icons.get("extension-browser")).toBe("extension-browser_large-ZSoY-xhC.png");
+    expect(icons.get("extension-calendar")).toBe("extension-calendar_large-6WCzGo_w.png");
+    expect(icons.has("extension-games")).toBe(false);
+    expect(icons.size).toBe(6);
+  });
+
+  it("falls back from own icon to rename, command, wrapped app, then Raycast", () => {
+    expect(builtInIcon("browser", icons, "/f")).toEqual({ source: "/f/extension-browser_large-ZSoY-xhC.png" });
+    expect(builtInIcon("applications", icons, "/f")).toEqual({
+      source: "/f/extension-applications-mac-BDInx8WQ.png",
+    });
+    expect(builtInIcon("ai", icons, "/f")).toEqual({ source: "/f/command-ai_large-BeuoFu8S.png" });
+    expect(builtInIcon("raycast-settings", icons, "/f")).toEqual({
+      source: {
+        light: "/f/command-general-light_large-CPJ4oOT4.png",
+        dark: "/f/command-general-dark_large-BxgUa5Ru.png",
+      },
+    });
+    expect(builtInIcon("window-management", icons, "/f")).toEqual({ fileIcon: RAYCAST_APP });
   });
 });
 

@@ -7,3 +7,4 @@
 - Extensions you open often rise to the top.
 - Open a Store extension's Store page, or copy an extension's name.
 - Settings to show development extensions, authors, and origin tags.
+- Built-in extensions show their real Raycast icons.
