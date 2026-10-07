@@ -76,7 +76,7 @@ async function getClient(channel: Channel): Promise<ImapFlow> {
       await client.connect();
       if (startedIn !== generation) {
         await client.logout().catch(() => undefined);
-        throw new Error("Connection closed");
+        throw new Error("Command closed while connecting");
       }
       state.client = client;
       return client;
@@ -87,9 +87,41 @@ async function getClient(channel: Channel): Promise<ImapFlow> {
   return state.connecting;
 }
 
+// Bridge can drop a connection at any time, for example while it starts up and syncs, or when it restarts.
+// imapflow then rejects the pending command with one of these codes.
+const CONNECTION_LOST_CODES = new Set([
+  "NoConnection",
+  "EConnectionClosed",
+  "ClosedAfterConnectText",
+  "ClosedAfterConnectTLS",
+  "ECONNRESET",
+  "EPIPE",
+  "ETIMEDOUT",
+]);
+
+function isConnectionLost(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === "string" && CONNECTION_LOST_CODES.has(code);
+}
+
+function dropConnection(channel: Channel) {
+  const state = channels[channel];
+  const client = state.client;
+  state.client = null;
+  client?.close();
+}
+
 async function withClient<T>(operation: (client: ImapFlow) => Promise<T>, channel: Channel = "actions"): Promise<T> {
   try {
-    return await operation(await getClient(channel));
+    try {
+      return await operation(await getClient(channel));
+    } catch (error) {
+      if (!isConnectionLost(error)) throw error;
+      // Retry once on a fresh connection instead of surfacing the drop. Operations are reads or flag changes;
+      // a move that went through just before the drop fails the retry, since the email has already left the folder.
+      dropConnection(channel);
+      return await operation(await getClient(channel));
+    }
   } catch (error) {
     const prefs = getPreferenceValues<Preferences>();
     const errorMessage = error instanceof Error ? error.message : String(error);
