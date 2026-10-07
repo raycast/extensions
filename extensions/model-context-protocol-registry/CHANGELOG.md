@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Hermoso MCP Server] - {PR_MERGE_DATE}
+
+- Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
+
 ## [Add MiningBridge Intelligence MCP Server] - 2026-10-06
 
 - Add MiningBridge Intelligence to the community registry: critical-mineral and rare-earth trade intelligence (commodity snapshots, trade flows, supplier screening, supply-risk scores, reports). Hosted remote Streamable HTTP server at https://intel.miningbridge.in/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Nine read-only tools.
