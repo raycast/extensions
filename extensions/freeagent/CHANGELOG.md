@@ -1,6 +1,6 @@
 # FreeAgent Changelog
 
-## [Prefill task billing rate from project] - {PR_MERGE_DATE}
+## [Prefill task billing rate from project] - 2026-10-07
 
 - Create Task now fills in the billing rate and period from the selected project's normal billing rate
 
