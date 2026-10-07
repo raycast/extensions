@@ -9,7 +9,8 @@ import { PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 /** How often a view waiting for the browser login checks on it. */
 const LOGIN_CHECK_INTERVAL_MS = 1_000;
 
-type LoginStatus = BrowserLoginStatus | { state: "starting" };
+/** `checking` until the view knows whether a login started before is still running. */
+type LoginStatus = BrowserLoginStatus | { state: "checking" };
 export type BrowserLogin = ReturnType<typeof useBrowserLogin>;
 
 function asPassCliError(error: unknown): PassCliError {
@@ -22,8 +23,9 @@ function asPassCliError(error: unknown): PassCliError {
  * `onLoggedIn` runs once it succeeded.
  */
 export function useBrowserLogin(onLoggedIn: () => void) {
-  const [status, setStatus] = useState<LoginStatus>({ state: "none" });
+  const [status, setStatus] = useState<LoginStatus>({ state: "checking" });
   const isChecking = useRef(false);
+  const isStarting = useRef(false);
 
   async function check() {
     if (isChecking.current) return;
@@ -53,18 +55,31 @@ export function useBrowserLogin(onLoggedIn: () => void) {
     return () => clearInterval(timer);
   }, [status.state]);
 
+  /**
+   * The screen stays as it is until the browser is in front, which closes Raycast: switching screens before would
+   * flash two screens just as Raycast closes.
+   */
   async function start() {
-    setStatus({ state: "starting" });
+    if (isStarting.current) return;
+    isStarting.current = true;
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Opening the Login Page" });
     try {
       const url = await startBrowserLogin();
+      void toast.hide();
       if (url) {
-        setStatus({ state: "waiting", url });
+        setStatus({ state: "waiting", url, isFinishing: false });
       } else {
         setStatus({ state: "none" });
         onLoggedIn();
       }
     } catch (error) {
-      setStatus({ state: "failed", error: asPassCliError(error) });
+      const failure = asPassCliError(error);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't Start the Login";
+      toast.message = failure.message;
+      setStatus({ state: "failed", error: failure });
+    } finally {
+      isStarting.current = false;
     }
   }
 
@@ -82,7 +97,11 @@ interface LoginScreenProps {
   onCheckAgain: () => void;
 }
 
-/** The Not Logged In screen, or, once a browser login has started, what's left to do to finish it. */
+/**
+ * The Not Logged In screen, then where the browser login is: waiting for the browser, saving the session, and, once
+ * logged in, while the view loads. Raycast never shows an empty view while its list is loading, so these screens say
+ * what's happening rather than spin.
+ */
 export function LoginScreen({ login, onCheckAgain }: LoginScreenProps) {
   const { status } = login;
   const checkAgain = (
@@ -94,16 +113,30 @@ export function LoginScreen({ login, onCheckAgain }: LoginScreenProps) {
     />
   );
 
-  if (status.state === "starting" || status.state === "waiting") {
+  if (status.state === "checking") return <List isLoading />;
+
+  if (status.state === "succeeded") {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.CheckCircle} title="You're Logged In" description="Loading your items…" />
+      </List>
+    );
+  }
+
+  if (status.state === "waiting") {
     return (
       <List>
         <List.EmptyView
           icon={Icon.Hourglass}
-          title={status.state === "starting" ? "Opening the Login Page" : "Finish Logging In in Your Browser"}
-          description="You can close Raycast meanwhile: the login keeps going, and the extension picks it up when you come back."
+          title={status.isFinishing ? "Finishing the Login" : "Log In in Your Browser"}
+          description={
+            status.isFinishing
+              ? "pass-cli is saving your session. This takes a few seconds."
+              : "Use the page that opened in your browser. Once you're logged in there, this continues by itself within about 10 seconds, even if Raycast closes meanwhile."
+          }
           actions={
             <ActionPanel>
-              {status.state === "waiting" && status.url && (
+              {status.url && !status.isFinishing && (
                 <Action.OpenInBrowser title="Open Login Page Again" url={status.url} icon={Icon.Globe} />
               )}
               {checkAgain}
@@ -157,7 +190,10 @@ export function LoginScreen({ login, onCheckAgain }: LoginScreenProps) {
   );
 }
 
-/** Not Logged In screen of the commands that load items: `reload` runs once logged in, and for Check Again. */
+/**
+ * Not Logged In screen of the commands that load items: `reload` runs once logged in, and for Check Again. The view
+ * keeps this screen while it reloads, until it has something to show.
+ */
 export function NotLoggedInView({ reload }: { reload: () => void }) {
   const login = useBrowserLogin(reload);
   return <LoginScreen login={login} onCheckAgain={reload} />;

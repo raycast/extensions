@@ -25,7 +25,8 @@ export default function Command() {
 
   async function loadVaults() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
     setIsLoading(true);
 
     const cachedVaults = await getCachedVaults();
@@ -44,6 +45,7 @@ export default function Command() {
       const freshVaults = await listVaults();
       if (!isLatest()) return;
       setVaults(freshVaults);
+      setError(null);
       await setCachedVaults(freshVaults);
     } catch (err: unknown) {
       if (!isLatest()) return;

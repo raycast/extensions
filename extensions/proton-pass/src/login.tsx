@@ -46,7 +46,7 @@ export default function Command() {
   }, []);
 
   // A login in progress comes first, also one started from the logged-in screen to log in again.
-  if (login.status.state === "starting" || login.status.state === "waiting") {
+  if (login.status.state === "waiting") {
     return <LoginScreen login={login} onCheckAgain={checkAgain} />;
   }
 

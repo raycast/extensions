@@ -1236,7 +1236,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
 
-test("Check Again in Search Items loads with a spinner, without the ended session's vaults", async () => {
+test("Check Again in Search Items keeps the login screen until the items have loaded", async () => {
   const harness = hookHarness();
   const vault = { shareId: "vault", name: "Personal" };
   let isLoggedIn = false;
@@ -1278,9 +1278,9 @@ test("Check Again in Search Items loads with a spinner, without the ended sessio
 
   isLoggedIn = true;
   const checking = (notLoggedIn.props.reload as () => Promise<void>)();
-  const list = render();
-  assert.equal(list.props.isLoading, true);
-  assert.equal(((list.props.searchBarAccessory as Element).props.vaults as unknown[]).length, 0);
+  // No empty list, nor the ended session's vaults, while the items load.
+  assert.equal(typeof render().props.reload, "function");
+  assert.equal("items" in render().props, false);
 
   await checking;
   assert.deepEqual(render().props.items, [item]);
@@ -1300,7 +1300,7 @@ test("Login with Browser shows what's left to do, then reloads once the login su
       Keyboard: { Shortcut: { Common: { Refresh: {} } } },
       List: { EmptyView: {} },
       Toast: { Style: { Success: "success" } },
-      showToast: async () => undefined,
+      showToast: async () => ({ hide: async () => undefined }),
     },
     "./core/login": {},
     "./pass-cli": {
@@ -1324,8 +1324,8 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   await new Promise(setImmediate);
   await (action("Login with Browser")?.onAction as () => Promise<void>)();
 
-  const emptyView = tree(screen()).find((props) => "description" in props);
-  assert.equal(emptyView?.title, "Finish Logging In in Your Browser");
+  const title = () => tree(screen()).find((props) => "description" in props)?.title;
+  assert.equal(title(), "Log In in Your Browser");
   assert.equal(action("Open Login Page Again")?.url, url);
   assert.equal(reloads, 0);
 
@@ -1333,6 +1333,8 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   checkLogin();
   await new Promise(setImmediate);
   assert.equal(reloads, 1);
+  // Rather than an empty list, until the view has loaded.
+  assert.equal(title(), "You're Logged In");
 });
 
 test("no pass-cli command starts while a browser login is saving its session", async () => {

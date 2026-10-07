@@ -12,6 +12,7 @@ const expectedArgs = {
   "login-hang": ["login"],
   "login-wait": ["login"],
   "login-url-fail": ["login"],
+  "login-finishing": ["login"],
   "login-fail": ["login"],
   "login-fail-unknown": ["login"],
   "malformed-json": ["vault", "list", "--output", "json"],
@@ -118,6 +119,14 @@ switch (mode) {
     console.log(
       `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
     );
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication complete, setting up your account"), 50);
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
     break;
