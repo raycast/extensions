@@ -12,11 +12,12 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { exec } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ServerForm, ServerFormInput } from "./components/ServerForm";
 import { buildShare, PROTOCOL_LABELS, ServerEntry } from "./lib/share";
-import { findMountedShare, unmountShare, UnreachableError, connectShare } from "./lib/mount";
+import { findMountedShare, openMountPoint, unmountShare, UnreachableError, connectShare } from "./lib/mount";
+import { errorText } from "./lib/errors";
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
@@ -129,11 +130,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     try {
       share = buildShare(server);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid drive",
-        message: error instanceof Error ? error.message : "Check the saved host and path.",
-      });
+      await showFailureToast(error, { title: "Invalid drive" });
       return;
     }
 
@@ -150,7 +147,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       if (connected) {
         toast.title = `Connected to ${share.label}`;
         if (options?.open) {
-          exec(`open "${connected.mountPoint}"`);
+          openMountPoint(connected.mountPoint);
         }
       }
     } catch (error) {
@@ -159,7 +156,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
         toast.title = error.message;
       } else {
         toast.title = `Couldn't mount ${share.label}`;
-        toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "open failed";
+        toast.message = errorText(error, "Mounting failed.");
       }
     }
   }
@@ -167,7 +164,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   async function handleBrowse(server: ServerEntry) {
     const existing = findMountedShare(mounted, server);
     if (existing) {
-      exec(`open "${existing.mountPoint}"`);
+      openMountPoint(existing.mountPoint);
       return;
     }
     await handleConnect(server, { open: true });
@@ -178,11 +175,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     try {
       share = buildShare(server);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid drive",
-        message: error instanceof Error ? error.message : "Check the saved host and path.",
-      });
+      await showFailureToast(error, { title: "Invalid drive" });
       return;
     }
 
@@ -199,7 +192,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Couldn't unmount ${share.label}`;
-      toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "unmount failed";
+      toast.message = errorText(error, "Unmounting failed.");
     }
   }
 
@@ -379,7 +372,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                   )}
                   {protocol === "smb" && (
                     <Action
-                      title="Browse Shares on This Host…"
+                      title="Browse Shares on This Host"
                       icon={Icon.MagnifyingGlass}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                       onAction={() =>

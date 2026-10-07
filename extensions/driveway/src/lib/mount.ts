@@ -50,13 +50,17 @@ export async function mountShare(share: Share): Promise<void> {
     await execFileAsync("/usr/bin/osascript", ["-e", script], { timeout: APPLESCRIPT_MOUNT_TIMEOUT_MS });
   } catch (error) {
     const execError = error as { killed?: boolean; stderr?: string };
+    // Every caller already names the drive, and osascript's own text is script
+    // offsets and an OSStatus code, so that goes to the log and the throw
+    // carries a cause a person can read.
+    console.error("mount volume failed", execError.stderr?.trim() || error);
+
     if (execError.killed) {
       throw new Error(
-        `Mounting ${share.label} timed out after ${APPLESCRIPT_MOUNT_TIMEOUT_MS / 1000}s and was cancelled. If a macOS dialog appeared (a certificate, password, or Keychain access prompt), try again and answer it promptly.`,
+        `Timed out after ${APPLESCRIPT_MOUNT_TIMEOUT_MS / 1000}s. If macOS asked for a password or to trust a certificate, try again and answer it promptly.`,
       );
     }
-    const detail = execError.stderr?.trim();
-    throw new Error(`Couldn't mount ${share.label}${detail ? `: ${detail}` : ""}`);
+    throw new Error("The server refused the mount.");
   }
 }
 
@@ -152,6 +156,16 @@ export function parseMountOutput(stdout: string): MountLocation[] {
   return shares;
 }
 
+// Opens a mounted volume in Finder. Not through a shell: a volume name can
+// contain a quote, a space, a dollar sign or a backtick, and interpolating one
+// into `open "<path>"` would either mangle the path or hand it to sh to
+// evaluate.
+export function openMountPoint(mountPoint: string): void {
+  execFile("/usr/bin/open", [mountPoint], (error) => {
+    if (error) console.error("open failed", error);
+  });
+}
+
 export async function listMountedShares(): Promise<MountLocation[]> {
   const { stdout } = await execFileAsync("/sbin/mount", []);
   return parseMountOutput(stdout);
@@ -175,5 +189,10 @@ export async function unmountShare(entry: ShareLocation): Promise<void> {
     throw new Error("Share is not currently mounted.");
   }
 
-  await execFileAsync("/usr/sbin/diskutil", ["unmount", match.mountPoint]);
+  try {
+    await execFileAsync("/usr/sbin/diskutil", ["unmount", match.mountPoint]);
+  } catch (error) {
+    console.error("diskutil unmount failed", (error as { stderr?: string }).stderr?.trim() || error);
+    throw new Error("Something on the drive is still in use.");
+  }
 }

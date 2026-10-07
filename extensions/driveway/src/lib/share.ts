@@ -46,8 +46,25 @@ export type Share = {
 // eslint-disable-next-line no-control-regex -- rejects control characters and Windows-reserved path characters
 const INVALID_PATH_SEGMENT = /[\x00-\x1f<>:"\\|?*]/;
 
+// Each dot-separated label starts and ends alphanumeric, with hyphens allowed
+// inside. That rejects a half-typed address — "10.0.0.", "nas..local", "-nas"
+// — which the old pattern accepted and only failed much later, at mount time.
 // An optional ":port" is allowed, mainly for self-hosted WebDAV.
-export const HOST_PATTERN = /^[A-Za-z0-9.-]+(:\d{1,5})?$/;
+const HOST_LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?";
+export const HOST_PATTERN = new RegExp(`^${HOST_LABEL}(?:\\.${HOST_LABEL})*(?::\\d{1,5})?$`);
+
+// Four numeric labels can only be an IPv4 address, so hold them to one:
+// "10.0.0.999" passes the pattern above as a hostname but can never resolve.
+export function isValidHost(host: string): boolean {
+  if (!HOST_PATTERN.test(host)) return false;
+
+  const octets = host.split(":")[0].split(".");
+  if (octets.length === 4 && octets.every((octet) => /^\d+$/.test(octet))) {
+    return octets.every((octet) => Number(octet) <= 255);
+  }
+
+  return true;
+}
 
 function pathSegments(path: string): string[] {
   return path
@@ -76,7 +93,7 @@ export function buildShare(entry: ServerEntry): Share {
   const alias = entry.alias?.trim();
   const user = entry.user?.trim();
 
-  if (!HOST_PATTERN.test(host)) {
+  if (!isValidHost(host)) {
     throw new Error(`Invalid IP address or hostname: "${entry.host}"`);
   }
 

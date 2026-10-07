@@ -5,6 +5,7 @@ import { VolumeUsage } from "../lib/disk-usage";
 import type { ServerEntry } from "../lib/share";
 import type { MountLocation } from "../lib/mount";
 import { unmountShare } from "../lib/mount";
+import { errorText } from "../lib/errors";
 import { DiscoveredDriveItem } from "./DiscoveredDrive";
 
 // One-time credentials to browse any saved host's shares. Held in state only.
@@ -33,7 +34,7 @@ export function BrowseHostShares(props: {
         if (!cancelled) setShares(result);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message.replace(/\s+/g, " ") : "Failed to list shares");
+        if (!cancelled) setError(errorText(err, "Couldn’t list shares on this host."));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -68,8 +69,18 @@ export function BrowseHostShares(props: {
           </ActionPanel>
         }
       >
-        <Form.TextField id="user" title="Username" defaultValue={props.server.user} />
-        <Form.PasswordField id="password" title="Password" />
+        <Form.TextField
+          id="user"
+          title="Username"
+          defaultValue={props.server.user}
+          info="Prefilled from the saved drive. Used for this host only, and never stored."
+        />
+        <Form.PasswordField
+          id="password"
+          title="Password"
+          placeholder="Optional on servers that allow listing"
+          info="Many servers list their share names without a password. Leave this empty to try that; if the server refuses, you can enter one and try again."
+        />
       </Form>
     );
   }

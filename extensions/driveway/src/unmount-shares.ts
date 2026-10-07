@@ -2,6 +2,8 @@ import { showToast, Toast } from "@raycast/api";
 import { buildShare } from "./lib/share";
 import { findMountedShare, listMountedShares, unmountShare } from "./lib/mount";
 import { getServers } from "./lib/storage";
+import { errorText } from "./lib/errors";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 
 export default async function command() {
   const entries = await getServers();
@@ -27,7 +29,7 @@ export default async function command() {
     try {
       label = buildShare(entry).label;
     } catch (error) {
-      invalid.push(error instanceof Error ? error.message : `Invalid entry: ${entry.host}`);
+      invalid.push(errorText(error, `Invalid entry: ${entry.host}`));
       continue;
     }
 
@@ -38,10 +40,11 @@ export default async function command() {
       mounted.splice(mounted.indexOf(found), 1);
       unmounted.push(label);
     } catch (error) {
-      const message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "unmount failed";
-      failures.push(`${label} (${message})`);
+      failures.push(`${label} (${errorText(error, "unmounting failed")})`);
     }
   }
+
+  if (unmounted.length) await refreshMenuBar();
 
   const problems = [
     invalid.length ? `invalid: ${invalid.join(", ")}` : "",

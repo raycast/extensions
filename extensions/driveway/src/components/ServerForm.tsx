@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
-import { buildShare, HOST_PATTERN, PROTOCOL_LABELS, PROTOCOLS, Protocol, USER_IN_URL_PROTOCOLS } from "../lib/share";
+import { buildShare, isValidHost, PROTOCOL_LABELS, PROTOCOLS, Protocol, USER_IN_URL_PROTOCOLS } from "../lib/share";
 import { DuplicateServerError } from "../lib/storage";
 
 export type ServerFormInput = {
@@ -43,11 +44,7 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
         protocol,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't save drive",
-        message: error instanceof Error ? error.message : "Check the host and path.",
-      });
+      await showFailureToast(error, { title: "Couldn't save drive" });
       return;
     }
 
@@ -67,11 +64,17 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
       if (onDuplicate) {
         await onDuplicate(error.existingId);
       } else {
-        await launchCommand({
-          name: "index",
-          type: LaunchType.UserInitiated,
-          context: { selectId: error.existingId },
-        });
+        try {
+          await launchCommand({
+            name: "index",
+            type: LaunchType.UserInitiated,
+            context: { selectId: error.existingId },
+          });
+        } catch (launchError) {
+          // Manage Drives is off in Preferences, so name the clash here
+          // rather than leaving the form looking like nothing happened.
+          await showFailureToast(launchError, { title: "Drive already added, but Manage Drives wouldn't open" });
+        }
       }
     }
   }
@@ -89,7 +92,7 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
         title="Protocol"
         value={protocol}
         onChange={(value) => setProtocol(value as Protocol)}
-        info="How this drive is mounted. Live share discovery (Discovered section, Browse Shares on This Host…) only works for SMB."
+        info="How this drive is mounted. Live share discovery (Discovered section, Browse Shares on This Host) only works for SMB."
       >
         {PROTOCOLS.map((option) => (
           <Form.Dropdown.Item key={option} value={option} title={PROTOCOL_LABELS[option]} />
@@ -115,7 +118,7 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
         onChange={() => setHostError(undefined)}
         onBlur={(event) => {
           const value = (event.target.value ?? "").trim();
-          setHostError(value && !HOST_PATTERN.test(value) ? "Invalid IP address or hostname" : undefined);
+          setHostError(value && !isValidHost(value) ? "Invalid IP address or hostname" : undefined);
         }}
       />
       <Form.TextField

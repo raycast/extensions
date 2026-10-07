@@ -25,10 +25,23 @@ const SMBUTIL_TIMEOUT_MS = 10_000;
 // The timeout is required: without a TTY, smbutil can block forever on a
 // password prompt that never appears.
 async function view(target: string, extraFlags: string[] = []): Promise<string> {
-  const { stdout } = await execFileAsync("/usr/bin/smbutil", ["-v", "view", ...extraFlags, "-f", target], {
-    timeout: SMBUTIL_TIMEOUT_MS,
-  });
-  return stdout;
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/smbutil", ["-v", "view", ...extraFlags, "-f", target], {
+      timeout: SMBUTIL_TIMEOUT_MS,
+    });
+    return stdout;
+  } catch (error) {
+    const execError = error as { killed?: boolean; stderr?: string };
+    const stderr = execError.stderr?.trim() ?? "";
+    console.error("smbutil view failed", stderr || error);
+
+    if (execError.killed) throw new Error("Timed out listing shares.");
+    // The same outcomes viewWithPassword distinguishes, named the same way.
+    if (/connection failed|no route to host|not responding|operation timed out/i.test(stderr)) {
+      throw new Error("Couldn't reach this host.");
+    }
+    throw new Error("This host won't list its shares without a username and password.");
+  }
 }
 
 const EXPECT_TIMEOUT_S = Math.ceil(SMBUTIL_TIMEOUT_MS / 1000);

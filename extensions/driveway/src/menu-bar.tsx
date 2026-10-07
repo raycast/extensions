@@ -13,9 +13,9 @@ import { useEffect, useState } from "react";
 import { getServers } from "./lib/storage";
 import { buildShare, ServerEntry } from "./lib/share";
 import { delay } from "./lib/throttle";
+import { errorText } from "./lib/errors";
+import { MENU_BAR_CACHE_KEY } from "./lib/menu-bar-cache";
 import { findMountedShare, isReachable, listMountedShares, mountShare, unmountShare, MountLocation } from "./lib/mount";
-
-const CACHE_KEY = "menu-bar-cache";
 
 // Raycast unloads a menu bar command as soon as its menu closes, and clicking
 // an item closes the menu. An action still awaiting something by then is cut
@@ -77,12 +77,30 @@ async function watchForMount(attempt: Promise<Settled>, server: ServerEntry): Pr
   }
 }
 
-function describe(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message.replace(/\s+/g, " ") : fallback;
+// A HUD is the only feedback a menu bar command can show. Raycast launches an
+// item's callback in the background, where the Toast API refuses to run at all
+// ("Toast API is not available when command is launched in background") and
+// throws, which lands on the menu bar as an error icon. A HUD takes no style
+// either, so the outcome is carried by a marker at the front. Nothing here is
+// allowed to throw: feedback is never worth breaking the menu bar over.
+async function say(text: string): Promise<void> {
+  try {
+    await showHUD(text);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function reportSuccess(text: string): Promise<void> {
+  return say(`✅ ${text}`);
+}
+
+function reportFailure(text: string, error: unknown, fallback: string): Promise<void> {
+  return say(`❌ ${text}: ${errorText(error, fallback)}`);
 }
 
 async function readCache(): Promise<Cache | null> {
-  const raw = await LocalStorage.getItem<string>(CACHE_KEY);
+  const raw = await LocalStorage.getItem<string>(MENU_BAR_CACHE_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as Cache;
@@ -107,7 +125,7 @@ export default function Command() {
     setMounted(mountedShares);
     setIsLoading(false);
     const cache: Cache = { servers: entries, mounted: mountedShares, timestamp: Date.now() };
-    await LocalStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    await LocalStorage.setItem(MENU_BAR_CACHE_KEY, JSON.stringify(cache));
   }
 
   // Both the Refresh item and the tail of every action land here.
@@ -116,7 +134,7 @@ export default function Command() {
       await load();
     } catch (error) {
       setIsLoading(false);
-      await showHUD(describe(error, "Couldn't refresh drive status"));
+      await reportFailure("Couldn't refresh drive status", error, "Reading the mount list failed.");
     }
   }
 
@@ -164,33 +182,33 @@ export default function Command() {
         const result = await within(settle(unmountShare(server)));
         if (!result) {
           stillRunning = true;
-          await showHUD(`Disconnecting ${label}…`);
+          await say(`⏳ Disconnecting ${label}…`);
         } else if (result.ok) {
-          await showHUD(`Disconnected ${label}`);
+          await reportSuccess(`Disconnected ${label}`);
         } else {
-          await showHUD(describe(result.error, `Couldn't disconnect ${label}`));
+          await reportFailure(`Couldn't disconnect ${label}`, result.error, "Unmounting failed.");
         }
       } else {
         const share = buildShare(server);
         // Checked here rather than through connectShare so an offline server
         // is reported as such well inside the budget, instead of racing it.
         if (!(await isReachable(share.host, share.protocol))) {
-          await showHUD(`${label} is unreachable`);
+          await say(`⚠️ ${label} is unreachable`);
         } else {
           const outcome = await watchForMount(settle(mountShare(share)), server);
           if (outcome.kind === "mounted") {
-            await showHUD(`Connected to ${label}`);
+            await reportSuccess(`Connected to ${label}`);
           } else if (outcome.kind === "failed") {
-            await showHUD(describe(outcome.error, `Couldn't connect to ${label}`));
+            await reportFailure(`Couldn't connect to ${label}`, outcome.error, "Mounting failed.");
           } else {
             stillRunning = true;
-            await showHUD(`Connecting to ${label}…`);
+            await say(`⏳ Connecting to ${label}…`);
           }
         }
       }
     } catch (error) {
       // buildShare rejects a malformed saved entry; nothing was attempted.
-      await showHUD(describe(error, `Couldn't connect to ${label}`));
+      await reportFailure(`Couldn't connect to ${label}`, error, "The saved entry is invalid.");
     }
 
     setBusyId(null);
@@ -201,7 +219,7 @@ export default function Command() {
     if (stillRunning) {
       // The snapshot just written says "not connected" for something that is
       // still being mounted, so don't let the next menu open trust it.
-      await LocalStorage.removeItem(CACHE_KEY).catch(() => undefined);
+      await LocalStorage.removeItem(MENU_BAR_CACHE_KEY).catch(() => undefined);
     }
   }
 
@@ -209,7 +227,7 @@ export default function Command() {
     try {
       await launchCommand({ name, type: LaunchType.UserInitiated });
     } catch (error) {
-      await showHUD(describe(error, `Couldn't open ${title}`));
+      await reportFailure(`Couldn't open ${title}`, error, "The command may be disabled in Preferences.");
     }
   }
 

@@ -1,7 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
-import { buildShare, Share } from "./lib/share";
-import { isReachable, mountShare } from "./lib/mount";
+import { buildShare, ServerEntry, Share } from "./lib/share";
+import { findMountedShare, isReachable, listMountedShares, mountShare } from "./lib/mount";
 import { getServers } from "./lib/storage";
+import { errorText } from "./lib/errors";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 
 export default async function command() {
   const entries = await getServers();
@@ -15,22 +17,35 @@ export default async function command() {
     return;
   }
 
-  const shares: Share[] = [];
+  // The entry is kept beside the share: matching a live mount needs the saved
+  // host and path, which a built Share no longer carries.
+  const targets: { entry: ServerEntry; share: Share }[] = [];
   const invalid: string[] = [];
 
   for (const entry of entries) {
     try {
-      shares.push(buildShare(entry));
+      targets.push({ entry, share: buildShare(entry) });
     } catch (error) {
-      invalid.push(error instanceof Error ? error.message : `Invalid entry: ${entry.host}`);
+      invalid.push(errorText(error, `Invalid entry: ${entry.host}`));
     }
   }
 
   const requested: string[] = [];
+  const alreadyMounted: string[] = [];
   const unavailable: string[] = [];
   const openFailures: string[] = [];
 
-  for (const share of shares) {
+  // `mount volume` on a share that is already mounted doesn't no-op: macOS
+  // mounts it a second time, at "/Volumes/<name>-1". So skip those, the way
+  // Manage Drives and the menu bar already do.
+  const mounted = await listMountedShares();
+
+  for (const { entry, share } of targets) {
+    if (findMountedShare(mounted, entry)) {
+      alreadyMounted.push(share.label);
+      continue;
+    }
+
     if (!(await isReachable(share.host, share.protocol))) {
       unavailable.push(share.label);
       continue;
@@ -40,8 +55,7 @@ export default async function command() {
       await mountShare(share);
       requested.push(share.label);
     } catch (error) {
-      const message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "open failed";
-      openFailures.push(`${share.label} (${message})`);
+      openFailures.push(`${share.label} (${errorText(error, "mounting failed")})`);
     }
   }
 
@@ -50,6 +64,8 @@ export default async function command() {
     unavailable.length ? `unreachable: ${unavailable.join(", ")}` : "",
     openFailures.length ? `failed: ${openFailures.join(", ")}` : "",
   ].filter(Boolean);
+
+  if (requested.length) await refreshMenuBar();
 
   if (failures.length) {
     await showToast({
@@ -60,9 +76,20 @@ export default async function command() {
     return;
   }
 
+  if (!requested.length) {
+    await showToast({
+      style: Toast.Style.Success,
+      title: alreadyMounted.length === 1 ? "Already connected" : `All ${alreadyMounted.length} already connected`,
+      message: alreadyMounted.join(", "),
+    });
+    return;
+  }
+
   await showToast({
     style: Toast.Style.Success,
     title: "Mount requested",
-    message: requested.join(", "),
+    message: [requested.join(", "), alreadyMounted.length ? `${alreadyMounted.length} already connected` : ""]
+      .filter(Boolean)
+      .join("; "),
   });
 }

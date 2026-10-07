@@ -10,12 +10,19 @@ import {
   List,
   Keyboard,
 } from "@raycast/api";
-import { exec } from "child_process";
 import { discoveryUsernameFor } from "../lib/preferences";
 import { VolumeUsage, usageForMountPoint, formatUsage } from "../lib/disk-usage";
 import { ServerForm, ServerFormInput } from "./ServerForm";
 import { buildShare, PROTOCOL_LABELS, Protocol } from "../lib/share";
-import { connectShare, findMountedShare, unmountShare, MountLocation, UnreachableError } from "../lib/mount";
+import {
+  connectShare,
+  findMountedShare,
+  openMountPoint,
+  unmountShare,
+  MountLocation,
+  UnreachableError,
+} from "../lib/mount";
+import { errorText } from "../lib/errors";
 import { addServer, DuplicateServerError } from "../lib/storage";
 
 // One icon per kind of discovered thing, so the list reads at a glance:
@@ -174,7 +181,7 @@ function DiscoveredDriveActions(props: {
   const { push } = useNavigation();
 
   async function doMount(): Promise<MountLocation | undefined> {
-    const toast = await showToast({ title: "Mounting...", style: Toast.Style.Animated });
+    const toast = await showToast({ title: `Mounting ${props.vol}…`, style: Toast.Style.Animated });
     try {
       const share = buildShare({ id: props.vol, host: props.host, path: props.vol });
       await connectShare(share);
@@ -190,15 +197,15 @@ function DiscoveredDriveActions(props: {
       if (error instanceof UnreachableError) {
         toast.title = error.message;
       } else {
-        toast.title = "Action Failed";
-        toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "open failed";
+        toast.title = `Couldn't mount ${props.vol}`;
+        toast.message = errorText(error, "Mounting failed.");
       }
       return undefined;
     }
   }
 
   async function doUnmount() {
-    const toast = await showToast({ title: "Unmounting...", style: Toast.Style.Animated });
+    const toast = await showToast({ title: `Unmounting ${props.vol}…`, style: Toast.Style.Animated });
     try {
       await unmountShare({ host: props.host, path: props.vol });
       toast.style = Toast.Style.Success;
@@ -206,8 +213,8 @@ function DiscoveredDriveActions(props: {
       props.onChanged();
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Action Failed";
-      toast.message = error instanceof Error ? error.message.replace(/\s+/g, " ") : "unmount failed";
+      toast.title = `Couldn't unmount ${props.vol}`;
+      toast.message = errorText(error, "Unmounting failed.");
     }
   }
 
@@ -239,7 +246,7 @@ function DiscoveredDriveActions(props: {
             const match = await doMount();
             const mountPoint = match?.mountPoint ?? props.mountPoint;
             if (mountPoint) {
-              exec(`open "${mountPoint}"`);
+              openMountPoint(mountPoint);
             }
           }}
         ></Action>
@@ -319,7 +326,7 @@ export function DiscoveredHostItem(props: {
         <ActionPanel>
           {props.onBrowse && (
             <Action
-              title="Browse Shares on This Host…"
+              title="Browse Shares on This Host"
               icon={Icon.MagnifyingGlass}
               shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
               onAction={props.onBrowse}
