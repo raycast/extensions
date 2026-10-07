@@ -7,5 +7,6 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   }
 }
