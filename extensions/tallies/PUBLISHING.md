@@ -16,7 +16,12 @@ The tests, TypeScript build, ESLint, formatting, and icon checks passed during p
 
 ## Store screenshots
 
-Capture screenshots before submitting. Use fictional names and notes, never an actual attendance roster. Raycast's native Window Capture workflow can save Store screenshots into `metadata/`. Recommended views are the attendance roster, template form, and add-entry form. Use the same theme and background for each.
+Store screenshots are included in `metadata/`:
+
+- `tallies-1.png`: attendance roster with present, clocked-out, and no-show entries.
+- `tallies-2.png`: template form with a default time, heading, notes, and reusable placeholders.
+
+Both are native Raycast Window Capture exports at 2000 × 1250 pixels, using fictional names and notes with the same theme and background. When refreshing them, use fictional data, never an actual attendance roster. Raycast's Window Capture workflow can save replacements directly into `metadata/`.
 
 See [Raycast's screenshot instructions](https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots).
 
