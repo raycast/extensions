@@ -15,8 +15,8 @@ A Raycast extension that exposes [Alibaba Cloud Model Studio](https://www.alibab
 2. **Raycast Pro** — Raycast requires a Pro subscription to *use* models provided by extensions
 3. **Node.js** 22.22.2+ and **npm** 7+ (check with `node -v` — matches `@raycast/api`'s own requirement, also declared in `engines`)
 4. **An API key**:
-   - International: create one at [modelstudio.console.alibabacloud.com](https://modelstudio.console.alibabacloud.com) → API Keys (works with the `Pay-as-you-go (International)` platform setting)
-   - China: create one at [bailian.console.aliyun.com](https://bailian.console.aliyun.com) (works with the `Pay-as-you-go (China)` setting)
+   - International: create one at [modelstudio.console.alibabacloud.com](https://modelstudio.console.alibabacloud.com) → API Keys (works with the `Pay-As-You-Go (International)` platform setting)
+   - China: create one at [bailian.console.aliyun.com](https://bailian.console.aliyun.com) (works with the `Pay-As-You-Go (China)` setting)
 
    Keys are **not interchangeable** between the two regions. Pay-as-you-go API keys only — Token Plan and Coding Plan keys (`sk-sp-…`) are **not supported**.
 
@@ -34,14 +34,14 @@ Running `npm run dev` registers the extension locally in Raycast (it appears at 
 
 The first time Raycast needs the extension's settings, it shows a setup form asking for every required preference together — **API Key** and **Platform** — with a help page (from `help.md`) beside the form. Pick the platform that matches where your key was created; the two regions' keys are not interchangeable.
 
-> **Picked "Custom base URL"?** The setup form only collects the *required* preferences, so it never asks for the URL itself. After the form, set **Custom Base URL** in **Raycast Settings → Extensions → Alibaba Model Studio** to your HTTPS OpenAI-compatible endpoint (e.g. `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`), then run **Refresh Models**. Check Setup can validate a URL typed into it, but nothing typed there is ever saved.
+> **Picked "Custom Base URL"?** The setup form only collects the *required* preferences, so it never asks for the URL itself. After the form, set **Custom Base URL** in **Raycast Settings → Extensions → Alibaba Model Studio** to your HTTPS OpenAI-compatible endpoint (e.g. `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`), then run **Refresh Models**. Check Setup can validate a URL typed into it, but nothing typed there is ever saved.
 
 | Preference | What to enter |
 | --- | --- |
 | API Key | Your Model Studio key |
-| Platform | `Pay-as-you-go (International)` or `Pay-as-you-go (China)` — must match where the key came from. Pay-as-you-go keys only: Token Plan / Coding Plan keys are not supported |
+| Platform | `Pay-As-You-Go (International)` or `Pay-As-You-Go (China)` — must match where the key came from. Pay-as-you-go keys only: Token Plan / Coding Plan keys are not supported |
 | Workspace ID | Optional business-space ID for team accounts on pay-as-you-go platforms — sent as the `X-DashScope-WorkSpace` header |
-| Custom Base URL | Only if you picked *Custom* (any HTTPS OpenAI-compatible endpoint) — not part of the setup form; set it in the extension settings |
+| Custom Base URL | Only if you picked *Custom* (any HTTPS OpenAI-compatible endpoint, no query parameters) — not part of the setup form; set it in the extension settings |
 | Extra Models | Optional comma-separated model IDs to force-include in the picker |
 
 After the setup form, validate everything with the **Check Setup** command: it calls the live API with your saved key and platform and tells you exactly what's wrong if they don't match (401 → key/region mismatch), the endpoint is unreachable, or all good (N models discovered, listed below the result). It can also test a different key/platform combination before you commit it to preferences — a combination that differs from the saved one is reported as *validated, but not applied*, since extensions cannot change their own preferences — and its *Open Model Studio Console* action deep-links to the region's console. Validating the saved combination also refreshes Raycast's model list.
@@ -54,7 +54,7 @@ Then opt in to extension models (one-time):
 
 While developing, keep `npm run dev` running for hot reload. Press `⌃C` to stop; the extension stays in Raycast. Re-run `npm run dev` after code changes.
 
-The **Refresh Models** command validates the saved key + platform and re-runs model discovery in one step, reporting the outcome (e.g. "Pay-as-you-go (International): 59 models available") — the one-step way to pick up a platform change from the settings (Raycast also refreshes automatically in the background, but it doesn't notify extensions when preferences change).
+The **Refresh Models** command validates the saved key + platform and re-runs model discovery in one step, reporting the outcome (e.g. "Pay-As-You-Go (International): 59 models available") — the one-step way to pick up a platform change from the settings (Raycast also refreshes automatically in the background, but it doesn't notify extensions when preferences change).
 
 The **Show Models** command lists everything the extension provides to Raycast's model picker in a master-detail view: the searchable model list on the left, and the selected model's full metadata on the right — display title, model ID, context window, vision/reasoning/tools capabilities, whether it comes from the Extra Models preference, and where the list came from (the platform's live `/models` endpoint, or the models.dev / curated fallback when that is unreachable). Run it after changing preferences to see exactly what Raycast will receive.
 
@@ -75,7 +75,7 @@ Notes:
 ## Troubleshooting
 
 - **Run "Check Setup" first** — it validates your saved key and platform against the live API and classifies the failure (key/region mismatch, network, endpoint unavailable).
-- **Picked "Custom base URL" during setup and no models appear** — Raycast's first-run setup form only collects the required preferences (API Key, Platform), so the URL is still unset. Set **Custom Base URL** in the extension settings, then run **Refresh Models**. Check Setup only validates — a URL typed there is never saved.
+- **Picked "Custom Base URL" during setup and no models appear** — Raycast's first-run setup form only collects the required preferences (API Key, Platform), so the URL is still unset. Set **Custom Base URL** in the extension settings, then run **Refresh Models**. Check Setup only validates — a URL typed there is never saved.
 - **Changed Platform but the model picker is stale** — Raycast doesn't notify extensions when preferences change. Run **Refresh Models** to validate and refresh in one step. Note that **Check Setup** only validates: after testing a different platform or key, save it in the extension settings for it to take effect.
 - **No models in the picker** — check the `npm run dev` console: it logs either `alibaba-model-studio: discovered N model ids via …/models` (dynamic discovery worked) or `alibaba-model-studio: /models lookup failed …` followed by which fallback list was used (models.dev or the curated catalog). Also confirm you toggled the extension on in Raycast Settings → AI.
 - **401/403 errors** — your API key doesn't match the selected region (China vs International keys are not interchangeable), or it is a Token Plan / Coding Plan key, which this extension does not support.

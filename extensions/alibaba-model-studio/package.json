@@ -59,18 +59,18 @@
       "data": [
         {
           "value": "payg",
-          "title": "Pay-as-you-go (International)"
+          "title": "Pay-As-You-Go (International)"
         },
         {
           "value": "payg-cn",
-          "title": "Pay-as-you-go (China)"
+          "title": "Pay-As-You-Go (China)"
         },
         {
           "value": "custom",
-          "title": "Custom base URL"
+          "title": "Custom Base URL"
         }
       ],
-      "description": "Where your API key was created. Keys only work against their own region — International vs China. Pay-as-you-go API keys only: Token Plan and Coding Plan keys (sk-sp-…) are not supported. Picking Custom base URL? The setup form doesn't ask for the URL — after finishing, open Raycast Settings → Extensions → Alibaba Model Studio, set Custom Base URL, then run Refresh Models."
+      "description": "Where your API key was created. Keys only work against their own region — International vs China. Pay-As-You-Go API keys only: Token Plan and Coding Plan keys (sk-sp-…) are not supported. Picking Custom Base URL? The setup form doesn't ask for the URL — after finishing, open Raycast Settings → Extensions → Alibaba Model Studio, set Custom Base URL, then run Refresh Models."
     },
     {
       "name": "workspaceId",
@@ -84,7 +84,7 @@
       "title": "Custom Base URL",
       "type": "textfield",
       "required": false,
-      "description": "HTTPS OpenAI-compatible base URL, used when Platform is set to Custom (e.g. https://dashscope-intl.aliyuncs.com/compatible-mode/v1)"
+      "description": "HTTPS OpenAI-compatible base URL without query parameters, used when Platform is set to Custom (e.g. https://dashscope-intl.aliyuncs.com/compatible-mode/v1)"
     },
     {
       "name": "extraModels",

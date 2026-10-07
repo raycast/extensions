@@ -12,16 +12,16 @@ Pick **one** region — keys are region-bound and won't work anywhere else:
 ## 2. Fill in the form
 
 - **API Key** — paste the key you just created
-- **Platform** — pick **Pay-as-you-go (International)** or **Pay-as-you-go (China)** to match; pick **Custom base URL** for any other OpenAI-compatible DashScope endpoint
+- **Platform** — pick **Pay-As-You-Go (International)** or **Pay-As-You-Go (China)** to match; pick **Custom Base URL** for any other OpenAI-compatible DashScope endpoint
 
 > ⚠️ A key from one region will not work on the other — requests fail with `401 invalid_api_key`. If that happens, run the extension's **Check Setup** command to diagnose.
 
 > 💡 **Pay-as-you-go keys only.** Token Plan and Coding Plan keys (`sk-sp-…`) use plan-specific endpoints and are **not supported** by this extension — plan subscriptions are limited to their own supported surfaces. Create a pay-as-you-go key as described above.
 
-> 📌 **Picked Custom base URL?** The setup form only asks for the API Key and Platform — it never asks for the URL itself. After finishing the form:
+> 📌 **Picked Custom Base URL?** The setup form only asks for the API Key and Platform — it never asks for the URL itself. After finishing the form:
 
 1. Open **Raycast Settings → Extensions → Alibaba Model Studio**
-2. Set **Custom Base URL** to your HTTPS endpoint (e.g. `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`)
+2. Set **Custom Base URL** to your HTTPS endpoint (e.g. `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`) — no query parameters: the API key goes in the API Key field, never the URL
 3. Run the **Refresh Models** command
 
 The **Check Setup** command can validate a URL, but nothing typed there is ever saved.

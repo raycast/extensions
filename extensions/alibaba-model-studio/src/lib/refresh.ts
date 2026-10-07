@@ -8,11 +8,22 @@ import {
   type ModelsProbe,
 } from "./catalog";
 
+/**
+ * The preferences an explicit refresh ran against, snapshotted before any
+ * network work: callers label results with this snapshot, because settings
+ * saved while the refresh is in flight must not relabel its output.
+ */
+export type RefreshedPrefs = Pick<
+  ReturnType<typeof getPreferences>,
+  "platform" | "baseURL" | "extraModels"
+>;
+
 export type RefreshOutcome =
   | {
       status: "ok";
       models: AI.RegisteredModel[];
       probe: Extract<ModelsProbe, { ok: true }>;
+      prefs: RefreshedPrefs;
     }
   | { status: "failed"; probe: Extract<ModelsProbe, { ok: false }> };
 
@@ -73,7 +84,16 @@ export async function refreshModelsWithToast(): Promise<
     // Report the failure instead: callers keep their current list and surface
     // it in the view. The toast above already reported it too.
     if (!probe.ok) return { status: "failed", probe };
-    return { status: "ok", models, probe };
+    return {
+      status: "ok",
+      models,
+      probe,
+      prefs: {
+        platform: prefs.platform,
+        baseURL: prefs.baseURL,
+        extraModels: prefs.extraModels,
+      },
+    };
   } catch (error) {
     await showFailureToast(error, { title: "Refresh failed" });
     return undefined;

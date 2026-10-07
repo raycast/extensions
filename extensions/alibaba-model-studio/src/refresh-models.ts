@@ -1,7 +1,7 @@
 import { AI, showHUD } from "@raycast/api";
 import {
+  getModels,
   getPreferences,
-  loadModelMetadata,
   platformTitle,
   probeModelsEndpoint,
   probeWorkspace,
@@ -16,20 +16,24 @@ export default async function Command() {
   // An explicit refresh must check the live endpoint, not the 60-second
   // discovery cache.
   const probeWorkspaceId = probeWorkspace(platform, workspaceId);
-  const probe = await probeModelsEndpoint(baseURL, apiKey, probeWorkspaceId, {
-    bypassCache: true,
-  });
   try {
-    if (probe.ok) {
-      // Bust the models.dev metadata cache before realigning Raycast's list,
-      // so ids that are new since the last discovery get real titles and
-      // context windows on the poll that follows.
-      await loadModelMetadata(platform, { bypassCache: true });
-    }
+    // Same shape as refreshModelsWithToast: discovery and the bypassed probe
+    // share one in-flight fetch, and the fresh models.dev metadata means ids
+    // that are new since the last discovery register with real titles and
+    // context windows on the poll that follows.
+    const [models, probe] = await Promise.all([
+      getModels({ bypassCache: true }),
+      probeModelsEndpoint(baseURL, apiKey, probeWorkspaceId, {
+        bypassCache: true,
+      }),
+    ]);
     await AI.refreshModels();
     if (probe.ok) {
+      // Registered models, not the raw /models id count: DashScope lists many
+      // non-chat services that discovery filters out, and Extra Models ids
+      // never appear in the endpoint's response.
       await showHUD(
-        `${platformTitle(platform)}: ${probe.ids.length} models available`,
+        `${platformTitle(platform)}: ${models.length} models available`,
       );
     } else {
       await showHUD(`Refreshed, but validation failed — ${probe.message}`);

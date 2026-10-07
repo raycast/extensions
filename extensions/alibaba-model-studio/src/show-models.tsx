@@ -20,7 +20,7 @@ import {
   type ModelsProbe,
 } from "./lib/catalog";
 import { formatContextWindow, redactEndpoint } from "./lib/format";
-import { refreshModelsWithToast } from "./lib/refresh";
+import { refreshModelsWithToast, type RefreshedPrefs } from "./lib/refresh";
 
 type DiscoveryResult = {
   models: AI.RegisteredModel[];
@@ -66,7 +66,7 @@ export default function ShowModels() {
     (
       models: AI.RegisteredModel[],
       probe: ModelsProbe | undefined,
-      prefs: ReturnType<typeof getPreferences>,
+      prefs: RefreshedPrefs,
     ) => {
       setResult({
         models,
@@ -128,7 +128,10 @@ export default function ShowModels() {
       if (!outcome) return;
       if (outcome.status === "ok") {
         setRefreshError(undefined);
-        apply(outcome.models, outcome.probe, getPreferences());
+        // Label with the snapshot the refresh ran against, never a fresh
+        // read: settings saved while the refresh was in flight would label
+        // the old endpoint's models with the new platform and base URL.
+        apply(outcome.models, outcome.probe, outcome.prefs);
       } else {
         // Keep the list the picker is still serving; surface the failure in
         // the view so an explicit refresh never looks like a silent no-op.

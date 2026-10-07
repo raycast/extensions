@@ -17,16 +17,19 @@ const DEFAULT_PLATFORM: Platform = "payg";
 export type Platform = "payg" | "payg-cn" | "custom";
 
 export const PLATFORM_OPTIONS: Array<{ value: Platform; title: string }> = [
-  { value: "payg", title: "Pay-as-you-go (International)" },
-  { value: "payg-cn", title: "Pay-as-you-go (China)" },
-  { value: "custom", title: "Custom base URL" },
+  { value: "payg", title: "Pay-As-You-Go (International)" },
+  { value: "payg-cn", title: "Pay-As-You-Go (China)" },
+  { value: "custom", title: "Custom Base URL" },
 ];
 
 /** Display title for a raw platform preference value — raw values are never shown to users. */
 export function platformTitle(value: string | undefined): string {
+  const match = PLATFORM_OPTIONS.find((option) => option.value === value);
+  if (match) return match.title;
+  // Unknown/legacy values fall back to the default platform's title.
   return (
-    PLATFORM_OPTIONS.find((option) => option.value === value)?.title ??
-    "Pay-as-you-go (International)"
+    PLATFORM_OPTIONS.find((option) => option.value === DEFAULT_PLATFORM)
+      ?.title ?? PLATFORM_OPTIONS[0].title
   );
 }
 
@@ -61,12 +64,22 @@ export function resolveBaseURL(
       const url = customBaseUrl?.trim() ?? "";
       if (!url) return null;
       // The custom URL carries the API key as a bearer credential — HTTPS
-      // only, so an http:// or malformed value can't leak the key.
+      // only, so an http:// or malformed value can't leak the key. Query
+      // strings are rejected: both the /models probe and the AI SDK append
+      // the request path by string concatenation, so a query would swallow
+      // it and silently request the wrong endpoint.
       try {
         const parsed = new URL(url);
-        return parsed.protocol === "https:"
-          ? parsed.toString().replace(/\/+$/, "")
-          : null;
+        // `parsed.search` is "" for an empty query ("…/v1?"), which toString()
+        // still serializes — check the normalized string so a bare "?" is
+        // rejected too. The hash is cleared first, so a fragment containing
+        // "?" isn't wrongly rejected.
+        parsed.hash = "";
+        const normalized = parsed.toString();
+        if (parsed.protocol !== "https:" || normalized.includes("?")) {
+          return null;
+        }
+        return normalized.replace(/\/+$/, "");
       } catch {
         return null;
       }
@@ -924,8 +937,15 @@ export const getModels = async (options?: {
   }
   let enrichedMetadata = metadata;
   if (missingVendorSlugs.size > 0) {
+    // The qwen vendor rule maps to the platform's own slug, which
+    // loadModelMetadata just fetched with the same options — re-bypassing it
+    // would re-download the identical models.dev document, so that slug goes
+    // through the fresh cache (or failure backoff) instead.
+    const platformSlug = modelsDevSlug(platform);
     const vendorCatalogs = await Promise.all(
-      [...missingVendorSlugs].map((slug) => loadMetadataForSlug(slug)),
+      [...missingVendorSlugs].map((slug) =>
+        loadMetadataForSlug(slug, slug === platformSlug ? undefined : options),
+      ),
     );
     enrichedMetadata = { ...Object.assign({}, ...vendorCatalogs), ...metadata };
   }
