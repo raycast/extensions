@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { GlyphKind, kindFor } from "./palettes";
+import { GlyphKind, glyphFor } from "./palettes";
 
 export { labelFor } from "./palettes";
 
@@ -27,10 +27,11 @@ const TAG_COLORS: Record<GlyphKind, Color> = {
   storm: Color.Orange,
 };
 
-export function iconFor(code: number): Icon {
-  return ICONS[kindFor(code)];
+/** Raycast icon for a weather code; a clear sky at night shows the moon. Daily rows pass no `isDay`. */
+export function iconFor(code: number, isDay = true): Icon {
+  return ICONS[glyphFor(code, isDay)];
 }
 
-export function tagColorFor(code: number): Color {
-  return TAG_COLORS[kindFor(code)];
+export function tagColorFor(code: number, isDay = true): Color {
+  return TAG_COLORS[glyphFor(code, isDay)];
 }

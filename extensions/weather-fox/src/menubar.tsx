@@ -35,7 +35,10 @@ export default function MenuBarWeather() {
 
   const cur = forecast?.current;
   const title = cur ? `${Math.round(cur.temperature_2m)}°` : "…";
-  const icon = cur ? { source: iconFor(cur.weather_code), tintColor: tagColorFor(cur.weather_code) } : Icon.Cloud;
+  const isDay = cur?.is_day === 1;
+  const icon = cur
+    ? { source: iconFor(cur.weather_code, isDay), tintColor: tagColorFor(cur.weather_code, isDay) }
+    : Icon.Cloud;
   const nowcast = forecast ? nowcastSummary(forecast) : undefined;
   const vsYesterday = forecast ? yesterdayComparison(forecast) : undefined;
   const aqi = airQuality?.current.us_aqi;
@@ -55,7 +58,7 @@ export default function MenuBarWeather() {
           <MenuBarExtra.Item
             title={`${labelFor(cur.weather_code)} · feels like ${fmt(cur.apparent_temperature, "°")}${unitSymbol}`}
             subtitle={`H ${Math.round(forecast.daily.temperature_2m_max[0])}° L ${Math.round(forecast.daily.temperature_2m_min[0])}°`}
-            icon={{ source: iconFor(cur.weather_code), tintColor: tagColorFor(cur.weather_code) }}
+            icon={{ source: iconFor(cur.weather_code, isDay), tintColor: tagColorFor(cur.weather_code, isDay) }}
             onAction={openWeather}
           />
         )}

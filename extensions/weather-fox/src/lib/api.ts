@@ -197,14 +197,18 @@ export function normalizeForecast(raw: Omit<Forecast, "units">, units: Units): F
   }
   const hourly = { ...raw.hourly };
   const daily = { ...raw.daily };
-  const yesterdayTemps = raw.hourly.temperature_2m.slice(0, 24);
+  // Open-Meteo reports every hour in one fixed UTC offset, so yesterday is 24 slots; locate
+  // today's first hour by date anyway rather than trusting the count.
+  const firstToday = raw.hourly.time.findIndex((t) => t.startsWith(raw.daily.time[1]));
+  const yesterdayHours = firstToday > 0 ? firstToday : 24;
+  const yesterdayTemps = raw.hourly.temperature_2m.slice(0, yesterdayHours);
   const yesterday: YesterdaySummary = {
     temperature_2m: yesterdayTemps,
     max: raw.daily.temperature_2m_max[0],
     min: raw.daily.temperature_2m_min[0],
   };
   for (const key of Object.keys(hourly) as (keyof HourlyWeather)[]) {
-    hourly[key] = hourly[key].slice(24) as never;
+    hourly[key] = hourly[key].slice(yesterdayHours) as never;
   }
   for (const key of Object.keys(daily) as (keyof DailyWeather)[]) {
     daily[key] = daily[key].slice(1) as never;

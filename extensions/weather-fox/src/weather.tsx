@@ -237,7 +237,10 @@ function NowItem(props: {
       title="Now"
       keywords={["current", "conditions"]}
       subtitle={label}
-      icon={{ source: iconFor(cur.weather_code), tintColor: tagColorFor(cur.weather_code) }}
+      icon={{
+        source: iconFor(cur.weather_code, cur.is_day === 1),
+        tintColor: tagColorFor(cur.weather_code, cur.is_day === 1),
+      }}
       accessories={[{ text: `${Math.round(cur.temperature_2m)}°${unitSymbol}` }]}
       detail={
         <List.Item.Detail
@@ -332,7 +335,8 @@ function DayItem(props: {
   const label = labelFor(code);
   const high = daily.temperature_2m_max[d];
   const low = daily.temperature_2m_min[d];
-  const rain = daily.precipitation_probability_max[d] ?? 0;
+  // null past the model horizon on 16-day forecasts; shown as "—" rather than 0%.
+  const rain = daily.precipitation_probability_max[d] as number | null;
   const { unitSymbol, windUnit, theme } = settings;
 
   const name = dayName(forecast, d);
@@ -343,10 +347,12 @@ function DayItem(props: {
   );
 
   const accessories: List.Item.Accessory[] = [];
-  if (rain >= 30) accessories.push({ tag: { value: `${rain}%`, color: Color.Blue }, tooltip: "Chance of rain" });
+  if (rain != null && rain >= 30) {
+    accessories.push({ tag: { value: `${rain}%`, color: Color.Blue }, tooltip: "Chance of rain" });
+  }
   accessories.push({ text: `${Math.round(low)}° / ${Math.round(high)}°` });
 
-  const summary = `${name} in ${formatPlace(place)}: ${label}, high ${Math.round(high)}°${unitSymbol}, low ${Math.round(low)}°${unitSymbol}, rain ${rain}%`;
+  const summary = `${name} in ${formatPlace(place)}: ${label}, high ${Math.round(high)}°${unitSymbol}, low ${Math.round(low)}°${unitSymbol}${rain != null ? `, rain ${rain}%` : ""}`;
 
   // Let searches like "friday", "aug 29", or "29" find the day.
   const date = isoToDate(daily.time[d]);
@@ -371,7 +377,7 @@ function DayItem(props: {
                 <List.Item.Detail.Metadata.TagList.Item text={`H ${Math.round(high)}°`} color={Color.Orange} />
                 <List.Item.Detail.Metadata.TagList.Item text={`L ${Math.round(low)}°`} color={Color.Blue} />
               </List.Item.Detail.Metadata.TagList>
-              <List.Item.Detail.Metadata.Label title="Chance of Rain" icon={Icon.Raindrop} text={`${rain}%`} />
+              <List.Item.Detail.Metadata.Label title="Chance of Rain" icon={Icon.Raindrop} text={fmt(rain, "%")} />
               {(precipSum >= 0.1 || snowSum >= 0.1) && (
                 <List.Item.Detail.Metadata.Label
                   title="Precipitation"
