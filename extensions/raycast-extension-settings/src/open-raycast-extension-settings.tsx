@@ -14,9 +14,7 @@ import {
 import { runAppleScript, useFrecencySorting } from "@raycast/utils";
 import { useMemo } from "react";
 import { failureFromError, JUMP_SCRIPT, parseJumpOutput, reasonFor } from "./jump";
-import { ExtensionKind, ExtensionRow, loadRows } from "./sources";
-
-type Preferences = { showDevelopment: boolean; showAuthor: boolean; showOrigin: boolean };
+import { ExtensionKind, ExtensionRow, loadRows, rowKey } from "./sources";
 
 const cache = new Cache();
 
@@ -26,8 +24,7 @@ const KIND_TAG: Record<ExtensionKind, { value: string; color: Color }> = {
   dev: { value: "Dev", color: Color.Green },
 };
 
-const ACCESSIBILITY_PANE =
-  "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+const ACCESSIBILITY_PANE = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
 async function openSettings(row: ExtensionRow) {
   await closeMainWindow();
@@ -47,24 +44,21 @@ async function openSettings(row: ExtensionRow) {
 
 export default function Command() {
   const { showDevelopment, showAuthor, showOrigin } = getPreferenceValues<Preferences>();
-  const rows = useMemo(
-    () => loadRows(showDevelopment, cache, environment.raycastVersion),
-    [showDevelopment],
-  );
+  const rows = useMemo(() => loadRows(showDevelopment, cache, environment.raycastVersion), [showDevelopment]);
   // Most-used extensions rise to the top; never-opened ones keep A–Z order.
   const {
     data: sorted,
     visitItem,
     resetRanking,
   } = useFrecencySorting(rows, {
-    key: (row) => `${row.kind}:${row.title}`,
+    key: rowKey,
     sortUnvisited: (a, b) => a.title.localeCompare(b.title),
   });
   return (
     <List searchBarPlaceholder="Search extensions…">
       {sorted.map((row) => (
         <List.Item
-          key={`${row.kind}:${row.title}`}
+          key={rowKey(row)}
           title={row.title}
           subtitle={showAuthor ? row.author : undefined}
           icon={row.icon ? { source: row.icon } : Icon.Box}
@@ -92,11 +86,7 @@ export default function Command() {
                 content={row.title}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
-              <Action
-                title="Reset Ranking"
-                icon={Icon.ArrowCounterClockwise}
-                onAction={() => resetRanking(row)}
-              />
+              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(row)} />
             </ActionPanel>
           }
         />

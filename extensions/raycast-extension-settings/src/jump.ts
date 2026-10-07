@@ -9,12 +9,7 @@
 export const SETTINGS_DEEPLINK = "raycast://extensions/raycast/raycast/settings";
 
 export type JumpFailure =
-  | "no-accessibility"
-  | "settings-not-opened"
-  | "no-search-box"
-  | "no-result"
-  | "wrong-page"
-  | "unknown";
+  "no-accessibility" | "settings-not-opened" | "no-search-box" | "no-result" | "wrong-page" | "unknown";
 
 export type JumpResult = { ok: true } | { ok: false; code: JumpFailure; detail?: string };
 
@@ -144,12 +139,7 @@ export function parseJumpOutput(output: string): JumpResult {
   if (code.startsWith("wrong-page:")) {
     return { ok: false, code: "wrong-page", detail: code.slice("wrong-page:".length) || undefined };
   }
-  const known: JumpFailure[] = [
-    "no-accessibility",
-    "settings-not-opened",
-    "no-search-box",
-    "no-result",
-  ];
+  const known: JumpFailure[] = ["no-accessibility", "settings-not-opened", "no-search-box", "no-result"];
   return known.includes(code as JumpFailure)
     ? { ok: false, code: code as JumpFailure }
     : { ok: false, code: "unknown", detail: code };
@@ -174,9 +164,7 @@ export function reasonFor(title: string, result: Exclude<JumpResult, { ok: true 
     case "no-result":
       return `Raycast Settings has no extension named “${title}”`;
     case "wrong-page":
-      return result.detail
-        ? `Settings opened ${result.detail} instead`
-        : `Settings opened, but not on ${title}'s page`;
+      return result.detail ? `Settings opened ${result.detail} instead` : `Settings opened, but not on ${title}'s page`;
     default:
       return result.detail ? `Unexpected error: ${result.detail}` : "Unexpected error";
   }

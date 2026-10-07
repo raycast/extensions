@@ -3,7 +3,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { failureFromError, parseJumpOutput, reasonFor } from "../src/jump";
-import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, TextCache } from "../src/sources";
+import { loadBuiltIns, mergeRows, parseBuiltIns, readInstalled, rowKey, TextCache } from "../src/sources";
 
 describe("parseBuiltIns", () => {
   it("reads built-in titles and drops the hidden ones", () => {
@@ -84,7 +84,7 @@ describe("loadBuiltIns", () => {
 });
 
 describe("mergeRows", () => {
-  it("keeps one row per title, installed wins, sorted", () => {
+  it("drops a built-in an installed extension shadows, sorted", () => {
     const merged = mergeRows(
       [{ title: "Calendar", kind: "built-in" }],
       [
@@ -96,6 +96,18 @@ describe("mergeRows", () => {
       ["Bartender", "store"],
       ["calendar", "store"],
     ]);
+  });
+
+  it("keeps installed extensions that share a title, with distinct keys", () => {
+    const merged = mergeRows(
+      [],
+      [
+        { title: "GitHub", kind: "store", owner: "raycast", name: "github" },
+        { title: "GitHub", kind: "store", owner: "someone", name: "github-lite" },
+      ],
+    );
+    expect(merged).toHaveLength(2);
+    expect(new Set(merged.map(rowKey)).size).toBe(2);
   });
 });
 

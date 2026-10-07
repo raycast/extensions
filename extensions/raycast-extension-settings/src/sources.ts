@@ -60,8 +60,8 @@ export function readInstalled(dir: string = INSTALLED_DIR): ExtensionRow[] {
   for (const id of readdirSync(dir)) {
     const manifest = join(dir, id, "package.json");
     if (!existsSync(manifest)) continue;
-    if (UUID.test(id) && !installedByRaycast(manifest)) continue;
     try {
+      if (UUID.test(id) && !installedByRaycast(manifest)) continue;
       const pkg = JSON.parse(readFileSync(manifest, "utf8"));
       if (!pkg.title) continue;
       const icon = pkg.icon ? join(dir, id, "assets", pkg.icon) : undefined;
@@ -74,17 +74,24 @@ export function readInstalled(dir: string = INSTALLED_DIR): ExtensionRow[] {
         icon: icon && existsSync(icon) ? icon : undefined,
       });
     } catch {
-      // unreadable manifest: skip the row rather than fail the list
+      // unreadable or vanished manifest (mid-update): skip the row rather than fail the list
     }
   }
   return rows;
 }
 
-// One list, one row per title, sorted A–Z; an installed row wins over a built-in of the same name.
+// One list sorted A–Z. A built-in sharing an installed extension's title is dropped; installed
+// extensions are all kept, even when two share a title.
 export function mergeRows(builtIns: ExtensionRow[], installed: ExtensionRow[]): ExtensionRow[] {
-  const byTitle = new Map<string, ExtensionRow>();
-  for (const r of [...builtIns, ...installed]) byTitle.set(r.title.toLowerCase(), r);
-  return [...byTitle.values()].sort((a, b) => a.title.localeCompare(b.title));
+  const installedTitles = new Set(installed.map((r) => r.title.toLowerCase()));
+  return [...builtIns.filter((r) => !installedTitles.has(r.title.toLowerCase())), ...installed].sort((a, b) =>
+    a.title.localeCompare(b.title),
+  );
+}
+
+// Stable identity for a row (list key and ranking), distinct even when titles match.
+export function rowKey(row: ExtensionRow): string {
+  return `${row.kind}:${row.owner ?? ""}/${row.name ?? row.title}`;
 }
 
 // The subset of Raycast's `Cache` used here, so tests can pass a plain Map-backed stand-in.
@@ -115,11 +122,7 @@ export function loadBuiltIns(
   return rows;
 }
 
-export function loadRows(
-  showDevelopment: boolean,
-  cache: TextCache,
-  raycastVersion: string,
-): ExtensionRow[] {
+export function loadRows(showDevelopment: boolean, cache: TextCache, raycastVersion: string): ExtensionRow[] {
   const installed = readInstalled().filter((r) => showDevelopment || r.kind !== "dev");
   return mergeRows(loadBuiltIns(cache, raycastVersion), installed);
 }
