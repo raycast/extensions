@@ -1,6 +1,6 @@
 # Hostbeam Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-07
 
 - Beam Clipboard — send the screenshot on your clipboard to your current host.
 - Switch Host — choose where beams go, or switch and beam in one action.
