@@ -67,12 +67,26 @@ export function HighlightListItem({ highlight, showingDetail, onToggleDetail, mu
     }
   }
 
+  // The built-in filter only sees title and subtitle, and the title is a
+  // truncated snippet. Keywords let it match the whole quote, note, source and tags.
+  const keywords = [
+    highlight.content,
+    highlight.note,
+    source?.name,
+    source?.author,
+    ...highlight.tags.map((t) => t.name),
+  ]
+    .filter((text): text is string => Boolean(text))
+    .flatMap((text) => text.split(/\s+/))
+    .filter(Boolean);
+
   return (
     <List.Item
       key={highlight.id}
       icon={sourceIcon(source?.type)}
       title={truncate(highlight.content, showingDetail ? 60 : 120)}
       subtitle={showingDetail ? undefined : highlightSubtitle(highlight)}
+      keywords={keywords}
       accessories={accessories}
       detail={
         <List.Item.Detail
