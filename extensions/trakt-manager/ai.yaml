@@ -28,6 +28,7 @@ instructions: |
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
   - For "what should I watch next?", "what can I finish tonight?" or "where was I?", use `get-up-next`: it is Trakt's Continue Watching. Shows in progress come back in `data` with their next episode, movies paused mid-playback in `movies` with `progressPercent` and `minutesLeft`. Pass `type: "shows"` or `type: "movies"` when the user asks for only one kind.
   - When `get-up-next` returns a `warning`, one of its two lists could not be loaded: tell the user, and never conclude that the missing list is empty.
+  - For "what's airing this week?", "when does the next episode of X come out?" or "which movies come out soon?", use `get-calendar`. Pass `startDate` (YYYY-MM-DD, in the user's local time) and `days` (max 32) for another period, and `type: "shows"` or `type: "movies"` for only one kind. Dates and times in the answer are already local: present them as is. The calendar only lists titles Trakt tracks for the user (shows they watched or watchlisted, minus shows hidden from the calendar), so never conclude that a show or movie has no release because it is absent. Surface `warning` when present.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
   - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
@@ -145,6 +146,68 @@ evals:
           name: "get-recommendations"
           arguments:
             type: shows
+
+  - input: "@trakt-manager what's airing this week?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-08"
+          endDate: "2026-10-14"
+          days: 7
+          timeZone: "Europe/Paris"
+        episodes:
+          - localDate: "2026-10-09"
+            localTime: "03:00"
+            showTitle: "Severance"
+            showTraktId: 154784
+            season: 3
+            number: 1
+            episodeTitle: "Hello Again"
+            episodeTraktId: 4100001
+        movies: []
+        message: "1 episode(s) and 0 movie(s) from 2026-10-08 to 2026-10-14 (Europe/Paris)."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+
+  - input: "@trakt-manager any movies coming out in the next two weeks?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-08"
+          endDate: "2026-10-21"
+          days: 14
+          timeZone: "Europe/Paris"
+        episodes: []
+        movies:
+          - releaseDate: "2026-10-16"
+            title: "Dune: Part Three"
+            year: 2026
+            traktId: 900001
+        message: "1 movie(s) from 2026-10-08 to 2026-10-21 (Europe/Paris)."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+          arguments:
+            type: movies
+            days: 14
+
+  - input: "@trakt-manager what's on my calendar from 2026-10-20?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-20"
+          endDate: "2026-10-26"
+          days: 7
+          timeZone: "Europe/Paris"
+        episodes: []
+        movies: []
+        message: "0 episode(s) and 0 movie(s) from 2026-10-20 to 2026-10-26 (Europe/Paris)."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+          arguments:
+            startDate: "2026-10-20"
 
   - input: "@trakt-manager when did I watch Inception?"
     mocks:
