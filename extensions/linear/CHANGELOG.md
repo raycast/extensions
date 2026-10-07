@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Simplify AI Tools] - {PR_MERGE_DATE}
+## [Simplify AI Tools] - 2026-10-07
 
 - Remove 17 older AI tools that overlapped with the newer `list-*`, `get-*`, and `save-*` tools, so Raycast AI picks the right tool more reliably.
 - **List Cycles**, **List Issue Statuses**, and **List Milestones** now work without a team or project and list across the workspace. **List Cycles** takes a team name, key, or ID.
