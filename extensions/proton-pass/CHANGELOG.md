@@ -2,6 +2,9 @@
 
 ## [Login Fixes] - {PR_MERGE_DATE}
 
+- Login with Browser keeps going when Raycast closes: pass-cli runs on its own, so the login completes however long it takes in the browser. Before, Raycast could stop it once the browser came to the front, and nothing said the login hadn't completed
+- While the login runs, the screen says to finish it in the browser, with Open Login Page Again and Cancel Login. Coming back to the extension picks the login up: it reloads once logged in, or says why the login didn't complete
+- Get TOTP's Not Logged In screen can log in too
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
 

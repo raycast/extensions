@@ -5,7 +5,7 @@ import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
-import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
+import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
@@ -244,7 +244,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} onCheckAgain={loadItems} />;
+    return <NotLoggedInView reload={loadItems} />;
   }
   const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;

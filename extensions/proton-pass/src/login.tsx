@@ -1,15 +1,14 @@
-import { List, ActionPanel, Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { checkAuth, loginWithBrowser } from "./lib/pass-cli";
+import { checkAuth } from "./lib/pass-cli";
 import { PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
-import { openTerminalForLogin } from "./lib/terminal";
+import { LoginScreen, useBrowserLogin } from "./lib/login-view";
 import { platformShortcut } from "./lib/shortcuts";
 
 type AuthState = "loading" | "not-installed" | "not-authenticated" | "authenticated";
 
 export default function Command() {
   const [authState, setAuthState] = useState<AuthState>("loading");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   async function verifyAuth() {
     try {
@@ -35,40 +34,23 @@ export default function Command() {
     }
   }
 
+  function checkAgain() {
+    setAuthState("loading");
+    void verifyAuth();
+  }
+
+  const login = useBrowserLogin(checkAgain);
+
   useEffect(() => {
     verifyAuth();
   }, []);
 
-  async function handleBrowserLogin() {
-    setIsLoggingIn(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting Proton Pass login",
-      message: "Complete authentication in your browser",
-    });
-
-    try {
-      await loginWithBrowser();
-      const isAuthenticated = await checkAuth();
-      if (!isAuthenticated) {
-        throw new PassCliError("Login did not complete. Please try again.", "not_authenticated");
-      }
-      setAuthState("authenticated");
-      toast.style = Toast.Style.Success;
-      toast.title = "Logged in";
-      toast.message = "Proton Pass session is active";
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Login failed";
-      toast.message = message;
-      setAuthState("not-authenticated");
-    } finally {
-      setIsLoggingIn(false);
-    }
+  // A login in progress comes first, also one started from the logged-in screen to log in again.
+  if (login.status.state === "starting" || login.status.state === "waiting") {
+    return <LoginScreen login={login} onCheckAgain={checkAgain} />;
   }
 
-  if (authState === "loading" || isLoggingIn) {
+  if (authState === "loading") {
     return <List isLoading={true} />;
   }
 
@@ -90,47 +72,7 @@ export default function Command() {
   }
 
   if (authState === "not-authenticated") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.Lock}
-          title="Not Logged In"
-          description={
-            process.platform === "darwin"
-              ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
-              : "Use browser login to authenticate with Proton Pass."
-          }
-          actions={
-            <ActionPanel>
-              <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              {process.platform === "darwin" && (
-                <Action
-                  title="Open Terminal Login (Fallback)"
-                  icon={Icon.Terminal}
-                  onAction={openTerminalForLogin}
-                  shortcut={platformShortcut(["cmd"], "t")}
-                />
-              )}
-              <Action.OpenInBrowser
-                title="View CLI Documentation"
-                url={PROTON_PASS_CLI_DOCS}
-                icon={Icon.Globe}
-                shortcut={platformShortcut(["cmd"], "d")}
-              />
-              <Action
-                title="Check Again"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={() => {
-                  setAuthState("loading");
-                  void verifyAuth();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <LoginScreen login={login} onCheckAgain={checkAgain} />;
   }
 
   return (
@@ -138,10 +80,14 @@ export default function Command() {
       <List.EmptyView
         icon={Icon.CheckCircle}
         title="You're Logged In"
-        description="You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
+        description={
+          login.status.state === "failed"
+            ? `Your session is still active, but the new login didn't complete: ${login.status.error.message}`
+            : "You are successfully authenticated with Proton Pass. You can now use other commands to search and manage your vaults."
+        }
         actions={
           <ActionPanel>
-            <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={handleBrowserLogin} />
+            <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={login.start} />
             <Action.OpenInBrowser
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}

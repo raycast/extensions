@@ -33,7 +33,7 @@ pass-cli login
 
 This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
-You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. Once a login completes elsewhere, for example after Raycast has closed, Check Again (⌘R) picks up the new session.
+You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session.
 
 Optional: use terminal prompts with interactive login:
 

@@ -1,13 +1,33 @@
-import { spawn } from "node:child_process";
+import { ChildProcess, spawn } from "node:child_process";
+import { once } from "node:events";
+import { mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { CommandDescriptor, normalizeCliExecutionError } from "./exec";
 import { PassCliError } from "../types";
 
 const LOGIN_HOST = "account.proton.me";
+const STATE_FILE = "login.json";
+const OUTPUT_FILE = "output.txt";
+const EXIT_CODE_FILE = "exit-code.txt";
+const POLL_MS = 100;
+/** How long a browser login may take; past it, a saved process ID may belong to another process by now. */
+export const LOGIN_TIMEOUT_MS = 10 * 60_000;
 
-export interface BrowserLoginOptions {
-  openUrl: (url: string) => void | Promise<void>;
-  timeoutMs: number;
+/** A login running on its own, saved so that the extension finds it again after Raycast stopped it. */
+interface SavedLogin {
+  pid: number;
+  url: string;
+  startedAt: number;
 }
+
+export type BrowserLoginStatus =
+  | { state: "none" }
+  | { state: "waiting"; url: string }
+  | { state: "succeeded" }
+  | { state: "failed"; error: PassCliError };
+
+/** Logins started by this process, which it can stop safely once they've run too long. */
+const ownLogins = new Map<number, ChildProcess>();
 
 export function extractLoginUrl(text: string): string | null {
   for (const candidate of text.match(/https?:\/\/\S+/g) ?? []) {
@@ -22,67 +42,152 @@ export function extractLoginUrl(text: string): string | null {
   return null;
 }
 
-function normalizeLoginError(error: unknown, cliPath: string): PassCliError {
-  const normalized = normalizeCliExecutionError(error, cliPath);
-  return normalized.type === "unknown" ? new PassCliError("pass-cli login failed.", "unknown") : normalized;
+export function isProcessRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    // EPERM: the process exists, but can't be signaled.
+    return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
 }
 
-export function runBrowserLogin(command: CommandDescriptor, options: BrowserLoginOptions): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command.file, [...command.args, "login"], { stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    let opened = false;
-    let settled = false;
-    let openPromise: Promise<void> | undefined;
+function stopProcess(pid: number): void {
+  try {
+    process.kill(pid);
+  } catch {
+    // Already gone.
+  }
+}
 
-    const finish = (error?: PassCliError) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (error) reject(error);
-      else resolve();
-    };
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    const scanCompleteLines = (flush = false) => {
-      const boundary = flush ? stdout.length : stdout.lastIndexOf("\n") + 1;
-      if (boundary === 0) return;
-      const complete = stdout.slice(0, boundary);
-      stdout = stdout.slice(boundary);
-      const url = opened ? null : extractLoginUrl(complete);
-      if (!url) return;
-      opened = true;
-      openPromise = Promise.resolve(options.openUrl(url)).then(
-        () => undefined,
-        () => {
-          child.kill();
-          finish(new PassCliError("Could not open Proton login URL.", "unknown"));
-        },
-      );
-    };
+const readText = (path: string) => readFile(path, "utf8").catch(() => "");
 
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString("utf8");
-      scanCompleteLines();
+async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
+  try {
+    const saved = JSON.parse(await readFile(join(dir, STATE_FILE), "utf8")) as Partial<SavedLogin>;
+    const isValid =
+      typeof saved.pid === "number" && typeof saved.url === "string" && typeof saved.startedAt === "number";
+    return isValid ? (saved as SavedLogin) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The output holds the login URL and its payload, so the files go as soon as the login is over. */
+const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true });
+
+/** Why the login failed, from pass-cli's output, leaving out the login URL and its payload. */
+function loginFailure(output: string, cliPath: string): PassCliError {
+  const details = output
+    .split("\n")
+    .filter((line) => !/https?:\/\/|payload=/i.test(line))
+    .join("\n");
+  const error = normalizeCliExecutionError(
+    Object.assign(new Error("pass-cli login failed"), { stderr: details }),
+    cliPath,
+  );
+  if (error.type === "not_authenticated") return new PassCliError("The login didn't complete. Try again.", error.type);
+  return error.type === "unknown" ? new PassCliError("pass-cli login failed.", "unknown") : error;
+}
+
+/**
+ * Starts `pass-cli login` on its own, writing to a file in `dir`: Raycast can stop the extension once the browser
+ * opens, and the login must still complete. Resolves with the URL to open, as soon as pass-cli prints it.
+ */
+export async function startDetachedLogin(
+  command: CommandDescriptor,
+  dir: string,
+  urlTimeoutMs: number,
+): Promise<string> {
+  // A login still running from before would compete with this one.
+  await cancelDetachedLogin(dir);
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  const outputPath = join(dir, OUTPUT_FILE);
+  const output = await open(outputPath, "w", 0o600);
+  let child: ChildProcess;
+  try {
+    child = spawn(command.file, [...command.args, "login"], {
+      detached: true,
+      stdio: ["ignore", output.fd, output.fd],
+      windowsHide: true,
     });
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString("utf8");
-    });
-    child.on("error", (error) => finish(normalizeLoginError(error, command.file)));
-    child.on("close", (code) => {
-      scanCompleteLines(true);
-      if (settled) return;
-      if (code !== 0) {
-        const error = Object.assign(new Error(`pass-cli exited with code ${code ?? "unknown"}`), { stderr });
-        finish(normalizeLoginError(error, command.file));
-        return;
-      }
-      void (openPromise ?? Promise.resolve()).then(() => finish());
-    });
+    await once(child, "spawn");
+  } catch (error) {
+    await removeLogin(dir);
+    throw normalizeCliExecutionError(error, command.file);
+  } finally {
+    await output.close();
+  }
 
-    const timer = setTimeout(() => {
-      child.kill();
-      finish(new PassCliError("Login timed out. Complete browser authentication and try again.", "timeout"));
-    }, options.timeoutMs);
+  child.unref();
+  const pid = child.pid as number;
+  ownLogins.set(pid, child);
+  // The exit code tells success from failure, if the extension is still running when pass-cli exits.
+  child.once("exit", (code) => {
+    ownLogins.delete(pid);
+    void writeFile(join(dir, EXIT_CODE_FILE), String(code)).catch(() => undefined);
   });
+
+  const startedAt = Date.now();
+  while (true) {
+    const text = await readText(outputPath);
+    // Complete lines only: the URL may still be being written.
+    const url = extractLoginUrl(text.slice(0, text.lastIndexOf("\n") + 1));
+    if (url) {
+      await writeFile(join(dir, STATE_FILE), JSON.stringify({ pid, url, startedAt } satisfies SavedLogin), {
+        mode: 0o600,
+      });
+      return url;
+    }
+    const hasTimedOut = Date.now() - startedAt > urlTimeoutMs;
+    if (hasTimedOut || !isProcessRunning(pid)) {
+      if (hasTimedOut) child.kill();
+      await removeLogin(dir);
+      throw hasTimedOut
+        ? new PassCliError("pass-cli didn't start the login. Try again.", "timeout")
+        : loginFailure(text, command.file);
+    }
+    await sleep(POLL_MS);
+  }
+}
+
+/**
+ * Where the login started by startDetachedLogin is. Once pass-cli has exited, its exit code, or else whether a session
+ * exists, tells success from failure, and the login's files are removed. A login older than `timeoutMs` has failed if
+ * it's still running, and is forgotten otherwise.
+ */
+export async function checkDetachedLogin(
+  dir: string,
+  isLoggedIn: () => Promise<boolean>,
+  timeoutMs = LOGIN_TIMEOUT_MS,
+): Promise<BrowserLoginStatus> {
+  const saved = await readSavedLogin(dir);
+  if (!saved) return { state: "none" };
+
+  const isRunning = isProcessRunning(saved.pid);
+  const hasTimedOut = Date.now() - saved.startedAt > timeoutMs;
+  if (isRunning && !hasTimedOut) return { state: "waiting", url: saved.url };
+
+  const [output, exitCode] = await Promise.all([
+    readText(join(dir, OUTPUT_FILE)),
+    readText(join(dir, EXIT_CODE_FILE)).then((text) => text.trim()),
+  ]);
+  await removeLogin(dir);
+  if (hasTimedOut) {
+    if (!isRunning) return { state: "none" };
+    // After this long, only a process started here is surely still pass-cli.
+    ownLogins.get(saved.pid)?.kill();
+    return { state: "failed", error: new PassCliError("The login timed out. Try again.", "timeout") };
+  }
+  const hasSucceeded = exitCode ? exitCode === "0" : await isLoggedIn();
+  return hasSucceeded ? { state: "succeeded" } : { state: "failed", error: loginFailure(output, "pass-cli") };
+}
+
+/** Stops the login started by startDetachedLogin, if it's still running, and removes its files. */
+export async function cancelDetachedLogin(dir: string, timeoutMs = LOGIN_TIMEOUT_MS): Promise<void> {
+  const saved = await readSavedLogin(dir);
+  if (saved && Date.now() - saved.startedAt <= timeoutMs && isProcessRunning(saved.pid)) stopProcess(saved.pid);
+  await removeLogin(dir);
 }
