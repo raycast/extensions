@@ -7,6 +7,7 @@ export interface MutexOptions {
   onBeforeReclaimForTesting?: () => void | Promise<void>;
   onBeforeRenameForTesting?: () => void | Promise<void>;
   onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
+  onBeforeHeartbeatWriteForTesting?: () => void;
 }
 
 interface StaleLockSnapshot {
@@ -24,6 +25,7 @@ export class CrossProcessMutex {
   private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
   private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
   private readonly onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
+  private readonly onBeforeHeartbeatWriteForTesting?: () => void;
   private static readonly HEARTBEAT_INTERVAL_MS = 1000;
   private static readonly STALE_THRESHOLD_MS = 6000;
   private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 10000;
@@ -39,6 +41,7 @@ export class CrossProcessMutex {
       this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
       this.onBeforeRenameForTesting = options?.onBeforeRenameForTesting;
       this.onBeforeWriteLockContentForTesting = options?.onBeforeWriteLockContentForTesting;
+      this.onBeforeHeartbeatWriteForTesting = options?.onBeforeHeartbeatWriteForTesting;
     }
   }
 
@@ -158,10 +161,15 @@ export class CrossProcessMutex {
         return;
       }
       try {
+        if (this.onBeforeHeartbeatWriteForTesting) {
+          this.onBeforeHeartbeatWriteForTesting();
+        }
         this.writeLockContent(token, acquiredDirIno);
       } catch {
-        lockLost = true;
-        clearInterval(heartbeat);
+        if (!isOwnershipValid()) {
+          lockLost = true;
+          clearInterval(heartbeat);
+        }
       }
     }, CrossProcessMutex.HEARTBEAT_INTERVAL_MS);
 
@@ -176,7 +184,7 @@ export class CrossProcessMutex {
       return result;
     } finally {
       clearInterval(heartbeat);
-      if (!lockLost && isOwnershipValid()) {
+      if (isOwnershipValid()) {
         await this.releaseIfOwned(token, acquiredDirIno);
       }
     }

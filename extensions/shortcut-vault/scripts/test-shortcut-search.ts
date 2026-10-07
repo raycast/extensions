@@ -94,6 +94,19 @@ const shortcuts: Shortcut[] = [
     createdAt: "2026-07-04T00:00:00.000Z",
     updatedAt: "2026-07-04T00:00:00.000Z",
   },
+  {
+    id: "center-align",
+    commandName: "Center Align",
+    modifiers: ["command"],
+    key: "E",
+    shortcutDisplay: "⌘ + E",
+    ownerName: "Pages",
+    ownerType: "mac-app",
+    scope: "app",
+    sourceType: "default",
+    createdAt: "2026-07-04T00:00:00.000Z",
+    updatedAt: "2026-07-04T00:00:00.000Z",
+  },
 ];
 
 assert.deepEqual(tokenizeSearchQuery("cmd right"), ["command", "right"]);
@@ -101,8 +114,11 @@ assert.deepEqual(searchShortcuts(shortcuts, "cmd right").map((shortcut) => short
 assert.deepEqual(searchShortcuts(shortcuts, "right arrow").map((shortcut) => shortcut.id), ["next-tab"]);
 assert.deepEqual(searchShortcuts(shortcuts, "escape").map((shortcut) => shortcut.id), ["dismiss"]);
 assert.deepEqual(searchShortcuts(shortcuts, "esc").map((shortcut) => shortcut.id), ["dismiss"]);
+assert.deepEqual(tokenizeSearchQuery("enter"), ["return", "enter"]);
+assert.deepEqual(tokenizeSearchQuery("return"), ["return", "enter"]);
 assert.deepEqual(searchShortcuts(shortcuts, "enter").map((shortcut) => shortcut.id), ["submit-form"]);
 assert.deepEqual(searchShortcuts(shortcuts, "return").map((shortcut) => shortcut.id), ["submit-form"]);
+assert.deepEqual(searchShortcuts(shortcuts, "center").map((shortcut) => shortcut.id), ["center-align"]);
 assert.deepEqual(searchShortcuts(shortcuts, "cmd shift p").map((shortcut) => shortcut.id), ["command-palette"]);
 
 // Either/or del alias regressions

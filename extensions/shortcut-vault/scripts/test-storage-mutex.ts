@@ -386,6 +386,70 @@ async function run() {
     assert.equal(await liveTaskPromise, "live-holder-done");
     assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after live holder finishes");
 
+    // 13. A failed heartbeat write while the lock is still owned does not mark the lock as lost or strand the lock
+    let heartbeatWriteAttempted = false;
+    const failingHeartbeatMutex = new CrossProcessMutex(lockDir, {
+      acquireTimeoutMs: 2000,
+      onBeforeHeartbeatWriteForTesting: () => {
+        heartbeatWriteAttempted = true;
+        throw new Error("simulated transient heartbeat write error");
+      },
+    });
+
+    let failingHeartbeatTaskRan = false;
+    const failingHeartbeatResult = await failingHeartbeatMutex.runExclusive(async () => {
+      failingHeartbeatTaskRan = true;
+      // Wait long enough for the heartbeat (1000ms interval) to fire at least once
+      await new Promise((r) => setTimeout(r, 1200));
+      return "heartbeat-test-success";
+    });
+
+    assert.equal(heartbeatWriteAttempted, true, "Heartbeat write must have been attempted and failed");
+    assert.equal(failingHeartbeatTaskRan, true, "Task must have executed");
+    assert.equal(failingHeartbeatResult, "heartbeat-test-success", "Task must report success even if heartbeat write threw");
+    assert.ok(!fs.existsSync(lockDir), "Owned lock must be cleanly released when task ends and not stranded");
+
+    // 14. If lock ownership is actually lost during operation, lock is marked as lost and command rejects
+    let lostLockTaskStarted = false;
+    let resumeLostLockTask: (() => void) | undefined;
+    const lostLockPromise = new Promise<void>((resolve) => {
+      resumeLostLockTask = resolve;
+    });
+
+    const lostLockMutex = new CrossProcessMutex(lockDir, 2000);
+    const lostTaskPromise = lostLockMutex.runExclusive(async () => {
+      lostLockTaskStarted = true;
+      await lostLockPromise;
+      return "should-not-succeed";
+    });
+
+    while (!lostLockTaskStarted) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    // Simulate lock directory being reclaimed / replaced by another contender
+    fs.rmSync(lockDir, { recursive: true, force: true });
+    fs.mkdirSync(lockDir);
+    fs.writeFileSync(path.join(lockDir, "pid.txt"), `999999999:${Date.now()}:other-token`);
+
+    // Let heartbeat detect that ownership is lost
+    await new Promise((r) => setTimeout(r, 1100));
+    resumeLostLockTask?.();
+
+    await assert.rejects(
+      lostTaskPromise,
+      /Cross-process storage lock was lost/,
+      "Command must reject when lock ownership is actually lost",
+    );
+
+    // Verify other contender's lock was not removed by the first command
+    assert.ok(fs.existsSync(lockDir), "Other contender's lock directory must not be removed");
+    assert.ok(
+      fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").includes("other-token"),
+      "Other contender's lock file must remain intact",
+    );
+    fs.rmSync(lockDir, { recursive: true, force: true });
+
     console.log("storage mutex tests passed");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

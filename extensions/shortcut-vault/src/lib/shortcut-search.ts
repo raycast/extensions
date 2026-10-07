@@ -7,8 +7,6 @@ const SEARCH_TERM_ALIASES: Record<string, string[]> = {
   del: ["del", "delete", "backspace"],
   esc: ["esc", "escape"],
   escape: ["escape", "esc"],
-  return: ["return", "enter"],
-  enter: ["enter", "return"],
 };
 
 function getSearchTermVariants(term: string): string[] {
@@ -116,6 +114,7 @@ function normalizeSearchValue(value: string): string {
     .replace(/\bcontrol\b/g, "control")
     .replace(/\bshift\b/g, "shift")
     .replace(/\bfn\b/g, "fn")
+    .replace(/\b(return|enter)\b/g, "return enter")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim()
     .replace(/\s+/g, " ");
