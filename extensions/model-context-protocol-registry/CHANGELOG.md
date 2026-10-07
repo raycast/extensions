@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Hermoso MCP Server] - {PR_MERGE_DATE}
+## [Update Hermoso MCP Server] - 2026-10-07
 
 - Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
 
