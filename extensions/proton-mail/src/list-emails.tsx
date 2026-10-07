@@ -1176,10 +1176,6 @@ function EmailActions({
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Navigation">
-        <BackAction onBack={pop} />
-      </ActionPanel.Section>
-
       <ActionPanel.Section title="Quicklinks">
         <Action.CreateQuicklink
           title="Save Current View as Quicklink"
@@ -1212,6 +1208,11 @@ function EmailActions({
           />
         </ActionPanel.Section>
       )}
+
+      {/* New actions go last so existing ones keep their positions */}
+      <ActionPanel.Section title="Navigation">
+        <BackAction onBack={pop} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
