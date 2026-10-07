@@ -709,7 +709,6 @@ function ExpandedEmailView({
 
   return (
     <Detail
-      navigationTitle={displayEmail.subject}
       isLoading={isLoading}
       markdown={markdown}
       actions={
