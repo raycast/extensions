@@ -120,7 +120,8 @@ export const StudyDeck = ({ deckName }: Props) => {
   } else if (error) {
     markdown = '## Could not load study cards\n\nCheck Anki and try again, or study in Anki.';
   } else if (!isLoading && cardsDueInfo?.length === 0) {
-    markdown = '## Congratulations! You have finished this deck for now.';
+    markdown =
+      '## Congratulations! You have finished this deck for now.\n\nLearning cards may become due later. Choose Refresh Study Cards to check again.';
   } else if (requiresNativeReview) {
     markdown =
       '## Study this card in Anki\n\nThis card uses image masks or typed answers that need Anki’s reviewer. Choose Study in Anki to continue.';
@@ -156,7 +157,7 @@ export const StudyDeck = ({ deckName }: Props) => {
               />
             </ActionPanel.Section>
           ) : null}
-          {refreshReason && !isGrading ? (
+          {!isLoading && (refreshReason || cardsDueInfo?.length === 0) ? (
             <Action title="Refresh Study Cards" onAction={handleRefresh} />
           ) : null}
           <Action

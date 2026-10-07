@@ -253,6 +253,49 @@ test('answer visibility is bound to the card identity', () => {
   assert.equal(h.action('Good'), undefined);
 });
 
+test('empty study queue can refresh until the last learning card becomes due again', async () => {
+  let dueCards = [];
+  const h = harness({ refresh: async () => dueCards });
+  h.action('Show Answer')();
+  await h.action('Again')();
+  assert.match(h.render().props.markdown, /Refresh Study Cards to check again/);
+  assert.equal(h.action('Show Answer'), undefined);
+  assert.ok(h.action('Refresh Study Cards'));
+
+  // Refreshing before the next learning step stays empty and keeps refresh available.
+  await h.action('Refresh Study Cards')();
+  assert.match(h.render().props.markdown, /Congratulations/);
+  assert.ok(h.action('Refresh Study Cards'));
+
+  dueCards = [card];
+  await h.action('Refresh Study Cards')();
+  assert.equal(h.render().props.markdown, 'Reverse prompt');
+  assert.ok(h.action('Show Answer'));
+  assert.equal(h.action('Good'), undefined);
+  assert.deepEqual(h.state.grades, [[card.cardId, 1]]);
+});
+
+test('empty queue refresh blocks repeated requests while loading', async () => {
+  const refresh = deferred();
+  let refreshCount = 0;
+  const h = harness({
+    cards: [],
+    refresh: () => {
+      refreshCount++;
+      return refresh.promise;
+    },
+  });
+  const refreshAction = h.action('Refresh Study Cards');
+  const first = refreshAction();
+  assert.equal(h.render().props.isLoading, true);
+  assert.equal(h.action('Refresh Study Cards'), undefined);
+  await refreshAction();
+  assert.equal(refreshCount, 1);
+  refresh.resolve([card]);
+  await first;
+  assert.equal(h.render().props.markdown, 'Reverse prompt');
+});
+
 test('native reviewer action passes the deck name to Anki', async () => {
   const h = harness();
   await h.action('Study in Anki')();

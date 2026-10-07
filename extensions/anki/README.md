@@ -94,7 +94,7 @@ Typed-answer and image occlusion cards show a **Study in Anki** action because t
 
 ### Verification
 
-Use Node.js 22.22.2 or later. Run `npm ci`, `npm run build`, `npm test`, `npm run typecheck`, and `npm run lint`. Build first to generate the Raycast definitions used by the type-contract test. CI runs these checks for pushes and pull requests. Regression tests cover note payloads, editing, pagination, error messages, API retries, grading, study rendering, and AI tool results and confirmations.
+Use Node.js 22.22.2 or later. Run `npm ci`, `npm run build`, `npm test`, `npm run typecheck`, and `npm run lint`. Build first to generate the Raycast definitions used by the type-contract test. The extension CI workflow runs the Ray CLI on pushes and pull requests, but does not invoke this extension's `test` or `typecheck` scripts. Run those checks locally before contributing. Regression tests cover note payloads, editing, pagination, error messages, API retries, grading, study rendering, and AI tool results and confirmations.
 
 Run `npx ray evals -I --exit-on-error` to check the AI instructions with mocked tool responses. These evals do not validate the connection to Anki.
 
