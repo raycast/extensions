@@ -90,9 +90,18 @@ export async function startBrowserLogin(): Promise<string | undefined> {
     return undefined;
   }
 
+  // The new session may belong to another account: no view may show the previous one's cached items, whichever
+  // view opens first once the login completes.
+  await clearCache();
   const cliPath = await getCliPath();
   const url = await startDetachedLogin({ file: cliPath, args: [] }, loginDir(), LOGIN_URL_TIMEOUT_MS);
-  await open(url);
+  try {
+    await open(url);
+  } catch (error) {
+    // Nobody can finish this login, and while it runs, no other pass-cli command does.
+    await cancelDetachedLogin(loginDir());
+    throw error;
+  }
   return url;
 }
 
@@ -102,8 +111,6 @@ export async function checkBrowserLogin(): Promise<BrowserLoginStatus> {
 
   const status = await checkDetachedLogin(loginDir(), checkAuth);
   if (status.state === "failed") console.error(`Browser login failed: ${status.error.message}`);
-  // The new session may belong to another account, so don't show the previous session's cached items.
-  if (status.state === "succeeded") await clearCache();
   return status;
 }
 
