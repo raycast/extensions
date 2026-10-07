@@ -43,11 +43,11 @@ export function parseCliPapers(rawJson: string, options: ParseOptions): Paper[] 
   try {
     data = JSON.parse(rawJson);
   } catch {
-    return [];
+    throw new Error("Paper Agent returned invalid JSON. Check that your core installation is up to date.");
   }
 
   if (!Array.isArray(data)) {
-    return [];
+    throw new Error("Paper Agent returned an unexpected response. Check that your core installation is up to date.");
   }
 
   return data

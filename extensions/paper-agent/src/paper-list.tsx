@@ -22,6 +22,7 @@ type PaperListViewProps = {
   showOpenFavoritesAction?: boolean;
   showOpenQueueAction?: boolean;
   searchBarPlaceholder?: string;
+  searchText?: string;
   onSearchTextChange?: (text: string) => void;
 };
 
@@ -232,6 +233,7 @@ export function PaperListView({
   showOpenFavoritesAction = true,
   showOpenQueueAction = true,
   searchBarPlaceholder,
+  searchText,
   onSearchTextChange,
 }: PaperListViewProps): ReactElement {
   const { favorites, isLoading, isFavorite, addFavorite, removeFavorite } = useFavoritePapers();
@@ -262,6 +264,7 @@ export function PaperListView({
       isShowingDetail
       isLoading={externalIsLoading || isLoading || isQueueLoading || isReadLoading}
       searchBarPlaceholder={searchBarPlaceholder}
+      searchText={searchText}
       onSearchTextChange={onSearchTextChange}
       onSelectionChange={setSelectedItemId}
     >
