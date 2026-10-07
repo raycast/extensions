@@ -152,6 +152,9 @@ export const utilizationColor = (percent: number): Color => {
   return Color.Green;
 };
 
+// Labels such as "< 0.01 vCPU" would otherwise make the SVG invalid
+const escapeXml = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 export interface ChartPoint {
   ts: number;
   value: number;
@@ -190,9 +193,9 @@ export const chartMarkdown = (
 
   // Without a scale, a steady line near the top would look like it is about to hit the limit
   const labelStyle = `font-family="-apple-system, Helvetica, sans-serif" font-size="12" fill="#9CA3AF"`;
-  const labels = `<text x="${padding + 4}" y="${padding + 12}" ${labelStyle}>${format(maxValue)}</text><text x="${
-    padding + 4
-  }" y="${height - padding - 4}" ${labelStyle}>0</text>`;
+  const labels = `<text x="${padding + 4}" y="${padding + 12}" ${labelStyle}>${escapeXml(
+    format(maxValue),
+  )}</text><text x="${padding + 4}" y="${height - padding - 4}" ${labelStyle}>0</text>`;
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${limitLine}<path d="${area}" fill="${color}" fill-opacity="0.18"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>${labels}</svg>`;
 

@@ -210,9 +210,8 @@ function CustomDomainDetail({ domain }: { domain: CustomDomainGQL }) {
   const status = customDomainStatus(domain);
   const records = domain.status.dnsRecords;
 
-  const markdown = [
-    `# ${domain.domain}`,
-    "Add these records at your DNS provider so the domain points to Railway.",
+  // Table rows must be on consecutive lines, so only the blocks around the table are separated by blank lines
+  const table = [
     "| Type | Name | Value | Status |",
     "| --- | --- | --- | --- |",
     ...records.map(
@@ -221,6 +220,12 @@ function CustomDomainDetail({ domain }: { domain: CustomDomainGQL }) {
           r.status === "DNS_RECORD_STATUS_PROPAGATED" ? "✅ Propagated" : "⚠️ Waiting for update"
         } |`,
     ),
+  ].join("\n");
+
+  const markdown = [
+    `# ${domain.domain}`,
+    "Add these records at your DNS provider so the domain points to Railway.",
+    table,
     ...(domain.status.certificateErrorMessage ? [`> ${domain.status.certificateErrorMessage}`] : []),
   ].join("\n\n");
 

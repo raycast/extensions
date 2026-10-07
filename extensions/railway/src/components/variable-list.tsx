@@ -55,8 +55,10 @@ export function VariableList({ context, serviceName, environmentName }: Variable
     />
   );
 
+  // Shared by every row: a deployed service always has RAILWAY_ variables, so their rows must offer Add too
   const listActions = (
     <>
+      {addAction}
       <Action
         title={showValues ? "Hide Values" : "Show Values"}
         icon={showValues ? Icon.EyeDisabled : Icon.Eye}
@@ -130,7 +132,6 @@ export function VariableList({ context, serviceName, environmentName }: Variable
                   }
                 />
               )}
-              {addAction}
               <Action
                 title="Delete Variable"
                 icon={Icon.Trash}
@@ -172,12 +173,7 @@ export function VariableList({ context, serviceName, environmentName }: Variable
           icon={Icon.Key}
           title="No Variables"
           description={`${serviceName} has no variables in ${environmentName}`}
-          actions={
-            <ActionPanel>
-              {addAction}
-              {listActions}
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{listActions}</ActionPanel>}
         />
       )}
       <List.Section title="Service Variables">{userVariables.map(renderItem)}</List.Section>
