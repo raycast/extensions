@@ -1,6 +1,6 @@
 # Craftdocs Changelog
 
-## [AI Extension] - {PR_MERGE_DATE}
+## [AI Extension] - 2026-10-07
 
 - Added AI tools: list and manage spaces, search blocks, read documents and Daily Notes, create documents, and add content to any document or Daily Note.
 - Add to Daily Note settings are now extension-wide so the AI tools use them too. Previously customized values reset to defaults; please re-check them in the extension preferences.
