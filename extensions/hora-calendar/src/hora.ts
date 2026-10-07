@@ -45,8 +45,8 @@ export class HoraNotAuthorizedError extends Error {
  * tells them nothing about what to do next.
  */
 export class HoraOutdatedError extends Error {
-  constructor() {
-    super("This version of hora Calendar cannot be scripted.");
+  constructor(message = "This version of hora Calendar cannot be scripted.") {
+    super(message);
     this.name = "HoraOutdatedError";
   }
 }
@@ -290,7 +290,7 @@ export async function addTask(input: {
         sameName[0].id !== input.listID ||
         sameName[0].accountEmail.toLowerCase() !== input.accountEmail.toLowerCase()
       ) {
-        throw new Error(
+        throw new HoraOutdatedError(
           "This hora build cannot safely select that task list. Update to a build with account-specific task lists.",
         );
       }

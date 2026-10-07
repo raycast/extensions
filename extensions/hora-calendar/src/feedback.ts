@@ -30,7 +30,7 @@ export async function showFailure(error: unknown, title = "Something went wrong"
     await showToast({
       style: Toast.Style.Failure,
       title: "Update hora Calendar",
-      message: "Raycast support arrived in hora 1.1.5. Update Direct or Setapp; the Mac App Store update is pending.",
+      message: error.message,
       primaryAction: {
         title: "Download the Latest Direct Version",
         onAction: () => {
