@@ -81,15 +81,27 @@ test("validates percentages, timestamps, labels and URLs", () => {
   }
 });
 
-test("old observations and expired resets stay stale without resetting usage", () => {
+test("old observations stay stale without changing their observation time", () => {
   const [old] = parse(provider({ updatedAt: new Date(now - 300_000).toISOString() }));
   assert.equal(old.source, "stale");
   assert.equal(old.data.fetchedAt, now - 300_000);
-  const [expired] = parse(
-    provider({ windows: [{ label: "Session", usedPercent: 98, resetAt: new Date(now).toISOString() }] }),
+});
+
+test("an expired session window does not mark a current weekly observation stale", () => {
+  const [state] = parse(
+    provider({
+      windows: [
+        { label: "5-hour", usedPercent: 98, resetAt: new Date(now).toISOString() },
+        { label: "Weekly", usedPercent: 28, resetAt: new Date(now + 86_400_000).toISOString() },
+      ],
+    }),
   );
-  assert.equal(expired.source, "stale");
-  assert.equal(expired.data.windows[0].remainingPercent, 2);
+  assert.equal(state.source, "live");
+  assert.equal(state.data.fetchedAt, now);
+  assert.equal(state.data.windows[0].remainingPercent, 2);
+  assert.equal(state.data.windows[0].resetsAt, now);
+  assert.equal(state.data.windows[1].remainingPercent, 72);
+  assert.equal(state.data.windows[1].resetsAt, now + 86_400_000);
 });
 
 test("reads bounded regular files and rejects invalid JSON", async () => {

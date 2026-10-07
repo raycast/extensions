@@ -80,9 +80,7 @@ function parseProvider(value: unknown, now: number): ProviderUsageState {
     windows: input.windows.map(parseWindow),
     ...(dashboardUrl ? { dashboardUrl } : {}),
   };
-  const stale =
-    now - fetchedAt >= 5 * 60_000 ||
-    data.windows.some((window) => window.resetsAt !== undefined && window.resetsAt <= now);
+  const stale = now - fetchedAt >= 5 * 60_000;
   return { provider, name, data, source: stale ? "stale" : "live" };
 }
 

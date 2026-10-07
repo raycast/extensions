@@ -50,9 +50,15 @@ export async function readClaudeStatusLineUsage(): Promise<ProviderUsageState | 
       return { ...state, error: "Your Claude status line changed. Disconnect and reconnect to resume updates." };
     }
     const snapshot = await readBridgeDocument(paths.snapshot);
-    const updatedAt = isoDate(snapshot?.value.updatedAt);
+    // Legacy connections need an explicit reconnect; never treat an older
+    // invocation's observation as belonging to the current connection.
+    if (typeof connection.value.connectionId !== "string") {
+      return { ...state, needsConnection: true, error: "Reconnect Claude Code to update the status-line connection." };
+    }
+    const currentSnapshot = snapshot?.value.connectionId === connection.value.connectionId ? snapshot : undefined;
+    const updatedAt = isoDate(currentSnapshot?.value.updatedAt);
     const fetchedAt = updatedAt ? Date.parse(updatedAt) : undefined;
-    const limits = record(snapshot?.value.rate_limits);
+    const limits = record(currentSnapshot?.value.rate_limits);
     const now = Date.now();
     const windows: UsageWindow[] = [];
     for (const [id, title, durationMinutes] of [
@@ -63,7 +69,7 @@ export async function readClaudeStatusLineUsage(): Promise<ProviderUsageState | 
       const usedPercent = percent(limit.used_percentage);
       const reset = isoDate(limit.resets_at, true);
       const resetsAt = reset ? Date.parse(reset) : undefined;
-      if (usedPercent !== undefined && resetsAt !== undefined && resetsAt > now) {
+      if (usedPercent !== undefined && resetsAt !== undefined) {
         windows.push({
           id: `claude:${id}`,
           title,
@@ -81,14 +87,12 @@ export async function readClaudeStatusLineUsage(): Promise<ProviderUsageState | 
           "Connected. Send a message in Claude Code, then refresh. Requires Claude Code 2.1.251 or later with supported subscription limits.",
       };
     }
-    const stale = now - fetchedAt > staleAfterMilliseconds;
+    const stale = now - fetchedAt >= staleAfterMilliseconds || windows.every((window) => window.resetsAt! <= now);
     return {
       ...state,
       source: stale ? "stale" : "live",
       data: { provider: "claude", fetchedAt, windows },
-      ...(stale
-        ? { error: "Last observed usage is over 5 minutes old. Send a message in Claude Code to update it." }
-        : {}),
+      ...(stale ? { error: "Last observed usage is out of date. Send a message in Claude Code to update it." } : {}),
     };
   } catch {
     return {

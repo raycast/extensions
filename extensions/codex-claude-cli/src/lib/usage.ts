@@ -98,7 +98,7 @@ interface RpcPendingRequest {
   reject: (error: Error) => void;
 }
 
-const cacheKey = "cli-usage-cache-v2";
+const cacheKey = "cli-usage-cache-v3";
 const revisionKey = "cli-usage-revision-v2";
 const providers: ChatProvider[] = ["claude", "codex"];
 const codexTimeoutMilliseconds = 15_000;
@@ -106,6 +106,7 @@ const claudeTimeoutMilliseconds = 20_000;
 const maximumJsonBufferLength = 4 * 1_024 * 1_024;
 let inFlightUsageRequest: Promise<UsageSnapshot> | undefined;
 let queuedForcedRequest: Promise<UsageSnapshot> | undefined;
+let legacyCacheCleaned = false;
 
 // A forced refresh arriving during a read must run after it (for example after Connect).
 export async function loadUsageSnapshot(options?: { force?: boolean }): Promise<UsageSnapshot> {
@@ -130,11 +131,12 @@ export async function loadUsageSnapshot(options?: { force?: boolean }): Promise<
 }
 
 export async function invalidateUsageCache(): Promise<void> {
-  // Versioned cache keys prevent another Raycast command's older request from restoring invalidated data.
+  // The revision is part of the saved profile tag, so older writes cannot restore invalidated data.
   await LocalStorage.setItem(revisionKey, randomUUID());
 }
 
 async function loadCurrentUsageSnapshot(force: boolean): Promise<UsageSnapshot> {
+  await cleanLegacyUsageCaches();
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const revision = await LocalStorage.getItem<string>(revisionKey);
     const preferences = getPreferenceValues<Preferences>();
@@ -151,7 +153,7 @@ async function loadCurrentUsageSnapshot(force: boolean): Promise<UsageSnapshot> 
       )
       .digest("hex")
       .slice(0, 24);
-    const snapshot = await loadUsageSnapshotInternal(force, `${cacheKey}-${profile}`, preferences);
+    const snapshot = await loadUsageSnapshotInternal(force, profile, preferences);
     if (revision === (await LocalStorage.getItem<string>(revisionKey))) return snapshot;
     force = true;
   }
@@ -207,11 +209,11 @@ export function providerRemainingPercent(data: ProviderUsageData | undefined): n
 
 async function loadUsageSnapshotInternal(
   force: boolean,
-  key: string,
+  profile: string,
   preferences: Preferences,
 ): Promise<UsageSnapshot> {
   const now = Date.now();
-  const cache = await readUsageCache(key);
+  const cache = await readUsageCache(profile);
   const nextCache: StoredUsageCache = {
     version: 1,
     providers: { claude: { ...cache.providers.claude }, codex: { ...cache.providers.codex } },
@@ -261,7 +263,7 @@ async function loadUsageSnapshotInternal(
       });
     }),
   );
-  await writeUsageCache(nextCache, key);
+  await writeUsageCache(nextCache, profile);
   let customProviders: ProviderUsageState[] = [];
   if (preferences.customUsageFile) {
     try {
@@ -280,17 +282,19 @@ async function loadUsageSnapshotInternal(
   return { generatedAt: Date.now(), providers: states, customProviders };
 }
 
-async function readUsageCache(key: string): Promise<StoredUsageCache> {
+async function readUsageCache(profile: string): Promise<StoredUsageCache> {
   const emptyCache = (): StoredUsageCache => ({
     version: 1,
     providers: { claude: {}, codex: {} },
   });
 
   try {
-    const stored = await LocalStorage.getItem<string>(key);
+    const stored = await LocalStorage.getItem<string>(cacheKey);
     if (!stored) return emptyCache();
     const parsed: unknown = JSON.parse(stored);
-    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.providers)) return emptyCache();
+    if (!isRecord(parsed) || parsed.version !== 1 || parsed.profile !== profile || !isRecord(parsed.providers)) {
+      return emptyCache();
+    }
     return {
       version: 1,
       providers: {
@@ -303,11 +307,25 @@ async function readUsageCache(key: string): Promise<StoredUsageCache> {
   }
 }
 
-async function writeUsageCache(cache: StoredUsageCache, key: string): Promise<void> {
+async function writeUsageCache(cache: StoredUsageCache, profile: string): Promise<void> {
   try {
-    await LocalStorage.setItem(key, JSON.stringify(cache));
+    // One bounded entry, tagged with both profile and revision. A racing older
+    // writer may cause a cache miss, but its data can never match a new connection.
+    await LocalStorage.setItem(cacheKey, JSON.stringify({ ...cache, profile }));
   } catch {
     return;
+  }
+}
+
+async function cleanLegacyUsageCaches(): Promise<void> {
+  if (legacyCacheCleaned) return;
+  try {
+    const items = await LocalStorage.allItems();
+    const obsolete = Object.keys(items).filter((key) => /^cli-usage-cache-v(?:1|2(?:-[a-f0-9]{24})?)$/.test(key));
+    await Promise.all(obsolete.map((key) => LocalStorage.removeItem(key)));
+    legacyCacheCleaned = true;
+  } catch {
+    // Cache cleanup must not prevent reading current provider usage.
   }
 }
 

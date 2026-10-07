@@ -143,3 +143,27 @@ test("quota-only menu never mounts the history hook; normal menu retains it", ()
     assert.equal(historyReads, usageOnly ? 0 : 1);
   }
 });
+
+test("a parsed custom weekly window remains selectable when its session reset has passed", () => {
+  const { parseCustomUsage } = load("custom-usage");
+  const providers = parseCustomUsage(
+    {
+      version: 1,
+      providers: [
+        {
+          name: "Example",
+          updatedAt: new Date(now).toISOString(),
+          windows: [
+            { label: "5-hour", usedPercent: 99, resetAt: new Date(now - 1000).toISOString() },
+            { label: "Weekly", usedPercent: 28, resetAt: new Date(now + 86400000).toISOString() },
+          ],
+        },
+      ],
+    },
+    now,
+  );
+  const selected = selectMenuBarWindow(providers, undefined, "automatic", now);
+  assert.equal(selected.window.title, "Weekly");
+  assert.equal(selected.window.remainingPercent, 72);
+  assert.equal(selectMenuBarWindow(providers, providers[0].provider, "weekly", now).window.remainingPercent, 72);
+});

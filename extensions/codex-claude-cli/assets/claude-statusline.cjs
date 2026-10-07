@@ -66,7 +66,7 @@ process.stdin.on("data", (chunk) => {
 });
 process.stdin.on("end", () => {
   original?.stdin.end();
-  if (!state || state.active === false || size > 4194304) return;
+  if (!state || state.active === false || typeof state.connectionId !== "string" || size > 4194304) return;
   try {
     const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
     const limits = {};
@@ -88,7 +88,7 @@ process.stdin.on("end", () => {
     const currentState = readState();
     if (!currentState || currentState.active === false || JSON.stringify(currentState) !== JSON.stringify(state))
       return;
-    const snapshot = { updatedAt: new Date().toISOString(), rate_limits: limits };
+    const snapshot = { connectionId: state.connectionId, updatedAt: new Date().toISOString(), rate_limits: limits };
     const temp = path.join(path.dirname(snapshotPath), `.usage-${crypto.randomUUID()}.tmp`);
     try {
       fs.writeFileSync(temp, JSON.stringify(snapshot), { mode: 0o600, flag: "wx" });

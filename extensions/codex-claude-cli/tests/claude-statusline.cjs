@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const { execFileSync } = require("node:child_process");
+const { execFileSync, spawn } = require("node:child_process");
 const Module = require("node:module");
 const ts = require("typescript");
 
@@ -62,12 +62,34 @@ const ts = require("typescript");
     const output = execFileSync("/bin/sh", ["-c", installed.statusLine.command], { input: payload, encoding: "utf8" });
     assert.equal(output, payload, "existing status line receives exact stdin and retains stdout");
     const saved = await read(paths.snapshot);
-    assert.deepEqual(Object.keys(saved).sort(), ["rate_limits", "updatedAt"]);
+    assert.deepEqual(Object.keys(saved).sort(), ["connectionId", "rate_limits", "updatedAt"]);
     assert.deepEqual(Object.keys(saved.rate_limits).sort(), ["five_hour", "seven_day"]);
     const fresh = await api.readClaudeStatusLineUsage();
     assert.equal(fresh.source, "live");
     assert.equal(fresh.data.windows[0].remainingPercent, 75);
     assert.equal(fresh.data.windows[1].durationMinutes, 10080);
+    const expired = {
+      ...saved,
+      rate_limits: {
+        five_hour: { used_percentage: 25, resets_at: Date.now() / 1000 - 60 },
+        seven_day: { used_percentage: 40, resets_at: Date.now() / 1000 - 30 },
+      },
+    };
+    await write(paths.snapshot, expired);
+    const historical = await api.readClaudeStatusLineUsage();
+    assert.equal(historical.source, "stale");
+    assert.equal(historical.data.fetchedAt, Date.parse(saved.updatedAt));
+    assert.deepEqual(
+      historical.data.windows.map((window) => window.remainingPercent),
+      [75, 60],
+    );
+    await write(paths.snapshot, {
+      ...expired,
+      rate_limits: { ...expired.rate_limits, seven_day: saved.rate_limits.seven_day },
+    });
+    const mixed = await api.readClaudeStatusLineUsage();
+    assert.equal(mixed.source, "live");
+    assert.equal(mixed.data.windows.length, 2);
     await write(paths.snapshot, { ...saved, updatedAt: new Date(Date.now() - 16 * 60000).toISOString() });
     assert.equal((await api.readClaudeStatusLineUsage()).source, "stale");
     await write(paths.snapshot, { ...saved, updatedAt: new Date(Date.now() + 600000).toISOString() });
@@ -77,6 +99,45 @@ const ts = require("typescript");
       rate_limits: { five_hour: { used_percentage: -1, resets_at: Date.now() / 1000 + 3600 } },
     });
     assert.equal((await api.readClaudeStatusLineUsage()).source, "unavailable");
+    // cat echoes a partial payload only after the wrapper has loaded its state.
+    // This synchronizes the old invocation without timing-based sleeps.
+    const delayed = spawn("/bin/sh", ["-c", installed.statusLine.command], { stdio: ["pipe", "pipe", "pipe"] });
+    const started = new Promise((resolve, reject) => {
+      delayed.stdout.once("data", resolve);
+      delayed.once("error", reject);
+    });
+    const finished = new Promise((resolve, reject) => {
+      delayed.once("close", resolve);
+      delayed.once("error", reject);
+    });
+    delayed.stdin.write(payload.slice(0, 1));
+    await started;
+    await api.disconnectClaudeStatusLine();
+    await api.connectClaudeStatusLine();
+    assert.notEqual((await read(paths.state)).connectionId, saved.connectionId);
+    delayed.stdin.end(payload.slice(1));
+    await finished;
+    assert.equal(
+      await fs.stat(paths.snapshot).then(
+        () => true,
+        () => false,
+      ),
+      false,
+    );
+    assert.equal((await api.readClaudeStatusLineUsage()).source, "unavailable");
+    // Even a late rename after the writer's generation check cannot be accepted.
+    await write(paths.snapshot, saved);
+    assert.equal((await api.readClaudeStatusLineUsage()).source, "unavailable");
+    const currentCommand = (await read(paths.settings)).statusLine.command;
+    execFileSync("/bin/sh", ["-c", currentCommand], { input: payload });
+    assert.equal((await api.readClaudeStatusLineUsage()).source, "live");
+    const currentState = await read(paths.state);
+    delete currentState.connectionId;
+    await write(paths.state, currentState);
+    const legacy = await api.readClaudeStatusLineUsage();
+    assert.equal(legacy.bridgeConnected, true);
+    assert.equal(legacy.needsConnection, true);
+    assert.match(legacy.error, /Reconnect/);
     await api.connectClaudeStatusLine();
     assert.deepEqual((await read(paths.state)).original, original, "reconnect never nests wrappers");
     await api.disconnectClaudeStatusLine();

@@ -24,7 +24,7 @@ Write quota observations to a local JSON file, then select it in **Custom Usage 
 }
 ```
 
-Replace the example values with your provider's measurements. Update `updatedAt` when you observe usage; refreshing Raycast keeps that timestamp intact. Observations older than five minutes or past a reported reset are marked stale and excluded from the menu-bar total.
+Replace the example values with your provider's measurements. Update `updatedAt` when you observe usage; refreshing Raycast keeps that timestamp intact. Observations older than five minutes are marked stale and excluded from the menu-bar total. Windows past their reported reset are excluded individually, so a current weekly window still counts when a session window expires.
 
 - `name`, `updatedAt`, and `windows` are required. `id`, `plan`, and `dashboardUrl` are optional.
 - Keep `id` unique and stable across updates. Without one, `name` identifies the provider.

@@ -242,6 +242,7 @@ export async function connectClaudeBridge(options: BridgeInstall): Promise<void>
     const installed = { ...record(original), type: "command", command };
     const state = {
       version: 1,
+      connectionId: randomUUID(),
       active: true,
       installed,
       hadOriginal: saved ? saved.value.hadOriginal : current !== undefined,

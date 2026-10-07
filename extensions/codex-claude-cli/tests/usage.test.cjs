@@ -28,8 +28,7 @@ const bridgeReading = (overrides = {}) => ({
   },
   ...overrides,
 });
-function harness(preferences = { usageOnly: true }) {
-  const storage = new Map();
+function harness(preferences = { usageOnly: true }, storage = new Map()) {
   const spawned = [];
   const runtime = {
     clock: now,
@@ -48,6 +47,10 @@ function harness(preferences = { usageOnly: true }) {
     getPreferenceValues: () => preferences,
     LocalStorage: {
       getItem: async (key) => storage.get(key),
+      allItems: async () => Object.fromEntries(storage),
+      removeItem: async (key) => {
+        storage.delete(key);
+      },
       setItem: async (key, value) => {
         storage.set(key, value);
       },
@@ -133,7 +136,7 @@ function harness(preferences = { usageOnly: true }) {
       return require(id);
     },
   });
-  return { usage: module.exports, runtime, spawned, storage, preferences };
+  return { usage: module.exports, runtime, spawned, storage, preferences, api };
 }
 
 // Bound the wait so a scheduling regression fails instead of hanging the test run.
@@ -262,4 +265,62 @@ test("forced refreshes coalesce and settle under concurrent callers", { timeout:
     results.every((s) => s.providers.codex.data.windows.length === 1),
     true,
   );
+});
+
+test("invalidations and profile changes retain one cache entry and remove only obsolete usage keys", async () => {
+  const { usage, storage, preferences } = harness();
+  storage.set("cli-usage-cache-v1", "old cache");
+  storage.set("cli-usage-cache-v2", "old cache");
+  for (let i = 0; i < 5; i++) storage.set(`cli-usage-cache-v2-${String(i).padStart(24, "0")}`, "old cache");
+  storage.set("favorite-chat-keys", "preserve this");
+  for (let i = 0; i < 12; i++) {
+    await usage.invalidateUsageCache();
+    preferences.codexHome = `/tmp/profile-${i}`;
+    await usage.loadUsageSnapshot();
+    assert.equal([...storage.keys()].filter((key) => key.startsWith("cli-usage-cache-")).length, 1);
+  }
+  assert.equal(storage.get("favorite-chat-keys"), "preserve this");
+  assert.equal(JSON.parse(storage.get("cli-usage-cache-v3")).providers.codex.data.windows[0].remainingPercent, 80);
+});
+
+test("a late pre-invalidation write cannot be reused by another command", { timeout: 3000 }, async () => {
+  const storage = new Map();
+  const oldCommand = harness({ usageOnly: true }, storage);
+  const newCommand = harness({ usageOnly: true }, storage);
+  let unblock;
+  const gate = new Promise((resolve) => {
+    unblock = resolve;
+  });
+  const originalSet = oldCommand.api.LocalStorage.setItem;
+  let blocked = false;
+  oldCommand.api.LocalStorage.setItem = async (key, value) => {
+    if (key === "cli-usage-cache-v3" && !blocked) {
+      blocked = true;
+      await gate;
+    }
+    await originalSet(key, value);
+  };
+  const pending = oldCommand.usage.loadUsageSnapshot();
+  await until(() => blocked);
+  await newCommand.usage.invalidateUsageCache();
+  await newCommand.usage.loadUsageSnapshot();
+  const currentTag = JSON.parse(storage.get("cli-usage-cache-v3")).profile;
+  let verifiedMiss = false;
+  const originalGet = oldCommand.api.LocalStorage.getItem;
+  oldCommand.api.LocalStorage.getItem = async (key) => {
+    if (key === "cli-usage-revision-v2" && !verifiedMiss) {
+      verifiedMiss = true;
+      // The old write has landed; a separate command must fetch, not reuse it.
+      assert.notEqual(JSON.parse(storage.get("cli-usage-cache-v3")).profile, currentTag);
+      newCommand.runtime.failCodex = true;
+      const result = await newCommand.usage.loadUsageSnapshot();
+      assert.equal(result.providers.codex.source, "unavailable");
+      assert.equal(result.providers.codex.data, undefined);
+    }
+    return originalGet(key);
+  };
+  unblock();
+  await pending;
+  assert.equal(verifiedMiss, true);
+  assert.equal([...storage.keys()].filter((key) => key.startsWith("cli-usage-cache-")).length, 1);
 });
