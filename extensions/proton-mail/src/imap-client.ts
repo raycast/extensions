@@ -249,7 +249,10 @@ function findBodyParts(
     return found;
   }
 
-  if (node.disposition === "attachment") return found;
+  // A text part named like a file (an attached .txt or .html) is an attachment even without that disposition
+  const paramNames = Object.keys({ ...node.parameters, ...node.dispositionParameters });
+  const isNamedFile = paramNames.some((name) => /^(?:file)?name\*?$/.test(name));
+  if (node.disposition === "attachment" || isNamedFile) return found;
   // A single-part message has no part number; IMAP addresses its body as part 1
   const bodyPart = { part: node.part || "1", charset: node.parameters?.charset };
   if (type === "text/plain" && !found.text) found.text = bodyPart;
@@ -277,6 +280,11 @@ export async function fetchEmailBody(
 
     try {
       if (inlineImages) {
+        // Check there is an HTML version before downloading the whole message for it
+        const structure = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+        if (!structure || !findBodyParts(structure.bodyStructure).html) {
+          return {};
+        }
         // Opening the original in the browser needs the inline images, which live in other parts of the message
         const message = await client.fetchOne(uid, { source: true }, { uid: true });
         if (!message || !message.source) {
