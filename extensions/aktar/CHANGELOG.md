@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Replace Files and Automatic Destination] - {PR_MERGE_DATE}
+## [Replace Files and Automatic Destination] - 2026-10-07
 
 - Replace File (⌘⇧R, Ctrl+Shift+R on Windows) in Search Uploads and Browse Buckets: pick a new file and Aktar writes it at the same key, so every link already shared shows the new file. The link is copied again, and the list and thumbnails refresh. Needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions ask you to update
 - Upload File starts on Automatic: Aktar sends each file to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Pick a destination to upload into a folder
