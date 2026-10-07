@@ -59,7 +59,12 @@ export default function MenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra icon={Icon.Stopwatch} title={elapsed} isLoading={isLoading} tooltip="Local Time Tracker">
+    <MenuBarExtra
+      icon={Icon.Stopwatch}
+      title={activeTimer ? elapsed : undefined}
+      isLoading={isLoading}
+      tooltip="Local Time Tracker"
+    >
       {activeTimer ? (
         <>
           <MenuBarExtra.Item title={getProjectName(projects, activeTimer.projectId)} />
