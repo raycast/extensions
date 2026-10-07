@@ -1,5 +1,11 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-10-07
+
+### Fixed
+
+- After an action finishes, only the detail view it started in closes: a detail you opened meanwhile stays open.
+
 ## [Update] - 2026-10-06
 
 ### Added
