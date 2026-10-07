@@ -1,15 +1,12 @@
 export const RAYCAST_CLIENT_ID = "happy-squid-raycast";
 export const RAYCAST_REDIRECT_URI = "raycast://extensions/happy-squid/happy-squid/tasks";
 export const RAYCAST_APP_URL = "happysquid-raycast://connect";
-export const RAYCAST_AUTH_HASH = "#connect-raycast?";
-
 export interface RaycastAuthorization {
   clientId: string;
   challenge: string;
   redirectUri: string;
   state: string;
 }
-
 export function parseRaycastAuthorization(params: URLSearchParams): RaycastAuthorization | null {
   const clientId = params.get("client_id");
   const challenge = params.get("code_challenge") ?? "";
@@ -27,7 +24,6 @@ export function parseRaycastAuthorization(params: URLSearchParams): RaycastAutho
     return null;
   return { clientId, challenge, redirectUri, state };
 }
-
 export function raycastAuthorizationParams(request: RaycastAuthorization): URLSearchParams {
   return new URLSearchParams({
     client_id: request.clientId,
@@ -37,12 +33,4 @@ export function raycastAuthorizationParams(request: RaycastAuthorization): URLSe
     redirect_uri: request.redirectUri,
     state: request.state,
   });
-}
-
-export async function sha256Base64Url(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
 }

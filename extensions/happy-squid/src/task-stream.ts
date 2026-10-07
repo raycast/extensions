@@ -5,7 +5,12 @@ import { parseTaskStreamProgress, TASK_STREAM_EVENT, TASK_STREAM_TOPIC_PREFIX } 
 
 const BUFFERED_REVIEWS = 4;
 
-export function useTaskStream(client: SupabaseClient, userId: string | undefined, review: TaskSnapshot["review"]) {
+export function useTaskStream(
+  client: SupabaseClient,
+  userId: string | undefined,
+  review: TaskSnapshot["review"],
+  onTaskChange: () => Promise<void>,
+) {
   const [progress, setProgress] = useState(new Map<string, { sequence: number; text: string }>());
   useEffect(() => {
     setProgress(new Map());
@@ -13,6 +18,14 @@ export function useTaskStream(client: SupabaseClient, userId: string | undefined
     let mounted = true;
     const channel = client
       .channel(`${TASK_STREAM_TOPIC_PREFIX}${userId}`, { config: { private: true } })
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_state", filter: `user_id=eq.${userId}` },
+        ({ new: row }) => {
+          if (mounted && "key" in row && ["recentTasks", "activeTask", "pausedTask"].includes(row.key))
+            void onTaskChange();
+        },
+      )
       .on("broadcast", { event: TASK_STREAM_EVENT }, ({ payload }) => {
         const next = parseTaskStreamProgress(payload);
         if (!mounted || !next) return;
@@ -25,11 +38,13 @@ export function useTaskStream(client: SupabaseClient, userId: string | undefined
           return updated;
         });
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (mounted && status === "SUBSCRIBED") void onTaskChange();
+      });
     return () => {
       mounted = false;
       void client.removeChannel(channel);
     };
-  }, [client, userId]);
+  }, [client, userId, onTaskChange]);
   return review?.status === "checking" ? (progress.get(review.id)?.text ?? "") : "";
 }

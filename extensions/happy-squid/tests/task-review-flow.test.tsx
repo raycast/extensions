@@ -129,7 +129,7 @@ test("Back reveals the current task editor without mutation or a refresh reopeni
   expect(nodes("Form")[0].props.navigationTitle).toBe("Happy Squid");
   await back();
   expect(routes).toHaveLength(0);
-  expect(nodes("Form")[0].props.navigationTitle).toBe("Happy Squid");
+  expect(nodes("Form")[0].props.navigationTitle).toBeUndefined();
   expect(nodes("Form.TextArea")[0].props.value).toBe("Research video examples");
   expect(nodes("Form.Dropdown")[0].props.value).toBe("5");
   expect(nodes("Action.SubmitForm")[0].props.title).toBe("Start Task");

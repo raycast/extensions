@@ -99,7 +99,6 @@ export function TaskProvider({ account, children }: { account: Account; children
     snapshotRevision: number;
   }>({ snapshot: null, snapshotRevision: 0 });
   const nextSnapshotRevision = useRef(0);
-  const streamingMessage = useTaskStream(account.client, userId, snapshot?.review ?? null);
   const [error, setError] = useState<string | null>(null);
   const [readError, setReadError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -110,6 +109,7 @@ export function TaskProvider({ account, children }: { account: Account; children
   const current = useRef<TaskSnapshot | null>(null);
   const reading = useRef<Promise<void> | null>(null);
   const mutating = useRef(false);
+  const remoteChangePending = useRef(false);
   const mounted = useRef(true);
   const cacheWrites = useRef(Promise.resolve());
 
@@ -173,6 +173,16 @@ export function TaskProvider({ account, children }: { account: Account; children
     [account.client, accept, cacheKey],
   );
 
+  const refreshAfterRead = useCallback(async () => {
+    // A snapshot already in flight can predate the notification we just got.
+    remoteChangePending.current = true;
+    await reading.current;
+    if (mutating.current) return;
+    remoteChangePending.current = false;
+    await refresh(true);
+  }, [refresh]);
+  const streamingMessage = useTaskStream(account.client, userId, snapshot?.review ?? null, refreshAfterRead);
+
   useEffect(() => {
     mounted.current = true;
     let poll: ReturnType<typeof setTimeout>;
@@ -232,6 +242,7 @@ export function TaskProvider({ account, children }: { account: Account; children
     } finally {
       mutating.current = false;
       if (mounted.current) setBusy(false);
+      if (remoteChangePending.current) void refreshAfterRead();
     }
   };
 

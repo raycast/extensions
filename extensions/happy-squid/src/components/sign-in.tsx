@@ -60,7 +60,6 @@ export function SignIn({ client, initialError }: { client: SupabaseClient; initi
   };
   return (
     <Detail
-      navigationTitle="Happy Squid"
       markdown="# Connect to Happy Squid"
       isLoading={busy}
       metadata={

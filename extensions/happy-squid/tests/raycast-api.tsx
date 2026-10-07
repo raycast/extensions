@@ -45,6 +45,8 @@ export const Alert = { ActionStyle: { Default: "default", Destructive: "destruct
 export const confirmAlert = vi.fn().mockResolvedValue(true);
 export const updateCommandMetadata = vi.fn().mockResolvedValue(undefined);
 export const launchCommand = vi.fn().mockResolvedValue(undefined);
+export const Toast = { Style: { Failure: "failure" } };
+export const showToast = vi.fn().mockResolvedValue(undefined);
 export const LaunchType = { UserInitiated: "userInitiated", Background: "background" };
 export const environment = { launchType: LaunchType.UserInitiated };
 export class Cache extends Map<string, string> {

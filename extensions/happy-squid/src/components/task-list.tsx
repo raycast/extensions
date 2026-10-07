@@ -9,11 +9,7 @@ export function TaskList() {
   const { snapshot, busy, loading, error, now } = useTasks();
   if (!snapshot) return null;
   return (
-    <List
-      navigationTitle="Happy Squid"
-      searchBarPlaceholder="Search bookmarked and recent tasks…"
-      isLoading={busy || loading}
-    >
+    <List searchBarPlaceholder="Search bookmarked and recent tasks…" isLoading={busy || loading}>
       <List.Section>
         {error && (
           <List.Item
@@ -39,7 +35,7 @@ export function TaskList() {
                   title="New Task"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<TaskForm purpose="start" displayed={snapshot} />}
+                  target={<TaskForm navigationTitle="Happy Squid" purpose="start" displayed={snapshot} />}
                 />
               )}
               {snapshot.weekSpent && <Action.OpenInBrowser title="View Plans" url="https://happy-squid.com/#pricing" />}
@@ -92,6 +88,7 @@ function RecentTask({ task, snapshot }: { task: TaskSnapshot["recentTasks"][numb
               icon={Icon.Play}
               target={
                 <TaskForm
+                  navigationTitle="Happy Squid"
                   purpose="start"
                   displayed={snapshot}
                   description={task.description}

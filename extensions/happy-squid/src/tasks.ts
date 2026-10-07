@@ -1,4 +1,4 @@
-import { Cache, environment, launchCommand, LaunchType, updateCommandMetadata } from "@raycast/api";
+import { Cache, environment, launchCommand, LaunchType, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { createTaskClient, requestTasks } from "./client";
 import { taskSubtitle } from "./format";
@@ -13,7 +13,15 @@ export default async function Tasks({
   launchContext?: TaskPageContext & { subtitle?: string };
 } = {}): Promise<void> {
   if (environment.launchType !== LaunchType.Background) {
-    await launchCommand({ name: "manage-tasks", type: LaunchType.UserInitiated, context: launchContext });
+    try {
+      await launchCommand({ name: "manage-tasks", type: LaunchType.UserInitiated, context: launchContext });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not open Manage Tasks",
+        message: String(error),
+      });
+    }
     return;
   }
 

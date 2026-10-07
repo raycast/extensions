@@ -48,7 +48,6 @@ Pause or resume it, edit it, stop or complete it, lock it, or bookmark it for la
 ## Good to know
 
 - The time left under **Current Task** refreshes about once a minute in the background. You can switch that off in the command's settings in Raycast.
-- **Open Happy Squid Settings** (in the Actions menu) opens your Happy Squid settings in your browser. It needs the Happy Squid browser extension.
 
 ## Help
 

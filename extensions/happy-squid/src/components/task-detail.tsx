@@ -58,7 +58,15 @@ export function TaskDetail() {
         title: "Edit Task",
         icon: Icon.Pencil,
         shortcut: { modifiers: ["cmd"], key: "e" },
-        onAction: () => push(<TaskForm purpose="edit" displayed={snapshot} description={task.description} />),
+        onAction: () =>
+          push(
+            <TaskForm
+              navigationTitle="Happy Squid"
+              purpose="edit"
+              displayed={snapshot}
+              description={task.description}
+            />,
+          ),
       });
       if (task.openEnded)
         controls.push({
@@ -80,7 +88,10 @@ export function TaskDetail() {
         label: "Lock…",
         title: "Lock Task…",
         icon: Icon.Lock,
-        onAction: () => (task.openEnded ? push(<TaskForm purpose="lock" displayed={snapshot} />) : lock()),
+        onAction: () =>
+          task.openEnded
+            ? push(<TaskForm navigationTitle="Happy Squid" purpose="lock" displayed={snapshot} />)
+            : lock(),
       });
     if (saved)
       controls.push({
@@ -96,7 +107,6 @@ export function TaskDetail() {
 
   return (
     <Detail
-      navigationTitle="Happy Squid"
       isLoading={busy || loading}
       markdown={`# ${markdownText(task.description)}\n\n${status}${times.remaining === null ? "" : ` · ${duration(times.remaining)} remaining`}\n\n${markdownText(task.context)}${error ? `\n\n**${markdownText(error)}**` : ""}`}
       metadata={

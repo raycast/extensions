@@ -36,8 +36,7 @@ export default function Tasks({ launchContext }: { launchContext?: TaskPageConte
   useEffect(() => {
     if (account.session === null) void updateTaskSubtitle("Sign in to Happy Squid");
   }, [account.session]);
-  if (connecting || account.session === undefined)
-    return <Detail navigationTitle="Happy Squid" isLoading markdown="" />;
+  if (connecting || account.session === undefined) return <Detail isLoading markdown="" />;
   if (!account.session) return <SignIn client={account.client} initialError={account.error} />;
   return (
     <TaskProvider key={account.session.user.id} account={account}>
@@ -72,11 +71,10 @@ function TaskPage({ cancelReview }: { cancelReview?: CancelReview }) {
     snapshot?.review?.id === cancelReview.reviewId &&
     (snapshot.task?.id ?? null) === cancelReview.taskId &&
     (cancelledReview.current !== cancelReview.reviewId || cancellingReview === cancelReview.reviewId);
-  if (cancelling && routeDepth === 0) return <Detail navigationTitle="Happy Squid" isLoading markdown="" />;
+  if (cancelling && routeDepth === 0) return <Detail isLoading markdown="" />;
   if (!snapshot)
     return (
       <Detail
-        navigationTitle="Happy Squid"
         isLoading={loading}
         markdown={error ? `# Connect to Happy Squid\n\n${markdownText(error)}` : ""}
         actions={

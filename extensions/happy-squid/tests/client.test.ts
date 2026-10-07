@@ -1,6 +1,8 @@
-import { beforeEach, expect, test, vi } from "vitest";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { requestTasks } from "../src/client";
+
+vi.mock("@supabase/supabase-js", () => ({ createClient: vi.fn() }));
 
 const request = {
   action: { kind: "start" as const, description: "Write launch notes", durationMinutes: 5 },
@@ -13,6 +15,20 @@ const from = vi.fn(() => {
 });
 const client = { functions: { invoke }, from } as unknown as SupabaseClient;
 beforeEach(() => vi.clearAllMocks());
+afterEach(() => vi.unstubAllEnvs());
+
+test("environment overrides cannot send Raycast accounts to another backend", async () => {
+  vi.stubEnv("HS_RAYCAST_SUPABASE_URL", "https://other-backend.invalid");
+  vi.stubEnv("HS_RAYCAST_SUPABASE_KEY", "other-key");
+  vi.resetModules();
+  const { createTaskClient } = await import("../src/client");
+  createTaskClient();
+  expect(createClient).toHaveBeenCalledExactlyOnceWith(
+    "https://dtptcpfaeqstzzdumfeb.supabase.co",
+    "sb_publishable_Y5IcTkTqpNR_-zL_A9nXag_9IqfWME7",
+    expect.any(Object),
+  );
+});
 
 test("task actions return the backend response directly without selecting a device or polling its queue", async () => {
   const response = { ok: true, snapshot: { review: { status: "checking" } } };

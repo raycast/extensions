@@ -9,6 +9,7 @@ type Submission = { status: "editing" } | { status: "submitting" } | { status: "
 const MAX_CUSTOM_TASK_MINUTES = 9 * 60 + 99;
 
 export function TaskForm({
+  navigationTitle,
   purpose,
   displayed,
   description = "",
@@ -16,6 +17,7 @@ export function TaskForm({
   onSaved,
   revision = 0,
 }: {
+  navigationTitle?: string;
   purpose: Purpose;
   displayed: TaskSnapshot;
   description?: string;
@@ -125,7 +127,7 @@ export function TaskForm({
 
   return (
     <Form
-      navigationTitle="Happy Squid"
+      navigationTitle={navigationTitle}
       isLoading={waiting}
       actions={
         <ActionPanel>

@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { environment, launchCommand, LaunchType, LocalStorage, updateCommandMetadata } from "./raycast-api";
+import {
+  environment,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showToast,
+  Toast,
+  updateCommandMetadata,
+} from "./raycast-api";
 import Tasks from "../src/tasks";
 import type { TaskSnapshot } from "../src/vendor/task-control";
 
@@ -84,6 +92,31 @@ test.each([
   });
   expect(h.request).not.toHaveBeenCalled();
 });
+
+test.each([
+  undefined,
+  { raycastConnection: { code: "one-time-code", state: "pending-state" } },
+  { cancelReview: { reviewId: "review-1", taskId: null } },
+])(
+  "a disabled task page reports a launch failure without crashing or replaying the callback: %j",
+  async (launchContext) => {
+    environment.launchType = LaunchType.UserInitiated;
+    launchCommand.mockRejectedValueOnce(new Error("Manage Tasks is disabled"));
+    await expect(Tasks({ launchContext })).resolves.toBeUndefined();
+    expect(showToast).toHaveBeenCalledExactlyOnceWith({
+      style: Toast.Style.Failure,
+      title: "Could not open Manage Tasks",
+      message: "Error: Manage Tasks is disabled",
+    });
+    expect(launchCommand).toHaveBeenCalledExactlyOnceWith({
+      name: "manage-tasks",
+      type: LaunchType.UserInitiated,
+      context: launchContext,
+    });
+    expect(h.createClient).not.toHaveBeenCalled();
+    expect(updateCommandMetadata).not.toHaveBeenCalled();
+  },
+);
 
 test("scheduled runs advance the countdown and pick up pause, completion and tasks started elsewhere with no page open", async () => {
   for (const [snapshot, subtitle] of [

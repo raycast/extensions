@@ -18,7 +18,6 @@ import { TaskProvider, useAccount, useTasks } from "../src/task-state";
 import { TaskForm } from "../src/components/task-form";
 import { taskTimes, taskSubtitle } from "../src/format";
 import manifest from "../package.json";
-import { BROWSER_SETTINGS_URL } from "../src/vendor/browser-settings";
 
 // Page/state tests render the conversation directly; task-review-flow.test.tsx
 // exercises the real native editor/chat stack.
@@ -33,6 +32,7 @@ const h = vi.hoisted(() => ({
   channel: vi.fn(),
   removeChannel: vi.fn(),
   progress: (_event: { payload: unknown }) => {},
+  stateChanged: (_event: { new: { key: string } }) => {},
 }));
 vi.mock("../src/client", () => ({
   requestTasks: h.request,
@@ -101,8 +101,9 @@ beforeEach(() => {
   environment.launchType = LaunchType.UserInitiated;
   h.userId = "user-1";
   h.channel.mockImplementation(() => ({
-    on(_type: string, _filter: unknown, callback: typeof h.progress) {
-      h.progress = callback;
+    on(type: string, _filter: unknown, callback: typeof h.progress & typeof h.stateChanged) {
+      if (type === "postgres_changes") h.stateChanged = callback;
+      else h.progress = callback;
       return this;
     },
     subscribe() {
@@ -159,13 +160,6 @@ test("Happy Squid refreshes in the background and its task page requests snapsho
     context: { subtitle: "Start a task" },
   });
   expect(h.request.mock.calls.every((call) => call[1].action.kind === "snapshot")).toBe(true);
-});
-
-test("common actions open Happy Squid Settings through the default browser", async () => {
-  await render(<Tasks />);
-  const links = nodes("Action.OpenInBrowser");
-  expect(links.find((node) => node.props.title === "Open Happy Squid Settings")!.props.url).toBe(BROWSER_SETTINGS_URL);
-  expect(links.some((node) => node.props.title === "Open Happy Squid Website")).toBe(false);
 });
 
 test("reopening with a running task shows its details and changes only the subtitle", async () => {
@@ -572,6 +566,36 @@ test("background reads are silent, never overlap, and stop when the page closes"
   await act(async () => read.resolve({ ok: true, snapshot: idle }));
   await advance(30_000);
   expect(h.request).toHaveBeenCalledTimes(2);
+});
+
+test("a deletion on another device removes a visible recent task without waiting for the poll", async () => {
+  vi.useFakeTimers();
+  h.request.mockResolvedValueOnce({
+    ok: true,
+    snapshot: { ...idle, recentTasks: [{ description: "Write notes", durationMinutes: 30, workedMs: 0 }] },
+  });
+  await render(<Tasks />);
+  expect(nodes("List.Item").map((node) => node.props.title)).toContain("Write notes");
+  await act(async () => h.stateChanged({ new: { key: "recentTasks" } }));
+  expect(h.request).toHaveBeenCalledTimes(2);
+  expect(nodes("List.Item").map((node) => node.props.title)).not.toContain("Write notes");
+  await act(async () => h.stateChanged({ new: { key: "history" } }));
+  expect(h.request).toHaveBeenCalledTimes(2);
+});
+
+test("a deletion notification during a read fetches again after that stale read finishes", async () => {
+  vi.useFakeTimers();
+  const stale = { ...idle, recentTasks: [{ description: "Write notes", durationMinutes: 30, workedMs: 0 }] };
+  h.request.mockResolvedValueOnce({ ok: true, snapshot: stale });
+  await render(<Tasks />);
+  const read = deferred<{ ok: true; snapshot: TaskSnapshot }>();
+  h.request.mockReturnValueOnce(read.promise);
+  await advance(3_000);
+  await act(async () => h.stateChanged({ new: { key: "recentTasks" } }));
+  expect(h.request).toHaveBeenCalledTimes(2);
+  await act(async () => read.resolve({ ok: true, snapshot: stale }));
+  expect(h.request).toHaveBeenCalledTimes(3);
+  expect(nodes("List.Item").map((node) => node.props.title)).not.toContain("Write notes");
 });
 
 test("reopening displays cached tasks and opens New Task while the live read is still pending", async () => {
