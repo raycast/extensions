@@ -10,7 +10,7 @@
 export const SETTINGS_DEEPLINK = "raycast://extensions/raycast/raycast/settings";
 
 export type JumpFailure =
-  "no-accessibility" | "settings-not-opened" | "no-search-box" | "no-result" | "wrong-page" | "unknown";
+  "no-accessibility" | "settings-not-opened" | "no-search-box" | "no-result" | "wrong-page" | "ambiguous" | "unknown";
 
 export type JumpResult = { ok: true } | { ok: false; code: JumpFailure; detail?: string };
 
