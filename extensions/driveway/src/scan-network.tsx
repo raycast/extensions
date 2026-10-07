@@ -98,7 +98,7 @@ export default function Command() {
     otherDevicesNotSaved.length === 0;
 
   return (
-    <List isLoading={isLoading} navigationTitle="Discover Devices">
+    <List isLoading={isLoading}>
       {nothingFound && (
         <List.EmptyView
           title="No Devices Found"
