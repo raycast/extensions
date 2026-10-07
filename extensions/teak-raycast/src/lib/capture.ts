@@ -5,7 +5,11 @@ import {
   getRecoveryHint,
   getUserFacingErrorMessage,
 } from "./api";
-import { getStoredTeakAccessToken, TeakDiscoveryError } from "./oauth";
+import {
+  getStoredTeakAccessToken,
+  TeakDiscoveryError,
+  TeakSignOutRequiredError,
+} from "./oauth";
 import { getPreferences } from "./preferences";
 
 const URL_INLINE_PATTERN = /(https?:\/\/[^\s]+)/i;
@@ -15,7 +19,7 @@ const URL_INLINE_PATTERN = /(https?:\/\/[^\s]+)/i;
 // refreshing an expired access token when possible). Refreshing here also means
 // the subsequent request path finds a valid token and never opens the browser
 // overlay. When there is no usable session (missing or stale/revoked), it shows
-// a sign-in prompt and returns false so the command stops instead of triggering
+// recovery or sign-in guidance and returns false, stopping the command before
 // interactive reauthorization from a background command.
 export const ensureCredentialsForNoViewCommand = async (): Promise<boolean> => {
   if (getPreferences().apiKey?.trim()) {
@@ -26,6 +30,14 @@ export const ensureCredentialsForNoViewCommand = async (): Promise<boolean> => {
   try {
     token = await getStoredTeakAccessToken();
   } catch (error) {
+    if (error instanceof TeakSignOutRequiredError) {
+      await showToast({
+        title: "Sign Out required",
+        message: "Open Search Cards, choose Sign Out, then sign in again.",
+        style: Toast.Style.Failure,
+      });
+      return false;
+    }
     if (!(error instanceof TeakDiscoveryError)) {
       throw error;
     }

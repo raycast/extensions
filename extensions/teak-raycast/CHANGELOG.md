@@ -4,7 +4,7 @@
 
 - Sign-in follows Teak’s current authentication provider automatically.
 - Account connections recover after authentication changes.
-- Sign Out recovers saved connections that can no longer refresh or reconnect.
+- Keep Sign Out available when saved credentials cannot refresh or reconnect.
 - Uncertain sign-in responses keep saved credentials without reopening browser sign-in.
 - Confirmed WorkOS disconnect signs out Raycast across installations; reconnect can take about five minutes.
 - Sign Out explains when only this Mac was signed out and preserves credentials on uncertain failures.
