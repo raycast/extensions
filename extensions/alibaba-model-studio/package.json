@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alibaba-model-studio",
+  "version": "1.0.0",
+  "title": "Alibaba Model Studio",
+  "description": "Use Alibaba Cloud Model Studio models (Qwen, GLM, Kimi and more) inside Raycast AI Chat, Quick AI and AI Commands",
+  "icon": "icon.png",
+  "author": "paulgit",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "check-setup",
+      "title": "Check Setup",
+      "subtitle": "Alibaba Model Studio",
+      "mode": "view",
+      "icon": "icon.png",
+      "description": "Validate your API key and platform settings against the Alibaba Cloud Model Studio API"
+    },
+    {
+      "name": "refresh-models",
+      "title": "Refresh Models",
+      "subtitle": "Alibaba Model Studio",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "description": "Re-fetch the list of models available to your account"
+    },
+    {
+      "name": "show-models",
+      "title": "Show Models",
+      "subtitle": "Alibaba Model Studio",
+      "mode": "view",
+      "icon": "icon.png",
+      "description": "List the Alibaba Cloud Model Studio models available to your account with context windows and capabilities"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": true,
+      "description": "API key from Alibaba Cloud Model Studio (Bailian). Keys are region-bound — pick the matching Platform below. Create keys at modelstudio.console.alibabacloud.com (International) or bailian.console.aliyun.com (China)."
+    },
+    {
+      "name": "platform",
+      "title": "Platform",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "payg",
+          "title": "Pay-as-you-go (International)"
+        },
+        {
+          "value": "payg-cn",
+          "title": "Pay-as-you-go (China)"
+        },
+        {
+          "value": "custom",
+          "title": "Custom base URL"
+        }
+      ],
+      "description": "Where your API key was created. Keys only work against their own region — International vs China. Pay-as-you-go API keys only: Token Plan and Coding Plan keys (sk-sp-…) are not supported. Picking Custom base URL? The setup form doesn't ask for the URL — after finishing, open Raycast Settings → Extensions → Alibaba Model Studio, set Custom Base URL, then run Refresh Models."
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional business space (workspace) ID for team accounts on pay-as-you-go platforms — sent as the X-DashScope-WorkSpace header. Ignored for Custom."
+    },
+    {
+      "name": "customBaseUrl",
+      "title": "Custom Base URL",
+      "type": "textfield",
+      "required": false,
+      "description": "HTTPS OpenAI-compatible base URL, used when Platform is set to Custom (e.g. https://dashscope-intl.aliyuncs.com/compatible-mode/v1)"
+    },
+    {
+      "name": "extraModels",
+      "title": "Extra Models",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional comma-separated model IDs to always include in the model list"
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "1.0.46",
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "ai": "5.0.222",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.11.0",
+    "typescript": "^5.8.0"
+  }
+}
