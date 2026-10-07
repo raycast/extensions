@@ -1,9 +1,8 @@
 import { withAccessToken } from "@raycast/utils";
-import { bucketOf, dueLabel, isMine, localDate } from "../lib/agenda";
+import { bucketOf, dueLabel, isMine, localDate, personName } from "../vendor/twelfth-shared/index";
 import { authorize, signedInEmail } from "../lib/auth";
 import { appUrl } from "../lib/config";
 import { workspaceContext } from "../lib/context";
-import { personName } from "../lib/format";
 import { listOpenActions } from "../lib/twelfth";
 
 type Input = {

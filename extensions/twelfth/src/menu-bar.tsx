@@ -9,7 +9,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { dueLabel, groupActions, isMine } from "./lib/agenda";
+import { dueLabel, groupActions, isMine } from "./vendor/twelfth-shared/index";
 import { AuthError, NotSignedInError, signedInEmail } from "./lib/auth";
 import { appUrl } from "./lib/config";
 import { workspaceContext } from "./lib/context";

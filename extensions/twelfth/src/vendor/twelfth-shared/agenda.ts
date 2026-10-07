@@ -1,4 +1,4 @@
-import type { Action } from "./twelfth";
+import type { Action } from "./types";
 
 export type Bucket = "overdue" | "today" | "week" | "next" | "later" | "undated";
 export type WeekStart = "monday" | "sunday";

@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
-import { BUCKET_TITLES, type Bucket, dueLabel, groupActions, isMine } from "./lib/agenda";
+import { BUCKET_TITLES, type Bucket, dueLabel, groupActions, isMine, personName } from "./vendor/twelfth-shared/index";
 import { authorize, signedInEmail } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
 import { workspaceContext } from "./lib/context";
-import { personName } from "./lib/format";
 import { type Action as TwelfthAction, listOpenActions } from "./lib/twelfth";
 
 const BUCKET_COLORS: Record<Bucket, Color.ColorLike> = {

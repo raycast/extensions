@@ -3,9 +3,8 @@ import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/util
 import { useState } from "react";
 import { authorize } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
-import { validZone } from "./lib/agenda";
+import { money, validZone } from "./vendor/twelfth-shared/index";
 import { type WorkspaceContext, workspaceContext } from "./lib/context";
-import { money } from "./lib/format";
 import { PRODUCT_SORTS, type Figure, type Product, type ProductSort, listProducts } from "./lib/twelfth";
 
 const PAGE_SIZE = 50;
