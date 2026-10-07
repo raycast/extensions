@@ -32,20 +32,25 @@ export default async function RefreshMail() {
     await showToast(Toast.Style.Animated, "Refreshing messages for accounts");
   }
 
+  let failed = false;
   for (const mailbox of mailboxes) {
     const messages = await getMessages(mailbox.account, mailbox);
     if (!messages) {
-      if (environment.launchType !== LaunchType.Background) {
-        await showToast(Toast.Style.Failure, "Failed to refresh messages");
-      } else {
-        console.log("Failed to refresh messages");
-      }
-      return;
+      failed = true;
+      console.log(`Failed to refresh messages for ${mailbox.name}`);
     }
   }
-  if (environment.launchType !== LaunchType.Background) {
-    await showToast(Toast.Style.Success, "Refreshed all Mail accounts");
+  if (failed) {
+    if (environment.launchType !== LaunchType.Background) {
+      await showToast(Toast.Style.Failure, "Failed to refresh some mailboxes");
+    } else {
+      console.log("Failed to refresh some mailboxes");
+    }
   } else {
-    console.log("Refreshed all Mail accounts");
+    if (environment.launchType !== LaunchType.Background) {
+      await showToast(Toast.Style.Success, "Refreshed all Mail accounts");
+    } else {
+      console.log("Refreshed all Mail accounts");
+    }
   }
 }
