@@ -22,7 +22,14 @@ export function Catalog({ context }: { context: Context }) {
     return { ...page, items: page.items.map((offering) => ({ id: offering.id, offering })) };
   });
   const catalogFilter = (
-    <ActionPanel.Submenu title="Show Catalog" icon={Icon.Filter} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}>
+    <ActionPanel.Submenu
+      title="Show Catalog"
+      icon={Icon.Filter}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "f" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+      }}
+    >
       <Action
         title="Products"
         icon={tab === "products" ? Icon.Checkmark : Icon.Box}

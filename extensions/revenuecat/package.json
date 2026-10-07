@@ -7,7 +7,8 @@
   "author": "samuelkraft",
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Finance",

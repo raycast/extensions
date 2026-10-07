@@ -228,7 +228,10 @@ export function Customers({ context }: { context: Context }) {
                   <Action.Push
                     title="View Event History"
                     icon={Icon.Clock}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "opt"], key: "e" },
+                    }}
                     target={<Events context={context} customer={item} />}
                   />
                   <CommonActions

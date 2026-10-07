@@ -131,7 +131,14 @@ export function Trends({ context }: { context: Context }) {
         {value !== undefined && (
           <Action.CopyToClipboard title="Copy Revenue" content={money(value, context.currency)} />
         )}
-        <ActionPanel.Submenu title="Date Range" icon={Icon.Filter} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}>
+        <ActionPanel.Submenu
+          title="Date Range"
+          icon={Icon.Filter}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
+        >
           {[
             ["all", "All"],
             ["7d", "Last 7 Days"],

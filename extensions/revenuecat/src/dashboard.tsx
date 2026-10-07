@@ -22,19 +22,28 @@ function Home({ context }: { context: Context }) {
         title="Search Customers"
         icon={Icon.TwoPeople}
         target={<Customers context={context} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "u" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+        }}
       />
       <Action.Push
         title="View Revenue Trends"
         icon={Icon.BarChart}
         target={<Trends context={context} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "r" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+        }}
       />
       <Action.Push
         title="Browse Product Catalog"
         icon={Icon.Box}
         target={<Catalog context={context} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "p" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+        }}
       />
     </ActionPanel.Section>
   );
