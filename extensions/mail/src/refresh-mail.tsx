@@ -37,7 +37,7 @@ export default async function RefreshMail() {
     const messages = await getMessages(mailbox.account, mailbox);
     if (!messages) {
       failed = true;
-      console.log(`Failed to refresh messages for ${mailbox.name}`);
+      console.log(`Failed to refresh messages for ${mailbox.account.name}: ${mailbox.name}`);
     }
   }
   if (failed) {

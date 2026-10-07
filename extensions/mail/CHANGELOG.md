@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Fix] - 2026-10-07
+## [Fix] - {PR_MERGE_DATE}
 
 - Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
 
