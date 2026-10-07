@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -170,9 +170,12 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     }
   }, [emails, currentPage, pageSize]);
 
+  // Scrolling can call onLoadMore again before the state update lands, so guard with a ref
+  const loadingMoreRef = useRef(false);
   const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
+    if (loadingMoreRef.current || !hasMore) return;
 
+    loadingMoreRef.current = true;
     setIsLoadingMore(true);
     try {
       const filterParam = filter === "all" ? undefined : filter;
@@ -193,9 +196,10 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to load more emails", message: String(error) });
     } finally {
+      loadingMoreRef.current = false;
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder]);
+  }, [hasMore, filter, currentPage, pageSize, selectedFolder]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -229,7 +233,9 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingMore}
+      // Older emails load when scrolling to the bottom, in pages of "Emails to Load"
+      pagination={{ pageSize, hasMore, onLoadMore: handleLoadMore }}
       isShowingDetail={selectedEmailUid !== null}
       searchBarPlaceholder="Search emails..."
       searchBarAccessory={

@@ -1,5 +1,9 @@
 # Proton Mail Changelog
 
+## [Load Older Emails on Scroll] - {PR_MERGE_DATE}
+
+- Older emails now load automatically when scrolling to the bottom of the list ("Load More Emails" and ⌘L still work)
+
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
 - "Delete" now moves emails to Trash ("Move to Trash"). In Trash and Drafts it becomes "Delete Permanently", with a confirmation

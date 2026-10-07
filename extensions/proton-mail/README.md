@@ -64,7 +64,7 @@ Select a folder first, then use the filter section to narrow down emails.
 
 ## Pagination
 
-The extension loads emails in pages based on your "Emails to Load" preference. Press ⌘L or select "Load More Emails" from the action menu to fetch older emails.
+The extension loads emails in pages based on your "Emails to Load" preference. Scroll to the bottom of the list to load older emails automatically, or press ⌘L ("Load More Emails" in the action menu).
 
 ## Attachments
 
