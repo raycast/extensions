@@ -1,6 +1,8 @@
 /** Trakt caps a calendar at 33 UTC days; one goes to covering the local window's offset. */
 export const MAX_CALENDAR_DAYS = 32;
 export const DEFAULT_CALENDAR_DAYS = 7;
+export const DEFAULT_CALENDAR_LIMIT = 50;
+export const MAX_CALENDAR_LIMIT = 200;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -59,11 +61,14 @@ export function localToday(timeZone: string, now = Date.now()) {
   return localParts(now, timeZone).date;
 }
 
-/** `startDate` as given by the caller, or today in `timeZone`. Anything but a real `YYYY-MM-DD` date throws. */
+/**
+ * `startDate` as given by the caller, or today in `timeZone` when it is omitted. Anything else but a real
+ * `YYYY-MM-DD` date throws, an empty or blank value included.
+ */
 export function parseStartDate(input: string | undefined, timeZone: string, now = Date.now()) {
-  const trimmed = input?.trim();
-  if (!trimmed) return localToday(timeZone, now);
+  if (input === undefined) return localToday(timeZone, now);
 
+  const trimmed = input.trim();
   if (!DATE_PATTERN.test(trimmed)) {
     throw new Error(`startDate must be a date in YYYY-MM-DD format, got "${input}".`);
   }
@@ -83,6 +88,38 @@ export function resolveDays(input: number | undefined) {
   }
 
   return input > MAX_CALENDAR_DAYS ? { days: MAX_CALENDAR_DAYS, capped: true } : { days: input, capped: false };
+}
+
+/** Maximum entries per list: 50 by default, capped at 200. Anything but a whole number of at least 1 throws. */
+export function resolveLimit(input: number | undefined) {
+  if (input === undefined) return { limit: DEFAULT_CALENDAR_LIMIT, capped: false };
+
+  if (!Number.isInteger(input) || input < 1) {
+    throw new Error(`limit must be a whole number of at least 1, got ${input}.`);
+  }
+
+  return input > MAX_CALENDAR_LIMIT ? { limit: MAX_CALENDAR_LIMIT, capped: true } : { limit: input, capped: false };
+}
+
+/**
+ * Keeps the first `limit` entries of a list already filtered and sorted chronologically. `lastDate` is the local
+ * date of the last entry kept, so a cut list can say where it stops instead of looking like nothing comes after.
+ */
+export function truncateList<T>(items: T[], limit: number, dateOf: (item: T) => string) {
+  const kept = items.slice(0, limit);
+  const truncated = items.length > kept.length;
+
+  return {
+    items: kept,
+    total: items.length,
+    truncated,
+    lastDate: truncated && kept.length > 0 ? dateOf(kept[kept.length - 1]) : undefined,
+  };
+}
+
+/** "episodes truncated at 2026-10-23 (50 of 158)." for a cut list, `undefined` otherwise. */
+export function truncationNote(label: string, list: ReturnType<typeof truncateList>) {
+  return list.truncated ? `${label} truncated at ${list.lastDate} (${list.items.length} of ${list.total}).` : undefined;
 }
 
 export function calendarWindow(startDate: string, days: number, timeZone: string): CalendarWindow {

@@ -7,9 +7,12 @@ import {
   MOVIES_FAILED_WARNING,
   parseStartDate,
   resolveDays,
+  resolveLimit,
   settleCalendarHalves,
   toLocalAiring,
   toTraktQuery,
+  truncateList,
+  truncationNote,
 } from "./calendar-window";
 import { toCompactCalendarEpisode, toCompactCalendarMovie } from "./compact-media";
 
@@ -72,6 +75,11 @@ test("an invalid startDate throws instead of falling back to today", () => {
   for (const input of ["2026-13-01", "2026-02-30", "demain", "08/10/2026"]) {
     assert.throws(() => parseStartDate(input, PARIS), /startDate/);
   }
+  // A blank value is not an omitted one: it throws instead of meaning today.
+  assert.throws(() => parseStartDate("", PARIS), { message: 'startDate must be a date in YYYY-MM-DD format, got "".' });
+  assert.throws(() => parseStartDate("   ", PARIS), {
+    message: 'startDate must be a date in YYYY-MM-DD format, got "   ".',
+  });
   assert.equal(parseStartDate("2026-10-20", PARIS), "2026-10-20");
   // Default: today in the given time zone (23:30 UTC on the 7th is already the 8th in Paris).
   assert.equal(parseStartDate(undefined, PARIS, Date.parse("2026-10-07T23:30:00.000Z")), "2026-10-08");
@@ -112,3 +120,36 @@ test("an explicit type, or both halves failing, throws", () => {
     error,
   );
 });
+
+const dated = (dates: string[]) => dates.map((localDate, index) => ({ localDate, index }));
+
+test("a list under the limit is not truncated and keeps its total", () => {
+  const list = truncateList(dated(["2026-10-08", "2026-10-09"]), 50, (item) => item.localDate);
+  assert.equal(list.items.length, 2);
+  assert.equal(list.total, 2);
+  assert.equal(list.truncated, false);
+  assert.equal(truncationNote("Episodes", list), undefined);
+});
+
+test("a list over the limit keeps the first entries and names the last date kept", () => {
+  const dates = Array.from({ length: 158 }, (_, index) => addDaysForTest("2026-10-07", Math.floor(index / 5)));
+  const list = truncateList(dated(dates), 50, (item) => item.localDate);
+  assert.equal(list.items.length, 50);
+  assert.equal(list.total, 158);
+  assert.equal(list.truncated, true);
+  assert.equal(list.lastDate, "2026-10-16");
+  assert.equal(truncationNote("Episodes", list), "Episodes truncated at 2026-10-16 (50 of 158).");
+});
+
+test("limit defaults to 50, is capped at 200, and rejects anything but a whole number of at least 1", () => {
+  assert.deepEqual(resolveLimit(undefined), { limit: 50, capped: false });
+  assert.deepEqual(resolveLimit(120), { limit: 120, capped: false });
+  assert.deepEqual(resolveLimit(500), { limit: 200, capped: true });
+  for (const input of [0, -1, 1.5]) {
+    assert.throws(() => resolveLimit(input), /limit must be a whole number of at least 1/);
+  }
+});
+
+function addDaysForTest(date: string, days: number) {
+  return new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 86400000).toISOString().slice(0, 10);
+}
