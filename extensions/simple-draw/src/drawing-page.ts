@@ -686,6 +686,8 @@ export function generateDrawingPage(base64Image: string): string {
 
   // --- Tool switching ---
   function setTool(tool) {
+    // Commit any in-progress stroke or shape with the tool that started it
+    if (drawing) endDraw();
     currentTool = tool;
     document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
     document.querySelector('.tool-btn[data-tool="' + tool + '"]').classList.add("active");
