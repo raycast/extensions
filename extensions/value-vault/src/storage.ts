@@ -84,30 +84,14 @@ async function migrateLegacyStorage(): Promise<void> {
     }
   }
   await LocalStorage.removeItem(LEGACY_KEY);
-  await pruneStaleTombstones();
-}
-
-async function pruneStaleTombstones(): Promise<void> {
-  const items = await LocalStorage.allItems();
-  const live = new Set(
-    Object.keys(items)
-      .filter((key) => key.startsWith(ENTRY_PREFIX))
-      .map((key) => idFromKey(key, ENTRY_PREFIX)),
-  );
-  for (const key of Object.keys(items)) {
-    // Markers shadowing a live entry are load-bearing: keep them so a
-    // resurrected secret stays hidden. Only drop markers with no entry left.
-    if (key.startsWith(TOMBSTONE_PREFIX) && !live.has(idFromKey(key, TOMBSTONE_PREFIX))) {
-      await LocalStorage.removeItem(key);
-    }
-  }
 }
 
 /**
  * Retrieve all stored value entries.
  * Entries live under individual keys, so concurrent writers in separate
  * command processes cannot clobber each other the way a shared array could.
- * Ids deleted mid-migration stay hidden via their tombstones.
+ * Deletion markers are permanent and always honored, so an id deleted while
+ * another process was mid-migration stays hidden no matter the ordering.
  */
 export async function getAllEntries(): Promise<ValueEntry[]> {
   await migrateLegacyStorage();
