@@ -6,6 +6,12 @@
 
 - **Calendar AI tool**: Raycast AI can list upcoming episodes of the shows you follow and upcoming movie releases, for up to 32 days, with episode times in your local time zone. Each list returns 50 entries by default, up to 200.
 
+## [Update] - 2026-10-07
+
+### Fixed
+
+- After an action finishes, only the detail view it started in closes: a detail you opened meanwhile stays open.
+
 ## [Update] - 2026-10-06
 
 ### Added
