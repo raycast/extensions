@@ -281,17 +281,20 @@ function handleToggle(
   groupedLight: GroupedLight,
   group: Group,
 ) {
-  const { groupedLights, zones } = hue;
+  const { groupedLights, lights, zones } = hue;
   const changesToGroup = {
     on: { on: !groupedLight.on?.on },
     // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
     //   even when only applied to toggling off.
   };
+  const otherLightsOn = lights.filter((light) => light.on.on && !groupLights.some(({ id }) => id === light.id));
 
   const changesToGroupedLights = new Map(
     zones
       // Find zones that contain affected lights
       .filter((zone) => getLightsFromGroup(groupLights, zone).length > 0)
+      // When turning off, skip zones that other lights keep on
+      .filter((zone) => changesToGroup.on.on || getLightsFromGroup(otherLightsOn, zone).length === 0)
       .map((zone) => getGroupedLightFromGroup(groupedLights, zone))
       // Filter out undefined grouped lights
       .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
