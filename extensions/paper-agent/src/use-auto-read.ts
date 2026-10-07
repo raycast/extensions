@@ -14,10 +14,15 @@ export function useAutoRead(
   latest.current = { paper, isRead, markAsRead, markAsUnread };
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const key = paper ? getPaperStateKey(paper) : undefined;
+  const manualSelection = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    manualSelection.current = undefined;
+  }, [key]);
 
   useEffect(() => {
     const selected = latest.current.paper;
-    if (!ready || !selected || latest.current.isRead(selected)) return;
+    if (!ready || !selected || manualSelection.current === key || latest.current.isRead(selected)) return;
     timer.current = setTimeout(() => {
       if (latest.current.isRead(selected)) return;
       void latest.current.markAsRead(selected).catch((error: unknown) => {
@@ -31,13 +36,15 @@ export function useAutoRead(
     return () => clearTimeout(timer.current);
   }, [key, ready]);
 
-  // A manual choice must not be reversed by an already scheduled auto-read timer.
+  // Preserve the manual choice across storage reloads until selection changes.
   return {
     markAsRead: (item: Paper) => {
+      manualSelection.current = getPaperStateKey(item);
       clearTimeout(timer.current);
       return latest.current.markAsRead(item);
     },
     markAsUnread: (item: Paper) => {
+      manualSelection.current = getPaperStateKey(item);
       clearTimeout(timer.current);
       return latest.current.markAsUnread(item);
     },

@@ -3,9 +3,42 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { isPaperRecord, parseCliPapers, renderPaperDetailMarkdown } from "../src/paper-utils";
+import { isPaperRecord, parseCliPapers, parseSavedPapers, renderPaperDetailMarkdown } from "../src/paper-utils";
 
 const options = { paperDir: "/papers", libraryDir: "/papers/library", fallbackDate: "2026-10-06" };
+
+test("legacy null metadata remains readable with saved timestamps and all entries intact", () => {
+  const base = { id: "legacy", title: "Legacy", date: "2026-01-01", notePath: "/papers/legacy.md", hasNote: true };
+  const raw = JSON.stringify([
+    {
+      ...base,
+      authors: null,
+      categories: null,
+      abstract: null,
+      link: null,
+      published: null,
+      whyThisPaper: null,
+      favoritedAt: "2026-01-02",
+      queuedAt: "2026-01-03",
+      researchSummary: { heading: null, body: null },
+      relatedLocalPapers: [{ id: "related", title: "Related", date: null, notePath: null, link: null, reasons: null }],
+    },
+    { ...base, id: "current", abstract: "Current abstract" },
+  ]);
+  const papers = parseSavedPapers(raw);
+  assert.equal(papers.length, 2);
+  assert.equal((papers[0] as unknown as { favoritedAt: string }).favoritedAt, "2026-01-02");
+  assert.equal((papers[0] as unknown as { queuedAt: string }).queuedAt, "2026-01-03");
+  assert.match(renderPaperDetailMarkdown(papers[0], papers[0].date), /No abstract available/);
+  assert.equal(papers[1].abstract, "Current abstract");
+});
+
+test("invalid required saved metadata is still rejected without silently dropping entries", () => {
+  assert.throws(
+    () => parseSavedPapers('[{"id":null,"title":"Saved","date":"2026-01-01","notePath":"/note.md"}]'),
+    /not been overwritten/,
+  );
+});
 
 test("corrupted saved related papers are rejected before rendering", () => {
   const [paper] = parseCliPapers('[{"id":"saved","title":"Saved"}]', options);

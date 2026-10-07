@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import * as fs from "node:fs";
-import { type Paper, isPaperRecord } from "./paper-utils";
+import { type Paper, parseSavedPapers } from "./paper-utils";
 import { getPaperStateKey } from "./read-utils";
 import { createListStore } from "./list-store";
 import { useListStore } from "./use-list-store";
@@ -16,10 +16,7 @@ function sortFavorites(items: FavoritePaper[]): FavoritePaper[] {
 async function readFavorites(): Promise<FavoritePaper[]> {
   const raw = await LocalStorage.getItem<string>(FAVORITES_STORAGE_KEY);
   if (!raw) return [];
-  const parsed: unknown = JSON.parse(raw);
-  if (!Array.isArray(parsed) || !parsed.every(isPaperRecord)) {
-    throw new Error("Saved papers are invalid. Existing data has not been overwritten.");
-  }
+  const parsed = parseSavedPapers(raw);
   return sortFavorites(
     parsed.map((entry) => ({
       ...entry,

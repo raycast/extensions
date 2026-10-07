@@ -10,6 +10,7 @@
 - Add offline regression checks and a distribution build to CI.
 - Keep favorites, reading queues, and read state synchronized across nested views; preserve saved data when storage fails.
 - Respect manual unread changes, validate saved paper fields, and handle absolute note paths.
+- Keep legacy saved papers with null optional metadata readable and preserve manual read choices across nested-view reloads.
 - Pass Gmail app passwords to manual and scheduled runs and validate numeric preferences before starting.
 - Keep startup errors visible with retry actions, allow refreshing run status, and verify schedule removal.
 

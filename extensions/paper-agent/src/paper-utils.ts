@@ -83,6 +83,31 @@ export function isPaperRecord(value: unknown): value is Paper {
   );
 }
 
+export function parseSavedPapers(rawJson: string): Paper[] {
+  const data: unknown = JSON.parse(rawJson);
+  const withoutNulls = (record: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(record).filter(([, value]) => value !== null));
+  const papers = Array.isArray(data)
+    ? data.map((value) => {
+        if (!isRecord(value)) return value;
+        // Older versions persisted null for missing optional metadata. Keep every
+        // saved entry and its timestamps, treating those nulls as absent fields.
+        const paper = withoutNulls(value);
+        if (isRecord(paper.researchSummary)) paper.researchSummary = withoutNulls(paper.researchSummary);
+        if (Array.isArray(paper.relatedLocalPapers)) {
+          paper.relatedLocalPapers = paper.relatedLocalPapers.map((item) =>
+            isRecord(item) ? withoutNulls(item) : item,
+          );
+        }
+        return paper;
+      })
+    : undefined;
+  if (!papers || !papers.every(isPaperRecord)) {
+    throw new Error("Saved papers are invalid. Existing data has not been overwritten.");
+  }
+  return papers;
+}
+
 export function parseCliPapers(rawJson: string, options: ParseOptions): Paper[] {
   let data: unknown;
   try {
