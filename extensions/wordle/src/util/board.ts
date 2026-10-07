@@ -171,11 +171,38 @@ export const renderBoardSvg = ({
   );
 };
 
+const HINT_TYPE_DESCRIPTION = {
+  [HintType.CORRECT_POSITION]: "correct spot",
+  [HintType.INCORRECT_POSITION]: "wrong spot",
+  [HintType.NON_EXISTENT]: "not in the word",
+};
+
+// Brackets and line breaks would break the markdown image, and the typed text is user input.
+const toAltText = (text: string) => text.replace(/\s*·\s*/g, ", ").replace(/[^\p{L}\p{N} .,:'-]/gu, "");
+
 const toMarkdownImage = (alt: string, svg: string) =>
-  `![${alt}](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`;
+  `![${toAltText(alt)}](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`;
+
+// The board is an image, so every guess and its letter results are also written out for screen readers.
+const describeBoard = ({ guesses, input, caption }: RenderBoardProps): string => {
+  const guessDescriptions = guesses.map(({ word, hints }, index) => {
+    const results = hints.map(({ value, type }) => `${getUppercaseValue(value)} ${HINT_TYPE_DESCRIPTION[type]}`);
+    return `Guess ${index + 1}, ${getUppercaseValue(word)}: ${results.join(", ")}`;
+  });
+  const typedLetters = guesses.length < GUESS_LIMIT ? input.slice(0, WORD_LENGTH) : "";
+
+  return [
+    guesses.length === 0 ? "Wordle board, no guesses yet" : "Wordle board",
+    ...guessDescriptions,
+    typedLetters && `Typed so far ${getUppercaseValue(typedLetters)}`,
+    caption,
+  ]
+    .filter(Boolean)
+    .join(". ");
+};
 
 export const getBoardMarkdown = (props: RenderBoardProps): string =>
-  toMarkdownImage("Wordle board", renderBoardSvg(props));
+  toMarkdownImage(describeBoard(props), renderBoardSvg(props));
 
 export type ExampleTile = { letter: string; type?: HintType };
 
@@ -204,8 +231,13 @@ export const getExampleRowMarkdown = (tiles: ExampleTile[], theme: Theme): strin
     ];
   });
 
+  const word = getUppercaseValue(tiles.map((tile) => tile.letter).join(""));
+  const results = tiles.map(({ letter, type }) =>
+    type === undefined ? getUppercaseValue(letter) : `${getUppercaseValue(letter)} ${HINT_TYPE_DESCRIPTION[type]}`
+  );
+
   return toMarkdownImage(
-    tiles.map((tile) => tile.letter).join(""),
+    `Example ${word}: ${results.join(", ")}`,
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${EXAMPLE_TILE_SIZE}" ` +
       `viewBox="0 0 ${width} ${EXAMPLE_TILE_SIZE}">${elements.join("")}</svg>`
   );
