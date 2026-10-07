@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mac-fan-control",
+  "title": "Mac Fan Control",
+  "description": "Read and force Apple Silicon fan speed directly through the SMC.",
+  "icon": "extension-icon.png",
+  "author": "triuzzi",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "fan-status",
+      "title": "Fan Status",
+      "description": "Show live fan speed, control mode and CPU/GPU temperature.",
+      "mode": "view"
+    },
+    {
+      "name": "set-fan-speed",
+      "title": "Set Fan Speed",
+      "description": "Force every fan to a percentage of its hardware range.",
+      "mode": "view"
+    },
+    {
+      "name": "maximum",
+      "title": "Set Fans to Maximum",
+      "description": "Force every fan to its hardware maximum.",
+      "mode": "no-view"
+    },
+    {
+      "name": "automatic",
+      "title": "Set Fans to Automatic",
+      "description": "Hand every fan back to SMC firmware control.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fan-menu-bar",
+      "title": "Fan Menu Bar",
+      "description": "Show current fan speed in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "macos-fan-control-client": "^1.0.0",
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
