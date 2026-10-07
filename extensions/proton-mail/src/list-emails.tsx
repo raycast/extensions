@@ -27,7 +27,7 @@ import {
   deleteEmail,
   deletesPermanently,
   archiveEmail,
-  disconnectClient,
+  holdConnections,
 } from "./imap-client";
 import { Email, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
@@ -197,12 +197,8 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
     }
   }, [isLoadingMore, hasMore, filter, currentPage, pageSize, selectedFolder]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      disconnectClient().catch(console.error);
-    };
-  }, []);
+  // Keep the connections open while the list is shown; they close once the command closes
+  useEffect(() => holdConnections(), []);
 
   // Handle errors
   useEffect(() => {

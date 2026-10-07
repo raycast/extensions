@@ -131,6 +131,27 @@ async function withClient<T>(operation: (client: ImapFlow) => Promise<T>, channe
   }
 }
 
+// Views hold the connections while they're mounted, and they close once the last view lets go. Closing is delayed
+// so a view that unmounts and mounts again right away (React does this in development) keeps the connections
+// and the loads already in flight, instead of having them cut off as if the command had closed.
+const CLOSE_DELAY_MS = 1000;
+let holders = 0;
+let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+export function holdConnections(): () => void {
+  holders += 1;
+  clearTimeout(closeTimer);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    holders -= 1;
+    if (holders === 0) {
+      closeTimer = setTimeout(() => void disconnectClient(), CLOSE_DELAY_MS);
+    }
+  };
+}
+
 export async function disconnectClient(): Promise<void> {
   generation += 1;
   await Promise.all(
