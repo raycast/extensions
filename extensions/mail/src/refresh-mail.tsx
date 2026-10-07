@@ -31,10 +31,9 @@ export default async function RefreshMail() {
   if (environment.launchType !== LaunchType.Background) {
     await showToast(Toast.Style.Animated, "Refreshing messages for accounts");
   }
-  const getAccountMessagesPromises = mailboxes.map((mailbox) => getMessages(mailbox.account, mailbox));
 
-  const mailboxMessages = await Promise.all(getAccountMessagesPromises);
-  for (const messages of mailboxMessages) {
+  for (const mailbox of mailboxes) {
+    const messages = await getMessages(mailbox.account, mailbox);
     if (!messages) {
       if (environment.launchType !== LaunchType.Background) {
         await showToast(Toast.Style.Failure, "Failed to refresh messages");
