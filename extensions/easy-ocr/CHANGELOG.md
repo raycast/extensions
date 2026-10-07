@@ -1,6 +1,6 @@
 # Tesseract OCR Changelog
 
-## [Bug Fixes] - 2026-10-07
+## [Bug Fixes] - {PR_MERGE_DATE}
 
 - Fixed screenshot capture failing when the path contains spaces
 
