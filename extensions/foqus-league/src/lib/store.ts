@@ -127,6 +127,18 @@ const LOCK_WAIT_MS = 5_000;
 let tmpSeq = 0;
 const scratchFor = (target: string) => `${target}.${process.pid}.${Date.now()}.${tmpSeq++}.tmp`;
 
+const inodeOf = async (file: string) => (await fs.stat(file).catch(() => null))?.ino;
+
+export async function dropLock(lock: string, aside: string, ino: number): Promise<void> {
+  try {
+    await fs.rename(lock, aside);
+  } catch {
+    return;
+  }
+  if ((await inodeOf(aside)) !== ino) await fs.link(aside, lock).catch(() => undefined);
+  await fs.rm(aside, { force: true });
+}
+
 export interface SessionStore {
   all(): Promise<Session[]>;
   add(sessions: Session[]): Promise<number>;
@@ -200,6 +212,8 @@ function parseSites(value: unknown): Record<string, number> | undefined {
 export class LocalSessionStore implements SessionStore {
   private queue: Promise<unknown> = Promise.resolve();
 
+  private held: number | null = null;
+
   private readonly dir: string;
 
   constructor(dir: string) {
@@ -227,19 +241,17 @@ export class LocalSessionStore implements SessionStore {
         break;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        const touched = (await fs.stat(lock).catch(() => null))?.mtimeMs ?? Date.now();
-        if (Date.now() - touched > LOCK_STALE_MS) {
-          const claim = `${lock}.${token}.stale`;
-          await fs.rename(lock, claim).then(
-            () => fs.rm(claim, { force: true }),
-            () => undefined,
-          );
+        const other = await fs.stat(lock).catch(() => null);
+        if (other && Date.now() - other.mtimeMs > LOCK_STALE_MS) {
+          await dropLock(lock, `${lock}.${token}.stale`, other.ino);
           continue;
         }
         if (Date.now() > deadline) throw new Error("Another Foqus command is writing sessions. Try again.");
         await new Promise((resolve) => setTimeout(resolve, 25 + Math.random() * 50));
       }
     }
+    const ino = (await fs.stat(lock)).ino;
+    this.held = ino;
     const heartbeat = setInterval(() => {
       const now = new Date();
       fs.utimes(lock, now, now).catch(() => undefined);
@@ -249,7 +261,14 @@ export class LocalSessionStore implements SessionStore {
       return await op();
     } finally {
       clearInterval(heartbeat);
-      if ((await fs.readFile(lock, "utf8").catch(() => "")) === token) await fs.rm(lock, { force: true });
+      this.held = null;
+      if ((await inodeOf(lock)) === ino) await dropLock(lock, `${lock}.${token}.done`, ino);
+    }
+  }
+
+  private async fence(): Promise<void> {
+    if (this.held !== null && (await inodeOf(this.file("store.lock"))) !== this.held) {
+      throw new Error("Another Foqus command took over the session files. Try again.");
     }
   }
 
@@ -316,6 +335,7 @@ export class LocalSessionStore implements SessionStore {
       if (!fresh.length) return 0;
 
       await this.ensureDir();
+      await this.fence();
       await fs.appendFile(this.sessionsPath(), fresh.map((s) => JSON.stringify(s)).join("\n") + "\n", "utf8");
 
       return fresh.length;
@@ -324,6 +344,7 @@ export class LocalSessionStore implements SessionStore {
 
   private async rewrite(sessions: Session[]): Promise<void> {
     await this.ensureDir();
+    await this.fence();
     const target = this.sessionsPath();
     const tmp = scratchFor(target);
     await fs.writeFile(tmp, sessions.map((s) => JSON.stringify(s)).join("\n") + (sessions.length ? "\n" : ""), "utf8");
@@ -398,6 +419,7 @@ export class LocalSessionStore implements SessionStore {
 
   async writeState(state: SyncState): Promise<void> {
     await this.ensureDir();
+    await this.fence();
     const target = this.statePath();
     const tmp = scratchFor(target);
     await fs.writeFile(tmp, JSON.stringify(state, null, 2), "utf8");

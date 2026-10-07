@@ -69,17 +69,21 @@ export default function FocusMenuBar() {
   const setups = [...quickStarts, ...moreGoals].flatMap(({ name, need }) => (need ? [{ name, need }] : []));
 
   const startItem = (goal: (typeof goals)[number], shortcut?: Keyboard.Shortcut) => {
-    const gap = goal.need?.pending ? undefined : goal.need;
+    const { need } = goal;
     return (
       <MenuBarExtra.Item
         key={goal.name}
         title={`${formatDuration(goal.minutes)} ${goal.name}`}
-        subtitle={gap && `without ${strandedSummary(gap.stranded)}`}
+        subtitle={need && `${need.pending ? "maybe without" : "without"} ${strandedSummary(need.stranded)}`}
         icon={Icon.Play}
         shortcut={shortcut}
         tooltip={
-          gap &&
-          `${strandedSummary(gap.stranded, 3)}\nQuick starts leave these out until they're in ${gap.own.title}. See Set Up Categories.`
+          need &&
+          `${strandedSummary(need.stranded, 3)}\n${
+            need.pending
+              ? `Quick starts block these only if they're in ${need.own.title}. This start confirms it.`
+              : `Quick starts leave these out until they're in ${need.own.title}. See Set Up Categories.`
+          }`
         }
         onAction={async () => {
           if (isRaycast2) await rememberQuickStart(goal.name, goal.plan.categories).catch(() => undefined);

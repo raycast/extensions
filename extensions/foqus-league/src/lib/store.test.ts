@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
-import { writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { editedSession, LocalSessionStore, MAX_NOTES, parseSession, pruneDeleted, type SyncState } from "./store.ts";
+import {
+  dropLock,
+  editedSession,
+  LocalSessionStore,
+  MAX_NOTES,
+  parseSession,
+  pruneDeleted,
+  type SyncState,
+} from "./store.ts";
 import type { Session } from "./types.ts";
 
 const DAY = 86_400_000;
@@ -623,14 +631,35 @@ test("a write waits for another command's lock and sweeps one left by a dead pro
     assert.equal(await exists(lock), false, "the lock is released afterwards");
   }));
 
-test("release leaves a lock that another holder replaced in the meantime", () =>
+test("a holder whose lock was taken over writes nothing and leaves the new lock alone", () =>
   withStore(async (store, dir) => {
     const lock = path.join(dir, "store.lock");
-    await store.mutateState((state) => {
-      writeFileSync(lock, "another command's token");
-      return state;
-    });
+    await assert.rejects(
+      store.mutateState((state) => {
+        rmSync(lock);
+        writeFileSync(lock, "another command's token");
+        return { ...state, cursor: T1 };
+      }),
+      /took over/,
+    );
     assert.equal(await fs.readFile(lock, "utf8"), "another command's token", "only the owner's lock is removed");
+    assert.equal((await store.readState()).cursor, null, "the overtaken write is dropped");
+  }));
+
+test("sweeping a stale lock puts back a live one that replaced it in the meantime", () =>
+  withStore(async (_store, dir) => {
+    const lock = path.join(dir, "store.lock");
+    await fs.writeFile(lock, "dead");
+    const stale = (await fs.stat(lock)).ino;
+    await fs.rm(lock);
+    await fs.writeFile(lock, "alive");
+
+    await dropLock(lock, `${lock}.aside`, stale);
+    assert.equal(await fs.readFile(lock, "utf8"), "alive");
+    assert.equal(await exists(`${lock}.aside`), false);
+
+    await dropLock(lock, `${lock}.aside`, (await fs.stat(lock)).ino);
+    assert.equal(await exists(lock), false, "the lock it was meant for is removed");
   }));
 
 const crashOnRewrite = (store: LocalSessionStore) => {

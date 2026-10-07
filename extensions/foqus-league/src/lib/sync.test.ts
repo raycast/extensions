@@ -266,6 +266,27 @@ test("a quick start that blocked the goal's stranded apps is remembered as using
   assert.equal(fake.state().quickStarts[0].start, clicked + 500, "bound to this start, so a re-read agrees");
 });
 
+test("a start that blocks nothing clears the goal's saved categories, and one that logs no blocks keeps them", async () => {
+  const social = { id: "social", title: "Social" };
+  const saved = { Ship: { categories: [social], mode: "block" as const, skipped: [] } };
+  const owned = { categories: [{ ...social, apps: [], websites: ["x.com"] }] };
+  const raycast2: FocusEvent = {
+    type: "start",
+    at: Date.now() - MINUTE,
+    goal: "Ship",
+    plannedSeconds: 1500,
+    blocked: { mode: "block", apps: [], websites: [] },
+  };
+
+  const cleared = fakeStore({ goalBlocks: saved });
+  await syncSessions(cleared.store, fakeSources([raycast2], [], 512, owned));
+  assert.deepEqual(cleared.state().goalBlocks.Ship, { categories: [], mode: "block", skipped: [] });
+
+  const raycast1 = fakeStore({ goalBlocks: saved });
+  await syncSessions(raycast1.store, fakeSources([startEvent(Date.now() - MINUTE, "Ship", 1500)], [], 512, owned));
+  assert.deepEqual(raycast1.state().goalBlocks, saved, "Raycast 1 logs no Mode line, so the start says nothing");
+});
+
 test("the next start drops a set-up mark, so a category that never got imported is listed again", async () => {
   const clicked = Date.now() - MINUTE;
   const social = { id: "social", title: "Social" };
