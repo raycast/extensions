@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Hermoso MCP Server] - 2026-10-07
+
+- Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
+
 ## [Add Aitho MCP Server] - 2026-10-07
 
 - Add Aitho to the community registry, for rehearsing and delivering presentations with your own slides. Create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.

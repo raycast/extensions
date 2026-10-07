@@ -452,7 +452,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "hermoso",
     title: "Hermoso",
     description:
-      "Hermoso is an AI ad studio for marketers. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), generate finished on-brand image and video ads, publish and schedule to your own social channels, and build and manage paid campaigns on Meta, Google, TikTok, LinkedIn, Reddit, Pinterest, X and Microsoft. Hosted remote server with OAuth sign-in, no API key to paste.",
+      "Hermoso is marketing on autopilot, run from your AI agent. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), make finished image and video ads and organic posts in your brand, publish and schedule to 10 social channels or let Autopilot posting fill your calendar, automate DMs on Instagram, Facebook, Messenger and X, and build and manage paid campaigns on 12 ad platforms. Hosted remote server with OAuth sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
