@@ -10,7 +10,8 @@ import useGradientUris from "./hooks/useGradientUris";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";
-import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
+import { getColorFromLight, getGroupedLightFromGroup, getLightsFromGroup } from "./helpers/hueResources";
+import { byName } from "./helpers/collections";
 import { getTransitionTimeInMs, optimisticGroupUpdate } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 import chroma from "chroma-js";
@@ -51,54 +52,42 @@ export default function ControlGroups() {
     <Grid isLoading={isLoading} aspectRatio="16/9" fit={Grid.Fit.Fill} filtering={{ keepSectionOrder: true }}>
       {rooms.length > 0 && (
         <Grid.Section title="Rooms">
-          {[...rooms]
-            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
-            .map((room: Room) => {
-              const groupLights = getLightsFromGroup(lights, room).sort((a, b) =>
-                a.metadata.name.localeCompare(b.metadata.name),
-              );
-              const groupedLight = groupedLights.find(
-                (groupedLight) =>
-                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid,
-              );
+          {[...rooms].sort(byName).map((room: Room) => {
+            const groupLights = getLightsFromGroup(lights, room);
+            const groupedLight = getGroupedLightFromGroup(groupedLights, room);
 
-              return (
-                <Group
-                  key={room.id}
-                  groupLights={groupLights}
-                  groupedLight={groupedLight}
-                  group={room}
-                  gradientUri={gradientUris.get(room.id)}
-                  useHue={useHueObject}
-                  rateLimiter={rateLimiter}
-                />
-              );
-            })}
+            return (
+              <Group
+                key={room.id}
+                groupLights={groupLights}
+                groupedLight={groupedLight}
+                group={room}
+                gradientUri={gradientUris.get(room.id)}
+                useHue={useHueObject}
+                rateLimiter={rateLimiter}
+              />
+            );
+          })}
         </Grid.Section>
       )}
       {zones.length > 0 && (
         <Grid.Section title="Zones">
-          {[...zones]
-            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
-            .map((zone: Zone) => {
-              const groupLights = getLightsFromGroup(lights, zone);
-              const groupedLight = groupedLights.find(
-                (groupedLight) =>
-                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid,
-              );
+          {[...zones].sort(byName).map((zone: Zone) => {
+            const groupLights = getLightsFromGroup(lights, zone);
+            const groupedLight = getGroupedLightFromGroup(groupedLights, zone);
 
-              return (
-                <Group
-                  key={zone.id}
-                  group={zone}
-                  groupLights={groupLights}
-                  groupedLight={groupedLight}
-                  gradientUri={gradientUris.get(zone.id)}
-                  useHue={useHueObject}
-                  rateLimiter={rateLimiter}
-                />
-              );
-            })}
+            return (
+              <Group
+                key={zone.id}
+                group={zone}
+                groupLights={groupLights}
+                groupedLight={groupedLight}
+                gradientUri={gradientUris.get(zone.id)}
+                useHue={useHueObject}
+                rateLimiter={rateLimiter}
+              />
+            );
+          })}
         </Grid.Section>
       )}
     </Grid>
@@ -295,17 +284,8 @@ async function handleToggle(
     const changesToGroupedLights = new Map(
       zones
         // Find zones that contain affected lights
-        .filter((zone) =>
-          zone.children.some((child) =>
-            groupLights.some((light) => light.id === child.rid || light.owner.rid === child.rid),
-          ),
-        )
-        // Get the grouped lights that belong to those zones
-        .map((zone) =>
-          groupedLights.find((zoneGroupedLight) =>
-            zone.services.some((zoneService) => zoneService.rid === zoneGroupedLight.id),
-          ),
-        )
+        .filter((zone) => getLightsFromGroup(groupLights, zone).length > 0)
+        .map((zone) => getGroupedLightFromGroup(groupedLights, zone))
         // Filter out undefined grouped lights
         .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
         .map((zoneGroupedLight) => [zoneGroupedLight.id, changesToGroup]),

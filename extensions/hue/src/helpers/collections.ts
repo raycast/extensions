@@ -26,3 +26,6 @@ export function mergeObjectsById<T extends HasId>(items: T[]): T[] {
     }, {}),
   );
 }
+
+export const byName = (a: { metadata: { name: string } }, b: { metadata: { name: string } }) =>
+  a.metadata.name.localeCompare(b.metadata.name);

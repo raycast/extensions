@@ -15,6 +15,7 @@ import {
   hexToXy,
 } from "./helpers/colors";
 import { getLightsFromGroup } from "./helpers/hueResources";
+import { byName } from "./helpers/collections";
 import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
 import useLightIconPngUriSets from "./hooks/useLightIconUris";
 import Style = Toast.Style;
@@ -25,7 +26,7 @@ export default function ControlLights() {
   const rateLimiter = useInputRateLimiter(10, 1000);
   const { lightIconPngUriSets } = useLightIconPngUriSets(lights, 162, 162);
 
-  const groups = ([] as Group[]).concat(rooms, zones).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+  const groups = [...rooms, ...zones].sort(byName);
 
   const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -37,7 +38,7 @@ export default function ControlLights() {
           <Group
             key={group.id}
             group={group}
-            lights={getLightsFromGroup(lights, group).sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))}
+            lights={getLightsFromGroup(lights, group).sort(byName)}
             lightIconPngUriSets={lightIconPngUriSets}
             useHue={useHueObject}
             rateLimiter={rateLimiter}

@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import useGradients from "./hooks/useGradientUris";
 import React, { useMemo, useState } from "react";
-import { getColorsFromScene } from "./helpers/hueResources";
+import { getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
 import { getTransitionTimeInMs, optimisticGroupUpdate } from "./helpers/raycast";
 import Style = Toast.Style;
@@ -32,10 +32,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
 
   if (props.group !== undefined) {
     const group = props.group;
-    const groupScenes =
-      scenes
-        .filter((scene: Scene) => scene.group.rid === group.id)
-        .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
+    const groupScenes = getScenesFromGroup(scenes, group);
 
     return (
       <Grid
@@ -67,10 +64,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
       <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
         {groupTypes.map((groupType: Group[]): React.JSX.Element[] => {
           return groupType.map((group: Group): React.JSX.Element => {
-            const groupScenes =
-              scenes
-                .filter((scene: Scene) => scene.group.rid === group.id)
-                .sort((sceneA, sceneB) => sceneA.metadata.name.localeCompare(sceneB.metadata.name)) ?? [];
+            const groupScenes = getScenesFromGroup(scenes, group);
 
             return (
               <Group

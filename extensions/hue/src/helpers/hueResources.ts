@@ -1,6 +1,7 @@
-import { Group, Light, Palette, Scene } from "../lib/types";
+import { Group, GroupedLight, Light, Palette, Scene } from "../lib/types";
 import { miredToHexString, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
+import { byName } from "./collections";
 import { environment } from "@raycast/api";
 import { existsSync } from "fs";
 
@@ -11,6 +12,12 @@ export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
     }),
   );
 }
+
+export const getGroupedLightFromGroup = (groupedLights: GroupedLight[], group: Group) =>
+  groupedLights.find((gl) => group.services.some((s) => s.rtype === "grouped_light" && s.rid === gl.id));
+
+export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
+  scenes.filter((scene) => scene.group.rid === group.id).sort(byName);
 
 export function getIconPathFromLight(light: Light): string {
   const iconPath = `${environment.assetsPath}/icons/${light.metadata.archetype}.png`;
