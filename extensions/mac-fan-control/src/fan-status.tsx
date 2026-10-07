@@ -24,7 +24,12 @@ import {
 // calmer cadence than the fans themselves change.
 const REFRESH_INTERVAL_MS = 5000;
 
-function markdown(status: FanStatus | undefined): string {
+function markdown(
+  status: FanStatus | undefined,
+  error: Error | undefined,
+): string {
+  if (error)
+    return `# Fan Control Unavailable\n\n${error.message}\n\nPress ⌘R to retry.`;
   if (!status) return "# Fan Status";
   const rows = status.fans
     .map(
@@ -39,7 +44,17 @@ function markdown(status: FanStatus | undefined): string {
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(readStatus, [true]);
+  // The failure is shown in the view; without this a missing core would toast on
+  // every poll tick.
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    readStatus,
+    [true],
+    {
+      onError: () => {
+        // Shown in the view instead.
+      },
+    },
+  );
   const fans = data?.fans ?? [];
 
   useEffect(() => {
@@ -64,7 +79,7 @@ export default function Command() {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={markdown(data)}
+      markdown={markdown(data, error)}
       metadata={
         data ? (
           <Detail.Metadata>
