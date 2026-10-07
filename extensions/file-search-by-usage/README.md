@@ -36,7 +36,7 @@ To skip `~/Library` in the home scan while keeping cloud files, add `**/Library/
 
 Changes take effect on the next rebuild. Settings edits are saved one at a time; if a save, rebuild, or data deletion is active, wait and retry. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
 
-**Scan Messages** in Search Index Settings keeps per-folder warnings with their timestamps and refreshes while the screen is open. Select a message to read or copy its full text. A successful rescan clears that folder's warning.
+**Scan Messages** in Search Index Settings keeps per-folder warnings with their timestamps, including unavailable folders and deadline-skipped scans. It refreshes while the screen is open. Select a message to read or copy its full text. Each rebuild replaces the previous run's diagnostics without changing retained file coverage.
 
 You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
 

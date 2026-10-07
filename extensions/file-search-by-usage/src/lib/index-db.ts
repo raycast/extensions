@@ -125,6 +125,14 @@ CREATE TABLE IF NOT EXISTS index_meta (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+/* Diagnostic outcomes are not evidence about saved file coverage. */
+CREATE TABLE IF NOT EXISTS index_scan_outcomes (
+  root        TEXT PRIMARY KEY,
+  recorded_at INTEGER NOT NULL,
+  complete    INTEGER NOT NULL,
+  note        TEXT
+);
 `;
 
 function applyPragmas(
@@ -452,6 +460,7 @@ export function readIndexStats(db: DatabaseSync, file: string): IndexStats {
 export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
   db.exec("BEGIN IMMEDIATE");
   try {
+    db.exec("DELETE FROM index_scan_outcomes");
     db.prepare(
       "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_started_at', ?)",
     ).run(String(startedAt));

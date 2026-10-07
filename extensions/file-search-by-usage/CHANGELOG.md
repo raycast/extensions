@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Save offline, deadline-skipped, and cancelled folder warnings separately from retained index coverage so they remain visible after the rebuild notification closes.
+
 - Keep scan warnings and errors in Search Index Settings with folder names, timestamps, full-message viewing, and copying.
 
 - Replace the indexing progress notification with an awaited completion or error notification before the command exits.

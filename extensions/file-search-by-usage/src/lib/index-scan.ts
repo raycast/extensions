@@ -1117,6 +1117,24 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       ...(policy?.protectedRoots ?? []),
     ]);
     const outcomes: RootOutcome[] = [];
+    const saveOutcome = (outcome: RootOutcome) => {
+      options.assertOwned?.();
+      // Unavailable and unstarted roots have no new coverage record. Persist
+      // their diagnostic without changing index_roots or retained file rows.
+      options.db
+        .prepare(
+          `INSERT OR REPLACE INTO index_scan_outcomes (root, recorded_at, complete, note)
+         VALUES (?, ?, ?, ?)`,
+        )
+        .run(
+          outcome.root,
+          Date.now(),
+          outcome.complete ? 1 : 0,
+          outcome.error ||
+            (outcome.stopped ? STOP_NOTES[outcome.stopped] : null),
+        );
+      outcomes.push(outcome);
+    };
 
     /*
      * Progress is reported for the run, not for the root being walked.
@@ -1154,7 +1172,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
 
     for (const root of roots) {
       if (signal.aborted || Date.now() > deadline) {
-        outcomes.push({
+        saveOutcome({
           root,
           scanned: 0,
           indexed: 0,
@@ -1181,7 +1199,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       );
       doneScanned += outcome.scanned;
       doneIndexed += outcome.indexed;
-      outcomes.push(outcome);
+      saveOutcome(outcome);
     }
 
     const complete =

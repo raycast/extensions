@@ -42,7 +42,31 @@ export function readScanMessages(file: string): ScanMessages {
         recordedAt: ended > 0 ? ended : started > 0 ? started : undefined,
         message: meta.last_scan_error,
       });
-    for (const root of readIndexRoots(opened.db)) {
+    const roots = new Map(
+      readIndexRoots(opened.db).map((root) => [root.root, root]),
+    );
+    // Older indexes have coverage notes only. The new table is added on the
+    // next writable open without a schema-version bump or index reset.
+    const hasOutcomes = opened.db
+      .prepare(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'index_scan_outcomes'",
+      )
+      .get();
+    if (hasOutcomes) {
+      const outcomes = opened.db
+        .prepare(
+          "SELECT root, recorded_at AS scannedAt, complete, note FROM index_scan_outcomes ORDER BY root",
+        )
+        .all() as {
+        root: string;
+        scannedAt: number;
+        complete: number;
+        note: string | null;
+      }[];
+      for (const outcome of outcomes)
+        roots.set(outcome.root, { ...outcome, files: 0 });
+    }
+    for (const root of roots.values()) {
       if (root.complete && !root.note) continue;
       messages.push({
         id: `root:${root.root}`,

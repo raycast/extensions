@@ -6,11 +6,14 @@ import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { transformSync } from "esbuild";
 import {
   openIndexForWrite,
+  openIndexForRead,
+  readIndexRoots,
   suspendFtsSync,
   writeScanStarted,
   writeScanEnded,
   writeScanError,
 } from "../src/lib/index-db";
+import { rebuildIndex, BuildOptions } from "../src/lib/index-build";
 import {
   readScanMessages,
   scanMessageMarkdown,
@@ -103,6 +106,11 @@ export function scanMessageChecks(
           .every((line) => line.startsWith("    ")),
         "diagnostic paths and output are rendered literally, not as Markdown links or markup",
       );
+      opened.db.exec("DROP TABLE index_scan_outcomes");
+      assert(
+        readScanMessages(file).messages.length === 1,
+        "older indexes without the diagnostics table still expose saved coverage notes",
+      );
       opened.db.exec("DROP TABLE index_roots");
       assert(
         readScanMessages(file).status === "failed",
@@ -111,6 +119,118 @@ export function scanMessageChecks(
     } finally {
       opened.db.close();
     }
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+export async function scanOutcomeChecks(
+  assert: (ok: boolean, label: string) => void,
+) {
+  const directory = fs.realpathSync(
+    fs.mkdtempSync(path.join(os.tmpdir(), "scan-outcomes-")),
+  );
+  const file = path.join(directory, "index.sqlite");
+  const known = path.join(directory, "known");
+  const fresh = path.join(directory, "fresh");
+  const healthy = path.join(directory, "healthy");
+  const snapshot = () => {
+    const opened = openIndexForRead(file);
+    if (opened.kind !== "opened") throw new Error("Synthetic index unreadable");
+    try {
+      return {
+        roots: readIndexRoots(opened.db),
+        files: opened.db.prepare("SELECT * FROM files ORDER BY path").all(),
+      };
+    } finally {
+      opened.db.close();
+    }
+  };
+  const build = (options: Partial<BuildOptions> = {}) =>
+    rebuildIndex({
+      file,
+      roots: [known],
+      withLock: async (work) => work(() => {}),
+      lookupFd: () => ({
+        kind: "found",
+        path: "/synthetic/fd",
+        source: "path",
+      }),
+      spawnFd: async function* () {
+        yield Buffer.from(`${path.join(known, "report.txt")}\0`);
+      },
+      ...options,
+    });
+  try {
+    fs.mkdirSync(known);
+    fs.mkdirSync(healthy);
+    fs.writeFileSync(path.join(known, "report.txt"), "synthetic");
+    const first = await build();
+    assert(
+      first.kind === "done" && first.report.complete,
+      "diagnostic regression starts with complete saved coverage",
+    );
+    const before = snapshot();
+    fs.renameSync(known, `${known}-offline`);
+    const missing = await build({
+      roots: [known, fresh, healthy],
+      spawnFd: async function* () {},
+    });
+    const after = snapshot();
+    const warnings = readScanMessages(file).messages;
+    assert(
+      missing.kind === "done" &&
+        !missing.report.complete &&
+        [known, fresh].every((root) =>
+          warnings.some(
+            (item) =>
+              item.root === root && item.message.includes("unavailable"),
+          ),
+        ),
+      "unavailable known and never-indexed folders both retain warnings after rebuild completion",
+    );
+    assert(
+      JSON.stringify(after.files) === JSON.stringify(before.files) &&
+        JSON.stringify(after.roots.find((root) => root.root === known)) ===
+          JSON.stringify(before.roots[0]) &&
+        !after.roots.some((root) => root.root === fresh),
+      "offline diagnostics do not replace coverage records or erase retained file rows",
+    );
+    const timed = await build({ roots: [known, fresh, healthy], budgetMs: -1 });
+    assert(
+      timed.kind === "done" &&
+        !timed.report.complete &&
+        readScanMessages(file).messages.length === 3 &&
+        readScanMessages(file).messages.every((item) =>
+          item.message.includes("time limit"),
+        ),
+      "every deadline-skipped root gets a saved time-limit warning, superseding the earlier diagnostic",
+    );
+    assert(
+      JSON.stringify(snapshot()) === JSON.stringify(after),
+      "deadline-skipped diagnostics leave all saved coverage unchanged",
+    );
+    const cancelled = await build({
+      roots: [known, fresh],
+      signal: AbortSignal.abort(),
+    });
+    assert(
+      cancelled.kind === "done" &&
+        !cancelled.report.complete &&
+        readScanMessages(file).messages.length === 2 &&
+        readScanMessages(file).messages.every((item) =>
+          item.message.includes("Cancelled"),
+        ),
+      "cancellation before scanning persists per-folder warnings rather than a clean status",
+    );
+    fs.renameSync(`${known}-offline`, known);
+    const retry = await build();
+    assert(
+      retry.kind === "done" &&
+        retry.report.complete &&
+        readScanMessages(file).messages.length === 0,
+      "a successful retry replaces warnings, and removed scopes leave no obsolete diagnostic",
+    );
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

@@ -16,6 +16,7 @@ import { indexingChecks } from "./indexing-checks";
 import { rebuildFeedbackChecks } from "./rebuild-feedback-checks";
 import {
   scanMessageChecks,
+  scanOutcomeChecks,
   scanMessageViewChecks,
 } from "./scan-message-checks";
 import { indexChecks } from "./index-checks";
@@ -160,6 +161,7 @@ async function main() {
   await indexingChecks(assert);
   await rebuildFeedbackChecks(assert);
   scanMessageChecks(assert);
+  await scanOutcomeChecks(assert);
   await scanMessageViewChecks(assert);
   await performanceChecks(assert);
   const live = process.argv.includes("--live");
