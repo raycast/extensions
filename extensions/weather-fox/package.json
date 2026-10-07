@@ -40,8 +40,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.3.1",
-    "@raycast/utils": "^2.3.1",
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2",
     "gifenc": "^1.0.3",
     "jpeg-js": "^0.4.4",
     "pngjs": "^7.0.0",
