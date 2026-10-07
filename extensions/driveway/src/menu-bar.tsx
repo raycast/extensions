@@ -177,6 +177,9 @@ export default function Command() {
     const label = server.alias || server.host;
     let stillRunning = false;
 
+    // Work still running at the deadline gets no second message: Raycast has
+    // unloaded this command by then, so there is nothing left to show a HUD.
+    // The refresh below, and the next one, are what report where it got to.
     try {
       if (findMountedShare(mounted, server)) {
         const result = await within(settle(unmountShare(server)));
