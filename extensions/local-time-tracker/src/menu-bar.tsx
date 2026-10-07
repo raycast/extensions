@@ -1,5 +1,6 @@
 import { Icon, LaunchType, MenuBarExtra, Toast, launchCommand, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { launchWithFailure } from "./lib/command-actions";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { getProjectName } from "./lib/projects";
@@ -80,7 +81,13 @@ export default function MenuBarCommand() {
           <MenuBarExtra.Item
             title="Start Work"
             icon={Icon.Play}
-            onAction={() => launchCommand({ name: "start-work", type: LaunchType.UserInitiated })}
+            onAction={() =>
+              launchWithFailure(
+                () => launchCommand({ name: "start-work", type: LaunchType.UserInitiated }),
+                "Could not open Start Work",
+                showFailure,
+              )
+            }
           />
         </>
       )}
@@ -88,12 +95,24 @@ export default function MenuBarCommand() {
       <MenuBarExtra.Item
         title="Open Work Logs"
         icon={Icon.List}
-        onAction={() => launchCommand({ name: "work-logs", type: LaunchType.UserInitiated })}
+        onAction={() =>
+          launchWithFailure(
+            () => launchCommand({ name: "work-logs", type: LaunchType.UserInitiated }),
+            "Could not open Work Logs",
+            showFailure,
+          )
+        }
       />
       <MenuBarExtra.Item
         title="Open Reports"
         icon={Icon.BarChart}
-        onAction={() => launchCommand({ name: "reports", type: LaunchType.UserInitiated })}
+        onAction={() =>
+          launchWithFailure(
+            () => launchCommand({ name: "reports", type: LaunchType.UserInitiated }),
+            "Could not open Reports",
+            showFailure,
+          )
+        }
       />
     </MenuBarExtra>
   );

@@ -16,18 +16,21 @@
     {
       "name": "start-work",
       "title": "Start Work",
+      "subtitle": "Start a project timer",
       "description": "Start tracking work",
       "mode": "view"
     },
     {
       "name": "stop-work",
       "title": "Stop Work",
+      "subtitle": "Stop the active timer",
       "description": "Stop the active timer",
       "mode": "no-view"
     },
     {
       "name": "menu-bar",
       "title": "Menu Bar Timer",
+      "subtitle": "View the running timer",
       "description": "Show the active timer in the menu bar",
       "mode": "menu-bar",
       "interval": "1m"
@@ -35,18 +38,21 @@
     {
       "name": "work-logs",
       "title": "Work Logs",
+      "subtitle": "Review and edit time entries",
       "description": "View and edit work logs",
       "mode": "view"
     },
     {
       "name": "reports",
       "title": "Reports",
+      "subtitle": "Analyze tracked time",
       "description": "View work-time reports",
       "mode": "view"
     },
     {
       "name": "projects",
       "title": "Projects",
+      "subtitle": "Manage projects and categories",
       "description": "Manage projects",
       "mode": "view"
     }

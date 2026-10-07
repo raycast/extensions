@@ -13,6 +13,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { getRecentDescriptions } from "./lib/descriptions";
 import { getCategoryIcon } from "./lib/categories";
+import { launchWithFailure } from "./lib/command-actions";
 import { formatDuration, getDurationSeconds } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { findProject, sortProjectsByPreference } from "./lib/projects";
@@ -129,7 +130,13 @@ export default function StartWorkCommand() {
             <Action
               title="Open Work Logs"
               icon={Icon.List}
-              onAction={() => launchCommand({ name: "work-logs", type: LaunchType.UserInitiated })}
+              onAction={() =>
+                launchWithFailure(
+                  () => launchCommand({ name: "work-logs", type: LaunchType.UserInitiated }),
+                  "Could not open Work Logs",
+                  showFailure,
+                )
+              }
             />
           </ActionPanel>
         }
@@ -146,7 +153,13 @@ export default function StartWorkCommand() {
             <Action
               title="Open Projects"
               icon={Icon.Folder}
-              onAction={() => launchCommand({ name: "projects", type: LaunchType.UserInitiated })}
+              onAction={() =>
+                launchWithFailure(
+                  () => launchCommand({ name: "projects", type: LaunchType.UserInitiated }),
+                  "Could not open Projects",
+                  showFailure,
+                )
+              }
             />
           </ActionPanel>
         }
