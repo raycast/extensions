@@ -35,7 +35,7 @@ import {
 import { Email, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
 import { AttachmentList } from "./attachment-list";
-import { emailBodyToMarkdown } from "./email-markdown";
+import { emailBodyToMarkdown, escapeMarkdown } from "./email-markdown";
 
 interface CommandArguments {
   folder?: string;
@@ -558,6 +558,34 @@ function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
   );
 }
 
+// Subject, sender, recipients and date as Markdown above the body
+function emailHeaderMarkdown(email: Email): string {
+  const sender = email.from[0];
+  const from = sender
+    ? `**${escapeMarkdown(sender.name || sender.address)}**${sender.name ? ` · ${escapeMarkdown(sender.address)}` : ""}`
+    : "";
+  const list = (addresses: { name?: string; address: string }[]) => {
+    const shown = addresses.slice(0, 3).map((address) => escapeMarkdown(address.name || address.address));
+    const more = addresses.length - shown.length;
+    return more > 0 ? `${shown.join(", ")} and ${more} more` : shown.join(", ");
+  };
+  const recipients = [
+    email.to.length ? `To ${list(email.to)}` : "",
+    email.cc?.length ? `Cc ${list(email.cc)}` : "",
+  ].filter(Boolean);
+  const details = [
+    new Date(email.date).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" }),
+    hasFlag(email.flags, "\\Seen") ? "" : "Unread",
+    email.hasAttachment ? "Attachment" : "",
+  ].filter(Boolean);
+  // Two trailing spaces end each line with a line break
+  return [
+    `## ${escapeMarkdown(email.subject)}`,
+    "",
+    [from, recipients.join(" · "), details.join(" · ")].filter(Boolean).join("  \n"),
+  ].join("\n");
+}
+
 interface ExpandedEmailViewProps {
   email: Email;
   folder: string;
@@ -597,15 +625,22 @@ function ExpandedEmailView({
     [body, loadRemoteImages],
   );
 
-  let markdown = "";
+  let bodyText = "";
 
   if (isLoading) {
-    markdown = `*Loading email content...*`;
+    bodyText = `*Loading email content...*`;
   } else if (demoMode) {
-    markdown = DEMO_BODY;
+    bodyText = DEMO_BODY;
   } else {
-    markdown = bodyMarkdown || email.preview || "*No content available*";
+    bodyText = bodyMarkdown || email.preview || "*No content available*";
   }
+
+  // The header goes above the body rather than in a metadata sidebar: the sidebar has a fixed narrow width
+  // that cuts subjects and addresses off, while the body area uses the full width and wraps
+  const header = emailHeaderMarkdown(displayEmail);
+  const markdown = `${header}\n\n---\n\n${bodyText}`;
+  // Copy actions keep the body only
+  const markdownBody = bodyText;
 
   const getEmailBodyForCompose = async (): Promise<string> => {
     return body?.text || body?.html || email.preview || "";
@@ -677,24 +712,6 @@ function ExpandedEmailView({
       navigationTitle={displayEmail.subject}
       isLoading={isLoading}
       markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Subject" text={displayEmail.subject} />
-          <Detail.Metadata.Label title="From" text={fromDisplay} />
-          <Detail.Metadata.Label title="To" text={toDisplay} />
-          {ccDisplay && <Detail.Metadata.Label title="CC" text={ccDisplay} />}
-          <Detail.Metadata.Label title="Date" text={displayEmail.date.toLocaleString()} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Status">
-            {hasFlag(email.flags, "\\Seen") ? (
-              <Detail.Metadata.TagList.Item text="Read" color={Color.Green} />
-            ) : (
-              <Detail.Metadata.TagList.Item text="Unread" color={Color.Blue} />
-            )}
-            {email.hasAttachment && <Detail.Metadata.TagList.Item text="Attachment" color={Color.Orange} />}
-          </Detail.Metadata.TagList>
-        </Detail.Metadata>
-      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Email Actions">
@@ -764,10 +781,10 @@ function ExpandedEmailView({
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Email Body" content={markdown} />
+            <Action.CopyToClipboard title="Copy Email Body" content={markdownBody} />
             <Action.CopyToClipboard
               title="Copy Email Body as Markdown"
-              content={`# ${displayEmail.subject}\n\n**From:** ${fromDisplay}\n**To:** ${toDisplay}${ccDisplay ? `\n**CC:** ${ccDisplay}` : ""}\n**Date:** ${displayEmail.date.toLocaleString()}\n\n---\n\n${markdown}`}
+              content={`# ${displayEmail.subject}\n\n**From:** ${fromDisplay}\n**To:** ${toDisplay}${ccDisplay ? `\n**CC:** ${ccDisplay}` : ""}\n**Date:** ${displayEmail.date.toLocaleString()}\n\n---\n\n${markdownBody}`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
             />
             <Action.CopyToClipboard

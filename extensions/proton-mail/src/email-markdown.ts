@@ -129,6 +129,17 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
     replacement: () => "",
   });
 
+  // Newsletters use headings for decoration; at full Markdown size they dwarf the text
+  turndown.addRule("heading", {
+    filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
+    replacement: (content, node) => {
+      const text = content.replace(/\s+/g, " ").trim();
+      if (!text) return "";
+      const level = Math.min(6, Number(node.nodeName.charAt(1)) + 2);
+      return `\n\n${"#".repeat(level)} ${text}\n\n`;
+    },
+  });
+
   turndown.addRule("image", {
     filter: "img",
     replacement: (_content, node) => imageMarkdown(node as HtmlElement, options),
@@ -149,6 +160,8 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
         // Image-only link (logo, button, social icon) shown without images: fall back to the alt text.
         // Short alts name the target; long ones describe the picture, so keep the link under its site name.
         const alt = (element.querySelector("img")?.getAttribute("alt") || "").replace(/\s+/g, " ").trim();
+        // A linked logo just points to the sender's site: without the image it's noise
+        if (/\blogo\b/i.test(alt)) return "";
         if (alt.length > MAX_ALT_LABEL_LENGTH) label = shortUrlLabel(href);
         else label = alt;
       }
@@ -188,18 +201,47 @@ function dropRepeatedBlocks(markdown: string): string {
     .join("\n\n");
 }
 
+// Short links that follow each other (social networks, a listing's details, a footer menu) each end up in their
+// own block, which stacks them down the page: put them on one line
+const MAX_JOINED_LINK_LABEL_LENGTH = 40;
+
+function joinShortLinks(markdown: string): string {
+  const isShortLink = (block: string) => {
+    const match = block.trim().match(/^\[([^\]\n]*)\]\([^)\s]*\)$/);
+    return !!match && match[1].length <= MAX_JOINED_LINK_LABEL_LENGTH;
+  };
+  const blocks: string[] = [];
+  for (const block of markdown.split("\n\n")) {
+    const previous = blocks[blocks.length - 1];
+    // The previous block is a short link, or short links already joined
+    if (previous !== undefined && isShortLink(block) && previous.trim().split(" · ").every(isShortLink)) {
+      blocks[blocks.length - 1] = `${previous.trim()} · ${block.trim()}`;
+    } else {
+      blocks.push(block);
+    }
+  }
+  return blocks.join("\n\n");
+}
+
+// For text written around the email body (subject, names), so it isn't read as Markdown
+export function escapeMarkdown(text: string): string {
+  return text.replace(/([\\`*_[\]#<>|])/g, "\\$1");
+}
+
 function tidyMarkdown(markdown: string): string {
-  return dropRepeatedBlocks(
-    markdown
-      .replace(INVISIBLE_CHARS, "")
-      .replace(NBSP, " ")
-      // Whitespace-only lines left behind by layout tables
-      .replace(/^[ \t]+$/gm, "")
-      .replace(/[ \t]+$/gm, (spaces) => (spaces.length >= 2 ? "  " : ""))
-      // Separators stacked by nested layout tables
-      .replace(/(\n\s*---\s*){2,}/g, "\n\n---\n\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim(),
+  return joinShortLinks(
+    dropRepeatedBlocks(
+      markdown
+        .replace(INVISIBLE_CHARS, "")
+        .replace(NBSP, " ")
+        // Whitespace-only lines left behind by layout tables
+        .replace(/^[ \t]+$/gm, "")
+        .replace(/[ \t]+$/gm, (spaces) => (spaces.length >= 2 ? "  " : ""))
+        // Separators stacked by nested layout tables
+        .replace(/(\n\s*---\s*){2,}/g, "\n\n---\n\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim(),
+    ),
   );
 }
 
