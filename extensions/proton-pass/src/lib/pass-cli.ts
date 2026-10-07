@@ -91,6 +91,7 @@ export async function checkBrowserLogin(): Promise<BrowserLoginStatus> {
   if (USE_MOCK_DATA) return { state: "none" };
 
   const status = await checkDetachedLogin(loginDir(), checkAuth);
+  if (status.state === "failed") console.error(`Browser login failed: ${status.error.message}`);
   // The new session may belong to another account, so don't show the previous session's cached items.
   if (status.state === "succeeded") await clearCache();
   return status;
