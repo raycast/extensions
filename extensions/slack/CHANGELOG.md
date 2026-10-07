@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Add Canvas AI tools] - {PR_MERGE_DATE}
+
+- Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
+- Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
+
 ## [Archive Channels AI Tool] - 2026-10-05
 
 - Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
