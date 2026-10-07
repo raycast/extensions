@@ -90,6 +90,21 @@ export function generateDrawingPage(base64Image: string): string {
     background: #e0e0e0;
   }
 
+  .style-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #333;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .style-btn:hover { background: #444; }
+  .style-btn.active { border-color: #7c5cff; background: #3d3560; }
+
   .tool-btn {
     padding: 6px 14px;
     border-radius: 6px;
@@ -221,6 +236,9 @@ export function generateDrawingPage(base64Image: string): string {
   <div class="toolbar-group">
     <span class="toolbar-label">Tool</span>
     <button class="tool-btn active" id="drawToolBtn" data-tool="draw">Draw</button>
+    <button class="tool-btn" id="boxToolBtn" data-tool="box">Box</button>
+    <button class="tool-btn" id="ovalToolBtn" data-tool="oval">Oval</button>
+    <button class="tool-btn" id="arrowToolBtn" data-tool="arrow">Arrow</button>
     <button class="tool-btn" id="textToolBtn" data-tool="text">Text</button>
   </div>
 
@@ -247,6 +265,19 @@ export function generateDrawingPage(base64Image: string): string {
     <div class="width-btn" data-width="5"><div class="width-dot" style="width:7px;height:7px"></div></div>
     <div class="width-btn active" data-width="10"><div class="width-dot" style="width:11px;height:11px"></div></div>
     <div class="width-btn" data-width="20"><div class="width-dot" style="width:16px;height:16px"></div></div>
+  </div>
+
+  <div class="toolbar-group" id="styleGroup" style="display:none">
+    <span class="toolbar-label">Line</span>
+    <div class="style-btn active" data-style="solid" title="Solid">
+      <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#e0e0e0" stroke-width="2"/></svg>
+    </div>
+    <div class="style-btn" data-style="dashed" title="Dashed">
+      <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="6 3"/></svg>
+    </div>
+    <div class="style-btn" data-style="dotted" title="Dotted">
+      <svg width="24" height="4"><line x1="1" y1="2" x2="24" y2="2" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 5"/></svg>
+    </div>
   </div>
 
   <div class="separator"></div>
@@ -281,12 +312,18 @@ export function generateDrawingPage(base64Image: string): string {
   let drawing = false;
   let currentColor = "#e74c3c";
   let currentWidth = 10;
-  let currentTool = "draw"; // "draw" or "text"
+  let currentTool = "draw"; // "draw", "box", "oval", "arrow" or "text"
+  let currentLineStyle = "solid"; // "solid", "dashed" or "dotted"
   let history = [];
   let baseImageData = null;
 
   // Smooth drawing state
   let strokePoints = [];
+
+  // Box/arrow drag state
+  let shapeStart = null;
+  let shapeEnd = null;
+  let shiftHeld = false;
 
   // Text tool state
   let activeTextBadge = null;
@@ -410,18 +447,198 @@ export function generateDrawingPage(base64Image: string): string {
     return Math.hypot(point.x - projX, point.y - projY);
   }
 
+  // --- Box and arrow shapes ---
+
+  function isShapeTool(tool) {
+    return tool === "box" || tool === "oval" || tool === "arrow";
+  }
+
+  function hasLineStyles(tool) {
+    return tool === "box" || tool === "oval";
+  }
+
+  // Sets the line cap for the current dashed/dotted style and returns its base dash pattern
+  function applyPatternStyle() {
+    const dotted = currentLineStyle === "dotted";
+    // Zero-length dashes with round caps render as evenly spaced dots
+    ctx.lineCap = dotted ? "round" : "square";
+    return {
+      dash: dotted ? 0 : currentWidth * 4,
+      gap: currentWidth * 2,
+      capExtension: dotted ? 0 : currentWidth
+    };
+  }
+
+  // Stretch the gaps so the path holds a whole number of dashes; open paths also begin and end on a dash
+  function setFittedLineDash(length, pattern, closed) {
+    const { dash, gap, capExtension } = pattern;
+    const count = Math.max(2, Math.round((length + (closed ? 0 : gap)) / (dash + gap)));
+    const fittedGap = Math.max(0, (length - count * dash) / (closed ? count : count - 1));
+    // Caps extend each dash on both ends, so shrink dashes and widen gaps to compensate
+    ctx.setLineDash([Math.max(0, dash - capExtension), fittedGap + capExtension]);
+  }
+
+  function normalizeRect(start, end) {
+    return {
+      left: Math.min(start.x, end.x),
+      top: Math.min(start.y, end.y),
+      right: Math.max(start.x, end.x),
+      bottom: Math.max(start.y, end.y)
+    };
+  }
+
+  function drawBox(start, end) {
+    const { left, top, right, bottom } = normalizeRect(start, end);
+
+    ctx.save();
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = currentWidth;
+    ctx.lineJoin = "miter";
+
+    if (currentLineStyle === "solid") {
+      ctx.strokeRect(left, top, right - left, bottom - top);
+    } else {
+      // Fit each side separately so every corner lands on a dash
+      const pattern = applyPatternStyle();
+      const corners = [
+        { x: left, y: top },
+        { x: right, y: top },
+        { x: right, y: bottom },
+        { x: left, y: bottom }
+      ];
+      corners.forEach((from, i) => {
+        const to = corners[(i + 1) % 4];
+        setFittedLineDash(Math.hypot(to.x - from.x, to.y - from.y), pattern, false);
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+      });
+    }
+    ctx.restore();
+  }
+
+  function drawOval(start, end) {
+    const { left, top, right, bottom } = normalizeRect(start, end);
+    const rx = (right - left) / 2;
+    const ry = (bottom - top) / 2;
+
+    ctx.save();
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = currentWidth;
+
+    if (currentLineStyle === "solid") {
+      ctx.setLineDash([]);
+    } else {
+      // Ramanujan's approximation of the ellipse perimeter
+      const perimeter = Math.PI * (3 * (rx + ry) - Math.sqrt((3 * rx + ry) * (rx + 3 * ry)));
+      setFittedLineDash(perimeter, applyPatternStyle(), true);
+    }
+    ctx.beginPath();
+    ctx.ellipse(left + rx, top + ry, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawArrow(start, end) {
+    const angle = Math.atan2(end.y - start.y, end.x - start.x);
+    const length = Math.hypot(end.x - start.x, end.y - start.y);
+    const headLength = Math.min(length, Math.max(12, currentWidth * 4));
+    const headHalfWidth = headLength * 0.5;
+    // Stop the shaft inside the head so thick lines don't poke past the tip
+    const shaftLength = Math.max(0, length - headLength * 0.8);
+    const baseX = end.x - headLength * Math.cos(angle);
+    const baseY = end.y - headLength * Math.sin(angle);
+
+    ctx.save();
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+    ctx.lineWidth = currentWidth;
+    ctx.lineCap = "round";
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(start.x + shaftLength * Math.cos(angle), start.y + shaftLength * Math.sin(angle));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(end.x, end.y);
+    ctx.lineTo(baseX + headHalfWidth * Math.sin(angle), baseY - headHalfWidth * Math.cos(angle));
+    ctx.lineTo(baseX - headHalfWidth * Math.sin(angle), baseY + headHalfWidth * Math.cos(angle));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Shift makes boxes square, ovals circular, and snaps arrows to 45° increments
+  function constrainShapeEnd(start, end) {
+    if (!shiftHeld) return end;
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    if (currentTool === "box" || currentTool === "oval") {
+      const side = Math.max(Math.abs(dx), Math.abs(dy));
+      return {
+        x: start.x + (dx < 0 ? -side : side),
+        y: start.y + (dy < 0 ? -side : side)
+      };
+    }
+    const step = Math.PI / 4;
+    const angle = Math.round(Math.atan2(dy, dx) / step) * step;
+    const length = Math.hypot(dx, dy);
+    return {
+      x: start.x + length * Math.cos(angle),
+      y: start.y + length * Math.sin(angle)
+    };
+  }
+
+  function redrawShape() {
+    if (history.length > 0) {
+      ctx.putImageData(history[history.length - 1], 0, 0);
+    }
+    const end = constrainShapeEnd(shapeStart, shapeEnd);
+    if (currentTool === "box") drawBox(shapeStart, end);
+    else if (currentTool === "oval") drawOval(shapeStart, end);
+    else drawArrow(shapeStart, end);
+  }
+
+  function setShiftHeld(held) {
+    if (held === shiftHeld) return;
+    shiftHeld = held;
+    if (drawing && isShapeTool(currentTool)) redrawShape();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Shift") setShiftHeld(true);
+  });
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "Shift") setShiftHeld(false);
+  });
+  window.addEventListener("blur", () => setShiftHeld(false));
+
   function startDraw(e) {
-    if (currentTool !== "draw") return;
+    if (currentTool === "text") return;
     e.preventDefault();
     drawing = true;
     const pos = getPos(e);
-    strokePoints = [pos];
+    if (isShapeTool(currentTool)) {
+      shapeStart = pos;
+      shapeEnd = pos;
+    } else {
+      strokePoints = [pos];
+    }
   }
 
   function draw(e) {
-    if (!drawing || currentTool !== "draw") return;
+    if (!drawing || currentTool === "text") return;
     e.preventDefault();
     const pos = getPos(e);
+    if (isShapeTool(currentTool)) {
+      shapeEnd = pos;
+      shiftHeld = e.shiftKey;
+      redrawShape();
+      return;
+    }
     strokePoints.push(pos);
     smoothRedraw();
   }
@@ -429,6 +646,19 @@ export function generateDrawingPage(base64Image: string): string {
   function endDraw(e) {
     if (!drawing) return;
     drawing = false;
+    if (isShapeTool(currentTool)) {
+      const moved = Math.hypot(shapeEnd.x - shapeStart.x, shapeEnd.y - shapeStart.y);
+      if (moved < 3) {
+        // Treat as a click: discard any preview without adding an undo step
+        ctx.putImageData(history[history.length - 1], 0, 0);
+      } else {
+        redrawShape();
+        pushHistory();
+      }
+      shapeStart = null;
+      shapeEnd = null;
+      return;
+    }
     if (strokePoints.length >= 3) {
       // Simplify, then do final smooth render
       const epsilon = Math.max(0.5, currentWidth * 0.15);
@@ -442,7 +672,14 @@ export function generateDrawingPage(base64Image: string): string {
   canvas.addEventListener("mousedown", startDraw);
   canvas.addEventListener("mousemove", draw);
   canvas.addEventListener("mouseup", endDraw);
-  canvas.addEventListener("mouseleave", endDraw);
+  canvas.addEventListener("mouseleave", (e) => {
+    if (!isShapeTool(currentTool)) endDraw(e);
+  });
+  // Let box/arrow drags continue past the image edge
+  document.addEventListener("mousemove", (e) => {
+    if (drawing && isShapeTool(currentTool) && e.target !== canvas) draw(e);
+  });
+  document.addEventListener("mouseup", endDraw);
   canvas.addEventListener("touchstart", startDraw, { passive: false });
   canvas.addEventListener("touchmove", draw, { passive: false });
   canvas.addEventListener("touchend", endDraw);
@@ -453,14 +690,15 @@ export function generateDrawingPage(base64Image: string): string {
     document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
     document.querySelector('.tool-btn[data-tool="' + tool + '"]').classList.add("active");
 
-    if (tool === "draw") {
-      canvas.style.cursor = "crosshair";
-      document.getElementById("widthGroup").style.display = "flex";
-      // Confirm any active text
-      if (activeTextBadge) confirmText();
-    } else if (tool === "text") {
+    document.getElementById("styleGroup").style.display = hasLineStyles(tool) ? "flex" : "none";
+
+    if (tool === "text") {
       canvas.style.cursor = "text";
       document.getElementById("widthGroup").style.display = "none";
+    } else {
+      canvas.style.cursor = "crosshair";
+      document.getElementById("widthGroup").style.display = "flex";
+      if (activeTextBadge) confirmText();
     }
   }
 
@@ -764,6 +1002,15 @@ export function generateDrawingPage(base64Image: string): string {
     });
   });
 
+  // Line style buttons
+  document.querySelectorAll(".style-btn").forEach(el => {
+    el.addEventListener("click", () => {
+      document.querySelectorAll(".style-btn").forEach(b => b.classList.remove("active"));
+      el.classList.add("active");
+      currentLineStyle = el.dataset.style;
+    });
+  });
+
   // Undo
   document.getElementById("undoBtn").addEventListener("click", () => {
     if (history.length > 1) {
@@ -813,12 +1060,15 @@ export function generateDrawingPage(base64Image: string): string {
       e.preventDefault();
       document.getElementById("saveBtn").click();
     }
-    // D for draw tool, T for text tool (when not typing in text input)
+    // Single-key tool shortcuts (when not typing in text input)
     if (!e.metaKey && !e.ctrlKey && !e.altKey) {
       const active = document.activeElement;
       const isTyping = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA");
       if (!isTyping) {
         if (e.key === "d") setTool("draw");
+        if (e.key === "b") setTool("box");
+        if (e.key === "o") setTool("oval");
+        if (e.key === "a") setTool("arrow");
         if (e.key === "t") setTool("text");
       }
     }
