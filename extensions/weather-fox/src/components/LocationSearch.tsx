@@ -29,8 +29,11 @@ export function LocationSearch(props: {
     },
   });
 
-  const results = hasQuery ? filterGeoResults(data?.results ?? [], query) : [];
+  const { results, relaxed } = hasQuery
+    ? filterGeoResults(data?.results ?? [], query)
+    : { results: [], relaxed: false };
   const searching = hasQuery && isLoading && !data;
+  const qualifiers = query.split(",").slice(1).join(",").trim();
 
   // Easter eggs: certain "places" aren't on any map.
   const secret = query
@@ -73,27 +76,30 @@ export function LocationSearch(props: {
                 : 'Qualify with commas: "noe valley, california"'
         }
       />
-      {results.map((geo) => (
-        <List.Item
-          key={geo.id}
-          title={geo.name}
-          subtitle={[geo.admin2, geo.admin1, geo.country].filter(Boolean).join(", ")}
-          icon={Icon.Pin}
-          accessories={geo.timezone ? [{ text: geo.timezone }] : undefined}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Select Location"
-                icon={Icon.Checkmark}
-                onAction={() => {
-                  props.onSelect(geo);
-                  if (props.popOnSelect) pop();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {/* When the comma qualifiers match nothing, every result is shown so the user can pick by region. */}
+      <List.Section title={relaxed ? `No region matching "${qualifiers}" — showing all` : undefined}>
+        {results.map((geo) => (
+          <List.Item
+            key={geo.id}
+            title={geo.name}
+            subtitle={[geo.admin2, geo.admin1, geo.country].filter(Boolean).join(", ")}
+            icon={Icon.Pin}
+            accessories={geo.timezone ? [{ text: geo.timezone }] : undefined}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Select Location"
+                  icon={Icon.Checkmark}
+                  onAction={() => {
+                    props.onSelect(geo);
+                    if (props.popOnSelect) pop();
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
       {foundCastWorld && (
         <List.Item
           key="egg-cast-world"

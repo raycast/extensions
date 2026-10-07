@@ -115,98 +115,41 @@ export function geocodeUrl(query: string): string {
   return `https://geocoding-api.open-meteo.com/v1/search?${params}`;
 }
 
-/** Postal abbreviations people type after a comma ("manchester, nh"), keyed by the region name the geocoder returns. */
-const REGION_ABBREVIATIONS: Record<string, string> = {
-  // United States
-  alabama: "al",
-  alaska: "ak",
-  arizona: "az",
-  arkansas: "ar",
-  california: "ca",
-  colorado: "co",
-  connecticut: "ct",
-  delaware: "de",
-  "district of columbia": "dc",
-  florida: "fl",
-  georgia: "ga",
-  hawaii: "hi",
-  idaho: "id",
-  illinois: "il",
-  indiana: "in",
-  iowa: "ia",
-  kansas: "ks",
-  kentucky: "ky",
-  louisiana: "la",
-  maine: "me",
-  maryland: "md",
-  massachusetts: "ma",
-  michigan: "mi",
-  minnesota: "mn",
-  mississippi: "ms",
-  missouri: "mo",
-  montana: "mt",
-  nebraska: "ne",
-  nevada: "nv",
-  "new hampshire": "nh",
-  "new jersey": "nj",
-  "new mexico": "nm",
-  "new york": "ny",
-  "north carolina": "nc",
-  "north dakota": "nd",
-  ohio: "oh",
-  oklahoma: "ok",
-  oregon: "or",
-  pennsylvania: "pa",
-  "rhode island": "ri",
-  "south carolina": "sc",
-  "south dakota": "sd",
-  tennessee: "tn",
-  texas: "tx",
-  utah: "ut",
-  vermont: "vt",
-  virginia: "va",
-  washington: "wa",
-  "west virginia": "wv",
-  wisconsin: "wi",
-  wyoming: "wy",
-  "puerto rico": "pr",
-  // Canada
-  alberta: "ab",
-  "british columbia": "bc",
-  manitoba: "mb",
-  "new brunswick": "nb",
-  "newfoundland and labrador": "nl",
-  "nova scotia": "ns",
-  ontario: "on",
-  "prince edward island": "pe",
-  quebec: "qc",
-  saskatchewan: "sk",
-};
+/** Initials of a multi-word region name: "New South Wales" → "nsw", "British Columbia" → "bc". */
+function initialsOf(name: string): string | undefined {
+  const words = name
+    .toLowerCase()
+    .split(/[\s-]+/)
+    .filter(Boolean);
+  return words.length > 1 ? words.map((w) => w[0]).join("") : undefined;
+}
 
 /**
  * Narrow results using the comma-separated qualifiers the user typed, e.g.
  * "noe valley, san francisco, california" keeps results whose region fields
- * match "san francisco" and "california". A qualifier may also be a postal
- * abbreviation of the region ("manchester, nh"), matched exactly.
+ * match "san francisco" and "california". A qualifier also matches the
+ * initials of a multi-word region ("manchester, nh", "sydney, nsw"), which
+ * works in any country without a table of abbreviations.
+ *
+ * Qualifiers narrow, they never empty the list: when nothing matches (an
+ * abbreviation we can't derive, a typo) the geocoder's population-ranked
+ * results are returned unfiltered with `relaxed: true`, so the user can still
+ * pick the right place from the region shown on each row.
  */
-export function filterGeoResults(results: GeoResult[], query: string): GeoResult[] {
+export function filterGeoResults(results: GeoResult[], query: string): { results: GeoResult[]; relaxed: boolean } {
   const qualifiers = query
     .split(",")
     .slice(1)
     .map((q) => q.trim().toLowerCase())
     .filter((q) => q.length > 0);
-  if (qualifiers.length === 0) return results;
-  return results.filter((r) => {
-    const haystack = [r.admin1, r.admin2, r.admin3, r.country, r.country_code, ...(r.postcodes ?? [])]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const abbreviations = [r.admin1, r.admin2]
-      .filter((s): s is string => Boolean(s))
-      .map((s) => REGION_ABBREVIATIONS[s.toLowerCase()])
-      .filter(Boolean);
-    return qualifiers.every((q) => haystack.includes(q) || abbreviations.includes(q));
+  if (qualifiers.length === 0) return { results, relaxed: false };
+  const narrowed = results.filter((r) => {
+    const regions = [r.admin1, r.admin2, r.admin3, r.country].filter((s): s is string => Boolean(s));
+    const haystack = [...regions, r.country_code, ...(r.postcodes ?? [])].filter(Boolean).join(" ").toLowerCase();
+    const initials = regions.map(initialsOf).filter(Boolean);
+    return qualifiers.every((q) => haystack.includes(q) || initials.includes(q));
   });
+  return narrowed.length > 0 ? { results: narrowed, relaxed: false } : { results, relaxed: true };
 }
 
 export function forecastUrl(latitude: number, longitude: number, units: Units, days: number = 7): string {
