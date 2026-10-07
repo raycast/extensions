@@ -8,7 +8,6 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -115,7 +114,7 @@ export default function Command() {
               <Action
                 title="Restore Automatic"
                 icon={Icon.Repeat}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 onAction={() => apply(setAutomatic, "Fans on automatic")}
               />
             </ActionPanel>
