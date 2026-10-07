@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Aitho MCP Server] - 2026-10-07
+
+- Add Aitho to the community registry, for rehearsing and delivering presentations with your own slides. Create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.
+
 ## [Add MiningBridge Intelligence MCP Server] - 2026-10-06
 
 - Add MiningBridge Intelligence to the community registry: critical-mineral and rare-earth trade intelligence (commodity snapshots, trade flows, supplier screening, supply-risk scores, reports). Hosted remote Streamable HTTP server at https://intel.miningbridge.in/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Nine read-only tools.
