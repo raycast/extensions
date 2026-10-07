@@ -1027,12 +1027,6 @@ function EmailActions({
           onAction={handleExpandEmail}
           shortcut={{ modifiers: ["cmd"], key: "return" }}
         />
-        <Action
-          title={showPreview ? "Hide Preview" : "Show Preview"}
-          icon={Icon.Sidebar}
-          onAction={onTogglePreview}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-        />
         <Action title="Reply" icon={Icon.Reply} onAction={handleReply} shortcut={{ modifiers: ["cmd"], key: "r" }} />
         <Action
           title="Reply All"
@@ -1145,6 +1139,16 @@ function EmailActions({
           />
         </ActionPanel.Section>
       )}
+
+      {/* New actions go last so existing ones keep their positions */}
+      <ActionPanel.Section title="View">
+        <Action
+          title={showPreview ? "Hide Preview" : "Show Preview"}
+          icon={Icon.Sidebar}
+          onAction={onTogglePreview}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
