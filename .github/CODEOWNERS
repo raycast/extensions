@@ -1224,6 +1224,7 @@
 /extensions/homey                                                   @DominicVonk
 /extensions/hoogle                                                  @waj
 /extensions/hop                                                     @danmartuszewski
+/extensions/hora-calendar                                           @szamski
 /extensions/horoscope                                               @xmok
 /extensions/host-io                                                 @xmok
 /extensions/host-switch                                             @ewgenius @xmok
