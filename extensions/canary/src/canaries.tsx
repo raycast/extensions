@@ -125,20 +125,20 @@ function Command() {
                 url={pr.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               />
-              {pr.canaryUrl && (
-                <Action.CopyToClipboard
-                  title="Copy Canary URL"
-                  icon={Icon.Clipboard}
-                  content={pr.canaryUrl}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-              )}
               {pr.extraUrl && (
                 <Action.OpenInBrowser
                   title="Open Extra Link"
                   icon={Icon.Link}
                   url={pr.extraUrl}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                />
+              )}
+              {pr.canaryUrl && (
+                <Action.CopyToClipboard
+                  title="Copy Canary URL"
+                  icon={Icon.Clipboard}
+                  content={pr.canaryUrl}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
               )}
               <Action

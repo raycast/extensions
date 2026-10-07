@@ -31,8 +31,8 @@ Press ⌘K on a pull request to see them all.
 | ----------------- | -------- |
 | Open Canary       | ↵        |
 | Open Pull Request | ⌘⇧P      |
-| Copy Canary URL   | ⌘C       |
 | Open Extra Link   | ⌘⇧A      |
+| Copy Canary URL   | ⌘C       |
 | Refresh           | ⌘R       |
 
 ## Troubleshooting
