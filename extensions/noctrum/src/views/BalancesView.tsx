@@ -24,7 +24,6 @@ export function BalancesView({ wallet }: { wallet: WalletData }) {
         })),
       ]);
       const eth = await getEthBalance(wallet.address);
-      console.log("private balances response:", JSON.stringify(priv));
       setPrivateBalances(priv.balances ?? []);
       setOnChainBalances(onChain);
       setEthBal(eth);

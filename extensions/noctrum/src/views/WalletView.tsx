@@ -25,13 +25,13 @@ export function WalletView({ onDone }: { onDone?: () => void }) {
   }
 
   async function handleImport() {
-    const text = await Clipboard.readText();
+    const text = (await Clipboard.readText())?.trim();
     if (!text || !text.startsWith("0x") || text.length !== 66) {
       showToast(Toast.Style.Failure, "Paste a valid private key to clipboard first");
       return;
     }
     try {
-      const w = await storeWallet(text.trim());
+      const w = await storeWallet(text);
       setWallet(w);
       showToast(Toast.Style.Success, "Wallet imported", w.address);
       onDone?.();

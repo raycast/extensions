@@ -6,7 +6,6 @@ import {
   cancelBorrow as apiCancelBorrow,
   acceptProposal as apiAcceptProposal,
   rejectProposal as apiRejectProposal,
-  repayLoan as apiRepayLoan,
   claimExcessCollateral as apiClaimExcess,
 } from "../lib/noctrum-api";
 import {
@@ -15,11 +14,11 @@ import {
   CANCEL_BORROW_TYPES,
   ACCEPT_PROPOSAL_TYPES,
   REJECT_PROPOSAL_TYPES,
-  REPAY_LOAN_TYPES,
   CLAIM_EXCESS_COLLATERAL_TYPES,
   NOCTRUM_DOMAIN,
 } from "../lib/constants";
 import { ethers } from "ethers";
+import { repayLoan } from "../lib/repay";
 import { BorrowerStatus, errorMessage } from "../lib/types";
 
 export function BorrowPositionsView({ wallet }: { wallet: WalletData }) {
@@ -91,13 +90,21 @@ export function BorrowPositionsView({ wallet }: { wallet: WalletData }) {
       "Rejecting proposal",
     );
 
-  const handleRepay = (loanId: string, totalDue: string) =>
-    signAndCall(
-      REPAY_LOAN_TYPES,
-      { account: wallet.address, loanId, amount: totalDue, timestamp: ts() },
-      apiRepayLoan,
-      "Repaying loan",
-    );
+  async function handleRepay(loanId: string, token: string, totalDue: string) {
+    const toast = await showToast(Toast.Style.Animated, "Repaying loan");
+    try {
+      if (!signer) throw new Error("Wallet not loaded");
+      await repayLoan(wallet, loanId, token, totalDue, toast);
+      toast.style = Toast.Style.Success;
+      toast.title = "Repaying loan - Done";
+      load();
+    } catch (e) {
+      console.log(e);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Repaying loan";
+      toast.message = errorMessage(e);
+    }
+  }
 
   const handleClaimExcess = (loanId: string) =>
     signAndCall(
@@ -186,7 +193,7 @@ export function BorrowPositionsView({ wallet }: { wallet: WalletData }) {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Repay Full" onAction={() => handleRepay(l.loanId, l.totalDue)} />
+                <Action title="Repay Full" onAction={() => handleRepay(l.loanId, l.token, l.totalDue)} />
                 {l.excessCollateral && BigInt(l.excessCollateral) > 0n && (
                   <Action title="Claim Excess Collateral" onAction={() => handleClaimExcess(l.loanId)} />
                 )}

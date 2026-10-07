@@ -8,6 +8,7 @@ import { privateTransfer } from "../lib/external-api";
 import { encryptRate } from "../lib/encryption";
 import { ethers } from "ethers";
 import { errorMessage } from "../lib/types";
+import { loadProgress, saveProgress, clearProgress } from "../lib/progress";
 
 export function LendFormView({ wallet }: { wallet: WalletData }) {
   const [token, setToken] = useState<string>(COINS[0].address);
@@ -51,23 +52,40 @@ export function LendFormView({ wallet }: { wallet: WalletData }) {
     setIsSubmitting(true);
     const toast = await showToast(Toast.Style.Animated, "Step 1/5: Approving token...");
     try {
-      const amountWei = ethers.parseEther(amount).toString();
+      const amountWei = ethers.parseEther(amount.trim()).toString();
+      // Completed steps are remembered, so a retry after a failure does not deposit or transfer again.
+      const progressKey = `lend:${wallet.address.toLowerCase()}:${token}:${amountWei}`;
+      const progress = await loadProgress(progressKey);
+      let slotId = progress.data.slotId;
+      const save = (step: number) => saveProgress(progressKey, { step, data: slotId ? { slotId } : {} });
 
       // Step 1: Approve
-      await approveToken(wallet.privateKey, token, amountWei);
+      if (progress.step < 1) {
+        await approveToken(wallet.privateKey, token, amountWei);
+        await save(1);
+      }
 
       // Step 2: Vault deposit
-      toast.title = "Step 2/5: Depositing to vault...";
-      await depositToVault(wallet.privateKey, token, amountWei);
+      if (progress.step < 2) {
+        toast.title = "Step 2/5: Depositing to vault...";
+        await depositToVault(wallet.privateKey, token, amountWei);
+        await save(2);
+      }
 
       // Step 3: Init lend (get slotId)
-      toast.title = "Step 3/5: Initializing lend slot...";
-      const { slotId } = await initDepositLend({ account: wallet.address, token, amount: amountWei });
+      if (progress.step < 3) {
+        toast.title = "Step 3/5: Initializing lend slot...";
+        slotId = (await initDepositLend({ account: wallet.address, token, amount: amountWei })).slotId;
+        await save(3);
+      }
 
       // Step 4: Private transfer to pool
-      toast.title = "Step 4/5: Private transfer to pool...";
-      const poolAddress = await fetchPoolAddress();
-      await privateTransfer(wallet, poolAddress, token, amountWei);
+      if (progress.step < 4) {
+        toast.title = "Step 4/5: Private transfer to pool...";
+        const poolAddress = await fetchPoolAddress();
+        await privateTransfer(wallet, poolAddress, token, amountWei);
+        await save(4);
+      }
 
       // Step 5: Confirm with encrypted rate
       toast.title = "Step 5/5: Confirming with encrypted rate...";
@@ -87,6 +105,7 @@ export function LendFormView({ wallet }: { wallet: WalletData }) {
         timestamp,
         auth,
       });
+      await clearProgress(progressKey);
 
       toast.style = Toast.Style.Success;
       toast.title = "Lend intent created!";

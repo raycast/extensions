@@ -1,22 +1,10 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { WalletData } from "../lib/wallet";
-import {
-  fetchLenderStatus,
-  fetchBorrowerStatus,
-  repayLoan as apiRepayLoan,
-  fetchPoolAddress,
-  claimExcessCollateral as apiClaimExcess,
-} from "../lib/noctrum-api";
-import {
-  tokenName,
-  tokenIcon,
-  REPAY_LOAN_TYPES,
-  CLAIM_EXCESS_COLLATERAL_TYPES,
-  NOCTRUM_DOMAIN,
-} from "../lib/constants";
+import { fetchLenderStatus, fetchBorrowerStatus, claimExcessCollateral as apiClaimExcess } from "../lib/noctrum-api";
+import { tokenName, tokenIcon, CLAIM_EXCESS_COLLATERAL_TYPES, NOCTRUM_DOMAIN } from "../lib/constants";
 import { ethers } from "ethers";
-import { privateTransfer } from "../lib/external-api";
+import { repayLoan } from "../lib/repay";
 import { Loan, errorMessage } from "../lib/types";
 
 export function MyLoansView({ wallet }: { wallet: WalletData }) {
@@ -62,12 +50,7 @@ export function MyLoansView({ wallet }: { wallet: WalletData }) {
     const toast = await showToast(Toast.Style.Animated, "Repaying loan");
     try {
       if (!signer) throw new Error("No wallet");
-      toast.title = "Transferring repayment to pool";
-      await privateTransfer(wallet, await fetchPoolAddress(), token, totalDue);
-      toast.title = "Repaying loan";
-      const message = { account: wallet.address, loanId, amount: totalDue, timestamp: ts() };
-      const auth = await signer.signTypedData(NOCTRUM_DOMAIN, REPAY_LOAN_TYPES, message);
-      await apiRepayLoan({ ...message, auth });
+      await repayLoan(wallet, loanId, token, totalDue, toast);
       toast.style = Toast.Style.Success;
       toast.title = "Repaid";
       load();
