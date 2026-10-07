@@ -9,10 +9,18 @@
   each new item.
 - Pick the calendar a new block publishes to, or keep it in Reassign only, and
   choose the calendars that receive a one-way mirror copy. Edit the calendar
-  home and mirrors on an existing block. The detail pane shows both.
+  home and mirrors on an existing block. A Reassign-only block can also have
+  mirror copies. "Copies show" sets each copy to the calendar default, full
+  details, private, or busy. The detail pane shows the home, the mirrors, and
+  each copy style.
 - Edit Details sets the end as a date and time, so a block can end on a later
   day. "Unassigned" and "None" clear the area and the activity.
 - Five commands: Agenda, Add Block, Inbox, Search Blocks, and Now. Agenda opens
   today by default and remembers the selected day/week view.
 - Compact block forms with optional Reassign AI previews. Scheduled blocks require
-  a date and time; duration-only scheduling offers times to confirm.
+  a date and time; duration-only scheduling lists open slots to pick. If a slot
+  is taken, the list shows the nearest open slots.
+- Check off Kept or Skipped on a block from a past day in Agenda. Reassign
+  accepts a check-off only after the day ends, so Now has no check-off.
+- Save to Inbox uses your default Source, the same as the Reassign app. When the
+  default is a task list, Reassign also adds the task to that app.

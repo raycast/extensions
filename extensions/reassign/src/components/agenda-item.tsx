@@ -10,6 +10,7 @@ import {
   homeCalendarId,
   isRecurring,
   isReflected,
+  MIRROR_STYLE_LABELS,
   reflectState,
   resolveActivity,
   resolveArea,
@@ -72,7 +73,7 @@ export function BlockDetail(props: {
   const notes = typeof event.notes === "string" ? event.notes.trim() : "";
   const source = homeCalendarLabel(event, calendars, defaultCalendarId);
   const mirrors = (event.mirrorCalendarIds ?? [])
-    .map((id) => calendars.find((c) => c.id === id)?.name)
+    .map((id) => mirrorLabel(id, event, calendars))
     .filter(Boolean)
     .join(", ");
   const minutes = spanMinutes(event);
@@ -108,6 +109,14 @@ export function BlockDetail(props: {
       }
     />
   );
+}
+
+/** "Work (Busy)": the mirror name, plus its copy style when the event sets one. */
+function mirrorLabel(id: string, event: ScheduleEvent, calendars: Calendar[]): string | undefined {
+  const name = calendars.find((c) => c.id === id)?.name;
+  const style = event.mirrorStyles?.[id];
+  const label = style ? MIRROR_STYLE_LABELS[style] : undefined;
+  return name && label ? `${name} (${label})` : name;
 }
 
 /** Search keywords for a row: the area, activity, and source names, when present. */

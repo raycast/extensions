@@ -11,8 +11,8 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { getScheduleRange, writeEvents } from "./lib/api";
-import { batchFailure, needsSignIn, rowError } from "./lib/envelope";
+import { getScheduleRange } from "./lib/api";
+import { needsSignIn } from "./lib/envelope";
 import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
@@ -77,24 +77,6 @@ export default function Command() {
   const currentMeeting = model.current ? eventMeeting(model.current) : null;
   const { title, icon } = barTitle(model.current, model.upcoming[0], prefs.showBlockName);
 
-  // Reflect the current block from the menu bar, then refresh. A HUD gives the
-  // only feedback a menu-bar command can show.
-  async function reflectCurrent(status: "kept" | "skipped") {
-    if (!model.current) return;
-    const result = await writeEvents([{ op: "reflect", id: model.current.id, status }]);
-    // A 2xx can still carry a rejected row; do not report a false success.
-    const failedRow = result.ok ? batchFailure(result.data) : undefined;
-    const failed = !result.ok ? result : failedRow ? rowError(failedRow) : undefined;
-    await showHUD(
-      !failed
-        ? status === "kept"
-          ? "Checked off the block"
-          : "Marked the block skipped"
-        : `Could not update the block: ${failed.message}`,
-    );
-    if (!failed) revalidate();
-  }
-
   return (
     <MenuBarExtra icon={icon} title={title} isLoading={isLoading || notifyPending} tooltip="Reassign">
       {model.current && (
@@ -110,20 +92,6 @@ export default function Command() {
               icon={Icon.Video}
               onAction={() => open(currentMeeting.url)}
             />
-          )}
-          {!model.current.readOnly && (
-            <>
-              <MenuBarExtra.Item
-                title="Check off Kept"
-                icon={Icon.CheckCircle}
-                onAction={() => reflectCurrent("kept")}
-              />
-              <MenuBarExtra.Item
-                title="Check off Skipped"
-                icon={Icon.XMarkCircle}
-                onAction={() => reflectCurrent("skipped")}
-              />
-            </>
           )}
           <MenuBarExtra.Item
             title="Open in Reassign"

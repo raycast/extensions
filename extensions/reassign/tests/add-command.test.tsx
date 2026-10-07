@@ -9,11 +9,11 @@ const mock = vi.hoisted(() => ({
   fullDays: new WeakSet<Date>(),
   capture: vi.fn(),
   create: vi.fn(),
-  plan: vi.fn(),
-  confirm: vi.fn(),
+  free: vi.fn(),
   calendar: {} as Record<string, unknown>,
   root: vi.fn(),
   push: vi.fn(),
+  toast: vi.fn(),
 }));
 vi.mock("react", () => ({
   useState: (initial: unknown) => {
@@ -49,10 +49,10 @@ vi.mock("@raycast/api", () => ({
     }),
   }),
   Icon: {},
-  List: Object.assign("List", { Item: "ListItem" }),
+  List: Object.assign("List", { Item: "ListItem", EmptyView: "EmptyView" }),
   popToRoot: mock.root,
   useNavigation: () => ({ push: mock.push }),
-  showToast: async () => ({ hide: async () => undefined }),
+  showToast: mock.toast,
   Toast: { Style: {} },
 }));
 vi.mock("@raycast/utils", () => ({
@@ -61,12 +61,12 @@ vi.mock("@raycast/utils", () => ({
 }));
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
 // `mock.create` sees the single create op that the command sends to POST /events.
-vi.mock("../src/lib/api", () => ({
+vi.mock("../src/lib/api", async (importOriginal) => ({
+  nearestSlotsOf: (await importOriginal<typeof import("../src/lib/api")>()).nearestSlotsOf,
   getSchedule: vi.fn(),
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
   backlogCaptureText: mock.capture,
-  planSchedule: mock.plan,
-  confirmSchedule: mock.confirm,
+  getFreeSlots: mock.free,
 }));
 vi.mock("../src/components/ai-fill-form", () => ({ AiFillForm: "AiFillForm" }));
 vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
@@ -76,7 +76,7 @@ vi.mock("../src/components/calendar-fields", () => ({
   CalendarFields: "CalendarFields",
   CALENDAR_DEFAULT: "",
 }));
-import AddCommand, { clockOffsetOf, planWindow } from "../src/add";
+import AddCommand, { clockOffsetOf, planWindow, slotStarts } from "../src/add";
 
 type Values = {
   name: string;
@@ -122,12 +122,14 @@ beforeEach(() => {
   mock.cursor = 0;
   mock.fullDays = new WeakSet();
   mock.calendar = {};
-  for (const fn of [mock.capture, mock.create, mock.root, mock.plan, mock.confirm, mock.push]) fn.mockReset();
+  for (const fn of [mock.capture, mock.create, mock.root, mock.free, mock.push, mock.toast]) fn.mockReset();
+  mock.toast.mockImplementation(async (options) => ({ ...options, hide: async () => undefined }));
   mock.capture.mockResolvedValue({
     ok: true,
     data: { results: [{ index: 0, status: "ok", result: { created: [{ id: "b1", name: "idea" }], source: "ai" } }] },
   });
   mock.create.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  mock.free.mockResolvedValue({ ok: true, data: { days: [] } });
 });
 it("blank Add Block opens with Save to Inbox as primary", () => {
   expect(render().find((n) => n.type === "SubmitForm")?.props.title).toBe("Save to Inbox");
@@ -189,16 +191,6 @@ it("does not submit the same saved draft twice", async () => {
   await action.props.onSubmit(values);
   expect(mock.capture).toHaveBeenCalledTimes(1);
 });
-it("handles a replayed flexible commit", async () => {
-  mock.plan.mockResolvedValue({
-    ok: true,
-    data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "new" } } }] },
-  });
-  await render()
-    .find((n) => n.props.title === "Schedule Block")!
-    .props.onSubmit({ ...values, duration: "90m" });
-  expect(mock.root).toHaveBeenCalledTimes(1);
-});
 it("keeps hidden details when submitting the compact form", async () => {
   render()
     .find((n) => n.props.id === "showDetails")!
@@ -247,7 +239,7 @@ it("an AI home calendar keeps the mirrors the user chose, apart from that calend
   const picker = render().find((n) => n.type === "CalendarFields")! as unknown as ReactElement<{
     onChange: (values: { calendarId: string; mirrorIds: string[] }) => void;
   }>;
-  picker.props.onChange({ calendarId: "", mirrorIds: ["home", "work"] });
+  picker.props.onChange({ calendarId: "", mirrorIds: ["home", "work"], mirrorStyle: "busy" } as never);
   const action = render().find((n) => n.props.title === "Fill with AI…")!;
   const target = (action.props as unknown as { target: ReactElement<{ onFill: (draft: unknown) => void }> }).target;
   target.props.onFill({
@@ -264,9 +256,12 @@ it("an AI home calendar keeps the mirrors the user chose, apart from that calend
   const filled = render().find((n) => n.type === "CalendarFields")! as unknown as ReactElement<{
     calendarDefault: string;
     mirrorDefault: string[];
+    styleDefault?: string;
   }>;
   expect(filled.props.calendarDefault).toBe("work");
   expect(filled.props.mirrorDefault).toEqual(["home"]);
+  // The remount keeps the copy style that the user chose.
+  expect(filled.props.styleDefault).toBe("busy");
 });
 it("native full-day picker input stays in Inbox, not an event at midnight", async () => {
   const date = new Date(2026, 8, 22);
@@ -388,21 +383,13 @@ it("does not schedule full-day input without a duration", async () => {
   expect(mock.create).not.toHaveBeenCalled();
   expect(mock.root).not.toHaveBeenCalled();
 });
-it("duration-only scheduling requests concrete proposals without auto-commit", async () => {
-  mock.plan.mockResolvedValue({ ok: true, data: { results: [] } });
+it("duration-only scheduling reads the free slots of the window with minDuration", async () => {
   const date = new Date(2026, 8, 22);
   mock.fullDays.add(date);
   await render()
     .find((n) => n.props.title === "Schedule Block")!
     .props.onSubmit({ ...values, start: date, duration: "90m" });
-  expect(mock.plan).toHaveBeenCalledWith([
-    expect.objectContaining({
-      durationMinutes: 90,
-      earliest: "2026-09-22T08:00",
-      latest: "2026-09-22T22:00",
-      autoCommitBest: false,
-    }),
-  ]);
+  expect(mock.free).toHaveBeenCalledWith("2026-09-22", "2026-09-22", 90);
   expect(mock.create).not.toHaveBeenCalled();
   expect(mock.root).not.toHaveBeenCalled();
 });
@@ -442,7 +429,6 @@ it.each([
 it("an AI park draft preserves the typed time window when Find a Time runs", async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date(2026, 8, 22, 12));
-  mock.plan.mockResolvedValue({ ok: true, data: { results: [] } });
   const text = "lunch tomorrow 60m in the evening";
   const draft = blockDraft({ intents: [{ op: "park", name: "Lunch", durationMinutes: 60 }] });
   expect(draft.destination).toBe("inbox");
@@ -460,15 +446,8 @@ it("an AI park draft preserves the typed time window when Find a Time runs", asy
       name: "Lunch",
       duration: "60m",
     });
-  expect(mock.plan).toHaveBeenCalledTimes(1);
-  expect(mock.plan).toHaveBeenCalledWith([
-    expect.objectContaining({
-      durationMinutes: 60,
-      earliest: "2026-09-23T17:00",
-      latest: "2026-09-23T21:00",
-      autoCommitBest: false,
-    }),
-  ]);
+  expect(mock.free).toHaveBeenCalledTimes(1);
+  expect(mock.free).toHaveBeenCalledWith("2026-09-23", "2026-09-23", 60);
   expect(mock.capture).not.toHaveBeenCalled();
   expect(mock.create).not.toHaveBeenCalled();
 });
@@ -498,9 +477,9 @@ it("moves a window that has passed today to the same window tomorrow", () => {
     latest: "2026-09-23T22:00",
     nextDay: true,
   });
-  // A window that is still open today, and any other day, stay as they are.
+  // A window that is still open today starts at now + 5 minutes. Any other day stays as it is.
   expect(planWindow("2026-09-22", undefined, undefined, new Date(2026, 8, 22, 12))).toMatchObject({
-    earliest: "2026-09-22T08:00",
+    earliest: "2026-09-22T12:05",
     nextDay: false,
   });
   expect(planWindow("2026-09-25", "06:00", "12:00", evening)).toMatchObject({
@@ -528,29 +507,19 @@ it("routes a recurring capture to the web and sends no write", () => {
   expect(tree.find((n) => n.type === "Description")?.props.title).toBe("Repeating blocks");
   expect(mock.create).not.toHaveBeenCalled();
   expect(mock.capture).not.toHaveBeenCalled();
-  expect(mock.plan).not.toHaveBeenCalled();
+  expect(mock.free).not.toHaveBeenCalled();
 });
 
-// ProposalsList: the pushed slot picker for a flexible block.
+// SlotsList: the pushed slot picker for a flexible block.
 const NOON = new Date(2026, 8, 22, 12);
-function proposals(token: string, expiresAt: Date) {
-  const result = {
-    commitToken: token,
-    expiresAt: expiresAt.toISOString(),
-    options: [{ start: "2026-09-22T14:00", end: "2026-09-22T15:30" }],
-  };
-  return { ok: true, data: { results: [{ index: 0, status: "ok", result }] } };
-}
-const booked = {
-  ok: true,
-  data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "ev1" } } }] },
-};
+const at = (clock: string, date = "2026-09-22") => `${date}T${clock}`;
+type ListNode = ReactElement<{ title?: string; onAction?: () => Promise<void> }>;
 
-/** Submit a duration-only block and give the slot action of the pushed list. */
-async function openProposals(expiresAt: Date) {
+/** Submit a duration-only block on these free slots, and give a render of the pushed list. */
+async function openSlots(freeSlots: { start: string; end: string }[]) {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(NOON);
-  mock.plan.mockResolvedValueOnce(proposals("tok-1", expiresAt));
+  mock.free.mockResolvedValueOnce({ ok: true, data: { days: [{ date: "2026-09-22", freeSlots }] } });
   await render()
     .find((n) => n.props.title === "Schedule Block")!
     .props.onSubmit({ ...values, duration: "90m" });
@@ -559,109 +528,189 @@ async function openProposals(expiresAt: Date) {
   mock.slots = [];
   return () => {
     mock.cursor = 0;
-    const tree = nodes((list.type as (props: unknown) => unknown)(list.props));
-    const action = tree.find((n) => n.props.title === "Use This Slot");
-    // No slot left gives undefined; the callers that pick a slot call it at once.
-    return (action?.props as unknown as { onAction: () => Promise<void> } | undefined)?.onAction as () => Promise<void>;
+    const tree = nodes((list.type as (props: unknown) => unknown)(list.props)) as unknown as ListNode[];
+    const items = tree.filter((n) => n.type === "ListItem");
+    const picks = tree.filter((n) => n.props.title === "Use This Slot").map((n) => n.props.onAction!);
+    return { titles: items.map((n) => n.props.title), picks, empty: tree.some((n) => n.type === "EmptyView") };
   };
 }
+const MORNING = { start: at("07:00"), end: at("09:10") };
+const AFTERNOON = { start: at("12:10"), end: at("15:00") };
+const NIGHT = { start: at("21:00"), end: at("23:00") };
+const created = (start: string, end: string) => ({ op: "create", name: "idea", kind: "blocking", start, end });
 
-it("lets the server judge the expiry, then re-plans with the same calendar", async () => {
-  mock.calendar = { calendarId: null };
-  // A device clock past `expiresAt` must not block the confirm: the server decides.
-  const slot = await openProposals(new Date(NOON.getTime() - 60_000));
-  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "That proposal has expired." });
-  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
-  await slot()();
-  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-1", choice: 0 }]);
-  expect(mock.plan).toHaveBeenCalledTimes(2);
-  const [first, second] = mock.plan.mock.calls.map((call) => call[0][0]);
-  expect(second.requestId).not.toBe(first.requestId);
-  expect(second.autoCommitBest).toBe(false);
-  // The confirm sends only the token, so the re-plan must keep the calendar choice ("Reassign only" here).
-  expect(second.calendarId).toBeNull();
-
-  // The fresh proposals replace the stale ones, so the next pick sends the new token.
-  mock.confirm.mockResolvedValueOnce(booked);
-  await slot()();
-  expect(mock.confirm).toHaveBeenLastCalledWith([{ token: "tok-2", choice: 0 }]);
-  expect(mock.root).toHaveBeenCalledTimes(1);
-});
-
-it("a sure confirm with a device clock that is wrong still books", async () => {
-  const slot = await openProposals(new Date(NOON.getTime() - 3_600_000));
-  mock.confirm.mockResolvedValueOnce(booked);
-  await slot()();
-  expect(mock.plan).toHaveBeenCalledTimes(1);
-  expect(mock.root).toHaveBeenCalledTimes(1);
-});
-
-it("clears the dead slots when the re-plan finds none", async () => {
-  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
-  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "That proposal has expired." });
-  mock.plan.mockResolvedValueOnce({ ok: true, data: { results: [] } });
-  await slot()();
-  expect(mock.plan).toHaveBeenCalledTimes(2);
-  // No slot is left, so a tap cannot send the same closed window again.
-  expect(slot()).toBeUndefined();
-});
-
-it("keeps slots after a failed re-plan so the user can retry and confirm a fresh proposal", async () => {
-  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
-  mock.confirm.mockResolvedValue({ ok: false, code: "not_found", message: "That proposal has expired." });
-  mock.plan.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
-  await slot()();
-  expect(mock.plan).toHaveBeenCalledTimes(2);
-  expect(mock.root).not.toHaveBeenCalled();
-  expect(slot()).toBeTypeOf("function");
-
-  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
-  await slot()();
-  expect(mock.plan).toHaveBeenCalledTimes(3);
-  expect(mock.plan.mock.calls[2][0][0]).toEqual({
-    ...mock.plan.mock.calls[1][0][0],
-    requestId: expect.any(String),
-  });
-  expect(mock.plan.mock.calls[2][0][0].requestId).not.toBe(mock.plan.mock.calls[1][0][0].requestId);
-  expect(mock.root).not.toHaveBeenCalled();
-
-  mock.confirm.mockResolvedValueOnce(booked);
-  await slot()();
-  expect(mock.confirm).toHaveBeenLastCalledWith([{ token: "tok-2", choice: 0 }]);
-  expect(mock.root).toHaveBeenCalledTimes(1);
-});
-
-it("re-plans when the server refuses the token with not_found", async () => {
-  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
-  mock.confirm.mockResolvedValueOnce({ ok: false, code: "not_found", message: "gone" });
-  mock.plan.mockResolvedValueOnce(proposals("tok-2", new Date(NOON.getTime() + 600_000)));
-  await slot()();
-  expect(mock.confirm).toHaveBeenCalledWith([{ token: "tok-1", choice: 0 }]);
-  expect(mock.plan).toHaveBeenCalledTimes(2);
-  expect(mock.root).not.toHaveBeenCalled();
-});
-
-it("sends one commit for a double tap on a slot", async () => {
-  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
-  let answer: (value: unknown) => void = () => undefined;
-  mock.confirm.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
-  const pick = slot();
-  const taps = Promise.all([pick(), pick()]);
-  await vi.waitFor(() => expect(mock.confirm).toHaveBeenCalledTimes(1));
-  answer(booked);
-  await taps;
-  expect(mock.confirm).toHaveBeenCalledTimes(1);
-  expect(mock.root).toHaveBeenCalledTimes(1);
-});
-
-it("the plan carries the chosen calendar, so a committed slot needs no second write", async () => {
-  mock.calendar = { calendarId: "work" };
-  const slot = await openProposals(new Date(NOON.getTime() + 600_000));
-  expect(mock.plan).toHaveBeenCalledWith([expect.objectContaining({ calendarId: "work" })]);
-  mock.confirm.mockResolvedValueOnce(booked);
-  await slot()();
+it("clips the free slots to the window and lists the starts where the block fits", async () => {
+  const list = await openSlots([MORNING, AFTERNOON, NIGHT]);
+  // 08:00–09:10 and 21:00–22:00 are too short after the clip. No request books a slot.
+  expect(list().titles).toEqual(["12:10 → 13:40", "12:30 → 14:00", "13:00 → 14:30", "13:30 → 15:00"]);
   expect(mock.create).not.toHaveBeenCalled();
+});
+
+it("takes each gap start first, then the half-hour marks, up to five slots", () => {
+  const free = [
+    { start: at("08:00"), end: at("12:00") },
+    { start: at("14:00"), end: at("15:00") },
+    { start: at("16:00"), end: at("17:00") },
+  ];
+  const starts = slotStarts(free, { earliest: at("08:00"), latest: at("22:00") }, 60).map((s) => s.start);
+  expect(starts).toEqual([at("08:00"), at("08:30"), at("09:00"), at("14:00"), at("16:00")]);
+});
+
+it("joins a gap split at midnight inside an overnight window", () => {
+  const free = [
+    { start: at("22:00"), end: at("00:00", "2026-09-23") },
+    { start: at("00:00", "2026-09-23"), end: at("03:00", "2026-09-23") },
+  ];
+  const bounds = { earliest: at("22:00"), latest: at("01:00", "2026-09-23") };
+  expect(slotStarts(free, bounds, 120)).toEqual([
+    { start: at("22:00"), end: at("00:00", "2026-09-23") },
+    { start: at("22:30"), end: at("00:30", "2026-09-23") },
+    { start: at("23:00"), end: at("01:00", "2026-09-23") },
+  ]);
+});
+
+it("books a picked slot with an exact create and the calendar fields of the exact path", async () => {
+  mock.calendar = { calendarId: "work", mirrorCalendarIds: ["home"], mirrorStyles: { home: "busy" } };
+  const list = await openSlots([AFTERNOON]);
+  mock.create.mockResolvedValueOnce({
+    ok: true,
+    data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "ev1" } } }] },
+  });
+  await list().picks[1]();
+  expect(mock.create).toHaveBeenCalledWith({ ...created(at("12:30"), at("14:00")), ...mock.calendar });
   expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("shows the nearest slots of a conflict, and books one of them", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.create.mockResolvedValueOnce({
+    ok: false,
+    code: "conflict",
+    message: "That time is taken.",
+    status: 409,
+    nearestSlots: [{ start: at("16:00"), end: at("17:30"), reason: "Next free time" }],
+  });
+  await list().picks[0]();
+  expect(mock.root).not.toHaveBeenCalled();
+  expect(list().titles).toEqual(["16:00 → 17:30"]);
+  await list().picks[0]();
+  expect(mock.create).toHaveBeenLastCalledWith(created(at("16:00"), at("17:30")));
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("lists each nearest slot start once", async () => {
+  const list = await openSlots([AFTERNOON]);
+  const slot = { start: at("16:00"), end: at("17:30") };
+  mock.create.mockResolvedValueOnce({
+    ok: false,
+    code: "conflict",
+    message: "Taken.",
+    status: 409,
+    nearestSlots: [slot, slot],
+  });
+  await list().picks[0]();
+  expect(list().titles).toEqual(["16:00 → 17:30"]);
+});
+
+it("shows the empty state when a conflict has no nearby slot", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.create.mockResolvedValueOnce({ ok: false, code: "conflict", message: "Taken.", status: 409, nearestSlots: [] });
+  await list().picks[0]();
+  expect(list()).toMatchObject({ titles: [], picks: [], empty: true });
+});
+
+it.each([false, true])("keeps a sync conflict retryable (batch receipt: %s)", async (batchReceipt) => {
+  const list = await openSlots([{ start: at("13:00"), end: at("14:30") }]);
+  const error = { code: "conflict", message: "A sync is running. Try again shortly." };
+  mock.create.mockResolvedValueOnce(
+    batchReceipt
+      ? { ok: true, data: { results: [{ index: 0, status: "error", error }] } }
+      : { ok: false, ...error, status: 409 },
+  );
+  await list().picks[0]();
+  expect(list().titles).toEqual(["13:00 → 14:30"]);
+  const toast = await mock.toast.mock.results.at(-1)!.value;
+  expect(toast.message).toBe(error.message);
+  expect(mock.root).not.toHaveBeenCalled();
+  await list().picks[0]();
+  expect(mock.create).toHaveBeenCalledTimes(2);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("reads replacement slots from a rejected row in a successful HTTP response", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.create.mockResolvedValueOnce({
+    ok: true,
+    data: {
+      results: [
+        {
+          index: 0,
+          status: "error",
+          error: {
+            code: "conflict",
+            message: "Taken.",
+            nearestSlots: [{ start: at("16:00"), end: at("17:30") }],
+          },
+        },
+      ],
+    },
+  });
+  await list().picks[0]();
+  expect(list().titles).toEqual(["16:00 → 17:30"]);
+  expect(mock.root).not.toHaveBeenCalled();
+});
+
+it("keeps the slots after a failure that is not a conflict, so the user can try again", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.create.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
+  await list().picks[0]();
+  expect(list().titles).toHaveLength(4);
+  await list().picks[0]();
+  expect(mock.create).toHaveBeenCalledTimes(2);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("pushes the empty state when no free slot fits", async () => {
+  const list = await openSlots([MORNING]);
+  expect(list()).toMatchObject({ titles: [], empty: true });
+});
+
+it("sends one create for a double tap on a slot", async () => {
+  const list = await openSlots([AFTERNOON]);
+  let answer: (value: unknown) => void = () => undefined;
+  mock.create.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+  const pick = list().picks[0];
+  const taps = Promise.all([pick(), pick()]);
+  await vi.waitFor(() => expect(mock.create).toHaveBeenCalledTimes(1));
+  answer({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  await taps;
+  expect(mock.create).toHaveBeenCalledTimes(1);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+it("allows no second booking while closing the list after success", async () => {
+  const list = await openSlots([AFTERNOON, { start: at("16:00"), end: at("18:00") }]);
+  let close: () => void = () => undefined;
+  mock.root.mockReturnValueOnce(new Promise<void>((resolve) => (close = resolve)));
+  const booking = list().picks[0]();
+  await vi.waitFor(() => expect(mock.root).toHaveBeenCalledTimes(1));
+  try {
+    await list().picks.at(-1)!();
+    expect(mock.create).toHaveBeenCalledTimes(1);
+  } finally {
+    close();
+    await booking;
+  }
+  await list().picks[0]();
+  expect(mock.create).toHaveBeenCalledTimes(1);
+});
+
+it("keeps a successful booking final even when closing the list fails", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.root.mockRejectedValueOnce(new Error("Could not close Raycast"));
+  await expect(list().picks[0]()).rejects.toThrow("Could not close Raycast");
+  await list().picks[0]();
+  expect(mock.create).toHaveBeenCalledTimes(1);
 });
 
 it("rounds the account clock offset to whole quarter hours", () => {

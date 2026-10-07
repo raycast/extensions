@@ -150,3 +150,29 @@ describe("the row keywords and accessory", () => {
     expect(accessories.some((a) => a.icon === "Calendar" && a.tooltip === "Connected calendar")).toBe(true);
   });
 });
+
+describe("the Mirrored to label", () => {
+  function mirroredFor(event: ScheduleEvent, calendars: Calendar[]): string | undefined {
+    const labels: string[] = [];
+    walk(BlockDetail({ event, areas: [], activityTypes: [], calendars }), (n) => {
+      if (n.props.title === "Mirrored to") labels.push(n.props.text as string);
+    });
+    return labels[0];
+  }
+  const home = { id: "home", name: "Home" } as Calendar;
+
+  test("adds the copy style of a mirror when the event sets one", () => {
+    const event = {
+      ...nativeEvent,
+      mirrorCalendarIds: ["home", "work2"],
+      mirrorStyles: { home: "busy" },
+    } as ScheduleEvent;
+    expect(mirroredFor(event, [workCalendar, home, { id: "work2", name: "Side" } as Calendar])).toBe(
+      "Home (Busy), Side",
+    );
+  });
+
+  test("shows the bare names without styles", () => {
+    expect(mirroredFor({ ...nativeEvent, mirrorCalendarIds: ["home"] }, [home])).toBe("Home");
+  });
+});

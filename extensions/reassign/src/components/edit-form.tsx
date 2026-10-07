@@ -5,6 +5,7 @@ import { showApiError } from "../lib/feedback";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import {
   homeCalendarId,
+  isRecurring,
   occurrenceTarget,
   parseReach,
   resolveActivity,
@@ -14,7 +15,15 @@ import {
 import { localMinutesBetween, localToDate, textLimitError, toLocalDateTime } from "../lib/format";
 import { MAX_SPAN_MINUTES, MIN_SPAN_MINUTES } from "../lib/wire";
 import { ScopeDropdown } from "./scope-dropdown";
-import { CALENDAR_NONE, CalendarFields, CalendarFormValues, calendarEditFields, useCalendars } from "./calendar-fields";
+import {
+  CALENDAR_NONE,
+  CalendarFields,
+  CalendarFormValues,
+  calendarEditFields,
+  MIRROR_STYLE_MIXED,
+  mirrorStyleChoice,
+  useCalendars,
+} from "./calendar-fields";
 
 interface EditFormValues extends CalendarFormValues {
   name: string;
@@ -53,6 +62,11 @@ export function EditForm(props: {
   const mirrorIds = Array.isArray(event.mirrorCalendarIds) ? event.mirrorCalendarIds : [];
   const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
   const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
+  const mirrorStyles = event.mirrorStyles ?? {};
+  // Only a one-off block keeps mirrors without a home; a series cannot.
+  const mirrorsWithoutHome = home === null && !recurring && !isRecurring(event);
+  // The dropdown edits only the shown mirrors; hidden ones keep their styles.
+  const currentStyle = mirrorStyleChoice(knownMirrors, mirrorStyles);
 
   const [showDetails, setShowDetails] = useState(false);
   const [details, setDetails] = useState<Partial<EditFormValues>>({});
@@ -104,7 +118,12 @@ export function EditForm(props: {
     }
     if (values.notes !== currentNotes) patch.notes = values.notes;
     if (canPickCalendar) {
-      const cal = calendarEditFields(values, { calendarId: home, mirrorIds: knownMirrors });
+      const cal = calendarEditFields(values, {
+        calendarId: home,
+        mirrorIds: knownMirrors,
+        hiddenMirrorIds: hiddenMirrors,
+        mirrorStyles,
+      });
       if (cal.calendarId !== undefined) patch.calendarId = cal.calendarId;
       // An unlink also removes the mirrors, and it takes no mirror field.
       if (cal.calendarId !== null && cal.mirrorCalendarIds) {
@@ -112,6 +131,7 @@ export function EditForm(props: {
         // that is already on the event and checks only the added ones.
         patch.mirrorCalendarIds = [...cal.mirrorCalendarIds, ...hiddenMirrors];
       }
+      if (cal.calendarId !== null && cal.mirrorStyles) patch.mirrorStyles = cal.mirrorStyles;
     }
 
     // Nothing changed — skip the round-trip and return to the list.
@@ -122,7 +142,7 @@ export function EditForm(props: {
     const reach = recurring ? parseReach(values.scope) : "this";
     if (recurring) {
       // The server applies a calendar change to the whole series only.
-      if ((patch.calendarId !== undefined || patch.mirrorCalendarIds) && reach !== "all") {
+      if ((patch.calendarId !== undefined || patch.mirrorCalendarIds || patch.mirrorStyles) && reach !== "all") {
         await showToast({
           style: Toast.Style.Failure,
           title: "A calendar change covers the whole series",
@@ -212,6 +232,9 @@ export function EditForm(props: {
               allowDefault={false}
               calendarDefault={calendarValues.calendarId ?? home ?? CALENDAR_NONE}
               mirrorDefault={calendarValues.mirrorIds ?? knownMirrors}
+              styleDefault={calendarValues.mirrorStyle ?? currentStyle}
+              allowMixed={currentStyle === MIRROR_STYLE_MIXED}
+              mirrorsWithoutHome={mirrorsWithoutHome}
               onChange={setCalendarValues}
             />
           )}

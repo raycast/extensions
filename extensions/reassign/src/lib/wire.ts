@@ -57,16 +57,22 @@ export type EventKind = (typeof EVENT_KINDS)[number];
 export const REFLECT_STATUSES = ["kept", "skipped", "changed", "added"] as const;
 export type ReflectStatus = (typeof REFLECT_STATUSES)[number];
 
+// How a one-way copy shows the block in its calendar. An omitted key keeps the calendar default.
+export const MIRROR_STYLES = ["full", "private", "busy"] as const;
+export type MirrorStyle = (typeof MIRROR_STYLES)[number];
+
 export function isEventKind(value: unknown): value is EventKind {
   return (EVENT_KINDS as readonly unknown[]).includes(value);
+}
+
+export function isMirrorStyle(value: unknown): value is MirrorStyle {
+  return (MIRROR_STYLES as readonly unknown[]).includes(value);
 }
 
 export const PATHS = {
   schedule: "/schedule",
   events: "/events",
   eventsSearch: "/events/search",
-  schedulePlan: "/schedule/plan",
-  scheduleConfirm: "/schedule/confirm",
   actionsUndo: "/actions/undo",
   backlog: "/backlog",
   calendars: "/calendars",

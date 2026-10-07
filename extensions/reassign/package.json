@@ -16,7 +16,7 @@
     {
       "name": "agenda",
       "title": "Agenda",
-      "description": "See your plan for the day or the week, and check off each block.",
+      "description": "See your plan for the day or the week, and check off past blocks.",
       "mode": "view"
     },
     {

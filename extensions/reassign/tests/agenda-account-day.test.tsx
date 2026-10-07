@@ -230,3 +230,28 @@ it("the week view keeps the last good list over a network error", () => {
   expect(refusalView).not.toHaveBeenCalled();
   expect(tree.some((node) => node.type === "AgendaItem")).toBe(true);
 });
+
+it("the day view gives the account day, not the device day, to the actions", () => {
+  // The device is on 2026-09-30; the account `now` is on 2026-09-29.
+  mock.data = schedule("2026-09-29T20:00", [{ date: "2026-09-30", events: [block("2026-09-30")] }]);
+  const tree = render();
+  const actions = tree.find((node) => node.type === "AgendaActions") as ReactElement<{ todayIso?: string }>;
+  expect(actions.props.todayIso).toBe("2026-09-29");
+});
+
+it("the week view gives its account day to the actions", () => {
+  mock.storage["agenda.scope"] = "week";
+  mock.data = {
+    ok: true,
+    todayIso: "2026-09-29",
+    days: [
+      {
+        date: "2026-09-30",
+        model: { date: "2026-09-30", events: [block("2026-09-30")], areas: [], activityTypes: [] },
+      },
+    ],
+  };
+  const tree = render();
+  const actions = tree.find((node) => node.type === "AgendaActions") as ReactElement<{ todayIso?: string }>;
+  expect(actions.props.todayIso).toBe("2026-09-29");
+});

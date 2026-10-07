@@ -85,6 +85,8 @@ vi.mock("../src/components/calendar-fields", () => ({
   useCalendars: () => ({ writable: mock.writable }),
   calendarEditFields: () => mock.calendarFields,
   CalendarFields: "CalendarFields",
+  MIRROR_STYLE_MIXED: "__mixed",
+  mirrorStyleChoice: () => "",
 }));
 import NowCommand from "../src/now";
 import { EditForm } from "../src/components/edit-form";
@@ -408,6 +410,19 @@ it("keeps the mirrors that the picker cannot show", async () => {
   });
   await tree.props.actions.props.children.props.onSubmit({ name: "work", end: new Date(2026, 8, 21, 23, 30) });
   expect(submit).toHaveBeenCalledWith({ op: "update", id: "id", mirrorCalendarIds: ["home", "gone"] });
+});
+it("passes a style change through, and drops it with an unlink", async () => {
+  mock.writable = [{ id: "work" }, { id: "home" }];
+  mock.calendarFields = { mirrorStyles: { home: "busy" } };
+  const submit = vi.fn(async () => true);
+  const homed = { ...event, calendarId: "work", mirrorCalendarIds: ["home"] };
+  const tree = EditForm({ event: homed, areas: [], activityTypes: [], onSubmit: submit });
+  await tree.props.actions.props.children.props.onSubmit({ name: "work", end: new Date(2026, 8, 21, 23, 30) });
+  expect(submit).toHaveBeenCalledWith({ op: "update", id: "id", mirrorStyles: { home: "busy" } });
+  mock.calendarFields = { calendarId: null, mirrorStyles: { home: "busy" } };
+  const unlink = EditForm({ event: homed, areas: [], activityTypes: [], onSubmit: submit });
+  await unlink.props.actions.props.children.props.onSubmit({ name: "work", end: new Date(2026, 8, 21, 23, 30) });
+  expect(submit).toHaveBeenLastCalledWith({ op: "update", id: "id", calendarId: null });
 });
 it("offers the later-blocks choice for any occurrence id", () => {
   const tree = MoveForm({ event: { ...event, id: "series@2026-09-20" }, onMove: vi.fn() });

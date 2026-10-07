@@ -41,11 +41,14 @@ Use a test account and remove or undo any blocks created during testing.
 - Schedule `deep work tomorrow 9am-11am`: the duration must be two hours both
   in the form and in Reassign. Repeat with `work tomorrow 11pm-1am`.
 - Schedule a flexible block, such as `writing tomorrow for 90m`. Verify
-  proposal selection, calendar assignment, and Undo.
+  the open-slot list, calendar assignment, and Undo. Book a slot that another
+  block took a moment before: the list must show the nearest open slots.
+  A temporary sync conflict must keep the same slot available to retry and show
+  the server's reason. After a successful booking, repeated Enter presses while
+  the list closes must create only one block.
 - Save `buy milk and call mom tomorrow` to Inbox. Confirm two items, their
   names in the toast, and one Undo for both. Select two lines of text, open
   Add Block with no argument, and save to Inbox: both lines must reach the AI.
-  Needs the server `capture_text` op (reassign#1309) in prod.
 - Save a bare idea, schedule it from Inbox, then undo/remove it. Verify that an
   Inbox with over 50 items shows later items too.
 - Edit and move a block. Force a failed request (for example, disconnect the
@@ -53,7 +56,10 @@ Use a test account and remove or undo any blocks created during testing.
 - In Edit Details and Move, choose a date without a time and submit. Confirm the
   form stays open and asks for a time without changing the block. Then choose
   explicit midnight and confirm the edit or move succeeds. Repeat for a whole series.
-- Verify check-off, shift, delete/Undo, search, calendar mirrors, and meeting links.
+- Verify check-off on a block from yesterday (today and Now show none), shift,
+  delete/Undo, search, calendar mirrors, and meeting links.
+- Set "Copies show" to Busy on a new block with a mirror. Check the copy in the
+  mirror calendar. Rename a Reassign-only block with copies: the copies must stay.
 - Verify Now with block names hidden and shown; verify opt-in notifications.
 - Test feedback validation locally; submit real feedback only when intended.
 
@@ -65,12 +71,13 @@ schemas and response serializers, and the deployed public
 
 The extension's OAuth client, web redirect, resource audience and event scopes
 remain supported. Schedule, event writes, search, calendars, Inbox mutations,
-plan/confirm and Undo use the existing public API. No backend edits are required
+and Undo use the existing public API. Find a Time reads `freeSlots` with
+`minDuration` and books with an event `create`: reassign#1329 removed
+`/schedule/confirm`. No backend edits are required
 for the reviewed workflows. Compatibility fixes in this extension handle:
 
 - `nextBacklogOffset` pagination (50 Inbox items per schedule response).
 - Required feedback `kind` (`bug`, `idea`, or `other`).
-- Plan/confirm outcomes inside `results[].result`, with numeric `committed` counts.
 - Active trials as well as Pro subscriptions in the documented requirements.
 
 The SDK is `@raycast/api` 2.4.1; the installed app is Raycast 2.4.1.
@@ -94,12 +101,12 @@ and the browser callback remain part of the pending live checks.
   a multi-block or recurring request: unsupported suggestions must not be filled.
 - Change the description while AI is loading: the old response must not replace
   the current description's draft. AI errors must leave manual entry available.
-- Save from the compact form and from a flexible scheduling proposal. Both should
+- Save from the compact form and from a Find a Time slot. Both should
   return to Raycast root after success, while a failure should keep the draft.
 
 - Type only a date in the native Start picker: this must remain an Inbox idea, not create an
   event at midnight. A scheduled event requires a concrete date and time.
-  Duration-only scheduling must show concrete time proposals before confirmation.
+  Duration-only scheduling must list open slots before it books one.
 
 - Type “tomorrow at 10am” in Start and a later date/time in End. Duration should
   disappear, and the preview/save must use the picked range. Clear either boundary:

@@ -20,7 +20,7 @@ you already use: glance at your dial day, capture blocks, and check them off.
 
 - **Agenda** — today’s plan by default, with a week view (`⌘⇧W` toggles).
   Your explicit day/week choice is remembered.
-  Day view groups blocks into Now / Up next / Later / Done, with check-off,
+  Day view groups blocks into Now / Up next / Later / Done, with check-off for past days,
   edit (including the calendar home and mirrors), move, shift, and delete.
   Filter by area or activity, or hide non-blocking and reference blocks. `⌘F` searches blocks by name, from the last 7 days to the next 30. A **Join**
   action opens a block's meeting link.
@@ -31,7 +31,7 @@ you already use: glance at your dial day, capture blocks, and check them off.
   missing (`90m`, `1h30`, or `1 hour 30 minutes`); with both filled, it is calculated.
   A date without a time is an Inbox
   idea with a planned date; a duration without a time offers **Find a Time** and
-  concrete slots to choose from. Successful saves return to Raycast.
+  lists open slots to choose from. Successful saves return to Raycast.
   **Save to Inbox** sends the text to Reassign AI, which splits it into one or
   more Inbox items. With no argument, the command uses every line of the
   selected text. A field you set in the form applies to every item. If the AI
@@ -41,11 +41,12 @@ you already use: glance at your dial day, capture blocks, and check them off.
   block needs no AI call.
   With a connected calendar, pick the calendar the block publishes to (or keep
   it in Reassign only) and the calendars that get a one-way mirror copy.
+  **Copies show** sets each copy to full details, private, or busy.
 - **Inbox** — your saved ideas with no time yet; schedule or remove them.
 - **Search Blocks** — search directly from Raycast, with an optional query argument.
   This is also available inside Agenda with `⌘F`.
-- **Now** — the current block in the menu bar, with the time remaining, check-off
-  and Join actions. When you turn it on in preferences, a heads-up notification
+- **Now** — the current block in the menu bar, with the time remaining and a Join
+  action. When you turn it on in preferences, a heads-up notification
   also comes before each block starts.
 
 ## Getting started

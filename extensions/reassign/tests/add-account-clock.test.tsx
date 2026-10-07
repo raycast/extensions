@@ -9,7 +9,7 @@ const mock = vi.hoisted(() => ({
   data: undefined as unknown,
   loading: true,
   create: vi.fn(),
-  plan: vi.fn(),
+  free: vi.fn(),
 }));
 vi.mock("react", () => ({
   useState: (initial: unknown) => {
@@ -60,8 +60,7 @@ vi.mock("../src/lib/api", () => ({
   getSchedule: vi.fn(),
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
   backlogCaptureText: vi.fn(),
-  planSchedule: mock.plan,
-  confirmSchedule: vi.fn(),
+  getFreeSlots: mock.free,
 }));
 vi.mock("../src/components/ai-fill-form", () => ({ AiFillForm: "AiFillForm" }));
 vi.mock("../src/components/states", () => ({ refusalView: vi.fn() }));
@@ -120,7 +119,7 @@ beforeEach(() => {
   mock.data = undefined;
   mock.loading = true;
   mock.create.mockReset().mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
-  mock.plan.mockReset().mockResolvedValue({ ok: true, data: { results: [] } });
+  mock.free.mockReset().mockResolvedValue({ ok: true, data: { days: [] } });
   vi.useFakeTimers({ toFake: ["Date"] });
   // The device is already on the 23rd; the account is still on the evening of the 22nd.
   vi.setSystemTime(new Date(2026, 8, 23, 0, 30));
@@ -138,9 +137,7 @@ it("parses a relative day on the account date, not the device date", async () =>
 it("finds a slot in today's window on the account clock", async () => {
   const tree = renderWithAccountClock("read 1h", "2026-09-22T18:30");
   await tree.find((n) => n.props.title === "Find a Time")!.props.onSubmit({ ...submitValues(tree), duration: "1h" });
-  expect(mock.plan).toHaveBeenCalledWith([
-    expect.objectContaining({ earliest: "2026-09-22T08:00", latest: "2026-09-22T22:00" }),
-  ]);
+  expect(mock.free).toHaveBeenCalledWith("2026-09-22", "2026-09-22", 60);
 });
 
 it("keeps a start that the user chose before the account clock arrived", async () => {

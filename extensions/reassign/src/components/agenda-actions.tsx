@@ -17,7 +17,15 @@ import { useRef, useState } from "react";
 import { ApiError, ApiResult, writeEvents, WriteOp } from "../lib/api";
 import { batchFailure, BatchReceipt, rowError } from "../lib/envelope";
 import { applyUndoToast, failToast } from "../lib/feedback";
-import { ActivityType, Area, eventMeeting, ScheduleEvent, ScheduleResponse } from "../lib/schedule-model";
+import { datePart } from "../lib/format";
+import {
+  ActivityType,
+  Area,
+  eventMeeting,
+  ScheduleEvent,
+  ScheduleResponse,
+  splitOccurrenceId,
+} from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { EditForm } from "./edit-form";
 import { FeedbackForm } from "./feedback-form";
@@ -156,12 +164,22 @@ export function AgendaNavActions(props: { showingDetail: boolean; onToggleDetail
 }
 
 /**
+ * The day that the server checks for a reflect: the original date of an
+ * occurrence id, else the date part of the start.
+ */
+export function reflectDay(event: Pick<ScheduleEvent, "id" | "start">): string {
+  return splitOccurrenceId(event.id)?.date ?? datePart(event.start);
+}
+
+/**
  * The per-event action panel shared by `today` and `upcoming`. `nav` is the
  * command-specific navigation section (day step, detail toggle, refresh).
+ * `todayIso` is the account day; the server refuses a reflect on it or later.
  */
 export function AgendaActions(props: {
   event: ScheduleEvent;
   date: string;
+  todayIso: string;
   areas: Area[];
   activityTypes: ActivityType[];
   mutate: (loading: string, success: string, ops: WriteOp[]) => Promise<boolean>;
@@ -169,8 +187,9 @@ export function AgendaActions(props: {
   runUndo: () => Promise<void>;
   nav: ReactNode;
 }) {
-  const { event, date, areas, activityTypes, mutate, lastUndoToken, runUndo, nav } = props;
+  const { event, date, todayIso, areas, activityTypes, mutate, lastUndoToken, runUndo, nav } = props;
   const editable = !event.readOnly;
+  const reflectable = editable && reflectDay(event) < todayIso;
   const meeting = eventMeeting(event);
   return (
     <ActionPanel>
@@ -184,7 +203,7 @@ export function AgendaActions(props: {
           />
         )}
         <Action.OpenInBrowser title="Open Block in Reassign" url={webDayUrl(date, event.id)} />
-        {editable && (
+        {reflectable && (
           <>
             <Action
               title="Check off Kept"

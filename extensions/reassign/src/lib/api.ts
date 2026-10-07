@@ -3,7 +3,7 @@ import { getAccessToken, NotAuthorizedError, SignedOutError } from "./oauth";
 import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
 import { batchFailure, BatchReceipt, BatchResultRow, toClientCode } from "./envelope";
 import { addDaysISO, addMinutesLocal, clockPart, datePart, localMinutesBetween } from "./format";
-import { API_BASE, ErrorCode, PATHS, type EventKind, type ReflectStatus } from "./wire";
+import { API_BASE, ErrorCode, PATHS, type EventKind, type MirrorStyle, type ReflectStatus } from "./wire";
 
 export type { BatchReceipt, BatchResultRow } from "./envelope";
 
@@ -18,6 +18,16 @@ export interface ApiError {
   code: ClientCode;
   message: string;
   status?: number;
+  // Only on a `conflict` row: the free spans near the taken time, in the length of the block.
+  nearestSlots?: TimeSlot[];
+}
+
+/** A bookable span. `start` / `end` are local datetimes. */
+export interface TimeSlot {
+  start: string;
+  end: string;
+  score?: number;
+  reason?: string;
 }
 
 export type ApiResult<T> = { ok: true; data: T } | ApiError;
@@ -42,6 +52,8 @@ interface EventFields {
   // Home calendar (`null` = Reassign only; omitted = the default) and one-way copies (Pro).
   calendarId?: string | null;
   mirrorCalendarIds?: string[];
+  // The style of each copy, by calendar id. An omitted key keeps the calendar default.
+  mirrorStyles?: Record<string, MirrorStyle>;
 }
 
 export type CreateOp = { op: "create"; start: string; end: string; name: string } & EventFields;
@@ -239,17 +251,33 @@ async function normalizeError(response: Response): Promise<ApiError> {
       ? "Reassign blocked the request (403). Try again later."
       : `Request failed (${status}).`;
   const message = error?.message ?? fallback;
-  return { ok: false, code: toClientCode(error?.code, status), message, status };
+  const nearestSlots = nearestSlotsOf(error);
+  return {
+    ok: false,
+    code: toClientCode(error?.code, status),
+    message,
+    status,
+    ...(nearestSlots ? { nearestSlots } : {}),
+  };
 }
 
-/** A read, or a write that the server deduplicates by its `requestId` / `submissionId`. */
+/**
+ * The `nearestSlots` of a row error, or undefined. The envelope type does not
+ * name the field, so check each item before use.
+ */
+export function nearestSlotsOf(error: unknown): TimeSlot[] | undefined {
+  const slots = (error as { nearestSlots?: unknown } | undefined)?.nearestSlots;
+  if (!Array.isArray(slots)) return undefined;
+  return slots.filter(
+    (slot): slot is TimeSlot =>
+      typeof slot?.start === "string" && typeof slot.end === "string" && slot.start < slot.end,
+  );
+}
+
+/** A read, or a write that the server deduplicates by its `submissionId`. */
 function safeToRetry(method: "GET" | "POST", body: unknown): boolean {
   if (method === "GET") return true;
-  const b = body as { submissionId?: unknown; requests?: { requestId?: unknown }[] } | undefined;
-  if (typeof b?.submissionId === "string") return true;
-  return (
-    Array.isArray(b?.requests) && b.requests.length > 0 && b.requests.every((r) => typeof r.requestId === "string")
-  );
+  return typeof (body as { submissionId?: unknown } | undefined)?.submissionId === "string";
 }
 
 /** The JSON body, or undefined. A non-JSON body (an HTML error page) is never a message. */
@@ -278,6 +306,7 @@ interface ScheduleParams {
   includeBacklog?: boolean;
   backlogOffset?: number;
   includeSeries?: boolean;
+  minDuration?: number;
 }
 
 /** Build the /schedule query string. `from` and `to` are required; backlog needs the flag. */
@@ -286,6 +315,7 @@ function scheduleQuery(params: ScheduleParams): string {
   if (params.includeBacklog) q.set("includeBacklog", "true");
   if (params.backlogOffset !== undefined) q.set("backlogOffset", String(params.backlogOffset));
   if (params.includeSeries) q.set("includeSeries", "true");
+  if (params.minDuration !== undefined) q.set("minDuration", String(params.minDuration));
   return `?${q.toString()}`;
 }
 
@@ -297,6 +327,11 @@ export function getSchedule(date: string): Promise<ApiResult<ScheduleResponse>> 
 /** Read a contiguous [from, to] date range in one call. Response groups days[]. */
 export function getScheduleRange(from: string, to: string): Promise<ApiResult<ScheduleResponse>> {
   return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to }));
+}
+
+/** Read a [from, to] range with only the free slots of at least `minDuration` minutes, if set. */
+export function getFreeSlots(from: string, to: string, minDuration?: number): Promise<ApiResult<ScheduleResponse>> {
+  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to, minDuration }));
 }
 
 /** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
@@ -373,36 +408,6 @@ export function listCalendars(): Promise<ApiResult<CalendarsResponse>> {
 /** The one event write endpoint: create, update, shift, reflect, and delete ops. */
 export function writeEvents(ops: WriteOp[]): Promise<ApiResult<BatchReceipt>> {
   return request<BatchReceipt>("POST", PATHS.events, { ops });
-}
-
-/**
- * One /schedule/plan request. The bounds are local datetimes; `start` excludes the window.
- * The calendar fields have the same meaning as on a `create` op. The proposal keeps them for `/schedule/confirm`.
- */
-export interface PlanRequest extends Pick<EventFields, "calendarId" | "mirrorCalendarIds"> {
-  name: string;
-  durationMinutes: number;
-  start?: string;
-  earliest?: string;
-  latest?: string;
-  areaId?: string;
-  activityTypeId?: string;
-  kind?: EventKind;
-  notes?: string;
-  autoCommitBest?: boolean;
-  requestId?: string;
-}
-
-export function planSchedule(requests: PlanRequest[]): Promise<ApiResult<Record<string, unknown>>> {
-  // Only `autoCommitBest: false` is a sure preview. An unset flag can book, so it keeps the warning.
-  const writes = requests.some((r) => r.autoCommitBest !== false);
-  return request<Record<string, unknown>>("POST", PATHS.schedulePlan, { requests }, { writes });
-}
-
-export function confirmSchedule(
-  items: { token: string; choice?: number }[],
-): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>("POST", PATHS.scheduleConfirm, { items });
 }
 
 export function undo(tokens: string[]): Promise<ApiResult<BatchReceipt>> {

@@ -4,7 +4,7 @@
 // account timezone. The end is after the start. Durations are computed here.
 
 import { clockPart, datePart, localMinutesBetween } from "./format";
-import { REFLECT_STATUSES, type EventKind, type ReflectStatus } from "./wire";
+import { REFLECT_STATUSES, type EventKind, type MirrorStyle, type ReflectStatus } from "./wire";
 
 export interface Area {
   id: string;
@@ -39,6 +39,8 @@ export interface ScheduleEvent {
   // The home calendar and the one-way copies (ids from GET /calendars). Null = Reassign only.
   calendarId?: string | null;
   mirrorCalendarIds?: string[];
+  // The copy style per mirror id. A mirror without a key uses its calendar's default.
+  mirrorStyles?: Record<string, MirrorStyle>;
   meeting?: { url?: string; label?: string };
   location?: { text?: string; url?: string };
   areaId?: string | null;
@@ -46,6 +48,13 @@ export interface ScheduleEvent {
   reflect?: ReflectState;
   [key: string]: unknown;
 }
+
+/** The user-facing name of each mirror copy style, in menu order. */
+export const MIRROR_STYLE_LABELS: Record<MirrorStyle, string> = {
+  full: "Full details",
+  private: "Private",
+  busy: "Busy",
+};
 
 export interface FreeSlot {
   start: string;

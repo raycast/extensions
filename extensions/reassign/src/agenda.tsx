@@ -272,6 +272,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
                     <AgendaActions
                       event={event}
                       date={date}
+                      todayIso={todayIso}
                       areas={model.areas}
                       activityTypes={model.activityTypes}
                       mutate={applyMutation}
@@ -474,6 +475,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
                   <AgendaActions
                     event={event}
                     date={day.date}
+                    todayIso={todayIso}
                     areas={day.model.areas}
                     activityTypes={day.model.activityTypes}
                     mutate={mutate}

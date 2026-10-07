@@ -1,7 +1,6 @@
 import { BlockTiming, resolveBlockTiming, shiftWallMinutes, wallMinutes } from "./lib/block-timing";
 import { AiFillForm } from "./components/ai-fill-form";
 import type { BlockDraft } from "./lib/ai-draft";
-import { Proposal, readOutcome } from "./lib/schedule-outcome";
 import {
   Action,
   ActionPanel,
@@ -16,31 +15,34 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { randomUUID } from "node:crypto";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
-  type ApiError,
+  type ApiResult,
   backlogCaptureText,
-  confirmSchedule,
+  type BatchReceipt,
+  type CreateOp,
+  getFreeSlots,
   getSchedule,
-  planSchedule,
-  PlanRequest,
+  nearestSlotsOf,
+  type TimeSlot,
   writeEvents,
 } from "./lib/api";
 import { captureText, captureTextOp, captureToast } from "./lib/capture-text";
-import { needsSignIn } from "./lib/envelope";
-import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
+import { batchFailure, needsSignIn } from "./lib/envelope";
+import { failToast, runMutation } from "./lib/feedback";
 import {
   addDaysISO,
   textLimitError,
   addMinutesLocal,
   clockHM,
+  clockPart,
   combineDateTime,
   datePart,
   formatRange,
   humanDuration,
   isIsoDate,
   isLocalDateTime,
+  localMinutesBetween,
   localToDate,
   parseDuration,
   todayISO,
@@ -269,9 +271,10 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     setHasNamedDate((current) => Boolean(draft.start) || current);
     setDetails({ areaId: draft.areaId, activityTypeId: draft.activityTypeId, kind: draft.kind, notes: draft.notes });
     if (draft.calendarId) {
-      // Keep the mirrors the user chose; only the new home cannot be a mirror.
+      // Keep the mirrors and the copy style that the user chose. Only the new home cannot be a mirror.
       const home = draft.calendarId;
       setCalendarValues((current) => ({
+        ...current,
         calendarId: home,
         mirrorIds: (current.mirrorIds ?? []).filter((id) => id !== home),
       }));
@@ -306,14 +309,14 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     if (timing.kind === "exact") {
       const result = await runMutation("Scheduling…", `Scheduled “${finalName}”`, () =>
         writeEvents([
-          {
-            op: "create",
-            start: toLocalDateTime(timing.start),
-            end: toLocalDateTime(timing.end),
-            name: finalName,
-            ...extras,
-            ...calendar,
-          },
+          createOp(
+            finalName,
+            { start: toLocalDateTime(timing.start), end: toLocalDateTime(timing.end) },
+            {
+              ...extras,
+              ...calendar,
+            },
+          ),
         ]),
       );
       if (result.ok) await onSaved();
@@ -498,7 +501,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
           placeholder="90m, 1h30, or 2 hours"
           value={duration}
           onChange={changeDuration}
-          info="With one time, calculates the other (30 minutes by default). Without times, finds a slot to confirm."
+          info="With one time, calculates the other (30 minutes by default). Without times, lists open slots to pick."
         />
       )}
       <Form.Checkbox
@@ -554,6 +557,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
             allowDefault
             calendarDefault={calendarValues.calendarId ?? CALENDAR_DEFAULT}
             mirrorDefault={calendarValues.mirrorIds ?? []}
+            styleDefault={calendarValues.mirrorStyle}
             onChange={setCalendarValues}
           />
           <Form.TextArea
@@ -584,6 +588,13 @@ interface FlexibleArgs {
   onSaved: () => Promise<void>;
 }
 
+type CreateFields = FlexibleArgs["fields"];
+
+/** The one create op of Add Block, for an exact time and for a picked slot. */
+function createOp(name: string, span: { start: string; end: string }, fields: CreateFields): CreateOp {
+  return { op: "create", start: span.start, end: span.end, name, ...fields };
+}
+
 /**
  * The search window as local datetimes. A parsed window ("morning") keeps its
  * clocks on the day; a latest at or before the earliest is on the next day.
@@ -599,10 +610,11 @@ export function planWindow(
   const from = earliest ?? "08:00";
   const to = latest ?? "22:00";
   const span = { earliest: `${date}T${from}`, latest: `${to > from ? date : addDaysISO(date, 1)}T${to}` };
-  // The server refuses a window that ends before now + its 5-minute lead. For
-  // today, look at the same window tomorrow, not refuse the request.
+  // Today offers no start before now + 5 minutes. When today's window has
+  // passed, look at the same window tomorrow.
   const soonest = toLocalDateTime(new Date(now.getTime() + 5 * 60_000));
-  if (date !== todayISO(now) || span.latest > soonest) return { ...span, nextDay: false };
+  if (date !== todayISO(now) || span.earliest >= soonest) return { ...span, nextDay: false };
+  if (span.latest > soonest) return { ...span, earliest: soonest, nextDay: false };
   return {
     earliest: addMinutesLocal(span.earliest, 1440),
     latest: addMinutesLocal(span.latest, 1440),
@@ -620,109 +632,114 @@ export function clockOffsetOf(accountNow: string, deviceMs: number): number {
   return Math.round((localToDate(accountNow).getTime() - deviceMs) / quarter) * quarter || 0; // not -0
 }
 
-/** Find concrete time proposals for the user to review before committing. */
+// The picker shows at most this many slots.
+const MAX_SLOTS = 5;
+
+/** Read the free slots in the plan window and show the ones that fit the block. */
 async function runFlexible(args: FlexibleArgs): Promise<void> {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Finding a slot…" });
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Finding open slots…" });
   const searchWindow = planWindow(args.date, args.earliest, args.latest, args.now);
-  const request: PlanRequest = {
-    name: args.name,
-    durationMinutes: args.minutes,
-    earliest: searchWindow.earliest,
-    latest: searchWindow.latest,
-    ...args.fields,
-    autoCommitBest: false,
-    // The key of this plan: the 503 retry sends it again, and the server
-    // replays the first result. The server replays only by this key.
-    requestId: randomUUID(),
-  };
-  const result = await planSchedule([request]);
+  const from = datePart(searchWindow.earliest);
+  const to = datePart(searchWindow.latest);
+  // The server filters by length on each day, so it drops a gap that midnight
+  // splits. Filter on the client for a window that crosses midnight.
+  const result = await getFreeSlots(from, to, from === to ? args.minutes : undefined);
   if (!result.ok) {
     failToast(toast, result);
     return;
   }
-
-  const outcome = readOutcome(result.data);
-  if (outcome.kind === "committed") return finishCommitted(toast, outcome, args);
-  if (outcome.kind === "proposals") {
-    if (searchWindow.nextDay) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Showing tomorrow";
-      toast.message = "Today's time window has passed.";
-    } else await toast.hide();
-    args.push(
-      <ProposalsList
-        name={args.name}
-        onSaved={args.onSaved}
-        request={request}
-        initial={{ options: outcome.options, commitToken: outcome.commitToken }}
-      />,
-    );
-    return;
-  }
-  showNoSlot(toast, outcome.error);
+  const free = (result.data.days ?? []).flatMap((day) => day.freeSlots ?? []);
+  const slots = slotStarts(free, searchWindow, args.minutes);
+  if (searchWindow.nextDay) {
+    toast.style = Toast.Style.Success;
+    toast.title = "Showing tomorrow";
+    toast.message = "Today's time window has passed.";
+  } else await toast.hide();
+  args.push(<SlotsList name={args.name} fields={args.fields} initial={slots} onSaved={args.onSaved} />);
 }
 
-interface ProposalState {
-  options: Proposal[];
-  commitToken: string;
-}
-
-function ProposalsList(props: {
-  name: string;
-  request: PlanRequest;
-  initial: ProposalState;
-  onSaved: () => Promise<void>;
-}) {
-  const [state, setState] = useState<ProposalState>(props.initial);
-  // One confirm at a time. A double-tap must never send two commits of one token.
-  const confirming = useRef(false);
-
-  // Re-run the plan and re-present fresh proposals on the same toast. With
-  // autoCommitBest off the server never books; it returns the options.
-  async function replan(toast: Toast): Promise<void> {
-    const result = await planSchedule([{ ...props.request, requestId: randomUUID(), autoCommitBest: false }]);
-    // Keep the choices available so the user can retry a failed refresh.
-    if (!result.ok) return failToast(toast, result);
-    const outcome = readOutcome(result.data);
-    if (outcome.kind === "committed") return finishCommitted(toast, outcome, props);
-    if (outcome.kind === "proposals") {
-      setState({ options: outcome.options, commitToken: outcome.commitToken });
-      toast.style = Toast.Style.Success;
-      toast.title = "Refreshed the open slots";
-      toast.message = "The earlier ones expired.";
-      return;
+/**
+ * The candidate slots for a block of `minutes` in the free spans. Clip each span
+ * to the window and keep a gap that still fits the block. Each gap gives its start
+ * first, then the :00 and :30 marks in it. The result is in time order.
+ */
+export function slotStarts(
+  free: { start: string; end: string }[],
+  bounds: { earliest: string; latest: string },
+  minutes: number,
+): TimeSlot[] {
+  const gaps = mergeSpans(
+    free.map((span) => ({
+      start: span.start > bounds.earliest ? span.start : bounds.earliest,
+      end: span.end < bounds.latest ? span.end : bounds.latest,
+    })),
+  ).filter((gap) => (localMinutesBetween(gap.start, gap.end) ?? 0) >= minutes);
+  const firsts = gaps.map((gap) => gap.start);
+  const marks = gaps.flatMap((gap) => {
+    const out: string[] = [];
+    const offset = Number(clockPart(gap.start).slice(3)) % 30;
+    for (let mark = addMinutesLocal(gap.start, 30 - offset); addMinutesLocal(mark, minutes) <= gap.end;) {
+      out.push(mark);
+      mark = addMinutesLocal(mark, 30);
     }
-    // The old options are dead, so a tap on one must not send the same plan again.
-    setState((current) => ({ ...current, options: [] }));
-    showNoSlot(toast, outcome.error);
-  }
+    return out;
+  });
+  // Gap starts take the first places, so the list shows each gap before more
+  // marks inside one gap. Then sort the kept starts by time.
+  return [...firsts, ...marks]
+    .slice(0, MAX_SLOTS)
+    .sort()
+    .map((start) => ({ start, end: addMinutesLocal(start, minutes) }));
+}
 
-  async function confirm(index: number): Promise<void> {
-    if (confirming.current) return;
-    confirming.current = true;
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Confirming…" });
+/** Sort the spans and join the ones that touch or overlap, such as a gap split at midnight. */
+function mergeSpans(spans: { start: string; end: string }[]): { start: string; end: string }[] {
+  const out: { start: string; end: string }[] = [];
+  for (const span of [...spans].filter((s) => s.start < s.end).sort((a, b) => a.start.localeCompare(b.start))) {
+    const last = out[out.length - 1];
+    if (last && span.start <= last.end) last.end = span.end > last.end ? span.end : last.end;
+    else out.push({ ...span });
+  }
+  return out;
+}
+
+/** The `conflict` refusal of a slot booking with its `nearestSlots`, or undefined for any other result. */
+function conflictOf(result: ApiResult<BatchReceipt> | undefined): { nearest?: TimeSlot[] } | undefined {
+  if (!result) return undefined;
+  if (!result.ok) return result.code === "conflict" ? { nearest: result.nearestSlots } : undefined;
+  const row = batchFailure(result.data);
+  return row?.error?.code === "conflict" ? { nearest: nearestSlotsOf(row.error) } : undefined;
+}
+
+function SlotsList(props: { name: string; fields: CreateFields; initial: TimeSlot[]; onSaved: () => Promise<void> }) {
+  const [slots, setSlots] = useState<TimeSlot[]>(props.initial);
+  // One booking at a time. A double tap must never create the block twice.
+  const booking = useRef(false);
+  const saved = useRef(false);
+
+  async function book(slot: TimeSlot): Promise<void> {
+    if (booking.current || saved.current) return;
+    booking.current = true;
     try {
-      // The server checks the expiry, so a device clock that is wrong cannot block a confirm.
-      const result = await confirmSchedule([{ token: state.commitToken, choice: index }]);
-      const outcome = result.ok ? readOutcome(result.data) : undefined;
-      // The server refuses an expired token with `not_found`. Re-plan and
-      // re-present the slots, never a raw "expired" error.
-      const failure = !result.ok ? result : outcome?.kind === "failed" ? outcome.error : undefined;
-      if (failure?.code === "not_found") {
-        toast.title = "Refreshing slots…";
-        await replan(toast);
+      let reply: ApiResult<BatchReceipt> | undefined;
+      const result = await runMutation("Scheduling…", `Scheduled “${props.name}”`, async () => {
+        reply = await writeEvents([createOp(props.name, slot, props.fields)]);
+        return reply;
+      });
+      if (result.ok) {
+        saved.current = true;
+        await props.onSaved();
         return;
       }
-      if (outcome?.kind === "committed") return finishCommitted(toast, outcome, props);
-      if (!result.ok) failToast(toast, result);
-      else if (outcome?.kind === "failed" && outcome.error) failToast(toast, outcome.error);
-      else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "The slot was not scheduled";
-        toast.message = "Refresh the available slots and try again.";
-      }
+      // Another block took the time: show the near free slots that the server sent.
+      // A conflict without slots can be a sync in flight. Keep the choices and
+      // the server's error message so the same booking can be retried.
+      const conflict = conflictOf(reply);
+      if (!conflict?.nearest) return;
+      setSlots(conflict.nearest.filter((s, i, all) => all.findIndex((o) => o.start === s.start) === i));
+      await showToast({ style: Toast.Style.Failure, title: "That time was taken. Pick another slot." });
     } finally {
-      confirming.current = false;
+      booking.current = false;
     }
   }
 
@@ -731,45 +748,23 @@ function ProposalsList(props: {
       <List.EmptyView
         icon={Icon.Calendar}
         title="No open slots"
-        description="Go back and try another day or a shorter block."
+        description="Nothing free fits this block. Go back and try another day or a shorter block."
       />
-      {state.options.map((option, index) => (
+      {slots.map((slot) => (
         <List.Item
-          key={index}
-          title={option.start && option.end ? formatRange(option) : `Option ${index + 1}`}
-          subtitle={option.reason}
-          accessories={option.start ? [{ text: datePart(option.start) }] : []}
+          key={slot.start}
+          title={formatRange(slot)}
+          subtitle={slot.reason}
+          accessories={[{ text: datePart(slot.start) }]}
           actions={
             <ActionPanel>
-              <Action title="Use This Slot" icon={Icon.Check} onAction={() => confirm(index)} />
+              <Action title="Use This Slot" icon={Icon.Check} onAction={() => book(slot)} />
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
-}
-
-type Committed = Extract<ReturnType<typeof readOutcome>, { kind: "committed" }>;
-
-/** A booked plan: the success toast with Undo, then close the form. */
-async function finishCommitted(
-  toast: Toast,
-  outcome: Committed,
-  block: { name: string; onSaved: () => Promise<void> },
-): Promise<void> {
-  toast.style = Toast.Style.Success;
-  toast.title = `Scheduled “${block.name}”`;
-  if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
-  await block.onSaved();
-}
-
-/** A plan without a slot. A rejected row shows the server's reason instead. */
-function showNoSlot(toast: Toast, error?: ApiError): void {
-  if (error) return failToast(toast, error);
-  toast.style = Toast.Style.Failure;
-  toast.title = "No slot found";
-  toast.message = "Try a different day or a shorter block.";
 }
 
 /** The start, end and planned day that a parsed capture seeds into the form. */

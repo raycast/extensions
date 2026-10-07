@@ -10,7 +10,7 @@ vi.mock("../src/lib/oauth", () => {
 import {
   getSchedule,
   getScheduleWithBacklog,
-  planSchedule,
+  getFreeSlots,
   previewBlock,
   rebaseOnSeries,
   sendFeedback,
@@ -208,21 +208,37 @@ it("maps a refresh that a sign-out cancelled to signed_out", async () => {
   expect(await getSchedule("2026-09-21")).toMatchObject({ ok: false, code: "signed_out" });
   expect(fetchMock).toHaveBeenCalledTimes(1);
 });
-it("retries a 503 plan once when every request has a requestId, with the same id", async () => {
-  fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(Response.json({ results: [] }));
-  const plan = { name: "Focus", durationMinutes: 60, requestId: "a" };
-  expect(await withFakeBackoff(() => planSchedule([plan]))).toMatchObject({ ok: true });
-  const ids = fetchMock.mock.calls.map((c) => JSON.parse(c[1].body).requests[0].requestId);
-  expect(ids).toEqual(["a", "a"]);
+it("sends minDuration with the free-slot read", async () => {
+  fetchMock.mockResolvedValueOnce(Response.json({ days: [] }));
+  expect(await getFreeSlots("2026-09-21", "2026-09-22", 90)).toMatchObject({ ok: true });
+  expect(Object.fromEntries(new URL(fetchMock.mock.calls[0][0]).searchParams)).toEqual({
+    from: "2026-09-21",
+    to: "2026-09-22",
+    minDuration: "90",
+  });
 });
-it("does not retry a 503 plan when one request has no requestId", async () => {
-  fetchMock.mockImplementation(async () => busy());
-  const plans = [
-    { name: "Focus", durationMinutes: 60, requestId: "a" },
-    { name: "Gym", durationMinutes: 45 },
-  ];
-  expect(await planSchedule(plans)).toMatchObject({ ok: false, code: "internal" });
-  expect(fetchMock).toHaveBeenCalledTimes(1);
+it("keeps the nearest slots of a rejected conflict row and drops a malformed one", async () => {
+  const nearestSlots = [{ start: "2026-09-21T11:00", end: "2026-09-21T12:00", reason: "Next free hour" }];
+  const error = { code: "conflict", message: "That time is taken.", nearestSlots: [...nearestSlots, { start: 9 }] };
+  fetchMock.mockResolvedValueOnce(
+    Response.json({ error, results: [{ index: 0, status: "error", error }] }, { status: 409 }),
+  );
+  const op = { op: "create" as const, start: "2026-09-21T10:00", end: "2026-09-21T11:00", name: "x" };
+  expect(await writeEvents([op])).toEqual({
+    ok: false,
+    code: "conflict",
+    message: "That time is taken.",
+    status: 409,
+    nearestSlots,
+  });
+});
+it("reads the nearest slots from a top-level conflict error with no results", async () => {
+  const nearestSlots = [{ start: "2026-09-21T11:00", end: "2026-09-21T12:00" }];
+  fetchMock.mockResolvedValueOnce(
+    Response.json({ error: { code: "conflict", message: "Taken.", nearestSlots } }, { status: 409 }),
+  );
+  const op = { op: "create" as const, start: "2026-09-21T10:00", end: "2026-09-21T11:00", name: "x" };
+  expect(await writeEvents([op])).toMatchObject({ ok: false, code: "conflict", nearestSlots });
 });
 it("retries a 503 once for a body with a submissionId, with the same id", async () => {
   fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(new Response(null, { status: 204 }));
@@ -363,25 +379,11 @@ const failures: [string, () => void, string][] = [
     "The socket connection was closed.",
   ],
 ];
-const preview = { name: "Focus", durationMinutes: 60, requestId: "a", autoCommitBest: false };
-
 // A preview changes nothing on the server, so "can have been saved" is false there.
 it.each(failures)("does not warn about a save on %s for a preview", async (_label, fail, base) => {
   fail();
   const message = base.endsWith("in time.") ? `${base} Try again.` : base;
-  expect(await planSchedule([preview])).toEqual({ ok: false, code: "network", message });
   expect(await previewBlock("deep work tomorrow 9am")).toEqual({ ok: false, code: "network", message });
-  // No new retry: one fetch for each call.
-  expect(fetchMock).toHaveBeenCalledTimes(2);
-});
-
-// An unset or true autoCommitBest can book a slot, so the plan keeps the warning.
-it.each(failures)("warns about a save on %s for a plan that can book", async (_label, fail, base) => {
-  fail();
-  const message = `${base} The change can have been saved. Check it before you try again.`;
-  for (const autoCommitBest of [undefined, true]) {
-    const plans = [preview, { ...preview, requestId: "b", autoCommitBest }];
-    expect(await planSchedule(plans)).toEqual({ ok: false, code: "network", message });
-  }
-  expect(fetchMock).toHaveBeenCalledTimes(2);
+  // No new retry: one fetch for the call.
+  expect(fetchMock).toHaveBeenCalledTimes(1);
 });
