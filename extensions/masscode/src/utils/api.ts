@@ -7,7 +7,8 @@ const PORT = parseInt(preferences.port, 10) || 4321;
 
 // massCode listens on IPv4 loopback only, localhost may resolve to ::1
 export const API_URL = `http://127.0.0.1:${PORT}`;
-export const API_HEADERS = { Authorization: `Bearer ${preferences.token.trim()}` };
+const TOKEN = preferences.token?.trim();
+export const API_HEADERS: Record<string, string> = TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {};
 
 export class ApiError extends Error {
   constructor(
@@ -48,6 +49,14 @@ export function getFragmentValue(item: ListItem, snippet?: Snippet): string | nu
   return snippet.contents.find((content) => content.id === item.contentId)?.value ?? null;
 }
 
+export function getErrorMessage(error: Error) {
+  if (error instanceof ApiError) {
+    return error.status === 401 ? MESSAGES.UNAUTHORIZED : error.message;
+  }
+
+  return MESSAGES.ERROR;
+}
+
 export async function showApiError(error: Error) {
   if (error instanceof ApiError && error.status === 401) {
     await showToast({
@@ -62,5 +71,5 @@ export async function showApiError(error: Error) {
     return;
   }
 
-  await showToast(Toast.Style.Failure, error instanceof ApiError ? error.message : MESSAGES.ERROR);
+  await showToast(Toast.Style.Failure, getErrorMessage(error));
 }

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { Snippet, SnippetListEntry } from "./types";
 import { EXAMPLE_SNIPPETS } from "./constants/exampleData";
 import { transformSnippets } from "./utils/transformSnippets";
-import { API_HEADERS, API_URL, getFragmentValue, parseResponse, showApiError } from "./utils/api";
+import { API_HEADERS, API_URL, getErrorMessage, getFragmentValue, parseResponse, showApiError } from "./utils/api";
 import { useAppInstallation } from "./hooks/useAppInstallation";
 import { SnippetListItem } from "./components/SnippetListItem";
 
@@ -13,6 +13,7 @@ const ENABLE_MOCK_DATA = getPreferenceValues<Preferences>().enableMockData;
 export default function Command() {
   const isInstalled = useAppInstallation(ENABLE_MOCK_DATA);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<{ snippetId: number; message: string } | null>(null);
 
   const { data, isLoading } = useFetch<SnippetListEntry[]>(`${API_URL}/snippets?isDeleted=0`, {
     headers: API_HEADERS,
@@ -33,7 +34,11 @@ export default function Command() {
     headers: API_HEADERS,
     parseResponse,
     execute: !ENABLE_MOCK_DATA && selected !== undefined,
-    onError: showApiError,
+    onData: () => setDetailError(null),
+    onError: (error) => {
+      if (selected) setDetailError({ snippetId: selected.snippetId, message: getErrorMessage(error) });
+      return showApiError(error);
+    },
   });
 
   return (
@@ -48,6 +53,7 @@ export default function Command() {
           key={item.id}
           item={item}
           value={item === selected ? getFragmentValue(item, selectedSnippet) : item.value}
+          error={item === selected && detailError?.snippetId === item.snippetId ? detailError.message : undefined}
         />
       ))}
     </List>

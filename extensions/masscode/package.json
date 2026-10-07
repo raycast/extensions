@@ -35,7 +35,7 @@
       "description": "Generate it in massCode Preferences > API with Enable API integrations turned on",
       "type": "password",
       "placeholder": "mc_...",
-      "required": true
+      "required": false
     },
     {
       "name": "enableMockData",
