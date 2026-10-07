@@ -62,8 +62,8 @@ export function scanMessageChecks(
       suspendFtsSync(opened.db);
       saved = readScanMessages(file);
       assert(
-        saved.unfinished === true && saved.messages.length === 2,
-        "diagnostics remain readable while FTS is suspended, and previous folder warnings retain their dates",
+        saved.unfinished === true && saved.messages.length === 0,
+        "a new diagnostic snapshot remains readable while FTS is suspended without resurrecting old coverage warnings",
       );
       writeScanError(opened.db, "Synthetic scan failure");
       writeScanEnded(opened.db, 2000, 3000);
@@ -72,14 +72,14 @@ export function scanMessageChecks(
         saved.unfinished === false &&
           saved.messages[0].message === "Synthetic scan failure" &&
           saved.messages[0].recordedAt === 3000,
-        "a finished failed scan retains its build error alongside folder warnings",
+        "a finished failed scan retains its build error",
       );
       writeScanStarted(opened.db, 4000);
       assert(
         !readScanMessages(file).messages.some(
           (item) => item.id === "build-error",
         ),
-        "a new scan clears the previous overall error without clearing folder warnings",
+        "a new scan clears the previous overall error",
       );
       opened.db
         .prepare(
@@ -87,8 +87,8 @@ export function scanMessageChecks(
         )
         .run("/example/cloud");
       assert(
-        readScanMessages(file).messages.length === 1,
-        "a successful folder retry replaces its old warning",
+        readScanMessages(file).messages.length === 0,
+        "an empty diagnostic snapshot does not fall back to older coverage warnings",
       );
       const item = {
         id: "format",
@@ -107,6 +107,13 @@ export function scanMessageChecks(
         "diagnostic paths and output are rendered literally, not as Markdown links or markup",
       );
       opened.db.exec("DROP TABLE index_scan_outcomes");
+      assert(
+        readScanMessages(file).status === "failed",
+        "a missing marked diagnostic table is reported as an error instead of falling back to stale coverage",
+      );
+      opened.db.exec(
+        "DELETE FROM index_meta WHERE key = 'scan_outcomes_version'",
+      );
       assert(
         readScanMessages(file).messages.length === 1,
         "older indexes without the diagnostics table still expose saved coverage notes",
@@ -230,6 +237,96 @@ export async function scanOutcomeChecks(
         retry.report.complete &&
         readScanMessages(file).messages.length === 0,
       "a successful retry replaces warnings, and removed scopes leave no obsolete diagnostic",
+    );
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+export async function scanAliasMessageChecks(
+  assert: (ok: boolean, label: string) => void,
+) {
+  const directory = fs.realpathSync(
+    fs.mkdtempSync(path.join(os.tmpdir(), "scan-alias-messages-")),
+  );
+  const file = path.join(directory, "index.sqlite");
+  const target = path.join(directory, "provider");
+  const alias = path.join(directory, "shortcut");
+  const other = path.join(directory, "other-offline");
+  const snapshot = () => {
+    const opened = openIndexForRead(file);
+    if (opened.kind !== "opened") throw new Error("Synthetic index unreadable");
+    try {
+      return JSON.stringify({
+        roots: readIndexRoots(opened.db),
+        files: opened.db.prepare("SELECT * FROM files ORDER BY path").all(),
+      });
+    } finally {
+      opened.db.close();
+    }
+  };
+  const build = (roots = [alias]) =>
+    rebuildIndex({
+      file,
+      roots,
+      withLock: async (work) => work(() => {}),
+      lookupFd: () => ({
+        kind: "found",
+        path: "/synthetic/fd",
+        source: "path",
+      }),
+      spawnFd: async function* () {
+        yield Buffer.from(`${path.join(target, "report.txt")}\0`);
+      },
+    });
+  try {
+    fs.mkdirSync(target);
+    fs.writeFileSync(path.join(target, "report.txt"), "synthetic");
+    fs.symlinkSync(target, alias);
+    await build();
+    const seed = openIndexForWrite(file);
+    if (seed.kind !== "opened") throw new Error("Synthetic index unreadable");
+    seed.db
+      .prepare(
+        "UPDATE index_roots SET complete = 0, note = 'Older partial coverage warning' WHERE root = ?",
+      )
+      .run(target);
+    seed.db.close();
+    const before = snapshot();
+    fs.renameSync(target, `${target}-offline`);
+    const result = await build([alias, other]);
+    const messages = readScanMessages(file).messages;
+    assert(
+      result.kind === "done" &&
+        !result.report.complete &&
+        messages.length === 2 &&
+        messages.some(
+          (item) => item.root === alias && item.message.includes("unavailable"),
+        ) &&
+        messages.some((item) => item.root === other),
+      "an offline symlink shows its current diagnostic without a duplicate canonical warning and preserves other current warnings",
+    );
+    assert(
+      !messages.some((item) => item.root === target) && snapshot() === before,
+      "suppressing stale canonical diagnostics leaves retained coverage and file rows unchanged",
+    );
+    const legacy = openIndexForWrite(file);
+    if (legacy.kind !== "opened") throw new Error("Synthetic index unreadable");
+    legacy.db.exec(
+      "DELETE FROM index_meta WHERE key = 'scan_outcomes_version'",
+    );
+    legacy.db.close();
+    assert(
+      readScanMessages(file).messages.length === 2,
+      "non-empty diagnostics from the preceding extension version also suppress canonical coverage duplicates",
+    );
+    fs.renameSync(`${target}-offline`, target);
+    const retry = await build();
+    assert(
+      retry.kind === "done" &&
+        retry.report.complete &&
+        readScanMessages(file).messages.length === 0,
+      "a successful symlink retry clears its offline diagnostic without stale fallback",
     );
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });

@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Keep current scan diagnostics separate from older coverage warnings, including when an offline symlink no longer resolves to its saved canonical path.
+
 - Save offline, deadline-skipped, and cancelled folder warnings separately from retained index coverage so they remain visible after the rebuild notification closes.
 
 - Keep scan warnings and errors in Search Index Settings with folder names, timestamps, full-message viewing, and copying.

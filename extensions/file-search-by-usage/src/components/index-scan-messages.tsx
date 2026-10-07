@@ -84,7 +84,9 @@ export function IndexScanMessages({ file }: { file: string }) {
           title={
             saved.status === "missing"
               ? "No saved scan messages yet"
-              : "No saved scan warnings"
+              : saved.unfinished
+                ? "No warnings recorded so far"
+                : "No saved scan warnings"
           }
           subtitle="Folder warnings are recorded when each folder finishes scanning"
         />

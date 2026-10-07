@@ -1,4 +1,4 @@
-import { openIndexForRead, readIndexRoots } from "./index-db";
+import { IndexRoot, openIndexForRead, readIndexRoots } from "./index-db";
 
 export type ScanMessage = {
   id: string;
@@ -28,7 +28,7 @@ export function readScanMessages(file: string): ScanMessages {
       (
         opened.db
           .prepare(
-            "SELECT key, value FROM index_meta WHERE key IN ('last_started_at', 'last_ended_at', 'last_scan_error')",
+            "SELECT key, value FROM index_meta WHERE key IN ('last_started_at', 'last_ended_at', 'last_scan_error', 'scan_outcomes_version')",
           )
           .all() as { key: string; value: string }[]
       ).map(({ key, value }) => [key, value]),
@@ -42,18 +42,20 @@ export function readScanMessages(file: string): ScanMessages {
         recordedAt: ended > 0 ? ended : started > 0 ? started : undefined,
         message: meta.last_scan_error,
       });
-    const roots = new Map(
-      readIndexRoots(opened.db).map((root) => [root.root, root]),
-    );
-    // Older indexes have coverage notes only. The new table is added on the
-    // next writable open without a schema-version bump or index reset.
+    // New scan diagnostics are a complete snapshot of outcomes recorded so far,
+    // not patches to coverage notes. Offline aliases can use different root
+    // spellings than old canonical coverage, so merging by path is unsafe.
     const hasOutcomes = opened.db
       .prepare(
         "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'index_scan_outcomes'",
       )
       .get();
+    let outcomes: Pick<
+      IndexRoot,
+      "root" | "scannedAt" | "complete" | "note"
+    >[] = [];
     if (hasOutcomes) {
-      const outcomes = opened.db
+      outcomes = opened.db
         .prepare(
           "SELECT root, recorded_at AS scannedAt, complete, note FROM index_scan_outcomes ORDER BY root",
         )
@@ -63,10 +65,22 @@ export function readScanMessages(file: string): ScanMessages {
         complete: number;
         note: string | null;
       }[];
-      for (const outcome of outcomes)
-        roots.set(outcome.root, { ...outcome, files: 0 });
     }
-    for (const root of roots.values()) {
+    if (
+      meta.scan_outcomes_version &&
+      (meta.scan_outcomes_version !== "1" || !hasOutcomes)
+    ) {
+      throw new Error(
+        "Saved scan diagnostics could not be read. Rebuild the search index.",
+      );
+    }
+    // Non-empty outcomes also cover indexes written before the snapshot marker
+    // was introduced. A newly created but unused table still permits fallback.
+    const roots =
+      meta.scan_outcomes_version === "1" || outcomes.length > 0
+        ? outcomes
+        : readIndexRoots(opened.db);
+    for (const root of roots) {
       if (root.complete && !root.note) continue;
       messages.push({
         id: `root:${root.root}`,

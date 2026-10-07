@@ -461,6 +461,11 @@ export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
   db.exec("BEGIN IMMEDIATE");
   try {
     db.exec("DELETE FROM index_scan_outcomes");
+    // Marks even an empty new diagnostic snapshot as authoritative. Coverage
+    // notes may use older canonical identities and must not be merged into it.
+    db.prepare(
+      "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('scan_outcomes_version', '1')",
+    ).run();
     db.prepare(
       "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_started_at', ?)",
     ).run(String(startedAt));
