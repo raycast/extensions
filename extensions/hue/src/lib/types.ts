@@ -23,8 +23,6 @@ export type BridgeConfig = {
   username: string;
 };
 
-export type ParsedUpdateEvent = { key: number; value: UpdateEvent };
-
 export type CssColor = {
   name: string;
   value: string;

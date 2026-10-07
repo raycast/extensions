@@ -5,6 +5,7 @@
 - Show the selected scene on its room immediately
 - Show the bridge's error message when changing a light, room or scene fails
 - Show connection errors in a HUD when toggling all lights fails
+- Fix live updates from the bridge stopping or skipping changes
 
 ## [Improvements] - 2026-06-01
 

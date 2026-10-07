@@ -108,7 +108,6 @@
     "bonjour-service": "^1.4.0",
     "chroma-js": "^3.2.0",
     "jimp": "^1.6.1",
-    "stream-json": "^3.0.0",
     "xstate": "^5.32.0"
   },
   "devDependencies": {

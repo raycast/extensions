@@ -7,17 +7,15 @@ import {
   Light,
   LightRequest,
   Method,
-  ParsedUpdateEvent,
   Room,
   Scene,
   SceneRequest,
+  UpdateEvent,
   Zone,
 } from "./types";
 import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
 import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
-import StreamArray from "stream-json/streamers/stream-array.js";
-import { Duplex } from "node:stream";
 import { logError } from "../helpers/errors";
 import { mergeObjectsById, replaceItems } from "../helpers/collections";
 
@@ -187,9 +185,9 @@ export default class HueClient {
       [sensitiveHeaders]: ["hue-application-key"],
     });
 
-    let parser: Duplex | null = null;
+    let buffer = "";
 
-    const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
+    const onUpdateEvent = (updateEvent: UpdateEvent) => {
       this.setLights?.((lights) => {
         const lightUpdates = updateEvent.data.filter((resource) => {
           return resource.type === "light";
@@ -225,52 +223,28 @@ export default class HueClient {
         }) as (Partial<Scene> & HasId)[];
         return replaceItems(scenes, updatedScenes);
       });
-
-      // If the parser encounters a new JSON array, it will throw an error
-      // because two successive arrays is not valid JSON.
-      // To prevent this, a new parser is created for each new array.
-      parser = null;
     };
 
     stream.setEncoding("utf8");
 
     stream.on("data", (chunk) => {
-      parser ??= createParser(parser, onParsedUpdateEvent);
-
-      const lines = chunk.split("\n");
-
+      const lines = (buffer + chunk).split("\n");
+      buffer = lines.pop() ?? "";
       for (const line of lines) {
-        const dataPrefixIndex = line.indexOf(DATA_PREFIX);
-        if (dataPrefixIndex === -1) continue;
-        const dataString: string = line.substring(dataPrefixIndex + DATA_PREFIX.length);
-        parser.write(dataString);
+        if (!line.startsWith(DATA_PREFIX)) continue;
+        try {
+          (JSON.parse(line.slice(DATA_PREFIX.length)) as UpdateEvent[]).forEach(onUpdateEvent);
+        } catch (error) {
+          logError(error);
+        }
       }
     });
 
-    stream.on("end", () => {
-      parser?.end();
-      stream.close();
-    });
+    stream.on("end", () => stream.close());
 
     stream.on("error", (error) => {
-      parser?.end();
       stream.close();
       logError(error);
     });
   }
-}
-
-function createParser(parser: Duplex | null, callback: (data: ParsedUpdateEvent) => void): Duplex {
-  parser = StreamArray.withParserAsStream();
-
-  parser.on("data", (data) => {
-    callback(data);
-    parser = null;
-  });
-
-  parser.on("error", (error) => {
-    console.error(error);
-  });
-
-  return parser;
 }
