@@ -43,9 +43,10 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const [isLoading, setIsLoading] = useState(true);
   const [icons, setIcons] = useState<IconData[]>([]);
   const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
-  const version = useVersion({ launchContext });
+  const version = useVersion();
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchIcons = async (version: string) => {
       setIsLoading(true);
       setIcons([]);
@@ -55,16 +56,20 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         title: "Loading Icons",
       });
 
-      await cacheAssetPack(version).catch(async (error) => {
+      if (controller.signal.aborted) return;
+      await cacheAssetPack(version, controller.signal).catch(async (error) => {
+        if (controller.signal.aborted) return;
         await showFailureToast(error, { title: "Failed to cache asset pack" });
         await setTimeout(1200);
       });
+      if (controller.signal.aborted) return;
       const json = await loadCachedJson(version).catch(() => {
         return [];
       });
+      if (controller.signal.aborted) return;
       const icons = json.map((icon) => ({
         ...icon,
-        slug: getIconSlug(icon),
+        slug: getIconSlug(icon, version),
       }));
 
       setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
@@ -84,9 +89,12 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     };
     if (version) {
       fetchIcons(version).catch((error) => {
-        showFailureToast(error, { title: "Failed to fetch icons" });
+        if (!controller.signal.aborted) showFailureToast(error, { title: "Failed to fetch icons" });
       });
     }
+    return () => {
+      controller.abort();
+    };
   }, [version]);
 
   const DefaultAction = actions[defaultDetailAction];
