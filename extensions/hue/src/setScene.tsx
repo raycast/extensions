@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
 import type { Group, Id, Light, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -7,8 +7,7 @@ import useGradients from "./hooks/useGradientUris";
 import React, { useMemo, useState } from "react";
 import { getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
-import { getTransitionTimeInMs, optimisticGroupUpdate } from "./helpers/raycast";
-import Style = Toast.Style;
+import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
 const GRID_ITEM_WIDTH = 271;
@@ -143,56 +142,31 @@ function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }
   return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
-async function handleSetScene(
-  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
-  group: Group,
-  scene: Scene,
-) {
-  const toast = new Toast({ title: "" });
+function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Scene) {
+  const changesToLights = new Map(
+    scene.actions.map(({ target, action }) => [
+      target.rid,
+      // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
+      (action.color ? { ...action, color_temperature: { mirek: null, mirek_valid: false } } : action) as Partial<Light>,
+    ]),
+  );
+  const changesToGroupedLights = new Map(
+    group.services
+      .filter((resource) => resource.rtype === "grouped_light")
+      .map((resource) => [resource.rid, { on: { on: scene.actions.some(({ action }) => action.on?.on) } }]),
+  );
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Hue client not initialized.");
-
-    const changesToLights = new Map(
-      scene.actions.map(({ target, action }) => [
-        target.rid,
-        // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
-        (action.color
-          ? { ...action, color_temperature: { mirek: null, mirek_valid: false } }
-          : action) as Partial<Light>,
-      ]),
-    );
-    const changesToGroupedLights = new Map(
-      group.services
-        .filter((resource) => resource.rtype === "grouped_light")
-        .map((resource) => [resource.rid, { on: { on: scene.actions.some(({ action }) => action.on?.on) } }]),
-    );
-
-    const undoOptimisticUpdate = optimisticGroupUpdate(
-      changesToLights,
-      changesToGroupedLights,
-      setLights,
-      setGroupedLights,
-    );
-    await hueBridgeState.context.hueClient
-      .updateScene(scene, {
+  return applyUpdate(hue, {
+    lights: changesToLights,
+    groupedLights: changesToGroupedLights,
+    request: (hueClient) =>
+      hueClient.updateScene(scene, {
         recall: {
           action: "active",
           duration: getTransitionTimeInMs(),
         },
-      })
-      .catch((e: Error) => {
-        undoOptimisticUpdate();
-        throw e;
-      });
-
-    toast.style = Style.Success;
-    toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
-    await toast.show();
-  } catch (error) {
-    toast.style = Style.Failure;
-    toast.title = `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}.`;
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+      }),
+    success: `Scene ${scene.metadata.name} set for ${group.metadata.name}`,
+    failure: `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}`,
+  });
 }

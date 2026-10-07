@@ -1,5 +1,4 @@
-import { Action, ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
-import { logError } from "./helpers/errors";
+import { Action, ActionPanel, environment, Grid, Icon, Image } from "@raycast/api";
 import type { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -16,9 +15,8 @@ import {
 } from "./helpers/colors";
 import { getLightsFromGroup } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
-import { getIconForColor, getTransitionTimeInMs, optimisticUpdate } from "./helpers/raycast";
+import { applyUpdate, getIconForColor, getTransitionTimeInMs } from "./helpers/raycast";
 import useLightIconPngUriSets from "./hooks/useLightIconUris";
-import Style = Toast.Style;
 
 export default function ControlLights() {
   const useHueObject = useHue();
@@ -281,192 +279,116 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
   );
 }
 
-async function handleToggle(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+function handleToggle(
+  hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
 ) {
-  const toast = new Toast({ title: "" });
+  const changes = {
+    on: { on: !light.on.on },
+    dynamics: { duration: getTransitionTimeInMs() },
+    ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
+  };
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (!rateLimiter.canExecute()) return;
-
-    const changes = {
-      on: { on: !light.on.on },
-      dynamics: { duration: getTransitionTimeInMs() },
-      ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
-      undoOptimisticUpdate();
-      throw error;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`;
-    await toast.show();
-  } catch (error) {
-    logError(error);
-    toast.style = Style.Failure;
-    toast.title = `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`;
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+  return applyUpdate(hue, {
+    rateLimiter,
+    lights: new Map([[light.id, changes]]),
+    request: (hueClient) => hueClient.updateLight(light, changes),
+    success: `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`,
+    failure: `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
+  });
 }
 
-async function handleSetBrightness(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+function handleSetBrightness(
+  hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   brightness: number,
 ) {
-  const toast = new Toast({ title: "" });
+  const changes = {
+    on: { on: true },
+    dimming: { brightness: brightness },
+    dynamics: { duration: getTransitionTimeInMs() },
+  };
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
-    if (!rateLimiter.canExecute()) return;
-
-    const changes = {
-      on: { on: true },
-      dimming: { brightness: brightness },
-      dynamics: { duration: getTransitionTimeInMs() },
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
-      undoOptimisticUpdate();
-      throw error;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`;
-    await toast.show();
-  } catch (error) {
-    logError(error);
-    toast.style = Style.Failure;
-    toast.title = `Failed setting brightness of ${light.metadata.name}`;
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+  return applyUpdate(hue, {
+    rateLimiter,
+    lights: new Map([[light.id, changes]]),
+    request: (hueClient) => hueClient.updateLight(light, changes),
+    success: `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
+    failure: `Failed setting brightness of ${light.metadata.name}`,
+  });
 }
 
-async function handleBrightnessChange(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+function handleBrightnessChange(
+  hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   direction: "increase" | "decrease",
 ) {
-  const toast = new Toast({ title: "" });
+  const adjustedBrightness = calculateAdjustedBrightness(light.dimming?.brightness ?? 0, direction);
+  const changes = {
+    on: { on: true },
+    // dimming_delta exists, but manually calculating the new value
+    // enables the usage of the value in the optimistic update.
+    dimming: { brightness: adjustedBrightness },
+    dynamics: { duration: getTransitionTimeInMs() },
+  };
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
-    if (!rateLimiter.canExecute()) return;
-
-    const adjustedBrightness = calculateAdjustedBrightness(light.dimming.brightness, direction);
-    const changes = {
-      on: { on: true },
-      // dimming_delta exists, but manually calculating the new value
-      // enables the usage of the value in the optimistic update.
-      dimming: { brightness: adjustedBrightness },
-      dynamics: { duration: getTransitionTimeInMs() },
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
-      undoOptimisticUpdate();
-      throw error;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`;
-    await toast.show();
-  } catch (error) {
-    toast.style = Style.Failure;
-    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${light.metadata.name}`;
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+  return applyUpdate(hue, {
+    rateLimiter,
+    lights: new Map([[light.id, changes]]),
+    request: (hueClient) => hueClient.updateLight(light, changes),
+    success: `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`,
+    failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${light.metadata.name}`,
+  });
 }
 
-async function handleSetColor(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+function handleSetColor(
+  hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   color: CssColor,
 ) {
-  const toast = new Toast({ title: "" });
+  const { xy, brightness } = hexToXy(color.value);
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.color === undefined) throw new Error("Light does not support colors.");
-    if (!rateLimiter.canExecute()) return;
+  // Darker colors will result in a lower brightness value to better match the color.
+  const changes = {
+    on: { on: true },
+    color: { xy: xy },
+    dimming: { brightness: brightness },
+    dynamics: { duration: getTransitionTimeInMs() },
+  };
 
-    const { xy, brightness } = hexToXy(color.value);
-
-    // Darker colors will result in a lower brightness value to better match the color.
-    const changes = {
-      on: { on: true },
-      color: { xy: xy },
-      dimming: { brightness: brightness },
-      dynamics: { duration: getTransitionTimeInMs() },
-    };
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
-      undoOptimisticUpdate();
-      throw error;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `Set color of ${light.metadata.name} to ${color.name}`;
-    await toast.show();
-  } catch (error) {
-    toast.style = Style.Failure;
-    toast.title = "Failed setting color";
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+  return applyUpdate(hue, {
+    rateLimiter,
+    lights: new Map([[light.id, changes]]),
+    request: (hueClient) => hueClient.updateLight(light, changes),
+    success: `Set color of ${light.metadata.name} to ${color.name}`,
+    failure: "Failed setting color",
+  });
 }
 
-async function handleColorTemperatureChange(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+function handleColorTemperatureChange(
+  hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   direction: "increase" | "decrease",
 ) {
-  const toast = new Toast({ title: "" });
+  const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
+  const changes = {
+    on: { on: true },
+    // color_temperature_delta exists, but manually calculating the new value
+    // enables the usage of the value in the optimistic update.
+    color_temperature: { mirek: adjustedColorTemperature },
+    dynamics: { duration: getTransitionTimeInMs() },
+  } as Partial<Light>;
 
-  try {
-    if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (light.color_temperature === undefined) throw new Error("Light does not support color temperature.");
-    if (!rateLimiter.canExecute()) return;
-
-    const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
-    const changes = {
-      on: { on: true },
-      // color_temperature_delta exists, but manually calculating the new value
-      // enables the usage of the value in the optimistic update.
-      color_temperature: { mirek: adjustedColorTemperature },
-      dynamics: { duration: getTransitionTimeInMs() },
-    } as Partial<Light>;
-
-    const undoOptimisticUpdate = optimisticUpdate(light, changes, setLights);
-    await hueBridgeState.context.hueClient.updateLight(light, changes).catch((error) => {
-      undoOptimisticUpdate();
-      throw error;
-    });
-
-    toast.style = Style.Success;
-    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`;
-    await toast.show();
-  } catch (error) {
-    toast.style = Style.Failure;
-    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${light.metadata.name}`;
-    toast.message = error instanceof Error ? error.message : undefined;
-    await toast.show();
-  }
+  return applyUpdate(hue, {
+    rateLimiter,
+    lights: new Map([[light.id, changes]]),
+    request: (hueClient) => hueClient.updateLight(light, changes),
+    success: `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`,
+    failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${light.metadata.name}`,
+  });
 }

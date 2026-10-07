@@ -1,8 +1,11 @@
-import { CssColor, HasId, Id } from "../lib/types";
+import { CssColor, GroupedLight, HasId, Id, Light } from "../lib/types";
+import type HueClient from "../lib/HueClient";
+import type { useHue } from "../hooks/useHue";
 import React from "react";
-import { getPreferenceValues, Icon, Image } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
 import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
-import { updateItem, updateItems } from "./collections";
+import { updateItems } from "./collections";
+import { logError } from "./errors";
 
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
@@ -22,24 +25,41 @@ export function getTransitionTimeInMs(): number {
   return Math.round(transitionTime);
 }
 
-export function optimisticUpdate<T extends HasId>(
-  stateItem: T,
-  changes: Partial<T>,
-  setState: React.Dispatch<React.SetStateAction<T[]>>,
-): () => void {
-  let undoState: T[];
-
-  setState((prevState: T[]) => {
-    undoState = prevState;
-    return updateItem(prevState, stateItem.id, changes);
-  });
-
-  return (): void => {
-    setState(undoState);
-  };
+export async function applyUpdate(
+  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
+  update: {
+    rateLimiter?: { canExecute(): boolean };
+    lights?: Map<Id, Partial<Light>>;
+    groupedLights?: Map<Id, Partial<GroupedLight>>;
+    request: (hueClient: HueClient) => Promise<unknown>;
+    success: string;
+    failure: string;
+  },
+) {
+  try {
+    const { hueClient } = hueBridgeState.context;
+    if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (update.rateLimiter && !update.rateLimiter.canExecute()) return;
+    const undos = [
+      update.groupedLights && optimisticUpdates(update.groupedLights, setGroupedLights),
+      update.lights && optimisticUpdates(update.lights, setLights),
+    ];
+    await update.request(hueClient).catch((error) => {
+      undos.forEach((undo) => undo?.());
+      throw error;
+    });
+    await showToast({ style: Toast.Style.Success, title: update.success });
+  } catch (error) {
+    logError(error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: update.failure,
+      message: error instanceof Error ? error.message : undefined,
+    });
+  }
 }
 
-export function optimisticUpdates<T extends HasId>(
+function optimisticUpdates<T extends HasId>(
   changes: Map<Id, Partial<T>>,
   setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
@@ -52,20 +72,5 @@ export function optimisticUpdates<T extends HasId>(
 
   return (): void => {
     setState(undoState);
-  };
-}
-
-export function optimisticGroupUpdate<TGroupedLight extends HasId, TLight extends HasId>(
-  changesToLights: Map<Id, Partial<TLight>>,
-  changesToGroupedLights: Map<Id, Partial<TGroupedLight>>,
-  setLights: React.Dispatch<React.SetStateAction<TLight[]>>,
-  setGroupedLights: React.Dispatch<React.SetStateAction<TGroupedLight[]>>,
-): () => void {
-  const undoGroupedLights = optimisticUpdates(changesToGroupedLights, setGroupedLights);
-  const undoLights = optimisticUpdates(changesToLights, setLights);
-
-  return (): void => {
-    undoGroupedLights();
-    undoLights();
   };
 }
