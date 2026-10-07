@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -188,7 +188,6 @@ function AttendanceActions({ data, save, entry }: { data: Store; save: SaveStore
 export default function AttendanceCommand() {
   const { data, isLoading, isSaving, save } = useStore();
   const [selectedId, setSelectedId] = useState<string>();
-  const skipInitialTemplateChange = useRef(true);
   const entries = data ? templateEntries(data, data.selectedTemplateId) : [];
   const template = data?.templates.find((item) => item.id === data.selectedTemplateId);
   return (
@@ -205,10 +204,6 @@ export default function AttendanceCommand() {
             tooltip="Select Template"
             value={data.selectedTemplateId}
             onChange={async (id) => {
-              if (skipInitialTemplateChange.current) {
-                skipInitialTemplateChange.current = false;
-                return;
-              }
               if (id !== data.selectedTemplateId) {
                 if (await save((store) => ({ ...store, selectedTemplateId: id }), "Template Selected")) {
                   rememberSelectedTemplate(id);
