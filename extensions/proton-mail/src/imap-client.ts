@@ -42,15 +42,15 @@ function createClient(): ImapFlow {
   });
 }
 
-export type BridgeErrorReason = "not-running" | "authentication";
+export type BridgeErrorReason = "unreachable" | "authentication";
 
 // Raised when Bridge can't be reached or rejects the credentials, so the list can say what to do
 // instead of showing an empty folder
 export class BridgeError extends Error {
   constructor(readonly reason: BridgeErrorReason) {
     super(
-      reason === "not-running"
-        ? "Proton Mail Bridge isn't running"
+      reason === "unreachable"
+        ? "Can't reach Proton Mail Bridge"
         : "Proton Mail Bridge rejected the username or password",
     );
     this.name = "BridgeError";
@@ -59,8 +59,8 @@ export class BridgeError extends Error {
 
 function toBridgeError(error: unknown): BridgeError | undefined {
   const { code, authenticationFailed } = (error ?? {}) as { code?: string; authenticationFailed?: boolean };
-  // Nothing listens on Bridge's port when it isn't running
-  if (code === "ECONNREFUSED") return new BridgeError("not-running");
+  // Nothing listens on the configured port: Bridge isn't running, or it uses another host or port
+  if (code === "ECONNREFUSED") return new BridgeError("unreachable");
   if (authenticationFailed) return new BridgeError("authentication");
   return undefined;
 }

@@ -1,4 +1,13 @@
-import { Action, ActionPanel, getApplications, Icon, List, open, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  List,
+  open,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { BridgeErrorReason } from "./imap-client";
 
 const BRIDGE_BUNDLE_ID = "com.protonmail.bridge";
@@ -51,11 +60,13 @@ export function BridgeErrorView({ reason, onRetry }: { reason: BridgeErrorReason
     );
   }
 
+  // Nothing answered: Bridge may be stopped, or running on another host or port than the preferences say
+  const { imapHost, imapPort } = getPreferenceValues<Preferences>();
   return (
     <List.EmptyView
       icon={Icon.Plug}
-      title="Proton Mail Bridge Isn't Running"
-      description="Start Proton Mail Bridge, then try again."
+      title="Can't Reach Proton Mail Bridge"
+      description={`Nothing answered at ${imapHost}:${imapPort}. Start Proton Mail Bridge, or check that the IMAP host and port match Bridge's mailbox details.`}
       actions={
         <ActionPanel>
           {bridge}

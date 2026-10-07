@@ -2,7 +2,7 @@
 
 ## [Bridge Connection Errors] - {PR_MERGE_DATE}
 
-- When Proton Mail Bridge isn't running, show it with actions to open Bridge and try again, instead of an empty folder and a connection error
+- When Proton Mail Bridge can't be reached (not running, or a different host or port than the preferences), say so with the configured address and actions to open Bridge, try again or open the preferences, instead of an empty folder and a connection error
 - When Bridge rejects the username or password, explain which password to use, with an action to open the extension preferences
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
