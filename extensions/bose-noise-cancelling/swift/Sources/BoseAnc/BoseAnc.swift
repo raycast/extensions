@@ -46,12 +46,11 @@ func findHeadphones() throws -> (IOBluetoothDevice, BluetoothRFCOMMChannelID) {
     throw BoseError("No connected Bose headphones found")
 }
 
-func levelInStatus(_ bytes: [UInt8]) -> UInt8? {
-    guard bytes.count >= 5 else { return nil }
-    for i in 0...(bytes.count - 5) where bytes[i] == 0x01 && bytes[i + 1] == 0x06 && bytes[i + 2] == 0x03 {
-        return bytes[i + 4]
-    }
-    return nil
+func levelsInStatus(_ bytes: [UInt8]) -> [UInt8] {
+    guard bytes.count >= 5 else { return [] }
+    return (0...(bytes.count - 5))
+        .filter { bytes[$0] == 0x01 && bytes[$0 + 1] == 0x06 && bytes[$0 + 2] == 0x03 }
+        .map { bytes[$0 + 4] }
 }
 
 func withControlChannel<T>(_ body: (Session, IOBluetoothRFCOMMChannel) throws -> T) throws -> T {
@@ -71,7 +70,7 @@ func withControlChannel<T>(_ body: (Session, IOBluetoothRFCOMMChannel) throws ->
 @raycast func getLevel() throws -> String {
     try withControlChannel { session, channel in
         try session.send(channel, [0x01, 0x01, 0x05, 0x00])
-        guard session.waitFor({ levelInStatus($0) != nil }), let level = levelInStatus(session.buffer),
+        guard session.waitFor({ !levelsInStatus($0).isEmpty }), let level = levelsInStatus(session.buffer).last,
               let name = levels.first(where: { $0.value == level })?.key
         else { throw BoseError("Could not read noise cancelling level") }
         return name
@@ -82,6 +81,6 @@ func withControlChannel<T>(_ body: (Session, IOBluetoothRFCOMMChannel) throws ->
     guard let level = levels[name] else { throw BoseError("Unknown level \(name)") }
     try withControlChannel { session, channel in
         try session.send(channel, [0x01, 0x06, 0x02, 0x01, level])
-        if !session.waitFor({ levelInStatus($0) == level }) { throw BoseError("Headphones did not confirm the change") }
+        if !session.waitFor({ levelsInStatus($0).contains(level) }) { throw BoseError("Headphones did not confirm the change") }
     }
 }
