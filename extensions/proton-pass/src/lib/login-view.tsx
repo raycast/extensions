@@ -103,7 +103,7 @@ export function LoginScreen({ login, onCheckAgain }: LoginScreenProps) {
           description="You can close Raycast meanwhile: the login keeps going, and the extension picks it up when you come back."
           actions={
             <ActionPanel>
-              {status.state === "waiting" && (
+              {status.state === "waiting" && status.url && (
                 <Action.OpenInBrowser title="Open Login Page Again" url={status.url} icon={Icon.Globe} />
               )}
               {checkAgain}

@@ -142,14 +142,16 @@ export async function startDetachedLogin(
   });
 
   const startedAt = Date.now();
+  const saveLogin = (url: string) =>
+    writeFile(join(dir, STATE_FILE), JSON.stringify({ pid, url, startedAt } satisfies SavedLogin), { mode: 0o600 });
+  // Saved from the start, so that no other pass-cli command runs meanwhile (see isDetachedLoginRunning).
+  await saveLogin("");
   while (true) {
     const text = await readText(outputPath);
     // Complete lines only: the URL may still be being written.
     const url = extractLoginUrl(text.slice(0, text.lastIndexOf("\n") + 1));
     if (url) {
-      await writeFile(join(dir, STATE_FILE), JSON.stringify({ pid, url, startedAt } satisfies SavedLogin), {
-        mode: 0o600,
-      });
+      await saveLogin(url);
       return url;
     }
     const hasTimedOut = Date.now() - startedAt > urlTimeoutMs;
@@ -198,6 +200,16 @@ export async function checkDetachedLogin(
   }
   const hasSucceeded = exitCode ? exitCode === "0" : await isLoggedIn();
   return hasSucceeded ? { state: "succeeded" } : { state: "failed", error: loginFailure(output, "pass-cli") };
+}
+
+/**
+ * Whether the login started by startDetachedLogin is still running. No other pass-cli command may run meanwhile: one
+ * starting while the login saves the new session can find its data without its key yet, and pass-cli then logs out
+ * "for security", deleting the session being saved.
+ */
+export async function isDetachedLoginRunning(dir: string, timeoutMs = LOGIN_TIMEOUT_MS): Promise<boolean> {
+  const saved = await readSavedLogin(dir);
+  return saved !== undefined && Date.now() - saved.startedAt <= timeoutMs && isProcessRunning(saved.pid);
 }
 
 /** Stops the login started by startDetachedLogin, if it's still running, and removes its files. */

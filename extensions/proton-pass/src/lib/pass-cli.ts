@@ -4,7 +4,13 @@ import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
 import { ensureCli } from "./cli";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
-import { BrowserLoginStatus, cancelDetachedLogin, checkDetachedLogin, startDetachedLogin } from "./core/login";
+import {
+  BrowserLoginStatus,
+  cancelDetachedLogin,
+  checkDetachedLogin,
+  isDetachedLoginRunning,
+  startDetachedLogin,
+} from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
 import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault } from "./types";
 
@@ -57,7 +63,14 @@ export async function getCliPath(): Promise<string> {
   return getConfiguredCliPath() ?? ensureCli();
 }
 
+/** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
+const loginDir = () => join(environment.supportPath, "login");
+
 async function getAdapter(): Promise<PassCliAdapter> {
+  // A pass-cli command running while a login saves its session can make pass-cli delete that session.
+  if (await isDetachedLoginRunning(loginDir())) {
+    throw new PassCliError("Finish logging in in your browser first.", "not_authenticated");
+  }
   const cliPath = await getCliPath();
   return createPassCliAdapter(
     { file: cliPath, args: [] },
@@ -66,9 +79,6 @@ async function getAdapter(): Promise<PassCliAdapter> {
     },
   );
 }
-
-/** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */
-const loginDir = () => join(environment.supportPath, "login");
 
 /**
  * Starts a browser login and opens its page. The login keeps going if Raycast closes meanwhile: checkBrowserLogin()

@@ -8,6 +8,7 @@ import {
   cancelDetachedLogin,
   checkDetachedLogin,
   extractLoginUrl,
+  isDetachedLoginRunning,
   isProcessRunning,
   startDetachedLogin,
 } from "./login";
@@ -148,6 +149,15 @@ test("a login says when something stopped pass-cli, rather than a vague failure"
   const status = await checkDetachedLogin(dir, loggedOut);
   assert.equal(status.state, "failed");
   if (status.state === "failed") assert.match(status.error.message, /stopped \(SIGKILL\)/);
+});
+
+test("a login counts as running from its start until pass-cli exits", async () => {
+  const dir = loginDir();
+  assert.equal(await isDetachedLoginRunning(dir), false);
+  await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+  assert.equal(await isDetachedLoginRunning(dir), true);
+  await cancelDetachedLogin(dir);
+  assert.equal(await isDetachedLoginRunning(dir), false);
 });
 
 test("a running login is waiting for the browser, and canceling it stops pass-cli", async () => {
