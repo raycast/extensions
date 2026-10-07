@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [CLI Not Found Screen] - {PR_MERGE_DATE}
+
+- The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
+
 ## [Smoother List Scrolling] - 2026-10-05
 
 - The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker

@@ -6,6 +6,7 @@ import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
 import { getCachedVaults, setCachedVaults } from "./lib/cache";
 import { platformShortcut } from "./lib/shortcuts";
+import { CliNotFoundView } from "./lib/error-views";
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -82,20 +83,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_installed") {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Proton Pass CLI Not Installed"
-          description="You need to install the Proton Pass CLI to use this extension. Click below to learn how to install it."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open Installation Guide" url={PROTON_PASS_CLI_DOCS} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <CliNotFoundView />;
   }
 
   if (error?.type === "not_authenticated") {
