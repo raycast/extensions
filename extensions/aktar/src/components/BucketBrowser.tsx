@@ -31,6 +31,7 @@ import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
+import { ReplaceForm } from "./ReplaceForm";
 import { UploadForm } from "./UploadForm";
 
 type Entry = { type: "folder"; folder: BucketFolder } | { type: "object"; object: BucketObject };
@@ -274,6 +275,17 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<MoveForm destination={destination} object={object} onMoved={revalidate} />}
                   />
+                  <Action.Push
+                    title="Replace File"
+                    icon={Icon.Repeat}
+                    shortcut={primaryShortcut("r", "shift")}
+                    target={
+                      <ReplaceForm
+                        target={{ kind: "object", destinationId: destination.id, key: object.key, name: object.name }}
+                        onReplaced={revalidate}
+                      />
+                    }
+                  />
                   <Action
                     title="Delete"
                     icon={Icon.Trash}
@@ -302,7 +314,10 @@ function ObjectDetail({
   object: BucketObject;
   preview?: string | null;
 }) {
-  const image = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+  // The date in the URL makes Raycast load a replaced image instead of its cached copy.
+  const version = object.lastModified ? Date.parse(object.lastModified) : NaN;
+  const imageURL = object.url && !Number.isNaN(version) ? `${object.url}?v=${version}` : object.url;
+  const image = imageURL && isImageName(object.name) ? `![](${imageURL})` : "";
   const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail

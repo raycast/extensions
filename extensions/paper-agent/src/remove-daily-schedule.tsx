@@ -22,15 +22,22 @@ async function unloadLaunchAgent(plistPath: string): Promise<void> {
     // Ignore unload failures if the service is not active.
   }
 
-  if (!fs.existsSync(plistPath)) {
-    return;
+  if (fs.existsSync(plistPath)) {
+    try {
+      await execFileAsync("/bin/launchctl", ["bootout", target, plistPath]);
+    } catch {
+      // Verify below before removing the job's configuration.
+    }
   }
 
+  let stillLoaded = false;
   try {
-    await execFileAsync("/bin/launchctl", ["bootout", target, plistPath]);
+    await execFileAsync("/bin/launchctl", ["print", `${target}/${DAILY_SCHEDULE_LABEL}`]);
+    stillLoaded = true;
   } catch {
-    // Ignore unload failures if the agent is not active.
+    // launchctl print fails for an unloaded service.
   }
+  if (stillLoaded) throw new Error("The daily schedule is still loaded. Its configuration was kept; try again.");
 }
 
 export default async function Command() {

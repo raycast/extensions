@@ -111,6 +111,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "boim",
+    title: "BOIM (보임)",
+    description:
+      "Korean business directory for AI agents: find businesses across all industries in Korea (2.7M) by region and industry, public-procurement vendor cards (75,000+) built from Public Procurement Service data, and open public bids from KONEPS, Defense e-Procurement, LH, K-water and Nuri-jangteo. Read-only. Remote Streamable HTTP server at https://boim.io/api/mcp; no sign-in and no API key for the free tier, which shows up to 5 results per tool plus a link to the full public list.",
+    icon: "https://raw.githubusercontent.com/kikiyop1101/boim-mcp/main/assets/logo.png",
+    homepage: "https://github.com/kikiyop1101/boim-mcp",
+    remoteUrl: "https://boim.io/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://boim.io/api/mcp"],
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -452,7 +465,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "hermoso",
     title: "Hermoso",
     description:
-      "Hermoso is an AI ad studio for marketers. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), generate finished on-brand image and video ads, publish and schedule to your own social channels, and build and manage paid campaigns on Meta, Google, TikTok, LinkedIn, Reddit, Pinterest, X and Microsoft. Hosted remote server with OAuth sign-in, no API key to paste.",
+      "Hermoso is marketing on autopilot, run from your AI agent. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), make finished image and video ads and organic posts in your brand, publish and schedule to 10 social channels or let Autopilot posting fill your calendar, automate DMs on Instagram, Facebook, Messenger and X, and build and manage paid campaigns on 12 ad platforms. Hosted remote server with OAuth sign-in, no API key to paste.",
     icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
     homepage: "https://hermoso.ai/mcp/",
     configuration: {
@@ -924,6 +937,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         TAVILY_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "the-bridge",
+    title: "The Bridge",
+    description:
+      "Complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant: sign-in and sign-up pages, Google and Microsoft sign-in, magic links, passkeys, MFA and SSO; customer teams with email invites and roles; plans, prices and usage limits on Stripe; and feature flags per plan, customer or rule. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/thebridgedev/bridge-mcp/main/assets/logo-400.png",
+    homepage: "https://thebridge.dev/docs/ai-assistants/mcp/",
+    remoteUrl: "https://api.thebridge.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.thebridge.dev/mcp"],
     },
   },
   {
@@ -1968,6 +1994,19 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "search-fragments",
+    title: "Search Fragments",
+    description:
+      "Resolves half-remembered books, films, songs and people into a cited answer, a shortlist or an explicit no. Built to decline rather than guess. Also checks specific factual claims against current web sources. Remote Streamable HTTP server at https://searchfragments.com/api/mcp; no sign-in, no API key.",
+    icon: "https://searchfragments.com/icon-512.png",
+    homepage: "https://searchfragments.com",
+    remoteUrl: "https://searchfragments.com/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://searchfragments.com/api/mcp"],
+    },
+  },
+  {
     name: "serato-dj",
     title: "Serato DJ",
     description:
@@ -2050,6 +2089,32 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.linkmcp.io/api/mcp"],
+    },
+  },
+  {
+    name: "miningbridge",
+    title: "MiningBridge Intelligence",
+    description:
+      "Critical-mineral and rare-earth trade intelligence: commodity snapshots, UN Comtrade trade flows, supplier screening, supply-risk scores, evidence search and MiningBridge market reports. Nine read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with your MiningBridge account (dynamic client registration and PKCE), no API key to paste. Free plan with headline figures; paid plans add full reports. Figures are screening magnitudes, not investment advice.",
+    icon: "https://intel.miningbridge.in/icon.png",
+    homepage: "https://intel.miningbridge.in/connect",
+    remoteUrl: "https://intel.miningbridge.in/api/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://intel.miningbridge.in/api/mcp"],
+    },
+  },
+  {
+    name: "aitho",
+    title: "Aitho",
+    description:
+      "Rehearse and deliver presentations with your own slides: create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.",
+    icon: "https://aitho.app/icon-512.png",
+    homepage: "https://aitho.app",
+    remoteUrl: "https://present.aitho.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://present.aitho.app/mcp"],
     },
   },
 ];

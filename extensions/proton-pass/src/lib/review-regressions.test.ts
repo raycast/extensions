@@ -1333,6 +1333,7 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
     },
     "./lib/types": { PassCliError },
     "./lib/search-items-view": {},
+    "./lib/error-views": {},
     "./lib/login-view": {},
     "./lib/cache": {
       getCachedItems: async () => null,
@@ -1387,6 +1388,7 @@ test("an older List Vaults load can't replace newer sharing", async () => {
     },
     "./lib/types": { PassCliError },
     "./lib/search-items-view": {},
+    "./lib/error-views": {},
     "./lib/login-view": {},
     "./lib/cache": {
       getCachedItems: async () => null,

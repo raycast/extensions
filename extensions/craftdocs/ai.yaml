@@ -1,0 +1,128 @@
+instructions: |
+  When referencing Craft content, include its craftdocs:// url so the user can open it.
+  Use search-blocks to find a document's documentId and spaceId before reading or writing to it.
+  When no space is specified, omit spaceId to use the primary space.
+  get-document blocks are unordered; if order matters and craft-api is configured, use GET /blocks?id=<documentId> instead.
+  To add content, prefer append-to-document and add-to-daily-note.
+  To edit, delete or move existing content, or to manage tasks, collections and folders, use craft-api:
+  GET /blocks?id=<documentId> to get block IDs, then PUT /blocks or DELETE /blocks.
+  If craft-api says the API is not configured, tell the user to add the Craft API URL in the extension preferences.
+evals:
+  - input: "@craftdocs find my notes about the product launch"
+    mocks:
+      search-blocks:
+        - content: "Product Launch Plan"
+          type: document
+          blockId: DOC-1
+          documentId: DOC-1
+          document: Product Launch Plan
+          spaceId: SPACE-1
+          space: Personal (Primary)
+          url: craftdocs://open?blockId=DOC-1&spaceId=SPACE-1
+    expected:
+      - callsTool: search-blocks
+      - includes: "Product Launch Plan"
+  - input: "@craftdocs what did I write in today's daily note?"
+    mocks:
+      get-document:
+        title: "2026.10.03"
+        documentId: DAILY-1
+        spaceId: SPACE-1
+        url: craftdocs://open?blockId=DAILY-1&spaceId=SPACE-1
+        note: "Blocks are unordered (local search index has no document order)."
+        blocks:
+          - "Call Sam about the contract"
+          - "Review Q4 roadmap"
+    expected:
+      - callsTool: get-document
+      - includes: "Sam"
+  - input: "@craftdocs add 'buy oat milk' to my daily note"
+    mocks:
+      add-to-daily-note: "Added to the Daily Note."
+    expected:
+      - callsTool:
+          name: add-to-daily-note
+          arguments:
+            content:
+              includes: "oat milk"
+  - input: "@craftdocs add 'ship v2 on Friday' to my Roadmap document"
+    mocks:
+      search-blocks:
+        - content: Roadmap
+          type: document
+          blockId: DOC-2
+          documentId: DOC-2
+          document: Roadmap
+          spaceId: SPACE-1
+          space: Personal (Primary)
+          url: craftdocs://open?blockId=DOC-2&spaceId=SPACE-1
+      append-to-document: "Content added to the document."
+    expected:
+      - callsTool: search-blocks
+      - callsTool:
+          name: append-to-document
+          arguments:
+            documentId: DOC-2
+            content:
+              includes: "ship v2"
+  - input: "@craftdocs create a document called Meeting Notes"
+    mocks:
+      create-document: 'Created "Meeting Notes" in Personal (Primary).'
+    expected:
+      - callsTool:
+          name: create-document
+          arguments:
+            title: Meeting Notes
+  - input: "@craftdocs in my Roadmap document, change 'ship v2 on Friday' to 'ship v2 on Monday'"
+    mocks:
+      search-blocks:
+        - content: "ship v2 on Friday"
+          type: block
+          blockId: BLOCK-9
+          documentId: DOC-2
+          document: Roadmap
+          spaceId: SPACE-1
+          space: Personal (Primary)
+          url: craftdocs://open?blockId=BLOCK-9&spaceId=SPACE-1
+      craft-api: '{"blocks":[{"id":"BLOCK-9","markdown":"ship v2 on Monday"}]}'
+    expected:
+      - callsTool:
+          name: craft-api
+          arguments:
+            method: PUT
+            path: /blocks
+            body:
+              includes: "Monday"
+  - input: "@craftdocs rename my Work space to Client Work"
+    mocks:
+      list-spaces:
+        - spaceId: SPACE-2
+          name: Work
+          customName: Work
+          primary: false
+          enabled: true
+      manage-space: "Space updated."
+    expected:
+      - callsTool: list-spaces
+      - callsTool:
+          name: manage-space
+          arguments:
+            spaceId: SPACE-2
+            name:
+              includes: "Client"
+  - input: "@craftdocs list my spaces"
+    mocks:
+      list-spaces:
+        - spaceId: SPACE-1
+          name: Personal (Primary)
+          customName: Personal
+          primary: true
+          enabled: true
+        - spaceId: SPACE-2
+          name: Work
+          customName: Work
+          primary: false
+          enabled: true
+    expected:
+      - callsTool: list-spaces
+      - includes: "Work"

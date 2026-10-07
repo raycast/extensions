@@ -1,3 +1,5 @@
+import { formatTime } from "../utils/dateTimeFormatter";
+
 export type AddToDailyNoteAction = "append" | "open-daily-note" | "submit";
 
 export const resolveAddToDailyNoteAction = ({
@@ -18,4 +20,12 @@ export const resolveAddToDailyNoteAction = ({
   }
 
   return "open-daily-note";
+};
+
+export const formatDailyNoteContent = (content: string, preferences: Preferences): string => {
+  const prefix = preferences.addTimestamp
+    ? `**${formatTime(new Date(), preferences.timeFormat)}**${preferences.contentPrefix}`
+    : preferences.contentPrefix;
+
+  return `${prefix}${content}${preferences.contentSuffix}`;
 };

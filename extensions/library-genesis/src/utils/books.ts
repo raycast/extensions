@@ -1,33 +1,16 @@
 import fse from "fs-extra";
-import type { RequestInit } from "node-fetch";
-import fetch, { FetchError } from "node-fetch";
-import https from "node:https";
 
-import { Toast, getPreferenceValues, open, showHUD, showInFinder, showToast } from "@raycast/api";
+import { Toast, getPreferenceValues, open, showInFinder, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 import type { BookEntry } from "@/types";
 import type { LibgenPreferences } from "@/types";
 
+import { downloadBookFromMirrors } from "./api/downloads";
 import { parseLowerCaseArray } from "./common";
 import { languages } from "./constants";
+import { pickBookDownloadDirectory } from "./folder-picker";
 import { showActionToast, showFailureToast } from "./toast";
-
-const fetchImageArrayBuffer = async (url: string, signal?: AbortSignal): Promise<ArrayBuffer> => {
-  const requestInit: RequestInit = {
-    method: "GET",
-    signal: signal,
-  };
-  const { allowIgnoreHTTPSErrors } = getPreferenceValues<LibgenPreferences>();
-  if (allowIgnoreHTTPSErrors) {
-    requestInit.agent = new https.Agent({
-      rejectUnauthorized: false,
-    });
-  }
-  const res = await fetch(url, requestInit);
-  const buffer = await res.arrayBuffer();
-  return buffer;
-};
 
 export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLanguages: string) => {
   // parse the languages to a list in lower case
@@ -112,29 +95,30 @@ export function buildFileName(path: string, name: string, extension: string) {
   }
 }
 
-export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) {
-  const { downloadPath } = getPreferenceValues<LibgenPreferences>();
+export async function downloadBookToDefaultDirectory(downloadPage: string, book: BookEntry, directory?: string) {
+  const { downloadPath, allowIgnoreHTTPSErrors } = getPreferenceValues<LibgenPreferences>();
+  const outputDirectory = directory ?? downloadPath;
   const name = fileNameFromBookEntry(book);
   const extension = book.extension.toLowerCase();
-
-  console.log("Download", downloadPath, name, extension);
 
   const toast = await showActionToast({
     title: "Downloading...",
     cancelable: true,
   });
   try {
-    const fileName = buildFileName(downloadPath, name, extension);
-    const filePath = `${downloadPath}/${fileName}`;
-    const arrayBuffer = await fetchImageArrayBuffer(url, toast.signal);
-    console.log(url, arrayBuffer.byteLength / 1024, "KB");
-
-    fse.writeFileSync(filePath, Buffer.from(arrayBuffer));
+    const fileName = buildFileName(`${outputDirectory}/`, name, extension);
+    const filePath = `${outputDirectory}/${fileName}`;
+    await downloadBookFromMirrors(downloadPage, filePath, {
+      extension,
+      md5: book.md5,
+      allowIgnoreHTTPSErrors,
+      signal: toast.signal,
+    });
 
     const options: Toast.Options = {
       style: Toast.Style.Success,
       title: "Success!",
-      message: `Saved to ${downloadPath}`,
+      message: `Saved to ${outputDirectory}`,
       primaryAction: {
         title: "Open Book",
         onAction: (toast) => {
@@ -152,7 +136,7 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
     };
     await showToast(options);
   } catch (err) {
-    if (err instanceof FetchError && err.code === "CERT_HAS_EXPIRED") {
+    if ((err as { cause?: { cause?: { code?: string } } }).cause?.cause?.code === "CERT_HAS_EXPIRED") {
       await showFailureToast(
         "Download Failed",
         new Error(
@@ -165,20 +149,17 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
   }
 }
 
-export async function downloadBookToLocation(url = "", book: BookEntry) {
-  const fileName = fileNameWithExtensionFromBookEntry(book);
-  await showToast(Toast.Style.Animated, "Please pick a folder...");
+export async function downloadBookToLocation(downloadPage: string, book: BookEntry) {
+  const toast = await showToast(Toast.Style.Animated, "Please pick a folder...");
+  let directory: string | undefined;
   try {
-    await runAppleScript(`
-      set outputFolder to choose folder with prompt "Please select an output folder:"
-      set temp_folder to (POSIX path of outputFolder) & "${fileName}"
-      set q_temp_folder to quoted form of temp_folder
-      set cmd to "curl -o " & q_temp_folder & " " & "${url}"
-        do shell script cmd
-    `);
-    await showHUD("Download Complete.");
+    directory = await pickBookDownloadDirectory(runAppleScript);
   } catch (err) {
-    console.error(err);
-    await showHUD("Download Failed. Try with a different download gateway.");
+    await showFailureToast("Could Not Choose Folder", err as Error);
+    return;
+  } finally {
+    await toast.hide();
   }
+  if (!directory) return;
+  await downloadBookToDefaultDirectory(downloadPage, book, directory);
 }

@@ -5,6 +5,7 @@ import {
   TraktMovieBaseItem,
   TraktMovieHistoryListItem,
   TraktMovieListItem,
+  TraktPlaybackMovieItem,
   TraktShowBaseItem,
   TraktShowHistoryListItem,
   TraktShowListItem,
@@ -49,6 +50,17 @@ export type CompactUpNextItem = {
     aired: number;
     completed: number;
   };
+};
+
+export type CompactPausedMovie = {
+  traktId: number;
+  title: string;
+  year?: number;
+  /** How far playback got, 0–100. */
+  progressPercent: number;
+  /** Rounded from the runtime; absent when Trakt has no runtime for the movie. */
+  minutesLeft?: number;
+  pausedAt: string;
 };
 
 export type CompactEpisode = {
@@ -207,6 +219,17 @@ export function toCompactUpNext(item: TraktShowListItem): CompactUpNextItem {
       aired: item.progress.aired,
       completed: item.progress.completed,
     },
+  };
+}
+
+export function toCompactPausedMovie({ movie, progress, paused_at }: TraktPlaybackMovieItem): CompactPausedMovie {
+  return {
+    traktId: movie.ids.trakt,
+    title: movie.title,
+    year: movie.year,
+    progressPercent: Math.round(progress),
+    minutesLeft: movie.runtime ? Math.max(1, Math.round(movie.runtime * (1 - progress / 100))) : undefined,
+    pausedAt: paused_at,
   };
 }
 

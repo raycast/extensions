@@ -1,13 +1,10 @@
 import { LocalStorage } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Paper } from "./paper-utils";
+import { createListStore } from "./list-store";
+import { useListStore } from "./use-list-store";
 
 const READ_STORAGE_KEY = "read-papers";
-
-export type ReadPaperRecord = {
-  key: string;
-  readAt: string;
-};
+export type ReadPaperRecord = { key: string; readAt: string };
 
 export function getPaperStateKey(paper: Pick<Paper, "id" | "date">): string {
   return `${paper.date}::${paper.id}`;
@@ -15,92 +12,34 @@ export function getPaperStateKey(paper: Pick<Paper, "id" | "date">): string {
 
 async function readReadPapers(): Promise<ReadPaperRecord[]> {
   const raw = await LocalStorage.getItem<string>(READ_STORAGE_KEY);
-  if (!raw) {
-    return [];
+  if (!raw) return [];
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed) || !parsed.every((entry) => entry && typeof entry.key === "string")) {
+    throw new Error("Saved reading state is invalid. Existing data has not been overwritten.");
   }
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed
-      .filter((entry): entry is ReadPaperRecord => !!entry && typeof entry === "object")
-      .map((entry) => ({
-        key: typeof entry.key === "string" ? entry.key : "",
-        readAt: typeof entry.readAt === "string" ? entry.readAt : new Date(0).toISOString(),
-      }))
-      .filter((entry) => entry.key.length > 0);
-  } catch {
-    return [];
-  }
+  return parsed.map((entry) => ({
+    key: entry.key,
+    readAt: typeof entry.readAt === "string" ? entry.readAt : new Date(0).toISOString(),
+  }));
 }
 
-async function writeReadPapers(records: ReadPaperRecord[]): Promise<void> {
-  await LocalStorage.setItem(READ_STORAGE_KEY, JSON.stringify(records));
-}
+const store = createListStore(readReadPapers, async (items) => {
+  await LocalStorage.setItem(READ_STORAGE_KEY, JSON.stringify(items));
+});
 
 export function useReadPapers() {
-  const [readRecords, setReadRecords] = useState<ReadPaperRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const readRecordsRef = useRef<ReadPaperRecord[]>([]);
-  const readWriteRef = useRef<Promise<void>>(Promise.resolve());
-
-  const reloadReadPapers = useCallback(async () => {
-    setIsLoading(true);
-    const next = await readReadPapers();
-    readRecordsRef.current = next;
-    setReadRecords(next);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void reloadReadPapers();
-  }, [reloadReadPapers]);
-
-  const readKeys = useMemo(() => new Set(readRecords.map((record) => record.key)), [readRecords]);
-
-  const isRead = useCallback((paper: Paper) => readKeys.has(getPaperStateKey(paper)), [readKeys]);
-
-  const updateReadRecords = useCallback(async (updater: (current: ReadPaperRecord[]) => ReadPaperRecord[]) => {
-    const nextWrite = readWriteRef.current.then(async () => {
-      const next = updater(readRecordsRef.current);
-      readRecordsRef.current = next;
-      setReadRecords(next);
-      await writeReadPapers(next);
-    });
-    readWriteRef.current = nextWrite.catch(() => undefined);
-    await nextWrite;
-  }, []);
-
-  const markAsUnread = useCallback(
-    async (paper: Paper) => {
-      const key = getPaperStateKey(paper);
-      await updateReadRecords((current) => current.filter((record) => record.key !== key));
-    },
-    [updateReadRecords],
-  );
-
-  const markAsRead = useCallback(
-    async (paper: Paper) => {
-      const key = getPaperStateKey(paper);
-      await updateReadRecords((current) => [
-        ...current.filter((record) => record.key !== key),
-        {
-          key,
-          readAt: new Date().toISOString(),
-        },
-      ]);
-    },
-    [updateReadRecords],
-  );
-
+  const { items, isLoading, error } = useListStore(store, "Could not load reading state");
   return {
     isLoading,
-    isRead,
-    markAsRead,
-    markAsUnread,
-    reloadReadPapers,
+    error,
+    isRead: (paper: Paper) => items.some((entry) => entry.key === getPaperStateKey(paper)),
+    markAsUnread: (paper: Paper) =>
+      store.update((current) => current.filter((entry) => entry.key !== getPaperStateKey(paper))),
+    markAsRead: (paper: Paper) =>
+      store.update((current) => [
+        ...current.filter((entry) => entry.key !== getPaperStateKey(paper)),
+        { key: getPaperStateKey(paper), readAt: new Date().toISOString() },
+      ]),
+    reloadReadPapers: store.reload,
   };
 }

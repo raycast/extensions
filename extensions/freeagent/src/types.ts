@@ -107,6 +107,8 @@ export interface Project {
   status: string;
   is_billable: boolean;
   budget?: string;
+  normal_billing_rate?: string;
+  billing_period?: string;
   currency: string;
   created_at: string;
   updated_at: string;

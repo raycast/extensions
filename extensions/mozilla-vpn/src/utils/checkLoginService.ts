@@ -1,37 +1,26 @@
 // src/utils/checkLoginService.ts
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+
+const MOZILLA_VPN_BINARY =
+  '/Applications/Mozilla VPN.app/Contents/MacOS/Mozilla VPN';
 
 interface LoginStatus {
   isAuthenticated: boolean;
 }
 
-// Execute a shell command and return the output as a promise
-const executeCommand = (command: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Execution error:', stderr);
-        reject(new Error(`Execution failed: ${error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
-};
-
 // Check if the user is authenticated
 export const checkLoginStatus = (): Promise<LoginStatus> => {
-  return executeCommand(
-    '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN status'
-  )
-    .then((stdout) => {
+  return new Promise((resolve, reject) => {
+    execFile(MOZILLA_VPN_BINARY, ['status'], (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error checking login status:', stderr || error.message);
+        reject(new Error('Failed to retrieve login status'));
+        return;
+      }
       const isAuthenticated = !stdout.includes(
         'User status: not authenticated'
       );
-      return { isAuthenticated };
-    })
-    .catch((err) => {
-      console.error('Error checking login status:', err);
-      throw new Error('Failed to retrieve login status');
+      resolve({ isAuthenticated });
     });
+  });
 };

@@ -16,6 +16,10 @@
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
 - List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
 
+## [CLI Not Found Screen] - {PR_MERGE_DATE}
+
+- The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
+
 ## [Smoother List Scrolling] - 2026-10-05
 
 - The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker

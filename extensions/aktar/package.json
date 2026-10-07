@@ -52,14 +52,14 @@
       "name": "search-uploads",
       "title": "Search Uploads",
       "subtitle": "Aktar",
-      "description": "Search your upload history, copy links in any format, show QR codes, and delete uploads.",
+      "description": "Search your upload history, copy links in any format, show QR codes, replace a file while keeping its link, and delete uploads.",
       "mode": "view"
     },
     {
       "name": "browse-buckets",
       "title": "Browse Buckets",
       "subtitle": "Aktar",
-      "description": "Browse the folders and files in your destinations' buckets: copy links, create temporary links and QR codes, rename, move, delete, and upload.",
+      "description": "Browse the folders and files in your destinations' buckets: copy links, create temporary links and QR codes, replace files while keeping their links, rename, move, delete, and upload.",
       "mode": "view"
     },
     {

@@ -1,116 +1,57 @@
 import { LocalStorage } from "@raycast/api";
 import * as fs from "node:fs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type Paper } from "./paper-utils";
+import { type Paper, parseSavedPapers } from "./paper-utils";
 import { getPaperStateKey } from "./read-utils";
+import { createListStore } from "./list-store";
+import { useListStore } from "./use-list-store";
 
 const READING_QUEUE_STORAGE_KEY = "reading-queue-papers";
 
-export type QueuedPaper = Paper & {
-  queuedAt: string;
-};
+export type QueuedPaper = Paper & { queuedAt: string };
 
-function normalizePaper(paper: Paper): Paper {
-  return {
-    ...paper,
-    hasNote: fs.existsSync(paper.notePath),
-  };
-}
-
-function sortQueue(queue: QueuedPaper[]): QueuedPaper[] {
-  return [...queue].sort((left, right) => right.queuedAt.localeCompare(left.queuedAt));
+function sortQueue(items: QueuedPaper[]): QueuedPaper[] {
+  return [...items].sort((left, right) => right.queuedAt.localeCompare(left.queuedAt));
 }
 
 async function readQueue(): Promise<QueuedPaper[]> {
   const raw = await LocalStorage.getItem<string>(READING_QUEUE_STORAGE_KEY);
-  if (!raw) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    const queue = parsed
-      .filter((entry): entry is QueuedPaper => !!entry && typeof entry === "object")
-      .map((entry) => ({
-        ...normalizePaper(entry),
-        queuedAt: typeof entry.queuedAt === "string" ? entry.queuedAt : new Date(0).toISOString(),
-      }));
-
-    return sortQueue(queue);
-  } catch {
-    return [];
-  }
+  if (!raw) return [];
+  const parsed = parseSavedPapers(raw);
+  return sortQueue(
+    parsed.map((entry) => ({
+      ...entry,
+      hasNote: fs.existsSync(entry.notePath),
+      queuedAt:
+        typeof (entry as QueuedPaper).queuedAt === "string"
+          ? (entry as QueuedPaper).queuedAt
+          : new Date(0).toISOString(),
+    })),
+  );
 }
 
-async function writeQueue(queue: QueuedPaper[]): Promise<void> {
-  await LocalStorage.setItem(READING_QUEUE_STORAGE_KEY, JSON.stringify(sortQueue(queue)));
-}
+const store = createListStore(readQueue, async (items) => {
+  await LocalStorage.setItem(READING_QUEUE_STORAGE_KEY, JSON.stringify(sortQueue(items)));
+});
 
 export function useReadingQueue() {
-  const [queue, setQueue] = useState<QueuedPaper[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const queueRef = useRef<QueuedPaper[]>([]);
-  const queueWriteRef = useRef<Promise<void>>(Promise.resolve());
-
-  const reloadQueue = useCallback(async () => {
-    setIsLoading(true);
-    const next = await readQueue();
-    queueRef.current = next;
-    setQueue(next);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void reloadQueue();
-  }, [reloadQueue]);
-
-  const queueKeys = useMemo(() => new Set(queue.map((paper) => getPaperStateKey(paper))), [queue]);
-
-  const isQueued = useCallback((paper: Paper) => queueKeys.has(getPaperStateKey(paper)), [queueKeys]);
-
-  const updateQueue = useCallback(async (updater: (current: QueuedPaper[]) => QueuedPaper[]) => {
-    const nextWrite = queueWriteRef.current.then(async () => {
-      const next = updater(queueRef.current);
-      queueRef.current = next;
-      setQueue(next);
-      await writeQueue(next);
-    });
-    queueWriteRef.current = nextWrite.catch(() => undefined);
-    await nextWrite;
-  }, []);
-
-  const removeFromQueue = useCallback(
-    async (paper: Paper) => {
-      await updateQueue((current) => current.filter((entry) => getPaperStateKey(entry) !== getPaperStateKey(paper)));
-    },
-    [updateQueue],
-  );
-
-  const addToQueue = useCallback(
-    async (paper: Paper) => {
-      await updateQueue((current) =>
-        sortQueue([
-          ...current.filter((entry) => getPaperStateKey(entry) !== getPaperStateKey(paper)),
-          {
-            ...normalizePaper(paper),
-            queuedAt: new Date().toISOString(),
-          },
-        ]),
-      );
-    },
-    [updateQueue],
-  );
-
+  const { items, isLoading, error } = useListStore(store, "Could not load reading queue");
+  const isQueued = (paper: Paper) => items.some((entry) => getPaperStateKey(entry) === getPaperStateKey(paper));
+  const remove = (paper: Paper) =>
+    store.update((current) => current.filter((entry) => getPaperStateKey(entry) !== getPaperStateKey(paper)));
+  const add = (paper: Paper) =>
+    store.update((current) =>
+      sortQueue([
+        ...current.filter((entry) => getPaperStateKey(entry) !== getPaperStateKey(paper)),
+        { ...paper, hasNote: fs.existsSync(paper.notePath), queuedAt: new Date().toISOString() },
+      ]),
+    );
   return {
-    queue,
+    queue: items,
     isLoading,
+    error,
     isQueued,
-    addToQueue,
-    removeFromQueue,
-    reloadQueue,
+    addToQueue: add,
+    removeFromQueue: remove,
+    reloadQueue: store.reload,
   };
 }

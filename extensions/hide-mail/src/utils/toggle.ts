@@ -1,6 +1,6 @@
 import { getApiKey } from "./key";
-import { showToast, Toast } from "@raycast/api";
-import { API_URL, getHeaders } from "../config";
+import { getApiUrl, getHeaders } from "../config";
+import { InvalidApiKeyError } from "./invalid-key";
 
 export const toggleAlias = async (email: string, newState: boolean) => {
   const headers = getHeaders(getApiKey());
@@ -8,7 +8,7 @@ export const toggleAlias = async (email: string, newState: boolean) => {
   let res: Response;
 
   if (!newState) {
-    res = await fetch(`${API_URL}/delete-aliases`, {
+    res = await fetch(`${getApiUrl()}/delete-aliases`, {
       method: "DELETE",
       headers,
       body: JSON.stringify({
@@ -16,7 +16,7 @@ export const toggleAlias = async (email: string, newState: boolean) => {
       }),
     });
   } else {
-    res = await fetch(`${API_URL}/active-aliases`, {
+    res = await fetch(`${getApiUrl()}/active-aliases`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -26,14 +26,7 @@ export const toggleAlias = async (email: string, newState: boolean) => {
   }
 
   if (res.status === 401) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error creating",
-      message:
-        "❌ HideMail API credentials are invalid. Create new API Token and update it on Raycast extension preferences",
-    });
-
-    return false;
+    throw new InvalidApiKeyError();
   }
 
   return res.status === (newState ? 200 : 204);

@@ -1,0 +1,44 @@
+import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useRef } from "react";
+import type { Workspace } from "@type/octarine";
+import { findWorkspaceByName } from "@lib/workspaces";
+import type { LoadStatus } from "@hooks/use-workspaces";
+
+type Options = {
+  requestedWorkspace: string;
+  workspaces: Workspace[];
+  status: LoadStatus;
+  open: (workspaceName: string) => Promise<void>;
+};
+
+export function useOpenTarget({ requestedWorkspace, workspaces, status, open }: Options) {
+  const workspace = findWorkspaceByName(workspaces, requestedWorkspace);
+  const workspaceNotFound = Boolean(requestedWorkspace) && !status.isLoading && !status.failed && !workspace;
+  const lastToast = useRef("");
+  const lastOpen = useRef("");
+
+  useEffect(() => {
+    if (!workspaceNotFound || lastToast.current === requestedWorkspace) {
+      return;
+    }
+
+    lastToast.current = requestedWorkspace;
+    void showToast({
+      style: Toast.Style.Failure,
+      title: `Workspace “${requestedWorkspace}” not found`,
+    });
+  }, [workspaceNotFound, requestedWorkspace]);
+
+  useEffect(() => {
+    if (!workspace || lastOpen.current === workspace.path) {
+      return;
+    }
+
+    lastOpen.current = workspace.path;
+    void open(workspace.name).catch((error) => {
+      console.error("Failed to open workspace", error);
+      void showFailureToast(error, { title: "Failed to Open Workspace" });
+    });
+  }, [workspace, open]);
+}

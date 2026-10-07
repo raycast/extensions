@@ -89,8 +89,8 @@
     },
     {
       "name": "get-up-next",
-      "title": "Get up Next Episodes",
-      "description": "Get the next unwatched episodes for TV series you are currently watching on Trakt"
+      "title": "Get Continue Watching",
+      "description": "Get your Trakt Continue Watching list: the next episode of each show in progress and movies paused mid-playback"
     },
     {
       "name": "get-show-progress",

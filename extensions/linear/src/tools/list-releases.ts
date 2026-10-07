@@ -1,6 +1,6 @@
 import { LinearClient, PaginationOrderBy, ReleaseStageType } from "@linear/sdk";
 
-import { afterDate, client, collect, PageInput, resolveReleasePipeline } from "./linearUtils";
+import { afterDate, client, collect, isUuid, PageInput, resolveReleasePipeline } from "./linearUtils";
 import { serializeRelease, serializeReleaseStage } from "./serializers";
 import { withLinear } from "./withLinear";
 
@@ -38,7 +38,10 @@ export default withLinear(async (input: Input) => {
               ...(input.stage
                 ? [
                     {
-                      or: [{ id: { eq: input.stage } }, { name: { eqIgnoreCase: input.stage } }],
+                      or: [
+                        ...(isUuid(input.stage) ? [{ id: { eq: input.stage } }] : []),
+                        { name: { eqIgnoreCase: input.stage } },
+                      ],
                     },
                   ]
                 : []),

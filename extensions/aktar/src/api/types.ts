@@ -34,6 +34,8 @@ export type Upload = {
   createdAt: string;
   /** When Aktar's lifecycle rule deletes the file. Null keeps it forever; missing before Aktar 0.5.0. */
   expiresAt?: string | null;
+  /** When the file was last replaced in place (its link stayed); missing or null when it never was. */
+  replacedAt?: string | null;
   formats: Record<OutputFormat, string>;
   /**
    * Only on an upload reply: true when nothing was uploaded because the same

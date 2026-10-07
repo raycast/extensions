@@ -1,25 +1,115 @@
 instructions: |
   - Format Linear object titles and names as markdown links whenever the object has a URL.
-  - Resolve referenced objects with the appropriate lookup, search, or list tool. Never invent IDs or silently choose an unrelated fuzzy match. If multiple plausible matches remain, ask the user to clarify.
-  - Prefer the `list-*`, `get-*`, and `save-*` tools for capabilities they cover. Use a `save-*` tool without `id` to create and with `id` to update. Use the older, operation-specific tools only for capabilities not covered by those tools.
-  - For comment, document, issue, project, initiative, milestone, release, release-note, and status-update writes, use the matching `save-*` tool instead of an older create/update tool.
+  - Never invent IDs or silently choose an unrelated fuzzy match. If multiple plausible matches remain, ask the user to clarify.
+  - Use a `save-*` tool without `id` to create and with `id` to update. Writes for comments, documents, issues, projects, initiatives, milestones, releases, release notes, and status updates all go through the matching `save-*` tool.
+  - Most inputs that reference another object accept a name, key, identifier, slug, or ID, so pass what the user said (for example `team: ENG`) instead of looking up an ID first. Look objects up only to disambiguate or when the user asks to see them.
+  - Scope inputs on list tools are optional unless a tool's schema requires them. Call `list-teams`, `list-users`, `list-cycles`, `list-issue-statuses`, and `list-milestones` without arguments to list across the workspace. Pass `team` to `list-issue-statuses` before using a status ID in a write, because statuses are team-specific.
+  - Use `get-user` with `query: me` for the current user and `list-users` for workspace members. Use `list-teams` for teams; it has no "my teams" filter, so describe results as workspace teams.
   - `save-document` uses `project`, `issue`, `initiative`, `cycle`, or `team` for its parent. Do not pass legacy `projectId`, `issueId`, `initiativeId`, `cycleId`, or `teamId` fields to `save-document`.
-  - When filtering by the current user, resolve the current user and pass the resolved user to the relevant assignee, owner, member, creator, or user filter.
+  - When filtering by the current user, pass `me` where a filter accepts it; otherwise resolve the current user with `get-user` and pass the resolved user.
   - When the user specifies a team, project, initiative, label, release pipeline, release, or other scope, pass that scope into the final list/filter tool after resolving it. Do not drop a requested filter just because a lookup returned relevant-looking mock data.
-  - Use `full-text-search-issues` for relevance-ranked keyword searches. Use `filter-issues` or `list-issues` for structured criteria. Follow `nextCursor` when the user asks for all results or when the current page is insufficient.
+  - Use `list-issues` for structured issue queries. Use `full-text-search-issues` for relevance-ranked topic or phrase searches. Use `filter-issues` only for criteria `list-issues` cannot express, such as priority or date ranges, estimates, or OR conditions. Follow `nextCursor` when the user asks for all results or when the current page is insufficient.
   - "My issues" means issues assigned to the current user. Use `list-issues` with `assignee: me`. Use `assignee: "null"` for unassigned issues.
+  - `list-issues` accepts a status name or type in `state` (for example `In Progress` or `started`) and, without `team`, matches it in every team. Do not look up statuses or split the query per team first.
   - Use ISO 8601 dates and timestamps. Pass the literal string `null` only where a tool documents it as the way to clear a field.
   - Linear issue priorities are `1` urgent, `2` high, `3` medium, `4` low, and `0` no priority.
   - To attach a local file to an issue, call `create-attachment` with its absolute `filePath`. The extension reads, uploads, and links the file. Do not base64-encode files, request signed upload URLs, or upload bytes outside the extension. When creating a new issue with an attachment, create the issue first, then attach the file using the returned issue ID.
+  - To add or remove a single label without touching the others, use `add-label` or `remove-label`. Passing `labels` to `save-issue` replaces the whole set.
   - For `list-comments` and new threads with `save-comment`, provide exactly one parent. Use `parentId` for replies and `id` for edits.
   - "Close" an issue by moving it to a completed status. Only use `delete-issue` when the user explicitly asks to delete or trash it.
-  - "Inbox" means Linear notifications.
+  - "Inbox" means Linear notifications. Use `get-notifications` with `unreadOnly: true` for unread notifications.
 
 evals:
+  # Tool selection and optional scopes
+  - input: "@linear which teams are there?"
+    mocks:
+      list-teams:
+        nodes:
+          - id: team-eng
+            key: ENG
+            name: Engineering
+    expected:
+      - callsTool: list-teams
+
+  - input: "@linear what are the current cycles?"
+    usedAsExample: false
+    mocks:
+      list-cycles:
+        nodes:
+          - id: cycle-24
+            number: 24
+            teamId: team-eng
+            isActive: true
+    expected:
+      - callsTool:
+          name: list-cycles
+          arguments:
+            type: current
+
+  - input: "@linear add the Bug label to ENG-42"
+    usedAsExample: false
+    mocks:
+      add-label:
+        id: issue-42
+        identifier: ENG-42
+        title: Flaky OAuth redirects
+    expected:
+      - callsTool:
+          name: add-label
+          arguments:
+            issueId: ENG-42
+            label: Bug
+
+  - input: "@linear show my unread notifications"
+    usedAsExample: false
+    mocks:
+      get-notifications:
+        nodes: []
+    expected:
+      - callsTool:
+          name: get-notifications
+          arguments:
+            unreadOnly: true
+
+  - input: "@linear show my in-progress issues"
+    usedAsExample: false
+    mocks:
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
+      list-issues:
+        nodes: []
+      list-issue-statuses:
+        nodes:
+          - id: status-progress-eng
+            name: In Progress
+            type: started
+            teamId: team-eng
+          - id: status-progress-ios
+            name: In Progress
+            type: started
+            teamId: team-ios
+    expected:
+      - callsTool:
+          name: list-issues
+          arguments:
+            assignee:
+              or:
+                - me
+                - user-me
+            state:
+              or:
+                - In Progress
+                - in progress
+                - started
+
   # Existing core behavior and routing boundaries
   - input: "@linear what's in my inbox"
     mocks:
-      get-notifications: []
+      get-notifications:
+        nodes: []
     expected:
       - callsTool: get-notifications
 
@@ -40,19 +130,15 @@ evals:
 
   - input: "@linear show my priority 1 issues"
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       filter-issues:
         issues: []
       list-issues:
         nodes: []
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
@@ -74,15 +160,6 @@ evals:
           - id: user-me
             name: Alex Chen
             isMe: true
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
@@ -90,6 +167,11 @@ evals:
             name: Engineering
       list-issues:
         nodes: []
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool:
           name: list-issues
@@ -103,11 +185,6 @@ evals:
   - input: "@linear close issue ENG-42"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       filter-issues:
         issues:
           - id: issue-oauth
@@ -125,22 +202,6 @@ evals:
             team:
               id: team-eng
               key: ENG
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
-      get-issue-states:
-        - id: status-done
-          name: Done
-          type: completed
-      update-issue:
-        id: issue-oauth
-        identifier: ENG-42
-        title: Flaky OAuth redirects
-        state:
-          id: status-done
-          name: Done
-          type: completed
       list-issue-statuses:
         nodes:
           - id: status-done
@@ -151,6 +212,11 @@ evals:
         identifier: ENG-42
         title: Flaky OAuth redirects
         state: Done
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - not:
           callsTool: delete-issue
@@ -171,7 +237,6 @@ evals:
   # Documentation and agent skills
   - input: "@linear how do I configure automatic closing of canceled issues?"
     mocks:
-      get-projects: []
       search-documentation:
         - id: doc-auto-close
           title: Automatically close issues
@@ -200,11 +265,6 @@ evals:
   - input: "@linear show the full instructions for agent skill skill-triage"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       get-workspace:
         id: workspace-acme
         name: Acme
@@ -217,6 +277,11 @@ evals:
         id: skill-triage
         name: Triage issues
         instructions: Review severity and ownership.
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool:
           name: get-agent-skill
@@ -240,15 +305,6 @@ evals:
   - input: "@linear show inline comments on document api-migration"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
-      get-documents:
-        - id: document-api-migration
-          slugId: api-migration
-          title: API migration
       list-documents:
         nodes:
           - id: document-api-migration
@@ -259,6 +315,11 @@ evals:
           - id: comment-inline
             body: Clarify this section
             quotedText: Retry policy
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
@@ -277,10 +338,6 @@ evals:
           - id: project-mobile-redesign
             name: Mobile redesign
             slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       save-comment:
         id: comment-project
         body: Waiting for design
@@ -317,26 +374,16 @@ evals:
   - input: "@linear change comment comment-1 to 'Fixed in the latest build'"
     usedAsExample: false
     mocks:
-      update-comment:
-        id: comment-1
-        body: Fixed in the latest build
       save-comment:
         id: comment-1
         body: Fixed in the latest build
     expected:
-      - or:
-          - callsTool:
-              name: save-comment
-              arguments:
-                id: comment-1
-                body:
-                  includes: latest build
-          - callsTool:
-              name: update-comment
-              arguments:
-                id: comment-1
-                body:
-                  includes: latest build
+      - callsTool:
+          name: save-comment
+          arguments:
+            id: comment-1
+            body:
+              includes: latest build
 
   - input: "@linear delete comment comment-reply"
     usedAsExample: false
@@ -361,10 +408,6 @@ evals:
   # Cycles, teams, users, and workspace
   - input: "@linear show the current cycle for team team-eng"
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
@@ -383,7 +426,7 @@ evals:
       - callsTool:
           name: list-cycles
           arguments:
-            teamId: team-eng
+            team: team-eng
 
   - input: "@linear list archived teams whose name contains platform"
     usedAsExample: false
@@ -404,10 +447,6 @@ evals:
   - input: "@linear get details for team ENG"
     usedAsExample: false
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
@@ -439,15 +478,6 @@ evals:
         id: workspace-acme
         name: Acme
         urlKey: acme
-      get-members:
-        - id: user-alex
-          name: Alex Chen
-          email: alex@example.com
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       get-user:
         id: user-alex
         name: Alex Chen
@@ -495,15 +525,15 @@ evals:
   - input: "@linear list our release pipelines"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-release-pipelines:
         nodes:
           - id: pipeline-app
             name: App Releases
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool: list-release-pipelines
 
@@ -759,46 +789,20 @@ evals:
           - id: document-api-migration
             slugId: api-migration
             title: API migration
-      get-document-content:
-        id: document-api-migration
-        title: API migration
-        content: "# API migration"
-      get-documents:
-        - id: document-api-migration
-          title: API migration
-          slugId: api-migration
       get-document:
         id: document-api-migration
         slugId: api-migration
         title: API migration
         content: "# API migration"
     expected:
-      - or:
-          - callsTool:
-              name: get-document
-              arguments:
-                id: api-migration
-          - callsTool:
-              name: get-documents
-              arguments:
-                query: api-migration
-          - callsTool:
-              name: get-document-content
-              arguments:
-                documentId: api-migration
+      - callsTool:
+          name: get-document
+          arguments:
+            id: api-migration
 
   - input: "@linear list documents in project mobile-redesign updated since 2026-08-01"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -808,6 +812,11 @@ evals:
         nodes:
           - id: document-mobile-spec
             title: Mobile redesign spec
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
@@ -830,44 +839,35 @@ evals:
 
   - input: "@linear create a document titled 'Launch checklist' under project mobile-redesign with content '# Checklist'"
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-projects:
         nodes:
           - id: project-mobile-redesign
             name: Mobile redesign
             slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       save-document:
         id: document-launch-checklist
         title: Launch checklist
         content: "# Checklist"
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool:
           name: save-document
           arguments:
             title: Launch checklist
-            project: project-mobile-redesign
+            project:
+              or:
+                - mobile-redesign
+                - project-mobile-redesign
             content:
               includes: "# Checklist"
 
   - input: "@linear create a document titled 'Cycle retrospective' under cycle 24 for team ENG with content '# Retro'"
     usedAsExample: false
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
@@ -888,7 +888,10 @@ evals:
             title: Cycle retrospective
             content:
               includes: "# Retro"
-            cycle: cycle-24
+            cycle:
+              or:
+                - cycle-24
+                - "24"
 
   - input: "@linear use a patch to replace 'Polling' with 'Webhooks' in document api-migration"
     usedAsExample: false
@@ -904,15 +907,6 @@ evals:
             title: API migration
             slugId: api-migration
             content: Use Polling for updates.
-      get-document-content:
-        id: document-api-migration
-        title: API migration
-        content: Use Polling for updates.
-      get-documents:
-        - id: document-api-migration
-          title: API migration
-          slugId: api-migration
-          content: Use Polling for updates.
       save-document:
         id: document-api-migration
         title: API migration
@@ -977,10 +971,6 @@ evals:
           - id: team-eng
             key: ENG
             name: Engineering
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       get-project:
         id: project-platform
         name: Platform reliability
@@ -1009,13 +999,13 @@ evals:
   - input: "@linear continue listing projects after cursor projects-page-1"
     usedAsExample: false
     mocks:
-      get-current-user:
+      list-projects:
+        nodes: []
+      get-user:
         id: user-me
         name: Alex Chen
         email: alex@example.com
         isMe: true
-      list-projects:
-        nodes: []
     expected:
       - callsTool:
           name: list-projects
@@ -1052,11 +1042,6 @@ evals:
         id: team-eng
         key: ENG
         name: Engineering
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-teams:
         nodes:
           - id: team-eng
@@ -1065,13 +1050,6 @@ evals:
           - id: team-desktop
             key: DESKTOP
             name: Desktop
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
-        - id: team-desktop
-          key: DESKTOP
-          name: Desktop
       save-project:
         id: project-desktop-performance
         name: Desktop performance
@@ -1079,6 +1057,11 @@ evals:
           id: user-me
           name: Alex Chen
         targetDate: 2026-12-31
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
@@ -1088,16 +1071,22 @@ evals:
                 addTeams:
                   - includes: team-eng
                   - includes: team-desktop
-                lead: user-me
+                lead:
+                  or:
+                    - me
+                    - user-me
                 targetDate: 2026-12-31
           - callsTool:
               name: save-project
               arguments:
                 name: Desktop performance
                 addTeams:
-                  - includes: team-eng
-                  - includes: team-desktop
-                lead: Alex Chen
+                  - includes: ENG
+                  - includes: DESKTOP
+                lead:
+                  or:
+                    - me
+                    - user-me
                 targetDate: 2026-12-31
           - callsTool:
               name: save-project
@@ -1106,16 +1095,22 @@ evals:
                 setTeams:
                   - includes: team-eng
                   - includes: team-desktop
-                lead: user-me
+                lead:
+                  or:
+                    - me
+                    - user-me
                 targetDate: 2026-12-31
           - callsTool:
               name: save-project
               arguments:
                 name: Desktop performance
                 setTeams:
-                  - includes: team-eng
-                  - includes: team-desktop
-                lead: Alex Chen
+                  - includes: ENG
+                  - includes: DESKTOP
+                lead:
+                  or:
+                    - me
+                    - user-me
                 targetDate: 2026-12-31
 
   - input: "@linear edit project mobile-redesign: append 'Measure cold launch time.' to its description and add the project to initiative quality"
@@ -1125,10 +1120,6 @@ evals:
         id: initiative-quality
         name: Product quality
         slugId: quality
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -1177,23 +1168,19 @@ evals:
         id: project-mobile-redesign
         name: Mobile redesign
         slugId: mobile-redesign
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-projects:
         nodes:
           - id: project-mobile-redesign
             name: Mobile redesign
             slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       save-project:
         id: project-mobile-redesign
         name: Mobile redesign
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool:
           name: save-project
@@ -1223,10 +1210,6 @@ evals:
         id: project-mobile-redesign
         name: Mobile redesign
         slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -1249,10 +1232,6 @@ evals:
   - input: "@linear get milestone Public beta in project mobile-redesign"
     usedAsExample: false
     mocks:
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       get-project:
         id: project-mobile-redesign
         name: Mobile redesign
@@ -1300,10 +1279,6 @@ evals:
           - id: project-mobile-redesign
             name: Mobile redesign
             slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       save-milestone:
         id: milestone-beta
         name: Public beta
@@ -1329,10 +1304,6 @@ evals:
       get-milestone:
         id: milestone-beta
         name: Public beta
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -1342,31 +1313,15 @@ evals:
         nodes:
           - id: milestone-beta
             name: Public beta
-      update-project-milestone:
-        id: milestone-beta
-        name: Open beta
       save-milestone:
         id: milestone-beta
         name: Open beta
     expected:
-      - or:
-          - callsTool:
-              name: save-milestone
-              arguments:
-                project: mobile-redesign
-                id: milestone-beta
-                name: Open beta
-          - callsTool:
-              name: save-milestone
-              arguments:
-                project: project-mobile-redesign
-                id: milestone-beta
-                name: Open beta
-          - callsTool:
-              name: update-project-milestone
-              arguments:
-                milestoneId: milestone-beta
-                name: Open beta
+      - callsTool:
+          name: save-milestone
+          arguments:
+            id: milestone-beta
+            name: Open beta
 
   # Initiative labels and initiatives
   - input: "@linear list initiative labels"
@@ -1396,17 +1351,16 @@ evals:
   - input: "@linear list initiatives owned by me with status planned"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-initiatives:
         nodes:
           - id: initiative-quality
             name: Product quality
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
-      - callsTool: get-current-user
       - callsTool:
           name: list-initiatives
           arguments:
@@ -1431,29 +1385,20 @@ evals:
   - input: "@linear create initiative Product quality owned by me, led by team ENG, targeting 2026-12-31"
     usedAsExample: false
     mocks:
-      get-members:
-        - id: user-me
-          name: Alex Chen
-          email: alex@example.com
-          isMe: true
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-teams:
         nodes:
           - id: team-eng
             key: ENG
             name: Engineering
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       save-initiative:
         id: initiative-quality
         name: Product quality
         targetDate: 2026-12-31
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - callsTool:
           name: save-initiative
@@ -1472,11 +1417,6 @@ evals:
   - input: "@linear append 'Track crash-free sessions.' to initiative quality and remove its owner"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       get-initiative:
         id: initiative-quality
         name: Product quality
@@ -1497,6 +1437,11 @@ evals:
         name: Product quality
         description: Track crash-free sessions.
         owner: null
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
@@ -1547,29 +1492,16 @@ evals:
   - input: "@linear create issue 'Investigate crash' for team ENG and attach /Users/alex/Desktop/crash.log"
     usedAsExample: false
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-issue-statuses:
         nodes:
           - id: status-backlog
             name: Backlog
             type: backlog
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
             key: ENG
             name: Engineering
-      create-issue:
-        id: issue-crash
-        identifier: ENG-99
-        title: Investigate crash
       save-issue:
         id: issue-crash
         identifier: ENG-99
@@ -1578,10 +1510,13 @@ evals:
         id: attachment-crash
         title: crash.log
         issueId: issue-crash
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
-      - or:
-          - callsTool: save-issue
-          - callsTool: create-issue
+      - callsTool: save-issue
       - callsTool:
           name: create-attachment
           arguments:
@@ -1637,23 +1572,11 @@ evals:
 
   - input: "@linear list high-priority issues with label Bug in project mobile-redesign updated since 2026-08-01"
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
-      get-labels:
-        - id: label-bug
-          name: Bug
       filter-issues:
         issues:
           - id: issue-oauth
             identifier: ENG-42
             title: Flaky OAuth redirects
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -1669,24 +1592,28 @@ evals:
             identifier: ENG-42
             title: Flaky OAuth redirects
             priority: 2
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
       - or:
           - callsTool:
               name: list-issues
               arguments:
-                project: project-mobile-redesign
-                label: Bug
-                priority: 2
-                updatedAt: 2026-08-01
-          - callsTool: filter-issues
-          - callsTool:
-              name: list-issues
-              arguments:
-                project: project-mobile-redesign
-                label: label-bug
+                project:
+                  or:
+                    - mobile-redesign
+                    - project-mobile-redesign
+                label:
+                  or:
+                    - Bug
+                    - label-bug
                 priority: 2
                 updatedAt:
-                  matches: "^2026-08-01"
+                  matches: ^2026-08-01
+          - callsTool: filter-issues
 
   - input: "@linear continue listing issues after cursor issues-page-1"
     usedAsExample: false
@@ -1701,73 +1628,48 @@ evals:
 
   - input: "@linear create an urgent issue titled 'OAuth outage' for team ENG, assign it to me, due 2026-08-26"
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
             key: ENG
             name: Engineering
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       list-issue-statuses:
         nodes:
           - id: status-backlog
             name: Backlog
             type: backlog
-      get-issue-states:
-        - id: status-backlog
-          name: Backlog
-          type: backlog
       list-issues:
         nodes: []
-      create-issue:
-        id: issue-outage
-        identifier: ENG-100
-        title: OAuth outage
-        priority: 4
-        dueDate: 2026-08-26
       save-issue:
         id: issue-outage
         identifier: ENG-100
         title: OAuth outage
         priority: 1
         dueDate: 2026-08-26
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
     expected:
-      - or:
-          - callsTool:
-              name: save-issue
-              arguments:
-                title: OAuth outage
-                team:
-                  or:
-                    - ENG
-                    - team-eng
-                assignee:
-                  or:
-                    - me
-                    - user-me
-                priority: 1
-                dueDate: 2026-08-26
-          - callsTool: create-issue
+      - callsTool:
+          name: save-issue
+          arguments:
+            title: OAuth outage
+            team:
+              or:
+                - ENG
+                - team-eng
+            assignee:
+              or:
+                - me
+                - user-me
+            priority: 1
+            dueDate: 2026-08-26
 
   - input: "@linear append 'Reproduces on macOS 15.' to the description of issue ENG-42 and move it to In Progress"
     usedAsExample: false
     mocks:
-      update-issue:
-        id: issue-oauth
-        identifier: ENG-42
-        title: Flaky OAuth redirects
-        description: Existing issue description. Reproduces on macOS 15.
-        state:
-          id: status-progress
-          name: In Progress
-          type: started
       get-issue:
         id: issue-oauth
         identifier: ENG-42
@@ -1786,10 +1688,6 @@ evals:
           - id: team-eng
             key: ENG
             name: Engineering
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-comments:
         nodes: []
       list-issues:
@@ -1805,10 +1703,6 @@ evals:
           - id: status-progress
             name: In Progress
             type: started
-      get-issue-states:
-        - id: status-progress
-          name: In Progress
-          type: started
       save-issue:
         id: issue-oauth
         identifier: ENG-42
@@ -1820,8 +1714,14 @@ evals:
           - callsTool:
               name: save-issue
               arguments:
-                id: ENG-42
-                state: In Progress
+                id:
+                  or:
+                    - ENG-42
+                    - issue-oauth
+                state:
+                  or:
+                    - In Progress
+                    - status-progress
                 patch.0.op: append
                 patch.0.text:
                   includes: Reproduces on macOS 15
@@ -1853,7 +1753,6 @@ evals:
                 state: In Progress
                 description:
                   includes: Reproduces on macOS 15
-          - callsTool: update-issue
 
   - input: "@linear clear issue ENG-42 by setting assignee, cycle, and dueDate to the literal string 'null', and estimate to -1"
     usedAsExample: false
@@ -1940,10 +1839,6 @@ evals:
   - input: "@linear list all issue statuses for team ENG"
     usedAsExample: false
     mocks:
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       list-teams:
         nodes:
           - id: team-eng
@@ -1981,10 +1876,6 @@ evals:
     mocks:
       list-issues:
         nodes: []
-      get-teams:
-        - id: team-eng
-          key: ENG
-          name: Engineering
       get-team:
         id: team-eng
         key: ENG
@@ -2021,10 +1912,6 @@ evals:
   - input: "@linear list project status updates for mobile-redesign created since 2026-08-01"
     usedAsExample: false
     mocks:
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       list-projects:
         nodes:
           - id: project-mobile-redesign
@@ -2039,7 +1926,6 @@ evals:
       - callsTool:
           name: get-status-updates
           arguments:
-            type: project
             project: project-mobile-redesign
             createdAt:
               matches: "^2026-08-01"
@@ -2055,38 +1941,36 @@ evals:
       - callsTool:
           name: get-status-updates
           arguments:
-            type: initiative
             id: initiative-update-1
 
   - input: "@linear post an at-risk status update to project mobile-redesign saying 'Launch date may slip'"
     mocks:
-      get-current-user:
-        id: user-me
-        name: Alex Chen
-        email: alex@example.com
-        isMe: true
       full-text-search-issues:
         issues: []
       get-project:
         id: project-mobile-redesign
         name: Mobile redesign
         slugId: mobile-redesign
-      get-project-statuses:
-        - id: project-status-started
-          name: In Progress
       list-projects:
         nodes:
           - id: project-mobile-redesign
             name: Mobile redesign
             slugId: mobile-redesign
-      get-projects:
-        - id: project-mobile-redesign
-          name: Mobile redesign
-          slugId: mobile-redesign
       save-status-update:
         id: project-update-2
         body: Launch date may slip
         health: atRisk
+      get-user:
+        id: user-me
+        name: Alex Chen
+        email: alex@example.com
+        isMe: true
+      list-users:
+        nodes:
+          - id: user-me
+            name: Alex Chen
+            email: alex@example.com
+            isMe: true
     expected:
       - callsTool:
           name: save-status-update
@@ -2128,6 +2012,10 @@ evals:
     mocks:
       delete-status-update:
         success: true
+      get-status-updates:
+        id: project-update-2
+        type: project
+        body: Launch is on track.
     expected:
       - callsTool:
           name: delete-status-update

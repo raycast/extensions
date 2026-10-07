@@ -21,17 +21,7 @@
       "title": "Search Projects",
       "subtitle": "Railway",
       "description": "Search and navigate to your Railway projects",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "railwayApiKey",
-          "type": "password",
-          "title": "Railway API Key",
-          "required": true,
-          "description": "type your Railway api key for auth",
-          "placeholder": "xxxxxxxxxx"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "railway-templates",
@@ -39,6 +29,60 @@
       "subtitle": "Railway",
       "description": "Search Railway templates and deploy them with one click",
       "mode": "view"
+    },
+    {
+      "name": "railway-usage",
+      "title": "Show Usage",
+      "subtitle": "Railway",
+      "description": "Show the current billing period usage, estimated bill, and usage limits of a workspace",
+      "mode": "view"
+    },
+    {
+      "name": "railway-last-deploy",
+      "title": "Last Deploy",
+      "subtitle": "Railway",
+      "description": "Show the status of your latest Railway deployments in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "showServiceName",
+          "type": "checkbox",
+          "label": "Show service name in the menu bar",
+          "title": "Menu Bar Title",
+          "required": false,
+          "default": true,
+          "description": "Show the name of the last deployed service next to the status icon"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "railwayApiKey",
+      "type": "password",
+      "title": "Railway API Token",
+      "required": false,
+      "description": "Create an account, workspace, or project token at railway.com/account/tokens. Search Templates works without one",
+      "placeholder": "xxxxxxxxxx"
+    },
+    {
+      "name": "tokenType",
+      "type": "dropdown",
+      "title": "Token Type",
+      "required": false,
+      "default": "account",
+      "description": "Project tokens only give access to a single project environment",
+      "data": [
+        {
+          "title": "Account or Workspace Token",
+          "value": "account"
+        },
+        {
+          "title": "Project Token",
+          "value": "project"
+        }
+      ]
     }
   ],
   "dependencies": {

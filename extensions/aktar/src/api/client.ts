@@ -222,6 +222,43 @@ export async function uploadFile(
   return unwrapUpload(response);
 }
 
+/**
+ * Writes `filePath` over an upload in Aktar's history: the key and link stay,
+ * the file is new. Needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0;
+ * older versions answer 404, see `isReplaceUnsupported`.
+ */
+export async function replaceUpload(id: string, filePath: string, onProgress?: (fraction: number) => void) {
+  const response = await request<UploadReply>("POST", `uploads/${encodeURIComponent(id)}/replace`, {
+    query: { filename: path.basename(filePath) },
+    file: { path: filePath, onProgress },
+  });
+  return unwrapUpload(response);
+}
+
+/** Writes `filePath` over the object at `key` in a destination's bucket, keeping its link. */
+export async function replaceObject(
+  destinationId: string,
+  key: string,
+  filePath: string,
+  onProgress?: (fraction: number) => void,
+) {
+  const response = await request<UploadReply>("PUT", bucketRoute(destinationId, "objects"), {
+    query: { key, filename: path.basename(filePath) },
+    file: { path: filePath, onProgress },
+  });
+  return unwrapUpload(response);
+}
+
+/** True when this Aktar predates replacing files: it answers the unknown route with 404 "Not found.". */
+export function isReplaceUnsupported(error: unknown) {
+  return (
+    error instanceof AktarError &&
+    error.kind === "request-failed" &&
+    error.status === 404 &&
+    error.message === "Not found."
+  );
+}
+
 export async function uploadClipboard(options: { destinationId?: string; expires?: number } = {}) {
   const response = await request<UploadReply>("POST", "uploads/clipboard", {
     query: { destinationId: options.destinationId, expires: options.expires || undefined },

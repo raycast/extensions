@@ -1,0 +1,11 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.DS_Store
+.env*
+coverage/
+*.log
+evals/
+design/
+assets/synci-glass-*.png
+assets/synci-simple-*.png

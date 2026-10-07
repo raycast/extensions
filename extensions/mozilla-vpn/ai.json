@@ -1,0 +1,218 @@
+{
+  "instructions": "Use explicit action parameters when controlling Mozilla VPN:\n\n• action='connect' - Connect to VPN (optionally with country/city)\n• action='disconnect' - Disconnect VPN\n• action='status' - Show VPN status and IP\n• action='list' - List all available countries\n• action='list_cities' - List cities in a country (requires country parameter)\n• action='list_servers' - List servers (requires country, optionally city)\n• action='change_server' - Change server without connecting\n• action='open_account' - Open Mozilla account portal (use for 'Open Account', 'Open My Account', 'Account', 'Manage subscription')\n\nWhen users specify country and/or city with connect, pass those parameters to connect to that location.",
+  "evals": [
+    {
+      "input": "@mozilla-vpn Connect to VPN",
+      "mocks": {
+        "mozilla-vpn-control": "VPN connected using your last configuration.\nServer: Seattle, WA, USA\nNew IP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn Disconnect VPN",
+      "mocks": {
+        "mozilla-vpn-control": "Mozilla VPN disconnected successfully."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn VPN status",
+      "mocks": {
+        "mozilla-vpn-control": "VPN is currently connected.\nServer: Seattle, WA, USA\nIP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn List countries",
+      "mocks": {
+        "mozilla-vpn-control": "Available VPN countries: Canada, Germany, UK, USA"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Show cities in USA",
+      "mocks": {
+        "mozilla-vpn-control": "Cities available in USA: Atlanta, GA, Chicago, IL, Seattle, WA"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_cities", "country": "USA" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn Show servers in UK",
+      "mocks": {
+        "mozilla-vpn-control": "Servers in UK:\n\nLondon:\n• gb-lon-wg-001"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_servers", "country": "UK" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn Connect to Seattle, USA",
+      "mocks": {
+        "mozilla-vpn-control": "VPN server switched to Seattle, WA, USA.\nVPN connected successfully.\nServer: Seattle, WA, USA\nNew IP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect", "country": "USA", "city": "Seattle" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@mozilla-vpn Change server to Germany",
+      "mocks": {
+        "mozilla-vpn-control": "VPN server switched to Frankfurt, Germany.\nVPN server changed but not connected."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "change_server", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Connect to Germany",
+      "mocks": {
+        "mozilla-vpn-control": "VPN server switched to Frankfurt, Germany.\nVPN connected successfully."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Turn off VPN",
+      "mocks": {
+        "mozilla-vpn-control": "Mozilla VPN disconnected successfully."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn What is my IP?",
+      "mocks": {
+        "mozilla-vpn-control": "VPN is currently disconnected.\nServer: Seattle, WA, USA\nIP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Cities in UK",
+      "mocks": {
+        "mozilla-vpn-control": "Cities available in UK: Glasgow, London, Manchester"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_cities", "country": "UK" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Servers in London, UK",
+      "mocks": {
+        "mozilla-vpn-control": "Servers in London, UK:\n• gb-lon-wg-001\n• gb-lon-wg-002"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_servers", "country": "UK", "city": "London" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn What countries are available?",
+      "mocks": {
+        "mozilla-vpn-control": "Available VPN countries: Canada, Germany, UK, USA"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Switch server to Germany",
+      "mocks": {
+        "mozilla-vpn-control": "VPN server switched to Frankfurt, Germany."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "change_server", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Enable VPN",
+      "mocks": {
+        "mozilla-vpn-control": "VPN connected using your last configuration."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Stop VPN",
+      "mocks": {
+        "mozilla-vpn-control": "Mozilla VPN disconnected successfully."
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn What's my IP address?",
+      "mocks": {
+        "mozilla-vpn-control": "VPN is currently connected.\nServer: Seattle, WA, USA\nIP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Is VPN connected?",
+      "mocks": {
+        "mozilla-vpn-control": "VPN is currently connected.\nServer: Seattle, WA, USA\nIP address: 24.113.186.164"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Open my account management portal",
+      "mocks": {
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Open Account",
+      "mocks": {
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Open My Account",
+      "mocks": {
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
+      ]
+    },
+    {
+      "input": "@mozilla-vpn Manage my subscription",
+      "mocks": {
+        "mozilla-vpn-control": "Opened Mozilla account portal in browser: https://accounts.firefox.com/"
+      },
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "open_account" } } }
+      ]
+    }
+  ]
+}
