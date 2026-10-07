@@ -85,8 +85,9 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
       if (error) {
         const detail = (stderr || stdout || error.message).trim();
         logFailure(args, error, detail);
+        // The CLI says "You need to login first" (0.8.0); the other phrasings are kept as a safety net.
         const loggedOut =
-          /not (logged|signed) in|auth login|unauthori[sz]ed|no (active )?session|session (expired|not found)/i.test(
+          /need to log ?in|not (logged|signed) in|auth login|unauthori[sz]ed|no (active )?session|session (expired|not found)/i.test(
             detail,
           );
         reject(
