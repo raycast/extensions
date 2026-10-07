@@ -82,6 +82,8 @@ export const DEFAULT_PATTERNS: readonly string[] = [
   "**/Library/Daemon Containers/**",
   "**/Library/Group Containers/**",
   "**/Library/Mail/**",
+  "**/Library/WebKit/**",
+  "**/Library/Trial/**",
 ];
 
 export const DEFAULT_SETTINGS: IndexSettings = {

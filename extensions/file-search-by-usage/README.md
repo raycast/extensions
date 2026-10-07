@@ -20,7 +20,7 @@ Before the first rebuild, search uses remembered paths and standard locations. F
 
 ## Index scope and rebuilding
 
-By default the index covers your home folder and every detected folder under `~/Library/CloudStorage`, including Dropbox, OneDrive, Google Drive, and other providers. Hidden names, common caches, and your ignore patterns are skipped. `/Applications` is not included.
+By default the index covers your home folder and every detected folder under `~/Library/CloudStorage`, including Dropbox, OneDrive, Google Drive, and other providers. Hidden names, common caches, and your ignore patterns are skipped. Default exclusions also cover application state such as `Library/WebKit` and `Library/Trial`; updates do not overwrite saved exclusions. `/Applications` is not included.
 
 In **Search Index Settings** you can:
 
@@ -35,6 +35,8 @@ Some exclusions always apply, including `.git`, `node_modules`, and CloudStorage
 To skip `~/Library` in the home scan while keeping cloud files, add `**/Library/**` and leave **Include Cloud Storage** enabled. Each cloud provider is scanned separately; the home scan skips those provider folders to avoid duplicates. Ignore patterns match the traversed path, not a symbolic link's resolved target: a differently named link elsewhere can still expose excluded content. Exclude that link path separately if needed. Ignore patterns still apply within each provider scope.
 
 Changes take effect on the next rebuild. Settings edits are saved one at a time; if a save, rebuild, or data deletion is active, wait and retry. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
+
+**Scan Messages** in Search Index Settings keeps per-folder warnings with their timestamps and refreshes while the screen is open. Select a message to read or copy its full text. A successful rescan clears that folder's warning.
 
 You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries. An incomplete or unreachable scope—and a failed settings or cloud-provider discovery pass—keeps its previously indexed paths.
 

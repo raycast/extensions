@@ -33,6 +33,7 @@ import { searchIndexPath } from "./lib/index-rebuild";
 import { cloudStorageIndexRoots } from "./lib/index-build";
 import { displayPath } from "./lib/read-dir";
 import { formatDuration, formatIndexBytes } from "./lib/format";
+import { IndexScanMessages } from "./components/index-scan-messages";
 
 function formatPhaseDuration(
   elapsedMs: number | undefined,
@@ -476,6 +477,7 @@ export default function Command() {
             />
           </List.Section>
 
+          <IndexScanMessages file={searchIndexPath()} />
           <List.Section
             title="Index Stats"
             subtitle={stats ? undefined : "No index built yet"}

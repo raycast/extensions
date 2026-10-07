@@ -7,6 +7,7 @@ import { buildSync, transformSync } from "esbuild";
 import { DatabaseSync } from "node:sqlite";
 import { acquireOwnedLock } from "../src/lib/owned-lock";
 import { between } from "./source-slice";
+import { readScanMessages } from "../src/lib/scan-messages";
 
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -55,7 +56,7 @@ function loadCommand(supportPath: string) {
     },
     showToast: async (options: (typeof toasts)[number]) => {
       toasts.push(options);
-      return options;
+      return Object.assign(options, { hide: async () => {} });
     },
     LocalStorage: {
       getItem: async (key: string) => {
@@ -559,6 +560,12 @@ export async function indexingChecks(
       "the real command reports scan errors instead of treating them as lock contention",
     );
     assert(
+      readScanMessages(path.join(root, "file-index.sqlite")).messages.some(
+        (item) => item.message === "Synthetic scan failure",
+      ),
+      "a real rebuild failure remains available in Settings after its toast disappears",
+    );
+    assert(
       !fs.existsSync(path.join(root, "google-drive-indexing.lock")),
       "a scan exception releases the indexing lock",
     );
@@ -584,6 +591,12 @@ export async function indexingChecks(
           toast.style === "failure" && toast.message?.includes("files_fts"),
       ),
       "the real rebuild command preserves the FTS finalization error through its lock wrapper",
+    );
+    assert(
+      readScanMessages(path.join(root, "file-index.sqlite")).messages.some(
+        (item) => item.message.includes("files_fts"),
+      ),
+      "Settings can read a finalization error even when the search FTS index is unavailable",
     );
 
     const replacementTest = loadCommand(path.join(root, "replacement"));

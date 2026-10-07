@@ -13,6 +13,11 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { performanceChecks } from "./performance-checks";
 import { indexingChecks } from "./indexing-checks";
+import { rebuildFeedbackChecks } from "./rebuild-feedback-checks";
+import {
+  scanMessageChecks,
+  scanMessageViewChecks,
+} from "./scan-message-checks";
 import { indexChecks } from "./index-checks";
 import { indexSafetyChecks } from "./index-safety-checks";
 import { rankSourcesChecks } from "./rank-sources-checks";
@@ -153,6 +158,9 @@ async function main() {
   await indexSafetyChecks(assert);
   rankSourcesChecks(assert);
   await indexingChecks(assert);
+  await rebuildFeedbackChecks(assert);
+  scanMessageChecks(assert);
+  await scanMessageViewChecks(assert);
   await performanceChecks(assert);
   const live = process.argv.includes("--live");
   const targetArg = process.argv.slice(2).find((arg) => arg !== "--live");

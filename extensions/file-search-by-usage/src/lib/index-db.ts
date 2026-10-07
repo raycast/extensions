@@ -127,9 +127,15 @@ CREATE TABLE IF NOT EXISTS index_meta (
 );
 `;
 
-function applyPragmas(db: DatabaseSync, readOnly: boolean) {
+function applyPragmas(
+  db: DatabaseSync,
+  readOnly: boolean,
+  busyTimeoutMs = 5000,
+) {
   // A stale lock from a killed process must not fail a query outright.
-  db.exec("PRAGMA busy_timeout = 5000");
+  db.exec(
+    `PRAGMA busy_timeout = ${Number.isFinite(busyTimeoutMs) ? Math.max(0, Math.floor(busyTimeoutMs)) : 5000}`,
+  );
   db.exec(`PRAGMA cache_size = -${CACHE_KIB}`);
   if (readOnly) return;
   db.exec("PRAGMA journal_mode = WAL");
@@ -211,12 +217,15 @@ function rebuild(file: string, attempt: number): OpenResult {
  * Open for reading. Missing is an ordinary state, not an error: search falls
  * back to memory-only results until the index has been built once.
  */
-export function openIndexForRead(file: string): OpenResult {
+export function openIndexForRead(
+  file: string,
+  busyTimeoutMs = 5000,
+): OpenResult {
   if (!fs.existsSync(file)) return { kind: "missing" };
   let db: DatabaseSync | undefined;
   try {
     db = new DatabaseSync(file, { readOnly: true });
-    applyPragmas(db, true);
+    applyPragmas(db, true, busyTimeoutMs);
     const version = Number(
       (db.prepare("PRAGMA user_version").get() as { user_version?: number })
         ?.user_version ?? 0,
@@ -448,6 +457,7 @@ export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
     ).run(String(startedAt));
     db.exec(`DELETE FROM index_meta WHERE key IN (
       'last_ended_at',
+      'last_scan_error',
       'last_duration_ms',
       'last_enumeration_ms',
       'last_metadata_ms',
@@ -459,6 +469,13 @@ export function writeScanStarted(db: DatabaseSync, startedAt: number): void {
     rollback(db);
     throw error;
   }
+}
+
+/** Best-effort diagnostic only; callers must still preserve the original failure. */
+export function writeScanError(db: DatabaseSync, message: string): void {
+  db.prepare(
+    "INSERT OR REPLACE INTO index_meta (key, value) VALUES ('last_scan_error', ?)",
+  ).run(message.slice(0, 16_384));
 }
 
 /** Includes final FTS maintenance, not just filesystem traversal. */

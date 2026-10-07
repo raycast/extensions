@@ -63,25 +63,45 @@ export async function rebuildWithFeedback(): Promise<void> {
     message:
       "Scanning configured folders with fd. This can take a few minutes.",
   });
-  const outcome = await rebuildSearchIndex({
-    onFdDownload: (stage) => {
-      toast.message =
-        stage === "downloading"
-          ? "Downloading the verified fd crawler…"
-          : "Verifying and installing fd…";
-    },
-    onFinishing: () => {
-      toast.title = "Building search index…";
-      toast.message = "Writing the search index…";
-    },
-    onProgress: (progress) => {
-      toast.title = "Building search index…";
-      toast.message = describeScanProgress(progress);
-    },
-  });
+  let outcome: BuildOutcome;
+  let finished = false;
+  try {
+    outcome = await rebuildSearchIndex({
+      onFdDownload: (stage) => {
+        if (finished) return;
+        toast.message =
+          stage === "downloading"
+            ? "Downloading the verified fd crawler…"
+            : "Verifying and installing fd…";
+      },
+      onFinishing: () => {
+        if (finished) return;
+        toast.title = "Building search index…";
+        toast.message = "Writing the search index…";
+      },
+      onProgress: (progress) => {
+        if (finished) return;
+        toast.title = "Building search index…";
+        toast.message = describeScanProgress(progress);
+      },
+    });
+  } catch (error) {
+    outcome = {
+      kind: "failed",
+      message: error instanceof Error ? error.message : String(error),
+    };
+  } finally {
+    finished = true;
+  }
+  // Property updates are fire-and-forget. Await the native notification calls
+  // before the no-view command exits, and retire the animated toast explicitly.
+  try {
+    await toast.hide();
+  } catch {
+    // A dismissed progress toast must not prevent showing the build outcome.
+  }
   const complete = outcome.kind === "done" && outcome.report.complete;
-  toast.style = complete ? Toast.Style.Success : Toast.Style.Failure;
-  toast.title =
+  const title =
     outcome.kind === "done"
       ? complete
         ? "Search index rebuilt"
@@ -91,5 +111,9 @@ export async function rebuildWithFeedback(): Promise<void> {
         : outcome.kind === "no-roots"
           ? "No folders configured for indexing"
           : "The search index could not be built";
-  toast.message = outcome.kind === "done" ? outcome.summary : outcome.message;
+  await showToast({
+    style: complete ? Toast.Style.Success : Toast.Style.Failure,
+    title,
+    message: outcome.kind === "done" ? outcome.summary : outcome.message,
+  });
 }

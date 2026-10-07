@@ -2,6 +2,11 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Keep scan warnings and errors in Search Index Settings with folder names, timestamps, full-message viewing, and copying.
+
+- Replace the indexing progress notification with an awaited completion or error notification before the command exits.
+- Exclude `Library/WebKit` and `Library/Trial` by default, without overwriting saved exclusion lists.
+
 - Download the pinned fd 10.5.0 macOS release automatically when fd is not installed, verify its SHA-256 checksum and version, and reuse only an unchanged cached executable.
 
 - Show the last index scan's start and end times, total duration, and phase-by-phase timing breakdown in Search Index Settings.

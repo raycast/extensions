@@ -446,6 +446,19 @@ export async function indexChecks(assert: Assert) {
     "the default ignore patterns cover scratch files, caches and app sandboxes",
   );
   assert(
+    DEFAULT_PATTERNS.includes("**/Library/WebKit/**") &&
+      DEFAULT_PATTERNS.includes("**/Library/Trial/**"),
+    "default exclusions include WebKit and Trial application state",
+  );
+  assert(
+    parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, patterns: [] }))
+      .patterns.length === 0 &&
+      parseSettings(
+        JSON.stringify({ ...DEFAULT_SETTINGS, patterns: ["*.custom"] }),
+      ).patterns.join("|") === "*.custom",
+    "new defaults do not overwrite empty or customized saved exclusions",
+  );
+  assert(
     !DEFAULT_PATTERNS.some((pattern) =>
       pattern.includes('Mobile Documents/**"'),
     ) && !DEFAULT_PATTERNS.includes("**/Library/**"),
@@ -3021,6 +3034,63 @@ export async function indexChecks(assert: Assert) {
   // --------------------------------------------------- real fd, when installed
   const realFd = findFd();
   if (realFd.kind === "found") {
+    const defaultsDir = tempDir("default-exclusions");
+    try {
+      const home = path.join(defaultsDir, "home");
+      for (const name of ["WebKit", "Trial"]) {
+        const folder = path.join(home, "Library", name, "state");
+        fs.mkdirSync(folder, { recursive: true });
+        fs.writeFileSync(path.join(folder, "state.txt"), "state");
+        fs.symlinkSync(folder, path.join(folder, "loop"));
+      }
+      const documents = [
+        path.join(
+          home,
+          "Library",
+          "CloudStorage",
+          "ExampleProvider",
+          "report.txt",
+        ),
+        path.join(
+          home,
+          "Library",
+          "Mobile Documents",
+          "Documents",
+          "report.txt",
+        ),
+      ];
+      for (const file of documents) {
+        fs.mkdirSync(path.dirname(file), { recursive: true });
+        fs.writeFileSync(file, "report");
+      }
+      const db = openWritable(defaultsDir);
+      try {
+        const outcome = await scanRoot(
+          home,
+          {
+            fd: realFd.path,
+            roots: [home],
+            db,
+            showHidden: true,
+            patterns: [...DEFAULT_PATTERNS],
+          },
+          Date.now() + 60_000,
+        );
+        const paths = rowPaths(db);
+        assert(
+          outcome.complete && !paths.some((file) => file.endsWith("state.txt")),
+          "default WebKit and Trial exclusions prevent traversing application-state symlink loops",
+        );
+        assert(
+          documents.every((file) => paths.includes(file)),
+          "default exclusions keep CloudStorage and iCloud documents searchable",
+        );
+      } finally {
+        db.close();
+      }
+    } finally {
+      fs.rmSync(defaultsDir, { recursive: true, force: true });
+    }
     const locatorDir = tempDir("locator-exclusion");
     try {
       const home = path.join(locatorDir, "home");

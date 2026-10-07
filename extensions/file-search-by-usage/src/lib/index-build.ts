@@ -10,6 +10,7 @@ import {
   suspendFtsSync,
   writeScanStarted,
   writeScanEnded,
+  writeScanError,
 } from "./index-db";
 import {
   ScanProgress,
@@ -282,61 +283,75 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
       // scan cannot leave the index permanently out of step.
       const startedAt = Date.now();
       let report: ScanReport | undefined;
-      try {
-        assertOwned();
-        writeScanStarted(opened.db, startedAt);
-        suspendFtsSync(opened.db);
-        const knownRoots = readKnownIndexRoots(opened.db);
-        const protectedRoots = cleanupAuthoritative ? [] : [...knownRoots];
-        const automaticCloud =
-          options.roots === undefined && settings.includeDrive;
-        report = await scanRoots({
-          fd: lookup.path,
-          roots,
-          db: opened.db,
-          signal: options.signal,
-          budgetMs: options.budgetMs ?? REBUILD_BUDGET_MS,
-          maxEntries: options.maxEntries,
-          showHidden: options.showHidden ?? settings.includeHidden,
-          useIgnoreFiles: options.useIgnoreFiles ?? settings.useIgnoreFiles,
-          patterns: options.patterns ?? settings.patterns,
-          allowRootCleanup: cleanupAuthoritative,
-          allowStaleCleanup: loaded.authoritative,
-          allowEmptyCleanup: emptyConfiguredScope,
-          protectedRoots,
-          cloudSources: [...cloud.roots, ...readCloudIndexRoots(opened.db)],
-          prepareRoots: (resolutions) => {
-            assertOwned();
-            if (automaticCloud)
-              return prepareCloudRootState(opened.db, {
-                cloudRoot,
-                canonicalCloudRoot: cloud.resolvedRoot,
-                knownRoots,
-                sources: cloud.roots,
-                removedSources: cloud.removedSources,
-                resolutions,
-                authoritative: cleanupAuthoritative,
-              });
-            return {
-              cloudRoots: readCloudIndexRoots(opened.db),
-              commitCleanup:
-                options.roots === undefined && cleanupAuthoritative
-                  ? () => forgetCloudRootState(opened.db)
-                  : undefined,
-            };
-          },
-          onProgress: options.onProgress,
-          spawnFd: options.spawnFd,
-          assertOwned,
-          tuning: options.tuning,
-        });
-        return {
-          kind: "done" as const,
-          report,
-          summary: describeScan(report),
-        };
-      } finally {
+      let scanStarted = false;
+      const saveError = (error: unknown) => {
+        if (!scanStarted) return;
         try {
+          assertOwned();
+          writeScanError(
+            opened.db,
+            error instanceof Error ? error.message : String(error),
+          );
+        } catch {
+          // Diagnostic persistence must not replace the scan's original error.
+        }
+      };
+      try {
+        try {
+          assertOwned();
+          writeScanStarted(opened.db, startedAt);
+          scanStarted = true;
+          suspendFtsSync(opened.db);
+          const knownRoots = readKnownIndexRoots(opened.db);
+          const protectedRoots = cleanupAuthoritative ? [] : [...knownRoots];
+          const automaticCloud =
+            options.roots === undefined && settings.includeDrive;
+          report = await scanRoots({
+            fd: lookup.path,
+            roots,
+            db: opened.db,
+            signal: options.signal,
+            budgetMs: options.budgetMs ?? REBUILD_BUDGET_MS,
+            maxEntries: options.maxEntries,
+            showHidden: options.showHidden ?? settings.includeHidden,
+            useIgnoreFiles: options.useIgnoreFiles ?? settings.useIgnoreFiles,
+            patterns: options.patterns ?? settings.patterns,
+            allowRootCleanup: cleanupAuthoritative,
+            allowStaleCleanup: loaded.authoritative,
+            allowEmptyCleanup: emptyConfiguredScope,
+            protectedRoots,
+            cloudSources: [...cloud.roots, ...readCloudIndexRoots(opened.db)],
+            prepareRoots: (resolutions) => {
+              assertOwned();
+              if (automaticCloud)
+                return prepareCloudRootState(opened.db, {
+                  cloudRoot,
+                  canonicalCloudRoot: cloud.resolvedRoot,
+                  knownRoots,
+                  sources: cloud.roots,
+                  removedSources: cloud.removedSources,
+                  resolutions,
+                  authoritative: cleanupAuthoritative,
+                });
+              return {
+                cloudRoots: readCloudIndexRoots(opened.db),
+                commitCleanup:
+                  options.roots === undefined && cleanupAuthoritative
+                    ? () => forgetCloudRootState(opened.db)
+                    : undefined,
+              };
+            },
+            onProgress: options.onProgress,
+            spawnFd: options.spawnFd,
+            assertOwned,
+            tuning: options.tuning,
+          });
+          return {
+            kind: "done" as const,
+            report,
+            summary: describeScan(report),
+          };
+        } finally {
           /*
            * Rebuilding the FTS index blocks the event loop: 2.7s over 900,000
            * rows. Nothing can repaint during it, so say what is happening and
@@ -356,13 +371,16 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
           if (report !== undefined)
             report.timings.ftsMs = performance.now() - ftsStarted;
           writeScanEnded(opened.db, startedAt, Date.now(), report?.timings);
+        }
+      } catch (error) {
+        saveError(error);
+        throw error;
+      } finally {
+        try {
+          opened.db.close();
         } finally {
-          try {
-            opened.db.close();
-          } finally {
-            // The reader may hold a snapshot from before this scan.
-            closeIndexReader();
-          }
+          // The reader may hold a snapshot from before this scan.
+          closeIndexReader();
         }
       }
     }),
