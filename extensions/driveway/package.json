@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "driveway",
   "title": "DriveWay",
-  "description": "Discover, mount, and unmount SMB and WebDAV network drives. Save multiple servers with aliases and reconnect or mount them all at once. (The Domain/IP preference is for one always-included host, not where you add multiple servers.)",
+  "description": "Finds SMB and WebDAV drives on your network and keeps a list of as many as you like, each with its own alias, username, and protocol: mount, unmount, auto-reconnect, or open any of them from the menu bar. Drives are added with Add Drive; the Domain/IP preference only pins one extra host to always include.",
   "icon": "icon.png",
   "author": "pankajpopli",
   "categories": [
@@ -12,46 +12,58 @@
   "keywords": [
     "smb",
     "webdav",
-    "network drive",
     "nas",
+    "network drive",
     "mount",
-    "server"
+    "unmount",
+    "share",
+    "server",
+    "discover",
+    "bonjour",
+    "connect to server",
+    "samba"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Manage Drives",
+      "subtitle": "DriveWay",
       "description": "View, edit, remove, connect, and disconnect your saved drives. If Domain/IP is set in Preferences, also browse that server's shares live.",
       "mode": "view"
     },
     {
       "name": "add-server",
       "title": "Add Drive",
+      "subtitle": "DriveWay",
       "description": "Save a new drive (host, share path, optional alias and username) to your list.",
       "mode": "view"
     },
     {
       "name": "scan-network",
       "title": "Discover Devices",
+      "subtitle": "DriveWay",
       "description": "Finds SMB and WebDAV servers, computers, and other devices on your local network via Bonjour/mDNS, a subnet scan, and a ping sweep, per the Network Discovery preferences below.",
       "mode": "view"
     },
     {
       "name": "mount-shares",
       "title": "Mount All",
+      "subtitle": "DriveWay",
       "description": "Mount every saved, reachable drive at once.",
       "mode": "no-view"
     },
     {
       "name": "unmount-shares",
       "title": "Unmount All",
+      "subtitle": "DriveWay",
       "description": "Unmount every currently connected saved drive at once.",
       "mode": "no-view"
     },
     {
       "name": "auto-reconnect",
       "title": "Auto-Reconnect",
+      "subtitle": "DriveWay",
       "description": "Runs in the background and silently reconnects saved drives with Auto-Reconnect enabled. Never touches drives without it, and never unmounts anything. Actual cadence is controlled by the Interval preference below.",
       "mode": "no-view",
       "interval": "5m",
@@ -91,6 +103,7 @@
     {
       "name": "menu-bar",
       "title": "DriveWay Menu Bar",
+      "subtitle": "DriveWay",
       "description": "Shows saved drives in the menu bar with live connection status and one-click mount/unmount.",
       "mode": "menu-bar",
       "interval": "1m",

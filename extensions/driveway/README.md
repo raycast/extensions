@@ -2,6 +2,8 @@
 
 Discover, save, and mount SMB and WebDAV network drives from Raycast, without opening Finder.
 
+If you only ever connect to one server, [Network Drive](https://www.raycast.com/SuoweiHu/network-drive) covers that case with a single host set in preferences. DriveWay is for finding drives on your network and keeping a list of several, each with its own alias, username, and protocol.
+
 ## For Everyone
 
 **Getting started**

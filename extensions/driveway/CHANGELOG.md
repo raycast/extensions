@@ -2,12 +2,16 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Save, mount, and unmount multiple network drives over **SMB** and **WebDAV**, each with an optional alias and username. A **WebDAV (insecure, no TLS)** option is available for a trusted local network whose server has no valid certificate.
-- **Network Discovery** finds servers on your local network through three independently toggled sources: Bonjour/mDNS browsing, an active subnet scan that confirms WebDAV with an RFC 4918 `OPTIONS` capability check rather than just an open port, a Bonjour lookup of machines that announce themselves without advertising a sharing service, the way Finder's network browse does, and a ping sweep that lists any reachable device regardless of protocol. An SMB host expands into its individual shares only when it can be listed without a password, so no stored credential is ever sent to a machine you didn't name; anything else appears at the host level with a Browse Shares action that asks for credentials for that host alone.
-- **Discover Devices** runs that discovery as its own command, with a Refresh action to re-scan on demand.
-- **Manage Drives** lists saved drives with live connection status and disk usage, plus **Browse Shares on This Host…** for one-time-credential share discovery on any saved SMB host. It opens straight to your saved drives and runs discovery only when you pick **Discover on Network**, so nothing is waiting on a subnet scan.
-- **Mount All** and **Unmount All** act on every saved drive at once.
-- **Auto-Reconnect** silently reconnects only the drives you opt in, on a configurable interval, and never unmounts anything.
-- **DriveWay Menu Bar** shows saved drives and their status outside Raycast, with one-click mount and unmount.
-- Mounting goes through AppleScript's `mount volume`, the same mechanism Finder's Connect to Server uses, so a cached Keychain credential connects silently and a self-signed WebDAV certificate can be trusted interactively. No Automation permission is required and no password is stored by the extension.
-- AFP is not offered: Apple removed AFP client support in macOS 27, with no CLI or AppleScript fallback.
+- Save, mount, and unmount any number of network drives over SMB and WebDAV, each with an optional alias and username
+- WebDAV (insecure, no TLS) option for a trusted local network whose server has no valid certificate
+- Manage Drives: saved drives with live connection status and disk usage, plus connect, disconnect, edit, and remove
+- Browse Shares on This Host: lists an SMB host's shares using credentials entered once, for that host only, with the password left empty on servers that list without one
+- Discover Devices: finds servers on the local network via Bonjour/mDNS, a subnet scan, and a ping sweep, each toggled independently
+- Subnet scan confirms WebDAV with an RFC 4918 `OPTIONS` check rather than just an open port
+- An SMB host expands into its shares only when it can be listed without a password, so no stored credential is sent to a machine you didn't name
+- Mount All and Unmount All act on every saved drive at once, skipping any already connected
+- Auto-Reconnect reconnects only the drives you opt in, on a configurable interval, and never unmounts anything
+- Menu bar command with saved drives, their status, and one-click mount and unmount
+- Mounting uses AppleScript's `mount volume`, the same mechanism as Finder's Connect to Server, so a cached Keychain credential connects silently and a self-signed WebDAV certificate can be trusted interactively
+- No Automation permission required and no password stored by the extension
+- AFP is not offered: Apple removed AFP client support in macOS 27, with no CLI or AppleScript fallback
