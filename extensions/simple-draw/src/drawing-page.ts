@@ -553,7 +553,8 @@ export function generateDrawingPage(base64Image: string): string {
     ctx.save();
     ctx.strokeStyle = currentColor;
     ctx.fillStyle = currentColor;
-    ctx.lineWidth = currentWidth;
+    // Thin the shaft on short arrows so its round cap stays inside the shrunken head
+    ctx.lineWidth = Math.min(currentWidth, headLength * 0.7);
     ctx.lineCap = "round";
     ctx.setLineDash([]);
 
@@ -614,7 +615,11 @@ export function generateDrawingPage(base64Image: string): string {
   document.addEventListener("keyup", (e) => {
     if (e.key === "Shift") setShiftHeld(false);
   });
-  window.addEventListener("blur", () => setShiftHeld(false));
+  // A mouseup outside the window never reaches us, so commit any drag when focus leaves
+  window.addEventListener("blur", () => {
+    if (drawing) endDraw();
+    setShiftHeld(false);
+  });
 
   function startDraw(e) {
     if (currentTool === "text") return;
