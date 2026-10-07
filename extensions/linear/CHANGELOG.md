@@ -10,6 +10,7 @@
 - **List Issues** matches a status name such as "In Progress" across all teams when no team is given, instead of failing.
 - Fix **List Projects** and **List Releases** failing with "Argument Validation Error" when filtering by a status or stage name instead of an ID.
 - Clarify AI instructions and tool descriptions for choosing between the issue list, search, and filter tools.
+- Fix publishing failing while extracting the **Get Notifications** tool schema with Ray CLI 2.7.0.
 
 ## [Fix AI Tool Errors] - 2026-10-02
 
