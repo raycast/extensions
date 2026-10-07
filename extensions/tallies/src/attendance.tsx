@@ -107,7 +107,7 @@ function AttendanceActions({ data, save, entry }: { data: Store; save: SaveStore
             icon={Icon.Person}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "n" },
-              windows: { modifiers: ["ctrl", "shift"], key: "n" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "n" },
             }}
             onAction={async () => {
               await save(
