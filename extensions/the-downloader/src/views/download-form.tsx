@@ -39,6 +39,7 @@ import { resolveBrowser } from "../lib/browsers.js";
 import { AbortError } from "../lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "../lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "../lib/spotdl.js";
+import { ABOUT_URL, SPOTDL_SETUP_GUIDE_URL, SUPPORTED_SITES_URL } from "../lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "../lib/monolith.js";
 import { DownloadInit, DownloadSession } from "../lib/download-session.js";
 import { entryFromSnapshot, recordDownload } from "../lib/history.js";
@@ -99,8 +100,6 @@ const FILETYPE_ICON: Record<Filetype, Icon> = {
   transcript: Icon.Document,
   website: Icon.Globe,
 };
-
-const SPOTDL_SETUP_GUIDE_URL = "https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md";
 
 const QUALITY_TITLE: Record<string, string> = {
   best: "Best",
@@ -630,7 +629,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
         toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
         toast.secondaryAction = {
           title: "Open Setup Guide",
-          onAction: () => open("https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md"),
+          onAction: () => open(SPOTDL_SETUP_GUIDE_URL),
         };
         return;
       }
@@ -808,20 +807,11 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
-            <Action.OpenInBrowser
-              icon={Icon.Info}
-              title="About This Extension"
-              url="https://github.com/sth3no/the-downloader/blob/main/ABOUT.md"
-            />
+            <Action.OpenInBrowser icon={Icon.Info} title="About This Extension" url={ABOUT_URL} />
           </ActionPanel.Section>
         </ActionPanel>
       }
-      searchBarAccessory={
-        <Form.LinkAccessory
-          text="Supported Sites"
-          target="https://github.com/sth3no/the-downloader/blob/main/SUPPORTED_SITES.md"
-        />
-      }
+      searchBarAccessory={<Form.LinkAccessory text="Supported Sites" target={SUPPORTED_SITES_URL} />}
     >
       <Form.Description title={statusLabel} text={statusText} />
       {detailsText && <Form.Description title="Details" text={detailsText} />}

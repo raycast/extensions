@@ -23,6 +23,7 @@ import {
   wingetIdFor,
 } from "../lib/tools.js";
 import { downloadSpotdl, isAppleSilicon, isRosettaInstalled } from "../lib/managed-binary.js";
+import { SPOTDL_SETUP_GUIDE_URL } from "../lib/docs.js";
 import { resetWingetPackagesCache } from "../lib/binary.js";
 
 const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
@@ -70,8 +71,6 @@ Press **↵** to download it now, and keep Raycast open until it finishes.
 `;
 
 const BUSY_NOTE = "> **Installing…** This can take a couple of minutes. Keep Raycast open until it finishes.\n\n";
-
-const SPOTDL_SETUP_GUIDE_URL = "https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md";
 
 const spotdlInstallGuide = (installed: boolean) => {
   const installBlock = installed

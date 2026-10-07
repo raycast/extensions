@@ -23,6 +23,7 @@ import { resolveBrowser } from "./lib/browsers.js";
 import { AbortError } from "./lib/run.js";
 import { needsRosetta, RosettaRequiredError } from "./lib/managed-binary.js";
 import { runSpotdlDownload, SpotdlDownloadError } from "./lib/spotdl.js";
+import { SPOTDL_SETUP_GUIDE_URL } from "./lib/docs.js";
 import { reserveWebpagePath, runMonolithSave } from "./lib/monolith.js";
 import { progressMessage } from "./lib/format.js";
 import { DownloadKind, DownloadSession } from "./lib/download-session.js";
@@ -217,7 +218,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
       toast.secondaryAction = {
         title: "Open Setup Guide",
-        onAction: () => open("https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md"),
+        onAction: () => open(SPOTDL_SETUP_GUIDE_URL),
       };
       return;
     }
@@ -283,7 +284,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         } else if (error.summary.action === "open-setup-guide") {
           toast.secondaryAction = {
             title: "Open Setup Guide",
-            onAction: () => open("https://github.com/sth3no/the-downloader/blob/main/SPOTIFY.md"),
+            onAction: () => open(SPOTDL_SETUP_GUIDE_URL),
           };
         } else {
           toast.secondaryAction = undefined;
