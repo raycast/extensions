@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/config-utils.ts", "tests/**/*.ts"],
+  "include": ["src/config-utils.ts", "tests/**/*.ts", "raycast-env.d.ts"],
   "compilerOptions": {
     "rootDir": ".",
     "outDir": ".test-build"

@@ -38,6 +38,51 @@ type ParseOptions = {
   fallbackDate: string;
 };
 
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isPaperRecord(value: unknown): value is Paper {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.title === "string" &&
+    typeof value.date === "string" &&
+    typeof value.notePath === "string" &&
+    ["published", "abstract", "whyThisPaper", "link"].every(
+      (key) => value[key] === undefined || typeof value[key] === "string",
+    ) &&
+    (value.researchSummary === undefined ||
+      (isRecord(value.researchSummary) &&
+        [value.researchSummary.heading, value.researchSummary.body].every(
+          (item) => item === undefined || typeof item === "string",
+        ))) &&
+    (value.relatedLocalPapers === undefined ||
+      (Array.isArray(value.relatedLocalPapers) &&
+        value.relatedLocalPapers.every(
+          (item) =>
+            isRecord(item) &&
+            typeof item.id === "string" &&
+            typeof item.title === "string" &&
+            [item.date, item.notePath, item.link].every((field) => field === undefined || typeof field === "string") &&
+            (item.reasons === undefined ||
+              (Array.isArray(item.reasons) && item.reasons.every((reason) => typeof reason === "string"))),
+        ))) &&
+    (value.authors === undefined ||
+      (Array.isArray(value.authors) && value.authors.every((item) => typeof item === "string"))) &&
+    (value.categories === undefined ||
+      (Array.isArray(value.categories) && value.categories.every((item) => typeof item === "string")))
+  );
+}
+
 export function parseCliPapers(rawJson: string, options: ParseOptions): Paper[] {
   let data: unknown;
   try {
@@ -50,48 +95,44 @@ export function parseCliPapers(rawJson: string, options: ParseOptions): Paper[] 
     throw new Error("Paper Agent returned an unexpected response. Check that your core installation is up to date.");
   }
 
-  return data
-    .filter((e): e is Record<string, unknown> => !!e && typeof e === "object")
-    .map((e) => {
-      const id = (e.id as string) ?? "";
-      const date = (e.date as string) ?? options.fallbackDate;
-      const published = e.published as string | undefined;
-      const rawNotePath = e.note_path as string | undefined;
-      const notePath = rawNotePath
-        ? path.join(options.paperDir, rawNotePath)
-        : path.join(options.libraryDir, date || options.fallbackDate, `${id || "note"}.md`);
-      const rs = e.research_summary as Record<string, unknown> | undefined;
-      const related = Array.isArray(e.related_local_papers) ? e.related_local_papers : [];
+  return data.filter(isRecord).map((e) => {
+    const id = stringValue(e.id) ?? "";
+    const date = stringValue(e.date) || options.fallbackDate;
+    const published = stringValue(e.published);
+    const rawNotePath = stringValue(e.note_path);
+    const notePath = rawNotePath
+      ? path.resolve(options.paperDir, rawNotePath)
+      : path.join(options.libraryDir, date || options.fallbackDate, `${id || "note"}.md`);
+    const rs = isRecord(e.research_summary) ? e.research_summary : undefined;
+    const related = Array.isArray(e.related_local_papers) ? e.related_local_papers : [];
 
-      return {
-        id: id || path.basename(notePath, ".md"),
-        title: (e.title as string) ?? "Untitled",
-        date,
-        published,
-        authors: e.authors as string[] | undefined,
-        abstract: e.abstract as string | undefined,
-        whyThisPaper: e.why_this_paper as string | undefined,
-        categories: e.categories as string[] | undefined,
-        researchSummary: rs ? { heading: rs.heading as string, body: rs.body as string } : undefined,
-        relatedLocalPapers: related
-          .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
-          .map((item) => {
-            const rawRelatedNotePath = item.note_path as string | undefined;
-            return {
-              id: (item.id as string) ?? "",
-              title: (item.title as string) ?? "Untitled",
-              date: item.date as string | undefined,
-              notePath: rawRelatedNotePath ? path.join(options.paperDir, rawRelatedNotePath) : undefined,
-              hasNote: rawRelatedNotePath ? fs.existsSync(path.join(options.paperDir, rawRelatedNotePath)) : false,
-              link: item.link as string | undefined,
-              reasons: Array.isArray(item.reasons) ? (item.reasons as string[]) : [],
-            } satisfies RelatedLocalPaper;
-          }),
-        link: e.link as string | undefined,
-        notePath,
-        hasNote: fs.existsSync(notePath),
-      } satisfies Paper;
-    });
+    return {
+      id: id || path.basename(notePath, ".md"),
+      title: stringValue(e.title) ?? "Untitled",
+      date,
+      published,
+      authors: stringList(e.authors),
+      abstract: stringValue(e.abstract),
+      whyThisPaper: stringValue(e.why_this_paper),
+      categories: stringList(e.categories),
+      researchSummary: rs ? { heading: stringValue(rs.heading), body: stringValue(rs.body) } : undefined,
+      relatedLocalPapers: related.filter(isRecord).map((item) => {
+        const rawRelatedNotePath = stringValue(item.note_path);
+        return {
+          id: stringValue(item.id) ?? "",
+          title: stringValue(item.title) ?? "Untitled",
+          date: stringValue(item.date),
+          notePath: rawRelatedNotePath ? path.resolve(options.paperDir, rawRelatedNotePath) : undefined,
+          hasNote: rawRelatedNotePath ? fs.existsSync(path.resolve(options.paperDir, rawRelatedNotePath)) : false,
+          link: stringValue(item.link),
+          reasons: stringList(item.reasons),
+        } satisfies RelatedLocalPaper;
+      }),
+      link: stringValue(e.link),
+      notePath,
+      hasNote: fs.existsSync(notePath),
+    } satisfies Paper;
+  });
 }
 
 export function renderPaperDetailMarkdown(paper: Paper, displayDate: string): string {

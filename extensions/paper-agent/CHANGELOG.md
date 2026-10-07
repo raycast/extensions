@@ -1,11 +1,17 @@
-# Paper Agent
+# Paper Agent Changelog
 
-## [Raycast 2 Compatibility and Library Reliability] - {PR_MERGE_DATE}
+## [Maintenance] - {PR_MERGE_DATE}
 
-- Update to Raycast API 2.6.3 and refresh dependencies.
-- Report core and library failures separately from empty results, with preference and retry actions.
-- Add query timeouts and cancellation, preserve search input after errors, and support responses up to 8 MiB.
-- Add offline regression tests and document the Node.js 22.22.2 requirement.
+- Update to Raycast API 2.6.3 and Node.js 22.22.2 for development and CI.
+- Show core and library errors separately from empty results, with actions to open preferences and retry.
+- Trim Python paths consistently, cancel superseded searches, and add timeouts for core checks and library queries.
+- Allow library responses up to 8 MiB and report invalid CLI output.
+- Preserve the clipboard when schedule installation cannot find the core.
+- Add offline regression checks and a distribution build to CI.
+- Keep favorites, reading queues, and read state synchronized across nested views; preserve saved data when storage fails.
+- Respect manual unread changes, validate saved paper fields, and handle absolute note paths.
+- Pass Gmail app passwords to manual and scheduled runs and validate numeric preferences before starting.
+- Keep startup errors visible with retry actions, allow refreshing run status, and verify schedule removal.
 
 ## [Initial Release] - 2026-04-02
 
