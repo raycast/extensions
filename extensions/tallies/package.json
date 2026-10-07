@@ -3,24 +3,26 @@
   "name": "tallies",
   "title": "Tallies",
   "description": "Track attendance and copy Excel-compatible tables and template notes.",
-  "icon": "tally-icon.png",
+  "icon": "tallies-icon.png",
   "author": "spannmicah",
   "license": "MIT",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "template",
       "title": "Template",
       "description": "Create and select attendance markdown templates",
       "mode": "view",
-      "icon": "tally-icon.png"
+      "icon": "tallies-icon.png"
     },
     {
       "name": "attendance",
       "title": "Check In",
       "description": "Track attendance and copy Excel-compatible tables",
       "mode": "view",
-      "icon": "tally-icon.png"
+      "icon": "tallies-icon.png"
     }
   ],
   "scripts": {
@@ -33,18 +35,19 @@
   },
   "dependencies": {
     "@raycast/api": "latest",
-    "proper-lockfile": "^4.1.2",
     "react": "^19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "latest",
     "@types/node": "^22.0.0",
-    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.0"
   },
   "type": "module",
-  "platforms": ["macOS", "Windows"]
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

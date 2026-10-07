@@ -1,4 +1,4 @@
-# Publishing Tally
+# Publishing Tallies
 
 The extension has not yet been submitted to the Raycast Store.
 
@@ -23,7 +23,7 @@ See [Raycast's screenshot instructions](https://developers.raycast.com/basics/pr
 ## Submit
 
 ```sh
-cd /Users/micah/Desktop/apps/tally
+cd /Users/micah/dev/tallies
 npm run publish
 ```
 
@@ -35,4 +35,8 @@ See [Raycast's publishing workflow](https://developers.raycast.com/basics/publis
 
 ## Use on another Mac before Store approval
 
-Run `npm run bundle`, then transfer the resulting `tally.rayext` to the other Mac and open it with Raycast. Export a backup from **Check in → Actions → Export Backup**, transfer the JSON file, then use **Import Backup** in the other installation. Keep your existing installation until its data has been backed up and transferred.
+Run `npm run bundle`, then transfer the resulting `tallies.rayext` to the other Mac and open it with Raycast. Export a backup from **Check in → Actions → Export Backup**, transfer the JSON file, then use **Import Backup** in the other installation. Keep your existing installation until its data has been backed up and transferred.
+
+## Upgrade from the previous extension name
+
+Before loading Tallies, export a JSON backup from your existing attendance extension. After loading Tallies, import that backup. The renamed extension has a separate Raycast storage scope; older attendance backups remain supported.

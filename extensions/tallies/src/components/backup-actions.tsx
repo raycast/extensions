@@ -14,15 +14,16 @@ import { readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { exportBackup, importBackup } from "../lib/backup";
-import { readStore, reportError, type SaveStore } from "../lib/storage";
+import { reportError, type SaveStore } from "../lib/storage";
+import type { Store } from "../lib/types";
 
-function ExportForm() {
+function ExportForm({ data }: { data: Store }) {
   const { pop } = useNavigation();
   async function submit({ folders }: { folders: string[] }) {
     try {
       if (folders.length !== 1) throw new Error("Choose a destination folder.");
-      const path = join(folders[0], `tally-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
-      await writeFile(path, exportBackup(await readStore()), { flag: "wx", mode: 0o600 });
+      const path = join(folders[0], `tallies-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
+      await writeFile(path, exportBackup(data), { flag: "wx", mode: 0o600 });
       await showToast({ style: Toast.Style.Success, title: "Backup Saved", message: path });
       try {
         await Clipboard.copy({ file: path });
@@ -64,11 +65,11 @@ function ImportForm({ save }: { save: SaveStore }) {
   const { pop } = useNavigation();
   async function submit({ files }: { files: string[] }) {
     try {
-      if (files.length !== 1) throw new Error("Choose one Tally JSON backup.");
+      if (files.length !== 1) throw new Error("Choose one Tallies JSON backup.");
       const incoming = importBackup(await readFile(files[0], "utf8"));
       if (
         !(await confirmAlert({
-          title: "Replace All Tally Data?",
+          title: "Replace All Tallies Data?",
           message: `Import ${incoming.templates.length} templates and ${incoming.entries.length} entries? This replaces all current templates and entries. Export a backup first if you want to keep them.`,
           primaryAction: { title: "Replace and Import", style: Alert.ActionStyle.Destructive },
         }))
@@ -93,10 +94,10 @@ function ImportForm({ save }: { save: SaveStore }) {
     </Form>
   );
 }
-export function BackupActions({ save }: { save: SaveStore }) {
+export function BackupActions({ data, save }: { data: Store; save: SaveStore }) {
   return (
     <ActionPanel.Section title="Move Between Computers">
-      <Action.Push title="Export Backup" icon={Icon.Download} target={<ExportForm />} />
+      <Action.Push title="Export Backup" icon={Icon.Download} target={<ExportForm data={data} />} />
       <Action.Push title="Import Backup" icon={Icon.Upload} target={<ImportForm save={save} />} />
     </ActionPanel.Section>
   );
