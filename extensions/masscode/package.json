@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "masscode",
   "title": "massCode",
-  "description": "Fetch snippets from massCode v4 app",
+  "description": "Fetch snippets from massCode app",
   "icon": "massCode.png",
   "author": "antonreshetov",
   "version": "2.0.0",
@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "MassCode Assistant",
-      "description": "Fetch snippets from massCode v4 app",
+      "description": "Fetch snippets from massCode app",
       "mode": "view"
     }
   ],
@@ -28,6 +28,14 @@
       "placeholder": "4321",
       "default": "4321",
       "required": false
+    },
+    {
+      "name": "token",
+      "title": "massCode API Token",
+      "description": "Generate it in massCode Preferences > API with Enable API integrations turned on",
+      "type": "password",
+      "placeholder": "mc_...",
+      "required": true
     },
     {
       "name": "enableMockData",
@@ -55,7 +63,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "volta": {
     "node": "22.17.0"
