@@ -22,7 +22,7 @@ function asPassCliError(error: unknown): PassCliError {
  * Browser login that completes even when Raycast closes meanwhile: a view opened while it runs waits for it too.
  * `onLoggedIn` runs once it succeeded.
  */
-export function useBrowserLogin(onLoggedIn: () => void) {
+export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
   const [status, setStatus] = useState<LoginStatus>({ state: "checking" });
   const isChecking = useRef(false);
   const isStarting = useRef(false);
@@ -35,7 +35,10 @@ export function useBrowserLogin(onLoggedIn: () => void) {
       setStatus(next);
       if (next.state === "succeeded") {
         void showToast({ style: Toast.Style.Success, title: "Logged In" });
-        onLoggedIn();
+        // "You're Logged In" shows while the view loads. A view still showing the login screen once loaded isn't
+        // logged in after all, and gets its actions back.
+        await onLoggedIn();
+        setStatus({ state: "none" });
       }
     } catch (error) {
       setStatus({ state: "failed", error: asPassCliError(error) });
@@ -88,7 +91,12 @@ export function useBrowserLogin(onLoggedIn: () => void) {
     setStatus({ state: "none" });
   }
 
-  return { status, start, cancel };
+  /** Back to the Not Logged In screen, e.g. after logging out. */
+  function reset() {
+    setStatus({ state: "none" });
+  }
+
+  return { status, start, cancel, reset };
 }
 
 interface LoginScreenProps {
@@ -194,7 +202,7 @@ export function LoginScreen({ login, onCheckAgain }: LoginScreenProps) {
  * Not Logged In screen of the commands that load items: `reload` runs once logged in, and for Check Again. The view
  * keeps this screen while it reloads, until it has something to show.
  */
-export function NotLoggedInView({ reload }: { reload: () => void }) {
+export function NotLoggedInView({ reload }: { reload: () => void | Promise<void> }) {
   const login = useBrowserLogin(reload);
   return <LoginScreen login={login} onCheckAgain={reload} />;
 }

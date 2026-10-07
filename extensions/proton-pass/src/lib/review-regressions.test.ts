@@ -1291,6 +1291,13 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   const url = "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
   const statuses: unknown[] = [{ state: "none" }, { state: "succeeded" }];
   let reloads = 0;
+  let finishReload = () => {};
+  const reload = () => {
+    reloads++;
+    return new Promise<void>((done) => {
+      finishReload = done;
+    });
+  };
   const { NotLoggedInView, LoginScreen } = loadView("login-view.tsx", {
     react: harness.react,
     "@raycast/api": {
@@ -1312,7 +1319,7 @@ test("Login with Browser shows what's left to do, then reloads once the login su
     "./terminal": { openTerminalForLogin: () => undefined },
     "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
   });
-  const screen = () => LoginScreen(harness.render(NotLoggedInView, { reload: () => reloads++ }).props);
+  const screen = () => LoginScreen(harness.render(NotLoggedInView, { reload }).props);
   // The empty view holds its actions in a prop rather than in its children.
   const tree = (element: unknown): Element["props"][] =>
     actions(element).flatMap((props) => [props, ...(props.actions ? tree(props.actions) : [])]);
@@ -1335,6 +1342,12 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   assert.equal(reloads, 1);
   // Rather than an empty list, until the view has loaded.
   assert.equal(title(), "You're Logged In");
+
+  // Still on screen once the view has loaded, the login didn't hold: the actions are back.
+  finishReload();
+  await new Promise(setImmediate);
+  assert.equal(title(), "Not Logged In");
+  assert.equal(typeof action("Login with Browser")?.onAction, "function");
 });
 
 test("no pass-cli command starts while a browser login is saving its session", async () => {
@@ -1363,4 +1376,41 @@ test("no pass-cli command starts while a browser login is saving its session", a
   });
   await assert.rejects(api.checkAuth());
   assert.equal(adapters, 0);
+});
+
+test("a browser login clears the previous account's cache, and is canceled when the browser can't open", async () => {
+  const events: string[] = [];
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": {
+      environment: { isDevelopment: false, supportPath: "/fixture" },
+      getPreferenceValues: () => ({}),
+      open: async () => {
+        throw new Error("No browser");
+      },
+    },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {
+      clearCache: async () => {
+        events.push("clear cache");
+      },
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {},
+    "./core/login": {
+      startDetachedLogin: async () => {
+        events.push("start login");
+        return "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+      },
+      cancelDetachedLogin: async () => {
+        events.push("cancel login");
+      },
+    },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { startBrowserLogin: () => Promise<string | undefined> };
+
+  await assert.rejects(api.startBrowserLogin(), /No browser/);
+  // Nobody could finish that login, and while it ran, no other pass-cli command would.
+  assert.deepEqual(events, ["clear cache", "start login", "cancel login"]);
 });

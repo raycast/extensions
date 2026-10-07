@@ -47,6 +47,7 @@ export default function Command() {
       await logout(force);
       toast.style = Toast.Style.Success;
       toast.title = "Logged Out";
+      login.reset();
       setAuthState("not-authenticated");
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -113,13 +114,13 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action title="Re-Run Browser Login" icon={Icon.Globe} onAction={login.start} />
-            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
             <Action.OpenInBrowser
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
               shortcut={platformShortcut(["cmd"], "d")}
             />
+            <Action title="Logout" icon={Icon.Logout} style={Action.Style.Destructive} onAction={confirmLogOut} />
           </ActionPanel>
         }
       />
