@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { ExplorerClient } from "../lib/explorer-api";
 import {
   DateRange,
+  boundedRevenueRange,
+  calendarDate,
+  utcTodayForDatePicker,
   REVENUE_PAGE_SIZE,
   RevenueDay,
   reserveRevenueRequest,
@@ -38,17 +41,14 @@ function CustomRange({ onSelect }: { onSelect: (range: DateRange) => void }) {
           <Action.SubmitForm
             title="Apply Date Range"
             onSubmit={(values: { start?: Date; end?: Date }) => {
-              // DatePicker represents local calendar dates; API dates represent UTC days.
-              const date = (value: Date) =>
-                `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
               if (!values.start || !values.end) {
                 setError("Choose a start and end date.");
                 return;
               }
-              const start = date(values.start),
-                end = date(values.end);
+              const start = calendarDate(values.start),
+                end = calendarDate(values.end);
               if (start > end || end > utcDate()) {
-                setError("Choose a range ending today or earlier, with the start before the end.");
+                setError("Choose a range ending today (UTC) or earlier, with the start before the end.");
                 return;
               }
               onSelect({ start, end });
@@ -59,7 +59,12 @@ function CustomRange({ onSelect }: { onSelect: (range: DateRange) => void }) {
       }
     >
       <Form.DatePicker id="start" title="Start Date (UTC)" type={Form.DatePicker.Type.Date} error={error} />
-      <Form.DatePicker id="end" title="End Date (UTC)" type={Form.DatePicker.Type.Date} defaultValue={new Date()} />
+      <Form.DatePicker
+        id="end"
+        title="End Date (UTC)"
+        type={Form.DatePicker.Type.Date}
+        defaultValue={utcTodayForDatePicker()}
+      />
     </Form>
   );
 }
@@ -69,12 +74,12 @@ export function Trends({ context }: { context: Context }) {
   const cache = useRef(new Map<string, number>());
   const today = utcDate();
   const range = period === "custom" && custom ? custom : revenueRange(period, today);
-  const requestKey = `${context.project.id}:revenue:${context.currency}:${context.demo}:${range.start || "all"}:${range.end}`;
+  const requestKey = `${context.project.id}:revenue:${context.currency}:${context.demo}:${range.start || context.project.created_at || "all"}:${range.end}`;
   const [waiting, setWaiting] = useState<{ key: string; until?: number }>();
   const waitingUntil = waiting?.key === requestKey ? waiting.until : undefined;
-  const state = usePaged<RevenueDay>(requestKey, (next, signal) =>
+  const state = usePaged<RevenueDay>(requestKey, async (next, signal) =>
     revenueDayPage(
-      range,
+      boundedRevenueRange(range, context.project.created_at),
       next,
       async (batch) => {
         const prefix = `${context.project.id}:${context.currency}:${context.demo}:`;

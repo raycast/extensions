@@ -16,6 +16,9 @@ function SubscriptionMetadata({ subscription, title }: { subscription: Subscript
           text={readable(subscription.status)}
           color={statusColor(subscription.status)}
         />
+        {subscription.environment === "sandbox" && (
+          <List.Item.Detail.Metadata.TagList.Item text="Sandbox" color={Color.Orange} />
+        )}
       </List.Item.Detail.Metadata.TagList>
       <List.Item.Detail.Metadata.Label title="Access" text={subscription.gives_access ? "Granted" : "Not granted"} />
       <List.Item.Detail.Metadata.Label title="Renewal" text={readable(subscription.auto_renewal_status)} />

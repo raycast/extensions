@@ -1,6 +1,7 @@
 export interface Project {
   id: string;
   name: string;
+  created_at?: number;
   icon_url?: string | null;
   icon_url_large?: string | null;
 }

@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { revenueDayPage, revenueRange, parseRevenueChart, shiftDate, type DateRange } from "../src/lib/revenue-history";
+import {
+  revenueDayPage,
+  revenueRange,
+  parseRevenueChart,
+  shiftDate,
+  type DateRange,
+  boundedRevenueRange,
+  calendarDate,
+  utcTodayForDatePicker,
+} from "../src/lib/revenue-history";
 import { ExplorerClient } from "../src/lib/explorer-api";
 
 function days(range: Required<DateRange>) {
@@ -32,7 +41,7 @@ test("loads a year in one request and paginates backwards without gaps, includin
     calls.push(range);
     return days(range);
   };
-  const range = revenueRange("all", "2026-10-07");
+  const range = boundedRevenueRange(revenueRange("all", "2026-10-07"), Date.parse("2020-01-01"));
   const signal = new AbortController().signal;
   const first = await revenueDayPage(range, undefined, read, signal);
   const second = await revenueDayPage(range, first.next_page!, read, signal);
@@ -60,7 +69,7 @@ test("date filters respect both boundaries, including leap days", async () => {
   assert.equal(page.next_page, null);
 });
 test("missing dates, failed requests, and cancelled batches cannot silently skip history", async () => {
-  const range = revenueRange("7d", "2026-10-07");
+  const range = boundedRevenueRange(revenueRange("7d", "2026-10-07"));
   await assert.rejects(
     revenueDayPage(range, undefined, async () => [], new AbortController().signal),
     /incomplete/,
@@ -124,4 +133,63 @@ test("daily revenue requests one unsegmented gross daily chart with explicit dat
   assert.equal(urls[0].searchParams.get("selectors"), '{"revenue_type":"revenue"}');
   assert.equal(urls[0].searchParams.has("aggregate"), false);
   assert.equal(result.length, 2);
+});
+
+test("all history stops at project creation, including a partial final page and zero-revenue years", async () => {
+  const range = boundedRevenueRange(revenueRange("all", "2026-10-07"), Date.parse("2025-10-01T23:00:00Z"));
+  const signal = new AbortController().signal;
+  const first = await revenueDayPage(range, undefined, async (r) => days(r), signal);
+  const last = await revenueDayPage(range, first.next_page!, async (r) => days(r), signal);
+  assert.equal(last.items.at(-1)?.id, "2025-10-01");
+  assert.equal(last.next_page, null);
+  assert.equal(first.items.length + last.items.length, 372);
+  let called = false;
+  const beyond = await revenueDayPage(
+    range,
+    "2025-09-30",
+    async () => {
+      called = true;
+      return [];
+    },
+    signal,
+  );
+  assert.deepEqual(beyond, { items: [], next_page: null });
+  assert.equal(called, false);
+  assert.throws(() => boundedRevenueRange({ end: "2026-10-07" }), /creation date/);
+  assert.throws(() => boundedRevenueRange({ end: "2026-10-07" }, NaN), /creation date/);
+});
+test("demo revenue history is finite and explicit ranges can include imported history before project creation", async () => {
+  const { demoProject } = await import("../src/lib/demo");
+  const end = new Date(demoProject.created_at! + 730 * 86400000).toISOString().slice(0, 10);
+  const range = boundedRevenueRange(revenueRange("all", end), demoProject.created_at);
+  let next: string | undefined;
+  let count = 0;
+  let pages = 0;
+  do {
+    const page = await revenueDayPage(range, next, async (r) => days(r), new AbortController().signal);
+    next = page.next_page || undefined;
+    count += page.items.length;
+    assert.ok(++pages <= 3);
+  } while (next);
+  assert.equal(count, 731);
+  assert.deepEqual(boundedRevenueRange({ start: "2020-01-01", end }, demoProject.created_at), {
+    start: "2020-01-01",
+    end,
+  });
+});
+test("date picker defaults to the current UTC day in timezones ahead of and behind UTC", () => {
+  const previous = process.env.TZ;
+  try {
+    for (const zone of ["Pacific/Auckland", "America/Los_Angeles", "UTC"]) {
+      process.env.TZ = zone;
+      for (const timestamp of ["2026-10-07T00:30:00Z", "2026-10-07T23:30:00Z"]) {
+        const now = new Date(timestamp);
+        const selected = utcTodayForDatePicker(now);
+        assert.equal(calendarDate(selected), "2026-10-07");
+      }
+    }
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
+  }
 });

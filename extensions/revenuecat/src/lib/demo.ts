@@ -1,9 +1,14 @@
 import type { Customer, CustomerEvent, Offering, Product, Subscription } from "./explorer-api";
 import type { Project } from "./revenuecat";
 
-export const demoProject: Project = { id: "demo_project", name: "Demo", icon_url: "revenuecat-icon.png" };
 const now = Date.now();
 const day = 86400000;
+export const demoProject: Project = {
+  id: "demo_project",
+  name: "Demo",
+  icon_url: "revenuecat-icon.png",
+  created_at: now - 730 * day,
+};
 const people = [
   ["Alex Morgan", "SE", "iOS", "active"],
   ["Jamie Chen", "US", "Web", "trialing"],

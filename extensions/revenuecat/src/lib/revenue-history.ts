@@ -14,6 +14,25 @@ export interface DateRange {
 export function utcDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
+// DatePicker uses local calendar fields, even when the selected day represents UTC.
+export function calendarDate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+export function utcTodayForDatePicker(now = new Date()) {
+  return new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12);
+}
+export function boundedRevenueRange(range: DateRange, createdAt?: number): Required<DateRange> {
+  // Explicit date filters can reach imported transactions from before project creation.
+  if (range.start) return { start: range.start, end: range.end };
+  if (
+    createdAt === undefined ||
+    !Number.isFinite(createdAt) ||
+    createdAt < 0 ||
+    !Number.isFinite(new Date(createdAt).getTime())
+  )
+    throw new Error("RevenueCat did not return the project's creation date. Refresh or choose a date range.");
+  return { start: utcDate(new Date(createdAt)), end: range.end };
+}
 export function shiftDate(date: string, days: number) {
   return utcDate(new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY));
 }
@@ -27,13 +46,13 @@ export function revenueRange(period: string, today: string): DateRange {
 // Fetch a year of daily values at a time. The cursor is the next inclusive
 // UTC date, so scrolling never overlaps or skips a day at batch boundaries.
 export async function revenueDayPage(
-  range: DateRange,
+  range: Required<DateRange>,
   next: string | undefined,
   read: (range: Required<DateRange>) => Promise<RevenueDay[]>,
   signal: AbortSignal,
 ): Promise<Page<RevenueDay>> {
   const end = next || range.end;
-  const start = [shiftDate(end, 1 - REVENUE_PAGE_SIZE), range.start || ""].sort().at(-1)!;
+  const start = [shiftDate(end, 1 - REVENUE_PAGE_SIZE), range.start].sort().at(-1)!;
   if (start > end) return { items: [], next_page: null };
   signal.throwIfAborted();
   const items = await read({ start, end });
