@@ -5,6 +5,7 @@ import { DriveNode, listFolderCached } from "../lib/cli";
 import { isDemo } from "../lib/demo";
 import { showError } from "../lib/errors";
 import { handleSignedOut, isSignedOut, useSignedOut } from "../lib/session";
+import { folderSizes } from "../lib/index";
 import { searchIndex, searchNodes } from "../lib/search";
 import { SORT_ORDERS, SortOrder, sortNodes } from "../lib/sort";
 import { useDriveIndex } from "../lib/useDriveIndex";
@@ -39,10 +40,13 @@ export function FolderView(props: { path: string; title?: string }) {
     },
   });
 
+  // Folder sizes exist only through a complete index (a partial one would undercount).
+  const sizes = useMemo(() => (index && !index.partial ? folderSizes(index) : undefined), [index]);
+
   const here = useMemo(() => {
     // While searching, results are ranked by relevance; otherwise by the chosen order.
-    return query ? searchNodes(data ?? [], query) : sortNodes(data ?? [], sort);
-  }, [data, query, sort]);
+    return query ? searchNodes(data ?? [], query) : sortNodes(data ?? [], sort, sizes);
+  }, [data, query, sort, sizes]);
 
   const elsewhere = useMemo(() => {
     if (!query || !index) return [];
@@ -64,6 +68,7 @@ export function FolderView(props: { path: string; title?: string }) {
       showPath={showPath}
       contents={node.uid === selectedUid ? contents : undefined}
       sort={sort}
+      folderSizes={sizes}
       extraActions={indexActions}
     />
   );

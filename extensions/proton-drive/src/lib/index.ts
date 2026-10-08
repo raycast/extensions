@@ -121,6 +121,36 @@ export async function readIndex(): Promise<DriveIndex | undefined> {
   return index?.format === FORMAT ? index : undefined;
 }
 
+const folderSizeCache = new WeakMap<DriveIndex, Map<string, number>>();
+
+/**
+ * Total size of every indexed folder: all the files below it, in subfolders too. The CLI reports
+ * sizes for files only. Computed once per index object (it is replaced on refresh).
+ */
+export function folderSizes(index: DriveIndex): Map<string, number> {
+  const cached = folderSizeCache.get(index);
+  if (cached) return cached;
+
+  const folderOf = new Map(index.folders.map((path, i) => [path, i]));
+  // Parent folder of each folder, found through the entry that lists it.
+  const parentOf = new Int32Array(index.folders.length).fill(-1);
+  const totals = new Float64Array(index.folders.length);
+  index.entries.forEach((entry, i) => {
+    if (entry[2] === 1) {
+      const self = folderOf.get(entryToNode(index, i).path);
+      if (self !== undefined) parentOf[self] = entry[1];
+    }
+  });
+  for (const [, parent, isFolder, size] of index.entries) {
+    if (isFolder || !size) continue;
+    for (let folder = parent; folder >= 0; folder = parentOf[folder]) totals[folder] += size;
+  }
+
+  const sizes = new Map(index.folders.map((path, i) => [path, totals[i]]));
+  folderSizeCache.set(index, sizes);
+  return sizes;
+}
+
 /** Rebuilds a full node for display. Only done for the few results actually shown. */
 export function entryToNode(index: DriveIndex, i: number): DriveNode {
   const [name, parent, isFolder, size, modified, mediaType, shared, created, segment] = index.entries[i];

@@ -32,7 +32,7 @@ Named like the Proton Pass and Proton Mail extensions: an action as title, "Prot
 
 | Command | What it does |
 | --- | --- |
-| **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. |
+| **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. Sort by name, date modified or size; folder sizes (all files below a folder) come from the search index, so without it folders keep their name order. |
 | **Upload Files** | Uploads the Finder selection, or files you choose when nothing is selected, to a folder you pick (existing files are renamed, folders merged). |
 | **Login to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
 | **Refresh Search Index** | Rebuilds the index. Also runs daily while Raycast's Background Refresh is on for this command: off when installed from the Store, on once you run the command yourself, and switchable in the command's settings. |

@@ -17,9 +17,11 @@ export function NodeItem(props: {
   showPath?: boolean;
   contents?: FolderContents;
   sort?: SortOrder;
+  /** Total size of folders, from the search index when it exists. */
+  folderSizes?: Map<string, number>;
   extraActions?: ReactNode;
 }) {
-  const { node, showPath, contents, sort = "name", extraActions } = props;
+  const { node, showPath, contents, sort = "name", folderSizes, extraActions } = props;
 
   return (
     <List.Item
@@ -30,7 +32,7 @@ export function NodeItem(props: {
       accessories={node.sharedByUrl ? [{ icon: Icon.Link, tooltip: "Shared by link" }] : undefined}
       detail={
         node.type === "folder" ? (
-          <FolderDetail node={node} contents={contents} sort={sort} />
+          <FolderDetail node={node} contents={contents} sort={sort} folderSizes={folderSizes} />
         ) : (
           <FileDetail node={node} />
         )
@@ -50,9 +52,20 @@ const LOADING = "…";
 const NONE = "—";
 
 /** The same rows for every folder, whatever its contents, so the panel doesn't jump around. */
-function FolderDetail({ node, contents, sort }: { node: DriveNode; contents?: FolderContents; sort: SortOrder }) {
+function FolderDetail({
+  node,
+  contents,
+  sort,
+  folderSizes,
+}: {
+  node: DriveNode;
+  contents?: FolderContents;
+  sort: SortOrder;
+  folderSizes?: Map<string, number>;
+}) {
   // Same order as the list on the left.
-  const children = contents?.nodes && sortNodes(contents.nodes, sort);
+  const children = contents?.nodes && sortNodes(contents.nodes, sort, folderSizes);
+  const totalSize = folderSizes?.get(node.path);
   const folders = children?.filter((c) => c.type === "folder") ?? [];
   const files = children?.filter((c) => c.type === "file") ?? [];
   const filesSize = files.reduce((sum, f) => sum + (f.size ?? 0), 0);
@@ -90,6 +103,10 @@ function FolderDetail({ node, contents, sort }: { node: DriveNode; contents?: Fo
           <List.Item.Detail.Metadata.Label
             title="Size of Files"
             text={value(files.length ? formatSize(filesSize) : undefined)}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Total Size"
+            text={totalSize !== undefined ? formatSize(totalSize) : NONE}
           />
           <List.Item.Detail.Metadata.Label
             title="Last Change Inside"
