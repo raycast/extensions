@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Fix Stop Command] - {PR_MERGE_DATE}
+## [Fix Stop Command] - 2026-10-08
 
 - Update native-say to fix Stop not stopping speech on Windows
 
