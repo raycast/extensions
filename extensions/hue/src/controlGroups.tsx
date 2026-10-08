@@ -8,7 +8,7 @@ import React, { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
-import SetScene from "./setScene";
+import { SetScene } from "./setScene";
 import { getColorFromLight, getGroupedLightFromGroup, getLightsFromGroup } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";

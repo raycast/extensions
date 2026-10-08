@@ -13,9 +13,12 @@ import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 const GRID_ITEM_WIDTH = 271;
 const GRID_ITEM_HEIGHT = 153;
 
-export default function SetScene(props: { group?: Group; useHue?: ReturnType<typeof useHue> }) {
-  const useHueObject = props.useHue ?? useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHueObject;
+export default function SetSceneCommand() {
+  return <SetScene useHue={useHue()} />;
+}
+
+export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHue> }) {
+  const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = props.useHue;
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const { pop } = useNavigation();
@@ -44,7 +47,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
               scene={scene}
               gradientUri={gradientUris.get(scene.id)}
               onSetScene={props.group && pop}
-              useHue={useHueObject}
+              useHue={props.useHue}
             />
           ))}
         </Grid.Section>
