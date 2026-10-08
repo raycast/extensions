@@ -1,5 +1,6 @@
 import { listUploads } from "../api/client";
 import { formatBytes } from "../lib/format";
+import { cleanText } from "../lib/markdown";
 import { findDestination } from "../lib/destinations";
 
 type Input = {
@@ -8,7 +9,7 @@ type Input = {
    * Leave empty to get the most recent uploads.
    */
   query?: string;
-  /** Only search uploads to this destination (its name or bucket). Leave empty for all destinations. */
+  /** Only search uploads to this destination (its exact name or bucket). Leave empty for all destinations. */
   destination?: string;
   /** How many uploads to return at most. Defaults to 20. */
   limit?: number;
@@ -28,8 +29,8 @@ export default async function tool(input: Input) {
   return {
     count: uploads.length,
     uploads: uploads.map((upload) => ({
-      filename: upload.filename,
-      key: upload.objectKey,
+      filename: cleanText(upload.filename),
+      key: cleanText(upload.objectKey),
       url: upload.url,
       markdown: upload.formats.markdown,
       destination: upload.destinationName,

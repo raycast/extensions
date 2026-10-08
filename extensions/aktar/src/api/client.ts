@@ -1,13 +1,19 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
+import { helloNonce, isValidHello, OUTDATED_APP_MESSAGE, unverifiedMessage } from "./hello";
 import type { BucketListing, Destination, Status, TemporaryLink, Upload, WatchedFolder, WatchedFolders } from "./types";
 
 export const DEFAULT_PORT = 47913;
 const CONNECTION_KEY = "connection";
 const REQUEST_TIMEOUT_MS = 30_000;
+/** Bigger replies than any route sends; past this, something else is answering. */
+const MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
+/** How long a proof from /v1/hello is trusted before the app is asked again. */
+const VERIFIED_FOR_MS = 60_000;
 
 export type Connection = {
   port: number;
@@ -21,6 +27,10 @@ export type AktarErrorKind =
   | "unauthorized"
   /** Nothing is listening: Aktar isn't running, is too old, or its local API is off. */
   | "not-running"
+  /** The app on the port couldn't prove it has the token (not Aktar, or the token changed), so it wasn't sent. */
+  | "unverified"
+  /** The app on the port predates /v1/hello, so the token wasn't sent. */
+  | "outdated"
   /** Aktar answered with an error of its own (storage, validation, ...). */
   | "request-failed";
 
@@ -78,10 +88,52 @@ type RequestOptions = {
   connection?: Connection;
   /** The reply's bytes instead of JSON: a Buffer, or null for 204 No Content. */
   binary?: boolean;
+  /** Sends no token: for /v1/hello. */
+  anonymous?: boolean;
 };
+
+/** Ports and tokens whose app proved it's Aktar lately, by a hash of both. */
+const verified = new Map<string, { check: Promise<void>; at: number }>();
+
+const verifiedKey = (connection: Connection) =>
+  createHash("sha256").update(`${connection.port}\n${connection.token}`).digest("hex");
+
+/**
+ * Asks the app on the connection's port to prove it has the token before
+ * the token is sent, so a program squatting the port while Aktar isn't
+ * running never gets the token or a file. A proof holds for a minute, and
+ * until the connection fails.
+ */
+function verify(connection: Connection): Promise<void> {
+  const key = verifiedKey(connection);
+  const known = verified.get(key);
+  if (known && Date.now() - known.at < VERIFIED_FOR_MS) return known.check;
+  const check = hello(connection);
+  verified.set(key, { check, at: Date.now() });
+  check.catch(() => {
+    if (verified.get(key)?.check === check) verified.delete(key);
+  });
+  return check;
+}
+
+async function hello(connection: Connection) {
+  const nonce = helloNonce();
+  let reply: unknown;
+  try {
+    reply = await request("GET", "hello", { query: { nonce }, connection, anonymous: true });
+  } catch (error) {
+    if (error instanceof AktarError && error.kind !== "not-running" && error.status !== undefined) {
+      throw new AktarError("outdated", OUTDATED_APP_MESSAGE, error.status);
+    }
+    throw error;
+  }
+  if (!isValidHello(reply, connection.token, nonce))
+    throw new AktarError("unverified", unverifiedMessage(connection.port));
+}
 
 async function request<T>(method: string, route: string, options: RequestOptions = {}): Promise<T> {
   const connection = options.connection ?? (await getConnection());
+  if (!options.anonymous) await verify(connection);
 
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(options.query ?? {})) {
@@ -91,10 +143,8 @@ async function request<T>(method: string, route: string, options: RequestOptions
 
   let body: Buffer | undefined;
   let fileSize = 0;
-  const headers: Record<string, string | number> = {
-    Authorization: `Bearer ${connection.token}`,
-    Accept: "application/json",
-  };
+  const headers: Record<string, string | number> = { Accept: "application/json" };
+  if (!options.anonymous) headers.Authorization = `Bearer ${connection.token}`;
   if (options.file) {
     fileSize = (await stat(options.file.path)).size;
     headers["Content-Type"] = "application/octet-stream";
@@ -120,7 +170,16 @@ async function request<T>(method: string, route: string, options: RequestOptions
       },
       (res) => {
         const chunks: Buffer[] = [];
-        res.on("data", (chunk: Buffer) => chunks.push(chunk));
+        let received = 0;
+        res.on("data", (chunk: Buffer) => {
+          received += chunk.length;
+          if (received > MAX_RESPONSE_BYTES) {
+            res.destroy();
+            reject(new AktarError("request-failed", "Aktar's reply was too big."));
+            return;
+          }
+          chunks.push(chunk);
+        });
         res.on("end", () => {
           const status = res.statusCode ?? 0;
           if (options.binary && status >= 200 && status < 300) {
@@ -146,6 +205,8 @@ async function request<T>(method: string, route: string, options: RequestOptions
 
     req.on("timeout", () => req.destroy(new Error("Aktar took too long to respond.")));
     req.on("error", (error: NodeJS.ErrnoException) => {
+      // Whatever answers next on this port proves itself again.
+      if (error.code === "ECONNREFUSED" || error.code === "ECONNRESET") verified.delete(verifiedKey(connection));
       if (error.code === "ECONNREFUSED") {
         reject(new AktarError("not-running", "Aktar isn't running, or its local API is turned off."));
       } else if (error.code === "EPIPE" || error.code === "ECONNRESET") {
