@@ -150,6 +150,7 @@ let secretExpression = try! NSRegularExpression(pattern: "(?:sk|rk)[_\\s]+(?:liv
 struct NumericDetections {
   let hasCard: Bool
   let hasPhone: Bool
+  let hasIP: Bool
 }
 
 func numericDetections(_ text: String) -> NumericDetections {
@@ -213,5 +214,5 @@ func numericDetections(_ text: String) -> NumericDetections {
     }
     if hasPhone { break }
   }
-  return NumericDetections(hasCard: !cardRanges.isEmpty, hasPhone: hasPhone)
+  return NumericDetections(hasCard: !cardRanges.isEmpty, hasPhone: hasPhone, hasIP: !ipv4Ranges.isEmpty)
 }

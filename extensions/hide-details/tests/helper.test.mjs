@@ -11,6 +11,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const directory = mkdtempSync(path.join(tmpdir(), "hide-details-test-"));
 const input = path.join(directory, "input.png");
 const numericInput = path.join(directory, "numeric.png");
+const ipv4Input = path.join(directory, "ipv4.png");
 let sequence = 0;
 
 before(() => {
@@ -27,6 +28,14 @@ before(() => {
     path.join(directory, "module-cache"),
     path.join(root, "tests/create-numeric-fixture.swift"),
     numericInput,
+  ]);
+  execFileSync("xcrun", [
+    "swift",
+    "-module-cache-path",
+    path.join(directory, "module-cache"),
+    path.join(root, "tests/create-numeric-fixture.swift"),
+    ipv4Input,
+    "ip",
   ]);
   copyFileSync(path.join(root, "tests/custom-regex.swift"), path.join(directory, "main.swift"));
   execFileSync("xcrun", [
@@ -218,6 +227,29 @@ for (const [field, value, message] of [
 }
 
 for (const recognition of ["fast", "accurate"]) {
+  test(`${recognition} OCR detects and masks IPv4 beside text and spaced dots`, () => {
+    const output = path.join(directory, `ipv4-output-${sequence++}.png`);
+    const report = redactImage({ inputPath: ipv4Input, outputPath: output, categories: "ip", recognition });
+    assert.ok(report.hits.every((hit) => hit.kind === "ip"));
+    for (const address of ["192.168.10.20", "192.168.1.10", "10.0.0.1", "192.168.1.20"]) {
+      assert.ok(
+        report.hits.some((hit) => hit.text.replaceAll(/\s/g, "").includes(address)),
+        `missing IPv4 ${address}`,
+      );
+    }
+    assert.equal(report.hits.length, 4, "invalid octets must not be reported as IPv4");
+    const reportFile = path.join(directory, `ipv4-${sequence++}.json`);
+    writeFileSync(reportFile, JSON.stringify(report));
+    execFileSync("xcrun", [
+      "swift",
+      "-module-cache-path",
+      path.join(directory, "module-cache"),
+      path.join(root, "tests/check-blackout.swift"),
+      output,
+      reportFile,
+    ]);
+  });
+
   test(`${recognition} OCR detects numbers beside expiry and ticket digits`, () => {
     const output = path.join(directory, `numeric-output-${sequence++}.png`);
     const report = redactImage({ inputPath: numericInput, outputPath: output, categories: "card,phone", recognition });

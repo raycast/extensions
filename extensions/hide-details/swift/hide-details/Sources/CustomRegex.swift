@@ -19,8 +19,8 @@ enum CustomRegexError: LocalizedError {
 
 struct CustomRegex {
   private let expression: NSRegularExpression
-  // A shared budget for all OCR lines, excluding time spent on OCR itself.
-  private var remainingTime: TimeInterval = 0.1
+  // Each OCR line gets its own matching budget.
+  private let matchingBudget: TimeInterval = 0.1
 
   init(pattern: String) throws {
     do {
@@ -30,28 +30,25 @@ struct CustomRegex {
     }
   }
 
-  mutating func matches(_ text: String) throws -> Bool {
+  func matches(_ text: String) throws -> Bool {
     let start = ProcessInfo.processInfo.systemUptime
-    let budget = remainingTime
     var matched = false
     var failure: CustomRegexError?
     expression.enumerateMatches(
       in: text, options: [.reportProgress, .reportCompletion], range: NSRange(text.startIndex..., in: text)
     ) { result, flags, stop in
-      if ProcessInfo.processInfo.systemUptime - start >= budget {
-        failure = .timedOut
-        stop.pointee = true
-      } else if flags.contains(.internalError) {
+      if flags.contains(.internalError) {
         failure = .matchingFailed
         stop.pointee = true
       } else if let result, result.range.length > 0 {
         matched = true
         stop.pointee = true
+      } else if !flags.contains(.completed), ProcessInfo.processInfo.systemUptime - start >= matchingBudget {
+        failure = .timedOut
+        stop.pointee = true
       }
     }
-    remainingTime -= ProcessInfo.processInfo.systemUptime - start
     if let failure { throw failure }
-    if remainingTime <= 0 { throw CustomRegexError.timedOut }
     return matched
   }
 }

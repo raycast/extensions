@@ -9,6 +9,7 @@
 - Detect sensitive text even when OCR inserts spaces into email addresses, token prefixes, or custom words.
 - Add custom regex rules for internal IDs, invoice numbers, and other text patterns in both redaction commands.
 - Detect cards with dot separators or beside expiry dates, phones beside ticket numbers or IPv4 addresses, and adjacent phone numbers.
+- Detect valid IPv4 addresses beside other text, including spaces around dots.
 - Avoid reporting digits inside secret keys as phone or card numbers, and optionally hide OCR confidence percentages in the review list.
 - Mask recognized text in detection labels while reviewing images during screen sharing.
 - Copy finished images even when the previous clipboard advertises unavailable formats.

@@ -125,6 +125,14 @@ for text in ["Phone +1 415 555 0123 Ticket 123456789", "Contact (415) 555-0123 R
 let multiple = numericDetections("4111 1111 1111 1111 Phone +1 415 555 0123")
 require(multiple.hasCard && multiple.hasPhone, "separate card and phone should both be classified")
 require(!numericDetections("192.168.10.20").hasPhone, "IPv4 classified as phone")
+for text in ["server 192.168.1.10", "Host 10.0.0.1 up", "Gateway 192 . 168 . 1 . 20 ready",
+             "Host 10\t.\t0 . 0. 1 up", "0.0.0.0", "255.255.255.255", "🔒 server 192.168.1.10"] {
+  let result = numericDetections(text)
+  require(result.hasIP && !result.hasPhone && !result.hasCard, "missed IPv4 or misclassified its digits in \(text)")
+}
+for text in ["999.1.1.1", "1.256.1.1", "1.1.256.1", "1.1.1.256", "1192.168.1.10", "10.0.0.1000", "1.2.3"] {
+  require(!numericDetections(text).hasIP, "invalid IPv4 classified in \(text)")
+}
 require(!numericDetections("0000 0000 0000 0000").hasCard, "placeholder card classified")
 require(!numericDetections("41111111111111111").hasPhone, "a long numeric run must not be split into phone fragments")
 require(!numericDetections("4111 1111 1111 1112").hasCard, "invalid Luhn checksum classified")

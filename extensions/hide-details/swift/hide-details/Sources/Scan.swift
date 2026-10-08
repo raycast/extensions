@@ -18,7 +18,7 @@ struct Configuration {
   let categories: Set<String>
   let extraWords: [String]
   let recognition: VNRequestTextRecognitionLevel
-  var customRegex: CustomRegex?
+  let customRegex: CustomRegex?
 }
 
 func parseConfiguration(
@@ -53,7 +53,6 @@ func parseConfiguration(
 }
 
 func redact(_ configuration: Configuration) throws -> Report {
-  var configuration = configuration
   let image: CGImage
   let clipboardChangeCount: Int?
   if let inputURL = configuration.inputURL {
@@ -102,7 +101,6 @@ func redact(_ configuration: Configuration) throws -> Report {
   }
 
   let email = try NSRegularExpression(pattern: "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}", options: [.caseInsensitive])
-  let ip = try NSRegularExpression(pattern: "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b")
   func matches(_ expression: NSRegularExpression, _ text: String) -> Bool {
     expression.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
   }
@@ -118,8 +116,8 @@ func redact(_ configuration: Configuration) throws -> Report {
     }
     if matches(email, compact) { try add(kind: "email", text: text, confidence: confidence, rect: rect) }
     if matches(secretExpression, text) { try add(kind: "secret", text: text, confidence: confidence, rect: rect) }
-    if matches(ip, compact) { try add(kind: "ip", text: text, confidence: confidence, rect: rect) }
     let numeric = numericDetections(text)
+    if numeric.hasIP { try add(kind: "ip", text: text, confidence: confidence, rect: rect) }
     if numeric.hasCard { try add(kind: "card", text: text, confidence: confidence, rect: rect) }
     if numeric.hasPhone { try add(kind: "phone", text: text, confidence: confidence, rect: rect) }
     if configuration.extraWords.contains(where: { compact.localizedCaseInsensitiveContains($0) }) {
