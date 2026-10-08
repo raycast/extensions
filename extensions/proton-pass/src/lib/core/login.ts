@@ -1,16 +1,20 @@
 import { ChildProcess, spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { once } from "node:events";
-import { mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, open, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CommandDescriptor, normalizeCliExecutionError } from "./exec";
 import { PassCliError } from "../types";
 
 const LOGIN_HOST = "account.proton.me";
 const STATE_FILE = "login.json";
-const OUTPUT_FILE = "output.txt";
-const EXIT_CODE_FILE = "exit-code.txt";
-/** Each process has its own, since a canceled one may exit after its replacement. */
-const exitCodePath = (dir: string, pid: number) => join(dir, `${pid}-${EXIT_CODE_FILE}`);
+/**
+ * Each login attempt has its own files, and each process its own exit code: a canceled login may exit after its
+ * replacement started, and cleaning up after an attempt must not touch the next one's.
+ */
+const outputPath = (dir: string, attempt: string) => join(dir, `${attempt}-output.txt`);
+const failurePath = (dir: string, attempt: string) => join(dir, `${attempt}-failure.txt`);
+const exitCodePath = (dir: string, pid: number) => join(dir, `${pid}-exit-code.txt`);
 const POLL_MS = 100;
 /** How long a browser login may take; past it, a saved process ID may belong to another process by now. */
 export const LOGIN_TIMEOUT_MS = 10 * 60_000;
@@ -18,10 +22,8 @@ export const LOGIN_TIMEOUT_MS = 10 * 60_000;
 /** A login running on its own, saved so that the extension finds it again after Raycast stopped it. */
 interface SavedLogin {
   pid: number;
-  url: string;
+  attempt: string;
   startedAt: number;
-  /** Set once pass-cli has exited and the login URL is gone, while the result waits for a login screen. */
-  isOver?: boolean;
 }
 
 export type BrowserLoginStatus =
@@ -68,12 +70,19 @@ function stopProcess(pid: number): void {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const readText = (path: string) => readFile(path, "utf8").catch(() => "");
+const exists = (path: string) =>
+  access(path).then(
+    () => true,
+    () => false,
+  );
+/** Complete lines only: the URL may still be being written. */
+const urlIn = (output: string) => extractLoginUrl(output.slice(0, output.lastIndexOf("\n") + 1));
 
 async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
   try {
     const saved = JSON.parse(await readFile(join(dir, STATE_FILE), "utf8")) as Partial<SavedLogin>;
     const isValid =
-      typeof saved.pid === "number" && typeof saved.url === "string" && typeof saved.startedAt === "number";
+      typeof saved.pid === "number" && typeof saved.attempt === "string" && typeof saved.startedAt === "number";
     return isValid ? (saved as SavedLogin) : undefined;
   } catch {
     return undefined;
@@ -130,8 +139,8 @@ export async function startDetachedLogin(
   // A login still running from before would compete with this one.
   await cancelDetachedLogin(dir);
   await mkdir(dir, { recursive: true, mode: 0o700 });
-  const outputPath = join(dir, OUTPUT_FILE);
-  const output = await open(outputPath, "w", 0o600);
+  const attempt = randomUUID();
+  const output = await open(outputPath(dir, attempt), "w", 0o600);
   let child: ChildProcess;
   try {
     child = spawn(command.file, [...command.args, "login"], {
@@ -158,18 +167,13 @@ export async function startDetachedLogin(
   });
 
   const startedAt = Date.now();
-  const saveLogin = (url: string) =>
-    writeFile(join(dir, STATE_FILE), JSON.stringify({ pid, url, startedAt } satisfies SavedLogin), { mode: 0o600 });
   // Saved from the start, so that no other pass-cli command runs meanwhile (see isDetachedLoginRunning).
-  await saveLogin("");
+  const saved = { pid, attempt, startedAt } satisfies SavedLogin;
+  await writeFile(join(dir, STATE_FILE), JSON.stringify(saved), { mode: 0o600 });
   while (true) {
-    const text = await readText(outputPath);
-    // Complete lines only: the URL may still be being written.
-    const url = extractLoginUrl(text.slice(0, text.lastIndexOf("\n") + 1));
-    if (url) {
-      await saveLogin(url);
-      return url;
-    }
+    const text = await readText(outputPath(dir, attempt));
+    const url = urlIn(text);
+    if (url) return url;
     const hasTimedOut = Date.now() - startedAt > urlTimeoutMs;
     if (hasTimedOut || !isProcessRunning(pid)) {
       if (hasTimedOut) child.kill();
@@ -195,15 +199,17 @@ export async function checkDetachedLogin(
   const saved = await readSavedLogin(dir);
   if (!saved) return { state: "none" };
 
-  const isRunning = !saved.isOver && isProcessRunning(saved.pid);
+  // Once the output is gone, pass-cli has exited (see forgetLoginUrl), even if its process ID is in use again.
+  const isRunning = (await exists(outputPath(dir, saved.attempt))) && isProcessRunning(saved.pid);
   const hasTimedOut = Date.now() - saved.startedAt > timeoutMs;
   if (isRunning && !hasTimedOut) {
-    const isFinishing = FINISHING_LINE.test(await readText(join(dir, OUTPUT_FILE)));
-    return { state: "waiting", url: saved.url, isFinishing };
+    const output = await readText(outputPath(dir, saved.attempt));
+    return { state: "waiting", url: urlIn(output) ?? "", isFinishing: FINISHING_LINE.test(output) };
   }
 
-  const [output, exitCode] = await Promise.all([
-    readText(join(dir, OUTPUT_FILE)),
+  const [output, failure, exitCode] = await Promise.all([
+    readText(outputPath(dir, saved.attempt)),
+    readText(failurePath(dir, saved.attempt)),
     readText(exitCodePath(dir, saved.pid)).then((text) => text.trim()),
   ]);
   await removeLogin(dir);
@@ -218,7 +224,8 @@ export async function checkDetachedLogin(
     return { state: "failed", error };
   }
   const hasSucceeded = exitCode ? exitCode === "0" : await isLoggedIn();
-  return hasSucceeded ? { state: "succeeded" } : { state: "failed", error: loginFailure(output, "pass-cli") };
+  const error = loginFailure(output || failure, "pass-cli");
+  return hasSucceeded ? { state: "succeeded" } : { state: "failed", error };
 }
 
 /**
@@ -228,7 +235,7 @@ export async function checkDetachedLogin(
  */
 export async function isDetachedLoginRunning(dir: string, timeoutMs = LOGIN_TIMEOUT_MS): Promise<boolean> {
   const saved = await readSavedLogin(dir);
-  if (!saved || saved.isOver) return false;
+  if (!saved || !(await exists(outputPath(dir, saved.attempt)))) return false;
   if (isProcessRunning(saved.pid)) return Date.now() - saved.startedAt <= timeoutMs;
   await forgetLoginUrl(dir, saved);
   return false;
@@ -236,21 +243,20 @@ export async function isDetachedLoginRunning(dir: string, timeoutMs = LOGIN_TIME
 
 /**
  * Once pass-cli has exited, the login's files wait for a login screen to read the result (see checkDetachedLogin),
- * but none shows once logged in: the login URL goes now. A login that succeeded leaves nothing; otherwise, why it
- * failed stays for the login screen, since a missing exit code, when Raycast closed first, doesn't mean success.
+ * but none shows once logged in: the output, which holds the login URL, goes now. Why a login failed stays for the
+ * login screen, since a missing exit code, when Raycast closed first, doesn't mean success. Only this attempt's files
+ * change, so a login started meanwhile keeps its own. Exported for tests.
  */
-async function forgetLoginUrl(dir: string, saved: SavedLogin): Promise<void> {
+export async function forgetLoginUrl(dir: string, saved: SavedLogin): Promise<void> {
+  const output = outputPath(dir, saved.attempt);
   try {
-    const [output, exitCode] = await Promise.all([
-      readText(join(dir, OUTPUT_FILE)),
-      readText(exitCodePath(dir, saved.pid)),
-    ]);
-    if (exitCode.trim() === "0") return await removeLogin(dir);
-    await writeFile(join(dir, OUTPUT_FILE), failureDetails(output), { mode: 0o600 });
-    const ended = { ...saved, url: "", isOver: true } satisfies SavedLogin;
-    await writeFile(join(dir, STATE_FILE), JSON.stringify(ended), { mode: 0o600 });
+    const [text, exitCode] = await Promise.all([readText(output), readText(exitCodePath(dir, saved.pid))]);
+    const failure = exitCode.trim() === "0" ? undefined : failureDetails(text);
+    // Written first, so that a login screen reading meanwhile finds either the output or why the login failed.
+    if (failure !== undefined) await writeFile(failurePath(dir, saved.attempt), failure, { mode: 0o600 });
+    await rm(output, { force: true });
   } catch {
-    // A login screen removed the files meanwhile.
+    // A login screen or a new login removed the folder meanwhile.
   }
 }
 
