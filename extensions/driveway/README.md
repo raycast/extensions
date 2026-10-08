@@ -20,7 +20,7 @@ If you only ever connect to one server, [Network Drive](https://www.raycast.com/
 **Background commands**
 
 - **Auto-Reconnect** silently reconnects any saved drive you have opted into, on an interval you choose.
-- **DriveWay Menu Bar** shows your saved drives and their connection status without opening Raycast, with one-click mount and unmount.
+- **DriveWay Menu Bar** shows your saved drives and their connection status without opening Raycast, with one-click mount and unmount. Network drives that are mounted without being saved, from **Browse Shares on This Host** or from Finder, appear under **Mounted but Not Saved** and can be unmounted from there. The number next to the icon counts connected saved drives only, so it doesn't move for mounts the extension isn't keeping.
 
 The extension keeps no password store of its own. The optional Domain/IP password lives in Raycast's secure preference storage, and everything else is left to the macOS Keychain, the same way Finder's "Connect to Server" does it.
 

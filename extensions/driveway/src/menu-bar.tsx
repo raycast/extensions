@@ -100,6 +100,13 @@ function reportFailure(text: string, error: unknown, fallback: string): Promise<
   return say(`❌ ${text}: ${errorText(error, fallback)}`);
 }
 
+// No saved entry means no alias, so name an unsaved mount after its share,
+// falling back to the volume it landed on.
+function shareLabel(share: MountLocation): string {
+  const segments = share.path.split("/").filter(Boolean);
+  return segments[segments.length - 1] || share.mountPoint.split("/").filter(Boolean).pop() || share.host;
+}
+
 async function readCache(): Promise<Cache | null> {
   const raw = await LocalStorage.getItem<string>(MENU_BAR_CACHE_KEY);
   if (!raw) return null;
@@ -201,6 +208,12 @@ export default function Command() {
 
   const savedDrives = servers.filter((server) => server.path?.trim());
   const connectedCount = savedDrives.filter((server) => findMountedShare(mounted, server)).length;
+  // Network drives that are mounted but aren't in the saved list: a one-off
+  // from Browse Shares, or anything connected in Finder. The count in the menu
+  // bar deliberately ignores them, so it doesn't jump around for mounts this
+  // extension doesn't keep, but hiding them entirely made the menu look like a
+  // picture of what is mounted when it wasn't.
+  const unsavedMounts = mounted.filter((share) => !savedDrives.some((server) => findMountedShare([share], server)));
 
   async function handleToggle(server: ServerEntry) {
     setBusyId(server.id);
@@ -261,6 +274,27 @@ export default function Command() {
     }
   }
 
+  async function handleUnmountUnsaved(share: MountLocation) {
+    const label = shareLabel(share);
+    setBusyId(share.mountPoint);
+
+    try {
+      const result = await within(settle(unmountShare({ host: share.host, path: share.path, protocol: share.family })));
+      if (!result) {
+        await say(`⏳ Disconnecting ${label}…`);
+      } else if (result.ok) {
+        await reportSuccess(`Disconnected ${label}`);
+      } else {
+        await reportFailure(`Couldn't disconnect ${label}`, result.error, "Unmounting failed.");
+      }
+    } catch (error) {
+      await reportFailure(`Couldn't disconnect ${label}`, error, "Unmounting failed.");
+    }
+
+    setBusyId(null);
+    await refresh();
+  }
+
   async function openCommand(name: string, title: string) {
     try {
       await launchCommand({ name, type: LaunchType.UserInitiated });
@@ -312,6 +346,22 @@ export default function Command() {
           );
         })}
       </MenuBarExtra.Section>
+      {unsavedMounts.length > 0 && (
+        <MenuBarExtra.Section title="Mounted but Not Saved">
+          {unsavedMounts.map((share) => {
+            const label = shareLabel(share);
+            return (
+              <MenuBarExtra.Item
+                key={share.mountPoint}
+                title={busyId === share.mountPoint ? `${label}…` : label}
+                subtitle={`${share.host}, click to unmount`}
+                icon={{ source: Icon.HardDrive, tintColor: Color.SecondaryText }}
+                onAction={() => handleUnmountUnsaved(share)}
+              />
+            );
+          })}
+        </MenuBarExtra.Section>
+      )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Manage Drives…"
