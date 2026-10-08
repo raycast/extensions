@@ -43,6 +43,7 @@ import {
   frontBundleId,
   matchAccessory,
   primaryAction,
+  rowAfterClose,
   visibleItems,
   type AppItem,
   type AppRow,
@@ -73,7 +74,8 @@ import {
   showConfigNotices,
 } from "./storage.ts";
 import { pidsForBundle } from "./running.ts";
-import { quitApplication, switchToWindow } from "./switch-action.ts";
+import { quitTarget } from "./lib/selection.ts";
+import { closeAppWindow, quitApplication, switchToWindow } from "./switch-action.ts";
 import { listWindows, quitApp } from "./window-helper.ts";
 
 // ---------- shortcuts (SPEC.md §4.2; Configure keeps ⌘⇧C, so Diagnostic Info moves to ⌘⇧D) ----------
@@ -276,8 +278,17 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
   const [query, setQuery] = useState(props.fallbackText ?? "");
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(props.selectId);
+  // A relaunch's selectId is handed to Raycast only once its row is listed (pendingSelect below): Raycast applies
+  // selectedItemId when the value changes, so one set at mount, before the rows load, never took effect (observed).
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
   const selectedRef = useRef<string | null>(props.selectId ?? null);
+  /**
+   * A relaunch's selectId until its row is listed (owner, 2026-10-08). Raycast reports the first row as selected while
+   * the rows load (observed: the stored selection became the top app while the list showed the requested window row),
+   * so reports of other rows are ignored until then, and the stored selection stays cleared: a hotkey press meanwhile
+   * refuses instead of acting on the top row.
+   */
+  const pendingSelect = useRef(props.selectId);
   const previousItems = useRef<ListItem[]>([]);
   const mounted = useRef(false);
   const started = useRef(false);
@@ -367,6 +378,7 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
   useEffect(() => {
     mounted.current = true;
     void saveListState(true, mountId.current);
+    if (pendingSelect.current && !props.startup) void clearSelection();
     if (!started.current) {
       started.current = true;
       if (startup.current === "quit-selected") {
@@ -386,19 +398,30 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
               : selection.bundleId
                 ? await pidsForBundle(selection.bundleId)
                 : [];
-          if (pids.length === 0) {
+          const target = quitTarget(selection);
+          const noRefresh = async () => {};
+          let selectId = appId(selection.key);
+          if (target.kind === "window") {
+            // A window row of an app with other windows: close just that window (owner, 2026-10-08).
+            const name = selection.name;
+            const outcome = await closeAppWindow({ ...target, name, bundleId: selection.bundleId }, noRefresh, () => {
+              if (selection.afterClose) selectId = selection.afterClose;
+            });
+            // The app's save prompt is now in front and Raycast is closed: do not reopen the list over it.
+            if (outcome === "asking") return;
+          } else if (pids.length === 0) {
             await showToast({ style: Toast.Style.Failure, title: `${selection.name} is not running` });
           } else {
-            const noRefresh = async () => {};
             for (const pid of pids) {
-              await quitApplication({ pid, name: selection.name, bundleId: selection.bundleId }, noRefresh);
+              const outcome = await quitApplication(
+                { pid, name: selection.name, bundleId: selection.bundleId },
+                noRefresh,
+              );
+              // The app's save prompt is now in front and Raycast is closed: do not reopen the list over it.
+              if (outcome === "asking") return;
             }
           }
-          await launchCommand({
-            name: "app-list",
-            type: LaunchType.UserInitiated,
-            context: { selectId: appId(selection.key) },
-          });
+          await launchCommand({ name: "app-list", type: LaunchType.UserInitiated, context: { selectId } });
         })();
         return () => {
           mounted.current = false;
@@ -456,14 +479,40 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       return;
     }
     const { row } = item;
-    void saveSelection({ key: row.key, name: row.name, bundleId: row.bundleId, pids: row.pids });
+    const base = {
+      key: row.key,
+      name: row.name,
+      bundleId: row.bundleId,
+      pids: row.pids,
+      windowCount: row.windows.length,
+    };
+    if (item.kind === "window") {
+      const { pid, wid } = item.window;
+      void saveSelection({ ...base, window: { pid, wid }, afterClose: rowAfterClose(itemsRef.current, id) });
+    } else {
+      void saveSelection(base);
+    }
   }, []);
 
   // §7.4 selection stability: when the selected id disappears, move once to the nearest survivor.
   useEffect(() => {
-    const sel = selectedRef.current;
     const prev = previousItems.current;
     previousItems.current = items;
+    const pending = pendingSelect.current;
+    if (pending) {
+      if (items.some((i) => i.id === pending)) {
+        // The requested row is listed: it is the selection, whether or not Raycast reports it.
+        pendingSelect.current = undefined;
+        selectedRef.current = pending;
+        setSelectedItemId(pending);
+        persistSelection(pending);
+        return;
+      }
+      // Still loading: wait. Scan done without that row: give up, and the survivor rule below picks a row.
+      if (windows.kind === "loading") return;
+      pendingSelect.current = undefined;
+    }
+    const sel = selectedRef.current;
     if (!sel) return;
     if (sel === TRASH_ITEM_ID && trashShown) return; // outside the app rows, and still there
     if (items.some((i) => i.id === sel)) {
@@ -492,13 +541,15 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       selectedRef.current = null;
       persistSelection(null);
     }
-  }, [items, persistSelection, trashShown]);
+  }, [items, persistSelection, trashShown, windows.kind]);
 
   // Only track the selection here. `selectedItemId` is set solely by the survivor fallback above and released on the
   // next change: mirroring every selection into it made Raycast scroll the clicked or arrowed row to the top
   // (observed by the owner as the list "sliding up" on a single click).
   const onSelectionChange = useCallback(
     (id: string | null) => {
+      if (pendingSelect.current && id !== pendingSelect.current) return;
+      pendingSelect.current = undefined;
       selectedRef.current = id;
       persistSelection(id);
       setSelectedItemId((current) => (current === undefined ? current : undefined));
@@ -614,6 +665,20 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
     [refreshWindows, updateConfig],
   );
 
+  /** ⌃Q on a window row of a multi-window app: close that window, then select a sibling window (rowAfterClose). */
+  const closeWin = useCallback(
+    async (item: Extract<ListItem, { kind: "window" }>) => {
+      const { row, window: w } = item;
+      const next = rowAfterClose(itemsRef.current, item.id);
+      await closeAppWindow({ pid: w.pid, wid: w.wid, name: row.name, bundleId: w.bundleId }, refreshWindows, () => {
+        if (!next) return;
+        selectedRef.current = next;
+        setSelectedItemId(next);
+      });
+    },
+    [refreshWindows],
+  );
+
   const openApp = useCallback(async (row: AppRow) => {
     if (!row.path || !existsSync(row.path)) {
       await showToast({ style: Toast.Style.Failure, title: `${row.name} was not found`, message: row.path });
@@ -710,7 +775,9 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
         return;
       }
       // Several pids under one key: each is asked in turn with its bundle guard and reports on its own.
-      for (const pid of pids) await quitApplication({ pid, name: row.name, bundleId: row.bundleId }, refresh);
+      for (const pid of pids) {
+        if ((await quitApplication({ pid, name: row.name, bundleId: row.bundleId }, refresh)) === "asking") return;
+      }
     },
     [refreshWindows, livePids],
   );
@@ -876,14 +943,15 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
       </>
     ) : null;
 
-  const quitAction = (row: AppRow) => (
+  /** `quitShortcut` false on a window row whose ⌃Q closes the window instead; Quit stays in the panel without a key. */
+  const quitAction = (row: AppRow, quitShortcut = true) => (
     <>
       {row.pids.length > 0 || row.tracked ? (
         <Action
           title={`Quit ${row.name}`}
           icon={Icon.XMarkCircle}
           style={Action.Style.Destructive}
-          shortcut={QUIT_SHORTCUT}
+          shortcut={quitShortcut ? QUIT_SHORTCUT : undefined}
           onAction={() => void quit(row)}
         />
       ) : null}
@@ -1131,7 +1199,17 @@ export function AppList(props: { fallbackText?: string; startup?: StartupAction;
             </ActionPanel.Section>
             <ActionPanel.Section>
               {pinAction(row)}
-              {quitAction(row)}
+              {row.windows.length >= 2 ? (
+                // Same ⌃Q as Quit on an app row and the same rule as Quit Selected App: close only this window.
+                <Action
+                  title="Close Window"
+                  icon={Icon.XMarkCircle}
+                  style={Action.Style.Destructive}
+                  shortcut={QUIT_SHORTCUT}
+                  onAction={() => void closeWin(item)}
+                />
+              ) : null}
+              {quitAction(row, row.windows.length < 2)}
             </ActionPanel.Section>
             {commonActions}
           </ActionPanel>

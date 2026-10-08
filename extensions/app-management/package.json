@@ -35,7 +35,7 @@
     {
       "name": "quit-selected-app",
       "title": "Quit Selected App",
-      "description": "Quit the app selected in the list and keep the list open. Meant for a hotkey.",
+      "description": "Quit the app selected in the list, or close the selected window when its app has others, and keep the list open. Meant for a hotkey.",
       "mode": "view"
     },
     {

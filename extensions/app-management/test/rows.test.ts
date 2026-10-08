@@ -15,6 +15,7 @@ import {
   matchAccessory,
   NO_EXPANSION,
   primaryAction,
+  rowAfterClose,
   rowVisibleIn,
   visibleItems,
   type AppItem,
@@ -222,18 +223,27 @@ describe("S-1 direct title search", () => {
   });
 });
 
-describe("S-2 app-name search does not flood", () => {
-  it("edge → one Edge row, no window rows, Return expands (Show Windows)", () => {
+describe("S-2 app-name search lists windows as the unfiltered list does (owner, 2026-10-08)", () => {
+  it("edge with expand-by-default → Edge and all its windows; Return switches to the first listed", () => {
     const xs = items(okWindows(), okBadges(dock({})), config(), "edge");
-    assert.deepEqual(ids(xs), ["app:com.test.microsoft edge"]);
+    assert.deepEqual(ids(xs), ["app:com.test.microsoft edge", "win:10:104", "win:10:101", "win:10:102", "win:10:103"]);
     const edge = appOf(xs, "Microsoft Edge");
     assert.equal(edge.match.kind, "name");
-    assert.equal(edge.collapsed, true);
-    assert.deepEqual(primaryAction(edge), { kind: "show-windows", label: "Show Windows" });
+    assert.equal(edge.collapsed, false);
     assert.equal(matchAccessory(edge), undefined);
   });
-  it("Show Windows during the search lists all windows beneath; Return then switches to the first listed", () => {
-    const e: Expansion = { ...NO_EXPANSION, expanded: new Set(["com.test.microsoft edge"]) };
+  it("a collapsed group, or expand-by-default off, stays collapsed during the search; Return expands", () => {
+    for (const e of [
+      { ...NO_EXPANSION, collapsed: new Set(["com.test.microsoft edge"]) },
+      { ...NO_EXPANSION, expandByDefault: false },
+    ]) {
+      const edge = appOf(items(okWindows(), okBadges(dock({})), config(), "edge", e), "Microsoft Edge");
+      assert.equal(edge.collapsed, true);
+      assert.deepEqual(primaryAction(edge), { kind: "show-windows", label: "Show Windows" });
+    }
+  });
+  it("expanded during the search: Return switches to the first listed", () => {
+    const e: Expansion = { ...NO_EXPANSION, expandByDefault: false, expanded: new Set(["com.test.microsoft edge"]) };
     const xs = items(okWindows(), okBadges(dock({})), config(), "edge", e);
     assert.deepEqual(ids(xs), ["app:com.test.microsoft edge", "win:10:104", "win:10:101", "win:10:102", "win:10:103"]);
     const p = primaryAction(appOf(xs, "Microsoft Edge"));
@@ -440,5 +450,29 @@ describe("badgeLabel: ten or more is a dot, everything else verbatim", () => {
   it("caps only numeric values of ten or more", () => {
     for (const v of ["1", "9", "0", "•", "99+", "1,204", "New", " 3", "00"]) assert.equal(badgeLabel(v), v);
     for (const v of ["10", "27", "100", "1204"]) assert.equal(badgeLabel(v), "•");
+  });
+});
+
+describe("Close Window selects a sibling window, never another app (owner, 2026-10-08)", () => {
+  const all = items(okWindows(), okBadges(dock({})), config(), "", { ...NO_EXPANSION, expandByDefault: true });
+  const groups = new Map<string, Extract<ListItem, { kind: "window" }>[]>();
+  for (const i of all) if (i.kind === "window") groups.set(i.row.key, [...(groups.get(i.row.key) ?? []), i]);
+  const [key, wins] = [...groups].find(([, ws]) => ws.length >= 2) ?? [];
+  it("the sample has an expanded app with two or more window rows", () => assert.ok(key && wins));
+  it("picks the next window, the previous one for the last, and nothing for a non-window row", () => {
+    const ws = wins!;
+    assert.equal(rowAfterClose(all, ws[0].id), ws[1].id);
+    assert.equal(rowAfterClose(all, ws[ws.length - 1].id), ws[ws.length - 2].id);
+    assert.equal(rowAfterClose(all, ws[0].row.id), undefined);
+    assert.equal(rowAfterClose(all, "win:0:0"), undefined);
+  });
+  it("falls back to the owning app row when no sibling window is listed", () => {
+    const only = all.filter((i) => i.kind !== "window" || i.id === wins![0].id);
+    assert.equal(rowAfterClose(only, wins![0].id), wins![0].row.id);
+  });
+  it("selects the app row when closing leaves one window (a one-window app has no window rows)", () => {
+    const w = wins![0];
+    const two = { ...w, row: { ...w.row, windows: w.row.windows.slice(0, 2) } };
+    assert.equal(rowAfterClose([two, { ...wins![1], row: two.row }], w.id), w.row.id);
   });
 });

@@ -62,7 +62,7 @@ func parseTarget() -> (pid_t, CGWindowID) {
 AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 1.0)
 
 let arguments = CommandLine.arguments
-guard arguments.count >= 2 else { usage("Usage: window-helper list | focus <pid> <window-id> | quit <pid> | check | version") }
+guard arguments.count >= 2 else { usage("Usage: window-helper list | focus <pid> <window-id> | close <pid> <window-id> | quit <pid> | check | version") }
 
 switch arguments[1] {
 case "version":
@@ -81,6 +81,9 @@ case "focus":
     let (pid, wid) = parseTarget()
     let mode = ActivationMode(rawValue: option("--activation") ?? "auto") ?? .auto
     emit(focusWindow(pid: pid, wid: wid, mode: mode, expectedBundle: option("--bundle")))
+case "close":
+    let (pid, wid) = parseTarget()
+    emit(closeWindow(pid: pid, wid: wid, expectedBundle: option("--bundle")))
 case "quit":
     let args = CommandLine.arguments
     guard args.count >= 3, let pid = Int32(args[2]), pid > 0 else { usage("Usage: window-helper quit <pid>") }

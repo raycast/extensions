@@ -1,14 +1,16 @@
 // Copied from raycast-window-switcher src/helper.ts on 2026-09-30, unchanged except this header, import paths, and the
 // activation mode fixed to "auto" (public activation, private fallback) instead of a preference (owner, 2026-09-30),
 // every call guarded by architectureFailure (arm64-only helper), and the list passed through
-// dropUnresolvedOnVisibleDesktop
-// Raycast-side helper access: bundled path, list, focus, quit.
+// dropUnresolvedOnVisibleDesktop, plus closeWindow (owner, 2026-10-08)
+// Raycast-side helper access: bundled path, list, focus, close, quit.
 import { environment } from "@raycast/api";
 import { join } from "node:path";
 import {
+  parseClose,
   parseFocus,
   parseList,
   parseQuit,
+  type CloseResult,
   type FocusResult,
   type QuitResult,
   type Parsed,
@@ -57,6 +59,12 @@ export async function focusWindow(pid: number, wid: number, bundleId?: string): 
   const args = ["focus", ...targetArgs(pid, wid, bundleId), "--activation", "auto"];
   const run = await runHelper(helperPath(), args, FOCUS_TIMEOUT_MS);
   return run.ok ? parseFocus(run.stdout) : run;
+}
+
+/** Presses the window's close button; the app keeps running and may ask to save. */
+export async function closeWindow(pid: number, wid: number, bundleId?: string): Promise<Parsed<CloseResult>> {
+  const run = await runHelper(helperPath(), ["close", ...targetArgs(pid, wid, bundleId)], FOCUS_TIMEOUT_MS);
+  return run.ok ? parseClose(run.stdout) : run;
 }
 
 /** Asks the app to quit normally. The bundle ID guards against a reused process ID. */

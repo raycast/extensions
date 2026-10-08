@@ -1,6 +1,7 @@
 // Configuration persistence in this extension's own LocalStorage (SPEC.md §5.3). Only the configuration keys (plus the
-// utility pins of §9) are ever written; badge values, window titles, and window IDs never are. Composes the badge
-// project's pin and filter loaders with the new first-run rules and the recency store.
+// utility pins of §9) are ever written; badge values and window titles never are, and window IDs only in the hotkey
+// selection (selection.v1). Composes the badge project's pin and filter loaders with the new first-run rules and the
+// recency store.
 import { getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
 import { serializeSelection, STORAGE_KEY, type SelectedApp } from "./lib/badge/config.ts";
 import {

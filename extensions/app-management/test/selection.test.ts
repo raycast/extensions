@@ -5,6 +5,7 @@ import {
   CLOSED_GRACE_MS,
   parseListState,
   parseSelection,
+  quitTarget,
   SELECTION_FRESH_MS,
 } from "../src/lib/selection.ts";
 
@@ -26,5 +27,21 @@ describe("hotkey commands act only on a live selection", () => {
     assert.equal(actionableSelection(undefined, { open: true, at: 1 }, 2), undefined);
     assert.deepEqual(actionableSelection(sel, undefined, 1500), sel, "no list state yet: the fresh selection counts");
     assert.deepEqual(parseListState(JSON.stringify({ open: true, at: 7, id: "m1" })), { open: true, at: 7, id: "m1" });
+  });
+});
+
+describe("Quit Selected App closes a selected window only while its app has others", () => {
+  const win = { ...sel, window: { pid: 42, wid: 1475 }, windowCount: 3 };
+  it("round-trips the window part and drops a malformed one", () => {
+    assert.deepEqual(parseSelection(JSON.stringify(win)), win);
+    assert.deepEqual(parseSelection(JSON.stringify({ ...win, window: { pid: 42 }, windowCount: "3" })), sel);
+    assert.deepEqual(parseSelection(JSON.stringify({ ...win, window: { pid: 42, wid: -1 } })), { ...sel, windowCount: 3 });
+  });
+  it("closes the window with two or more windows, quits the app otherwise", () => {
+    assert.deepEqual(quitTarget(win), { kind: "window", pid: 42, wid: 1475 });
+    assert.deepEqual(quitTarget({ ...win, windowCount: 2 }), { kind: "window", pid: 42, wid: 1475 });
+    assert.deepEqual(quitTarget({ ...win, windowCount: 1 }), { kind: "app" }, "last window: quit, not an app with no windows");
+    assert.deepEqual(quitTarget({ window: win.window }), { kind: "app" }, "unknown count: quit as before");
+    assert.deepEqual(quitTarget(sel), { kind: "app" }, "app row selected");
   });
 });

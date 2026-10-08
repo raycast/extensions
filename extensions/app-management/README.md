@@ -29,8 +29,9 @@ Open Raycast Settings → Extensions → **Window Switcher & Badges** and record
 - **Manage Apps**: your main hotkey. Every press reopens the list with a fresh window scan and badge read. **App List**
   is the screen it opens and needs no hotkey.
 - **Quit Selected App** (optional): quits the app selected in the open list and keeps the list open. It also works for
-  apps running without a window, such as Discord in the menu bar or Mail with its window closed. With no list open, or
-  more than 30 seconds after your last selection, it just opens the list.
+  apps running without a window, such as Discord in the menu bar or Mail with its window closed. With a window row
+  selected, it closes just that window and the app keeps its other windows; on the app's last window it quits the app.
+  With no list open, or more than 30 seconds after your last selection, it just opens the list.
 - **Quit Other Apps** (optional): quits every running app in the list except the selected one, after asking. Finder is
   never quit.
 - **Manage Pinned Apps** (optional): opens the same screen as ⌘⇧C in the list.
@@ -63,7 +64,7 @@ scan, never a different window.
 which). On an app with collapsed windows it shows them, and on an app with no windows it opens the app.
 
 **Search** matches every word you type against app names and window titles. Type part of a window title to narrow the
-list to that window, then press Return. Typing an app's name shows just that app. If several windows share a title, all
+list to that window, then press Return. Typing an app's name shows that app with its windows, as in the full list. If several windows share a title, all
 of them are listed (`2 of N match`) instead of one being picked for you.
 
 **Filters** (⌘P, or ⌘⇧V to cycle):
@@ -90,7 +91,7 @@ track app use outside this command.
 | -------------- | ----------------------------------------------------------------------------------------------------- |
 | ⌘R / ⌘⇧R / ⌘⌥R | Refresh everything / windows only / badges only                                                       |
 | ⌘.             | Pin or unpin (pinning an untracked app also tracks its badge)                                         |
-| ⌃Q             | Quit the selected app; the list stays open                                                            |
+| ⌃Q             | Quit the selected app, or close the selected window when its app has others; the list stays open     |
 | ⌃⇧Q            | Quit every other app in the list, after asking (never Finder)                                         |
 | ⌥← / ⌥→        | Collapse or expand an app's windows (add ⇧ for all apps)                                              |
 | ⌘⇧C            | Open Manage Pinned Apps                                                                               |

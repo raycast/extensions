@@ -188,3 +188,28 @@ export function parseQuit(text: string): Parsed<QuitResult> {
     },
   };
 }
+
+export interface CloseResult {
+  ok: boolean;
+  closed: boolean;
+  code?: string;
+  message?: string;
+}
+
+export function parseClose(text: string): Parsed<CloseResult> {
+  const parsed = parseJson(text);
+  if (!parsed.ok) return parsed;
+  const v = parsed.value;
+  if (typeof v.ok !== "boolean" || typeof v.closed !== "boolean") {
+    return { ok: false, failure: { kind: "bad-output", detail: "Helper close response is malformed" } };
+  }
+  return {
+    ok: true,
+    value: {
+      ok: v.ok,
+      closed: v.closed,
+      code: typeof v.code === "string" ? v.code : undefined,
+      message: typeof v.message === "string" ? v.message : undefined,
+    },
+  };
+}

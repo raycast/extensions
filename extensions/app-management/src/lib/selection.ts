@@ -18,8 +18,24 @@ export interface StoredSelection {
   name: string;
   bundleId?: string;
   pids: number[];
+  /** Set when a window row is selected (owner, 2026-10-08): the hotkey then closes that window instead of quitting. */
+  window?: { pid: number; wid: number };
+  /** The app's discovered window count at selection time, so the hotkey quits instead of closing a last window. */
+  windowCount?: number;
+  /** The list row to select after the hotkey closes `window` (a sibling window, else the app row). */
+  afterClose?: string;
   at: number;
 }
+
+/** What Quit Selected App does: close the selected window while its app has others, otherwise quit the app. */
+export type QuitTarget = { kind: "window"; pid: number; wid: number } | { kind: "app" };
+
+export function quitTarget(selection: Partial<StoredSelection>): QuitTarget {
+  const { window, windowCount } = selection;
+  return window && (windowCount ?? 0) >= 2 ? { kind: "window", pid: window.pid, wid: window.wid } : { kind: "app" };
+}
+
+const positiveInt = (n: unknown): n is number => typeof n === "number" && Number.isInteger(n) && n > 0;
 
 export interface ListState {
   open: boolean;
@@ -36,11 +52,16 @@ export function parseSelection(raw: unknown): StoredSelection | undefined {
     if (typeof v !== "object" || v === null) return undefined;
     if (typeof v.key !== "string" || typeof v.name !== "string" || typeof v.at !== "number") return undefined;
     if (!Array.isArray(v.pids) || !v.pids.every((p) => typeof p === "number")) return undefined;
+    const w = v.window as Record<string, unknown> | undefined;
     return {
       key: v.key,
       name: v.name,
       bundleId: typeof v.bundleId === "string" ? v.bundleId : undefined,
       pids: v.pids as number[],
+      // A malformed window part is dropped, never guessed: the hotkey then quits the app as before.
+      ...(w && positiveInt(w.pid) && positiveInt(w.wid) ? { window: { pid: w.pid, wid: w.wid } } : {}),
+      ...(positiveInt(v.windowCount) ? { windowCount: v.windowCount } : {}),
+      ...(typeof v.afterClose === "string" ? { afterClose: v.afterClose } : {}),
       at: v.at,
     };
   } catch {

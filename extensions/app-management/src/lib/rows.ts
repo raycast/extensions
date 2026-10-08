@@ -250,10 +250,10 @@ function childrenOf(row: AppRow, match: Match, ts: string[], e: Expansion): Wind
       return [match.window];
     case "multi":
       return match.matches;
+    // An app-name match lists the app's windows exactly as the unfiltered list does (owner, 2026-10-08; this replaces
+    // S-2's "never flood"): expand-by-default and the app's own Expand/Collapse decide. A query with a token that is not
+    // in the app name is not a name match, so it reaches single/multi above.
     case "name":
-      // S-2: an app-name match never floods (Edge's titles all contain "Edge"); only the explicit Show Windows expands.
-      // A query with a token that is not in the app name is not a name match, so it reaches single/multi above.
-      return e.expanded.has(row.key) ? row.windows : [];
     case "none":
       return row.windows.length >= 2 && isExpanded(row.key, e) ? row.windows : [];
   }
@@ -312,6 +312,22 @@ export function visibleItems(input: VisibleInput): ListItem[] {
     for (const w of children) items.push({ kind: "window", id: w.key, row, window: w });
   }
   return items;
+}
+
+/**
+ * The row to select once window row `id` closes (owner, 2026-10-08): the next window of the same app, else the previous
+ * one, else the app row (always the app row when only one window will be left). Never another app's row, so a second Quit press cannot reach a different app.
+ */
+export function rowAfterClose(items: ListItem[], id: string): string | undefined {
+  const index = items.findIndex((i) => i.id === id);
+  const item = items[index];
+  if (!item || item.kind !== "window") return undefined;
+  // Two windows: the one left is shown on the app row itself (no window rows for a one-window app).
+  if (item.row.windows.length <= 2) return item.row.id;
+  for (const i of [items[index + 1], items[index - 1]]) {
+    if (i?.kind === "window" && i.row.key === item.row.key) return i.id;
+  }
+  return item.row.id;
 }
 
 // ---------- Primary action (SPEC.md §4.2) ----------

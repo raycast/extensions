@@ -12,10 +12,11 @@ const binaries = {
   "window-helper": join(root, "assets", "window-helper"),
 };
 
-/** SPEC.md §10.4: the two binaries' hashes as observed on 2026-09-30 and verified byte-identical to the installed copies. */
+/** SPEC.md §10.4: the two binaries' hashes as observed on 2026-09-30 and verified byte-identical to the installed copies;
+ * window-helper rebuilt 2026-10-08 for the `close` command (Close.swift). */
 const RECORDED_BINARY_SHA256 = {
   "dock-badges": "9d16509531b9bc9ebd6dea6b07f805da34f81799aebd5274c6b0b4efafcd9af5",
-  "window-helper": "a5c4be9e97c54e9b0c9e832f15865531487a29debd717be2c09b87df85b866c2",
+  "window-helper": "476c52d57ce49373048456c6f392c5ec5e9d8999520ff87a0724a9ede40d2f86",
 };
 
 for (const [name, binary] of Object.entries(binaries)) {
