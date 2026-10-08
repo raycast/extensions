@@ -4,6 +4,7 @@
 
 - When Proton Mail Bridge can't be reached (not running, or a different host or port than the preferences), say so with the configured address and actions to open Bridge, try again or open the preferences, instead of an empty folder and a connection error
 - When Bridge rejects the username or password, explain which password to use, with an action to open the extension preferences
+- These screens check Bridge again every few seconds and load the emails once it's ready, so starting Bridge is enough, even with the extension left open in the background. While Bridge is still loading the account after starting, the screen says so instead of reporting rejected credentials
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 

@@ -69,6 +69,17 @@ export function bridgeErrorReason(error: unknown): BridgeErrorReason | undefined
   return error instanceof Error && error.name === "BridgeError" ? (error as BridgeError).reason : undefined;
 }
 
+export type BridgeStatus = "ready" | BridgeErrorReason | "failed";
+
+// Logs in without loading anything, so the error screen can tell when Bridge is back
+export async function checkBridge(): Promise<BridgeStatus> {
+  try {
+    return await withClient(async () => "ready" as const);
+  } catch (error) {
+    return bridgeErrorReason(error) ?? "failed";
+  }
+}
+
 async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promise<T> {
   const client = createClient();
   try {

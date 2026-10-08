@@ -245,7 +245,8 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
 
   return (
     <List
-      isLoading={isLoading}
+      // Raycast hides the empty view while loading, so the error screen would blink on each reload
+      isLoading={isLoading && !bridgeError}
       isShowingDetail={selectedEmailUid !== null}
       searchBarPlaceholder="Search emails..."
       searchBarAccessory={
