@@ -94,7 +94,7 @@ async function openFile(node: DriveNode) {
     await open(path);
     await toast.hide();
   } catch (error) {
-    await reportError(error, `Could not open ${node.name}`);
+    await reportError(error, `Could not open ${node.name}`, toast);
   }
 }
 
@@ -108,7 +108,7 @@ async function downloadNode(node: DriveNode) {
     toast.primaryAction = { title: "Show in Finder", onAction: () => showInFinder(path) };
     toast.secondaryAction = { title: "Open", onAction: () => open(path) };
   } catch (error) {
-    await reportError(error, `Could not download ${node.name}`);
+    await reportError(error, `Could not download ${node.name}`, toast);
   }
 }
 
@@ -134,12 +134,19 @@ async function copyPublicLink(node: DriveNode) {
     toast.title = "Public link copied";
     toast.message = url;
   } catch (error) {
-    await reportError(error, "Could not get a public link");
+    await reportError(error, "Could not get a public link", toast);
   }
 }
 
-/** A lost session hides Drive content in every view; anything else is shown as an error. */
-async function reportError(error: unknown, title: string) {
-  if (isSignedOut(error)) await handleSignedOut();
-  else await showError(error, title);
+/**
+ * A lost session hides Drive content in every view; anything else is shown as an error, which replaces
+ * the operation's progress toast. The signed-out path shows no toast of its own, so hide it there.
+ */
+async function reportError(error: unknown, title: string, progress: Toast) {
+  if (isSignedOut(error)) {
+    await progress.hide();
+    await handleSignedOut();
+  } else {
+    await showError(error, title);
+  }
 }
