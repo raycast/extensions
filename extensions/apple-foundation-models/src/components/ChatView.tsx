@@ -106,8 +106,8 @@ export function ChatView({
     (async () => {
       const saved = chatId ? await store.get(chatId) : undefined;
       if (saved?.draft) setInput(saved.draft);
-      // The draft stays in the file until the next save, so it is not lost if the chat closes again first.
-      updateChat(saved ? { ...saved, draft: undefined } : store.create(getDefaultInstructions()));
+      // The draft stays on the chat until a message is sent, so other saves (like new instructions) keep it.
+      updateChat(saved ?? store.create(getDefaultInstructions()));
       if (initialQuestion?.trim()) send(initialQuestion.trim());
     })();
   }, [chatId]);
@@ -190,6 +190,9 @@ export function ChatView({
     const question = input.trim();
     if (!question) return;
     setInput("");
+    // The message in the input is sent now, so a saved draft is no longer needed. The next save removes it.
+    const current = chatRef.current;
+    if (current?.draft) updateChat({ ...current, draft: undefined });
     if (!busy.current) {
       send(question);
       return;
