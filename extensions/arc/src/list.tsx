@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List, showToast, Toast, Icon, open, showInFinder } from "@raycast/api";
+import { Action, ActionPanel, Image, List, showToast, Toast, Icon, open, showInFinder, Keyboard } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import {
   CopyLinkActionSection,
@@ -41,7 +41,7 @@ export function SpaceListItem(props: { space: Space }) {
             <Action.CopyToClipboard
               title="Copy Space Title"
               content={getSpaceTitle(props.space)}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -67,7 +67,7 @@ export function DownloadListItem(props: { download: Download }) {
             onAction={async () => {
               try {
                 await open(props.download.current_path);
-              } catch (error) {
+              } catch {
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Could't open the file. The file may have been removed or moved.",
@@ -81,7 +81,7 @@ export function DownloadListItem(props: { download: Download }) {
             onAction={async () => {
               try {
                 await showInFinder(props.download.current_path);
-              } catch (error) {
+              } catch {
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Could't open the file in Finder. The file may have been removed or moved.",

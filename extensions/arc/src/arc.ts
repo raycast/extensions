@@ -22,6 +22,11 @@ async function ensureArcIsRunning() {
   `);
 }
 
+export async function isArcRunning() {
+  const response = await runAppleScript(`return application "Arc" is running`);
+  return response === "true";
+}
+
 // Tabs
 export async function getTabs() {
   await ensureArcIsRunning();

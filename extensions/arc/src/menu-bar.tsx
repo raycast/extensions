@@ -1,14 +1,19 @@
-import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences, Keyboard } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { truncate } from "lodash";
-import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./arc";
+import { findTab, getSpaces, getTabs, isArcRunning, selectSpace, selectTab } from "./arc";
 import { getDomain, getKey, getShortcut, getSpaceTitle } from "./utils";
 
 const LIMIT = 25;
 
+// Background refreshes must not launch Arc; skip the AppleScript calls while it is not running.
+async function ifArcIsRunning<T>(fn: () => Promise<T>) {
+  return (await isArcRunning()) ? fn() : undefined;
+}
+
 export default function Command() {
-  const { data: spaces, isLoading: isLoadingSpaces } = useCachedPromise(getSpaces);
-  const { data: tabs, isLoading: isLoadingTabs } = useCachedPromise(getTabs);
+  const { data: spaces, isLoading: isLoadingSpaces } = useCachedPromise(() => ifArcIsRunning(getSpaces));
+  const { data: tabs, isLoading: isLoadingTabs } = useCachedPromise(() => ifArcIsRunning(getTabs));
 
   return (
     <MenuBarExtra
@@ -53,7 +58,7 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="View All Spaces"
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Save}
           onAction={async () => await launchCommand({ name: "search-spaces", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
@@ -66,7 +71,6 @@ export default function Command() {
           title="Configure Command"
           tooltip="Open Command Preferences"
           onAction={openCommandPreferences}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
