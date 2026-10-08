@@ -14,6 +14,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { showError } from "../lib/errors";
+import { handleSignedOut, isSignedOut } from "../lib/session";
 import { createPublicLink, DriveNode, existingPublicLink } from "../lib/cli";
 import { downloadToDownloads, localCopyForOpening } from "../lib/files";
 import { FolderView } from "./FolderView";
@@ -93,7 +94,7 @@ async function openFile(node: DriveNode) {
     await open(path);
     await toast.hide();
   } catch (error) {
-    await showError(error, `Could not open ${node.name}`);
+    await reportError(error, `Could not open ${node.name}`);
   }
 }
 
@@ -107,7 +108,7 @@ async function downloadNode(node: DriveNode) {
     toast.primaryAction = { title: "Show in Finder", onAction: () => showInFinder(path) };
     toast.secondaryAction = { title: "Open", onAction: () => open(path) };
   } catch (error) {
-    await showError(error, `Could not download ${node.name}`);
+    await reportError(error, `Could not download ${node.name}`);
   }
 }
 
@@ -133,6 +134,12 @@ async function copyPublicLink(node: DriveNode) {
     toast.title = "Public link copied";
     toast.message = url;
   } catch (error) {
-    await showError(error, "Could not get a public link");
+    await reportError(error, "Could not get a public link");
   }
+}
+
+/** A lost session hides Drive content in every view; anything else is shown as an error. */
+async function reportError(error: unknown, title: string) {
+  if (isSignedOut(error)) await handleSignedOut();
+  else await showError(error, title);
 }

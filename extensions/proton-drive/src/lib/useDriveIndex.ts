@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { showError } from "./errors";
+import { handleSignedOut, isSignedOut, onSignedOut } from "./session";
 import {
   backgroundRefreshEnabled,
   buildIndex,
@@ -14,6 +15,10 @@ import {
 
 /** Parsed once per command run and shared by every folder view pushed on the navigation stack. */
 let shared: DriveIndex | undefined;
+// Once signed out, the previous session's index must not stay in memory either.
+onSignedOut(() => {
+  shared = undefined;
+});
 
 /**
  * The optional whole-Drive search index: loads it, and builds or refreshes it on demand.
@@ -30,6 +35,7 @@ export function useDriveIndex() {
   }, []);
   const [progress, setProgress] = useState<string>();
   const refreshing = useRef(false);
+  useEffect(() => onSignedOut(() => setIndexState(undefined)), []);
 
   const refresh = useCallback(
     async (silent: boolean) => {
@@ -72,7 +78,8 @@ export function useDriveIndex() {
           setProgress("Indexing in the background…");
           return;
         }
-        if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
+        if (isSignedOut(error)) await handleSignedOut();
+        else if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
       } finally {
         if (refreshing.current) {
           refreshing.current = false;

@@ -225,9 +225,9 @@ export async function buildIndex(
    * Writes only while the lock is ours. If logout deletes INDEX_DIR after this check, the write itself
    * fails (the directory is gone), so the previous account's data is never written back.
    */
-  const guardedWrite = async (path: string, value: unknown) => {
+  const guardedWrite = async (path: string, json: string) => {
     if (!(await ownsLock(token))) throw new IndexAbortedError("Indexing stopped");
-    await writeJson(path, value, token).catch((error) => {
+    await writeText(path, json, token).catch((error) => {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new IndexAbortedError("Indexing stopped");
       throw error;
     });
@@ -262,8 +262,13 @@ export async function buildIndex(
 
     const saveCheckpoint = async () => {
       // Folders being listed right now aren't done: put them back so a resumed crawl redoes them.
-      await guardedWrite(crawlFile(), { ...state, queue: [...inFlight, ...state.queue] });
-      if (publishPartial) await guardedWrite(indexFile(), snapshot(true));
+      // Serialize now, synchronously: a listing that finishes during the writes below would otherwise
+      // add its children while its folder is still saved as pending, and a resumed crawl would list it
+      // again, duplicating those entries.
+      const crawlJson = JSON.stringify({ ...state, queue: [...inFlight, ...state.queue] });
+      const partialJson = publishPartial ? JSON.stringify(snapshot(true)) : undefined;
+      await guardedWrite(crawlFile(), crawlJson);
+      if (partialJson) await guardedWrite(indexFile(), partialJson);
     };
 
     const crawl = () =>
@@ -312,7 +317,7 @@ export async function buildIndex(
 
     // Folders still failing are recorded: the index is marked stale and the UI says what is missing.
     const index = snapshot(false);
-    await guardedWrite(indexFile(), index);
+    await guardedWrite(indexFile(), JSON.stringify(index));
     await rm(crawlFile(), { force: true });
     return index;
   } finally {
@@ -330,9 +335,9 @@ async function readJson<T>(path: string): Promise<T | undefined> {
 }
 
 /** Atomic write; `writer` keeps temporary files of concurrent writers apart. */
-async function writeJson(path: string, value: unknown, writer: string) {
+async function writeText(path: string, text: string, writer: string) {
   const tmp = `${path}.${writer.replace(/\W/g, "")}.tmp`;
   // Item names are stored in clear here: readable by this macOS user only.
-  await writeFile(tmp, JSON.stringify(value), { mode: 0o600 });
+  await writeFile(tmp, text, { mode: 0o600 });
   await rename(tmp, path);
 }

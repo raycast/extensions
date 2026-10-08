@@ -17,7 +17,7 @@ import { displayPath } from "./components/NodeActions";
 import { listFolderCached, ROOT, upload } from "./lib/cli";
 import { isDemo } from "./lib/demo";
 import { showError } from "./lib/errors";
-import { forgetLocalData, isSignedOut } from "./lib/session";
+import { handleSignedOut, isSignedOut, useSignedOut } from "./lib/session";
 import { SignedOutView } from "./components/SignedOutView";
 import { readIndex } from "./lib/index";
 import { sortNodes } from "./lib/sort";
@@ -83,12 +83,11 @@ function ChooseFiles(props: { indexedFolders: string[] }) {
 function FolderPicker(props: { path: string; files: string[]; indexedFolders: string[] }) {
   const { path, files, indexedFolders } = props;
   const [query, setQuery] = useState("");
-  const [signedOut, setSignedOut] = useState(false);
+  const signedOut = useSignedOut();
   const { data, isLoading } = useCachedPromise(listFolderCached, [path, isDemo() ? "demo" : "live"], {
     onError: async (error) => {
       if (isSignedOut(error)) {
-        setSignedOut(true);
-        await forgetLocalData();
+        await handleSignedOut();
       } else {
         await showError(error, "Could not list folder");
       }
@@ -190,6 +189,7 @@ async function doUpload(files: string[], parentPath: string) {
     if (!result.failedItems) await popToRoot();
   } catch (error) {
     await toast.hide();
-    await showError(error, "Upload failed");
+    if (isSignedOut(error)) await handleSignedOut();
+    else await showError(error, "Upload failed");
   }
 }

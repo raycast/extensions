@@ -7,7 +7,7 @@ export function SignedOutView() {
       <List.EmptyView
         icon={Icon.Lock}
         title="Not signed in to Proton Drive"
-        description="Local data from the previous session was deleted. Log in to browse your Drive again."
+        description="The Proton Drive CLI has no active session, so nothing from your Drive is shown. Log in to browse it again."
         actions={
           <ActionPanel>
             <Action

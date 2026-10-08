@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { DriveNode, listFolderCached } from "./cli";
 import { isDemo } from "./demo";
+import { handleSignedOut, isSignedOut } from "./session";
 import { FolderContents } from "../components/NodeItem";
 
 /**
@@ -27,8 +28,11 @@ export function useSelectedFolder(nodes: DriveNode[] | undefined) {
     {
       execute: Boolean(settledPath) && settledPath === folderPath,
       keepPreviousData: false,
-      // Background prefetch for the preview: on failure the panel just stays empty, no alert.
-      onError: () => undefined,
+      // Background prefetch for the preview: a failure just shows in the panel, without an alert,
+      // unless the session is gone, which every view must react to.
+      onError: (error) => {
+        if (isSignedOut(error)) handleSignedOut();
+      },
     },
   );
 
