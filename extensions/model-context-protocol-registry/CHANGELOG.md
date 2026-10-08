@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update MAQAMI Travel MCP Server] - {PR_MERGE_DATE}
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
 ## [Update Moved Repository Links] - 2026-10-08
 
 - Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
