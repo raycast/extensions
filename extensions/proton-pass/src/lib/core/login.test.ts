@@ -229,6 +229,33 @@ test("once a login is over, the next pass-cli command removes the login URL, and
   }
 });
 
+test("cleanups that overlap keep why the login failed", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-url-fail"), dir, 2_000);
+  const ended = JSON.parse(readFileSync(join(dir, "login.json"), "utf8"));
+  await waitUntil(() => !isProcessRunning(ended.pid));
+  await sleep(50);
+
+  // The second one reads the output after the first removed it.
+  await forgetLoginUrl(dir, ended);
+  await forgetLoginUrl(dir, ended);
+  const status = await settle(dir);
+  assert.equal(status.state, "failed");
+  if (status.state === "failed") assert.equal(status.error.message, "The login didn't complete. Try again.");
+});
+
+test("a login that succeeded a while ago doesn't show again once its session has ended", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-ok"), dir, 2_000);
+  const pid = savedPid(dir);
+  await waitUntil(() => !isProcessRunning(pid));
+  await sleep(50);
+  // A command ran meanwhile, then the user logged out.
+  assert.equal(await isDetachedLoginRunning(dir), false);
+
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "none" });
+});
+
 test("cleaning up after a login that's over leaves a login started meanwhile alone", async () => {
   const dir = loginDir();
   await startDetachedLogin(fakeCommand("login-url-fail"), dir, 2_000);

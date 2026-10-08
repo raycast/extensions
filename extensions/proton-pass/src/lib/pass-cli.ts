@@ -125,6 +125,8 @@ export async function cancelBrowserLogin(): Promise<void> {
 export async function logout(force = false): Promise<void> {
   if (!USE_MOCK_DATA) await (await getAdapter()).logout(force);
   await clearCache();
+  // A finished login's result would otherwise show on the next login screen.
+  await cancelBrowserLogin();
 }
 
 export async function checkAuth(): Promise<boolean> {
