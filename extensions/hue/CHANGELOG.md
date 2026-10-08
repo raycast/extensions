@@ -32,6 +32,7 @@
 - Show only the colors of lights that are on in room and zone images
 - Show scenes at their own brightness instead of all looking dim
 - Show each room and zone's icon on its Control Groups tile, as in the Hue app
+- Draw whites in the Hue app's colors, from warm yellow to cool mint, and lights without color, like plugs, in its cream
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

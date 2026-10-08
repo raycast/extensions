@@ -3,12 +3,6 @@ import { BRIGHTNESSES, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import chroma from "chroma-js";
 
 /**
- * The mired from Hue’s API is too warm, so we make it cooler by an arbitrary amount
- */
-const CT_MIRED_ADJUSTMENT = -50;
-const CT_HUE_ADJUSTMENT = 8;
-
-/**
  * Converts an RGB value to a CIE (x, y) color and brightness (0-100)
  *
  * @link https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/#Color-rgb-to-xy
@@ -54,9 +48,8 @@ export function hexToXy(color: string): { xy: Xy; brightness: number } {
  *
  * @link https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/#xy-to-rgb-color
  * @param {Xy} xy
- * @param brightness Brightness of the light (0 – 100)
  */
-export function xyToRgbHexString({ x, y }: Xy, brightness = 100) {
+export function xyToRgbHexString({ x, y }: Xy) {
   if (y === 0) return "#000000";
 
   function applyReverseGammaCorrection(value: number) {
@@ -106,24 +99,30 @@ export function xyToRgbHexString({ x, y }: Xy, brightness = 100) {
     blue = blue / max;
   }
 
-  return chroma
-    .rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255))
-    .darken(1 - brightness / 100)
-    .hex();
+  return chroma.rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255)).hex();
 }
+
+/**
+ * The Hue app draws whites from its own palette rather than the black-body curve: its coolest white is mint. These are
+ * its colors at 153, 346 and 454 mirek, read from its room cards. Colors between them blend in OKLab, and beyond them
+ * the nearest segment continues, so color lights' 455-500 mirek get warmer still.
+ */
+const WHITES: [number, string][] = [
+  [153, "#d3ebdc"],
+  [346, "#ffe7a1"],
+  [454, "#ffca6a"],
+];
 
 /**
  * Converts color temperature in mireds to a hex string
  *
  * @param {number} mireds Philips Hue color temperature value (153-500)
- * @param brightness Brightness of the light (1-100)
  */
-export function miredToHexString(mireds: number, brightness = 100) {
-  const color = chroma.temperature(1_000_000 / (mireds + CT_MIRED_ADJUSTMENT));
-  return color
-    .set("hsl.h", color.get("hsl.h") + CT_HUE_ADJUSTMENT)
-    .darken(1 - brightness / 100)
-    .hex();
+export function miredToHexString(mireds: number) {
+  const next = WHITES.findIndex(([mired]) => mired >= mireds);
+  const end = next === -1 ? WHITES.length - 1 : Math.max(next, 1);
+  const [[fromMired, fromColor], [toMired, toColor]] = [WHITES[end - 1], WHITES[end]];
+  return chroma.mix(fromColor, toColor, (mireds - fromMired) / (toMired - fromMired), "oklab").hex();
 }
 
 /**

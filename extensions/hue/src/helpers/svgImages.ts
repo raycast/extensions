@@ -13,9 +13,9 @@ const round = (n: number) => Math.round(n * 1e4) / 1e4;
 // As in the Hue app's room cards, a near-black overlay shades tiles from the top down, more as brightness drops. Its
 // opacity at height fraction t blends a curve that rises fast and levels off, at the lowest brightness, with one that
 // starts slow, at full brightness. Both are fitted to screenshots of the app at 1, 25, 50, 75 and 100% brightness.
-const SHADE_COLOR = "#00040f";
+const SHADE_COLOR = "#000310";
 function shade(t: number, brightness: number) {
-  const dim = 0.61 * (1 - (1 - t) ** 3.25) + 0.08;
+  const dim = 0.59 * (1 - (1 - t) ** 3) + 0.1;
   const full = 0.42 * t ** 1.7 + 0.02;
   return dim + ((full - dim) * brightness) / 100;
 }
