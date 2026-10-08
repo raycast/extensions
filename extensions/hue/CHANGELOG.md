@@ -26,6 +26,7 @@
 - Keep connecting to bridges after Signify moves them to its secondary root certificate
 - Fix bridge discovery hanging when MeetHue's discovery service returns an unexpected response
 - Find the bridge with mDNS first, as Philips recommends, with MeetHue's discovery service as the fallback
+- Fix the Toggle All Lights message when some lights fail, which said "Turned on" when turning off and miscounted the failures
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

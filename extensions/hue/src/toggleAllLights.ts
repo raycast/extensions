@@ -4,6 +4,7 @@ import {
   environment,
   getPreferenceValues,
   showHUD,
+  showToast,
   Toast,
   updateCommandMetadata,
 } from "@raycast/api";
@@ -23,19 +24,18 @@ export default async function ToggleAllLights() {
     }
 
     const resources = await hueClient.getResources();
-    const onLights = resources.lights.filter((light) => light.on.on);
+    const onCount = resources.lights.filter((light) => light.on.on).length;
 
     const cache = new Cache({ namespace: RESOURCES_CACHE_NAMESPACE });
     for (const [key, items] of Object.entries(resources)) if (items.length > 0) cache.set(key, JSON.stringify(items));
 
-    // Update command metadata
-    if (onLights.length === 0) {
-      updateCommandMetadata({ subtitle: "All lights are off" }).then();
-    } else if (onLights.length === resources.lights.length) {
-      updateCommandMetadata({ subtitle: "All lights are on" }).then();
-    } else {
-      updateCommandMetadata({ subtitle: `${onLights.length} of ${resources.lights.length} lights are on` }).then();
-    }
+    const subtitle =
+      onCount === 0
+        ? "All lights are off"
+        : onCount === resources.lights.length
+          ? "All lights are on"
+          : `${onCount} of ${resources.lights.length} lights are on`;
+    updateCommandMetadata({ subtitle }).then();
   } catch (error) {
     if (environment.launchType !== "userInitiated" || !(error instanceof Error)) {
       throw error;
@@ -52,48 +52,25 @@ export default async function ToggleAllLights() {
 
 async function toggleLightsAndNotifyUser(hueClient: HueClient): Promise<void> {
   const lights = await hueClient.getLights();
-  const onLights = lights.filter((light) => light.on.on);
+  const onCount = lights.filter((light) => light.on.on).length;
   const { toggleAllLights } = getPreferenceValues<Preferences>();
-  const toast = new Toast({
-    style: Toast.Style.Animated,
-    title: "",
-    message: "Please wait…",
-  });
+  const toggleOn = onCount === 0 || (toggleAllLights === "on" && onCount !== lights.length);
+  const onOrOff = toggleOn ? "on" : "off";
 
-  const toggleOn = onLights.length === 0 || (toggleAllLights === "on" && lights.length !== onLights.length);
-  let toastTitle: string;
-  let successMessage: string;
-  let failureMessage: string;
+  showToast({ style: Toast.Style.Animated, title: `Turning ${onOrOff} all lights…`, message: "Please wait…" }).then();
 
-  if (toggleOn) {
-    toastTitle = "Turning on all lights…";
-    successMessage = `Turned on all ${lights.length} lights.`;
-    failureMessage = `failed turning on ${lights.length} lights.`;
-  } else {
-    toastTitle = "Turning off all lights…";
-    successMessage = `Turned off all ${onLights.length} lights that were on.`;
-    failureMessage = `failed turning off ${onLights.length} lights that were on.`;
-  }
-
-  toast.title = toastTitle;
-  toast.show().then();
-
-  const settledPromises = await Promise.allSettled(
+  const results = await Promise.allSettled(
     lights
-      .filter((light) => {
-        return toggleOn ? !onLights.includes(light) : onLights.includes(light);
-      })
-      .map((light) => {
-        return hueClient.updateLight(light, { on: { on: toggleOn } });
-      }),
+      .filter((light) => light.on.on !== toggleOn)
+      .map((light) => hueClient.updateLight(light, { on: { on: toggleOn } })),
   );
+  const failed = results.filter((result) => result.status === "rejected").length;
 
-  const lightsTurnedOn = settledPromises.filter((p) => p.status === "fulfilled").length;
-  const lightsFailed = settledPromises.filter((p) => p.status === "rejected").length;
-
-  if (lightsFailed === 0) {
-    showHUD(successMessage).then();
-  } else {
-    showHUD(`Turned on ${lightsTurnedOn} lights, ${failureMessage}`).then();
-  }
+  showHUD(
+    failed > 0
+      ? `Turned ${onOrOff} ${results.length - failed} lights, failed turning ${onOrOff} ${failed}.`
+      : toggleOn
+        ? `Turned on all ${lights.length} lights.`
+        : `Turned off all ${onCount} lights that were on.`,
+  ).then();
 }
