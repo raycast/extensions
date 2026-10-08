@@ -1,9 +1,20 @@
 import { DeepPartial, HasId, Id } from "../lib/types";
 
-export function updateItems<T extends HasId>(items: T[], changes: Map<Id, DeepPartial<T>>): T[] {
+// existingOnly skips properties an item lacks, so an optimistic update can't give a plug dimming.
+export function updateItems<T extends HasId>(
+  items: T[],
+  changes: Map<Id, DeepPartial<T>>,
+  { existingOnly = false } = {},
+): T[] {
   return items.map((it) => {
     const change = changes.get(it.id);
-    return !change ? it : merge(it, change);
+    if (!change) return it;
+    return merge(
+      it,
+      existingOnly
+        ? (Object.fromEntries(Object.entries(change).filter(([key]) => key in it)) as typeof change)
+        : change,
+    );
   });
 }
 

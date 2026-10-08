@@ -21,6 +21,7 @@
 - Fix scene images ignoring the brightness of the scene's palette colors
 - Fix the color temperature actions forgetting a light's own limits after its temperature changes
 - Fix changing the color temperature of a light set to a color; it now starts from the nearest white instead of jumping to the coolest
+- Fix plugs offering brightness actions after a room's brightness changes, and color-only lights offering color temperature actions after a scene is set
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

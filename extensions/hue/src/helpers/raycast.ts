@@ -76,7 +76,7 @@ function optimisticUpdates<T extends HasId>(
 
   setState((prevState: T[]) => {
     undoState = prevState;
-    return updateItems(prevState, changes);
+    return updateItems(prevState, changes, { existingOnly: true });
   });
 
   return (): void => {
