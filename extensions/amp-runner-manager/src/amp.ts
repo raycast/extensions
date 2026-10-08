@@ -121,7 +121,11 @@ async function runAmp(ampPath: string, args: string[]): Promise<string> {
   }
 }
 
+// Check permissions before activating Amp so Raycast stays open to show the
+// failure toast and its settings action.
 const OPEN_RUNNER_SETTINGS_SCRIPT = `
+tell application "System Events" to set canScript to UI elements enabled
+if not canScript then error "Raycast is not allowed assistive access." number -25211
 tell application id "com.ampcode.amp.macos" to activate
 tell application "System Events" to tell process "Amp"
   repeat 50 times

@@ -37,7 +37,6 @@ async function openAmpRunnerSettings() {
   try {
     await openRunnerSettings();
   } catch (error) {
-    await open("/Applications/Amp.app");
     const message = errorMessage(error);
     const permission = missingPermission(message);
     await showToast({
