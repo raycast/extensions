@@ -77,7 +77,8 @@ async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
 }
 
 /** The output holds the login URL and its payload, so the files go as soon as the login is over. */
-const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true });
+// pass-cli's exit code can be written while the folder is removed, which then fails as not empty: retried.
+const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true, maxRetries: 3 });
 
 /** What pass-cli prints once the browser login is done, before saving the session. */
 const FINISHING_LINE = /web authentication complete/i;
