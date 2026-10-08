@@ -101,7 +101,10 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
         path: "/api",
         hostname: ipAddress,
         port: 443,
-        agent: getBridgeHttpsAgent(bridgeId),
+        agent: new https.Agent({
+          ca: getCaCertificate(),
+          checkServerIdentity: (_hostname, peerCertificate) => validateBridgeCertificate(peerCertificate, bridgeId),
+        }),
         timeout: CONNECTION_TIMEOUT_MS,
         headers: {
           "Content-Type": "application/json",
@@ -178,27 +181,6 @@ export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
       reject(error);
     });
   });
-}
-
-let _bridgeHttpsAgent: https.Agent | null = null;
-
-/**
- * Creates a bridge-specific HTTPS agent that inherits the connection pooling and TLS
- * session resumption settings from our base agent.
- * @param bridgeId Bridge ID for certificate validation
- * @returns HTTPS agent configured for the specific Hue Bridge
- */
-export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
-  if (_bridgeHttpsAgent) return _bridgeHttpsAgent;
-
-  _bridgeHttpsAgent = new https.Agent({
-    keepAlive: true,
-    rejectUnauthorized: true,
-    ca: getCaCertificate(),
-    checkServerIdentity: (_hostname, peerCertificate) => validateBridgeCertificate(peerCertificate, bridgeId),
-  });
-
-  return _bridgeHttpsAgent;
 }
 
 /**
