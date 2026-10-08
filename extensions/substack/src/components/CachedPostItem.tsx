@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { useMemo } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
 
 import type { CachedPost, WithDetails } from "@/types";
 
@@ -53,9 +53,7 @@ ${post.truncated_body}`}
       actions={
         <ActionPanel>
           <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} />
-          {post.url && (
-            <Action.OpenInBrowser title="Open on Substack" url={post.url} icon={{ source: "substack.svg" }} />
-          )}
+          {post.url && <Action title="Open on Substack" onAction={() => open(post.url)} />}
         </ActionPanel>
       }
     />
