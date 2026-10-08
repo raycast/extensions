@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
-import type { Group, Id, Light, Palette, PngUri, Scene } from "./lib/types";
+import type { Group, Light, PngUri, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue, useHueResources } from "./hooks/useHue";
 import useGradients from "./hooks/useGradientUris";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
@@ -20,13 +20,9 @@ export default function SetSceneCommand() {
 export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHue> }) {
   const { hueBridgeState, sendHueMessage, isLoading } = props.useHue;
   const { rooms, zones, scenes } = useHueResources();
-  const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
+  const palettes = useMemo(() => new Map(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])), [scenes]);
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const { pop } = useNavigation();
-
-  useMemo(() => {
-    setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
-  }, [scenes]);
 
   // When pushed, the parent handles the bridge state.
   const manageHueBridgeElement = props.group ? null : ManageHueBridge(hueBridgeState, sendHueMessage);

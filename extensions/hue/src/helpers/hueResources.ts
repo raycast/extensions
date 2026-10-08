@@ -4,6 +4,7 @@ import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
 import { environment } from "@raycast/api";
 import { existsSync } from "fs";
+import chroma from "chroma-js";
 
 export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
   return lights.filter((light) =>
@@ -38,6 +39,11 @@ export function getColorFromLight(light: Light): string {
   }
   return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
+
+export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
+  getLightsFromGroup(lights, group)
+    .map(getColorFromLight)
+    .sort((a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"));
 
 export function getColorsFromScene(scene: Scene): Palette {
   // Try each color source in priority order

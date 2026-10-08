@@ -1,19 +1,18 @@
 import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
-import type { Group, GroupedLight, Id, Light, Palette, PngUri, Room, Zone } from "./lib/types";
+import type { Group, GroupedLight, Light, PngUri, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import useGradientUris from "./hooks/useGradientUris";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import { SetScene } from "./setScene";
-import { getColorFromLight, getGroupedLightFromGroup, getLightsFromGroup } from "./helpers/hueResources";
+import { getColorsFromGroup, getGroupedLightFromGroup, getLightsFromGroup } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
-import chroma from "chroma-js";
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
 const GRID_ITEM_WIDTH = 271;
@@ -23,25 +22,11 @@ export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(3, 1000);
-  const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
+  const palettes = useMemo(
+    () => new Map([...rooms, ...zones].map((group) => [group.id, getColorsFromGroup(lights, group)])),
+    [rooms, zones, lights],
+  );
   const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
-
-  useMemo(() => {
-    const groups = [...rooms, ...zones];
-    const palettes = new Map<Id, Palette>(
-      groups.map((group) => {
-        const groupLights = getLightsFromGroup(lights, group);
-        const uniqueColors = new Set(groupLights.map((light) => getColorFromLight(light)));
-        const groupColors = groupLights
-          .filter((light) => uniqueColors.has(getColorFromLight(light)))
-          .map((light) => getColorFromLight(light))
-          .sort((a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"));
-        return [group.id, groupColors];
-      }),
-    );
-
-    setPalettes(palettes);
-  }, [rooms, zones, lights]);
 
   const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
