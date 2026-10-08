@@ -190,6 +190,17 @@ test("a running login is waiting for the browser, and canceling it stops pass-cl
   assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "none" });
 });
 
+test("a canceled login exiting late can't replace a newer successful login's result", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-slow-stop"), dir, 2_000);
+  const oldPid = savedPid(dir);
+  await startDetachedLogin(fakeCommand("login-ok"), dir, 2_000);
+  await waitUntil(() => !isProcessRunning(oldPid));
+  await sleep(50);
+
+  assert.deepEqual(await settle(dir), { state: "succeeded" });
+});
+
 test("when the extension missed pass-cli's exit, the session tells whether the login succeeded", async () => {
   for (const isLoggedIn of [true, false]) {
     const dir = loginDir();
@@ -199,7 +210,7 @@ test("when the extension missed pass-cli's exit, the session tells whether the l
     await waitUntil(() => !isProcessRunning(pid));
     await sleep(50);
     // As if Raycast had stopped the extension before pass-cli exited.
-    rmSync(join(dir, "exit-code.txt"), { force: true });
+    rmSync(join(dir, `${pid}-exit-code.txt`), { force: true });
 
     const status = await checkDetachedLogin(dir, async () => isLoggedIn);
     assert.equal(status.state, isLoggedIn ? "succeeded" : "failed");

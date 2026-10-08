@@ -11,6 +11,7 @@ const expectedArgs = {
   "login-garbage": ["login"],
   "login-hang": ["login"],
   "login-wait": ["login"],
+  "login-slow-stop": ["login"],
   "login-url-fail": ["login"],
   "login-finishing": ["login"],
   "login-fail": ["login"],
@@ -120,6 +121,11 @@ switch (mode) {
       `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
     );
     process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-slow-stop":
+    console.log(`Please open the following URL in your browser:\n${loginUrl}\n`);
+    process.on("SIGTERM", () => setTimeout(() => process.exit(1), 500));
     setInterval(() => {}, 1_000);
     break;
   case "login-finishing":

@@ -142,7 +142,8 @@ export async function startDetachedLogin(
   // its place, tells that something stopped pass-cli.
   child.once("exit", (code, signal) => {
     ownLogins.delete(pid);
-    void writeFile(join(dir, EXIT_CODE_FILE), String(code ?? signal)).catch(() => undefined);
+    // A canceled process may exit after its replacement: keep each process's result separate.
+    void writeFile(join(dir, `${pid}-${EXIT_CODE_FILE}`), String(code ?? signal)).catch(() => undefined);
   });
 
   const startedAt = Date.now();
@@ -192,7 +193,7 @@ export async function checkDetachedLogin(
 
   const [output, exitCode] = await Promise.all([
     readText(join(dir, OUTPUT_FILE)),
-    readText(join(dir, EXIT_CODE_FILE)).then((text) => text.trim()),
+    readText(join(dir, `${saved.pid}-${EXIT_CODE_FILE}`)).then((text) => text.trim()),
   ]);
   await removeLogin(dir);
   if (hasTimedOut) {
