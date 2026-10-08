@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.7.0] - {PR_MERGE_DATE}
+## [1.7.0] - 2026-10-08
 
 Frozen Trail update support and MetaForge API sync.
 
