@@ -1,12 +1,12 @@
 import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { API, EventTimer, EventsScheduleResponse, MetaForgeUrl } from "./api";
 import { formatDuration } from "./format";
 import { findMap } from "./maps";
-import { RefreshAction, loadFailure } from "./ui";
+import { RefreshAction, loadFailure, useNow } from "./ui";
 
-type EventStatus = "active" | "upcoming" | "later";
+type EventStatus = "active" | "upcoming" | "later" | "ended";
 
 interface EventWithStatus extends EventTimer {
   status: EventStatus;
@@ -21,16 +21,24 @@ const STATUS: Record<EventStatus, { section: string; label: string; detail: stri
   active: { section: "Active Now", label: "Active", detail: "ACTIVE NOW", color: Color.Green },
   upcoming: { section: "Starting Soon", label: "Soon", detail: "Starting soon", color: Color.Yellow },
   later: { section: "Later", label: "Later", detail: "Later", color: Color.SecondaryText },
+  ended: { section: "Ended", label: "Ended", detail: "Ended", color: Color.SecondaryText },
 };
 
 function withStatus(event: EventTimer, now: number): EventWithStatus {
   const minutesUntil = Math.max(0, Math.ceil((event.startTime - now) / 60000));
   const status: EventStatus =
-    now >= event.startTime ? "active" : minutesUntil <= UPCOMING_WINDOW_MINUTES ? "upcoming" : "later";
+    now >= event.endTime
+      ? "ended"
+      : now >= event.startTime
+        ? "active"
+        : minutesUntil <= UPCOMING_WINDOW_MINUTES
+          ? "upcoming"
+          : "later";
   return { ...event, status, startDate: new Date(event.startTime), endDate: new Date(event.endTime), minutesUntil };
 }
 
 function timeUntil(event: EventWithStatus): string {
+  if (event.status === "ended") return "Ended";
   return event.status === "active" ? "Active now!" : formatDuration(event.minutesUntil);
 }
 
@@ -53,7 +61,18 @@ function EventActions({ event, onRefresh }: { event: EventWithStatus; onRefresh:
   );
 }
 
-function EventDetail({ event, region, onRefresh }: { event: EventWithStatus; region?: string; onRefresh: () => void }) {
+function EventDetail({
+  event: pushed,
+  region,
+  onRefresh,
+}: {
+  event: EventTimer;
+  region?: string;
+  onRefresh: () => void;
+}) {
+  // Recompute from the raw times so the status and countdown keep moving while the detail is open.
+  const now = useNow();
+  const event = withStatus(pushed, now);
   const status = STATUS[event.status];
   const markdown = `
 # ${event.name}
@@ -74,7 +93,7 @@ function EventDetail({ event, region, onRefresh }: { event: EventWithStatus; reg
 
 **Status:** ${status.detail}
 
-${event.status !== "active" ? `**Starts in:** ${timeUntil(event)}` : ""}
+${event.status === "upcoming" || event.status === "later" ? `**Starts in:** ${timeUntil(event)}` : ""}
 `;
 
   return (
@@ -115,18 +134,12 @@ function accessoriesFor(event: EventWithStatus): List.Item.Accessory[] {
 
 export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
-  const [now, setNow] = useState(() => Date.now());
+  const now = useNow();
 
   const { isLoading, data, revalidate } = useFetch<EventsScheduleResponse>(API.eventsSchedule, {
     keepPreviousData: true,
     failureToastOptions: loadFailure("events"),
   });
-
-  // Re-evaluate event statuses every minute so events move from "upcoming" to "active" on their own.
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
 
   const events = data?.data ?? [];
   const region = data?.region ? data.region.charAt(0).toUpperCase() + data.region.slice(1) : undefined;

@@ -16,6 +16,8 @@ export type BlueprintStore = Record<string, BlueprintStatus>;
 type StatusChange = (status: BlueprintStatus | undefined) => BlueprintStatus;
 
 const NOT_OBTAINED: BlueprintStatus = { obtained: false, duplicates: 0 };
+// Stable reference: useCachedState's setter changes identity whenever its initial value does.
+const EMPTY_STORE: BlueprintStore = {};
 
 export async function getBlueprintStore(): Promise<BlueprintStore> {
   const data = await LocalStorage.getItem<string>(BLUEPRINTS_KEY);
@@ -30,6 +32,8 @@ export async function getBlueprintStore(): Promise<BlueprintStore> {
 
 // Writes are chained so rapid toggles cannot interleave their read-modify-write cycles.
 let pendingWrite: Promise<unknown> = Promise.resolve();
+// Bumped by every update, so a load that started before an update can't overwrite its result with older data.
+let revision = 0;
 
 function saveStatus(id: string, change: StatusChange): Promise<BlueprintStore> {
   const write = pendingWrite.then(async () => {
@@ -54,15 +58,16 @@ function withDuplicates(delta: number): StatusChange {
 export type BlueprintTracker = ReturnType<typeof useBlueprintStore>;
 
 export function useBlueprintStore() {
-  const [store, setStore] = useCachedState<BlueprintStore>(STORE_CACHE_KEY, {});
+  const [store, setStore] = useCachedState<BlueprintStore>(STORE_CACHE_KEY, EMPTY_STORE);
   const [isLoading, setIsLoading] = useState(true);
 
   // LocalStorage is the source of truth; refresh the mirror once any in-flight write has finished.
   useEffect(() => {
     let cancelled = false;
+    const loadRevision = revision;
     pendingWrite.then(getBlueprintStore).then((saved) => {
       if (cancelled) return;
-      setStore(saved);
+      if (revision === loadRevision) setStore(saved);
       setIsLoading(false);
     });
     return () => {
@@ -72,6 +77,7 @@ export function useBlueprintStore() {
 
   const update = useCallback(
     async (id: string, change: StatusChange): Promise<BlueprintStatus> => {
+      revision++;
       setStore((current) => ({ ...current, [id]: change(current[id]) }));
       try {
         const saved = await saveStatus(id, change);

@@ -1,6 +1,17 @@
 import { Action, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { GuideLink, MetaForgeUrl, getRarityColor } from "./api";
 import { isUrl } from "./format";
+
+/** Current time, refreshed every minute so countdowns and statuses stay current while a view is open. */
+export function useNow(): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+  return now;
+}
 
 export function loadFailure(what: string) {
   return {

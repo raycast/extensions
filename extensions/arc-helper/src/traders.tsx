@@ -1,10 +1,10 @@
 import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { API, BarterItem, BarterOffer, BarterService, ItemRef, MetaForgeUrl, TradersResponse } from "./api";
 import { formatDuration, formatNumber, itemTable, section } from "./format";
 import { ItemDetail, ViewItemsSubmenu } from "./item-detail";
-import { RefreshAction, itemIcon, loadFailure, rarityAccessory } from "./ui";
+import { RefreshAction, itemIcon, loadFailure, rarityAccessory, useNow } from "./ui";
 
 const ERMAL = "Ermal";
 
@@ -48,7 +48,7 @@ function costText(coinCost: number): string {
 }
 
 function OfferDetail({ offer }: { offer: BarterOffer }) {
-  const now = Date.now();
+  const now = useNow();
   const status = STATUS_LABEL[offerStatus(offer, now)];
   const markdown = [
     `# ${offer.offer_title}`,
@@ -130,12 +130,7 @@ export default function Traders() {
   const traderNames = [...Object.keys(inventories), ...(ermal ? [ERMAL] : [])].sort((a, b) => a.localeCompare(b));
   const shownTraders = traderFilter === "all" ? traderNames : traderNames.filter((name) => name === traderFilter);
 
-  // Tick every minute so offer countdowns and active/expired status stay current while the list is open.
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const now = useNow();
 
   const offers = useMemo(() => {
     const order: Record<OfferStatus, number> = { active: 0, upcoming: 1, expired: 2 };
