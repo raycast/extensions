@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [Fix Empty Request Without Selected Text] - {PR_MERGE_DATE}
+
+- Commands like Translate and Summarize now show the prompt form when no text is selected, instead of sending an empty request that fails with "Request has empty input".
+
 ## [Dynamic Model Selection & Live Model List] - 2026-09-07
 
 - 🆕 Fetch the list of available models live from Google's API instead of a hardcoded dropdown, so newly released and retired models no longer require a manual extension update.
