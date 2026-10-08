@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue, useHueResources } from "./hooks/useHue";
 import { createGradientUri } from "./helpers/svgImages";
 import { useMemo } from "react";
-import { getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
+import { getBrightnessFromScene, getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 
@@ -17,7 +17,10 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
   const { hueBridgeState, sendHueMessage, isLoading } = props.useHue;
   const { rooms, zones, scenes } = useHueResources();
   const gradientUris = useMemo(
-    () => new Map(scenes.map((scene) => [scene.id, createGradientUri(getColorsFromScene(scene))])),
+    () =>
+      new Map(
+        scenes.map((scene) => [scene.id, createGradientUri(getColorsFromScene(scene), getBrightnessFromScene(scene))]),
+      ),
     [scenes],
   );
   const { pop } = useNavigation();

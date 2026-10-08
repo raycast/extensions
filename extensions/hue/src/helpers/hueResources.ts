@@ -33,14 +33,11 @@ export const getIconPathFromLight = (light: Light, color: "black" | "white") =>
 export const getIconPathFromGroup = (group: Group, color: "black" | "white") =>
   getIconPath(`rooms/${group.metadata.archetype}`, "rooms/other", color);
 
+// At full brightness: tiles show brightness with their shading.
 export function getColorFromLight(light: Light): string {
-  if (light.color_temperature?.mirek) {
-    return miredToHexString(light.color_temperature.mirek, light.dimming?.brightness);
-  }
-  if (light.color?.xy) {
-    return xyToRgbHexString(light.color.xy, light.dimming?.brightness);
-  }
-  return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
+  if (light.color_temperature?.mirek) return miredToHexString(light.color_temperature.mirek);
+  if (light.color?.xy) return xyToRgbHexString(light.color.xy);
+  return miredToHexString(MIRED_DEFAULT);
 }
 
 // In color mode a light has no color temperature, so the temperature actions start from the white nearest its color,
@@ -52,39 +49,41 @@ export function getMiredFromLight({ color_temperature, color }: Light): number {
 }
 
 // Like the Hue app, palettes have one entry per color, not per light. Colors closer than ΔE 5 count as one, so lights a
-// few mirek or percent apart do too, while 2200K and 2700K, or 100% and 50% brightness, stay apart.
+// few mirek apart do too, while 2200K and 2700K stay apart.
 const distinctColors = (colors: string[]) =>
   colors.reduce<string[]>(
     (kept, color) => (kept.some((k) => chroma.deltaE(k, color) < 5) ? kept : [...kept, color]),
     [],
   );
 
+// The Hue app shows the colors of the lights that are on, warm to cool.
 export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
-  distinctColors(getLightsFromGroup(lights, group).map(getColorFromLight)).sort(
-    (a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"),
+  distinctColors(
+    getLightsFromGroup(lights, group)
+      .filter((light) => light.on.on)
+      .map(getColorFromLight),
+  ).sort((a, b) => chroma(a).get("hsl.h") - chroma(b).get("hsl.h"));
+
+// The brightness the scene's lights get, averaged like a room's grouped light.
+export function getBrightnessFromScene({ actions }: Scene): number {
+  const brightnesses = actions.flatMap(({ action }) =>
+    action.on?.on && action.dimming ? [action.dimming.brightness] : [],
   );
+  return brightnesses.length > 0 ? brightnesses.reduce((sum, b) => sum + b, 0) / brightnesses.length : 100;
+}
 
 export function getColorsFromScene({ palette, actions }: Scene): Palette {
-  // Color sources in priority order
+  // Color sources in priority order, at full brightness like getColorFromLight
   const sources = [
-    () => palette?.color.map(({ color, dimming }) => xyToRgbHexString(color.xy, dimming.brightness)),
+    () => palette?.color.map(({ color }) => xyToRgbHexString(color.xy)),
+    () => actions.flatMap(({ action }) => (action.color ? [xyToRgbHexString(action.color.xy)] : [])),
+    () => palette?.color_temperature.map(({ color_temperature }) => miredToHexString(color_temperature.mirek)),
     () =>
       actions.flatMap(({ action }) =>
-        action.color ? [xyToRgbHexString(action.color.xy, action.dimming?.brightness)] : [],
+        action.color_temperature ? [miredToHexString(action.color_temperature.mirek)] : [],
       ),
     () =>
-      palette?.color_temperature.map(({ color_temperature, dimming }) =>
-        miredToHexString(color_temperature.mirek, dimming.brightness),
-      ),
-    () =>
-      actions.flatMap(({ action }) =>
-        action.color_temperature ? [miredToHexString(action.color_temperature.mirek, action.dimming?.brightness)] : [],
-      ),
-    () => palette?.dimming.map(({ brightness }) => miredToHexString(MIRED_DEFAULT, brightness)),
-    () =>
-      actions.flatMap(({ action }) =>
-        action.dimming ? [miredToHexString(MIRED_DEFAULT, action.dimming.brightness)] : [],
-      ),
+      palette?.dimming.length || actions.some(({ action }) => action.dimming) ? [miredToHexString(MIRED_DEFAULT)] : [],
   ];
 
   for (const source of sources) {

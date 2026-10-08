@@ -24,11 +24,7 @@ export default function ControlGroups() {
       new Map(
         [...rooms, ...zones].map((group) => [
           group.id,
-          createGroupIcon(
-            group,
-            getColorsFromGroup(lights, group),
-            getGroupedLightFromGroup(groupedLights, group)?.on?.on === true,
-          ),
+          createGroupIcon(group, getColorsFromGroup(lights, group), getGroupedLightFromGroup(groupedLights, group)),
         ]),
       ),
     [rooms, zones, lights, groupedLights],

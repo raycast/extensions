@@ -1,7 +1,7 @@
 import { Cache, environment, Image } from "@raycast/api";
 import chroma from "chroma-js";
 import { readFileSync } from "fs";
-import { Group, Light, Palette } from "../lib/types";
+import { Group, GroupedLight, Light, Palette } from "../lib/types";
 import { getColorFromLight, getIconPathFromGroup, getIconPathFromLight } from "./hueResources";
 
 // Earlier versions cached their Jimp PNGs in these namespaces.
@@ -10,10 +10,15 @@ new Cache({ namespace: "hue-light-icons" }).clear();
 
 const round = (n: number) => Math.round(n * 1e4) / 1e4;
 
-// As in the Hue app's room cards, a dark overlay shades tiles from the top down. Its opacity at height fraction t rises
-// fast and levels off; color and curve are fitted to a screenshot of the app.
-const SHADE_COLOR = "#242424";
-const shade = (t: number) => 0.78 * (1 - (1 - t) ** 3.25);
+// As in the Hue app's room cards, a near-black overlay shades tiles from the top down, more as brightness drops. Its
+// opacity at height fraction t blends a curve that rises fast and levels off, at the lowest brightness, with one that
+// starts slow, at full brightness. Both are fitted to screenshots of the app at 1, 25, 50, 75 and 100% brightness.
+const SHADE_COLOR = "#00040f";
+function shade(t: number, brightness: number) {
+  const dim = 0.61 * (1 - (1 - t) ** 3.25) + 0.08;
+  const full = 0.42 * t ** 1.7 + 0.02;
+  return dim + ((full - dim) * brightness) / 100;
+}
 
 function svgUri(width: number, height: number, content: string, stretch = false) {
   const aspect = stretch ? ' preserveAspectRatio="none"' : "";
@@ -27,12 +32,18 @@ function linearGradient(id: string, x2: number, y2: number, steps: number, stop:
 }
 
 // The colors blend evenly from left to right, edge to edge.
-function gradientContent(colors: Palette, width: number, height: number) {
+function gradientContent(colors: Palette, brightness: number, width: number, height: number) {
   const rect = (gradientId: string) => `<rect width="${width}" height="${height}" fill="url(#${gradientId})"/>`;
   const last = colors.length - 1;
   const color = (t: number) => `stop-color="${colors[Math.round(t * last)]}"`;
   const horizontal = linearGradient("h", 1, 0, Math.max(last, 1), color);
-  const vertical = linearGradient("v", 0, 1, 8, (t) => `stop-color="${SHADE_COLOR}" stop-opacity="${round(shade(t))}"`);
+  const vertical = linearGradient(
+    "v",
+    0,
+    1,
+    8,
+    (t) => `stop-color="${SHADE_COLOR}" stop-opacity="${round(shade(t, brightness))}"`,
+  );
   return `<defs>${horizontal}${vertical}</defs>${rect("h")}${rect("v")}`;
 }
 
@@ -40,9 +51,10 @@ function gradientContent(colors: Palette, width: number, height: number) {
 const GRADIENT_WIDTH = 271;
 const GRADIENT_HEIGHT = 153;
 
-export function createGradientUri(colors: Palette): string | undefined {
+export function createGradientUri(colors: Palette, brightness: number): string | undefined {
   if (colors.length === 0) return undefined;
-  return svgUri(GRADIENT_WIDTH, GRADIENT_HEIGHT, gradientContent(colors, GRADIENT_WIDTH, GRADIENT_HEIGHT), true);
+  const content = gradientContent(colors, brightness, GRADIENT_WIDTH, GRADIENT_HEIGHT);
+  return svgUri(GRADIENT_WIDTH, GRADIENT_HEIGHT, content, true);
 }
 
 // Assets don't change while a command runs, so each file is read once.
@@ -69,10 +81,16 @@ const glyphImage =
 
 // The glyph sits in the icon's top left quarter, so it is black or white, whichever stands out more at that quarter's
 // center. APCA, unlike WCAG 2's contrast ratio, rates white higher than black on saturated reds and purples.
-function onIcon(width: number, height: number, colors: Palette, glyph: Glyph): Image {
-  const behindGlyph = chroma.mix(chroma.scale(colors)(0.25), SHADE_COLOR, shade(0.25), "rgb");
+function onIcon(width: number, height: number, colors: Palette, brightness: number, glyph: Glyph): Image {
+  const behindGlyph = chroma.mix(chroma.scale(colors)(0.25), SHADE_COLOR, shade(0.25, brightness), "rgb");
   const black = Math.abs(chroma.contrastAPCA("#000", behindGlyph)) > Math.abs(chroma.contrastAPCA("#fff", behindGlyph));
-  return { source: svgUri(width, height, gradientContent(colors, width, height) + glyph(black ? "black" : "white")) };
+  return {
+    source: svgUri(
+      width,
+      height,
+      gradientContent(colors, brightness, width, height) + glyph(black ? "black" : "white"),
+    ),
+  };
 }
 
 // The off tiles are light in the light theme and dark in the dark theme, so their glyphs are black and white.
@@ -88,13 +106,13 @@ const LIGHT_ICON_SIZE = 162;
 export function createLightIcon(light: Light): Image {
   const glyph = glyphImage((color) => getIconPathFromLight(light, color));
   return light.on.on
-    ? onIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, [getColorFromLight(light)], glyph)
+    ? onIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, [getColorFromLight(light)], light.dimming?.brightness ?? 100, glyph)
     : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, "light-off", glyph);
 }
 
-export function createGroupIcon(group: Group, colors: Palette, on: boolean): Image {
+export function createGroupIcon(group: Group, colors: Palette, groupedLight: GroupedLight | undefined): Image {
   const glyph = glyphImage((color) => getIconPathFromGroup(group, color));
-  return on && colors.length > 0
-    ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, glyph)
+  return groupedLight?.on?.on && colors.length > 0
+    ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, groupedLight.dimming?.brightness ?? 100, glyph)
     : offIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, "group-off", glyph);
 }

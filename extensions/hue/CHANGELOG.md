@@ -28,7 +28,9 @@
 - Find the bridge with mDNS first, as Philips recommends, with MeetHue's discovery service as the fallback
 - Fix the Toggle All Lights message when some lights fail, which said "Turned on" when turning off and miscounted the failures
 - Show each color once in room, zone and scene images, like the Hue app, so a color several lights share no longer fills most of the image, even when their settings differ slightly
-- Shade room, scene and light images like the Hue app, and show their outer colors in full
+- Shade room, scene and light images like the Hue app, darker as brightness drops, with colors from warm to cool and the outer ones in full
+- Show only the colors of lights that are on in room and zone images
+- Show scenes at their own brightness instead of all looking dim
 - Show each room and zone's icon on its Control Groups tile, as in the Hue app
 - Update the Raycast API and utilities
 
