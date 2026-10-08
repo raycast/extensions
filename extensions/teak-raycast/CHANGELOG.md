@@ -1,6 +1,6 @@
 # Changelog
 
-## [Shared Teak sign-in] - {PR_MERGE_DATE}
+## [Shared Teak sign-in] - 2026-10-08
 
 - Sign-in, token renewal, and Sign Out now use the same Teak sign-in library as the CLI and browser extension
 
