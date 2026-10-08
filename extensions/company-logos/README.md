@@ -6,7 +6,7 @@ Find a company logo in Raycast. Copy the image, then paste it into a document, s
 
 ## Install
 
-**Install from source for now.** A Raycast Store listing requires review before one-click installation becomes available.
+**Install from source for now.** The [Raycast Store submission](https://github.com/raycast/extensions/pull/32079) is pending review. One-click installation becomes available after approval and publication.
 
 1. Install [Raycast](https://www.raycast.com/) on macOS.
 2. Install [Node.js](https://nodejs.org/en/download) 22 or newer. npm is included.
