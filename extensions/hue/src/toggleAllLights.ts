@@ -10,6 +10,7 @@ import {
 import createHueClient, { loadBridgeConfig } from "./lib/createHueClient";
 import HueClient from "./lib/HueClient";
 import { logError } from "./helpers/errors";
+import { RESOURCES_CACHE_NAMESPACE } from "./helpers/constants";
 
 export default async function ToggleAllLights() {
   try {
@@ -24,7 +25,7 @@ export default async function ToggleAllLights() {
     const resources = await hueClient.getResources();
     const onLights = resources.lights.filter((light) => light.on.on);
 
-    const cache = new Cache();
+    const cache = new Cache({ namespace: RESOURCES_CACHE_NAMESPACE });
     for (const [key, items] of Object.entries(resources)) if (items.length > 0) cache.set(key, JSON.stringify(items));
 
     // Update command metadata

@@ -3,8 +3,13 @@ import { useCachedState } from "@raycast/utils";
 import { DeepPartial, GroupedLight, HueResource, Light, Room, Scene, Zone } from "../lib/types";
 import { useHueBridgeMachine } from "./useHueBridgeMachine";
 import { updateItems } from "../helpers/collections";
-import { Toast } from "@raycast/api";
+import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
+import { Cache, Toast } from "@raycast/api";
 import Style = Toast.Style;
+
+// Earlier versions cached the resources in the default namespace, in shapes that no longer match the types.
+const defaultCache = new Cache();
+["isLoading", "lights", "groupedLights", "rooms", "zones", "scenes"].forEach((key) => defaultCache.remove(key));
 
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
@@ -12,13 +17,15 @@ export type SendHueMessage = (message: HueMessage) => void;
 export function useHueResources() {
   // Holding a brightness or color shortcut changes these many times a second. Rooms, zones and scenes aren't
   // debounced: the pushed Set Scene reads them through its own hook instance, which only sees flushed writes.
-  const [lights, setLights] = useCachedState("lights", [] as Light[], { cacheWriteDebounce: 1000 });
+  const cache = { cacheNamespace: RESOURCES_CACHE_NAMESPACE };
+  const [lights, setLights] = useCachedState("lights", [] as Light[], { ...cache, cacheWriteDebounce: 1000 });
   const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[], {
+    ...cache,
     cacheWriteDebounce: 1000,
   });
-  const [rooms, setRooms] = useCachedState("rooms", [] as Room[]);
-  const [zones, setZones] = useCachedState("zones", [] as Zone[]);
-  const [scenes, setScenes] = useCachedState("scenes", [] as Scene[]);
+  const [rooms, setRooms] = useCachedState("rooms", [] as Room[], cache);
+  const [zones, setZones] = useCachedState("zones", [] as Zone[], cache);
+  const [scenes, setScenes] = useCachedState("scenes", [] as Scene[], cache);
   return { lights, setLights, groupedLights, setGroupedLights, rooms, setRooms, zones, setZones, scenes, setScenes };
 }
 
