@@ -112,7 +112,7 @@
           "type": "dropdown",
           "name": "pref_menu_bar_refresh_interval",
           "title": "Refresh Interval",
-          "description": "How often status re-checks itself in the background. Opening the menu always shows the last-known status instantly, then refreshes for real only once this much time has passed. To stop background refresh entirely (rely on the menu's own Refresh item only), use the Background Refresh toggle above instead. This only sets cadence.",
+          "description": "How often status is re-checked in the background. To stop background refresh altogether, use the Background Refresh toggle above.",
           "data": [
             {
               "title": "Every 1 minute",
@@ -139,7 +139,7 @@
           "name": "pref_menu_bar_count_unsaved",
           "title": "Count",
           "label": "Include drives that are mounted but not saved",
-          "description": "The number beside the menu bar icon counts your connected saved drives. Turn this on to count mounts that aren't saved drives as well, such as a one-off from Browse Shares or anything connected in Finder. They are always listed in the menu either way; this only changes the number.",
+          "description": "Counts mounts that aren't saved drives, such as a one-off from Browse Shares or anything mounted in Finder. They are listed in the menu either way.",
           "default": false,
           "required": false
         }
