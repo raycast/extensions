@@ -21,7 +21,7 @@ export type IconData = {
   code: number;
   title: string;
   hex: string;
-  source: string;
+  source?: string;
   slug: string;
   guidelines?: string;
   license?: { type: string; url?: string };
