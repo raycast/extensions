@@ -116,7 +116,7 @@ function anonymizeEmail(email: Email, index: number): Email {
 }
 
 function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ListEmails>();
   const pageSize = parseInt(prefs.emailsToLoad || "50", 10);
 
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");

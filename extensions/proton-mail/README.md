@@ -42,7 +42,7 @@ View and manage your Proton Mail inbox directly in Raycast via Proton Mail Bridg
    - **SMTP Port**: Usually `1025`
    - **Username**: Your Proton Mail email address
    - **Password**: The Bridge-generated password (found in Bridge app, NOT your Proton account password)
-   - **Emails to Load**: Number of emails per page (25, 50, 100, or 200)
+4. Optionally, set **Emails to Load** (25, 50, 100, or 200 per page) in the Browse Email command's preferences
 
 ## How to Find Your Bridge Settings
 
@@ -64,7 +64,7 @@ Select a folder first, then use the filter section to narrow down emails.
 
 ## Pagination
 
-The extension loads emails in pages based on your "Emails to Load" preference. Scroll to the bottom of the list to load older emails automatically, or press ⌘L ("Load More Emails" in the action menu).
+The extension loads emails in pages based on Browse Email's "Emails to Load" preference. Scroll to the bottom of the list to load older emails automatically, or press ⌘L ("Load More Emails" in the action menu).
 
 ## Attachments
 

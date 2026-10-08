@@ -3,6 +3,7 @@
 ## [Load Older Emails on Scroll] - {PR_MERGE_DATE}
 
 - Older emails now load automatically when scrolling to the bottom of the list ("Load More Emails" and ⌘L still work)
+- "Emails to Load" moves from the extension preferences to Browse Email's, the only command that uses it
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
