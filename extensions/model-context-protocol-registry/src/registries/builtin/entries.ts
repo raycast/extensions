@@ -623,7 +623,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research.",
     icon: "https://svgl.app/library/perplexity.svg",
-    homepage: "https://github.com/ppl-ai/modelcontextprotocol",
+    homepage: "https://github.com/perplexityai/modelcontextprotocol",
     configuration: {
       command: "npx",
       args: ["-y", "server-perplexity-ask"],
@@ -906,7 +906,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "This project follows the Model Context Protocol standard, allowing AI assistants to interact with Stripe's API.",
     icon: "https://svgl.app/library/stripe.svg",
-    homepage: "https://github.com/stripe/agent-toolkit",
+    homepage: "https://github.com/stripe/ai",
     configuration: {
       command: "npx",
       args: ["-y", "@stripe/mcp", "--tools=all", "--api-key=YOUR_STRIPE_SECRET_KEY"],
@@ -1047,7 +1047,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     description:
       "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
     icon: "🔥",
-    homepage: "https://github.com/mendableai/firecrawl-mcp-server",
+    homepage: "https://github.com/firecrawl/firecrawl-mcp-server",
     configuration: {
       command: "npx",
       args: ["-y", "firecrawl-mcp"],
@@ -1636,7 +1636,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     description:
       "This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically.",
     icon: "https://svgl.app/library/figma.svg",
-    homepage: "https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp",
+    homepage: "https://github.com/grab/cursor-talk-to-figma-mcp",
     configuration: {
       command: "bunx",
       args: ["cursor-talk-to-figma-mcp@latest"],
@@ -1903,7 +1903,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     description:
       "MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents.",
     icon: "monday.svg",
-    homepage: "https://github.com/sakce/mcp-server-monday",
+    homepage: "https://github.com/Prat011/mcp-server-monday",
     configuration: {
       command: "uvx",
       args: ["mcp-server-monday"],
