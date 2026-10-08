@@ -25,7 +25,7 @@
 
 ## 源码安装与开发
 
-Blazwitcher Raycast 目前通过源码安装。需要 macOS、Google Chrome、Raycast，以及 Node.js 22.22.2 或更新版本；不需要全局安装 Raycast CLI。
+开发或通过源码安装需要 Node.js 22.22.2 或更新版本；不需要全局安装 Raycast CLI。
 
 ```bash
 git clone https://github.com/cjinhuo/blazwitcher-raycast.git
