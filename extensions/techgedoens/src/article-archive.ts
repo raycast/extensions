@@ -1,6 +1,6 @@
 import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { mkdir, open, readdir, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, open, readdir, readFile, rename, rm, rmdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { Article, fetchArticleFeedPage } from "./articles";
 
@@ -14,7 +14,8 @@ const MAX_ARCHIVE_ARTICLES = 2_000;
 const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
 const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
 const ARCHIVE_LIMIT_TITLE = "Article Archive Limit Reached";
-const ARCHIVE_UPDATE_LOCK_PATH = join(environment.supportPath, "article-archive-update-v2.lock");
+const ARCHIVE_UPDATE_LOCK_PATH = join(environment.supportPath, "article-archive-update-v3.lock");
+const ARCHIVE_UPDATE_ACTIVE_LOCK_PATH = join(ARCHIVE_UPDATE_LOCK_PATH, "active");
 const ARCHIVE_UPDATE_LOCK_HEARTBEAT_MS = 1_000;
 const ARCHIVE_UPDATE_LOCK_RETRY_MS = 50;
 const ARCHIVE_UPDATE_LOCK_TIMEOUT_MS = 10_000;
@@ -50,7 +51,6 @@ type ArticleRefreshOptions = {
 };
 
 type ArchiveLockOwner = {
-  createdAt: number;
   id: string;
   pid: number;
 };
@@ -247,53 +247,52 @@ async function runArchiveUpdate<T>(update: () => Promise<T>): Promise<T> {
 }
 
 async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
-  const owner: ArchiveLockOwner = { createdAt: Date.now(), id: randomUUID(), pid: process.pid };
+  const owner: ArchiveLockOwner = { id: randomUUID(), pid: process.pid };
   const serializedOwner = JSON.stringify(owner);
-  const leasePath = join(ARCHIVE_UPDATE_LOCK_PATH, `${owner.id}.lease`);
+  const claimPath = join(ARCHIVE_UPDATE_LOCK_PATH, `${owner.id}.claim`);
+  const claimOwnerPath = join(claimPath, `${owner.id}.owner`);
   const startedAt = Date.now();
   await mkdir(ARCHIVE_UPDATE_LOCK_PATH, { recursive: true });
-  const leaseFile = await open(leasePath, "wx");
+  await mkdir(claimPath);
+  const ownerFile = await open(claimOwnerPath, "wx");
   try {
-    await leaseFile.writeFile(serializedOwner, "utf8");
+    await ownerFile.writeFile(serializedOwner, "utf8");
   } catch (error) {
-    await leaseFile.close();
-    await rm(leasePath, { force: true });
+    await ownerFile.close();
+    await removeArchiveUpdateClaim(claimPath, owner.id);
     throw error;
   }
 
   const lockHeartbeat = setInterval(() => {
     const heartbeatTime = new Date();
-    void leaseFile.utimes(heartbeatTime, heartbeatTime).catch(() => undefined);
+    void ownerFile.utimes(heartbeatTime, heartbeatTime).catch(() => undefined);
   }, ARCHIVE_UPDATE_LOCK_HEARTBEAT_MS);
   lockHeartbeat.unref();
 
-  let updateFailed = false;
-  let updateError: unknown;
-  let updateResult: T | undefined;
+  let hasActiveClaim = false;
   try {
-    await waitForArchiveUpdateTurn(owner, startedAt);
-    updateResult = await update();
-  } catch (error) {
-    updateFailed = true;
-    updateError = error;
+    await waitForArchiveUpdateTurn(claimPath, startedAt);
+    hasActiveClaim = true;
+    return await update();
+  } finally {
+    clearInterval(lockHeartbeat);
+    await ownerFile.close();
+    await removeArchiveUpdateClaim(hasActiveClaim ? ARCHIVE_UPDATE_ACTIVE_LOCK_PATH : claimPath, owner.id);
   }
-
-  clearInterval(lockHeartbeat);
-  await leaseFile.close();
-  await rm(leasePath, { force: true });
-
-  if (updateFailed) {
-    throw updateError;
-  }
-  return updateResult as T;
 }
 
-async function waitForArchiveUpdateTurn(owner: ArchiveLockOwner, startedAt: number): Promise<void> {
+async function waitForArchiveUpdateTurn(claimPath: string, startedAt: number): Promise<void> {
   while (true) {
-    const activeOwners = await readActiveArchiveLockOwners();
-    if (activeOwners[0]?.id === owner.id) {
+    try {
+      await rename(claimPath, ARCHIVE_UPDATE_ACTIVE_LOCK_PATH);
       return;
+    } catch (error) {
+      if (!isNodeError(error) || (error.code !== "EEXIST" && error.code !== "ENOTEMPTY")) {
+        throw error;
+      }
     }
+
+    await removeAbandonedArchiveUpdateClaim();
     if (Date.now() - startedAt >= ARCHIVE_UPDATE_LOCK_TIMEOUT_MS) {
       throw new Error("The article archive is busy. Please try again in a moment.");
     }
@@ -301,52 +300,63 @@ async function waitForArchiveUpdateTurn(owner: ArchiveLockOwner, startedAt: numb
   }
 }
 
-async function readActiveArchiveLockOwners(): Promise<ArchiveLockOwner[]> {
-  const leaseNames = (await readdir(ARCHIVE_UPDATE_LOCK_PATH)).filter((name) => name.endsWith(".lease"));
-  const activeOwners: ArchiveLockOwner[] = [];
-
-  for (const leaseName of leaseNames) {
-    const leasePath = join(ARCHIVE_UPDATE_LOCK_PATH, leaseName);
-    try {
-      const [serializedOwner, leaseStats] = await Promise.all([readFile(leasePath, "utf8"), stat(leasePath)]);
-      const owner = parseArchiveLockOwner(serializedOwner);
-      const isStale = Date.now() - leaseStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
-
-      if (!owner) {
-        if (isStale) {
-          await rm(leasePath, { force: true });
-        } else {
-          activeOwners.push({ createdAt: leaseStats.birthtimeMs, id: leaseName, pid: 0 });
-        }
-        continue;
-      }
-
-      if (!isProcessAlive(owner.pid) || isStale) {
-        await rm(leasePath, { force: true });
-        continue;
-      }
-      activeOwners.push(owner);
-    } catch (error) {
-      if (!isNodeError(error) || error.code !== "ENOENT") {
-        throw error;
-      }
+async function removeArchiveUpdateClaim(claimPath: string, ownerId: string): Promise<void> {
+  await rm(join(claimPath, `${ownerId}.owner`), { force: true });
+  try {
+    await rmdir(claimPath);
+  } catch (error) {
+    if (!isNodeError(error) || (error.code !== "ENOENT" && error.code !== "ENOTEMPTY")) {
+      throw error;
     }
   }
+}
 
-  return activeOwners.sort((first, second) => first.createdAt - second.createdAt || first.id.localeCompare(second.id));
+async function removeAbandonedArchiveUpdateClaim(): Promise<void> {
+  try {
+    const [ownerNames, lockStats] = await Promise.all([
+      readdir(ARCHIVE_UPDATE_ACTIVE_LOCK_PATH),
+      stat(ARCHIVE_UPDATE_ACTIVE_LOCK_PATH),
+    ]);
+    const ownerName = ownerNames.find((name) => name.endsWith(".owner"));
+    if (!ownerName) {
+      if (Date.now() - lockStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
+        await removeEmptyArchiveUpdateClaim();
+      }
+      return;
+    }
+
+    const ownerPath = join(ARCHIVE_UPDATE_ACTIVE_LOCK_PATH, ownerName);
+    const [serializedOwner, ownerStats] = await Promise.all([readFile(ownerPath, "utf8"), stat(ownerPath)]);
+    const owner = parseArchiveLockOwner(serializedOwner);
+    const isStale = Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
+    if (owner ? isProcessAlive(owner.pid) : !isStale) {
+      return;
+    }
+
+    await rm(ownerPath, { force: true });
+    await removeEmptyArchiveUpdateClaim();
+  } catch (error) {
+    if (!isNodeError(error) || (error.code !== "ENOENT" && error.code !== "ENOTDIR")) {
+      throw error;
+    }
+  }
+}
+
+async function removeEmptyArchiveUpdateClaim(): Promise<void> {
+  try {
+    await rmdir(ARCHIVE_UPDATE_ACTIVE_LOCK_PATH);
+  } catch (error) {
+    if (!isNodeError(error) || (error.code !== "ENOENT" && error.code !== "ENOTEMPTY")) {
+      throw error;
+    }
+  }
 }
 
 function parseArchiveLockOwner(value: string): ArchiveLockOwner | undefined {
   try {
     const parsedValue = JSON.parse(value) as Partial<ArchiveLockOwner>;
-    return Number.isFinite(parsedValue.createdAt) &&
-      typeof parsedValue.id === "string" &&
-      Number.isInteger(parsedValue.pid)
-      ? {
-          createdAt: parsedValue.createdAt as number,
-          id: parsedValue.id,
-          pid: parsedValue.pid as number,
-        }
+    return typeof parsedValue.id === "string" && Number.isInteger(parsedValue.pid)
+      ? { id: parsedValue.id, pid: parsedValue.pid as number }
       : undefined;
   } catch {
     return undefined;
