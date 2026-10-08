@@ -1,7 +1,7 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
@@ -136,10 +136,13 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
-    const [sharedItems, cachedVaults, legacyItems] = await Promise.all([
+    const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
+      // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
+      // than items whose passwords can't load.
+      hasLoadedFromCache.current ? undefined : endedSessionError(),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
@@ -155,8 +158,8 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
           }
         : sharedItems;
     if (!isLatest()) return;
-    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
-      // Show cached metadata right away, even when stale: the first pass-cli call can take
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
+      // Show cached metadata once the session is confirmed, even when stale: listing everything can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
@@ -172,6 +175,7 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
     }
 
     try {
+      if (sessionEnded) throw sessionEnded;
       if (initialVault && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {

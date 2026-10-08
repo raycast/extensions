@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { listVaultSharing, listVaultsAndItems } from "./pass-cli";
+import { endedSessionError, listVaultSharing, listVaultsAndItems } from "./pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
@@ -63,13 +63,15 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (error?.type !== "not_authenticated") setError(null);
     setIsLoading(true);
 
-    const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
+    const [cachedVaults, cachedItems, cachedSharing, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
+      // Saved vaults wait for pass-cli to confirm the session: an ended one shows the login screen right away.
+      hasLoadedFromCache.current ? undefined : endedSessionError(),
     ]);
     if (!isLatest()) return;
-    if (cachedVaults && !hasLoadedFromCache.current) {
+    if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       // The items cache only holds complete listings, so every cached vault gets a count.
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
@@ -83,6 +85,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     }
 
     try {
+      if (sessionEnded) throw sessionEnded;
       // Items are listed too, for their number per vault; the listing also refreshes the item list's cache.
       const listing = listingSaves.start();
       const sharingListing = sharingSaves.start();

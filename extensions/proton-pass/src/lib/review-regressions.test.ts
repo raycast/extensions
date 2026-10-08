@@ -297,6 +297,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [item],
       listVaultsAndItems: async () => {
         calls++;
@@ -346,7 +347,11 @@ test("pass-cli not found shows its screen instead of the cached items, which can
       showToast: async () => undefined,
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
-    "./pass-cli": { listItems: notFound, listVaultsAndItems: notFound },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: notFound,
+      listVaultsAndItems: notFound,
+    },
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: true }),
@@ -515,6 +520,7 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       },
       "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
       "./pass-cli": {
+        endedSessionError: async () => undefined,
         listItems: async () => {
           throw new PassCliError("Offline", "network_error");
         },
@@ -557,6 +563,7 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultsAndItems: async () => {
         calls++;
         return {
@@ -1308,6 +1315,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [],
       listVaultsAndItems: async () => {
         calls++;
@@ -1353,7 +1361,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
 
-function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown }) {
+function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown; "./item-counts"?: unknown }) {
   const harness = hookHarness();
   const { SearchItemsView } = loadView("search-items-view.tsx", {
     react: harness.react,
@@ -1377,6 +1385,41 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
   return { harness, SearchItemsView };
 }
 
+test("an ended session shows the login screen at once, without showing the saved items first", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => new PassCliError("Not authenticated.", "not_authenticated"),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(shownSaved, false);
+  assert.equal(listings, 0);
+  // NotLoggedInView, which reloads once logged in.
+  assert.equal(typeof render().props.reload, "function");
+});
+
 test("the vault list saves sharing on its own, and vaults with items from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };
@@ -1395,6 +1438,7 @@ test("the vault list saves sharing on its own, and vaults with items from comple
       useNavigation: () => ({ push: () => undefined }),
     },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: async () => new Map([["vault", { role: "owner", isShared: true }]]),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
@@ -1456,6 +1500,7 @@ test("an older vault list load can't replace newer sharing or displayed counts",
       useNavigation: () => ({ push: () => undefined }),
     },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [vault],
@@ -1522,6 +1567,7 @@ test("Browse Items opens all items over the vaults, which load only once they're
       }),
     },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: async () => new Map(),
       listVaultsAndItems: async () => {
         listings++;
@@ -1568,6 +1614,7 @@ test("a vault opened from the vault list keeps its count when its items can't be
   const failed = { shareId: "vault", name: "Personal" };
   const { harness, SearchItemsView } = searchItemsFixture({
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => {
         throw new PassCliError("Offline", "network_error");
       },
@@ -1602,6 +1649,7 @@ test("Check Again in Search Items keeps the login screen until the items have lo
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultsAndItems: async () => {
         if (!isLoggedIn) throw new PassCliError("Session ended", "not_authenticated");
         return { vaults: [vault], items: [item], failedVaults: [] };

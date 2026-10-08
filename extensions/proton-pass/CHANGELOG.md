@@ -5,6 +5,7 @@
 - Search Items and List Vaults become one command, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. Its Open On preference starts on the vaults instead
 - Primary Action, Fill Login and the Item List preferences move to Browse Items, the only command using them. Raycast resets them to their defaults once, so they need to be set again
 - Hotkeys and aliases of Search Items keep working with Browse Items. Those of List Vaults need to be set again on Browse Items
+- Browse Items checks the pass-cli session before showing saved items and vaults: when it has ended, the login screen shows right away, instead of items whose passwords can't load
 - Browse Items says TOTP code rather than 2FA code, like Get TOTP Code: Copy TOTP Code, Paste TOTP Code, and the TOTP Code row of the details. 2FA covers other methods too, such as SMS codes
 
 ## [Login Fixes] - {PR_MERGE_DATE}

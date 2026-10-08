@@ -135,6 +135,21 @@ export async function checkAuth(): Promise<boolean> {
   return (await getAdapter()).checkAuth();
 }
 
+/**
+ * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile. Nothing when
+ * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
+ */
+export async function endedSessionError(): Promise<PassCliError | undefined> {
+  try {
+    if (await checkAuth()) return undefined;
+  } catch {
+    return undefined;
+  }
+  // Cached items belong to the session that wrote them.
+  await clearCache();
+  return new PassCliError("Not authenticated. Run pass-cli login to authenticate.", "not_authenticated");
+}
+
 export async function listVaults(): Promise<Vault[]> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
