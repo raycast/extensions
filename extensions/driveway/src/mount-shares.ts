@@ -4,6 +4,7 @@ import { findMountedShare, isReachable, listMountedShares, mountShare } from "./
 import { getServers } from "./lib/storage";
 import { errorText } from "./lib/errors";
 import { refreshMenuBar } from "./lib/menu-bar-cache";
+import { mountsInFlight } from "./lib/in-flight";
 
 export default async function command() {
   const entries = await getServers();
@@ -32,6 +33,7 @@ export default async function command() {
 
   const requested: string[] = [];
   const alreadyMounted: string[] = [];
+  const stillConnecting: string[] = [];
   const unavailable: string[] = [];
   const openFailures: string[] = [];
 
@@ -39,10 +41,18 @@ export default async function command() {
   // mounts it a second time, at "/Volumes/<name>-1". So skip those, the way
   // Manage Drives and the menu bar already do.
   const mounted = await listMountedShares();
+  // A mount the menu bar started and couldn't wait for is still running, so
+  // mounting it again here would attach the same share twice.
+  const inFlight = await mountsInFlight();
 
   for (const { entry, share } of targets) {
     if (findMountedShare(mounted, entry)) {
       alreadyMounted.push(share.label);
+      continue;
+    }
+
+    if (inFlight.has(entry.id)) {
+      stillConnecting.push(share.label);
       continue;
     }
 
@@ -63,6 +73,7 @@ export default async function command() {
     invalid.length ? `invalid: ${invalid.join(", ")}` : "",
     unavailable.length ? `unreachable: ${unavailable.join(", ")}` : "",
     openFailures.length ? `failed: ${openFailures.join(", ")}` : "",
+    stillConnecting.length ? `still connecting: ${stillConnecting.join(", ")}` : "",
   ].filter(Boolean);
 
   if (requested.length) await refreshMenuBar();

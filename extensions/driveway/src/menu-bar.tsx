@@ -15,6 +15,7 @@ import { buildShare, ServerEntry } from "./lib/share";
 import { delay } from "./lib/throttle";
 import { errorText } from "./lib/errors";
 import { MENU_BAR_CACHE_KEY } from "./lib/menu-bar-cache";
+import { clearMountInFlight, markMountInFlight, mountsInFlight } from "./lib/in-flight";
 import { findMountedShare, isReachable, listMountedShares, mountShare, unmountShare, MountLocation } from "./lib/mount";
 
 // Raycast unloads a menu bar command as soon as its menu closes, and clicking
@@ -115,14 +116,29 @@ export default function Command() {
   const [mounted, setMounted] = useState<MountLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Mounts a previous click started and couldn't wait for. Read fresh every
+  // run, cached snapshot or not, since it is the one thing that changes while
+  // this command isn't running.
+  const [inFlight, setInFlight] = useState<Set<string>>(new Set());
 
   // A real fetch shells out to mount and df, so the result is cached and
   // reused until the chosen interval has elapsed.
   async function load() {
     setIsLoading(true);
-    const [entries, mountedShares] = await Promise.all([getServers(), listMountedShares()]);
+    const [entries, mountedShares, pending] = await Promise.all([getServers(), listMountedShares(), mountsInFlight()]);
+
+    // A drive that has landed is no longer in flight, however it got there.
+    for (const id of [...pending]) {
+      const entry = entries.find((server) => server.id === id);
+      if (entry && findMountedShare(mountedShares, entry)) {
+        await clearMountInFlight(id);
+        pending.delete(id);
+      }
+    }
+
     setServers(entries);
     setMounted(mountedShares);
+    setInFlight(pending);
     setIsLoading(false);
     const cache: Cache = { servers: entries, mounted: mountedShares, timestamp: Date.now() };
     await LocalStorage.setItem(MENU_BAR_CACHE_KEY, JSON.stringify(cache));
@@ -152,6 +168,7 @@ export default function Command() {
             // Not due yet; show the cached snapshot instantly.
             setServers(cache.servers);
             setMounted(cache.mounted);
+            setInFlight(await mountsInFlight());
             setIsLoading(false);
             return;
           }
@@ -200,11 +217,16 @@ export default function Command() {
         } else {
           const outcome = await watchForMount(settle(mountShare(share)), server);
           if (outcome.kind === "mounted") {
+            await clearMountInFlight(server.id);
             await reportSuccess(`Connected to ${label}`);
           } else if (outcome.kind === "failed") {
+            await clearMountInFlight(server.id);
             await reportFailure(`Couldn't connect to ${label}`, outcome.error, "Mounting failed.");
           } else {
             stillRunning = true;
+            // Still going, most likely behind a macOS dialog. Remember it, so
+            // the next click doesn't mount the same share a second time.
+            await markMountInFlight(server.id);
             await say(`⏳ Connecting to ${label}…`);
           }
         }
@@ -252,13 +274,27 @@ export default function Command() {
         {savedDrives.map((server) => {
           const match = findMountedShare(mounted, server);
           const label = server.alias || server.host;
+          // Started earlier and not finished: say so rather than offering a
+          // click that would mount the same share twice.
+          const connecting = !match && inFlight.has(server.id);
+
           return (
             <MenuBarExtra.Item
               key={server.id}
               title={busyId === server.id ? `${label}…` : label}
-              subtitle={match ? "Connected, click to unmount" : "Click to connect"}
-              icon={match ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
-              onAction={() => handleToggle(server)}
+              subtitle={match ? "Connected, click to unmount" : connecting ? "Still connecting" : "Click to connect"}
+              icon={
+                match
+                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                  : connecting
+                    ? { source: Icon.Clock, tintColor: Color.SecondaryText }
+                    : Icon.Circle
+              }
+              onAction={
+                connecting
+                  ? () => say(`⏳ ${label} is still connecting. Answer any macOS prompt, or wait.`)
+                  : () => handleToggle(server)
+              }
             />
           );
         })}

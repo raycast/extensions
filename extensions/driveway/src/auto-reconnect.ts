@@ -3,6 +3,7 @@ import { buildShare } from "./lib/share";
 import { connectShare, findMountedShare, listMountedShares } from "./lib/mount";
 import { getServers } from "./lib/storage";
 import { dueToRun, markRun } from "./lib/throttle";
+import { mountsInFlight } from "./lib/in-flight";
 
 const LAST_RUN_KEY = "auto-reconnect-last-run";
 
@@ -30,12 +31,14 @@ export default async function command() {
   }
 
   const mounted = await listMountedShares();
+  // Mounting a share the menu bar is already mounting would attach it twice.
+  const inFlight = await mountsInFlight();
   let reconnected = 0;
   let alreadyConnected = 0;
   let failed = 0;
 
   for (const server of candidates) {
-    if (findMountedShare(mounted, server)) {
+    if (findMountedShare(mounted, server) || inFlight.has(server.id)) {
       alreadyConnected++;
       continue;
     }

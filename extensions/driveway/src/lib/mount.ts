@@ -43,7 +43,7 @@ export function isReachable(host: string, protocol: Protocol = "smb"): Promise<b
 // Only AppleScript's `mount volume` matches Finder's Cmd+K: silent
 // reconnect on a cached credential, interactive trust prompt for a
 // self-signed cert. It can block on a dialog, hence the long timeout.
-const APPLESCRIPT_MOUNT_TIMEOUT_MS = 90_000;
+export const APPLESCRIPT_MOUNT_TIMEOUT_MS = 90_000;
 
 export async function mountShare(share: Share): Promise<void> {
   const script = `mount volume ${JSON.stringify(share.url)}`;
