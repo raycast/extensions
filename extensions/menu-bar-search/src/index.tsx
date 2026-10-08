@@ -23,10 +23,7 @@ import {
   readStaleMenuBarCatalog,
   writeCachedMenuBarCatalog,
 } from "./menu-bar-catalog-cache";
-import {
-  openSelectedMenuBarItem,
-  showMenuBarChangedToast,
-} from "./menu-bar-opening";
+import { openSelectedMenuBarItem } from "./menu-bar-opening";
 import { displayTitle, itemIcon, openHint } from "./menu-bar-presentation";
 import { HelperError, MenuBarItem } from "./menu-bar-types";
 
@@ -38,7 +35,6 @@ export default function Command() {
   const [error, setError] = useState<HelperError | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const itemsRef = useRef(items);
-  const isCatalogFreshRef = useRef(false);
   const refreshPromiseRef = useRef<Promise<void> | undefined>(undefined);
 
   const applyItems = useCallback((nextItems: MenuBarItem[]) => {
@@ -48,7 +44,6 @@ export default function Command() {
 
   const refresh = useCallback(() => {
     if (refreshPromiseRef.current) return refreshPromiseRef.current;
-    isCatalogFreshRef.current = false;
 
     setIsLoading(true);
     setError(undefined);
@@ -58,7 +53,6 @@ export default function Command() {
         const nextItems = await listMenuBarItems(helperPath);
         writeCachedMenuBarCatalog(helperPath, nextItems);
         applyItems(nextItems);
-        isCatalogFreshRef.current = true;
       } catch (caughtError) {
         const nextError = normalizeError(caughtError);
         const cachedItems = isTransientCatalogError(nextError)
@@ -93,26 +87,11 @@ export default function Command() {
     return request;
   }, [applyItems, helperPath]);
 
-  const resolveFreshItem = useCallback(
-    async (id: string) => {
-      if (!isCatalogFreshRef.current) await refresh();
-      if (!isCatalogFreshRef.current) return undefined;
-
-      const item = itemsRef.current.find((candidate) => candidate.id === id);
-      if (!item) {
-        await showMenuBarChangedToast();
-      }
-      return item;
-    },
-    [refresh],
-  );
-
+  // Rows may come from the cached catalog. Opening never trusts them as authority: the
+  // helper re-resolves each row against the live Accessibility tree by owner, title, and category.
   const openItem = useCallback(
-    async (id: string) => {
-      const item = await resolveFreshItem(id);
-      if (item) await openSelectedMenuBarItem(helperPath, item, refresh);
-    },
-    [helperPath, refresh, resolveFreshItem],
+    (item: MenuBarItem) => openSelectedMenuBarItem(helperPath, item, refresh),
+    [helperPath, refresh],
   );
 
   useEffect(() => {
@@ -161,7 +140,7 @@ function isTransientCatalogError(error: HelperError) {
 function MenuBarListItem(props: {
   helperPath: string;
   item: MenuBarItem;
-  onOpen: (id: string) => Promise<void>;
+  onOpen: (item: MenuBarItem) => Promise<void>;
   onRefresh: () => void;
 }) {
   const { helperPath, item, onOpen, onRefresh } = props;
@@ -181,7 +160,7 @@ function MenuBarListItem(props: {
           <Action
             title="Open Menu"
             icon={Icon.Mouse}
-            onAction={() => onOpen(item.id)}
+            onAction={() => onOpen(item)}
           />
           <Action
             title="Refresh"

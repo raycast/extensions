@@ -110,6 +110,7 @@ enum CoordinateClickMode: Equatable {
 enum Command: String {
     case list
     case open
+    case resolve
     case debug
     case permissions
     case selftest
@@ -119,12 +120,16 @@ enum Command: String {
 let encoder = JSONEncoder()
 encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
 
+// Bound every Accessibility call so one busy or hung app cannot stall a whole scan
+// past the Raycast-side helper timeout. The default messaging timeout is about 6 seconds.
+AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 1.0)
+
 do {
     let arguments = CommandLine.arguments.dropFirst()
     guard let commandName = arguments.first, let command = Command(rawValue: commandName) else {
         throw HelperError(
             code: "usage",
-            message: "Usage: menubarctl list | open <id> | debug <id> | permissions",
+            message: "Usage: menubarctl list | open <id> | resolve <id> | debug <id> | permissions",
             recoverySuggestion: nil
         )
     }
@@ -141,6 +146,17 @@ do {
         let id = arguments[arguments.index(after: arguments.startIndex)]
         let hint = parseElementHint(arguments.dropFirst(2).first)
         try printJSON(try MenuOpening.open(id: String(id), hint: hint))
+    case .resolve:
+        try requireAccessibility()
+        guard arguments.count >= 2 else {
+            throw HelperError(code: "missing_id", message: "Usage: menubarctl resolve <id>", recoverySuggestion: nil)
+        }
+        let id = arguments[arguments.index(after: arguments.startIndex)]
+        let hint = parseElementHint(arguments.dropFirst(2).first)
+        guard let target = findElement(id: String(id), hint: hint) else {
+            throw itemNotFoundError()
+        }
+        try printJSON(target.item)
     case .debug:
         try requireAccessibility()
         guard arguments.count >= 2 else {
@@ -167,6 +183,14 @@ do {
 } catch {
     printError(HelperError(code: "unexpected_error", message: String(describing: error), recoverySuggestion: nil))
     exit(1)
+}
+
+func itemNotFoundError() -> HelperError {
+    HelperError(
+        code: "item_not_found",
+        message: "Menu bar item is no longer available",
+        recoverySuggestion: "Refresh the list and try again."
+    )
 }
 
 func requireAccessibility() throws {
@@ -236,11 +260,7 @@ enum MenuOpening {
                 attempts: []
             )
             writeLastOpenTrace(trace)
-            throw HelperError(
-                code: "item_not_found",
-                message: "Menu bar item is no longer available",
-                recoverySuggestion: "Refresh the list and try again."
-            )
+            throw itemNotFoundError()
         }
 
         let isObscured = isElementObscured(target.element)
@@ -441,11 +461,7 @@ func finishOpenTrace(
 enum DebugSnapshot {
     static func capture(id: String, hint: ElementHint?) throws -> DebugSnapshotPayload {
     guard let target = findElement(id: id, hint: hint) else {
-        throw HelperError(
-            code: "item_not_found",
-            message: "Menu bar item is no longer available",
-            recoverySuggestion: "Refresh the list and try again."
-        )
+        throw itemNotFoundError()
     }
 
     let frame = frame(of: target.element)
@@ -834,6 +850,99 @@ enum SelfTest {
         try rejectsGenericInputCategoryWithoutTitleAsIdentity()
         try resolvesGenericSameOwnerItemWhenFrameIsClear()
         try rejectsAmbiguousGenericSameOwnerItems()
+        try acceptsExactIDForUntitledInputItem()
+        try rejectsExactIDWhenOwnerOrCategoryChanged()
+        try keepsThirdPartyLabelsGeneric()
+        try classifiesSystemAndInputOwners()
+    }
+
+    private static func acceptsExactIDForUntitledInputItem() throws {
+        let input = itemFixture(
+            title: nil,
+            category: "input:generic",
+            source: "extras",
+            frame: Frame(x: 945, y: 4.5, width: 46, height: 24),
+            bundleId: "com.apple.TextInputMenuAgent",
+            processName: "TextInputMenuAgent"
+        )
+        let hint = hintFixture(
+            title: nil,
+            category: "input:generic",
+            source: "extras",
+            frame: Frame(x: 945, y: 4.5, width: 46, height: 24),
+            bundleId: "com.apple.TextInputMenuAgent",
+            processName: "TextInputMenuAgent"
+        )
+
+        try assert(isExactIDMatch(item: input, id: input.id, hint: hint), "exact_id_untitled_input")
+        try assert(isExactIDMatch(item: input, id: input.id, hint: nil), "exact_id_without_hint")
+        try assert(!isExactIDMatch(item: input, id: input.id + "x", hint: hint), "exact_id_mismatch")
+    }
+
+    private static func rejectsExactIDWhenOwnerOrCategoryChanged() throws {
+        let item = itemFixture(
+            title: nil,
+            category: "app:generic",
+            source: "extras",
+            frame: Frame(x: 500, y: 0, width: 24, height: 24)
+        )
+        let otherCategory = hintFixture(
+            title: nil,
+            category: "input:generic",
+            source: "extras",
+            frame: Frame(x: 500, y: 0, width: 24, height: 24)
+        )
+        let otherOwner = ElementHint(
+            ownerPid: 200,
+            bundleId: "com.example.other",
+            processName: "Other",
+            title: nil,
+            category: "app:generic",
+            source: "extras",
+            frame: Frame(x: 500, y: 0, width: 24, height: 24)
+        )
+
+        try assert(!isExactIDMatch(item: item, id: item.id, hint: otherCategory), "exact_id_category_changed")
+        try assert(!isExactIDMatch(item: item, id: item.id, hint: otherOwner), "exact_id_owner_changed")
+    }
+
+    private static func keepsThirdPartyLabelsGeneric() throws {
+        let thirdPartyLabels: [[String?]] = [
+            ["Display Settings"],
+            ["Power Manager"],
+            ["Focus Timer"],
+            ["Sound Control", "audio"],
+            ["My VPN"],
+            ["Keyboard Maestro"],
+            ["ABC"],
+            ["Wi-Fi Explorer"]
+        ]
+
+        for labels in thirdPartyLabels {
+            try assert(
+                SemanticCategory.classify(labels: labels, isSystemOwner: false, isInputOwner: false) == "app:generic",
+                "third_party_generic_\(labels.compactMap { $0 }.joined(separator: "_"))"
+            )
+        }
+    }
+
+    private static func classifiesSystemAndInputOwners() throws {
+        try assert(
+            SemanticCategory.classify(labels: ["Wi-Fi"], isSystemOwner: true, isInputOwner: false) == "system:wifi",
+            "system_owner_wifi"
+        )
+        try assert(
+            SemanticCategory.classify(labels: ["Some Status"], isSystemOwner: true, isInputOwner: false) == "app:generic",
+            "system_owner_unknown_label"
+        )
+        try assert(
+            SemanticCategory.classify(labels: ["ABC"], isSystemOwner: true, isInputOwner: true) == "input:abc",
+            "input_owner_abc"
+        )
+        try assert(
+            SemanticCategory.classify(labels: ["微信输入法"], isSystemOwner: true, isInputOwner: true) == "input:generic",
+            "input_owner_generic"
+        )
     }
 
     private static func resolvesMovedItemAcrossSourceChange() throws {
@@ -1283,15 +1392,8 @@ func findElement(id: String, hint: ElementHint? = nil) -> (element: AXUIElement,
                 let snapshot = menuBarElementSnapshot(element)
                 let item = makeMenuBarItem(element: element, app: app, source: source.name, sourceIndex: index, snapshot: snapshot)
                 guard !shouldFilterMenuBarItem(app: app, item: item, snapshot: snapshot) else { continue }
-                let hintScore = hint.map { hintMatchScore(item: item, source: source.name, hint: $0) } ?? 0
-                if item.id == id {
-                    if let hint {
-                        if isAcceptableHintMatch(item: item, score: hintScore, hint: hint) {
-                            return (element, item)
-                        }
-                    } else {
-                        return (element, item)
-                    }
+                if isExactIDMatch(item: item, id: id, hint: hint) {
+                    return (element, item)
                 }
 
                 if let hint {
@@ -1299,7 +1401,7 @@ func findElement(id: String, hint: ElementHint? = nil) -> (element: AXUIElement,
                         hintMatches.append(HintMatch(
                             element: element,
                             item: item,
-                            score: hintScore,
+                            score: hintMatchScore(item: item, source: source.name, hint: hint),
                             frameDistance: hintFrameDistance(item: item, hint: hint)
                         ))
                     }
@@ -1379,7 +1481,11 @@ func makeMenuBarItem(
     snapshot: MenuBarElementSnapshot
 ) -> MenuBarItem {
     let labels = snapshot.labels
-    let category = SemanticCategory.classify(labels: labels, app: app)
+    let category = SemanticCategory.classify(
+        labels: labels,
+        isSystemOwner: isSystemMenuOwner(app),
+        isInputOwner: isInputMenuOwner(app)
+    )
     let title = menuBarItemTitle(labels: labels, app: app, category: category)
     let frame = snapshot.frame
     let appPath = app.bundleURL?.path ?? app.executableURL?.path
@@ -1501,22 +1607,22 @@ func isControlCenterApp(_ app: NSRunningApplication) -> Bool {
 }
 
 enum SemanticCategory {
-    static func classify(labels: [String?], app: NSRunningApplication) -> String {
+    // Semantic categories replace the item's title and change its open policy, so they are
+    // only assigned to macOS-owned items. Third-party items stay app:generic whatever their
+    // labels say, keeping their real title and their click and System Events paths.
+    static func classify(labels: [String?], isSystemOwner: Bool, isInputOwner: Bool) -> String {
         let labelText = labelSearchText(labels)
 
-        if labelText == "abc" || labelText.contains(" abc ") {
-            return "input:abc"
+        if isInputOwner {
+            if labelText == "abc" || labelText.contains(" abc ") {
+                return "input:abc"
+            }
+
+            return "input:generic"
         }
 
-        if isInputMenuOwner(app) ||
-            labelText.contains("input") ||
-            labelText.contains("keyboard") ||
-            labelText.contains("textinput") ||
-            labelText.contains("输入") ||
-            labelText.contains("拼音") ||
-            labelText.contains("五笔")
-        {
-            return "input:generic"
+        guard isSystemOwner else {
+            return "app:generic"
         }
 
         if labelText.contains("airdrop") {
@@ -1628,6 +1734,15 @@ func labelSearchText(_ labels: [String?]) -> String {
     labels
         .compactMap { normalizedText($0)?.lowercased() }
         .joined(separator: " ")
+}
+
+func isSystemMenuOwner(_ app: NSRunningApplication) -> Bool {
+    if app.bundleIdentifier?.hasPrefix("com.apple.") == true || isControlCenterApp(app) {
+        return true
+    }
+
+    let paths = [app.bundleURL?.path, app.executableURL?.path].compactMap { $0 }
+    return paths.contains { $0.hasPrefix("/System/") }
 }
 
 func isInputMenuOwner(_ app: NSRunningApplication) -> Bool {
@@ -1752,16 +1867,20 @@ func hintMatchScore(item: MenuBarItem, source: String, hint: ElementHint) -> Int
     return score
 }
 
-func isAcceptableHintMatch(item: MenuBarItem, score: Int, hint: ElementHint) -> Bool {
-    guard isSameOwner(item: item, hint: hint) else {
+// The id already encodes pid, owner, source, title, and half-point frame, so an exact hit
+// is the same slot. Still require the same owner and category so a relabeled item is not
+// opened under a stale identity. Untitled items (for example input methods) rely on this.
+func isExactIDMatch(item: MenuBarItem, id: String, hint: ElementHint?) -> Bool {
+    guard item.id == id else {
         return false
     }
 
-    if requiresStableIdentity(hint) {
-        return hasStableIdentityMatch(item: item, hint: hint)
+    guard let hint else {
+        return true
     }
 
-    return hasStableIdentityMatch(item: item, hint: hint) || score >= 70
+    let categoryMatches = normalizedText(hint.category).map { item.category == $0 } ?? true
+    return isSameOwner(item: item, hint: hint) && categoryMatches
 }
 
 func isSameOwner(item: MenuBarItem, hint: ElementHint) -> Bool {

@@ -30,6 +30,18 @@ export async function openMenuBarItem(
   await runHelper(helperPath, ["open", id, JSON.stringify(hint)]);
 }
 
+export async function resolveMenuBarItem(
+  helperPath: string,
+  id: string,
+  hint: MenuBarItemHint,
+) {
+  return runHelper<MenuBarItem>(helperPath, [
+    "resolve",
+    id,
+    JSON.stringify(hint),
+  ]);
+}
+
 export async function getMenuBarItemDebugInfo(
   helperPath: string,
   id: string,

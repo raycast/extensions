@@ -32,7 +32,7 @@
   ],
   "scripts": {
     "generate-icon": "mkdir -p assets .build/module-cache && env CLANG_MODULE_CACHE_PATH=.build/module-cache swift scripts/generate-icon.swift",
-    "build-helper": "mkdir -p assets .build/module-cache && env CLANG_MODULE_CACHE_PATH=.build/module-cache swiftc helper/menubarctl.swift -o assets/menubarctl",
+    "build-helper": "sh scripts/build-helper.sh",
     "test:helper": "npm run build-helper && ./assets/menubarctl selftest",
     "dev": "npm run build-helper && ray develop",
     "build": "npm run build-helper && ray build -e dist",

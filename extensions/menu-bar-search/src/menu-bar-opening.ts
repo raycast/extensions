@@ -3,38 +3,19 @@ import { runAppleScript } from "@raycast/utils";
 import {
   normalizeError,
   openMenuBarItem as openMenuBarItemWithHelper,
+  resolveMenuBarItem,
 } from "./helper-client";
 import { openHint } from "./menu-bar-presentation";
-import { MenuBarItem } from "./menu-bar-types";
+import { Frame, MenuBarItem } from "./menu-bar-types";
 
 export async function openSelectedMenuBarItem(
   helperPath: string,
-  item: MenuBarItem,
+  cachedItem: MenuBarItem,
   onRefresh: () => Promise<void> | void,
 ) {
-  const trySystemEventsFirst = shouldOpenWithSystemEventsFirst(item);
-
   try {
-    if (trySystemEventsFirst) {
-      try {
-        await openWithSystemEvents(item);
-        return;
-      } catch {
-        // Let the helper re-resolve the item against the live Accessibility tree.
-      }
-    }
-
-    await openMenuBarItemWithHelper(helperPath, item.id, openHint(item));
+    await openLiveMenuBarItem(helperPath, cachedItem);
   } catch (caughtError) {
-    if (!trySystemEventsFirst && canFallbackToSystemEvents(item)) {
-      try {
-        await openWithSystemEvents(item);
-        return;
-      } catch {
-        // Keep the helper error below. It has the better user-facing recovery text.
-      }
-    }
-
     const error = normalizeError(caughtError);
     if (error.code === "item_not_found") {
       await Promise.resolve(onRefresh());
@@ -50,7 +31,57 @@ export async function openSelectedMenuBarItem(
   }
 }
 
-export function showMenuBarChangedToast() {
+async function openLiveMenuBarItem(
+  helperPath: string,
+  cachedItem: MenuBarItem,
+) {
+  // Rows on screen may be stale. The helper re-resolves them against the live
+  // Accessibility tree, so the cached row only needs to be a usable hint.
+  if (!canFallbackToSystemEvents(cachedItem)) {
+    await openMenuBarItemWithHelper(
+      helperPath,
+      cachedItem.id,
+      openHint(cachedItem),
+    );
+    return;
+  }
+
+  // System Events clicks by position, so it only ever sees a frame the helper has just
+  // matched by identity. If the item is gone, resolve throws item_not_found and nothing is clicked.
+  const item = await resolveMenuBarItem(
+    helperPath,
+    cachedItem.id,
+    openHint(cachedItem),
+  );
+  const trySystemEventsFirst = shouldOpenWithSystemEventsFirst(item);
+
+  if (trySystemEventsFirst) {
+    try {
+      await openWithSystemEvents(item);
+      return;
+    } catch {
+      // Let the helper open the item through its own policy.
+    }
+  }
+
+  try {
+    await openMenuBarItemWithHelper(helperPath, item.id, openHint(item));
+  } catch (helperError) {
+    if (trySystemEventsFirst || !canFallbackToSystemEvents(item))
+      throw helperError;
+    if (normalizeError(helperError).code === "item_not_found")
+      throw helperError;
+
+    try {
+      await openWithSystemEvents(item);
+    } catch {
+      // Keep the helper error. It has the better user-facing recovery text.
+      throw helperError;
+    }
+  }
+}
+
+function showMenuBarChangedToast() {
   return showToast({
     style: Toast.Style.Success,
     title: "Menu bar changed",
@@ -83,52 +114,41 @@ async function openWithSystemEvents(item: MenuBarItem) {
     throw new Error("Missing process name or frame");
   }
 
-  const clickX = item.frame.x + item.frame.width / 2;
-  const clickY = item.frame.y + item.frame.height / 2;
-  const tolerance = Math.max(item.frame.width, item.frame.height);
-
-  await runAppleScript(
-    systemEventsClickScript(item.processName, clickX, clickY, tolerance),
-    {
-      timeout: 2500,
-    },
-  );
+  await runAppleScript(systemEventsClickScript(item.processName, item.frame), {
+    timeout: 2500,
+  });
 }
 
-function systemEventsClickScript(
-  processName: string,
-  clickX: number,
-  clickY: number,
-  tolerance: number,
-) {
+// The frame comes from a live helper resolve, so System Events must find exactly one item
+// of the same process at that geometry. Anything else means the menu bar changed.
+const FRAME_TOLERANCE = 2;
+
+function systemEventsClickScript(processName: string, frame: Frame) {
   return `
 tell application "System Events"
   if not (exists process ${appleScriptString(processName)}) then error "process not found"
   tell process ${appleScriptString(processName)}
     if not (exists menu bar 2) then error "menu bar 2 not found"
-    set bestItem to missing value
-    set bestDistance to 1000000
+    set matches to {}
     repeat with candidate in menu bar items of menu bar 2
       set candidatePosition to position of candidate
       set candidateSize to size of candidate
-      set candidateCenterX to (item 1 of candidatePosition) + ((item 1 of candidateSize) / 2)
-      set candidateCenterY to (item 2 of candidatePosition) + ((item 2 of candidateSize) / 2)
-      set deltaX to candidateCenterX - ${clickX}
-      if deltaX < 0 then set deltaX to -deltaX
-      set deltaY to candidateCenterY - ${clickY}
-      if deltaY < 0 then set deltaY to -deltaY
-      set candidateDistance to deltaX + deltaY
-      if candidateDistance < bestDistance then
-        set bestDistance to candidateDistance
-        set bestItem to candidate
-      end if
+      set deviation to my absolute((item 1 of candidatePosition) - (${frame.x}))
+      set deviation to deviation + (my absolute((item 2 of candidatePosition) - (${frame.y})))
+      set deviation to deviation + (my absolute((item 1 of candidateSize) - (${frame.width})))
+      set deviation to deviation + (my absolute((item 2 of candidateSize) - (${frame.height})))
+      if deviation ≤ ${FRAME_TOLERANCE} then set end of matches to contents of candidate
     end repeat
-    if bestItem is missing value then error "menu bar item not found"
-    if bestDistance > ${tolerance} then error "menu bar item moved"
-    click bestItem
-    return bestDistance as text
+    if (count of matches) is 0 then error "menu bar item not found"
+    if (count of matches) > 1 then error "menu bar item is ambiguous"
+    click item 1 of matches
   end tell
 end tell
+
+on absolute(value)
+  if value < 0 then return -value
+  return value
+end absolute
 `;
 }
 

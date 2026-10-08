@@ -30,7 +30,7 @@ The extension must stay within public macOS Accessibility APIs. Do not introduce
 ## Common Commands
 
 - `npm run dev`: build the helper and start Raycast development mode.
-- `npm run build-helper`: compile `helper/menubarctl.swift` into `assets/menubarctl`.
+- `npm run build-helper`: compile `helper/menubarctl.swift` into a universal (arm64 + x86_64) `assets/menubarctl` via `scripts/build-helper.sh`.
 - `npm run test:helper`: build the Swift helper and run helper self-tests.
 - `npm run build`: build the helper, compile the Raycast extension, generate Raycast types, and type-check.
 - `npm run lint`: run Raycast manifest, icon, metadata, ESLint, and Prettier checks.
@@ -69,7 +69,9 @@ This extension builds its macOS helper from helper/menubarctl.swift during npm r
 - The Swift helper owns semantic category detection and open policy. Keep UI logic from re-inferring categories.
 - Element identity should prefer stable owner/title/category facts. Treat frame and source as hints, not durable identity.
 - For items hidden behind the camera housing with no physical click point, Accessibility may be the only available open path.
-- For visible generic app status items, System Events can be used as a fallback when helper opening fails.
+- For visible generic app status items, System Events can be used as a fallback when helper opening fails. System Events clicks by position, so only pass it a frame returned by `menubarctl resolve`, never a cached row's frame.
+- Semantic `system:*` and `input:*` categories are reserved for macOS-owned items. Third-party items stay `app:generic` regardless of their labels.
+- The helper sets a global Accessibility messaging timeout so one hung app cannot stall a scan past the Raycast-side helper timeout.
 - Raycast may show a cached Menu Bar Catalog for fast launch, but opening must always re-resolve against the current Accessibility tree. Cached rows are display hints, not authority.
 - Generated app icons should use a persistent lazy cache. Prefer `appPath`/Raycast file icons when available, and do not read `NSRunningApplication.icon` when the cached PNG already exists.
 - Do not make `shouldOpenWithSystemEventsFirst` and fallback eligibility the same predicate; that makes the fallback branch unreachable.
