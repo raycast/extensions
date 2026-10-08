@@ -1,4 +1,4 @@
-import { getBookmarksTree, searchAllBookmarks } from "../bookmarks";
+import { BOOKMARK_FILE_NOT_FOUND_MESSAGE, getBookmarksTree, searchAllBookmarks } from "../bookmarks";
 import { FULL_DISK_ACCESS_MESSAGE } from "../dia";
 
 const DEFAULT_LIMIT = 50;
@@ -35,6 +35,10 @@ export default async function tool(input: Input) {
   } catch (error) {
     if (error instanceof Error && "code" in error && (error.code === "EPERM" || error.code === "EACCES")) {
       throw new Error(FULL_DISK_ACCESS_MESSAGE);
+    }
+    // Without Full Disk Access the file can look missing rather than unreadable, so mention both causes
+    if (error instanceof Error && error.message === BOOKMARK_FILE_NOT_FOUND_MESSAGE) {
+      throw new Error(`Dia's bookmarks file was not found. If you have bookmarks in Dia: ${FULL_DISK_ACCESS_MESSAGE}`);
     }
     throw error;
   }

@@ -105,9 +105,9 @@ async function searchBookmarks(searchText: string): Promise<Bookmark[]> {
   }
 }
 
-function getHistoryQuery(searchText?: string, limit = 100) {
-  // Skip filtered query for single-char searches (too broad, wastes I/O)
-  const effectiveSearch = searchText && searchText.trim().length >= 2 ? searchText : undefined;
+function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) {
+  // Skip filtered query for single-char searches while typing (too broad, wastes I/O)
+  const effectiveSearch = searchText && searchText.trim().length >= minSearchLength ? searchText : undefined;
   const whereClause = effectiveSearch
     ? effectiveSearch
         .split(" ")
@@ -166,7 +166,7 @@ export async function searchHistory(searchText?: string, limit?: number): Promis
   }
 
   try {
-    return await executeSQL<HistoryItem>(historyPath, getHistoryQuery(searchText, limit));
+    return await executeSQL<HistoryItem>(historyPath, getHistoryQuery(searchText, limit, 1));
   } catch (error) {
     if (error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message))) {
       throw new Error(FULL_DISK_ACCESS_MESSAGE);
