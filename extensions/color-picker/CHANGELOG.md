@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Color Groups] - {PR_MERGE_DATE}
+## [Color Groups] - 2026-10-08
 
 - Sort saved colors into named groups from Organize Colors, each shown as its own section
 - Nest groups with a slash, for example `Work/Calendar`
