@@ -121,6 +121,53 @@ async function runAmp(ampPath: string, args: string[]): Promise<string> {
   }
 }
 
+const OPEN_RUNNER_SETTINGS_SCRIPT = `
+tell application id "com.ampcode.amp.macos" to activate
+tell application "System Events" to tell process "Amp"
+  repeat 50 times
+    if exists menu bar item "Amp" of menu bar 1 then exit repeat
+    delay 0.1
+  end repeat
+  click menu item "App Settings…" of menu 1 of menu bar item "Amp" of menu bar 1
+  repeat 50 times
+    if exists button "Runner" of toolbar 1 of front window then exit repeat
+    delay 0.1
+  end repeat
+  click button "Runner" of toolbar 1 of front window
+end tell
+`;
+
+export type MissingPermission = "accessibility" | "automation";
+
+export const PRIVACY_SETTINGS_URLS: Record<MissingPermission, string> = {
+  accessibility:
+    "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+  automation:
+    "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation",
+};
+
+export function missingPermission(message: string): MissingPermission | null {
+  if (/-25211|-1719|not allowed assistive access/i.test(message))
+    return "accessibility";
+  if (/-1743|not authori[sz]ed to send apple events/i.test(message))
+    return "automation";
+  return null;
+}
+
+export async function openRunnerSettings(): Promise<void> {
+  try {
+    await execFileAsync("/usr/bin/osascript", [
+      "-e",
+      OPEN_RUNNER_SETTINGS_SCRIPT,
+    ]);
+  } catch (error) {
+    const failure = error as Error & { stderr?: string };
+    throw new Error(
+      failure.stderr?.trim() || failure.message || "osascript failed",
+    );
+  }
+}
+
 export async function listRunners(ampPath: string): Promise<Runner[]> {
   return parseRunnerList(await runAmp(ampPath, ["runner", "list", "--json"]));
 }

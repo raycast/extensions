@@ -5,6 +5,7 @@ import {
   displayPath,
   expandHome,
   getServedDirectories,
+  missingPermission,
   parseRunnerList,
 } from "../src/amp";
 
@@ -114,5 +115,24 @@ test("expands and shortens home paths only at the path boundary", () => {
   assert.equal(
     displayPath(`${homedir()}-backup/code`),
     `${homedir()}-backup/code`,
+  );
+});
+
+test("detects missing macOS permissions from osascript errors", () => {
+  assert.equal(
+    missingPermission(
+      "execution error: System Events got an error: osascript is not allowed assistive access. (-25211)",
+    ),
+    "accessibility",
+  );
+  assert.equal(
+    missingPermission(
+      "execution error: Not authorized to send Apple events to System Events. (-1743)",
+    ),
+    "automation",
+  );
+  assert.equal(
+    missingPermission("Can't get menu item \"App Settings…\". (-1728)"),
+    null,
   );
 });

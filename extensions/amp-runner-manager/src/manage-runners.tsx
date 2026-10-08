@@ -22,7 +22,10 @@ import {
   addDirectory,
   displayPath,
   getServedDirectories,
+  PRIVACY_SETTINGS_URLS,
   listRunners,
+  missingPermission,
+  openRunnerSettings,
   removeDirectory,
 } from "./amp";
 
@@ -31,12 +34,31 @@ function errorMessage(error: unknown): string {
 }
 
 async function openAmpRunnerSettings() {
-  await open("/Applications/Amp.app");
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Amp opened",
-    message: "Open Settings to manage this Mac's runner.",
-  });
+  try {
+    await openRunnerSettings();
+  } catch (error) {
+    await open("/Applications/Amp.app");
+    const message = errorMessage(error);
+    const permission = missingPermission(message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: permission
+        ? `Raycast needs ${permission === "accessibility" ? "Accessibility" : "Automation"} access`
+        : "Open Amp → App Settings… → Runner",
+      message: permission
+        ? "Grant access to open Runner settings automatically. For now, use Amp → App Settings… → Runner."
+        : message,
+      primaryAction: permission
+        ? {
+            title: `Open ${permission === "accessibility" ? "Accessibility" : "Automation"} Settings`,
+            onAction: (toast) => {
+              void open(PRIVACY_SETTINGS_URLS[permission]);
+              void toast.hide();
+            },
+          }
+        : undefined,
+    });
+  }
 }
 
 function AddFolderForm({
