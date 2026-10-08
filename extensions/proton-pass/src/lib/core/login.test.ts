@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -201,31 +201,38 @@ test("a canceled login exiting late can't replace a newer successful login's res
   assert.deepEqual(await settle(dir), { state: "succeeded" });
 });
 
-test("once a login is over, the next pass-cli command removes its files, unless the login failed", async () => {
-  // No login screen shows once logged in to remove them, also after an exit the extension missed.
-  for (const missedExit of [false, true]) {
+test("once a login is over, the next pass-cli command removes the login URL, and keeps why the login failed", async () => {
+  // Succeeded: nothing stays, since no login screen shows once logged in.
+  const succeeded = loginDir();
+  await startDetachedLogin(fakeCommand("login-ok"), succeeded, 2_000);
+  const succeededPid = savedPid(succeeded);
+  await waitUntil(() => !isProcessRunning(succeededPid));
+  await sleep(50);
+  assert.equal(await isDetachedLoginRunning(succeeded), false);
+  assert.equal(existsSync(succeeded), false);
+
+  // Otherwise the result waits for the login screen: a missing exit code, when Raycast closed first, isn't a success.
+  for (const { mode, missedExit, isLoggedIn, state } of [
+    { mode: "login-url-fail", missedExit: false, isLoggedIn: false, state: "failed" },
+    { mode: "login-url-fail", missedExit: true, isLoggedIn: false, state: "failed" },
+    { mode: "login-ok", missedExit: true, isLoggedIn: true, state: "succeeded" },
+  ]) {
     const dir = loginDir();
-    await startDetachedLogin(fakeCommand("login-ok"), dir, 2_000);
+    await startDetachedLogin(fakeCommand(mode), dir, 2_000);
     const pid = savedPid(dir);
     await waitUntil(() => !isProcessRunning(pid));
     await sleep(50);
     if (missedExit) rmSync(join(dir, `${pid}-exit-code.txt`), { force: true });
 
     assert.equal(await isDetachedLoginRunning(dir), false);
-    // The output held the login URL and its payload.
+    for (const file of readdirSync(dir)) {
+      assert.doesNotMatch(readFileSync(join(dir, file), "utf8"), /https?:|payload|TOKEN/i);
+    }
+    const status = await settle(dir, async () => isLoggedIn);
+    assert.equal(status.state, state);
+    if (status.state === "failed") assert.equal(status.error.message, "The login didn't complete. Try again.");
     assert.equal(existsSync(dir), false);
   }
-
-  // The user is logged out then, so a login screen shows and says why.
-  const failed = loginDir();
-  await startDetachedLogin(fakeCommand("login-url-fail"), failed, 2_000);
-  const pid = savedPid(failed);
-  await waitUntil(() => !isProcessRunning(pid));
-  await sleep(50);
-  assert.equal(await isDetachedLoginRunning(failed), false);
-  assert.equal(existsSync(failed), true);
-  assert.equal((await settle(failed)).state, "failed");
-  assert.equal(existsSync(failed), false);
 });
 
 test("when the extension missed pass-cli's exit, the session tells whether the login succeeded", async () => {

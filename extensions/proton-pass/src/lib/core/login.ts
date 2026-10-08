@@ -20,6 +20,8 @@ interface SavedLogin {
   pid: number;
   url: string;
   startedAt: number;
+  /** Set once pass-cli has exited and the login URL is gone, while the result waits for a login screen. */
+  isOver?: boolean;
 }
 
 export type BrowserLoginStatus =
@@ -78,8 +80,10 @@ async function readSavedLogin(dir: string): Promise<SavedLogin | undefined> {
   }
 }
 
-/** The output holds the login URL and its payload, so the files go as soon as the login is over. */
-// pass-cli's exit code can be written while the folder is removed, which then fails as not empty: retried.
+/**
+ * The output holds the login URL and its payload, so the files go as soon as the login is over. pass-cli's exit code
+ * can be written meanwhile, which makes the removal fail as not empty: retried.
+ */
 const removeLogin = (dir: string) => rm(dir, { recursive: true, force: true, maxRetries: 3 });
 
 /** What pass-cli prints once the browser login is done, before saving the session. */
@@ -88,17 +92,22 @@ const FINISHING_LINE = /web authentication complete/i;
 /** What pass-cli prints on the way, which explains no failure. */
 const PROGRESS_LINE = /^(please open the following url|waiting for authentication|web authentication complete)/i;
 
-/**
- * Why the login failed, in pass-cli's words, leaving out the login URL, its payload and email addresses. Without any,
- * pass-cli was stopped from outside: it prints an error whenever the login itself fails.
- */
-function loginFailure(output: string, cliPath: string): PassCliError {
-  const details = output
+/** pass-cli's output without the login URL, its payload, progress lines and email addresses. */
+function failureDetails(output: string): string {
+  return output
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line && !/https?:\/\/|payload=/i.test(line) && !PROGRESS_LINE.test(line))
     .map((line) => line.replace(/[^\s@]+@[^\s@]+/g, "<email>"))
     .join("\n");
+}
+
+/**
+ * Why the login failed, in pass-cli's words, leaving out the login URL, its payload and email addresses. Without any,
+ * pass-cli was stopped from outside: it prints an error whenever the login itself fails.
+ */
+function loginFailure(output: string, cliPath: string): PassCliError {
+  const details = failureDetails(output);
   if (!details) return new PassCliError("pass-cli was stopped before the login completed.", "unknown");
   const error = normalizeCliExecutionError(
     Object.assign(new Error("pass-cli login failed"), { stderr: details }),
@@ -186,7 +195,7 @@ export async function checkDetachedLogin(
   const saved = await readSavedLogin(dir);
   if (!saved) return { state: "none" };
 
-  const isRunning = isProcessRunning(saved.pid);
+  const isRunning = !saved.isOver && isProcessRunning(saved.pid);
   const hasTimedOut = Date.now() - saved.startedAt > timeoutMs;
   if (isRunning && !hasTimedOut) {
     const isFinishing = FINISHING_LINE.test(await readText(join(dir, OUTPUT_FILE)));
@@ -216,18 +225,33 @@ export async function checkDetachedLogin(
  * Whether the login started by startDetachedLogin is still running. No other pass-cli command may run meanwhile: one
  * starting while the login saves the new session can find its data without its key yet, and pass-cli then logs out
  * "for security", deleting the session being saved.
- *
- * Once pass-cli has exited, the login's files, which hold the login URL, wait for a login screen to read the result
- * (see checkDetachedLogin). None shows once logged in, so the files of a login that succeeded, or whose exit was
- * missed, are removed here. A failed login's stay until a login screen says why.
  */
 export async function isDetachedLoginRunning(dir: string, timeoutMs = LOGIN_TIMEOUT_MS): Promise<boolean> {
   const saved = await readSavedLogin(dir);
-  if (!saved) return false;
+  if (!saved || saved.isOver) return false;
   if (isProcessRunning(saved.pid)) return Date.now() - saved.startedAt <= timeoutMs;
-  const exitCode = (await readText(exitCodePath(dir, saved.pid))).trim();
-  if (exitCode === "" || exitCode === "0") await removeLogin(dir);
+  await forgetLoginUrl(dir, saved);
   return false;
+}
+
+/**
+ * Once pass-cli has exited, the login's files wait for a login screen to read the result (see checkDetachedLogin),
+ * but none shows once logged in: the login URL goes now. A login that succeeded leaves nothing; otherwise, why it
+ * failed stays for the login screen, since a missing exit code, when Raycast closed first, doesn't mean success.
+ */
+async function forgetLoginUrl(dir: string, saved: SavedLogin): Promise<void> {
+  try {
+    const [output, exitCode] = await Promise.all([
+      readText(join(dir, OUTPUT_FILE)),
+      readText(exitCodePath(dir, saved.pid)),
+    ]);
+    if (exitCode.trim() === "0") return await removeLogin(dir);
+    await writeFile(join(dir, OUTPUT_FILE), failureDetails(output), { mode: 0o600 });
+    const ended = { ...saved, url: "", isOver: true } satisfies SavedLogin;
+    await writeFile(join(dir, STATE_FILE), JSON.stringify(ended), { mode: 0o600 });
+  } catch {
+    // A login screen removed the files meanwhile.
+  }
 }
 
 /** Stops the login started by startDetachedLogin, if it's still running, and removes its files. */
