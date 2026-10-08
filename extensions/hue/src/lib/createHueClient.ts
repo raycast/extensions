@@ -1,7 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { ClientHttp2Session, connect } from "http2";
 import { BridgeConfig } from "./types";
-import dns from "dns";
 import HueClient, { authHeaders } from "./HueClient";
 import { checkBridgeIdentity, getCaCertificate } from "../helpers/hueNetworking";
 import { BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
@@ -10,23 +9,10 @@ export default async function createHueClient(bridgeConfig: BridgeConfig) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
     console.log("Connecting to the Hue Bridge…");
 
-    /*
-     * Connect to the Hue Bridge using the Bridge ID as the hostname instead of the IP address, which is then resolved
-     * using the function provided to the `lookup` option. This is necessary because RFC 6066 does not permit connecting
-     * to IP addresses using TLS.
-     */
-    const session = connect(`https://${bridgeConfig.id}`, {
+    // The certificate names the bridge ID, not its IP address, so the identity check replaces the hostname check
+    const session = connect(`https://${bridgeConfig.ipAddress}`, {
       ca: getCaCertificate(),
       checkServerIdentity: (_hostname, peerCertificate) => checkBridgeIdentity(peerCertificate, bridgeConfig.id),
-      lookup: (hostname, options, callback) => {
-        if (bridgeConfig.ipAddress !== undefined && hostname.toLowerCase() === bridgeConfig.id) {
-          // Resolve the hostname (which is the Bridge ID) to the IP address of the Hue Bridge
-          callback(null, [{ address: bridgeConfig.ipAddress, family: 4 }]);
-        } else {
-          // Fallback to the default DNS lookup
-          dns.lookup(hostname, options, callback);
-        }
-      },
     });
 
     session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
