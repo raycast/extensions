@@ -1,0 +1,36 @@
+2026-09-21T16:17:30.3547442Z ##[endgroup]
+2026-09-21T16:17:31.4113016Z env:
+2026-09-21T16:17:31.4113622Z   ARTIFACT_NAME: remote
+2026-09-21T16:17:31.4114318Z   NPM_ARCH: x64
+2026-09-21T16:17:31.4115048Z   VSCODE_ARCH: x64
+2026-09-21T16:17:31.4115707Z   VSCODE_SKIP_PRELAUNCH: 1
+2026-09-21T16:17:46.8491354Z shell: /usr/bin/bash -e {0}
+2026-09-21T16:18:16.2836989Z   NODE_MODULES_CACHE_KEY: node_modules-linux-c225cf4c787448436f7f96579089220801a55906fbf31d47c30af065f08bc48d
+2026-09-21T16:18:49.8118255Z   FONTCONFIG_FILE: /tmp/fonts-minimal.conf
+2026-09-21T16:18:54.3609452Z [16:18:54] Using gulpfile ~/work/vscode/vscode/gulpfile.mjs
+2026-09-21T16:19:05.5687808Z   ELECTRON_CACHE_PATH: /home/runner/.cache/electron
+2026-09-21T16:19:20.9556749Z ##[group]Run ./scripts/test-remote-integration.sh
+2026-09-21T16:19:20.9557103Z [36;1m./scripts/test-remote-integration.sh[0m
+2026-09-21T16:19:20.9635423Z   DISPLAY: :10
+2026-09-21T16:19:22.0639670Z [16:19:22] Starting 'node'...
+2026-09-21T16:19:22.0648480Z [16:19:22] Downloading node.js 24.20.0 linux x64 from https://nodejs.org...
+2026-09-21T16:19:22.0650620Z [16:19:22] Using SHA256 checksum for checking integrity: 855d581f8a4eb1a8117e3426de25fe02770592febcfb31369aee1ffbfee9e8ec
+2026-09-21T16:19:22.0703091Z [16:19:22] Start fetching [35mhttps://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.gz[39m
+2026-09-21T16:19:22.2272576Z [16:19:22] Fetch completed: Status 200. Took [35m156 ms[39m
+2026-09-21T16:19:22.9554969Z [16:19:22] Verified SHA256 checksums match for [36mhttps://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.gz[39m
+2026-09-21T16:19:22.9555636Z [16:19:22] Fetched response body buffer: [35m58006679 bytes[39m
+2026-09-21T16:19:24.1437838Z [16:19:24] Finished 'node' after 2.08 s
+2026-09-21T16:19:24.1922423Z Running remote integration tests out of sources.
+2026-09-21T16:19:24.1923051Z Using remote server out of sources for integration tests
+2026-09-21T16:19:24.1923734Z Storing crash reports into '/home/runner/work/vscode/vscode/.build/crashes'.
+2026-09-21T16:19:24.1924652Z Storing log files into '/home/runner/work/vscode/vscode/.build/logs/integration-tests-remote'.
+2026-09-21T16:19:24.1925270Z ### API tests (folder)
+2026-09-21T16:19:24.4008828Z Found --crash-reporter-directory argument. Setting crashDumps directory to be '/home/runner/work/vscode/vscode/.build/crashes'
+2026-09-21T16:19:24.9177929Z [3915:0921/161924.917262:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+2026-09-21T16:19:25.1421674Z [3915:0921/161925.101937:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+2026-09-21T16:19:25.1885721Z [90m[main 2026-09-21T16:19:25.188Z][0m StorageMainService: creating application shared storage
+2026-09-21T16:19:25.2319681Z [90m[main 2026-09-21T16:19:25.231Z][0m [CSS_DEV] DONE, 468 css modules (36ms)
+2026-09-21T16:19:25.3062785Z [90m[main 2026-09-21T16:19:25.304Z][0m update#setState disabled
+2026-09-21T16:19:25.3063737Z [90m[main 2026-09-21T16:19:25.305Z][0m [shared storage] Creating shared storage database at ':memory:' (wasCreated: true)
+2026-09-21T16:19:25.3064726Z [90m[main 2026-09-21T16:19:25.305Z][0m [shared storage] Initializing fallback application storage (path: in-memory)
+2026-09-21T16:19:25.3432109Z [90m[main 2026-09-21T16:19:25.342Z][0m [shared storage] Fallback application storage initialized with 3 items

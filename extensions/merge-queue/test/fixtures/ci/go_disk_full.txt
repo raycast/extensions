@@ -1,0 +1,44 @@
+2026-10-03T07:10:18.4087857Z ##[group]Run mage -v test
+2026-10-03T07:10:18.4088133Z [36;1mmage -v test[0m
+2026-10-03T07:10:18.4158711Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-03T07:10:18.4158997Z env:
+2026-10-03T07:10:18.4159354Z   GOPROXY: https://proxy.golang.org
+2026-10-03T07:10:18.4159568Z   GO111MODULE: on
+2026-10-03T07:10:18.4159738Z   SASS_VERSION: 1.80.3
+2026-10-03T07:10:18.4160021Z   DART_SASS_SHA_LINUX: 7c933edbad0a7d389192c5b79393485c088bd2c4398e32f5754c32af006a9ffd
+2026-10-03T07:10:18.4160452Z   DART_SASS_SHA_MACOS: 79e060b0e131c3bb3c16926bafc371dc33feab122bfa8c01aa337a072097967b
+2026-10-03T07:10:18.4160929Z   DART_SASS_SHA_WINDOWS: 0bc4708b37cd1bac4740e83ac5e3176e66b774f77fd5dd364da5b5cfc9bfb469
+2026-10-03T07:10:18.4161320Z   GOTOOLCHAIN: local
+2026-10-03T07:10:18.4161491Z   TMPDIR: D:\a\_temp
+2026-10-03T07:10:18.4161653Z   HOME: C:\Users\runneradmin
+2026-10-03T07:33:27.2443744Z exec: go "test" "-p" "2" "./resources/kinds" "-tags" "extended,withdeploy"
+2026-10-03T07:33:27.6022405Z ok  	github.com/gohugoio/hugo/resources/kinds	0.016s
+2026-10-03T07:33:27.6075645Z exec: go "clean" "-testcache"
+2026-10-03T07:33:27.6316788Z exec: go "clean" "-i" "./..."
+2026-10-03T07:33:28.2005097Z exec: go "test" "-p" "2" "./resources/page" "-tags" "extended,withdeploy"
+2026-10-03T07:33:58.0479394Z ok  	github.com/gohugoio/hugo/resources/page	0.964s
+2026-10-03T07:33:58.1126066Z exec: go "clean" "-testcache"
+2026-10-03T07:33:58.1375260Z exec: go "clean" "-i" "./..."
+2026-10-03T07:33:58.7300322Z exec: go "test" "-p" "2" "./resources/page/page_generate" "-tags" "extended,withdeploy"
+2026-10-03T07:33:59.0759984Z ?   	github.com/gohugoio/hugo/resources/page/page_generate	[no test files]
+2026-10-03T07:33:59.0841004Z exec: go "clean" "-testcache"
+2026-10-03T07:33:59.1094723Z exec: go "clean" "-i" "./..."
+2026-10-03T07:33:59.6914870Z exec: go "test" "-p" "2" "./resources/page/pagemeta" "-tags" "extended,withdeploy"
+2026-10-03T07:34:28.0138622Z ok  	github.com/gohugoio/hugo/resources/page/pagemeta	0.349s
+2026-10-03T07:34:28.0737259Z exec: go "clean" "-testcache"
+2026-10-03T07:34:28.0990148Z exec: go "clean" "-i" "./..."
+2026-10-03T07:34:28.6682785Z exec: go "test" "-p" "2" "./resources/page/siteidentities" "-tags" "extended,withdeploy"
+2026-10-03T07:34:28.7912706Z ?   	github.com/gohugoio/hugo/resources/page/siteidentities	[no test files]
+2026-10-03T07:34:28.7978544Z exec: go "clean" "-testcache"
+2026-10-03T07:34:28.8243387Z exec: go "clean" "-i" "./..."
+2026-10-03T07:34:29.4168465Z exec: go "test" "-p" "2" "./resources/postpub" "-tags" "extended,withdeploy"
+2026-10-03T07:34:30.5962327Z ok  	github.com/gohugoio/hugo/resources/postpub	0.047s
+2026-10-03T07:34:30.6037464Z exec: go "clean" "-testcache"
+2026-10-03T07:34:30.6380150Z exec: go "clean" "-i" "./..."
+2026-10-03T07:34:31.2292581Z exec: go "test" "-p" "2" "./resources/resource" "-tags" "extended,withdeploy"
+2026-10-03T07:34:55.4989966Z # github.com/gohugoio/hugo/hugolib [github.com/gohugoio/hugo/resources/resource.test]
+2026-10-03T07:34:55.4991164Z compile: writing output: write $WORK\b501\_pkg_.a: There is not enough space on the disk.
+2026-10-03T07:34:55.4995875Z FAIL	github.com/gohugoio/hugo/resources/resource [build failed]
+2026-10-03T07:34:55.4997609Z FAIL
+2026-10-03T07:34:55.5625851Z Error: running "go test -p 2 ./resources/resource -tags extended,withdeploy" failed with exit code 1
+2026-10-03T07:34:56.1187882Z ##[error]Process completed with exit code 1.

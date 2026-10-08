@@ -185,6 +185,10 @@ export async function rerunJob(config: RepoConfig, jobId: number): Promise<void>
 
 const FAILED_JOB_CONCLUSIONS = new Set(["failure", "timed_out", "cancelled", "startup_failure", "action_required"]);
 
+export function isBehindQueue(job: Job | undefined, queueState: CheckState): boolean {
+  return job !== undefined && job.status !== "completed" && queueState !== "pending";
+}
+
 export function jobState(job: Job): CheckState {
   if (job.status !== "completed") {
     return "pending";

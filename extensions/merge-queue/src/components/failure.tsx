@@ -1,9 +1,10 @@
 import { Color, Detail, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { loadJob, loadLogSummary, LogJob } from "../data";
-import { logErrorMessage } from "../lib/errors";
+import { jobErrorMessage, logErrorMessage } from "../lib/errors";
 import { formatSeconds, secondsBetween } from "../lib/format";
-import { jobState } from "../lib/jobs";
+import { isBehindQueue, jobState } from "../lib/jobs";
 import { Check, PullRequestSummary } from "../lib/queue";
 import { currentStep, failedStep, failingStepName, failureUrl, JobReportInput, LogState } from "../lib/report";
 import { checkLabel } from "./presentation";
@@ -13,6 +14,8 @@ export type MetadataRow =
   | { kind: "label"; title: string; text: string }
   | { kind: "link"; title: string; text: string; target: string }
   | { kind: "separator" };
+
+const RUNNING_JOB_POLL_MS = 15_000;
 
 export function statusColor(check: Check): Color {
   switch (check.state) {
@@ -38,7 +41,26 @@ export function useJobReport(props: {
   const hasJob = props.check.jobId !== undefined;
   const jobId = props.check.jobId ?? 0;
   const details = useCachedPromise(loadJob, [jobId], { execute: props.enabled && hasJob });
-  const job = props.enabled ? details.data?.job : undefined;
+  const loaded = props.enabled ? details.data?.job : undefined;
+  const behindQueue = isBehindQueue(loaded, props.check.state);
+  const job = behindQueue ? undefined : loaded;
+  const refreshJob = useRef(details.revalidate);
+  refreshJob.current = details.revalidate;
+
+  useEffect(() => {
+    if (behindQueue) {
+      refreshJob.current();
+    }
+  }, [behindQueue, props.check.state]);
+
+  useEffect(() => {
+    if (!props.enabled || !loaded || loaded.status === "completed") {
+      return;
+    }
+    const timer = setInterval(() => refreshJob.current(), RUNNING_JOB_POLL_MS);
+    return () => clearInterval(timer);
+  }, [props.enabled, loaded?.status]);
+
   const finished = job?.status === "completed";
   const step = failedStep(job);
   const stepRef = step ? { name: step.name, startedAt: step.startedAt } : undefined;
@@ -79,6 +101,7 @@ export function useJobReport(props: {
     log: logState,
     repo: props.repo,
     sha: props.sha,
+    jobError: props.enabled && details.error && !job ? jobErrorMessage(details.error) : undefined,
   };
   return {
     input,

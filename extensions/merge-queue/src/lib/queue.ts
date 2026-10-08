@@ -89,16 +89,21 @@ export type RawEntry = {
     author: { login: string; avatarUrl: string } | null;
   } | null;
   headCommit: {
+    id?: string;
     oid?: string;
-    statusCheckRollup: { contexts: { nodes: (RawCheckRun | RawStatusContext | null)[] } } | null;
+    statusCheckRollup: { contexts: RawContexts } | null;
   } | null;
 };
+
+type PageInfo = { hasNextPage: boolean; endCursor: string | null };
+
+type RawContexts = { pageInfo?: PageInfo; nodes: (RawCheckRun | RawStatusContext | null)[] };
 
 export type QueueResponse = {
   viewer: { login: string };
   repository: {
     defaultBranchRef: { name: string } | null;
-    mergeQueue: { url: string; entries: { nodes: RawEntry[] } } | null;
+    mergeQueue: { url: string; entries: { pageInfo?: PageInfo; nodes: RawEntry[] } } | null;
   } | null;
 };
 
@@ -111,14 +116,32 @@ export type RawBranch = {
   protection?: { required_status_checks?: { contexts?: string[]; checks?: { context: string }[] } };
 };
 
+const CONTEXT_FIELDS = `
+  pageInfo { hasNextPage endCursor }
+  nodes {
+    __typename
+    ... on CheckRun {
+      databaseId
+      name
+      status
+      conclusion
+      detailsUrl
+      startedAt
+      completedAt
+      checkSuite { workflowRun { databaseId workflow { name } } }
+    }
+    ... on StatusContext { context state targetUrl createdAt }
+  }`;
+
 const QUEUE_QUERY = `
-query($owner: String!, $name: String!, $branch: String) {
+query($owner: String!, $name: String!, $branch: String, $after: String) {
   viewer { login }
   repository(owner: $owner, name: $name) {
     defaultBranchRef { name }
     mergeQueue(branch: $branch) {
       url
-      entries(first: 50) {
+      entries(first: 50, after: $after) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           id
           position
@@ -128,23 +151,10 @@ query($owner: String!, $name: String!, $branch: String) {
           enqueuer { login }
           pullRequest { number title url headRefName author { login avatarUrl } }
           headCommit {
+            id
             oid
             statusCheckRollup {
-              contexts(first: 100) {
-                nodes {
-                  __typename
-                  ... on CheckRun {
-                    databaseId
-                    name
-                    status
-                    conclusion
-                    detailsUrl
-                    startedAt
-                    completedAt
-                    checkSuite { workflowRun { databaseId workflow { name } } }
-                  }
-                  ... on StatusContext { context state targetUrl createdAt }
-                }
+              contexts(first: 100) {${CONTEXT_FIELDS}
               }
             }
           }
@@ -153,6 +163,20 @@ query($owner: String!, $name: String!, $branch: String) {
     }
   }
 }`;
+
+const MORE_CONTEXTS_QUERY = `
+query($commit: ID!, $after: String) {
+  node(id: $commit) {
+    ... on Commit {
+      statusCheckRollup {
+        contexts(first: 100, after: $after) {${CONTEXT_FIELDS}
+        }
+      }
+    }
+  }
+}`;
+
+const MAX_PAGES = 10;
 
 const FAILED_CONCLUSIONS = new Set(["FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE"]);
 
@@ -349,15 +373,47 @@ export function parseQueue(
   };
 }
 
+async function fetchRemainingContexts(config: RepoConfig, entry: RawEntry): Promise<void> {
+  const contexts = entry.headCommit?.statusCheckRollup?.contexts;
+  const commit = entry.headCommit?.id;
+  let pageInfo = contexts?.pageInfo;
+  for (let page = 1; contexts && commit && pageInfo?.hasNextPage && page < MAX_PAGES; page++) {
+    const data = await graphql<{ node: { statusCheckRollup: { contexts: RawContexts } | null } | null }>(
+      config,
+      MORE_CONTEXTS_QUERY,
+      { commit, after: pageInfo.endCursor ?? undefined },
+    );
+    const more = data.node?.statusCheckRollup?.contexts;
+    contexts.nodes.push(...(more?.nodes ?? []));
+    pageInfo = more?.pageInfo;
+  }
+}
+
+export async function fetchQueueResponse(config: RepoConfig): Promise<QueueResponse> {
+  const request = (after?: string) =>
+    graphql<QueueResponse>(config, QUEUE_QUERY, {
+      owner: config.owner,
+      name: config.name,
+      branch: config.branch || undefined,
+      after,
+    });
+  const data = await request();
+  const entries = data.repository?.mergeQueue?.entries;
+  let pageInfo = entries?.pageInfo;
+  for (let page = 1; entries && pageInfo?.hasNextPage && page < MAX_PAGES; page++) {
+    const next = (await request(pageInfo.endCursor ?? undefined)).repository?.mergeQueue?.entries;
+    entries.nodes.push(...(next?.nodes ?? []));
+    pageInfo = next?.pageInfo;
+  }
+  await Promise.all((entries?.nodes ?? []).map((entry) => fetchRemainingContexts(config, entry)));
+  return data;
+}
+
 export async function fetchQueue(
   config: RepoConfig,
   requiredChecksFor: (branch: string) => Promise<string[]>,
 ): Promise<QueueSnapshot> {
-  const data = await graphql<QueueResponse>(config, QUEUE_QUERY, {
-    owner: config.owner,
-    name: config.name,
-    branch: config.branch || undefined,
-  }).catch((error: unknown) => {
+  const data = await fetchQueueResponse(config).catch((error: unknown) => {
     if (error instanceof GhError && (error.kind === "not-found" || error.kind === "sso")) {
       throw new GhError(error.message, error.kind, { ...error.details, repo: repoSlug(config) });
     }

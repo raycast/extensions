@@ -1,0 +1,23 @@
+2026-10-08T08:31:40.3823608Z env:
+2026-10-08T08:31:40.3824706Z   NAPI_CLI_VERSION: 3.4.1
+2026-10-08T08:31:40.3825955Z   TURBO_VERSION: 2.9.4
+2026-10-08T08:31:40.3827806Z   TURBO_ARGS: -v --env-mode loose --remote-cache-timeout 300 --log-order stream
+2026-10-08T08:31:40.3829788Z   NODE_LTS_VERSION: 20.9.0
+2026-10-08T08:31:40.3831050Z   TEST_CONCURRENCY: 8
+2026-10-08T08:31:40.3832403Z   TURBO_TASKS_AVAILABLE_PARALLELISM: 4
+2026-10-08T08:31:40.3833820Z   RUST_BACKTRACE: 0
+2026-10-08T08:31:40.3835092Z   TURBO_TEAM: vtest314-next-adapter-e2e-tests
+2026-10-08T08:31:40.3836634Z   TURBO_CACHE: local:rw,remote:rw
+2026-10-08T08:32:26.7393704Z ##[group]Run pnpm types-and-precompiled
+2026-10-08T08:32:26.7394308Z [36;1mpnpm types-and-precompiled[0m
+2026-10-08T08:32:26.7434706Z shell: /usr/bin/bash -le {0}
+2026-10-08T08:32:29.5838734Z @next/third-parties:typescript: 
+2026-10-08T08:32:29.5839713Z @next/third-parties:typescript: > @next/third-parties@16.5.0-canary.3 typescript /home/runner/work/next.js/next.js/packages/third-parties
+2026-10-08T08:32:29.5840887Z @next/third-parties:typescript: > tsc --noEmit -p tsconfig.json
+2026-10-08T08:32:29.6578925Z @next/playwright:typescript: cache hit, replaying logs 3ae64ee62766518a
+2026-10-08T08:32:29.6579620Z @next/playwright:typescript: 
+2026-10-08T08:32:29.6580571Z @next/playwright:typescript: > @next/playwright@16.5.0-canary.3 typescript /home/runner/work/next.js/next.js/packages/next-playwright
+2026-10-08T08:32:29.6581668Z @next/playwright:typescript: > tsc --noEmit -p tsconfig.json
+2026-10-08T08:32:29.9714162Z //:typescript: 
+2026-10-08T08:32:29.9714830Z //:typescript: > nextjs-project@0.0.0 typescript /home/runner/work/next.js/next.js
+2026-10-08T08:32:29.9716248Z //:typescript: > tsc --noEmit

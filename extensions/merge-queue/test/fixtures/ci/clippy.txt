@@ -1,0 +1,44 @@
+2026-10-07T20:16:08.0012105Z ##[group]Run cargo clippy --workspace --tests --no-deps --features $TOKIO_STABLE_FEATURES
+2026-10-07T20:16:08.0013202Z [36;1mcargo clippy --workspace --tests --no-deps --features $TOKIO_STABLE_FEATURES[0m
+2026-10-07T20:16:08.0014396Z [36;1m# Removing the tokio workspace patch to check without path dependencies[0m
+2026-10-07T20:16:08.0015179Z [36;1m# (if not specified differently in the crate)[0m
+2026-10-07T20:16:08.0015857Z [36;1mperl -0 -i.bak -pe 's/\[patch\.crates-io\].+\n\[/[/s' Cargo.toml[0m
+2026-10-07T20:16:08.0016863Z [36;1mcargo clippy --workspace --exclude tokio --tests --no-deps --features $TOKIO_STABLE_FEATURES[0m
+2026-10-07T20:16:08.0096616Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-07T20:16:08.0097178Z env:
+2026-10-07T20:16:08.0097500Z   RUSTFLAGS: -Dwarnings
+2026-10-07T20:16:08.0097877Z   RUST_BACKTRACE: 1
+2026-10-07T20:16:08.0098247Z   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
+2026-10-07T20:16:08.0098676Z   rust_stable: stable
+2026-10-07T20:16:08.0099095Z   rust_nightly: nightly-2025-10-12
+2026-10-07T20:16:44.9749814Z [1m[32m  Downloaded[0m mio v1.2.4
+2026-10-07T20:16:44.9918690Z [1m[32m  Downloaded[0m tokio-util v0.7.19
+2026-10-07T20:16:45.0181601Z [1m[32m  Downloaded[0m tokio v1.53.2
+2026-10-07T20:16:45.1045787Z [1m[32m   Compiling[0m libc v0.2.190
+2026-10-07T20:16:45.1047005Z [1m[32m   Compiling[0m tokio-macros v2.7.2
+2026-10-07T20:16:45.9981842Z [1m[32m    Checking[0m parking_lot_core v0.9.12
+2026-10-07T20:16:45.9982578Z [1m[32m    Checking[0m errno v0.3.14
+2026-10-07T20:16:45.9983105Z [1m[32m    Checking[0m mio v1.2.4
+2026-10-07T20:16:45.9983658Z [1m[32m    Checking[0m socket2 v0.6.5
+2026-10-07T20:16:46.0530958Z [1m[32m    Checking[0m signal-hook-registry v1.4.8
+2026-10-07T20:16:46.1193239Z [1m[32m    Checking[0m parking_lot v0.12.5
+2026-10-07T20:16:46.1518312Z [1m[32m    Checking[0m getrandom v0.4.3
+2026-10-07T20:16:46.2315756Z [1m[32m    Checking[0m tempfile v3.27.0
+2026-10-07T20:16:46.2539270Z [1m[32m    Checking[0m tokio v1.53.2
+2026-10-07T20:16:46.2540729Z [1m[32m    Checking[0m tokio v1.53.2 (/home/runner/work/tokio/tokio/tokio)
+2026-10-07T20:16:46.5918894Z [0m[1m[38;5;9merror[E0432][0m[0m[1m: unresolved import `mio::IoSource`[0m
+2026-10-07T20:16:46.5919819Z [0m  [0m[0m[1m[38;5;12m--> [0m[0mtokio/src/process/unix/mod.rs:40:5[0m
+2026-10-07T20:16:46.5920437Z [0m   [0m[0m[1m[38;5;12m|[0m
+2026-10-07T20:16:46.5921217Z [0m[1m[38;5;12m40[0m[0m [0m[0m[1m[38;5;12m|[0m[0m [0m[0muse mio::IoSource;[0m
+2026-10-07T20:16:46.5922337Z [0m   [0m[0m[1m[38;5;12m|[0m[0m     [0m[0m[1m[38;5;9m^^^^^^^^^^^^^[0m[0m [0m[0m[1m[38;5;9mno `IoSource` in the root[0m
+2026-10-07T20:16:46.5922888Z 
+2026-10-07T20:16:48.5936417Z [1m[32m    Checking[0m tokio-stream v0.1.19
+2026-10-07T20:16:48.5937404Z [1m[32m    Checking[0m tokio-util v0.7.19 (/home/runner/work/tokio/tokio/tokio-util)
+2026-10-07T20:16:48.5938278Z [1m[32m    Checking[0m tokio-util v0.7.19
+2026-10-07T20:16:48.7696822Z [1m[32m    Checking[0m tokio-stream v0.1.19 (/home/runner/work/tokio/tokio/tokio-stream)
+2026-10-07T20:16:48.9200846Z [1m[32m    Checking[0m tokio-test v0.4.6
+2026-10-07T20:16:49.0376259Z [1m[32m    Checking[0m tokio-test v0.4.6 (/home/runner/work/tokio/tokio/tokio-test)
+2026-10-07T20:16:49.0585913Z [0m[1mFor more information about this error, try `rustc --explain E0432`.[0m
+2026-10-07T20:16:49.0836578Z [1m[31merror[0m[1m:[0m could not compile `tokio` (lib) due to 1 previous error
+2026-10-07T20:16:49.0843474Z [1m[33mwarning[0m[1m:[0m build failed, waiting for other jobs to finish...
+2026-10-07T20:16:49.7690671Z ##[error]Process completed with exit code 101.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_ANNOTATIONS, DEMO_FAILING_JOB_ID, DEMO_LOG, demoJob, demoLog, demoQueue } from "../src/lib/demo";
+import { isBehindQueue } from "../src/lib/jobs";
 import { excerptAround, failureLineInStep, summarizeLog } from "../src/lib/logs";
 import {
   buildCopyText,
@@ -229,4 +230,50 @@ describe("job report", () => {
     expect(text).toContain("Failure: https://github.com/acme/storefront/actions/runs/16100/job/9100#step:5:");
     expect(text).toContain("Flaky tests:");
   });
+});
+
+describe("a job with more than one failed step", () => {
+  const at = (time: string, line: string) => `2026-10-07T${time}.0000000Z ${line}`;
+  const log = [
+    at("10:00:00", "##[group]Run npm test"),
+    at("10:00:00", "##[endgroup]"),
+    at("10:00:30", "src/cart.test.ts:12:3 - error: expected 3 to be 2"),
+    at("10:00:31", "##[error]Process completed with exit code 1."),
+    at("10:00:32", "##[group]Run ./scripts/report.sh"),
+    at("10:00:32", "##[endgroup]"),
+    at("10:00:33", "report.sh: error: no results to upload"),
+    at("10:00:33", "##[error]Process completed with exit code 2."),
+  ].join("\n");
+
+  it("reads the step the report names, not the last one in the log", () => {
+    const summary = summarizeLog(log, { step: { name: "Run tests", startedAt: "2026-10-07T10:00:00Z" } });
+    expect(summary.failingStep).toBe("npm test");
+    expect(summary.errors[0].text).toContain("expected 3 to be 2");
+    expect(summary.failureLine).toBe(2);
+  });
+
+  it("falls back to the last failed step without one", () =>
+    expect(summarizeLog(log).failingStep).toBe("./scripts/report.sh"));
+});
+
+describe("job details that can't load", () => {
+  it("says why instead of loading forever", () =>
+    expect(
+      buildPreviewMarkdown({
+        check: { name: "e2e", state: "failure", required: true, jobId: 1 },
+        log: { status: "idle" },
+        jobError: "Can't reach GitHub. Check your connection.",
+      }),
+    ).toBe("_Can't reach GitHub. Check your connection. Press ⌘R to try again._"));
+});
+
+describe("isBehindQueue", () => {
+  const running = demoJob(9100, new Date("2026-10-07T14:30:00Z"));
+  const inProgress = { ...running, status: "in_progress", conclusion: null };
+
+  it("spots a running job the queue already shows as failed", () =>
+    expect(isBehindQueue(inProgress, "failure")).toBe(true));
+  it("trusts a running job while the queue says it's running", () =>
+    expect(isBehindQueue(inProgress, "pending")).toBe(false));
+  it("trusts a finished job", () => expect(isBehindQueue(running, "pending")).toBe(false));
 });

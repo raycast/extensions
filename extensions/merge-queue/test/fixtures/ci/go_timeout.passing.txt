@@ -1,0 +1,75 @@
+2026-10-07T14:04:10.7343666Z ##[endgroup]
+2026-10-07T14:04:36.0970761Z env:
+2026-10-07T14:04:36.0970957Z   GOMEMLIMIT: 13098762KiB
+2026-10-07T14:04:36.5108899Z ##[group]Run make GO_ONLY=1 SKIP_GOLANGCI_LINT=1
+2026-10-07T14:04:36.5109295Z [36;1mmake GO_ONLY=1 SKIP_GOLANGCI_LINT=1[0m
+2026-10-07T14:04:36.5110413Z shell: sh -e {0}
+2026-10-07T14:04:36.6034965Z >> checking code style
+2026-10-07T14:04:37.3157103Z >> checking license header
+2026-10-07T14:04:38.0459822Z >> checking for copyright years 2026 or later
+2026-10-07T14:04:38.0581050Z >> running yamllint on all YAML files in the repository
+2026-10-07T14:04:38.0583493Z yamllint .
+2026-10-07T14:04:47.0548905Z >> running check for unused/missing packages in go.mod
+2026-10-07T14:04:47.0549495Z go mod tidy
+2026-10-07T14:05:28.4172141Z + tsc --module esnext --target es2018 --outDir dist/esm
+2026-10-07T14:05:28.5425267Z + tsc6 --module commonjs --moduleResolution node --target es5 --outDir dist/cjs --downlevelIteration --ignoreDeprecations 6.0
+2026-10-07T14:05:30.1844708Z build react-app
+2026-10-07T14:05:30.6874711Z $ react-app-rewired build
+2026-10-07T14:05:31.8131102Z Creating an optimized production build...
+2026-10-07T14:06:09.9259285Z Compiled with warnings.
+2026-10-07T14:06:09.9260162Z [eslint] 
+2026-10-07T14:06:09.9260520Z src/pages/graph/SeriesName.tsx
+2026-10-07T14:06:09.9261165Z   Line 1:21:  'useContext' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-07T14:06:09.9261901Z src/pages/status/Status.tsx
+2026-10-07T14:06:09.9262927Z   Line 130:37:  Expected '!==' and instead saw '!='                                                                                                                                                                                                          eqeqeq
+2026-10-07T14:06:09.9266022Z   Line 133:6:   React Hook useEffect has a missing dependency: 'setAnimateLogo'. Either include it or remove the dependency array. If 'setAnimateLogo' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+2026-10-07T14:06:09.9268134Z Search for the keywords to learn more about each warning.
+2026-10-07T14:06:09.9269254Z To ignore, add // eslint-disable-next-line to the line before.
+2026-10-07T14:06:09.9270016Z File sizes after gzip:
+2026-10-07T14:06:10.0434854Z   496.37 kB  build/static/js/main.43db6efb.js
+2026-10-07T14:06:10.0457616Z   53.76 kB   build/static/css/main.3a01f811.css
+2026-10-07T14:06:10.0526629Z The project was built assuming it is hosted at ./.
+2026-10-07T14:06:10.0527447Z You can control this with the homepage field in your package.json.
+2026-10-07T14:06:10.0539824Z The build folder is ready to be deployed.
+2026-10-07T14:27:05.6900620Z ok  	github.com/prometheus/prometheus/tsdb/agent	368.221s
+2026-10-07T14:27:05.6901450Z ok  	github.com/prometheus/prometheus/tsdb/chunkenc	2.809s
+2026-10-07T14:27:05.6902108Z ok  	github.com/prometheus/prometheus/tsdb/chunks	40.358s
+2026-10-07T14:27:05.6902786Z ?   	github.com/prometheus/prometheus/tsdb/compression	[no test files]
+2026-10-07T14:27:05.6903309Z ?   	github.com/prometheus/prometheus/tsdb/encoding	[no test files]
+2026-10-07T14:27:05.6903779Z ok  	github.com/prometheus/prometheus/tsdb/fileutil	1.041s
+2026-10-07T14:27:05.6904675Z ok  	github.com/prometheus/prometheus/tsdb/goversion	1.016s
+2026-10-07T14:27:05.6905298Z ok  	github.com/prometheus/prometheus/tsdb/index	63.375s
+2026-10-07T14:27:05.6905709Z ok  	github.com/prometheus/prometheus/tsdb/record	1.547s
+2026-10-07T14:27:05.6906310Z ok  	github.com/prometheus/prometheus/tsdb/tombstones	1.027s
+2026-10-07T14:27:05.6906759Z ok  	github.com/prometheus/prometheus/tsdb/tsdbutil	1.036s
+2026-10-07T14:27:05.6907167Z ok  	github.com/prometheus/prometheus/tsdb/wlog	132.356s
+2026-10-07T14:27:05.6907560Z ok  	github.com/prometheus/prometheus/util/almost	1.014s
+2026-10-07T14:27:05.6907976Z ok  	github.com/prometheus/prometheus/util/annotations	1.018s
+2026-10-07T14:27:05.6909826Z ?   	github.com/prometheus/prometheus/util/features	[no test files]
+2026-10-07T14:27:05.6910284Z ok  	github.com/prometheus/prometheus/util/fmtutil	1.019s
+2026-10-07T14:27:05.6910690Z ok  	github.com/prometheus/prometheus/util/fuzzing	2.484s
+2026-10-07T14:27:05.6911119Z ?   	github.com/prometheus/prometheus/util/gate	[no test files]
+2026-10-07T14:27:05.6911556Z ok  	github.com/prometheus/prometheus/util/httputil	1.149s
+2026-10-07T14:27:05.6912002Z ?   	github.com/prometheus/prometheus/util/jsonutil	[no test files]
+2026-10-07T14:27:05.6912451Z ok  	github.com/prometheus/prometheus/util/junitxml	1.013s
+2026-10-07T14:27:05.6912865Z ok  	github.com/prometheus/prometheus/util/kahansum	1.014s
+2026-10-07T14:27:05.6913271Z ok  	github.com/prometheus/prometheus/util/logging	1.218s
+2026-10-07T14:27:05.6913736Z ok  	github.com/prometheus/prometheus/util/namevalidationutil	1.013s
+2026-10-07T14:27:05.6914230Z ok  	github.com/prometheus/prometheus/util/netconnlimit	1.622s
+2026-10-07T14:27:05.6914805Z ok  	github.com/prometheus/prometheus/util/notifications	1.322s
+2026-10-07T14:27:05.6915245Z ?   	github.com/prometheus/prometheus/util/osutil	[no test files]
+2026-10-07T14:27:05.6915634Z ok  	github.com/prometheus/prometheus/util/pool	1.013s
+2026-10-07T14:27:05.6915998Z ok  	github.com/prometheus/prometheus/util/runtime	1.014s
+2026-10-07T14:27:05.6916390Z ?   	github.com/prometheus/prometheus/util/runutil	[no test files]
+2026-10-07T14:27:05.6916774Z ok  	github.com/prometheus/prometheus/util/stats	1.038s
+2026-10-07T14:27:05.6917122Z ok  	github.com/prometheus/prometheus/util/strutil	2.715s
+2026-10-07T14:27:05.6917518Z ?   	github.com/prometheus/prometheus/util/testrecord	[no test files]
+2026-10-07T14:27:05.6917928Z ok  	github.com/prometheus/prometheus/util/teststorage	1.064s
+2026-10-07T14:27:05.6918324Z ?   	github.com/prometheus/prometheus/util/testutil	[no test files]
+2026-10-07T14:27:05.6918708Z ok  	github.com/prometheus/prometheus/util/testwal	1.033s
+2026-10-07T14:27:05.6919106Z ?   	github.com/prometheus/prometheus/util/treecache	[no test files]
+2026-10-07T14:27:05.6919503Z ok  	github.com/prometheus/prometheus/util/zeropool	2.488s
+2026-10-07T14:27:05.6919843Z ok  	github.com/prometheus/prometheus/web	17.588s
+2026-10-07T14:27:05.6920234Z ?   	github.com/prometheus/prometheus/web/api/testhelpers	[no test files]
+2026-10-07T14:27:05.6920657Z ok  	github.com/prometheus/prometheus/web/api/v1	43.743s
+2026-10-07T14:27:05.6921019Z ?   	github.com/prometheus/prometheus/web/ui	[no test files]

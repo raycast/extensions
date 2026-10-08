@@ -18,6 +18,7 @@ export type JobReportInput = {
   log: LogState;
   repo?: string;
   sha?: string;
+  jobError?: string;
 };
 
 export type FailureError = { text: string; location?: string; url?: string };
@@ -210,7 +211,7 @@ export function buildPreviewMarkdown(input: JobReportInput): string {
     return "_This check runs outside GitHub Actions. Open it on GitHub (⌘↵) for details._";
   }
   if (!job) {
-    return "_Loading the failure…_";
+    return input.jobError ? `_${input.jobError} Press ⌘R to try again._` : "_Loading the failure…_";
   }
   const lines: string[] = [];
   const errors = failureErrors(input);
@@ -252,6 +253,9 @@ function stepsLines(job: Job): string[] {
 
 export function buildJobMarkdown(input: JobReportInput): string {
   const { job, log } = input;
+  if (!job && input.jobError) {
+    return `_${input.jobError} Press ⌘R to try again._`;
+  }
   const summary = loadedSummary(log);
   const lines: string[] = [];
   const errors = failureErrors(input);

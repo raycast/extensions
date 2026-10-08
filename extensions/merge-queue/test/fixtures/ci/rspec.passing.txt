@@ -1,0 +1,88 @@
+2026-10-08T16:49:58.1309978Z ##[endgroup]
+2026-10-08T16:50:52.5178181Z ##[group]Run bundle exec rake ascii_spec
+2026-10-08T16:50:52.5178721Z [36;1mbundle exec rake ascii_spec[0m
+2026-10-08T16:50:52.8100517Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-08T16:50:52.8100842Z env:
+2026-10-08T16:50:52.8101012Z   TMPDIR: D:\a\_temp
+2026-10-08T16:50:52.8101189Z   HOME: C:\Users\runneradmin
+2026-10-08T16:50:52.8101384Z   MSYS2_PATH_TYPE: inherit
+2026-10-08T16:50:52.8101606Z   ACLOCAL_PATH: /ucrt64/share/aclocal:/usr/share/aclocal
+2026-10-08T16:50:52.8101851Z   LANG: en_US.UTF-8
+2026-10-08T16:50:52.8102004Z   MAKE: make
+2026-10-08T16:50:52.8102156Z   MANPATH: /ucrt64/share/man
+2026-10-08T16:50:52.8102335Z   MINGW_CHOST: x86_64-w64-mingw32
+2026-10-08T16:50:52.8102558Z   MINGW_PACKAGE_PREFIX: mingw-w64-ucrt-x86_64
+2026-10-08T16:50:52.8104238Z   RI_DEVKIT: C:\hostedtoolcache\windows\Ruby\4.0.7\x64\msys64
+2026-10-08T16:50:52.8110465Z   Path: C:\Program Files\MongoDB\Server\7.0\bin;C:\vcpkg;C:\tools\zstd;C:\hostedtoolcache\windows\stack\3.11.1\x64;C:\cabal\bin;C:\\ghcup\bin;C:\mingw64\bin;C:\Program Files\dotnet;C:\Program Files\MySQL\MySQL Server 8.0\bin;C:\Program Files\R\R-4.6.1\bin\x64;C:\SeleniumWebDrivers\GeckoDriver;C:\SeleniumWebDrivers\EdgeDriver\;C:\SeleniumWebDrivers\ChromeDriver;C:\Program Files (x86)\sbt\bin;C:\Program Files (x86)\GitHub CLI;C:\Program Files\Git\bin;C:\Program Files (x86)\pipx_bin;C:\npm\prefix;C:\hostedtoolcache\windows\go\1.24.13\x64\bin;C:\hostedtoolcache\windows\Python\3.12.10\x64\Scripts;C:\hostedtoolcache\windows\Python\3.12.10\x64;C:\Program Files\OpenSSL\bin;C:\tools\kotlinc\bin;C:\hostedtoolcache\windows\Java_Temurin-Hotspot_jdk\17.0.20-101\x64\bin;C:\Program Files\ImageMagick-7.1.2-Q16-HDRI;C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin;C:\ProgramData\kind;C:\ProgramData\Chocolatey\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\PowerShell\7\;C:\Program Files\Microsoft\Web Platform Installer\;C:\Program Files\Microsoft SQL Server\170\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\dotnet\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\WiX Toolset v3.14\bin;C:\Program Files\Microsoft SQL Server\130\DTS\Binn\;C:\Program Files\Microsoft SQL Server\140\DTS\Binn\;C:\Program Files\Microsoft SQL Server\150\DTS\Binn\;C:\Program Files\Microsoft SQL Server\160\DTS\Binn\;C:\Program Files\Microsoft SQL Server\170\DTS\Binn\;C:\ProgramData\chocolatey\lib\pulumi\tools\Pulumi\bin;C:\Program Files\CMake\bin;C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.16\bin;C:\Program Files\Microsoft Service Fabric\bin\Fabric\Fabric.Code;C:\Program Files\Microsoft SDKs\Service Fabric\Tools\ServiceFabricLocalClusterManager;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Program Files\GitHub CLI\;c:\tools\php;C:\Program Files (x86)\sbt\bin;C:\Program Files\Amazon\AWSCLIV2\;C:\Program Files\Amazon\SessionManagerPlugin\bin\;C:\Program Files\Amazon\AWSSAMCLI\bin\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\mongosh\;C:\Program Files\LLVM\bin;C:\Program Files (x86)\LLVM\bin;C:\Users\runneradmin\.dotnet\tools;C:\Users\runneradmin\.cargo\bin;C:\Users\runneradmin\AppData\Local\Microsoft\WindowsApps
+2026-10-08T16:50:52.8116805Z   CI_RUBY_VERSION: ruby
+2026-10-08T16:51:02.2172289Z Randomized with seed 63599
+2026-10-08T16:54:09.0073477Z Pending: (Failures listed here are expected and do not affect your suite's status)
+2026-10-08T16:54:09.0079187Z   1) RuboCop::Cop::Lint::UselessAssignment when a variable is reassigned in loop body but won't be referenced either next iteration or loop condition registers an offense
+2026-10-08T16:54:09.0080281Z      # Requires advanced logic that checks whether the return value of an operator assignment is used or not.
+2026-10-08T16:54:09.0080759Z      Failure/Error: expect(actual_annotations).to eq(expected_annotations), ''
+2026-10-08T16:54:09.0081072Z        Diff:
+2026-10-08T16:54:09.0081385Z        @@ -5,7 +5,6 @@
+2026-10-08T16:54:09.0081570Z           while total < 100
+2026-10-08T16:54:09.0081750Z             total += 1
+2026-10-08T16:54:09.0081902Z             foo += 1
+2026-10-08T16:54:09.0082094Z        -    ^^^ Useless assignment to variable - `foo`.
+2026-10-08T16:54:09.0082316Z           end
+2026-10-08T16:54:09.0082600Z           total
+2026-10-08T16:54:09.0082908Z      # ./lib/rubocop/rspec/expect_offense.rb:130:in 'RuboCop::RSpec::ExpectOffense#expect_offense'
+2026-10-08T16:54:09.0083391Z      # ./spec/rubocop/cop/lint/useless_assignment_spec.rb:757:in 'block (3 levels) in <top (required)>'
+2026-10-08T16:54:09.0083926Z      # ./vendor/bundle/ruby/4.0.0/gems/webmock-3.26.4/lib/webmock/rspec.rb:39:in 'block (2 levels) in <top (required)>'
+2026-10-08T16:54:09.0084399Z      # tasks/spec_runner.rake:41:in 'block in RuboCop::SpecRunner#run_specs'
+2026-10-08T16:54:09.0084805Z      # ./spec/support/encoding_helper.rb:10:in 'EncodingHelper#with_default_internal_encoding'
+2026-10-08T16:54:09.0085233Z      # tasks/spec_runner.rake:52:in 'block in RuboCop::SpecRunner#with_encoding'
+2026-10-08T16:54:09.0085635Z      # ./spec/support/encoding_helper.rb:18:in 'EncodingHelper#with_default_external_encoding'
+2026-10-08T16:54:09.0086012Z      # tasks/spec_runner.rake:51:in 'RuboCop::SpecRunner#with_encoding'
+2026-10-08T16:54:09.0087029Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:281:in 'block in Rake::Task#execute'
+2026-10-08T16:54:09.0087447Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:281:in 'Array#each'
+2026-10-08T16:54:09.0087854Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:281:in 'Rake::Task#execute'
+2026-10-08T16:54:09.0088601Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:219:in 'block in Rake::Task#invoke_with_call_chain'
+2026-10-08T16:54:09.0089210Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:199:in 'Monitor#synchronize'
+2026-10-08T16:54:09.0089664Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:199:in 'Rake::Task#invoke_with_call_chain'
+2026-10-08T16:54:09.0090109Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/task.rb:188:in 'Rake::Task#invoke'
+2026-10-08T16:54:09.0090569Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:183:in 'Rake::Application#invoke_task'
+2026-10-08T16:54:09.0091117Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:139:in 'block (2 levels) in Rake::Application#top_level'
+2026-10-08T16:54:09.0091624Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:139:in 'Array#each'
+2026-10-08T16:54:09.0092099Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:139:in 'block in Rake::Application#top_level'
+2026-10-08T16:54:09.0092635Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:148:in 'Rake::Application#run_with_threads'
+2026-10-08T16:54:09.0093155Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:133:in 'Rake::Application#top_level'
+2026-10-08T16:54:09.0093650Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:84:in 'block in Rake::Application#run'
+2026-10-08T16:54:09.0094189Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:209:in 'Rake::Application#standard_exception_handling'
+2026-10-08T16:54:09.0094713Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/lib/rake/application.rb:81:in 'Rake::Application#run'
+2026-10-08T16:54:09.0095132Z      # ./vendor/bundle/ruby/4.0.0/gems/rake-13.4.2/exe/rake:27:in '<top (required)>'
+2026-10-08T16:54:09.0095721Z   2) RuboCop::Cop::Layout::IndentationWidth with Width set to 2 with mixed tabs and spaces when tabs are enforced handles space followed by tab in indentation
+2026-10-08T16:54:09.0096236Z      # autocorrection for mixed indentation needs work
+2026-10-08T16:54:09.0096498Z      Failure/Error: expect(new_source).to eq(correction)
+2026-10-08T16:54:09.0096761Z        expected: "    if condition\n    \tfoo\n    end\n"
+2026-10-08T16:54:09.0096995Z             got: "if condition\n\tfoo\nend\n"
+2026-10-08T16:54:09.0097218Z        (compared using ==)
+2026-10-08T16:54:09.0097709Z        -    if condition
+2026-10-08T16:54:09.0097881Z        -    	foo
+2026-10-08T16:54:09.0098033Z        -    end
+2026-10-08T16:54:09.0098180Z        +if condition
+2026-10-08T16:54:09.0098329Z        +	foo
+2026-10-08T16:54:09.0098463Z        +end
+2026-10-08T16:54:09.0098771Z      # ./lib/rubocop/rspec/expect_offense.rb:176:in 'RuboCop::RSpec::ExpectOffense#expect_correction'
+2026-10-08T16:54:09.0099286Z      # ./spec/rubocop/cop/layout/indentation_width_spec.rb:2610:in 'block (5 levels) in <top (required)>'
+2026-10-08T16:54:09.0112335Z   3) RuboCop::Cop::Layout::IndentationWidth with Width set to 2 with mixed tabs and spaces when tabs are enforced correctly autocorrects mixed tab and space indentation
+2026-10-08T16:54:09.0113605Z        expected: "    class Test\n      def foo\n    \tbar\n      end\n    end\n"
+2026-10-08T16:54:09.0113996Z             got: "class Test\n  def foo\n\t\tbar\n  end\nend\n"
+2026-10-08T16:54:09.0114964Z        -    class Test
+2026-10-08T16:54:09.0115175Z        -      def foo
+2026-10-08T16:54:09.0115383Z        -    	bar
+2026-10-08T16:54:09.0116013Z        +class Test
+2026-10-08T16:54:09.0116214Z        +  def foo
+2026-10-08T16:54:09.0116411Z        +		bar
+2026-10-08T16:54:09.0116606Z        +  end
+2026-10-08T16:54:09.0132503Z   5) RuboCop::Formatter::JSONFormatter#file_problems keeps a file name that looks like a backreference intact
+2026-10-08T16:54:09.0132982Z      # Windows paths use backslashes as separators
+2026-10-08T16:54:09.0133294Z      # ./spec/rubocop/formatter/json_formatter_spec.rb:89
+2026-10-08T16:54:09.0134913Z      # Symlinks not implemented on Windows
+2026-10-08T16:54:09.0135292Z      # ./spec/rubocop/result_cache_spec.rb:254
+2026-10-08T16:54:09.0136006Z   7) RuboCop::ResultCache cached result that was saved with no command line option when no option is given when a symlink is present in the cache location and symlink attack protection is disabled permits caching and prints no warning
+2026-10-08T16:54:09.0137405Z   8) RuboCop::ResultCache when the file is not a regular file is neither saved nor considered valid
+2026-10-08T16:54:09.0137806Z      # Device files are not stat-able on Windows
+2026-10-08T16:54:09.0138773Z 38167 examples, 0 failures, 8 pending

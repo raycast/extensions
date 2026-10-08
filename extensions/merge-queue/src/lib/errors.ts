@@ -112,6 +112,14 @@ export function describeError(error: unknown): ErrorAdvice {
   }
 }
 
+export function jobErrorMessage(error: unknown): string {
+  const advice = describeError(error);
+  if (advice.kind === "gone" || advice.kind === "not-found") {
+    return "GitHub couldn't find this job. It may have been deleted.";
+  }
+  return advice.kind === "other" ? advice.description : `${advice.title}. ${advice.description}`;
+}
+
 export function logErrorMessage(error: unknown): string {
   const advice = describeError(error);
   if (advice.kind === "gone" || advice.kind === "not-found") {

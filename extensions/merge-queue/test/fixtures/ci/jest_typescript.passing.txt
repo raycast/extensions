@@ -1,0 +1,7 @@
+2026-09-18T13:57:06.3862111Z ##[endgroup]
+2026-09-18T13:57:17.6867064Z shell: /usr/bin/bash -e {0}
+2026-09-18T13:57:35.7867598Z ##[group]Run yarn build
+2026-09-18T13:57:35.7867828Z [36;1myarn build[0m
+2026-09-18T13:57:36.8403891Z  Bundling packages 
+2026-09-18T13:57:41.4153567Z  DONE 
+2026-09-18T13:57:42.4309002Z  Building TypeScript definition files 

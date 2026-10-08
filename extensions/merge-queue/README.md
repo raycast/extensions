@@ -42,7 +42,7 @@ To switch, use the **Repository** section of the dropdown next to the search bar
 
 A queue is detected on the default branch, on a branch named in a ruleset with a merge queue rule, or on the base branch of your queued pull requests. **GitHub CLI Path** is found automatically in `/opt/homebrew/bin`, `/usr/local/bin` or `/usr/bin`; set it in preferences if `gh` lives somewhere else.
 
-The extension reads through `gh`, so it sees exactly what your `gh` account can see. Each refresh is one GraphQL query. Required checks come from the branch's rulesets and branch protection (read access is enough) and are cached for an hour. Job logs are only fetched when you open a failed job, or press `⌘L` on another one. Comparing with a passing run costs one more log download and three small API calls the first time a job fails; the result is cached for six hours per workflow and job.
+The extension reads through `gh`, so it sees exactly what your `gh` account can see. Each refresh is one GraphQL query. Required checks come from the branch's rulesets and branch protection (read access is enough) and are cached for an hour. A job and its log load only for the check you select, or when you press `⌘L` on a job that didn't fail. A running job refreshes every 15 seconds while it's selected. Queues longer than 50 entries and commits with more than 100 checks are read in pages. Comparing with a passing run costs one more log download and three small API calls the first time a job fails; the result is cached for six hours per workflow and job.
 
 ## Shortcuts
 

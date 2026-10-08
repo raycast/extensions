@@ -1,0 +1,28 @@
+2026-10-07T10:57:06.9475915Z env:
+2026-10-07T10:57:06.9476733Z   GOPROXY: https://proxy.golang.org
+2026-10-07T10:57:06.9477679Z   GO111MODULE: on
+2026-10-07T10:57:06.9478439Z   SASS_VERSION: 1.80.3
+2026-10-07T10:57:06.9479778Z   DART_SASS_SHA_LINUX: 7c933edbad0a7d389192c5b79393485c088bd2c4398e32f5754c32af006a9ffd
+2026-10-07T10:57:06.9481663Z   DART_SASS_SHA_MACOS: 79e060b0e131c3bb3c16926bafc371dc33feab122bfa8c01aa337a072097967b
+2026-10-07T10:57:06.9483562Z   DART_SASS_SHA_WINDOWS: 0bc4708b37cd1bac4740e83ac5e3176e66b774f77fd5dd364da5b5cfc9bfb469
+2026-10-07T11:00:57.6495554Z   GOTOOLCHAIN: local
+2026-10-07T11:01:37.4062991Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T11:01:37.4068447Z   TMPDIR: D:\a\_temp
+2026-10-07T11:01:37.4068780Z   HOME: C:\Users\runneradmin
+2026-10-07T11:03:39.9496815Z ##[group]Run mage -v test
+2026-10-07T11:03:39.9497587Z [36;1mmage -v test[0m
+2026-10-07T11:04:54.1464539Z exec: go "clean" "-testcache"
+2026-10-07T11:04:54.1798842Z exec: go "clean" "-i" "./..."
+2026-10-07T11:37:45.9370451Z exec: go "test" "-p" "2" "./resources/kinds" "-tags" "extended,withdeploy"
+2026-10-07T11:37:46.5657206Z ok  	github.com/gohugoio/hugo/resources/kinds	0.020s
+2026-10-07T11:37:47.5790998Z exec: go "test" "-p" "2" "./resources/page" "-tags" "extended,withdeploy"
+2026-10-07T11:38:30.0179583Z ok  	github.com/gohugoio/hugo/resources/page	1.136s
+2026-10-07T11:38:31.0649449Z exec: go "test" "-p" "2" "./resources/page/page_generate" "-tags" "extended,withdeploy"
+2026-10-07T11:38:31.6230121Z ?   	github.com/gohugoio/hugo/resources/page/page_generate	[no test files]
+2026-10-07T11:38:32.5237518Z exec: go "test" "-p" "2" "./resources/page/pagemeta" "-tags" "extended,withdeploy"
+2026-10-07T11:39:08.1784588Z ok  	github.com/gohugoio/hugo/resources/page/pagemeta	0.483s
+2026-10-07T11:39:09.1443620Z exec: go "test" "-p" "2" "./resources/page/siteidentities" "-tags" "extended,withdeploy"
+2026-10-07T11:39:09.3216433Z ?   	github.com/gohugoio/hugo/resources/page/siteidentities	[no test files]
+2026-10-07T11:39:10.2003315Z exec: go "test" "-p" "2" "./resources/postpub" "-tags" "extended,withdeploy"
+2026-10-07T11:39:11.4848155Z ok  	github.com/gohugoio/hugo/resources/postpub	0.062s
+2026-10-07T11:39:12.3782037Z exec: go "test" "-p" "2" "./resources/resource" "-tags" "extended,withdeploy"

@@ -177,8 +177,8 @@ function firstIndexMatching(lines: string[], pattern: RegExp, from: number, to: 
 
 type Region = { failingStep?: string; from: number; end: number };
 
-function failingRegion(lines: string[]): Region {
-  const exitIndex = lastIndexMatching(lines, EXIT_ERROR);
+function failingRegion(lines: string[], stepEnd = -1): Region {
+  const exitIndex = stepEnd >= 0 ? stepEnd : lastIndexMatching(lines, EXIT_ERROR);
   const failureEnd = exitIndex >= 0 ? exitIndex : lastIndexMatching(lines, /##\[error\]/);
   const end = failureEnd >= 0 ? failureEnd : lines.length;
   const stepIndex = lastIndexMatching(lines, STEP_START, end);
@@ -484,7 +484,7 @@ function collapsedExcerpt(
   return { excerpt, excerptFocus: Math.min(focus - start, excerpt.length) };
 }
 
-function stepStartIndex(stamped: string[], lines: string[], step: StepRef, before: number): number {
+function knownStepStart(stamped: string[], lines: string[], step: StepRef, before: number): number {
   const condition = `##[debug]Evaluating condition for step: '${step.name}'`;
   for (let index = before; index >= 0; index--) {
     if (lines[index].startsWith(condition)) {
@@ -500,7 +500,17 @@ function stepStartIndex(stamped: string[], lines: string[], step: StepRef, befor
       }
     }
   }
-  return lastIndexMatching(lines, STEP_START, before + 1);
+  return -1;
+}
+
+function stepStartIndex(stamped: string[], lines: string[], step: StepRef, before: number): number {
+  const start = knownStepStart(stamped, lines, step, before);
+  return start >= 0 ? start : lastIndexMatching(lines, STEP_START, before + 1);
+}
+
+function stepEndIndex(stamped: string[], lines: string[], step: StepRef | undefined): number {
+  const start = step ? knownStepStart(stamped, lines, step, lines.length - 1) : -1;
+  return start >= 0 ? firstIndexMatching(lines, EXIT_ERROR, start, lines.length) : -1;
 }
 
 function lineInStep(stamped: string[], lines: string[], step: StepRef, target: number): number | undefined {
@@ -540,7 +550,7 @@ function failureTarget(lines: string[], region: Region, reportIndex: number, can
   return region.end < lines.length ? region.end : -1;
 }
 
-function analyse(raw: string, passing?: ReadonlySet<string>) {
+function analyse(raw: string, passing?: ReadonlySet<string>, step?: StepRef) {
   const { stamped, lines } = splitLog(raw);
   const knownCache = new Map<number, boolean>();
   const isKnown = (index: number) => {
@@ -554,19 +564,19 @@ function analyse(raw: string, passing?: ReadonlySet<string>) {
     }
     return known;
   };
-  const region = failingRegion(lines);
+  const region = failingRegion(lines, stepEndIndex(stamped, lines, step));
   const reportIndex = reportStart(lines, region, isKnown);
   const candidates = errorCandidates(lines, region, isKnown, Boolean(passing), reportIndex);
   return { stamped, lines, region, candidates, reportIndex, isKnown };
 }
 
 export function failureLineInStep(raw: string, step: StepRef, passing?: ReadonlySet<string>): number | undefined {
-  const { stamped, lines, region, candidates, reportIndex } = analyse(raw, passing);
+  const { stamped, lines, region, candidates, reportIndex } = analyse(raw, passing, step);
   return lineInStep(stamped, lines, step, failureTarget(lines, region, reportIndex, candidates.indices));
 }
 
 export function summarizeLog(raw: string, options: SummarizeOptions = {}): LogSummary {
-  const { stamped, lines, region, candidates, reportIndex, isKnown } = analyse(raw, options.passing);
+  const { stamped, lines, region, candidates, reportIndex, isKnown } = analyse(raw, options.passing, options.step);
 
   const errors = runnerErrors(lines);
   const found: FoundError[] = [];

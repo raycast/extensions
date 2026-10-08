@@ -1,0 +1,99 @@
+2026-10-08T14:08:33.2699609Z ##[group]Run ./gradlew build
+2026-10-08T14:08:33.2699903Z [36;1m./gradlew build[0m
+2026-10-08T14:08:33.2716042Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-08T14:08:33.2716448Z env:
+2026-10-08T14:08:33.2716755Z   JAVA_HOME: C:\hostedtoolcache\windows\Java_Liberica_jdk\25.0.4-9\x64
+2026-10-08T14:08:33.2717242Z   JAVA_HOME_27_X64: C:\hostedtoolcache\windows\Java_Liberica_jdk\27.0.0-36\x64
+2026-10-08T14:08:33.2717711Z   JAVA_HOME_25_X64: C:\hostedtoolcache\windows\Java_Liberica_jdk\25.0.4-9\x64
+2026-10-08T14:08:33.2718084Z   MAVEN_ARGS: -ntp
+2026-10-08T14:08:33.2718344Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-08T14:08:33.2718694Z   GRADLE_USER_HOME: D:\a\.gradle
+2026-10-08T14:08:33.2718978Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-08T14:08:33.2740486Z   DEVELOCITY_ACCESS_KEY: ***
+2026-10-08T14:08:33.2761533Z   GRADLE_ENTERPRISE_ACCESS_KEY: ***
+2026-10-08T14:13:34.7291873Z > Task :test-support:spring-boot-test-support:classes UP-TO-DATE
+2026-10-08T14:13:34.7293454Z > Task :test-support:spring-boot-test-support:extractLegalResources
+2026-10-08T14:13:34.7294316Z > Task :test-support:spring-boot-test-support:jar
+2026-10-08T14:13:34.7294991Z > Task :build-plugin:spring-boot-maven-plugin:syncHelpMojoInputs
+2026-10-08T14:13:35.3262035Z > Task :platform:spring-boot-dependencies:createResolvedBom
+2026-10-08T14:13:35.5212825Z > Task :buildpack:spring-boot-buildpack-platform:javadoc FROM-CACHE
+2026-10-08T14:13:35.7329943Z > Task :buildpack:spring-boot-buildpack-platform:javadocJar
+2026-10-08T14:13:35.9441183Z > Task :buildpack:spring-boot-buildpack-platform:sourcesJar
+2026-10-08T14:13:36.0490852Z > Task :buildpack:spring-boot-buildpack-platform:generateMetadataFileForMavenPublication
+2026-10-08T14:13:36.0501560Z > Task :buildpack:spring-boot-buildpack-platform:generatePomFileForMavenPublication
+2026-10-08T14:13:36.0511664Z 
+2026-10-08T14:13:36.0537917Z > Task :build-plugin:spring-boot-antlib:integrationTest
+2026-10-08T14:13:36.0561187Z Trying to override old definition of task fail
+2026-10-08T14:13:36.0684367Z Trying to override old definition of datatype resources
+2026-10-08T14:13:36.0803539Z Trying to override old definition of task buildnumber
+2026-10-08T14:13:36.2138103Z 
+2026-10-08T14:13:36.2264204Z > Task :buildpack:spring-boot-buildpack-platform:publishMavenPublicationToProjectRepository
+2026-10-08T14:13:36.6179088Z > Task :configuration-metadata:spring-boot-configuration-processor:compileJava FROM-CACHE
+2026-10-08T14:13:36.6398876Z > Task :configuration-metadata:spring-boot-configuration-processor:processResources
+2026-10-08T14:13:36.6423435Z > Task :configuration-metadata:spring-boot-configuration-processor:classes
+2026-10-08T14:13:36.6432699Z > Task :configuration-metadata:spring-boot-configuration-processor:extractLegalResources
+2026-10-08T14:13:36.7591082Z > Task :configuration-metadata:spring-boot-configuration-processor:jar
+2026-10-08T14:13:36.7874003Z > Task :core:spring-boot:checkKotlinGradlePluginConfigurationErrors SKIPPED
+2026-10-08T14:13:36.9209423Z > Task :core:spring-boot:syncJavaTemplates
+2026-10-08T14:13:38.6120789Z > Task :build-plugin:spring-boot-gradle-plugin:nodeSetup
+2026-10-08T14:13:39.7496927Z > Task :core:spring-boot:compileKotlin FROM-CACHE
+2026-10-08T14:13:39.8669354Z > Task :core:spring-boot:processResources
+2026-10-08T14:15:10.1247063Z > Task :module:spring-boot-micrometer-observation:processResources
+2026-10-08T14:15:12.9457227Z > Task :module:spring-boot-micrometer-observation:compileJava
+2026-10-08T14:15:12.9469760Z > Task :module:spring-boot-opentelemetry:processResources
+2026-10-08T14:15:14.8369477Z > Task :module:spring-boot-web-server:compileJava
+2026-10-08T14:15:16.0133251Z > Task :module:spring-boot-opentelemetry:compileJava
+2026-10-08T14:15:16.0138070Z > Task :module:spring-boot-persistence:processResources
+2026-10-08T14:15:16.4181125Z node:events:505
+2026-10-08T14:15:16.4181469Z 
+2026-10-08T14:15:16.4248524Z     throw er; // Unhandled 'error' event
+2026-10-08T14:15:16.4255742Z > Task :build-plugin:spring-boot-gradle-plugin:antora
+2026-10-08T14:15:16.4256549Z     ^
+2026-10-08T14:15:16.4262624Z 
+2026-10-08T14:15:16.4450862Z Error: unexpected EOF
+2026-10-08T14:15:16.4570878Z     at [90mD:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\index.js:912:23
+2026-10-08T14:15:16.4635482Z     at [90mD:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\fd-slicer.js:28:7
+2026-10-08T14:15:16.4649456Z [90m    at FSReqCallback.wrapper [as oncomplete] (node:fs:730:5)[39m
+2026-10-08T14:15:16.4663415Z Emitted 'error' event on ZipFile instance at:
+2026-10-08T14:15:16.4689719Z     at emitError [90m(D:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\index.js:275:8[90m)[39m
+2026-10-08T14:15:16.4706357Z     at emitErrorAndAutoClose [90m(D:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\index.js:270:3[90m)[39m
+2026-10-08T14:15:16.4718690Z     at [90mD:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\index.js:296:21
+2026-10-08T14:15:16.4837150Z     at [90mD:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\index.js:912:14
+2026-10-08T14:15:16.5068171Z     at [90mD:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodeproject\[39mnode_modules\[4myauzl[24m\fd-slicer.js:28:7
+2026-10-08T14:15:16.5176819Z [90m    at FSReqCallback.wrapper [as oncomplete] (node:fs:730:5)[39m
+2026-10-08T14:15:16.5220911Z 
+2026-10-08T14:15:16.5220965Z 
+2026-10-08T14:15:16.5334487Z Node.js v24.21.0
+2026-10-08T14:15:16.5335159Z > Task :build-plugin:spring-boot-gradle-plugin:antora FAILED
+2026-10-08T14:15:17.9263283Z > Task :module:spring-boot-persistence:compileJava
+2026-10-08T14:15:20.5121220Z > Task :module:spring-boot-actuator:compileJava
+2026-10-08T14:15:20.9223335Z > Task :build-plugin:spring-boot-maven-plugin:antora
+2026-10-08T14:15:21.0121463Z gradle/actions: Writing build results to D:\a\_temp\.gradle-actions\build-results\build-1791468518433.json
+2026-10-08T14:15:21.0122463Z 
+2026-10-08T14:15:21.0122954Z [Incubating] Problems report is available at: file:///D:/a/spring-boot/spring-boot/build/reports/problems/problems-report.html
+2026-10-08T14:15:21.0123591Z 
+2026-10-08T14:15:21.0123869Z FAILURE: Build failed with an exception.
+2026-10-08T14:15:21.0124239Z 
+2026-10-08T14:15:21.0124769Z * What went wrong:
+2026-10-08T14:15:21.0126456Z Execution failed for task ':build-plugin:spring-boot-gradle-plugin:antora' (registered by plugin class 'org.antora.gradle.AntoraPlugin').
+2026-10-08T14:15:21.0128453Z > Process 'command 'D:\a\spring-boot\spring-boot\build-plugin\spring-boot-gradle-plugin\build\.gradle\nodejs\node-v24.21.0-win-x64\npx.cmd'' finished with non-zero exit value 1
+2026-10-08T14:15:21.0130000Z 
+2026-10-08T14:15:21.0130169Z * Try:
+2026-10-08T14:15:21.0130600Z > Run with --stacktrace option to get the stack trace.
+2026-10-08T14:15:21.0131194Z > Run with --info or --debug option to get more log output.
+2026-10-08T14:15:21.0131715Z > Get more help at https://help.gradle.org.
+2026-10-08T14:15:21.0131971Z 
+2026-10-08T14:15:21.0131984Z 
+2026-10-08T14:15:21.0132323Z Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+2026-10-08T14:15:21.0132749Z 
+2026-10-08T14:15:21.0133271Z You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+2026-10-08T14:15:21.0133845Z 
+2026-10-08T14:15:21.0134404Z For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+2026-10-08T14:15:21.0135183Z BUILD FAILED in 6m 47s
+2026-10-08T14:15:21.0135587Z 180 actionable tasks: 155 executed, 25 from cache
+2026-10-08T14:15:21.3119962Z 
+2026-10-08T14:15:21.3120655Z Publishing Build Scan to Develocity...
+2026-10-08T14:15:21.4131349Z gradle/actions: Writing build results to D:\a\_temp\.gradle-actions\build-scans\build-1791468518433.json
+2026-10-08T14:15:21.8131191Z https://ge.spring.io/s/ujyzybhicew54
+2026-10-08T14:15:21.8132393Z 
+2026-10-08T14:15:22.1275759Z ##[error]Process completed with exit code 1.

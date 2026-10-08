@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { excerptAround, findLocation, fingerprint, logFingerprints, summarizeLog } from "../src/lib/logs";
 import { failureErrors } from "../src/lib/report";
 
-const FIXTURES = join(process.cwd(), "test/fixtures/logs");
+const FIXTURES = join(process.cwd(), "test/fixtures/ci");
 
 function fixture(name: string) {
-  const raw = readFileSync(join(FIXTURES, `${name}.log`), "utf8");
-  const passing = new Set(logFingerprints(readFileSync(join(FIXTURES, `${name}.passing.log`), "utf8")));
+  const raw = readFileSync(join(FIXTURES, `${name}.txt`), "utf8");
+  const passing = new Set(logFingerprints(readFileSync(join(FIXTURES, `${name}.passing.txt`), "utf8")));
   return { raw, alone: summarizeLog(raw), compared: summarizeLog(raw, { passing }) };
 }
 

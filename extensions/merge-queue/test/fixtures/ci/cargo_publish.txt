@@ -1,0 +1,59 @@
+2026-10-08T17:38:59.3828531Z ##[group]Run cargo publish --workspace --dry-run
+2026-10-08T17:38:59.3829309Z [36;1mcargo publish --workspace --dry-run[0m
+2026-10-08T17:38:59.3847375Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T17:38:59.3848213Z env:
+2026-10-08T17:38:59.3848449Z   UV_LOCKED: 1
+2026-10-08T17:38:59.3848707Z   CARGO_INCREMENTAL: 0
+2026-10-08T17:38:59.3848933Z   CARGO_NET_RETRY: 10
+2026-10-08T17:38:59.3849160Z   CARGO_PROFILE_DEV_LTO: false
+2026-10-08T17:38:59.3849402Z   CARGO_PROFILE_DEV_OPT_LEVEL: 0
+2026-10-08T17:38:59.3849637Z   CARGO_TERM_COLOR: always
+2026-10-08T17:38:59.3849890Z   HAWK_VERSION: 0.1.15
+2026-10-08T17:38:59.3850105Z   RUSTUP_MAX_RETRIES: 10
+2026-10-08T17:38:59.3850327Z   PACKAGE_NAME: ruff
+2026-10-08T17:41:49.3830512Z [1m[92m   Compiling[0m ruff_python_literal v0.0.16
+2026-10-08T17:41:49.3830983Z [1m[92m   Compiling[0m ruff_python_edits v0.0.16
+2026-10-08T17:41:50.0502178Z [1m[92m   Compiling[0m ruff_db v0.0.16
+2026-10-08T17:41:50.0503980Z [1m[92m   Compiling[0m ruff_python_codegen v0.0.16
+2026-10-08T17:41:50.1644692Z [1m[92m   Compiling[0m ruff_python_importer v0.0.16
+2026-10-08T17:41:50.9188571Z [1m[92m   Compiling[0m ruff_ranged_value v0.0.16
+2026-10-08T17:41:50.9190146Z [1m[92m   Compiling[0m ty_vendored v0.0.16
+2026-10-08T17:41:50.9190726Z [1m[92m   Compiling[0m ty_site_packages v0.0.16
+2026-10-08T17:41:50.9191122Z [1m[92m   Compiling[0m ty_module_resolver v0.0.16
+2026-10-08T17:41:50.9941807Z [1m[92m   Compiling[0m ty_combine v0.0.16
+2026-10-08T17:41:51.7683838Z [1m[92m   Compiling[0m ty_python_core v0.0.16
+2026-10-08T17:41:53.5020135Z [1m[92m   Compiling[0m ty_python_semantic v0.0.16 (/home/runner/work/ruff/ruff/target/package/ty_python_semantic-0.0.16)
+2026-10-08T17:41:59.6195507Z [1m[91merror[E0277][0m[1m: the trait bound `ruff_python_ast::name::Name: db::Db` is not satisfied[0m
+2026-10-08T17:41:59.6196981Z    [1m[94m--> [0msrc/types/overrides.rs:887:48
+2026-10-08T17:41:59.6197455Z     [1m[94m|[0m
+2026-10-08T17:41:59.6197859Z [1m[94m887[0m [1m[94m|[0m                 && !is_constructor_like_method(&member.name)
+2026-10-08T17:41:59.6198662Z     [1m[94m|[0m                                                [1m[91m^^^^^^^^^^^^[0m [1m[91mthe trait `db::Db` is not implemented for `ruff_python_ast::name::Name`[0m
+2026-10-08T17:41:59.6199182Z     [1m[94m|[0m
+2026-10-08T17:41:59.6199625Z [1m[96mhelp[0m: this trait has no implementations, consider adding one
+2026-10-08T17:41:59.6200044Z    [1m[94m--> [0msrc/db.rs:10:1
+2026-10-08T17:41:59.6200396Z     [1m[94m|[0m
+2026-10-08T17:41:59.6200762Z [1m[94m 10[0m [1m[94m|[0m pub trait Db: PythonCoreDb {
+2026-10-08T17:41:59.6201155Z     [1m[94m|[0m [1m[96m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+2026-10-08T17:41:59.6201731Z     [1m[94m= [0m[1mnote[0m: required for the cast from `&ruff_python_ast::name::Name` to `&(dyn db::Db + 'static)`
+2026-10-08T17:41:59.6202137Z 
+2026-10-08T17:41:59.6202437Z [1m[91merror[E0061][0m[1m: this function takes 3 arguments but 1 argument was supplied[0m
+2026-10-08T17:41:59.6203150Z     [1m[94m--> [0msrc/types/overrides.rs:887:21
+2026-10-08T17:41:59.6203559Z      [1m[94m|[0m
+2026-10-08T17:41:59.6203941Z [1m[94m 887[0m [1m[94m|[0m                 && !is_constructor_like_method(&member.name)
+2026-10-08T17:41:59.6204698Z      [1m[94m|[0m                     [1m[91m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m[1m[94m--------------[0m [1m[94mtwo arguments of type `ClassType<'_>` and `&str` are missing[0m
+2026-10-08T17:41:59.6205211Z      [1m[94m|[0m
+2026-10-08T17:41:59.6205613Z [1m[92mnote[0m: function defined here
+2026-10-08T17:41:59.6205981Z     [1m[94m--> [0msrc/types/overrides.rs:1512:4
+2026-10-08T17:41:59.6206371Z      [1m[94m|[0m
+2026-10-08T17:41:59.6206854Z [1m[94m1512[0m [1m[94m|[0m fn is_constructor_like_method<'db>(db: &'db dyn Db, class: ClassType<'db>, name: &str) -> bool {
+2026-10-08T17:41:59.6207534Z      [1m[94m|[0m    [1m[92m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m                       [1m[94m---------------------[0m  [1m[94m----------[0m
+2026-10-08T17:41:59.6208006Z [1m[96mhelp[0m: provide the arguments
+2026-10-08T17:41:59.6208381Z      [1m[94m|[0m
+2026-10-08T17:41:59.6208875Z [1m[94m 887[0m [1m[94m| [0m                && !is_constructor_like_method(&member.name[92m, /* ClassType<'_> */, /* &str */[0m)
+2026-10-08T17:41:59.6209492Z      [1m[94m|[0m                                                            [92m+++++++++++++++++++++++++++++++++[0m
+2026-10-08T17:41:59.6209782Z 
+2026-10-08T17:42:06.8379595Z [1mSome errors have detailed explanations: E0061, E0277.[0m
+2026-10-08T17:42:06.8381323Z [1mFor more information about an error, try `rustc --explain E0061`.[0m
+2026-10-08T17:42:06.8616069Z [1m[91merror[0m: could not compile `ty_python_semantic` (lib) due to 2 previous errors
+2026-10-08T17:42:06.8787334Z [1m[91merror[0m: failed to verify package tarball
+2026-10-08T17:42:06.8851189Z ##[error]Process completed with exit code 101.
