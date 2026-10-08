@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { parseDate, formatDateKey } from "./utils";
 import { jiraRequest } from "./requests";
 import { issuesValidator, paginationValidator, projectsValidator, worklogsValidator } from "./validators";
-import { Preferences, Issue, Project, Worklog, WorklogEntry } from "./types";
+import { Issue, Project, Worklog, WorklogEntry } from "./types";
 const getApiPath = (path: string) =>
   `/rest/api/${getPreferenceValues<Preferences>().isJiraCloud === "cloud" ? "3" : "2"}${path}`;
 function nextOffset(body: { startAt: number; total: number }, count: number): string | undefined {

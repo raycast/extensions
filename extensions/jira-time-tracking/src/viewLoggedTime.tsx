@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -15,7 +15,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { getWorklogs, updateWorklog, postTimeLog, deleteWorklog } from "./controllers";
-import { DailyWorklog, WorklogEntry, Preferences } from "./types";
+import { DailyWorklog, WorklogEntry } from "./types";
 import {
   parseTimeToSeconds,
   createTimeLogSuccessMessage,
@@ -205,10 +205,9 @@ function AddTimeToIssueForm({
   );
 }
 
-// Cache complete results by account and month.
-const worklogCache = new Map<string, WorklogEntry[]>();
-
 export default function ViewLoggedTime() {
+  // Cache only during this view's lifetime; reopening fetches external changes.
+  const worklogCache = useRef(new Map<string, WorklogEntry[]>()).current;
   const preferences = getPreferenceValues<Preferences>();
   const configuredThreshold = Number(preferences.dailyHoursThreshold || "7");
   const dailyHoursThreshold = Number.isFinite(configuredThreshold) && configuredThreshold > 0 ? configuredThreshold : 7;
@@ -251,14 +250,7 @@ export default function ViewLoggedTime() {
   };
 
   // Format time duration
-  const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    if (minutes === 0) {
-      return `${hours}h`;
-    }
-    return `${hours}h ${minutes}m`;
-  };
+  const formatDuration = formatSecondsToTimeString;
 
   // Get cache key for a month
   const getMonthCacheKey = (date: Date): string => {
@@ -414,7 +406,12 @@ export default function ViewLoggedTime() {
           icon={Icon.Clock}
           actions={
             <ActionPanel>
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refreshWorklogs} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={refreshWorklogs}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
               <Action title="Previous Month" icon={Icon.ArrowLeft} onAction={goToPreviousMonth} />
               <Action title="Next Month" icon={Icon.ArrowRight} onAction={goToNextMonth} />
               <Action title="Current Month" icon={Icon.Calendar} onAction={goToCurrentMonth} />
@@ -520,6 +517,12 @@ export default function ViewLoggedTime() {
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     <ActionPanel.Section title="Navigation">
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        onAction={refreshWorklogs}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                      />
                       <Action title="Previous Month" icon={Icon.ArrowLeft} onAction={goToPreviousMonth} />
                       <Action title="Next Month" icon={Icon.ArrowRight} onAction={goToNextMonth} />
                       <Action title="Current Month" icon={Icon.Calendar} onAction={goToCurrentMonth} />
@@ -543,6 +546,12 @@ export default function ViewLoggedTime() {
                         icon={Icon.Plus}
                         target={<Command initialDate={day.date} onSuccess={refreshWorklogs} />}
                       />
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        onAction={refreshWorklogs}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                      />
                       <Action title="Previous Month" icon={Icon.ArrowLeft} onAction={goToPreviousMonth} />
                       <Action title="Next Month" icon={Icon.ArrowRight} onAction={goToNextMonth} />
                       <Action title="Current Month" icon={Icon.Calendar} onAction={goToCurrentMonth} />
@@ -561,6 +570,12 @@ export default function ViewLoggedTime() {
             icon={{ source: Icon.BarChart, tintColor: Color.Green }}
             actions={
               <ActionPanel>
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={refreshWorklogs}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                />
                 <Action title="Previous Month" icon={Icon.ArrowLeft} onAction={goToPreviousMonth} />
                 <Action title="Next Month" icon={Icon.ArrowRight} onAction={goToNextMonth} />
                 <Action title="Current Month" icon={Icon.Calendar} onAction={goToCurrentMonth} />

@@ -1,12 +1,3 @@
-export type Preferences = {
-  isJiraCloud: "cloud" | "server";
-  domain: string;
-  token: string;
-  username: string;
-  customJQL?: string;
-  defaultProject?: string;
-  dailyHoursThreshold?: string;
-};
 export type Project = { name: string; key: string };
 export type Issue = { key: string; fields: { summary: string; project?: Project } };
 export type PaginationBody = { startAt: number; maxResults: number; total: number };

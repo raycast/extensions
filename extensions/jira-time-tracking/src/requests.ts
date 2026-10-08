@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { createJiraUrl } from "./utils";
 import { handleJiraResponseError } from "./handlers";
-import { Preferences } from "./types";
 import fetch from "node-fetch";
 export const jiraRequest = async (
   endpoint: string,

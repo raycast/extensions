@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog, loadAllPages } from "./controllers";
 import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
-import { Project, Issue, Preferences } from "./types";
+import { Project, Issue } from "./types";
 
 type LogTimeProps = {
   initialDate?: Date;

@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, WorklogComment, WorklogCommentNode, WorklogEntry, DailyWorklog } from "./types";
+import { WorklogComment, WorklogCommentNode, WorklogEntry, DailyWorklog } from "./types";
 
 export const parseTimeToSeconds = (input: string) => {
   const regex = /^(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?$/;

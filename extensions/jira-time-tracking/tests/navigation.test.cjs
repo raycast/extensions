@@ -72,7 +72,14 @@ function fixtureUI(overrides = {}) {
     Icon: new Proxy({}, { get: (_, key) => key }),
     Color: {},
     Alert: { ActionStyle: {} },
-    Keyboard: { Shortcut: { Common: { Edit: { modifiers: ["cmd"], key: "e" } } } },
+    Keyboard: {
+      Shortcut: {
+        Common: {
+          Edit: { modifiers: ["cmd"], key: "e" },
+          Refresh: { modifiers: ["cmd"], key: "r" },
+        },
+      },
+    },
     Toast: { Style: {} },
     showToast: async () => {},
     confirmAlert: async () => true,
@@ -232,7 +239,7 @@ test("empty and partially logged weekdays open a form with the selected date", a
     }
     const empty = renderer.root
       .findAllByType("item")
-      .find((item) => item.props.title === "Log Time for This Day" && item.props.subtitle.startsWith("0h"));
+      .find((item) => item.props.title === "Log Time for This Day" && item.props.subtitle.startsWith("0s"));
     assert.ok(elements(empty.props.actions).some((node) => node.props.title === "Open Log Time" && node.props.target));
   } finally {
     await act(async () => renderer.unmount());
@@ -278,5 +285,104 @@ test("editing only time sends no replacement for the original rich-text comment"
   } finally {
     if (form) await act(async () => form.unmount());
     await act(async () => renderer.unmount());
+  }
+});
+
+test("Refresh is available on every normal row and reloads externally changed cached months", async () => {
+  const currentMonth = new Date().getMonth();
+  let changedExternally = false;
+  let requests = 0;
+  const ui = fixtureUI({
+    getWorklogs: async (start) => {
+      requests++;
+      const date = new Date(start);
+      date.setHours(12);
+      while (date.getDay() === 0 || date.getDay() === 6) date.setDate(date.getDate() + 1);
+      return [
+        {
+          issue: { key: "A-1", summary: "Fixture", project: { key: "A", name: "A" } },
+          worklog: {
+            id: "one",
+            started: date.toISOString(),
+            timeSpentSeconds: 3600 * ((start.getMonth() === currentMonth ? 1 : 2) + (changedExternally ? 2 : 0)),
+            author: { displayName: "Fixture" },
+          },
+        },
+      ];
+    },
+  });
+  const renderer = await mount(ui.load("viewLoggedTime").default);
+  const summary = () => renderer.root.findAllByType("item").find((node) => node.props.title === "Total for Month");
+  const run = async (item, title) => {
+    const selected = elements(item.props.actions).find((node) => node.props.title === title);
+    assert.ok(selected, `${title} is available`);
+    await act(async () => selected.props.onAction());
+  };
+  try {
+    for (const row of renderer.root.findAllByType("item")) {
+      const refresh = elements(row.props.actions).find((node) => node.props.title === "Refresh");
+      assert.ok(refresh, `Refresh is available on ${row.props.title}`);
+      assert.deepEqual(refresh.props.shortcut, { modifiers: ["cmd"], key: "r" });
+    }
+    assert.equal(summary().props.subtitle, "1h");
+    await run(summary(), "Previous Month");
+    assert.equal(summary().props.subtitle, "2h");
+    changedExternally = true;
+    await run(summary(), "Next Month");
+    assert.equal(summary().props.subtitle, "1h");
+    assert.equal(requests, 2, "returning to a cached month avoids a request");
+    const worklog = renderer.root.findAllByType("item").find((node) => node.props.title === "A-1");
+    await run(worklog, "Refresh");
+    assert.equal(summary().props.subtitle, "3h");
+    assert.equal(requests, 3, "Refresh fetches external changes despite a populated cache");
+    await run(summary(), "Previous Month");
+    assert.equal(summary().props.subtitle, "4h");
+    assert.equal(requests, 4, "Refresh also invalidates other cached months");
+  } finally {
+    await act(async () => renderer.unmount());
+  }
+});
+
+test("reopening the view fetches external changes and preserves seconds in every total", async () => {
+  let seconds = 30;
+  let requests = 0;
+  const ui = fixtureUI({
+    getWorklogs: async (start) => {
+      requests++;
+      return [
+        {
+          issue: { key: "A-1", summary: "Fixture", project: { key: "A", name: "A" } },
+          worklog: {
+            id: "one",
+            started: start.toISOString(),
+            timeSpentSeconds: seconds,
+            author: { displayName: "Fixture" },
+          },
+        },
+      ];
+    },
+  });
+  const Component = ui.load("viewLoggedTime").default;
+  const first = await mount(Component);
+  try {
+    const item = first.root.findAllByType("item").find((node) => node.props.title === "A-1");
+    assert.equal(item.props.accessories[0].text, "30s");
+    const day = first.root
+      .findAllByType("section")
+      .find((node) => node.findAllByType("item").some((row) => row.props.title === "A-1"));
+    assert.equal(day.props.subtitle, "30s");
+    const total = first.root.findAllByType("item").find((node) => node.props.title === "Total for Month");
+    assert.equal(total.props.subtitle, "30s");
+  } finally {
+    await act(async () => first.unmount());
+  }
+  seconds = 3630;
+  const reopened = await mount(Component);
+  try {
+    const total = reopened.root.findAllByType("item").find((node) => node.props.title === "Total for Month");
+    assert.equal(total.props.subtitle, "1h 30s");
+    assert.equal(requests, 2);
+  } finally {
+    await act(async () => reopened.unmount());
   }
 });
