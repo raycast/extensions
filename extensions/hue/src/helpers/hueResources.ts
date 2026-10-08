@@ -49,65 +49,45 @@ export function getMiredFromLight({ color_temperature, color }: Light): number {
   return color_temperature.mirek ?? (color && xyToMired(color.xy)) ?? (mirek_minimum + mirek_maximum) / 2;
 }
 
-export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
-  getLightsFromGroup(lights, group)
-    .map(getColorFromLight)
-    .sort((a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"));
+// Like the Hue app, palettes have one entry per color, not per light. Colors closer than ΔE 5 count as one, so lights a
+// few mirek or percent apart do too, while 2200K and 2700K, or 100% and 50% brightness, stay apart.
+const distinctColors = (colors: string[]) =>
+  colors.reduce<string[]>(
+    (kept, color) => (kept.some((k) => chroma.deltaE(k, color) < 5) ? kept : [...kept, color]),
+    [],
+  );
 
-export function getColorsFromScene(scene: Scene): Palette {
-  // Try each color source in priority order
-  const colorExtractors = [
-    // 1. Scene palette colors
-    () => {
-      const colors = scene.palette?.color;
-      if (!colors || colors.length === 0) return null;
-      const uniqueXY = new Set(colors.map((c) => c.color.xy));
-      return colors
-        .filter((c) => uniqueXY.has(c.color.xy))
-        .map((c) => xyToRgbHexString(c.color.xy, c.dimming.brightness));
-    },
-    // 2. Action colors
-    () => {
-      const actions = scene.actions?.filter((a) => a.action.color);
-      if (!actions || actions.length === 0) return null;
-      return actions.map((a) => {
-        if (!a.action.color?.xy) throw new Error("action.action.color.xy is undefined");
-        return xyToRgbHexString(a.action.color.xy, a.action.dimming?.brightness);
-      });
-    },
-    // 3. Scene palette color temperatures
-    () => {
-      const temps = scene.palette?.color_temperature;
-      if (!temps || temps.length === 0) return null;
-      return temps.map((ct) => miredToHexString(ct.color_temperature.mirek, ct.dimming.brightness));
-    },
-    // 4. Action color temperatures
-    () => {
-      const actions = scene.actions?.filter((a) => a.action.color_temperature);
-      if (!actions || actions.length === 0) return null;
-      return actions.map((a) => {
-        if (!a.action.color_temperature?.mirek) throw new Error("action.action.color_temperature.mirek is undefined");
-        return miredToHexString(a.action.color_temperature.mirek, a.action.dimming?.brightness);
-      });
-    },
-    // 5. Scene palette dimming
-    () => {
-      const dimmings = scene.palette?.dimming;
-      if (!dimmings || dimmings.length === 0) return null;
-      return dimmings.map((d) => miredToHexString(MIRED_DEFAULT, d.brightness));
-    },
-    // 6. Action dimming
-    () => {
-      const actions = scene.actions?.filter((a) => a.action.dimming);
-      if (!actions || actions.length === 0) return null;
-      return actions.map((a) => miredToHexString(MIRED_DEFAULT, a.action.dimming?.brightness));
-    },
+export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
+  distinctColors(getLightsFromGroup(lights, group).map(getColorFromLight)).sort(
+    (a, b) => chroma(b).get("hsl.h") - chroma(a).get("hsl.h"),
+  );
+
+export function getColorsFromScene({ palette, actions }: Scene): Palette {
+  // Color sources in priority order
+  const sources = [
+    () => palette?.color.map(({ color, dimming }) => xyToRgbHexString(color.xy, dimming.brightness)),
+    () =>
+      actions.flatMap(({ action }) =>
+        action.color ? [xyToRgbHexString(action.color.xy, action.dimming?.brightness)] : [],
+      ),
+    () =>
+      palette?.color_temperature.map(({ color_temperature, dimming }) =>
+        miredToHexString(color_temperature.mirek, dimming.brightness),
+      ),
+    () =>
+      actions.flatMap(({ action }) =>
+        action.color_temperature ? [miredToHexString(action.color_temperature.mirek, action.dimming?.brightness)] : [],
+      ),
+    () => palette?.dimming.map(({ brightness }) => miredToHexString(MIRED_DEFAULT, brightness)),
+    () =>
+      actions.flatMap(({ action }) =>
+        action.dimming ? [miredToHexString(MIRED_DEFAULT, action.dimming.brightness)] : [],
+      ),
   ];
 
-  for (const extractor of colorExtractors) {
-    const colors = extractor();
-    if (colors && colors.length > 0) return colors;
+  for (const source of sources) {
+    const colors = distinctColors(source() ?? []);
+    if (colors.length > 0) return colors;
   }
-
   return [];
 }
