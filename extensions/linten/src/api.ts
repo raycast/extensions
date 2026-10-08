@@ -261,30 +261,27 @@ export async function synthesizeCompanion(input: {
 }
 
 export function getBadgeUrl(domain: string): string {
-  const cleanDomain =
-    domain
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "")
-      .trim() || "acme.com";
+  const cleanDomain = domain
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
   return `${LINTEN_CLOUD_BASE}/badge?domain=${encodeURIComponent(cleanDomain)}`;
 }
 
 export function getBadgeMarkdown(domain: string): string {
-  const cleanDomain =
-    domain
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "")
-      .trim() || "acme.com";
+  const cleanDomain = domain
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
   const badgeUrl = getBadgeUrl(cleanDomain);
   return `[![llms.txt](${badgeUrl})](${LINTEN_CLOUD_BASE})`;
 }
 
 export function getBadgeHtml(domain: string): string {
-  const cleanDomain =
-    domain
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "")
-      .trim() || "acme.com";
+  const cleanDomain = domain
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
   const badgeUrl = getBadgeUrl(cleanDomain);
   return `<a href="${LINTEN_CLOUD_BASE}"><img src="${badgeUrl}" alt="llms.txt" /></a>`;
 }
@@ -434,11 +431,14 @@ export interface GenerateTemplateResult {
 export async function generateTemplate(
   domain: string,
 ): Promise<GenerateTemplateResult> {
-  const cleanDomain =
-    domain
-      .trim()
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "") || "acme.com";
+  const cleanDomain = domain
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
+  if (!cleanDomain) {
+    throw new Error("Please enter a valid domain to generate a template.");
+  }
   const url = `${LINTEN_CLOUD_BASE}/api/v1/generate?url=${encodeURIComponent(cleanDomain)}&source=raycast`;
 
   const res = await fetch(url, {

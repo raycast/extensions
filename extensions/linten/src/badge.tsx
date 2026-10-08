@@ -17,13 +17,11 @@ import {
 } from "./api";
 
 function cleanDomain(input: string): string {
-  return (
-    input
-      .trim()
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "")
-      .trim() || "acme.com"
-  );
+  return input
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
 }
 
 function buildBadgeDetail(domain: string): string {
@@ -94,6 +92,10 @@ export default function BadgeCommand() {
 
   const isTyping = searchText.trim().length > 0;
   const typedDomain = isTyping ? cleanDomain(searchText) : "";
+  const isValidTyped =
+    isTyping &&
+    typedDomain.length > 0 &&
+    (isValidUrlInput(searchText.trim()) || isValidUrlInput(typedDomain));
 
   function getActionsForDomain(domain: string) {
     const md = getBadgeMarkdown(domain);
@@ -149,17 +151,41 @@ export default function BadgeCommand() {
     >
       {isTyping && (
         <List.Section title="Typed Target">
-          <List.Item
-            id="typed-badge"
-            icon={{ source: Icon.Tag, tintColor: Color.Blue }}
-            title={typedDomain}
-            subtitle="Press Enter to copy Markdown badge"
-            accessories={[{ tag: { value: "Typed", color: Color.Blue } }]}
-            actions={getActionsForDomain(typedDomain)}
-            detail={
-              <List.Item.Detail markdown={buildBadgeDetail(typedDomain)} />
-            }
-          />
+          {isValidTyped ? (
+            <List.Item
+              id="typed-badge"
+              icon={{ source: Icon.Tag, tintColor: Color.Blue }}
+              title={typedDomain}
+              subtitle="Press Enter to copy Markdown badge"
+              accessories={[{ tag: { value: "Typed", color: Color.Blue } }]}
+              actions={getActionsForDomain(typedDomain)}
+              detail={
+                <List.Item.Detail markdown={buildBadgeDetail(typedDomain)} />
+              }
+            />
+          ) : (
+            <List.Item
+              id="typed-badge"
+              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              title={searchText.trim()}
+              subtitle="Invalid domain format (e.g. company.com)"
+              accessories={[{ tag: { value: "Invalid", color: Color.Red } }]}
+              detail={
+                <List.Item.Detail
+                  markdown={[
+                    `# Invalid Domain Format`,
+                    "",
+                    `\`${searchText.trim()}\` is not recognized as a valid domain or URL.`,
+                    "",
+                    "### Expected Format",
+                    "- Standard domain: `loopstates.com`",
+                    "- Subdomain: `docs.loopstates.com`",
+                    "- Full URL: `https://loopstates.com`",
+                  ].join("\n")}
+                />
+              }
+            />
+          )}
         </List.Section>
       )}
       {clipboardDomain ? (

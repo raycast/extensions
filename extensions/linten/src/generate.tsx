@@ -17,13 +17,11 @@ import {
 } from "./templates";
 
 function cleanDomain(input: string): string {
-  return (
-    input
-      .trim()
-      .replace(/^https?:\/\//i, "")
-      .replace(/\/.*$/, "")
-      .trim() || "acme.com"
-  );
+  return input
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
 }
 
 function isDomainLike(text: string): boolean {
@@ -47,9 +45,12 @@ function FullManifestView({
   content: string;
 }) {
   const { pop } = useNavigation();
+  const isPlaceholder = domain === "acme.com";
 
   const markdown = [
-    `# ${template.name} for \`${domain}\``,
+    isPlaceholder
+      ? `# ${template.name} (Starter Scaffold)`
+      : `# ${template.name} for \`${domain}\``,
     "",
     `*Category*: **${template.category}** | *Specification*: **Spec v2** | *Cloud Scaffolder*: **Linten**`,
     "",
@@ -73,7 +74,11 @@ function FullManifestView({
           <Action.OpenInBrowser
             title="Open in Linten Cloud Scaffolder"
             icon={Icon.Globe}
-            url={`${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(domain)}`}
+            url={
+              isPlaceholder
+                ? LINTEN_CLOUD_BASE
+                : `${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(domain)}`
+            }
           />
           <Action
             title="Back to Templates"
@@ -115,16 +120,25 @@ export default function GenerateCommand() {
     loadData();
   }, []);
 
+  const trimmedSearch = searchText.trim();
+  const isTyping = trimmedSearch.length > 0;
+  const isDomainInput = isTyping && isDomainLike(trimmedSearch);
+  const cleanedTypedDomain = isDomainInput ? cleanDomain(trimmedSearch) : "";
+  const isValidTypedDomain =
+    isDomainInput &&
+    cleanedTypedDomain.length > 0 &&
+    (isValidUrlInput(trimmedSearch) || isValidUrlInput(cleanedTypedDomain));
+
   // Determine active target domain
   const activeDomain = useMemo(() => {
-    if (searchText && isDomainLike(searchText)) {
-      return cleanDomain(searchText);
+    if (isValidTypedDomain) {
+      return cleanedTypedDomain;
     }
-    if (clipboardDomain) {
+    if (!isTyping && clipboardDomain) {
       return clipboardDomain;
     }
     return "acme.com";
-  }, [searchText, clipboardDomain]);
+  }, [isValidTypedDomain, cleanedTypedDomain, isTyping, clipboardDomain]);
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -134,11 +148,15 @@ export default function GenerateCommand() {
   }, [templates]);
 
   // Filter templates:
-  // If user typed a domain name (e.g. loopstates.com), keep all templates and personalize for it!
-  // If user typed text that is not a domain (e.g. "saas", "api", "health"), filter by text match.
+  // If user entered an invalid domain, return empty list to trigger the invalid domain EmptyView.
+  // If user typed a valid domain, show all templates personalized for that domain.
+  // If user typed search keywords, filter templates by keyword match.
   const filteredTemplates = useMemo(() => {
-    const isDomain = isDomainLike(searchText);
-    const query = searchText.trim().toLowerCase();
+    if (isDomainInput && !isValidTypedDomain) {
+      return [];
+    }
+
+    const query = trimmedSearch.toLowerCase();
 
     return templates.filter((t) => {
       // Category filter
@@ -146,8 +164,8 @@ export default function GenerateCommand() {
         return false;
       }
 
-      // If user typed a domain, show all templates for that domain
-      if (isDomain || !query) {
+      // If user typed a valid domain, show all templates for that domain
+      if (isValidTypedDomain || !query) {
         return true;
       }
 
@@ -159,7 +177,13 @@ export default function GenerateCommand() {
         t.description.toLowerCase().includes(query)
       );
     });
-  }, [templates, searchText, selectedCategory]);
+  }, [
+    templates,
+    trimmedSearch,
+    selectedCategory,
+    isDomainInput,
+    isValidTypedDomain,
+  ]);
 
   return (
     <List
@@ -184,11 +208,19 @@ export default function GenerateCommand() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView
-        icon={Icon.Document}
-        title="No matching templates found"
-        description="Try searching for another industry keyword or clear the search filter."
-      />
+      {isDomainInput && !isValidTypedDomain ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Invalid Domain or URL"
+          description={`"${trimmedSearch}" is not a valid domain. Enter a valid domain (e.g. loopstates.com) or search by keyword.`}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Document}
+          title="No matching templates found"
+          description="Try searching for another industry keyword or clear the search filter."
+        />
+      )}
       {filteredTemplates.map((template) => {
         const personalized = personalizeTemplate(
           template.content,
@@ -202,7 +234,7 @@ export default function GenerateCommand() {
           "",
           `> ${template.description}`,
           "",
-          `**Target Domain**: \`${activeDomain}\``,
+          `**Target Domain**: \`${activeDomain === "acme.com" ? "acme.com (Template Preview)" : activeDomain}\``,
           "",
           "```markdown",
           personalized,
@@ -234,7 +266,11 @@ export default function GenerateCommand() {
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Active Target Domain"
-                      text={activeDomain}
+                      text={
+                        activeDomain === "acme.com"
+                          ? "acme.com (Template Preview)"
+                          : activeDomain
+                      }
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label

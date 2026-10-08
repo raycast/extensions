@@ -804,7 +804,8 @@ export function personalizeTemplate(content: string, domain: string): string {
   if (!clean || clean === "acme.com") return content;
 
   const brandDomain = clean.replace(/^www\./i, "");
-  const rawBrand = brandDomain.split(".")[0] || "acme";
+  const rawBrand = brandDomain.split(".")[0];
+  if (!rawBrand) return content;
   const brand = rawBrand.charAt(0).toUpperCase() + rawBrand.slice(1);
 
   return content
