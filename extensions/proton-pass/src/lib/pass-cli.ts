@@ -8,7 +8,9 @@ import {
   BrowserLoginStatus,
   cancelDetachedLogin,
   checkDetachedLogin,
+  forgetDetachedLogin,
   isDetachedLoginRunning,
+  savedDetachedLogin,
   startDetachedLogin,
 } from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
@@ -123,10 +125,13 @@ export async function cancelBrowserLogin(): Promise<void> {
  * from this computer, for when ending it on Proton's servers fails.
  */
 export async function logout(force = false): Promise<void> {
-  if (!USE_MOCK_DATA) await (await getAdapter()).logout(force);
+  if (USE_MOCK_DATA) return clearCache();
+  // A login running now stops Logout (see getAdapter), so this one is over. One started meanwhile must keep going.
+  const endedLogin = await savedDetachedLogin(loginDir());
+  await (await getAdapter()).logout(force);
   await clearCache();
-  // A finished login's result would otherwise show on the next login screen.
-  await cancelBrowserLogin();
+  // Its result would otherwise show on the next login screen.
+  if (endedLogin) await forgetDetachedLogin(loginDir(), endedLogin);
 }
 
 export async function checkAuth(): Promise<boolean> {

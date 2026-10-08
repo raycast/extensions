@@ -8,9 +8,11 @@ import {
   cancelDetachedLogin,
   checkDetachedLogin,
   extractLoginUrl,
+  forgetDetachedLogin,
   forgetLoginUrl,
   isDetachedLoginRunning,
   isProcessRunning,
+  savedDetachedLogin,
   startDetachedLogin,
 } from "./login";
 import { PassCliError } from "../types";
@@ -254,6 +256,36 @@ test("a login that succeeded a while ago doesn't show again once its session has
   assert.equal(await isDetachedLoginRunning(dir), false);
 
   assert.deepEqual(await checkDetachedLogin(dir, loggedOut), { state: "none" });
+});
+
+test("forgetting a login that's over leaves a login started since alone", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-url-fail"), dir, 2_000);
+  const ended = await savedDetachedLogin(dir);
+  assert.ok(ended);
+  await waitUntil(() => !isProcessRunning(ended.pid));
+  await sleep(50);
+
+  // As with Logout, while a new login starts.
+  await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+  await forgetDetachedLogin(dir, ended);
+  assert.equal(await isDetachedLoginRunning(dir), true);
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), {
+    state: "waiting",
+    url: FAKE_LOGIN_URL,
+    isFinishing: false,
+  });
+  await cancelDetachedLogin(dir);
+
+  // Without one, its result no longer shows.
+  const alone = loginDir();
+  await startDetachedLogin(fakeCommand("login-url-fail"), alone, 2_000);
+  const failed = await savedDetachedLogin(alone);
+  assert.ok(failed);
+  await waitUntil(() => !isProcessRunning(failed.pid));
+  await sleep(50);
+  await forgetDetachedLogin(alone, failed);
+  assert.deepEqual(await checkDetachedLogin(alone, loggedOut), { state: "none" });
 });
 
 test("cleaning up after a login that's over leaves a login started meanwhile alone", async () => {

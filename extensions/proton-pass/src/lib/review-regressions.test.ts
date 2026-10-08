@@ -1415,7 +1415,7 @@ test("a browser login clears the previous account's cache, and is canceled when 
   assert.deepEqual(events, ["clear cache", "start login", "cancel login"]);
 });
 
-test("Logout forgets a finished login, whose success would otherwise show on the next login screen", async () => {
+test("Logout forgets the login that was over when it started, and only that one", async () => {
   const events: string[] = [];
   const api = loadView("pass-cli.ts", {
     "@raycast/api": {
@@ -1439,8 +1439,9 @@ test("Logout forgets a finished login, whose success would otherwise show on the
     },
     "./core/login": {
       isDetachedLoginRunning: async () => false,
-      cancelDetachedLogin: async () => {
-        events.push("forget login");
+      savedDetachedLogin: async () => ({ pid: 1, attempt: "ended", startedAt: 0 }),
+      forgetDetachedLogin: async (_dir: string, login: { attempt: string }) => {
+        events.push(`forget ${login.attempt}`);
       },
     },
     "./mock-data": {},
@@ -1448,5 +1449,5 @@ test("Logout forgets a finished login, whose success would otherwise show on the
   }) as unknown as { logout: () => Promise<void> };
 
   await api.logout();
-  assert.deepEqual(events, ["log out", "clear cache", "forget login"]);
+  assert.deepEqual(events, ["log out", "clear cache", "forget ended"]);
 });
