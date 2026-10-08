@@ -578,7 +578,18 @@ async function fetchSystemSnapshot(): Promise<SystemSnapshot> {
     },
   );
 
-  return JSON.parse(stdout.trim()) as SystemSnapshot;
+  const snapshot = JSON.parse(stdout.trim()) as SystemSnapshot;
+
+  // `if (...) { $adapter.addresses }` sends the array through the PowerShell
+  // pipeline, which unrolls a single address into a plain string.
+  const addresses: unknown = snapshot.network.addresses;
+  snapshot.network.addresses = Array.isArray(addresses)
+    ? addresses
+    : typeof addresses === "string"
+      ? [addresses]
+      : [];
+
+  return snapshot;
 }
 
 function getInternetIcon(snapshot: SystemSnapshot) {
