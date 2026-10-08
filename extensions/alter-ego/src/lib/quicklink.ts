@@ -20,6 +20,11 @@ export function buildSearchQuicklinksDeeplink(): string {
   return `${RAYCAST_SCHEME}://${EXTENSION_HOST}/${SEARCH_QUICKLINKS_PATH}`;
 }
 
+export function isRaycastDeeplink(link: string): boolean {
+  const url = tryParseUrl(link);
+  return url !== null && KNOWN_SCHEMES.has(url.protocol);
+}
+
 export function isAlterEgoLink(link: string): boolean {
   const url = tryParseUrl(link);
   if (!url) return false;

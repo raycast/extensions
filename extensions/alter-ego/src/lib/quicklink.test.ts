@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildRunDeeplink, extractPayloadFromLink, isAlterEgoLink } from "./quicklink";
+import { buildRunDeeplink, extractPayloadFromLink, isAlterEgoLink, isRaycastDeeplink } from "./quicklink";
 import { AlterEgoPayload } from "./types";
 
 const payload: AlterEgoPayload = {
@@ -82,5 +82,17 @@ describe("extractPayloadFromLink on a non-Alter-Ego link", () => {
     const result = extractPayloadFromLink("https://example.com/totally-unrelated");
 
     expect(result).toEqual({ ok: false, reason: "not-alter-ego-link" });
+  });
+});
+
+describe("isRaycastDeeplink", () => {
+  it("accepts both stable and Beta schemes", () => {
+    expect(isRaycastDeeplink("raycast://extensions/raycast/clipboard-history/clipboard-history")).toBe(true);
+    expect(isRaycastDeeplink("raycast-x://extensions/raycast/clipboard-history/clipboard-history")).toBe(true);
+  });
+
+  it("rejects other schemes and non-URLs", () => {
+    expect(isRaycastDeeplink("https://example.com")).toBe(false);
+    expect(isRaycastDeeplink("not a link")).toBe(false);
   });
 });

@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Application,
+  confirmAlert,
   Form,
   getApplications,
   Icon,
@@ -10,11 +12,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { isRaycastDeeplink } from "../lib/quicklink";
 import { Target, TargetType } from "../lib/types";
 
 interface TargetFormProps {
   initialUsername: string;
   initialTarget?: Target;
+  // Usernames of every other row, used to confirm before overwriting one.
+  otherUsernames: string[];
   onSubmit: (username: string, target: Target) => void;
   // Only passed when a Quicklink already exists to paste into — offers a
   // second action that saves and immediately copies + opens Search Quicklinks,
@@ -29,7 +34,13 @@ const TYPE_OPTIONS: { value: TargetType; title: string }[] = [
   { value: "path", title: "File or Folder" },
 ];
 
-export function TargetForm({ initialUsername, initialTarget, onSubmit, onSaveAndCopyLink }: TargetFormProps) {
+export function TargetForm({
+  initialUsername,
+  initialTarget,
+  otherUsernames,
+  onSubmit,
+  onSaveAndCopyLink,
+}: TargetFormProps) {
   const { pop } = useNavigation();
 
   const [username, setUsername] = useState(initialUsername);
@@ -73,9 +84,17 @@ export function TargetForm({ initialUsername, initialTarget, onSubmit, onSaveAnd
       await showToast({ style: Toast.Style.Failure, title: "Target is required" });
       return null;
     }
-    if (type === "deeplink" && !value.startsWith("raycast://")) {
-      await showToast({ style: Toast.Style.Failure, title: "Expected a raycast:// deeplink" });
+    if (type === "deeplink" && !isRaycastDeeplink(value)) {
+      await showToast({ style: Toast.Style.Failure, title: "Expected a raycast:// or raycast-x:// deeplink" });
       return null;
+    }
+    if (otherUsernames.includes(trimmedUsername)) {
+      const confirmed = await confirmAlert({
+        title: `Replace mapping for "${trimmedUsername}"?`,
+        message: "This username already has a target. Saving will overwrite it.",
+        primaryAction: { title: "Replace", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return null;
     }
 
     return { username: trimmedUsername, target: { type, value } };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { removeRow, upsertRow } from "./merge";
+import { removeRow, saveRow, upsertRow } from "./merge";
 import { AlterEgoMap } from "./types";
 
 describe("upsertRow", () => {
@@ -51,5 +51,36 @@ describe("removeRow", () => {
     const next = removeRow(map, "nobody");
 
     expect(next).toEqual(map);
+  });
+});
+
+describe("saveRow", () => {
+  const map: AlterEgoMap = {
+    work: { type: "app", value: "/Applications/Arc.app" },
+    colleague: { type: "app", value: "/Applications/Chrome.app" },
+  };
+
+  it("moves the row when an existing username is renamed", () => {
+    const next = saveRow(map, "work", "personal", { type: "app", value: "/Applications/Arc.app" });
+
+    expect(next).toEqual({
+      personal: { type: "app", value: "/Applications/Arc.app" },
+      colleague: { type: "app", value: "/Applications/Chrome.app" },
+    });
+  });
+
+  it("updates in place when the username is unchanged", () => {
+    const next = saveRow(map, "work", "work", { type: "app", value: "/Applications/Safari.app" });
+
+    expect(next).toEqual({
+      work: { type: "app", value: "/Applications/Safari.app" },
+      colleague: { type: "app", value: "/Applications/Chrome.app" },
+    });
+  });
+
+  it("adds a row without removing anything for a new mapping", () => {
+    const next = saveRow(map, undefined, "new", { type: "url", value: "https://example.com" });
+
+    expect(Object.keys(next).sort()).toEqual(["colleague", "new", "work"]);
   });
 });

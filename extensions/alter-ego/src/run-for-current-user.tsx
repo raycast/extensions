@@ -4,9 +4,7 @@ import { lookupTarget } from "./lib/lookup";
 import { decodePayload } from "./lib/payload";
 import { Target } from "./lib/types";
 
-type CommandArguments = { map: string };
-
-export default async function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.RunForCurrentUser }>) {
   const decoded = decodePayload(props.arguments.map);
 
   if (!decoded.ok) {

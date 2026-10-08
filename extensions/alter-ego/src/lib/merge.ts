@@ -11,3 +11,17 @@ export function removeRow(map: AlterEgoMap, username: string): AlterEgoMap {
   delete next[username];
   return next;
 }
+
+/**
+ * Saves a row from the edit form. When an existing row's username was changed,
+ * the original key is dropped so the old target doesn't linger under it.
+ */
+export function saveRow(
+  map: AlterEgoMap,
+  originalUsername: string | undefined,
+  username: string,
+  target: Target,
+): AlterEgoMap {
+  const base = originalUsername !== undefined && originalUsername !== username ? removeRow(map, originalUsername) : map;
+  return upsertRow(base, username, target);
+}

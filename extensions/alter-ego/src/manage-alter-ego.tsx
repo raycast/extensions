@@ -18,7 +18,7 @@ import {
 import { userInfo } from "node:os";
 import { useEffect, useState } from "react";
 import { TargetForm } from "./components/TargetForm";
-import { removeRow, upsertRow } from "./lib/merge";
+import { removeRow, saveRow } from "./lib/merge";
 import {
   buildRunDeeplink,
   buildSearchQuicklinksDeeplink,
@@ -90,18 +90,20 @@ export default function Command(props: LaunchProps<{ launchContext?: HandoffCont
     // Only offer "save & copy" once a Quicklink already exists to paste into —
     // for a brand-new setup the next step is Create Quicklink instead.
     const quicklinkExists = source !== "new";
+    const originalUsername = initialTarget ? initialUsername : undefined;
     push(
       <TargetForm
         initialUsername={initialUsername}
         initialTarget={initialTarget}
+        otherUsernames={Object.keys(map).filter((username) => username !== originalUsername)}
         onSubmit={(username, target) => {
-          setMap((current) => upsertRow(current, username, target));
+          setMap((current) => saveRow(current, originalUsername, username, target));
           showToast({ style: Toast.Style.Success, title: `Saved — now ${nextStepTitle(source)}` });
         }}
         onSaveAndCopyLink={
           quicklinkExists
             ? (username, target) => {
-                const updatedMap = upsertRow(map, username, target);
+                const updatedMap = saveRow(map, originalUsername, username, target);
                 setMap(updatedMap);
                 copyUpdatedLinkAndOpenSearch(updatedMap);
               }
