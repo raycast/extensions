@@ -1,6 +1,6 @@
 # Changelog
 
-## [Reliable account connections] - {PR_MERGE_DATE}
+## [Reliable account connections] - 2026-10-08
 
 - Sign-in follows Teak’s current authentication provider automatically.
 - Account connections recover after authentication changes.
