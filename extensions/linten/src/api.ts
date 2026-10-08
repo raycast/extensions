@@ -158,10 +158,10 @@ export function isValidUrlInput(text: string): boolean {
 
 export function isLocalOrInternalUrl(urlStr: string): boolean {
   try {
-    const fullUrl =
-      urlStr.startsWith("http://") || urlStr.startsWith("https://")
-        ? urlStr
-        : `https://${urlStr}`;
+    const trimmed = urlStr.trim();
+    const fullUrl = /^https?:\/\//i.test(trimmed)
+      ? trimmed
+      : `https://${trimmed}`;
     const parsed = new URL(fullUrl);
     const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
     return (

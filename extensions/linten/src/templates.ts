@@ -803,7 +803,8 @@ export function personalizeTemplate(content: string, domain: string): string {
     .trim();
   if (!clean || clean === "acme.com") return content;
 
-  const rawBrand = clean.split(".")[0] || "acme";
+  const brandDomain = clean.replace(/^www\./i, "");
+  const rawBrand = brandDomain.split(".")[0] || "acme";
   const brand = rawBrand.charAt(0).toUpperCase() + rawBrand.slice(1);
 
   return content
