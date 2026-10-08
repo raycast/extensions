@@ -9,13 +9,19 @@ import Style = Toast.Style;
 export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
-export function useHue() {
-  const [isLoading, setIsLoading] = useCachedState("isLoading", true);
+export function useHueResources() {
   const [lights, setLights] = useCachedState("lights", [] as Light[]);
   const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[]);
   const [rooms, setRooms] = useCachedState("rooms", [] as Room[]);
   const [zones, setZones] = useCachedState("zones", [] as Zone[]);
   const [scenes, setScenes] = useCachedState("scenes", [] as Scene[]);
+  return { lights, setLights, groupedLights, setGroupedLights, rooms, setRooms, zones, setZones, scenes, setScenes };
+}
+
+export function useHue() {
+  const [isLoading, setIsLoading] = useCachedState("isLoading", true);
+  const resources = useHueResources();
+  const { setLights, setGroupedLights, setRooms, setZones, setScenes } = resources;
 
   const { hueBridgeState, sendHueMessage } = useHueBridgeMachine();
   const { hueClient } = hueBridgeState.context;
@@ -63,19 +69,5 @@ export function useHue() {
     return stopListening;
   }, [hueClient]);
 
-  return {
-    hueBridgeState,
-    sendHueMessage,
-    isLoading: isLoading,
-    lights,
-    setLights,
-    groupedLights,
-    setGroupedLights,
-    rooms,
-    setRooms,
-    zones,
-    setZones,
-    scenes,
-    setScenes,
-  };
+  return { hueBridgeState, sendHueMessage, isLoading, ...resources };
 }
