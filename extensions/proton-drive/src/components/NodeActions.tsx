@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { showError } from "../lib/errors";
 import { handleSignedOut, isSignedOut } from "../lib/session";
-import { createPublicLink, DriveNode, existingPublicLink } from "../lib/cli";
+import { createPublicLink, DriveNode, existingPublicLink, ROOT } from "../lib/cli";
 import { downloadToDownloads, localCopyForOpening } from "../lib/files";
 import { FolderView } from "./FolderView";
 
@@ -86,6 +86,11 @@ export function NodeActions(props: { node: DriveNode; extraActions?: ReactNode }
 
 export function displayPath(path: string): string {
   return path.replace(/^\/my-files/, "") || "/";
+}
+
+/** A folder named for people: the Drive's root reads "My Files", as in Proton Drive. */
+export function folderLabel(path: string): string {
+  return path === ROOT ? "My Files" : displayPath(path);
 }
 
 async function openFile(node: DriveNode) {

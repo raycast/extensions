@@ -82,7 +82,8 @@ export function FolderView(props: { path: string; title?: string }) {
       filtering={false}
       onSearchTextChange={setQuery}
       throttle
-      navigationTitle={progress ? `Indexing — ${progress}` : (props.title ?? props.path)}
+      // The command name stays in the navigation title; the folder shows in the search bar placeholder.
+      navigationTitle={progress ? `Indexing — ${progress}` : undefined}
       searchBarPlaceholder={`Search in ${props.title ?? displayPath(props.path)}${index ? " and the whole Drive" : ""}…`}
       onSelectionChange={onSelectionChange}
       searchBarAccessory={

@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { displayPath } from "./components/NodeActions";
+import { folderLabel } from "./components/NodeActions";
 import { listFolderCached, ROOT, upload } from "./lib/cli";
 import { isDemo } from "./lib/demo";
 import { showError } from "./lib/errors";
@@ -40,7 +40,7 @@ export default function Command() {
   // Nothing selected in Finder: let the user pick files or folders here instead.
   if (files.length === 0) return <ChooseFiles indexedFolders={indexedFolders} />;
 
-  return <FolderPicker path={ROOT} files={files} indexedFolders={indexedFolders} />;
+  return <FolderPicker path={ROOT} files={files} fromFinder indexedFolders={indexedFolders} />;
 }
 
 function ChooseFiles(props: { indexedFolders: string[] }) {
@@ -49,7 +49,6 @@ function ChooseFiles(props: { indexedFolders: string[] }) {
 
   return (
     <Form
-      navigationTitle="Upload Files"
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -57,7 +56,7 @@ function ChooseFiles(props: { indexedFolders: string[] }) {
             icon={Icon.ArrowRight}
             onSubmit={({ files }: { files: string[] }) => {
               if (!files?.length) return setError("Choose at least one file or folder");
-              push(<FolderPicker path={ROOT} files={files} indexedFolders={props.indexedFolders} />);
+              push(<FolderPicker path={ROOT} files={files} fromFinder={false} indexedFolders={props.indexedFolders} />);
             }}
           />
         </ActionPanel>
@@ -80,8 +79,8 @@ function ChooseFiles(props: { indexedFolders: string[] }) {
  * Destination picker: browse the Drive folder by folder (no index needed) and upload to the
  * current folder or to any subfolder. With the search index, typing also matches folders anywhere.
  */
-function FolderPicker(props: { path: string; files: string[]; indexedFolders: string[] }) {
-  const { path, files, indexedFolders } = props;
+function FolderPicker(props: { path: string; files: string[]; fromFinder: boolean; indexedFolders: string[] }) {
+  const { path, files, fromFinder, indexedFolders } = props;
   const [query, setQuery] = useState("");
   const signedOut = useSignedOut();
   const { data, isLoading } = useCachedPromise(listFolderCached, [path, isDemo() ? "demo" : "live"], {
@@ -111,15 +110,26 @@ function FolderPicker(props: { path: string; files: string[]; indexedFolders: st
   );
 
   const uploadHere = (target: string) => (
-    <Action title={`Upload to ${displayPath(target)}`} icon={Icon.Upload} onAction={() => doUpload(files, target)} />
+    <Action title={`Upload to ${folderLabel(target)}`} icon={Icon.Upload} onAction={() => doUpload(files, target)} />
   );
   const open = (target: string) => (
     <Action.Push
       title="Open Folder"
       icon={Icon.Folder}
-      target={<FolderPicker path={target} files={files} indexedFolders={indexedFolders} />}
+      target={<FolderPicker path={target} files={files} fromFinder={fromFinder} indexedFolders={indexedFolders} />}
     />
   );
+
+  // A Finder selection is used without asking: offer a way out if it is not what the user meant.
+  const otherFiles = fromFinder ? (
+    <ActionPanel.Section>
+      <Action.Push
+        title="Choose Other Files…"
+        icon={Icon.Document}
+        target={<ChooseFiles indexedFolders={indexedFolders} />}
+      />
+    </ActionPanel.Section>
+  ) : null;
 
   if (signedOut) return <SignedOutView />;
 
@@ -128,15 +138,20 @@ function FolderPicker(props: { path: string; files: string[]; indexedFolders: st
       isLoading={isLoading}
       filtering={false}
       onSearchTextChange={setQuery}
-      navigationTitle={`Upload ${label}`}
-      searchBarPlaceholder={`Choose a folder in ${displayPath(path)}…`}
+      searchBarPlaceholder={`Choose a folder in ${folderLabel(path)}…`}
     >
-      <List.Section title={`Upload ${label}`}>
+      {/* Say where the files come from: a Finder selection is picked up without asking. */}
+      <List.Section title={fromFinder ? `From Finder: ${label}` : `Chosen: ${label}`}>
         <List.Item
-          title={`Upload to ${displayPath(path)}`}
+          title={`Upload to ${folderLabel(path)}`}
           subtitle="This folder"
           icon={Icon.Upload}
-          actions={<ActionPanel>{uploadHere(path)}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {uploadHere(path)}
+              {otherFiles}
+            </ActionPanel>
+          }
         />
       </List.Section>
       <List.Section title="Subfolders" subtitle="↵ to open · ⌘↵ to upload there">
@@ -150,6 +165,7 @@ function FolderPicker(props: { path: string; files: string[]; indexedFolders: st
                 {open(folder.path)}
                 {/* Second action: ⌘↵ in Raycast. */}
                 {uploadHere(folder.path)}
+                {otherFiles}
               </ActionPanel>
             }
           />
@@ -160,13 +176,14 @@ function FolderPicker(props: { path: string; files: string[]; indexedFolders: st
           {elsewhere.map((p) => (
             <List.Item
               key={p}
-              title={displayPath(p)}
+              title={folderLabel(p)}
               icon={Icon.Folder}
               actions={
                 <ActionPanel>
                   {/* Same keys as Subfolders: ↵ opens, ⌘↵ uploads. */}
                   {open(p)}
                   {uploadHere(p)}
+                  {otherFiles}
                 </ActionPanel>
               }
             />
@@ -184,7 +201,7 @@ async function doUpload(files: string[], parentPath: string) {
     toast.style = result.failedItems ? Toast.Style.Failure : Toast.Style.Success;
     toast.title = result.failedItems
       ? `${result.failedItems} item(s) failed`
-      : `Uploaded to ${displayPath(parentPath)}`;
+      : `Uploaded to ${folderLabel(parentPath)}`;
     toast.message = `${result.transferredItems} uploaded · ${result.skippedItems} unchanged`;
     if (!result.failedItems) await popToRoot();
   } catch (error) {
