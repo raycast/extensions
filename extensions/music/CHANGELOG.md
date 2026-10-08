@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Fix Add to Playlist] - {PR_MERGE_DATE}
+## [Fix Add to Playlist] - 2026-10-08
 
 - Fixed adding a song that is not in your library yet to a playlist.
 
