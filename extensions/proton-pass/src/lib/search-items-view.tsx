@@ -39,7 +39,7 @@ interface VaultDropdownProps {
   vaults: Vault[];
   /** Number of items in each vault, once known. */
   itemCounts: Map<string, number>;
-  /** Vault to show, for a vault opened from List Vaults. Otherwise the last selection is restored. */
+  /** Vault to show, for a vault opened from the vault list. Otherwise the last selection is restored. */
   value?: string;
   onVaultChange: (vaultId: string) => void;
 }
@@ -73,11 +73,18 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
   );
 }
 
-/** Search Items, also opened from List Vaults with that vault preselected. */
-export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
+interface SearchItemsViewProps {
+  /** Vault opened from the vault list. */
+  initialVault?: Vault;
+  /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
+  allVaults?: boolean;
+}
+
+/** The item list of Browse Items, with every vault, or the one opened from the vault list. */
+export function SearchItemsView({ initialVault, allVaults = false }: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
-  // A vault opened from List Vaults brings its count, kept if its own listing fails.
+  // A vault opened from the vault list brings its count, kept if its own listing fails.
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(
     new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
   );
@@ -86,7 +93,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
   const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
   const [loadFailureMessage, setLoadFailureMessage] = useState<string>();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchItems>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
   const hasLoadedFromCache = useRef(false);
@@ -195,7 +202,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
-      // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
+      // Saves follow the order listings started, also across the vault list, so an older one can't replace a newer one.
       if (isComplete && isLatest()) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
@@ -262,13 +269,12 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
       isLoading={isLoading || isLoadingActiveTab}
-      navigationTitle={initialVault ? "Search Items" : undefined}
       searchBarAccessory={
         <VaultDropdown
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
           itemCounts={itemCounts}
-          value={initialVault ? selectedVaultId : undefined}
+          value={initialVault || allVaults ? selectedVaultId : undefined}
           onVaultChange={setSelectedVaultId}
         />
       }

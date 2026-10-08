@@ -1377,13 +1377,13 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
   return { harness, SearchItemsView };
 }
 
-test("List Vaults saves sharing on its own, and vaults with items from complete listings only", async () => {
+test("the vault list saves sharing on its own, and vaults with items from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };
   const saved: string[] = [];
   let failing = true;
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1392,8 +1392,9 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
+    "./pass-cli": {
       listVaultSharing: async () => new Map([["vault", { role: "owner", isShared: true }]]),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
@@ -1401,11 +1402,11 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
         failedVaults: failing ? [{ vault: added, message: "Offline" }] : [],
       }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/error-views": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1419,12 +1420,12 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
         saved.push("vaults");
       },
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -1437,12 +1438,12 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
-test("an older List Vaults load can't replace newer sharing", async () => {
+test("an older vault list load can't replace newer sharing", async () => {
   const vault = { shareId: "vault", name: "Personal" };
   const savedSharing: unknown[] = [];
   const pending: ((sharing: Map<string, unknown>) => void)[] = [];
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1451,16 +1452,17 @@ test("an older List Vaults load can't replace newer sharing", async () => {
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
+    "./pass-cli": {
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
       listVaultsAndItems: async () => ({ vaults: [vault], items: [item], failedVaults: [] }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/error-views": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1470,12 +1472,12 @@ test("an older List Vaults load can't replace newer sharing", async () => {
       setCachedItems: async () => undefined,
       setCachedVaults: async () => undefined,
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -1490,7 +1492,67 @@ test("an older List Vaults load can't replace newer sharing", async () => {
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
 });
 
-test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
+test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
+  const pushed: { view: Element; onPop?: () => void }[] = [];
+  let listings = 0;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({
+        push: (view: Element, onPop?: () => void) => {
+          pushed.push({ view, onPop });
+        },
+      }),
+    },
+    "./pass-cli": {
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [{ shareId: "vault", name: "Personal" }], items: [item], failedVaults: [] };
+      },
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const render = () => harness.render(VaultsView, { startOnItems: true });
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  // All items, rather than a vault, and nothing listed for the vaults underneath meanwhile.
+  assert.equal(pushed.length, 1);
+  assert.equal(pushed[0].view.props.initialVault, undefined);
+  assert.equal(listings, 0);
+
+  pushed[0].onPop?.();
+  await new Promise(setImmediate);
+  assert.equal(listings, 1);
+  const rows = (render().props.children as { props: { children: unknown[] } }).props.children.flat();
+  const titles = rows.flatMap((row) => (row && typeof row === "object" ? [(row as Element).props.title] : []));
+  assert.equal(titles.join(", "), "All Vaults, Personal");
+});
+
+test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {
   const failed = { shareId: "vault", name: "Personal" };
   const { harness, SearchItemsView } = searchItemsFixture({
     "./pass-cli": {

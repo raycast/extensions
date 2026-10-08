@@ -1,9 +1,9 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
-import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
-import { SearchItemsView } from "./lib/search-items-view";
-import { NotLoggedInView } from "./lib/login-view";
+import { listVaultSharing, listVaultsAndItems } from "./pass-cli";
+import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
+import { SearchItemsView } from "./search-items-view";
+import { NotLoggedInView } from "./login-view";
 import {
   getCachedItems,
   getCachedSharing,
@@ -11,14 +11,14 @@ import {
   setCachedItems,
   setCachedSharing,
   setCachedVaults,
-} from "./lib/cache";
-import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
-import { createListingSaves, createRequestTracker, listingSaves } from "./lib/refresh";
-import { platformShortcut } from "./lib/shortcuts";
-import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
-import { CliNotFoundView } from "./lib/error-views";
+} from "./cache";
+import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
+import { createListingSaves, createRequestTracker, listingSaves } from "./refresh";
+import { platformShortcut } from "./shortcuts";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
+import { CliNotFoundView } from "./error-views";
 
-/** Only List Vaults lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
+/** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
 
 /** Marks shared vaults, whether you shared them or they were shared with you. */
@@ -27,12 +27,17 @@ function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
   return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
 }
 
-export default function Command() {
+/**
+ * The vault list of Browse Items, under the items it opens. `startOnItems` opens all items on top of it right away, so
+ * that Esc goes back to the vaults.
+ */
+export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
+  const { push } = useNavigation();
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchItems>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
 
@@ -40,7 +45,9 @@ export default function Command() {
   const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
-    loadVaults();
+    // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
+    if (startOnItems) push(<SearchItemsView />, () => void loadVaults());
+    else void loadVaults();
   }, []);
 
   async function loadVaults() {
@@ -61,7 +68,7 @@ export default function Command() {
       if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
-      // Search Items renews the vaults it saves, but only List Vaults lists sharing, so its age counts too.
+      // The item list renews the vaults it saves, but only the vault list lists sharing, so its age counts too.
       if (!cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled) {
         setIsLoading(false);
         return;
@@ -69,7 +76,7 @@ export default function Command() {
     }
 
     try {
-      // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
+      // Items are listed too, for their number per vault; the listing also refreshes the item list's cache.
       const listing = listingSaves.start();
       const sharingListing = sharingSaves.start();
       const [{ vaults: freshVaults, items, failedVaults }, freshSharing] = await Promise.all([
@@ -86,7 +93,7 @@ export default function Command() {
       // Sharing is saved on its own, so it stays up to date even when some items can't be listed.
       if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
-      // items would count 0 items. Saves follow the order listings started, also across Search Items.
+      // items would count 0 items. Saves follow the order listings started, also across the item lists.
       if (failed.size === 0) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
@@ -116,6 +123,7 @@ export default function Command() {
     () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
     [vaults, itemCounts],
   );
+  const allItemsCount = totalItemCount(vaults, itemCounts);
 
   if (error?.type === "not_installed") {
     return <CliNotFoundView />;
@@ -204,32 +212,47 @@ export default function Command() {
           description="You don't have any vaults yet or they couldn't be loaded."
         />
       ) : (
-        shownVaults.map((vault) => (
-          <List.Item
-            key={vault.shareId}
-            icon={Icon.Folder}
-            title={vault.name}
-            accessories={[
-              sharedAccessory(vault),
-              vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
-            ].filter((accessory) => accessory !== undefined)}
-            actions={
-              <ActionPanel>
-                <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
-                <Action.CopyToClipboard
-                  title="Copy Vault Name"
-                  content={vault.name}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Share ID"
-                  content={vault.shareId}
-                  shortcut={platformShortcut(["cmd", "shift"], "i")}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+        <>
+          {vaults.length > 0 && (
+            <List.Item
+              key="all-vaults"
+              icon={Icon.Globe}
+              title="All Vaults"
+              accessories={allItemsCount === undefined ? [] : [{ text: formatItemCount(allItemsCount) }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView allVaults />} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {shownVaults.map((vault) => (
+            <List.Item
+              key={vault.shareId}
+              icon={Icon.Folder}
+              title={vault.name}
+              accessories={[
+                sharedAccessory(vault),
+                vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
+              ].filter((accessory) => accessory !== undefined)}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="View Items" icon={Icon.List} target={<SearchItemsView initialVault={vault} />} />
+                  <Action.CopyToClipboard
+                    title="Copy Vault Name"
+                    content={vault.name}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Share ID"
+                    content={vault.shareId}
+                    shortcut={platformShortcut(["cmd", "shift"], "i")}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </>
       )}
     </List>
   );

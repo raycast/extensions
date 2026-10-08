@@ -1,5 +1,11 @@
 # proton-pass Changelog
 
+## [Browse Items] - {PR_MERGE_DATE}
+
+- Search Items and List Vaults become one command, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. Its Open On preference starts on the vaults instead
+- Primary Action, Fill Login and the Item List preferences move to Browse Items, the only command using them, so they may need to be set again once
+- Hotkeys and aliases of Search Items keep working with Browse Items. Those of List Vaults need to be set again on Browse Items
+
 ## [Login Fixes] - {PR_MERGE_DATE}
 
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
