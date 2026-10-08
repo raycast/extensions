@@ -81,12 +81,7 @@ export default function MenuBar() {
         </>
       )}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="What Should I Do Today"
-          icon={Icon.List}
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "t" } }}
-          onAction={openToday}
-        />
+        <MenuBarExtra.Item title="What Should I Do Today" icon={Icon.List} onAction={openToday} />
         <MenuBarExtra.Item
           title="Open Twelfth"
           icon={Icon.Globe}
