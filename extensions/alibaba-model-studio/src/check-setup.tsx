@@ -15,6 +15,7 @@ import {
   acceptsWorkspaceHeader,
   consoleURL,
   getPreferences,
+  parseCustomBaseUrl,
   parseExtraModels,
   platformTitle,
   probeModelsEndpoint,
@@ -90,21 +91,19 @@ export default function CheckSetup() {
         values.customBaseUrl ?? saved.customBaseUrl,
       );
       if (!baseURL) {
-        // resolveBaseURL rejects Custom URLs carrying a query string (the
-        // request path is appended to them), so name that failure instead of
-        // sending the user hunting for an HTTPS problem they don't have.
-        const enteredUrl = (values.customBaseUrl ?? saved.customBaseUrl).trim();
-        let hasQuery = false;
-        try {
-          hasQuery = Boolean(new URL(enteredUrl).search);
-        } catch {
-          // Unparseable input — the generic message covers it.
-        }
+        // The verdict comes from the same parser resolveBaseURL used, so the
+        // message names the failure the validator actually hit — a bare
+        // trailing "?" has an empty URL.search, so re-deriving the rule here
+        // once misreported it as an HTTPS problem.
+        const rejection = parseCustomBaseUrl(
+          values.customBaseUrl ?? saved.customBaseUrl,
+        );
         setResult({
           ok: false,
-          text: hasQuery
-            ? "⚠️ Custom Base URL doesn't support query parameters: put the API key in the API Key field and use the plain base URL."
-            : "⚠️ Enter a valid HTTPS base URL for the Custom platform.",
+          text:
+            !rejection.ok && rejection.reason === "query"
+              ? "⚠️ Custom Base URL doesn't support query parameters: put the API key in the API Key field and use the plain base URL."
+              : "⚠️ Enter a valid HTTPS base URL for the Custom platform.",
         });
         return;
       }

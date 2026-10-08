@@ -52,6 +52,40 @@ export function consoleURL(platform: string | undefined): string {
     : "https://modelstudio.console.alibabacloud.com/";
 }
 
+/** Why a Custom Base URL was rejected. */
+export type CustomUrlRejection = "query" | "https" | "unparseable";
+
+/** Validates a Custom Base URL and normalizes it the way the provider will
+ * send it. Single source of the rejection rule: resolveBaseURL consumes the
+ * verdict and Check Setup names it, so the error messages can't drift from
+ * what the validator actually rejects. */
+export function parseCustomBaseUrl(
+  url: string | undefined,
+):
+  { ok: true; normalized: string } | { ok: false; reason: CustomUrlRejection } {
+  const trimmed = url?.trim() ?? "";
+  if (!trimmed) return { ok: false, reason: "unparseable" };
+  // The custom URL carries the API key as a bearer credential — HTTPS
+  // only, so an http:// or malformed value can't leak the key. Query
+  // strings are rejected: both the /models probe and the AI SDK append
+  // the request path by string concatenation, so a query would swallow
+  // it and silently request the wrong endpoint.
+  try {
+    const parsed = new URL(trimmed);
+    // `parsed.search` is "" for an empty query ("…/v1?"), which toString()
+    // still serializes — check the normalized string so a bare "?" is
+    // rejected too. The hash is cleared first, so a fragment containing
+    // "?" isn't wrongly rejected.
+    parsed.hash = "";
+    const normalized = parsed.toString();
+    if (normalized.includes("?")) return { ok: false, reason: "query" };
+    if (parsed.protocol !== "https:") return { ok: false, reason: "https" };
+    return { ok: true, normalized: normalized.replace(/\/+$/, "") };
+  } catch {
+    return { ok: false, reason: "unparseable" };
+  }
+}
+
 /** Maps a platform preference value to its base URL; null when custom is selected without a URL. */
 export function resolveBaseURL(
   platform: string | undefined,
@@ -61,28 +95,8 @@ export function resolveBaseURL(
     case "payg-cn":
       return PAYG_CN_BASE_URL;
     case "custom": {
-      const url = customBaseUrl?.trim() ?? "";
-      if (!url) return null;
-      // The custom URL carries the API key as a bearer credential — HTTPS
-      // only, so an http:// or malformed value can't leak the key. Query
-      // strings are rejected: both the /models probe and the AI SDK append
-      // the request path by string concatenation, so a query would swallow
-      // it and silently request the wrong endpoint.
-      try {
-        const parsed = new URL(url);
-        // `parsed.search` is "" for an empty query ("…/v1?"), which toString()
-        // still serializes — check the normalized string so a bare "?" is
-        // rejected too. The hash is cleared first, so a fragment containing
-        // "?" isn't wrongly rejected.
-        parsed.hash = "";
-        const normalized = parsed.toString();
-        if (parsed.protocol !== "https:" || normalized.includes("?")) {
-          return null;
-        }
-        return normalized.replace(/\/+$/, "");
-      } catch {
-        return null;
-      }
+      const parsed = parseCustomBaseUrl(customBaseUrl);
+      return parsed.ok ? parsed.normalized : null;
     }
     case "payg":
     default:
