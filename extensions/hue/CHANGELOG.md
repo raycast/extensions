@@ -17,6 +17,7 @@
 - Fix Control Lights loading forever when the bridge has no lights
 - Fix the names of the Steel Blue and Old Lace colors
 - Remove entertainment areas from the Control Groups description, as the command never listed them
+- Fix the bridge screens calling the Unlink Saved Hue Bridge action by another name
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

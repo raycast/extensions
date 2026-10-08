@@ -60,7 +60,7 @@ const failedToConnectMessage = `
 
 Please check your network connection and make sure you are connected to the same network as your Hue Bridge.
 
-You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action.
+You can remove your saved Hue Bridge by using the ‘Unlink Saved Hue Bridge’ action.
 `;
 
 const linkedMessage = `
@@ -70,7 +70,7 @@ const linkedMessage = `
 
 The extension is now linked to your Hue Bridge.
 
-You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action.
+You can remove your saved Hue Bridge by using the ‘Unlink Saved Hue Bridge’ action.
 `;
 
 /**
