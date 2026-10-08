@@ -5,7 +5,6 @@ import ActionStyle = Alert.ActionStyle;
 export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) {
   return (
     <Action
-      key="unlink"
       title="Unlink Saved Hue Bridge"
       style={Action.Style.Destructive}
       onAction={async () =>

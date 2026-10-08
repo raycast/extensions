@@ -52,7 +52,7 @@ function Group(props: {
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
   return (
-    <Grid.Section key={props.group.id} title={props.group.metadata.name}>
+    <Grid.Section title={props.group.metadata.name}>
       {props.lights.map(
         (light: Light): React.JSX.Element => (
           <Light
@@ -70,7 +70,7 @@ function Group(props: {
 
 function Light(props: {
   light: Light;
-  group?: Group;
+  group: Group;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -78,7 +78,7 @@ function Light(props: {
     <Grid.Item
       title={props.light.metadata.name}
       content={createLightIcon(props.light)}
-      keywords={[props.group?.metadata?.name ?? ""]}
+      keywords={[props.group.metadata.name]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -142,11 +142,11 @@ function Light(props: {
   );
 }
 
-function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
+function ToggleLightAction(props: { light: Light; onToggle: () => void }) {
   return (
     <Action
-      title={`Turn ${props.light.metadata.name} ${props.light.on?.on ? "Off" : "On"}`}
-      icon={props.light.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
+      title={`Turn ${props.light.metadata.name} ${props.light.on.on ? "Off" : "On"}`}
+      icon={props.light.on.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
     />
   );
@@ -225,7 +225,7 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
   );
 }
 
-function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
+function IncreaseColorTemperatureAction(props: { light: Light; onIncrease: () => void }) {
   const { color_temperature } = props.light;
   if (!color_temperature || getMiredFromLight(props.light) <= color_temperature.mirek_schema.mirek_minimum) {
     return null;
@@ -244,7 +244,7 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
   );
 }
 
-function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
+function DecreaseColorTemperatureAction(props: { light: Light; onDecrease: () => void }) {
   const { color_temperature } = props.light;
   if (!color_temperature || getMiredFromLight(props.light) >= color_temperature.mirek_schema.mirek_maximum) {
     return null;
@@ -270,14 +270,14 @@ function handleToggle(
 ) {
   const changes = {
     on: { on: !light.on.on },
-    ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
+    ...(light.dimming ? { dimming: { brightness: light.dimming.brightness } } : {}),
   };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
-    success: `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`,
+    success: `Turned ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
     failure: `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
   });
 }

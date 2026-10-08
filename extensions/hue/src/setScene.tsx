@@ -70,7 +70,7 @@ function Scene(props: {
   onSetScene?: () => void;
   useHue: ReturnType<typeof useHue>;
 }) {
-  const activeEmoji = !(props.scene.status?.active === "inactive") ? "💡 " : "";
+  const activeEmoji = props.scene.status.active !== "inactive" ? "💡 " : "";
   return (
     <Grid.Item
       title={activeEmoji + props.scene.metadata.name}

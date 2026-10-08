@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Icon, useNavigation } from "@raycast/api";
 import type { Group, GroupedLight, Light, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -104,16 +104,10 @@ function Group(props: {
 
   const content = groupedLight?.on?.on
     ? (props.gradientUri ?? "")
-    : ({
-        source: {
-          light: "group-off.png",
-          dark: "group-off@dark.png",
-        },
-      } as Image);
+    : { source: { light: "group-off.png", dark: "group-off@dark.png" } };
 
   return (
     <Grid.Item
-      key={props.group.id}
       title={props.group.metadata.name}
       subtitle={lightStatusText}
       content={content}
@@ -303,8 +297,8 @@ function handleToggle(
       hueClient.updateGroupedLight(groupedLight, changesToGroup).catch((error: Error) => {
         if (error.message !== 'device (grouped_light) is "soft off", command (.on) may not have effect') throw error;
       }),
-    success: `Turned ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`,
-    failure: `Failed turning ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`,
+    success: `Turned ${groupedLight.on?.on ? "off" : "on"} ${group.metadata.name}`,
+    failure: `Failed turning ${groupedLight.on?.on ? "off" : "on"} ${group.metadata.name}`,
   });
 }
 
