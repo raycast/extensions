@@ -1,8 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { APPLESCRIPT_MOUNT_TIMEOUT_MS } from "./mount";
 
-const KEY = "mounts-in-flight";
-
 // Mounts that were started but not waited for. The menu bar can't wait: Raycast
 // unloads the command seconds after its menu closes, while `mount volume` sits
 // there for as long as macOS shows a password or certificate dialog. Recording
@@ -10,45 +8,39 @@ const KEY = "mounts-in-flight";
 // macOS does not treat as a no-op: it attaches another copy of the same share
 // at "/Volumes/<name>-1".
 //
+// One key per drive, rather than one record holding them all. These are written
+// by whichever command happens to be running — the menu bar, Mount All,
+// Auto-Reconnect — and a shared record would mean reading it, changing one
+// entry and writing the whole thing back. Two of those overlapping would drop
+// each other's change, and the change being dropped is what stops a drive from
+// being mounted twice. A write here only ever touches the one drive it is about.
+const PREFIX = "mount-in-flight:";
+
 // A record lasts only as long as the AppleScript itself can, so a mount whose
 // dialog was dismissed, or that failed out of sight, can be retried rather than
-// blocking the drive for good.
-type InFlight = Record<string, number>;
-
-async function read(): Promise<InFlight> {
-  const raw = await LocalStorage.getItem<string>(KEY);
-  if (!raw) return {};
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? (parsed as InFlight) : {};
-  } catch {
-    return {};
-  }
-}
-
-// Expired records are dropped on the way out, so nothing has to prune them.
+// blocking the drive for good. Expired keys are dropped on the way past.
 export async function mountsInFlight(): Promise<Set<string>> {
-  const records = await read();
-  const live = Object.entries(records).filter(([, startedAt]) => Date.now() - startedAt < APPLESCRIPT_MOUNT_TIMEOUT_MS);
+  const items = await LocalStorage.allItems<Record<string, string>>();
+  const live = new Set<string>();
 
-  if (live.length !== Object.keys(records).length) {
-    await LocalStorage.setItem(KEY, JSON.stringify(Object.fromEntries(live)));
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(PREFIX)) continue;
+
+    const startedAt = Number(value);
+    if (Number.isFinite(startedAt) && Date.now() - startedAt < APPLESCRIPT_MOUNT_TIMEOUT_MS) {
+      live.add(key.slice(PREFIX.length));
+    } else {
+      await LocalStorage.removeItem(key);
+    }
   }
 
-  return new Set(live.map(([id]) => id));
+  return live;
 }
 
 export async function markMountInFlight(id: string): Promise<void> {
-  const records = await read();
-  records[id] = Date.now();
-  await LocalStorage.setItem(KEY, JSON.stringify(records));
+  await LocalStorage.setItem(PREFIX + id, String(Date.now()));
 }
 
 export async function clearMountInFlight(id: string): Promise<void> {
-  const records = await read();
-  if (!(id in records)) return;
-
-  delete records[id];
-  await LocalStorage.setItem(KEY, JSON.stringify(records));
+  await LocalStorage.removeItem(PREFIX + id);
 }

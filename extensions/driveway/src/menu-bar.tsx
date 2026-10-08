@@ -140,6 +140,16 @@ export default function Command() {
     setMounted(mountedShares);
     setInFlight(pending);
     setIsLoading(false);
+
+    // A snapshot taken while a mount is still going would go stale the moment
+    // the volume lands: the next open would pair a drive that reads as
+    // disconnected with an in-flight record that outlives it, and show "Still
+    // connecting" for something already mounted. Leave no snapshot instead.
+    if (pending.size) {
+      await LocalStorage.removeItem(MENU_BAR_CACHE_KEY);
+      return;
+    }
+
     const cache: Cache = { servers: entries, mounted: mountedShares, timestamp: Date.now() };
     await LocalStorage.setItem(MENU_BAR_CACHE_KEY, JSON.stringify(cache));
   }
@@ -161,14 +171,17 @@ export default function Command() {
         const intervalMinutes = parseInt(intervalPref, 10);
 
         const cache = await readCache();
+        // Anything in flight means the snapshot can't be trusted, whoever
+        // wrote it: `mount` has to be read for real to tell whether the drive
+        // has landed since.
+        const pending = await mountsInFlight();
 
-        if (cache) {
+        if (cache && pending.size === 0) {
           const elapsedMinutes = (Date.now() - cache.timestamp) / 60_000;
           if (elapsedMinutes < intervalMinutes) {
             // Not due yet; show the cached snapshot instantly.
             setServers(cache.servers);
             setMounted(cache.mounted);
-            setInFlight(await mountsInFlight());
             setIsLoading(false);
             return;
           }
