@@ -89,7 +89,6 @@ type StateConfig = {
 const STATE_CONFIGS: Record<string, StateConfig> = {
   loadingPreferences: { returnNull: true },
   loadingCredentials: { returnNull: true },
-  discoveringUsingPublicApi: { returnNull: true },
   connected: { returnNull: true },
   connecting: { returnNull: true, toast: { message: "Connecting to Hue Bridge…", show: true } },
   failedToLoadPreferences: { markdown: failedToLoadPreferencesMessage },
@@ -110,6 +109,7 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
     markdown: discoveringMessage,
     toast: { title: "Discovering Hue Bridges…", show: true },
   },
+  discoveringUsingPublicApi: { markdown: discoveringMessage },
   noBridgeFound: {
     markdown: noBridgeFoundMessage,
     actions: (sendHueMessage) => [

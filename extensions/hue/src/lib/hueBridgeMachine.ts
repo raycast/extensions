@@ -109,7 +109,7 @@ export default function hueBridgeMachine() {
               guard: ({ context }) => !!context.bridgeIpAddress,
             },
             {
-              target: "discoveringUsingPublicApi",
+              target: "discoveringUsingMdns",
             },
           ],
         },
@@ -157,6 +157,33 @@ export default function hueBridgeMachine() {
           },
         },
       },
+      discoveringUsingMdns: {
+        invoke: {
+          id: "discoverBridgeUsingMdns",
+          src: fromPromise(discoverBridgeUsingMdns),
+          onDone: [
+            {
+              target: "linking",
+              actions: assign({
+                bridgeIpAddress: ({ event }) => event.output.ipAddress,
+                bridgeId: ({ event }) => event.output.id,
+              }),
+              guard: ({ context }) => !!context.bridgeUsername,
+            },
+            {
+              actions: assign({
+                bridgeIpAddress: ({ event }) => event.output.ipAddress,
+                bridgeId: ({ event }) => event.output.id,
+              }),
+              target: "linkWithBridge",
+            },
+          ],
+          onError: {
+            actions: ({ event }) => logError(event.error),
+            target: "discoveringUsingPublicApi",
+          },
+        },
+      },
       discoveringUsingPublicApi: {
         invoke: {
           id: "discoverBridgeUsingHuePublicApi",
@@ -180,34 +207,6 @@ export default function hueBridgeMachine() {
           ],
           onError: {
             actions: ({ event }) => logError(event.error),
-            target: "discoveringUsingMdns",
-          },
-        },
-      },
-      discoveringUsingMdns: {
-        invoke: {
-          id: "discoverBridgeUsingMdns",
-          src: fromPromise(discoverBridgeUsingMdns),
-          onDone: [
-            {
-              target: "linking",
-              actions: assign({
-                bridgeIpAddress: ({ event }) => event.output.ipAddress,
-                bridgeId: ({ event }) => event.output.id,
-              }),
-              guard: ({ context }) => !!context.bridgeUsername,
-            },
-            {
-              actions: assign({
-                bridgeIpAddress: ({ event }) => event.output.ipAddress,
-                bridgeId: ({ event }) => event.output.id,
-              }),
-              target: "linkWithBridge",
-            },
-          ],
-
-          onError: {
-            actions: ({ event }) => logError(event.error),
             target: "noBridgeFound",
           },
         },
@@ -215,7 +214,7 @@ export default function hueBridgeMachine() {
       noBridgeFound: {
         on: {
           RETRY: {
-            target: "discoveringUsingPublicApi",
+            target: "discoveringUsingMdns",
           },
         },
       },
@@ -300,7 +299,7 @@ export default function hueBridgeMachine() {
               guard: () => !!getPreferenceValues<Preferences>().bridgeIpAddress,
             },
             {
-              target: "discoveringUsingPublicApi",
+              target: "discoveringUsingMdns",
               actions: assign({
                 bridgeIpAddress: () => undefined,
                 bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername,

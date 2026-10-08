@@ -27,28 +27,27 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 /**
  * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
  */
-export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id: string }> {
+export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id?: string }> {
   console.info("Discovering bridge using mDNS…");
 
   return new Promise((resolve, reject) => {
-    const browser = new Bonjour().findOne({ type: "hue", protocol: "tcp" });
+    const bonjour = new Bonjour();
+    // Calls back with null after the timeout
+    bonjour.findOne(
+      { type: "hue", protocol: "tcp" },
+      10000,
+      (service: { addresses?: string[]; txt?: { bridgeid: string } } | null) => {
+        bonjour.destroy();
 
-    browser.on("up", (service) => {
-      const ipAddress = service.addresses?.find((address) => isIPv4(address));
-      const id = service.txt?.bridgeid;
+        const ipAddress = service?.addresses?.find(isIPv4);
+        if (service === null || ipAddress === undefined)
+          return reject(new Error("Could not find a Hue Bridge using mDNS"));
 
-      console.info(`Discovered Hue Bridge using mDNS: ${ipAddress}, ${id}`);
-      return ipAddress ? resolve({ ipAddress, id }) : reject(new Error("Could not find a Hue Bridge using mDNS"));
-    });
-
-    browser.on("down", () => {
-      return reject(new Error("Could not find a Hue Bridge using mDNS"));
-    });
-
-    setTimeout(() => {
-      browser.stop();
-      return reject(new Error("Could not find a Hue Bridge using mDNS"));
-    }, 10000);
+        const id = service.txt?.bridgeid;
+        console.info(`Discovered Hue Bridge using mDNS: ${ipAddress}, ${id}`);
+        resolve({ ipAddress, id });
+      },
+    );
   });
 }
 
