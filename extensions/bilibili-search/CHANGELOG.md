@@ -1,6 +1,6 @@
 # Bilibili Search Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-10-08
 
 - Add Windows support.
 - Use platform-aware shortcuts for deleting search history, avoiding Ctrl+X conflicts on Windows.
