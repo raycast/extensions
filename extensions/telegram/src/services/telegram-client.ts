@@ -373,21 +373,17 @@ export async function authenticateWithQr(
     }
   }
 
-  // Case B: Authorization token was already obtained by the refresh loop
-  if (scanResult) {
-    return await handleLoginTokenResult(client, scanResult, isAborted);
-  }
-
-  // Case C: onUpdate triggered or token was already accepted:
-  // Fetch the final authorization token exactly once.
+  // Case B & C: Finalize token exchange under unified 2FA / error handling
   try {
-    const finalResult = await client.invoke(
-      new Api.auth.ExportLoginToken({
-        apiId: config.apiId,
-        apiHash: config.apiHash,
-        exceptIds: [],
-      }),
-    );
+    const finalResult =
+      scanResult ??
+      (await client.invoke(
+        new Api.auth.ExportLoginToken({
+          apiId: config.apiId,
+          apiHash: config.apiHash,
+          exceptIds: [],
+        }),
+      ));
 
     if (isAborted()) {
       return { needsPassword: false, success: false };
