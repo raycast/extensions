@@ -1,6 +1,6 @@
 # Webhook Sender Changelog
 
-## [Quick Send & Shortcuts] - {PR_MERGE_DATE}
+## [Quick Send & Shortcuts] - 2026-10-08
 
 ### Added
 
