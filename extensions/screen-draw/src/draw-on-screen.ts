@@ -25,9 +25,16 @@ export default async function Command() {
 
   try {
     const binary = await buildOverlay();
-    spawn(binary, [], { detached: true, stdio: "ignore" }).unref();
+    // spawn() reports launch failures through the "error" event, not by throwing.
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(binary, [], { detached: true, stdio: "ignore" });
+      child.once("error", reject);
+      child.once("spawn", () => {
+        child.unref();
+        resolve();
+      });
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await showHUD(`Screen Draw failed: ${message.includes("swiftc") ? "run xcode-select --install" : message}`);
+    await showHUD(`Screen Draw failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

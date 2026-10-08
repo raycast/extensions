@@ -82,6 +82,11 @@ final class CanvasView: NSView {
     // MARK: Mouse
 
     override func mouseDown(with event: NSEvent) {
+        // Take keyboard focus back (e.g. after Cmd+Tab) so Esc and the shortcuts keep working.
+        if let window, !window.isKeyWindow {
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKey()
+        }
         let point = convert(event.locationInWindow, from: nil)
         current = Stroke(tool: session.tool, color: session.color, width: session.width, points: [point])
         needsDisplay = true
@@ -148,6 +153,7 @@ final class CanvasView: NSView {
 
     func clear() {
         strokes.removeAll()
+        current = nil
         needsDisplay = true
     }
 
