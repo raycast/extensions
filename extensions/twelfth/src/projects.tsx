@@ -52,7 +52,10 @@ function Projects() {
               <Action.OpenInBrowser
                 title="Ask Twelfth for a Status Update"
                 icon={Icon.SpeechBubble}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "k" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "k" },
+                }}
                 url={askUrl(`Where is the "${project.name}" project at, and what's blocking it?`)}
               />
               <ActionPanel.Section>

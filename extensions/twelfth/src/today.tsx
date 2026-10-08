@@ -82,13 +82,16 @@ function Today() {
                     <Action
                       title={showingDetail ? "Hide Details" : "Show Details"}
                       icon={Icon.Sidebar}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                       onAction={() => setShowingDetail(!showingDetail)}
                     />
                     <Action.OpenInBrowser
                       title="Ask Twelfth About This"
                       icon={Icon.SpeechBubble}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "k" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "k" },
+                      }}
                       url={askUrl(helpPrompt(action))}
                     />
                     <ActionPanel.Section>

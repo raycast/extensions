@@ -115,15 +115,31 @@ export async function pkceChallenge(verifier: string): Promise<string> {
 }
 
 /** The signed-in person's email from an ID token, so "mine" can be told apart. Unverified: display only. */
-export function emailFromIdToken(idToken: string | undefined): string | undefined {
-  if (!idToken) return undefined;
+/** The payload of a JWT, without checking its signature: the client only reads what the server told it. */
+export function claimsFromToken(token: string | undefined): Record<string, unknown> | undefined {
+  if (!token) return undefined;
   try {
-    const part = idToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
     const json = new TextDecoder().decode(Uint8Array.from(atob(part), (c) => c.charCodeAt(0)));
-    const email = (JSON.parse(json) as { email?: unknown }).email;
-    return typeof email === "string" ? email.toLowerCase() : undefined;
+    const claims = JSON.parse(json) as unknown;
+    return claims && typeof claims === "object" ? (claims as Record<string, unknown>) : undefined;
   } catch {
-    // An unreadable ID token only costs the "mine" filter.
     return undefined;
   }
+}
+
+export function emailFromIdToken(idToken: string | undefined): string | undefined {
+  // An unreadable ID token only costs the "mine" filter.
+  const email = claimsFromToken(idToken)?.email;
+  return typeof email === "string" ? email.toLowerCase() : undefined;
+}
+
+/**
+ * The person's Twelfth user id (`sub`): what Core keys the connection on, and
+ * the same id the web app identifies the person by in analytics, so a surface
+ * that reports usage files it under one person rather than a second one.
+ */
+export function subjectFromIdToken(idToken: string | undefined): string | undefined {
+  const sub = claimsFromToken(idToken)?.sub;
+  return typeof sub === "string" && sub ? sub : undefined;
 }

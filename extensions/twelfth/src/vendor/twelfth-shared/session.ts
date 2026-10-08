@@ -18,6 +18,7 @@ import {
   TokenError,
   type TokenResponse,
   emailFromIdToken,
+  subjectFromIdToken,
   registerClient,
   tokenRequest,
 } from "./oauth";
@@ -65,6 +66,8 @@ export type Session = ReturnType<typeof createSession>;
 
 export const CLIENT_ID_KEY = "oauth.clientId";
 export const EMAIL_KEY = "oauth.email";
+/** The signed-in person's Twelfth user id, from the ID token's `sub`. */
+export const SUBJECT_KEY = "oauth.subject";
 export const EPOCH_KEY = "oauth.epoch";
 /** The cached workspace context (context.ts); belongs to one connection. */
 export const CONTEXT_CACHE_KEY = "workspace.context";
@@ -101,6 +104,20 @@ export function createSession(options: SessionOptions) {
     return storage.getItem<string>(EMAIL_KEY);
   }
 
+  /** The signed-in person's Twelfth user id, when the ID token carried one. */
+  async function signedInUserId(): Promise<string | undefined> {
+    if (apiKey()) return undefined;
+    return storage.getItem<string>(SUBJECT_KEY);
+  }
+
+  /** Keep who is signed in beside the tokens; nothing known clears what was there. */
+  async function rememberPerson(email: string | undefined, userId: string | undefined, clear: boolean) {
+    if (email) await storage.setItem(EMAIL_KEY, email);
+    else if (clear) await storage.removeItem(EMAIL_KEY);
+    if (userId) await storage.setItem(SUBJECT_KEY, userId);
+    else if (clear) await storage.removeItem(SUBJECT_KEY);
+  }
+
   async function refresh(refreshToken: string): Promise<string | undefined> {
     try {
       const refreshed = await tokenRequest(endpoints, {
@@ -110,8 +127,7 @@ export function createSession(options: SessionOptions) {
       });
       await tokens.set({ ...refreshed, refresh_token: refreshed.refresh_token ?? refreshToken });
       // A connection made before Core put the email in the ID token learns it here.
-      const email = emailFromIdToken(refreshed.id_token);
-      if (email) await storage.setItem(EMAIL_KEY, email);
+      await rememberPerson(emailFromIdToken(refreshed.id_token), subjectFromIdToken(refreshed.id_token), false);
       return refreshed.access_token;
     } catch (error) {
       // Only a dead grant (revoked in Settings → AI & agents, or rotated out)
@@ -119,7 +135,7 @@ export function createSession(options: SessionOptions) {
       // token is likely still good, and the next attempt will use it.
       if (!(error instanceof TokenError && error.dead)) throw error;
       await tokens.remove();
-      await storage.removeItem(EMAIL_KEY);
+      await rememberPerson(undefined, undefined, true);
       await bumpConnection();
       return undefined;
     }
@@ -189,8 +205,8 @@ export function createSession(options: SessionOptions) {
       // The ID token when the server sends one; the access token's own claims
       // otherwise, which is all a resource-bound token may carry.
       const email = emailFromIdToken(issued.id_token) ?? emailFromIdToken(issued.access_token);
-      if (email) await storage.setItem(EMAIL_KEY, email);
-      else await storage.removeItem(EMAIL_KEY);
+      const userId = subjectFromIdToken(issued.id_token) ?? subjectFromIdToken(issued.access_token);
+      await rememberPerson(email, userId, true);
       // The new connection may be to another workspace.
       await bumpConnection();
       return issued.access_token;
@@ -214,7 +230,7 @@ export function createSession(options: SessionOptions) {
   /** Forget the OAuth session so the next read signs in again. */
   async function signOut() {
     await tokens.remove();
-    await storage.removeItem(EMAIL_KEY);
+    await rememberPerson(undefined, undefined, true);
     await bumpConnection();
   }
 
@@ -237,10 +253,21 @@ export function createSession(options: SessionOptions) {
   async function adopt(issued: TokenResponse, email?: string) {
     await tokens.set(issued);
     const known = email?.toLowerCase() ?? emailFromIdToken(issued.id_token) ?? emailFromIdToken(issued.access_token);
-    if (known) await storage.setItem(EMAIL_KEY, known);
-    else await storage.removeItem(EMAIL_KEY);
+    const userId = subjectFromIdToken(issued.id_token) ?? subjectFromIdToken(issued.access_token);
+    await rememberPerson(known, userId, true);
     await bumpConnection();
   }
 
-  return { adopt, apiKey, authorize, connectionEpoch, forceRefresh, reconnect, signOut, signedInEmail, storedToken };
+  return {
+    adopt,
+    apiKey,
+    authorize,
+    connectionEpoch,
+    forceRefresh,
+    reconnect,
+    signOut,
+    signedInEmail,
+    signedInUserId,
+    storedToken,
+  };
 }

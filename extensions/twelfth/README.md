@@ -1,14 +1,14 @@
 # Twelfth for Raycast
 
-Your Twelfth workspace from Raycast.
+Your Twelfth workspace from Raycast on macOS and Windows.
 
-| Command | What it does |
-|---|---|
-| **What Should I Do Today** | Your open actions, grouped Overdue → Due Today → This Week → Later, in the workspace's timezone. Filter to yours (plus unassigned) or everyone's. `⌘D` shows the detail, `⌘⇧K` asks Twelfth about the action. |
-| **Twelfth Today** (menu bar) | The count of overdue and due-today actions, refreshed every 15 minutes. Red when something is overdue. |
-| **Search Products** | Your range with stock on hand, cover, velocity, sales, GP% and open findings. Sort by most findings, lowest cover, fastest selling and more. |
-| **Projects** | Projects in flight with stage, open and overdue tasks. |
-| **Ask Twelfth** | Opens a Twelfth chat with your question filled in. Also works as a fallback command. |
+| Command                            | What it does                                                                                                                                                                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **What Should I Do Today**         | Your open actions, grouped Overdue → Due Today → This Week → Later, in the workspace's timezone. Filter to yours (plus unassigned) or everyone's. `⌘D` / `Ctrl+D` shows the detail; `⌘⇧K` / `Ctrl+Shift+K` asks Twelfth about the action. |
+| **Twelfth Today** (macOS menu bar) | The count of overdue and due-today actions, refreshed every 15 minutes. Red when something is overdue. Raycast menu bar commands are unavailable on Windows.                                                                              |
+| **Search Products**                | Your range with stock on hand, cover, velocity, sales, GP% and open findings. Sort by most findings, lowest cover, fastest selling and more.                                                                                              |
+| **Projects**                       | Projects in flight with stage, open and overdue tasks.                                                                                                                                                                                    |
+| **Ask Twelfth**                    | Opens a Twelfth chat with your question filled in. Also works as a fallback command.                                                                                                                                                      |
 
 In Raycast AI, `@twelfth what should I do today?` uses the same data through three AI tools (open actions, products, projects).
 
