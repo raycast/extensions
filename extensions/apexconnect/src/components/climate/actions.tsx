@@ -1,8 +1,8 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { apex } from "@lib/common";
 import { State } from "@lib/apexapi";
+import { range } from "@lib/utils";
 import { Action, ActionPanel, Color, Icon, popToRoot } from "@raycast/api";
-import { range } from "lodash-es";
 import { useState } from "react";
 
 export function ClimateActionPanel(props: { state: State }) {
@@ -21,8 +21,14 @@ export function ClimateActionPanel(props: { state: State }) {
       : false;
   const currentTempValue: number | undefined = state.attributes.temperature || undefined;
   const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
-  const upperTemp = currentTemp ? currentTemp + tempStep : undefined;
-  const lowerTemp = currentTemp ? currentTemp - tempStep : undefined;
+  const upperTemp =
+    currentTemp !== undefined && currentTemp < maxNormalizedTemp
+      ? Math.min(currentTemp + tempStep, maxNormalizedTemp)
+      : undefined;
+  const lowerTemp =
+    currentTemp !== undefined && currentTemp > minNormalizedTemp
+      ? Math.max(currentTemp - tempStep, minNormalizedTemp)
+      : undefined;
 
   const temps: number[] = range(minNormalizedTemp, maxNormalizedTemp, tempStep);
 

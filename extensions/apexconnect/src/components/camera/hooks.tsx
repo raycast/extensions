@@ -35,7 +35,7 @@ export function useImage(
       if (didUnmount) {
         return;
       }
-      const newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.png`, true);
+      const newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.jpg`, true);
       await fs.writeFile(newFilepath, frame);
       setLocalFilepath(`data:image/jpeg;base64,${frame.toString("base64")}`);
       setImageFilepath(newFilepath);
@@ -92,7 +92,7 @@ export function useImage(
           return;
         }
         try {
-          const newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.png`, true);
+          const newFilepath = await getCacheFilepath(`img_${entityID}_${Date.now()}.jpg`, true);
           await apex.getCameraProxyURL(entityID, newFilepath);
           await saveFrame(await fs.readFile(newFilepath));
           await fs.unlink(newFilepath).catch(() => undefined);

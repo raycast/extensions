@@ -14,7 +14,7 @@ Search Bilibili (哔哩哔哩) directly from Raycast with real-time autosuggesti
 1. Open Raycast, type **Search Bilibili**
 2. Start typing — suggestions appear automatically
 3. Press `Enter` to open the search results in your browser
-4. `⌘C` to copy the search link instead
+4. `⌘C` on macOS or `Ctrl+C` on Windows to copy the search link instead
 
 ## Preferences
 
@@ -26,7 +26,7 @@ Search Bilibili (哔哩哔哩) directly from Raycast with real-time autosuggesti
 ### Managing History
 
 When history is enabled, on the history screen:
-- `⌃X` — Delete a single history item
-- `⌃⇧X` — Clear all history
+- Use **Remove from History** to delete one item, or **Clear All History** to remove all entries.
+- The actions show the standard shortcuts for your platform.
 
 Created by 55b.life with Claude.

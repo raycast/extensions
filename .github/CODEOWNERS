@@ -253,7 +253,7 @@
 /extensions/big-o                                                   @shayneo
 /extensions/bike                                                    @SKaplanOfficial
 /extensions/bikeshare-station-status                                @itsmingjie
-/extensions/bilibili-search                                         @ADog55B
+/extensions/bilibili-search                                         @ADog55B @zwjtano
 /extensions/binance                                                 @grzegorzkrukowski
 /extensions/binance-exchange                                        @xilopaint
 /extensions/bing-search                                             @maver1ck @3c1u
@@ -1209,6 +1209,7 @@
 /extensions/heyclaude                                               @JSONbored
 /extensions/hidden-icons                                            @koinzhang
 /extensions/hide-all-apps                                           @peduarte @pernielsentikaer @andrewsardone @haydencbarnes
+/extensions/hide-details                                            @0xdhrv
 /extensions/hide-files                                              @koinzhang
 /extensions/hide-mail                                               @Flatroy @xmok
 /extensions/hidemyemail                                             @svenhofman @pernielsentikaer @dcastil
@@ -2469,11 +2470,12 @@
 /extensions/retool                                                  @andre347
 /extensions/retrac                                                  @Skarf4U
 /extensions/retrace                                                 @haseab @pernielsentikaer
+/extensions/revenuecat                                              @samuelkraft
 /extensions/reverso-context                                         @MrModest @MrModest
 /extensions/rewardful                                               @AlexIsMaking
 /extensions/rewiser                                                 @sertanhelvaci
 /extensions/rg-adguard-links                                        @jergensturdley @0xdhrv
-/extensions/rhttp                                                   @SebastianJarsve
+/extensions/rhttp                                                   @SebastianJarsve @shanto462
 /extensions/ricescore                                               @tonka3000
 /extensions/rick-and-morty                                          @xmok
 /extensions/ring-intercom                                           @stefanbd
@@ -2654,6 +2656,7 @@
 /extensions/simple-reminder                                         @comoser @pernielsentikaer @miguel-felix1
 /extensions/simple-youdao                                           @xeric
 /extensions/simplebackups                                           @zOxta
+/extensions/simplebanking                                           @klotzbrocken
 /extensions/simplelogin                                             @adrian-schnell @marcelruhf
 /extensions/simpletexocr                                            @zhuozhiyongde @yiran-frank-mao @Xel-naga7
 /extensions/simpread                                                @Kenshin

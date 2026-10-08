@@ -1,4 +1,6 @@
 import {
+  TraktCalendarMovieItem,
+  TraktCalendarShowItem,
   TraktEpisodeListItem,
   TraktList,
   TraktListEntry,
@@ -12,6 +14,7 @@ import {
   TraktUserRatingItem,
   TraktUserStats,
 } from "../lib/schema";
+import { toLocalAiring } from "./calendar-window";
 
 export type CompactMovie = {
   traktId: number;
@@ -61,6 +64,27 @@ export type CompactPausedMovie = {
   /** Rounded from the runtime; absent when Trakt has no runtime for the movie. */
   minutesLeft?: number;
   pausedAt: string;
+};
+
+export type CompactCalendarEpisode = {
+  /** Air date in the user's time zone, YYYY-MM-DD. */
+  localDate: string;
+  /** Air time in the user's time zone, HH:mm. */
+  localTime: string;
+  showTitle: string;
+  showTraktId: number;
+  season: number;
+  number: number;
+  episodeTitle?: string;
+  episodeTraktId: number;
+};
+
+export type CompactCalendarMovie = {
+  /** Release date exactly as Trakt sends it (YYYY-MM-DD, no time zone). */
+  releaseDate: string;
+  title: string;
+  year?: number;
+  traktId: number;
 };
 
 export type CompactEpisode = {
@@ -231,6 +255,31 @@ export function toCompactPausedMovie({ movie, progress, paused_at }: TraktPlayba
     minutesLeft: movie.runtime ? Math.max(1, Math.round(movie.runtime * (1 - progress / 100))) : undefined,
     pausedAt: paused_at,
   };
+}
+
+/** `undefined` when Trakt sent no air time: an episode without a date has no place on a calendar. */
+export function toCompactCalendarEpisode(
+  { first_aired, episode, show }: TraktCalendarShowItem,
+  timeZone: string,
+): CompactCalendarEpisode | undefined {
+  const airing = toLocalAiring(first_aired, timeZone);
+  if (!airing) return undefined;
+
+  return {
+    ...airing,
+    showTitle: show.title,
+    showTraktId: show.ids.trakt,
+    season: episode.season,
+    number: episode.number,
+    episodeTitle: episode.title ?? undefined,
+    episodeTraktId: episode.ids.trakt,
+  };
+}
+
+export function toCompactCalendarMovie({ released, movie }: TraktCalendarMovieItem): CompactCalendarMovie | undefined {
+  if (!released) return undefined;
+
+  return { releaseDate: released, title: movie.title, year: movie.year ?? undefined, traktId: movie.ids.trakt };
 }
 
 export function toCompactEpisode(episode: TraktEpisodeListItem): CompactEpisode {
