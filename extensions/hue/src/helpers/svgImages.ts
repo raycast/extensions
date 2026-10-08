@@ -10,8 +10,10 @@ new Cache({ namespace: "hue-light-icons" }).clear();
 
 const round = (n: number) => Math.round(n * 1e4) / 1e4;
 
-// The amount to pass to chroma's darken() at height fraction t. It gives tiles a 3D-ish depth.
-const darkening = (t: number) => 0.5 * (2.3 * t) ** 2;
+// As in the Hue app's room cards, a dark overlay shades tiles from the top down. Its opacity at height fraction t rises
+// fast and levels off; color and curve are fitted to a screenshot of the app.
+const SHADE_COLOR = "#242424";
+const shade = (t: number) => 0.78 * (1 - (1 - t) ** 3.25);
 
 function svgUri(width: number, height: number, content: string, stretch = false) {
   const aspect = stretch ? ' preserveAspectRatio="none"' : "";
@@ -24,21 +26,13 @@ function linearGradient(id: string, x2: number, y2: number, steps: number, stop:
   return `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.join("")}</linearGradient>`;
 }
 
+// The colors blend evenly from left to right, edge to edge.
 function gradientContent(colors: Palette, width: number, height: number) {
   const rect = (gradientId: string) => `<rect width="${width}" height="${height}" fill="url(#${gradientId})"/>`;
-
-  if (colors.length === 1) {
-    const color = chroma(colors[0]);
-    const vertical = linearGradient("v", 0, 1, 8, (t) => `stop-color="${color.darken(darkening(t)).hex()}"`);
-    return `<defs>${vertical}</defs>${rect("v")}`;
-  }
-
-  // One black overlay can only follow the darkening of a mid-gray, so its opacity is derived from that.
-  const gray = (t: number) => chroma.lab(60, 0, 0).darken(darkening(t)).rgb(false)[0];
-  const opacity = (t: number) => round(1 - gray(t) / gray(0));
-  const scale = chroma.scale(colors).gamma(0.8).padding(0.15);
-  const horizontal = linearGradient("h", 1, 0, 32, (t) => `stop-color="${scale(t).hex()}"`);
-  const vertical = linearGradient("v", 0, 1, 8, (t) => `stop-color="#000" stop-opacity="${opacity(t)}"`);
+  const last = colors.length - 1;
+  const color = (t: number) => `stop-color="${colors[Math.round(t * last)]}"`;
+  const horizontal = linearGradient("h", 1, 0, Math.max(last, 1), color);
+  const vertical = linearGradient("v", 0, 1, 8, (t) => `stop-color="${SHADE_COLOR}" stop-opacity="${round(shade(t))}"`);
   return `<defs>${horizontal}${vertical}</defs>${rect("h")}${rect("v")}`;
 }
 
@@ -85,7 +79,7 @@ export function createLightIcon(light: Light): Image {
   // The glyph sits in the icon's top left quarter, whose center is a quarter of the way down the gradient.
   // APCA, unlike WCAG 2's contrast ratio, rates white higher than black on saturated reds and purples.
   const lightColor = getColorFromLight(light);
-  const behindGlyph = chroma(lightColor).darken(darkening(0.25));
+  const behindGlyph = chroma.mix(lightColor, SHADE_COLOR, shade(0.25), "rgb");
   const black = Math.abs(chroma.contrastAPCA("#000", behindGlyph)) > Math.abs(chroma.contrastAPCA("#fff", behindGlyph));
   const background = gradientContent([lightColor], LIGHT_ICON_SIZE, LIGHT_ICON_SIZE);
   return { source: iconUri(background + glyph(black ? "black" : "white")) };
