@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add "(Read & Speak)" to Siri Voice tips in the documentation
+
 ## [Maintenance] - 2026-04-16
 
 - Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`
