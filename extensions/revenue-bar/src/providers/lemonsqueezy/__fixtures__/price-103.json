@@ -1,0 +1,46 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "self": "https://api.lemonsqueezy.com/v1/prices/103"
+  },
+  "data": {
+    "type": "prices",
+    "id": "103",
+    "attributes": {
+      "variant_id": 1,
+      "category": "subscription",
+      "scheme": "graduated",
+      "usage_aggregation": null,
+      "unit_price": null,
+      "unit_price_decimal": null,
+      "setup_fee_enabled": false,
+      "setup_fee": null,
+      "package_size": 1,
+      "tiers": [
+        {
+          "last_unit": 2,
+          "unit_price": 1000,
+          "unit_price_decimal": null,
+          "fixed_fee": 0
+        },
+        {
+          "last_unit": "inf",
+          "unit_price": 500,
+          "unit_price_decimal": null,
+          "fixed_fee": 0
+        }
+      ],
+      "renewal_interval_unit": "month",
+      "renewal_interval_quantity": 3,
+      "trial_interval_unit": null,
+      "trial_interval_quantity": null,
+      "min_price": null,
+      "suggested_price": null,
+      "tax_code": "saas",
+      "created_at": "2026-01-01T00:00:00.000000Z",
+      "updated_at": "2026-01-01T00:00:00.000000Z"
+    }
+  }
+}

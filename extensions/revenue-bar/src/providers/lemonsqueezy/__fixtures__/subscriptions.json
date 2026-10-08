@@ -1,0 +1,284 @@
+{
+  "meta": {
+    "page": {
+      "currentPage": 1,
+      "from": 1,
+      "lastPage": 1,
+      "perPage": 100,
+      "to": 6,
+      "total": 6
+    }
+  },
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "first": "https://api.lemonsqueezy.com/v1/subscriptions?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt",
+    "last": "https://api.lemonsqueezy.com/v1/subscriptions?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt"
+  },
+  "data": [
+    {
+      "type": "subscriptions",
+      "id": "7",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 7,
+        "order_item_id": 7,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Pro",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "sam@example.com",
+        "status": "active",
+        "status_formatted": "Active",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": false,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": {
+          "id": 7,
+          "subscription_id": 7,
+          "price_id": 101,
+          "quantity": 1,
+          "created_at": "2026-09-06T08:00:00.000000Z",
+          "updated_at": "2026-09-06T08:00:00.000000Z"
+        },
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-09-06T08:00:00.000000Z",
+        "updated_at": "2026-10-06T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "type": "subscriptions",
+      "id": "8",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 8,
+        "order_item_id": 8,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Team",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "team@example.com",
+        "status": "active",
+        "status_formatted": "Active",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": false,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": {
+          "id": 8,
+          "subscription_id": 8,
+          "price_id": 102,
+          "quantity": 2,
+          "created_at": "2026-10-04T08:00:00.000000Z",
+          "updated_at": "2026-10-04T08:00:00.000000Z"
+        },
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-10-04T08:00:00.000000Z",
+        "updated_at": "2026-10-04T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "type": "subscriptions",
+      "id": "9",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 9,
+        "order_item_id": 9,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Pro",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "trial@example.com",
+        "status": "on_trial",
+        "status_formatted": "On_Trial",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": false,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": null,
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-10-07T08:00:00.000000Z",
+        "updated_at": "2026-10-07T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "type": "subscriptions",
+      "id": "10",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 10,
+        "order_item_id": 10,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Pro",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "gone@example.com",
+        "status": "cancelled",
+        "status_formatted": "Cancelled",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": true,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": {
+          "id": 10,
+          "subscription_id": 10,
+          "price_id": 101,
+          "quantity": 1,
+          "created_at": "2026-03-01T08:00:00.000000Z",
+          "updated_at": "2026-03-01T08:00:00.000000Z"
+        },
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-03-01T08:00:00.000000Z",
+        "updated_at": "2026-10-02T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "type": "subscriptions",
+      "id": "11",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 11,
+        "order_item_id": 11,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Pro",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "ancient@example.com",
+        "status": "expired",
+        "status_formatted": "Expired",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": false,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": {
+          "id": 11,
+          "subscription_id": 11,
+          "price_id": 101,
+          "quantity": 1,
+          "created_at": "2025-01-01T08:00:00.000000Z",
+          "updated_at": "2025-01-01T08:00:00.000000Z"
+        },
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2025-01-01T08:00:00.000000Z",
+        "updated_at": "2025-06-01T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    },
+    {
+      "type": "subscriptions",
+      "id": "12",
+      "attributes": {
+        "store_id": 1,
+        "customer_id": 20,
+        "order_id": 12,
+        "order_item_id": 12,
+        "product_id": 1,
+        "variant_id": 1,
+        "product_name": "Seats",
+        "variant_name": "Default",
+        "user_name": "Sam Lee",
+        "user_email": "seats@example.com",
+        "status": "past_due",
+        "status_formatted": "Past_Due",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "payment_processor": "stripe",
+        "pause": null,
+        "cancelled": false,
+        "trial_ends_at": null,
+        "billing_anchor": 6,
+        "first_subscription_item": {
+          "id": 12,
+          "subscription_id": 12,
+          "price_id": 103,
+          "quantity": 5,
+          "created_at": "2026-08-01T08:00:00.000000Z",
+          "updated_at": "2026-08-01T08:00:00.000000Z"
+        },
+        "urls": {
+          "update_payment_method": "https://x",
+          "customer_portal": "https://x",
+          "customer_portal_update_subscription": null
+        },
+        "renews_at": "2026-11-06T00:00:00.000000Z",
+        "ends_at": null,
+        "created_at": "2026-08-01T08:00:00.000000Z",
+        "updated_at": "2026-10-01T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {}
+    }
+  ]
+}

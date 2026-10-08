@@ -1,0 +1,29 @@
+{
+  "activated": true,
+  "error": null,
+  "license_key": {
+    "id": 1,
+    "status": "active",
+    "key": "38b1460a-5104-4067-a91d-77b872934d51",
+    "activation_limit": 3,
+    "activation_usage": 2,
+    "created_at": "2021-01-24T14:15:07.000000Z",
+    "expires_at": null
+  },
+  "instance": {
+    "id": "f90ec370-fd83-46a5-8bbd-44a241e78665",
+    "name": "Revenue Bar \u00b7 test-mac",
+    "created_at": "2026-10-08T14:15:07.000000Z"
+  },
+  "meta": {
+    "store_id": 1,
+    "order_id": 2,
+    "order_item_id": 3,
+    "product_id": 4,
+    "product_name": "Revenue Bar Pro",
+    "variant_name": "Default",
+    "customer_id": 6,
+    "customer_name": "John Doe",
+    "customer_email": "john@example.com"
+  }
+}

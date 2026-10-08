@@ -1,0 +1,227 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "revenue-bar",
+  "title": "Revenue Bar",
+  "description": "See your Stripe, Lemon Squeezy, Gumroad and Paddle revenue in one dashboard and in your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "felitrejos",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "View Revenue Dashboard",
+      "subtitle": "Revenue Bar",
+      "description": "Today, last 7 days, last 30 days and month-to-date revenue, per provider and combined.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-sales",
+      "title": "View Recent Sales",
+      "subtitle": "Revenue Bar",
+      "description": "Latest orders across your payment providers.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Revenue Menu Bar",
+      "subtitle": "Revenue Bar",
+      "description": "Show revenue for a chosen range in the menu bar. Requires Revenue Bar Pro.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "menuBarRange",
+          "title": "Range",
+          "description": "Which revenue range the menu bar title shows.",
+          "type": "dropdown",
+          "required": false,
+          "default": "today",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Last 7 Days",
+              "value": "7d"
+            },
+            {
+              "title": "Last 30 Days",
+              "value": "30d"
+            },
+            {
+              "title": "Month to Date",
+              "value": "mtd"
+            }
+          ]
+        },
+        {
+          "name": "menuBarShowProviderBreakdown",
+          "title": "Provider Breakdown",
+          "label": "Show a line per provider in the menu",
+          "description": "Show the revenue of each provider in the dropdown.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "title": "View Subscriptions",
+      "subtitle": "Revenue Bar",
+      "description": "MRR, active subscriptions, and new and churned subscriptions this month. Requires Revenue Bar Pro.",
+      "mode": "view"
+    },
+    {
+      "name": "refunds",
+      "title": "View Refunds and Disputes",
+      "subtitle": "Revenue Bar",
+      "description": "Refunds, disputes and chargebacks from the last 30 days. Requires Revenue Bar Pro.",
+      "mode": "view"
+    },
+    {
+      "name": "search-customers",
+      "title": "Search Customers",
+      "subtitle": "Revenue Bar",
+      "description": "Find a customer by email across providers and see their orders and subscriptions. Requires Revenue Bar Pro.",
+      "mode": "view"
+    },
+    {
+      "name": "export-csv",
+      "title": "Export Sales to CSV",
+      "subtitle": "Revenue Bar",
+      "description": "Export the sales of the selected dashboard range to a CSV file in Downloads. Requires Revenue Bar Pro.",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-license",
+      "title": "Manage License",
+      "subtitle": "Revenue Bar",
+      "description": "Check, validate or deactivate your Revenue Bar Pro license key.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stripeApiKey",
+      "title": "Stripe Restricted API Key",
+      "description": "A read-only restricted key (rk_live_...). See the README for the permissions to enable.",
+      "type": "password",
+      "required": false,
+      "placeholder": "rk_live_..."
+    },
+    {
+      "name": "lemonSqueezyApiKey",
+      "title": "Lemon Squeezy API Key",
+      "description": "Create one in Lemon Squeezy under Settings > API.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "gumroadAccessToken",
+      "title": "Gumroad Access Token",
+      "description": "Generate one in Gumroad under Settings > Advanced > Applications.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "paddleApiKey",
+      "title": "Paddle API Key",
+      "description": "A Paddle Billing API key with read permissions (pdl_live_apikey_...).",
+      "type": "password",
+      "required": false,
+      "placeholder": "pdl_live_apikey_..."
+    },
+    {
+      "name": "paddleEnvironment",
+      "title": "Paddle Environment",
+      "description": "Live or sandbox. Keys that contain live_ or sdbx_ select their environment automatically.",
+      "type": "dropdown",
+      "required": false,
+      "default": "live",
+      "data": [
+        {
+          "title": "Live",
+          "value": "live"
+        },
+        {
+          "title": "Sandbox",
+          "value": "sandbox"
+        }
+      ]
+    },
+    {
+      "name": "displayCurrency",
+      "title": "Display Currency",
+      "description": "Three-letter currency code used for combined totals. Other currencies are converted with daily ECB rates.",
+      "type": "textfield",
+      "required": false,
+      "default": "USD",
+      "placeholder": "USD"
+    },
+    {
+      "name": "defaultRange",
+      "title": "Default Range",
+      "description": "The range the dashboard opens with.",
+      "type": "dropdown",
+      "required": false,
+      "default": "today",
+      "data": [
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Last 7 Days",
+          "value": "7d"
+        },
+        {
+          "title": "Last 30 Days",
+          "value": "30d"
+        },
+        {
+          "title": "Month to Date",
+          "value": "mtd"
+        }
+      ]
+    },
+    {
+      "name": "licenseKey",
+      "title": "Revenue Bar Pro License Key",
+      "description": "Optional. Unlocks all providers, the menu bar, subscriptions, refunds, customer search and CSV export.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

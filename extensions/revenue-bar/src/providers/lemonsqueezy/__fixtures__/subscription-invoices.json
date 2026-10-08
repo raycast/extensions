@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "page": {
+      "currentPage": 1,
+      "from": 1,
+      "lastPage": 1,
+      "perPage": 100,
+      "to": 4,
+      "total": 4
+    }
+  },
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "first": "https://api.lemonsqueezy.com/v1/subscription-invoices?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt",
+    "last": "https://api.lemonsqueezy.com/v1/subscription-invoices?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt"
+  },
+  "data": [
+    {
+      "type": "subscription-invoices",
+      "id": "13",
+      "attributes": {
+        "store_id": 1,
+        "subscription_id": 7,
+        "customer_id": 20,
+        "user_name": "Sam Lee",
+        "user_email": "sam@example.com",
+        "billing_reason": "renewal",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "currency": "USD",
+        "currency_rate": "1.00000000",
+        "status": "paid",
+        "status_formatted": "Paid",
+        "refunded": false,
+        "refunded_at": null,
+        "subtotal": 999,
+        "discount_total": 0,
+        "tax": 0,
+        "tax_inclusive": false,
+        "total": 999,
+        "refunded_amount": 0,
+        "subtotal_usd": 999,
+        "discount_total_usd": 0,
+        "tax_usd": 0,
+        "total_usd": 999,
+        "refunded_amount_usd": 0,
+        "urls": {
+          "invoice_url": null
+        },
+        "created_at": "2026-10-06T08:00:00.000000Z",
+        "updated_at": "2026-10-06T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/subscription-invoices/13"
+      }
+    },
+    {
+      "type": "subscription-invoices",
+      "id": "12",
+      "attributes": {
+        "store_id": 1,
+        "subscription_id": 8,
+        "customer_id": 20,
+        "user_name": "Sam Lee",
+        "user_email": "sam@example.com",
+        "billing_reason": "initial",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "currency": "USD",
+        "currency_rate": "1.00000000",
+        "status": "paid",
+        "status_formatted": "Paid",
+        "refunded": false,
+        "refunded_at": null,
+        "subtotal": 4900,
+        "discount_total": 0,
+        "tax": 0,
+        "tax_inclusive": false,
+        "total": 4900,
+        "refunded_amount": 0,
+        "subtotal_usd": 4900,
+        "discount_total_usd": 0,
+        "tax_usd": 0,
+        "total_usd": 4900,
+        "refunded_amount_usd": 0,
+        "urls": {
+          "invoice_url": null
+        },
+        "created_at": "2026-10-04T08:00:00.000000Z",
+        "updated_at": "2026-10-04T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/subscription-invoices/12"
+      }
+    },
+    {
+      "type": "subscription-invoices",
+      "id": "11",
+      "attributes": {
+        "store_id": 1,
+        "subscription_id": 7,
+        "customer_id": 20,
+        "user_name": "Sam Lee",
+        "user_email": "sam@example.com",
+        "billing_reason": "updated",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "currency": "USD",
+        "currency_rate": "1.00000000",
+        "status": "void",
+        "status_formatted": "Void",
+        "refunded": false,
+        "refunded_at": null,
+        "subtotal": 500,
+        "discount_total": 0,
+        "tax": 0,
+        "tax_inclusive": false,
+        "total": 500,
+        "refunded_amount": 0,
+        "subtotal_usd": 500,
+        "discount_total_usd": 0,
+        "tax_usd": 0,
+        "total_usd": 500,
+        "refunded_amount_usd": 0,
+        "urls": {
+          "invoice_url": null
+        },
+        "created_at": "2026-10-03T08:00:00.000000Z",
+        "updated_at": "2026-10-03T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/subscription-invoices/11"
+      }
+    },
+    {
+      "type": "subscription-invoices",
+      "id": "10",
+      "attributes": {
+        "store_id": 1,
+        "subscription_id": 7,
+        "customer_id": 20,
+        "user_name": "Sam Lee",
+        "user_email": "sam@example.com",
+        "billing_reason": "renewal",
+        "card_brand": "visa",
+        "card_last_four": "4242",
+        "currency": "USD",
+        "currency_rate": "1.00000000",
+        "status": "paid",
+        "status_formatted": "Paid",
+        "refunded": false,
+        "refunded_at": null,
+        "subtotal": 999,
+        "discount_total": 0,
+        "tax": 0,
+        "tax_inclusive": false,
+        "total": 999,
+        "refunded_amount": 0,
+        "subtotal_usd": 999,
+        "discount_total_usd": 0,
+        "tax_usd": 0,
+        "total_usd": 999,
+        "refunded_amount_usd": 0,
+        "urls": {
+          "invoice_url": null
+        },
+        "created_at": "2026-09-06T08:00:00.000000Z",
+        "updated_at": "2026-09-06T08:00:00.000000Z",
+        "test_mode": false
+      },
+      "relationships": {},
+      "links": {
+        "self": "https://api.lemonsqueezy.com/v1/subscription-invoices/10"
+      }
+    }
+  ]
+}

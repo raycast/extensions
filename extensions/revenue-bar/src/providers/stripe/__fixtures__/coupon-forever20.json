@@ -1,0 +1,17 @@
+{
+  "id": "FOREVER20",
+  "object": "coupon",
+  "amount_off": null,
+  "created": 1791460800,
+  "currency": null,
+  "duration": "forever",
+  "duration_in_months": null,
+  "livemode": true,
+  "max_redemptions": null,
+  "metadata": {},
+  "name": "20% forever",
+  "percent_off": 20,
+  "redeem_by": null,
+  "times_redeemed": 1,
+  "valid": true
+}

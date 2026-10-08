@@ -1,0 +1,38 @@
+[
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "AUD",
+    "rate": 1.4371
+  },
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "CAD",
+    "rate": 1.4242
+  },
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "EUR",
+    "rate": 0.89132
+  },
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "GBP",
+    "rate": 0.7556
+  },
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "JPY",
+    "rate": 158.25
+  },
+  {
+    "date": "2026-10-08",
+    "base": "USD",
+    "quote": "NGN",
+    "rate": 1329.31
+  }
+]

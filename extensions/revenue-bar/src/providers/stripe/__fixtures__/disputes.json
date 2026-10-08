@@ -1,0 +1,51 @@
+{
+  "object": "list",
+  "url": "/v1/disputes",
+  "has_more": false,
+  "data": [
+    {
+      "id": "du_1",
+      "object": "dispute",
+      "amount": 4000,
+      "balance_transactions": [],
+      "charge": "ch_disputed",
+      "created": 1791460300,
+      "currency": "usd",
+      "evidence": {},
+      "evidence_details": {
+        "due_by": 1792065600,
+        "has_evidence": false,
+        "past_due": false,
+        "submission_count": 0
+      },
+      "is_charge_refundable": true,
+      "livemode": true,
+      "metadata": {},
+      "payment_intent": null,
+      "reason": "fraudulent",
+      "status": "needs_response"
+    },
+    {
+      "id": "du_2",
+      "object": "dispute",
+      "amount": 1200,
+      "balance_transactions": [],
+      "charge": "ch_disputed",
+      "created": 1791456800,
+      "currency": "usd",
+      "evidence": {},
+      "evidence_details": {
+        "due_by": 1792065600,
+        "has_evidence": false,
+        "past_due": false,
+        "submission_count": 0
+      },
+      "is_charge_refundable": true,
+      "livemode": true,
+      "metadata": {},
+      "payment_intent": null,
+      "reason": "general",
+      "status": "warning_needs_response"
+    }
+  ]
+}

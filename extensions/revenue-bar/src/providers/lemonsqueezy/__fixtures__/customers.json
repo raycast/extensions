@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "page": {
+      "currentPage": 1,
+      "from": 1,
+      "lastPage": 1,
+      "perPage": 100,
+      "to": 1,
+      "total": 1
+    }
+  },
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "first": "https://api.lemonsqueezy.com/v1/customers?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt",
+    "last": "https://api.lemonsqueezy.com/v1/customers?page%5Bnumber%5D=1&page%5Bsize%5D=100&sort=-createdAt"
+  },
+  "data": [
+    {
+      "type": "customers",
+      "id": "20",
+      "attributes": {
+        "store_id": 1,
+        "name": "Sam Lee",
+        "email": "sam@example.com",
+        "status": "subscribed",
+        "city": null,
+        "region": null,
+        "country": "US",
+        "total_revenue_currency": 84332,
+        "mrr": 999,
+        "status_formatted": "Subscribed",
+        "country_formatted": "United States",
+        "total_revenue_currency_formatted": "$843.32",
+        "mrr_formatted": "$9.99",
+        "urls": {
+          "customer_portal": "https://x"
+        },
+        "created_at": "2024-12-01T13:01:07.000000Z",
+        "updated_at": "2024-12-09T09:05:21.000000Z",
+        "test_mode": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "errors": [
+    {
+      "detail": "Unauthenticated.",
+      "status": "401",
+      "title": "Unauthorized"
+    }
+  ],
+  "jsonapi": {
+    "version": "1.0"
+  }
+}

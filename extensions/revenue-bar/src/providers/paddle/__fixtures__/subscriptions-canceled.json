@@ -1,0 +1,179 @@
+{
+  "data": [
+    {
+      "id": "sub_churned",
+      "status": "canceled",
+      "customer_id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "address_id": "add_01",
+      "business_id": null,
+      "currency_code": "USD",
+      "created_at": "2026-08-12T12:42:27.89Z",
+      "updated_at": "2026-08-12T12:42:27.89Z",
+      "started_at": "2026-08-12T12:42:27.89Z",
+      "first_billed_at": "2026-08-12T12:42:27.89Z",
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": "2026-10-03T10:00:00Z",
+      "collection_mode": "automatic",
+      "billing_details": null,
+      "current_billing_period": null,
+      "billing_cycle": {
+        "frequency": 1,
+        "interval": "month"
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "status": "active",
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-08-12T12:42:27.89Z",
+          "updated_at": "2026-08-12T12:42:27.89Z",
+          "previously_billed_at": null,
+          "next_billed_at": null,
+          "trial_dates": null,
+          "price": {
+            "id": "pri_seat",
+            "product_id": "pro_01",
+            "type": "standard",
+            "description": "d",
+            "name": "Monthly (per seat)",
+            "tax_mode": "account_setting",
+            "billing_cycle": {
+              "frequency": 1,
+              "interval": "month"
+            },
+            "trial_period": null,
+            "unit_price": {
+              "amount": "3000",
+              "currency_code": "USD"
+            },
+            "unit_price_overrides": [],
+            "custom_data": null,
+            "status": "active",
+            "quantity": {
+              "minimum": 1,
+              "maximum": 999
+            },
+            "import_meta": null,
+            "created_at": "2026-08-12T12:42:27.89Z",
+            "updated_at": "2026-08-12T12:42:27.89Z"
+          },
+          "product": {
+            "id": "pro_01",
+            "name": "AeroEdit Pro",
+            "type": "standard",
+            "tax_category": "standard",
+            "description": "x",
+            "image_url": null,
+            "custom_data": null,
+            "status": "active",
+            "import_meta": null,
+            "created_at": "2026-08-12T12:42:27.89Z",
+            "updated_at": "2026-08-12T12:42:27.89Z"
+          }
+        }
+      ],
+      "custom_data": null,
+      "management_urls": {
+        "update_payment_method": null,
+        "cancel": "https://x"
+      },
+      "discount": null,
+      "import_meta": null,
+      "consent_requirements": []
+    },
+    {
+      "id": "sub_old",
+      "status": "canceled",
+      "customer_id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "address_id": "add_01",
+      "business_id": null,
+      "currency_code": "USD",
+      "created_at": "2026-08-12T12:42:27.89Z",
+      "updated_at": "2026-08-12T12:42:27.89Z",
+      "started_at": "2026-08-12T12:42:27.89Z",
+      "first_billed_at": "2026-08-12T12:42:27.89Z",
+      "next_billed_at": null,
+      "paused_at": null,
+      "canceled_at": "2026-05-03T10:00:00Z",
+      "collection_mode": "automatic",
+      "billing_details": null,
+      "current_billing_period": null,
+      "billing_cycle": {
+        "frequency": 1,
+        "interval": "month"
+      },
+      "scheduled_change": null,
+      "items": [
+        {
+          "status": "active",
+          "quantity": 1,
+          "recurring": true,
+          "created_at": "2026-08-12T12:42:27.89Z",
+          "updated_at": "2026-08-12T12:42:27.89Z",
+          "previously_billed_at": null,
+          "next_billed_at": null,
+          "trial_dates": null,
+          "price": {
+            "id": "pri_seat",
+            "product_id": "pro_01",
+            "type": "standard",
+            "description": "d",
+            "name": "Monthly (per seat)",
+            "tax_mode": "account_setting",
+            "billing_cycle": {
+              "frequency": 1,
+              "interval": "month"
+            },
+            "trial_period": null,
+            "unit_price": {
+              "amount": "3000",
+              "currency_code": "USD"
+            },
+            "unit_price_overrides": [],
+            "custom_data": null,
+            "status": "active",
+            "quantity": {
+              "minimum": 1,
+              "maximum": 999
+            },
+            "import_meta": null,
+            "created_at": "2026-08-12T12:42:27.89Z",
+            "updated_at": "2026-08-12T12:42:27.89Z"
+          },
+          "product": {
+            "id": "pro_01",
+            "name": "AeroEdit Pro",
+            "type": "standard",
+            "tax_category": "standard",
+            "description": "x",
+            "image_url": null,
+            "custom_data": null,
+            "status": "active",
+            "import_meta": null,
+            "created_at": "2026-08-12T12:42:27.89Z",
+            "updated_at": "2026-08-12T12:42:27.89Z"
+          }
+        }
+      ],
+      "custom_data": null,
+      "management_urls": {
+        "update_payment_method": null,
+        "cancel": "https://x"
+      },
+      "discount": null,
+      "import_meta": null,
+      "consent_requirements": []
+    }
+  ],
+  "meta": {
+    "request_id": "r",
+    "pagination": {
+      "per_page": 200,
+      "next": "https://api.paddle.com/subscriptions?after=sub_old",
+      "has_more": false,
+      "estimated_total": 2
+    }
+  }
+}

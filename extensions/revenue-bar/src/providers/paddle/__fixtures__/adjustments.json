@@ -1,0 +1,169 @@
+{
+  "data": [
+    {
+      "id": "adj_06",
+      "action": "refund",
+      "type": "full",
+      "transaction_id": "txn_05refunded",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [],
+      "totals": {
+        "subtotal": "1500",
+        "tax": "0",
+        "total": "1500",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-10-08T16:00:00Z",
+      "updated_at": "2026-10-08T16:00:00Z"
+    },
+    {
+      "id": "adj_05",
+      "action": "chargeback",
+      "type": "full",
+      "transaction_id": "txn_07cb",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [],
+      "totals": {
+        "subtotal": "4000",
+        "tax": "0",
+        "total": "4000",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-10-08T15:30:00Z",
+      "updated_at": "2026-10-08T15:30:00Z"
+    },
+    {
+      "id": "adj_04",
+      "action": "refund",
+      "type": "full",
+      "transaction_id": "txn_x",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "pending_approval",
+      "items": [],
+      "totals": {
+        "subtotal": "700",
+        "tax": "0",
+        "total": "700",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-10-08T15:00:00Z",
+      "updated_at": "2026-10-08T15:00:00Z"
+    },
+    {
+      "id": "adj_03",
+      "action": "credit",
+      "type": "full",
+      "transaction_id": "txn_y",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [],
+      "totals": {
+        "subtotal": "300",
+        "tax": "0",
+        "total": "300",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-10-08T14:00:00Z",
+      "updated_at": "2026-10-08T14:00:00Z"
+    },
+    {
+      "id": "adj_02",
+      "action": "chargeback_warning",
+      "type": "full",
+      "transaction_id": "txn_z",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [],
+      "totals": {
+        "subtotal": "2000",
+        "tax": "0",
+        "total": "2000",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-10-08T13:00:00Z",
+      "updated_at": "2026-10-08T13:00:00Z"
+    },
+    {
+      "id": "adj_01",
+      "action": "refund",
+      "type": "full",
+      "transaction_id": "txn_old",
+      "subscription_id": null,
+      "customer_id": "ctm_01",
+      "reason": "Customer requested",
+      "credit_applied_to_balance": null,
+      "currency_code": "USD",
+      "status": "approved",
+      "items": [],
+      "totals": {
+        "subtotal": "900",
+        "tax": "0",
+        "total": "900",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "currency_code": "USD"
+      },
+      "payout_totals": null,
+      "tax_rates_used": [],
+      "created_at": "2026-09-20T10:00:00Z",
+      "updated_at": "2026-09-20T10:00:00Z"
+    }
+  ],
+  "meta": {
+    "request_id": "r",
+    "pagination": {
+      "per_page": 50,
+      "next": "https://api.paddle.com/adjustments?after=adj_01",
+      "has_more": true,
+      "estimated_total": 60
+    }
+  }
+}

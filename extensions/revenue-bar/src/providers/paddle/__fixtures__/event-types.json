@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "event_type_id": 1,
+      "name": "transaction.completed",
+      "description": "x",
+      "group": "Transaction",
+      "available_versions": [1]
+    }
+  ],
+  "meta": {
+    "request_id": "r"
+  }
+}

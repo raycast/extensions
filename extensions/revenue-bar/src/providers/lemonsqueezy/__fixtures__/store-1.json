@@ -1,0 +1,26 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": {
+    "type": "stores",
+    "id": "1",
+    "attributes": {
+      "name": "My Store",
+      "slug": "my-store",
+      "domain": "my-store.lemonsqueezy.com",
+      "url": "https://my-store.lemonsqueezy.com",
+      "avatar_url": "",
+      "plan": "fresh",
+      "country": "US",
+      "country_nicename": "United States",
+      "currency": "USD",
+      "total_sales": 1,
+      "total_revenue": 999,
+      "thirty_day_sales": 0,
+      "thirty_day_revenue": 0,
+      "created_at": "2021-05-24T14:15:06.000000Z",
+      "updated_at": "2021-05-24T14:15:06.000000Z"
+    }
+  }
+}

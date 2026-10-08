@@ -1,0 +1,899 @@
+{
+  "object": "list",
+  "url": "/v1/subscriptions",
+  "has_more": false,
+  "data": [
+    {
+      "id": "sub_monthly",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": {
+        "id": "cus_1",
+        "object": "customer",
+        "email": "m@example.com",
+        "name": "M"
+      },
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_monthly_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 1,
+            "subscription": "sub_monthly",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_monthly"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_yearly",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_yearly_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_y",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "year",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 12000,
+              "unit_amount_decimal": "12000"
+            },
+            "quantity": 3,
+            "subscription": "sub_yearly",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_yearly"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_quarterly",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_quarterly_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_q",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 3,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 3000,
+              "unit_amount_decimal": "3000"
+            },
+            "quantity": 1,
+            "subscription": "sub_quarterly",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_quarterly"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "past_due",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_weekly",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_weekly_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_w",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "week",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 500,
+              "unit_amount_decimal": "500"
+            },
+            "quantity": 1,
+            "subscription": "sub_weekly",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_weekly"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_trial",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1791374400,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1791374400,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_trial_0",
+            "object": "subscription_item",
+            "created": 1791374400,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 1,
+            "subscription": "sub_trial",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_trial"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1791374400,
+      "status": "trialing",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_discount_pct",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [
+        {
+          "id": "di_1",
+          "object": "discount",
+          "source": {
+            "type": "coupon",
+            "coupon": "FOREVER20"
+          },
+          "customer": "cus_1",
+          "end": null,
+          "start": 1788868800,
+          "subscription": "sub_discount_pct"
+        }
+      ],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_discount_pct_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 2,
+            "subscription": "sub_discount_pct",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_discount_pct"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_discount_once",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [
+        {
+          "id": "di_2",
+          "object": "discount",
+          "source": {
+            "type": "coupon",
+            "coupon": {
+              "id": "ONCE50",
+              "object": "coupon",
+              "percent_off": 50,
+              "amount_off": null,
+              "currency": null,
+              "duration": "once"
+            }
+          },
+          "customer": "cus_1",
+          "end": null,
+          "start": 1788868800,
+          "subscription": "sub_discount_once"
+        }
+      ],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_discount_once_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 1,
+            "subscription": "sub_discount_once",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_discount_once"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_metered",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_metered_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_metered",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "metered"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": null,
+              "unit_amount_decimal": null
+            },
+            "quantity": null,
+            "subscription": "sub_metered",
+            "tax_rates": []
+          },
+          {
+            "id": "si_sub_metered_1",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_base",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 900,
+              "unit_amount_decimal": "900"
+            },
+            "quantity": 1,
+            "subscription": "sub_metered",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 2,
+        "url": "/v1/subscription_items?subscription=sub_metered"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_jpy",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "jpy",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_jpy_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_jpy",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "jpy",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1200,
+              "unit_amount_decimal": "1200"
+            },
+            "quantity": 1,
+            "subscription": "sub_jpy",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_jpy"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_new",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1791288000,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1791288000,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_new_0",
+            "object": "subscription_item",
+            "created": 1791288000,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 1,
+            "subscription": "sub_new",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_new"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1791288000,
+      "status": "active",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    },
+    {
+      "id": "sub_incomplete",
+      "object": "subscription",
+      "application": null,
+      "billing_cycle_anchor": 1788004800,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "collection_method": "charge_automatically",
+      "created": 1788004800,
+      "currency": "usd",
+      "customer": "cus_1",
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "items": {
+        "object": "list",
+        "data": [
+          {
+            "id": "si_sub_incomplete_0",
+            "object": "subscription_item",
+            "created": 1788004800,
+            "current_period_end": 1793188800,
+            "current_period_start": 1790596800,
+            "metadata": {},
+            "price": {
+              "id": "price_m",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1791460800,
+              "currency": "usd",
+              "custom_unit_amount": null,
+              "livemode": true,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": {
+                "id": "prod_1",
+                "name": "Pro"
+              },
+              "recurring": {
+                "interval": "month",
+                "interval_count": 1,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "unspecified",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 1000,
+              "unit_amount_decimal": "1000"
+            },
+            "quantity": 1,
+            "subscription": "sub_incomplete",
+            "tax_rates": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_incomplete"
+      },
+      "latest_invoice": "in_1",
+      "livemode": true,
+      "metadata": {},
+      "pause_collection": null,
+      "schedule": null,
+      "start_date": 1788004800,
+      "status": "incomplete",
+      "test_clock": null,
+      "trial_end": null,
+      "trial_start": null
+    }
+  ]
+}

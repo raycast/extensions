@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "api_key_expired",
+    "doc_url": "https://stripe.com/docs/error-codes/api-key-expired",
+    "message": "Expired API Key provided: rk_live_*********1234",
+    "type": "invalid_request_error"
+  }
+}

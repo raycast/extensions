@@ -1,0 +1,11 @@
+{
+  "error": {
+    "type": "request_error",
+    "code": "authentication_malformed",
+    "detail": "Authentication header included, but incorrectly formatted.",
+    "documentation_url": "https://developer.paddle.com/errors/shared/authentication_malformed"
+  },
+  "meta": {
+    "request_id": "r"
+  }
+}

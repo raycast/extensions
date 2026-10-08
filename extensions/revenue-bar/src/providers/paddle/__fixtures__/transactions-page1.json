@@ -1,0 +1,437 @@
+{
+  "data": [
+    {
+      "id": "txn_01paid",
+      "status": "completed",
+      "customer_id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "address_id": "add_01",
+      "business_id": null,
+      "custom_data": null,
+      "origin": "web",
+      "collection_mode": "automatic",
+      "subscription_id": null,
+      "invoice_id": null,
+      "invoice_number": null,
+      "billing_details": null,
+      "billing_period": null,
+      "currency_code": "USD",
+      "discount_id": null,
+      "created_at": "2026-10-08T15:00:00Z",
+      "updated_at": "2026-10-08T15:00:00Z",
+      "billed_at": "2026-10-08T15:00:00Z",
+      "revised_at": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01",
+            "description": "Monthly",
+            "name": "Monthly (per seat)",
+            "product_id": "pro_01",
+            "billing_cycle": {
+              "frequency": 1,
+              "interval": "month"
+            },
+            "unit_price": {
+              "amount": "1000",
+              "currency_code": "USD"
+            },
+            "status": "active"
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "tax_rates_used": [],
+        "totals": {
+          "subtotal": "1000",
+          "discount": "0",
+          "tax": "200",
+          "total": "1200",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "1200",
+          "grand_total_tax": "200",
+          "fee": "110",
+          "earnings": "1090",
+          "currency_code": "USD"
+        },
+        "adjusted_totals": {
+          "subtotal": "1000",
+          "discount": "0",
+          "tax": "200",
+          "total": "1200",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "1200",
+          "grand_total_tax": "200",
+          "fee": "110",
+          "earnings": "1090",
+          "currency_code": "USD"
+        },
+        "payout_totals": {
+          "subtotal": "0",
+          "discount": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "0",
+          "fee": "110",
+          "earnings": "890",
+          "currency_code": "USD",
+          "exchange_rate": "1"
+        },
+        "adjusted_payout_totals": null,
+        "line_items": [
+          {
+            "id": "txnitm_01",
+            "price_id": "pri_01",
+            "quantity": 1,
+            "proration": null,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "subtotal": "1000",
+              "discount": "0",
+              "tax": "200",
+              "total": "1200"
+            },
+            "totals": {
+              "subtotal": "1000",
+              "discount": "0",
+              "tax": "200",
+              "total": "1200"
+            },
+            "product": {
+              "id": "pro_01",
+              "name": "AeroEdit Pro",
+              "type": "standard",
+              "tax_category": "standard",
+              "status": "active"
+            }
+          }
+        ]
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "customer": {
+        "id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+        "name": "Sam Miller",
+        "email": "sam@example.com",
+        "marketing_consent": false,
+        "status": "active",
+        "custom_data": null,
+        "locale": "en",
+        "created_at": "2024-04-11T15:57:24.813Z",
+        "updated_at": "2024-04-11T15:59:56.658719Z",
+        "import_meta": null
+      },
+      "adjustments_totals": {
+        "subtotal": "0",
+        "tax": "0",
+        "total": "0",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "breakdown": {
+          "credit": "0",
+          "refund": "0",
+          "chargeback": "0"
+        },
+        "currency_code": "USD"
+      }
+    },
+    {
+      "id": "txn_02sub",
+      "status": "completed",
+      "customer_id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "address_id": "add_01",
+      "business_id": null,
+      "custom_data": null,
+      "origin": "subscription_recurring",
+      "collection_mode": "automatic",
+      "subscription_id": "sub_01hv959anj4zrw503h2acawb3p",
+      "invoice_id": null,
+      "invoice_number": null,
+      "billing_details": null,
+      "billing_period": null,
+      "currency_code": "USD",
+      "discount_id": null,
+      "created_at": "2026-10-08T14:00:00Z",
+      "updated_at": "2026-10-08T14:00:00Z",
+      "billed_at": "2026-10-08T14:00:00Z",
+      "revised_at": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01",
+            "description": "Monthly",
+            "name": "Monthly (per seat)",
+            "product_id": "pro_01",
+            "billing_cycle": {
+              "frequency": 1,
+              "interval": "month"
+            },
+            "unit_price": {
+              "amount": "2900",
+              "currency_code": "USD"
+            },
+            "status": "active"
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "tax_rates_used": [],
+        "totals": {
+          "subtotal": "2900",
+          "discount": "0",
+          "tax": "0",
+          "total": "2900",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "2900",
+          "grand_total_tax": "0",
+          "fee": "195",
+          "earnings": "2705",
+          "currency_code": "USD"
+        },
+        "adjusted_totals": {
+          "subtotal": "2900",
+          "discount": "0",
+          "tax": "0",
+          "total": "2900",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "2900",
+          "grand_total_tax": "0",
+          "fee": "195",
+          "earnings": "2705",
+          "currency_code": "USD"
+        },
+        "payout_totals": {
+          "subtotal": "0",
+          "discount": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "0",
+          "fee": "195",
+          "earnings": "2705",
+          "currency_code": "USD",
+          "exchange_rate": "1"
+        },
+        "adjusted_payout_totals": null,
+        "line_items": [
+          {
+            "id": "txnitm_01",
+            "price_id": "pri_01",
+            "quantity": 1,
+            "proration": null,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "subtotal": "2900",
+              "discount": "0",
+              "tax": "0",
+              "total": "2900"
+            },
+            "totals": {
+              "subtotal": "2900",
+              "discount": "0",
+              "tax": "0",
+              "total": "2900"
+            },
+            "product": {
+              "id": "pro_01",
+              "name": "AeroEdit Pro",
+              "type": "standard",
+              "tax_category": "standard",
+              "status": "active"
+            }
+          }
+        ]
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "customer": {
+        "id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+        "name": "Sam Miller",
+        "email": "sam@example.com",
+        "marketing_consent": false,
+        "status": "active",
+        "custom_data": null,
+        "locale": "en",
+        "created_at": "2024-04-11T15:57:24.813Z",
+        "updated_at": "2024-04-11T15:59:56.658719Z",
+        "import_meta": null
+      },
+      "adjustments_totals": {
+        "subtotal": "0",
+        "tax": "0",
+        "total": "0",
+        "fee": "0",
+        "retained_fee": "0",
+        "earnings": "0",
+        "breakdown": {
+          "credit": "0",
+          "refund": "0",
+          "chargeback": "0"
+        },
+        "currency_code": "USD"
+      }
+    },
+    {
+      "id": "txn_03eur",
+      "status": "completed",
+      "customer_id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "address_id": "add_01",
+      "business_id": null,
+      "custom_data": null,
+      "origin": "web",
+      "collection_mode": "automatic",
+      "subscription_id": null,
+      "invoice_id": null,
+      "invoice_number": null,
+      "billing_details": null,
+      "billing_period": null,
+      "currency_code": "EUR",
+      "discount_id": null,
+      "created_at": "2026-10-08T13:00:00Z",
+      "updated_at": "2026-10-08T13:00:00Z",
+      "billed_at": "2026-10-08T13:00:00Z",
+      "revised_at": null,
+      "items": [
+        {
+          "price": {
+            "id": "pri_01",
+            "description": "Monthly",
+            "name": "Monthly (per seat)",
+            "product_id": "pro_01",
+            "billing_cycle": {
+              "frequency": 1,
+              "interval": "month"
+            },
+            "unit_price": {
+              "amount": "1000",
+              "currency_code": "EUR"
+            },
+            "status": "active"
+          },
+          "quantity": 1,
+          "proration": null
+        }
+      ],
+      "details": {
+        "tax_rates_used": [],
+        "totals": {
+          "subtotal": "1000",
+          "discount": "0",
+          "tax": "190",
+          "total": "1190",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "1190",
+          "grand_total_tax": "190",
+          "fee": "110",
+          "earnings": "1080",
+          "currency_code": "EUR"
+        },
+        "adjusted_totals": {
+          "subtotal": "1000",
+          "discount": "0",
+          "tax": "190",
+          "total": "1190",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "1190",
+          "grand_total_tax": "190",
+          "fee": "110",
+          "earnings": "1080",
+          "currency_code": "EUR"
+        },
+        "payout_totals": {
+          "subtotal": "0",
+          "discount": "0",
+          "tax": "0",
+          "total": "0",
+          "credit": "0",
+          "credit_to_balance": "0",
+          "balance": "0",
+          "grand_total": "0",
+          "fee": "118",
+          "earnings": "1003",
+          "currency_code": "USD",
+          "exchange_rate": "1"
+        },
+        "adjusted_payout_totals": null,
+        "line_items": [
+          {
+            "id": "txnitm_01",
+            "price_id": "pri_01",
+            "quantity": 1,
+            "proration": null,
+            "tax_rate": "0.2",
+            "unit_totals": {
+              "subtotal": "1000",
+              "discount": "0",
+              "tax": "190",
+              "total": "1190"
+            },
+            "totals": {
+              "subtotal": "1000",
+              "discount": "0",
+              "tax": "190",
+              "total": "1190"
+            },
+            "product": {
+              "id": "pro_01",
+              "name": "AeroEdit Pro",
+              "type": "standard",
+              "tax_category": "standard",
+              "status": "active"
+            }
+          }
+        ]
+      },
+      "payments": [],
+      "checkout": {
+        "url": null
+      },
+      "customer": {
+        "id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+        "name": "Sam Miller",
+        "email": "sam@example.com",
+        "marketing_consent": false,
+        "status": "active",
+        "custom_data": null,
+        "locale": "en",
+        "created_at": "2024-04-11T15:57:24.813Z",
+        "updated_at": "2024-04-11T15:59:56.658719Z",
+        "import_meta": null
+      }
+    }
+  ],
+  "meta": {
+    "request_id": "9346b365",
+    "pagination": {
+      "per_page": 30,
+      "next": "https://api.paddle.com/transactions?after=txn_03eur&billed_at%5BGTE%5D=2026-10-08T04%3A00%3A00.000Z&status=completed%2Cpaid",
+      "has_more": true,
+      "estimated_total": 5
+    }
+  }
+}

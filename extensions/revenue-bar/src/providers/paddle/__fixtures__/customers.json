@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": "ctm_01hv8wt8nffez4p2t6typn4a5j",
+      "name": "Sam Miller",
+      "email": "sam@example.com",
+      "marketing_consent": false,
+      "status": "active",
+      "custom_data": null,
+      "locale": "en",
+      "created_at": "2024-04-11T15:57:24.813Z",
+      "updated_at": "2024-04-11T15:59:56.658719Z",
+      "import_meta": null
+    },
+    {
+      "id": "ctm_02",
+      "name": "Eu Ro",
+      "email": "eu@example.com",
+      "marketing_consent": false,
+      "status": "active",
+      "custom_data": null,
+      "locale": "en",
+      "created_at": "2024-04-11T15:57:24.813Z",
+      "updated_at": "2024-04-11T15:59:56.658719Z",
+      "import_meta": null
+    }
+  ],
+  "meta": {
+    "request_id": "r",
+    "pagination": {
+      "per_page": 200,
+      "next": "https://api.paddle.com/customers?after=ctm_02",
+      "has_more": false,
+      "estimated_total": 2
+    }
+  }
+}
