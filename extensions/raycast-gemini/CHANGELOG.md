@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Fix Empty Request Without Selected Text] - {PR_MERGE_DATE}
+## [Fix Empty Request Without Selected Text] - 2026-10-08
 
 - Commands like Translate and Summarize now show the prompt form when no text is selected, instead of sending an empty request that fails with "Request has empty input".
 
