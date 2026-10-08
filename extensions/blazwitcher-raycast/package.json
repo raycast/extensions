@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blazwitcher-raycast",
+  "title": "Blazwitcher 拼音搜索",
+  "description": "使用拼音、首字母和中英文混合搜索 Chrome 标签页、书签与历史记录，单栏展示并快速跳转。",
+  "icon": "extension-icon.png",
+  "author": "cjinhuo",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "pinyin",
+    "拼音",
+    "initials",
+    "chrome",
+    "tabs",
+    "bookmarks",
+    "history"
+  ],
+  "commands": [
+    {
+      "name": "search-all",
+      "title": "搜索浏览器",
+      "subtitle": "Blazwitcher",
+      "description": "统一拼音搜索 Chrome 标签页、书签和历史记录",
+      "mode": "view",
+      "keywords": [
+        "chrome",
+        "pinyin",
+        "blazwitcher",
+        "搜索"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "startupPreview",
+      "title": "启动预览缓存",
+      "label": "优先显示上次结果，再读取完整数据",
+      "description": "每个 Chrome 配置最多缓存 100 条书签和 100 条历史，有效期 5 分钟，仅存于本机；不缓存标签页或无痕数据。关闭后不再使用缓存。",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "historyLimit",
+      "title": "历史记录读取上限",
+      "description": "按最近访问排序读取的条数，默认 20000；上限 100000。拼音搜索在这些记录中进行。",
+      "type": "textfield",
+      "default": "20000",
+      "required": false
+    },
+    {
+      "name": "includeIncognito",
+      "title": "无痕标签页",
+      "label": "包含无痕窗口中的标签页",
+      "description": "只在内存中读取；不会写入历史记录或缓存。",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "sourceShortcuts",
+      "title": "旧版来源快捷键（仅首次迁移）",
+      "description": "仅在首次打开新版本时迁移旧设置；以后请在命令动作菜单的“快捷键设置”中修改，此项不再生效。",
+      "type": "dropdown",
+      "default": "cmd-shift",
+      "required": false,
+      "data": [
+        {
+          "title": "⌘⇧0 / 1 / 2 / 3",
+          "value": "cmd-shift"
+        },
+        {
+          "title": "⌃⇧0 / 1 / 2 / 3",
+          "value": "ctrl-shift"
+        },
+        {
+          "title": "关闭（保留动作菜单）",
+          "value": "none"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint && eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "test:local": "tsx scripts/inspect-local.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "text-search-engine": "1.5.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "text-search-engine": {
+      "react": "$react"
+    }
+  }
+}
