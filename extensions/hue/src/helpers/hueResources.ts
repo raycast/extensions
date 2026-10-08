@@ -20,13 +20,14 @@ export const getGroupedLightFromGroup = (groupedLights: GroupedLight[], group: G
 export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
   scenes.filter((scene) => scene.group.rid === group.id).sort(byName);
 
-export function getIconPathFromLight(light: Light): string {
-  const iconPath = `${environment.assetsPath}/icons/${light.metadata.archetype}.png`;
+export function getIconPathFromLight(light: Light, color: "black" | "white"): string {
+  const folder = `${environment.assetsPath}/${color === "black" ? "icons-black" : "icons"}`;
+  const iconPath = `${folder}/${light.metadata.archetype}.png`;
 
   if (existsSync(iconPath)) {
     return iconPath;
   } else {
-    return `${environment.assetsPath}/icons/question_mark.png`;
+    return `${folder}/question_mark.png`;
   }
 }
 

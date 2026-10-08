@@ -12,10 +12,6 @@
 
 export type Id = string | number;
 export type Palette = string[];
-export type LightIcon = { iconPath: string; color: string };
-export type PngUri = string;
-export type PngUriCache = Map<Id, PngUri>;
-export type PngUriLightIconSet = { on: PngUri; offLight: PngUri; offDark: PngUri };
 
 export type BridgeConfig = {
   ipAddress: string;

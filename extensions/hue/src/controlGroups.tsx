@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
-import type { Group, GroupedLight, Light, PngUri, Room, Zone } from "./lib/types";
+import type { Group, GroupedLight, Light, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
 import React, { useMemo } from "react";
-import useGradientUris from "./hooks/useGradientUris";
+import { createGradientUri } from "./helpers/svgImages";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import { SetScene } from "./setScene";
@@ -23,11 +23,16 @@ export default function ControlGroups() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
   // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
   const rateLimiter = useInputRateLimiter(1, 1000);
-  const palettes = useMemo(
-    () => new Map([...rooms, ...zones].map((group) => [group.id, getColorsFromGroup(lights, group)])),
+  const gradientUris = useMemo(
+    () =>
+      new Map(
+        [...rooms, ...zones].map((group) => [
+          group.id,
+          createGradientUri(getColorsFromGroup(lights, group), GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT),
+        ]),
+      ),
     [rooms, zones, lights],
   );
-  const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
 
   const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
@@ -82,7 +87,7 @@ function Group(props: {
   groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  gradientUri?: PngUri;
+  gradientUri?: string;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {

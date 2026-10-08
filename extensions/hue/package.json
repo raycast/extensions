@@ -107,7 +107,6 @@
     "@xstate/react": "^6.1.0",
     "bonjour-service": "^1.4.0",
     "chroma-js": "^3.2.0",
-    "jimp": "^1.6.1",
     "xstate": "^5.32.0"
   },
   "devDependencies": {

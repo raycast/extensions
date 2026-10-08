@@ -3,6 +3,7 @@
 ## [Optimistic scene updates] - {PR_MERGE_DATE}
 
 - Show the selected scene on its room immediately
+- Show room, scene and light images instantly
 - Show the bridge's error message when changing a light, room or scene fails
 - Show connection errors in a HUD when toggling all lights fails
 - Fix live updates from the bridge stopping or skipping changes
@@ -12,6 +13,8 @@
 - Fix the loading indicator not showing after the first launch
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back
 - Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
+- Fix light icon symbols always being black; they're now black or white, whichever stands out more
+- Fix Control Lights loading forever when the bridge has no lights
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

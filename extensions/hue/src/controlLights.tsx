@@ -1,5 +1,5 @@
-import { Action, ActionPanel, environment, Grid, Icon, Image } from "@raycast/api";
-import type { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
+import { Action, ActionPanel, environment, Grid, Icon } from "@raycast/api";
+import type { CssColor, Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
@@ -16,13 +16,12 @@ import {
 import { getLightsFromGroup } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, getIconForColor, getTransitionTimeInMs } from "./helpers/raycast";
-import useLightIconPngUriSets from "./hooks/useLightIconUris";
+import { createLightIcon } from "./helpers/svgImages";
 
 export default function ControlLights() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   const rateLimiter = useInputRateLimiter(10, 1000);
-  const { lightIconPngUriSets } = useLightIconPngUriSets(lights, 162, 162);
 
   const groups = [...rooms, ...zones].sort(byName);
 
@@ -30,14 +29,13 @@ export default function ControlLights() {
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
-    <Grid isLoading={isLoading || lightIconPngUriSets === null} filtering={{ keepSectionOrder: true }} columns={8}>
+    <Grid isLoading={isLoading} filtering={{ keepSectionOrder: true }} columns={8}>
       {groups.map((group: Group) => {
         return (
           <Group
             key={group.id}
             group={group}
             lights={getLightsFromGroup(lights, group).sort(byName)}
-            lightIconPngUriSets={lightIconPngUriSets}
             useHue={useHueObject}
             rateLimiter={rateLimiter}
           />
@@ -50,7 +48,6 @@ export default function ControlLights() {
 function Group(props: {
   group: Group;
   lights: Light[];
-  lightIconPngUriSets: Map<Id, PngUriLightIconSet> | null;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -62,7 +59,6 @@ function Group(props: {
             key={light.id}
             light={light}
             group={props.group}
-            lightIconPngUriSet={props.lightIconPngUriSets?.get(light.id)}
             useHue={props.useHue}
             rateLimiter={props.rateLimiter}
           />
@@ -75,27 +71,13 @@ function Group(props: {
 function Light(props: {
   light: Light;
   group?: Group;
-  lightIconPngUriSet?: PngUriLightIconSet;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
-  const content = props.lightIconPngUriSet
-    ? ((props.light?.on?.on
-        ? {
-            source: props.lightIconPngUriSet?.on,
-          }
-        : {
-            source: {
-              light: props.lightIconPngUriSet?.offLight,
-              dark: props.lightIconPngUriSet?.offDark,
-            },
-          }) as Image)
-    : "";
-
   return (
     <Grid.Item
       title={props.light.metadata.name}
-      content={content}
+      content={createLightIcon(props.light)}
       keywords={[props.group?.metadata?.name ?? ""]}
       actions={
         <ActionPanel>
