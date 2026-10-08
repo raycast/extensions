@@ -24,6 +24,7 @@
 - Fix plugs offering brightness actions after a room's brightness changes, and color-only lights offering color temperature actions after a scene is set
 - Show a certificate error at once when the bridge's certificate doesn't match, instead of timing out
 - Keep connecting to bridges after Signify moves them to its secondary root certificate
+- Fix bridge discovery hanging when MeetHue's discovery service returns an unexpected response
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

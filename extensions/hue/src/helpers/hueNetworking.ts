@@ -9,59 +9,19 @@ import fs from "fs";
 
 /**
  * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
+ * The endpoint allows one request per 15 minutes per client.
  */
 export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using MeetHue's public API…");
 
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: "discovery.meethue.com",
-      path: "/",
-      method: "GET",
-      timeout: CONNECTION_TIMEOUT_MS,
-    };
+  const response = await fetch("https://discovery.meethue.com", { signal: AbortSignal.timeout(CONNECTION_TIMEOUT_MS) });
+  if (!response.ok) throw new Error(`Status ${response.status} from MeetHue's public API`);
 
-    const request = https.request(options, (response) => {
-      let data = "";
+  const [bridge] = (await response.json()) as HueApiService[];
+  if (bridge === undefined) throw new Error("Could not find a Hue Bridge using MeetHue's public API");
 
-      response.on("data", (chunk) => {
-        data += chunk;
-      });
-
-      response.on("end", () => {
-        if (response.statusCode !== 200) {
-          return reject(new Error(`Unexpected status code from MeetHue's public API: ${response.statusCode}`));
-        }
-
-        if (data === "") {
-          return reject(new Error("Could not find a Hue Bridge using MeetHue's public API"));
-        }
-
-        const hueApiResults: HueApiService[] = JSON.parse(data);
-
-        if (hueApiResults.length === 0) {
-          return reject(new Error("Could not find a Hue Bridge using MeetHue's public API"));
-        }
-
-        const ipAddress = hueApiResults[0].internalipaddress;
-        const id = hueApiResults[0].id;
-
-        console.info(`Discovered Hue Bridge using MeetHue's public API: ${ipAddress}, ${id}`);
-        return resolve({ ipAddress, id });
-      });
-    });
-
-    request.on("timeout", () => {
-      request.destroy();
-      return reject(new Error("Timed out finding a Hue Bridge using MeetHue's public API"));
-    });
-
-    request.on("error", (error) => {
-      return reject(new Error(`Could not find a Hue Bridge using MeetHue's public API ${error.message}`));
-    });
-
-    request.end();
-  });
+  console.info(`Discovered Hue Bridge using MeetHue's public API: ${bridge.internalipaddress}, ${bridge.id}`);
+  return { ipAddress: bridge.internalipaddress, id: bridge.id };
 }
 
 /**
