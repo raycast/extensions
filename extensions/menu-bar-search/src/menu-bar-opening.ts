@@ -37,7 +37,9 @@ async function openLiveMenuBarItem(
 ) {
   // Rows on screen may be stale. The helper re-resolves them against the live
   // Accessibility tree, so the cached row only needs to be a usable hint.
-  if (!canFallbackToSystemEvents(cachedItem)) {
+  // Only stable identity facts gate this branch: frame and obscured state move
+  // with the menu bar, so they are checked on the live item below.
+  if (!mayFallbackToSystemEvents(cachedItem)) {
     await openMenuBarItemWithHelper(
       helperPath,
       cachedItem.id,
@@ -97,10 +99,14 @@ function shouldOpenWithSystemEventsFirst(item: MenuBarItem) {
   );
 }
 
+function mayFallbackToSystemEvents(item: MenuBarItem) {
+  return Boolean(item.processName?.trim()) && item.category === "app:generic";
+}
+
 function canFallbackToSystemEvents(item: MenuBarItem) {
   return (
+    mayFallbackToSystemEvents(item) &&
     canOpenWithSystemEvents(item) &&
-    item.category === "app:generic" &&
     item.isObscured !== true
   );
 }
