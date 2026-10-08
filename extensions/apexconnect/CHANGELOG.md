@@ -1,6 +1,6 @@
 # Apex Connect Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-10-08
 
 - Fix camera cache files written as .jpg instead of .png (content was always JPEG)
 - Fix Wi-Fi SSID detection on macOS 14.4+ by switching from the removed `airport` binary to `networksetup`
