@@ -56,6 +56,10 @@ export function ChatView({
   const busy = useRef(false);
   const stoppedByUser = useRef(false);
   const isMounted = useRef(true);
+  // The chat whose answer is being written, and a chat left with New Chat during that answer. When the answer
+  // ends, it is saved to the chat it belongs to, together with a waiting message as a draft.
+  const answeringId = useRef<string>(undefined);
+  const leftChat = useRef<Chat>(undefined);
   // Chat files are written one after another in the order the changes were made, so an older copy never
   // overwrites a newer one and a delete always comes after the saves before it.
   const writes = useRef<Promise<void>>(Promise.resolve());
@@ -116,6 +120,7 @@ export function ChatView({
     const started = chatRef.current;
     if (!started || !question || busy.current) return;
     busy.current = true;
+    answeringId.current = started.id;
     let answer: string | undefined;
     let userStopped = false;
     try {
@@ -144,8 +149,12 @@ export function ChatView({
       userStopped = stoppedByUser.current;
 
       const latest = chatRef.current;
-      // When the chat was deleted or replaced by a new one meanwhile, the answer belongs to neither.
-      if (latest && latest.id === started.id && answer !== undefined) {
+      const left = leftChat.current?.id === started.id ? leftChat.current : undefined;
+      leftChat.current = undefined;
+      if (left) {
+        // New Chat was opened meanwhile. A deleted chat is neither current nor left, so it is not saved again.
+        saveLeftChat(left, question, answer);
+      } else if (latest && latest.id === started.id && answer !== undefined) {
         const now = new Date().toISOString();
         const updated: Chat = {
           ...latest,
@@ -165,9 +174,29 @@ export function ChatView({
       }
     } finally {
       busy.current = false;
+      answeringId.current = undefined;
       stoppedByUser.current = false;
     }
     handleQueued(answer !== undefined && !userStopped);
+  }
+
+  /** Saves the answer (if any) and the waiting message (as a draft) to a chat that is no longer shown. */
+  function saveLeftChat(left: Chat, question: string, answer: string | undefined) {
+    if (answer === undefined) {
+      if (left.messages.length > 0 || left.draft) saveChat(left);
+      return;
+    }
+    const now = new Date().toISOString();
+    saveChat({
+      ...left,
+      title: left.messages.length === 0 ? chatTitle(question) : left.title,
+      updatedAt: now,
+      messages: [
+        ...left.messages,
+        { role: "user", content: question, createdAt: now },
+        { role: "assistant", content: answer, createdAt: now },
+      ],
+    });
   }
 
   /** Sends the waiting message after an answer, or keeps it when it should not be sent now. */
@@ -242,6 +271,10 @@ export function ChatView({
   }
 
   function startNewChat() {
+    const current = chatRef.current;
+    if (current && current.id === answeringId.current) {
+      leftChat.current = { ...current, draft: queuedRef.current ?? current.draft };
+    }
     stop();
     updateQueued(undefined);
     setPendingQuestion(undefined);

@@ -39,6 +39,8 @@ const REPLACING_TASKS: TextTask["kind"][] = ["rewrite", "proofread", "translate"
 /** Reads the selected text (or the clipboard when nothing is selected), then runs the task on it. */
 export function SelectedTextCommand({ task, clipboardOnly }: SelectedTextCommandProps) {
   const [input, setInput] = useState<TextInput | null>();
+  // What happened when nothing was selected and the task was handed to Ask.
+  const [handOff, setHandOff] = useState<"opened" | "failed">();
   const started = useRef(false);
 
   useEffect(() => {
@@ -56,19 +58,43 @@ export function SelectedTextCommand({ task, clipboardOnly }: SelectedTextCommand
         return;
       }
       // When nothing is selected, getSelectedText tries to copy in the frontmost app, which hides the Raycast
-      // window. A command cannot launch itself, so Ask (a command of this extension) shows the result instead.
+      // window, so a HUD is the only feedback that is seen right away.
+      if (getPreferenceValues<ExtensionPreferences>().useClipboard === false) {
+        setInput(null);
+        await showHUD("Select some text first");
+        return;
+      }
+      // A command cannot launch itself, so Ask (a command of this extension) shows the clipboard result instead.
       try {
         await launchCommand({
           name: "ask",
           type: LaunchType.UserInitiated,
           context: { textTask: task } satisfies TextTaskContext,
         });
+        setHandOff("opened");
       } catch {
+        setHandOff("failed");
         await showHUD("Select some text first, or turn on the Ask command to use the clipboard");
       }
     })();
   }, []);
 
+  if (handOff === "opened") {
+    return (
+      <Detail
+        navigationTitle={taskTitle(task)}
+        markdown="## Opened in Ask\n\nNothing was selected, so the result for the text on the clipboard is shown in the Ask command."
+      />
+    );
+  }
+  if (handOff === "failed") {
+    return (
+      <Detail
+        navigationTitle={taskTitle(task)}
+        markdown="## No text selected\n\nSelect some text in another app, then run this command again.\n\nTo use the text on the clipboard when nothing is selected, turn on the **Ask** command of this extension in Raycast Settings."
+      />
+    );
+  }
   if (input === undefined) {
     return <Detail isLoading navigationTitle={taskTitle(task)} markdown="" />;
   }
