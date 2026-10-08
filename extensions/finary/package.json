@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finary",
+  "title": "Finary",
+  "description": "Fastest way to explore your Finary Portfolio & Investments.",
+  "icon": "icon.png",
+  "author": "jetaix",
+  "categories": [
+    "Finance",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "See Your Current Net Worth",
+      "subtitle": "Finary",
+      "description": "Go to Dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "portfolio",
+      "title": "See Your Detailed Portfolio",
+      "subtitle": "Finary",
+      "description": "Go to Portfolio",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-asset",
+      "title": "Add an Asset to Your Portfolio",
+      "subtitle": "Finary",
+      "description": "Add an Asset",
+      "mode": "no-view"
+    },
+    {
+      "name": "insights",
+      "title": "Discover Your Insights",
+      "subtitle": "Finary",
+      "description": "Go to Insights",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Edit the Settings of Your Account",
+      "subtitle": "Finary",
+      "description": "Go to Settings",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

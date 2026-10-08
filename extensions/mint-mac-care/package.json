@@ -1,0 +1,354 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mint-mac-care",
+  "title": "Mint",
+  "description": "Clean up your Mac with Mint: see what fills the disk, get space back without deleting anything, clear caches, organize folders, free memory and uninstall apps",
+  "icon": "extension-icon.png",
+  "author": "dzg-studio",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "mac cleaner",
+    "cleaner",
+    "disk space",
+    "free space",
+    "storage",
+    "junk",
+    "cache",
+    "duplicates",
+    "memory",
+    "uninstaller",
+    "codex",
+    "claude"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mint-status",
+      "title": "View Mac Status",
+      "subtitle": "Mint",
+      "description": "Disk, memory and your organized folders on one screen, like Mint's menu bar",
+      "mode": "view",
+      "keywords": [
+        "disk",
+        "storage",
+        "space",
+        "free space",
+        "memory",
+        "ram",
+        "system status",
+        "overview"
+      ]
+    },
+    {
+      "name": "mint-optimize",
+      "title": "Optimize Storage",
+      "subtitle": "Mint",
+      "description": "Identical copies share their storage. Nothing is deleted and every file stays where it is",
+      "mode": "view",
+      "keywords": [
+        "duplicates",
+        "copies",
+        "clone",
+        "space",
+        "dedupe",
+        "apfs",
+        "codex",
+        "claude",
+        "ai agents"
+      ]
+    },
+    {
+      "name": "mint-scan",
+      "title": "Free Disk",
+      "subtitle": "Mint",
+      "description": "Mint's groups with what is in each: optimize copies, clean what apps make again, choose from your own files",
+      "mode": "view",
+      "keywords": [
+        "clean",
+        "cleaner",
+        "mac cleaner",
+        "cache",
+        "junk",
+        "space",
+        "disk space",
+        "free up space",
+        "node_modules",
+        "logs",
+        "purge",
+        "system data"
+      ]
+    },
+    {
+      "name": "mint-organize",
+      "title": "Organize a Folder",
+      "subtitle": "Mint",
+      "description": "How many files each folder has to sort and where they go, then organize it in one step",
+      "mode": "view",
+      "keywords": [
+        "desktop",
+        "downloads",
+        "tidy",
+        "sort",
+        "organize files",
+        "declutter",
+        "clean desktop"
+      ]
+    },
+    {
+      "name": "mint-memory",
+      "title": "Free Memory",
+      "subtitle": "Mint",
+      "description": "Quit every idle app in one step, or choose the apps to quit",
+      "mode": "view",
+      "keywords": [
+        "ram",
+        "memory",
+        "free ram",
+        "quit apps",
+        "idle apps",
+        "memory cleaner"
+      ]
+    },
+    {
+      "name": "mint-uninstall",
+      "title": "Uninstall App",
+      "subtitle": "Mint",
+      "description": "Find an app and what it left behind, then move them to the Trash",
+      "mode": "view",
+      "keywords": [
+        "remove",
+        "delete app",
+        "leftovers",
+        "uninstaller",
+        "remove app"
+      ]
+    },
+    {
+      "name": "mint-undo",
+      "title": "Undo Mint Action",
+      "subtitle": "Mint",
+      "description": "Put back files from a recent cleanup, uninstall or organize run",
+      "mode": "view",
+      "keywords": [
+        "restore",
+        "revert",
+        "put back"
+      ]
+    },
+    {
+      "name": "mint-why",
+      "title": "Show Disk Growth",
+      "subtitle": "Mint",
+      "description": "What grew on your disk this week, by app, folder, category or AI tool",
+      "mode": "view",
+      "keywords": [
+        "disk growth",
+        "what grew",
+        "storage history",
+        "space used",
+        "system data"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-disk-overview",
+      "title": "Get Disk Overview",
+      "description": "How full the Mac's disk is and what Mint found at its last Scan, in four groups: Optimizable (identical copies that can share their storage, nothing deleted), Safe to clean (caches, build output and leftovers that apps make again), Yours (the person's own files, chosen one by one) and Keep. Read-only."
+    },
+    {
+      "name": "get-memory-overview",
+      "title": "Get Memory Overview",
+      "description": "How much memory is in use and which apps hold it, in Mint's piles: Idle (Mint would quit these by itself), In use and Ask first, each app sized by what quitting it gives back. Read-only."
+    },
+    {
+      "name": "get-disk-growth",
+      "title": "Get Disk Growth",
+      "description": "What grew on the Mac's disk over the last days, by app or folder and by category, from the maps Mint keeps after each Scan. Read-only."
+    },
+    {
+      "name": "open-mint-command",
+      "title": "Open Mint Command",
+      "description": "Open one of Mint's commands in Raycast (Free Disk, Optimize Storage, Free Memory, Organize a Folder, Uninstall App, Show Disk Growth or View Mac Status) so the person reviews what it would do and confirms it there. The tool itself changes nothing."
+    }
+  ],
+  "ai": {
+    "instructions": "Mint must be installed for these tools to answer; if a tool says it is not, pass on its words and link. The read tools never change anything. Mint never removes, quits or moves anything from an AI answer: when the person wants space or memory back, say what Mint found with its sizes, then open the matching command with open-mint-command so they review and confirm it there. Never say something was cleaned, freed or deleted. Optimizable gives space back without deleting any file; Safe to clean is what apps make again; Yours is the person's own files. Write sizes exactly as the tools give them.",
+    "evals": [
+      {
+        "input": "@mint what's taking up space on my Mac?",
+        "mocks": {
+          "get-disk-overview": {
+            "disk": {
+              "total": "494.38 GB",
+              "free": "40.03 GB",
+              "used": "454.35 GB"
+            },
+            "lastScan": "2026-10-04T22:42:00Z",
+            "groups": [
+              {
+                "name": "Optimizable",
+                "size": "6.2 GB"
+              },
+              {
+                "name": "Safe to clean",
+                "size": "18.4 GB"
+              },
+              {
+                "name": "Yours",
+                "size": "26.96 GB"
+              },
+              {
+                "name": "Keep",
+                "size": "402.8 GB"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-disk-overview"
+          }
+        ]
+      },
+      {
+        "input": "@mint how much space can I get back without deleting anything?",
+        "mocks": {
+          "get-disk-overview": {
+            "groups": [
+              {
+                "name": "Optimizable",
+                "size": "6.2 GB"
+              },
+              {
+                "name": "Safe to clean",
+                "size": "18.4 GB"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-disk-overview"
+          }
+        ]
+      },
+      {
+        "input": "@mint which apps are using the most memory right now?",
+        "mocks": {
+          "get-memory-overview": {
+            "used": "21.4 GB",
+            "total": "34.36 GB",
+            "piles": [
+              {
+                "name": "Idle",
+                "size": "3.1 GB",
+                "apps": [
+                  {
+                    "name": "Google Chrome",
+                    "size": "1.9 GB"
+                  },
+                  {
+                    "name": "Slack",
+                    "size": "640 MB"
+                  }
+                ]
+              },
+              {
+                "name": "In use",
+                "size": "5.8 GB",
+                "apps": [
+                  {
+                    "name": "Xcode",
+                    "size": "3.2 GB"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-memory-overview"
+          }
+        ]
+      },
+      {
+        "input": "@mint what grew on my disk this week?",
+        "mocks": {
+          "get-disk-growth": {
+            "from": "2026-09-28T08:00:00Z",
+            "to": "2026-10-05T08:00:00Z",
+            "usedChange": "+21.3 GB",
+            "grewByAppOrFolder": [
+              {
+                "name": "huggingface",
+                "now": "5.81 GB",
+                "grewBy": "4.6 GB"
+              }
+            ],
+            "grewByCategory": [
+              {
+                "name": "Developer",
+                "now": "129.8 GB",
+                "grewBy": "12.1 GB"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-disk-growth"
+          }
+        ]
+      },
+      {
+        "input": "@mint free up some disk space",
+        "mocks": {
+          "get-disk-overview": {
+            "groups": [
+              {
+                "name": "Safe to clean",
+                "size": "18.4 GB"
+              }
+            ]
+          },
+          "open-mint-command": "Opened Free Disk. Nothing has changed yet: the person reviews it there and confirms."
+        },
+        "expected": [
+          {
+            "callsTool": "open-mint-command"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --import ./test/register.mjs --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "validate": "npm run lint && npm test && npm run build",
+    "prepublishOnly": "echo 'Publish this extension through the Raycast Store, not npm.' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

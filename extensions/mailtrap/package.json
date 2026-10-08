@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mailtrap",
+  "title": "Mailtrap",
+  "description": "Mailtrap - View Inboxes, Emails, Copy Subjects while marking as Read",
+  "icon": "extension_icon.png",
+  "author": "samjwillis97",
+  "categories": [
+    "Developer Tools"
+  ],
+  "contributors": [
+    "xmok",
+    "chrisclose-nib"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Mailtrap API key",
+      "type": "password",
+      "required": true,
+      "placeholder": "xxx...xxx"
+    },
+    {
+      "name": "accountId",
+      "title": "Account ID",
+      "description": "Your Mailtrap Account ID",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "000000"
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-mailtrap-subject",
+      "title": "List Inboxes",
+      "subtitle": "Mailtrap",
+      "description": "Navigate emails and copy information from subject line to your clipboard",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "clipboardRegex",
+          "description": "A regex to match specific your current clipboard. If a match is found it will be automatically pasted into the email search",
+          "type": "textfield",
+          "required": false,
+          "title": "Clipboard Regex",
+          "placeholder": "^@temp$"
+        },
+        {
+          "name": "subjectRegex",
+          "description": "A regex to match specific subsets from subject line to be copied to clipboard",
+          "type": "textfield",
+          "required": false,
+          "title": "Matching Regex",
+          "placeholder": "^congrats$"
+        },
+        {
+          "name": "inboxId",
+          "description": "The ID of the inbox you prefer to use",
+          "type": "textfield",
+          "required": false,
+          "title": "Inbox ID",
+          "placeholder": "000000"
+        },
+        {
+          "name": "autoPaste",
+          "title": "Auto Paste",
+          "label": "Enable automatic pasting of content",
+          "type": "checkbox",
+          "required": false,
+          "description": "Automatically paste the selected email subject text to your last program"
+        },
+        {
+          "name": "onlyShowUnread",
+          "title": "Hide Read",
+          "label": "Hide read emails",
+          "type": "checkbox",
+          "required": false,
+          "description": "When enabled read emails will be hidden"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

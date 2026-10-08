@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "podcasts",
+  "title": "Podcasts",
+  "description": "Control the Podcasts app for macOS with your keyboard.",
+  "icon": "icon.png",
+  "author": "ron-myers",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "Podcasts",
+      "description": "Plays current episode in Podcasts",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "subtitle": "Podcasts",
+      "description": "Pause current episode in Podcasts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "togglePlayPause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "Podcasts",
+      "description": "Toggles play/pause of current episode in Podcasts",
+      "mode": "no-view"
+    },
+    {
+      "name": "rewind",
+      "title": "Rewind 15 seconds",
+      "subtitle": "Podcasts",
+      "description": "Rewind the current episode in Podcasts by 15 seconds.",
+      "mode": "no-view"
+    },
+    {
+      "name": "skipThirtySeconds",
+      "title": "Skip 30 seconds",
+      "subtitle": "Podcasts",
+      "description": "Skip the current episode in Podcasts by 30 seconds.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.29.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

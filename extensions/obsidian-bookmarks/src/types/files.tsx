@@ -1,0 +1,63 @@
+import { FrontMatterResult } from "front-matter";
+import { isStringArray } from "./is-string-array";
+
+export function isFrontMatter(v: unknown): v is FrontMatter {
+  if (v == null || typeof v !== "object") return false;
+  const frontMatter = v as FrontMatter;
+  return (
+    typeof frontMatter.source === "string" &&
+    typeof frontMatter.title === "string" &&
+    // typeof frontMatter.saved === "string" &&
+    typeof frontMatter.read === "boolean" &&
+    (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
+    (frontMatter.favicon == null || typeof frontMatter.favicon === "string") &&
+    (frontMatter.favorite == null || typeof frontMatter.favorite === "number") &&
+    isStringArray(frontMatter.tags)
+  );
+}
+
+export function isFile(v: unknown): v is File {
+  if (v == null || typeof v !== "object") return false;
+  const file = v as File;
+  return (
+    (file.body == null || typeof file.body === "string") &&
+    (file.bodyBegin == null || typeof file.bodyBegin === "number") &&
+    (file.frontmatter == null || typeof file.frontmatter === "string") &&
+    typeof file.fileName === "string" &&
+    typeof file.fullPath === "string" &&
+    typeof file.mtime === "number" && // mtime is a timestamp number
+    isFrontMatter(file.attributes)
+  );
+}
+
+export function unique(files: File[]): File[] {
+  const record = files.reduce((memo, file) => ({ ...memo, [file.fullPath]: file }), {} as Record<string, File>);
+  return Object.values(record);
+}
+
+export interface FrontMatter {
+  source: string;
+  publisher: string | null;
+  /**
+   * Overrides the URL used to look up the bookmark's favicon. Read from the
+   * frontmatter field named by the `faviconField` preference.
+   */
+  favicon?: string | null;
+  /**
+   * Position of the bookmark in the favorites grid, starting at 1. Null when
+   * the bookmark isn't a favorite.
+   */
+  favorite?: number | null;
+  title: string;
+  tags: string[];
+  saved: Date;
+  read: boolean;
+}
+
+export interface File extends Omit<FrontMatterResult<FrontMatter>, "body" | "bodyBegin"> {
+  fileName: string;
+  fullPath: string;
+  mtime: number; // Unix timestamp in milliseconds
+  body?: string;
+  bodyBegin?: number;
+}

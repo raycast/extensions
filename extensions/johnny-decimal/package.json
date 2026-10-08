@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "johnny-decimal",
+  "title": "Johnny.Decimal",
+  "description": "Search and manage Johnny.Decimal system.",
+  "icon": "logo.png",
+  "author": "x0ba",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-areas",
+      "title": "Search Johnny.Decimal Areas",
+      "description": "Search Johnny.Decimal Areas.",
+      "mode": "view"
+    },
+    {
+      "name": "search-categories",
+      "title": "Search Johnny.Decimal Categories",
+      "description": "Search Johnny.Decimal Categories.",
+      "mode": "view"
+    },
+    {
+      "name": "search-ids",
+      "title": "Search Johnny.Decimal IDs",
+      "description": "Search Johnny.Decimal IDs.",
+      "mode": "view"
+    },
+    {
+      "name": "rebuild-index",
+      "title": "Rebuild Johnny.Decimal Index",
+      "description": "Rebuild the Johnny.Decimal index file.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootFolder",
+      "type": "directory",
+      "required": true,
+      "title": "Johnny.Decimal Folder",
+      "description": "The location of your Johnny.Decimal System."
+    },
+    {
+      "name": "indexFilePath",
+      "type": "file",
+      "required": false,
+      "title": "Index File Path",
+      "description": "The full path to the index file (defaults to 'index.md' in the Johnny.Decimal folder if not specified)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smartthings-connector",
+  "title": "SmartThings Connector",
+  "description": "Integration with SmartThings to manage lights, scenes, and location modes.",
+  "icon": "smartthings_white.png",
+  "author": "IngoJ",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "show-lights",
+      "title": "Show Lights",
+      "description": "Displays a list of lights with their current status",
+      "mode": "view"
+    },
+    {
+      "name": "show-location-mode",
+      "title": "Show Location Mode",
+      "description": "Displays the current location mode",
+      "mode": "view"
+    },
+    {
+      "name": "show-rooms",
+      "title": "Show Rooms",
+      "description": "Displays a list of rooms with their device counts",
+      "mode": "view"
+    },
+    {
+      "name": "show-scenes",
+      "title": "Show Scenes",
+      "description": "Displays a list of scenes in the location",
+      "mode": "view"
+    },
+    {
+      "name": "show-all-devices",
+      "title": "Show All Devices",
+      "description": "Displays a list of devices in the location",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "SmartThings API Token",
+      "type": "password",
+      "description": "Your SmartThings API Token",
+      "required": true
+    },
+    {
+      "name": "locationId",
+      "title": "SmartThings Location ID",
+      "type": "password",
+      "description": "Your SmartThings Location ID",
+      "required": true
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

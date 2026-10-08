@@ -1,0 +1,29 @@
+Timestamp                       Thread     Type        Activity             PID    TTL
+2025-05-06 18:07:45.438839-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Start focus session
+	Goal: Open Source
+	Duration: 1500
+2025-05-06 18:07:49.048922-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Pause focus session
+	Duration:
+2025-05-06 18:07:56.292632-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Complete focus session
+2025-05-06 18:07:56.305242-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Stop focus session
+2025-05-06 18:07:56.407148-0700 0xaf73     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Focus session activity summary
+	Start date: 2025-05-07 01:07:45 +0000
+	Source: command
+	Duration: 10m
+	Pauses Count: 1
+	Block Events Count: 0
+	Snooze Events Count: 0
+2025-05-06 18:07:45.438839-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Start focus session
+	Goal: Work
+	Duration: 1500
+2025-05-06 18:07:49.048922-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Pause focus session
+	Duration:
+2025-05-06 18:07:56.292632-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Complete focus session
+2025-05-06 18:07:56.305242-0700 0x2013     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Stop focus session
+2025-05-06 18:07:56.407148-0700 0xaf73     Info        0x0                  861    0    Raycast: [com.raycast.macos:focus] Focus session activity summary
+	Start date: 2025-05-07 01:07:45 +0000
+	Source: command
+	Duration: 15m
+	Pauses Count: 1
+	Block Events Count: 0
+	Snooze Events Count: 0

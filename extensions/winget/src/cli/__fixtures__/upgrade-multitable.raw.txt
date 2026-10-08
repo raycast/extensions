@@ -1,0 +1,13 @@
+   -    \    |    /    -    \    |    /                                                                                                                            -    \    |    /    -    \                                                                                                                         Name                         Id                                     Version    Available   Source
+-------------------------------------------------------------------------------------------------
+WeChat                       Tencent.WeChat.Universal               4.1.10.31  4.1.10.1000 winget
+Visual Studio Community 2022 Microsoft.VisualStudio.2022.Community  < 17.14.31 17.14.33    winget
+Process Explorer             Microsoft.Sysinternals.ProcessExplorer 17.11      17.12       winget
+Codex CLI                    OpenAI.Codex                           0.121.0    0.138.0     winget
+Claude                       Anthropic.Claude                       1.8555.2.0 1.11187.4   winget
+6 upgrades available.
+
+The following packages have an upgrade available, but require explicit targeting for upgrade:
+Name    Id              Version  Available Source
+-------------------------------------------------
+Discord Discord.Discord 1.0.9238 1.0.9241  winget

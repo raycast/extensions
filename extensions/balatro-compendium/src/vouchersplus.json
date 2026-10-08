@@ -1,0 +1,97 @@
+[
+  {
+    "Name": "Overstock Plus",
+    "Appearance": "1-2.png",
+    "Effect": "+1 card slot available in shop",
+    "Downgrade": "Overstock"
+  },
+  {
+    "Name": "Liquidation",
+    "Appearance": "4-up-liquidation.png",
+    "Effect": "All cards and packs in shop are 50% off",
+    "Downgrade": "Clearance Sale"
+  },
+  {
+    "Name": "Glow Up",
+    "Appearance": "5-2.png",
+    "Effect": "Foil, Holographic, and Polychrome cards appear 4X more often",
+    "Downgrade": "Hone"
+  },
+  {
+    "Name": "Reroll Glut",
+    "Appearance": "9-2.png",
+    "Effect": "Rerolls cost $2 less",
+    "Downgrade": "Reroll Surplus"
+  },
+  {
+    "Name": "Omen Globe",
+    "Appearance": "11-2.png",
+    "Effect": "Spectral cards may appear in any Arcana Pack",
+    "Downgrade": "Crystal Ball"
+  },
+  {
+    "Name": "Observatory",
+    "Appearance": "12-2.png",
+    "Effect": "Planet cards in your consumable area give x1.5 Mult for their specified Poker Hand",
+    "Downgrade": "Telescope"
+  },
+  {
+    "Name": "Nacho Tong",
+    "Appearance": "6-2.png",
+    "Effect": "Permanently gain +1 hand per round"
+  },
+  {
+    "Name": "Recyclomancy",
+    "Appearance": "7-2.png",
+    "Effect": "Permanently gain +1 discard per round",
+    "Downgrade": "Grabber"
+  },
+  {
+    "Name": "Money Tree",
+    "Appearance": "10-2.png",
+    "Effect": "Raise the cap on interest earned per round to $20",
+    "Downgrade": "Seed Money"
+  },
+  {
+    "Name": "Antimatter",
+    "Appearance": "8-2.png",
+    "Effect": "+1 Joker slot",
+    "Downgrade": "Blank"
+  },
+  {
+    "Name": "Tarot Tycoon",
+    "Appearance": "2-2.png",
+    "Effect": "Tarot cards appear 4X more frequently in the shop",
+    "Downgrade": "Tarot Merchant"
+  },
+  {
+    "Name": "Planet Tycoon",
+    "Appearance": "3-2.png",
+    "Effect": "Planet cards appear 4X more frequently in the shop",
+    "Downgrade": "Planet Merchant"
+  },
+  {
+    "Name": "Illusion",
+    "Appearance": "13-2.png",
+    "Effect": "Playing cards in the Shop may have an Enhancement, Edition, and/or a Seal",
+    "Downgrade": "Magic Trick"
+  },
+  {
+    "Name": "Petroglyph",
+    "Appearance": "14-2.png",
+    "Effect": "-1 Ante, -1 discard per round",
+    "Downgrade": "Hieroglyph"
+  },
+  {
+    "Name": "Retcon",
+    "Appearance": "15-2.png",
+    "Effect": "Reroll Boss Blind unlimited times, $10 per roll",
+    "Downgrade": "Director’s Cut"
+  },
+  {
+    "Name": "Palette",
+    "Appearance": "vourcher_palette.png",
+    "Effect": "+1 hand size",
+    "Downgrade": "Paint Brush"
+  }
+]

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lock-time",
+  "title": "Lock Time",
+  "description": "Quietly tracks how long your Mac stays locked and how long you stay focused between unlocks.",
+  "icon": "icon.png",
+  "author": "mai_yang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lock-stats",
+      "title": "Lock Stats",
+      "subtitle": "Lock Time",
+      "description": "View today's lock time statistics",
+      "mode": "view"
+    },
+    {
+      "name": "update-lock-state",
+      "title": "Update Lock State",
+      "subtitle": "Lock Time",
+      "description": "Background command to detect and update lock state",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Lock Time Menu Bar",
+      "subtitle": "Lock Time",
+      "description": "Show lock time in menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

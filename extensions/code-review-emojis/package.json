@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "code-review-emojis",
+  "title": "Code Review Emoji Guide",
+  "description": "A simple emoji legend to help convey intention and added meaning in code review comments.",
+  "icon": "command-icon.png",
+  "author": "russellyeo",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Review Emoji",
+      "description": "Shows a list of emojis that can be used for code review, in line with the Code Review Emoji Guide.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "description": "The action to perform when selecting an item",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Paste",
+          "value": "paste"
+        },
+        {
+          "title": "Copy",
+          "value": "copy"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subwatch",
+  "title": "Subwatch",
+  "description": "Turn subscription chaos into financial harmony",
+  "icon": "icon.png",
+  "author": "nirgn",
+  "categories": [
+    "Finance",
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-subscriptions",
+      "title": "Manage Subscriptions",
+      "subtitle": "Subwatch",
+      "description": "List and delete subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "add-subscription",
+      "title": "Add New Subscription",
+      "subtitle": "Subwatch",
+      "description": "Add a new subscription to your Subwatch calendar",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "subwatchApiKey",
+      "title": "Subwatch - API Key",
+      "description": "Your Subwatch api key, you can find it in the Subwatch platform in the integrations page.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

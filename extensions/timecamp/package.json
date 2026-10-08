@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timecamp",
+  "title": "TimeCamp",
+  "description": "Start and stop TimeCamp tasks.",
+  "icon": "timecamp-logo.png",
+  "author": "iAmKevinCruz",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Start/Stop Tasks",
+      "subtitle": "TimeCamp",
+      "description": "Start/Stop tasks and edit active timer's notes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timecamp_api_token",
+      "description": "Get your programming API token from https://app.timecamp.com/app#/settings/users/me",
+      "type": "textfield",
+      "placeholder": "1e6472fe62db7421db0fc80472",
+      "required": true,
+      "title": "API Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.11.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.2",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

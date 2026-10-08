@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "myanimelist-search",
+  "title": "Myanimelist Search",
+  "description": "Easily search, open and manage your animes on Myanimelist.",
+  "icon": "MAL_macOS.png",
+  "author": "luknl",
+  "contributors": [
+    "taken"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Animes",
+      "subtitle": "Myanimelist",
+      "description": "Search for animes by name",
+      "mode": "view"
+    },
+    {
+      "name": "manage-watchlist",
+      "title": "Manage Watchlist",
+      "subtitle": "Myanimelist",
+      "description": "Manage your watchlist",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "view",
+      "type": "dropdown",
+      "title": "View",
+      "description": "Choose your view",
+      "default": "list",
+      "required": true,
+      "data": [
+        {
+          "title": "List (simple)",
+          "value": "list-simple"
+        },
+        {
+          "title": "List (detailed)",
+          "value": "list-detailed"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "hide_nsfw",
+      "label": "Hide",
+      "title": "Hide NSFW animes",
+      "description": "Check to hide NSFW animes",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^2.2.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.1",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

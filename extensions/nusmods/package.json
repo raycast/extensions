@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nusmods",
+  "title": "NUSMods",
+  "description": "Search and explore NUS courses with detailed module information, prerequisites, timetables, and exam schedules powered by NUSMods API",
+  "icon": "extension-icon.png",
+  "author": "wxiaoyun",
+  "categories": [
+    "Data"
+  ],
+  "contributors": [
+    "putttim"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "nus",
+    "nusmods",
+    "university",
+    "singapore",
+    "courses",
+    "modules",
+    "education",
+    "timetable",
+    "academic"
+  ],
+  "commands": [
+    {
+      "name": "search-nus-courses",
+      "title": "Search NUS Courses",
+      "description": "Quickly find NUS modules by code or title, view comprehensive course details including prerequisites, workload, timetables, and exam schedules.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "disqus_api_key",
+      "title": "Disqus API Key",
+      "description": "Your Disqus Public API Key.\nGet one by registering an application at https://disqus.com/api/applications/register/",
+      "type": "password",
+      "placeholder": "Enter your Disqus API Key",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "turndown": "^7.2.2",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

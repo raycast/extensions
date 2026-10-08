@@ -1,0 +1,91 @@
+{
+  "version": "4.0.0",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-norwegian-public-transport",
+  "title": "Norwegian Public Transport",
+  "keywords": [
+    "departures",
+    "avganger",
+    "norway",
+    "norge",
+    "public transport",
+    "kollektivtransport",
+    "travel",
+    "reise",
+    "entur",
+    "journey planner",
+    "real-time",
+    "sanntid"
+  ],
+  "description": "Real-time departures for Norwegian public transport. Data made available by Entur.",
+  "icon": "command-icon.png",
+  "author": "rosvik",
+  "categories": [
+    "Web",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "departures",
+      "title": "Departures",
+      "description": "Search for public transport departures from any stop place in Norway",
+      "mode": "view"
+    },
+    {
+      "name": "trips",
+      "title": "Search Trips",
+      "description": "Get trip suggestions using public transportation in Norway",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "web-planner",
+      "title": "Travel Planner for Quick Access",
+      "description": "Choose your preferred web travel planner to use for quick access.",
+      "data": [
+        {
+          "title": "Reis Nordland",
+          "value": "reis"
+        },
+        {
+          "title": "FRAM",
+          "value": "fram"
+        },
+        {
+          "title": "Svipper",
+          "value": "svipper"
+        },
+        {
+          "title": "AtB",
+          "value": "atb"
+        }
+      ],
+      "default": "reis",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "libraries-io",
+  "title": "Libraries.io",
+  "description": "Look up packages and dependency information via Libraries.io",
+  "icon": "libraries-io-icon.png",
+  "author": "djpowers",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-packages",
+      "title": "Search Packages",
+      "subtitle": "Libraries.io",
+      "description": "Search packages on Libraries.io",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "platform",
+          "placeholder": "Platform",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "show-platforms",
+      "title": "Show Platforms",
+      "subtitle": "Libraries.io",
+      "description": "Show supported package managers on Libraries.io",
+      "mode": "view"
+    },
+    {
+      "name": "show-subscriptions",
+      "title": "Show Subscriptions",
+      "subtitle": "Libraries.io",
+      "description": "Show packages you are watching",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "description": "The private token used to access your Libraries.io data",
+      "placeholder": "https://libraries.io/api",
+      "type": "password",
+      "required": true,
+      "title": "Libraries.io API Key"
+    }
+  ],
+  "keywords": [
+    "package",
+    "dependency",
+    "NPM",
+    "Maven",
+    "Pypi",
+    "NuGet",
+    "Go",
+    "Packagist",
+    "Rubygems",
+    "Cargo",
+    "CocoaPods",
+    "Bower"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "@raycast/utils": "^1.4.8",
+    "@types/semver": "^7.3.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "install-fonts",
+  "title": "Install Fonts",
+  "description": "Install fonts from Finder selections, folders, or zip files.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "will_thresher",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "install-fonts",
+      "title": "Install Fonts",
+      "description": "Install selected fonts into your Mac user Fonts folder.",
+      "mode": "view",
+      "keywords": [
+        "font",
+        "fonts",
+        "typeface",
+        "install",
+        "zip",
+        "ttf",
+        "otf"
+      ],
+      "preferences": [
+        {
+          "name": "trashSourceAfterInstall",
+          "title": "Clean Up",
+          "label": "Trash source after install",
+          "description": "Move the original font file, folder, or zip to the Trash after a successful install.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "duplicateHandling",
+          "title": "Duplicates",
+          "description": "Choose how Install Fonts should handle font files with the same filename as an existing font.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask",
+          "data": [
+            {
+              "title": "Ask every time",
+              "value": "ask"
+            },
+            {
+              "title": "Skip duplicates",
+              "value": "skip"
+            },
+            {
+              "title": "Overwrite duplicates",
+              "value": "overwrite"
+            },
+            {
+              "title": "Keep both",
+              "value": "keep-both"
+            }
+          ]
+        },
+        {
+          "name": "showFinderAfterInstall",
+          "title": "Post Install",
+          "label": "Show Fonts folder after install",
+          "description": "Reveal your user Fonts folder in Finder after a successful install.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "fontSelectionMode",
+          "title": "Font Versions",
+          "description": "Choose whether Install Fonts installs every discovered font or asks you to pick a format when mixed font types are found.",
+          "type": "dropdown",
+          "required": false,
+          "default": "ask-when-variants-found",
+          "data": [
+            {
+              "title": "Install all fonts",
+              "value": "install-all"
+            },
+            {
+              "title": "Ask when mixed formats are found",
+              "value": "ask-when-variants-found"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

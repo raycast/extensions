@@ -1,0 +1,97 @@
+import { Clipboard, open, showToast, Toast, trash } from "@raycast/api";
+import { Dispatch, SetStateAction } from "react";
+
+import copyUrlToClipboard from "../helpers/copy-url-to-clipboard";
+import openObsidianFileOrig, { createObsidianUri } from "../helpers/open-obsidian-file";
+import openUrlInCurrentWindowHelper from "../helpers/open-in-browser";
+import { withFreshBody } from "../helpers/read-bookmark-body";
+import saveToObsidian from "../helpers/save-to-obsidian";
+import { File } from "../types";
+
+export async function openObsidianFile(file: File) {
+  return openObsidianFileOrig(file.fileName);
+}
+
+export async function openUrl(file: File) {
+  return open(file.attributes.source);
+}
+
+export async function openUrlInCurrentWindow(file: File) {
+  return openUrlInCurrentWindowHelper(file.attributes.source);
+}
+
+export async function copyUrl(file: File) {
+  return copyUrlToClipboard(file.attributes.source, file.attributes.title);
+}
+
+export async function copyUrlAsMarkdown(file: File) {
+  const safeTitle = file.attributes.title.replace(/[[\]]/g, "");
+  return Clipboard.copy(`[${safeTitle}](${file.attributes.source})`);
+}
+
+export async function copyObsidianUri(file: File) {
+  const url = createObsidianUri(file.fileName);
+  return copyUrlToClipboard(url, file.attributes.title);
+}
+
+export async function copyObsidianUriAsMarkdown(file: File) {
+  const url = createObsidianUri(file.fileName);
+  const safeTitle = file.attributes.title.replace(/[[\]]/g, "");
+  return Clipboard.copy(`[${safeTitle}](${url})`);
+}
+
+export async function deleteFile(file: File) {
+  return trash(file.fullPath);
+}
+
+export async function saveFile(file: File, isUpdate = false): Promise<File> {
+  const toastPromise = showToast({
+    style: Toast.Style.Animated,
+    title: isUpdate ? "Updating Bookmark" : "Saving Bookmark",
+  });
+  const savePromise = saveToObsidian(file);
+
+  const [toast, saved] = await Promise.allSettled([toastPromise, savePromise]);
+  if (toast.status === "rejected") {
+    throw new Error("Unexpected: Toast failed to display.");
+  }
+  if (saved.status === "rejected") {
+    toast.value.style = Toast.Style.Failure;
+    toast.value.message = String(saved.reason);
+    toast.value.show();
+    return Promise.reject(saved.reason);
+  } else {
+    toast.value.hide();
+    return file;
+  }
+}
+
+/** Writes back every bookmark whose favorite position changed. */
+export async function saveFavorites(files: File[]): Promise<File[]> {
+  if (files.length === 0) return files;
+
+  try {
+    const fresh = await Promise.all(files.map(withFreshBody));
+    await Promise.all(fresh.map((file) => saveToObsidian(file)));
+    return fresh;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't update favorites",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+const markAs = (read: boolean) => async (file: File) => {
+  const fresh = await withFreshBody(file);
+  const newFile: File = { ...fresh, attributes: { ...fresh.attributes, read } };
+  return saveFile(newFile);
+};
+export const markAsRead = markAs(true);
+export const markAsUnread = markAs(false);
+
+export function toggleDetails(setDetails: Dispatch<SetStateAction<boolean>>) {
+  setDetails((details) => !details);
+}

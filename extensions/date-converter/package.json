@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "date-converter",
+  "title": "Date Converter",
+  "description": "Convert a variety of date formats",
+  "icon": "extension-icon.png",
+  "author": "asportnoy",
+  "contributors": [
+    "vineus",
+    "danyal",
+    "alex925"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "date",
+    "epoch",
+    "unix",
+    "seconds",
+    "milliseconds",
+    "iso",
+    "timestamp",
+    "convert"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Date",
+      "description": "Parse and convert a date",
+      "mode": "view",
+      "keywords": [
+        "date",
+        "epoch",
+        "unix",
+        "seconds",
+        "milliseconds",
+        "iso",
+        "timestamp",
+        "convert"
+      ],
+      "preferences": [
+        {
+          "name": "defaultFormat",
+          "title": "Preferred Format",
+          "description": "Default date format used in the copy action when ⏎ is pressed",
+          "type": "dropdown",
+          "default": "unix-ms",
+          "required": false,
+          "data": [
+            {
+              "title": "Unix Timestamp (ms)",
+              "value": "unix-ms"
+            },
+            {
+              "title": "Unix Timestamp (seconds)",
+              "value": "unix-s"
+            },
+            {
+              "title": "ISO Date",
+              "value": "iso"
+            },
+            {
+              "title": "Human Date",
+              "value": "human"
+            }
+          ]
+        },
+        {
+          "name": "secondaryFormat",
+          "title": "Secondary Format",
+          "description": "Secondary date format used in the copy action when ⌘ + ⏎ is pressed",
+          "type": "dropdown",
+          "default": "iso",
+          "required": false,
+          "data": [
+            {
+              "title": "Unix Timestamp (ms)",
+              "value": "unix-ms"
+            },
+            {
+              "title": "Unix Timestamp (seconds)",
+              "value": "unix-s"
+            },
+            {
+              "title": "ISO Date",
+              "value": "iso"
+            },
+            {
+              "title": "Human Date",
+              "value": "human"
+            }
+          ]
+        },
+        {
+          "name": "copyAction",
+          "title": "Copy Action",
+          "description": "Action to take when copying the converted date",
+          "type": "dropdown",
+          "default": "both",
+          "required": false,
+          "data": [
+            {
+              "title": "Copy to clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to frontmost app",
+              "value": "paste"
+            },
+            {
+              "title": "Copy and paste to frontmost app",
+              "value": "both"
+            }
+          ]
+        },
+        {
+          "name": "displayFormat",
+          "title": "Default Display Time Format",
+          "description": "Default time format for displaying time. By default, 'dddd, MMMM D, YYYY hh:mm:ss' will be used. Available formats can be found in the day.js library documentation.",
+          "type": "textfield",
+          "default": "dddd, MMMM D, YYYY hh:mm:ss",
+          "required": false
+        },
+        {
+          "name": "humanFormat",
+          "title": "Human-readable Time Format",
+          "description": "Time format for human-readable time. By default, 'dddd, MMMM D, YYYY hh:mm:ss' will be used. Available formats can be found in the day.js library documentation.",
+          "type": "textfield",
+          "default": "dddd, MMMM D, YYYY hh:mm:ss",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "chrono-node": "^2.7.7",
+    "dayjs": "^1.11.13",
+    "javascript-time-ago": "^2.5.11",
+    "timezone-support": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@total-typescript/ts-reset": "^0.4.2",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

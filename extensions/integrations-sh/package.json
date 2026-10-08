@@ -1,0 +1,348 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "integrations-sh",
+  "title": "Integrations.sh",
+  "description": "Search integrations.sh for MCP, OpenAPI, GraphQL, and CLI integration surfaces, and inspect setup and credentials per domain.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-integrations",
+      "title": "Search Integrations",
+      "description": "Search integrations.sh for MCP, OpenAPI, GraphQL, and CLI integration surfaces.",
+      "mode": "view"
+    },
+    {
+      "name": "inspect-domain",
+      "title": "Inspect Integration Domain",
+      "description": "Inspect integration surfaces and credentials for a domain.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "stripe.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-integration-surfaces",
+      "title": "Search Integration Surfaces",
+      "description": "Search integrations.sh for MCP, OpenAPI, GraphQL, and CLI integration surfaces by domain, service, or integration type."
+    },
+    {
+      "name": "inspect-integration-domain",
+      "title": "Inspect Integration Domain",
+      "description": "Inspect a domain's integrations.sh surface document, including available surfaces, auth status, and credential setup instructions."
+    }
+  ],
+  "ai": {
+    "instructions": "Use integrations.sh to answer questions about MCP, OpenAPI, GraphQL, and CLI integration surfaces for software services. Prefer searching before inspecting unless the user provided a specific domain. Surface credential setup requirements clearly, and include integrations.sh URLs when useful.",
+    "evals": [
+      {
+        "input": "@integrations-sh find Stripe integration surfaces",
+        "mocks": {
+          "search-integration-surfaces": {
+            "query": "Stripe",
+            "kind": "all",
+            "results": [
+              {
+                "domain": "stripe.com",
+                "name": "Stripe",
+                "description": "Payments platform with REST/OpenAPI and CLI integration surfaces.",
+                "kinds": [
+                  "openapi",
+                  "cli"
+                ],
+                "url": "https://integrations.sh/stripe.com/"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-integration-surfaces",
+              "arguments": {
+                "query": {
+                  "includes": "Stripe"
+                }
+              }
+            }
+          },
+          {
+            "includes": "stripe.com"
+          },
+          {
+            "includes": "OpenAPI"
+          },
+          {
+            "includes": "CLI"
+          }
+        ]
+      },
+      {
+        "input": "@integrations-sh what credentials are needed for stripe.com? Include exact credential field names.",
+        "mocks": {
+          "inspect-integration-domain": {
+            "domain": "stripe.com",
+            "summary": "Stripe exposes API and CLI integration surfaces.",
+            "description": "Stripe is a payments platform.",
+            "discoveredAt": "2026-07-03T00:00:00.000Z",
+            "pageUrl": "https://integrations.sh/stripe.com/",
+            "credentials": [
+              {
+                "id": "stripe-secret-key",
+                "type": "api_key",
+                "label": "Stripe Secret Key",
+                "acquisition": "manual",
+                "generateUrl": "https://dashboard.stripe.com/apikeys",
+                "setup": "Create or copy a restricted secret key from the Stripe Dashboard API keys page.",
+                "fields": {
+                  "STRIPE_SECRET_KEY": {
+                    "secret": true,
+                    "description": "Stripe secret API key"
+                  }
+                }
+              }
+            ],
+            "surfaces": [
+              {
+                "slug": "api",
+                "name": "Stripe API",
+                "type": "http",
+                "url": "https://api.stripe.com",
+                "docs": "https://docs.stripe.com/api",
+                "spec": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json",
+                "auth": {
+                  "status": "required",
+                  "entries": [
+                    {
+                      "use": [
+                        {
+                          "id": "stripe-secret-key"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "pageUrl": "https://integrations.sh/stripe.com/api/"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "inspect-integration-domain",
+              "arguments": {
+                "domain": "stripe.com"
+              }
+            }
+          },
+          {
+            "includes": "Stripe Secret Key"
+          },
+          {
+            "includes": "STRIPE_SECRET_KEY"
+          },
+          {
+            "includes": "https://dashboard.stripe.com/apikeys"
+          }
+        ]
+      },
+      {
+        "input": "@integrations-sh show me MCP integrations for browser automation",
+        "mocks": {
+          "search-integration-surfaces": {
+            "query": "browser automation",
+            "kind": "mcp",
+            "results": [
+              {
+                "domain": "playwright.dev",
+                "name": "Playwright",
+                "description": "Browser automation tooling with MCP support.",
+                "kinds": [
+                  "mcp",
+                  "cli"
+                ],
+                "url": "https://integrations.sh/playwright.dev/"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-integration-surfaces",
+              "arguments": {
+                "query": {
+                  "includes": "browser automation"
+                },
+                "kind": "mcp"
+              }
+            }
+          },
+          {
+            "includes": "playwright.dev"
+          },
+          {
+            "includes": "MCP"
+          }
+        ]
+      },
+      {
+        "input": "@integrations-sh inspect https://github.com/docs and list every available integration surface, including CLI surfaces and credential field names",
+        "mocks": {
+          "inspect-integration-domain": {
+            "domain": "github.com",
+            "summary": "GitHub exposes REST, GraphQL, CLI, and MCP integration surfaces.",
+            "description": "GitHub provides developer platform APIs and command-line tools.",
+            "discoveredAt": "2026-07-03T00:00:00.000Z",
+            "pageUrl": "https://integrations.sh/github.com/",
+            "credentials": [
+              {
+                "id": "github-token",
+                "type": "bearer",
+                "label": "GitHub Personal Access Token",
+                "acquisition": "manual",
+                "generateUrl": "https://github.com/settings/tokens",
+                "setup": "Create a personal access token with the scopes required by the target API operation.",
+                "fields": {
+                  "GITHUB_TOKEN": {
+                    "secret": true,
+                    "description": "GitHub personal access token"
+                  }
+                }
+              }
+            ],
+            "surfaces": [
+              {
+                "slug": "rest",
+                "name": "GitHub REST API",
+                "type": "http",
+                "url": "https://api.github.com",
+                "docs": "https://docs.github.com/rest",
+                "auth": {
+                  "status": "required",
+                  "entries": [
+                    {
+                      "use": [
+                        {
+                          "id": "github-token"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "pageUrl": "https://integrations.sh/github.com/rest/"
+              },
+              {
+                "slug": "graphql",
+                "name": "GitHub GraphQL API",
+                "type": "graphql",
+                "url": "https://api.github.com/graphql",
+                "docs": "https://docs.github.com/graphql",
+                "auth": {
+                  "status": "required",
+                  "entries": [
+                    {
+                      "use": [
+                        {
+                          "id": "github-token"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "pageUrl": "https://integrations.sh/github.com/graphql/"
+              },
+              {
+                "slug": "cli",
+                "name": "GitHub CLI",
+                "type": "cli",
+                "command": "gh",
+                "packages": [
+                  {
+                    "registryType": "brew",
+                    "identifier": "gh"
+                  }
+                ],
+                "auth": {
+                  "status": "required",
+                  "entries": [
+                    {
+                      "use": [
+                        {
+                          "id": "github-token"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "pageUrl": "https://integrations.sh/github.com/cli/"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "inspect-integration-domain",
+              "arguments": {
+                "domain": {
+                  "includes": "github.com"
+                }
+              }
+            }
+          },
+          {
+            "includes": "REST"
+          },
+          {
+            "includes": "GraphQL"
+          },
+          {
+            "includes": "GitHub CLI"
+          },
+          {
+            "includes": "GITHUB_TOKEN"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

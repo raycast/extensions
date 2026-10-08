@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "storyblok",
+  "title": "Storyblok",
+  "description": "Query your Storyblok spaces, stories, assets, and more.",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Data",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Storyblok Spaces",
+      "description": "Manage your Storyblok Spaces: See all your spaces, their stories, assets, and more.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "key": "token",
+      "title": "Personal Access Token",
+      "name": "accessToken",
+      "description": "Your personal access token from the Storyblok: https://app.storyblok.com/#/me/account?tab=token.",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "apiLocation",
+      "title": "Spaces Location",
+      "name": "apiLocation",
+      "description": "The geographical region your Storyblok spaces reside in.",
+      "required": true,
+      "type": "dropdown",
+      "defaultValue": "https://mapi.storyblok.com",
+      "data": [
+        {
+          "title": "Australia",
+          "value": "https://api-ap.storyblok.com"
+        },
+        {
+          "title": "Canada",
+          "value": "https://api-ca.storyblok.com"
+        },
+        {
+          "title": "China",
+          "value": "https://app.storyblokchina.cn"
+        },
+        {
+          "title": "European Union",
+          "value": "https://mapi.storyblok.com"
+        },
+        {
+          "title": "United States",
+          "value": "https://api-us.storyblok.com"
+        }
+      ]
+    },
+    {
+      "key": "modifierKey",
+      "title": "Modifier Key",
+      "name": "modifierKey",
+      "description": "Which key to use to use as a shortcut through this extension's main command",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": "ctrl",
+      "data": [
+        {
+          "title": "Control",
+          "value": "ctrl"
+        },
+        {
+          "title": "Option",
+          "value": "opt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "@web3-storage/parse-link-header": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

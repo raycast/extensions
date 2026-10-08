@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "currency-exchange",
+  "title": "Currency Exchange",
+  "description": "Simple Currency Exchange with a selectable rate provider (ExchangeRate-API or UniRateAPI)",
+  "icon": "currency.png",
+  "author": "xeric",
+  "contributors": [
+    "daudln",
+    "taken"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Currency Exchange",
+      "description": "Calculate with Exchange Rate",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Rate Provider",
+      "description": "Which exchange rate API to query. Switch this if you prefer UniRateAPI's pricing or coverage.",
+      "default": "exchangerate-api",
+      "data": [
+        {
+          "title": "ExchangeRate-API",
+          "value": "exchangerate-api"
+        },
+        {
+          "title": "UniRateAPI",
+          "value": "unirate"
+        }
+      ]
+    },
+    {
+      "name": "api_key",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Key for the selected provider. ExchangeRate-API: https://app.exchangerate-api.com/dashboard — UniRateAPI: https://unirateapi.com/dashboard",
+      "placeholder": "API key for the selected provider"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.3",
+    "@types/react": "^18.0.33",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parabol",
+  "title": "Parabol",
+  "description": "Provide shortcuts to Parabol application",
+  "icon": "parabol-logo.png",
+  "author": "parabol",
+  "contributors": [
+    "bjarocki"
+  ],
+  "version": "0.0.1",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "newMeeting",
+      "title": "Create New Meeting",
+      "subtitle": "Parabol",
+      "description": "Opens Parabol on a new meeting screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "myMeetings",
+      "title": "Show Meetings",
+      "subtitle": "Parabol",
+      "description": "Opens Parabol on a meetings screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "tasks",
+      "title": "Show Tasks",
+      "subtitle": "Parabol",
+      "description": "Opens Parabol on a tasks screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "timeline",
+      "title": "Show Timeline",
+      "subtitle": "Parabol",
+      "description": "Opens Parabol on a timeline screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "profile",
+      "title": "Show Profile",
+      "subtitle": "Parabol",
+      "description": "Opens Parabol on a profile screen",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

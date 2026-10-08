@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ottomatic",
+  "title": "Ottomatic",
+  "description": "Manage your Ottomatic servers and projects",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-servers",
+      "title": "Search Servers",
+      "subtitle": "Ottomatic",
+      "icon": "list-servers.png",
+      "description": "View the servers in your Ottomatic account",
+      "mode": "view"
+    },
+    {
+      "name": "search-favorites",
+      "title": "Search Favorites",
+      "subtitle": "Ottomatic",
+      "icon": "list-favs.png",
+      "description": "View your favorites in your Ottomatic account",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.0",
+    "cross-fetch": "^4.0.0",
+    "jose": "^5.2.4",
+    "lodash": "^4.17.21",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/bun": "^1.0.12",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

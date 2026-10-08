@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aranet-co2-monitor",
+  "title": "Aranet CO2 Monitor",
+  "description": "Monitor Aranet CO2 monitors via Bluetooth",
+  "icon": "command-icon.png",
+  "author": "Osprey",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Menu Bar Toggle",
+      "description": "Refresh CO2 readings in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "scan",
+      "title": "Scan for Devices",
+      "description": "Scan for nearby Aranet devices",
+      "mode": "view"
+    },
+    {
+      "name": "view",
+      "title": "View Current Readings",
+      "description": "View current Aranet data in Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "macAddress",
+      "title": "Aranet UUID",
+      "description": "The UUID of your Aranet device. Leave empty to automatically connect to the nearest device.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

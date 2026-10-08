@@ -1,0 +1,334 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zerion",
+  "title": "Zerion",
+  "description": "Browse Zerion from Raycast",
+  "icon": "zerion_icon.png",
+  "author": "imqdee",
+  "contributors": [
+    "zerts"
+  ],
+  "categories": [
+    "Web",
+    "Productivity",
+    "Data",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-wallets",
+      "title": "My Wallets",
+      "subtitle": "Zerion",
+      "description": "View your wallets overview",
+      "mode": "view",
+      "keywords": [
+        "wallet",
+        "address",
+        "portfolio"
+      ],
+      "icon": "zerion_icon.png"
+    },
+    {
+      "name": "address-info",
+      "title": "Overview",
+      "subtitle": "Zerion",
+      "description": "Overview a portofolio using an address or an ENS name",
+      "mode": "view",
+      "keywords": [
+        "address",
+        "crypto",
+        "0x",
+        "eth",
+        "lens"
+      ],
+      "icon": "zerion_icon.png",
+      "arguments": [
+        {
+          "name": "account",
+          "placeholder": "Address or ENS",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "find-token-or-address",
+      "title": "Search Web3",
+      "subtitle": "Zerion",
+      "description": "Search any token, address or domain",
+      "mode": "view",
+      "keywords": [
+        "address",
+        "wallet",
+        "crypto",
+        "asset",
+        "token"
+      ],
+      "icon": "zerion_icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-wallet",
+      "title": "Menu Bar Wallet",
+      "subtitle": "Zerion",
+      "description": "View your wallet's value in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "collection",
+      "title": "View Collection",
+      "subtitle": "Zerion",
+      "description": "See all NFTs from a collection",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "collection",
+          "placeholder": "Collection name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "favorites",
+      "subtitle": "Zerion",
+      "title": "View Favorites",
+      "description": "Check your favorite assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-gainers",
+      "subtitle": "Zerion",
+      "title": "View Top Gainers",
+      "description": "Daily top-performing assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-losers",
+      "subtitle": "Zerion",
+      "title": "View Top Losers",
+      "description": "Daily least-performing assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "market",
+      "subtitle": "Zerion",
+      "title": "View Market",
+      "description": "Real-time market performance",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-movers",
+      "subtitle": "Zerion",
+      "title": "View Top Movers",
+      "description": "Daily top gainers and losers",
+      "mode": "no-view"
+    },
+    {
+      "name": "trending-tokens",
+      "subtitle": "Zerion",
+      "title": "View Trending Tokens",
+      "description": "Tokens trending on Zerion right now",
+      "mode": "no-view"
+    },
+    {
+      "name": "stocks",
+      "subtitle": "Zerion",
+      "title": "View Stocks",
+      "description": "Tokenized stocks on Zerion",
+      "mode": "no-view"
+    },
+    {
+      "name": "perps",
+      "subtitle": "Zerion",
+      "title": "View Perps",
+      "description": "Perpetual futures on Zerion",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "look-wallets",
+      "title": "Check Saved Wallets",
+      "description": "Get the list of saved wallets"
+    },
+    {
+      "name": "check-portfolio",
+      "title": "Fetch Wallet Portfolio",
+      "description": "Fetch the portfolio and all positions of a wallet"
+    },
+    {
+      "name": "look-token",
+      "title": "Fetch Token Info",
+      "description": "Fetch the info of a token by the tokenId. This will bring information about the token, its price, its presence on different l2 chains and its market cap"
+    },
+    {
+      "name": "search-blockchain",
+      "title": "Search Token Info",
+      "description": "Search token short info by the symbol, name or the address. This tool will return the list of the best matches. It is usually better to use the first item from the list"
+    },
+    {
+      "name": "check-token-price-chart",
+      "title": "Get Token Historical Price Data",
+      "description": "Get the historical price data of a token by the tokenId. This will bring the price data of the token in the requested period"
+    }
+  ],
+  "ai": {
+    "instructions": "All prices are in USD. Wallet tools accept either a raw address or an ENS domain — pass domains as is, they are resolved automatically. To answer questions about a specific token, first use search-blockchain to find its id, then pass that id to look-token or check-token-price-chart.",
+    "evals": [
+      {
+        "input": "@zerion What is the price of eth",
+        "mocks": {
+          "search-blockchain": [
+            {
+              "id": "eth",
+              "name": "Ethereum",
+              "symbol": "ETH",
+              "price": 2016.25,
+              "market_cap": 243000000000,
+              "changes": {
+                "percent_1d": -2.7788493066136972
+              }
+            },
+            {
+              "id": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+              "name": "Wrapped Ethereum",
+              "symbol": "WETH",
+              "price": 2015.0536983875,
+              "market_cap": 5000000000,
+              "changes": {
+                "percent_1d": -2.7625533377850577
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-blockchain"
+          },
+          {
+            "meetsCriteria": "shows 2016.25 formatted in some way"
+          }
+        ]
+      },
+      {
+        "input": "@zerion What is the largest asset held at test.zerion.eth",
+        "mocks": {
+          "check-portfolio": {
+            "address": "0x24a6f8ac52a92d3ca11b1e1b5c1c0b3cf8e4b3d1",
+            "ens": "test.zerion.eth",
+            "portfolio": {
+              "total": {
+                "positions": 0.0049632
+              },
+              "changes": {
+                "absolute_1d": 0.0000021,
+                "percent_1d": 0.04
+              }
+            },
+            "positions": [
+              {
+                "name": "USD Coin (Fantom)",
+                "symbol": "USDC",
+                "fungible_id": "1469f757-c583-4bab-a91f-bb2221e7069f",
+                "chain": "fantom",
+                "position_type": "wallet",
+                "quantity": 0.0033,
+                "value": 0.0033353848492271997
+              },
+              {
+                "name": "TrueUSD",
+                "symbol": "TUSD",
+                "fungible_id": "0x0000000000085d4780b73119b644ae5ecd22b376",
+                "chain": "ethereum",
+                "position_type": "wallet",
+                "quantity": 0.0016,
+                "value": 0.0016226387441992428
+              },
+              {
+                "name": "higher",
+                "symbol": "HIGHER",
+                "fungible_id": "5b175bb6-5130-42c6-97e2-f352b1578b0a",
+                "chain": "base",
+                "position_type": "wallet",
+                "quantity": 0.0007,
+                "value": 0.000005180155450957471
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "check-portfolio",
+              "arguments": {
+                "addressOrDomain": "test.zerion.eth"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "shows USD Coin (Fantom) or USDC formatted in some way"
+          }
+        ]
+      },
+      {
+        "input": "@zerion Which wallets do I have saved?",
+        "mocks": {
+          "look-wallets": [
+            {
+              "address": "0x24a6f8ac52a92d3ca11b1e1b5c1c0b3cf8e4b3d1",
+              "ens": "test.zerion.eth"
+            },
+            {
+              "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+              "ens": "vitalik.eth"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "look-wallets"
+          },
+          {
+            "meetsCriteria": "lists test.zerion.eth and vitalik.eth"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "2.5.3",
+    "@raycast/utils": "2.3.2",
+    "lodash": "4.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/lodash": "4.17.24",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.4",
+    "prettier": "3.8.4",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "2.1.0",
+  "platforms": [
+    "macOS"
+  ]
+}

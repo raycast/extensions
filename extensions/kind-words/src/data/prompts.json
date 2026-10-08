@@ -1,0 +1,122 @@
+[
+  {
+    "id": "prompt-001",
+    "text": "Who gave you something recently that you're still using or thinking about?",
+    "context": "A gift, a book, a recipe, a playlist. The thing has stuck around in your life and the giver probably doesn't know.",
+    "examples": [
+      "I've been using that pan you gave me almost every week and I should have told you sooner.",
+      "That book you lent me is still on my nightstand. I keep going back to it.",
+      "The playlist you made me has been in heavy rotation. Thank you for the good taste."
+    ]
+  },
+  {
+    "id": "prompt-002",
+    "text": "Who spent real time on something for you lately, even if it looked small?",
+    "context": "Time is the easiest thing to undercount. Someone gave you an hour, a careful read, a long walk, and it deserves naming.",
+    "examples": [
+      "Thank you for the long call last week. I hung up feeling lighter than I had in days.",
+      "I know that edit took you longer than you let on, and it made the whole piece better.",
+      "You sat with me through that decision and didn't rush me. That mattered."
+    ]
+  },
+  {
+    "id": "prompt-003",
+    "text": "Whose recommendation turned out way better than you expected?",
+    "context": "A show, a restaurant, a person to talk to. Tell them the bet paid off — recommenders rarely hear back.",
+    "examples": [
+      "I finally watched the show you wouldn't shut up about and you were right, obviously.",
+      "That place you sent me to was perfect. Exactly the right night for it.",
+      "I took your advice on the meeting and it went well. Thanks for the nudge."
+    ]
+  },
+  {
+    "id": "prompt-004",
+    "text": "Who quietly held something together for you this month?",
+    "context": "Someone kept the calendar moving, the kid fed, the project unblocked, without performing it. Easy to miss, worth saying out loud.",
+    "examples": [
+      "I noticed you handled the whole back-and-forth with the school this week. Thank you for not making me ask.",
+      "You've been carrying more of the dinner stuff than I have lately and I see it.",
+      "Things didn't fall apart while I was heads-down, and that was you."
+    ]
+  },
+  {
+    "id": "prompt-005",
+    "text": "Who does something for the group that nobody actually thanks them for?",
+    "context": "The friend who books the table, the colleague who runs notes, the parent who tracks birthdays. The labor is invisible until they stop.",
+    "examples": [
+      "You're the reason this group still hangs out. Thank you for being the one who plans.",
+      "I realized you've been taking notes in every meeting and nobody's ever said anything. They're really good.",
+      "You remember everyone's birthday and it makes the family work. I notice."
+    ]
+  },
+  {
+    "id": "prompt-006",
+    "text": "Whose steady presence made a hard stretch less hard?",
+    "context": "Not advice, not a fix — just someone who kept showing up. Name it directly; people often don't realize their presence counted.",
+    "examples": [
+      "You didn't try to fix anything during that stretch and that was exactly what I needed.",
+      "Just knowing you were a text away made last month survivable.",
+      "Thank you for sitting with me when there wasn't anything to say."
+    ]
+  },
+  {
+    "id": "prompt-007",
+    "text": "Who taught you a habit you still use without thinking?",
+    "context": "A way of taking notes, a way of cooking onions, a way of ending a meeting. The habit outlived the lesson — close the loop.",
+    "examples": [
+      "I still take notes the way you showed me, twenty years later. It's just how I think now.",
+      "Every time I cook this I hear your voice telling me to be patient with the onions.",
+      "I learned how to actually end a meeting from watching you. I use it constantly."
+    ]
+  },
+  {
+    "id": "prompt-008",
+    "text": "Who shifted how you see something, and you never told them?",
+    "context": "A throwaway line that rearranged a piece of your thinking. The speaker probably forgot the conversation; you didn't.",
+    "examples": [
+      "Something you said years ago about choosing your hard things has stuck with me. I think about it a lot.",
+      "I haven't told you this, but the way you talked about your dad changed how I think about mine.",
+      "You said one thing in that car ride that I've been chewing on ever since."
+    ]
+  },
+  {
+    "id": "prompt-009",
+    "text": "Who modeled a kind of courage you ended up borrowing?",
+    "context": "You watched them do a hard thing — quit, ask, leave, start — and it gave you cover to do your own version.",
+    "examples": [
+      "Watching you leave that job is part of why I finally left mine. Thank you for going first.",
+      "You asked for what you wanted in front of me once and I've been quietly copying you ever since.",
+      "The way you handled saying no last year gave me permission to do the same."
+    ]
+  },
+  {
+    "id": "prompt-010",
+    "text": "Did a stranger do something small for you this week worth noting?",
+    "context": "Held a door, let you merge, returned a dropped glove. You can't thank them, so just hold the moment for a second.",
+    "examples": [
+      "The guy at the coffee place remembered my order and it made my whole morning.",
+      "Someone let me cut in line at the pharmacy and I'm still thinking about it.",
+      "A stranger picked up my scarf on the train and chased me down the platform."
+    ]
+  },
+  {
+    "id": "prompt-011",
+    "text": "When did someone give you their attention this week in a way that surprised you?",
+    "context": "A barista who looked up, a neighbor who actually asked, a checkout person who slowed down. Brief, real, easy to miss.",
+    "examples": [
+      "The cashier asked how my day was actually going and waited for the answer. Small thing, big thing.",
+      "My neighbor stopped me in the hall to ask about the move. I hadn't expected anyone to remember.",
+      "Someone at the gym noticed I was new and showed me where things were. That was nice of them."
+    ]
+  },
+  {
+    "id": "prompt-012",
+    "text": "Did you witness a small kindness between other people recently?",
+    "context": "Not for you, but you saw it. A parent on the bus, two strangers on the corner, a colleague helping a new hire. Worth keeping.",
+    "examples": [
+      "I watched a dad on the train be incredibly patient with his kid and it's stayed with me all day.",
+      "Two strangers helped someone pick up groceries on the corner and nobody made a thing of it.",
+      "I saw you walk the new person through the coffee machine yesterday. That was a kind thing to do."
+    ]
+  }
+]

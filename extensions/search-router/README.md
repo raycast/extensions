@@ -1,0 +1,100 @@
+# Search Router
+
+Implements Kagi Search bangs directly in Raycast without sending traffic through a third party website 🔐
+
+## What is Search Router?
+
+Search Router lets you search specific websites from Raycast using shortcuts by implementing [Kagi Search bangs](https://help.kagi.com/kagi/features/bangs.html). For example:
+
+- `!g cats` searches Google for "cats"
+- `!w cats` searches Wikipedia for "cats"
+- `Help me fix my code !t3` uses t3.chat to ask AI to fix your code
+- `markdown parser @gh` searches for "markdown parser" specifically within Github's domain (site:github.com)
+- And many more! See all available bangs in [Kagi Bang Explorer](https://kbe.smaertness.net)
+
+> **Pro Tip:** ✨ For the best experience, set up Search Router as a [Fallback Command](https://manual.raycast.com/fallback-commands) in Raycast. This allows you to use bangs directly from the main Raycast search without having to first open the extension!
+
+## Commands
+
+### Search the Web 🌐
+
+Set an engine trigger prefix in the extension preferences, then type your query.
+The default is `!`; leave the preference blank to use bare triggers.
+Whitespace-only prefixes are also treated as blank.
+
+With a blank prefix, common first words such as `go` or `docs` can redirect plain English queries away from your default engine.
+For example, `go tutorials` searches Gmail for `tutorials` unless you override that trigger.
+Keep a nonblank prefix or use an explicit bang for the default search engine to avoid these accidental matches.
+
+- Default: `!yt funny videos` searches YouTube
+- Custom prefix: `.yt funny videos` searches YouTube when the prefix is `.`
+- No prefix: `yt funny videos` searches YouTube when the preference is blank
+- Without a search engine: `funny videos` uses your default search engine
+- Site-specific search: `funny videos @yt` searches for "funny videos" only within YouTube's domain
+
+Built-in aliases work with both `!` and `@`: `!w` searches Wikipedia, `!gm` searches Google Maps, `!so` searches Stack Overflow, and `!r` searches Reddit. Shortcuts are case-insensitive.
+
+Custom engines take priority over built-in shortcuts. Overriding a primary shortcut also redirects its aliases to the custom engine; a custom engine with an alias as its trigger takes priority for that alias alone.
+
+The query form includes a cheat sheet with everyday searches, code and forum searches, and syntax tips. Examples stay visible while you type, and engine names reflect your custom overrides.
+
+Existing `!bang` and `@site` syntax remains available.
+`@` is reserved and cannot be used as the engine trigger prefix.
+Prefixes cannot contain internal whitespace.
+Invalid prefixes use `!` instead, so plain searches, legacy bangs, and site filters keep working.
+
+### Browse Search Engines 🧭
+
+View and manage all available search engines with filtering options. You can:
+
+- **Filter by type**: View all engines, only custom engines, or only built-in engines
+- **Search**: Find engines by name, primary trigger, or alias
+- **Set default**: Choose your default search engine
+- **Manage custom engines**: Add, edit, or delete your custom search engines directly
+- **Copy details**: View available aliases and copy primary shortcuts, aliases, or domains to clipboard
+
+### Add Custom Search Engine ➕
+
+Quickly add a new custom search engine with a personalized trigger and URL.
+
+Existing built-in triggers and aliases can be overridden, including those with non-ASCII characters. Deleting a custom default that used an alias restores the Google fallback rather than selecting the alias's built-in engine.
+
+Example custom search engines:
+
+- `!jira` for your company's Jira issue tracker: `https://company.atlassian.net/browse/{{{s}}}`
+- `!cgitlab` for a self hosted GitLab: `https://gitlab.company.com/search?search={{{s}}}`
+
+## Setting Up as a Fallback Command ⚡
+
+For the most seamless experience:
+
+1. In Raycast, search for "Manage Fallback Commands"
+2. Add "Search the Web" from the Search Router extension to your enabled fallback commands
+3. Now you can use bangs directly from Raycast's main search when no other results match!
+
+## Contributing
+
+Contributions welcome! Submit a pull request to add more search engines or improvements.
+
+### Managing Search Engines
+
+This extension uses search engine definitions from [Kagi's bangs repository](https://github.com/kagisearch/bangs). Here's how to add or update search engines:
+
+1. To add a new built-in search engine:
+   - Fork [Kagi's bangs repository](https://github.com/kagisearch/bangs)
+   - Add your search engine definition following their schema
+   - Submit a PR to Kagi's repository
+
+2. To update this extension with latest engines:
+   - Fork this repository
+   - Run `npm run download-kagi-bangs` to fetch latest definitions
+   - Test locally with `npm run dev`
+   - Submit a PR
+
+## Credits 🙏
+
+- [Kagi Search Bangs](https://help.kagi.com/kagi/features/bangs.html) - The implementation of the bangs concept 🔍
+- [Kagi Bangs Repository](https://github.com/kagisearch/bangs) - The official repository of Kagi Search bangs 📚
+- [DuckDuckGo !Bangs](https://duckduckgo.com/bangs) - The original implementation of the bangs concept 🦆
+- [Theo Browne's video on DuckDuckGo !Bangs](https://www.youtube.com/watch?v=_DnNzRaBWUU) - A great walkthrough of bangs and why he chose to implement it himself 📹
+- [unduck.link](https://unduck.link/) - Theo's web implementation of the original functionality with DuckDuckGo's bang 🔗

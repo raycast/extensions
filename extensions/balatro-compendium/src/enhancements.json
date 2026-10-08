@@ -1,0 +1,50 @@
+[
+  {
+    "Name": "Bonus",
+    "Appearance": "enhancer_bonus.png",
+    "Effect": "+30 extra chips",
+    "Additional": ""
+  },
+  {
+    "Name": "Glass",
+    "Appearance": "enhancer_glass.png",
+    "Effect": "x2 Mult, 1 in 4 chance to destroy card",
+    "Additional": ""
+  },
+  {
+    "Name": "Gold",
+    "Appearance": "enhancer_gold.png",
+    "Effect": "$3 if this card is held in hand at end of round",
+    "Additional": ""
+  },
+  {
+    "Name": "Lucky",
+    "Appearance": "enhancer_lucky.png",
+    "Effect": "1 in 5 chance for +20 Mult. 1 in 15 chance to win $20",
+    "Additional": ""
+  },
+  {
+    "Name": "Mult",
+    "Appearance": "enhancer_mult.png",
+    "Effect": "+4 Mult",
+    "Additional": ""
+  },
+  {
+    "Name": "Steel",
+    "Appearance": "enhancer_steel.png",
+    "Effect": "x1.5 Mult while this card stays in hand",
+    "Additional": ""
+  },
+  {
+    "Name": "Stone",
+    "Appearance": "enhancer_stone.png",
+    "Effect": "+50 Chips, no rank or suit",
+    "UnlockRequirement": "Note that Stone cards have no rank or suit, rather than being their own. Stone cards secretly retain a rank and suit like other playing cards, but they cannot be determined or used in scoring until the Stone enhancement is cleared or replaced."
+  },
+  {
+    "Name": "Wild",
+    "Appearance": "enhancer_wild.png",
+    "Effect": "Can be used as any suit",
+    "Additional": ""
+  }
+]

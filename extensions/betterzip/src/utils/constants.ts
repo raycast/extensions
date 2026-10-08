@@ -1,0 +1,18 @@
+export const archiveFormat = [
+  ".zip",
+  ".tar",
+  ".tgz",
+  ".tbz",
+  ".txz",
+  ".tzst",
+  ".tbr",
+  ".tz",
+  ".sevenzip",
+  ".xar",
+  ".rar ",
+  ".dmg",
+  ".iso",
+  ".nupkg",
+  ".gz",
+  ".7z",
+];

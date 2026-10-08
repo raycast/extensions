@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "readwise",
+  "title": "Readwise",
+  "description": "Search and browse your Readwise library, and ask AI about your saved highlights and notes.",
+  "icon": "icon.png",
+  "author": "natterstefan",
+  "contributors": [
+    "alexi.build"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "dailyreview",
+      "title": "Open Daily Review",
+      "subtitle": "Readwise",
+      "description": "Opens your Daily Review on Readwise with your default browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "library",
+      "title": "Open Library",
+      "subtitle": "Readwise",
+      "description": "Opens your Library on Readwise with your default browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "highlights",
+      "title": "Browse Highlights",
+      "subtitle": "Readwise",
+      "description": "Browse highlights on Readwise",
+      "keywords": [
+        "highlight",
+        "highlights"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "books",
+      "title": "Browse Library",
+      "subtitle": "Readwise",
+      "description": "Browse your Readwise Library",
+      "keywords": [
+        "book",
+        "books",
+        "article",
+        "articles",
+        "podcast",
+        "podcasts"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Browse Highlight Tags",
+      "subtitle": "Readwise",
+      "description": "Browse your Readwise Highlight Tags",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-books",
+      "title": "List Library Entries",
+      "description": "Browse your Readwise library, including books, articles, tweets, and podcasts. Returns IDs for fetching highlights and links to Readwise."
+    },
+    {
+      "name": "list-highlights",
+      "title": "List Highlights",
+      "description": "Read saved Readwise highlights and notes, optionally filtered by library entry or highlight date."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Readwise API Token",
+      "description": "Your Readwise API access token",
+      "link": "https://readwise.io/access_token",
+      "placeholder": "Enter your API access token"
+    },
+    {
+      "name": "pageSize",
+      "type": "textfield",
+      "required": false,
+      "title": "Page Size",
+      "description": "Define how many results you want to get per default (default is 500, max is 1000)",
+      "link": "https://readwise.io/api_deets",
+      "placeholder": "Enter the page size value",
+      "default": "500"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.3",
+    "date-fns": "^2.28.0",
+    "query-string": "^7.1.1",
+    "swr": "^2.5.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.2",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.test.json --noEmit"
+  }
+}

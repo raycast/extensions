@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-app-icon",
+  "title": "Get App Icon",
+  "description": "Quickly save or copy an app's icon in multiple sizes and formats.",
+  "icon": "get-app-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "icon",
+    "app",
+    "export",
+    "png",
+    "icns",
+    "jpeg",
+    "macos",
+    "finder",
+    "assets"
+  ],
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultViewMode",
+      "title": "Default View",
+      "type": "dropdown",
+      "default": "list",
+      "required": false,
+      "description": "Choose whether to display applications as a list or grid by default",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "outputPath",
+      "title": "Output Folder",
+      "type": "directory",
+      "default": "~/Downloads/",
+      "required": true,
+      "description": "Where exported icons are saved. Each app gets its own subfolder."
+    },
+    {
+      "name": "defaultExportSize",
+      "title": "Default Size",
+      "type": "dropdown",
+      "default": "512",
+      "required": false,
+      "description": "Size used by Export Icons. Use Export Icon Size… for a one-off, or Export All Sizes for every size.",
+      "data": [
+        { "title": "16 × 16", "value": "16" },
+        { "title": "32 × 32", "value": "32" },
+        { "title": "48 × 48", "value": "48" },
+        { "title": "64 × 64", "value": "64" },
+        { "title": "128 × 128", "value": "128" },
+        { "title": "256 × 256", "value": "256" },
+        { "title": "512 × 512", "value": "512" },
+        { "title": "1024 × 1024", "value": "1024" }
+      ]
+    },
+    {
+      "name": "formatPng",
+      "title": "PNG",
+      "label": "Export PNG",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Lossless, transparent background. The safe default."
+    },
+    {
+      "name": "formatJpeg",
+      "title": "JPEG",
+      "label": "Export JPEG",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Smaller files, no transparency."
+    },
+    {
+      "name": "formatIcns",
+      "title": "ICNS",
+      "label": "Export ICNS",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "The app's original .icns file. Unavailable for apps with Asset Catalogs."
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-app-icon",
+      "title": "Get App Icon",
+      "description": "Quickly save an app's icon in multiple sizes and formats.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-kit": "^0.1.3",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

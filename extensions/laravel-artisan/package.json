@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-artisan",
+  "title": "Laravel Artisan",
+  "description": "View and search Laravel Artisan commands.",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Console Commands",
+      "subtitle": "Laravel Artisan",
+      "description": "Search and view Artisan console commands",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2",
+    "fuse.js": "^7.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "tools": [
+    {
+      "name": "search-artisan-commands",
+      "title": "Search Artisan Commands",
+      "description": "Search Laravel Artisan commands and their exact options for a Laravel version."
+    }
+  ],
+  "ai": {
+    "instructions": "Before answering any question about an Artisan command, what it does, or its options and arguments, call Search Artisan Commands and answer from its results, not from memory. Pass the Laravel version when the user names one.",
+    "evals": [
+      {
+        "input": "@laravel-artisan how do I make a model with a migration?",
+        "mocks": {
+          "search-artisan-commands": {
+            "version": "13.x",
+            "commands": [
+              {
+                "name": "make:model",
+                "description": "Create a new Eloquent model class",
+                "usage": "php artisan make:model [-m|--migration] [--] <name>",
+                "options": [
+                  {
+                    "name": "--migration",
+                    "description": "Create a new migration file for the model",
+                    "takesValue": false
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "name",
+                    "description": "The name of the model",
+                    "required": true
+                  }
+                ]
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-artisan-commands"
+          },
+          {
+            "includes": "make:model"
+          },
+          {
+            "includes": "--migration"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-artisan tell me about the tinker command",
+        "mocks": {
+          "search-artisan-commands": {
+            "version": "13.x",
+            "commands": [
+              {
+                "name": "tinker",
+                "description": "Interact with your application",
+                "usage": "php artisan tinker [--execute [EXECUTE]] [--] [<include>...]",
+                "options": [
+                  {
+                    "name": "--execute",
+                    "description": "Execute the given code using Tinker",
+                    "takesValue": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "include",
+                    "description": "Include file(s) before starting tinker",
+                    "required": false
+                  }
+                ]
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-artisan-commands"
+          },
+          {
+            "includes": "--execute"
+          }
+        ]
+      }
+    ]
+  }
+}

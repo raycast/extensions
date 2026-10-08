@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "material-icons",
+  "title": "Material Icons",
+  "description": "Search and preview Material Icons",
+  "icon": "command-icon.png",
+  "author": "creasty",
+  "contributors": [
+    "201549BL",
+    "3llomi",
+    "j3lte"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Material Icons",
+      "description": "Search and preview Material Icons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "view",
+      "title": "Preferred view",
+      "description": "Select the preferred view",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ],
+      "default": "grid",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "fzy.js": "^0.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

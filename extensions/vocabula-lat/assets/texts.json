@@ -1,0 +1,213 @@
+{
+  "pos": {
+    "title": "Part of speech",
+    "X": "All, none or unknown",
+    "N": "Noun",
+    "PRON": "Pronoun",
+    "PACK": "Packon",
+    "ADJ": "Adjective",
+    "NUM": "Numeral",
+    "ADV": "Adverb",
+    "V": "Verb",
+    "VPAR": "Verb participle",
+    "SUPINE": "Supine",
+    "PREP": "Preposition",
+    "CONJ": "Conjunction",
+    "INTERJ": "Interjection",
+    "TACKON": "Tackon",
+    "PREFIX": "Prefix",
+    "SUFFIX": "Suffix"
+  },
+  "declension": {
+    "title": "Declension",
+    "N": {
+      "1": "1st declension",
+      "2": "2nd declension",
+      "3": "3rd declension",
+      "4": "4th declension",
+      "5": "5th declension",
+      "6": "possibly nonsyllabic",
+      "7": "possibly nonsyllabic",
+      "8": "possibly nonsyllabic",
+      "9": "possibly nonsyllabic"
+    },
+    "ADJ": {
+      "1": "1st or 2nd declension",
+      "2": "2nd declension",
+      "3": "3rd declension",
+      "4": "possibly nonsyllabic",
+      "5": "possibly nonsyllabic",
+      "6": "possibly nonsyllabic",
+      "7": "possibly nonsyllabic",
+      "8": "possibly nonsyllabic",
+      "9": "possibly nonsyllabic"
+    }
+  },
+  "conjugation": {
+    "title": "Conjugation",
+    "1_1": "1st conjugation",
+    "2_1": "2nd conjugation",
+    "3_1": "3rd conjugation",
+    "3_4": "4th conjugation",
+    "X_": "Unknown",
+    "5_1": "Form of to be"
+  },
+  "case": {
+    "title": "Case",
+    "NOM": "Nominative",
+    "VOC": "Vocative",
+    "GEN": "Genitive",
+    "LOC": "Locative",
+    "DAT": "Dative",
+    "ABL": "Ablative",
+    "ACC": "Accusative",
+    "X": "All, none or unknown"
+  },
+  "number": {
+    "title": "Number",
+    "X": "All, none or unknown",
+    "S": "Singular",
+    "P": "Plural"
+  },
+  "gender": {
+    "title": "Gender",
+    "X": "All, none or unknown",
+    "M": "Masculine",
+    "F": "Feminine",
+    "N": "Neuter",
+    "C": "Common (masculine or feminine)"
+  },
+  "comparison_type": {
+    "title": "Comparison type",
+    "X": "All, none or unknown",
+    "POS": "Positive",
+    "COMP": "Comparative",
+    "SUP": "Superlative"
+  },
+  "tense": {
+    "title": "Tense",
+    "X": "All, none or unknown",
+    "PRES": "Present",
+    "IMPF": "Imperfect",
+    "FUT": "Future",
+    "PERF": "Perfect",
+    "PLUP": "Pluperfect",
+    "FUTP": "Future perfect"
+  },
+  "voice": {
+    "title": "Voice",
+    "X": "All, none or unknown",
+    "ACTIVE": "Active",
+    "PASSIVE": "Passive"
+  },
+  "mood": {
+    "title": "Mood",
+    "X": "All, none or unknown",
+    "IND": "Indicative",
+    "SUB": "Subjunctive",
+    "IMP": "Imperative",
+    "INF": "Infinitive",
+    "PPL": "Participle"
+  },
+  "definition": {
+    "infinitive": "Infinitive",
+    "indicative": "Indikative",
+    "perfectum": "Perfectum",
+    "base": "Base",
+    "comparative": "Comparative",
+    "supinum": "Supine",
+    "genitive": "Genitive"
+  },
+  "dict": {
+    "age": {
+      "title": "Age",
+      "X": "In use throughout the ages/unknown",
+      "A": "Very early forms, obsolete by classical times",
+      "B": "Early Latin, pre-classical, used for effect/poetry",
+      "C": "Limited to classical (~150 BC - 200 AD)",
+      "D": "Late, post-classical (3rd-5th centuries)",
+      "E": "Latin not in use in Classical times (6th – 10th centuries) Christian",
+      "F": "Medieval (11th – 15th centuries)",
+      "G": "Latin post 15th - Scholarly/Scientific (16th – 18th centuries)",
+      "H": "Coined recently, words for new things (19th – 20th centuries)"
+    },
+    "area": {
+      "title": "Area",
+      "X": "All or none",
+      "A": "Agriculture, Flora, Fauna, Land, Equipment, Rural",
+      "B": "Biological, Medical, Body Parts",
+      "D": "Drama, Music, Theater, Art, Painting, Sculpture",
+      "E": "Ecclesiastic, Biblical, Religious",
+      "G": "Grammar, Rhetoric, Logic, Literature, Schools",
+      "L": "Legal, Government, Tax, Financial, Political, Titles",
+      "P": "Poetic",
+      "S": "Science, Philosophy, Mathematics, Units/Measures",
+      "T": "Technical, Architecture, Topography, Surveying",
+      "W": "War, Military, Naval, Ships, Armor",
+      "Y": "Mythology"
+    },
+    "geo": {
+      "title": "Geography",
+      "X": "All or none",
+      "A": "Africa",
+      "B": "Britain",
+      "C": "China",
+      "D": "Scandinavia",
+      "E": "Egypt",
+      "F": "France, Gaul",
+      "G": "Germany",
+      "H": "Greece",
+      "I": "Italy, Rome",
+      "J": "India",
+      "K": "Balkans",
+      "N": "Netherlands",
+      "P": "Persia",
+      "Q": "Near East",
+      "R": "Russia",
+      "S": "Spain, Iberia",
+      "U": "Eastern Europe"
+    },
+    "frequency": {
+      "title": "Frequency",
+      "X": "Unspecified - Unknown or unspecified",
+      "A": "Very frequent - Full column or more, more than 50 citations",
+      "B": "Frequent - Half column, more than 20 citations",
+      "C": "Common - More then 5 citations",
+      "D": "Lesser - 4-5 citations",
+      "E": "Uncommon - 2-3 citations",
+      "F": "Very rare - only 1 citation",
+      "I": "Inscription - Only citation is inscription",
+      "M": "Graffiti - Presently not much used",
+      "N": "Pliny - Things that appear only in Pliny Natural History"
+    },
+    "source": {
+      "title": "Source",
+      "X": "General or unknown or too common to say",
+      "A": "General or unknown or too common to say",
+      "B": "C.H.Beeson, A Primer of Medieval Latin, 1925 (Bee)",
+      "C": "Charles Beard, Cassell's Latin Dictionary 1892 (CAS)",
+      "D": "J.N.Adams, Latin Sexual Vocabulary, 1982 (Sex)",
+      "E": "L.F.Stelten, Dictionary of Eccles. Latin, 1995 (Ecc)",
+      "F": "Roy J. Deferrari, Dictionary of St. Thomas Aquinas, 1960 (DeF)",
+      "G": "Gildersleeve + Lodge, Latin Grammar 1895 (G+L)",
+      "H": "Collatinus Dictionary by Yves Ouvrard",
+      "I": "Leverett, F.P., Lexicon of the Latin Language, Boston 1845",
+      "J": "Not specified",
+      "K": "Calepinus Novus, modern Latin, by Guy Licoppe (Cal)",
+      "L": "Lewis, C.S., Elementary Latin Dictionary 1891",
+      "M": "Latham, Revised Medieval Word List, 1980",
+      "N": "Lynn Nelson, Wordlist",
+      "O": "Oxford Latin Dictionary, 1982 (OLD)",
+      "P": "Souter, A Glossary of Later Latin to 600 A.D., Oxford 1949",
+      "Q": "Other, cited or unspecified dictionaries",
+      "R": "Plater & White, A Grammar of the Vulgate, Oxford 1926",
+      "S": "Lewis and Short, A Latin Dictionary, 1879 (L+S)",
+      "T": "Found in a translation  --  no dictionary reference",
+      "U": "Du Cange",
+      "V": "Vademecum in opus Saxonis - Franz Blatt (Saxo)",
+      "W": "Whitaker's personal guess",
+      "Y": "Temp special code",
+      "Z": "Sent by user --  no dictionary reference"
+    }
+  }
+}

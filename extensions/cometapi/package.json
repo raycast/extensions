@@ -1,0 +1,202 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "cometapi",
+    "title": "CometAPI",
+    "description": "AI-powered text processing tools using CometAPI. Summarize, translate, rephrase, proofread text with advanced language models.",
+    "icon": "cometapi.png",
+    "author": "mutewinter",
+    "license": "MIT",
+    "categories": [
+        "Developer Tools"
+    ],
+    "commands": [
+        {
+            "name": "summarize",
+            "title": "Summarize",
+            "description": "Summarize selected text",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "prompt_summarize",
+                    "title": "Summarize Prompt",
+                    "description": "The prompt for summarize",
+                    "type": "textfield",
+                    "default": "Summarize the following text as concise as possible, keeping the key information clear and easy to understand:",
+                    "required": false
+                },
+                {
+                    "name": "model_summarize",
+                    "description": "Override the global model for this command",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Model Override",
+                    "placeholder": "Follow global model"
+                }
+            ]
+        },
+        {
+            "name": "translate",
+            "title": "Translate",
+            "description": "Translate selected text into English (default)",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "prompt_translate",
+                    "title": "Translate Prompt",
+                    "description": "System prompt for translate; supports {PRIMARY} and {SECONDARY} placeholders.",
+                    "type": "textfield",
+                    "default": "You are a translation assistant. Rules:\n1) If the user supplies 'Target: <LANG>', translate into <LANG>.\n2) If the source language is {PRIMARY} or {SECONDARY}, translate into the other one.\n3) Otherwise, translate into {PRIMARY}.\nPreserve formatting and meaning. Output only the translated text without extra explanations.",
+                    "required": false
+                },
+                {
+                    "name": "primary_language_translate",
+                    "title": "Primary Default Language",
+                    "description": "When source is not detected as Secondary, translate to this language",
+                    "type": "textfield",
+                    "default": "English",
+                    "required": false
+                },
+                {
+                    "name": "secondary_language_translate",
+                    "title": "Secondary Default Language",
+                    "description": "If source looks like this language, translate to Primary; if source looks like Primary, translate to this",
+                    "type": "textfield",
+                    "default": "Chinese",
+                    "required": false
+                },
+                {
+                    "name": "model_translate",
+                    "description": "Override the global model for this command",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Model Override",
+                    "placeholder": "Follow global model"
+                }
+            ]
+        },
+        {
+            "name": "rephrase",
+            "title": "Rephrase",
+            "description": "Rewrite text in a clearer, more natural way",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "prompt_rephrase",
+                    "title": "Rephrase Prompt",
+                    "description": "The prompt for rephrase",
+                    "type": "textfield",
+                    "default": "Rephrase the following text to make it clearer and more natural, without changing its meaning:",
+                    "required": false
+                },
+                {
+                    "name": "model_rephrase",
+                    "description": "Override the global model for this command",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Model Override",
+                    "placeholder": "Follow global model"
+                }
+            ]
+        },
+        {
+            "name": "proofread",
+            "title": "Proofread",
+            "description": "Correct grammar and spelling in text",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "prompt_proofread",
+                    "title": "Proofread Prompt",
+                    "description": "The prompt for proofread",
+                    "type": "textfield",
+                    "default": "Proofread the following text. Correct grammar, spelling, and punctuation errors, but do not change the meaning:",
+                    "required": false
+                },
+                {
+                    "name": "model_proofread",
+                    "description": "Override the global model for this command",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Model Override",
+                    "placeholder": "Follow global model"
+                }
+            ]
+        },
+        {
+            "name": "ask",
+            "title": "Ask AI",
+            "description": "Get a quick answer to your question",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "prompt_ask",
+                    "title": "Ask Prompt",
+                    "description": "The prompt for Ask AI",
+                    "type": "textfield",
+                    "default": "Answer the following question as clearly and concisely as possible:",
+                    "required": false
+                },
+                {
+                    "name": "model_ask",
+                    "description": "Override the global model for this command",
+                    "type": "textfield",
+                    "required": false,
+                    "title": "Model Override",
+                    "placeholder": "Follow global model"
+                }
+            ]
+        },
+        {
+            "name": "custom",
+            "title": "Custom API Request",
+            "description": "Make custom requests to CometAPI endpoints",
+            "mode": "view"
+        },
+        {
+            "name": "models",
+            "title": "List Models",
+            "description": "View all available models on CometAPI",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.102.4",
+        "@raycast/utils": "^2.2.1",
+        "openai": "^5.12.2"
+    },
+    "preferences": [
+        {
+            "name": "apikey",
+            "description": "Your CometAPI Key",
+            "type": "password",
+            "required": true,
+            "title": "CometAPI API Key"
+        },
+        {
+            "name": "model",
+            "description": "CometAPI model to use (e.g. gpt-5-mini)",
+            "type": "textfield",
+            "required": true,
+            "default": "gpt-5-mini",
+            "title": "Model ID"
+        }
+    ],
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.6.2",
+        "typescript": "^5.8.2"
+    },
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    },
+    "platforms": [
+        "macOS"
+    ]
+}

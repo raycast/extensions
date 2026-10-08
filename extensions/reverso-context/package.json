@@ -1,0 +1,228 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reverso-context",
+  "title": "Reverso Context",
+  "description": "Get Translations and Examples via Reverso Context",
+  "icon": "reverso-context.png",
+  "author": "adielBm",
+  "contributors": [
+    "MrModest"
+  ],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "context",
+      "title": "Translate",
+      "subtitle": "Reverso Context",
+      "description": "Get Translations, Pronunciation and Examples.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Enter text",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "correctLangPairDirection",
+      "type": "checkbox",
+      "required": true,
+      "title": "Translation direction",
+      "default": false,
+      "description": "Corrects translation direction based on typed text language",
+      "label": "Auto reverse direction"
+    },
+    {
+      "name": "langFrom",
+      "type": "dropdown",
+      "required": true,
+      "title": "From language",
+      "default": "en",
+      "description": "From language",
+      "data": [
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇦🇪 Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "🇨🇳 Chinese",
+          "value": "zh"
+        }
+      ]
+    },
+    {
+      "name": "langTo",
+      "type": "dropdown",
+      "required": true,
+      "title": "To language",
+      "default": "en",
+      "description": "To language",
+      "data": [
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "🇦🇪 Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇹🇷 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "🇨🇳 Chinese",
+          "value": "zh"
+        }
+      ]
+    },
+    {
+      "name": "puppeteerExecutablePath",
+      "type": "textfield",
+      "required": true,
+      "title": "Puppeteer Executable Path",
+      "default": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "description": "Executable path of your browser for Puppeteer."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "languagedetect": "^2.0.0",
+    "puppeteer-core": "^24.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

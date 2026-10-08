@@ -1,0 +1,80 @@
+{
+  "name": "beehiiv",
+  "title": "Beehiiv",
+  "description": "Integrate beehiiv with Raycast, allowing you to search for posts, check statistics, show subscribers count in the menu bar, and more.",
+  "icon": "beehiiv.png",
+  "author": "damian_zachwieja",
+  "categories": [
+    "Web",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-subscribers",
+      "title": "Search Subscribers",
+      "subtitle": "Beehiiv",
+      "description": "Search and browse through your publication's subscriber list. View subscriber details and open profiles in beehiiv.",
+      "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "Beehiiv",
+      "description": "Search across all your posts, view analytics, copy links and open posts in beehiiv.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-count-subscribers",
+      "title": "Menu Bar Subscribers Count",
+      "subtitle": "Beehiiv",
+      "description": "Display your current subscriber count in the menu bar. Updates hourly to keep you informed.",
+      "mode": "menu-bar",
+      "interval": "1h"
+    },
+    {
+      "name": "menubar-last-email",
+      "title": "Menu Bar Last Email Stats",
+      "subtitle": "Beehiiv",
+      "description": "Show performance metrics for your most recent email campaign right in the menu bar. Updates every 30 minutes.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Beehiiv API Key"
+    },
+    {
+      "name": "publicationId",
+      "type": "textfield",
+      "required": true,
+      "title": "Publication ID",
+      "description": "Your Beehiiv Publication ID"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
+    "@types/node": "~16.10.0",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^17.0.28",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

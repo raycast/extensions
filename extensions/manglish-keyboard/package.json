@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "manglish-keyboard",
+  "title": "Manglish Keyboard",
+  "description": "Write in Manglish — transliterate English phonetics to Malayalam script.",
+  "icon": "extension-icon.png",
+  "author": "mohammed_sherin_mohammed",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "type-in-manglish",
+      "title": "Type in Manglish",
+      "description": "Transliterate English phonetics to Malayalam",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Browse Manglish History",
+      "description": "Browse recent transliterations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "26.0.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "resolutions": {
+    "react": "undefined"
+  },
+  "permissions": {
+    "network": {
+      "domains": [
+        "inputtools.google.com"
+      ]
+    }
+  }
+}

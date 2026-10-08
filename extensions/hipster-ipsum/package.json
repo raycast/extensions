@@ -1,0 +1,225 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hipster-ipsum",
+  "title": "Hipster Ipsum",
+  "description": "Generate placeholder content using the official Hipster Ipsum API",
+  "version": "1.0.0",
+  "icon": "hipster-ipsum-icon.png",
+  "author": "plev",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Design Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paragraphs",
+      "title": "Generate Paragraphs",
+      "subtitle": "Hipster Ipsum",
+      "description": "Generate random paragraphs and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfParagraphs",
+          "type": "dropdown",
+            "data": [
+                {
+                "value": "1",
+                "title": "1 Paragraph"
+                },
+                {
+                "value": "2",
+                "title": "2 Paragraphs"
+                },
+                {
+                "value": "3",
+                "title": "3 Paragraphs"
+                },
+                {
+                "value": "4",
+                "title": "4 Paragraphs"
+                },
+                {
+                "value": "5",
+                "title": "5 Paragraphs"
+                }
+            ],
+          "required": false,
+          "placeholder": "No. of Paragraphs"
+        }
+      ]
+    },
+    {
+      "name": "sentences",
+      "title": "Generate Sentences",
+      "subtitle": "Hipster Ipsum",
+      "description": "Generate random sentences and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfSentences",
+          "type": "dropdown",
+          "data": [
+            {
+              "value": "1",
+              "title": "1 Sentence"
+            },
+            {
+              "value": "2",
+              "title": "2 Sentences"
+            },
+            {
+              "value": "3",
+              "title": "3 Sentences"
+            },
+            {
+              "value": "4",
+              "title": "4 Sentences"
+            },
+            {
+              "value": "5",
+              "title": "5 Sentences"
+            }
+          ],
+          "required": false,
+          "placeholder": "No. of Sentences"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "type",
+      "type": "dropdown",
+      "title": "Type",
+      "label": "`hipster-centric` for hipster speak only or `hipster-latin` for hipster speak mixed with Latin words from Lorem ipsum.",
+      "description": "“Hipster Centric” for hipster speak only or “Hipster Latin” for hipster speak mixed with Latin words from Lorem ipsum.",
+      "data": [
+        {
+          "value": "hipster-centric",
+          "title": "Hipster Centric"
+        },
+        {
+          "value": "hipster-latin",
+          "title": "Hipster Latin"
+        }
+      ],
+      "default": "hipster-centric",
+      "required": true
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "What you would like to happen when running the command?",
+      "data": [
+        {
+          "value": "clipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "paste",
+          "title": "Paste to Active App"
+        },
+        {
+          "value": "pasteAndCopy",
+          "title": "Paste and Copy to Clipboard"
+        }
+      ],
+      "default": "clipboard",
+      "required": false
+    },
+    {
+      "name": "paras",
+      "type": "dropdown",
+      "title": "Default Paragraphs",
+      "description": "How many paragraphs you would like to generate by default?",
+      "data": [
+        {
+          "value": "1",
+          "title": "1 Paragraph"
+        },
+        {
+          "value": "2",
+          "title": "2 Paragraphs"
+        },
+        {
+          "value": "3",
+          "title": "3 Paragraphs"
+        },
+        {
+          "value": "4",
+          "title": "4 Paragraphs"
+        },
+        {
+          "value": "5",
+          "title": "5 Paragraphs"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "sentences",
+      "type": "dropdown",
+      "title": "Default Sentences",
+      "description": "How many sentences you would like to generate by default?",
+      "data": [
+        {
+          "value": "1",
+          "title": "1 Sentence"
+        },
+        {
+          "value": "2",
+          "title": "2 Sentences"
+        },
+        {
+          "value": "3",
+          "title": "3 Sentences"
+        },
+        {
+          "value": "4",
+          "title": "4 Sentences"
+        },
+        {
+          "value": "5",
+          "title": "5 Sentences"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "startWithLorem",
+      "type": "checkbox",
+      "title": "Other Options",
+      "description": "Select to start the first paragraph with the phrase “I’m baby”.",
+      "label": "Start with Lorem",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

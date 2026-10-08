@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qalc",
+  "title": "Qalccast - CLI Calculator",
+  "description": "Run qalc calculator with Raycast",
+  "icon": "extension-icon.png",
+  "author": "vlad2305m",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "qalc",
+      "title": "Calculator",
+      "description": "Open interactive qalc view.\nRequires one of (qalc executable | qalc path) to be valid.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "qalcPath",
+      "title": "qalc executable",
+      "description": "The extension will interface with this program to calculate",
+      "type": "file",
+      "required": false,
+      "default": "/opt/homebrew/bin/qalc"
+    },
+    {
+      "name": "qalcPathText",
+      "title": "...or path to qalc",
+      "description": "The extension will interface with this program to calculate (fallback)",
+      "type": "textfield",
+      "required": false,
+      "default": "/opt/homebrew/bin/qalc"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "extract-zip": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.4.1",
+    "@types/react": "19.2.18",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "unlink support_folder; npx @raycast/api@latest publish; ln -s ~/Library/Application\\ Support/com.raycast.macos/extensions/qalc support_folder"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "My Backend",
+      "command": "npm run test",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "name": "Test dev",
+      "command": "npm run dev",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+  ]
+}

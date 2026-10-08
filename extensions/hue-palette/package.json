@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hue-palette",
+  "title": "Hue Palette",
+  "description": "Painting Your World In Vibrant Hues",
+  "icon": "extension-icon.png",
+  "author": "ridemountainpig",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hue-palette",
+      "title": "View Hue Palette",
+      "subtitle": "Hue Palette",
+      "description": "Explore color palettes to discover various color schemes and find inspiration for your design projects.",
+      "mode": "view"
+    },
+    {
+      "name": "hue-generator",
+      "title": "View Hue Generator",
+      "subtitle": "Hue Palette",
+      "description": "Generate a custom color palette based on your hues.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hueName",
+          "description": "The name of the hue",
+          "type": "text",
+          "placeholder": "Hue Name",
+          "required": true
+        },
+        {
+          "name": "hueColorOne",
+          "description": "The first color of the hue",
+          "type": "text",
+          "placeholder": "ffffff",
+          "required": true
+        },
+        {
+          "name": "hueColorTwo",
+          "description": "The second color of the hue",
+          "type": "text",
+          "placeholder": "ffffff",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "random-hue-generator",
+      "title": "Random Hue Generator",
+      "subtitle": "Hue Palette",
+      "description": "Quickly generate a random set of hues to inspire your design process or discover unexpected color combinations.",
+      "mode": "view"
+    },
+    {
+      "name": "hue-generate-record",
+      "title": "Search Hue Palette History",
+      "subtitle": "Hue Palette",
+      "description": "View your generated hues and color palettes.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "node-fetch": "^3.3.2",
+    "random-words": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

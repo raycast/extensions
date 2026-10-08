@@ -1,0 +1,63 @@
+# This workflow warns and then closes PRs that have had no activity for a specified amount of time.
+#
+# It runs on a schedule every 4 hours. Event-based triggers (pull_request_target, issues,
+# issue_comment) were removed because actions/stale always does a full scan of the backlog
+# regardless of which event triggered it, so running it on every PR push just repeated the
+# same scan dozens of times a day.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Close stale issues and PRs
+
+on:
+  schedule:
+    # Every 4 hours, at :23 past so it doesn't queue behind the top-of-hour rush.
+    - cron: "23 */4 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-stale-workflow]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+# Never run two scans at the same time. If a manual/dispatch run lands while the
+# scheduled one is in progress, it queues instead of stacking.
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    if: github.repository == 'raycast/extensions'
+    steps:
+      - uses: actions/stale@v11
+        with:
+          repo-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+
+          # Issues are intentionally never processed by this workflow.
+          only-issue-labels: "never-match-this"
+
+          # PRs
+          stale-pr-message: "This pull request has been automatically marked as stale because it did not have any recent activity.\n\nIt will be closed if no further activity occurs in the next 7 days to keep our backlog clean 😊"
+          close-pr-message: "This pull request has been automatically closed due to inactivity.\n\nFeel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
+          exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename, Dont close"
+          stale-pr-label: "status: stalled"
+          days-before-pr-stale: 25
+          days-before-pr-close: 7
+
+          # Any push or comment on a stalled PR removes the label on the next run (default behaviour, made explicit).
+          remove-stale-when-updated: true
+
+          # Limiting
+          # Each run only needs to handle the delta since the previous one.
+          # Each page of 100 PRs costs 1 operation; each label/comment/close costs 1.
+          operations-per-run: 200
+
+          # Process oldest PRs first so the ones most likely to be stale are handled before the budget runs out.
+          ascending: true
+
+          # Debug
+          # debug-only: true

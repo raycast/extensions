@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.raycast/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+coverage/

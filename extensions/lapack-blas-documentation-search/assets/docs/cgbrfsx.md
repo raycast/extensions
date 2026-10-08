@@ -1,0 +1,315 @@
+```fortran
+subroutine cgbrfsx (
+        character trans,
+        character equed,
+        integer n,
+        integer kl,
+        integer ku,
+        integer nrhs,
+        complex, dimension( ldab, * ) ab,
+        integer ldab,
+        complex, dimension( ldafb, * ) afb,
+        integer ldafb,
+        integer, dimension( * ) ipiv,
+        real, dimension( * ) r,
+        real, dimension( * ) c,
+        complex, dimension( ldb, * ) b,
+        integer ldb,
+        complex, dimension( ldx , * ) x,
+        integer ldx,
+        real rcond,
+        real, dimension( * ) berr,
+        integer n_err_bnds,
+        real, dimension( nrhs, * ) err_bnds_norm,
+        real, dimension( nrhs, * ) err_bnds_comp,
+        integer nparams,
+        real, dimension( * ) params,
+        complex, dimension( * ) work,
+        real, dimension( * ) rwork,
+        integer info
+)
+```
+
+CGBRFSX improves the computed solution to a system of linear
+equations and provides error bounds and backward error estimates
+for the solution.  In addition to normwise error bound, the code
+provides maximum componentwise error bound if possible.  See
+comments for ERR_BNDS_NORM and ERR_BNDS_COMP for details of the
+error bounds.
+
+The original system of linear equations may have been equilibrated
+before calling this routine, as described by arguments EQUED, R
+and C below. In this case, the solution and error bounds returned
+are for the original unequilibrated system.
+
+## Parameters
+TRANS : CHARACTER\*1 [in]
+> Specifies the form of the system of equations:
+> = 'N':  A \* X = B     (No transpose)
+> = 'T':  A\*\*T \* X = B  (Transpose)
+> = 'C':  A\*\*H \* X = B  (Conjugate transpose)
+
+EQUED : CHARACTER\*1 [in]
+> Specifies the form of equilibration that was done to A
+> before calling this routine. This is needed to compute
+> the solution and error bounds correctly.
+> = 'N':  No equilibration
+> = 'R':  Row equilibration, i.e., A has been premultiplied by
+> diag(R).
+> = 'C':  Column equilibration, i.e., A has been postmultiplied
+> by diag(C).
+> = 'B':  Both row and column equilibration, i.e., A has been
+> replaced by diag(R) \* A \* diag(C).
+> The right hand side B has been changed accordingly.
+
+N : INTEGER [in]
+> The order of the matrix A.  N >= 0.
+
+KL : INTEGER [in]
+> The number of subdiagonals within the band of A.  KL >= 0.
+
+KU : INTEGER [in]
+> The number of superdiagonals within the band of A.  KU >= 0.
+
+NRHS : INTEGER [in]
+> The number of right hand sides, i.e., the number of columns
+> of the matrices B and X.  NRHS >= 0.
+
+AB : COMPLEX array, dimension (LDAB,N) [in]
+> The original band matrix A, stored in rows 1 to KL+KU+1.
+> The j-th column of A is stored in the j-th column of the
+> array AB as follows:
+> AB(ku+1+i-j,j) = A(i,j) for max(1,j-ku)<=i<=min(n,j+kl).
+
+LDAB : INTEGER [in]
+> The leading dimension of the array AB.  LDAB >= KL+KU+1.
+
+AFB : COMPLEX array, dimension (LDAFB,N) [in]
+> Details of the LU factorization of the band matrix A, as
+> computed by CGBTRF.  U is stored as an upper triangular band
+> matrix with KL+KU superdiagonals in rows 1 to KL+KU+1, and
+> the multipliers used during the factorization are stored in
+> rows KL+KU+2 to 2\*KL+KU+1.
+
+LDAFB : INTEGER [in]
+> The leading dimension of the array AFB.  LDAFB >= 2\*KL\*KU+1.
+
+IPIV : INTEGER array, dimension (N) [in]
+> The pivot indices from CGETRF; for 1<=i<=N, row i of the
+> matrix was interchanged with row IPIV(i).
+
+R : REAL array, dimension (N) [in,out]
+> The row scale factors for A.  If EQUED = 'R' or 'B', A is
+> multiplied on the left by diag(R); if EQUED = 'N' or 'C', R
+> is not accessed.  R is an input argument if FACT = 'F';
+> otherwise, R is an output argument.  If FACT = 'F' and
+> EQUED = 'R' or 'B', each element of R must be positive.
+> If R is output, each element of R is a power of the radix.
+> If R is input, each element of R should be a power of the radix
+> to ensure a reliable solution and error estimates. Scaling by
+> powers of the radix does not cause rounding errors unless the
+> result underflows or overflows. Rounding errors during scaling
+> lead to refining with a matrix that is not equivalent to the
+> input matrix, producing error estimates that may not be
+> reliable.
+
+C : REAL array, dimension (N) [in,out]
+> The column scale factors for A.  If EQUED = 'C' or 'B', A is
+> multiplied on the right by diag(C); if EQUED = 'N' or 'R', C
+> is not accessed.  C is an input argument if FACT = 'F';
+> otherwise, C is an output argument.  If FACT = 'F' and
+> EQUED = 'C' or 'B', each element of C must be positive.
+> If C is output, each element of C is a power of the radix.
+> If C is input, each element of C should be a power of the radix
+> to ensure a reliable solution and error estimates. Scaling by
+> powers of the radix does not cause rounding errors unless the
+> result underflows or overflows. Rounding errors during scaling
+> lead to refining with a matrix that is not equivalent to the
+> input matrix, producing error estimates that may not be
+> reliable.
+
+B : COMPLEX array, dimension (LDB,NRHS) [in]
+> The right hand side matrix B.
+
+LDB : INTEGER [in]
+> The leading dimension of the array B.  LDB >= max(1,N).
+
+X : COMPLEX array, dimension (LDX,NRHS) [in,out]
+> On entry, the solution matrix X, as computed by CGETRS.
+> On exit, the improved solution matrix X.
+
+LDX : INTEGER [in]
+> The leading dimension of the array X.  LDX >= max(1,N).
+
+RCOND : REAL [out]
+> Reciprocal scaled condition number.  This is an estimate of the
+> reciprocal Skeel condition number of the matrix A after
+> equilibration (if done).  If this is less than the machine
+> precision (in particular, if it is zero), the matrix is singular
+> to working precision.  Note that the error may still be small even
+> if this number is very small and the matrix appears ill-
+> conditioned.
+
+BERR : REAL array, dimension (NRHS) [out]
+> Componentwise relative backward error.  This is the
+> componentwise relative backward error of each solution vector X(j)
+> (i.e., the smallest relative change in any element of A or B that
+> makes X(j) an exact solution).
+
+N_ERR_BNDS : INTEGER [in]
+> Number of error bounds to return for each right hand side
+> and each type (normwise or componentwise).  See ERR_BNDS_NORM and
+> ERR_BNDS_COMP below.
+
+ERR_BNDS_NORM : REAL array, dimension (NRHS, N_ERR_BNDS) [out]
+> For each right-hand side, this array contains information about
+> various error bounds and condition numbers corresponding to the
+> normwise relative error, which is defined as follows:
+> 
+> Normwise relative error in the ith solution vector:
+> max_j (abs(XTRUE(j,i) - X(j,i)))
+> ------------------------------
+> max_j abs(X(j,i))
+> 
+> The array is indexed by the type of error information as described
+> below. There currently are up to three pieces of information
+> returned.
+> 
+> The first index in ERR_BNDS_NORM(i,:) corresponds to the ith
+> right-hand side.
+> 
+> The second index in ERR_BNDS_NORM(:,err) contains the following
+> three fields:
+> err = 1  boolean. Trust the answer if the
+> reciprocal condition number is less than the threshold
+> sqrt(n) \* slamch('Epsilon').
+> 
+> err = 2  error bound: The estimated forward error,
+> almost certainly within a factor of 10 of the true error
+> so long as the next entry is greater than the threshold
+> sqrt(n) \* slamch('Epsilon'). This error bound should only
+> be trusted if the previous boolean is true.
+> 
+> err = 3  Reciprocal condition number: Estimated normwise
+> reciprocal condition number.  Compared with the threshold
+> sqrt(n) \* slamch('Epsilon') to determine if the error
+> estimate is . These reciprocal condition
+> numbers are 1 / (norm(Z^{-1},inf) \* norm(Z,inf)) for some
+> appropriately scaled matrix Z.
+> Let Z = S\*A, where S scales each row by a power of the
+> radix so all absolute row sums of Z are approximately 1.
+> 
+> See Lapack Working Note 165 for further details and extra
+> cautions.
+
+ERR_BNDS_COMP : REAL array, dimension (NRHS, N_ERR_BNDS) [out]
+> For each right-hand side, this array contains information about
+> various error bounds and condition numbers corresponding to the
+> componentwise relative error, which is defined as follows:
+> 
+> Componentwise relative error in the ith solution vector:
+> abs(XTRUE(j,i) - X(j,i))
+> max_j ----------------------
+> abs(X(j,i))
+> 
+> The array is indexed by the right-hand side i (on which the
+> componentwise relative error depends), and the type of error
+> information as described below. There currently are up to three
+> pieces of information returned for each right-hand side. If
+> componentwise accuracy is not requested (PARAMS(3) = 0.0), then
+> ERR_BNDS_COMP is not accessed.  If N_ERR_BNDS < 3, then at most
+> the first (:,N_ERR_BNDS) entries are returned.
+> 
+> The first index in ERR_BNDS_COMP(i,:) corresponds to the ith
+> right-hand side.
+> 
+> The second index in ERR_BNDS_COMP(:,err) contains the following
+> three fields:
+> err = 1  boolean. Trust the answer if the
+> reciprocal condition number is less than the threshold
+> sqrt(n) \* slamch('Epsilon').
+> 
+> err = 2  error bound: The estimated forward error,
+> almost certainly within a factor of 10 of the true error
+> so long as the next entry is greater than the threshold
+> sqrt(n) \* slamch('Epsilon'). This error bound should only
+> be trusted if the previous boolean is true.
+> 
+> err = 3  Reciprocal condition number: Estimated componentwise
+> reciprocal condition number.  Compared with the threshold
+> sqrt(n) \* slamch('Epsilon') to determine if the error
+> estimate is . These reciprocal condition
+> numbers are 1 / (norm(Z^{-1},inf) \* norm(Z,inf)) for some
+> appropriately scaled matrix Z.
+> Let Z = S\*(A\*diag(x)), where x is the solution for the
+> current right-hand side and S scales each row of
+> A\*diag(x) by a power of the radix so all absolute row
+> sums of Z are approximately 1.
+> 
+> See Lapack Working Note 165 for further details and extra
+> cautions.
+
+NPARAMS : INTEGER [in]
+> Specifies the number of parameters set in PARAMS.  If <= 0, the
+> PARAMS array is never referenced and default values are used.
+
+PARAMS : REAL array, dimension NPARAMS [in,out]
+> Specifies algorithm parameters.  If an entry is < 0.0, then
+> that entry will be filled with default value used for that
+> parameter.  Only positions up to NPARAMS are accessed; defaults
+> are used for higher-numbered parameters.
+> 
+> PARAMS(LA_LINRX_ITREF_I = 1) : Whether to perform iterative
+> refinement or not.
+> Default: 1.0
+> = 0.0:  No refinement is performed, and no error bounds are
+> computed.
+> = 1.0:  Use the double-precision refinement algorithm,
+> possibly with doubled-single computations if the
+> compilation environment does not support DOUBLE
+> PRECISION.
+> (other values are reserved for future use)
+> 
+> PARAMS(LA_LINRX_ITHRESH_I = 2) : Maximum number of residual
+> computations allowed for refinement.
+> Default: 10
+> Aggressive: Set to 100 to permit convergence using approximate
+> factorizations or factorizations other than LU. If
+> the factorization uses a technique other than
+> Gaussian elimination, the guarantees in
+> err_bnds_norm and err_bnds_comp may no longer be
+> trustworthy.
+> 
+> PARAMS(LA_LINRX_CWISE_I = 3) : Flag determining if the code
+> will attempt to find a solution with small componentwise
+> relative error in the double-precision algorithm.  Positive
+> is true, 0.0 is false.
+> Default: 1.0 (attempt componentwise convergence)
+
+WORK : COMPLEX array, dimension (2\*N) [out]
+
+RWORK : REAL array, dimension (2\*N) [out]
+
+INFO : INTEGER [out]
+> = 0:  Successful exit. The solution to every right-hand side is
+> guaranteed.
+> < 0:  If INFO = -i, the i-th argument had an illegal value
+> > 0 and <= N:  U(INFO,INFO) is exactly zero.  The factorization
+> has been completed, but the factor U is exactly singular, so
+> the solution and error bounds could not be computed. RCOND = 0
+> is returned.
+> = N+J: The solution corresponding to the Jth right-hand side is
+> not guaranteed. The solutions corresponding to other right-
+> hand sides K with K > J may not be guaranteed as well, but
+> only the first such right-hand side is reported. If a small
+> componentwise error is not requested (PARAMS(3) = 0.0) then
+> the Jth right-hand side is the first with a normwise error
+> bound that is not guaranteed (the smallest J such
+> that ERR_BNDS_NORM(J,1) = 0.0). By default (PARAMS(3) = 1.0)
+> the Jth right-hand side is the first with either a normwise or
+> componentwise error bound that is not guaranteed (the smallest
+> J such that either ERR_BNDS_NORM(J,1) = 0.0 or
+> ERR_BNDS_COMP(J,1) = 0.0). See the definition of
+> ERR_BNDS_NORM(:,1) and ERR_BNDS_COMP(:,1). To get information
+> about all of the right-hand sides check ERR_BNDS_NORM or
+> ERR_BNDS_COMP.

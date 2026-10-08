@@ -1,0 +1,221 @@
+import { Action, ActionPanel, Icon, List, open, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import * as afs from "fs/promises";
+import * as os from "os";
+import path from "path";
+import { useEffect, useState } from "react";
+import { Shortcut } from "./lib/shortcuts";
+import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
+import { fileExists, getErrorMessage, isWin } from "./lib/utils";
+
+interface CommandMetadata {
+  command: string;
+  title: string;
+  category?: string;
+}
+
+function transitFolder(): string {
+  const build = getBuildNamePreference();
+
+  let ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
+
+  if (isWin) {
+    ts = path.join(os.homedir(), `AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
+  }
+  return ts;
+}
+
+function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
+  const c = props.command;
+  const title = c.category ? `${c.category}: ${c.title}` : c.title;
+  return (
+    <Action.CreateQuicklink
+      shortcut={Shortcut.CreateQuickLink}
+      quicklink={{
+        link: raycastForVSCodeURI(`runcommand?cmd=${encodeURIComponent(c.command)}`),
+        name: `VSCode - ${title}`,
+      }}
+    />
+  );
+}
+
+function raycastForVSCodeURI(uri: string) {
+  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
+}
+
+async function openURIinVSCode(uri: string) {
+  await open(raycastForVSCodeURI(uri));
+}
+
+async function getCommandFromVSCode() {
+  const tsFolder = transitFolder();
+  await afs.mkdir(tsFolder, { recursive: true });
+  const requestFilename = path.join(tsFolder, "request.json");
+  const responseFilename = path.join(tsFolder, "commands.json");
+  await afs.writeFile(
+    requestFilename,
+    JSON.stringify(
+      {
+        command: "writecommands",
+        args: {
+          filename: responseFilename,
+        },
+      },
+      null,
+      2,
+    ),
+  );
+  if (await fileExists(responseFilename)) {
+    await afs.rm(responseFilename);
+  }
+  const cmds = await waitForCommandsFile(responseFilename);
+  if (!cmds) {
+    throw new Error("Could not get VSCode commands");
+  }
+  return cmds;
+}
+
+function CommandListItem(props: { command: CommandMetadata }) {
+  const c = props.command;
+  const title = (c: CommandMetadata) => {
+    if (c.category) {
+      return `${c.category}: ${c.title}`;
+    } else {
+      return c.title;
+    }
+  };
+  const handle = async () => {
+    try {
+      await openURIinVSCode(`runcommand?cmd=${encodeURIComponent(c.command)}`);
+      popToRoot();
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Could not run Command", message: getErrorMessage(error) });
+    }
+  };
+  return (
+    <List.Item
+      icon={Icon.Terminal}
+      title={title(c)}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action title="Run Command" onAction={handle} icon={{ source: Icon.Terminal }} />
+            <CreateCommandQuickLinkAction command={c} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard shortcut={Shortcut.Copy} title="Copy Command ID" content={c.command} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function InstallRaycastForVSCodeAction() {
+  return (
+    <Action.OpenInBrowser
+      title="Install Raycast for VS Code"
+      url={`${getBuildScheme()}:extension/tonka3000.raycast`}
+      onOpen={() => {
+        popToRoot();
+        showHUD("Open VSCode Extension");
+      }}
+    />
+  );
+}
+
+export default function CommandPaletteCommand() {
+  const { isLoading, commands, error, refresh } = useCommands();
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+  }
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={isLoading === true ? "Load Commands from VSCode" : "Search Commands"}
+    >
+      <List.Section title="Commands" subtitle={`${commands?.length}`}>
+        {commands?.map((c) => (
+          <CommandListItem key={c.command} command={c} />
+        ))}
+      </List.Section>
+      {error && (
+        <List.EmptyView
+          title="No Response from Raycast for VSCode extension"
+          description="Please ensure the Raycast for VSCode extension is installed and running"
+          icon="⚠️"
+          actions={
+            <ActionPanel>
+              <Action title="Reload" icon={Icon.RotateClockwise} shortcut={Shortcut.Refresh} onAction={refresh} />
+              <InstallRaycastForVSCodeAction />
+            </ActionPanel>
+          }
+        />
+      )}
+    </List>
+  );
+}
+
+async function waitForCommandsFile(filename: string): Promise<CommandMetadata[] | undefined> {
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    if (await fileExists(filename)) {
+      try {
+        const data = await afs.readFile(filename, "utf-8");
+        const cmds = JSON.parse(data) as CommandMetadata[] | undefined;
+        await afs.rm(filename);
+        return cmds;
+      } catch {
+        // The file is probably still being written; retry shortly.
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return undefined;
+}
+
+function useCommands(): {
+  commands: CommandMetadata[] | undefined;
+  isLoading?: boolean;
+  error?: string;
+  refresh?: () => void;
+} {
+  const [isLoading, setIsLoading] = useState(true);
+  const [commands, setCommands] = useState<CommandMetadata[]>();
+  const [error, setError] = useState<string>();
+  const [date, setDate] = useState(new Date());
+
+  const refresh = () => {
+    setDate(new Date());
+  };
+
+  useEffect(() => {
+    let didUnmount = false;
+    async function fetchCommands() {
+      if (didUnmount) {
+        return;
+      }
+      setIsLoading(true);
+      setError(undefined);
+      try {
+        const cmds = await getCommandFromVSCode();
+        if (!didUnmount) {
+          setCommands(cmds);
+        }
+      } catch (error) {
+        if (!didUnmount) {
+          setError(getErrorMessage(error));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchCommands();
+    return () => {
+      didUnmount = true;
+    };
+  }, [date]);
+
+  return { commands, isLoading, error, refresh };
+}

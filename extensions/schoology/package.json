@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "schoology",
+  "title": "Schoology - Grade Viewer",
+  "description": "View your courselists, grades, graphs, and individual assignments quickly using Raycast.",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "pastContributors": [
+    "giantsquidgamer",
+    "akshay_mahajan"
+  ],
+  "categories": [
+    "Other",
+    "Productivity"
+  ],
+  "keywords": [
+    "schoology",
+    "grades",
+    "courses",
+    "classes",
+    "LMS",
+    "Learning",
+    "GPA",
+    "Raycast",
+    "Vaibhav",
+    "Satishkumar",
+    "Vaibhav-Satishkumar",
+    "School"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "showGrades",
+      "title": "Show Grades",
+      "description": "You will be able to see an updated list of your courses and their corresponding grades.",
+      "mode": "view",
+      "subtitle": "View list of grades."
+    },
+    {
+      "name": "showNotifications",
+      "title": "Check for Grade Updates",
+      "description": "If you have a new assignment's grade posted, you will receive a notification.",
+      "mode": "no-view",
+      "subtitle": "Receive notifications on grade updates",
+      "interval": "20m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "key",
+      "title": "Key",
+      "description": "Your current consumer key:",
+      "placeholder": "Your current consumer key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "secret",
+      "title": "Secret",
+      "description": "Your current consumer secret:",
+      "placeholder": "Your current consumer secret",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "1.11.1",
+    "quickchart-js": "^3.1.3",
+    "schoologyapi": "^4.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

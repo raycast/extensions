@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wallpaperengine",
+  "description": "Raycast Extension for controlling WallpaperEngine",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "no-view",
+      "name": "pause",
+      "title": "Pause All Wallpapers",
+      "description": "Pause all wallpapers",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "play",
+      "title": "Play All Wallpapers",
+      "description": "Resume all wallpapers from pause or stop",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "stop",
+      "title": "Stop All Wallpapers",
+      "description": "Stop all wallpapers",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "mute",
+      "title": "Mute All Wallpapers",
+      "description": "Mute all wallpapers",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "unmute",
+      "title": "Unmute All Wallpapers",
+      "description": "Unmute all wallpapers",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "hideIcons",
+      "title": "Hide Desktop Icons",
+      "description": "Hide the desktop icons",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "no-view",
+      "name": "showIcons",
+      "title": "Show Desktop Icons",
+      "description": "Show the desktop icons",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "nextWallpaper",
+      "title": "Next Wallpaper",
+      "description": "Skip to the next wallpaper on a monitor",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "closeWallpaper",
+      "title": "Close Wallpaper",
+      "description": "Remove wallpaper from a monitor",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "getWallpaper",
+      "title": "Get Current Wallpaper",
+      "description": "Show current wallpaper for each monitor",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "openWallpaper",
+      "title": "Open Wallpaper",
+      "description": "Open a specific wallpaper on a monitor",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "openPlaylist",
+      "title": "Open Playlist",
+      "description": "Open a saved playlist on a monitor",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "openProfile",
+      "title": "Open Profile",
+      "description": "Apply a saved display profile",
+      "subtitle": "WallpaperEngine"
+    },
+    {
+      "mode": "view",
+      "name": "applyProperties",
+      "title": "Apply Properties",
+      "description": "Apply wallpaper settings dynamically",
+      "subtitle": "WallpaperEngine"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wallpaperEnginePath",
+      "title": "Wallpaper Engine Path",
+      "description": "Optional path to wallpaper_engine directory (e.g., C:\\Program Files (x86)\\Steam\\steamapps\\common\\wallpaper_engine)",
+      "type": "textfield",
+      "required": false,
+      "label": "Wallpaper Engine Path"
+    }
+  ],
+  "title": "WallpaperEngine",
+  "author": "hunter_dermott",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "System",
+    "Media"
+  ]
+}

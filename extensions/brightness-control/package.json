@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brightness-control",
+  "title": "Brightness Control",
+  "description": "Quickly controls the brightness levels of your display",
+  "icon": "command-icon.png",
+  "author": "cali",
+  "contributors": [
+    "pavzagor",
+    "fatih_isaogullari",
+    "0xdhrv",
+    "muhammadrizo"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "up",
+      "title": "Brightness Up",
+      "description": "Increases the brightness by 10% of your display",
+      "mode": "no-view",
+      "icon": "brightness-up.png",
+      "preferences": [
+        {
+          "name": "closeRaycast",
+          "description": "Close Raycast after changing brightness",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Close Raycast"
+        },
+        {
+          "name": "showDisplayName",
+          "description": "Show display name in toasts and HUDs",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show display name"
+        },
+        {
+          "name": "step",
+          "description": "Brightness change per press",
+          "type": "textfield",
+          "required": false,
+          "default": "10",
+          "title": "Step Size"
+        }
+      ]
+    },
+    {
+      "name": "down",
+      "title": "Brightness Down",
+      "description": "Decreases the brightness by 10% of your display",
+      "mode": "no-view",
+      "icon": "brightness-down.png",
+      "preferences": [
+        {
+          "name": "closeRaycast",
+          "description": "Close Raycast after changing brightness",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Close Raycast"
+        },
+        {
+          "name": "showDisplayName",
+          "description": "Show display name in toasts and HUDs",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show display name"
+        },
+        {
+          "name": "step",
+          "description": "Brightness change per press",
+          "type": "textfield",
+          "required": false,
+          "default": "10",
+          "title": "Step Size"
+        }
+      ]
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set the brightness level of your display using Lunar",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Brightness (0-100)",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "closeRaycast",
+          "description": "Close Raycast after changing brightness",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Close Raycast"
+        },
+        {
+          "name": "showDisplayName",
+          "description": "Show display name in toasts and HUDs",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show display name"
+        }
+      ]
+    },
+    {
+      "name": "max-brightness",
+      "title": "Max Brightness",
+      "description": "Instantly set brightness to 100% on the current display",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "preferences": [
+        {
+          "name": "closeRaycast",
+          "description": "Close Raycast after changing brightness",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Close Raycast"
+        },
+        {
+          "name": "showDisplayName",
+          "description": "Show display name in toasts and HUDs",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show display name"
+        }
+      ]
+    },
+    {
+      "name": "min-brightness",
+      "title": "Min Brightness",
+      "description": "Instantly set brightness to 0% on the current display",
+      "mode": "no-view",
+      "icon": "brightness-down.png",
+      "preferences": [
+        {
+          "name": "closeRaycast",
+          "description": "Close Raycast after changing brightness",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Close Raycast"
+        },
+        {
+          "name": "showDisplayName",
+          "description": "Show display name in toasts and HUDs",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show display name"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

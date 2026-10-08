@@ -1,0 +1,267 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "personio",
+  "title": "Personio",
+  "description": "Track your time with Personio.",
+  "icon": "command-icon-1.png",
+  "author": "boosteblume",
+  "contributors": [
+    "marcjulian"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trackTimeCommand",
+      "title": "Track Time",
+      "subtitle": "Personio",
+      "description": "Track your time during the day.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to track time for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "addPastTimesCommand",
+      "title": "Add Past Times",
+      "subtitle": "Personio",
+      "description": "Submit your past times to personio.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to track time for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "findEmployeeNumberCommand",
+      "title": "Find Employee Number",
+      "subtitle": "Personio",
+      "description": "Find the employee number of a person in Personio.",
+      "mode": "view"
+    },
+    {
+      "name": "attendancesCommand",
+      "title": "Attendances",
+      "subtitle": "Personio",
+      "description": "Get the attendances of a person in Personio.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to get the attendances for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "The client ID of your Personio company.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "The client secret of your Personio company.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "The timezone of your Personio company.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Berlin/Europe",
+          "value": "Europe/Berlin"
+        },
+        {
+          "title": "London/Europe",
+          "value": "Europe/London"
+        },
+        {
+          "title": "Rome/Europe",
+          "value": "Europe/Rome"
+        },
+        {
+          "title": "Stockholm/Europe",
+          "value": "Europe/Stockholm"
+        },
+        {
+          "title": "Tallinn/Europe",
+          "value": "Europe/Tallinn"
+        },
+        {
+          "title": "New York/America",
+          "value": "America/New_York"
+        },
+        {
+          "title": "Los Angeles/America",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Tokyo/Asia",
+          "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Etc/GMT",
+          "value": "Etc/GMT"
+        },
+        {
+          "title": "Etc/GMT+0",
+          "value": "Etc/GMT+0"
+        },
+        {
+          "title": "Etc/GMT+1",
+          "value": "Etc/GMT+1"
+        },
+        {
+          "title": "Etc/GMT+10",
+          "value": "Etc/GMT+10"
+        },
+        {
+          "title": "Etc/GMT+11",
+          "value": "Etc/GMT+11"
+        },
+        {
+          "title": "Etc/GMT+12",
+          "value": "Etc/GMT+12"
+        },
+        {
+          "title": "Etc/GMT+2",
+          "value": "Etc/GMT+2"
+        },
+        {
+          "title": "Etc/GMT+3",
+          "value": "Etc/GMT+3"
+        },
+        {
+          "title": "Etc/GMT+4",
+          "value": "Etc/GMT+4"
+        },
+        {
+          "title": "Etc/GMT+5",
+          "value": "Etc/GMT+5"
+        },
+        {
+          "title": "Etc/GMT+6",
+          "value": "Etc/GMT+6"
+        },
+        {
+          "title": "Etc/GMT+7",
+          "value": "Etc/GMT+7"
+        },
+        {
+          "title": "Etc/GMT+8",
+          "value": "Etc/GMT+8"
+        },
+        {
+          "title": "Etc/GMT+9",
+          "value": "Etc/GMT+9"
+        },
+        {
+          "title": "Etc/GMT-0",
+          "value": "Etc/GMT-0"
+        },
+        {
+          "title": "Etc/GMT-1",
+          "value": "Etc/GMT-1"
+        },
+        {
+          "title": "Etc/GMT-10",
+          "value": "Etc/GMT-10"
+        },
+        {
+          "title": "Etc/GMT-11",
+          "value": "Etc/GMT-11"
+        },
+        {
+          "title": "Etc/GMT-12",
+          "value": "Etc/GMT-12"
+        },
+        {
+          "title": "Etc/GMT-13",
+          "value": "Etc/GMT-13"
+        },
+        {
+          "title": "Etc/GMT-14",
+          "value": "Etc/GMT-14"
+        },
+        {
+          "title": "Etc/GMT-2",
+          "value": "Etc/GMT-2"
+        },
+        {
+          "title": "Etc/GMT-3",
+          "value": "Etc/GMT-3"
+        },
+        {
+          "title": "Etc/GMT-4",
+          "value": "Etc/GMT-4"
+        },
+        {
+          "title": "Etc/GMT-5",
+          "value": "Etc/GMT-5"
+        },
+        {
+          "title": "Etc/GMT-6",
+          "value": "Etc/GMT-6"
+        },
+        {
+          "title": "Etc/GMT-7",
+          "value": "Etc/GMT-7"
+        },
+        {
+          "title": "Etc/GMT-8",
+          "value": "Etc/GMT-8"
+        },
+        {
+          "title": "Etc/GMT-9",
+          "value": "Etc/GMT-9"
+        }
+
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "axios": "^1.8.4",
+    "moment-timezone": "^0.5.45"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

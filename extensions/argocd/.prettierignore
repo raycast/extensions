@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+assets/
+raycast-env.d.ts

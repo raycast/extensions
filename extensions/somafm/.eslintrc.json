@@ -1,0 +1,6 @@
+{
+  "extends": "@raycast/eslint-config",
+  "rules": {
+    "raycast/prefer-title-case": ["warn", { "ignore": ["SomaFM"] }]
+  }
+}

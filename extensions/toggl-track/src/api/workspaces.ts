@@ -1,0 +1,31 @@
+import { getMeWithRelatedData } from "@/api/me";
+import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
+
+export async function getMyWorkspaces(): Promise<Workspace[]> {
+  const cached = cacheHelper.get<Workspace[]>("workspaces");
+  if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Workspace[]>("workspaces");
+    if (stale) return stale;
+  }
+  const data = await getMeWithRelatedData();
+  return cacheHelper.get<Workspace[]>("workspaces") || data.workspaces || [];
+}
+
+// https://developers.track.toggl.com/docs/api/workspaces#response-4
+export interface Workspace {
+  id: number;
+  name: string;
+  premium: boolean;
+  admin: boolean;
+  logo_url: string;
+  /** Workspace on Premium subscription */
+  business_ws: boolean;
+  role: "admin" | "projectlead" | "teamlead" | "user";
+  only_admins_may_create_projects: boolean;
+  only_admins_may_create_tags: boolean;
+  organization_id: number;
+  projects_billable_by_default: boolean;
+  projects_private_by_default: boolean;
+}

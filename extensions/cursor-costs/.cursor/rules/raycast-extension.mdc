@@ -1,0 +1,97 @@
+---
+description: Raycast Extension Development Guidelines from "Prepare an Extension for Store"
+globs: ["**/*.tsx", "**/*.ts", "package.json"]
+alwaysApply: false
+---
+
+# Raycast Extension Store Requirements
+
+## Package.json Requirements
+
+- Use your **Raycast account username** in the `author` field
+- Use `MIT` in the `license` field
+- Use the latest Raycast API version
+- Set `platforms` field matching extension requirements (e.g., `["macOS"]` for platform-specific APIs)
+- Always include `package-lock.json` (use npm, not yarn)
+
+## Naming Conventions (Apple Style Guide)
+
+### Extension Title
+
+- Use **Title Case**: `Cursor Costs`, `Google Workplace`
+- Make it easy to understand what extension does
+- Prefer nouns over verbs: `Emoji Search` not `Search Emoji`
+- Avoid generic names for single-command extensions
+
+### Command Titles
+
+- Structure: `<verb> <noun>` or just `<noun>`
+- Examples: `Search Recent Projects`, `Create Task`, `Open Issues`
+- Avoid articles: `Search Emoji` not `Search an Emoji`
+
+### Command Subtitles
+
+- Use to add context (usually service/app name)
+- Don't use as description
+- Omit if it duplicates command title
+
+## Action Panel Guidelines
+
+- Use **Title Case** for action titles: `Open in Browser`, `Copy to Clipboard`
+- Provide icons for all actions if any action has an icon
+- Add ellipses `…` for actions with submenus
+- Don't repeat parent action name in submenu items
+
+## UI/UX Guidelines
+
+### Preferences
+
+- Use `required: true` for essential preferences (Raycast shows onboarding)
+- Don't build separate configuration commands
+
+### Navigation
+
+- Use Navigation API for pushing screens
+- Don't implement custom navigation stacks
+
+### Empty States
+
+- Use `List.EmptyView` or `Grid.EmptyView` for empty states
+- Prevent flickering: don't return empty list before data loads
+- Show loading indicator while fetching data
+
+### Navigation Title
+
+- Don't change `navigationTitle` in root command (auto-set to command name)
+- Use only in nested screens for context
+- Keep titles short
+
+### Placeholders
+
+- Add placeholders in text fields and search bars
+- Never leave search bar without placeholder
+
+## Error Handling
+
+- Handle errors gracefully with user-friendly messages
+- For authentication errors, provide clear instructions
+- Use `void` for fire-and-forget promises: `void open(url)`
+
+## Code Quality
+
+- Run `npm run build` before submitting
+- Run `npm run lint` to check for issues
+- Remove unused assets and icons
+
+## CHANGELOG Format
+
+```markdown
+## [Change Title] - {PR_MERGE_DATE}
+
+- Change description
+- Another change
+```
+
+- Title in square brackets
+- Date after hyphen with spaces
+- Use bullet points for changes

@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/util/commandRunner.ts",
+    "src/util/androidCliResolver.ts",
+    "src/util/shell.ts",
+    "src/util/androidCreate.ts",
+    "src/util/androidDocs.ts",
+    "src/util/screenshot.ts",
+    "src/util/expect.ts",
+    "src/util/commandRunner.test.ts",
+    "src/util/androidCliResolver.test.ts",
+    "src/util/androidCreate.test.ts",
+    "src/util/androidDocs.test.ts",
+    "src/util/screenshot.test.ts"
+  ]
+}

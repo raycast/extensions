@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "changedetection-io",
+  "title": "ChangeDetection.io",
+  "description": "Website Change Detection For Clever People",
+  "icon": "changedetection.png",
+  "author": "xmok",
+  "contributors": [
+    "j3lte"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "instance_url",
+      "title": "Instance URL",
+      "required": true,
+      "type": "textfield",
+      "description": "URL of changedetection instance",
+      "placeholder": "https://changedetection.example.com"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "required": true,
+      "type": "password",
+      "description": "API Key from Change Detection Settings",
+      "placeholder": "xxx...xxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-watches",
+      "title": "List Watches",
+      "description": "List Watches and go to Preview, Edit, History",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

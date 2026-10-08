@@ -1,0 +1,29 @@
+# DeepWiki Changelog
+
+## [Search History and Avatars] - 2026-08-03
+
+- Added recent search history when the search field is empty
+- Show GitHub owner avatars in search results and history
+- Hide star count and description when missing from the API
+- Refresh store screenshots
+- Updated Raycast API and related dependencies
+
+## [0.2.3] - 2026-03-26
+
+- Make the Open DeepWiki Page and Crawl DeepWiki Docs command arguments optional by falling back to the current browser tab URL via the Raycast Browser Extension.
+- Update command metadata and README usage notes, and align manifest/UI naming with the current DeepWiki branding review changes.
+
+## [0.2.2] - 2025-09-08
+
+- Rename `Deepwiki` to `DeepWiki`.
+
+## [0.2.1] - 2025-08-14
+
+- Update extension icon.
+
+## [Initial Version] - 2025-05-07
+
+- Initial release with three commands:
+  - **Crawl DeepWiki Docs**: This command crawls all documentation pages for a specified DeepWiki repository (e.g., `microsoft/vscode`) and copies the combined content to the clipboard in a Markdown format suitable for LLMs.
+  - **Open DeepWiki Page**: Opens the DeepWiki page for a specific GitHub repo URL or identifier.
+  - **Search DeepWiki Repos**: Searches repositories indexed by DeepWiki.

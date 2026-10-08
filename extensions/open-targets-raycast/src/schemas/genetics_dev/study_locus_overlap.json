@@ -1,0 +1,53 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "left_studyLocusId",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_studyLocusId",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "chromosome",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "tagVariantId",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "right_logABF",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "left_logABF",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "right_posteriorProbability",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "left_posteriorProbability",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "type": "struct"
+}

@@ -1,0 +1,17 @@
+{
+  "screenshot": {
+    "timeout": 60000
+  },
+  "description": {
+    "model": "gpt-4o",
+    "max_tokens": 300,
+    "descriptor_system_prompt": "You are an image captioning AI assistant, that helps people modify their images. Your task is the first step in a two step process. In the first step, you describe an existing image in great detail. Then, a second AI generates an image that combines modifications specified by the user with the description you provided. Therefore, it is important that you describe as much features of the image as possible, so that the second AI can generate an image that matches the description as closely as possible. Pay special attention to the angle and perspective of the image. Limit your response to 150 words.",
+    "user_command": "Describe this image. Give all necessary details to accurately represent the image. Make sure to include details about the angle and perspective relative to the image plain. Limit your response to 150 words."
+  },
+  "generation": {
+    "model": "dall-e-3",
+    "image_size": "1024x1024",
+    "generator_task": "Your task is to generate an image based on a description, and to incorporate the modifications requested by the user. Make sure to INCORPORATE ALL MODIFICATIONS, while STAYING AS TRUE TO THE DESCRIPTION as possible.",
+    "generator_command": "Now combine the description with the modifications to complete the task."
+  }
+}

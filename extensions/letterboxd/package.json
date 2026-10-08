@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "letterboxd",
+  "title": "Letterboxd",
+  "description": "Search for movies on Letterboxd",
+  "icon": "icon.png",
+  "author": "rafael_garcia",
+  "contributors": [
+    "ridemountainpig",
+    "0xdhrv"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movies-page",
+      "title": "Search Movies",
+      "subtitle": "Letterboxd",
+      "description": "Search Letterboxd movies by title",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-movies",
+      "title": "Search Letterboxd Movies",
+      "description": "Search Letterboxd for public movie results, including ratings, runtimes, genres, rankings, and Letterboxd, IMDb, and TMDB links. This tool is read-only."
+    },
+    {
+      "name": "get-movie-details",
+      "title": "Get Letterboxd Movie Details",
+      "description": "Get public details for a Letterboxd film path returned by Search Letterboxd Movies, including its synopsis, cast, production companies, release information, rating, and popular review excerpts. This tool is read-only."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0",
+    "cheerio": "^1.2.0",
+    "node-html-markdown": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.0",
+    "prettier": "3.9.6",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test src/**/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

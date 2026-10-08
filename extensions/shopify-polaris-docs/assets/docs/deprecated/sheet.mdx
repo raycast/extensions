@@ -1,0 +1,82 @@
+---
+title: Sheet
+shortDescription: A large container providing actions and information contextual to the page without interrupting flow like a modal.
+category: Deprecated
+keywords:
+  - sheet
+  - modal
+  - open
+  - title
+  - overlay
+  - drawer
+  - dialog
+status: Deprecated
+examples:
+  - fileName: sheet-default.tsx
+    title: Default
+    description: Use as the default option for a sheet.
+  - fileName: sheet-with-searchable-listbox.tsx
+    title: With searchable listbox
+    description: Use to help merchants browse, filter, and choose from a list of options.
+previewImg: /images/components/deprecated/sheet.png
+---
+
+# {frontmatter.title}
+
+<Lede>
+
+A sheet is a large container that enters from the edge of the screen when triggered by the merchant. It’s used to provide merchants with actions and information contextual to the page. It doesn’t interrupt their flow like a modal.
+
+</Lede>
+
+<StatusBanner status={frontmatter.status}>
+  The sheet component encourages designers to create a new layer on top of the
+  page instead of improving the existing user interface. It also blocks other
+  parts of the UI, forces users to switch context, and adds complexity to
+  otherwise simple interactions.
+</StatusBanner>
+
+<Examples />
+
+<Props componentName={frontmatter.title} />
+
+## Accessibility
+
+Sheets provide an opportunity to let merchants dig into more detail on their current task, or access information for their current task in a different way. Although merchants may be able to see content in the sheet and the main page content at the same time, they should only be expected to interact with one or the other at any given time.
+
+### Keyboard support
+
+- Use the `onClose` prop so that the sheet can be closed with the <kbd>esc</kbd> key as well as with button-based controls
+- Use a button to open the sheet
+- When the sheet opens, focus moves to it so merchants who rely on the keyboard and screen readers can access it
+- Focus is kept in the sheet until it is dismissed
+- When the sheet closes, focus moves back to the button that launched it
+
+---
+
+## Responsive behavior
+
+At small screen sizes, the sheet component enters the page from the bottom of the screen. At larger screen sizes, the sheet component enters the page from the right side of the scren.
+
+---
+
+## Best practices
+
+The sheet component should:
+
+- Include a heading that summarizes the actions and information in the sheet, for example, More filters
+- Be openable through clear actions, like a link or button
+- Be close-able through clear actions, like Done, the [X] button, and the esc key
+- Include information and actions contextual to the current task
+- Not block merchants from completing their task, like a modal would
+- Not open from within another sheet (only one sheet can be open at a time)
+- Preserve its state—the settings and actions won’t reset when it’s closed
+
+The sheet component is best used in cases where the merchant needs to see elements behind it, and for that reason it uses a transparent backdrop. The backdrop is a full screen overlay which closes its parent component when pressed.
+
+---
+
+## Related components
+
+- To offer an action before merchants can go to the next step in the flow, use the [modal component](https://polaris.shopify.com/components/deprecated/modal)
+- To present a small amount of content or a menu of actions in a non-blocking overlay, use the [popover component](https://polaris.shopify.com/components/overlays/popover)

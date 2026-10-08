@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mbta-tracker",
+  "title": "MBTA Tracker",
+  "description": "View departure times for saved stops along MBTA routes",
+  "icon": "mbta-secondary-logo-circle.png",
+  "author": "djpowers",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-stops",
+      "title": "Browse Stops",
+      "description": "Find a stop on a given route and view predicted departure times or add a favorite",
+      "mode": "view"
+    },
+    {
+      "name": "view-favorites",
+      "title": "View Favorites",
+      "description": "Display stops that have been added as favorites",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your MBTA developer account API key",
+      "placeholder": "https://api-v3.mbta.com/",
+      "type": "password",
+      "required": false,
+      "title": "MBTA API Key"
+    }
+  ],
+  "keywords": [
+    "the T",
+    "Boston",
+    "Massachusetts",
+    "transportation",
+    "transit",
+    "subway",
+    "bus",
+    "commuter",
+    "rail",
+    "train"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.4.8",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

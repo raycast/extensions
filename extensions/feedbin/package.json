@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "feedbin",
+  "title": "Feedbin",
+  "description": "Feedbin reader in Raycast",
+  "icon": "feedbin.png",
+  "author": "third774",
+  "categories": [
+    "Applications",
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Email",
+      "type": "textfield",
+      "name": "email",
+      "required": true,
+      "description": "Email used for your Feedbin account"
+    },
+    {
+      "title": "Password",
+      "type": "password",
+      "name": "password",
+      "required": true,
+      "description": "Password used for your Feedbin account"
+    },
+    {
+      "title": "URL Source",
+      "type": "dropdown",
+      "name": "urlSource",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "selected-text"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ],
+      "description": "Where to get the URL from when marking an article to read later or subscribing to a feed",
+      "required": false,
+      "default": "selected-text"
+    }
+  ],
+  "commands": [
+    {
+      "name": "all-feeds",
+      "title": "View Feeds",
+      "description": "Shows all feeds in your Feedbin account",
+      "mode": "view"
+    },
+    {
+      "name": "unread-menu-bar",
+      "title": "Feedbin Menu Bar",
+      "description": "Fetches updates every 15 minutes in the background and displays the number of unread entries in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "showCountInMenuBar",
+          "description": "Toggles whether or not the number of unread articles is shown in the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show Unread Count"
+        },
+        {
+          "name": "openWhileMarkingAsRead",
+          "description": "Toggles whether or not to open an article when marking it as read from the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Open While Marking as Read"
+        }
+      ]
+    },
+    {
+      "name": "starred-entries",
+      "title": "View Starred Content",
+      "description": "View a list of your starred entries",
+      "mode": "view"
+    },
+    {
+      "name": "subscriptions",
+      "title": "Subscriptions",
+      "description": "Feedbin Subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "add-subscription",
+      "title": "Subscribe to URL",
+      "description": "Looks for RSS feeds on the given URL. If only one is found it will be subscribed to, but if multiple are found you will be presented with the options to choose from. The source of the URL is based on the extension level URL Source preference and defaults to selected text.",
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "url",
+          "placeholder": "https://example.com",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "read-later",
+      "title": "Read Later",
+      "description": "Saves the URL to Feedbin to read later. The source of the URL is based on the extension level URL Source preference and defaults to selected text.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "url",
+          "placeholder": "https://example.com",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2",
+    "node-html-markdown": "^1.3.0",
+    "node-html-parser": "^6.1.11",
+    "tiny-invariant": "^1.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.45",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}

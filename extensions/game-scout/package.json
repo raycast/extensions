@@ -1,0 +1,373 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "game-scout",
+  "title": "Game Scout",
+  "description": "The ultimate gaming companion to track prices, deals, and free giveaways.",
+  "icon": "extension-icon.png",
+  "author": "glct26",
+  "categories": [
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-games",
+      "title": "Search Games",
+      "description": "Search for game prices and deals",
+      "mode": "view"
+    },
+    {
+      "name": "saved-games",
+      "title": "Saved Games",
+      "description": "Track your saved games and their prices.",
+      "mode": "view"
+    },
+    {
+      "name": "top-deals",
+      "title": "Top Deals",
+      "description": "View current best deals",
+      "mode": "view"
+    },
+    {
+      "name": "free-games",
+      "title": "Free Games",
+      "description": "Discover currently free games and giveaways.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-stores",
+      "title": "Manage Stores",
+      "description": "Select which stores to include in your searches and deals.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "itadApiKey",
+      "type": "textfield",
+      "required": false,
+      "title": "ITAD API Key",
+      "description": "Your IsThereAnyDeal API Key"
+    },
+    {
+      "name": "country",
+      "type": "dropdown",
+      "required": false,
+      "title": "Country",
+      "description": "Select your store region",
+      "default": "US",
+      "data": [
+        {
+          "title": "Argentina",
+          "value": "AR"
+        },
+        {
+          "title": "Australia",
+          "value": "AU"
+        },
+        {
+          "title": "Brazil",
+          "value": "BR"
+        },
+        {
+          "title": "Canada",
+          "value": "CA"
+        },
+        {
+          "title": "Chile",
+          "value": "CL"
+        },
+        {
+          "title": "China",
+          "value": "CN"
+        },
+        {
+          "title": "Colombia",
+          "value": "CO"
+        },
+        {
+          "title": "Czech Republic",
+          "value": "CZ"
+        },
+        {
+          "title": "Denmark",
+          "value": "DK"
+        },
+        {
+          "title": "France",
+          "value": "FR"
+        },
+        {
+          "title": "Germany",
+          "value": "DE"
+        },
+        {
+          "title": "Hong Kong",
+          "value": "HK"
+        },
+        {
+          "title": "Hungary",
+          "value": "HU"
+        },
+        {
+          "title": "India",
+          "value": "IN"
+        },
+        {
+          "title": "Indonesia",
+          "value": "ID"
+        },
+        {
+          "title": "Israel",
+          "value": "IL"
+        },
+        {
+          "title": "Japan",
+          "value": "JP"
+        },
+        {
+          "title": "Kazakhstan",
+          "value": "KZ"
+        },
+        {
+          "title": "Malaysia",
+          "value": "MY"
+        },
+        {
+          "title": "Mexico",
+          "value": "MX"
+        },
+        {
+          "title": "New Zealand",
+          "value": "NZ"
+        },
+        {
+          "title": "Norway",
+          "value": "NO"
+        },
+        {
+          "title": "Peru",
+          "value": "PE"
+        },
+        {
+          "title": "Philippines",
+          "value": "PH"
+        },
+        {
+          "title": "Poland",
+          "value": "PL"
+        },
+        {
+          "title": "Qatar",
+          "value": "QA"
+        },
+        {
+          "title": "Russia",
+          "value": "RU"
+        },
+        {
+          "title": "Saudi Arabia",
+          "value": "SA"
+        },
+        {
+          "title": "Singapore",
+          "value": "SG"
+        },
+        {
+          "title": "South Africa",
+          "value": "ZA"
+        },
+        {
+          "title": "South Korea",
+          "value": "KR"
+        },
+        {
+          "title": "Sweden",
+          "value": "SE"
+        },
+        {
+          "title": "Switzerland",
+          "value": "CH"
+        },
+        {
+          "title": "Taiwan",
+          "value": "TW"
+        },
+        {
+          "title": "Thailand",
+          "value": "TH"
+        },
+        {
+          "title": "Turkey",
+          "value": "TR"
+        },
+        {
+          "title": "Ukraine",
+          "value": "UA"
+        },
+        {
+          "title": "United Arab Emirates",
+          "value": "AE"
+        },
+        {
+          "title": "United Kingdom",
+          "value": "GB"
+        },
+        {
+          "title": "United States",
+          "value": "US"
+        },
+        {
+          "title": "Uruguay",
+          "value": "UY"
+        }
+      ]
+    },
+    {
+      "name": "showMature",
+      "type": "checkbox",
+      "required": false,
+      "title": "Content Filters",
+      "label": "[Game Search] Show mature (18+) games",
+      "description": "Include games with mature content in search results.",
+      "default": false
+    },
+    {
+      "name": "showDLCGameSearch",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "[Game Search] Show DLCs",
+      "description": "Include downloadable content in game search results.",
+      "default": true
+    },
+    {
+      "name": "maxResults",
+      "type": "dropdown",
+      "required": false,
+      "title": "[Game Search] Max Search Results",
+      "description": "Number of games to fetch per search.",
+      "default": "25",
+      "data": [
+        {
+          "title": "10 Results",
+          "value": "10"
+        },
+        {
+          "title": "25 Results",
+          "value": "25"
+        },
+        {
+          "title": "50 Results",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "name": "refreshFrequency",
+      "type": "dropdown",
+      "required": false,
+      "title": "[Saved Games] Update Frequency",
+      "description": "How often to check for price updates (helps to save API limits).",
+      "default": "12",
+      "data": [
+        {
+          "title": "Every 6 Hours",
+          "value": "6"
+        },
+        {
+          "title": "Every 12 Hours",
+          "value": "12"
+        },
+        {
+          "title": "Every 24 Hours",
+          "value": "24"
+        }
+      ]
+    },
+    {
+      "name": "minDiscount",
+      "type": "textfield",
+      "required": false,
+      "title": "[Top Deals] Min Discount %",
+      "description": "Show deals with at least this savings percentage (e.g., 50).",
+      "placeholder": "0"
+    },
+    {
+      "name": "maxPrice",
+      "type": "textfield",
+      "required": false,
+      "title": "[Top Deals] Max Price ($)",
+      "description": "Show deals below this price in USD.",
+      "placeholder": "e.g., 50"
+    },
+    {
+      "name": "showDLCFreeGames",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "[Free Games] Show DLCs",
+      "description": "Include downloadable content in the free games list.",
+      "default": true
+    },
+    {
+      "name": "showPriceHistoryChart",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Enable Price History & Recommendation Engine",
+      "description": "Displays the price trend chart and powers the Smart Recommendation Engine. Turn off to save API quota (disables insights).",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.8.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "screenshots": [
+    {
+      "path": "metadata/1.png",
+      "title": "Search Games"
+    },
+    {
+      "path": "metadata/2.png",
+      "title": "Saved Games"
+    },
+    {
+      "path": "metadata/3.png",
+      "title": "Game Detail - SKIP & Bundle"
+    },
+    {
+      "path": "metadata/4.png",
+      "title": "Game Detail - BUY & Chart"
+    },
+    {
+      "path": "metadata/5.png",
+      "title": "Free Games"
+    },
+    {
+      "path": "metadata/6.png",
+      "title": "Top Deals"
+    }
+  ],
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

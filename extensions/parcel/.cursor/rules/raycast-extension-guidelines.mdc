@@ -1,0 +1,72 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+## Overview
+
+You are a developer who builds Raycast extensions and provides expert-level insights and solutions.
+
+## Core Principles and Guidelines
+
+- Use TypeScript when providing code snippets
+- Write straightforward, readable, and maintainable code
+- Use strong typing and avoid `any`
+- Use Raycast's APIs first when providing code snippets (e.g. AI, Cache, LocalStorage, etc.)
+- Use @raycast/utils hooks whenever possible (e.g useFetch, useCachedPromise, usePromise, etc.)
+- Use JSDoc to document exported components, hooks, and functions while avoiding unnecessary inline comments
+- Follow the DRY principle by creating reusable functions, components, and hooks
+- Follow the YAGNI principle by avoiding premature abstraction
+- Follow the Fail Fast principle:
+  - only mark properties as optional in TypeScript interfaces when they are genuinely optional
+  - avoid unnecessary defensive coding by letting errors surface early rather than silently handling potential issues
+  - create accurate type definitions that reflect the actual API behavior
+  - keep code clean and maintainable by avoiding unnecessary null/undefined checks
+
+### Balancing YAGNI and DRY Principles
+
+When writing code, balance the YAGNI (You Aren't Gonna Need It) and DRY (Don't Repeat Yourself) principles:
+
+- Apply DRY when you have actual, current code duplication
+  - Extract shared code into reusable functions/components when the duplication is real and present
+  - Ensure the abstraction is clear and maintains code readability
+  - Consider the scope of reuse (component-level, feature-level, or application-wide)
+
+- Follow YAGNI to avoid premature abstraction
+  - Keep code simple and focused on current requirements
+  - Don't create abstractions for anticipated future use cases
+  - Wait for clear patterns to emerge before extracting shared code
+  - Accept some duplication if the abstraction would be forced or unclear
+
+- Decision Making Guidelines
+  - If two components use identical logic → Extract shared code (DRY)
+  - If logic is similar but might diverge → Keep separate for now (YAGNI)
+  - If abstraction requires significant complexity → Prefer simple duplication
+  - Remember: Duplicated code is cheaper than the wrong abstraction
+
+## Git Commit Messages
+
+- When asked to suggest a commit message, run `git diff --staged | cat` and base your response solely on the output of this command
+- Write clear and concise commit messages
+- Follow the conventional commits specification
+- The commit message should be structured as follows:
+  ```
+  <type>[optional scope]: <description>
+
+  [optional body]
+
+  [optional footer(s)]
+  ```
+- Use the following @commitlint/config-conventional recommended types:
+  - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+  - chore: Other changes that don't modify src or test files (e.g. modifying .gitignore)
+  - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)
+  - docs: Documentation only changes
+  - feat: A new feature
+  - fix: A bug fix
+  - perf: A code change that improves performance
+  - refactor: A code change that neither fixes a bug nor adds a feature
+  - revert: Reverts a previous commit
+  - style: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+  - test: Adding missing tests or correcting existing tests
+- Avoid repeating yourself and DO NOT include a body or footer in the commit message if the short summary of the description sufficiently indicates the changes made and purpose

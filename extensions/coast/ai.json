@@ -1,0 +1,1330 @@
+{
+  "instructions": "Coast is the user's private, local screen-history evidence layer. It records screenshots, OCR, application and domain metadata, usage, and sometimes macOS accessibility trees. Treat results as evidence of what was on screen, not proof of intent; captures may be partial, stale, or obscured. Resolve relative dates to explicit local ISO dates or datetimes before calling tools. Prefer narrow time ranges and filters. Use search-captures for specific remembered content, sample-activity for highlights across an hour or day, browse-timeline for a chronological reconstruction no longer than about 30 minutes, app-breakdown for time totals or rankings, and recent-activity for recording sessions. Use get-capture after another tool returns a frame ID; prefer get-accessibility-tree for UI controls or structured visible content and OCR for prose. Use list-coast-filters to resolve bundle IDs and domains. Screenshot paths are temporary local files. Only use capture-current-screen when the user explicitly asks about the current display; it requires confirmation. Use get-adjacent-moment for what happened next or before, find-related-moments for exact URL/title/app relationships, and use-saved-search only when the user explicitly refers to saved filters. Continue ordinary content searches with search-captures and the requested offset, not a saved-search lookup. Cite frame IDs, timestamps with timezone, and create-coast-link results for evidence. OCR is inherently noisy and can include overlays; preserve warnings. Accessibility has_tree is Coast's storage report, has_payload describes returned text, stored_bytes is not returned_bytes, and completeness must not be overstated. Timestamp strings without an offset are Mac local wall time; timestamp_utc is the equivalent instant, not a relabelled local timestamp. Keep UI navigation scopes narrow. These native Raycast AI tools use the Coast CLI internally; no separate native backend or fallback exists. List and text tools return bounded pages. When has_more is true and the user needs more or asks for a complete answer, continue with next_offset; Respect the total number of results a user explicitly requests, paging as needed to reach it and stopping at that count. For search-captures and use-saved-search reuse next_input exactly so its fixed scope is preserved, and for OCR or accessibility text pass next_character_offset as offset. A page with zero matches can still have more candidates. has_more false means that tool's selected or sampled source page is exhausted, not that Coast recorded every visible item or that OCR, accessibility, search, or sampling is complete. capture-current-screen is a one-off snapshot: when ocr_truncated is true, append ocr_text_tail to ocr_text rather than recapturing. When a user asks to look up a search result by frame ID or read its full OCR, call get-capture: search results are excerpts and may be truncated. In the final answer, explicitly say the accessibility tree is partial whenever is_partial_tree is true, completeness is partial, or truncated is true. Do not omit this limitation when summarizing UI controls. If completeness is unknown, say it is unknown and preserve the conflict warning. A screenshot export returns a local file path, not image bytes. Present that path as plain code; never invent sandbox: URLs or claim to have visually inspected an image from its path alone. Use only a Coast link returned by create-coast-link. Explicit-offset timestamps and their equivalent UTC instants are interchangeable; never reinterpret a wall-time string as UTC.",
+  "evals": [
+    {
+      "input": "@coast where did I see something about invoices on 2026-09-09?",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-captures",
+            "arguments": {
+              "tr": "2026-09-09"
+            }
+          }
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast how much time did I spend on ChatGPT on 2026-09-09?",
+      "expected": [
+        {
+          "callsTool": "app-breakdown"
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast walk me through what I did between 2pm and 2:30pm on 2026-09-09",
+      "expected": [
+        {
+          "callsTool": "browse-timeline"
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast what buttons were visible in frame 101?",
+      "expected": [
+        {
+          "callsTool": "get-accessibility-tree"
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast give me the highlights from 2026-09-09",
+      "expected": [
+        {
+          "callsTool": "sample-activity"
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast find a capture about Coast on 2026-09-09 in Raycast only (application bundle ID com.raycast.macos). Use capture lookup to read its full OCR by frame ID, inspect its screenshot and accessibility tree, then give me a Coast link to that exact moment.",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-captures",
+            "arguments": {
+              "tr": "2026-09-09"
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "get-capture",
+            "arguments": {
+              "frameId": 101
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "get-capture-image",
+            "arguments": {
+              "frameId": 101
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "get-accessibility-tree",
+            "arguments": {
+              "frameId": 101
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "create-coast-link",
+            "arguments": {
+              "when": {
+                "or": ["2026-09-09T14:30:00+08:00", "2026-09-09T06:30:00.000Z"]
+              }
+            }
+          }
+        },
+        {
+          "includes": "coast://"
+        },
+        {
+          "includes": "partial"
+        },
+        {
+          "not": {
+            "includes": "sandbox:"
+          }
+        }
+      ],
+      "mocks": {
+        "list-coast-filters": {
+          "applications": [
+            {
+              "bundle_id": "com.raycast.macos",
+              "display_name": "Raycast"
+            },
+            {
+              "bundle_id": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "domains": []
+        },
+        "search-captures": {
+          "result_count": 1,
+          "results": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic Coast setup excerpt… [truncated]",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ],
+              "ocr_truncated": true
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 20,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "get-capture": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "ocr_truncated": false,
+          "ocr_completeness": "complete-payload",
+          "ocr_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 66,
+            "has_more": false,
+            "total_count": 66,
+            "unit": "unicode-code-point"
+          }
+        },
+        "get-capture-image": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic eval fixture, not a real recording.",
+            "OCR can contain overlays."
+          ],
+          "image_path": "/tmp/synthetic-coast-eval.png",
+          "temporary": true
+        },
+        "get-accessibility-tree": {
+          "frame_id": 101,
+          "timestamp": "2026-09-09T14:30:00+08:00",
+          "timestamp_utc": "2026-09-09T06:30:00.000Z",
+          "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+          "timezone": "Asia/Manila",
+          "application": "Raycast",
+          "title": "Coast Extension Example",
+          "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+          "warnings": [
+            "Synthetic fixture.",
+            "The recorded accessibility tree is partial."
+          ],
+          "has_tree": true,
+          "has_payload": true,
+          "tree_text": "AXButton Open Coast",
+          "is_partial_tree": true,
+          "stored_bytes": 64,
+          "returned_bytes": 19,
+          "returned_characters": 19,
+          "truncated": false,
+          "completeness": "partial",
+          "text_pagination": {
+            "offset": 0,
+            "limit": 20000,
+            "returned_count": 19,
+            "has_more": false,
+            "total_count": 19,
+            "unit": "unicode-code-point"
+          },
+          "text_page_partial": false
+        },
+        "create-coast-link": {
+          "when": "2026-09-09T14:30:00+08:00",
+          "url": "coast://timeline?at=2026-09-09T14%3A30%3A00%2B08%3A00"
+        },
+        "app-breakdown": {
+          "frame_count": 30,
+          "recorded_seconds": 60,
+          "recorded_seconds_human": "1m",
+          "items": [
+            {
+              "frame_count": 30,
+              "recorded_seconds": 60,
+              "recorded_seconds_human": "1m",
+              "identifier": "com.openai.chat",
+              "display_name": "ChatGPT"
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "sample-activity": {
+          "segment_count": 1,
+          "truncated": false,
+          "segments": [
+            {
+              "frame_count": 30,
+              "duration": "1m",
+              "selected_frame": {
+                "frame_id": 101,
+                "timestamp": "2026-09-09T14:30:00+08:00",
+                "timestamp_utc": "2026-09-09T06:30:00.000Z",
+                "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+                "timezone": "Asia/Manila",
+                "application": "Raycast",
+                "title": "Coast Extension Example",
+                "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+                "warnings": [
+                  "Synthetic eval fixture, not a real recording.",
+                  "OCR can contain overlays."
+                ]
+              }
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        },
+        "browse-timeline": {
+          "total_frame_count": 30,
+          "selected_frame_count": 1,
+          "returned_frame_count": 1,
+          "truncated": false,
+          "frames": [
+            {
+              "frame_id": 101,
+              "timestamp": "2026-09-09T14:30:00+08:00",
+              "timestamp_utc": "2026-09-09T06:30:00.000Z",
+              "timestamp_local": "Sep 9, 2026, 2:30 PM GMT+8",
+              "timezone": "Asia/Manila",
+              "application": "Raycast",
+              "title": "Coast Extension Example",
+              "ocr_text": "Synthetic example: Coast extension setup and an invoice reference.",
+              "warnings": [
+                "Synthetic eval fixture, not a real recording.",
+                "OCR can contain overlays."
+              ]
+            }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 50,
+            "returned_count": 1,
+            "has_more": false,
+            "total_count": 1
+          }
+        }
+      }
+    },
+    {
+      "input": "@coast continue the Coast invoice search on 2026-09-09 from result offset 20",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-captures",
+            "arguments": {
+              "tr": "2026-09-09",
+              "offset": 20
+            }
+          }
+        }
+      ],
+      "mocks": {
+        "search-captures": {
+          "result_count": 0,
+          "results": [],
+          "pagination": {
+            "offset": 20,
+            "limit": 20,
+            "returned_count": 0,
+            "has_more": false,
+            "total_count": 20
+          },
+          "coverage": "Synthetic exhausted continuation page for the fixed query scope."
+        }
+      }
+    }
+  ]
+}

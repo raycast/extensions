@@ -1,0 +1,142 @@
+{
+  "name": "zipline",
+  "title": "Zipline",
+  "description": "Manage your Zipline uploads - browse, upload, and share files",
+  "icon": "zipline-icon.png",
+  "author": "treyg",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-uploads",
+      "title": "Browse Uploads",
+      "subtitle": "Zipline",
+      "description": "Browse and search your Zipline uploads",
+      "mode": "view"
+    },
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "subtitle": "Zipline",
+      "description": "Upload a new file to Zipline",
+      "mode": "view"
+    },
+    {
+      "name": "recent-uploads",
+      "title": "Recent Uploads",
+      "subtitle": "Zipline",
+      "description": "View your most recent uploads",
+      "mode": "view"
+    },
+    {
+      "name": "upload-clipboard-instant",
+      "title": "Upload Clipboard Text",
+      "subtitle": "Zipline",
+      "description": "Instantly upload clipboard text to Zipline",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "fileType",
+          "type": "dropdown",
+          "placeholder": "File Type",
+          "required": false,
+          "data": [
+            {
+              "title": "Text",
+              "value": "txt"
+            },
+            {
+              "title": "Markdown",
+              "value": "md"
+            },
+            {
+              "title": "JSON",
+              "value": "json"
+            },
+            {
+              "title": "JavaScript",
+              "value": "js"
+            },
+            {
+              "title": "TypeScript",
+              "value": "ts"
+            },
+            {
+              "title": "Python",
+              "value": "py"
+            },
+            {
+              "title": "HTML",
+              "value": "html"
+            },
+            {
+              "title": "CSS",
+              "value": "css"
+            },
+            {
+              "title": "SQL",
+              "value": "sql"
+            },
+            {
+              "title": "XML",
+              "value": "xml"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ziplineUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Zipline URL",
+      "description": "Your Zipline instance URL (e.g., https://zipline.example.com)",
+      "placeholder": "https://zipline.example.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Zipline API token"
+    },
+    {
+      "name": "pageSize",
+      "type": "textfield",
+      "required": false,
+      "title": "Page Size",
+      "description": "Number of uploads to display per page",
+      "default": "20",
+      "placeholder": "20"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "form-data": "^4.0.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.30.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "version": "1.0.0"
+}

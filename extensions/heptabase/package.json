@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heptabase",
+  "title": "Heptabase",
+  "description": "Connect to Heptabase via MCP to manage your knowledge base",
+  "icon": "heptabase.png",
+  "author": "ARui",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "append-to-journal",
+      "title": "Append to Journal",
+      "subtitle": "Heptabase",
+      "description": "Add content to today's Heptabase journal",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Journal content",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-heptabase-card",
+      "title": "Save to Note Card",
+      "subtitle": "Heptabase",
+      "description": "Save content to a note card in Heptabase",
+      "mode": "view"
+    },
+    {
+      "name": "search-heptabase",
+      "title": "Search Knowledge Base",
+      "subtitle": "Heptabase",
+      "description": "Semantic search for cards, PDFs, journals, and highlights",
+      "mode": "view"
+    },
+    {
+      "name": "get-journal-range",
+      "title": "Get Journal Range",
+      "subtitle": "Heptabase",
+      "description": "Retrieve journal entries within a date range",
+      "mode": "view"
+    },
+    {
+      "name": "search-whiteboards",
+      "title": "Search Whiteboards",
+      "subtitle": "Heptabase",
+      "description": "Search Heptabase whiteboards by keywords",
+      "mode": "view"
+    },
+    {
+      "name": "review-journals",
+      "title": "Review Journals",
+      "subtitle": "Heptabase",
+      "description": "Weekly/Monthly review of journal entries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "spaceId",
+      "type": "textfield",
+      "required": false,
+      "title": "Heptabase Space ID",
+      "description": "Your Heptabase space ID (found in the URL: https://app.heptabase.com/{spaceId}/...)",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

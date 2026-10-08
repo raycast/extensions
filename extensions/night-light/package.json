@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "night-light",
+  "title": "Night Light",
+  "description": "Manage Night Shift System Settings",
+  "icon": "icon.png",
+  "author": "devmoath",
+  "contributors": [
+    "kgrhartlage",
+    "erics118",
+    "alankyshum"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-night-shift-on",
+      "title": "Turn Night Shift on",
+      "subtitle": "Night Light",
+      "description": "Turn Night Shift on until tomorrow",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-night-shift-off",
+      "title": "Turn Night Shift off",
+      "subtitle": "Night Light",
+      "description": "Turn Night Shift off",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-night-shift",
+      "title": "Toggle Night Shift",
+      "subtitle": "Night Light",
+      "description": "Toggle Night Shift on and off",
+      "mode": "no-view"
+    },
+    {
+      "name": "change-night-shift-color-temperature",
+      "title": "Change Night Shift Color Temperature",
+      "subtitle": "Night Light",
+      "description": "Change Night Shift color temperature",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "closeWindow",
+      "default": false,
+      "type": "checkbox",
+      "label": "Close Raycast window",
+      "description": "Should the main Raycast window close when triggering a command?",
+      "required": false
+    },
+    {
+      "title": "Night Light Path",
+      "name": "nightlightPath",
+      "type": "textfield",
+      "description": "Path to the nightlight executable",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

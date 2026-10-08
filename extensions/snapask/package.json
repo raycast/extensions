@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapask",
+  "title": "SnapAsk",
+  "description": "Get instant AI answers for your questions.",
+  "icon": "extension-icon.png",
+  "author": "renzo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "snap-ask",
+      "title": "SnapAsk",
+      "description": "SnapAsk: Lightning-fast AI answers at your fingertips. This flexible Raycast extension allows you to quickly query various AI models using custom API keys and URLs. Get instant, to-the-point responses for your burning questions without the need for lengthy conversations. Perfect for rapid information retrieval and problem-solving on the fly.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "description": "The query to search for",
+          "placeholder": "Ask Anything..."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "The API key of your LLM provider",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseURL",
+      "title": "Base URL",
+      "description": "The base URL of your LLM provider, defaults to OpenAI",
+      "placeholder": "https://api.openai.com/v1/",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "model",
+      "description": "LLM model to use for your commands",
+      "type": "textfield",
+      "required": true,
+      "default": "gpt-4o-mini",
+      "title": "LLM Model"
+    }
+  ],
+  "dependencies": {
+    "@langchain/core": "^0.2.31",
+    "@langchain/openai": "^0.2.10",
+    "@raycast/api": "^1.82.4",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ]
+}

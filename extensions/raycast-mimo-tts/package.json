@@ -1,0 +1,260 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-mimo-tts",
+  "title": "MiMo TTS",
+  "description": "Read selected or clipboard text aloud with Xiaomi MiMo TTS — Chinese and English voices, fine-grained style controls, and chunked long-text playback.",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read",
+      "subtitle": "MiMo TTS",
+      "description": "Read selected text, or clipboard text if no selection is available. Trigger again to stop.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Browse MiMo voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Set Quick Read Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Choose and preview the MiMo voice used by Quick Read.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "tts-studio",
+      "title": "TTS Studio",
+      "subtitle": "MiMo TTS",
+      "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice, emotion, and style controls.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "design-voice",
+      "title": "Design Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Generate a custom MiMo voice from a one-sentence description (MiMo-V2.5-TTS-VoiceDesign). Supports auto-optimized sample text.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "clone-voice",
+      "title": "Clone Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Replicate a voice from an mp3 or wav sample (≤10 MB) and read your text aloud (MiMo-V2.5-TTS-VoiceClone).",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "setup-voice-defaults",
+      "title": "Setup Voice Defaults",
+      "subtitle": "MiMo TTS",
+      "description": "Configure the default MiMo model, voice, speech rate, style prompt, and token-plan base URL.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Stop the current MiMo TTS playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Speed up Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Increase reading speed by 0.25× for the next playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Slow Down Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Decrease reading speed by 0.25× for the next playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "playback-status",
+      "title": "Reading Status",
+      "subtitle": "MiMo TTS",
+      "description": "Menu-bar status of the current MiMo TTS reading with playback and speed controls.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mimoApiKey",
+      "type": "password",
+      "required": true,
+      "title": "MiMo Token Plan API Key",
+      "description": "MiMo Token Plan API key. Must start with tp-, not sk-.",
+      "placeholder": "tp-..."
+    },
+    {
+      "name": "mimoTokenPlanBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Token Plan Base URL",
+      "description": "Override the MiMo Token Plan endpoint. Leave empty to use the default.",
+      "default": "https://token-plan-cn.xiaomimimo.com/v1",
+      "placeholder": "https://token-plan-cn.xiaomimimo.com/v1"
+    },
+    {
+      "name": "mimoModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "MiMo TTS model used for synthesis.",
+      "default": "mimo-v2.5-tts",
+      "data": [
+        {
+          "title": "MiMo-V2.5-TTS (Recommended)",
+          "value": "mimo-v2.5-tts"
+        },
+        {
+          "title": "MiMo-V2-TTS (Legacy)",
+          "value": "mimo-v2-tts"
+        }
+      ]
+    },
+    {
+      "name": "mimoDefaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Default voice for Quick Read and other commands. Uses an explicit voice because MiMo Default is region-dependent.",
+      "default": "Chloe",
+      "data": [
+        {
+          "title": "Mia (English Female, Natural)",
+          "value": "Mia"
+        },
+        {
+          "title": "Chloe (English Female, Expressive)",
+          "value": "Chloe"
+        },
+        {
+          "title": "Milo (English Male, Warm)",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean (English Male, Grounded)",
+          "value": "Dean"
+        },
+        {
+          "title": "Bingtang (Chinese Female, Clear)",
+          "value": "冰糖"
+        },
+        {
+          "title": "Moli (Chinese Female, Soft)",
+          "value": "茉莉"
+        },
+        {
+          "title": "Soda (Chinese Male, Bright)",
+          "value": "苏打"
+        },
+        {
+          "title": "Baihua (Chinese Male, Steady)",
+          "value": "白桦"
+        }
+      ]
+    },
+    {
+      "name": "mimoSpeechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Speech Rate",
+      "description": "Baseline reading rate. Speed up / slow down commands override this for the current session.",
+      "default": "0",
+      "data": [
+        {
+          "title": "0.5x (Slow)",
+          "value": "-50"
+        },
+        {
+          "title": "0.75x (Relaxed)",
+          "value": "-25"
+        },
+        {
+          "title": "1.0x (Normal)",
+          "value": "0"
+        },
+        {
+          "title": "1.25x (Brisk)",
+          "value": "25"
+        },
+        {
+          "title": "1.5x (Fast)",
+          "value": "50"
+        },
+        {
+          "title": "1.75x (Very Brisk)",
+          "value": "75"
+        },
+        {
+          "title": "2.0x (Very Fast)",
+          "value": "100"
+        }
+      ]
+    },
+    {
+      "name": "mimoStylePrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Style Prompt",
+      "description": "Optional natural-language direction sent to MiMo for every reading.",
+      "placeholder": "e.g., Read with a calm, scholarly tone."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech",
+    "voice",
+    "mimo",
+    "xiaomi",
+    "chinese tts"
+  ]
+}

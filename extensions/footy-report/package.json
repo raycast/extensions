@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "footy-report",
+  "title": "Footy Report",
+  "description": "Raycast extension to find your essential football match day info and stats",
+  "icon": "extension-icon.png",
+  "author": "thuoe",
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "SportMonks API Key used to fetch all relevant football data",
+      "type": "password",
+      "required": true
+    },
+    {
+      "title": "Calendar Name",
+      "name": "calendarName",
+      "description": "Name of the calendar you wish to save all fixture dates",
+      "type": "textfield",
+      "default": "Calendar",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "test",
+      "title": "Test Endpoint",
+      "description": "Test SportMonks API Endpoints using access token",
+      "mode": "view"
+    },
+    {
+      "name": "searchTeam",
+      "title": "Search Team",
+      "description": "Search football team",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "team",
+          "placeholder": "Enter Team",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "searchLeagueStandings",
+      "title": "Search League Standings",
+      "description": "View league standing by displaying position, points, wins, draws and losses",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0",
+    "axios": "^1.8.4",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jest": "^29.5.11",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest"
+  }
+}

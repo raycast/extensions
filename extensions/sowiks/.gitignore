@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+*.log
+raycast-env.d.ts
+dist/
+.eslintcache
+
+# Working notes. Must never reach the Raycast monorepo:
+# ray publish copies every git-tracked file in this folder.
+IMPLEMENTATION.md

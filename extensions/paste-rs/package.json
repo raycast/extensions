@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paste-rs",
+  "title": "paste.rs - Quick Pastes",
+  "description": "Create anonymous paste.rs links from typed text or your clipboard, and browse recent pastes.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-paste",
+      "title": "Create Paste",
+      "subtitle": "paste.rs",
+      "description": "Create a paste from manually entered text and copy the URL",
+      "mode": "view"
+    },
+    {
+      "name": "paste-clipboard",
+      "title": "Create Paste from Clipboard",
+      "subtitle": "paste.rs",
+      "description": "Create a paste from clipboard text and copy the URL",
+      "mode": "no-view"
+    },
+    {
+      "name": "recent-pastes",
+      "title": "Browse Recent Pastes",
+      "subtitle": "paste.rs",
+      "description": "Browse pastes created with Raycast, copy them back, or delete them",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-paste",
+      "title": "Create Paste",
+      "description": "Use this tool whenever the user asks to create, upload, share, or get a link for text content on paste.rs. Pass the user's text in the content argument and return the created paste URL."
+    },
+    {
+      "name": "list-pastes",
+      "title": "List Pastes",
+      "description": "Use this tool whenever the user asks for their pastes, recent pastes, paste history, or pastes created with Raycast. paste.rs has no accounts, but this extension stores local history."
+    },
+    {
+      "name": "delete-paste",
+      "title": "Delete Paste",
+      "description": "Use this tool whenever the user asks to delete, remove, or destroy a paste.rs paste. Pass the paste URL or bare paste ID in the url argument."
+    }
+  ],
+  "ai": {
+    "instructions": "You are the paste.rs Raycast assistant. You have exactly three jobs, and each one must be done by calling a tool before answering. The tools may be shown as paste-rs-create-paste, paste-rs-list-pastes, and paste-rs-delete-paste; those are the same as create-paste, list-pastes, and delete-paste. If the user asks to create, upload, share, or get a link for text, call paste-rs-create-paste/create-paste with { \"content\": \"...\" }. If the user asks for \"my pastes\", recent pastes, or paste history, call paste-rs-list-pastes/list-pastes. If the user asks to delete or remove a paste, call paste-rs-delete-paste/delete-paste with { \"url\": \"...\" }. Never answer these requests from general knowledge, never say paste.rs has no history without calling the list tool, and never invent paste URLs. paste.rs pastes are anonymous and public, but this extension keeps local Raycast history for pastes created through it. Paste URLs and IDs are interchangeable, e.g. \"https://paste.rs/AbC\" and \"AbC\" refer to the same paste. create-paste and delete-paste already show Raycast confirmation dialogs, so call those tools directly instead of asking for confirmation first.",
+    "evals": [
+      {
+        "input": "@paste-rs create a paste with the text \"hello world\" and give me the link",
+        "mocks": {
+          "create-paste": [
+            {
+              "url": "https://paste.rs/AbC",
+              "partial": false,
+              "message": "Paste created: https://paste.rs/AbC"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-paste",
+              "arguments": {
+                "content": {
+                  "includes": "hello world"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@paste-rs what are my most recent pastes?",
+        "mocks": {
+          "list-pastes": [
+            {
+              "url": "https://paste.rs/AbC",
+              "content": "console.log('hello');",
+              "partial": false,
+              "createdAt": "2026-07-01T10:00:00.000Z"
+            },
+            {
+              "url": "https://paste.rs/XyZ",
+              "content": "some log output",
+              "partial": false,
+              "createdAt": "2026-06-30T09:00:00.000Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-pastes"
+          },
+          {
+            "includes": "AbC"
+          }
+        ]
+      },
+      {
+        "input": "@paste-rs delete the paste at https://paste.rs/AbC",
+        "mocks": {
+          "delete-paste": [
+            {
+              "deleted": true,
+              "id": "AbC"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-paste",
+              "arguments": {
+                "url": "https://paste.rs/AbC"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iconify",
+  "title": "Iconify — Search Icons",
+  "description": "Search icons via Iconify",
+  "icon": "icon.png",
+  "author": "destiner",
+  "contributors": [
+    "sxn",
+    "robert",
+    "kuddl",
+    "kevinxo328",
+    "ridemountainpig",
+    "pernielsentikaer",
+    "xmok",
+    "j3lte",
+    "kvoon3"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "view-icons",
+      "title": "View Icons",
+      "subtitle": "Iconify",
+      "description": "View available icons",
+      "mode": "view"
+    },
+    {
+      "name": "search-icons",
+      "title": "Search All Icons",
+      "subtitle": "Iconify",
+      "description": "Search through all available icons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste <svg> to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy <svg> to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste Svg File to Active App",
+          "value": "pasteFile"
+        },
+        {
+          "title": "Copy Svg File to Clipboard",
+          "value": "copyFile"
+        },
+        {
+          "title": "Paste <name> to Active App",
+          "value": "pasteName"
+        },
+        {
+          "title": "Copy <name> to Clipboard",
+          "value": "copyName"
+        },
+        {
+          "title": "Copy Svg URL to Clipboard",
+          "value": "copyURL"
+        },
+        {
+          "title": "Copy Data URI to Clipboard",
+          "value": "copyDataURI"
+        }
+      ]
+    },
+    {
+      "name": "iconColor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Monochromatic Icon Color",
+      "description": "Icon color to use in monochromatic icons",
+      "default": "currentColor",
+      "data": [
+        {
+          "title": "Default",
+          "value": "currentColor"
+        },
+        {
+          "title": "Custom",
+          "value": "customColor"
+        }
+      ]
+    },
+    {
+      "name": "customColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Icon Color",
+      "description": "Custom icon color to use in icons",
+      "default": "#ffffff"
+    },
+    {
+      "name": "iconNameFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Icon Name Format",
+      "description": "Choose how icon names should be formatted when copying or pasting",
+      "default": "set-name:icon-name",
+      "data": [
+        {
+          "title": "IconName",
+          "value": "IconName"
+        },
+        {
+          "title": "icon-name",
+          "value": "icon-name"
+        },
+        {
+          "title": "set-name:icon-name",
+          "value": "set-name:icon-name"
+        },
+        {
+          "title": "set-name-icon-name",
+          "value": "set-name-icon-name"
+        },
+        {
+          "title": "set-name/icon-name",
+          "value": "set-name/icon-name"
+        },
+        {
+          "title": "set-name--icon-name",
+          "value": "set-name--icon-name"
+        },
+        {
+          "title": "setNameIconName",
+          "value": "setNameIconName"
+        },
+        {
+          "title": "SetNameIconName",
+          "value": "SetNameIconName"
+        },
+        {
+          "title": "<SetNameIconName />",
+          "value": "<SetNameIconName />"
+        },
+        {
+          "title": "<set-name-icon-name />",
+          "value": "<set-name-icon-name />"
+        },
+        {
+          "title": "i-set-name:icon-name",
+          "value": "i-set-name:icon-name"
+        },
+        {
+          "title": "i-set-name-icon-name",
+          "value": "i-set-name-icon-name"
+        },
+        {
+          "title": "icon-[set-name--icon-name]",
+          "value": "icon-[set-name--icon-name]"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "raycast-cross-extension": "^0.2.3",
+    "react-hooks-global-state": "^2.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "prettier": "^3.7.4",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "crossExtensions": [
+    "thomas/color-picker"
+  ]
+}

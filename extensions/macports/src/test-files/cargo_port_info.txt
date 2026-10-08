@@ -1,0 +1,13 @@
+cargo @0.85.0 (devel)
+Variants:             mirror_all_architectures, universal
+
+Description:          Cargo downloads your Rust project's dependencies and compiles your project.
+Homepage:             https://crates.io
+
+Build Dependencies:   pkgconfig, cmake, rust
+Library Dependencies: curl, libgit2, libssh2, zlib, openssl3
+Runtime Dependencies: rust
+Platforms:            darwin
+License:              (MIT or Apache-2)
+Maintainers:          Email: mcalhoun@macports.org, GitHub: MarcusCalhoun-Lopez
+Policy: openmaintainer

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-new-instance",
+  "title": "New Instance",
+  "description": "Launch a new instance of any installed application on your Mac",
+  "icon": "icon.png",
+  "author": "Caramel",
+  "categories": [
+    "Applications",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open New App Instance",
+      "subtitle": "Select an app",
+      "description": "Select an installed application and launch a new instance of it",
+      "mode": "view"
+    },
+    {
+      "name": "current",
+      "title": "New Instance",
+      "subtitle": "Current App",
+      "description": "Launch a new instance of the currently active application",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.14",
+    "@types/react": "^19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

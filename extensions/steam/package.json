@@ -1,0 +1,1448 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "steam",
+  "title": "Steam",
+  "description": "Search Steam games and users, view game details, and browse the games you own.",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "contributors": [
+    "litomore",
+    "taken",
+    "clins1994"
+  ],
+  "crossExtensions": [
+    "litomore/protondb",
+    "litomore/steamgriddb"
+  ],
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "steam",
+      "title": "Search Games",
+      "subtitle": "Steam",
+      "description": "Search the Steam api for game information.",
+      "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "subtitle": "Steam",
+      "description": "Search Steam users and view public profile information.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-steam-games",
+      "title": "Search Steam Games",
+      "description": "Search Steam games by title and return matching apps with optional public store details."
+    },
+    {
+      "name": "get-steam-game-details",
+      "title": "Get Steam Game Details",
+      "description": "Get public Steam store details for a Steam app by app ID, Steam store URL, or title search."
+    },
+    {
+      "name": "search-steam-users",
+      "title": "Search Steam Users",
+      "description": "Search Steam users by Steam ID, profile URL, vanity URL, or display name and return public profile information."
+    },
+    {
+      "name": "get-owned-games",
+      "title": "Get Owned Games",
+      "description": "List the games you own on Steam with playtime and when each was last played. Needs your Web API Key and Steam ID."
+    },
+    {
+      "name": "get-recently-played-games",
+      "title": "Get Recently Played Games",
+      "description": "List the games you played on Steam in the last two weeks. Needs your Web API Key and Steam ID."
+    },
+    {
+      "name": "find-similar-games",
+      "title": "Find Similar Games",
+      "description": "Find games like a Steam game, from Steam's own More Like This list."
+    },
+    {
+      "name": "recommend-games",
+      "title": "Recommend Games",
+      "description": "Recommend Steam games you don't own, based on games you like."
+    },
+    {
+      "name": "recommend-owned-games",
+      "title": "Recommend Owned Games",
+      "description": "Find games in your library like games you name. Needs your Web API Key and Steam ID."
+    },
+    {
+      "name": "get-game-news",
+      "title": "Get Game News",
+      "description": "Get recent announcements, patch notes, and press coverage for a Steam game."
+    },
+    {
+      "name": "query-game-list",
+      "title": "Query Game List",
+      "description": "List the newest or most recently updated apps on Steam. Needs your Web API Key."
+    },
+    {
+      "name": "refresh-game-list",
+      "title": "Refresh Game List",
+      "description": "Download the Steam game list again. Needs your Web API Key."
+    },
+    {
+      "name": "launch-game",
+      "title": "Launch Game",
+      "description": "Launch a Steam game through the Steam client, after you confirm."
+    },
+    {
+      "name": "install-game",
+      "title": "Install Game",
+      "description": "Open Steam's install dialog for a game, after you confirm."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Search Steam Games only to look up games by title; it cannot search by genre or description, so for games like one the user names, call Find Similar Games with that title. Use Get Steam Game Details when the user asks about one game or provides a Steam app ID/store URL. Use Search Steam Users when the user asks about a Steam user or profile. Prefer direct Steam IDs, profile URLs, and vanity URLs when present. Display-name user search can return multiple people, so do not claim an exact identity unless the result came from a Steam ID, profile URL, or vanity URL. Use Get Owned Games for questions about the user's own library and playtime, and Get Recently Played Games for what they played lately. Use Get Game News for updates, patches, or news about a game. Use Find Similar Games when the user asks for games like one game. When they name two or more games, call Recommend Games once with all of them instead of Find Similar Games for each. Use Recommend Games for recommendations based on games the user likes, and Recommend Owned Games when they want something from their own library or backlog. Use Query Game List when the user asks what is new, just added, or recently updated on Steam. Only use Refresh Game List when the user asks to update or refresh the game list. Write each game as a Markdown link, [Name](storeUrl). Don't show app IDs unless the user asks for them. Only use Launch Game or Install Game when the user explicitly asks to play, launch, or install a game. Both need an app ID: get it from Search Steam Games or Get Owned Games first.",
+    "evals": [
+      {
+        "input": "@steam find Stardew Valley",
+        "mocks": {
+          "search-steam-games": {
+            "query": "Stardew Valley",
+            "results": [
+              {
+                "appid": 413150,
+                "name": "Stardew Valley",
+                "storeUrl": "https://store.steampowered.com/app/413150"
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-games",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "Stardew"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Stardew Valley"
+          },
+          {
+            "includes": "413150"
+          },
+          {
+            "not": {
+              "callsTool": "refresh-game-list"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@steam tell me about app 220",
+        "mocks": {
+          "get-steam-game-details": {
+            "query": "220",
+            "match": {
+              "appid": 220,
+              "name": "Half-Life 2",
+              "storeUrl": "https://store.steampowered.com/app/220",
+              "matchType": "appid"
+            },
+            "game": {
+              "appid": 220,
+              "name": "Half-Life 2",
+              "type": "game",
+              "storeUrl": "https://store.steampowered.com/app/220",
+              "releaseDate": "Nov 16, 2004",
+              "isFree": false,
+              "price": "$9.99",
+              "developers": [
+                "Valve"
+              ],
+              "publishers": [
+                "Valve"
+              ],
+              "platforms": [
+                "windows",
+                "mac",
+                "linux"
+              ],
+              "genres": [
+                "Action"
+              ],
+              "categories": [
+                "Single-player"
+              ],
+              "metacriticScore": 96,
+              "shortDescription": "1998. HALF-LIFE sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling."
+            },
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-steam-game-details"
+          },
+          {
+            "includes": "Half-Life 2"
+          },
+          {
+            "includes": "Valve"
+          }
+        ]
+      },
+      {
+        "input": "@steam what is Balatro on Steam?",
+        "mocks": {
+          "search-steam-games": {
+            "query": "Balatro",
+            "results": [
+              {
+                "appid": 2379780,
+                "name": "Balatro",
+                "storeUrl": "https://store.steampowered.com/app/2379780",
+                "details": {
+                  "appid": 2379780,
+                  "name": "Balatro",
+                  "type": "game",
+                  "storeUrl": "https://store.steampowered.com/app/2379780",
+                  "releaseDate": "Feb 20, 2024",
+                  "isFree": false,
+                  "price": "$14.99",
+                  "developers": [
+                    "LocalThunk"
+                  ],
+                  "publishers": [
+                    "Playstack"
+                  ],
+                  "platforms": [
+                    "windows",
+                    "mac"
+                  ],
+                  "genres": [
+                    "Casual",
+                    "Indie",
+                    "Strategy"
+                  ],
+                  "categories": [
+                    "Single-player"
+                  ],
+                  "shortDescription": "The poker roguelike."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          },
+          "get-steam-game-details": {
+            "query": "Balatro",
+            "match": {
+              "appid": 2379780,
+              "name": "Balatro",
+              "storeUrl": "https://store.steampowered.com/app/2379780",
+              "matchType": "search-result"
+            },
+            "game": {
+              "appid": 2379780,
+              "name": "Balatro",
+              "type": "game",
+              "storeUrl": "https://store.steampowered.com/app/2379780",
+              "releaseDate": "Feb 20, 2024",
+              "isFree": false,
+              "price": "$14.99",
+              "developers": [
+                "LocalThunk"
+              ],
+              "publishers": [
+                "Playstack"
+              ],
+              "platforms": [
+                "windows",
+                "mac"
+              ],
+              "genres": [
+                "Casual",
+                "Indie",
+                "Strategy"
+              ],
+              "categories": [
+                "Single-player"
+              ],
+              "shortDescription": "The poker roguelike."
+            },
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "or": [
+              {
+                "callsTool": "get-steam-game-details"
+              },
+              {
+                "callsTool": "search-steam-games"
+              }
+            ]
+          },
+          {
+            "includes": "Balatro"
+          },
+          {
+            "includes": "LocalThunk"
+          }
+        ]
+      },
+      {
+        "input": "@steam tell me about user gabelogannewell",
+        "mocks": {
+          "search-steam-users": {
+            "query": "gabelogannewell",
+            "totalCommunityMatches": 1,
+            "results": [
+              {
+                "steamId": "76561197960287930",
+                "personaName": "Gabe Newell",
+                "profileUrl": "https://steamcommunity.com/id/gabelogannewell/",
+                "realName": "Gabe Newell",
+                "status": "Offline",
+                "visibility": "Public",
+                "countryCode": "US",
+                "accountCreated": "2003-09-12",
+                "steamLevel": 13,
+                "friendCount": 104,
+                "gameCount": 239,
+                "topPlayedGames": [
+                  {
+                    "name": "Dota 2",
+                    "playtime": "380h"
+                  }
+                ],
+                "bans": {
+                  "communityBanned": false,
+                  "vacBanned": false,
+                  "vacBanCount": 0,
+                  "gameBanCount": 0,
+                  "daysSinceLastBan": 0,
+                  "economyBan": "none"
+                },
+                "matchType": "vanity",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "gabelogannewell"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Gabe Newell"
+          },
+          {
+            "includes": "Dota 2"
+          }
+        ]
+      },
+      {
+        "input": "@steam look up https://steamcommunity.com/profiles/76561197960287930",
+        "mocks": {
+          "search-steam-users": {
+            "query": "https://steamcommunity.com/profiles/76561197960287930",
+            "results": [
+              {
+                "steamId": "76561197960287930",
+                "personaName": "Steam User",
+                "profileUrl": "https://steamcommunity.com/profiles/76561197960287930",
+                "status": "Online",
+                "currentlyPlaying": "Half-Life 2",
+                "visibility": "Public",
+                "topPlayedGames": [],
+                "matchType": "steamid",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "76561197960287930"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Half-Life 2"
+          },
+          {
+            "includes": "76561197960287930"
+          }
+        ]
+      },
+      {
+        "input": "@steam search for users named alex",
+        "usedAsExample": false,
+        "mocks": {
+          "search-steam-users": {
+            "query": "alex",
+            "totalCommunityMatches": 42,
+            "results": [
+              {
+                "steamId": "76561198000000001",
+                "personaName": "alex",
+                "profileUrl": "https://steamcommunity.com/profiles/76561198000000001",
+                "status": "Offline",
+                "visibility": "Public",
+                "topPlayedGames": [],
+                "matchType": "community-search",
+                "warnings": []
+              },
+              {
+                "steamId": "76561198000000002",
+                "personaName": "Alex",
+                "profileUrl": "https://steamcommunity.com/profiles/76561198000000002",
+                "status": "Away",
+                "visibility": "Private",
+                "topPlayedGames": [],
+                "matchType": "community-search",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "alex"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "users"
+          },
+          {
+            "includes": "alex"
+          },
+          {
+            "includes": "Alex"
+          }
+        ]
+      },
+      {
+        "input": "@steam how many hours have I put into Stardew Valley?",
+        "mocks": {
+          "get-owned-games": {
+            "totalOwned": 3,
+            "matched": 1,
+            "games": [
+              {
+                "appid": 413150,
+                "name": "Stardew Valley",
+                "playtime": "152h",
+                "playtimeMinutes": 9120,
+                "lastPlayed": "2026-09-20",
+                "storeUrl": "https://store.steampowered.com/app/413150"
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-owned-games"
+          },
+          {
+            "includes": "152"
+          },
+          {
+            "not": {
+              "callsTool": "launch-game"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@steam what have I been playing lately?",
+        "mocks": {
+          "get-recently-played-games": {
+            "games": [
+              {
+                "appid": 1145360,
+                "name": "Hades",
+                "lastTwoWeeks": "9h",
+                "total": "61h",
+                "storeUrl": "https://store.steampowered.com/app/1145360"
+              },
+              {
+                "appid": 2379780,
+                "name": "Balatro",
+                "lastTwoWeeks": "3h",
+                "total": "40h",
+                "storeUrl": "https://store.steampowered.com/app/2379780"
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-recently-played-games"
+          },
+          {
+            "includes": "Hades"
+          },
+          {
+            "includes": "Balatro"
+          }
+        ]
+      },
+      {
+        "input": "@steam any recent patch notes for Balatro?",
+        "mocks": {
+          "get-game-news": {
+            "game": {
+              "appid": 2379780,
+              "name": "Balatro"
+            },
+            "news": [
+              {
+                "title": "Balatro 1.1.0 Update",
+                "date": "2026-09-10",
+                "source": "Community Announcements",
+                "url": "https://store.steampowered.com/news/app/2379780",
+                "summary": "New jokers, a new deck, and balance changes."
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-game-news",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "Balatro"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "1.1.0"
+          }
+        ]
+      },
+      {
+        "input": "@steam launch Hades",
+        "mocks": {
+          "launch-game": {
+            "game": {
+              "appid": 1145360,
+              "name": "Hades"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "search-steam-games": {
+            "query": "Hades",
+            "results": [
+              {
+                "appid": 1145360,
+                "name": "Hades",
+                "storeUrl": "https://store.steampowered.com/app/1145360"
+              }
+            ],
+            "warnings": []
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-steam-games"
+          },
+          {
+            "callsTool": "launch-game"
+          },
+          {
+            "not": {
+              "callsTool": "install-game"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@steam install Terraria for me",
+        "mocks": {
+          "install-game": {
+            "game": {
+              "appid": 105600,
+              "name": "Terraria"
+            },
+            "opened": true
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "search-steam-games": {
+            "query": "Terraria",
+            "results": [
+              {
+                "appid": 105600,
+                "name": "Terraria",
+                "storeUrl": "https://store.steampowered.com/app/105600"
+              }
+            ],
+            "warnings": []
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-steam-games"
+          },
+          {
+            "callsTool": "install-game"
+          },
+          {
+            "not": {
+              "callsTool": "launch-game"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@steam is Hades any good?",
+        "usedAsExample": false,
+        "mocks": {
+          "search-steam-games": {
+            "query": "Hades",
+            "results": [
+              {
+                "appid": 1145360,
+                "name": "Hades",
+                "storeUrl": "https://store.steampowered.com/app/1145360"
+              }
+            ],
+            "warnings": []
+          },
+          "get-steam-game-details": {
+            "query": "Hades",
+            "match": {
+              "appid": 1145360,
+              "name": "Hades",
+              "storeUrl": "https://store.steampowered.com/app/1145360",
+              "matchType": "search-result"
+            },
+            "game": {
+              "appid": 1145360,
+              "name": "Hades",
+              "type": "game",
+              "storeUrl": "https://store.steampowered.com/app/1145360",
+              "developers": [
+                "Supergiant Games"
+              ],
+              "publishers": [
+                "Supergiant Games"
+              ],
+              "platforms": [
+                "windows",
+                "mac"
+              ],
+              "genres": [
+                "Action",
+                "Indie",
+                "RPG"
+              ],
+              "categories": [
+                "Single-player"
+              ],
+              "metacriticScore": 93
+            },
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "not": {
+              "callsTool": "launch-game"
+            }
+          },
+          {
+            "not": {
+              "callsTool": "install-game"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@steam games like Hades that I don't own",
+        "mocks": {
+          "search-steam-games": {
+            "query": "Hades",
+            "results": [
+              {
+                "appid": 1145360,
+                "name": "Hades",
+                "storeUrl": "https://store.steampowered.com/app/1145360"
+              }
+            ],
+            "warnings": []
+          },
+          "find-similar-games": {
+            "game": {
+              "appid": 1145360,
+              "name": "Hades"
+            },
+            "games": [
+              {
+                "appid": 1145350,
+                "name": "Hades II",
+                "group": "Similar Games",
+                "type": "game",
+                "releaseDate": "Sep 25, 2025",
+                "developers": [
+                  "Supergiant Games"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/1145350",
+                "owned": true
+              },
+              {
+                "appid": 1313140,
+                "name": "Cult of the Lamb",
+                "group": "Similar Games",
+                "type": "game",
+                "releaseDate": "Aug 11, 2022",
+                "developers": [
+                  "Massive Monster"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/1313140",
+                "owned": false
+              },
+              {
+                "appid": 588650,
+                "name": "Dead Cells",
+                "group": "Similar Games",
+                "type": "game",
+                "releaseDate": "Aug 6, 2018",
+                "developers": [
+                  "Motion Twin"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/588650",
+                "owned": false
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          },
+          "recommend-games": {
+            "basedOn": [
+              {
+                "appid": 1145360,
+                "name": "Hades"
+              }
+            ],
+            "games": [
+              {
+                "appid": 1313140,
+                "name": "Cult of the Lamb",
+                "similarity": 0.7,
+                "sharedTags": [
+                  "Roguelite"
+                ],
+                "similarTo": [
+                  "Hades"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/1313140"
+              },
+              {
+                "appid": 588650,
+                "name": "Dead Cells",
+                "similarity": 0.68,
+                "sharedTags": [
+                  "Roguelite"
+                ],
+                "similarTo": [
+                  "Hades"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/588650"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "or": [
+              {
+                "callsTool": "find-similar-games"
+              },
+              {
+                "callsTool": "recommend-games"
+              }
+            ]
+          },
+          {
+            "includes": "Dead Cells"
+          },
+          {
+            "includes": "Cult of the Lamb"
+          }
+        ]
+      },
+      {
+        "input": "@steam I loved Hollow Knight and Celeste, what should I buy next?",
+        "mocks": {
+          "recommend-games": {
+            "basedOn": [
+              {
+                "appid": 367520,
+                "name": "Hollow Knight"
+              },
+              {
+                "appid": 504230,
+                "name": "Celeste"
+              }
+            ],
+            "games": [
+              {
+                "appid": 1030300,
+                "name": "Hollow Knight: Silksong",
+                "similarity": 0.87,
+                "sharedTags": [
+                  "Difficult",
+                  "Platformer",
+                  "Metroidvania"
+                ],
+                "similarTo": [
+                  "Hollow Knight",
+                  "Celeste"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/1030300"
+              },
+              {
+                "appid": 2725260,
+                "name": "ENDER MAGNOLIA: Bloom in the Mist",
+                "similarity": 0.61,
+                "sharedTags": [
+                  "Metroidvania",
+                  "2D"
+                ],
+                "similarTo": [
+                  "Hollow Knight",
+                  "Celeste"
+                ],
+                "storeUrl": "https://store.steampowered.com/app/2725260"
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          },
+          "find-similar-games": {
+            "game": {
+              "appid": 367520,
+              "name": "Hollow Knight"
+            },
+            "games": [
+              {
+                "appid": 1030300,
+                "name": "Hollow Knight: Silksong",
+                "group": "Similar Games",
+                "type": "game",
+                "storeUrl": "https://store.steampowered.com/app/1030300"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "recommend-games"
+          },
+          {
+            "includes": "Silksong"
+          }
+        ]
+      },
+      {
+        "input": "@steam what should I play from my backlog if I liked Hades?",
+        "mocks": {
+          "recommend-owned-games": {
+            "basedOn": [
+              {
+                "appid": 1145360,
+                "name": "Hades"
+              }
+            ],
+            "games": [
+              {
+                "appid": 1763250,
+                "name": "SWORN",
+                "similarity": 0.77,
+                "sharedTags": [
+                  "Action Roguelike",
+                  "Roguelite",
+                  "Hack and Slash"
+                ],
+                "playtime": "never played",
+                "storeUrl": "https://store.steampowered.com/app/1763250"
+              },
+              {
+                "appid": 1147560,
+                "name": "Skul: The Hero Slayer",
+                "similarity": 0.65,
+                "sharedTags": [
+                  "Action Roguelike",
+                  "Roguelite"
+                ],
+                "playtime": "never played",
+                "storeUrl": "https://store.steampowered.com/app/1147560"
+              }
+            ],
+            "warnings": []
+          },
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "recommend-owned-games"
+          },
+          {
+            "includes": "SWORN"
+          }
+        ]
+      },
+      {
+        "input": "@steam refresh my Steam game list",
+        "mocks": {
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "refresh-game-list"
+          }
+        ]
+      },
+      {
+        "input": "@steam what's new on Steam?",
+        "mocks": {
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          },
+          "query-game-list": {
+            "games": [
+              {
+                "appid": 4910490,
+                "name": "Ignite the Depths",
+                "type": "game",
+                "added": "2026-09-30",
+                "releaseDate": "Coming soon",
+                "comingSoon": true,
+                "storeUrl": "https://store.steampowered.com/app/4910490"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "query-game-list"
+          },
+          {
+            "includes": "Ignite the Depths"
+          }
+        ]
+      },
+      {
+        "input": "@steam any free games like Counter-Strike 2?",
+        "mocks": {
+          "launch-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Launch"
+            },
+            "opened": true
+          },
+          "install-game": {
+            "game": {
+              "appid": 0,
+              "name": "Unexpected Install"
+            },
+            "opened": true
+          },
+          "refresh-game-list": {
+            "updated": true,
+            "seconds": 0
+          },
+          "search-steam-games": {
+            "query": "Counter-Strike 2",
+            "results": [
+              {
+                "appid": 730,
+                "name": "Counter-Strike 2",
+                "storeUrl": "https://store.steampowered.com/app/730"
+              }
+            ],
+            "warnings": []
+          },
+          "find-similar-games": {
+            "game": {
+              "appid": 730,
+              "name": "Counter-Strike 2"
+            },
+            "games": [
+              {
+                "appid": 2073850,
+                "name": "THE FINALS",
+                "group": "Similar Games",
+                "type": "game",
+                "price": "Free",
+                "reviews": "Mostly Positive (77% of 250,000)",
+                "storeUrl": "https://store.steampowered.com/app/2073850"
+              },
+              {
+                "appid": 1172470,
+                "name": "Apex Legends",
+                "group": "Similar Games",
+                "type": "game",
+                "price": "Free",
+                "reviews": "Mostly Positive (72% of 900,000)",
+                "storeUrl": "https://store.steampowered.com/app/1172470"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-similar-games"
+          },
+          {
+            "includes": "THE FINALS"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "Web API Key",
+      "description": "Enables local mode for fast searches: https://steamcommunity.com/dev/apikey",
+      "placeholder": "Web API Key",
+      "required": false
+    },
+    {
+      "name": "steamid",
+      "type": "textfield",
+      "title": "Steam ID",
+      "description": "Steam ID, profile URL, or custom URL name",
+      "placeholder": "Steam ID or profile URL",
+      "required": false
+    },
+    {
+      "name": "indexRefresh",
+      "type": "dropdown",
+      "title": "Game List Refresh",
+      "description": "How often to refresh the game list",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Daily",
+          "value": "1"
+        },
+        {
+          "title": "Weekly",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "showGames",
+      "type": "checkbox",
+      "title": "Show",
+      "label": "Games",
+      "description": "Include games",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showSoftware",
+      "type": "checkbox",
+      "title": "",
+      "label": "Software like 3DMark",
+      "description": "Include software",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDlc",
+      "type": "checkbox",
+      "title": "",
+      "label": "DLC and soundtracks",
+      "description": "Include DLC and soundtracks",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showVideos",
+      "type": "checkbox",
+      "title": "",
+      "label": "Videos",
+      "description": "Include videos",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showHardware",
+      "type": "checkbox",
+      "title": "",
+      "label": "Hardware",
+      "description": "Include hardware",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ionos-sync",
+  "title": "IONOS Sync",
+  "description": "Sync local projects to IONOS web hosting via rsync over SSH — with dry-run preview, push/pull, and project management.",
+  "icon": "extension-icon.png",
+  "author": "wdeu",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "ionos",
+    "1and1",
+    "rsync",
+    "ssh",
+    "deploy",
+    "sync",
+    "hosting",
+    "webhosting",
+    "dach"
+  ],
+  "commands": [
+    {
+      "name": "sync-project",
+      "title": "Sync Project",
+      "subtitle": "IONOS Sync",
+      "description": "Select a project and push or pull files via rsync over SSH",
+      "mode": "view"
+    },
+    {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "IONOS Sync",
+      "description": "Add, edit or remove sync projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ionosHost",
+      "title": "IONOS Host",
+      "description": "SSH hostname from your IONOS control panel (e.g. ssh.hosting.ionos.de)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "homXXXXX.1and1-data.host"
+    },
+    {
+      "name": "ionosUser",
+      "title": "SSH Username",
+      "description": "Your IONOS SSH username",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "uXXXXXXXX"
+    },
+    {
+      "name": "ionosPort",
+      "title": "SSH Port",
+      "description": "SSH port (default: 22)",
+      "type": "textfield",
+      "required": false,
+      "default": "22",
+      "placeholder": "22"
+    },
+    {
+      "name": "sshKeyPath",
+      "title": "SSH Key Path (optional)",
+      "description": "Path to your SSH private key. Leave empty to use the default key (~/.ssh/id_rsa).",
+      "type": "file",
+      "required": false,
+      "placeholder": "~/.ssh/id_rsa"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "execa": "^9.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

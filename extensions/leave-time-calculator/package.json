@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leave-time-calculator",
+  "title": "Leave Time Calculator",
+  "description": "Calculate your leave time based on start time and break duration",
+  "icon": "clock-icon.png",
+  "author": "harunonsystem",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultWorkHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Work Hours",
+      "description": "Default work hours per day (e.g., 8, 9)",
+      "default": "8"
+    },
+    {
+      "name": "defaultBreakMinutes",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Break Minutes",
+      "description": "Default break time in minutes (e.g., 60)",
+      "default": "60"
+    }
+  ],
+  "commands": [
+    {
+      "name": "calculate-leave-time",
+      "title": "Calculate Leave Time",
+      "description": "Main command. Auto-updates subtitle and opens the editor view",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "calculate-leave-time-view",
+      "title": "Calculate Leave Time",
+      "description": "Internal editor view opened from the main command",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/bun": "latest",
+    "@types/node": "^20.17.6",
+    "@types/react": "^19.2.7",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

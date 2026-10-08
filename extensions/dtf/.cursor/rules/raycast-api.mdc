@@ -1,0 +1,204 @@
+# Raycast API Guidelines
+
+## UI Components
+
+### List with Detail
+
+```typescript
+<List isShowingDetail={true} pagination={pagination}>
+  <List.Item
+    title="Title"
+    icon={{ source: avatarUrl, mask: Image.Mask.Circle }}
+    detail={<List.Item.Detail markdown={md} metadata={...} />}
+    actions={<ActionPanel>...</ActionPanel>}
+  />
+</List>
+```
+
+### Detail View (Full Screen)
+
+Use `Action.Push` to navigate to a Detail view:
+
+```typescript
+<Action.Push
+  title="Open Details"
+  icon={Icon.Eye}
+  target={<Detail markdown={md} metadata={...} />}
+/>
+```
+
+### Image Markdown
+
+Control image dimensions with query strings:
+
+```markdown
+![](image.png?raycast-width=500&raycast-height=280)
+```
+
+### Metadata Panel
+
+```typescript
+<Detail.Metadata>
+  <Detail.Metadata.Label title="Label" text="value" icon={Icon.Person} />
+  <Detail.Metadata.Link title="Link" target="url" text="Click" />
+  <Detail.Metadata.TagList title="Tags">
+    <Detail.Metadata.TagList.Item text="Tag" color="#color" />
+  </Detail.Metadata.TagList>
+  <Detail.Metadata.Separator />
+</Detail.Metadata>
+```
+
+### Circular Icons
+
+Always use mask for avatar images:
+
+```typescript
+icon={{ source: avatarUrl, mask: Image.Mask.Circle }}
+```
+
+### Actions Priority
+
+First action = Enter key, use shortcuts for others:
+
+```typescript
+<ActionPanel>
+  <Action.Push title="Open" target={...} />  {/* Enter */}
+  <Action.OpenInBrowser url={...} shortcut={{ modifiers: ["cmd"], key: "return" }} />
+</ActionPanel>
+```
+
+### Search Bar Accessory (Dropdown)
+
+```typescript
+<List
+  searchBarAccessory={
+    <List.Dropdown tooltip="Filter" storeValue={true} onChange={setValue}>
+      <List.Dropdown.Item title="Option 1" value="1" />
+      <List.Dropdown.Item title="Option 2" value="2" />
+    </List.Dropdown>
+  }
+>
+```
+
+### Pagination with useFetch
+
+```typescript
+const { data, pagination, isLoading } = useFetch(
+  (options) => {
+    const params = new URLSearchParams();
+    if (options.cursor) params.set("lastId", options.cursor);
+    return `${URL}?${params}`;
+  },
+  {
+    mapResult(result) {
+      return {
+        data: result.items,
+        hasMore: !!result.lastId,
+        cursor: String(result.lastId),
+      };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  }
+);
+
+<List pagination={pagination} isLoading={isLoading}>
+```
+
+### Command Arguments
+
+In `package.json`:
+
+```json
+{
+  "name": "search",
+  "arguments": [{
+    "name": "query",
+    "placeholder": "Search...",
+    "type": "text",
+    "required": false
+  }]
+}
+```
+
+In component:
+
+```typescript
+export default function Command({ arguments }: LaunchProps<{ arguments: { query?: string } }>) {
+  const initialQuery = arguments?.query || "";
+}
+```
+
+### Server-Side Search (Disable Local Filtering)
+
+```typescript
+<List
+  filtering={false}
+  onSearchTextChange={setSearchText}
+  searchText={searchText}
+  throttle={true}
+>
+```
+
+## AI Features
+
+```typescript
+import { AI, environment } from "@raycast/api";
+import { useAI } from "@raycast/utils";
+
+// Check if AI is available
+const hasAIAccess = environment.canAccess(AI);
+
+// Streaming AI response
+const { data, isLoading } = useAI(prompt, {
+  creativity: "low",  // or "medium", "high"
+  stream: true,
+});
+
+// One-shot AI call
+const response = await AI.ask(prompt, { creativity: "low" });
+```
+
+## Menu Bar Commands
+
+> Note: Menu Bar is macOS only due to Raycast platform limitations.
+
+```typescript
+import { MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
+
+<MenuBarExtra
+  icon={icon}
+  title={title}
+  tooltip="Tooltip"
+  isLoading={isLoading}
+>
+  <MenuBarExtra.Section title="Section">
+    <MenuBarExtra.Item
+      title="Item"
+      icon={Icon.Star}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      onAction={() => { /* ... */ }}
+    />
+    <MenuBarExtra.Submenu title="Submenu">
+      <MenuBarExtra.Item title="Sub Item" />
+    </MenuBarExtra.Submenu>
+  </MenuBarExtra.Section>
+</MenuBarExtra>
+
+// Launch another command
+launchCommand({
+  name: "command-name",
+  type: LaunchType.UserInitiated,
+});
+```
+
+## Best Practices
+
+1. **Keys**: Use unique keys, filter duplicates if API returns them
+2. **Icons**: Always circular for avatars
+3. **Actions**: Push for details, Cmd+Enter for browser
+4. **Metadata**: Make it toggleable with `showMetadata` prop
+5. **Pagination**: Use `keepPreviousData: true` for smooth scrolling
+6. **Empty States**: Provide `List.EmptyView` with helpful messages
+7. **Platform shortcuts**: Use `{ macOS: {...}, Windows: {...} }` format
+8. **AI Features**: Check `environment.canAccess(AI)` before using

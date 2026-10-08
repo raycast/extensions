@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sage-hr",
+  "title": "Sage HR",
+  "description": "Integration with Sage HR to get a searchable list on who is out today",
+  "keywords": [
+    "SageHR Integration",
+    "Employee Absence Tracker",
+    "Workforce Management",
+    "Leave Management",
+    "Employee Availability",
+    "HR Dashboard Raycast",
+    "Workplace Attendance"
+  ],
+  "icon": "command-icon.png",
+  "author": "cyxn",
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "title": "Access Token",
+      "placeholder": "Enter your SageHR's API access token",
+      "description": "Required for Sage HR API access. See the README for the official documentation link",
+      "required": true
+    },
+    {
+      "name": "subdomain",
+      "type": "textfield",
+      "title": "Subdomain",
+      "placeholder": "Enter your SageHR's subdomain name",
+      "description": "SageHR Subdomain, e.g. in `https://acme.sage.hr` it is `acme`",
+      "required": true
+    }
+  ],
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Absent Employees",
+      "subtitle": "Sage HR",
+      "description": "Get a searchable list on who is out today",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

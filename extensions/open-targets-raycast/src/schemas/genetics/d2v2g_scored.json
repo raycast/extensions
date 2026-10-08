@@ -1,0 +1,254 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "tag_chrom", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "tag_pos", "nullable": true, "type": "integer" },
+    { "metadata": {}, "name": "tag_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "tag_alt", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "gene_id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "study_id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "source", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "pmid", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "pub_date", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "pub_journal",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "pub_title", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "pub_author",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "has_sumstats",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "trait_reported",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "trait_efos",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "ancestry_initial",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "ancestry_replication",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    { "metadata": {}, "name": "n_initial", "nullable": true, "type": "long" },
+    {
+      "metadata": {},
+      "name": "n_replication",
+      "nullable": true,
+      "type": "long"
+    },
+    { "metadata": {}, "name": "n_cases", "nullable": true, "type": "long" },
+    {
+      "metadata": {},
+      "name": "trait_category",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "num_assoc_loci",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "lead_chrom",
+      "nullable": true,
+      "type": "string"
+    },
+    { "metadata": {}, "name": "lead_pos", "nullable": true, "type": "long" },
+    { "metadata": {}, "name": "lead_ref", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "lead_alt", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "overall_r2",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "AFR_1000G_prop",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "AMR_1000G_prop",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "EAS_1000G_prop",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "EUR_1000G_prop",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "SAS_1000G_prop",
+      "nullable": true,
+      "type": "double"
+    },
+    { "metadata": {}, "name": "log10_ABF", "nullable": true, "type": "double" },
+    {
+      "metadata": {},
+      "name": "posterior_prob",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "odds_ratio",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "oddsr_ci_lower",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "oddsr_ci_upper",
+      "nullable": true,
+      "type": "double"
+    },
+    { "metadata": {}, "name": "direction", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "beta", "nullable": true, "type": "double" },
+    {
+      "metadata": {},
+      "name": "beta_ci_lower",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "beta_ci_upper",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "pval_mantissa",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "pval_exponent",
+      "nullable": true,
+      "type": "long"
+    },
+    { "metadata": {}, "name": "pval", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "feature", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "type_id", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "source_id", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "fpred_labels",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "fpred_scores",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "double", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "fpred_max_label",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "fpred_max_score",
+      "nullable": true,
+      "type": "double"
+    },
+    { "metadata": {}, "name": "qtl_beta", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "qtl_se", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "qtl_pval", "nullable": true, "type": "double" },
+    { "metadata": {}, "name": "qtl_score", "nullable": true, "type": "double" },
+    {
+      "metadata": {},
+      "name": "interval_score",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "qtl_score_q",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "interval_score_q",
+      "nullable": true,
+      "type": "double"
+    },
+    { "metadata": {}, "name": "d", "nullable": true, "type": "long" },
+    {
+      "metadata": {},
+      "name": "distance_score",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "distance_score_q",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "overall_score",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "source_list",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "string", "type": "array" }
+    },
+    {
+      "metadata": {},
+      "name": "source_score_list",
+      "nullable": true,
+      "type": { "containsNull": true, "elementType": "double", "type": "array" }
+    }
+  ],
+  "type": "struct"
+}

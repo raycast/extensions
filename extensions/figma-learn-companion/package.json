@@ -1,0 +1,47 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "figma-learn-companion",
+    "title": "Figma Learn Companion",
+    "description": "Your companion for the Figma Learn help center that helps you quickly search for topics and updates.",
+    "icon": "extension-icon.png",
+    "author": "madmaxmckinney",
+    "categories": [
+        "Documentation"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "search",
+            "title": "Search Figma Learn",
+            "description": "Get the top results from searching the Figma Learn help center",
+            "mode": "view"
+        },
+        {
+            "name": "updates",
+            "title": "View Updates",
+            "description": "View all the Figma product ecosystem updates",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.67.1",
+        "axios": "^1.8.4",
+        "node-html-parser": "^6.1.12",
+        "rss-parser": "^3.13.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.6",
+        "@types/node": "20.8.10",
+        "@types/react": "18.2.27",
+        "eslint": "^8.51.0",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

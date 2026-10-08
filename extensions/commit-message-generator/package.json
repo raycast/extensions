@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commit-message-generator",
+  "title": "Commit Message Generator",
+  "description": "Must have extension for any developer!",
+  "icon": "extension-icon.png",
+  "author": "rokartur",
+  "contributors": [
+    "dcp"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-random-commit-message",
+      "title": "Generate Random Commit Message",
+      "description": "Generate random commit message from https://whatthecommit.com",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

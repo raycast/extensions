@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gyazo-uploader",
+  "title": "Gyazo Uploader",
+  "description": "Upload clipboard image to Gyazo",
+  "icon": "gyazo-icon.png",
+  "author": "udus",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload",
+      "title": "Upload Clipboard Image",
+      "subtitle": "Gyazo",
+      "description": "Upload upload image to gyazo and copy direct link",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "",
+      "description": "You can get your own access token from https://gyazo.com/oauth/applications",
+      "name": "accessToken",
+      "required": true,
+      "title": "Access Token",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "gyazo-api": "^0.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

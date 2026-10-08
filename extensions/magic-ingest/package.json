@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "magic-ingest",
+  "title": "Magic Ingest",
+  "description": "Fast, background photo & video ingest from memory cards with date filtering, SHA-256 verification, and Photo Mechanic integration",
+  "icon": "extension-icon.png",
+  "author": "dustintchambers",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ingest",
+      "title": "Magic Ingest",
+      "description": "Ingest photos and videos from memory cards",
+      "mode": "view"
+    },
+    {
+      "name": "ingest-status",
+      "title": "Ingest Status",
+      "description": "View and manage running ingest jobs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

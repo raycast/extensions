@@ -1,0 +1,410 @@
+import { getPreferenceValues } from "@raycast/api";
+import { execSync, execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
+
+export type Location = {
+  Country: string;
+  CountryCode: string;
+  City: string;
+  CityCode: string;
+  Latitude: number;
+  Longitude: number;
+  Priority: number;
+};
+
+export interface Service {
+  name: string;
+  addresses: string[];
+  hostname: string;
+  ports: string[];
+  displayName?: string;
+  type?: string;
+}
+
+export interface Device {
+  self: boolean;
+  key: string;
+  name: string;
+  userid: string;
+  loginName?: string;
+  dns: string;
+  ipv4: string;
+  ipv6: string;
+  os: string;
+  online: boolean;
+  lastseen: Date;
+  exitnode: boolean;
+  exitnodeoption: boolean;
+  ssh?: boolean;
+  tags?: string[];
+  location?: Location;
+}
+
+export class InvalidPathError extends Error {}
+export class NotRunningError extends Error {}
+export class NotConnectedError extends Error {}
+export class ENOBUFSError extends Error {}
+export class MaxBufferNaNError extends Error {}
+
+export type StatusDevice = {
+  ID: string;
+  PublicKey: string;
+  HostName: string;
+  DNSName: string;
+  OS: string;
+  UserID: number;
+  TailscaleIPs: string[];
+  AllowedIPs: string[];
+  Addrs: string[] | null;
+  CurAddr: string;
+  Relay: string;
+  PeerRelay: string;
+  RxBytes: number;
+  TxBytes: number;
+  Created: string;
+  LastWrite: string;
+  LastSeen: string;
+  LastHandshake: string;
+  Online: boolean;
+  ExitNode: boolean;
+  ExitNodeOption: boolean;
+  Active: boolean;
+  PeerAPIURL: string[] | null;
+  TaildropTarget: number;
+  NoFileSharingReason: string;
+  InNetworkMap: boolean;
+  InMagicSock: boolean;
+  InEngine: boolean;
+  /** Only present when the key has expired. */
+  Expired?: boolean;
+  KeyExpiry?: string;
+  /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
+  sshHostKeys?: string[];
+  Tags?: string[];
+  /** Only present on Self. */
+  Capabilities?: string[];
+  /** Only present on Self. */
+  CapMap?: Record<string, null | string[]>;
+  Location?: Location;
+};
+
+/**
+ * StatusResponse is a subset of the fields returned by `tailscale status --json`.
+ */
+export type StatusResponse = {
+  Version: string;
+  BackendState: string;
+  HaveNodeKey: boolean;
+  AuthURL: string;
+  TailscaleIPs: string[];
+  Self: StatusDevice;
+  Health: string[];
+  MagicDNSSuffix: string;
+  CurrentTailnet: {
+    Name: string;
+    MagicDNSSuffix: string;
+    MagicDNSEnabled: boolean;
+  };
+  CertDomains: string[] | null;
+  Peer: Record<string, StatusDevice>;
+  User: Record<
+    string,
+    {
+      ID: number;
+      DisplayName: string;
+      LoginName: string;
+      ProfilePicURL?: string;
+    }
+  >;
+  ClientVersion: null | unknown;
+};
+
+/**
+ * NetcheckResponse are the fields returned by `tailscale netcheck --format json`.
+ * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
+ */
+export type NetcheckResponse = {
+  Now: string;
+  UDP: boolean;
+  IPv6: boolean;
+  IPv4: boolean;
+  IPv6CanSend: boolean;
+  IPv4CanSend: boolean;
+  OSHasIPv6: boolean;
+  ICMPv4: boolean;
+  MappingVariesByDestIP: boolean;
+  UPnP: boolean;
+  PMP: boolean;
+  PCP: boolean;
+  PreferredDERP: number;
+  RegionLatency: Record<string, number>;
+  RegionV4Latency: Record<string, number>;
+  RegionV6Latency: Record<string, number>;
+  GlobalV4Counters: Record<string, number>;
+  GlobalV6Counters: Record<string, number> | null;
+  GlobalV4: string;
+  GlobalV6: string;
+  CaptivePortal: boolean;
+};
+
+export type DerpRegion = {
+  RegionID: number;
+  RegionCode: string;
+  RegionName: string;
+  Latitude: number;
+  Longitude: number;
+  Nodes: DerpNode[];
+};
+
+type DerpNode = {
+  Name: string;
+  RegionID: number;
+  HostName: string;
+  IPv4: string;
+  IPv6: string;
+  CanPort80: boolean;
+};
+
+export type Derp = {
+  id: string;
+  code: string;
+  name: string;
+  latency: string | undefined;
+  latencies: {
+    v4: string | undefined;
+    v6: string | undefined;
+  };
+  nodes: DerpNode[];
+};
+
+export function getStatus(peers = true) {
+  const resp = tailscale(`status --json --peers=${peers}`);
+  const data = JSON.parse(resp) as StatusResponse;
+  if (!data || !data.Self.Online) {
+    throw new NotConnectedError();
+  }
+  return data;
+}
+
+type ServiceResponse = {
+  Name: string;
+  Addrs: string[];
+  Ports: string[];
+  Hostname: string;
+  DisplayName?: string;
+  Type?: string;
+};
+
+export function getServices(): Service[] {
+  const resp = tailscale("service list --json");
+  const services = JSON.parse(resp) as ServiceResponse[];
+
+  return services.map((service) => ({
+    name: service.Name.replace(/^svc:/, ""),
+    addresses: service.Addrs,
+    hostname: service.Hostname,
+    ports: service.Ports,
+    displayName: service.DisplayName,
+    type: service.Type?.toLowerCase(),
+  }));
+}
+
+export function getNetcheck() {
+  const resp = tailscale("netcheck --format json");
+  return JSON.parse(resp);
+}
+
+/**
+ * This function relies on a debug command, so it may not be stable on the returned value.
+ */
+export function getDerpMap() {
+  const resp = tailscale("debug netmap");
+  return JSON.parse(resp).DERPMap.Regions as Record<string, DerpRegion>;
+}
+
+export function getDevices(status: StatusResponse) {
+  const devices: Device[] = [];
+  const self = status.Self;
+
+  const selfUser = status.User?.[self.UserID.toString()];
+  const me = {
+    self: true,
+    key: self.ID,
+    name: self.DNSName.split(".")[0],
+    userid: self.UserID.toString(),
+    loginName: selfUser?.LoginName,
+    dns: self.DNSName,
+    ipv4: self.TailscaleIPs[0],
+    ipv6: self.TailscaleIPs[1],
+    os: self.OS,
+    online: self.Online,
+    lastseen: new Date(self.LastSeen),
+    exitnode: self.ExitNode,
+    exitnodeoption: self.ExitNodeOption,
+    ssh: (self.sshHostKeys?.length ?? 0) > 0,
+    tags: self.Tags,
+  };
+
+  devices.push(me);
+
+  for (const [, peer] of Object.entries(status.Peer)) {
+    const peerUser = status.User?.[peer.UserID.toString()];
+    const device = {
+      self: false,
+      key: peer.ID,
+      name: peer.DNSName.split(".")[0],
+      userid: peer.UserID.toString(),
+      loginName: peerUser?.LoginName,
+      dns: peer.DNSName,
+      ipv4: peer.TailscaleIPs[0],
+      ipv6: peer.TailscaleIPs[1],
+      os: peer.OS == "linux" ? "Linux" : peer.OS,
+      online: peer.Online,
+      lastseen: new Date(peer.LastSeen),
+      exitnode: peer.ExitNode,
+      exitnodeoption: peer.ExitNodeOption,
+      ssh: (peer.sshHostKeys?.length ?? 0) > 0,
+      tags: peer.Tags,
+      location: peer.Location,
+    };
+    devices.push(device);
+  }
+  return devices;
+}
+
+export function sortDevices(devices: Device[]) {
+  devices.sort((a, b) => {
+    // self should always be first
+    if (a.self) {
+      return -1;
+    } else if (b.self) {
+      return 1;
+    }
+    // then sort by online status
+    if (a.online && !b.online) {
+      return -1;
+    } else if (!a.online && b.online) {
+      return 1;
+    }
+    // lastly, sort by name
+    return a.name.localeCompare(b.name);
+  });
+}
+
+const prefs = getPreferenceValues();
+
+const tailscalePath: string =
+  prefs.tailscalePath && prefs.tailscalePath.length > 0
+    ? prefs.tailscalePath
+    : "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
+
+const execMaxBuffersBytes: number =
+  prefs.tailscaleExecMaxBuffersMB && (prefs.tailscaleExecMaxBuffersMB as number)
+    ? prefs.tailscaleExecMaxBuffersMB * 1024 * 1024
+    : 10 * 1024 * 1024; // 10 megabytes
+
+const execFileAsync = promisify(execFile);
+
+const TAILSCALE_ASYNC_TIMEOUT_MS = 15_000;
+
+/**
+ * tailscaleAsync runs a command against the Tailscale CLI asynchronously,
+ * keeping stdout and stderr separate, with a finite timeout and the
+ * configurable max buffer size. Non-zero exits reject with the child process
+ * error (with `.stdout` and `.stderr` attached), so callers can distinguish
+ * CLI failures from successful runs.
+ */
+export async function tailscaleAsync(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  let result;
+  try {
+    result = await execFileAsync(tailscalePath, args, {
+      maxBuffer: execMaxBuffersBytes,
+      timeout: TAILSCALE_ASYNC_TIMEOUT_MS,
+      env: { ...process.env, TAILSCALE_BE_CLI: "1" },
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "ENOENT" || err.message.includes("No such file or directory")) {
+        throw new InvalidPathError();
+      } else if ((err as { stderr?: string }).stderr?.includes("is Tailscale running?")) {
+        throw new NotRunningError();
+      }
+    }
+    console.log(`throwing error: ${err}`);
+    throw err;
+  }
+  return { stdout: result.stdout, stderr: result.stderr };
+}
+
+/**
+ * tailscale runs a command against the Tailscale CLI.
+ */
+export function tailscale(parameters: string): string {
+  try {
+    return execSync(`${tailscalePath} ${parameters}`, { maxBuffer: execMaxBuffersBytes }).toString().trim();
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message.includes("No such file or directory")) {
+        throw new InvalidPathError();
+      } else if (err.message.includes("is Tailscale running?")) {
+        throw new NotRunningError();
+      } else if (err.message.includes("spawnSync /bin/sh ENOBUFS")) {
+        throw new ENOBUFSError();
+      } else if (
+        err.message.includes(
+          'The value of "options.maxBuffer" is out of range. It must be a positive number. Received NaN',
+        )
+      ) {
+        throw new MaxBufferNaNError();
+      }
+    }
+    console.log(`throwing error: ${err}`);
+    throw err;
+  }
+}
+
+export type ErrorDetails = {
+  title: string;
+  description: string;
+};
+
+export function getErrorDetails(err: unknown, fallbackMessage: string): ErrorDetails {
+  if (err instanceof InvalidPathError) {
+    return {
+      title: "Can’t find the Tailscale CLI",
+      description: "Your Tailscale CLI Path is invalid.\nUpdate your extension preferences to fix this.",
+    };
+  } else if (err instanceof NotRunningError) {
+    return {
+      title: "Can’t connect to Tailscale",
+      description: "Make sure Tailscale is running and try again.",
+    };
+  } else if (err instanceof NotConnectedError) {
+    return {
+      title: "Not connected to a tailnet",
+      description: "Tailscale is running, but you’re not connected to a tailnet.\nLog in and try again.",
+    };
+  } else if (err instanceof ENOBUFSError) {
+    return {
+      title: "Response larger than buffer size",
+      description: "Increase `Max buffers ...` in the extension configuration.",
+    };
+  } else if (err instanceof MaxBufferNaNError) {
+    return {
+      title: "Invalid `Max buffers ...` configuration",
+      description: "Set `Max buffers ...` to a number in the extension configuration.",
+    };
+  }
+  console.log(`Unhandled error: ${err}`);
+  return {
+    title: "Something went wrong",
+    description: fallbackMessage,
+  };
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

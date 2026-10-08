@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 464.8 537">
+  <defs>
+    <style>
+      .d {
+        fill: url(#c);
+      }
+
+      .e {
+        fill: url(#b);
+      }
+
+      .f {
+        fill: #002d74;
+      }
+
+      .g {
+        fill: #fff;
+      }
+    </style>
+    <linearGradient id="b" x1="348.64" y1="1" x2="348.64" y2="269.5" gradientTransform="translate(0 538) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#002d74"/>
+      <stop offset="1" stop-color="#002d74" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="c" x1="116.15" y1="538" x2="116.15" xlink:href="#b"/>
+  </defs>
+  <rect class="g" x="0" y="79.57" width="464.8" height="377.86" rx="136.9" ry="136.9"/>
+  <path class="f" d="M232.49,0L0,134.29V402.8l232.49,134.2,232.31-134.2V134.29L232.49,0Zm163.48,363.01l-163.48,94.42-163.57-94.42V173.99L232.49,79.57l163.48,94.42v189.02Z"/>
+  <path class="e" d="M232.49,537l232.31-134.2V134.29L232.49,0V79.66l163.48,94.42v189.02l-163.48,94.33v79.57Z"/>
+  <path class="d" d="M232.31,0L0,134.2V402.71l232.31,134.29v-79.66l-163.48-94.42V173.9L232.31,79.57V0Z"/>
+  <path class="f" d="M340.9,331.24l-108.51,62.65-108.6-62.65v-125.38l108.6-62.74,108.51,62.74-45.17,26.1-63.34-36.63-63.34,36.63v73.09l63.34,36.63,63.34-36.63,45.17,26.19Z"/>
+</svg>

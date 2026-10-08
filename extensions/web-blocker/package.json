@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension",
+  "name": "web-blocker",
+  "title": "Web Blocker",
+  "description": "Stay focused and block distracting websites instantly. Works in all browsers, blocks even open tabs, and can't be easily bypassed.",
+  "icon": "icon.png",
+  "author": "ahmad_bulbul",
+  "access": "public",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-website",
+      "title": "Add Website to Block",
+      "subtitle": "Web Blocker",
+      "description": "Add websites to your block list with optional scheduling and categorization",
+      "mode": "view",
+      "icon": "add_website_to_block.png"
+    },
+    {
+      "name": "streamlined-enable-blocking",
+      "title": "Enable Website Blocking",
+      "subtitle": "Web Blocker",
+      "description": "Activate blocking for all enabled websites with biometric authentication and instant effect",
+      "mode": "no-view",
+      "icon": "enable_website_blocking.png"
+    },
+    {
+      "name": "streamlined-disable-blocking",
+      "title": "Disable Website Blocking",
+      "subtitle": "Web Blocker",
+      "description": "Deactivate website blocking and restore access to all blocked sites",
+      "mode": "no-view",
+      "icon": "disable_website_blocking.png"
+    },
+    {
+      "name": "view-blocked-sites",
+      "title": "Manage Blocked Sites",
+      "subtitle": "Web Blocker",
+      "description": "View, organize, and manage your blocked websites with schedules and categories",
+      "mode": "view",
+      "icon": "manage_blocked_sites.png"
+    },
+    {
+      "name": "refresh-blocking",
+      "title": "Force Re-Block & Fix",
+      "subtitle": "Web Blocker",
+      "description": "Troubleshoot blocking issues by re-applying blocks, clearing DNS cache, and refreshing connections",
+      "mode": "no-view",
+      "icon": "force_reblock.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "2.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.4",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "1.0.1",
+  "scripts": {
+    "build": "ray build",
+    "clean": "rm -f *.js *.js.map *.d.ts *.d.ts.map && rm -rf lib/ dist/",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prebuild": "npm run clean",
+    "build:extension": "./build-extension.sh",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/test"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ]
+  },
+  "schemaVersion": 1
+}
