@@ -1,6 +1,6 @@
 # Hide Details Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-10-08
 
 - Redact sensitive details in clipboard images using on-device text and face detection.
 - Preview the redacted image and detections, copy from any row, or redact immediately with a hotkey.
