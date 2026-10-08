@@ -613,11 +613,19 @@ export async function fetchAttachments(folderPath: string, uid: number): Promise
   });
 }
 
-export async function archiveEmail(folderPath: string, uid: number): Promise<void> {
-  const folders = await listFolders();
-  const archiveFolder = folders.find(
+export function findArchiveFolder(folders: Folder[]): Folder | undefined {
+  return folders.find(
     (f) => f.specialUse === "\\Archive" || f.path.toLowerCase() === "archive" || f.name.toLowerCase() === "archive",
   );
+}
+
+// All Mail holds every email, so one that was archived or moved to Trash can still be in it
+export function holdsEverything(folderPath: string, folders: Folder[]): boolean {
+  return findSpecialFolder(folders, "\\All", "all mail")?.path === folderPath;
+}
+
+export async function archiveEmail(folderPath: string, uid: number): Promise<void> {
+  const archiveFolder = findArchiveFolder(await listFolders());
   if (!archiveFolder) {
     throw new Error("Archive folder not found");
   }

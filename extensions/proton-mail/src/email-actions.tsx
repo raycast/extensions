@@ -25,6 +25,8 @@ export type EmailUpdate = { uid: number; read: boolean } | { uid: number; remove
 export interface EmailContext {
   folder: string;
   deletesPermanently: boolean;
+  // Not from the Archive folder itself
+  canArchive: boolean;
   onUpdate: (update: EmailUpdate) => void;
 }
 
@@ -122,7 +124,7 @@ export function RespondActions({ email, folder }: { email: Email; folder: string
 
 // Mark as Read or Unread, Archive and Delete, for both the list and the expanded email
 export function ManageActions({ email, read, context }: { email: Email; read: boolean; context: EmailContext }) {
-  const { folder, deletesPermanently, onUpdate } = context;
+  const { folder, deletesPermanently, canArchive, onUpdate } = context;
 
   const toggleRead = async () => {
     try {
@@ -162,7 +164,9 @@ export function ManageActions({ email, read, context }: { email: Email; read: bo
         onAction={toggleRead}
         shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       />
-      <Action title="Archive" icon={Icon.Box} onAction={archive} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+      {canArchive && (
+        <Action title="Archive" icon={Icon.Box} onAction={archive} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+      )}
       <Action
         title={deletesPermanently ? "Delete Permanently" : "Move to Trash"}
         icon={Icon.Trash}

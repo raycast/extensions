@@ -11,7 +11,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { createDeeplink, useCachedPromise } from "@raycast/utils";
-import { bridgeErrorReason, deletesPermanently, fetchEmails, holdConnections } from "./imap-client";
+import {
+  bridgeErrorReason,
+  deletesPermanently,
+  fetchEmails,
+  findArchiveFolder,
+  holdConnections,
+  holdsEverything,
+} from "./imap-client";
 import { BackAction, childFolders, folderDisplayName, FolderListItem, useFolders } from "./folders";
 import { copyEmailAsMarkdown, EmailContext, EmailUpdate, ManageActions, RespondActions } from "./email-actions";
 import { EmailDetail, ExpandedEmailView } from "./email-view";
@@ -46,8 +53,10 @@ function usePreview(): [boolean, () => void] {
   return [shown, toggle];
 }
 
-function applyUpdate(emails: Email[], update: EmailUpdate): Email[] {
-  if ("removed" in update) return emails.filter((email) => email.uid !== update.uid);
+function applyUpdate(emails: Email[], update: EmailUpdate, filter: EmailFilter): Email[] {
+  // An email marked as read no longer belongs under the Unread filter, and the other way around
+  const leavesFilter = "read" in update && (filter === "unread" ? update.read : filter === "read" && !update.read);
+  if ("removed" in update || leavesFilter) return emails.filter((email) => email.uid !== update.uid);
   return emails.map((email) => (email.uid === update.uid ? withRead(email, update.read) : email));
 }
 
@@ -116,12 +125,18 @@ export function EmailList({ folder, initialFilter }: { folder: string; initialFi
     folder,
     quicklink,
     deletesPermanently: deletesPermanently(folder, folders || []),
-    // Show the change right away instead of reloading the pages loaded so far
-    onUpdate: (update) =>
+    canArchive: findArchiveFolder(folders || [])?.path !== folder,
+    onUpdate: (update) => {
+      if ("removed" in update && holdsEverything(folder, folders || [])) {
+        revalidate();
+        return;
+      }
+      // Show the change right away instead of reloading the pages loaded so far
       mutate(undefined, {
-        optimisticUpdate: (data) => applyUpdate(data ?? [], update),
+        optimisticUpdate: (data) => applyUpdate(data ?? [], update, filter),
         shouldRevalidateAfter: false,
-      }),
+      });
+    },
     showPreview,
     togglePreview,
     loadMore: pagination?.hasMore ? pagination.onLoadMore : undefined,

@@ -31,8 +31,14 @@ async function openBridge() {
   await open("https://proton.me/mail/bridge");
 }
 
-// "starting": Bridge answers again but still rejects the login, because it hasn't loaded the account yet
-export type BridgeScreen = BridgeErrorReason | "starting";
+// "waiting": Bridge answers but rejects the login. It does that while it loads the account after starting, so a
+// rejection only counts as wrong credentials once it has lasted ACCOUNT_LOAD_MS, even on the first try (Bridge may
+// have been started just before the command).
+export type BridgeScreen = "unreachable" | "waiting" | "authentication";
+
+function firstScreen(reason: BridgeErrorReason): BridgeScreen {
+  return reason === "authentication" ? "waiting" : reason;
+}
 
 // Raycast keeps the command open in the background, so an error screen would stay up after Bridge starts.
 // Check Bridge again every few seconds instead, and reload once it lets us in.
@@ -48,7 +54,7 @@ export function watchBridge(
   onScreen: (screen: BridgeScreen) => void,
   onReady: () => void,
 ): () => void {
-  let screen: BridgeScreen = reason;
+  let screen = firstScreen(reason);
   const show = (next: BridgeScreen) => {
     if (next === screen) return;
     screen = next;
@@ -72,7 +78,7 @@ export function watchBridge(
         show("authentication");
         return;
       }
-      if (screen === "unreachable") show("starting");
+      show("waiting");
     } else if (status === "unreachable") {
       rejectedSince = undefined;
       show("unreachable");
@@ -91,9 +97,9 @@ export function watchBridge(
 export function BridgeErrorView({ reason, onRetry }: { reason: BridgeErrorReason; onRetry: () => void }) {
   const [watched, setWatched] = useState<{ reason: BridgeErrorReason; screen: BridgeScreen }>({
     reason,
-    screen: reason,
+    screen: firstScreen(reason),
   });
-  const screen = watched.reason === reason ? watched.screen : reason;
+  const screen = watched.reason === reason ? watched.screen : firstScreen(reason);
 
   const onRetryRef = useRef(onRetry);
   useEffect(() => {
@@ -151,12 +157,12 @@ export function BridgeErrorView({ reason, onRetry }: { reason: BridgeErrorReason
     );
   }
 
-  if (screen === "starting") {
+  if (screen === "waiting") {
     return (
       <List.EmptyView
         icon={Icon.Clock}
-        title="Proton Mail Bridge Is Starting"
-        description="Bridge is loading your account."
+        title="Waiting for Proton Mail Bridge"
+        description="Bridge may still be loading your account. If this lasts, check the username and password."
         actions={
           <ActionPanel>
             {bridge}
