@@ -1,5 +1,9 @@
 # WordReference Dictionary Translation Changelog
 
+## [Fix Translations Not Loading] - {PR_MERGE_DATE}
+
+- Send an extension user agent instead of a browser one, because WordReference's bot check now blocks requests that claim to be a browser
+
 ## [Windows support and storage migration] - 2026-06-16
 
 - Add Windows support
