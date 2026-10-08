@@ -1,6 +1,6 @@
 # Simple Draw Changelog
 
-## [Box, Oval, and Arrow Tools] - {PR_MERGE_DATE}
+## [Box, Oval, and Arrow Tools] - 2026-10-08
 
 - Add Box and Oval tools with solid, dashed, and dotted line styles
 - Add an Arrow tool
