@@ -21,6 +21,7 @@ import {
   authorizeTeak,
   getStoredTeakAccessToken,
   reauthorizeTeak,
+  TeakDiscoveryError,
 } from "./oauth";
 import { getPreferences } from "./preferences";
 import type { RaycastCardType, RaycastSort } from "./searchFilters";
@@ -164,16 +165,21 @@ const resolveBearerToken = async (
     return { source: "apiKey", token: apiKey };
   }
 
-  if (options?.interactive === false) {
-    const storedToken = await getStoredTeakAccessToken();
-    if (!storedToken) {
+  try {
+    const accessToken =
+      options?.interactive === false
+        ? await getStoredTeakAccessToken()
+        : await authorizeTeak();
+    if (!accessToken) {
       throw new RaycastApiError("INVALID_API_KEY", 401);
     }
-    return { source: "oauth", token: storedToken };
+    return { source: "oauth", token: accessToken };
+  } catch (error) {
+    if (error instanceof TeakDiscoveryError) {
+      throw new RaycastApiError("NETWORK_ERROR");
+    }
+    throw error;
   }
-
-  const accessToken = await authorizeTeak();
-  return { source: "oauth", token: accessToken };
 };
 
 const executeHttpRequest = async (
@@ -255,7 +261,15 @@ export const request = async <T>(
     bearer.source === "oauth" &&
     options?.interactive !== false
   ) {
-    const refreshedToken = await reauthorizeTeak();
+    let refreshedToken: string;
+    try {
+      refreshedToken = await reauthorizeTeak();
+    } catch (error) {
+      if (error instanceof TeakDiscoveryError) {
+        throw new RaycastApiError("NETWORK_ERROR");
+      }
+      throw error;
+    }
     ({ requestUrl, response } = await executeHttpRequest(
       path,
       refreshedToken,
