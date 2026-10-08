@@ -42,9 +42,13 @@ function gradientContent(colors: Palette, width: number, height: number) {
   return `<defs>${horizontal}${vertical}</defs>${rect("h")}${rect("v")}`;
 }
 
-export function createGradientUri(colors: Palette, width: number, height: number): string | undefined {
+// Matches a 16:9 grid item with Raycast's default 5 columns, as in Control Groups and Set Scene.
+const GRADIENT_WIDTH = 271;
+const GRADIENT_HEIGHT = 153;
+
+export function createGradientUri(colors: Palette): string | undefined {
   if (colors.length === 0) return undefined;
-  return svgUri(width, height, gradientContent(colors, width, height), true);
+  return svgUri(GRADIENT_WIDTH, GRADIENT_HEIGHT, gradientContent(colors, GRADIENT_WIDTH, GRADIENT_HEIGHT), true);
 }
 
 // Assets don't change while a command runs, so each file is read once.

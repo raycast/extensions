@@ -9,10 +9,6 @@ import { getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
 
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 
-// Exact dimensions of a 16:9 Raycast 5 column grid item.
-const GRID_ITEM_WIDTH = 271;
-const GRID_ITEM_HEIGHT = 153;
-
 export default function SetSceneCommand() {
   return <SetScene useHue={useHue()} />;
 }
@@ -21,13 +17,7 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
   const { hueBridgeState, sendHueMessage, isLoading } = props.useHue;
   const { rooms, zones, scenes } = useHueResources();
   const gradientUris = useMemo(
-    () =>
-      new Map(
-        scenes.map((scene) => [
-          scene.id,
-          createGradientUri(getColorsFromScene(scene), GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT),
-        ]),
-      ),
+    () => new Map(scenes.map((scene) => [scene.id, createGradientUri(getColorsFromScene(scene))])),
     [scenes],
   );
   const { pop } = useNavigation();

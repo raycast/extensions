@@ -14,10 +14,6 @@ import { byName } from "./helpers/collections";
 import { applyUpdate, withTransition } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 
-// Exact dimensions of a 16:9 Raycast 5 column grid item.
-const GRID_ITEM_WIDTH = 271;
-const GRID_ITEM_HEIGHT = 153;
-
 export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
@@ -25,12 +21,7 @@ export default function ControlGroups() {
   const rateLimiter = useInputRateLimiter(1, 1000);
   const gradientUris = useMemo(
     () =>
-      new Map(
-        [...rooms, ...zones].map((group) => [
-          group.id,
-          createGradientUri(getColorsFromGroup(lights, group), GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT),
-        ]),
-      ),
+      new Map([...rooms, ...zones].map((group) => [group.id, createGradientUri(getColorsFromGroup(lights, group))])),
     [rooms, zones, lights],
   );
 
