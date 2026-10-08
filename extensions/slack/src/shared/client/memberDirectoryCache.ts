@@ -10,7 +10,6 @@ type Snapshot = { savedAt: number; members: SlackMember[] };
 
 const cache = new Cache({ capacity: 20 * 1024 * 1024 });
 const memory = new Map<string, Snapshot>();
-const inflight = new Map<string, Promise<SlackMember[]>>();
 
 /** Keeps only fields used for search and for building User rows; drops deleted users and bots. */
 export function slimMember(member: SlackMember): SlackMember | undefined {
@@ -68,40 +67,74 @@ function write(key: string, members: SlackMember[]) {
   }
 }
 
-/** Returns the cached member list (even if stale) without triggering a load. */
-export function peekMemberDirectory(token: string | undefined): SlackMember[] | undefined {
-  const snapshot = read(keyFor(token));
-  return snapshot && Date.now() - snapshot.savedAt < MAX_AGE_MS ? snapshot.members : undefined;
+type FetchPage = (cursor?: string) => Promise<{ items: SlackMember[]; nextCursor?: string }>;
+
+/** One in-progress scan of users.list. Pages become readable as they arrive; the scan outlives any single search. */
+type Load = { pages: SlackMember[][]; finished: boolean; error?: unknown; listeners: Set<() => void> };
+
+const loads = new Map<string, Load>();
+
+function startLoad(key: string, fetchPage: FetchPage): Load {
+  const load: Load = { pages: [], finished: false, listeners: new Set() };
+  const notify = () => {
+    const listeners = [...load.listeners];
+    load.listeners.clear();
+    listeners.forEach((listener) => listener());
+  };
+  loads.set(key, load);
+  void (async () => {
+    try {
+      let cursor: string | undefined;
+      do {
+        const page = await fetchPage(cursor);
+        load.pages.push(page.items.flatMap((member) => slimMember(member) ?? []));
+        notify();
+        cursor = page.nextCursor || undefined;
+      } while (cursor);
+      write(key, load.pages.flat());
+    } catch (error) {
+      load.error = error;
+    } finally {
+      load.finished = true;
+      loads.delete(key);
+      notify();
+    }
+  })();
+  return load;
 }
 
+async function readLoadPage(load: Load, index: number): Promise<MemberPage> {
+  for (;;) {
+    const items = load.pages[index];
+    if (items) return { items, hasMore: index + 1 < load.pages.length || !load.finished };
+    if (load.finished) {
+      // Pages already delivered stay usable if a later page fails; a failure before any page is a real error.
+      if (load.error && load.pages.length === 0) throw load.error;
+      return { items: [], hasMore: false };
+    }
+    await new Promise<void>((resolve) => load.listeners.add(resolve));
+  }
+}
+
+export type MemberPage = { items: SlackMember[]; hasMore: boolean };
+
 /**
- * Returns the workspace member list, scanning users.list at most once per hour (single-flight, shared by every
- * search). A stale snapshot is served immediately while a refresh runs in the background; if a refresh fails,
- * the stale snapshot keeps working.
+ * Returns page `index` of the workspace member list. users.list is scanned at most once per hour and the scan is
+ * shared by every search, so a search can read matches as pages arrive instead of waiting for the whole workspace.
+ * A stale snapshot is served immediately while a refresh runs in the background; if a refresh fails, the stale
+ * snapshot keeps working. Only a complete scan is cached.
  */
-export async function getMemberDirectory(
+export async function getMemberPage(
   token: string | undefined,
-  fetchAll: () => Promise<SlackMember[]>,
-): Promise<SlackMember[]> {
+  fetchPage: FetchPage,
+  index: number,
+): Promise<MemberPage> {
   const key = keyFor(token);
   const snapshot = read(key);
   const age = snapshot ? Date.now() - snapshot.savedAt : Infinity;
-  if (snapshot && age < FRESH_MS) return snapshot.members;
+  if (snapshot && age < FRESH_MS) return { items: index === 0 ? snapshot.members : [], hasMore: false };
 
-  let load = inflight.get(key);
-  if (!load) {
-    load = fetchAll()
-      .then((members) => {
-        write(key, members);
-        return members;
-      })
-      .finally(() => inflight.delete(key));
-    inflight.set(key, load);
-  }
-
-  if (snapshot && age < MAX_AGE_MS) {
-    load.catch(() => undefined);
-    return snapshot.members;
-  }
-  return load;
+  const load = loads.get(key) ?? startLoad(key, fetchPage);
+  if (snapshot && age < MAX_AGE_MS) return { items: index === 0 ? snapshot.members : [], hasMore: false };
+  return readLoadPage(load, index);
 }

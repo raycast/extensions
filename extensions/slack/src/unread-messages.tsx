@@ -10,6 +10,11 @@ import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
+// Storage writes run one after another across screen instances, so the newest selection is always written last
+// and a reopened configuration never races a write still in flight from the previous one.
+let storageQueue: Promise<void> = Promise.resolve();
+let saveCount = 0;
+
 function UnreadMessages() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
@@ -215,11 +220,14 @@ type ConfigurationProps = {
 
 function Configuration({ data, refreshConversations }: ConfigurationProps) {
   const { pop } = useNavigation();
+  // Leave only after pending writes finish, so reopening configuration reads the latest selection
+  const done = async () => {
+    await storageQueue;
+    pop();
+  };
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
   // The latest selection, so toggles made before a re-render build on each other
   const latestSelection = useRef<string[]>([]);
-  // Saves run one after another, so the newest selection is always the last one written
-  const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
@@ -249,11 +257,15 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
     if (updatedSelectedConversations) {
       latestSelection.current = updatedSelectedConversations;
       setSelectedConversations(updatedSelectedConversations);
-      // Store the selection before refreshing, which reads it back from storage
+      // Store the selection before refreshing, which reads it back from storage. The Slack refresh is not part of
+      // the queue, so slow requests never delay later writes, and only the newest save triggers one.
       const selection = JSON.stringify(updatedSelectedConversations);
-      saveQueue.current = saveQueue.current
+      const saveId = ++saveCount;
+      storageQueue = storageQueue
         .then(() => LocalStorage.setItem(conversationsStorageKey, selection))
-        .then(() => refreshConversations())
+        .then(() => {
+          if (saveId === saveCount) return refreshConversations();
+        })
         .catch(async (error) => {
           await handleError(error, "Could not save the selected conversations");
         });
@@ -284,7 +296,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(conversationId)}
                   />
-                  <Action icon={Icon.Check} title="Done" onAction={pop} />
+                  <Action icon={Icon.Check} title="Done" onAction={done} />
                 </ActionPanel>
               }
             />
@@ -309,7 +321,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                       onAction={() => toggleConversation(id)}
                     />
-                    <Action icon={Icon.Check} title="Done" onAction={pop} />
+                    <Action icon={Icon.Check} title="Done" onAction={done} />
                   </ActionPanel>
                 }
               />
