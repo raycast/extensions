@@ -50,6 +50,15 @@ describe("ChatStore", () => {
     expect(chat?.messages).toEqual([{ role: "user", content: "Hi", createdAt: "" }]);
   });
 
+  it("keeps a waiting message as a draft, and ignores an empty one", async () => {
+    const store = new ChatStore(directory);
+    const chat = { ...store.create(""), draft: "Send this later" };
+    await store.save(chat);
+    expect((await store.get(chat.id))?.draft).toBe("Send this later");
+    await store.save({ ...chat, draft: "  " });
+    expect(await store.get(chat.id)).not.toHaveProperty("draft");
+  });
+
   it("only accepts the ids it creates, so an id cannot point outside the folder", async () => {
     const store = new ChatStore(directory);
     expect(await store.get("../secrets")).toBeUndefined();

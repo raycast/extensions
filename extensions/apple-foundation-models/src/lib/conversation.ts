@@ -3,7 +3,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Chat } from "./chats";
 import { FmError } from "./errors";
-import { countTokens, MAX_PROMPT_TOKENS, respond, RunOptions } from "./fm";
+import { countTranscriptTokens, MAX_PROMPT_TOKENS, respond, RunOptions } from "./fm";
 import { fitHistory } from "./history";
 import { buildTranscript, ChatMessage } from "./transcript";
 
@@ -31,13 +31,16 @@ export async function sendChatMessage(
   const writeTranscript = (history: ChatMessage[]) =>
     writeFile(transcriptPath, JSON.stringify(buildTranscript(chat.instructions, history)), "utf8");
 
+  // Counted with the new message as the last entry, which gives the same count as sending it after the history.
+  const newMessage: ChatMessage = { role: "user", content: prompt, createdAt: new Date().toISOString() };
+
   try {
     const fitted = await fitHistory(
       chat.messages,
       MAX_PROMPT_TOKENS,
       async (history) => {
-        await writeTranscript(history);
-        return countTokens(prompt, { transcriptPath, signal: runOptions.signal });
+        await writeTranscript([...history, newMessage]);
+        return countTranscriptTokens(transcriptPath, { signal: runOptions.signal });
       },
       runOptions.signal,
     );

@@ -52,9 +52,20 @@ export function ChatView({
   // Refs hold the latest values for code that runs after an answer arrives, so it never works on an old copy.
   const chatRef = useRef<Chat>(undefined);
   const queuedRef = useRef<string>(undefined);
-  // True from sending a message until its turn is saved, so a new message waits instead of racing it.
+  // True while a message is answered, so a new message waits instead of racing it.
   const busy = useRef(false);
   const stoppedByUser = useRef(false);
+  const isMounted = useRef(true);
+  // Chat files are written one after another in the order the changes were made, so an older copy never
+  // overwrites a newer one and a delete always comes after the saves before it.
+  const writes = useRef<Promise<void>>(Promise.resolve());
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const updateChat = (next: Chat | undefined) => {
     chatRef.current = next;
@@ -65,6 +76,28 @@ export function ChatView({
     setQueuedQuestion(next);
   };
 
+  function queueWrite(write: () => Promise<void>): Promise<void> {
+    const done = writes.current.then(write);
+    writes.current = done.catch(() => undefined);
+    return done;
+  }
+
+  /** Writes a copy of the chat to disk. The caller has already shown it, so later changes build on it. */
+  async function saveChat(next: Chat): Promise<boolean> {
+    try {
+      await queueWrite(() => store.save(next));
+      onChange?.();
+      return true;
+    } catch (caught) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not save the chat",
+        message: caught instanceof Error ? caught.message : String(caught),
+      });
+      return false;
+    }
+  }
+
   const didLoad = useRef(false);
   useEffect(() => {
     // Load once, also when React runs effects twice in development, so the first question is sent once.
@@ -72,7 +105,9 @@ export function ChatView({
     didLoad.current = true;
     (async () => {
       const saved = chatId ? await store.get(chatId) : undefined;
-      updateChat(saved ?? store.create(getDefaultInstructions()));
+      if (saved?.draft) setInput(saved.draft);
+      // The draft stays in the file until the next save, so it is not lost if the chat closes again first.
+      updateChat(saved ? { ...saved, draft: undefined } : store.create(getDefaultInstructions()));
       if (initialQuestion?.trim()) send(initialQuestion.trim());
     })();
   }, [chatId]);
@@ -81,63 +116,74 @@ export function ChatView({
     const started = chatRef.current;
     if (!started || !question || busy.current) return;
     busy.current = true;
-    setPendingQuestion(question);
-    setSelectedId("pending");
-    const result = { tokens: 0, dropped: 0 };
-    let partial = "";
-    const answer = await run(async (runOptions) => {
-      try {
-        const turn = await sendChatMessage(started, question, getWorkDirectory(), {
-          ...runOptions,
-          onText: (value) => {
-            partial = value;
-            runOptions.onText?.(value);
-          },
-        });
-        result.tokens = turn.promptTokens;
-        result.dropped = turn.droppedMessages;
-        return turn.answer;
-      } catch (caught) {
-        // Keep what was written before Stop, so it stays in the chat and the next message can refer to it.
-        if (caught instanceof FmError && caught.kind === "cancelled" && partial.trim()) return partial.trim();
-        throw caught;
+    let answer: string | undefined;
+    let userStopped = false;
+    try {
+      setPendingQuestion(question);
+      setSelectedId("pending");
+      const result = { tokens: 0, dropped: 0 };
+      let partial = "";
+      answer = await run(async (runOptions) => {
+        try {
+          const turn = await sendChatMessage(started, question, getWorkDirectory(), {
+            ...runOptions,
+            onText: (value) => {
+              partial = value;
+              runOptions.onText?.(value);
+            },
+          });
+          result.tokens = turn.promptTokens;
+          result.dropped = turn.droppedMessages;
+          return turn.answer;
+        } catch (caught) {
+          // Keep what was written before Stop, so it stays in the chat and the next message can refer to it.
+          if (caught instanceof FmError && caught.kind === "cancelled" && partial.trim()) return partial.trim();
+          throw caught;
+        }
+      });
+      userStopped = stoppedByUser.current;
+
+      const latest = chatRef.current;
+      // When the chat was deleted or replaced by a new one meanwhile, the answer belongs to neither.
+      if (latest && latest.id === started.id && answer !== undefined) {
+        const now = new Date().toISOString();
+        const updated: Chat = {
+          ...latest,
+          title: latest.messages.length === 0 ? chatTitle(question) : latest.title,
+          updatedAt: now,
+          messages: [
+            ...latest.messages,
+            { role: "user", content: question, createdAt: now },
+            { role: "assistant", content: answer, createdAt: now },
+          ],
+        };
+        updateChat(updated);
+        saveChat(updated);
+        setPendingQuestion(undefined);
+        setSelectedId(toTurns(updated.messages)[0]?.id);
+        setUsage(result.tokens > 0 ? result : undefined);
       }
-    });
-    const userStopped = stoppedByUser.current;
-    stoppedByUser.current = false;
-
-    const latest = chatRef.current;
-    // When the chat was deleted or replaced by a new one meanwhile, the answer belongs to neither.
-    if (latest && latest.id === started.id && answer !== undefined) {
-      const now = new Date().toISOString();
-      const updated: Chat = {
-        ...latest,
-        title: latest.messages.length === 0 ? chatTitle(question) : latest.title,
-        updatedAt: now,
-        messages: [
-          ...latest.messages,
-          { role: "user", content: question, createdAt: now },
-          { role: "assistant", content: answer, createdAt: now },
-        ],
-      };
-      await store.save(updated);
-      onChange?.();
-      updateChat(updated);
-      setPendingQuestion(undefined);
-      setSelectedId(toTurns(updated.messages)[0]?.id);
-      setUsage(result.tokens > 0 ? result : undefined);
+    } finally {
+      busy.current = false;
+      stoppedByUser.current = false;
     }
-    busy.current = false;
+    handleQueued(answer !== undefined && !userStopped);
+  }
 
+  /** Sends the waiting message after an answer, or keeps it when it should not be sent now. */
+  function handleQueued(canSend: boolean) {
     const queued = queuedRef.current;
     if (!queued) return;
     updateQueued(undefined);
-    if (answer === undefined || userStopped) {
-      // After Stop or an error, give the waiting message back instead of sending it.
-      setInput((current) => current || queued);
-    } else {
-      send(queued);
+    if (!isMounted.current) {
+      // The chat was closed: keep the message as a draft that is put back when the chat opens again.
+      const latest = chatRef.current;
+      if (latest && latest.messages.length > 0) saveChat({ ...latest, draft: queued });
+      return;
     }
+    if (canSend) send(queued);
+    // After Stop or an error, give the waiting message back instead of sending it.
+    else setInput((current) => current || queued);
   }
 
   function submitInput() {
@@ -175,8 +221,18 @@ export function ChatView({
     });
     if (!confirmed) return;
     stop();
+    updateQueued(undefined);
     updateChat(undefined);
-    await store.delete(current.id);
+    try {
+      await queueWrite(() => store.delete(current.id));
+    } catch (caught) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not delete the chat",
+        message: caught instanceof Error ? caught.message : String(caught),
+      });
+      return;
+    }
     onChange?.();
     await showToast({ style: Toast.Style.Success, title: "Chat deleted" });
     pop();
@@ -191,15 +247,13 @@ export function ChatView({
     updateChat(store.create(getDefaultInstructions()));
   }
 
-  async function saveInstructions(instructions: string) {
+  async function saveInstructions(instructions: string): Promise<boolean> {
     const current = chatRef.current;
-    if (!current) return;
+    if (!current) return false;
     const updated = { ...current, instructions };
-    if (updated.messages.length > 0) {
-      await store.save(updated);
-      onChange?.();
-    }
     updateChat(updated);
+    // A chat without messages is saved with its first answer.
+    return updated.messages.length > 0 ? saveChat(updated) : true;
   }
 
   const turns = chat ? toTurns(chat.messages) : [];
@@ -354,7 +408,7 @@ function InstructionsForm({
   onSave,
 }: {
   instructions: string;
-  onSave: (value: string) => Promise<void>;
+  onSave: (value: string) => Promise<boolean>;
 }) {
   const { pop } = useNavigation();
   return (
@@ -365,8 +419,10 @@ function InstructionsForm({
           <Action.SubmitForm
             title="Save Instructions"
             onSubmit={async (values: { instructions: string }) => {
-              await onSave(values.instructions.trim());
-              await showToast({ style: Toast.Style.Success, title: "Instructions saved" });
+              // A failed save shows its own error toast.
+              if (await onSave(values.instructions.trim())) {
+                await showToast({ style: Toast.Style.Success, title: "Instructions saved" });
+              }
               pop();
             }}
           />

@@ -90,6 +90,7 @@ export default function Command() {
               .slice(0, 80)}
             icon={Icon.SpeechBubble}
             accessories={[
+              ...(chat.draft ? [{ tag: "Draft", tooltip: `Not sent yet: ${chat.draft}` }] : []),
               { text: `${chat.messages.length} messages` },
               { date: new Date(chat.updatedAt), tooltip: `Last message: ${new Date(chat.updatedAt).toLocaleString()}` },
             ]}

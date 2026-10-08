@@ -36,7 +36,7 @@ Results can be copied or pasted into the frontmost app. Pasting right after a te
 - The on-device model is small (about 3 billion parameters). It is good at summaries, rewriting, extraction and short answers. Check facts, math and code yourself.
 - It can see about 8,000 tokens at a time. Long chats keep working: the oldest messages are left out first, and the chat shows how much of the context was used. Selected text that is too long is rejected before it is sent.
 - Each answer runs one short `fm respond` process that ends when the answer is done. **Stop** (⌃C in Chat) or closing the command ends it right away. Nothing keeps running in the background.
-- In Chat you can type your next message while an answer is still being written. It is sent when the answer is done. A stopped answer stays in the chat, so you can ask about it.
+- In Chat you can type your next message while an answer is still being written. It is sent when the answer is done. If you close the chat first, the message is kept as a draft for the next time you open it. A stopped answer stays in the chat, so you can ask about it.
 - The first time Describe Image reads the Finder selection, macOS asks whether Raycast may control Finder. Allow it to use images selected in Finder. Clipboard images and files work without it.
 - Chats are stored as JSON files in the extension's support folder. Image data from the clipboard is saved to a temporary file only when you ask about it. The file is removed when you close the answer. A file left behind, for example when Raycast quits during an answer, is removed after an hour, the next time Describe Image or Chat opens.
 

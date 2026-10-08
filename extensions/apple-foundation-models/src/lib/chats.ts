@@ -10,6 +10,8 @@ export interface Chat {
   createdAt: string;
   updatedAt: string;
   messages: ChatMessage[];
+  /** A message that was waiting to be sent when the chat closed. It is put back in the input when the chat opens. */
+  draft?: string;
 }
 
 const TITLE_LENGTH = 60;
@@ -47,6 +49,7 @@ export function toChat(id: string, value: unknown): Chat | undefined {
     createdAt: typeof data.createdAt === "string" ? data.createdAt : fallbackDate,
     updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : fallbackDate,
     messages,
+    ...(typeof data.draft === "string" && data.draft.trim() ? { draft: data.draft } : {}),
   };
 }
 

@@ -175,28 +175,33 @@ export function parseTokenCount(output: string): number {
   return count;
 }
 
-/** Counts the tokens of a prompt (sent on stdin), optionally on top of instructions or a saved transcript. */
-export async function countTokens(
-  text: string,
-  {
-    instructions,
-    transcriptPath,
+async function runCountTokens(args: string[], input: string | undefined, signal?: AbortSignal): Promise<number> {
+  const { stdout, stderr, exitCode } = await runFm(["count-tokens", "--quiet", ...args], {
+    timeoutMs: 30_000,
+    input,
     signal,
-  }: { instructions?: string; transcriptPath?: string; signal?: AbortSignal } = {},
-): Promise<number> {
-  const args = ["count-tokens", "--quiet"];
-  if (instructions?.trim()) args.push(`--instructions=${cleanText(instructions.trim())}`);
-  let input: string | undefined = cleanText(text);
-  if (transcriptPath) {
-    // With --transcript, count-tokens ignores stdin, so the prompt (a short chat message) goes on the command line.
-    args.push(`--transcript=${transcriptPath}`, "--", input);
-    input = undefined;
-  }
-  const { stdout, stderr, exitCode } = await runFm(args, { timeoutMs: 30_000, input, signal });
+  });
   if (exitCode !== 0) {
     throw toFmError(stderr, exitCode);
   }
   return parseTokenCount(stdout);
+}
+
+/** Counts the tokens of a text (sent on stdin), optionally together with instructions. */
+export function countTokens(
+  text: string,
+  { instructions, signal }: { instructions?: string; signal?: AbortSignal } = {},
+): Promise<number> {
+  const args = instructions?.trim() ? [`--instructions=${cleanText(instructions.trim())}`] : [];
+  return runCountTokens(args, cleanText(text), signal);
+}
+
+/**
+ * Counts the tokens of a whole transcript file. A chat puts its new message in the transcript as the last
+ * entry, so the message is never on the command line: count-tokens ignores stdin when given a transcript.
+ */
+export function countTranscriptTokens(transcriptPath: string, { signal }: { signal?: AbortSignal } = {}) {
+  return runCountTokens([`--transcript=${transcriptPath}`], undefined, signal);
 }
 
 export type ModelStatus = { available: true } | { available: false; message: string };

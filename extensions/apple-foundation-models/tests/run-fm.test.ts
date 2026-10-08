@@ -7,6 +7,7 @@ import { afterAll, afterEach, describe, expect, it } from "vitest";
 const directory = mkdtempSync(join(tmpdir(), "afm-stub-"));
 const stub = join(directory, "fm");
 const pidFile = join(directory, "pid");
+const argsFile = join(directory, "args");
 writeFileSync(
   stub,
   `#!/bin/sh
@@ -14,12 +15,14 @@ case "$FM_STUB_MODE" in
   echo) printf 'args:%s|' "$*"; cat ;;
   license) printf '\\033[31mError:\\033[0m You must accept the license first.\\n' >&2; exit 69 ;;
   hang) trap '' TERM; echo $$ > "${pidFile}"; while :; do sleep 0.2; done ;;
+  chat) printf '%s\n' "$*" >> "${argsFile}"; if [ "$1" = count-tokens ]; then cat > /dev/null; echo 42; else cat; fi ;;
 esac
 `,
 );
 chmodSync(stub, 0o755);
 process.env.AFM_FM_PATH = stub;
 const { respond, runFm } = await import("../src/lib/fm");
+const { sendChatMessage } = await import("../src/lib/conversation");
 
 const isRunning = (pid: number) => {
   try {
@@ -80,6 +83,28 @@ describe("runFm", () => {
     await expect(request).rejects.toMatchObject({ kind: "cancelled" });
     expect(isRunning(Number(readFileSync(pidFile, "utf8")))).toBe(false);
   }, 10_000);
+
+  it("never puts chat text in the process arguments, where other programs could read it", async () => {
+    process.env.FM_STUB_MODE = "chat";
+    rmSync(argsFile, { force: true });
+    const secret = "my bank PIN hint is the cat's birthday";
+    const chat = {
+      id: "6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b",
+      instructions: "Be brief.",
+      messages: [
+        { role: "user" as const, content: `First ${secret}`, createdAt: "" },
+        { role: "assistant" as const, content: "Noted.", createdAt: "" },
+      ],
+    };
+    const turn = await sendChatMessage(chat, `Then ${secret}`, join(directory, "work"));
+    // The stub answers with what it got on stdin, so the new message arrived there.
+    expect(turn.answer).toBe(`Then ${secret}`);
+    expect(turn.promptTokens).toBe(42);
+    const args = readFileSync(argsFile, "utf8");
+    expect(args).toContain("count-tokens --quiet --transcript=");
+    expect(args).toContain("respond --stream --resume=");
+    expect(args).not.toContain(secret);
+  });
 
   it("does not start fm when the request was already cancelled", async () => {
     const controller = new AbortController();
