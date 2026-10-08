@@ -47,6 +47,8 @@ function follow() {
   update({ progress: BACKGROUND });
   if (following) return;
   following = setInterval(async () => {
+    // A build started here in the meantime owns the state now; don't overwrite it with a checkpoint.
+    if (building) return;
     const stillIndexing = await isIndexing();
     const latest = await readIndex();
     if (latest) update({ index: latest });
@@ -67,6 +69,8 @@ onSignedOut(() => {
 export async function refreshIndex(silent: boolean): Promise<void> {
   if (building) return;
   if (await isIndexing()) return follow();
+  // A background build may have just finished: stop following it before starting ours.
+  stopFollowing();
   building = true;
   const toast = silent ? undefined : await showToast({ style: Toast.Style.Animated, title: "Indexing Proton Drive…" });
   try {
