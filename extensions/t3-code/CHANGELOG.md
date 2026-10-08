@@ -1,6 +1,6 @@
 # T3 Code Changelog
 
-## [Protocol v2 support] - {PR_MERGE_DATE}
+## [Protocol v2 support] - 2026-10-08
 
 - Waiting T3 Threads and Search T3 Threads work with T3 Code servers on orchestration protocol v2 as well as v1.
 - The T3 Code app name is detected from the running server, so both the stable (T3 Code (Alpha)) and Nightly builds open and focus correctly. The `App Name` preference is now an optional override.
