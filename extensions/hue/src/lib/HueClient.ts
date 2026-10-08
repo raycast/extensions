@@ -20,6 +20,11 @@ import { logError } from "../helpers/errors";
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
+export const authHeaders = (username: string) => ({
+  "hue-application-key": username,
+  [sensitiveHeaders]: ["hue-application-key"],
+});
+
 export default class HueClient {
   private readonly lightsQueue = new RateLimitedQueue(10);
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
@@ -74,8 +79,7 @@ export default class HueClient {
       const stream = this.http2Session.request({
         [HTTP2_HEADER_METHOD]: method,
         [HTTP2_HEADER_PATH]: path,
-        "hue-application-key": this.bridgeConfig.username,
-        [sensitiveHeaders]: ["hue-application-key"],
+        ...authHeaders(this.bridgeConfig.username),
       });
 
       let data = "";
@@ -137,8 +141,7 @@ export default class HueClient {
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/eventstream/clip/v2",
       [HTTP2_HEADER_ACCEPT]: "text/event-stream",
-      "hue-application-key": this.bridgeConfig.username,
-      [sensitiveHeaders]: ["hue-application-key"],
+      ...authHeaders(this.bridgeConfig.username),
     });
 
     let buffer = "";

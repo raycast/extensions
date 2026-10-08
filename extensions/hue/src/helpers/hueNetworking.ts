@@ -109,7 +109,7 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
       },
       (response) => {
         if (response.statusCode !== 200) {
-          return reject(new Error(`Unexpected status code from Hue Bridge: ${response.statusCode}`));
+          return reject(new Error(`Status ${response.statusCode} from Hue Bridge`));
         }
 
         response.on("data", (data) => {

@@ -1,8 +1,8 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { ClientHttp2Session, connect, sensitiveHeaders } from "http2";
+import { ClientHttp2Session, connect } from "http2";
 import { BridgeConfig } from "./types";
 import dns from "dns";
-import HueClient from "./HueClient";
+import HueClient, { authHeaders } from "./HueClient";
 import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
 import { BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
@@ -52,15 +52,14 @@ export default async function createHueClient(bridgeConfig: BridgeConfig) {
       const stream = session.request({
         ":method": "GET",
         ":path": "/clip/v2/resource/bridge",
-        "hue-application-key": bridgeConfig.username,
-        [sensitiveHeaders]: ["hue-application-key"],
+        ...authHeaders(bridgeConfig.username),
       });
 
       stream.on("response", (response) => {
         if (response[":status"] === 403) {
           return reject(new Error("Please check your username."));
         } else if (response[":status"] !== 200) {
-          return reject(new Error("Status code: " + response[":status"]));
+          return reject(new Error(`Status ${response[":status"]}`));
         }
         return resolve(session);
       });
