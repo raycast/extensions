@@ -134,11 +134,11 @@ export default function GenerateCommand() {
     if (isValidTypedDomain) {
       return cleanedTypedDomain;
     }
-    if (!isTyping && clipboardDomain) {
+    if (clipboardDomain) {
       return clipboardDomain;
     }
     return "acme.com";
-  }, [isValidTypedDomain, cleanedTypedDomain, isTyping, clipboardDomain]);
+  }, [isValidTypedDomain, cleanedTypedDomain, clipboardDomain]);
 
   // Extract unique categories
   const categories = useMemo(() => {
