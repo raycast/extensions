@@ -45,6 +45,7 @@ function EditServer({
 
   async function handleSave(values: ServerFormInput) {
     await updateServer(server.id, values);
+    await refreshMenuBar();
     await showToast({ style: Toast.Style.Success, title: "Drive updated" });
     onSaved();
     pop();
@@ -108,6 +109,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     if (!confirmed) return;
 
     await removeServer(server.id);
+    await refreshMenuBar();
     // Selection is controlled, so a selectedItemId left pointing at the removed
     // row selects nothing and takes the action panel with it. Hand selection
     // back to Raycast instead.
@@ -374,14 +376,9 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                       onAction={() =>
                         push(
-                          <BrowseHostShares
-                            server={server}
-                            mounted={mounted}
-                            volumes={volumes}
-                            onMountRequested={pollUntilMounted}
-                            onChanged={refreshMounted}
-                            onServerAdded={load}
-                          />,
+                          <BrowseHostShares server={server} onChanged={refreshMounted} onServerAdded={load} />,
+                          // Insurance for whatever the pushed view changed.
+                          refreshMounted,
                         )
                       }
                     />
@@ -439,12 +436,10 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                 push(
                   <BrowseHostShares
                     server={{ id: host, host, protocol: "smb" }}
-                    mounted={mounted}
-                    volumes={volumes}
-                    onMountRequested={pollUntilMounted}
                     onChanged={refreshMounted}
                     onServerAdded={load}
                   />,
+                  refreshMounted,
                 )
               }
             />
@@ -478,12 +473,10 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
                 push(
                   <BrowseHostShares
                     server={{ id: c.host, host: c.host, protocol: "smb" }}
-                    mounted={mounted}
-                    volumes={volumes}
-                    onMountRequested={pollUntilMounted}
                     onChanged={refreshMounted}
                     onServerAdded={load}
                   />,
+                  refreshMounted,
                 )
               }
             />

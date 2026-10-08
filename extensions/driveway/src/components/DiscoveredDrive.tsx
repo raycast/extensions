@@ -230,6 +230,7 @@ function DiscoveredDriveActions(props: {
       await showToast({ title: "Drive already added", message: error.message });
       return;
     }
+    await refreshMenuBar();
     await showToast({ style: Toast.Style.Success, title: "Saved to Drives", message: props.vol });
     props.onServerAdded();
   }

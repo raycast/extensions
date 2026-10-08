@@ -144,12 +144,10 @@ export default function Command() {
                 push(
                   <BrowseHostShares
                     server={{ id: host, host, protocol: "smb" }}
-                    mounted={mounted}
-                    volumes={volumes}
-                    onMountRequested={pollUntilMounted}
                     onChanged={refreshMounted}
                     onServerAdded={load}
                   />,
+                  refreshMounted,
                 )
               }
             />
@@ -183,12 +181,10 @@ export default function Command() {
                 push(
                   <BrowseHostShares
                     server={{ id: c.host, host: c.host, protocol: "smb" }}
-                    mounted={mounted}
-                    volumes={volumes}
-                    onMountRequested={pollUntilMounted}
                     onChanged={refreshMounted}
                     onServerAdded={load}
                   />,
+                  refreshMounted,
                 )
               }
             />

@@ -1,28 +1,42 @@
 import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { listShares } from "../lib/smb-shares";
-import { VolumeUsage } from "../lib/disk-usage";
 import { sameHost } from "../lib/share";
 import type { ServerEntry } from "../lib/share";
-import type { MountLocation } from "../lib/mount";
 import { unmountShare } from "../lib/mount";
+import { useMountStatus } from "../hooks/useMountStatus";
 import { errorText } from "../lib/errors";
 import { refreshMenuBar } from "../lib/menu-bar-cache";
 import { DiscoveredDriveItem } from "./DiscoveredDrive";
 
 // One-time credentials to browse any saved host's shares. Held in state only.
-export function BrowseHostShares(props: {
-  server: ServerEntry;
-  mounted: MountLocation[];
-  volumes: VolumeUsage[];
-  onMountRequested: (entry: { host: string; path?: string }) => Promise<MountLocation | undefined>;
-  onChanged: () => void;
-  onServerAdded: () => void;
-}) {
+export function BrowseHostShares(props: { server: ServerEntry; onChanged: () => void; onServerAdded: () => void }) {
   const [credentials, setCredentials] = useState<{ user: string; password: string } | null>(null);
   const [shares, setShares] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Mount status is read here rather than handed down. push() takes an element,
+  // so whatever the caller passed is frozen at that moment: mounting a share
+  // from this view updated the caller's state, and this view went on showing
+  // the drive as disconnected, with no Unmount action, no usage and a grey icon.
+  const { mounted, volumes, refreshMounted, pollUntilMounted } = useMountStatus();
+
+  useEffect(() => {
+    refreshMounted();
+  }, []);
+
+  // Both halves matter: this view redraws, and the caller behind it re-reads,
+  // so popping back doesn't land on a stale list.
+  async function handleChanged() {
+    await refreshMounted();
+    props.onChanged();
+  }
+
+  async function handleMountRequested(entry: { host: string; path?: string }) {
+    const match = await pollUntilMounted(entry);
+    props.onChanged();
+    return match;
+  }
 
   useEffect(() => {
     if (!credentials) return;
@@ -48,12 +62,12 @@ export function BrowseHostShares(props: {
   }, [credentials]);
 
   async function unmountAllOnHost() {
-    const hostMounted = props.mounted.filter((m) => sameHost(m.host, props.server.host));
+    const hostMounted = mounted.filter((m) => sameHost(m.host, props.server.host));
     if (!hostMounted.length) return;
     await Promise.all(
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
     );
-    props.onChanged();
+    await handleChanged();
     await refreshMenuBar();
   }
 
@@ -108,10 +122,10 @@ export function BrowseHostShares(props: {
           key={vol}
           vol={vol}
           host={props.server.host}
-          volumes={props.volumes}
-          mounted={props.mounted}
-          onChanged={props.onChanged}
-          onMountRequested={props.onMountRequested}
+          volumes={volumes}
+          mounted={mounted}
+          onChanged={handleChanged}
+          onMountRequested={handleMountRequested}
           onUnmountAll={unmountAllOnHost}
           onServerAdded={props.onServerAdded}
         />

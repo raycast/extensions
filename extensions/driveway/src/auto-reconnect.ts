@@ -4,6 +4,7 @@ import { connectShare, findMountedShare, listMountedShares } from "./lib/mount";
 import { getServers } from "./lib/storage";
 import { dueToRun, markRun } from "./lib/throttle";
 import { mountsInFlight } from "./lib/in-flight";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 
 const LAST_RUN_KEY = "auto-reconnect-last-run";
 
@@ -52,6 +53,10 @@ export default async function command() {
       failed++;
     }
   }
+
+  // Scheduled runs are silent, but the menu bar should still show what they
+  // connected rather than waiting for its own tick.
+  if (reconnected > 0) await refreshMenuBar();
 
   if (isManual) {
     const failedMessage = failed ? `${failed} unreachable or need a fresh password` : undefined;

@@ -140,7 +140,7 @@ export function ServerForm({ initialValues, submitTitle, onSave, onDuplicate }: 
           title="Username (optional)"
           placeholder="e.g. jane"
           defaultValue={initialValues?.user}
-          info="Set this so macOS mounts as the same account every time. It's what lets Keychain match a saved password instead of prompting again."
+          info="The account on the server. Leave it empty to let macOS use your Mac account name, the way Finder does. Setting it keeps every mount, and the Keychain password that matches it, tied to one account. A name the server doesn't know can still appear to connect while another share on that host is mounted, because macOS reuses that connection, and will start asking for a password once it isn't."
         />
       ) : (
         <Form.Description text="WebDAV doesn't use a username. Keychain matches by server, and any password or certificate prompt happens right here when you connect." />

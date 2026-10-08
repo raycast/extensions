@@ -2,10 +2,12 @@ import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ServerForm, ServerFormInput } from "./components/ServerForm";
 import { addServer } from "./lib/storage";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 
 export default function Command() {
   async function handleSave(values: ServerFormInput) {
     await addServer(values);
+    await refreshMenuBar();
     await showToast({
       style: Toast.Style.Success,
       title: "Drive added",
