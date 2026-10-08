@@ -1,0 +1,12 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6.5" fill="#131010"/>
+  <text
+    x="16"
+    y="20.5"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="11.8"
+    font-weight="900"
+    letter-spacing="-0.35"
+    fill="#F8F7F7">ABC</text>
+</svg>
