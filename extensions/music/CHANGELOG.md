@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Fix Add to Playlist] - {PR_MERGE_DATE}
+
+- Fixed adding a song that is not in your library yet to a playlist.
+
 ## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.
