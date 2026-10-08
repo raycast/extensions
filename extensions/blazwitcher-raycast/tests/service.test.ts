@@ -47,6 +47,38 @@ test("部分来源失败保留其余结果，权限归属为 Raycast", async () 
   assert.deepEqual(page.results[0].titleRanges, [[8, 9]]);
 });
 
+test("多配置书签部分失败时，警告只带一次配置名并保留可用书签", async () => {
+  const workProfile = { ...profile, id: "Profile 1", name: "工作" };
+  const service = new BrowserService(() => {}, {
+    ...readers,
+    discoverProfiles: async () => ({
+      profiles: [profile, workProfile],
+      defaultId: profile.id,
+    }),
+    readBookmarks: async (selected) => ({
+      entries: [
+        {
+          ...tab,
+          id: `bookmark:${selected.id}`,
+          source: "bookmark",
+          profile: selected,
+        },
+      ],
+      warnings: ["AccountBookmarks 读取失败"],
+    }),
+  });
+  await service.configure(
+    { ...defaultBrowserOptions, scope: "bookmark" },
+    "all",
+  );
+  const state = service.snapshot();
+  assert.deepEqual(state.states.bookmark.warnings, [
+    "默认：AccountBookmarks 读取失败",
+    "工作：AccountBookmarks 读取失败",
+  ]);
+  assert.equal(state.states.bookmark.count, 2);
+});
+
 test("新查询、数据刷新和取消之后不能打开旧结果", async () => {
   const service = new BrowserService(() => {}, readers);
   await service.configure(defaultBrowserOptions);

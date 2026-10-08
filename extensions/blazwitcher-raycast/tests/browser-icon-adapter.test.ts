@@ -147,10 +147,17 @@ test("等待 SDK 时取消，不再调用本地回退", async () => {
   assert.equal(fallbackReads, 0);
 });
 
-test("SDK 超时和本地读取失败都保留搜索流程", async (t) => {
+test("SDK 超时、迟到拒绝和本地读取失败都保留搜索流程", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
+  let rejectTabs!: (error: Error) => void;
   const adapter = new RaycastBrowserIconAdapter(
-    { isAvailable: () => true, getTabs: () => new Promise(() => {}) },
+    {
+      isAvailable: () => true,
+      getTabs: () =>
+        new Promise((_, reject) => {
+          rejectTabs = reject;
+        }),
+    },
     {
       getIcons: async () => {
         throw new Error("cache unavailable");
@@ -160,4 +167,6 @@ test("SDK 超时和本地读取失败都保留搜索流程", async (t) => {
   const pending = adapter.getIcons([bookmark], 1);
   t.mock.timers.tick(1500);
   assert.equal((await pending).size, 0);
+  rejectTabs(new Error("late rejection"));
+  await new Promise<void>((resolve) => setImmediate(resolve));
 });

@@ -66,7 +66,7 @@ export async function readBookmarks(
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT")
-        warnings.push(`${profile.name}：${file} 读取失败`);
+        warnings.push(`${file} 读取失败`);
     }
   }
   return { entries, warnings };

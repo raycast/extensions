@@ -22,6 +22,7 @@ import { BrowserResultItem } from "./browser-result-item";
 import { raycastShortcut } from "../shortcuts";
 import { parseQuery, switchScope } from "../search/query";
 import { createResultSections } from "../search/result-sections";
+import { resolveSelectedItemId } from "../search/selection";
 import {
   sourceNames,
   type Scope,
@@ -38,12 +39,7 @@ export default function SearchBrowser() {
       (error: unknown) => ({ error }),
     ),
   );
-  const preferences = getPreferenceValues<{
-    historyLimit?: string;
-    includeIncognito?: boolean;
-    sourceShortcuts?: string;
-    startupPreview?: boolean;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
   const options = useMemo(
     () => ({
       scope: "all" as const,
@@ -65,11 +61,6 @@ export default function SearchBrowser() {
   const query = parseQuery(input, selectedScope);
   const state = useBrowserSearch(options, query.text, query.scope);
   const { page, snapshot } = state;
-  const activeEntry =
-    page?.results.find(({ entry }) => entry.id === selectedId)?.entry ??
-    page?.results[0]?.entry;
-  const preview = usePagePreview(activeEntry, page?.version ?? -1, showDetail);
-  const favicons = useFavicons(page?.results, page?.version ?? -1);
   const cached = Object.entries(snapshot?.states ?? {}).some(
     ([source, state]) =>
       state.cached && (query.scope === "all" || query.scope === source),
@@ -79,12 +70,24 @@ export default function SearchBrowser() {
     Object.values(snapshot?.states ?? {}).some((source) => source.loading);
   const warnings = Object.entries(snapshot?.states ?? {}).flatMap(
     ([source, status]) =>
-      status.warnings.map(
-        (warning) => `${sourceNames[source as Source]}：${warning}`,
-      ),
+      status.warnings.map((warning) => ({
+        id: `warning:${source}:${warning}`,
+        title: `${sourceNames[source as Source]}：${warning}`,
+      })),
   );
-  if (state.error) warnings.push(state.error);
-  if (shortcuts.error) warnings.push(shortcuts.error);
+  if (state.error) warnings.push({ id: "warning:search", title: state.error });
+  if (shortcuts.error)
+    warnings.push({ id: "warning:shortcuts", title: shortcuts.error });
+  const activeId = resolveSelectedItemId(
+    page?.results ?? [],
+    warnings.map(({ id }) => id),
+    selectedId,
+  );
+  const activeEntry = page?.results.find(
+    ({ entry }) => entry.id === activeId,
+  )?.entry;
+  const preview = usePagePreview(activeEntry, page?.version ?? -1, showDetail);
+  const favicons = useFavicons(page?.results, page?.version ?? -1);
   const selectScope = (scope: Scope) => {
     const next = switchScope(input, scope);
     const nextQuery = parseQuery(next.input, next.scope);
@@ -157,7 +160,6 @@ export default function SearchBrowser() {
       </BrowserActions>
     );
   };
-  const activeId = activeEntry?.id;
   const sections = page ? createResultSections(page.results, query.text) : [];
   const resultSummary = page
     ? `${page.total.toLocaleString()} 个结果${cached ? " · 缓存预览" : ""}`
@@ -231,8 +233,9 @@ export default function SearchBrowser() {
         <List.Section title="来源状态">
           {warnings.map((warning) => (
             <List.Item
-              key={warning}
-              title={warning}
+              key={warning.id}
+              id={warning.id}
+              title={warning.title}
               icon={{ source: Icon.Warning, tintColor: Color.Orange }}
               actions={actions()}
             />

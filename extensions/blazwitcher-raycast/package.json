@@ -94,8 +94,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run lint && npm run build",
-    "test:local": "tsx scripts/inspect-local.ts",
+    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {

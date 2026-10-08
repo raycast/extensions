@@ -196,6 +196,30 @@ test("正文超时后不继续发起读取", async (t) => {
   assert.equal(reads, 0);
 });
 
+test("正文请求超时后的迟到拒绝不会产生未处理异常", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let rejectContent!: (error: Error) => void;
+  let started!: () => void;
+  const reading = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  const pending = preview(
+    entry,
+    client({
+      getContent: () =>
+        new Promise((_, reject) => {
+          rejectContent = reject;
+          started();
+        }),
+    }),
+  );
+  await reading;
+  t.mock.timers.tick(6000);
+  assert.match((await pending).message!, /超时/);
+  rejectContent(new Error("late rejection"));
+  await new Promise<void>((resolve) => setImmediate(resolve));
+});
+
 test("紧凑预览缩小标题并转换图片，保护代码示例", () => {
   const input =
     "# 标题\n![图片](https://example.com/image.png)\n```md\n# 原文\n![原文](image.png)\n```\n`![行内](image.png)`";

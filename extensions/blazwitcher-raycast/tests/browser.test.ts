@@ -107,6 +107,7 @@ test("书签双文件合并与错误隔离", () =>
     result = await readBookmarks(profile);
     assert.equal(result.entries.length, 1);
     assert.equal(result.warnings.length, 1);
+    assert.equal(result.warnings[0], "AccountBookmarks 读取失败");
     assert.throws(() => parseBookmarks({}, profile, "Bookmarks"));
   }));
 
