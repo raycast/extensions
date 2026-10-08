@@ -26,7 +26,13 @@ import { getTopCpuProcess, getUptimeLabel } from "./CpuUtils";
 import { formatTemperature, getTemperatureData, temperatureColor } from "../Temperature/TemperatureUtils";
 
 const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
+const cpuPercentMode = displayModeCpu === "free" ? "free" : "usage";
 const CORE_COUNT = cpus().length;
+
+/** CPU percent as the user chose to see it: used, or free when the display mode is Free. */
+function cpuDisplayPercent(usedPercent: number): number {
+  return cpuPercentMode === "free" ? 100 - usedPercent : usedPercent;
+}
 
 export default function CpuMonitor({ isActive = false }: { isActive?: boolean }) {
   useEffect(() => {
@@ -69,12 +75,7 @@ export default function CpuMonitor({ isActive = false }: { isActive?: boolean })
       title="CPU"
       icon={Icon.Monitor}
       accessories={[
-        !cpu
-          ? { text: pendingText(isActive) }
-          : percentTagAccessory(
-              displayModeCpu === "free" ? 100 - +cpu : +cpu,
-              displayModeCpu === "free" ? "free" : "usage",
-            ),
+        !cpu ? { text: pendingText(isActive) } : percentTagAccessory(cpuDisplayPercent(+cpu), cpuPercentMode),
       ]}
       detail={
         <CpuMonitorDetail
@@ -195,7 +196,11 @@ function CpuMonitorDetail({
           />
           <MetadataLabel title="GPU Memory" text={hardware?.gpuMemory ?? "Loading…"} />
           <List.Item.Detail.Metadata.Separator />
-          {cpu ? <UsageTag title="Usage" percent={+cpu} /> : <MetadataLabel title="Usage" text="Loading…" />}
+          {cpu ? (
+            <UsageTag title="Usage" percent={cpuDisplayPercent(+cpu)} displayMode={cpuPercentMode} />
+          ) : (
+            <MetadataLabel title="Usage" text="Loading…" />
+          )}
           <List.Item.Detail.Metadata.Separator />
           <TopProcessRows processes={topProcess} />
           <List.Item.Detail.Metadata.Separator />
