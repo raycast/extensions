@@ -41,7 +41,7 @@ Actions on a file or folder: **Open** (downloads to a cache, then opens), **Down
 download directory, never overwrites), **Show Enclosing Folder**, **Copy Public Link** (reuses an
 existing link, or asks before creating one), **Copy Drive Path**, **Copy Name**.
 
-Preferences: CLI Path, Primary Action (Open or Download on Enter) and Download Directory.
+Preferences: CLI Path for the whole extension; Primary Action (Open or Download on Enter) and Download Directory under Search Files, the only command that uses them.
 
 ## How the index works
 

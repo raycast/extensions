@@ -26,7 +26,35 @@
       "title": "Search Files",
       "subtitle": "Proton Drive",
       "description": "Browse and search your Proton Drive",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "description": "What Enter does on a file.",
+          "default": "open",
+          "required": false,
+          "data": [
+            {
+              "title": "Open",
+              "value": "open"
+            },
+            {
+              "title": "Download",
+              "value": "download"
+            }
+          ]
+        },
+        {
+          "name": "downloadDirectory",
+          "type": "directory",
+          "title": "Download Directory",
+          "description": "Where Download saves files.",
+          "default": "~/Downloads",
+          "required": false
+        }
+      ]
     },
     {
       "name": "upload-files",
@@ -59,32 +87,6 @@
       "description": "Command name or full path of the proton-drive executable. A name is looked up in /opt/homebrew/bin, /usr/local/bin, ~/.local/bin, ~/bin and PATH.",
       "required": false,
       "default": "proton-drive"
-    },
-    {
-      "name": "primaryAction",
-      "type": "dropdown",
-      "title": "Primary Action",
-      "description": "What Enter does on a file.",
-      "default": "open",
-      "required": false,
-      "data": [
-        {
-          "title": "Open",
-          "value": "open"
-        },
-        {
-          "title": "Download",
-          "value": "download"
-        }
-      ]
-    },
-    {
-      "name": "downloadDirectory",
-      "type": "directory",
-      "title": "Download Directory",
-      "description": "Where Download saves files.",
-      "default": "~/Downloads",
-      "required": false
     }
   ],
   "dependencies": {

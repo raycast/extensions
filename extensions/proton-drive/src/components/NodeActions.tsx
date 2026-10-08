@@ -22,7 +22,8 @@ import { FolderView } from "./FolderView";
 export function NodeActions(props: { node: DriveNode; extraActions?: ReactNode }) {
   const { node, extraActions } = props;
   const isFolder = node.type === "folder";
-  const { primaryAction } = getPreferenceValues<Preferences>();
+  // A Search Files preference: these actions only exist in that command.
+  const { primaryAction } = getPreferenceValues<Preferences.SearchFiles>();
 
   const openAction = <Action title="Open" icon={Icon.ArrowNe} onAction={() => openFile(node)} />;
   const downloadAction = (
