@@ -23,7 +23,27 @@
       "title": "Browse Email",
       "subtitle": "Proton Mail",
       "description": "View and manage your Proton Mail emails",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openOn",
+          "title": "Open On",
+          "description": "What Browse Email shows first. From the inbox, Esc goes back to the mailboxes.",
+          "type": "dropdown",
+          "required": false,
+          "default": "inbox",
+          "data": [
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            },
+            {
+              "title": "Mailboxes",
+              "value": "mailboxes"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "compose-email",

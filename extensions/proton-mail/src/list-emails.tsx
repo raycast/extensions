@@ -63,8 +63,8 @@ export default function Command(props?: LaunchProps<{ arguments: CommandArgument
   return <Mailboxes initialFolder={folder} initialFilter={filter as EmailFilter} />;
 }
 
-// Mailboxes first, like Mail: the command opens the inbox (or a quicklink's folder) right away,
-// and Esc comes back here to switch folders
+// Mailboxes first, like Mail: the command opens the inbox (or a quicklink's folder) on top right away, unless
+// "Open On" is set to Mailboxes, and Esc comes back here to switch folders
 function Mailboxes({ initialFolder, initialFilter }: { initialFolder?: string; initialFilter?: EmailFilter }) {
   const { push } = useNavigation();
   const { data: folders, isLoading, error, revalidate } = useFolders();
@@ -75,12 +75,14 @@ function Mailboxes({ initialFolder, initialFilter }: { initialFolder?: string; i
     [push, revalidate],
   );
 
+  const { openOn } = getPreferenceValues<Preferences.ListEmails>();
+  const startFolder = initialFolder || (openOn === "mailboxes" ? undefined : "INBOX");
   const openedInitialFolder = useRef(false);
   useEffect(() => {
-    if (openedInitialFolder.current) return;
+    if (!startFolder || openedInitialFolder.current) return;
     openedInitialFolder.current = true;
-    openFolder(initialFolder || "INBOX", initialFilter);
-  }, [openFolder, initialFolder, initialFilter]);
+    openFolder(startFolder, initialFilter);
+  }, [openFolder, startFolder, initialFilter]);
 
   // The connection is shared by every view, so only close it when the command closes
   useEffect(() => {

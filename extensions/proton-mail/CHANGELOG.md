@@ -2,7 +2,7 @@
 
 ## [Mailboxes Screen] - {PR_MERGE_DATE}
 
-- Add a Mailboxes screen listing system mailboxes, first-level folders and labels with their email and unread counts. The command still opens on the inbox; Esc (or ⌘[ "Back") goes back one level
+- Add a Mailboxes screen listing system mailboxes, first-level folders and labels with their email and unread counts. The command still opens on the inbox, or on the Mailboxes screen with Browse Email's new "Open On" preference; Esc (or ⌘[ "Back") goes back one level
 - Folders list their subfolders above their emails
 - The dropdown now only holds filters (All, Unread, Read, Has Attachment)
 
