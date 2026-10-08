@@ -672,6 +672,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "qrx",
+    title: "QRX",
+    description:
+      "Branded, print-ready art QR codes that always scan. Describe a look and give a link: QRX paints an artistic QR code, checks that it decodes, and returns the image with a hosted qrx.to short link that can be re-pointed later. Start a code, wait for the image, list your codes, change where a code points, check your daily allowance and list styles. Hosted remote Streamable HTTP server through `mcp-remote`; QRX API key as an `Authorization: Bearer` header (free account, 42 codes a day).",
+    icon: "https://qrx.codes/images/brand/qrx-code-512.png",
+    homepage: "https://qrx.codes/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://qrx.codes/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "quibbly",
     title: "Quibbly",
     description:

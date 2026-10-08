@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add QRX MCP Server] - {PR_MERGE_DATE}
+
+- Add QRX to the official registry: turn a prompt and a link into a branded, print-ready QR code that is checked to scan, with a hosted qrx.to short link. Hosted remote Streamable HTTP server at https://qrx.codes/mcp through `mcp-remote`; QRX API key sent as an `Authorization: Bearer` header.
+
 ## [Update MAQAMI Travel MCP Server] - {PR_MERGE_DATE}
 
 - Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
