@@ -1,72 +1,60 @@
-import { ActionPanel, Action, List, Detail, Icon, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
-import { API, EventTimer } from "./api";
-import { getCached, setCache, CacheKeys } from "./cache";
+import { API, EventTimer, EventsScheduleResponse, MetaForgeUrl } from "./api";
+import { formatDuration } from "./format";
+import { findMap } from "./maps";
+import { RefreshAction, loadFailure } from "./ui";
 
-interface EventTimersResponse {
-  data: EventTimer[];
-  cachedAt?: number;
-}
+type EventStatus = "active" | "upcoming" | "later";
 
 interface EventWithStatus extends EventTimer {
-  status: "active" | "upcoming" | "later";
+  status: EventStatus;
   startDate: Date;
   endDate: Date;
   minutesUntil: number;
 }
 
-function getEventStatus(event: EventTimer): EventWithStatus {
-  const now = Date.now();
-  const startDate = new Date(event.startTime);
-  const endDate = new Date(event.endTime);
+const UPCOMING_WINDOW_MINUTES = 60;
 
-  let status: "active" | "upcoming" | "later";
-  let minutesUntil: number;
+const STATUS: Record<EventStatus, { section: string; label: string; detail: string; color: Color }> = {
+  active: { section: "Active Now", label: "Active", detail: "ACTIVE NOW", color: Color.Green },
+  upcoming: { section: "Starting Soon", label: "Soon", detail: "Starting soon", color: Color.Yellow },
+  later: { section: "Later", label: "Later", detail: "Later", color: Color.SecondaryText },
+};
 
-  if (now >= event.startTime && now < event.endTime) {
-    status = "active";
-    minutesUntil = 0;
-  } else if (now < event.startTime) {
-    const diff = Math.floor((event.startTime - now) / 60000);
-    minutesUntil = diff;
-    status = diff <= 60 ? "upcoming" : "later";
-  } else {
-    status = "later";
-    minutesUntil = 9999;
-  }
-
-  return { ...event, status, startDate, endDate, minutesUntil };
+function withStatus(event: EventTimer, now: number): EventWithStatus {
+  const minutesUntil = Math.max(0, Math.ceil((event.startTime - now) / 60000));
+  const status: EventStatus =
+    now >= event.startTime ? "active" : minutesUntil <= UPCOMING_WINDOW_MINUTES ? "upcoming" : "later";
+  return { ...event, status, startDate: new Date(event.startTime), endDate: new Date(event.endTime), minutesUntil };
 }
 
-function formatTimeUntil(minutes: number | null): string {
-  if (minutes === null) return "Unknown";
-  if (minutes === 0) return "Active now!";
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+function timeUntil(event: EventWithStatus): string {
+  return event.status === "active" ? "Active now!" : formatDuration(event.minutesUntil);
 }
 
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
 function formatDateTime(date: Date): string {
-  return date.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  return date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
-function EventDetail({ event }: { event: EventWithStatus }) {
+function EventActions({ event, onRefresh }: { event: EventWithStatus; onRefresh: () => void }) {
+  const map = findMap(event.map);
+  return (
+    <>
+      {map && <Action.OpenInBrowser title="Open Map" icon={Icon.Map} url={MetaForgeUrl.map(map.slug)} />}
+      <Action.CopyToClipboard title="Copy Event Name" content={event.name} />
+      <RefreshAction onRefresh={onRefresh} />
+    </>
+  );
+}
+
+function EventDetail({ event, region, onRefresh }: { event: EventWithStatus; region?: string; onRefresh: () => void }) {
+  const status = STATUS[event.status];
   const markdown = `
 # ${event.name}
 
@@ -84,9 +72,9 @@ function EventDetail({ event }: { event: EventWithStatus }) {
 
 ---
 
-**Status:** ${event.status === "active" ? "ACTIVE NOW" : event.status === "upcoming" ? "Starting soon" : "Later"}
+**Status:** ${status.detail}
 
-${event.minutesUntil > 0 ? `**Starts in:** ${formatTimeUntil(event.minutesUntil)}` : ""}
+${event.status !== "active" ? `**Starts in:** ${timeUntil(event)}` : ""}
 `;
 
   return (
@@ -96,85 +84,64 @@ ${event.minutesUntil > 0 ? `**Starts in:** ${formatTimeUntil(event.minutesUntil)
         <Detail.Metadata>
           <Detail.Metadata.Label title="Map" text={event.map} />
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item
-              text={event.status === "active" ? "Active" : event.status === "upcoming" ? "Soon" : "Later"}
-              color={
-                event.status === "active"
-                  ? Color.Green
-                  : event.status === "upcoming"
-                    ? Color.Yellow
-                    : Color.SecondaryText
-              }
-            />
+            <Detail.Metadata.TagList.Item text={status.label} color={status.color} />
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Starts In" text={formatTimeUntil(event.minutesUntil)} />
+          <Detail.Metadata.Label title="Starts In" text={timeUntil(event)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Start" text={formatDateTime(event.startDate)} />
           <Detail.Metadata.Label title="End" text={formatDateTime(event.endDate)} />
+          {region && <Detail.Metadata.Label title="Schedule Region" text={region} />}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Event Name" content={event.name} />
+          <EventActions event={event} onRefresh={onRefresh} />
         </ActionPanel>
       }
     />
   );
 }
 
+function accessoriesFor(event: EventWithStatus): List.Item.Accessory[] {
+  switch (event.status) {
+    case "active":
+      return [{ tag: { value: "ACTIVE", color: Color.Green } }];
+    case "upcoming":
+      return [{ text: formatTime(event.startDate) }, { tag: { value: timeUntil(event), color: Color.Yellow } }];
+    default:
+      return [{ text: formatTime(event.startDate) }, { text: timeUntil(event) }];
+  }
+}
+
 export default function EventTimers() {
   const [mapFilter, setMapFilter] = useState<string>("all");
-  const [tick, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
-  const cachedEventTimers = getCached<EventTimer[]>(CacheKeys.eventTimers);
-
-  const { isLoading, data, revalidate } = useFetch<EventTimersResponse>(API.eventTimers, {
+  const { isLoading, data, revalidate } = useFetch<EventsScheduleResponse>(API.eventsSchedule, {
     keepPreviousData: true,
-    onError() {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load events",
-        message: "Server temporarily unavailable. Please try again.",
-      });
-    },
+    failureToastOptions: loadFailure("events"),
   });
 
-  // Update cache when data changes
+  // Re-evaluate event statuses every minute so events move from "upcoming" to "active" on their own.
   useEffect(() => {
-    if (data?.data && data.data.length > 0) {
-      setCache(CacheKeys.eventTimers, data.data);
-    }
-  }, [data]);
-
-  // Auto-refresh every 60 seconds to update event statuses
-  useEffect(() => {
-    const interval = setInterval(() => setTick((n) => n + 1), 60000);
+    const interval = setInterval(() => setNow(Date.now()), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const events = data?.data || cachedEventTimers || [];
-  const maps = [...new Set(events.map((e) => e.map))].sort();
+  const events = data?.data ?? [];
+  const region = data?.region ? data.region.charAt(0).toUpperCase() + data.region.slice(1) : undefined;
+  const maps = [...new Set(events.map((event) => event.map))].sort();
 
-  const eventsWithStatus = useMemo(() => {
-    const now = Date.now();
-    return events
-      .filter((e) => e.endTime > now) // Filter out past events
-      .map(getEventStatus)
-      .filter((e) => mapFilter === "all" || e.map === mapFilter)
-      .sort((a, b) => {
-        // Sort by status (active first, then upcoming, then later)
-        const statusOrder = { active: 0, upcoming: 1, later: 2 };
-        if (statusOrder[a.status] !== statusOrder[b.status]) {
-          return statusOrder[a.status] - statusOrder[b.status];
-        }
-        // Then by start time
-        return a.startTime - b.startTime;
-      });
-  }, [events, mapFilter, tick]);
-
-  const activeEvents = eventsWithStatus.filter((e) => e.status === "active");
-  const upcomingEvents = eventsWithStatus.filter((e) => e.status === "upcoming");
-  const laterEvents = eventsWithStatus.filter((e) => e.status === "later");
+  const groups = useMemo(() => {
+    const visible = events
+      .filter((event) => event.endTime > now && (mapFilter === "all" || event.map === mapFilter))
+      .map((event) => withStatus(event, now))
+      .sort((a, b) => a.startTime - b.startTime);
+    return (Object.keys(STATUS) as EventStatus[]).map((status) => ({
+      status,
+      events: visible.filter((event) => event.status === status),
+    }));
+  }, [events, mapFilter, now]);
 
   return (
     <List
@@ -192,108 +159,36 @@ export default function EventTimers() {
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={() => revalidate()}
-            shortcut={{
-              macOS: { modifiers: ["cmd"], key: "r" },
-              Windows: { modifiers: ["ctrl"], key: "r" },
-            }}
-          />
+          <RefreshAction onRefresh={revalidate} />
         </ActionPanel>
       }
     >
-      {activeEvents.length > 0 && (
-        <List.Section title="Active Now">
-          {activeEvents.map((event) => (
-            <List.Item
-              key={`${event.name}-${event.map}-${event.startTime}`}
-              icon={{ source: event.icon, fallback: Icon.Clock }}
-              title={event.name}
-              subtitle={event.map}
-              accessories={[{ tag: { value: "ACTIVE", color: Color.Green } }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => revalidate()}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "r" },
-                      Windows: { modifiers: ["ctrl"], key: "r" },
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-
-      {upcomingEvents.length > 0 && (
-        <List.Section title="Starting Soon">
-          {upcomingEvents.map((event) => (
-            <List.Item
-              key={`${event.name}-${event.map}-${event.startTime}`}
-              icon={{ source: event.icon, fallback: Icon.Clock }}
-              title={event.name}
-              subtitle={event.map}
-              accessories={[
-                { text: formatTime(event.startDate) },
-                {
-                  tag: {
-                    value: formatTimeUntil(event.minutesUntil),
-                    color: Color.Yellow,
-                  },
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => revalidate()}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "r" },
-                      Windows: { modifiers: ["ctrl"], key: "r" },
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-
-      {laterEvents.length > 0 && (
-        <List.Section title="Later">
-          {laterEvents.map((event) => (
-            <List.Item
-              key={`${event.name}-${event.map}-${event.startTime}`}
-              icon={{ source: event.icon, fallback: Icon.Clock }}
-              title={event.name}
-              subtitle={event.map}
-              accessories={[{ text: formatTime(event.startDate) }, { text: formatTimeUntil(event.minutesUntil) }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail event={event} />} />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => revalidate()}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "r" },
-                      Windows: { modifiers: ["ctrl"], key: "r" },
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
+      {groups.map(
+        (group) =>
+          group.events.length > 0 && (
+            <List.Section key={group.status} title={STATUS[group.status].section}>
+              {group.events.map((event) => (
+                <List.Item
+                  key={`${event.name}-${event.map}-${event.startTime}`}
+                  icon={{ source: event.icon, fallback: Icon.Clock }}
+                  title={event.name}
+                  subtitle={event.map}
+                  keywords={[event.map]}
+                  accessories={accessoriesFor(event)}
+                  actions={
+                    <ActionPanel>
+                      <Action.Push
+                        title="View Details"
+                        icon={Icon.Eye}
+                        target={<EventDetail event={event} region={region} onRefresh={revalidate} />}
+                      />
+                      <EventActions event={event} onRefresh={revalidate} />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          ),
       )}
     </List>
   );
