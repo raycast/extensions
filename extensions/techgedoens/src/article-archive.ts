@@ -271,6 +271,7 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
 
   let hasActiveClaim = false;
   try {
+    await removeAbandonedArchiveUpdateWaitingClaims();
     await waitForArchiveUpdateTurn(claimPath, startedAt);
     hasActiveClaim = true;
     return await update();
@@ -329,7 +330,7 @@ async function removeAbandonedArchiveUpdateClaim(): Promise<void> {
     const [serializedOwner, ownerStats] = await Promise.all([readFile(ownerPath, "utf8"), stat(ownerPath)]);
     const owner = parseArchiveLockOwner(serializedOwner);
     const isStale = Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
-    if (owner ? isProcessAlive(owner.pid) : !isStale) {
+    if (owner ? isProcessAlive(owner.pid) && !isStale : !isStale) {
       return;
     }
 
@@ -338,6 +339,44 @@ async function removeAbandonedArchiveUpdateClaim(): Promise<void> {
   } catch (error) {
     if (!isNodeError(error) || (error.code !== "ENOENT" && error.code !== "ENOTDIR")) {
       throw error;
+    }
+  }
+}
+
+async function removeAbandonedArchiveUpdateWaitingClaims(): Promise<void> {
+  const claimNames = (await readdir(ARCHIVE_UPDATE_LOCK_PATH)).filter((name) => name.endsWith(".claim"));
+  for (const claimName of claimNames) {
+    await removeAbandonedArchiveUpdateWaitingClaim(claimName);
+  }
+}
+
+async function removeAbandonedArchiveUpdateWaitingClaim(claimName: string): Promise<void> {
+  const ownerId = claimName.slice(0, -".claim".length);
+  const claimPath = join(ARCHIVE_UPDATE_LOCK_PATH, claimName);
+  const ownerPath = join(claimPath, `${ownerId}.owner`);
+  try {
+    const [serializedOwner, ownerStats] = await Promise.all([readFile(ownerPath, "utf8"), stat(ownerPath)]);
+    const owner = parseArchiveLockOwner(serializedOwner);
+    const isStale = Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
+    if (owner ? isProcessAlive(owner.pid) && !isStale : !isStale) {
+      return;
+    }
+
+    await removeArchiveUpdateClaim(claimPath, ownerId);
+  } catch (error) {
+    if (!isNodeError(error) || error.code !== "ENOENT") {
+      throw error;
+    }
+
+    try {
+      const claimStats = await stat(claimPath);
+      if (Date.now() - claimStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
+        await removeArchiveUpdateClaim(claimPath, ownerId);
+      }
+    } catch (claimError) {
+      if (!isNodeError(claimError) || claimError.code !== "ENOENT") {
+        throw claimError;
+      }
     }
   }
 }
