@@ -14,14 +14,14 @@ import {
   showToast,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import MultipleColorActions from "./components/MultipleColorActions";
 import { EditTitle } from "./components/EditTitle";
 import { GroupForm } from "./components/GroupForm";
 import { useColorsSelection } from "./hooks/useColorsSelection";
 import { formatGroup, getGroups, isRenameTaken } from "./lib/groups";
-import { useHistory } from "./lib/history";
+import { getHistoryItemKey, useHistory } from "./lib/history";
 import { HistoryItem, SelectMode, UseColorsSelectionObject } from "./lib/types";
 import { COPY_FORMATS, copySelectedColors, getFormattedColor, getIcon, getPreviewColor } from "./lib/utils";
 
@@ -52,11 +52,7 @@ const PickColorAction = () => (
 export default function Command() {
   const { history } = useHistory();
   const [selectMode, setSelectMode] = useState<SelectMode>("single");
-  // Stable reference so useColorsSelection's cleanup effect doesn't re-run every render.
-  // Combine date + formattedColor so distinct history entries that format to the same color
-  // (e.g. legacy data with duplicate picks) get distinct selection keys.
-  const getItemKey = useCallback((item: HistoryItem) => `${item.date}-${getFormattedColor(item.color)}`, []);
-  const { selection } = useColorsSelection<HistoryItem>(history ?? [], getItemKey);
+  const { selection } = useColorsSelection<HistoryItem>(history ?? [], getHistoryItemKey);
   const favoriteHistory = history?.filter((item) => item.isFavorite && !item.group) ?? [];
   const regularHistory = history?.filter((item) => !item.isFavorite && !item.group) ?? [];
   const groups = getGroups(history ?? []);
@@ -285,13 +281,12 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
   const canMoveFavoriteDown = favoriteIndex !== -1 && favoriteIndex < favoriteHistory.length - 1;
   const { countSelected, selectedItems } = selection.selected;
   const targets = selectMode === "multi" && countSelected > 0 ? selectedItems : [historyItem];
-  const targetColors = targets.map((item) => item.color);
   const targetsLabel = targets.length === 1 ? "Color" : `${targets.length} Colors`;
   const group = historyItem.group;
   const hasSubgroups = Boolean(group && groups.some((name) => name.startsWith(`${group}/`)));
 
   const moveToGroup = async (name: string) => {
-    setGroup(targetColors, name);
+    setGroup(targets, name);
     await showToast({ title: `Moved to ${formatGroup(name)}` });
   };
 
@@ -387,7 +382,7 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
             icon={Icon.XMarkCircle}
             title={`Remove ${targetsLabel} from Group`}
             onAction={async () => {
-              setGroup(targetColors, undefined);
+              setGroup(targets, undefined);
               await showToast({ title: "Removed from group" });
             }}
           />

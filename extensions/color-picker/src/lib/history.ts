@@ -6,6 +6,12 @@ import { getFormattedColor } from "./utils";
 
 const MAX_HISTORY_LENGTH = 200;
 
+// Combine date + formattedColor so distinct history entries that format to the same color
+// (e.g. legacy data with duplicate picks) get distinct keys.
+export function getHistoryItemKey(item: HistoryItem) {
+  return `${item.date}-${getFormattedColor(item.color)}`;
+}
+
 export function useHistory() {
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
   const update = (color: HistoryColor, updateItem: (item: HistoryItem) => HistoryItem) =>
@@ -29,12 +35,10 @@ export function useHistory() {
       }),
     addToFavorites: (color: HistoryColor) => update(color, (item) => ({ ...item, isFavorite: true })),
     removeFromFavorites: (color: HistoryColor) => update(color, (item) => ({ ...item, isFavorite: false })),
-    setGroup: (colors: HistoryColor[], group: string | undefined) =>
+    setGroup: (items: HistoryItem[], group: string | undefined) =>
       setHistory((previousHistory) => {
-        const colorKeys = new Set(colors.map((color) => getFormattedColor(color)));
-        return previousHistory.map((item) =>
-          colorKeys.has(getFormattedColor(item.color)) ? { ...item, group } : item,
-        );
+        const itemKeys = new Set(items.map(getHistoryItemKey));
+        return previousHistory.map((item) => (itemKeys.has(getHistoryItemKey(item)) ? { ...item, group } : item));
       }),
     renameGroup: (from: string, to: string) => setHistory((previousHistory) => renameGroup(previousHistory, from, to)),
     deleteGroup: (group: string) => setHistory((previousHistory) => deleteGroup(previousHistory, group)),
