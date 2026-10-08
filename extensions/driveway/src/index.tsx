@@ -18,6 +18,7 @@ import { ServerForm, ServerFormInput } from "./components/ServerForm";
 import { buildShare, hostKey, PROTOCOL_LABELS, sameHost, ServerEntry } from "./lib/share";
 import { findMountedShare, openMountPoint, unmountShare, UnreachableError, connectShare } from "./lib/mount";
 import { errorText } from "./lib/errors";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
@@ -96,6 +97,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
     );
     await refreshMounted();
+    await refreshMenuBar();
   }
 
   async function handleRemove(server: ServerEntry) {
@@ -144,6 +146,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       toast.style = Toast.Style.Success;
       toast.title = `Mount requested for ${share.label}`;
       const connected = await pollUntilMounted(server);
+      await refreshMenuBar();
       if (connected) {
         toast.title = `Connected to ${share.label}`;
         if (options?.open) {
@@ -189,6 +192,7 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
       toast.style = Toast.Style.Success;
       toast.title = `Unmounted ${share.label}`;
       await load();
+      await refreshMenuBar();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Couldn't unmount ${share.label}`;

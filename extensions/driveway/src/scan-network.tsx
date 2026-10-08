@@ -1,6 +1,7 @@
 import { List, Icon, ActionPanel, Action, Keyboard, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { hostKey, sameHost, ServerEntry } from "./lib/share";
+import { refreshMenuBar } from "./lib/menu-bar-cache";
 import { unmountShare } from "./lib/mount";
 import { getServers } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
@@ -80,6 +81,7 @@ export default function Command() {
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
     );
     await refreshMounted();
+    await refreshMenuBar();
   }
 
   const isLoading = servers === null || discoveryLoading;

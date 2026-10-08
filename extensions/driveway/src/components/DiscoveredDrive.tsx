@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   confirmAlert,
+  Alert,
   showToast,
   Toast,
   Icon,
@@ -23,6 +24,7 @@ import {
   UnreachableError,
 } from "../lib/mount";
 import { errorText } from "../lib/errors";
+import { refreshMenuBar } from "../lib/menu-bar-cache";
 import { addServer, DuplicateServerError } from "../lib/storage";
 
 // One icon per kind of discovered thing, so the list reads at a glance:
@@ -191,6 +193,7 @@ function DiscoveredDriveActions(props: {
       if (match) {
         toast.title = `${props.vol} Mounted`;
       }
+      await refreshMenuBar();
       return match;
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -211,6 +214,7 @@ function DiscoveredDriveActions(props: {
       toast.style = Toast.Style.Success;
       toast.title = `${props.vol} Unmounted`;
       props.onChanged();
+      await refreshMenuBar();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Couldn't unmount ${props.vol}`;
@@ -232,10 +236,15 @@ function DiscoveredDriveActions(props: {
 
   return (
     <ActionPanel>
-      <ActionPanel.Section title="Quick Option">
+      {/* This share, then the list it could join, then the one action that
+          touches every drive on the host. A single Mount or Unmount reads the
+          current state, rather than offering both and leaving it to be worked
+          out; it keeps whichever shortcut matches what it does. */}
+      <ActionPanel.Section>
         <Action
           title={props.mounted ? "Unmount" : "Mount"}
           icon={props.mounted ? Icon.Eject : Icon.Plug}
+          shortcut={props.mounted ? { modifiers: ["ctrl"], key: "x" } : Keyboard.Shortcut.Common.Open}
           onAction={props.mounted ? doUnmount : doMount}
         />
         <Action
@@ -249,54 +258,50 @@ function DiscoveredDriveActions(props: {
               openMountPoint(mountPoint);
             }
           }}
-        ></Action>
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
         <Action
           title="Save to Drives"
           icon={Icon.SaveDocument}
           shortcut={Keyboard.Shortcut.Common.Save}
           onAction={saveToNetworkDrives}
-        ></Action>
-        <Action
-          title="Unmount All"
-          icon={Icon.Eject}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-          onAction={async () => {
-            if (
-              await confirmAlert({
-                icon: Icon.AlarmRinging,
-                title: `Are you sure you want to \n "Unmount All Drives" ?`,
-              })
-            ) {
-              await props.onUnmountAll();
-            }
-          }}
-        ></Action>
+        />
         <Action
           title="Add Drive"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => push(<AddServer onSaved={props.onServerAdded} />)}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section title="Specific Option">
-        <Action title="Mount" icon={Icon.Plug} shortcut={Keyboard.Shortcut.Common.Open} onAction={doMount}></Action>
-        <Action
-          title="Unmount"
-          icon={Icon.Eject}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={doUnmount}
-        ></Action>
-      </ActionPanel.Section>
-      {props.onRefresh && (
-        <ActionPanel.Section>
+        {props.onRefresh && (
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={props.onRefresh}
           />
-        </ActionPanel.Section>
-      )}
+        )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Unmount Everything on This Host"
+          icon={Icon.Eject}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          onAction={async () => {
+            if (
+              await confirmAlert({
+                icon: Icon.Eject,
+                title: `Unmount every drive on ${props.host}?`,
+                message: "Drives from other hosts are left alone.",
+                primaryAction: { title: "Unmount All", style: Alert.ActionStyle.Destructive },
+              })
+            ) {
+              await props.onUnmountAll();
+            }
+          }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

@@ -7,6 +7,7 @@ import type { ServerEntry } from "../lib/share";
 import type { MountLocation } from "../lib/mount";
 import { unmountShare } from "../lib/mount";
 import { errorText } from "../lib/errors";
+import { refreshMenuBar } from "../lib/menu-bar-cache";
 import { DiscoveredDriveItem } from "./DiscoveredDrive";
 
 // One-time credentials to browse any saved host's shares. Held in state only.
@@ -53,6 +54,7 @@ export function BrowseHostShares(props: {
       hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
     );
     props.onChanged();
+    await refreshMenuBar();
   }
 
   if (!credentials) {
