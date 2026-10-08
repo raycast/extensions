@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { mkdtemp, readdir, rm, stat, writeFile } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
 import {
   List,
   ActionPanel,
@@ -17,11 +20,14 @@ import {
   Detail,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import {
   listFolders,
   fetchEmails,
   fetchEmailBody,
+  fetchOriginalHtml,
+  cachedEmailBody,
+  EmailBody,
   markAsRead,
   markAsUnread,
   deleteEmail,
@@ -29,9 +35,10 @@ import {
   archiveEmail,
   disconnectClient,
 } from "./imap-client";
-import { Email, Folder, EmailFilter } from "./types";
+import { Email, EmailAddress, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
 import { AttachmentList } from "./attachment-list";
+import { emailBodyToMarkdown, escapeMarkdown } from "./email-markdown";
 
 interface CommandArguments {
   folder?: string;
@@ -391,91 +398,66 @@ function hasFlag(flags: Set<string> | string[] | unknown, flag: string): boolean
   return false;
 }
 
-// Clean HTML content for display, removing VML, CSS, and other markup
-// Set includeImages to false to strip image markdown (for compact list/detail view)
-function cleanHtmlForDisplay(html: string, includeImages: boolean = true): string {
-  let text = html;
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
-  // Remove style, script, and head tags with their content
-  text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
-  text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
-  text = text.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "");
+// Opening the original in the browser must not run the sender's code: block scripts, frames, plugins,
+// forms and redirects, and only let through what the email needs to render (images, styles, fonts)
+const ORIGINAL_EMAIL_CSP = [
+  "default-src 'none'",
+  "img-src * data:",
+  "style-src * 'unsafe-inline'",
+  "font-src * data:",
+  "media-src * data:",
+  "form-action 'none'",
+  "base-uri 'none'",
+].join("; ");
+const ORIGINAL_FILE_PREFIX = "proton-mail-original-";
+// Long enough for the browser to load the file, which holds a decrypted email
+const ORIGINAL_FILE_LIFETIME_MS = 60_000;
 
-  // Remove VML/XML behavior declarations (Microsoft Outlook)
-  text = text.replace(/v:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/o:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/w:\*\s*\{[^}]*\}/gi, "");
-  text = text.replace(/\.shape\s*\{[^}]*\}/gi, "");
-  text = text.replace(/\{behavior:url\([^)]*\)[^}]*\}/gi, "");
+// Files left behind when the command closed before their timer fired
+async function removeStaleOriginals() {
+  const entries = await readdir(tmpdir());
+  await Promise.all(
+    entries
+      .filter((entry) => entry.startsWith(ORIGINAL_FILE_PREFIX))
+      .map(async (entry) => {
+        const path = join(tmpdir(), entry);
+        const { mtimeMs } = await stat(path);
+        if (Date.now() - mtimeMs > ORIGINAL_FILE_LIFETIME_MS) {
+          await rm(path, { recursive: true, force: true });
+        }
+      }),
+  );
+}
 
-  // Remove CSS-like declarations that leaked through
-  text = text.replace(/[a-z]+:\*\s*\{[^}]*\}/gi, "");
+// Raycast can only render Markdown, so hand the original HTML to the browser for full fidelity
+async function openOriginalInBrowser(folder: string, email: Email) {
+  try {
+    const content = await fetchOriginalHtml(folder, email.uid);
+    if (!content) {
+      showToast({ style: Toast.Style.Failure, title: "No HTML version", message: "This email is plain text only" });
+      return;
+    }
+    await removeStaleOriginals().catch(() => undefined);
 
-  // Convert common HTML entities
-  text = text.replace(/&nbsp;/gi, " ");
-  text = text.replace(/&amp;/gi, "&");
-  text = text.replace(/&lt;/gi, "<");
-  text = text.replace(/&gt;/gi, ">");
-  text = text.replace(/&quot;/gi, '"');
-  text = text.replace(/&#(\d+);/gi, (_, num) => String.fromCharCode(parseInt(num, 10)));
-
-  // Convert line breaks
-  text = text.replace(/<br\s*\/?>/gi, "\n");
-  text = text.replace(/<\/p>/gi, "\n\n");
-  text = text.replace(/<\/div>/gi, "\n");
-  text = text.replace(/<\/li>/gi, "\n");
-  text = text.replace(/<\/tr>/gi, "\n");
-
-  // Remove all remaining HTML tags
-  text = text.replace(/<[^>]+>/g, "");
-
-  // Clean up whitespace
-  text = text.replace(/[ \t]+/g, " ");
-  text = text.replace(/\n[ \t]+/g, "\n");
-  text = text.replace(/[ \t]+\n/g, "\n");
-  text = text.replace(/\n{3,}/g, "\n\n");
-
-  // Convert standalone URLs in brackets to markdown format
-  if (includeImages) {
-    // Image URLs (png, jpg, jpeg, gif, webp, svg) -> ![](url)
-    text = text.replace(/\[(https?:\/\/[^\]]+\.(png|jpg|jpeg|gif|webp|svg)(?:\?[^\]]*)?)\]/gi, "![]($1)");
-  } else {
-    // Strip image URLs entirely for compact view
-    text = text.replace(/\[(https?:\/\/[^\]]+\.(png|jpg|jpeg|gif|webp|svg)(?:\?[^\]]*)?)\]/gi, "");
+    // A private, unique directory: mkdtemp creates it readable by the current user only
+    const directory = await mkdtemp(join(tmpdir(), ORIGINAL_FILE_PREFIX));
+    const filePath = join(directory, "email.html");
+    const page =
+      `<!doctype html><meta charset="utf-8">` +
+      `<meta http-equiv="Content-Security-Policy" content="${ORIGINAL_EMAIL_CSP}">` +
+      `<title>${escapeHtml(email.subject)}</title>` +
+      // Meta refreshes are navigations, which the policy above doesn't cover
+      content.replace(/<meta[^>]+http-equiv\s*=\s*["']?refresh[^>]*>/gi, "");
+    await writeFile(filePath, page, { mode: 0o600 });
+    await open(filePath);
+    setTimeout(() => rm(directory, { recursive: true, force: true }).catch(() => undefined), ORIGINAL_FILE_LIFETIME_MS);
+  } catch (error) {
+    showToast({ style: Toast.Style.Failure, title: "Failed to open email", message: String(error) });
   }
-  // Other URLs -> [link](url)
-  text = text.replace(/\[(https?:\/\/[^\]]+)\]/gi, (match, url) => {
-    // Skip if already converted to image
-    if (match.startsWith("![")) return match;
-    return `[link](${url})`;
-  });
-
-  // If not including images, also remove any markdown image syntax that might exist
-  if (!includeImages) {
-    text = text.replace(/!\[[^\]]*\]\([^)]+\)/g, "");
-
-    // Remove common "view in browser" / "click here" boilerplate text
-    text = text.replace(/click here to view this message in a browser[^\n]*/gi, "");
-    text = text.replace(/view this (email|message) in (your |a )?browser[^\n]*/gi, "");
-    text = text.replace(/having trouble viewing this[^\n]*/gi, "");
-    text = text.replace(/can't see this (email|message)[^\n]*/gi, "");
-    text = text.replace(/not displaying correctly[^\n]*/gi, "");
-    text = text.replace(/view (this )?(email |message )?online[^\n]*/gi, "");
-    text = text.replace(/view in browser[^\n]*/gi, "");
-    text = text.replace(/open in browser[^\n]*/gi, "");
-
-    // Remove standalone long URLs (not in markdown link format) - they clutter the preview
-    // But keep markdown links - they don't take up extra space
-    text = text.replace(/(?<!\()(?<!\[)(https?:\/\/[^\s\n]{50,})(?!\))/g, "");
-
-    // For compact view, collapse 3+ newlines to 2 for tighter display
-    text = text.replace(/\n{3,}/g, "\n\n");
-  } else {
-    // For expanded view, allow max 2 consecutive newlines
-    text = text.replace(/\n{3,}/g, "\n\n");
-  }
-
-  return text.trim();
 }
 
 function EmailListItem({
@@ -530,31 +512,24 @@ interface EmailDetailProps {
 }
 
 function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
-  const { data: body, isLoading } = useCachedPromise(
-    async (f: string, uid: number) => {
-      return await fetchEmailBody(f, uid);
-    },
-    [folder, email.uid],
-  );
+  const { body, isLoading } = useEmailBody(folder, email.uid);
 
-  const fromDisplay = email.from.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const toDisplay = email.to.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const ccDisplay = email.cc?.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
+  const fromDisplay = formatAddresses(email.from);
+  const toDisplay = formatAddresses(email.to);
+  const ccDisplay = email.cc && formatAddresses(email.cc);
 
   // Build markdown with just the email body (metadata is shown below)
   // Skip images in list/detail view (includeImages=false) - they show in expanded view
+  const bodyMarkdown = useMemo(() => body && emailBodyToMarkdown(body, { images: false }), [body]);
+
   let markdown = "";
 
   if (isLoading) {
     markdown = `*Loading email content...*`;
   } else if (demoMode) {
     markdown = DEMO_BODY;
-  } else if (body?.text) {
-    markdown = cleanHtmlForDisplay(body.text, false);
-  } else if (body?.html) {
-    markdown = cleanHtmlForDisplay(body.html, false);
   } else {
-    markdown = email.preview || "*No content available*";
+    markdown = bodyMarkdown || email.preview || "*No content available*";
   }
 
   return (
@@ -580,6 +555,53 @@ function EmailDetail({ email, folder, demoMode }: EmailDetailProps) {
   );
 }
 
+// Bodies stay in memory only (usePromise, not useCachedPromise): persisting them would write decrypted emails to
+// disk. A body opened recently shows right away.
+function useEmailBody(folder: string, uid: number): { body?: EmailBody; isLoading: boolean } {
+  const cached = cachedEmailBody(folder, uid);
+  const { data, isLoading } = usePromise(fetchEmailBody, [folder, uid], { execute: !cached });
+  return { body: cached ?? data, isLoading: !cached && isLoading };
+}
+
+// "Name <address>, …" for the preview metadata and the copy actions
+function formatAddresses(addresses: EmailAddress[]): string {
+  return addresses.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
+}
+
+// The whole email as Markdown, for "Copy Email as Markdown"
+function emailAsMarkdown(email: Email, bodyMarkdown: string): string {
+  const cc = email.cc?.length ? `\n**CC:** ${formatAddresses(email.cc)}` : "";
+  return `# ${email.subject}\n\n**From:** ${formatAddresses(email.from)}\n**To:** ${formatAddresses(email.to)}${cc}\n**Date:** ${email.date.toLocaleString()}\n\n---\n\n${bodyMarkdown}`;
+}
+
+// Subject, sender, recipients and date as Markdown above the body
+function emailHeaderMarkdown(email: Email): string {
+  const sender = email.from[0];
+  const from = sender
+    ? `**${escapeMarkdown(sender.name || sender.address)}**${sender.name ? ` · ${escapeMarkdown(sender.address)}` : ""}`
+    : "";
+  const list = (addresses: { name?: string; address: string }[]) => {
+    const shown = addresses.slice(0, 3).map((address) => escapeMarkdown(address.name || address.address));
+    const more = addresses.length - shown.length;
+    return more > 0 ? `${shown.join(", ")} and ${more} more` : shown.join(", ");
+  };
+  const recipients = [
+    email.to.length ? `To ${list(email.to)}` : "",
+    email.cc?.length ? `Cc ${list(email.cc)}` : "",
+  ].filter(Boolean);
+  const details = [
+    new Date(email.date).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" }),
+    hasFlag(email.flags, "\\Seen") ? "" : "Unread",
+    email.hasAttachment ? "Attachment" : "",
+  ].filter(Boolean);
+  // Two trailing spaces end each line with a line break
+  return [
+    `## ${escapeMarkdown(email.subject)}`,
+    "",
+    [from, recipients.join(" · "), details.join(" · ")].filter(Boolean).join("  \n"),
+  ].join("\n");
+}
+
 interface ExpandedEmailViewProps {
   email: Email;
   folder: string;
@@ -596,44 +618,39 @@ function ExpandedEmailView({
   deletesPermanently = false,
 }: ExpandedEmailViewProps) {
   const { push } = useNavigation();
+  const { loadRemoteImages } = getPreferenceValues<Preferences.ListEmails>();
   const [demoMode, setDemoMode] = useState(initialDemoMode || false);
-  const { data: body, isLoading } = useCachedPromise(
-    async (f: string, uid: number) => {
-      return await fetchEmailBody(f, uid);
-    },
-    [folder, email.uid],
-  );
+  const { body, isLoading } = useEmailBody(folder, email.uid);
 
   // Apply demo mode anonymization
   const displayEmail = demoMode ? anonymizeEmail(email, 0) : email;
-  const fromDisplay = displayEmail.from.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const toDisplay = displayEmail.to.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const ccDisplay = displayEmail.cc?.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
+  const fromDisplay = formatAddresses(displayEmail.from);
   const fromAddress = email.from[0]?.address || "";
   const isUnread = !hasFlag(email.flags, "\\Seen");
 
-  let markdown = "";
+  const bodyMarkdown = useMemo(
+    () => body && emailBodyToMarkdown(body, { images: loadRemoteImages }),
+    [body, loadRemoteImages],
+  );
+
+  let bodyText = "";
 
   if (isLoading) {
-    markdown = `*Loading email content...*`;
+    bodyText = `*Loading email content...*`;
   } else if (demoMode) {
-    markdown = DEMO_BODY;
-  } else if (body?.text) {
-    markdown = cleanHtmlForDisplay(body.text);
-  } else if (body?.html) {
-    markdown = cleanHtmlForDisplay(body.html);
+    bodyText = DEMO_BODY;
   } else {
-    markdown = email.preview || "*No content available*";
+    bodyText = bodyMarkdown || email.preview || "*No content available*";
   }
 
-  const getEmailBodyForCompose = async (): Promise<string> => {
-    if (body?.text) return body.text;
-    if (body?.html) return body.html.replace(/<[^>]*>/g, "");
-    return email.preview || "";
-  };
+  // The header goes above the body rather than in a metadata sidebar: the sidebar has a fixed narrow width
+  // that cuts subjects and addresses off, while the body area uses the full width and wraps
+  const header = emailHeaderMarkdown(displayEmail);
+  const markdown = `${header}\n\n---\n\n${bodyText}`;
+  // Copy actions keep the body only
+  const markdownBody = bodyText;
 
-  const openComposeForm = async (mode: ComposeMode) => {
-    const bodyText = await getEmailBodyForCompose();
+  const openComposeForm = (mode: ComposeMode) => {
     push(
       <ComposeForm
         mode={mode}
@@ -643,7 +660,7 @@ function ExpandedEmailView({
           to: email.to.map((a) => a.address),
           cc: email.cc?.map((a) => a.address) || [],
           date: email.date,
-          body: bodyText,
+          body: body?.text || body?.html || email.preview || "",
         }}
       />,
     );
@@ -695,27 +712,8 @@ function ExpandedEmailView({
 
   return (
     <Detail
-      navigationTitle={displayEmail.subject}
       isLoading={isLoading}
       markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Subject" text={displayEmail.subject} />
-          <Detail.Metadata.Label title="From" text={fromDisplay} />
-          <Detail.Metadata.Label title="To" text={toDisplay} />
-          {ccDisplay && <Detail.Metadata.Label title="CC" text={ccDisplay} />}
-          <Detail.Metadata.Label title="Date" text={displayEmail.date.toLocaleString()} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Status">
-            {hasFlag(email.flags, "\\Seen") ? (
-              <Detail.Metadata.TagList.Item text="Read" color={Color.Green} />
-            ) : (
-              <Detail.Metadata.TagList.Item text="Unread" color={Color.Blue} />
-            )}
-            {email.hasAttachment && <Detail.Metadata.TagList.Item text="Attachment" color={Color.Orange} />}
-          </Detail.Metadata.TagList>
-        </Detail.Metadata>
-      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Email Actions">
@@ -785,10 +783,10 @@ function ExpandedEmailView({
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy Email Body" content={markdown} />
+            <Action.CopyToClipboard title="Copy Email Body" content={markdownBody} />
             <Action.CopyToClipboard
               title="Copy Email Body as Markdown"
-              content={`# ${displayEmail.subject}\n\n**From:** ${fromDisplay}\n**To:** ${toDisplay}${ccDisplay ? `\n**CC:** ${ccDisplay}` : ""}\n**Date:** ${displayEmail.date.toLocaleString()}\n\n---\n\n${markdown}`}
+              content={emailAsMarkdown(displayEmail, markdownBody)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
             />
             <Action.CopyToClipboard
@@ -811,6 +809,18 @@ function ExpandedEmailView({
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             />
           </ActionPanel.Section>
+
+          {/* New actions go last so existing ones keep their positions */}
+          {body?.html && (
+            <ActionPanel.Section title="Original">
+              <Action
+                title="Open Original in Browser"
+                icon={Icon.Window}
+                onAction={() => openOriginalInBrowser(folder, email)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
@@ -850,32 +860,19 @@ function EmailActions({
   const getEmailBodyForCompose = async (): Promise<string> => {
     try {
       const body = await fetchEmailBody(folder, email.uid);
-      return body.text || body.html?.replace(/<[^>]*>/g, "") || email.preview || "";
+      return body.text || body.html || email.preview || "";
     } catch {
       return email.preview || "";
     }
   };
 
-  // Build display strings for copy actions
-  const fromDisplay = email.from.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const toDisplay = email.to.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-  const ccDisplay = email.cc?.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
-
   const handleCopyAsMarkdown = async () => {
     try {
       const body = await fetchEmailBody(folder, email.uid);
-      let bodyText = "";
-      if (body?.text) {
-        bodyText = cleanHtmlForDisplay(body.text);
-      } else if (body?.html) {
-        bodyText = cleanHtmlForDisplay(body.html);
-      } else {
-        bodyText = email.preview || "";
-      }
+      const { loadRemoteImages } = getPreferenceValues<Preferences.ListEmails>();
+      const bodyText = emailBodyToMarkdown(body, { images: loadRemoteImages }) || email.preview || "";
 
-      const markdown = `# ${email.subject}\n\n**From:** ${fromDisplay}\n**To:** ${toDisplay}${ccDisplay ? `\n**CC:** ${ccDisplay}` : ""}\n**Date:** ${email.date.toLocaleString()}\n\n---\n\n${bodyText}`;
-
-      await Clipboard.copy(markdown);
+      await Clipboard.copy(emailAsMarkdown(email, bodyText));
       showToast({ style: Toast.Style.Success, title: "Copied as Markdown" });
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to copy", message: String(error) });
@@ -1092,6 +1089,16 @@ function EmailActions({
           />
         </ActionPanel.Section>
       )}
+
+      {/* New actions go last so existing ones keep their positions */}
+      <ActionPanel.Section title="Original">
+        <Action
+          title="Open Original in Browser"
+          icon={Icon.Window}
+          onAction={() => openOriginalInBrowser(folder, email)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
