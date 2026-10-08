@@ -1,6 +1,28 @@
 # Slack Changelog
 
-## [Quiet automatic rate-limit retries] - {PR_MERGE_DATE}
+## [Fix user search stalling] - {PR_MERGE_DATE}
+
+- Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
+- Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
+- Show the first page of people right away when opening the picker while the full list loads in the background.
+- Request smaller pages from Slack and stop retrying failed requests after a few attempts so errors show up instead of endless loading.
+
+## [Archive Channels AI Tool] - 2026-10-05
+
+- Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
+
+## [Fix Unread Messages configuration] - 2026-09-25
+
+- Fix selected conversations in the Unread Messages configuration sometimes being lost
+- Add a "Done" action to the configuration list to go back once you've picked your conversations
+
+## [Catch-up, Decisions, and Standup Skills] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add skills for catching up on selected Slack conversations, finding past discussions and decisions, and drafting standup updates from your own activity.
+- Include source references and coverage limits, with Slack delivery only when requested.
+
+## [Quiet automatic rate-limit retries] - 2026-09-23
 
 - Retry Slack rate-limited requests automatically without repeatedly showing a toast during commands and AI tasks.
 

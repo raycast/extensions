@@ -1,5 +1,5 @@
 import { Icon, Image } from "@raycast/api";
-import { getSlackWebClient } from "./WebClient";
+import { getSlackToken, getSlackWebClient } from "./WebClient";
 import type { SlackMember } from "./slackTypes";
 import { formatRelative } from "date-fns";
 import { Profile } from "@slack/web-api/dist/types/response/UsersProfileGetResponse";
@@ -10,6 +10,7 @@ import { toChannel, toGroup } from "./conversation";
 import type { Channel, Group } from "./conversation";
 import { searchMemberDirectory } from "./memberSearch";
 import { toUserName } from "./member";
+import { getMemberDirectory, peekMemberDirectory, slimMember } from "./memberDirectoryCache";
 
 export type { Channel, Group } from "./conversation";
 
@@ -89,6 +90,34 @@ function toUser(member: SlackMember): User | undefined {
     timezone: tz ?? "",
   };
 }
+
+/** Pages through users.list once; every search then filters this cached list locally. */
+async function loadAllMembers(): Promise<SlackMember[]> {
+  const slackWebClient = getSlackWebClient();
+  return collectPaginatedResults<SlackMember, SlackMember>({
+    loadPage: async (cursor) => {
+      const response = await slackWebClient.users.list({ limit: getDirectorySearchPageSize(), cursor });
+      return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+    },
+    transform: slimMember,
+    matches: () => true,
+    maxResults: Number.POSITIVE_INFINITY,
+    scanAllPages: true,
+  });
+}
+
+/**
+ * Typed queries wait for the full cached directory. An empty query on a cold cache only needs the first page, so it
+ * returns that immediately and warms the full directory in the background for the queries that follow.
+ */
+const createMemberPageLoader = (query: string) => async (): Promise<{ items: SlackMember[] }> => {
+  const token = getSlackToken();
+  if (query.trim() || peekMemberDirectory(token)) return { items: await getMemberDirectory(token, loadAllMembers) };
+
+  getMemberDirectory(token, loadAllMembers).catch(() => undefined);
+  const response = await getSlackWebClient().users.list({ limit: getDirectorySearchPageSize() });
+  return { items: (response.members ?? []).flatMap((member) => slimMember(member) ?? []) };
+};
 
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
@@ -171,15 +200,11 @@ export class SlackClient {
   }
 
   public static async searchDirectoryMembers(query: string, signal?: AbortSignal) {
-    const slackWebClient = getSlackWebClient();
     const result = await searchMemberDirectory({
       query,
       maxResults: maxSearchResultsPerType,
       toUser,
-      loadPage: async (cursor) => {
-        const response = await slackWebClient.users.list({ limit: getDirectorySearchPageSize(query), cursor });
-        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-      },
+      loadPage: createMemberPageLoader(query),
       signal,
     });
     result.users.sort((a, b) => sortNames(a.name, b.name));
@@ -203,13 +228,7 @@ export class SlackClient {
           searchUserNames({
             query,
             maxResults: maxSearchResultsPerType,
-            loadPage: async (cursor) => {
-              const response = await slackWebClient.users.list({
-                limit: getDirectorySearchPageSize(query),
-                cursor,
-              });
-              return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-            },
+            loadPage: createMemberPageLoader(query),
             signal,
           })),
       loadConversationsPage: async (cursor) => {
@@ -221,7 +240,7 @@ export class SlackClient {
               : types === "groups"
                 ? "mpim"
                 : "public_channel,private_channel,mpim",
-          limit: getDirectorySearchPageSize(query),
+          limit: getDirectorySearchPageSize(),
           cursor,
         });
         return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };

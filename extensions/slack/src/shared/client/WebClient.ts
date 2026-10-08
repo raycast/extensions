@@ -32,8 +32,9 @@ export const slack = OAuthService.slack({
   onAuthorize({ token }) {
     currentToken = token;
     const agent = getProxyAgent();
-    // Let the SDK honor Retry-After silently, including during AI tool calls.
-    slackWebClient = new WebClient(token, { ...(agent && { agent }) });
+    // Let the SDK honor Retry-After silently, including during AI tool calls. Cap retries of other failures
+    // (HTTP 5xx, timeouts): the default policy retries for ~30 minutes, which looks like an endless loading state.
+    slackWebClient = new WebClient(token, { retryConfig: { retries: 2, factor: 2 }, ...(agent && { agent }) });
   },
 });
 

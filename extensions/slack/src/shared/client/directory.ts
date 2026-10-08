@@ -2,8 +2,9 @@ export function isSlackUserId(id: string): boolean {
   return id.startsWith("U") || id.startsWith("W");
 }
 
-export function getDirectorySearchPageSize(query: string): number {
-  return query.trim() ? 999 : 200;
+/** Slack recommends at most 200 items per page; larger limits on big workspaces can time out or return HTTP 500. */
+export function getDirectorySearchPageSize(): number {
+  return 200;
 }
 
 export function mergeDirectorySearchResults<User, Channel, Group>(
