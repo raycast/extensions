@@ -1,6 +1,6 @@
 # RevenueCat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-08
 
 - Add an OAuth-connected dashboard for revenue, subscriptions, trials, and customers.
 - Search customers and inspect subscription details and event history.
