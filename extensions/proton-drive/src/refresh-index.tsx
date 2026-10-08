@@ -1,5 +1,6 @@
 import { environment, LaunchType, showHUD, updateCommandMetadata } from "@raycast/api";
 import { showError } from "./lib/errors";
+import { handleSignedOut, isSignedOut } from "./lib/session";
 import { backgroundRefreshEnabled, buildIndex, IndexAbortedError, IndexBusyError, isIndexing } from "./lib/index";
 
 export default async function Command() {
@@ -23,6 +24,8 @@ export default async function Command() {
       return;
     }
     if (error instanceof IndexAbortedError) return;
+    // The session ended outside the extension: delete local data, as every other command does.
+    if (isSignedOut(error)) return handleSignedOut();
     if (manual) await showError(error, "Indexing failed");
     else console.error(error);
   }

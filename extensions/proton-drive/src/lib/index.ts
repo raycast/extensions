@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { environment, getPreferenceValues } from "@raycast/api";
-import { DriveNode, joinPath, listFolder, ROOT } from "./cli";
+import { CliError, DriveNode, joinPath, listFolder, ROOT } from "./cli";
 import { isDemo } from "./demo";
 
 /**
@@ -287,8 +287,9 @@ export async function buildIndex(
                 }
               })
               .catch((error) => {
-                // If the root can't be listed (signed out, CLI missing…), nothing else will work either.
-                if (path === ROOT) throw error;
+                // Fatal: the root can't be listed (CLI missing…), or the session is gone. Continuing would
+                // record every remaining folder as failed and replace a good index with a sparse one.
+                if (path === ROOT || (error instanceof CliError && error.signedOut)) throw error;
                 state.failedFolders.push(path);
               })
               .then(async () => {

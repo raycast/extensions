@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { showError } from "./errors";
 import { handleSignedOut, isSignedOut, onSignedOut } from "./session";
@@ -13,101 +13,120 @@ import {
   readIndex,
 } from "./index";
 
-/** Parsed once per command run and shared by every folder view pushed on the navigation stack. */
-let shared: DriveIndex | undefined;
+/**
+ * Index state shared by every folder view of the command: building or refreshing the index from a
+ * nested folder updates the views further back in the navigation stack too.
+ */
+interface IndexState {
+  index?: DriveIndex;
+  /** Progress of a build, by this command or by another one (e.g. the background refresh). */
+  progress?: string;
+}
+
+const BACKGROUND = "Indexing in the background…";
+
+let state: IndexState = {};
+const listeners = new Set<(state: IndexState) => void>();
+
+function update(patch: Partial<IndexState> | ((current: IndexState) => Partial<IndexState>)) {
+  state = { ...state, ...(typeof patch === "function" ? patch(state) : patch) };
+  listeners.forEach((listener) => listener(state));
+}
+
+/** True while this command runs a build. */
+let building = false;
+/** Polls the index file while another command builds it, to show its checkpoints. */
+let following: ReturnType<typeof setInterval> | undefined;
+
+function stopFollowing() {
+  clearInterval(following);
+  following = undefined;
+}
+
+function follow() {
+  update({ progress: BACKGROUND });
+  if (following) return;
+  following = setInterval(async () => {
+    const stillIndexing = await isIndexing();
+    const latest = await readIndex();
+    if (latest) update({ index: latest });
+    if (!stillIndexing) {
+      stopFollowing();
+      update({ progress: undefined });
+    }
+  }, 10_000);
+}
+
 // Once signed out, the previous session's index must not stay in memory either.
 onSignedOut(() => {
-  shared = undefined;
+  stopFollowing();
+  update({ index: undefined, progress: undefined });
 });
 
+/** Builds or refreshes the index. `silent` skips the progress toast (automatic resume). */
+export async function refreshIndex(silent: boolean): Promise<void> {
+  if (building) return;
+  if (await isIndexing()) return follow();
+  building = true;
+  const toast = silent ? undefined : await showToast({ style: Toast.Style.Animated, title: "Indexing Proton Drive…" });
+  try {
+    let shown = 0;
+    const fresh = await buildIndex((done, left, partial) => {
+      const text = `${done} folders listed · ${left} to go · ${partial.entries.length} items`;
+      update({ progress: text });
+      if (toast) toast.message = text;
+      // During the very first crawl, make results searchable as they come in.
+      if (partial.entries.length - shown > 500) {
+        shown = partial.entries.length;
+        update((current) =>
+          !current.index || current.index.partial
+            ? // Copies: the crawl keeps appending to these arrays.
+              { index: { ...partial, folders: partial.folders.slice(), entries: partial.entries.slice() } }
+            : {},
+        );
+      }
+    });
+    update({ index: fresh });
+    if (toast) {
+      toast.style = Toast.Style.Success;
+      toast.title = `Indexed ${fresh.entries.length} items`;
+    }
+  } catch (error) {
+    await toast?.hide();
+    // Another command won the lock in the meantime: follow its progress instead.
+    if (error instanceof IndexBusyError) follow();
+    else if (isSignedOut(error)) await handleSignedOut();
+    else if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
+  } finally {
+    building = false;
+    if (!following) update({ progress: undefined });
+  }
+}
+
+let initialized = false;
+
+/** Loads the index once per command run; resumes an interrupted first crawl, or refreshes if opted in. */
+async function initialize() {
+  if (initialized) return;
+  initialized = true;
+  const cached = await readIndex();
+  update({ index: cached });
+  if (cached?.partial || (backgroundRefreshEnabled() && isStale(cached))) await refreshIndex(true);
+}
+
 /**
- * The optional whole-Drive search index: loads it, and builds or refreshes it on demand.
- * An interrupted first crawl is resumed automatically; otherwise crawling only happens
- * when the user asks, or when background refresh is enabled in preferences.
+ * The optional whole-Drive search index. Crawling only happens when the user asks, to finish an
+ * interrupted first crawl, or when background refresh is enabled in preferences.
  */
 export function useDriveIndex() {
-  const [index, setIndexState] = useState<DriveIndex | undefined>(shared);
-  const setIndex = useCallback((next: DriveIndex | undefined | ((current?: DriveIndex) => DriveIndex | undefined)) => {
-    setIndexState((current) => {
-      shared = typeof next === "function" ? next(current) : next;
-      return shared;
-    });
+  const [current, setCurrent] = useState(state);
+  useEffect(() => {
+    listeners.add(setCurrent);
+    setCurrent(state);
+    initialize();
+    return () => {
+      listeners.delete(setCurrent);
+    };
   }, []);
-  const [progress, setProgress] = useState<string>();
-  const refreshing = useRef(false);
-  useEffect(() => onSignedOut(() => setIndexState(undefined)), []);
-
-  const refresh = useCallback(
-    async (silent: boolean) => {
-      if (refreshing.current) return;
-      if (await isIndexing()) {
-        // The background command (or another window) is crawling: follow its checkpoints.
-        setProgress("Indexing in the background…");
-        return;
-      }
-      refreshing.current = true;
-      const toast = silent
-        ? undefined
-        : await showToast({ style: Toast.Style.Animated, title: "Indexing Proton Drive…" });
-      try {
-        let shown = 0;
-        const fresh = await buildIndex((done, left, partial) => {
-          const text = `${done} folders listed · ${left} to go · ${partial.entries.length} items`;
-          setProgress(text);
-          if (toast) toast.message = text;
-          // During the very first crawl, make results searchable as they come in.
-          if (partial.entries.length - shown > 500) {
-            shown = partial.entries.length;
-            setIndex((current) =>
-              !current || current.partial // Copies: the crawl keeps appending to these arrays.
-                ? { ...partial, folders: partial.folders.slice(), entries: partial.entries.slice() }
-                : current,
-            );
-          }
-        });
-        setIndex(fresh);
-        if (toast) {
-          toast.style = Toast.Style.Success;
-          toast.title = `Indexed ${fresh.entries.length} items`;
-        }
-      } catch (error) {
-        await toast?.hide();
-        if (error instanceof IndexBusyError) {
-          // Another command won the lock in the meantime: follow its progress instead.
-          refreshing.current = false;
-          setProgress("Indexing in the background…");
-          return;
-        }
-        if (isSignedOut(error)) await handleSignedOut();
-        else if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
-      } finally {
-        if (refreshing.current) {
-          refreshing.current = false;
-          setProgress(undefined);
-        }
-      }
-    },
-    [setIndex],
-  );
-
-  useEffect(() => {
-    (async () => {
-      const cached = shared ?? (await readIndex());
-      setIndex(cached);
-      if (cached?.partial || (backgroundRefreshEnabled() && isStale(cached))) await refresh(true);
-    })();
-  }, [refresh]);
-
-  // While someone else is indexing, reload the index file as it gets checkpointed.
-  useEffect(() => {
-    if (refreshing.current || !progress) return;
-    const timer = setInterval(async () => {
-      if (!(await isIndexing())) setProgress(undefined);
-      const latest = await readIndex();
-      if (latest) setIndex(latest);
-    }, 10_000);
-    return () => clearInterval(timer);
-  }, [progress]);
-
-  return { index, progress, refresh };
+  return { index: current.index, progress: current.progress, refresh: refreshIndex };
 }
