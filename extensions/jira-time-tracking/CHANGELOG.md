@@ -1,6 +1,6 @@
 # Changelog
 
-## [Restore Jira Cloud Search and Manage Worklogs] - {PR_MERGE_DATE}
+## [Restore Jira Cloud Search and Manage Worklogs] - 2026-10-08
 
 - Restore Jira Cloud issue search using the enhanced JQL endpoint and cursor pagination, while retaining Jira Server support.
 - Add View Logged Time with monthly totals, hour and text filters, and reminders for weekdays below the configured daily threshold.
