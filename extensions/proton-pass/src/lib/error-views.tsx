@@ -103,7 +103,7 @@ export function CliNotFoundView() {
       <List.EmptyView
         icon={Icon.XMarkCircle}
         title="Proton Pass CLI Not Found"
-        description="pass-cli wasn't found at the CLI Path set in the extension preferences. Correct the path, or clear it to use the pass-cli the extension installs."
+        description="pass-cli wasn't found at the CLI Path set in the extension preferences. Correct the path, or clear it to use the pass-cli the extension installs. Then open the command again."
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
