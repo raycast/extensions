@@ -1,12 +1,14 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { getSharedCookies, type TargetLanguage, translate } from "@deeplx/core";
+import { getSharedCookies, type SourceLanguage, type TargetLanguage, translate } from "@deeplx/core";
 import { Cache } from "@raycast/api";
 
+import type { TranslationContent } from "@/core/content/types";
 import { getLangCode } from "@/core/language/utils";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { logTrace } from "@/utils/logger";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
+import { logTrace } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
 
@@ -21,7 +23,16 @@ class CookieCacheManager {
     if (!value) return undefined;
 
     try {
-      const { cookies, timestamp } = JSON.parse(value) as { cookies: string; timestamp: number };
+      const decoded: unknown = JSON.parse(value);
+      if (
+        !isRecord(decoded) ||
+        typeof decoded.cookies !== "string" ||
+        !decoded.cookies ||
+        typeof decoded.timestamp !== "number" ||
+        !Number.isFinite(decoded.timestamp)
+      )
+        return undefined;
+      const { cookies, timestamp } = decoded;
       if (Date.now() - timestamp > this.TTL_MS) {
         logTrace("DeepLX", "cached cookies expired");
         return undefined;
@@ -66,7 +77,7 @@ const cookieCache = new CookieCacheManager();
 export class DeepLXTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.DeepLX;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
     const sourceLang = getLangCode(fromLanguage, "deepLSourceId");
     const targetLang = getLangCode(toLanguage, "deepLTargetId") || getLangCode(toLanguage, "deepLSourceId");
@@ -74,10 +85,9 @@ export class DeepLXTranslateProvider extends BaseNonStreamingTranslateProvider {
     if (!sourceLang || !targetLang) {
       logTrace(this.type, `translate not support language: ${fromLanguage} --> ${toLanguage}`);
       return {
-        type: TranslationType.DeepLX,
-        result: undefined,
-        translations: [],
-        queryWordInfo,
+        kind: "translation",
+        query: queryWordInfo,
+        paragraphs: [],
       };
     }
 
@@ -85,7 +95,7 @@ export class DeepLXTranslateProvider extends BaseNonStreamingTranslateProvider {
 
     let translatedText: string;
     try {
-      translatedText = await translate(word, targetLang as TargetLanguage, sourceLang as TargetLanguage, {
+      translatedText = await translate(word, targetLang as TargetLanguage, sourceLang as SourceLanguage, {
         signal,
         cookies: cachedCookies,
       });
@@ -99,21 +109,10 @@ export class DeepLXTranslateProvider extends BaseNonStreamingTranslateProvider {
 
     cookieCache.updateIfChanged(cachedCookies);
 
-    // Create a result object similar to DeepL API structure
-    const deepLXResult = {
-      translations: [
-        {
-          detected_source_language: sourceLang,
-          text: translatedText,
-        },
-      ],
-    };
-
     return {
-      type: TranslationType.DeepLX,
-      result: deepLXResult,
-      translations: translatedText.split("\n"),
-      queryWordInfo,
+      kind: "translation",
+      paragraphs: translatedText.split("\n"),
+      query: queryWordInfo,
     };
   }
 }

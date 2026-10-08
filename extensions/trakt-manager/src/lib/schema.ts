@@ -80,8 +80,12 @@ export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(Trak
 
 export const TraktHistoryQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
 
-export const TraktUpNextQuerySchema = TraktPaginationWithSortingSchema.extend({
-  include_stats: z.coerce.boolean(),
+/**
+ * Query for `/sync/progress/up_next_nitro`. Unlike `/sync/progress/up_next`, it takes `intent`
+ * (`continue` = shows being watched) and has no `extended` param.
+ */
+export const TraktUpNextNitroQuerySchema = TraktPaginationSchema.extend({
+  intent: z.enum(["all", "continue", "start", "completed"]),
 });
 
 export const TraktImageListItem = z.object({
@@ -142,6 +146,71 @@ export const TraktMovieListItem = z.object({
 });
 
 export const TraktMovieList = z.array(TraktMovieListItem);
+
+/** Response of `POST /sync/watchlist`. An item already listed counts under `existing`, not `added`. */
+export const TraktWatchlistAddResponseSchema = z.object({
+  added: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+  existing: z.object({ movies: z.number().optional(), shows: z.number().optional() }).optional(),
+});
+
+/** Response of `POST /sync/watchlist/remove`. `deleted` counts the items that were on the watchlist. */
+export const TraktWatchlistRemoveResponseSchema = z.object({
+  deleted: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+});
+
+/** Response of `POST /users/hidden/:section`. `added` counts the items Trakt hid. */
+export const TraktHiddenAddResponseSchema = z.object({
+  added: z.object({ movies: z.number().optional(), shows: z.number().optional(), season: z.number().optional() }),
+});
+
+/** Response of `GET /users/:id/watching`: what the user is watching right now. `204` (no body) means nothing. */
+export const TraktWatchingSchema = z.object({
+  type: z.enum(["movie", "episode"]),
+  expires_at: z.string(),
+  action: z.string().optional(),
+  movie: z.object({ title: z.string(), ids: z.object({ trakt: z.number() }) }).nullish(),
+  episode: z.object({ title: z.string().nullish(), ids: z.object({ trakt: z.number() }) }).nullish(),
+  show: z.object({ title: z.string() }).nullish(),
+});
+
+/** Body of `409` from `POST /checkin`: another check-in is active until `expires_at`. */
+export const TraktCheckinConflictSchema = z.object({ expires_at: z.string() });
+
+/**
+ * `sharing` is optional and falls back to the user's settings, which can post to connected networks.
+ * Every key is sent as `false` so a check-in made from here never publishes anything.
+ */
+export const TraktNoSharing = { twitter: false, mastodon: false, tumblr: false } as const;
+
+/**
+ * Response of `POST /sync/history`. `added` counts the plays Trakt stored; ids it could not match
+ * come back under `not_found`. A 2xx with `added` at zero stored nothing.
+ */
+export const TraktHistoryAddResponseSchema = z.object({
+  added: z.object({ movies: z.number(), episodes: z.number() }),
+  not_found: z
+    .object({ movies: z.array(z.unknown()).optional(), episodes: z.array(z.unknown()).optional() })
+    .optional(),
+});
+
+/**
+ * Query for `/sync/playback/movies`. Pagination is opt-in there: without `page` or `limit`
+ * Trakt returns the whole set and sends no `X-Pagination-*` headers, so callers always send both.
+ */
+export const TraktPlaybackQuerySchema = TraktPaginationSchema.extend({
+  extended: z.enum(["full", "images", "full,images"]),
+});
+
+/** A movie paused mid-playback. `progress` is 0–100, `id` is the playback id. */
+export const TraktPlaybackMovieItem = z.object({
+  id: z.number(),
+  type: z.literal("movie"),
+  progress: z.number(),
+  paused_at: z.string(),
+  movie: TraktMovieBaseItem,
+});
+
+export const TraktPlaybackMovieList = z.array(TraktPlaybackMovieItem);
 
 export const TraktEpisodeListItem = z.object({
   season: z.number(),
@@ -247,6 +316,7 @@ export const TraktMediaType = z.enum(["movie", "show"]);
 
 export type TraktMovieListItem = z.infer<typeof TraktMovieListItem>;
 export type TraktMovieList = z.infer<typeof TraktMovieList>;
+export type TraktPlaybackMovieItem = z.infer<typeof TraktPlaybackMovieItem>;
 export type TraktShowListItem = z.infer<typeof TraktShowListItem>;
 export type TraktShowList = z.infer<typeof TraktShowList>;
 export type TraktSeasonListItem = z.infer<typeof TraktSeasonListItem>;
@@ -401,6 +471,132 @@ export const TraktUserStatsSchema = z.object({
 });
 
 export type TraktUserStats = z.infer<typeof TraktUserStatsSchema>;
+
+export const TraktListPrivacySchema = z.enum(["private", "link", "friends", "public"]);
+
+export const TraktListSortBySchema = z.enum([
+  "rank",
+  "added",
+  "title",
+  "released",
+  "runtime",
+  "popularity",
+  "random",
+  "percentage",
+  "imdb_rating",
+  "tmdb_rating",
+  "rt_tomatometer",
+  "rt_audience",
+  "metascore",
+  "votes",
+  "imdb_votes",
+  "tmdb_votes",
+  "my_rating",
+  "watched",
+  "collected",
+]);
+
+export const TraktListSortHowSchema = z.enum(["asc", "desc"]);
+
+export const TraktListSchema = z.object({
+  name: z.string(),
+  description: z.string().optional().nullable(),
+  privacy: z.string().optional(),
+  share_link: z.string().optional().nullable(),
+  type: z.string().optional(),
+  display_numbers: z.boolean().optional(),
+  allow_comments: z.boolean().optional(),
+  sort_by: z.string().optional(),
+  sort_how: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  item_count: z.number().optional(),
+  comment_count: z.number().optional(),
+  likes: z.number().optional(),
+  ids: z.object({
+    trakt: z.number(),
+    slug: z.string().optional().nullable(),
+  }),
+});
+
+export const TraktListsSchema = z.array(TraktListSchema);
+
+export const TraktListWriteBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  privacy: TraktListPrivacySchema.optional(),
+  display_numbers: z.boolean().optional(),
+  allow_comments: z.boolean().optional(),
+  sort_by: TraktListSortBySchema.optional(),
+  sort_how: TraktListSortHowSchema.optional(),
+});
+
+/**
+ * List entries return lightweight media objects, so external ids may be missing or null.
+ */
+const TraktListMediaIdsSchema = z.object({
+  trakt: z.number(),
+  slug: z.string().optional().nullable(),
+  tvdb: z.number().optional().nullable(),
+  imdb: z.string().optional().nullable(),
+  tmdb: z.number().optional().nullable(),
+});
+
+export const TraktListEntrySchema = z.object({
+  id: z.number(),
+  rank: z.number().optional().nullable(),
+  listed_at: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  type: z.string(),
+  movie: z
+    .object({
+      title: z.string(),
+      year: z.number().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+  show: z
+    .object({
+      title: z.string(),
+      year: z.number().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+  season: z
+    .object({
+      number: z.number(),
+      ids: TraktListMediaIdsSchema.partial().optional(),
+    })
+    .optional(),
+  episode: z
+    .object({
+      season: z.number(),
+      number: z.number(),
+      title: z.string().optional().nullable(),
+      ids: TraktListMediaIdsSchema,
+    })
+    .optional(),
+});
+
+export const TraktListEntriesSchema = z.array(TraktListEntrySchema);
+
+export const TraktListItemIdSchema = z.object({
+  ids: z.object({
+    trakt: z.number(),
+  }),
+});
+
+export const TraktListItemsBodySchema = z.object({
+  movies: z.array(TraktListItemIdSchema).optional(),
+  shows: z.array(TraktListItemIdSchema).optional(),
+  seasons: z.array(TraktListItemIdSchema).optional(),
+  episodes: z.array(TraktListItemIdSchema).optional(),
+});
+
+export type TraktList = z.infer<typeof TraktListSchema>;
+export type TraktListEntry = z.infer<typeof TraktListEntrySchema>;
+export type TraktListItemsBody = z.infer<typeof TraktListItemsBodySchema>;
+export type TraktListWriteBody = z.infer<typeof TraktListWriteBodySchema>;
 
 export const TraktPaginationHeaderSchema = z.object({
   "x-pagination-page": z.coerce.number().default(0),

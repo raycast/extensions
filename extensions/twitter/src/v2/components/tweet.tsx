@@ -6,7 +6,7 @@ import { deduplicateById, Tweet } from "../lib/twitter";
 import { clientV2, Fetcher } from "../lib/twitterapi_v2";
 import { compactNumberFormat, padStart, replaceAll } from "../../utils";
 import {
-  DeleteTweetAction as DeleteTweetAction,
+  DeleteTweetAction,
   BookmarkTweetAction,
   LikeTweetAction,
   LogoutAction,
@@ -17,11 +17,10 @@ import {
   ReplyTweetAction,
   RetweetAction,
   QuoteTweetAction,
-  SetReplyHiddenAction,
-  ShowPostEngagementAction,
   ShowAuthorTweetsAction,
   ShowDetailV2Action,
   UnlikeTweetAction,
+  engagementAndModerationSections,
 } from "./actions";
 import { getMarkdownFromTweet } from "./detail";
 
@@ -178,7 +177,7 @@ export function TweetListItem(props: {
   const t = props.tweet;
   const withDetail = props.withDetail;
   const fetcher = props.fetcher;
-  const millifyState = props.millifyState !== undefined ? props.millifyState : true;
+  const millifyState = props.millifyState ?? true;
 
   const text = getCleanTweetText(t);
 
@@ -187,7 +186,7 @@ export function TweetListItem(props: {
     ? { source: imgUrl, mask: Image.Mask.Circle, fallback: Icon.Person }
     : Icon.Person;
 
-  const hasImage = t.image_url ? true : false;
+  const hasImage = Boolean(t.image_url);
   const p = (num: number | undefined, length: number): string => {
     if (num === undefined) {
       return "0";
@@ -253,17 +252,7 @@ export function TweetListItem(props: {
             <BookmarkTweetAction tweet={t} fetcher={fetcher} />
             <BookmarkTweetAction tweet={t} remove fetcher={fetcher} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Engagement">
-            <ShowPostEngagementAction tweet={t} kind="likes" />
-            <ShowPostEngagementAction tweet={t} kind="reposts" />
-            <ShowPostEngagementAction tweet={t} kind="quotes" />
-          </ActionPanel.Section>
-          {props.canModerateReply && (
-            <ActionPanel.Section title="Moderation">
-              <SetReplyHiddenAction tweet={t} hidden />
-              <SetReplyHiddenAction tweet={t} hidden={false} />
-            </ActionPanel.Section>
-          )}
+          {engagementAndModerationSections(t, props.canModerateReply)}
           <ActionPanel.Section>
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />
@@ -289,8 +278,8 @@ export function TweetListItem(props: {
 
 export function TweetList(props: {
   tweets: Tweet[] | undefined;
-  isLoading?: boolean | undefined;
-  fetcher?: Fetcher | undefined;
+  isLoading?: boolean;
+  fetcher?: Fetcher;
   millifyState?: boolean;
   pagination?: {
     pageSize: number;
@@ -310,7 +299,7 @@ export function TweetList(props: {
   const tweets = deduplicateById(props.tweets);
   const moderatableReplyIds = useModeratableReplyIds(tweets);
   const [isShowingDetail, setIsShowingDetail] = useState(shouldShowListWithDetails);
-  const millifyState = props.millifyState !== undefined ? props.millifyState : true;
+  const millifyState = props.millifyState ?? true;
   let maxFavDigits = 1;
   let maxRTDigits = 1;
   let maxCDigits = 1;
@@ -322,20 +311,18 @@ export function TweetList(props: {
     return text.length;
   };
 
-  if (tweets) {
-    for (const t of tweets) {
-      const lenF = getStringLength(t.like_count);
-      if (lenF > maxFavDigits) {
-        maxFavDigits = lenF;
-      }
-      const lenRT = getStringLength(t.retweet_count);
-      if (lenRT > maxRTDigits) {
-        maxRTDigits = lenRT;
-      }
-      const lenC = getStringLength(t.reply_count);
-      if (lenC > maxCDigits) {
-        maxCDigits = lenC;
-      }
+  for (const t of tweets) {
+    const lenF = getStringLength(t.like_count);
+    if (lenF > maxFavDigits) {
+      maxFavDigits = lenF;
+    }
+    const lenRT = getStringLength(t.retweet_count);
+    if (lenRT > maxRTDigits) {
+      maxRTDigits = lenRT;
+    }
+    const lenC = getStringLength(t.reply_count);
+    if (lenC > maxCDigits) {
+      maxCDigits = lenC;
     }
   }
   return (
@@ -369,7 +356,7 @@ export function TweetList(props: {
           }
         />
       )}
-      {tweets?.map((tweet) => (
+      {tweets.map((tweet) => (
         <TweetListItem
           key={tweet.id}
           tweet={tweet}

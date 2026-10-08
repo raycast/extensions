@@ -50,14 +50,30 @@
       "title": "Set Output Volume",
       "subtitle": "Audio Device",
       "description": "Set the volume of an output device.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "0-100",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "set-input-volume",
       "title": "Set Input Volume",
       "subtitle": "Audio Device",
       "description": "Set the volume of an input device.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "0-100",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "auto-switch-input",
@@ -202,6 +218,28 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "list-audio-devices",
+      "title": "List Audio Devices",
+      "description": "List available input or output devices, their IDs, and which one is currently active. Use before switching to a named device."
+    },
+    {
+      "name": "set-audio-device",
+      "title": "Set Audio Device",
+      "description": "Switch the active input or output device using an ID from List Audio Devices."
+    },
+    {
+      "name": "get-audio-volume",
+      "title": "Get Audio Volume",
+      "description": "Get the current input or output device volume as a percentage from 0 to 100."
+    },
+    {
+      "name": "set-audio-volume",
+      "title": "Set Audio Volume",
+      "description": "Set the current input or output device volume to a percentage from 0 to 100."
+    }
+  ],
   "preferences": [
     {
       "name": "systemOutput",
@@ -249,6 +287,7 @@
     "build": "npm run copy-binary && ray build -e dist",
     "dev": "npm run copy-binary && ray develop",
     "lint": "ray lint",
+    "test": "node --test tests/*.test.cjs",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   },

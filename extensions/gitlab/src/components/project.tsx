@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { getFirstChar, projectIconUrl } from "../utils";
+import { getFirstChar, getPreferences, projectDropdownTitle, projectIconUrl } from "../utils";
+import { useAvatars } from "../hooks";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -31,6 +32,7 @@ export enum ProjectScope {
 }
 
 export function ProjectListItem(props: { project: Project; nameOnly?: boolean; showCreateQuickLink?: boolean }) {
+  const avatarSources = useAvatars([projectIconUrl(props.project)]);
   const accessories = [];
   if (props.project.archived) {
     accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
@@ -48,8 +50,8 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean; s
       title={props.nameOnly === true ? props.project.name : props.project.name_with_namespace}
       accessories={accessories}
       icon={
-        projectIconUrl(props.project)
-          ? { source: projectIconUrl(props.project)! }
+        avatarSources[projectIconUrl(props.project) ?? ""]
+          ? { source: avatarSources[projectIconUrl(props.project) ?? ""] }
           : getTextIcon((props.project.name ? getFirstChar(props.project.name) : "?").toUpperCase())
       }
       actions={
@@ -127,25 +129,34 @@ export function ProjectList() {
   );
 }
 
-const MY_PROJECTS_PAGE_SIZE = 20;
-
-export function useMyProjects(
-  search = "",
-  execute = true,
-): {
+export function useMyProjects(execute = true): {
   projects: Project[];
   isLoading?: boolean;
 } {
-  const { data, isLoading } = useCachedPromise(
-    async (query: string): Promise<Project[]> =>
-      gitlab.getUserProjects({ search: query, per_page: `${MY_PROJECTS_PAGE_SIZE}` }, false),
-    [search],
-    { initialData: [], keepPreviousData: true, execute },
-  );
+  const { data, isLoading } = useCachedPromise(() => gitlab.getUserProjects({ simple: "true" }, true), [], {
+    initialData: [],
+    execute,
+  });
   return {
     projects: data,
     isLoading,
   };
+}
+
+const RECENT_PROJECTS_COUNT = 3;
+
+function MyProjectsDropdownItem(props: { project: Project; avatarSource?: string }) {
+  return (
+    <List.Dropdown.Item
+      title={projectDropdownTitle(props.project)}
+      icon={
+        props.avatarSource
+          ? { source: props.avatarSource }
+          : getTextIcon((props.project.name ? getFirstChar(props.project.name) : "?").toUpperCase())
+      }
+      value={`${props.project.id}`}
+    />
+  );
 }
 
 export function MyProjectsDropdown(props: {
@@ -154,27 +165,50 @@ export function MyProjectsDropdown(props: {
   storeValue?: boolean;
   includeAllItem?: boolean;
 }): React.ReactNode {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Project>();
-  const { projects, isLoading } = useMyProjects(search);
-  const includeAllItem = props.includeAllItem !== false;
-  const selectedId = props.value ?? (selected ? `${selected.id}` : undefined);
-  const { data: fetchedSelected } = useCachedPromise(
+  const { projects: myprojects, isLoading } = useMyProjects();
+  // the selected project can be outside the member projects (e.g. opened from "All" in Search Projects),
+  // so it is fetched by ID and pinned to keep the selection
+  const { data: selectedProject } = useCachedPromise(
     async (id: string): Promise<Project> => gitlab.getProject(Number(id)),
-    [selectedId ?? ""],
+    [props.value ?? ""],
     {
-      execute:
-        !!selectedId &&
-        selectedId !== "-" &&
-        !projects.some((project) => `${project.id}` === selectedId) &&
-        (!selected || `${selected.id}` !== selectedId),
+      execute: !!props.value && props.value !== "-" && !myprojects.some((project) => `${project.id}` === props.value),
     },
   );
-  const pinnedProject = selected && `${selected.id}` === selectedId ? selected : fetchedSelected;
-  const myprojects =
-    pinnedProject && !projects.some((project) => project.id === pinnedProject.id)
-      ? [pinnedProject, ...projects]
-      : projects;
+  const dropdownProjects = useMemo(
+    () =>
+      selectedProject && !myprojects.some((project) => project.id === selectedProject.id)
+        ? [selectedProject, ...myprojects]
+        : myprojects,
+    [myprojects, selectedProject],
+  );
+  const avatarSources = useAvatars(dropdownProjects.map(projectIconUrl));
+  const [recentProjectIds, setRecentProjectIds] = useCachedState<number[]>("my-projects-dropdown-recent", []);
+  const includeAllItem = props.includeAllItem !== false;
+
+  // "Recent" shows the last selected projects (current one first); the remaining projects are grouped
+  // by top-level group, or by the first subgroup when the top-level group is hidden from titles.
+  const { recentProjects, groupSections } = useMemo(() => {
+    const currentProjectId = props.value && props.value !== "-" ? [Number(props.value)] : [];
+    const recentProjects = [...new Set([...currentProjectId, ...recentProjectIds])]
+      .map((id) => dropdownProjects.find((project) => project.id === id))
+      .filter((project): project is Project => !!project)
+      .slice(0, RECENT_PROJECTS_COUNT);
+    const showRepositoryGroupName = getPreferences().showRepositoryGroupName;
+    const groups = new Map<string, Project[]>();
+    for (const project of myprojects) {
+      if (recentProjects.includes(project)) {
+        continue;
+      }
+      const namespaces = project.name_with_namespace.split(" / ").slice(0, -1);
+      const group = (showRepositoryGroupName ? namespaces[0] : (namespaces[1] ?? namespaces[0])) ?? "";
+      groups.set(group, [...(groups.get(group) ?? []), project]);
+    }
+    return {
+      recentProjects,
+      groupSections: [...groups].sort(([first], [second]) => first.localeCompare(second)),
+    };
+  }, [dropdownProjects, myprojects, props.value, recentProjectIds]);
 
   return (
     <List.Dropdown
@@ -183,17 +217,18 @@ export function MyProjectsDropdown(props: {
       value={props.value}
       storeValue={props.storeValue}
       isLoading={isLoading}
-      throttle={true}
-      onSearchTextChange={setSearch}
       onChange={(newValue) => {
         if (includeAllItem && newValue === "-") {
-          setSelected(undefined);
           props.onChange(undefined);
           return;
         }
-        const nextProject = myprojects.find((project) => `${project.id}` === newValue);
-        setSelected(nextProject);
-        props.onChange(nextProject);
+        const project = dropdownProjects.find((project) => `${project.id}` === newValue);
+        if (project) {
+          setRecentProjectIds((current) =>
+            [project.id, ...current.filter((id) => id !== project.id)].slice(0, RECENT_PROJECTS_COUNT),
+          );
+        }
+        props.onChange(project);
       }}
     >
       {includeAllItem && (
@@ -201,20 +236,28 @@ export function MyProjectsDropdown(props: {
           <List.Dropdown.Item title="All Projects" value="-" />
         </List.Dropdown.Section>
       )}
-      <List.Dropdown.Section>
-        {myprojects.map((project) => (
-          <List.Dropdown.Item
-            key={`${project.id}`}
-            title={project.name_with_namespace}
-            icon={
-              projectIconUrl(project)
-                ? { source: projectIconUrl(project)! }
-                : getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase())
-            }
-            value={`${project.id}`}
-          />
-        ))}
-      </List.Dropdown.Section>
+      {recentProjects.length > 0 && (
+        <List.Dropdown.Section title="Recent">
+          {recentProjects.map((project) => (
+            <MyProjectsDropdownItem
+              key={project.id}
+              project={project}
+              avatarSource={avatarSources[projectIconUrl(project) ?? ""]}
+            />
+          ))}
+        </List.Dropdown.Section>
+      )}
+      {groupSections.map(([group, projects]) => (
+        <List.Dropdown.Section key={group} title={group}>
+          {projects.map((project) => (
+            <MyProjectsDropdownItem
+              key={project.id}
+              project={project}
+              avatarSource={avatarSources[projectIconUrl(project) ?? ""]}
+            />
+          ))}
+        </List.Dropdown.Section>
+      ))}
     </List.Dropdown>
   );
 }

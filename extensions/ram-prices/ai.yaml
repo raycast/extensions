@@ -1,0 +1,86 @@
+instructions: |
+  Use get-market-trends to answer questions about RAM prices, DDR4 and DDR5
+  comparisons, and historical trends. Data is cached for up to one hour.
+  Prices are market averages in USD per GB, not prices for individual RAM kits.
+  Include the observation date when reporting prices and link to the source.
+  changePercent compares the latest observation with the previous observation,
+  which is not necessarily the previous day. Use history for other time ranges.
+  When comparing DDR4 and DDR5, identify which has the lower price per GB.
+  When reporting changes, include the date of the previous observation.
+  If a generation or requested date range has no data, explain that it is
+  unavailable. Do not invent prices, product listings, or future price forecasts.
+
+evals:
+  - input: "@ram-prices What is the latest DDR5 price per GB?"
+    mocks:
+      get-market-trends:
+        sourceUrl: https://ramradar.app
+        currency: USD
+        priceUnit: per GB
+        lastUpdated: "2026-04-01"
+        series:
+          - generation: DDR5
+            latest: { date: "2026-04-01", avgPricePerGb: 4.5, productCount: 120 }
+            previous: { date: "2026-03-30", avgPricePerGb: 5, productCount: 118 }
+            changePercent: -10
+            history:
+              - { date: "2026-03-30", avgPricePerGb: 5, productCount: 118 }
+              - { date: "2026-04-01", avgPricePerGb: 4.5, productCount: 120 }
+    expected:
+      - callsTool: get-market-trends
+      - includes: DDR5
+      - matches: '\b4[.,]50?\b'
+      - matches: '([Uu][Ss][Dd]|\$)'
+      - matches: '(per\s+[Gg][Bb]|/\s*[Gg][Bb])'
+      - matches: '([Aa]pril\s+1,?\s+2026|1\s+[Aa]pril\s+2026|2026-04-01)'
+      - includes: https://ramradar.app
+
+  - input: "@ram-prices Compare DDR4 and DDR5 prices and tell me how they changed since the previous observation."
+    mocks:
+      get-market-trends:
+        sourceUrl: https://ramradar.app
+        currency: USD
+        priceUnit: per GB
+        lastUpdated: "2026-04-01"
+        series:
+          - generation: DDR5
+            latest: { date: "2026-04-01", avgPricePerGb: 4.5, productCount: 120 }
+            previous: { date: "2026-03-30", avgPricePerGb: 5, productCount: 118 }
+            changePercent: -10
+            history:
+              - { date: "2026-03-30", avgPricePerGb: 5, productCount: 118 }
+              - { date: "2026-04-01", avgPricePerGb: 4.5, productCount: 120 }
+          - generation: DDR4
+            latest: { date: "2026-04-01", avgPricePerGb: 2.2, productCount: 80 }
+            previous: { date: "2026-03-30", avgPricePerGb: 2, productCount: 79 }
+            changePercent: 10
+            history:
+              - { date: "2026-03-30", avgPricePerGb: 2, productCount: 79 }
+              - { date: "2026-04-01", avgPricePerGb: 2.2, productCount: 80 }
+    expected:
+      - callsTool: get-market-trends
+      - matches: '[Dd][Dd][Rr]4[^\n]*\b2[.,]20?\b'
+      - matches: '[Dd][Dd][Rr]5[^\n]*\b4[.,]50?\b'
+      - matches: '([Uu][Ss][Dd]|\$)'
+      - matches: '(per\s+[Gg][Bb]|/\s*[Gg][Bb])'
+      - matches: '([-−]10\s*%|(?:down|decreas\w*|fell|drop\w*)[^\n]*10\s*%|10\s*%[^\n]*(?:down|decreas\w*|fell|drop\w*))'
+      - matches: '(\+10\s*%|(?:up|increas\w*|rose|ris\w*)[^\n]*10\s*%|10\s*%[^\n]*(?:up|increas\w*|rose|ris\w*))'
+      - matches: '([Mm]arch\s+30,?\s+2026|30\s+[Mm]arch\s+2026|2026-03-30)'
+      - matches: '([Dd][Dd][Rr]4[^\n]*(?:cheaper|less expensive|lower)|(?:cheaper|less expensive|lower)[^\n]*[Dd][Dd][Rr]4)'
+
+  - input: "@ram-prices What are the latest DDR4 and DDR5 prices?"
+    usedAsExample: false
+    mocks:
+      get-market-trends:
+        sourceUrl: https://ramradar.app
+        currency: USD
+        priceUnit: per GB
+        lastUpdated: "2026-04-01"
+        series: []
+    expected:
+      - callsTool: get-market-trends
+      - includes: DDR4
+      - includes: DDR5
+      - matches: '(unavailable|no[^\n]*(?:data|prices|pricing)|not[^\n]*available|couldn.t find|unable to[^\n]*(?:find|access))'
+      - not:
+          matches: '(\$\s*\d|\b\d+[.,]\d+\s*[Uu][Ss][Dd])'

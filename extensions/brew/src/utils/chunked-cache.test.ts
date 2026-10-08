@@ -14,9 +14,10 @@
 import { describe, expect, it } from "vitest";
 import path from "path";
 import os from "os";
-import { mkdtemp, rm, stat } from "fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "fs/promises";
 import { buildChunkedCache, loadIndex, loadItemsFromChunks } from "./cache";
 import { compactCaskArtifacts } from "./brew/link";
+import { ADOPT_INDEX_FILE, adoptIndexEntry, type AdoptIndex } from "./brew/adopt";
 import type { CaskArtifact, ChunkedCacheConfig, IndexEntry } from "./types";
 
 const SOURCE_URL = "https://formulae.brew.sh/api/formula.json";
@@ -58,7 +59,7 @@ interface RawFormula {
 
 /**
  * Formulae whose real records carry a non-empty `requirements[]` (captured
- * 2026-09-14). Several, because any one of them can leave the catalogue.
+ * 2026-09-14). Several, because any one of them can leave the catalog.
  */
 const WITH_REQUIREMENTS = ["acl", "age-plugin-se", "amdatu-bootstrap", "anyzig"];
 
@@ -133,7 +134,7 @@ describe("buildChunkedCache (committed fixtures)", () => {
         }),
         undefined,
         undefined,
-        compactCaskArtifacts,
+        { compact: compactCaskArtifacts },
       );
 
       const caskIndex = await loadIndex(caskConfig);
@@ -151,6 +152,133 @@ describe("buildChunkedCache (committed fixtures)", () => {
       expect(byToken.get("1password-cli")?.has_symlink_artifacts).toBe(true);
       expect(byToken.get("0-ad")?.has_symlink_artifacts).toBe(false);
       expect(byToken.get("0-ad")?.depends_on?.macos).toBeDefined();
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
+});
+
+describe("buildChunkedCache sidecar hooks", () => {
+  function caskConfigIn(dir: string): ChunkedCacheConfig {
+    const baseDir = path.join(dir, "cask");
+    return {
+      baseDir,
+      indexPath: path.join(baseDir, "index.json"),
+      metaPath: path.join(baseDir, "meta.json"),
+      type: "cask",
+    };
+  }
+  const extractCask = (item: RawCaskFull, c: number, i: number) => ({ id: item.token, n: item.token, c, i });
+
+  // `compact` deletes `artifacts`, so a hook that ran after it would derive
+  // nothing and the failure would look exactly like "no cask installs an app".
+  it("shows onRecord the whole record, before compact strips it", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "brew-sidecar-"));
+    try {
+      const config = caskConfigIn(dir);
+      const adopt: AdoptIndex = {};
+      await buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        config,
+        extractCask,
+        undefined,
+        undefined,
+        {
+          onRecord: (cask) => {
+            const entry = adoptIndexEntry(cask);
+            if (entry) adopt[cask.token] = entry;
+          },
+          compact: compactCaskArtifacts,
+          writeSidecar: async (partialDir) => writeFile(path.join(partialDir, ADOPT_INDEX_FILE), JSON.stringify(adopt)),
+        },
+      );
+
+      // Written into the partial dir, so it must survive the swap into place.
+      const onDisk = JSON.parse(await readFile(path.join(config.baseDir, ADOPT_INDEX_FILE), "utf-8")) as AdoptIndex;
+      expect(onDisk["1password-cli"]).toBeUndefined(); // installs no app
+      expect(onDisk["0-ad"]?.a).toEqual(["0 A.D..app"]);
+      // ...and the chunks still got compacted, so the two hooks did not collide.
+      const casks = await loadItemsFromChunks<RawCaskFull>(config, (await loadIndex(config)).entries);
+      expect(casks.every((c) => c.artifacts === undefined)).toBe(true);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  // The sidecar serves one command; the chunks serve every command. After a
+  // version bump there is no valid stale cache, so letting this reject would
+  // leave Search unable to load casks at all over a file only Adopt reads.
+  it("publishes the cache even when the sidecar write fails", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "brew-sidecar-fail-"));
+    try {
+      const config = caskConfigIn(dir);
+      await buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        config,
+        extractCask,
+        undefined,
+        undefined,
+        {
+          compact: compactCaskArtifacts,
+          writeSidecar: async () => {
+            throw new Error("disk full");
+          },
+        },
+      );
+
+      const index = await loadIndex(config);
+      expect(index.entries.map((e) => e.id).sort()).toEqual(["0-ad", "1password-cli", "battle-net"]);
+      await expect(stat(path.join(config.baseDir, ADOPT_INDEX_FILE))).rejects.toThrow();
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 30_000);
+  // Each rebuild parses a whole catalog: the smallest heap cap one survives is
+  // 40 MB, both at once 64 MB — which, on top of the running command, crossed
+  // Raycast's 100 MB cap on the first Search after a cache-version bump. The
+  // second build must wait for the first.
+  it("runs one build at a time, even for different catalogs", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "brew-serial-"));
+    try {
+      let reached!: () => void;
+      const reachedA = new Promise<void>((resolve) => (reached = resolve));
+      let release!: () => void;
+      const releaseA = new Promise<void>((resolve) => (release = resolve));
+      const parsedByB: string[] = [];
+
+      const a = buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        caskConfigIn(path.join(dir, "a")),
+        extractCask,
+        undefined,
+        undefined,
+        {
+          writeSidecar: async () => {
+            reached();
+            await releaseA;
+          },
+        },
+      );
+      const b = buildChunkedCache<RawCaskFull>(
+        FIXTURE_CASK,
+        "file:///nonexistent",
+        caskConfigIn(path.join(dir, "b")),
+        extractCask,
+        undefined,
+        undefined,
+        { onRecord: (cask) => parsedByB.push(cask.token) },
+      );
+
+      await reachedA;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(parsedByB).toEqual([]);
+
+      release();
+      await Promise.all([a, b]);
+      expect(parsedByB.sort()).toEqual(["0-ad", "1password-cli", "battle-net"]);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -236,7 +364,7 @@ describe("buildChunkedCache", () => {
         }),
         undefined,
         undefined,
-        compactCaskArtifacts,
+        { compact: compactCaskArtifacts },
       );
 
       const index = await loadIndex(config);

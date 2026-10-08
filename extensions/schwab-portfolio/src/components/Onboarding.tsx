@@ -8,9 +8,9 @@ export function Onboarding() {
     <List>
       <List.EmptyView
         icon={Icon.Key}
-        title="Connect your Schwab account"
+        title="One-time Schwab app setup"
         description={
-          "Add your Schwab App Key and Secret in the extension preferences.\nNeed credentials? Press ⌘⏎ to open the Schwab developer portal."
+          "Save your App Key and Secret once in extension preferences. Weekly sign-in keeps these settings.\nAlready set up? Check that you opened the same store or development installation."
         }
         actions={
           <ActionPanel>

@@ -3,7 +3,9 @@ import { execFile } from "child_process";
 import { getEnv } from "./env";
 
 export function openApp() {
-  const { openWithApp } = getPreferenceValues<Preferences.CmdConnect>();
+  const { openWithApp } = getPreferenceValues<
+    Preferences.CmdConnect | Preferences.CmdConnectWindow | Preferences.CmdConnectBrowserWorktree
+  >();
   if (!openWithApp) {
     return Promise.reject(new Error("No app selected"));
   }

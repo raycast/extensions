@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { clientV2, Fetcher, PostEngagementKind } from "../lib/twitterapi_v2";
+import { refreshingFetcher } from "../lib/tweet-page";
+import { clientV2, PostEngagementKind } from "../lib/twitterapi_v2";
 import { TweetList } from "./tweet";
 import { deduplicateById } from "../lib/twitter";
 
@@ -57,11 +58,7 @@ function QuotedPosts({ postId }: { postId: string }) {
     const page = await clientV2.quotedPosts(postId, options.cursor);
     return { data: page.items, hasMore: Boolean(page.nextToken), cursor: page.nextToken };
   });
-  const refresh = async () => {
-    clientV2.clearCache();
-    await revalidate();
-  };
-  const fetcher: Fetcher = { updateInline: refresh, refresh };
+  const fetcher = refreshingFetcher(revalidate);
 
   return (
     <TweetList

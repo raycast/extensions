@@ -143,7 +143,10 @@ export default function Command() {
                       <Action
                         title={`Download All Queued (${pending.length})`}
                         icon={Icon.Tray}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                        }}
                         onAction={handleDownloadAllPending}
                       />
                     ) : null}
@@ -161,7 +164,10 @@ export default function Command() {
                       title="Remove from Queue"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "backspace" },
+                        Windows: { modifiers: ["ctrl"], key: "backspace" },
+                      }}
                       onAction={() => removeFromQueue(item.id)}
                     />
                   </ActionPanel>
@@ -197,7 +203,10 @@ export default function Command() {
                       title="Remove from Queue"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "backspace" },
+                        Windows: { modifiers: ["ctrl"], key: "backspace" },
+                      }}
                       onAction={() => removeFromQueue(item.id)}
                     />
                     <Action
@@ -205,8 +214,14 @@ export default function Command() {
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "backspace",
+                        macOS: {
+                          modifiers: ["cmd", "shift"],
+                          key: "backspace",
+                        },
+                        Windows: {
+                          modifiers: ["ctrl", "shift"],
+                          key: "backspace",
+                        },
                       }}
                       onAction={handleClearDownloaded}
                     />

@@ -1,5 +1,21 @@
 # Notion Changelog
 
+## [Fix Links, Search Results, and Connection Recovery] - 2026-09-25
+
+- Fix Copy Formatted URL pasting only the title into plain-text apps. It now includes a Markdown link while preserving the rich-text link.
+- Show complete page and database titles, including titles with mixed formatting, and prevent matching search results from being hidden by a second filter.
+- Load remaining results in database lists and page pickers instead of stopping at the first batch.
+- Add Refresh Results and Manage Notion Connection actions to search, including when no results are found.
+- Add a Manage Notion Connection command to test access, reconnect after revocation, and find page-access settings. Invalid-token errors now offer a recovery action.
+- Ignore blank integration secrets and trim whitespace from pasted secrets.
+- Keep Add Text to Page open when adding content fails instead of reporting success.
+
+## [Knowledge Capture Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Add a skill for saving conversations, decisions, how-tos, and FAQs as database pages or additions to existing pages.
+- Check related content, preserve source links and uncertainty, and report limits when a requested change is unavailable.
+
 ## [Fix Open in App for notion.com URLs and Windows deep links] - 2026-08-28
 
 - Fix `Open in App` deep-link generation only matching `notion.so` URLs: since Notion's domain migration, page URLs are served from `notion.com` hosts (e.g. `app.notion.com`), so the `notion://` deep link was never built and the desktop app opened the last viewed page instead of the target ([#30540](https://github.com/raycast/extensions/issues/30540))

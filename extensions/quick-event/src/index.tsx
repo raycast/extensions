@@ -3,6 +3,7 @@ import { formatDate } from './dates';
 import { CalendarEvent } from './types';
 import { executeJxa, useCalendar } from './useCalendar';
 import { formatOffsetLabel } from './timezones';
+import { formatReminderLabel } from './reminders';
 
 export default function Command() {
   const { isLoading, results, parse } = useCalendar();
@@ -23,6 +24,18 @@ export default function Command() {
       script += `Calendar.viewCalendar({at: date})`;
     }
 
+    const alarmsScript =
+      item.reminders && item.reminders.length > 0
+        ? item.reminders
+            .map(
+              (offset) => `
+      var alarm = Calendar.DisplayAlarm({ triggerInterval: ${offset} })
+      event.displayAlarms.push(alarm)
+    `,
+            )
+            .join('\n')
+        : '';
+
     executeJxa(`
       var app = Application.currentApplication()
       app.includeStandardAdditions = true
@@ -41,6 +54,8 @@ export default function Command() {
         location: "${item.location?.replace(/"/g, '\\"')}",
       })
       projectCalendar.events.push(event)
+      ${alarmsScript}
+      Calendar.reloadCalendars()
     `);
 
     executeJxa(script);
@@ -60,15 +75,21 @@ export default function Command() {
             title={item.eventTitle || 'Untitled event'}
             subtitle={formatDate(item) || 'No date'}
             icon={Icon.Calendar}
-            accessories={
-              item.timezone
+            accessories={[
+              ...(item.reminders && item.reminders.length > 0
+                ? item.reminders.map((offset) => ({
+                    tag: { value: formatReminderLabel(offset), color: Color.Yellow },
+                    icon: Icon.Bell,
+                  }))
+                : []),
+              ...(item.timezone
                 ? [
                     {
                       tag: { value: formatOffsetLabel(item.timezone), color: Color.Blue },
                     },
                   ]
-                : []
-            }
+                : []),
+            ]}
             actions={
               <ActionPanel title="Add to a different calendar">
                 {calendars.map((calendar, index) => (

@@ -1,6 +1,6 @@
 import { getAccessToken } from "@raycast/utils";
 import { SCHWAB_TRADER_BASE, SCHWAB_MARKET_DATA_BASE } from "./constants";
-import { schwabOAuth } from "./oauth";
+import { refreshRejectedToken } from "./oauth";
 import type { Account, AccountNumberMapping, UserPreferenceResponse } from "../types/accounts";
 import type { Order } from "../types/orders";
 import type { QuoteResponse, PriceHistoryResponse, InstrumentSearchResponse, MoversResponse } from "../types/quotes";
@@ -42,7 +42,7 @@ async function schwabFetch<T>(url: string, retries = 2): Promise<T> {
 
     if (response.status === 401) {
       if (!retriedAuthentication) {
-        token = await schwabOAuth.authorize();
+        token = await refreshRejectedToken(token);
         retriedAuthentication = true;
         continue;
       }

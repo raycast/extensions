@@ -59,7 +59,7 @@
     "ohmyfetch": "^0.4.17"
   },
   "devDependencies": {
-    "@faker-js/faker": "^6.3.1",
+    "@faker-js/faker": "^10.6.0",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

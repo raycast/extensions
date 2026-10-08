@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, useNavigation } from "@raycast/api";
 import {
   brewAdoptCommand,
   brewInstallCommand,
@@ -26,6 +26,7 @@ import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 import { InstallPreview, UpgradePreview } from "./installPreview";
+import { ensureTrusted } from "./trust";
 
 /**
  * Outdated only — the caller gates on it: an up-to-date package has no plan to
@@ -35,23 +36,37 @@ import { InstallPreview, UpgradePreview } from "./installPreview";
  * to the whole-machine Preview Upgrades, and one action cannot mean two scopes
  * — so the single-package preview takes one binding that is free in both panels.
  */
-const PreviewUpgradeAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => (
-  <Action.Push
-    title="Preview Upgrade"
-    icon={Icon.Eye}
-    shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
-    target={<UpgradePreview target={props.item} onAction={props.onAction} />}
-  />
-);
+// Not an Action.Push, for the same reason as Preview Install below: a
+// fully-qualified `brew upgrade --dry-run` trusts the package by itself.
+const PreviewUpgradeAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => {
+  const { push } = useNavigation();
+  return (
+    <Action
+      title="Preview Upgrade"
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+      onAction={async () => {
+        if (await ensureTrusted(props.item)) push(<UpgradePreview target={props.item} onAction={props.onAction} />);
+      }}
+    />
+  );
+};
 
-const PreviewInstallAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => (
-  <Action.Push
-    title="Preview Install"
-    icon={Icon.Eye}
-    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-    target={<InstallPreview item={props.item} onAction={props.onAction} />}
-  />
-);
+// Not an Action.Push: the preview's dry run starts on mount and trusts a
+// third-party package by itself, so the trust question comes first.
+const PreviewInstallAction = (props: { item: Cask | Formula; onAction: (result: boolean) => void }) => {
+  const { push } = useNavigation();
+  return (
+    <Action
+      title="Preview Install"
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+      onAction={async () => {
+        if (await ensureTrusted(props.item)) push(<InstallPreview item={props.item} onAction={props.onAction} />);
+      }}
+    />
+  );
+};
 
 export const ToggleSidebarAction = (props: { onToggleSidebar: () => void }) => (
   <Action
@@ -238,6 +253,11 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
 );
 
 export function CaskActionPanel(props: {
+  /**
+   * Actions on what contains this package (Manage Taps' tap section), after
+   * every action on the package itself and before View: nearest object first.
+   */
+  extraActions?: ActionPanel.Children;
   /** Page navigation, rendered in every row so paging works from anywhere. */
   paging?: PagingProps;
   cask: Cask;
@@ -357,6 +377,7 @@ export function CaskActionPanel(props: {
           {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
         </ActionPanel.Section>
 
+        {props.extraActions}
         <ViewSection
           paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
@@ -406,20 +427,31 @@ export function CaskActionPanel(props: {
               title={`Run Install in ${terminalName}`}
               icon={terminalIcon}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
+              onAction={async () => {
+                // brew trusts a package named on its command line by itself.
+                if (await ensureTrusted(cask)) await runCommandInTerminal(brewInstallCommand(cask));
+              }}
             />
           )}
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(cask)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
           {!blocked && (
             <Action
               title={`Run Adopt in ${terminalName}`}
               icon={terminalIcon}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-              onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
+              onAction={async () => {
+                // A named `brew install --adopt` trusts the package by itself too.
+                if (await ensureTrusted(cask)) await runCommandInTerminal(brewAdoptCommand(cask));
+              }}
             />
           )}
         </ActionPanel.Section>
@@ -447,6 +479,7 @@ export function CaskActionPanel(props: {
             shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         </ActionPanel.Section>
+        {props.extraActions}
         <ViewSection
           paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
@@ -468,6 +501,11 @@ export function CaskActionPanel(props: {
 }
 
 export function FormulaActionPanel(props: {
+  /**
+   * Actions on what contains this package (Manage Taps' tap section), after
+   * every action on the package itself and before View: nearest object first.
+   */
+  extraActions?: ActionPanel.Children;
   /** Page navigation, rendered in every row so paging works from anywhere. */
   paging?: PagingProps;
   formula: Formula;
@@ -572,6 +610,7 @@ export function FormulaActionPanel(props: {
           )}
         </ActionPanel.Section>
 
+        {props.extraActions}
         <ViewSection
           paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
@@ -627,20 +666,31 @@ export function FormulaActionPanel(props: {
               title={`Run Install in ${terminalName}`}
               icon={terminalIcon}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
-              onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+              onAction={async () => {
+                // brew trusts a package named on its command line by itself.
+                if (await ensureTrusted(formula)) await runCommandInTerminal(brewInstallCommand(formula));
+              }}
             />
           )}
-          <Action.CopyToClipboard
-            title="Copy Adopt Command"
-            content={brewAdoptCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-          />
+          {/* Adopting claims an app already on THIS Mac, so it is meaningless for a
+              package this Mac cannot install. Copy Install stays: it is for
+              another machine, where the package may install fine. */}
+          {!blocked && (
+            <Action.CopyToClipboard
+              title="Copy Adopt Command"
+              content={brewAdoptCommand(formula)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+          )}
           {!blocked && (
             <Action
               title={`Run Adopt in ${terminalName}`}
               icon={terminalIcon}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-              onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
+              onAction={async () => {
+                // A named `brew install --adopt` trusts the package by itself too.
+                if (await ensureTrusted(formula)) await runCommandInTerminal(brewAdoptCommand(formula));
+              }}
             />
           )}
         </ActionPanel.Section>
@@ -669,6 +719,7 @@ export function FormulaActionPanel(props: {
           />
         </ActionPanel.Section>
 
+        {props.extraActions}
         <ViewSection
           paging={props.paging}
           onToggleSidebar={props.onToggleSidebar}
@@ -747,7 +798,7 @@ export function OutdatedActionSections(
   props: OutdatedActionProps & {
     /**
      * Omit the pin action. For rows that hoist a selection-aware pin action
-     * of their own — two Pin entries with different selection behaviour would
+     * of their own — two Pin entries with different selection behavior would
      * otherwise share the panel.
      */
     omitPin?: boolean;
@@ -792,7 +843,9 @@ export function OutdatedActionSections(
             title={`Run Upgrade in ${terminalName}`}
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-            onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
+            onAction={async () => {
+              if (await ensureTrusted(outdated)) await runCommandInTerminal(brewUpgradeCommand(outdated));
+            }}
           />
         </ActionPanel.Section>
       )}

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import { getHistoryPath, splitSearchTerms } from "src/utils";
 import { HistoryItem } from "../types";
 import { useSQL } from "@raycast/utils";
+import { useMemo, useRef, useState } from "react";
 
 const LIMIT = 100;
 
@@ -72,9 +72,21 @@ const getHistoryQuery = (searchText?: string) => {
 
 const useHistorySearch = (selectedProfileId: string, searchText?: string) => {
   const historyPath = getHistoryPath(selectedProfileId);
+  const queryKey = `${selectedProfileId}\u0000${searchText ?? ""}`;
+  const executingQueryKey = useRef(queryKey);
+  const [completedQueryKey, setCompletedQueryKey] = useState<string>();
 
-  const query = getHistoryQuery(searchText);
-  const result = useSQL<RawHistoryRow>(historyPath, query);
+  const result = useSQL<RawHistoryRow>(historyPath, getHistoryQuery(searchText), {
+    // `useSQL` deliberately keeps its previous result while a new query starts.
+    // Expose the completed query identity so callers can distinguish stale data
+    // from the result set for the text currently in the search bar.
+    onWillExecute: () => {
+      executingQueryKey.current = queryKey;
+    },
+    onData: () => {
+      setCompletedQueryKey(executingQueryKey.current);
+    },
+  });
 
   // `DATE(LAST_VISIT_TIME)` used to compute `lastVisitDate` in SQL, but that
   // is wrong whenever the column holds a raw epoch number rather than a date
@@ -89,7 +101,7 @@ const useHistorySearch = (selectedProfileId: string, searchText?: string) => {
     [result.data],
   );
 
-  return { ...result, data };
+  return { ...result, data, queryKey, completedQueryKey };
 };
 
 export default useHistorySearch;

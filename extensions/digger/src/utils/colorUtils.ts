@@ -1,19 +1,19 @@
 /**
- * CSS colour values → `#rrggbb`, so a swatch can be drawn for them.
+ * CSS color values → `#rrggbb`, so a swatch can be drawn for them.
  *
- * Raycast's `tintColor` accepts hex (or one of its own named colours) and
+ * Raycast's `tintColor` accepts hex (or one of its own named colors) and
  * nothing else, so every value a modern stylesheet actually uses — `oklch()`,
  * `lab()`, `color(display-p3 …)` — renders as an empty circle unless it is
  * converted here. Tailwind v4 ships its entire palette as `oklch()`, which is
  * why a Tailwind site showed ~200 tokens and almost no swatches.
  *
  * Values outside the sRGB gamut are clipped per channel. That is a lie about the
- * colour, but a small and visible one — the row still prints the exact declared
+ * color, but a small and visible one — the row still prints the exact declared
  * value next to the swatch, so nothing is lost, and a P3 green rendered as the
  * nearest sRGB green is far more informative than a blank circle.
  */
 
-/** The 148 CSS named colours, plus `transparent`. */
+/** The 148 CSS named colors, plus `transparent`. */
 const NAMED: Record<string, string> = {
   aliceblue: "#f0f8ff",
   antiquewhite: "#faebd7",
@@ -182,12 +182,12 @@ function toHexString(r: number, g: number, b: number, alpha = 1): string {
   // Alpha is carried through as an 8-digit value rather than dropped. Discarding
   // it here made `rgba(255,0,0,.5)` indistinguishable from opaque red by the time
   // it reached the swatch, defeating the hollow-indicator branch that exists
-  // precisely for translucent colours.
+  // precisely for translucent colors.
   const rgb = `#${byte(r)}${byte(g)}${byte(b)}`;
   return alpha >= 1 ? rgb : `${rgb}${byte(alpha)}`;
 }
 
-/** The alpha argument of a functional colour, after the `/` or as a 4th value. */
+/** The alpha argument of a functional color, after the `/` or as a 4th value. */
 function alphaOf(body: string): number {
   const slash = body.split("/");
   if (slash.length > 1) {
@@ -282,12 +282,12 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
 }
 
 /**
- * Converts any CSS colour value to `#rrggbb`, or undefined when it is not a
- * colour at all.
+ * Converts any CSS color value to `#rrggbb`, or undefined when it is not a
+ * color at all.
  *
  * Undefined is the honest answer for a system keyword (`Canvas`, `currentColor`)
  * — its rendered value depends on context this has no access to, and inventing
- * one would be a fabricated colour presented as the site's.
+ * one would be a fabricated color presented as the site's.
  */
 export function toHex(input: string): string | undefined {
   const value = input.trim().toLowerCase();
@@ -347,7 +347,7 @@ export function toHex(input: string): string | undefined {
     }
     case "color": {
       // `color(srgb r g b)` and `color(display-p3 r g b)`. P3 primaries are wider
-      // than sRGB, so a saturated P3 colour clips — deliberately, see the header.
+      // than sRGB, so a saturated P3 color clips — deliberately, see the header.
       const space = parts[0];
       const [r, g, b] = [num(parts[1]), num(parts[2]), num(parts[3])];
       if (space === "srgb") return toHexString(r, g, b);
@@ -369,7 +369,7 @@ export function toHex(input: string): string | undefined {
   }
 }
 
-/** True when the value names a colour we could draw, once `var()` is resolved. */
+/** True when the value names a color we could draw, once `var()` is resolved. */
 export function isColorValue(value: string): boolean {
   return toHex(value) !== undefined;
 }

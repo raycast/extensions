@@ -1,20 +1,19 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
-import { client, collectFiltered, CursorPageInput } from "./linearUtils";
+import { client, collectFiltered, CursorPageInput, resolveTeam } from "./linearUtils";
+import { mapPage, serializeCycle } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input extends CursorPageInput {
   /** Max results (default 50, max 250) */ limit?: number;
   /** Next page cursor */ cursor?: string;
-  /** Team ID */ teamId: string;
-  /** Filter the team's cycles */ type?: "current" | "previous" | "next";
+  /** Team name, key, or ID. Omit to list cycles across all teams. */ team?: string;
+  /** Only return the current, previous, or next cycle */ type?: "current" | "previous" | "next";
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
-  const team = await client().team(input.teamId);
-  return collectFiltered(
-    ({ first, after }) => team.cycles({ first, after }),
+/** Lists cycles for one team, or across the workspace when no team is given. Each cycle carries its `teamId`, so unscoped results stay attributable. */
+export default withLinear(async (input: Input) => {
+  const team = input.team ? await resolveTeam(input.team) : undefined;
+  const page = await collectFiltered(
+    ({ first, after }) => (team ? team.cycles({ first, after }) : client().cycles({ first, after })),
     (cycle) =>
       !input.type ||
       (input.type === "current" && cycle.isActive) ||
@@ -22,4 +21,5 @@ export default withAccessToken(linear)(async (input: Input) => {
       (input.type === "next" && cycle.isNext),
     input,
   );
+  return mapPage(page, serializeCycle);
 });

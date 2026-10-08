@@ -32,6 +32,7 @@ import {
   isTomorrow,
   truncate,
 } from "./helpers";
+import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -251,25 +252,7 @@ export default function Command() {
                   <MenuBarExtra.Item
                     title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
                     icon={Icon.Link}
-                    onAction={async () => {
-                      let failedCount = 0;
-                      for (const url of attachedUrls) {
-                        try {
-                          await open(url);
-                        } catch (error) {
-                          console.error("Failed to open URL", url, error);
-                          failedCount++;
-                        }
-                      }
-
-                      if (failedCount > 0) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
-                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
-                        });
-                      }
-                    }}
+                    onAction={() => openAttachedUrls(attachedUrls)}
                   />
                 ) : null}
 

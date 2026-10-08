@@ -112,7 +112,7 @@ async function probeOne(baseUrl: string, entry: WellKnownEntry, signal: AbortSig
     url: probe.finalUrl,
     registration: entry.status,
     reference: entry.reference,
-    contentType: probe.contentType ?? `(unlabelled ${probe.shape})`,
+    contentType: probe.contentType ?? `(unlabeled ${probe.shape})`,
     size: probe.size,
   };
 }

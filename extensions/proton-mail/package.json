@@ -5,6 +5,9 @@
   "description": "View and manage your Proton Mail inbox via Proton Mail Bridge",
   "icon": "extension-icon.png",
   "author": "NormC",
+  "contributors": [
+    "bastien"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -127,16 +130,15 @@
     "@raycast/utils": "^1.17.0",
     "html-to-text": "^9.0.5",
     "imapflow": "^1.0.171",
-    "mailparser": "^3.7.2",
+    "mailparser": "^3.9.31",
     "marked": "^17.0.1",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^10.0.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/html-to-text": "^9.0.4",
     "@types/mailparser": "^3.4.5",
     "@types/node": "22.13.10",
-    "@types/nodemailer": "^6.4.17",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",

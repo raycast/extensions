@@ -1,6 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { QueryWordInfo } from "@/types/query";
+import type { ContentEquivalent, ContentExample } from "@/core/content/types";
+import type { QueryWordInfo } from "@/core/results/types";
 
 export interface LingueeParseResult {
   queryWordInfo: QueryWordInfo;
@@ -9,66 +10,14 @@ export interface LingueeParseResult {
 
 export interface LingueeDictionaryResult {
   wordItems: LingueeWordItem[];
-  examples: LingueeExample[];
-  relatedWords: LingueeWordItem[];
-  wikipedias: LingueeWikipedia[];
+  examples: ContentExample[];
+  relatedWords: { expression: string; meaning: string; partOfSpeech: string }[];
+  wikipedias: { subject: string; text: string }[];
 }
 
 export interface LingueeWordItem {
   word: string;
-  title: string;
-  featured: boolean;
   pos: string; // part of speech, e.g. noun, verb, adj, etc.
   placeholder: string; // eg. (sth. ~), sth.
-  audioUrl: string; // may have value when search English word, there are US and UK audio, we use US audio
-  translationItems: LingueeWordExplanation[];
-}
-
-export interface LingueeWordExplanation {
-  featured?: boolean;
-  translation: string;
-  pos: string;
-  audioUrl: string; // may have value when search Chinese word
-  examples: LingueeExample[]; // French: good
-  frequencyTag: LingueeFrequencyTag;
-}
-
-export interface LingueeFrequencyTag {
-  tagForms: string; // (often used), (almost always used), "good" in French: (bonne f sl, bons m pl, bonnes f pl)
-  displayType: LingueeListItemType; // as frequency use: AlmostAlways, OfenUsed, Common, LessCommon
-}
-
-export interface LingueeExample {
-  example: LingueePosText;
-  // translation: string;
-  // pos: string;
-  translations: LingueePosText[];
-}
-
-export interface LingueePosText {
-  text: string; // good
-  pos: string; // adj
-}
-
-export interface LingueeWikipedia {
-  title: string;
-  explanation: string;
-  source: string;
-  sourceUrl: string;
-}
-
-export enum LingueeListItemType {
-  AlmostAlwaysUsed = "Almost Always Used", // also featured, eg. true
-  OftenUsed = "Often Used", // also featured, eg. good
-  Common = "Common", // also featured
-  LessCommon = "Less Common", // unfeatured
-
-  SpecialForms = "Forms", // special forms, like often used, but we currently don't handle it. eg. good  English-French
-
-  Unfeatured = "Unfeatured",
-  Example = "Example",
-  RelatedWord = "Related word", // eg. 优雅, 美丽
-  Wikipedia = "Wikipedia", // eg. sql
-
-  Translation = "Translation", // just used for linguee section title item
+  entries: ContentEquivalent[];
 }

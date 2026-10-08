@@ -1,13 +1,16 @@
-import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Grid, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import { GenericGrid } from "./components/generic-grid";
 import { MovieActionPanel } from "./components/media-actions";
+import {} from "./components/search-item-actions";
+import { MovieSearchActions } from "./components/search-item-actions";
 import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { getPosterUrl } from "./lib/helper";
-import { addMovieToHistory, addMovieToWatchlist } from "./lib/media-mutations";
 import { TraktMovieListItem } from "./lib/schema";
+import { useCheckinSync } from "./lib/use-checkin-state";
+import { useWatchlistSync } from "./lib/use-watchlist-ids";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
 export default function Command() {
@@ -15,6 +18,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
+  useWatchlistSync();
+  useCheckinSync();
   const {
     isLoading,
     data: movies,
@@ -38,20 +43,6 @@ export default function Command() {
     },
   );
 
-  const addMovieToWatchlistAction = useCallback(
-    async (movie: TraktMovieListItem) => {
-      await addMovieToWatchlist(traktClient, movie, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
-  const addMovieToHistoryAction = useCallback(
-    async (movie: TraktMovieListItem) => {
-      await addMovieToHistory(traktClient, movie, { signal: abortable.current?.signal });
-    },
-    [traktClient],
-  );
-
   const handleSearchTextChange = useCallback(abortSearch(abortable, setSearchText), []);
 
   const runMovieAction = useActionRunner<TraktMovieListItem>({ setActionLoading });
@@ -73,20 +64,15 @@ export default function Command() {
       actions={(item) => (
         <MovieActionPanel
           item={item}
-          actions={[
-            {
-              title: "Add to Watchlist",
-              icon: Icon.Bookmark,
-              shortcut: Keyboard.Shortcut.Common.Edit,
-              onAction: (movie) => runMovieAction(movie, addMovieToWatchlistAction, "Movie added to watchlist"),
-            },
-            {
-              title: "Add to History",
-              icon: Icon.Clock,
-              shortcut: Keyboard.Shortcut.Common.Duplicate,
-              onAction: (movie) => runMovieAction(movie, addMovieToHistoryAction, "Movie added to history"),
-            },
-          ]}
+          actions={[]}
+          actionItems={(movie) => (
+            <MovieSearchActions
+              item={movie}
+              client={traktClient}
+              signal={() => abortable.current?.signal}
+              run={runMovieAction}
+            />
+          )}
         />
       )}
     />

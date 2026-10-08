@@ -330,7 +330,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.15",
     "@raycast/utils": "^2.2.4",
-    "toml": "^4.1.1",
+    "toml": "^4.2.0",
     "yaml": "^2.8.4"
   },
   "devDependencies": {

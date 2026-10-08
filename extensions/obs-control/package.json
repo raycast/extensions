@@ -19,7 +19,15 @@
       "title": "Set Scene",
       "subtitle": "OBS Control",
       "description": "Set Current Scene",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sceneName",
+          "placeholder": "Scene Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "toggle-stream",
@@ -29,11 +37,43 @@
       "mode": "no-view"
     },
     {
+      "name": "start-stream",
+      "title": "Start Stream",
+      "subtitle": "OBS Control",
+      "description": "Start Stream",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "stop-stream",
+      "title": "Stop Stream",
+      "subtitle": "OBS Control",
+      "description": "Stop OBS Stream",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "toggle-virtual-cam",
       "title": "Toggle Virtual Camera",
       "subtitle": "OBS Control",
       "description": "Toggle Virtual Camera",
       "mode": "no-view"
+    },
+    {
+      "name": "start-virtual-cam",
+      "title": "Start Virtual Camera",
+      "subtitle": "OBS Control",
+      "description": "Start Virtual Camera",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "stop-virtual-cam",
+      "title": "Stop Virtual Camera",
+      "subtitle": "OBS Control",
+      "description": "Stop Virtual Camera",
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-recording",
@@ -43,11 +83,43 @@
       "mode": "no-view"
     },
     {
+      "name": "start-recording",
+      "title": "Start Recording",
+      "subtitle": "OBS Control",
+      "description": "Start Recording",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "OBS Control",
+      "description": "Stop Recording",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "toggle-pause-recording",
       "title": "Toggle Pause Recording",
       "subtitle": "OBS Control",
       "description": "Toggle Pause Recording",
       "mode": "no-view"
+    },
+    {
+      "name": "pause-recording",
+      "title": "Pause Recording",
+      "subtitle": "OBS Control",
+      "description": "Pause Recording",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "resume-recording",
+      "title": "Resume Recording",
+      "subtitle": "OBS Control",
+      "description": "Resume Recording",
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-studio-mode",
@@ -69,6 +141,22 @@
       "subtitle": "OBS Control",
       "description": "Toggle Replay Buffer",
       "mode": "no-view"
+    },
+    {
+      "name": "start-replay-buffer",
+      "title": "Start Replay Buffer",
+      "subtitle": "OBS Control",
+      "description": "Start Replay Buffer",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "stop-replay-buffer",
+      "title": "Stop Replay Buffer",
+      "subtitle": "OBS Control",
+      "description": "Stop Replay Buffer",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -111,5 +199,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx -y @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

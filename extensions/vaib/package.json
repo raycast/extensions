@@ -4,7 +4,7 @@
   "title": "vAIb - Your AI Companion",
   "description": "Get quick answers to your quick questions with the power of AI with this free extension.",
   "icon": "command-icon.png",
-  "author": "vaibhav_sisodiya",
+  "author": "Vaib215",
   "categories": [
     "Productivity",
     "Applications"
@@ -72,6 +72,6 @@
   },
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
+    "js-yaml@4": "4.3.2"
   }
 }

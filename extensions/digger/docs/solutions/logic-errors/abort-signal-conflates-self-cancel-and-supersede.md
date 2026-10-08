@@ -81,13 +81,13 @@ different predicates:
 
 | Question | Predicate | Gates |
 |---|---|---|
-| Has anything cancelled this work? | `signal.aborted` | data writes, progress updates |
+| Has anything canceled this work? | `signal.aborted` | data writes, progress updates |
 | Do I still own the UI? | `ref.current === mine` | error display, spinner |
 
 ## Why This Works
 
 `AbortSignal.aborted` is a single boolean with two distinct causes — "someone
-superseded me" and "I cancelled myself" — and it cannot distinguish them. The ref
+superseded me" and "I canceled myself" — and it cannot distinguish them. The ref
 is the actual source of truth for ownership: exactly one request is current, and
 assignment is what makes it so.
 

@@ -2,35 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wechat-devtool",
   "title": "WeChat DevTool",
-  "description": "Quickly open WeChat mini program project via official CLI.",
-  "version": "1.4.0",
   "type": "module",
+  "version": "1.4.1",
+  "description": "Quickly open WeChat mini program project via official CLI",
   "icon": "icon.png",
   "author": "tofrankie",
   "license": "MIT",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
-  "scripts": {
-    "dev": "ray develop",
-    "build": "ray build -e dist",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix",
-    "publish": "ray publish"
+  "homepage": "https://github.com/tofrankie/raycast-collection/tree/main/extensions/wechat-devtool",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tofrankie/raycast-collection.git",
+    "directory": "extensions/wechat-devtool"
   },
-  "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^1.19.1",
-    "pinyin-pro": "^3.27.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+  "bugs": {
+    "url": "https://github.com/tofrankie/raycast-collection/issues",
+    "email": "1426203851@qq.com"
   },
   "categories": [
     "Developer Tools"
@@ -40,27 +26,51 @@
     "WeChat",
     "WeChat DevTool",
     "WeChat mini program",
-    "miniprogram",
-    "miniapp"
+    "miniapp",
+    "miniprogram"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "pinyin-pro": "^3.28.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
   "commands": [
     {
       "name": "open-project",
+      "mode": "view",
       "title": "Open Project",
-      "description": "Open mini program project via WeChat DevTool.",
-      "mode": "view"
+      "description": "Open mini program project via WeChat DevTool."
     },
     {
       "name": "preview-project",
+      "mode": "view",
       "title": "Preview Project",
-      "description": "Generate QR Code for mini program project.",
-      "mode": "view"
+      "description": "Generate QR Code for mini program project."
     },
     {
       "name": "configure-projects",
+      "mode": "view",
       "title": "Configure Projects",
-      "description": "Configure mini program projects.",
-      "mode": "view"
+      "description": "Configure mini program projects."
     }
   ]
 }

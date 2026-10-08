@@ -1,5 +1,10 @@
 # Google Cloud CLI Changelog
 
+## [Compute Engine Lifecycle Fixes] - 2026-09-23
+
+- Fixed Compute Engine lifecycle actions to use state-aware verbs, including resuming suspended instances instead of trying to start them
+- Added Compute Engine suspend and restart actions, improved transitional state handling, and refreshed instance detail state after power actions
+
 ## [Fix Silent Empty Lists When gcloud Credentials Expire] - 2026-09-09
 
 - Fixed an expired gcloud session being treated as authenticated. `gcloud auth list` keeps reporting an account as `ACTIVE` after its refresh token has expired, so the extension stayed on the hub and every list — including the project dropdown — silently came back empty with no explanation. It now confirms the credentials still work and shows a **Session Expired** screen wired to the existing sign-in action. Failures that are not credential-related (a timeout, a network blip) are left alone so they still surface as real errors.

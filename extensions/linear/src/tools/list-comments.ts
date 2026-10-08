@@ -1,9 +1,5 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { linear } from "../api/linearClient";
-
-import { serializeComment } from "./commentUtils";
 import {
   client,
   collect,
@@ -14,6 +10,8 @@ import {
   resolveProject,
   tryGet,
 } from "./linearUtils";
+import { serializeComment } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input extends PageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -30,7 +28,7 @@ interface Input extends PageInput {
 
 type CommentFilter = NonNullable<Parameters<LinearClient["comments"]>[0]>["filter"];
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.statusUpdateType && !input.statusUpdateId) {
     throw new Error("statusUpdateType requires statusUpdateId.");
   }

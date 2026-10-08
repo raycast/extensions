@@ -1,5 +1,50 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-10-07
+
+### Fixed
+
+- After an action finishes, only the detail view it started in closes: a detail you opened meanwhile stays open.
+
+## [Update] - 2026-10-06
+
+### Added
+
+- **"Not Interested" on Recommendations** stops Trakt from recommending a movie or show again, and removes it from the grid.
+
+### Changed
+
+- The Continue Watching AI tool (formerly "Get up Next Episodes") also returns the movies you paused mid-playback, with how far you got and the minutes left, so Raycast AI sees the same list as the Continue Watching command. It can be limited to shows or movies.
+
+## [Update] - 2026-10-01
+
+### Added
+
+- **Continue Watching includes paused movies**, with an All / Shows / Movies filter, like Trakt's Continue Watching.
+- **Trakt's card actions on Continue Watching**: "Drop Show" and "Drop Movie" (after a confirmation), "Browse Seasons" on shows, and "Now Watching" to check in for the runtime of an episode or movie without posting to connected social networks. While a check-in is active, it becomes "Stop Check-In".
+- **"Mark as Watched on…"** records a watch on the release date (episodes), on an unknown date, or on a date you pick.
+- **Search results follow Trakt's card menu**: "Add to Watchlist" or "Remove from Watchlist" depending on whether the title is already on your watchlist, "Mark as Watched" ("Mark Whole Show as Watched" on shows) with "Mark as Watched on…", and "Now Watching" or "Stop Check-In" on movies.
+
+### Changed
+
+- **Up Next is now Continue Watching**, with wide cards showing the title's artwork, the next episode's number and name, a movie's length, and a progress ring whose tooltip says how many episodes or how much time is left.
+- **"Check-In" is now "Mark as Watched"**: it always added a watch at the current time, never a Trakt check-in. In Continue Watching it comes right after "View Details" (⌘↵). On a show, the old "Check-In" is named "Mark First Episode as Watched", and the duplicate "Add to History" on episodes is gone.
+- History shows "Unknown date" instead of January 1, 1970 for a watch saved without a date.
+- The "Get up Next Episodes" AI tool reads the same list of shows in progress, and no longer reports a total item count, since Trakt sends a fixed placeholder for it.
+
+### Fixed
+
+- Continue Watching (formerly Up Next) no longer lists shows you have not started.
+- Marking as watched, removing from the watchlist and dropping a show report an error when Trakt stored nothing, instead of a success.
+- A detail view no longer keeps stale actions: in search, its watchlist and check-in actions follow changes at once, and on the Watchlist, History and Continue Watching screens it closes after an action that changes or removes the item.
+
+## [Update] - 2026-09-23
+
+### Added
+
+- **AI tools for personal lists** — Raycast AI can now read your Trakt lists, check whether a title is on one, create, rename or delete a list, and add or remove movies, shows, seasons and episodes. Building a themed list takes a single batched call, and every change asks for confirmation naming the list and the items as Trakt holds them.
+- List names keep their emoji and non-Latin characters when matched, so "🎬 Oscars 2026" and "Oscars 2026" stay distinct lists.
+
 ## [Update] - 2026-09-19
 
 ### Added

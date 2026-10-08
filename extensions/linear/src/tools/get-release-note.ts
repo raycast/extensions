@@ -1,14 +1,11 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { resolveReleaseNote } from "./linearUtils";
+import { serializeRelease, serializeReleaseNote } from "./serializers";
+import { withLinear } from "./withLinear";
 type Input = { id: string; includeReleases?: boolean };
-export default withAccessToken(linear)(async ({ id, includeReleases }: Input) => {
+export default withLinear(async ({ id, includeReleases }: Input) => {
   const note = await resolveReleaseNote(id);
   return {
-    ...note,
-    content: note.documentContent?.content,
-    releases: includeReleases ? await note.releases : undefined,
+    ...serializeReleaseNote(note, { content: true }),
+    releases: includeReleases ? (await note.releases).map((release) => serializeRelease(release)) : undefined,
   };
 });

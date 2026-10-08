@@ -14,17 +14,19 @@ Search Qobuz, see what's playing, and manage your favourites and playlists — o
 
 ### Now Playing
 
-| Command         | Description                                                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Now Playing** | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every minute. |
+| Command                | Description                                                                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Now Playing**        | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every 5 seconds.                                    |
+| **Show Current Track** | See the track playing in Qobuz, how it matches on each streaming service, and copy its share links.                                                                    |
+| **Copy Share Links**   | Copy a ready-to-paste message with a track's title, artist and a link on every streaming service — the track playing in Qobuz, or a Spotify, YouTube Music or Qobuz track link passed as an argument. Preferences control which services appear (all on by default). |
 
 ### Playback controls
 
 | Command            | Description                                 |
 | ------------------ | ------------------------------------------- |
 | **Play / Pause**   | Toggle play/pause in the Qobuz desktop app. |
-| **Next Track**     | Skip to the next track.                     |
-| **Previous Track** | Skip to the previous track.                 |
+| **Next**         | Skip to the next track.                     |
+| **Previous**     | Skip to the previous track.                 |
 | **Fast-Forward**   | Fast-forward within the current track.      |
 | **Rewind**         | Rewind within the current track.            |
 

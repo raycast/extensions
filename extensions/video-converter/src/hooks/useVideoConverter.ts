@@ -4,6 +4,9 @@ import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import { loadSettings, saveSettings, defaultSettings } from "../utils/settings";
 import { isFFmpegInstalled, setFFmpegPath } from "../utils/ffmpeg";
+import { useOutputEstimate } from "./useOutputEstimate";
+import { requireGifski } from "../utils/gifski";
+import { validateGifSettings } from "../utils/mediaInfo";
 import type { FormValues } from "../types";
 import { AVAILABLE_VIDEO_FORMATS, AVAILABLE_AUDIO_FORMATS } from "../types";
 
@@ -52,6 +55,17 @@ const validateForm = (data: FormValues): boolean => {
     return false;
   }
 
+  if (data.videoFormat === "gif") {
+    try {
+      validateGifSettings(data.gifQuality, data.gifFps);
+      requireGifski();
+    } catch (error) {
+      showFailureToast(error, { title: "Cannot convert GIF" });
+      return false;
+    }
+    return true;
+  }
+
   if (data.compressionMode === "bitrate") {
     if (!isInteger(data.bitrate)) {
       showToast({
@@ -84,12 +98,17 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
   const [formData, setFormData] = useState<FormValues | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFfmpegInstalled, setIsFfmpegInstalled] = useState(true);
+  const { estimate, sourceFps } = useOutputEstimate(formData, !isSubmitted && isFfmpegInstalled);
 
   useEffect(() => {
     const initializeForm = async () => {
       const settings = isQuickConvert ? defaultSettings : await loadSettings();
       setFormData(settings);
+      const installed = isFFmpegInstalled();
+      setIsFfmpegInstalled(installed);
+      if (!installed) return;
       setFFmpegPath();
+      if (process.platform !== "darwin") return;
       try {
         const app = await getFrontmostApplication();
         if (app?.name === "Finder") {
@@ -113,8 +132,7 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       }
     };
 
-    setIsFfmpegInstalled(isFFmpegInstalled());
-    initializeForm();
+    initializeForm().catch((error) => showFailureToast(error, { title: "Failed to initialize converter" }));
   }, [isQuickConvert]);
 
   const handleChange = <K extends keyof FormValues>(key: K, value: FormValues[K]): void => {
@@ -148,13 +166,13 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     });
   };
 
-  const handleSubmit = (values: FormValues): void => {
-    if (!validateForm(values)) return;
+  const handleSubmit = (): void => {
+    if (!formData || !validateForm(formData)) return;
 
     showToast({
       style: Toast.Style.Success,
       title: "Conversion started",
-      message: `${values.videoFiles.length} file(s)`,
+      message: `${formData.videoFiles.length} file(s)`,
     });
     setIsSubmitted(true);
   };
@@ -167,7 +185,11 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
     settingsToValidate.videoFiles = [];
     settingsToValidate.audioFiles = [];
 
-    if (settingsToValidate.compressionMode === "bitrate" && !isInteger(settingsToValidate.bitrate)) {
+    if (
+      settingsToValidate.videoFormat !== "gif" &&
+      settingsToValidate.compressionMode === "bitrate" &&
+      !isInteger(settingsToValidate.bitrate)
+    ) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid Bitrate",
@@ -176,7 +198,11 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       return;
     }
 
-    if (settingsToValidate.compressionMode === "filesize" && !isNumber(settingsToValidate.maxSize)) {
+    if (
+      settingsToValidate.videoFormat !== "gif" &&
+      settingsToValidate.compressionMode === "filesize" &&
+      !isNumber(settingsToValidate.maxSize)
+    ) {
       showToast({
         style: Toast.Style.Failure,
         title: "Invalid File Size",
@@ -185,6 +211,14 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
       return;
     }
 
+    if (settingsToValidate.videoFormat === "gif") {
+      try {
+        validateGifSettings(settingsToValidate.gifQuality, settingsToValidate.gifFps);
+      } catch (error) {
+        showFailureToast(error, { title: "Invalid GIF settings" });
+        return;
+      }
+    }
     await saveSettings(settingsToValidate);
     showToast({ style: Toast.Style.Success, title: "Defaults saved" });
   };
@@ -197,6 +231,8 @@ export function useVideoConverter(isQuickConvert: boolean = false) {
 
   return {
     formData,
+    estimate,
+    sourceFps,
     isSubmitted,
     isFfmpegInstalled,
     handleChange,

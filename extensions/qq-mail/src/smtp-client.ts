@@ -1,10 +1,10 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import { getPreferenceValues } from "@raycast/api";
 
 const QQ_SMTP_HOST = "smtp.qq.com";
 const QQ_SMTP_PORT = 465;
 
-function createTransporter(): nodemailer.Transporter {
+function createTransporter(): Transporter {
   const prefs = getPreferenceValues<Preferences>();
   return nodemailer.createTransport({
     host: QQ_SMTP_HOST,

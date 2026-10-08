@@ -1,5 +1,20 @@
 # Sesh Changelog
 
+## [Connect to worktree from browser] - 2026-10-04
+
+- Add a Connect to Worktree from Browser command that reads the GitHub issue or pull request from your active browser tab and connects to its worktree, creating it if it doesn't exist
+- Show the custom icon (such as an emoji) set on a session or wildcard in your sesh config in place of the default source icon
+- Show each tmux session's window names instead of a window count
+- Remove the score from config, zoxide, and tmuxinator sessions
+- Show session aliases from your sesh config, narrow to the aliased session when its alias is typed exactly, and connect automatically when `alias_auto_connect` is set
+- Type `/` to list only aliased sessions, then type an alias to connect to it automatically
+- Hide duplicate entries that point to the same directory as another session
+
+## [Search and connect to windows] - 2026-09-23
+
+- Add a Connect to Window command that lists every tmux window, grouped by session, and jumps straight to the one you pick, even when several windows share a name
+- Add a Search Windows action (⌘↵) on tmux sessions that lists just that session's windows, and creates a new window when none has the name you typed
+
 ## [Helpful empty states] - 2026-09-22
 
 - Show a dedicated empty state when the sesh CLI isn't installed, with a copyable Homebrew install command and a link to sesh on GitHub

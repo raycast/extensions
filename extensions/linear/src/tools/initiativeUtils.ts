@@ -2,69 +2,6 @@ import { Initiative, InitiativeStatus, LinearClient } from "@linear/sdk";
 
 import { client, resolveInitiative, resolveInitiativeLabel, resolveTeam, resolveUser } from "./linearUtils";
 
-export type InitiativeField =
-  | "id"
-  | "name"
-  | "summary"
-  | "description"
-  | "url"
-  | "status"
-  | "priority"
-  | "targetDate"
-  | "health"
-  | "createdAt"
-  | "updatedAt"
-  | "owner"
-  | "creator"
-  | "leadTeam"
-  | "parentInitiatives"
-  | "labels"
-  | "projects"
-  | "subInitiatives";
-
-export const defaultInitiativeFields: InitiativeField[] = [
-  "id",
-  "name",
-  "summary",
-  "description",
-  "url",
-  "status",
-  "priority",
-  "targetDate",
-  "health",
-  "owner",
-  "leadTeam",
-];
-
-export async function serializeInitiative(initiative: Initiative, fields?: InitiativeField[]) {
-  const selected = new Set(fields?.length ? ["id", ...fields] : defaultInitiativeFields);
-  const result: Record<string, unknown> = { id: initiative.id };
-  const direct: Partial<Record<InitiativeField, unknown>> = {
-    name: initiative.name,
-    summary: initiative.description,
-    description: initiative.content,
-    url: initiative.url,
-    status: initiative.status,
-    priority: initiative.priority,
-    targetDate: initiative.targetDate,
-    health: initiative.health,
-    createdAt: initiative.createdAt,
-    updatedAt: initiative.updatedAt,
-  };
-  for (const field of selected) {
-    if (field in direct) result[field] = direct[field as InitiativeField];
-  }
-  if (selected.has("owner")) result.owner = initiative.owner ? await initiative.owner : undefined;
-  if (selected.has("creator")) result.creator = initiative.creator ? await initiative.creator : undefined;
-  if (selected.has("leadTeam")) result.leadTeam = initiative.leadTeam ? await initiative.leadTeam : undefined;
-  if (selected.has("parentInitiatives"))
-    result.parentInitiatives = initiative.parentInitiative ? [await initiative.parentInitiative] : [];
-  if (selected.has("labels")) result.labels = (await initiative.labels({ first: 250 })).nodes;
-  if (selected.has("projects")) result.projects = (await initiative.projects({ first: 250 })).nodes;
-  if (selected.has("subInitiatives")) result.subInitiatives = (await initiative.subInitiatives({ first: 250 })).nodes;
-  return result;
-}
-
 export function initiativeStatus(value?: string): InitiativeStatus | undefined {
   if (!value) return undefined;
   const found = Object.values(InitiativeStatus).find((status) => status.toLowerCase() === value.toLowerCase());

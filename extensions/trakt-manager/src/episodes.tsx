@@ -1,4 +1,4 @@
-import { Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 import { EpisodeActionPanel, episodeTraktUrl } from "./components/episode-actions";
@@ -7,6 +7,7 @@ import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "./lib/detail-helpers";
 import { getPosterUrl } from "./lib/helper";
+import { markEpisodeWatched } from "./lib/media-mutations";
 import { TraktShowHistoryListItem } from "./lib/schema";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
@@ -38,35 +39,8 @@ export default function Command() {
     },
   );
 
-  const addEpisodeToHistory = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.addEpisodeToHistory({
-      body: {
-        episodes: [
-          {
-            ids: { trakt: episode.episode.ids.trakt },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
-
-  const checkInEpisode = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.checkInEpisode({
-      body: {
-        episodes: [
-          {
-            ids: {
-              trakt: episode.episode.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-    });
+  const markWatched = useCallback(async (episode: TraktShowHistoryListItem) => {
+    await markEpisodeWatched(traktClient, episode.episode.ids.trakt, { signal: abortable.current?.signal });
   }, []);
 
   const handleSearchTextChange = useCallback(abortSearch(abortable, setSearchText), []);
@@ -104,15 +78,14 @@ export default function Command() {
           imdbId={(episode) => episode.episode.ids.imdb}
           actions={[
             {
-              title: "Check-In",
+              title: "Mark as Watched",
               icon: Icon.Checkmark,
-              onAction: (episode) => handleAction(episode, checkInEpisode, "Episode checked-in"),
-            },
-            {
-              title: "Add to History",
-              icon: Icon.Clock,
-              shortcut: Keyboard.Shortcut.Common.Duplicate,
-              onAction: (episode) => handleAction(episode, addEpisodeToHistory, "Episode added to history"),
+              onAction: (episode) =>
+                handleAction(
+                  episode,
+                  markWatched,
+                  `Marked "${episode.show.title}" S${episode.episode.season}E${episode.episode.number} as watched`,
+                ),
             },
           ]}
         />

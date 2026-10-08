@@ -1,36 +1,21 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, popToRoot, closeMainWindow } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { CraftEnvironmentForm } from "./components/CraftCommandState";
-import { APPEND_POSITIONS } from "./constants";
 import useCraftCommandContext from "./hooks/useCraftCommandContext";
-import { resolveAddToDailyNoteAction } from "./lib/addToDailyNote";
+import { buildCreateBlockUrl } from "./lib/aiTools";
+import { formatDailyNoteContent, resolveAddToDailyNoteAction } from "./lib/addToDailyNote";
 import { buildDailyNoteOpenUrl, findDailyNoteBlockId } from "./lib/dailyNotes";
-import { getDailyNotePreferences } from "./preferences";
-import { formatTime } from "./utils/dateTimeFormatter";
+import { getPreferences } from "./preferences";
 
 interface FormValues {
   content: string;
   spaceId: string;
 }
 
-const formatContent = (content: string, preferences: Preferences.AddToDailyNote): string => {
-  let finalContent = content;
-
-  if (preferences.addTimestamp) {
-    const now = new Date();
-    const timeString = formatTime(now, preferences.timeFormat);
-    finalContent = `**${timeString}**${preferences.contentPrefix}${finalContent}`;
-  } else {
-    finalContent = `${preferences.contentPrefix}${finalContent}`;
-  }
-
-  return `${finalContent}${preferences.contentSuffix}`;
-};
-
 export default function AddToDailyNote() {
   const command = useCraftCommandContext({ includeDatabases: true });
   const config = command.config.config;
-  const preferences = getDailyNotePreferences();
+  const preferences = getPreferences();
 
   const [formValues, setFormValues] = useState<FormValues>({
     content: "",
@@ -78,7 +63,7 @@ export default function AddToDailyNote() {
       return;
     }
 
-    const finalContent = formatContent(formValues.content, preferences);
+    const finalContent = formatDailyNoteContent(formValues.content, preferences);
     Clipboard.copy(finalContent);
 
     const position = preferences.appendPosition === "beginning" ? "prepended to" : "appended to";
@@ -99,12 +84,12 @@ export default function AddToDailyNote() {
       return null;
     }
 
-    const finalContent = formatContent(formValues.content, preferences);
-    const index = preferences.appendPosition === "beginning" ? APPEND_POSITIONS.BEGINNING : APPEND_POSITIONS.END;
-
-    return `craftdocs://createblock?parentBlockId=${
-      dailyNoteBlockId
-    }&spaceId=${formValues.spaceId}&content=${encodeURIComponent(finalContent)}&index=${index}`;
+    return buildCreateBlockUrl({
+      parentBlockId: dailyNoteBlockId,
+      spaceId: formValues.spaceId,
+      content: formatDailyNoteContent(formValues.content, preferences),
+      position: preferences.appendPosition,
+    });
   };
 
   const getFallbackUrl = () => {

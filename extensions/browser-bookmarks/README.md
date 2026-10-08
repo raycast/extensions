@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, Prisma Access, Perplexity Comet, Dia, Ghost Browser, or Helium.
+Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, Prisma Access, Perplexity Comet, Dia, DuckDuckGo, Ghost Browser, or Helium.
 
 ## Configuration
 

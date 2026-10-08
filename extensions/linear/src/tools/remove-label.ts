@@ -1,19 +1,25 @@
+import { Issue } from "@linear/sdk";
 import { Action } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { findExact } from "./linearUtils";
+import { serializeIssue } from "./serializers";
+import { withLinear } from "./withLinear";
+
 type Input = {
-  /** The ID of the issue to add the label to. Format is a combination of a team key and a unique number, like `ENG-123` */
+  /** The issue ID or identifier. Format is a combination of a team key and a unique number, like `ENG-123` */
   issueId: string;
 
-  /** The ID of the label to add to the issue. Never use title as ID: you have to use `get-labels` tool to get the actual ID from the list of labels */
-  labelId: string;
+  /** Label name or ID to remove from the issue. Other labels on the issue are kept. */
+  label: string;
 };
 
-export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
+export default withLinear(async ({ issueId, label }: Input) => {
   const { linearClient } = getLinearClient();
   const issue = await linearClient.issue(issueId);
+  const labelId = (await findIssueLabel(issue, label)).id;
   const currentLabelIds = issue.labelIds || [];
   const updatedLabelIds = currentLabelIds.filter((id) => id !== labelId);
   const result = await linearClient.updateIssue(issueId, {
@@ -24,14 +30,19 @@ export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
     throw new Error("Failed to remove label");
   }
 
-  return result.issue;
+  const updatedIssue = await result.issue;
+  if (!updatedIssue) {
+    throw new Error("Failed to remove label");
+  }
+
+  return serializeIssue(updatedIssue);
 });
 
-export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
+export const confirmation = withAccessToken(linear)(async ({ issueId, label: labelQuery }: Input) => {
   const { linearClient } = getLinearClient();
 
-  const label = await linearClient.issueLabel(labelId);
   const issue = await linearClient.issue(issueId);
+  const label = await findIssueLabel(issue, labelQuery);
 
   return {
     style: Action.Style.Destructive,
@@ -41,3 +52,8 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }:
     ],
   };
 });
+
+/** Finds the label to remove among the issue's current labels, so a name shared by several teams' labels still identifies the one on this issue. */
+async function findIssueLabel(issue: Issue, query: string) {
+  return findExact((await issue.labels({ first: 250 })).nodes, query, "label on this issue");
+}

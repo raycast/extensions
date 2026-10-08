@@ -7,7 +7,3 @@ export const getPreferences = (): Preferences => {
 export const getSearchPreferences = (): Preferences.Search => {
   return getPreferenceValues<Preferences.Search>();
 };
-
-export const getDailyNotePreferences = (): Preferences.AddToDailyNote => {
-  return getPreferenceValues<Preferences.AddToDailyNote>();
-};

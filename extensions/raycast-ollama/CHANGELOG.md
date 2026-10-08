@@ -1,5 +1,19 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-28
+
+- Added per-command model settings with global defaults fallback
+- Added "Change Model" and "Change Reasoning" actions to 15 commands (accessible from root search)
+- Added "Configure Command Models" command to manage all command settings at once
+- Added "Set as Default Model" action in Manage Models
+- Added "Global Model Settings" command with model dropdown
+- Replaced generic "💾 Loading..." toast with descriptive "🔌 Connecting to Ollama..." toast at inference start
+- Kept "🤔 Thinking...", "✍️ Typing...", "🧰 Tool Calling...", "👍 Done." toasts for stream phases
+
+## [Raycast Model Provider] - 2026-09-24
+
+- Use models from your local and remote Ollama servers directly in Raycast AI, with streamed responses, conversation history, vision, and tool calling when supported.
+
 ## [Improvement] - 2026-09-22
 
 - [Improvement] new per-command "Auto-Replace Selected Text" preference on the commands that rewrite their input: when enabled, the generated answer replaces the selected text automatically instead of waiting for you to copy or paste it. Disabled by default, and skipped when the answer did not complete cleanly or when the input came from the clipboard rather than a selection.

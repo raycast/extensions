@@ -28,6 +28,7 @@ import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useCometBookmarks from "./hooks/useCometBookmarks";
 import useDiaBookmarks from "./hooks/useDiaBookmarks";
+import useDuckDuckGoBookmarks from "./hooks/useDuckDuckGoBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
@@ -97,6 +98,17 @@ const CHROMIUM_SCRIPTABLE_BROWSER_IDS = new Set<string>([
 
 const IS_MACOS = process.platform === "darwin";
 
+const COPY_LINK_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
+  "cmd-c": {
+    macOS: { modifiers: ["cmd"], key: "c" },
+    Windows: { modifiers: ["ctrl"], key: "c" },
+  },
+  "cmd-opt-c": {
+    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+    Windows: { modifiers: ["ctrl", "alt"], key: "c" },
+  },
+};
+
 type BrowserOpenMode = "current-tab" | "new-tab" | "new-window";
 
 function supportsBrowserAutomation(browserBundleId: string) {
@@ -153,7 +165,7 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser, replaceCurrentTab } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -222,6 +234,7 @@ export default function Command() {
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasComet = browsers.includes(BROWSERS_BUNDLE_ID.comet) ?? false;
   const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
+  const hasDuckDuckGo = browsers.includes(BROWSERS_BUNDLE_ID.duckDuckGo) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
@@ -249,6 +262,7 @@ export default function Command() {
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const comet = useCometBookmarks(hasComet);
   const dia = useDiaBookmarks(hasDia);
+  const duckDuckGo = useDuckDuckGoBookmarks(hasDuckDuckGo);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
@@ -280,6 +294,7 @@ export default function Command() {
       ...chromeDev.bookmarks,
       ...comet.bookmarks,
       ...dia.bookmarks,
+      ...duckDuckGo.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
@@ -339,6 +354,7 @@ export default function Command() {
     chromeDev.bookmarks,
     comet.bookmarks,
     dia.bookmarks,
+    duckDuckGo.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
@@ -370,6 +386,7 @@ export default function Command() {
       ...chromeDev.folders,
       ...comet.folders,
       ...dia.folders,
+      ...duckDuckGo.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
@@ -399,6 +416,7 @@ export default function Command() {
     chromeDev.folders,
     comet.folders,
     dia.folders,
+    duckDuckGo.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
@@ -519,6 +537,9 @@ export default function Command() {
     if (hasDia) {
       dia.mutate();
     }
+    if (hasDuckDuckGo) {
+      duckDuckGo.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
@@ -591,7 +612,10 @@ export default function Command() {
     }
   }
 
-  if (safari.error?.message.includes("operation not permitted")) {
+  if (
+    safari.error?.message.includes("operation not permitted") ||
+    duckDuckGo.error?.message.includes("operation not permitted")
+  ) {
     return <PermissionErrorScreen />;
   }
 
@@ -617,6 +641,7 @@ export default function Command() {
         chromeDev.isLoading ||
         comet.isLoading ||
         dia.isLoading ||
+        duckDuckGo.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
@@ -727,7 +752,7 @@ export default function Command() {
                 <Action.CopyToClipboard
                   title="Copy Link"
                   content={item.url}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={COPY_LINK_SHORTCUTS[copyLinkShortcut] ?? COPY_LINK_SHORTCUTS["cmd-c"]}
                   onCopy={() => updateFrecency(item)}
                 />
 

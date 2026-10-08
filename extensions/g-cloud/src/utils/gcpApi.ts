@@ -211,6 +211,16 @@ export interface ComputeInstance {
   }>;
 }
 
+export interface ComputeZoneOperation {
+  id?: string;
+  name?: string;
+  operationType?: string;
+  status?: string;
+  error?: {
+    errors?: Array<{ code?: string; message?: string }>;
+  };
+}
+
 interface AggregatedInstancesResponse {
   items?: Record<
     string,
@@ -273,9 +283,9 @@ export async function startComputeInstance(
   projectId: string,
   zone: string,
   instanceName: string,
-): Promise<void> {
+): Promise<ComputeZoneOperation> {
   const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}/start`;
-  await gcpPost(gcloudPath, url);
+  return gcpPost<ComputeZoneOperation>(gcloudPath, url);
 }
 
 export async function stopComputeInstance(
@@ -283,9 +293,49 @@ export async function stopComputeInstance(
   projectId: string,
   zone: string,
   instanceName: string,
-): Promise<void> {
+): Promise<ComputeZoneOperation> {
   const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}/stop`;
-  await gcpPost(gcloudPath, url);
+  return gcpPost<ComputeZoneOperation>(gcloudPath, url);
+}
+
+export async function resumeComputeInstance(
+  gcloudPath: string,
+  projectId: string,
+  zone: string,
+  instanceName: string,
+): Promise<ComputeZoneOperation> {
+  const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}/resume`;
+  return gcpPost<ComputeZoneOperation>(gcloudPath, url);
+}
+
+export async function suspendComputeInstance(
+  gcloudPath: string,
+  projectId: string,
+  zone: string,
+  instanceName: string,
+): Promise<ComputeZoneOperation> {
+  const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}/suspend`;
+  return gcpPost<ComputeZoneOperation>(gcloudPath, url);
+}
+
+export async function resetComputeInstance(
+  gcloudPath: string,
+  projectId: string,
+  zone: string,
+  instanceName: string,
+): Promise<ComputeZoneOperation> {
+  const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances/${instanceName}/reset`;
+  return gcpPost<ComputeZoneOperation>(gcloudPath, url);
+}
+
+export async function getComputeZoneOperation(
+  gcloudPath: string,
+  projectId: string,
+  zone: string,
+  operationName: string,
+): Promise<ComputeZoneOperation> {
+  const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/operations/${operationName}`;
+  return gcpFetch<ComputeZoneOperation>(gcloudPath, url);
 }
 
 export interface ComputeZone {

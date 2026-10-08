@@ -28,7 +28,14 @@ export type CaskLinkVerb = "link" | "unlink";
  * only ones link/unlink touch (`cask/artifact/{binary,manpage,shellcompletion}.rb`).
  * `generate_completions_from_executable` and `app` are NOT among them.
  */
-const CASK_SYMLINK_STANZAS = ["binary", "manpage", "bash_completion", "zsh_completion", "fish_completion"] as const;
+const CASK_SYMLINK_STANZAS = [
+  "binary",
+  "manpage",
+  "bash_completion",
+  "zsh_completion",
+  "fish_completion",
+  "pwsh_completion",
+] as const;
 
 /**
  * Whether this cask has anything link/unlink could change.
@@ -64,7 +71,7 @@ export function caskHasSymlinkArtifacts(cask: Pick<Cask, "artifacts" | "has_syml
  * whitelist and nothing reads either, but `stream-json`'s filter matches PATHS
  * rather than top-level keys, so `variations.<os>.artifacts` matches on
  * `artifacts` and drags its whole parent subtree through — a second, per-OS
- * copy of the arrays, 900 KB of it across the catalogue (measured 2026-09-18).
+ * copy of the arrays, 900 KB of it across the catalog (measured 2026-09-18).
  * Dropping the top-level array while leaving those would give most of the
  * saving back.
  */

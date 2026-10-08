@@ -19,6 +19,12 @@ export type MenuBarSnapshot =
   | { kind: "no-track"; playerState: PlayerState }
   | { kind: "ok"; track: Readonly<Track>; playerState: PlayerState };
 
+export enum PlaylistKind {
+  ALL = "all",
+  USER = "user",
+  SUBSCRIPTION = "subscription",
+}
+
 export interface Playlist {
   id: string;
   name: string;

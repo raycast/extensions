@@ -1,8 +1,12 @@
 # Threads
 
-A basic extension for quickly navigating Threads. Post updates, follow users, view profiles, and browse topics directly from Raycast.
+A basic extension for quickly navigating Threads. Post updates, follow users, view profiles, browse topics, check raw analytics, and draw giveaway winners directly from Raycast.
 
 **Note:** This is not a full Threads client — it provides quick access to common actions and navigation within Threads.
+
+## Threads Access Token
+
+**Analytics**, **Analytics Menu Bar**, and **Giveaway** need a Threads API access token with the `threads_basic`, `threads_manage_insights`, and `threads_read_replies` permissions. Follow the [token guide](https://threads-analytics.app/en/token-guide), then paste the token into **Threads Access Token** in the extension preferences. Tokens expire after 60 days.
 
 ## Available Commands
 
@@ -79,6 +83,27 @@ View your account insights and analytics.
 - **Last 14 days** - Insights for the past two weeks
 - **Last 30 days** - Insights for the past month (default)
 - **Last 90 days** - Insights for the past quarter
+
+### Analytics
+
+View raw account and post metrics from the Threads API.
+
+**Options:**
+
+- **Period** - Last 7, 14, 30 (default), or 90 days
+
+### Analytics Menu Bar
+
+Show a Threads metric in the menu bar, refreshed every 30 minutes.
+
+**Preferences:**
+
+- **Menu Bar Title** - Follower count (default), views, likes, or replies in the period, your latest post, or icon only
+- **Period** - Last 7 (default), 14, 30, or 90 days
+
+### Giveaway
+
+Draw winners from the replies to one of your posts, filtered by keywords, mentions, reply time, or excluded accounts.
 
 ### Download Threads Media
 

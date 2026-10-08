@@ -11,7 +11,8 @@
     "ahetzm",
     "Xeyn",
     "ridemountainpig",
-    "janosorcsik"
+    "janosorcsik",
+    "Spike_B"
   ],
   "categories": [
     "Web"
@@ -34,7 +35,7 @@
         "bangs",
         "kagi"
       ],
-      "subtitle": "Search the Web with !bangs",
+      "subtitle": "!bangs with a customizable prefix",
       "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
       "mode": "view",
       "arguments": [
@@ -77,22 +78,34 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "engineTriggerPrefix",
+      "title": "Engine Trigger Prefix",
+      "description": "Prefix for engine triggers at the start of a query. Leave blank for bare triggers such as yt query. With a blank prefix, common first words like go or docs can redirect plain English queries away from your default engine. @ is reserved for sites. Invalid prefixes (@ or internal whitespace) use ! instead.",
+      "type": "textfield",
+      "required": false,
+      "default": "!",
+      "placeholder": "Leave blank for bare triggers"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
-    "fuse.js": "^7.4.0"
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2",
+    "fuse.js": "^7.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.9.1",
-    "eslint": "^10.4.1",
-    "typescript": "^6.0.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "eslint": "^10.11.0",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node scripts/check-overrides.mjs",
     "download-kagi-bangs": "npx ts-node scripts/download-kagi-bangs.ts && npm run fix-lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"

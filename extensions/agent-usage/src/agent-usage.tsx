@@ -44,6 +44,7 @@ import {
   useMinimaxCNUsage,
   useOpencodegoUsage,
   useOpenRouterUsage,
+  useRaycastUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -88,6 +89,8 @@ import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDeta
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
 import { formatOpenRouterUsageText, getOpenRouterAccessory, renderOpenRouterDetail } from "./openrouter/renderer.tsx";
 import type { OpenRouterError, OpenRouterUsage } from "./openrouter/types.ts";
+import { formatRaycastUsageText, getRaycastAccessory, renderRaycastDetail } from "./raycast/renderer.tsx";
+import type { RaycastError, RaycastUsage } from "./raycast/types.ts";
 import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
 import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
@@ -126,6 +129,7 @@ interface AgentUsageById {
   minimaxcn: MinimaxCNUsage;
   "opencode-go": OpencodegoUsage;
   openrouter: OpenRouterUsage;
+  raycast: RaycastUsage;
 }
 
 interface AgentErrorById {
@@ -148,6 +152,7 @@ interface AgentErrorById {
   minimaxcn: MinimaxCNError;
   "opencode-go": OpencodegoError;
   openrouter: OpenRouterError;
+  raycast: RaycastError;
 }
 
 type AgentRegistry = {
@@ -418,6 +423,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getOpenRouterAccessory,
     formatUsageText: formatOpenRouterUsageText,
   },
+  raycast: {
+    id: "raycast",
+    name: "Raycast",
+    icon: "raycast-icon.svg",
+    description: "Raycast AI Credits",
+    isSupported: true,
+    settingsUrl: "https://www.raycast.com/settings",
+    useUsage: useRaycastUsage,
+    renderDetail: renderRaycastDetail,
+    getAccessory: getRaycastAccessory,
+    formatUsageText: formatRaycastUsageText,
+  },
 };
 
 const AGENT_IDS: AgentId[] = [...DEFAULT_AGENT_ORDER];
@@ -520,6 +537,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
   const openrouterState = AGENT_REGISTRY.openrouter.useUsage(Boolean(prefs.showOpenRouter));
+  const raycastState = AGENT_REGISTRY.raycast.useUsage(Boolean(prefs.showRaycast));
 
   // Multi-account providers
   const claudeState = useClaudeAccounts(Boolean(prefs.showClaude));
@@ -543,6 +561,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
     openrouter: createAgentView(AGENT_REGISTRY.openrouter, openrouterState, Boolean(prefs.showOpenRouter)),
+    raycast: createAgentView(AGENT_REGISTRY.raycast, raycastState, Boolean(prefs.showRaycast)),
   };
 
   const clinePassAccountedViews = createAccountedViews(

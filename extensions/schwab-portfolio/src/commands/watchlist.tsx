@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { securityName } from "../lib/security-name";
 import { withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { hasSchwabCredentials, schwabOAuth } from "../lib/oauth";
@@ -56,7 +57,7 @@ function Watchlist() {
           <List.Item
             key={symbol}
             title={symbol}
-            subtitle={quote?.reference?.description}
+            subtitle={securityName(quote?.reference?.description, quote?.assetMainType)}
             accessories={accessories}
             actions={
               <ActionPanel>
