@@ -2,7 +2,7 @@
 
 See a GitHub merge queue from Raycast: where your pull request sits, what's running, and what's failing, with drill-down into each job's steps and log.
 
-![Merge Queue](metadata/merge-queue-1.png)
+![Merge Queue](media/queue.png)
 
 ## Commands
 
@@ -20,7 +20,7 @@ Optional checks that fail are shown in orange and don't count against the entry.
 
 Errors come from GitHub's annotations when a tool reports them. When it doesn't, the extension finds them in the log without knowing the tool: it looks only at the failed step, scores each line for signs of failure (`error:`, `FAIL`, `panic:`, tracebacks, assertion diffs) and skips build-tool wrap-up and warnings. It then compares the log with the last passing run of the same job and sets aside every line both runs printed, so a failure with no error wording still stands out and shared output collapses to `⋯ N lines also in the last passing run`. File paths are linked only after GitHub confirms the file exists at that commit. Failed test names are read for Jest, Vitest, Playwright, pytest, Go, RSpec, Cargo, Gradle and .NET.
 
-![Checks](metadata/merge-queue-2.png)
+![Checks](media/checks.png)
 
 **Merge Queue Menu Bar** shows your position (`#3 · 14m`) with an icon for your worst entry's state, refreshing every minute. Each entry has a submenu with its failing checks and a rerun action.
 
