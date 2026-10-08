@@ -36,6 +36,22 @@ Filter your logged time using powerful search syntax:
 - `=8` or `8` - Show days with exactly 8 hours logged
 - Text search - Search by issue key, summary, or description (e.g., "PROJ-123", "bug fix")
 
+## Screenshots
+
+Contributor-provided Raycast screenshots with sensitive Jira identifiers, project names, and work descriptions redacted.
+
+### Log Time
+
+![Log Time form with the date prefilled](screenshots/log-time.png)
+
+### View Logged Time
+
+![Logged time entries with daily totals and reminders](screenshots/logged-time.png)
+
+### Refresh and Month Navigation
+
+![Refresh and month navigation actions](screenshots/refresh-actions.png)
+
 ## Setup
 
 To use this extension, you need to configure the following preferences:
