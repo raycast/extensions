@@ -9,6 +9,8 @@ const LOGIN_HOST = "account.proton.me";
 const STATE_FILE = "login.json";
 const OUTPUT_FILE = "output.txt";
 const EXIT_CODE_FILE = "exit-code.txt";
+/** Each process has its own, since a canceled one may exit after its replacement. */
+const exitCodePath = (dir: string, pid: number) => join(dir, `${pid}-${EXIT_CODE_FILE}`);
 const POLL_MS = 100;
 /** How long a browser login may take; past it, a saved process ID may belong to another process by now. */
 export const LOGIN_TIMEOUT_MS = 10 * 60_000;
@@ -143,8 +145,7 @@ export async function startDetachedLogin(
   // its place, tells that something stopped pass-cli.
   child.once("exit", (code, signal) => {
     ownLogins.delete(pid);
-    // A canceled process may exit after its replacement: keep each process's result separate.
-    void writeFile(join(dir, `${pid}-${EXIT_CODE_FILE}`), String(code ?? signal)).catch(() => undefined);
+    void writeFile(exitCodePath(dir, pid), String(code ?? signal)).catch(() => undefined);
   });
 
   const startedAt = Date.now();
@@ -194,7 +195,7 @@ export async function checkDetachedLogin(
 
   const [output, exitCode] = await Promise.all([
     readText(join(dir, OUTPUT_FILE)),
-    readText(join(dir, `${saved.pid}-${EXIT_CODE_FILE}`)).then((text) => text.trim()),
+    readText(exitCodePath(dir, saved.pid)).then((text) => text.trim()),
   ]);
   await removeLogin(dir);
   if (hasTimedOut) {
@@ -215,10 +216,18 @@ export async function checkDetachedLogin(
  * Whether the login started by startDetachedLogin is still running. No other pass-cli command may run meanwhile: one
  * starting while the login saves the new session can find its data without its key yet, and pass-cli then logs out
  * "for security", deleting the session being saved.
+ *
+ * Once pass-cli has exited, the login's files, which hold the login URL, wait for a login screen to read the result
+ * (see checkDetachedLogin). None shows once logged in, so the files of a login that succeeded, or whose exit was
+ * missed, are removed here. A failed login's stay until a login screen says why.
  */
 export async function isDetachedLoginRunning(dir: string, timeoutMs = LOGIN_TIMEOUT_MS): Promise<boolean> {
   const saved = await readSavedLogin(dir);
-  return saved !== undefined && Date.now() - saved.startedAt <= timeoutMs && isProcessRunning(saved.pid);
+  if (!saved) return false;
+  if (isProcessRunning(saved.pid)) return Date.now() - saved.startedAt <= timeoutMs;
+  const exitCode = (await readText(exitCodePath(dir, saved.pid))).trim();
+  if (exitCode === "" || exitCode === "0") await removeLogin(dir);
+  return false;
 }
 
 /** Stops the login started by startDetachedLogin, if it's still running, and removes its files. */

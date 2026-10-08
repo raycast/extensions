@@ -201,6 +201,33 @@ test("a canceled login exiting late can't replace a newer successful login's res
   assert.deepEqual(await settle(dir), { state: "succeeded" });
 });
 
+test("once a login is over, the next pass-cli command removes its files, unless the login failed", async () => {
+  // No login screen shows once logged in to remove them, also after an exit the extension missed.
+  for (const missedExit of [false, true]) {
+    const dir = loginDir();
+    await startDetachedLogin(fakeCommand("login-ok"), dir, 2_000);
+    const pid = savedPid(dir);
+    await waitUntil(() => !isProcessRunning(pid));
+    await sleep(50);
+    if (missedExit) rmSync(join(dir, `${pid}-exit-code.txt`), { force: true });
+
+    assert.equal(await isDetachedLoginRunning(dir), false);
+    // The output held the login URL and its payload.
+    assert.equal(existsSync(dir), false);
+  }
+
+  // The user is logged out then, so a login screen shows and says why.
+  const failed = loginDir();
+  await startDetachedLogin(fakeCommand("login-url-fail"), failed, 2_000);
+  const pid = savedPid(failed);
+  await waitUntil(() => !isProcessRunning(pid));
+  await sleep(50);
+  assert.equal(await isDetachedLoginRunning(failed), false);
+  assert.equal(existsSync(failed), true);
+  assert.equal((await settle(failed)).state, "failed");
+  assert.equal(existsSync(failed), false);
+});
+
 test("when the extension missed pass-cli's exit, the session tells whether the login succeeded", async () => {
   for (const isLoggedIn of [true, false]) {
     const dir = loginDir();
