@@ -1,0 +1,88 @@
+instructions: |
+  # dia-ai-read
+  Dia is a web browser by The Browser Company. Use get-focused-tab when the user refers to "this tab", "the current tab" or "the page I'm on", and get-tabs for questions about open tabs.
+  Use search-history for pages the user visited before and search-bookmarks for saved bookmarks. Only pass searchText when the user names something to look for, and keep it to the essential keywords.
+  Never show tab or window IDs to the user unless they ask for them.
+
+evals:
+  # dia-ai-read
+  - input: "@dia what tabs do I have open?"
+    mocks:
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          isPinned: true
+          isFocused: false
+        - windowId: "W1"
+          tabId: "T2"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          isPinned: false
+          isFocused: true
+    expected:
+      - callsTool: get-tabs
+      - includes: "Hacker News"
+  - input: "@dia which page am I looking at right now?"
+    mocks:
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T2"
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        isPinned: false
+        isFocused: true
+    expected:
+      - callsTool: get-focused-tab
+      - includes: "Hacker News"
+  - input: "@dia do I have a GitHub tab open?"
+    mocks:
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T3"
+          title: "raycast/extensions: Everything you need to extend Raycast."
+          url: "https://github.com/raycast/extensions"
+          isPinned: false
+          isFocused: false
+    expected:
+      - callsTool: get-tabs
+      - includes: "raycast/extensions"
+  - input: "@dia find raycast in my history"
+    mocks:
+      search-history:
+        - id: 74
+          url: "https://www.raycast.com/blog/raycast-notes"
+          title: "Meet the new Raycast Notes - Raycast Blog"
+          lastVisitedAt: "2026-10-01 20:22:18"
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            searchText:
+              includes: "raycast"
+  - input: "@dia show me the last 10 pages I visited"
+    mocks:
+      search-history:
+        - id: 80
+          url: "https://www.raycast.com/"
+          title: "Raycast"
+          lastVisitedAt: "2026-10-08 09:12:00"
+    expected:
+      - callsTool:
+          name: search-history
+          arguments:
+            limit: 10
+  - input: "@dia search my bookmarks for react"
+    mocks:
+      search-bookmarks:
+        - name: "React"
+          url: "https://react.dev/"
+          folder: "Bookmarks Bar › Dev"
+    expected:
+      - callsTool:
+          name: search-bookmarks
+          arguments:
+            searchText:
+              includes: "react"
+      - includes: "react.dev"

@@ -1,5 +1,10 @@
 # Dia Changelog
 
+## [AI Tools: Tabs, History and Bookmarks] - {PR_MERGE_DATE}
+
+- Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
+- History and bookmark searches return 50 results by default, up to 100.
+
 ## [Security: Address dependabot alert] - 2026-08-19
 
 - Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383

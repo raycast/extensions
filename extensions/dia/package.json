@@ -140,6 +140,28 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "Return the open tabs across all Dia windows"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Return the tab currently focused in Dia"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the Dia browsing history"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search the Dia bookmarks"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.3",
