@@ -581,7 +581,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "maqami-travel",
     title: "MAQAMI Travel",
     description:
-      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, look up places and the weather, then prebook and book. Booking creates a real reservation and needs guest and payment details. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
+      "Official MCP server for MAQAMI, a hotel and flight booking platform with 3M+ hotels. Search hotels and flights, read hotel details and reviews, then give the customer a secure checkout link on book.maqami.co, where they pay. No booking or payment details in tool calls. Remote Streamable HTTP server at https://mcp.maqami.co/; no sign-in, no API key.",
     icon: "https://maqami.co/android-chrome-512x512.png",
     homepage: "https://github.com/negm17111995/mcp-server",
     remoteUrl: "https://mcp.maqami.co/",
