@@ -40,14 +40,21 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const preferences = getPreferenceValues<Preferences.SearchItems>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
+  const hasOpenedItems = useRef(false);
 
   // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
   const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
+    if (!startOnItems) {
+      void loadVaults();
+      return;
+    }
+    // Once only: in development, React runs this twice, and a second copy of the items would need a second Esc.
+    if (hasOpenedItems.current) return;
+    hasOpenedItems.current = true;
     // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    if (startOnItems) push(<SearchItemsView />, () => void loadVaults());
-    else void loadVaults();
+    push(<SearchItemsView />, () => void loadVaults());
   }, []);
 
   async function loadVaults() {

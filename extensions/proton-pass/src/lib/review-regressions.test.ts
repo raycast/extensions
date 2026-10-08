@@ -1537,6 +1537,8 @@ test("Browse Items opens all items over the vaults, which load only once they're
   });
   const render = () => harness.render(VaultsView, { startOnItems: true });
   render();
+  // Twice, as React does in development: a second copy of the items would take a second Esc to leave.
+  harness.effects.forEach((effect) => effect());
   harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
   // All items, rather than a vault, and nothing listed for the vaults underneath meanwhile.
