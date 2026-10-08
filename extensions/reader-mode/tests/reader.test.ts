@@ -17,6 +17,11 @@ import assert from "node:assert/strict";
 import { parseArticle } from "../src/utils/readability";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { preCleanHtml } from "../src/utils/html-cleaner";
+import { regenerateNeedsRevalidate } from "../src/utils/summarizer";
+import { getAIConfigForStyle, SUMMARY_MODELS, DEFAULT_SUMMARY_MODEL } from "../src/config/ai";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { AI, stubPreferences } from "./raycast-api-stub";
 import {
   loadFixture,
   loadPrivateFixture,
@@ -214,7 +219,7 @@ describe("paywall detection", () => {
       {
         textContent: "Three sentences of an actual, quite short post.",
         description:
-          "A long, search-engine-optimised description that the CMS generated automatically " +
+          "A long, search-engine-optimized description that the CMS generated automatically " +
           "and which runs considerably longer than the post it describes.",
       },
     ],
@@ -660,6 +665,39 @@ describe("bypass candidate quality gate (loader level)", () => {
       await new Promise((resolve) => server.close(resolve));
     }
   });
+
+  // Greptile (3rd): the cleaner's gate list was a hand-picked SUBSET of the detector's
+  // BARRIER_SELECTORS, so selectors like [class*="meter-"], .pw-overlay, and [class*="barrier"]
+  // still leaked their gating text into the extraction. The cleaner now strips the detector's
+  // whole list, so an embedded gate using ANY recognized selector is removed.
+  it("strips an embedded gate using a selector only the detector previously knew (barrier/meter)", async () => {
+    const body = "The harbor filled with fog as the last of the fishing boats made for the breakwater. ".repeat(24);
+    const articleWithBarrierGate =
+      `<!doctype html><html><head><title>The Harbor</title></head><body><article><h1>The Harbor</h1>` +
+      `<p>${body}</p>` +
+      `<div class="content-barrier meter-gate">Subscribe to read the rest of this story. Already a subscriber?</div>` +
+      `<p>${body}</p>` +
+      `</article></body></html>`;
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(articleWithBarrierGate);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success", "a gate using a detector-only selector must not sink the article");
+      assert.ok(
+        result.status === "success" && !result.article.textContent.includes("Already a subscriber"),
+        "the barrier/meter gate's text should have been stripped",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
 });
 
 describe("Condé Nast paywall-class content", () => {
@@ -694,5 +732,121 @@ describe("Condé Nast paywall-class content", () => {
       null,
       "the overlay container (an aside/div) should still be removed",
     );
+  });
+
+  // Codex (on the shared-barrier consolidation): `.subscriber-only` marks gated *content*, not
+  // gate UI. The per-element 30% guard and `:not(p)` don't protect SEGMENTED content — sibling
+  // subscriber-only blocks each under 30% would all be deleted, gutting the article. The cleaner
+  // must NOT delete these (detection still scores them from the raw html).
+  it("does not delete segmented subscriber-only article content", () => {
+    const para = "Subscriber-exclusive reporting that must survive the cleaning pass. ".repeat(8);
+    // Four sibling content blocks, each ~25% of the page — all below the 30% protection guard.
+    const blocks = Array.from({ length: 4 }, () => `<div class="subscriber-only"><p>${para}</p></div>`).join("");
+    const { document } = parseHTML(`<html><body><article><h1>Members Feature</h1>${blocks}</article></body></html>`);
+    preCleanHtml(document, "https://example.com/members/feature");
+    const text = document.body?.textContent ?? "";
+    assert.ok(
+      text.includes("Subscriber-exclusive reporting"),
+      "subscriber-only content must survive — deleting it guts the article",
+    );
+    assert.ok(text.length > 1000, `expected the segmented content to remain, got ${text.length} chars`);
+  });
+
+  // Greptile (#31933): Medium and the NYT put the article body in a `meteredContent` container,
+  // so `[class*="metered"]` marks content, like `.subscriber-only` — detected, never deleted.
+  it("does not delete segmented metered article content", () => {
+    const para = "Metered reporting that must survive the cleaning pass. ".repeat(8);
+    const blocks = Array.from({ length: 4 }, () => `<div class="meteredContent"><p>${para}</p></div>`).join("");
+    const { document } = parseHTML(`<html><body><article><h1>Metered Feature</h1>${blocks}</article></body></html>`);
+    preCleanHtml(document, "https://example.com/metered/feature");
+    const text = document.body?.textContent ?? "";
+    assert.ok(text.includes("Metered reporting"), "metered content must survive — deleting it guts the article");
+    assert.ok(text.length > 1000, `expected the segmented content to remain, got ${text.length} chars`);
+  });
+
+  // ...but only the content wrapper is kept. A small metered *gate* is still gate UI, and its text
+  // would make the candidate validator reject a complete article.
+  it("still strips a metered gate message inside a full article", () => {
+    const para = "Full reporting that the reader came for. ".repeat(8);
+    const { document } = parseHTML(
+      `<html><body><article><h1>Feature</h1><p>${para}</p><p>${para}</p>` +
+        `<div class="meteredMessage"><p>Subscribe to read the full story.</p></div></article></body></html>`,
+    );
+    preCleanHtml(document, "https://example.com/metered/gate");
+    const text = document.body?.textContent ?? "";
+    assert.ok(text.includes("Full reporting"), "the article body must survive");
+    assert.ok(!text.includes("Subscribe to read"), "the metered gate's text should have been stripped");
+  });
+});
+
+describe("Summary Model preference", () => {
+  const withModel = (summaryModel: string | undefined, fn: () => void) => {
+    stubPreferences.summaryModel = summaryModel;
+    try {
+      fn();
+    } finally {
+      delete stubPreferences.summaryModel;
+    }
+  };
+
+  it("keeps each style's own model when the preference is default or unset", () => {
+    withModel("default", () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-5.4-nano"));
+    withModel(undefined, () => assert.equal(getAIConfigForStyle("eli5").model, "openai-gpt-5.4-nano"));
+  });
+
+  it("uses the picked model and keeps the style's creativity", () => {
+    withModel("Anthropic_Claude_Haiku_4.5", () => {
+      const config = getAIConfigForStyle("eli5");
+      assert.equal(config.model, "anthropic-claude-4-5-haiku");
+      assert.equal(config.creativity, "medium");
+    });
+  });
+
+  it("lets a model picked with Regenerate with Model… override the preference", () => {
+    withModel("Anthropic_Claude_Haiku_4.5", () =>
+      assert.equal(getAIConfigForStyle("eli5", "OpenAI_GPT-5.4_nano").model, "openai-gpt-5.4-nano"),
+    );
+  });
+
+  it("resolves every offered model to itself", () => {
+    const models: Record<string, string> = AI.Model;
+    for (const { key } of SUMMARY_MODELS) {
+      withModel(key, () => assert.equal(getAIConfigForStyle("overview").model, models[key], key));
+    }
+  });
+
+  it("offers the same models in the preference and the Regenerate submenu", () => {
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+    const pref = manifest.preferences.find((p: { name: string }) => p.name === "summaryModel");
+    const prefKeys = pref.data.map((d: { value: string }) => d.value).filter((v: string) => v !== "default");
+    const menuKeys = SUMMARY_MODELS.map((m) => m.key).filter((k) => k !== DEFAULT_SUMMARY_MODEL);
+    assert.deepEqual(prefKeys, menuKeys);
+  });
+
+  it("falls back to the default when Raycast no longer has the picked model", () => {
+    withModel("OpenAI_GPT-4_retired", () => assert.equal(getAIConfigForStyle("overview").model, "openai-gpt-5.4-nano"));
+  });
+});
+
+describe("Regenerate", () => {
+  const request = {
+    prompt: "summarize X",
+    currentPrompt: "summarize X",
+    fromCache: false,
+    model: "OpenAI_GPT-5.4_nano",
+    currentModel: "OpenAI_GPT-5.4_nano",
+  };
+
+  it("forces a re-run when the same model regenerates a summary generated this session", () => {
+    assert.equal(regenerateNeedsRevalidate(request), true);
+  });
+
+  it("lets useAI re-run by itself when the summary came from the cache", () => {
+    assert.equal(regenerateNeedsRevalidate({ ...request, fromCache: true }), false);
+  });
+
+  it("lets useAI re-run by itself when the model or prompt changes", () => {
+    assert.equal(regenerateNeedsRevalidate({ ...request, model: "Anthropic_Claude_Haiku_4.5" }), false);
+    assert.equal(regenerateNeedsRevalidate({ ...request, currentPrompt: "" }), false);
   });
 });

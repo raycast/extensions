@@ -65,9 +65,24 @@ export function logSummaryError(style: SummaryStyle, error: string, durationMs?:
 }
 
 /**
+ * Whether a regenerate must be forced with `revalidate`. useAI re-runs by itself when its
+ * prompt, model, or `execute` flag changes; regenerating a summary that was generated (not
+ * loaded from the cache) with the same prompt and model changes none of them.
+ */
+export function regenerateNeedsRevalidate(request: {
+  prompt: string;
+  currentPrompt: string;
+  fromCache: boolean;
+  model: string;
+  currentModel: string;
+}): boolean {
+  return request.prompt === request.currentPrompt && !request.fromCache && request.model === request.currentModel;
+}
+
+/**
  * Format summary for display in markdown
  */
-export function formatSummaryBlock(summary: string, style: SummaryStyle): string {
-  const styleLabel = getStyleLabel(style);
-  return `**Summary (${styleLabel})**\n\n${summary}`;
+export function formatSummaryBlock(summary: string, style: SummaryStyle, modelTitle?: string | null): string {
+  const label = modelTitle ? `${getStyleLabel(style)} · ${modelTitle}` : getStyleLabel(style);
+  return `**Summary (${label})**\n\n${summary}`;
 }

@@ -333,9 +333,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.9",
-    "@raycast/utils": "^1.17.0",
-    "js-yaml": "^4.1.2"
+    "@raycast/api": "^2.6.3",
+    "js-yaml": "^4.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -347,7 +346,9 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build --environment dist --output dist --exit-on-error",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc -p tsconfig.test.json && node --test .test-build/tests/*.test.js",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

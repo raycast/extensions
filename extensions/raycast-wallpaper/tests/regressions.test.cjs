@@ -32,17 +32,16 @@ const wallpaper = { title: "Glaze 1", url: "https://example.com/wallpapers/glaze
 test("Windows converts HEIC bytes and filename while macOS keeps the original", async () => {
   let calls = 0;
   const files = loadSource("src/utils/wallpaper-file.ts", {
-    "heic-convert": async ({ buffer, format, quality }) => {
+    "heic-convert": async ({ buffer, format }) => {
       calls++;
       assert.equal(buffer.toString(), "heic");
-      assert.equal(format, "JPEG");
-      assert.equal(quality, 1);
-      return Buffer.from("jpeg");
+      assert.equal(format, "PNG");
+      return Buffer.from("png");
     },
   });
-  assert.equal(files.getPictureFilename(wallpaper, "win32"), "Glaze 1.jpg");
+  assert.equal(files.getPictureFilename(wallpaper, "win32"), "Glaze 1.png");
   assert.equal(files.getPictureFilename(wallpaper, "darwin"), "Glaze 1.heic");
-  assert.equal((await files.preparePicture(Buffer.from("heic"), wallpaper.url, "win32")).toString(), "jpeg");
+  assert.equal((await files.preparePicture(Buffer.from("heic"), wallpaper.url, "win32")).toString(), "png");
   assert.equal((await files.preparePicture(Buffer.from("heic"), wallpaper.url, "darwin")).toString(), "heic");
   assert.equal(calls, 1);
   assert.equal(files.needsConversion("https://example.com/a.HEIF?download=1", "win32"), true);

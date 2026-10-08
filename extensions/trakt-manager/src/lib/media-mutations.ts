@@ -244,6 +244,27 @@ export async function hideShowFromCalendar(traktClient: TraktClient, showTraktId
   return response.status === 200 || response.status === 201;
 }
 
+/**
+ * `DELETE /recommendations/{movies,shows}/:id` ("Not interested" on Trakt). Trakt answers 204 with
+ * no body, so the status is the only proof; anything else, network failures included (status 500), throws.
+ */
+export async function hideRecommendation(
+  traktClient: TraktClient,
+  type: "movie" | "show",
+  traktId: number,
+  { signal }: MutationOptions,
+) {
+  const request = { params: { id: traktId }, fetchOptions: { signal } };
+  const response =
+    type === "movie"
+      ? await traktClient.movies.hideMovieRecommendation(request)
+      : await traktClient.shows.hideShowRecommendation(request);
+
+  if (response.status !== 204) {
+    throw new Error(`Trakt did not hide this recommendation (HTTP ${response.status}). Try again.`);
+  }
+}
+
 /** Short, readable reason from an error body, if Trakt sent one. */
 function describeBody(body: unknown) {
   if (typeof body === "string" && body.length > 0) return `: ${body.slice(0, 120)}`;

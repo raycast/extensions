@@ -64,7 +64,7 @@ const HOST_SEGMENT = /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i;
  * it does the verification job instead — and where it varies between neighbours that the package, being
  * the sort key, cannot. Nothing searchable is lost either — `keywords` still carries the whole title.
  */
-const nameWithoutHost = (name: string) => {
+export const nameWithoutHost = (name: string) => {
   const separator = name.indexOf(" · ");
   if (separator < 0) return name;
 
@@ -135,6 +135,10 @@ const ScriptMetadata = ({ command }: { command: ScriptCommand }) => {
 
   return (
     <List.Item.Detail.Metadata>
+      {/* The list column narrows when the detail pane opens and truncates the row title, so the name
+          is repeated here in full. It keeps its host, which the row drops, and leads the table because
+          the pills below qualify it. */}
+      <List.Item.Detail.Metadata.Label title="Name" text={facets.name} />
       {/* Each facet keeps its own row, because a package and a category are different things and one
           shared heading would name neither. The value is a pill rather than plain text so the
           classification reads as chips against the scalar rows below, and it is spelled out rather

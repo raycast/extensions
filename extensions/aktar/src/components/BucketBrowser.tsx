@@ -25,10 +25,13 @@ import {
 } from "../api/client";
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
-import { FORMAT_TITLES, formatBytes, formatLink, isImageName, thumbnail } from "../lib/format";
+import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
+import { isWindows, primaryShortcut } from "../lib/platform";
+import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
+import { ReplaceForm } from "./ReplaceForm";
 import { UploadForm } from "./UploadForm";
 
 type Entry = { type: "folder"; folder: BucketFolder } | { type: "object"; object: BucketObject };
@@ -73,19 +76,31 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
   const folders = (data ?? []).flatMap((entry) => (entry.type === "folder" ? [entry.folder] : []));
   const objects = (data ?? []).flatMap((entry) => (entry.type === "object" ? [entry.object] : []));
   const location = `${destination.bucket}/${prefix}`;
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const icons = useThumbnailIcons(
+    objects.map((object) => ({ id: object.key, source: { kind: "object", destinationId: destination.id, object } })),
+    selectedKey,
+  );
+  const selectedObject = isShowingDetail ? objects.find((object) => object.key === selectedKey) : undefined;
+  // An image with a public link is shown from that link, so no thumbnail is made for it.
+  const preview = useDetailThumbnail(
+    selectedObject && !(selectedObject.url && isImageName(selectedObject.name))
+      ? { kind: "object", destinationId: destination.id, object: selectedObject }
+      : undefined,
+  );
 
   const sharedActions = (
     <>
       <Action.Push
         title="Upload Files Here"
         icon={Icon.Upload}
-        shortcut={{ modifiers: ["cmd"], key: "u" }}
+        shortcut={primaryShortcut("u")}
         target={<UploadForm destinationId={destination.id} prefix={prefix} onUploaded={revalidate} />}
       />
       <Action.Push
         title="New Folder"
         icon={Icon.NewFolder}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+        shortcut={primaryShortcut("n", "shift")}
         target={<NewFolderForm destination={destination} prefix={prefix} onCreated={revalidate} />}
       />
       <Action
@@ -102,6 +117,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
       isLoading={isLoading}
       pagination={pagination}
       isShowingDetail={isShowingDetail && objects.length > 0}
+      onSelectionChange={setSelectedKey}
       navigationTitle={location}
       searchBarPlaceholder={`Filter ${prefix ? prefix : destination.bucket}`}
     >
@@ -111,7 +127,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
         <List.EmptyView
           icon={Icon.Folder}
           title={isLoading ? "Loading…" : "This Folder Is Empty"}
-          description={isLoading ? undefined : "Upload files here with ⌘U."}
+          description={isLoading ? undefined : `Upload files here with ${isWindows ? "Ctrl+U" : "⌘U"}.`}
           actions={<ActionPanel>{sharedActions}</ActionPanel>}
         />
       )}
@@ -139,7 +155,8 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
         {objects.map((object) => (
           <List.Item
             key={object.key}
-            icon={thumbnail(object.name, object.url)}
+            id={object.key}
+            icon={thumbnailIcon(icons[object.key], object.name, object.url)}
             title={object.name}
             accessories={
               isShowingDetail
@@ -156,7 +173,13 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       : []),
                   ]
             }
-            detail={<ObjectDetail destination={destination} object={object} />}
+            detail={
+              <ObjectDetail
+                destination={destination}
+                object={object}
+                preview={object.key === selectedObject?.key ? preview : undefined}
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -170,7 +193,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.Push
                         title="Show QR Code"
                         icon={Icon.Mobile}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        shortcut={primaryShortcut("q", "shift")}
                         target={<QRCodeView name={object.name} link={object.url} />}
                       />
                     </>
@@ -185,7 +208,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.Push
                         title="Show 1-Hour Link QR Code"
                         icon={Icon.Mobile}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                        shortcut={primaryShortcut("q", "shift")}
                         target={<TemporaryLinkQRCode destination={destination} object={object} seconds={3600} />}
                       />
                     </>
@@ -193,7 +216,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                   <Action
                     title={isShowingDetail ? "Hide Preview" : "Show Preview"}
                     icon={Icon.Sidebar}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={primaryShortcut("p", "shift")}
                     onAction={() => setIsShowingDetail((value) => !value)}
                   />
                 </ActionPanel.Section>
@@ -212,11 +235,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                       <Action.CopyToClipboard title="Copy HTML" content={formatLink(object.url, object.name, "html")} />
                     </>
                   )}
-                  <ActionPanel.Submenu
-                    title="Copy Temporary Link"
-                    icon={Icon.Clock}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  >
+                  <ActionPanel.Submenu title="Copy Temporary Link" icon={Icon.Clock} shortcut={primaryShortcut("t")}>
                     {TEMPORARY_LINK_DURATIONS.map((duration) => (
                       <TemporaryLinkAction
                         key={duration.seconds}
@@ -230,7 +249,7 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                   <ActionPanel.Submenu
                     title="Show Temporary Link QR Code"
                     icon={Icon.Mobile}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                    shortcut={primaryShortcut("t", "shift")}
                   >
                     {TEMPORARY_LINK_DURATIONS.map((duration) => (
                       <Action.Push
@@ -256,11 +275,22 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<MoveForm destination={destination} object={object} onMoved={revalidate} />}
                   />
+                  <Action.Push
+                    title="Replace File"
+                    icon={Icon.Repeat}
+                    shortcut={primaryShortcut("r", "shift")}
+                    target={
+                      <ReplaceForm
+                        target={{ kind: "object", destinationId: destination.id, key: object.key, name: object.name }}
+                        onReplaced={revalidate}
+                      />
+                    }
+                  />
                   <Action
                     title="Delete"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => confirmAndDelete(destination, object, revalidate)}
                   />
                 </ActionPanel.Section>
@@ -274,11 +304,26 @@ export function BucketBrowser({ destination, prefix = "" }: { destination: Desti
   );
 }
 
-function ObjectDetail({ destination, object }: { destination: Destination; object: BucketObject }) {
-  const preview = object.url && isImageName(object.name) ? `![](${object.url})` : "";
+/** `preview`: the thumbnail of a video, PDF or document, or of an image without a public link. */
+function ObjectDetail({
+  destination,
+  object,
+  preview,
+}: {
+  destination: Destination;
+  object: BucketObject;
+  preview?: string | null;
+}) {
+  // The date in the URL makes Raycast load a replaced image instead of its cached copy.
+  const version = object.lastModified ? Date.parse(object.lastModified) : NaN;
+  const imageURL = object.url && !Number.isNaN(version) ? `${object.url}?v=${version}` : object.url;
+  const image = imageURL && isImageName(object.name) ? `![](${imageURL})` : "";
+  const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail
-      markdown={preview || `### ${object.name}\n\nNo preview for this file.`}
+      markdown={
+        image || thumbnail || `### ${object.name}\n\n${preview === undefined ? "" : "No preview for this file."}`
+      }
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Name" text={object.name} />

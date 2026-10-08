@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [My Merge Requests scope fix] - 2026-10-04
+
+- Change the `My Merge Requests` command to list merge requests you created, matching its title and the menu bar
+- Add an optional `scope` argument to the command so the menu bar's "Open Assigned Merge Requests" action opens the assigned list again
+
 ## [Project avatars, grouped project dropdown, and paginated project search] - 2026-09-27
 
 - Show avatars of private projects and groups; avatars are downloaded with authentication and cached locally

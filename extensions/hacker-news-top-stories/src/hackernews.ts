@@ -34,6 +34,7 @@ export async function getStories(points = "500", { cache }: GetStoriesProps["opt
       headers: {
         "User-Agent": `Hacker News Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
       },
+      signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
       console.error("Failed to fetch stories:", response.statusText);

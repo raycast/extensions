@@ -159,8 +159,8 @@
   ],
   "dependencies": {
     "@kud/qobuz": "0.5.5",
-    "@raycast/api": "2.3.1",
-    "@raycast/utils": "2.3.1"
+    "@raycast/api": "1.104.25",
+    "@raycast/utils": "2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",

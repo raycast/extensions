@@ -152,6 +152,7 @@ export async function fetchEmails(
           envelope: true,
           bodyStructure: true,
           source: { maxLength: 10000 }, // Fetch partial source for preview
+          headers: ["x-pm-internal-id"],
         },
         { uid: true }, // Tell fetch to interpret limitedUids as UIDs, not sequence numbers
       )) {
@@ -174,6 +175,7 @@ export async function fetchEmails(
           flags: message.flags instanceof Set ? message.flags : new Set(message.flags || []),
           hasAttachment,
           preview: extractPreview(message.source),
+          protonId: extractProtonId(message.headers),
         };
 
         emails.push(email);
@@ -203,6 +205,13 @@ function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: 
   }
 
   return false;
+}
+
+function extractProtonId(headers: Buffer | undefined): string | undefined {
+  if (!headers) return undefined;
+  // Unfold continuation lines before matching
+  const text = headers.toString("utf-8").replace(/\r?\n[ \t]+/g, " ");
+  return text.match(/^x-pm-internal-id:\s*(\S+)/im)?.[1];
 }
 
 function extractPreview(source: Buffer | undefined): string {
@@ -276,17 +285,40 @@ export async function markAsUnread(folderPath: string, uid: number): Promise<voi
   });
 }
 
-export async function deleteEmail(folderPath: string, uid: number): Promise<void> {
-  return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+function findSpecialFolder(folders: Folder[], specialUse: string, name: string): Folder | undefined {
+  return folders.find((folder) => folder.specialUse === specialUse || folder.path.toLowerCase() === name);
+}
 
-    try {
-      await client.messageFlagsAdd(uid, ["\\Deleted"], { uid: true });
-      await client.messageDelete(uid, { uid: true });
-    } finally {
-      lock.release();
-    }
-  });
+// Bridge only deletes emails for good when they're removed from Trash or Drafts. Removing one from any
+// other folder doesn't send it to Trash: it either loses its folder (left only in All Mail) or stays put.
+export function deletesPermanently(folderPath: string, folders: Folder[]): boolean {
+  return [findSpecialFolder(folders, "\\Trash", "trash"), findSpecialFolder(folders, "\\Drafts", "drafts")].some(
+    (folder) => folder?.path === folderPath,
+  );
+}
+
+// Moves the email to Trash, or deletes it for good when it's already in Trash or Drafts
+export async function deleteEmail(folderPath: string, uid: number): Promise<"trashed" | "deleted"> {
+  const folders = await listFolders();
+
+  if (deletesPermanently(folderPath, folders)) {
+    await withClient(async (client) => {
+      const lock = await client.getMailboxLock(folderPath);
+      try {
+        await client.messageDelete(uid, { uid: true });
+      } finally {
+        lock.release();
+      }
+    });
+    return "deleted";
+  }
+
+  const trashFolder = findSpecialFolder(folders, "\\Trash", "trash");
+  if (!trashFolder) {
+    throw new Error("Trash folder not found");
+  }
+  await moveToFolder(folderPath, uid, trashFolder.path);
+  return "trashed";
 }
 
 export async function moveToFolder(folderPath: string, uid: number, targetFolder: string): Promise<void> {

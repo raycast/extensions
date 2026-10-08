@@ -1,7 +1,7 @@
 import { environment, getApplications, LaunchProps, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { Connection, getStatus, saveConnection } from "./api/client";
-import { AKTAR_BUNDLE_ID, AKTAR_DOWNLOAD_URL, showAktarFailure } from "./lib/errors";
+import { AKTAR_DOWNLOAD_URL, isAktar, showAktarFailure } from "./lib/errors";
 
 type LaunchContext = {
   /** Sent back by Aktar through a deeplink once the user approves the connection. */
@@ -36,11 +36,11 @@ export default async function Command(props: LaunchProps<{ launchContext?: Launc
   }
 
   const applications = await getApplications();
-  if (!applications.some((application) => application.bundleId === AKTAR_BUNDLE_ID)) {
+  if (!applications.some(isAktar)) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Aktar isn't installed",
-      message: "Install the Aktar menu bar app first.",
+      message: "Install the Aktar app first.",
       primaryAction: { title: "Download Aktar", onAction: () => open(AKTAR_DOWNLOAD_URL) },
     });
     return;

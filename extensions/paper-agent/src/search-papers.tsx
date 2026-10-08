@@ -1,8 +1,9 @@
-import { Action, ActionPanel, List, getPreferenceValues, open } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import * as path from "node:path";
-import { execFile } from "node:child_process";
 import { useEffect, useMemo, useState } from "react";
-import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
+import { checkCoreAvailable } from "./core-check";
+import { runCoreCommand } from "./core-process";
+import { PaperEmptyView } from "./paper-empty-view";
 import { withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
 import { PaperListView } from "./paper-list";
@@ -18,6 +19,7 @@ async function loadSearchResults(
     libraryDir: string;
     pythonBin: string;
     agentRoot: string;
+    signal: AbortSignal;
   },
 ): Promise<Paper[]> {
   const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
@@ -26,50 +28,19 @@ async function loadSearchResults(
     return [];
   }
 
-  try {
-    const rawJson = await withEffectiveConfigPathAsync(
-      configPath,
-      prefPaperDir,
-      (effectiveConfigPath) =>
-        new Promise<string>((resolve, reject) => {
-          execFile(
-            pythonBin,
-            ["-m", "paper_agent", "search", "--query", query, "--json", "--config", effectiveConfigPath],
-            { cwd: agentRoot, encoding: "utf-8" },
-            (error, stdout) => {
-              if (error) {
-                reject(error);
-                return;
-              }
-              resolve(stdout);
-            },
-          );
-        }),
-    );
-
-    return parseCliPapers(rawJson, {
-      paperDir,
-      libraryDir,
-      fallbackDate: "unknown",
-    });
-  } catch {
-    return [];
-  }
-}
-
-function CoreNotFoundEmptyView() {
-  return (
-    <List.EmptyView
-      title="Core not found"
-      description={`Install: ${CORE_INSTALL_URL} — or run the bootstrap command (Copy action).`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Bootstrap Command" content={getBootstrapCopyText()} />
-          <Action title="Open GitHub" onAction={() => open(CORE_INSTALL_URL)} />
-        </ActionPanel>
-      }
-    />
+  const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, (effectiveConfigPath) =>
+    runCoreCommand(
+      pythonBin,
+      ["-m", "paper_agent", "search", "--query", query, "--json", "--config", effectiveConfigPath],
+      { cwd: agentRoot, signal: options.signal },
+    ),
   );
+
+  return parseCliPapers(rawJson, {
+    paperDir,
+    libraryDir,
+    fallbackDate: "unknown",
+  });
 }
 
 export default function Command() {
@@ -82,8 +53,10 @@ export default function Command() {
     const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
     const hasPaperDir = prefPaperDir.length > 0;
     const agentRoot = hasConfig ? path.dirname(configPath) : "";
-    const pythonPathTrim = prefs.pythonPath?.trim() ?? "";
-    const pythonBin = pythonPathTrim.length > 0 ? pythonPathTrim : path.join(agentRoot, ".venv", "bin", "python3");
+    const pythonBin =
+      prefs.pythonPath && prefs.pythonPath.trim().length > 0
+        ? prefs.pythonPath.trim()
+        : path.join(agentRoot, ".venv", "bin", "python3");
     return {
       configPath,
       hasConfig,
@@ -102,29 +75,41 @@ export default function Command() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
+  const [coreError, setCoreError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const retryLoad = () => setRetry((value) => value + 1);
 
   useEffect(() => {
     if (!hasConfig || !hasPaperDir) return;
 
     let cancelled = false;
-    void checkCoreAvailable({
-      configPath: prefs.configPath,
-      paperDir: prefs.paperDir,
-      pythonPath: prefs.pythonPath,
-    })
+    const controller = new AbortController();
+    setCoreOk(null);
+    void checkCoreAvailable(
+      {
+        configPath: prefs.configPath,
+        paperDir: prefs.paperDir,
+        pythonPath: prefs.pythonPath,
+      },
+      controller.signal,
+    )
       .then((r) => {
         if (cancelled) return;
         setCoreOk(r.ok);
+        setCoreError(r.error ?? "");
       })
       .catch(() => {
         if (cancelled) return;
         setCoreOk(false);
+        setCoreError("Unable to check Paper Agent. Check extension preferences and retry.");
       });
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [normalized]);
+  }, [normalized, retry]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -141,7 +126,9 @@ export default function Command() {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     setIsSearching(true);
+    setLoadError("");
 
     void loadSearchResults(debouncedSearchText, {
       configPath,
@@ -150,14 +137,16 @@ export default function Command() {
       libraryDir,
       pythonBin,
       agentRoot,
+      signal: controller.signal,
     })
       .then((results) => {
         if (cancelled) return;
         setPapers(results);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         setPapers([]);
+        setLoadError(error instanceof Error ? error.message : "Unable to search papers. Please retry.");
       })
       .finally(() => {
         if (cancelled) return;
@@ -166,6 +155,7 @@ export default function Command() {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [debouncedSearchText, normalized, coreOk]);
 
@@ -173,10 +163,11 @@ export default function Command() {
     return (
       <List
         isShowingDetail
+        searchText={searchText}
         searchBarPlaceholder="Search by title, authors, abstract, date..."
         onSearchTextChange={setSearchText}
       >
-        <List.EmptyView
+        <PaperEmptyView
           title="Set preferences first"
           description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
         />
@@ -187,7 +178,9 @@ export default function Command() {
   if (coreOk === null) {
     return (
       <List
+        isLoading
         isShowingDetail
+        searchText={searchText}
         searchBarPlaceholder="Search by title, authors, abstract, date..."
         onSearchTextChange={setSearchText}
       >
@@ -200,10 +193,23 @@ export default function Command() {
     return (
       <List
         isShowingDetail
+        searchText={searchText}
         searchBarPlaceholder="Search by title, authors, abstract, date..."
         onSearchTextChange={setSearchText}
       >
-        <CoreNotFoundEmptyView />
+        <PaperEmptyView title="Core unavailable" description={coreError} onRetry={retryLoad} showInstall />
+      </List>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <List
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder="Search by title, authors, abstract, date..."
+      >
+        <PaperEmptyView title="Could not search papers" description={loadError} onRetry={retryLoad} />
       </List>
     );
   }
@@ -212,11 +218,12 @@ export default function Command() {
     <PaperListView
       papers={papers}
       isLoading={isSearching}
-      emptyTitle="No papers or CLI failed"
-      emptyDescription="Run the pipeline at least once, or check Config path and Paper directory."
+      emptyTitle="No matching papers"
+      emptyDescription="Try another search, or run the pipeline to add papers to your library."
       subtitleMode="date-and-authors"
       searchBarPlaceholder="Search by title, authors, abstract, date..."
       onSearchTextChange={setSearchText}
+      searchText={searchText}
     />
   );
 }

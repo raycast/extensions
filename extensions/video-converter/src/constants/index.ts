@@ -1,8 +1,3 @@
-export const FFMPEG_PATHS = {
-  default: "/usr/local/bin/ffmpeg",
-  alternative: "/opt/homebrew/bin/ffmpeg",
-} as const;
-
 export const CONVERSION_STATUS = {
   CONVERTING: "converting",
   DONE: "done",

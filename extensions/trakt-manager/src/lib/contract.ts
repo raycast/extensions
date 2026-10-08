@@ -123,6 +123,18 @@ const TraktMovieContract = c.router({
     query: TraktRecommendationRequestSchema,
     summary: "Get recommended movies",
   },
+  hideMovieRecommendation: {
+    method: "DELETE",
+    path: "/recommendations/movies/:id",
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    body: z.undefined(),
+    responses: {
+      204: z.undefined(),
+    },
+    summary: "Stop recommending a movie",
+  },
   addMovieToWatchlist: {
     method: "POST",
     path: "/sync/watchlist",
@@ -253,6 +265,18 @@ const TraktShowContract = c.router({
     },
     query: TraktRecommendationRequestSchema,
     summary: "Get recommended shows",
+  },
+  hideShowRecommendation: {
+    method: "DELETE",
+    path: "/recommendations/shows/:id",
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    body: z.undefined(),
+    responses: {
+      204: z.undefined(),
+    },
+    summary: "Stop recommending a show",
   },
   addShowToWatchlist: {
     method: "POST",

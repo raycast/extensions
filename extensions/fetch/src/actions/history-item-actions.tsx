@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, LaunchType } from "@raycast/api";
 import { DownloadHistoryItem } from "../lib/history";
+import { launchOrShowError } from "../lib/launch";
 
 interface HistoryItemActionsProps {
   item: DownloadHistoryItem;
@@ -23,7 +24,11 @@ export function HistoryItemActions({ item, onRemove, onClearByAge, onClearAll }:
   // rather than offered as a button that silently does nothing.
   const url = item.url;
   const redownload = url
-    ? () => launchCommand({ name: "download", type: LaunchType.UserInitiated, arguments: { url } })
+    ? () =>
+        launchOrShowError(
+          { name: "download", type: LaunchType.UserInitiated, arguments: { url } },
+          "Could Not Start Download",
+        )
     : undefined;
 
   return (

@@ -3,7 +3,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import type { BucketListing, Destination, Status, TemporaryLink, Upload } from "./types";
+import type { BucketListing, Destination, Status, TemporaryLink, Upload, WatchedFolder, WatchedFolders } from "./types";
 
 export const DEFAULT_PORT = 47913;
 const CONNECTION_KEY = "connection";
@@ -76,6 +76,8 @@ type RequestOptions = {
   json?: unknown;
   file?: { path: string; onProgress?: (fraction: number) => void };
   connection?: Connection;
+  /** The reply's bytes instead of JSON: a Buffer, or null for 204 No Content. */
+  binary?: boolean;
 };
 
 async function request<T>(method: string, route: string, options: RequestOptions = {}): Promise<T> {
@@ -120,6 +122,11 @@ async function request<T>(method: string, route: string, options: RequestOptions
         const chunks: Buffer[] = [];
         res.on("data", (chunk: Buffer) => chunks.push(chunk));
         res.on("end", () => {
+          const status = res.statusCode ?? 0;
+          if (options.binary && status >= 200 && status < 300) {
+            resolve((status === 204 ? null : Buffer.concat(chunks)) as T);
+            return;
+          }
           const text = Buffer.concat(chunks).toString("utf8");
           let payload: unknown;
           try {
@@ -127,7 +134,6 @@ async function request<T>(method: string, route: string, options: RequestOptions
           } catch {
             payload = {};
           }
-          const status = res.statusCode ?? 0;
           if (status >= 200 && status < 300) {
             resolve(payload as T);
             return;
@@ -186,7 +192,7 @@ export async function deleteUpload(id: string) {
 
 /**
  * Uploads one file. Without a `prefix`, Aktar names it with the
- * destination's path template, same as a drop on the menu bar. With one,
+ * destination's path template, same as a file dropped on Aktar. With one,
  * the file keeps its name inside that folder (numbered if it's taken).
  * `expires` (days) asks Aktar to auto-delete the file; it can't be combined
  * with a `prefix`, and 0 or undefined keeps it forever.
@@ -214,6 +220,43 @@ export async function uploadFile(
     file: { path: filePath, onProgress: options.onProgress },
   });
   return unwrapUpload(response);
+}
+
+/**
+ * Writes `filePath` over an upload in Aktar's history: the key and link stay,
+ * the file is new. Needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0;
+ * older versions answer 404, see `isReplaceUnsupported`.
+ */
+export async function replaceUpload(id: string, filePath: string, onProgress?: (fraction: number) => void) {
+  const response = await request<UploadReply>("POST", `uploads/${encodeURIComponent(id)}/replace`, {
+    query: { filename: path.basename(filePath) },
+    file: { path: filePath, onProgress },
+  });
+  return unwrapUpload(response);
+}
+
+/** Writes `filePath` over the object at `key` in a destination's bucket, keeping its link. */
+export async function replaceObject(
+  destinationId: string,
+  key: string,
+  filePath: string,
+  onProgress?: (fraction: number) => void,
+) {
+  const response = await request<UploadReply>("PUT", bucketRoute(destinationId, "objects"), {
+    query: { key, filename: path.basename(filePath) },
+    file: { path: filePath, onProgress },
+  });
+  return unwrapUpload(response);
+}
+
+/** True when this Aktar predates replacing files: it answers the unknown route with 404 "Not found.". */
+export function isReplaceUnsupported(error: unknown) {
+  return (
+    error instanceof AktarError &&
+    error.kind === "request-failed" &&
+    error.status === 404 &&
+    error.message === "Not found."
+  );
 }
 
 export async function uploadClipboard(options: { destinationId?: string; expires?: number } = {}) {
@@ -256,4 +299,75 @@ export function createTemporaryLink(destinationId: string, key: string, expiresI
   return request<TemporaryLink>("POST", bucketRoute(destinationId, "links"), {
     json: { key, expiresIn: expiresInSeconds },
   });
+}
+
+// MARK: - Thumbnails
+
+/**
+ * A PNG thumbnail, its longest side at most `px` pixels, or null when there's
+ * none (thumbnails are off for the destination, or none could be made).
+ * With `generate` false, Aktar only returns one it already has, never
+ * downloading the file to make one. Aktar versions before thumbnails answer
+ * 404; see `isThumbnailsUnsupported`.
+ */
+export function getUploadThumbnail(id: string, options: { px: number; generate: boolean }) {
+  return request<Buffer | null>("GET", `uploads/${encodeURIComponent(id)}/thumbnail`, {
+    query: { px: options.px, generate: options.generate ? undefined : 0 },
+    binary: true,
+  });
+}
+
+export function getObjectThumbnail(
+  destinationId: string,
+  object: { key: string; size: number; lastModified: string | null },
+  options: { px: number; generate: boolean },
+) {
+  return request<Buffer | null>("GET", bucketRoute(destinationId, "thumbnail"), {
+    query: {
+      key: object.key,
+      objectSize: object.size,
+      lastModified: object.lastModified,
+      px: options.px,
+      generate: options.generate ? undefined : 0,
+    },
+    binary: true,
+  });
+}
+
+/**
+ * True when this Aktar predates thumbnails and doesn't know the route. Aktar
+ * answers an unknown route with "Not found."; a 404 about a missing upload,
+ * object or destination says so and doesn't count.
+ */
+export function isThumbnailsUnsupported(error: unknown) {
+  return (
+    error instanceof AktarError &&
+    error.kind === "request-failed" &&
+    error.status === 404 &&
+    error.message === "Not found."
+  );
+}
+
+// MARK: - Watched folders
+
+/** True when this Aktar predates watched folders and doesn't know the route. */
+export function isWatchedFoldersUnsupported(error: unknown) {
+  return error instanceof AktarError && error.kind === "request-failed" && error.status === 404;
+}
+
+export function listWatchedFolders() {
+  return request<WatchedFolders>("GET", "watched-folders");
+}
+
+/** Pauses every watched folder for `minutes`, or until resumed when it's left out. */
+export function pauseWatching(minutes?: number) {
+  return request<WatchedFolders>("POST", "watched-folders/pause", { json: { minutes: minutes ?? null } });
+}
+
+export function resumeWatching() {
+  return request<WatchedFolders>("POST", "watched-folders/resume");
+}
+
+export function setWatchedFolderEnabled(id: string, enabled: boolean) {
+  return request<WatchedFolder>("POST", `watched-folders/${encodeURIComponent(id)}`, { json: { enabled } });
 }

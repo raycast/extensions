@@ -60,14 +60,16 @@
     },
     {
       "name": "current-app",
-      "title": "Copy Current App's Bundle ID",
-      "description": "Saves current app's bundle id in the clipboard",
+      "title": "Copy Current App's ID",
+      "description": "Copy the current application identifier for this platform",
       "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "@supabase/supabase-js": "2.110.2",
+    "ws": "8.21.1"
   },
   "devDependencies": {
     "@raycast/api": "^1.103.5",
@@ -76,6 +78,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.2",
     "@types/react": "19.2.2",
+    "@types/ws": "8.18.1",
     "eslint": "^9.39.0",
     "jest": "^30.2.0",
     "prettier": "^3.6.2",
@@ -84,14 +87,17 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "node scripts/check-release-config.mjs && ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "jest"
+    "publish": "node scripts/check-release-config.mjs && npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:types": "tsc --noEmit",
+    "dev:catalog": "node scripts/dev-catalog.mjs"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
