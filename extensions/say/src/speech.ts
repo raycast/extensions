@@ -85,7 +85,12 @@ export const killRunningSay = async () => {
   if (isWindows) {
     // native-say stops speech with fkill, which needs a fastlist.exe that is not included in the extension build
     const sayProcess = await nativeCheckIfSayIsRunning();
-    if (sayProcess) process.kill(sayProcess.pid);
+    try {
+      if (sayProcess) process.kill(sayProcess.pid);
+    } catch (error) {
+      // The speech may have finished on its own after the check
+      if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+    }
     return;
   }
 
