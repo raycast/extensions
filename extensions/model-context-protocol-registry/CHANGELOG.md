@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Moved Repository Links] - {PR_MERGE_DATE}
+## [Update Moved Repository Links] - 2026-10-08
 
 - Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
 
