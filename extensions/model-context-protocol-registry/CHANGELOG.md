@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add A1 Gallery MCP Server] - {PR_MERGE_DATE}
+
+- Add A1 Gallery to the official registry: hand-curated web design references, inside your agent. Search real websites, sections, pages, fonts and designers, and read design tokens measured off each rendered page. 17 read-only tools. Hosted remote Streamable HTTP server at https://www.a1.gallery/api/mcp; OAuth 2.1 sign-in with dynamic client registration, free A1 account, no API key.
+
 ## [Update Moved Repository Links] - 2026-10-08
 
 - Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
