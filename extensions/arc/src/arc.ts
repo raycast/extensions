@@ -22,15 +22,25 @@ async function ensureArcIsRunning() {
   `);
 }
 
-export async function isArcRunning() {
-  const response = await runAppleScript(`return application "Arc" is running`);
-  return response === "true";
-}
+// Prepended to read-only scripts that run in the background: bail out instead of letting
+// `tell application "Arc"` launch Arc, and do so inside the script to keep the check-to-use gap minimal.
+const SKIP_IF_ARC_IS_CLOSED = `
+  if application "Arc" is not running then return ""
+  tell application "Arc"
+    if (count of windows) is 0 then return ""
+  end tell
+`;
+
+type ReadOptions = {
+  /** When false, never launch Arc or create a window; resolves to undefined if Arc is not ready. */
+  launch?: boolean;
+};
 
 // Tabs
-export async function getTabs() {
-  await ensureArcIsRunning();
+export async function getTabs({ launch = true }: ReadOptions = {}) {
+  if (launch) await ensureArcIsRunning();
   const response = await runAppleScript(`
+    ${launch ? "" : SKIP_IF_ARC_IS_CLOSED}
     on escape_value(this_text)
       set AppleScript's text item delimiters to "\\\\"
       set the item_list to every text item of this_text
@@ -338,9 +348,10 @@ export async function selectSpaceById(spaceId: string) {
   `);
 }
 
-export async function getSpaces() {
-  await ensureArcIsRunning();
+export async function getSpaces({ launch = true }: ReadOptions = {}) {
+  if (launch) await ensureArcIsRunning();
   const response = await runAppleScript(`
+    ${launch ? "" : SKIP_IF_ARC_IS_CLOSED}
     set _output to ""
 
     tell application "Arc"

@@ -1,19 +1,19 @@
 import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences, Keyboard } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { truncate } from "lodash";
-import { findTab, getSpaces, getTabs, isArcRunning, selectSpace, selectTab } from "./arc";
+import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./arc";
 import { getDomain, getKey, getShortcut, getSpaceTitle } from "./utils";
 
 const LIMIT = 25;
 
-// Background refreshes must not launch Arc; skip the AppleScript calls while it is not running.
-async function ifArcIsRunning<T>(fn: () => Promise<T>) {
-  return (await isArcRunning()) ? fn() : undefined;
-}
+// Background refreshes must never launch Arc. Separate named functions keep the
+// useCachedPromise cache keys distinct.
+const getMenuBarSpaces = () => getSpaces({ launch: false });
+const getMenuBarTabs = () => getTabs({ launch: false });
 
 export default function Command() {
-  const { data: spaces, isLoading: isLoadingSpaces } = useCachedPromise(() => ifArcIsRunning(getSpaces));
-  const { data: tabs, isLoading: isLoadingTabs } = useCachedPromise(() => ifArcIsRunning(getTabs));
+  const { data: spaces, isLoading: isLoadingSpaces } = useCachedPromise(getMenuBarSpaces);
+  const { data: tabs, isLoading: isLoadingTabs } = useCachedPromise(getMenuBarTabs);
 
   return (
     <MenuBarExtra
