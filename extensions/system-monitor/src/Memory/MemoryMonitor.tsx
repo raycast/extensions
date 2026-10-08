@@ -27,11 +27,14 @@ function gigabytes(megabytes: number): string {
 async function loadMemorySnapshot() {
   const memoryUsage = await getMemoryUsage();
   const usedPercent = Math.round((memoryUsage.memUsed * 100) / memoryUsage.memTotal);
+  // Round total and free, then derive used from them, so Used + Free always adds up to Total.
+  const totalMem = Math.round(memoryUsage.memTotal / 1024);
+  const freeMem = Math.round((memoryUsage.memTotal - memoryUsage.memUsed) / 1024);
 
   return {
-    totalMem: Math.round(memoryUsage.memTotal / 1024),
-    usedMem: Math.round(memoryUsage.memUsed / 1024),
-    freeMem: Math.round((memoryUsage.memTotal - memoryUsage.memUsed) / 1024),
+    totalMem,
+    usedMem: totalMem - freeMem,
+    freeMem,
     displayedPercent: memoryPercentMode === "free" ? 100 - usedPercent : usedPercent,
     active: gigabytes(memoryUsage.active),
     inactive: gigabytes(memoryUsage.inactive),
