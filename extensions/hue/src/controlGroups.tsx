@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Grid, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
 import type { Group, GroupedLight, Light, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
 import React, { useMemo } from "react";
-import { createGradientUri } from "./helpers/svgImages";
+import { createGroupIcon } from "./helpers/svgImages";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import { SetScene } from "./setScene";
@@ -19,10 +19,19 @@ export default function ControlGroups() {
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
   // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
   const rateLimiter = useInputRateLimiter(1, 1000);
-  const gradientUris = useMemo(
+  const icons = useMemo(
     () =>
-      new Map([...rooms, ...zones].map((group) => [group.id, createGradientUri(getColorsFromGroup(lights, group))])),
-    [rooms, zones, lights],
+      new Map(
+        [...rooms, ...zones].map((group) => [
+          group.id,
+          createGroupIcon(
+            group,
+            getColorsFromGroup(lights, group),
+            getGroupedLightFromGroup(groupedLights, group)?.on?.on === true,
+          ),
+        ]),
+      ),
+    [rooms, zones, lights, groupedLights],
   );
 
   const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
@@ -42,7 +51,7 @@ export default function ControlGroups() {
                 groupLights={groupLights}
                 groupedLight={groupedLight}
                 group={room}
-                gradientUri={gradientUris.get(room.id)}
+                icon={icons.get(room.id)}
                 useHue={useHueObject}
                 rateLimiter={rateLimiter}
               />
@@ -62,7 +71,7 @@ export default function ControlGroups() {
                 group={zone}
                 groupLights={groupLights}
                 groupedLight={groupedLight}
-                gradientUri={gradientUris.get(zone.id)}
+                icon={icons.get(zone.id)}
                 useHue={useHueObject}
                 rateLimiter={rateLimiter}
               />
@@ -78,7 +87,7 @@ function Group(props: {
   groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  gradientUri?: string;
+  icon?: Image;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -93,15 +102,11 @@ function Group(props: {
     lightStatusText = `${lightsOnCount} out of ${props.groupLights.length} lights are on`;
   }
 
-  const content = groupedLight?.on?.on
-    ? (props.gradientUri ?? "")
-    : { source: { light: "group-off.png", dark: "group-off@dark.png" } };
-
   return (
     <Grid.Item
       title={props.group.metadata.name}
       subtitle={lightStatusText}
-      content={content}
+      content={props.icon ?? ""}
       actions={
         groupedLight && (
           <ActionPanel>

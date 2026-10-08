@@ -1,8 +1,8 @@
 import { Cache, environment, Image } from "@raycast/api";
 import chroma from "chroma-js";
 import { readFileSync } from "fs";
-import { Light, Palette } from "../lib/types";
-import { getColorFromLight, getIconPathFromLight } from "./hueResources";
+import { Group, Light, Palette } from "../lib/types";
+import { getColorFromLight, getIconPathFromGroup, getIconPathFromLight } from "./hueResources";
 
 // Earlier versions cached their Jimp PNGs in these namespaces.
 new Cache({ namespace: "hue-scene-gradients" }).clear();
@@ -48,39 +48,53 @@ export function createGradientUri(colors: Palette): string | undefined {
 // Assets don't change while a command runs, so each file is read once.
 const pngFiles = new Map<string, Buffer>();
 
-function pngImage(path: string, x: number, y: number) {
+// Draws the PNG at its own size unless given one.
+function pngImage(path: string, x: number, y: number, size?: { width: number; height: number }) {
   const png = pngFiles.get(path) ?? readFileSync(path);
   pngFiles.set(path, png);
   // Width and height are the first two fields of a PNG's IHDR chunk.
-  const size = `width="${png.readUInt32BE(16)}" height="${png.readUInt32BE(20)}"`;
-  return `<image xlink:href="data:image/png;base64,${png.toString("base64")}" x="${x}" y="${y}" ${size}/>`;
+  const { width, height } = size ?? { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
+  return `<image xlink:href="data:image/png;base64,${png.toString("base64")}" x="${x}" y="${y}" width="${width}" height="${height}"/>`;
+}
+
+type Glyph = (color: "black" | "white") => string;
+
+const GLYPH_OFFSET = 24;
+
+// Raycast renders masks and filters at a lower resolution, so black glyphs come from black copies in icons-black.
+const glyphImage =
+  (path: (color: "black" | "white") => string): Glyph =>
+  (color) =>
+    pngImage(path(color), GLYPH_OFFSET, GLYPH_OFFSET);
+
+// The glyph sits in the icon's top left quarter, so it is black or white, whichever stands out more at that quarter's
+// center. APCA, unlike WCAG 2's contrast ratio, rates white higher than black on saturated reds and purples.
+function onIcon(width: number, height: number, colors: Palette, glyph: Glyph): Image {
+  const behindGlyph = chroma.mix(chroma.scale(colors)(0.25), SHADE_COLOR, shade(0.25), "rgb");
+  const black = Math.abs(chroma.contrastAPCA("#000", behindGlyph)) > Math.abs(chroma.contrastAPCA("#fff", behindGlyph));
+  return { source: svgUri(width, height, gradientContent(colors, width, height) + glyph(black ? "black" : "white")) };
+}
+
+// The off tiles are light in the light theme and dark in the dark theme, so their glyphs are black and white.
+function offIcon(width: number, height: number, tile: string, glyph: Glyph): Image {
+  const iconUri = (file: string, color: "black" | "white") =>
+    svgUri(width, height, pngImage(`${environment.assetsPath}/${file}`, 0, 0, { width, height }) + glyph(color));
+  return { source: { light: iconUri(`${tile}.png`, "black"), dark: iconUri(`${tile}@dark.png`, "white") } };
 }
 
 // Matches an 8-column grid item and light-off.png.
 const LIGHT_ICON_SIZE = 162;
 
-const GLYPH_OFFSET = 24;
-
 export function createLightIcon(light: Light): Image {
-  const iconUri = (content: string) => svgUri(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, content);
-  // Raycast renders masks and filters at a lower resolution, so black glyphs come from black copies in icons-black.
-  const glyph = (color: "black" | "white") => pngImage(getIconPathFromLight(light, color), GLYPH_OFFSET, GLYPH_OFFSET);
+  const glyph = glyphImage((color) => getIconPathFromLight(light, color));
+  return light.on.on
+    ? onIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, [getColorFromLight(light)], glyph)
+    : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, "light-off", glyph);
+}
 
-  if (!light.on.on) {
-    const tile = (file: string) => pngImage(`${environment.assetsPath}/${file}`, 0, 0);
-    return {
-      source: {
-        light: iconUri(tile("light-off.png") + glyph("black")),
-        dark: iconUri(tile("light-off@dark.png") + glyph("white")),
-      },
-    };
-  }
-
-  // The glyph sits in the icon's top left quarter, whose center is a quarter of the way down the gradient.
-  // APCA, unlike WCAG 2's contrast ratio, rates white higher than black on saturated reds and purples.
-  const lightColor = getColorFromLight(light);
-  const behindGlyph = chroma.mix(lightColor, SHADE_COLOR, shade(0.25), "rgb");
-  const black = Math.abs(chroma.contrastAPCA("#000", behindGlyph)) > Math.abs(chroma.contrastAPCA("#fff", behindGlyph));
-  const background = gradientContent([lightColor], LIGHT_ICON_SIZE, LIGHT_ICON_SIZE);
-  return { source: iconUri(background + glyph(black ? "black" : "white")) };
+export function createGroupIcon(group: Group, colors: Palette, on: boolean): Image {
+  const glyph = glyphImage((color) => getIconPathFromGroup(group, color));
+  return on && colors.length > 0
+    ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, glyph)
+    : offIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, "group-off", glyph);
 }

@@ -29,6 +29,7 @@
 - Fix the Toggle All Lights message when some lights fail, which said "Turned on" when turning off and miscounted the failures
 - Show each color once in room, zone and scene images, like the Hue app, so a color several lights share no longer fills most of the image, even when their settings differ slightly
 - Shade room, scene and light images like the Hue app, and show their outer colors in full
+- Show each room and zone's icon on its Control Groups tile, as in the Hue app
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

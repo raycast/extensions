@@ -20,16 +20,18 @@ export const getGroupedLightFromGroup = (groupedLights: GroupedLight[], group: G
 export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
   scenes.filter((scene) => scene.group.rid === group.id).sort(byName);
 
-export function getIconPathFromLight(light: Light, color: "black" | "white"): string {
+function getIconPath(name: string, fallback: string, color: "black" | "white"): string {
   const folder = `${environment.assetsPath}/${color === "black" ? "icons-black" : "icons"}`;
-  const iconPath = `${folder}/${light.metadata.archetype}.png`;
-
-  if (existsSync(iconPath)) {
-    return iconPath;
-  } else {
-    return `${folder}/question_mark.png`;
-  }
+  const iconPath = `${folder}/${name}.png`;
+  return existsSync(iconPath) ? iconPath : `${folder}/${fallback}.png`;
 }
+
+export const getIconPathFromLight = (light: Light, color: "black" | "white") =>
+  getIconPath(light.metadata.archetype, "question_mark", color);
+
+// The icon pack has no icons for the downstairs, upstairs and top_floor archetypes, so they fall back to other.
+export const getIconPathFromGroup = (group: Group, color: "black" | "white") =>
+  getIconPath(`rooms/${group.metadata.archetype}`, "rooms/other", color);
 
 export function getColorFromLight(light: Light): string {
   if (light.color_temperature?.mirek) {

@@ -17,5 +17,5 @@ Use any of the commands except the "Toggle all Lights" command and follow the in
 
 ## Icons
 
-The icons used in the “Control Lights” command are from
-the [Philips Hue Icon Pack](https://developers.meethue.com/develop/application-design-guidance/icon-pack/).
+The light, room and zone icons are from the Philips Hue Icon Pack. The room and zone icons come from
+its 2019 release, as converted in [HueIconPackPng](https://github.com/prasertcbs/HueIconPackPng).
