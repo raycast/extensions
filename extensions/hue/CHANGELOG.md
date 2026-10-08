@@ -22,6 +22,8 @@
 - Fix the color temperature actions forgetting a light's own limits after its temperature changes
 - Fix changing the color temperature of a light set to a color; it now starts from the nearest white, or the middle for strong colors, instead of jumping to the coolest
 - Fix plugs offering brightness actions after a room's brightness changes, and color-only lights offering color temperature actions after a scene is set
+- Show a certificate error at once when the bridge's certificate doesn't match, instead of timing out
+- Keep connecting to bridges after Signify moves them to its secondary root certificate
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

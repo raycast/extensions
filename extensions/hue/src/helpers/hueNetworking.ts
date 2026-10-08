@@ -1,6 +1,5 @@
 import { APP_NAME, CONNECTION_TIMEOUT_MS } from "./constants";
-import * as tls from "tls";
-import { PeerCertificate } from "tls";
+import { connect, PeerCertificate } from "tls";
 import * as https from "https";
 import { HueApiService, LinkResponse } from "../lib/types";
 import Bonjour from "bonjour-service";
@@ -103,7 +102,7 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
         port: 443,
         agent: new https.Agent({
           ca: getCaCertificate(),
-          checkServerIdentity: (_hostname, peerCertificate) => validateBridgeCertificate(peerCertificate, bridgeId),
+          checkServerIdentity: (_hostname, peerCertificate) => checkBridgeIdentity(peerCertificate, bridgeId),
         }),
         timeout: CONNECTION_TIMEOUT_MS,
         headers: {
@@ -150,19 +149,13 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
 
 export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const socket = tls.connect(
+    const socket = connect(
       {
         host: ipAddress,
         port: 443,
         ca: getCaCertificate(),
-        checkServerIdentity: (_hostname, peerCertificate) => {
-          if (peerCertificate.issuer.CN !== "root-bridge") {
-            return new Error(
-              "Server identity check failed. Certificate issuer's Common Name does not match the expected value.",
-            );
-          }
-          return undefined;
-        },
+        // The ID is what this reads, so there is nothing to check it against. The ca option still checks the chain.
+        checkServerIdentity: () => undefined,
       },
       () => {
         const cert = socket.getPeerCertificate();
@@ -187,32 +180,21 @@ export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
  * A certificate's Common Name (CN) may be a string, an array of strings, or undefined.
  * The Hue Bridge certificate always uses a single CN, so it is normalized to a string.
  */
-export function getCommonName(certificate: PeerCertificate): string {
+function getCommonName(certificate: PeerCertificate): string {
   const commonName = certificate.subject.CN;
   return Array.isArray(commonName) ? (commonName[0] ?? "") : (commonName ?? "");
 }
 
 /**
- * The Hue Bridge uses a certificate signed by a root-bridge certificate, or an intermediate certificate which will
- * be signed by a root-bridge certificate.
- * The CN (common name) of the certificate matches the ID of the Hue Bridge, which is a 16-character hex string.
- * The CN of a certificate signed by the Hue Bridge root certificate is 'root-bridge'.
+ * The bridge certificate's subject Common Name is the bridge ID, so this replaces Node's hostname check, as Signify's
+ * "Using HTTPS" guide describes. The ca option already checks the chain against the bundled root certificates.
+ * Returns the error like tls.checkServerIdentity does: a thrown error is uncaught and the connection carries on.
  * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
- * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
  */
-function validateBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
-  if (getCommonName(peerCertificate).toLowerCase() !== bridgeId.toLowerCase()) {
-    throw new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
+export function checkBridgeIdentity(certificate: PeerCertificate, bridgeId: string): Error | undefined {
+  if (getCommonName(certificate).toLowerCase() !== bridgeId.toLowerCase()) {
+    return new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
   }
-
-  if (peerCertificate.issuer.CN !== "root-bridge") {
-    throw new Error(
-      "Server identity check failed. Certificate issuer’s Common Name does not match the expected value.",
-    );
-  }
-
-  // Return undefined to indicate that the server identity check succeeded
-  return undefined;
 }
 
 let _caCertificate: Buffer | null = null;

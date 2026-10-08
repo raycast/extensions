@@ -3,7 +3,7 @@ import { ClientHttp2Session, connect } from "http2";
 import { BridgeConfig } from "./types";
 import dns from "dns";
 import HueClient, { authHeaders } from "./HueClient";
-import { getCaCertificate, getCommonName } from "../helpers/hueNetworking";
+import { checkBridgeIdentity, getCaCertificate } from "../helpers/hueNetworking";
 import { BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(bridgeConfig: BridgeConfig) {
@@ -17,21 +17,7 @@ export default async function createHueClient(bridgeConfig: BridgeConfig) {
      */
     const session = connect(`https://${bridgeConfig.id}`, {
       ca: getCaCertificate(),
-      checkServerIdentity: (_hostname, peerCertificate) => {
-        if (getCommonName(peerCertificate).toLowerCase() !== bridgeConfig.id.toLowerCase()) {
-          throw new Error(
-            "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
-          );
-        }
-        if (peerCertificate.issuer.CN !== "root-bridge") {
-          throw new Error(
-            "Server identity check failed. Certificate issuer’s Common Name does not match the expected value.",
-          );
-        }
-
-        // The certificate is valid. Undefined is returned to indicate that the server identity check succeeded.
-        return undefined;
-      },
+      checkServerIdentity: (_hostname, peerCertificate) => checkBridgeIdentity(peerCertificate, bridgeConfig.id),
       lookup: (hostname, options, callback) => {
         if (bridgeConfig.ipAddress !== undefined && hostname.toLowerCase() === bridgeConfig.id) {
           // Resolve the hostname (which is the Bridge ID) to the IP address of the Hue Bridge
