@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Fix Stop Command] - {PR_MERGE_DATE}
+
+- Fix Stop not stopping speech on Windows
+
 ## [Maintenance] - 2026-04-16
 
 - Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`

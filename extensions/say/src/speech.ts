@@ -64,7 +64,8 @@ const normalizeWindowsVoice = (voice: WindowsVoice): Voice => ({
 
 export const say = async (text: string, options?: SayOptions) => {
   if (isWindows) {
-    await nativeSay(text, toWindowsSayOptions(options));
+    if (!options?.skipRunningCheck) await killRunningSay();
+    await nativeSay(text, { ...toWindowsSayOptions(options), skipRunningCheck: true });
     return;
   }
 
@@ -80,4 +81,13 @@ export const getAudioDevices = nativeGetAudioDevices;
 
 export const checkIfSayIsRunning = nativeCheckIfSayIsRunning;
 
-export const killRunningSay = nativeKillRunningSay;
+export const killRunningSay = async () => {
+  if (isWindows) {
+    // native-say stops speech with fkill, which needs a fastlist.exe that is not included in the extension build
+    const sayProcess = await nativeCheckIfSayIsRunning();
+    if (sayProcess) process.kill(sayProcess.pid);
+    return;
+  }
+
+  await nativeKillRunningSay();
+};
