@@ -101,7 +101,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
       // items would count 0 items. Saves follow the order listings started, also across the item lists.
-      if (failed.size === 0) {
+      if (failed.size === 0 && isLatest()) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
         );

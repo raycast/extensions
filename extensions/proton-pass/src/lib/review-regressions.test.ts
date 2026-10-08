@@ -52,7 +52,7 @@ function loadView(
 function actions(element: unknown): Element["props"][] {
   if (!element || typeof element !== "object" || !("props" in element)) return [];
   const props = (element as Element).props;
-  return [props, ...[props.children].flat().flatMap(actions)];
+  return [props, ...[props.children].flat(Infinity).flatMap(actions)];
 }
 
 test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
@@ -1438,10 +1438,11 @@ test("the vault list saves sharing on its own, and vaults with items from comple
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
-test("an older vault list load can't replace newer sharing", async () => {
+test("an older vault list load can't replace newer sharing or displayed counts", async () => {
   const vault = { shareId: "vault", name: "Personal" };
   const savedSharing: unknown[] = [];
   const pending: ((sharing: Map<string, unknown>) => void)[] = [];
+  let listings = 0;
   const harness = hookHarness();
   const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
@@ -1456,7 +1457,11 @@ test("an older vault list load can't replace newer sharing", async () => {
     },
     "./pass-cli": {
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
-      listVaultsAndItems: async () => ({ vaults: [vault], items: [item], failedVaults: [] }),
+      listVaultsAndItems: async () => ({
+        vaults: [vault],
+        items: ++listings === 1 ? [item] : [item, { ...item, itemId: "second" }],
+        failedVaults: [],
+      }),
     },
     "./types": { PassCliError },
     "./search-items-view": {},
@@ -1490,6 +1495,11 @@ test("an older vault list load can't replace newer sharing", async () => {
   pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
   await new Promise(setImmediate);
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
+  const row = actions(harness.render(VaultsView, { startOnItems: false })).find((entry) => entry.title === vault.name)!;
+  assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [
+    { tooltip: "Shared with you · Viewer" },
+    { text: "2 items" },
+  ]);
 });
 
 test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
