@@ -358,92 +358,7 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
             }}
           />
         )}
-        <ActionPanel.Submenu
-          icon={Icon.Folder}
-          title={`Move ${targetsLabel} to Group`}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "m" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
-          }}
-        >
-          {groups
-            .filter((name) => targets.some((item) => item.group !== name))
-            .map((name) => (
-              <Action key={name} title={formatGroup(name)} onAction={() => moveToGroup(name)} />
-            ))}
-          <Action.Push
-            icon={Icon.Plus}
-            title="New Group"
-            target={<GroupForm submitTitle="Move to Group" onSubmit={moveToGroup} />}
-          />
-        </ActionPanel.Submenu>
-        {targets.some((item) => item.group) && (
-          <Action
-            icon={Icon.XMarkCircle}
-            title={`Remove ${targetsLabel} from Group`}
-            onAction={async () => {
-              setGroup(targets, undefined);
-              await showToast({ title: "Removed from group" });
-            }}
-          />
-        )}
       </ActionPanel.Section>
-
-      {group && (
-        <ActionPanel.Section title="Group">
-          <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Group">
-            <Action.CopyToClipboard
-              title="Copy to Clipboard"
-              content={sectionHistory.map((item) => getFormattedColor(item.color)).join(";")}
-            />
-            {COPY_FORMATS.map(({ format, title, icon }) => (
-              <Action.CopyToClipboard
-                key={format}
-                title={title}
-                content={copySelectedColors(sectionHistory, format)}
-                icon={icon}
-              />
-            ))}
-          </ActionPanel.Submenu>
-          <Action.Push
-            icon={Icon.Pencil}
-            title="Rename Group"
-            target={
-              <GroupForm
-                submitTitle="Rename Group"
-                defaultValue={group}
-                validate={(newGroup) =>
-                  isRenameTaken(groups, group, newGroup) ? "A group with this name already exists" : undefined
-                }
-                onSubmit={async (newGroup) => {
-                  renameGroup(group, newGroup);
-                  await showToast({ title: `Renamed to ${formatGroup(newGroup)}` });
-                }}
-              />
-            }
-          />
-          <Action
-            icon={Icon.Trash}
-            title="Delete Group"
-            style={Action.Style.Destructive}
-            onAction={async () => {
-              const confirmed = await confirmAlert({
-                title: "Delete Group",
-                message: `Delete ${formatGroup(group)}${hasSubgroups ? " and its subgroups" : ""}? The colors stay in your history.`,
-                primaryAction: {
-                  title: "Delete",
-                  style: Alert.ActionStyle.Destructive,
-                },
-              });
-
-              if (confirmed) {
-                deleteGroup(group);
-                await showToast({ title: "Deleted group" });
-              }
-            }}
-          />
-        </ActionPanel.Section>
-      )}
 
       {selectMode === "multi" && <MultipleColorActions item={historyItem} selection={selection} />}
 
@@ -491,6 +406,93 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
             }
           }}
         />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Groups">
+        <ActionPanel.Submenu
+          icon={Icon.Folder}
+          title={`Move ${targetsLabel} to Group`}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
+        >
+          {groups
+            .filter((name) => targets.some((item) => item.group !== name))
+            .map((name) => (
+              <Action key={name} title={formatGroup(name)} onAction={() => moveToGroup(name)} />
+            ))}
+          <Action.Push
+            icon={Icon.Plus}
+            title="New Group"
+            target={<GroupForm submitTitle="Move to Group" onSubmit={moveToGroup} />}
+          />
+        </ActionPanel.Submenu>
+        {targets.some((item) => item.group) && (
+          <Action
+            icon={Icon.XMarkCircle}
+            title={`Remove ${targetsLabel} from Group`}
+            onAction={async () => {
+              setGroup(targets, undefined);
+              await showToast({ title: "Removed from group" });
+            }}
+          />
+        )}
+        {group && (
+          <>
+            <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Group">
+              <Action.CopyToClipboard
+                title="Copy to Clipboard"
+                content={sectionHistory.map((item) => getFormattedColor(item.color)).join(";")}
+              />
+              {COPY_FORMATS.map(({ format, title, icon }) => (
+                <Action.CopyToClipboard
+                  key={format}
+                  title={title}
+                  content={copySelectedColors(sectionHistory, format)}
+                  icon={icon}
+                />
+              ))}
+            </ActionPanel.Submenu>
+            <Action.Push
+              icon={Icon.Pencil}
+              title="Rename Group"
+              target={
+                <GroupForm
+                  submitTitle="Rename Group"
+                  defaultValue={group}
+                  validate={(newGroup) =>
+                    isRenameTaken(groups, group, newGroup) ? "A group with this name already exists" : undefined
+                  }
+                  onSubmit={async (newGroup) => {
+                    renameGroup(group, newGroup);
+                    await showToast({ title: `Renamed to ${formatGroup(newGroup)}` });
+                  }}
+                />
+              }
+            />
+            <Action
+              icon={Icon.Trash}
+              title="Delete Group"
+              style={Action.Style.Destructive}
+              onAction={async () => {
+                const confirmed = await confirmAlert({
+                  title: "Delete Group",
+                  message: `Delete ${formatGroup(group)}${hasSubgroups ? " and its subgroups" : ""}? The colors stay in your history.`,
+                  primaryAction: {
+                    title: "Delete",
+                    style: Alert.ActionStyle.Destructive,
+                  },
+                });
+
+                if (confirmed) {
+                  deleteGroup(group);
+                  await showToast({ title: "Deleted group" });
+                }
+              }}
+            />
+          </>
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
