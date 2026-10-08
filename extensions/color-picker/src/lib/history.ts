@@ -1,5 +1,6 @@
 import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { deleteGroup, renameGroup } from "./groups";
 import { HistoryColor, HistoryItem } from "./types";
 import { getFormattedColor } from "./utils";
 
@@ -28,11 +29,20 @@ export function useHistory() {
       }),
     addToFavorites: (color: HistoryColor) => update(color, (item) => ({ ...item, isFavorite: true })),
     removeFromFavorites: (color: HistoryColor) => update(color, (item) => ({ ...item, isFavorite: false })),
+    setGroup: (colors: HistoryColor[], group: string | undefined) =>
+      setHistory((previousHistory) => {
+        const colorKeys = new Set(colors.map((color) => getFormattedColor(color)));
+        return previousHistory.map((item) =>
+          colorKeys.has(getFormattedColor(item.color)) ? { ...item, group } : item,
+        );
+      }),
+    renameGroup: (from: string, to: string) => setHistory((previousHistory) => renameGroup(previousHistory, from, to)),
+    deleteGroup: (group: string) => setHistory((previousHistory) => deleteGroup(previousHistory, group)),
     moveFavorite: (color: HistoryColor, direction: "up" | "down") =>
       setHistory((previousHistory) => {
         const colorKey = getFormattedColor(color);
         const currentIndex = previousHistory.findIndex(
-          (item) => item.isFavorite && getFormattedColor(item.color) === colorKey,
+          (item) => item.isFavorite && !item.group && getFormattedColor(item.color) === colorKey,
         );
 
         if (currentIndex === -1) {
@@ -40,7 +50,7 @@ export function useHistory() {
         }
 
         const favoriteIndexes = previousHistory.reduce<number[]>((indexes, item, index) => {
-          if (item.isFavorite) {
+          if (item.isFavorite && !item.group) {
             indexes.push(index);
           }
 
@@ -75,15 +85,17 @@ export function addToHistory(color: HistoryColor, options?: { isFavorite?: boole
     color,
     title: previousHistoryItem?.title,
     isFavorite: options?.isFavorite ?? previousHistoryItem?.isFavorite,
+    group: previousHistoryItem?.group,
   };
   const history = previousHistoryItem?.isFavorite
     ? previousHistory.map((item) => (getFormattedColor(item.color) === colorKey ? historyItem : item))
     : [historyItem, ...previousHistory.filter((item) => getFormattedColor(item.color) !== colorKey)];
-  const persistentItemsCount = history.filter((item) => item.isFavorite).length;
+  const isKept = (item: HistoryItem) => item.isFavorite || item.group;
+  const persistentItemsCount = history.filter(isKept).length;
   const maxRegularHistoryLength = Math.max(MAX_HISTORY_LENGTH - persistentItemsCount, 0);
   let regularHistoryCount = 0;
   const newHistory = history.filter((item) => {
-    if (item.isFavorite) {
+    if (isKept(item)) {
       return true;
     }
 

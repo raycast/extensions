@@ -1,5 +1,13 @@
 # Color Picker Changelog
 
+## [Color Groups] - {PR_MERGE_DATE}
+
+- Sort saved colors into named groups from Organize Colors, each shown as its own section
+- Nest groups with a slash, for example `Work/Calendar`
+- Rename or delete a group, move several colors at once in Multi-Select Mode, and copy a whole group as a list, JSON, CSS classes or CSS variables
+- Grouped colors are kept when history fills up, like favorites
+- Show each favorite's group in Favorite Colors, and let Raycast AI filter saved colors by group
+
 ## [Enable Ask AI Raycast Command] - 2026-09-27
 
 - Register the seven existing color tools with Raycast AI
