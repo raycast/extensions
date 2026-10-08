@@ -34,19 +34,24 @@ export const useCachedPromiseFixtures = {
 export function useCachedPromise<F extends AnyFn>(
   fn: F,
   args: Parameters<F> = [] as unknown as Parameters<F>,
-  options: { execute?: boolean } = {},
+  options: { execute?: boolean; keepPreviousData?: boolean } = {},
 ) {
   const key = JSON.stringify(args);
   const fixture = fixtures.get(fn);
   const skip = options.execute === false || fixture !== undefined;
-  const [resolved, setResolved] = useState<{ key: string; data: unknown }>();
+  const [settled, setSettled] = useState<{ key: string; data?: unknown; error?: Error }>();
 
   useEffect(() => {
     if (skip) return;
     let cancelled = false;
-    Promise.resolve(fn(...args)).then((data) => {
-      if (!cancelled) setResolved({ key, data });
-    });
+    Promise.resolve()
+      .then(() => fn(...args))
+      .then(
+        (data) => !cancelled && setSettled({ key, data }),
+        // Like useCachedPromise, a failure keeps the previous data only under keepPreviousData.
+        (error: Error) =>
+          !cancelled && setSettled((prev) => ({ key, error, data: options.keepPreviousData ? prev?.data : undefined })),
+      );
     return () => {
       cancelled = true;
     };
@@ -57,7 +62,8 @@ export function useCachedPromise<F extends AnyFn>(
   if (options.execute === false) data = undefined;
   else if (fixture && "error" in fixture) error = fixture.error;
   else if (fixture) data = fixture.data as Fixture<F>;
-  else if (resolved?.key === key) data = resolved.data as Fixture<F>;
+  else if (settled?.key === key) ({ data, error } = settled as { data?: Fixture<F>; error?: Error });
+  else if (options.keepPreviousData) data = settled?.data as Fixture<F> | undefined;
 
   return { data, error, isLoading: false, revalidate: useCachedPromiseFixtures.revalidateOf(fn) };
 }

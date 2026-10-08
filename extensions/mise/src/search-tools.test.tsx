@@ -164,6 +164,40 @@ describe("Search Tools", () => {
     }
   });
 
+  it("drops the previous query's packages when the next backend search fails", async () => {
+    setup();
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(new Response(JSON.stringify(npmFixture)))
+        .mockRejectedValueOnce(new Error("offline"));
+      const { root } = await render(<Command {...launch} />);
+      const list = root.findByType(List);
+      await flush(() => list.props.onSearchTextChange("npm:prettier"));
+      await flush(() => vi.advanceTimersByTime(250));
+      await flush();
+      expect(sections(root)[0].title).toBe("npm results");
+
+      await flush(() => list.props.onSearchTextChange("npm:eslint"));
+      await flush(() => vi.advanceTimersByTime(250));
+      await flush();
+      const [backend] = sections(root);
+      expect(backend.title).toBe("npm results");
+      expect(backend.items).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("shows mise default without storing it when the config files cannot be listed", async () => {
+    setup();
+    useCachedPromiseFixtures.fail(listConfigFiles, new Error("mise config ls failed"));
+    const { root } = await render(<Command {...launch} />);
+    const dropdown = (await render(root.findByType(List).props.searchBarAccessory)).root.findByType(List.Dropdown);
+    expect(dropdown.props.storeValue).toBe(false);
+    expect(dropdown.findAllByType(List.Dropdown.Item).map((item) => item.props.title)).toEqual(["mise default"]);
+  });
+
   it("filters the registry itself, ranking the typed name first and hiding tools that do not match", async () => {
     setup();
     const { root } = await render(<Command {...launch} />);

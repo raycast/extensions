@@ -8,6 +8,7 @@ import { addGlobally, type MiseOperation } from "../mise/operations";
 export type InstallTarget = {
   files: ConfigFile[];
   isLoading: boolean;
+  failed: boolean;
   target: string;
   setTarget: (target: string) => void;
 };
@@ -15,7 +16,8 @@ export type InstallTarget = {
 export function useInstallTarget(location: MiseLocation): InstallTarget {
   const files = useCachedPromise(listConfigFiles, [location]);
   const [target, setTarget] = useState("");
-  return { files: files.data ?? [], isLoading: files.data === undefined, target, setTarget };
+  const failed = files.data === undefined && files.error !== undefined;
+  return { files: files.data ?? [], isLoading: files.data === undefined && !failed, failed, target, setTarget };
 }
 
 export function addGloballyTo(
@@ -27,15 +29,20 @@ export function addGloballyTo(
   return configFile ? { ...op, successTitle: `${op.successTitle} → ${configFileLabel(configFile)}` } : op;
 }
 
+// The dropdown is held back until the config files load because a stored target missing from the
+// items would be replaced by the first one. When listing fails it shows mise default without
+// touching the stored target, so the next launch can restore it.
 export function InstallTargetDropdown({
   files,
+  failed,
   onChange,
 }: {
   files: ConfigFile[];
+  failed: boolean;
   onChange: (target: string) => void;
 }) {
   return (
-    <List.Dropdown tooltip="Install to" storeValue={true} onChange={onChange}>
+    <List.Dropdown tooltip="Install to" storeValue={!failed} onChange={onChange}>
       <List.Dropdown.Item title="mise default" value="" />
       {files.map((file) => (
         <List.Dropdown.Item key={file.path} title={configFileLabel(file.path)} value={file.path} />

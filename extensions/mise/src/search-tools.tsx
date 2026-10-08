@@ -63,7 +63,8 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
     otherTools.length < otherMatches.length
       ? `${otherTools.length} of ${otherMatches.length}`
       : String(otherTools.length);
-  const backendResults = backendQuery ? (backend.data ?? []) : [];
+  // keepPreviousData holds the last query's packages through a failure; they don't match this one.
+  const backendResults = backendQuery && !backend.error ? (backend.data ?? []) : [];
   const isLoading = registry.isLoading || installed.isLoading || backend.isLoading;
 
   const useGlobally = (spec: string, configFile: string) =>
@@ -125,7 +126,9 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       isShowingDetail={showDetail}
       searchBarPlaceholder={PLACEHOLDER}
       searchBarAccessory={
-        install.isLoading ? null : <InstallTargetDropdown files={install.files} onChange={install.setTarget} />
+        install.isLoading ? null : (
+          <InstallTargetDropdown files={install.files} failed={install.failed} onChange={install.setTarget} />
+        )
       }
       searchText={searchText}
       onSearchTextChange={setSearchText}

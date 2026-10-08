@@ -223,7 +223,9 @@ function VersionPicker({
       navigationTitle={`Set Global Version — ${tool.name}`}
       searchBarPlaceholder={`Search ${tool.name} versions`}
       searchBarAccessory={
-        install.isLoading ? null : <InstallTargetDropdown files={install.files} onChange={install.setTarget} />
+        install.isLoading ? null : (
+          <InstallTargetDropdown files={install.files} failed={install.failed} onChange={install.setTarget} />
+        )
       }
     >
       {remote.error && !remote.data ? (
