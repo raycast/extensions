@@ -16,7 +16,15 @@ import { delay } from "./lib/throttle";
 import { errorText } from "./lib/errors";
 import { MENU_BAR_CACHE_KEY } from "./lib/menu-bar-cache";
 import { clearMountInFlight, markMountInFlight, mountsInFlight } from "./lib/in-flight";
-import { findMountedShare, isReachable, listMountedShares, mountShare, unmountShare, MountLocation } from "./lib/mount";
+import {
+  findMountedShare,
+  isReachable,
+  listMountedShares,
+  mountShare,
+  unmountMountPoint,
+  unmountShare,
+  MountLocation,
+} from "./lib/mount";
 
 // Raycast unloads a menu bar command as soon as its menu closes, and clicking
 // an item closes the menu. An action still awaiting something by then is cut
@@ -214,6 +222,10 @@ export default function Command() {
   // extension doesn't keep, but hiding them entirely made the menu look like a
   // picture of what is mounted when it wasn't.
   const unsavedMounts = mounted.filter((share) => !savedDrives.some((server) => findMountedShare([share], server)));
+  // Off by default: counting these makes the number move for mounts this
+  // extension doesn't keep, including anything connected in Finder.
+  const { pref_menu_bar_count_unsaved: countUnsaved } = getPreferenceValues<Preferences.MenuBar>();
+  const shownCount = connectedCount + (countUnsaved ? unsavedMounts.length : 0);
 
   async function handleToggle(server: ServerEntry) {
     setBusyId(server.id);
@@ -277,10 +289,14 @@ export default function Command() {
   async function handleUnmountUnsaved(share: MountLocation) {
     const label = shareLabel(share);
     setBusyId(share.mountPoint);
+    let stillRunning = false;
 
     try {
-      const result = await within(settle(unmountShare({ host: share.host, path: share.path, protocol: share.family })));
+      // By mount point, not by share: this row may be the second of two
+      // copies of the same share, and resolving it again would take the first.
+      const result = await within(settle(unmountMountPoint(share.mountPoint)));
       if (!result) {
+        stillRunning = true;
         await say(`⏳ Disconnecting ${label}…`);
       } else if (result.ok) {
         await reportSuccess(`Disconnected ${label}`);
@@ -293,6 +309,12 @@ export default function Command() {
 
     setBusyId(null);
     await refresh();
+
+    if (stillRunning) {
+      // Same reason as a pending mount: the snapshot just written still shows
+      // this volume, and it is on its way out.
+      await LocalStorage.removeItem(MENU_BAR_CACHE_KEY).catch(() => undefined);
+    }
   }
 
   async function openCommand(name: string, title: string) {
@@ -306,7 +328,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={Icon.HardDrive}
-      title={connectedCount > 0 ? String(connectedCount) : undefined}
+      title={shownCount > 0 ? String(shownCount) : undefined}
       isLoading={isLoading}
       tooltip="DriveWay"
     >

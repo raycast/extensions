@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { listShares } from "../lib/smb-shares";
 import { sameHost } from "../lib/share";
 import type { ServerEntry } from "../lib/share";
-import { unmountShare } from "../lib/mount";
+import { unmountMountPoint } from "../lib/mount";
 import { useMountStatus } from "../hooks/useMountStatus";
 import { errorText } from "../lib/errors";
 import { refreshMenuBar } from "../lib/menu-bar-cache";
@@ -65,7 +65,9 @@ export function BrowseHostShares(props: { server: ServerEntry; onChanged: () => 
     const hostMounted = mounted.filter((m) => sameHost(m.host, props.server.host));
     if (!hostMounted.length) return;
     await Promise.all(
-      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
+      // By mount point: two copies of one share would otherwise both resolve
+      // to the first, leaving the second mounted.
+      hostMounted.map((m) => unmountMountPoint(m.mountPoint).catch(() => undefined)),
     );
     await handleChanged();
     await refreshMenuBar();

@@ -88,6 +88,10 @@ export type MountLocation = {
   path: string;
   mountPoint: string;
   family: MountFamily;
+  // Taken from the source's own scheme, so an http WebDAV mount isn't later
+  // reconnected over https. `family` is what matching uses, since `mount`
+  // reports one fstype for both.
+  protocol: Protocol;
 };
 
 export type ShareLocation = {
@@ -137,7 +141,9 @@ export function parseMountOutput(stdout: string): MountLocation[] {
     const fsType = optionList.find((option) => MOUNT_FS_TYPES.has(option));
     if (!fsType) continue;
 
-    // WebDAV sources are full URLs; strip any scheme, then the "//".
+    // WebDAV sources are full URLs. The scheme is the only record of whether
+    // the volume was mounted over TLS, so it is read before being stripped.
+    const scheme = source.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase();
     const withoutScheme = source.replace(/^[a-z][a-z0-9+.-]*:/i, "");
     const withoutSlashes = withoutScheme.replace(/^\/\//, "");
     const afterAuth = withoutSlashes.includes("@")
@@ -146,11 +152,14 @@ export function parseMountOutput(stdout: string): MountLocation[] {
     const [host, ...pathParts] = afterAuth.split("/");
     if (!host) continue;
 
+    const family: MountFamily = fsType === MOUNT_FS_TYPE.smb ? "smb" : "webdav";
+
     shares.push({
       host,
       path: pathParts.join("/"),
       mountPoint,
-      family: fsType === MOUNT_FS_TYPE.smb ? "smb" : "webdav",
+      family,
+      protocol: family === "smb" ? "smb" : scheme === "http" ? "webdav-http" : "webdav",
     });
   }
 
@@ -182,6 +191,18 @@ export function findMountedShare(mounted: MountLocation[], entry: ShareLocation)
   });
 }
 
+// Unmounts one exact volume. Needed wherever the caller is looking at a
+// specific mount: the same share mounted twice differs only by mount point,
+// and resolving it by host and path again would take the first copy.
+export async function unmountMountPoint(mountPoint: string): Promise<void> {
+  try {
+    await execFileAsync("/usr/sbin/diskutil", ["unmount", mountPoint]);
+  } catch (error) {
+    console.error("diskutil unmount failed", (error as { stderr?: string }).stderr?.trim() || error);
+    throw new Error("Something on the drive is still in use.");
+  }
+}
+
 export async function unmountShare(entry: ShareLocation): Promise<void> {
   const mounted = await listMountedShares();
   const match = findMountedShare(mounted, entry);
@@ -190,10 +211,5 @@ export async function unmountShare(entry: ShareLocation): Promise<void> {
     throw new Error("Share is not currently mounted.");
   }
 
-  try {
-    await execFileAsync("/usr/sbin/diskutil", ["unmount", match.mountPoint]);
-  } catch (error) {
-    console.error("diskutil unmount failed", (error as { stderr?: string }).stderr?.trim() || error);
-    throw new Error("Something on the drive is still in use.");
-  }
+  await unmountMountPoint(match.mountPoint);
 }

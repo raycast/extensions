@@ -133,6 +133,15 @@
           ],
           "default": "1",
           "required": false
+        },
+        {
+          "type": "checkbox",
+          "name": "pref_menu_bar_count_unsaved",
+          "title": "Count",
+          "label": "Include drives that are mounted but not saved",
+          "description": "The number beside the menu bar icon counts your connected saved drives. Turn this on to count mounts that aren't saved drives as well, such as a one-off from Browse Shares or anything connected in Finder. They are always listed in the menu either way; this only changes the number.",
+          "default": false,
+          "required": false
         }
       ]
     }

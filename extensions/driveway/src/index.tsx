@@ -16,7 +16,14 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { ServerForm, ServerFormInput } from "./components/ServerForm";
 import { buildShare, hostKey, PROTOCOL_LABELS, sameHost, ServerEntry } from "./lib/share";
-import { findMountedShare, openMountPoint, unmountShare, UnreachableError, connectShare } from "./lib/mount";
+import {
+  findMountedShare,
+  openMountPoint,
+  unmountMountPoint,
+  unmountShare,
+  UnreachableError,
+  connectShare,
+} from "./lib/mount";
 import { errorText } from "./lib/errors";
 import { refreshMenuBar } from "./lib/menu-bar-cache";
 import { getServers, removeServer, setAutoMount, updateServer } from "./lib/storage";
@@ -95,7 +102,9 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     const hostMounted = mounted.filter((m) => sameHost(m.host, host));
     if (!hostMounted.length) return;
     await Promise.all(
-      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
+      // By mount point: two copies of one share would otherwise both resolve
+      // to the first, leaving the second mounted.
+      hostMounted.map((m) => unmountMountPoint(m.mountPoint).catch(() => undefined)),
     );
     await refreshMounted();
     await refreshMenuBar();
@@ -230,8 +239,14 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
   // host that won't list its shares without a password.
   const unsavedMounts = mounted.filter((share) => !(servers ?? []).some((server) => findMountedShare([share], server)));
   // Listed here, so the discovery sections below leave them out rather than
-  // showing the same share twice.
-  const unsavedKeys = new Set(unsavedMounts.map((share) => `${hostKey(share.host)}/${share.path.toLowerCase()}`));
+  // showing the same share twice. SMB only: the keys carry no protocol, and
+  // discovery enumerates nothing but SMB shares, so including a WebDAV mount
+  // would hide a genuinely separate SMB share of the same name on that host.
+  const unsavedKeys = new Set(
+    unsavedMounts
+      .filter((share) => share.family === "smb")
+      .map((share) => `${hostKey(share.host)}/${share.path.toLowerCase()}`),
+  );
 
   // All sources merge into one shape; only SMB hosts expand into shares.
   const smbByHost = new Map<string, string[]>();
@@ -421,7 +436,10 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
               key={share.mountPoint}
               vol={share.path}
               host={share.host}
-              protocol={share.family === "webdav" ? "webdav" : "smb"}
+              protocol={share.protocol}
+              // This row is one specific volume, which matters when the same
+              // share is mounted more than once.
+              mountPoint={share.mountPoint}
               volumes={volumes}
               mounted={mounted}
               onChanged={refreshMounted}

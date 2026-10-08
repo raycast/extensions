@@ -2,7 +2,7 @@ import { List, Icon, ActionPanel, Action, Keyboard, useNavigation } from "@rayca
 import { useEffect, useState } from "react";
 import { hostKey, sameHost, ServerEntry } from "./lib/share";
 import { refreshMenuBar } from "./lib/menu-bar-cache";
-import { unmountShare } from "./lib/mount";
+import { unmountMountPoint } from "./lib/mount";
 import { getServers } from "./lib/storage";
 import { useMountStatus } from "./hooks/useMountStatus";
 import { useNetworkDiscovery } from "./hooks/useNetworkDiscovery";
@@ -78,7 +78,9 @@ export default function Command() {
     const hostMounted = mounted.filter((m) => sameHost(m.host, host));
     if (!hostMounted.length) return;
     await Promise.all(
-      hostMounted.map((m) => unmountShare({ host: m.host, path: m.path, protocol: m.family }).catch(() => undefined)),
+      // By mount point: two copies of one share would otherwise both resolve
+      // to the first, leaving the second mounted.
+      hostMounted.map((m) => unmountMountPoint(m.mountPoint).catch(() => undefined)),
     );
     await refreshMounted();
     await refreshMenuBar();

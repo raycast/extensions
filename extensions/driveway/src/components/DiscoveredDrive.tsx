@@ -19,6 +19,7 @@ import {
   connectShare,
   findMountedShare,
   openMountPoint,
+  unmountMountPoint,
   unmountShare,
   MountLocation,
   UnreachableError,
@@ -135,6 +136,9 @@ export function DiscoveredDriveItem(props: {
   host: string;
   // Absent for a discovered SMB share, which is all discovery enumerates.
   protocol?: Protocol;
+  // Set when this row stands for one known volume rather than a share that has
+  // to be looked up, so two mounts of the same share stay apart.
+  mountPoint?: string;
   mounted: MountLocation[];
   volumes: VolumeUsage[];
   onChanged: () => void;
@@ -143,7 +147,9 @@ export function DiscoveredDriveItem(props: {
   onServerAdded: () => void;
   onRefresh?: () => void;
 }) {
-  const match = findMountedShare(props.mounted, { host: props.host, path: props.vol, protocol: props.protocol });
+  const match = props.mountPoint
+    ? props.mounted.find((share) => share.mountPoint === props.mountPoint)
+    : findMountedShare(props.mounted, { host: props.host, path: props.vol, protocol: props.protocol });
   const mnt = Boolean(match);
 
   return (
@@ -215,7 +221,13 @@ function DiscoveredDriveActions(props: {
   async function doUnmount() {
     const toast = await showToast({ title: `Unmounting ${props.vol}…`, style: Toast.Style.Animated });
     try {
-      await unmountShare({ host: props.host, path: props.vol, protocol: props.protocol });
+      // The clicked volume, when the caller named one; otherwise whichever
+      // mount matches the share.
+      if (props.mountPoint) {
+        await unmountMountPoint(props.mountPoint);
+      } else {
+        await unmountShare({ host: props.host, path: props.vol, protocol: props.protocol });
+      }
       toast.style = Toast.Style.Success;
       toast.title = `${props.vol} Unmounted`;
       props.onChanged();
