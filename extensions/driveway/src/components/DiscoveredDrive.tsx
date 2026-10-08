@@ -128,10 +128,13 @@ export function AddServer({
   );
 }
 
-// A discovered share that hasn't been saved yet.
+// A share that isn't saved: either discovered on the network, or mounted
+// without being saved.
 export function DiscoveredDriveItem(props: {
   vol: string;
   host: string;
+  // Absent for a discovered SMB share, which is all discovery enumerates.
+  protocol?: Protocol;
   mounted: MountLocation[];
   volumes: VolumeUsage[];
   onChanged: () => void;
@@ -140,7 +143,7 @@ export function DiscoveredDriveItem(props: {
   onServerAdded: () => void;
   onRefresh?: () => void;
 }) {
-  const match = findMountedShare(props.mounted, { host: props.host, path: props.vol });
+  const match = findMountedShare(props.mounted, { host: props.host, path: props.vol, protocol: props.protocol });
   const mnt = Boolean(match);
 
   return (
@@ -151,6 +154,7 @@ export function DiscoveredDriveItem(props: {
         <DiscoveredDriveActions
           vol={props.vol}
           host={props.host}
+          protocol={props.protocol}
           mountPoint={match?.mountPoint}
           mounted={mnt}
           onChanged={props.onChanged}
@@ -172,6 +176,7 @@ export function DiscoveredDriveItem(props: {
 function DiscoveredDriveActions(props: {
   vol: string;
   host: string;
+  protocol?: Protocol;
   mountPoint: string | undefined;
   mounted: boolean;
   onChanged: () => void;
@@ -185,7 +190,7 @@ function DiscoveredDriveActions(props: {
   async function doMount(): Promise<MountLocation | undefined> {
     const toast = await showToast({ title: `Mounting ${props.vol}…`, style: Toast.Style.Animated });
     try {
-      const share = buildShare({ id: props.vol, host: props.host, path: props.vol });
+      const share = buildShare({ id: props.vol, host: props.host, path: props.vol, protocol: props.protocol });
       await connectShare(share);
       toast.style = Toast.Style.Success;
       toast.title = `${props.vol} Mount requested`;
@@ -210,7 +215,7 @@ function DiscoveredDriveActions(props: {
   async function doUnmount() {
     const toast = await showToast({ title: `Unmounting ${props.vol}…`, style: Toast.Style.Animated });
     try {
-      await unmountShare({ host: props.host, path: props.vol });
+      await unmountShare({ host: props.host, path: props.vol, protocol: props.protocol });
       toast.style = Toast.Style.Success;
       toast.title = `${props.vol} Unmounted`;
       props.onChanged();
@@ -224,7 +229,12 @@ function DiscoveredDriveActions(props: {
 
   async function saveToNetworkDrives() {
     try {
-      await addServer({ host: props.host, path: props.vol, user: discoveryUsernameFor(props.host) || undefined });
+      await addServer({
+        host: props.host,
+        path: props.vol,
+        protocol: props.protocol,
+        user: discoveryUsernameFor(props.host) || undefined,
+      });
     } catch (error) {
       if (!(error instanceof DuplicateServerError)) throw error;
       await showToast({ title: "Drive already added", message: error.message });
@@ -253,6 +263,13 @@ function DiscoveredDriveActions(props: {
           icon={Icon.Finder}
           shortcut={Keyboard.Shortcut.Common.OpenWith}
           onAction={async () => {
+            // Already mounted: open it. Mounting again doesn't no-op, it
+            // attaches a second copy at "/Volumes/<name>-1".
+            if (props.mounted && props.mountPoint) {
+              openMountPoint(props.mountPoint);
+              return;
+            }
+
             const match = await doMount();
             const mountPoint = match?.mountPoint ?? props.mountPoint;
             if (mountPoint) {

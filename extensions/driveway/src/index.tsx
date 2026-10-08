@@ -224,10 +224,20 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
     (servers ?? []).filter((s) => s.path?.trim()).map((s) => `${hostKey(s.host)}/${(s.path ?? "").toLowerCase()}`),
   );
 
+  // Mounted, but not one of the saved drives: a one-off from Browse Shares, or
+  // anything connected in Finder. Read straight from `mount`, so it shows
+  // without a network scan, and covers what discovery can't see — WebDAV, or a
+  // host that won't list its shares without a password.
+  const unsavedMounts = mounted.filter((share) => !(servers ?? []).some((server) => findMountedShare([share], server)));
+  // Listed here, so the discovery sections below leave them out rather than
+  // showing the same share twice.
+  const unsavedKeys = new Set(unsavedMounts.map((share) => `${hostKey(share.host)}/${share.path.toLowerCase()}`));
+
   // All sources merge into one shape; only SMB hosts expand into shares.
   const smbByHost = new Map<string, string[]>();
   for (const { host, vol } of smbShares) {
-    if (savedKeys.has(`${hostKey(host)}/${vol.toLowerCase()}`)) continue;
+    const key = `${hostKey(host)}/${vol.toLowerCase()}`;
+    if (savedKeys.has(key) || unsavedKeys.has(key)) continue;
     const existing = smbByHost.get(host) ?? [];
     existing.push(vol);
     smbByHost.set(host, existing);
@@ -404,6 +414,24 @@ export default function Command(props: LaunchProps<{ launchContext: { selectId?:
           );
         })}
       </List.Section>
+      {unsavedMounts.length > 0 && (
+        <List.Section title="Mounted but Not Saved">
+          {unsavedMounts.map((share) => (
+            <DiscoveredDriveItem
+              key={share.mountPoint}
+              vol={share.path}
+              host={share.host}
+              protocol={share.family === "webdav" ? "webdav" : "smb"}
+              volumes={volumes}
+              mounted={mounted}
+              onChanged={refreshMounted}
+              onMountRequested={pollUntilMounted}
+              onUnmountAll={() => unmountAllOnHost(share.host)}
+              onServerAdded={load}
+            />
+          ))}
+        </List.Section>
+      )}
       {[...smbByHost.entries()].map(([host, vols]) => (
         <List.Section key={host} title={`Discovered on ${host}`}>
           {vols.map((vol) => (
