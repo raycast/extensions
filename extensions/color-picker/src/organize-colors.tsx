@@ -366,7 +366,10 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
         <ActionPanel.Submenu
           icon={Icon.Folder}
           title={`Move ${targetsLabel} to Group`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
         >
           {groups
             .filter((name) => targets.some((item) => item.group !== name))
