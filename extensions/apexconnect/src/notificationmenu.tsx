@@ -7,7 +7,7 @@ import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
 import { State } from "@lib/apexapi";
 import { getErrorMessage } from "@lib/utils";
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { Color, getPreferenceValues, Image, MenuBarExtra } from "@raycast/api";
 
 function showCountInMenu(): boolean {
   const prefs = getPreferenceValues();
@@ -41,7 +41,7 @@ export default function MenuCommand(): JSX.Element {
     }
     return `${messageCount} Notifications`;
   };
-  const icon = valid ? "apex-connect.png" : "apex-connect.png";
+  const icon: Image.ImageLike = { source: "apex-connect.png", tintColor: valid ? Color.Yellow : undefined };
   const header = error ? getErrorMessage(error) : undefined;
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>

@@ -29,18 +29,28 @@ function createApexConnectClient(): ApexConnectClient {
   return apexClient;
 }
 
-let con: Connection;
+let con: Connection | undefined;
 export const apex = createApexConnectClient();
 
 export async function getApexWSConnection(): Promise<Connection> {
   if (con) {
     return con;
-  } else {
-    const instance = await apex.nearestURL();
-    const auth = createLongLivedTokenAuth(instance, apex.token);
-    con = await createConnection({ auth, createSocket: async () => createSocket(auth, apex.ignoreCerts) });
-    return con;
   }
+  const instance = await apex.nearestURL();
+  const auth = createLongLivedTokenAuth(instance, apex.token);
+  const connection = await createConnection({ auth, createSocket: async () => createSocket(auth, apex.ignoreCerts) });
+  // The library's own reconnect logic keeps retrying the same host; if that
+  // keeps failing, the network likely changed (e.g. left home WiFi). Drop
+  // the cached connection so the next call re-resolves nearestURL() instead
+  // of being stuck on a host that's no longer reachable.
+  connection.addEventListener("reconnect-error", () => {
+    if (con === connection) {
+      con = undefined;
+      connection.close();
+    }
+  });
+  con = connection;
+  return con;
 }
 
 export function shouldDisplayEntityID(): boolean {
