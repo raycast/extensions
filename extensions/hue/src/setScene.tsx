@@ -32,7 +32,8 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
   return (
     <Grid
       navigationTitle={props.group && `Set Scene for ${props.group.metadata.name}`}
-      isLoading={isLoading}
+      // When pushed, isLoading is frozen at push time, so a spinner would never stop.
+      isLoading={!props.group && isLoading}
       aspectRatio="16/9"
       filtering={{ keepSectionOrder: true }}
     >

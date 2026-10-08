@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { GroupedLight, HasId, Id, Light, Room, Scene, Zone } from "../lib/types";
 import { useHueBridgeMachine } from "./useHueBridgeMachine";
@@ -19,7 +19,7 @@ export function useHueResources() {
 }
 
 export function useHue() {
-  const [isLoading, setIsLoading] = useCachedState("isLoading", true);
+  const [isLoading, setIsLoading] = useState(true);
   const resources = useHueResources();
   const { setLights, setGroupedLights, setRooms, setZones, setScenes } = resources;
 
