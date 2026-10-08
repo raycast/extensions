@@ -1,42 +1,33 @@
 import { getPreferenceValues } from "@raycast/api";
 import { createJiraUrl } from "./utils";
 import { handleJiraResponseError } from "./handlers";
+import { Preferences } from "./types";
 import fetch from "node-fetch";
-
-interface UserPreferences {
-  isJiraCloud: string; // "cloud" or "server"
-  username: string;
-  token: string;
-}
-
-const prefs = getPreferenceValues<UserPreferences>();
-
-const getHeaders = () => {
-  if (prefs.isJiraCloud === "cloud") {
-    return {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Basic ${Buffer.from(`${prefs.username}:${prefs.token}`).toString("base64")}`,
-    };
-  } else {
-    // For Jira Server
-    return {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${prefs.token}`,
-    };
-  }
-};
-
-export const jiraRequest = async (endpoint: string, requestBody?: string, method: "GET" | "POST" = "GET") => {
-  const headers = getHeaders();
-  const opts = {
-    headers,
+export const jiraRequest = async (
+  endpoint: string,
+  requestBody?: string,
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+) => {
+  const prefs = getPreferenceValues<Preferences>();
+  const res = await fetch(createJiraUrl(endpoint), {
     method,
     body: requestBody,
-  };
-  const res = await fetch(createJiraUrl(endpoint), opts);
-  const responseBody = await res.json();
-  if (!res.ok) handleJiraResponseError(res.status, responseBody);
-  return responseBody;
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization:
+        prefs.isJiraCloud === "cloud"
+          ? `Basic ${Buffer.from(`${prefs.username}:${prefs.token}`).toString("base64")}`
+          : `Bearer ${prefs.token}`,
+    },
+  });
+  const text = await res.text();
+  let body: unknown;
+  try {
+    body = text ? JSON.parse(text) : undefined;
+  } catch {
+    if (res.ok) throw new Error("Jira returned an invalid JSON response.");
+  }
+  if (!res.ok) handleJiraResponseError(res.status, body);
+  return body;
 };

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira-time-tracking",
   "title": "Jira Time Tracking",
-  "description": "Log time against Jira issues",
+  "description": "Log, view, and manage time against Jira issues",
   "icon": "command-icon.png",
   "author": "niallpaterson",
   "contributors": [
@@ -16,6 +16,13 @@
       "title": "Log Time",
       "subtitle": "Jira Time Tracking",
       "description": "Log time against a Jira issue",
+      "mode": "view"
+    },
+    {
+      "name": "viewLoggedTime",
+      "title": "View Logged Time",
+      "subtitle": "Jira Time Tracking",
+      "description": "View your logged time entries by month",
       "mode": "view"
     }
   ],
@@ -76,26 +83,40 @@
       "title": "Default Project Key",
       "description": "Set the key of a project to select by default (e.g., 'MYPROJECT').",
       "placeholder": "Enter project key"
+    },
+    {
+      "name": "dailyHoursThreshold",
+      "type": "textfield",
+      "required": false,
+      "title": "Daily Hours Threshold",
+      "description": "Minimum hours required per day before hiding the 'Log Time' prompt (default: 7).",
+      "placeholder": "7",
+      "default": "7"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.1",
-    "@types/node-fetch": "^3.0.3",
+    "@raycast/api": "^2.7.1",
     "node-fetch": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.2.21",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "10.12.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.2.5",
-    "typescript": "^4.4.3"
+    "react-dom": "19.0.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "test": "node --test tests/*.test.cjs",
+    "fix-lint": "ray lint --fix"
+  },
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ]
 }

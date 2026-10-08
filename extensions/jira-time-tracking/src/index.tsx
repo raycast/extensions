@@ -1,213 +1,157 @@
 import { useState, useEffect, useRef } from "react";
-import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { getIssues, getProjects, postTimeLog } from "./controllers";
+import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import { getIssues, getProjects, postTimeLog, loadAllPages } from "./controllers";
 import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
-import { Project, Issue } from "./types";
+import { Project, Issue, Preferences } from "./types";
 
-type UserPreferences = {
-  isJiraCloud: string; // "cloud" or "server"
-  defaultProject?: string;
+type LogTimeProps = {
+  initialDate?: Date;
+  onSuccess?: () => void;
 };
 
-export default function Command() {
-  const userPrefs = getPreferenceValues<UserPreferences>();
+export default function Command({ initialDate, onSuccess }: LogTimeProps) {
+  const { pop } = useNavigation();
+  const userPrefs = getPreferenceValues<Preferences>();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedIssue, setSelectedIssue] = useState<Issue>();
-  const [description, setDescription] = useState("");
+  const [selectedIssueKey, setSelectedIssueKey] = useState<string>();
   const [selectedProject, setSelectedProject] = useState<string | undefined>(userPrefs.defaultProject);
-  const [startedAt, setStartedAt] = useState<Date>(new Date());
-  const [loading, setLoading] = useState(true);
-  const [issueCache, setIssueCache] = useState(new Map());
-  const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0); // Total time in seconds
-  const [isJiraCloud, setIsJiraCloud] = useState(userPrefs.isJiraCloud === "cloud"); // Use user preferences to determine Jira Cloud or Server
-  const [timeInput, setTimeInput] = useState<string>("");
-  const isValidTimeInput = (newTime: string) => /^[0-9hms ]*$/.test(newTime);
+  const [description, setDescription] = useState("");
+  const [startedAt, setStartedAt] = useState<Date>(() => initialDate ?? new Date());
+  const [timeInput, setTimeInput] = useState("");
+  const [timeError, setTimeError] = useState<string>();
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [issuesLoading, setIssuesLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [projectError, setProjectError] = useState<string>();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const issueCache = useRef(new Map<string, Issue[]>());
+  const loading = projectsLoading || issuesLoading || submitting;
 
-  const projectsPageGot = useRef(0);
-  const projectsPageTotal = useRef(1);
-
-  const issuesPageGot = useRef(0);
-  const issuesPageTotal = useRef(1);
-
-  const handleTimeInput = (newTime: string) => {
-    if (isValidTimeInput(newTime)) {
-      setTimeInput(newTime);
-      parseTimeInput(newTime);
-    }
+  const validateTime = () => {
+    const valid = parseTimeToSeconds(timeInput) > 0;
+    setTimeError(valid ? undefined : "Enter a duration such as 2h 30m or 45m, greater than zero.");
+    return valid;
   };
 
-  const parseTimeInput = (input: string) => {
-    const totalSeconds = parseTimeToSeconds(input);
-
-    setTotalTimeWorked(totalSeconds);
-    if (totalSeconds > 0) {
-      return true;
-    } else {
-      showToast(Toast.Style.Failure, "Please enter a valid time (Greater than 0.)");
-    }
-    return false;
-  };
-
-  async function handleSubmit() {
-    if (totalTimeWorked <= 0) {
-      showToast(Toast.Style.Failure, "Error logging time: no time entered.");
+  async function handleSubmit(values: { issueId: string; timeInput: string; description: string; startedAt: Date }) {
+    if (submitting || projectsLoading || issuesLoading) return;
+    const seconds = parseTimeToSeconds(values.timeInput);
+    if (seconds <= 0) {
+      validateTime();
       return;
     }
-
-    if (!selectedIssue) {
-      showToast(Toast.Style.Failure, "Error logging time: issue not found");
+    const issue = issues.find((item) => item.key === values.issueId);
+    if (!issue) {
+      await showToast(Toast.Style.Failure, "Choose an issue before logging time.");
       return;
     }
-
-    setLoading(true);
+    setSubmitting(true);
     try {
-      await postTimeLog(totalTimeWorked, selectedIssue.key, description, startedAt);
-      const successMessage = createTimeLogSuccessMessage(selectedIssue.key, totalTimeWorked);
-      showToast(Toast.Style.Success, successMessage);
-      cleanUp();
-    } catch (e) {
-      showToast(Toast.Style.Failure, e instanceof Error ? e.message : "Error Logging Time");
+      await postTimeLog(seconds, issue.key, values.description, values.startedAt);
+      await showToast(Toast.Style.Success, createTimeLogSuccessMessage(issue.key, seconds));
+      setDescription("");
+      setTimeInput("");
+      if (onSuccess) {
+        onSuccess();
+        pop();
+      }
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Failed to log time",
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
   useEffect(() => {
-    setIsJiraCloud(userPrefs.isJiraCloud === "cloud");
-  }, [userPrefs.isJiraCloud]);
-
-  useEffect(() => {
     let isMounted = true;
-
-    const fetchProjects = async () => {
-      if (projectsPageGot.current >= projectsPageTotal.current) {
-        setLoading(false);
-        showToast(Toast.Style.Success, "All projects loaded");
-        return;
-      }
-
-      setLoading(true);
+    setProjectsLoading(true);
+    setProjectError(undefined);
+    const load = async () => {
       try {
-        const result = await getProjects(projectsPageGot.current);
-        if (result.data.length > 0 && isMounted) {
-          setProjects((prevProjects) => {
-            const newProjects = [...prevProjects, ...result.data];
-            // Ensure unique keys and filter out undefined
-            const uniqueProjects = Array.from(new Set(newProjects.map((p) => p.key)))
-              .map((key) => newProjects.find((p) => p.key === key))
-              .filter((p): p is Project => !!p);
-            return uniqueProjects;
-          });
-
-          projectsPageGot.current += result.data.length;
-          if (isJiraCloud) {
-            projectsPageTotal.current = result.total;
-          } else {
-            projectsPageTotal.current = Math.max(projectsPageTotal.current, projectsPageGot.current + 100);
-          }
-
-          showToast(Toast.Style.Animated, `Loading projects ${projectsPageGot.current}/${projectsPageTotal.current}`);
-        } else {
-          setLoading(false);
-          showToast(Toast.Style.Success, `Projects loaded ${projectsPageGot.current}/${projectsPageTotal.current}`);
-        }
-      } catch (e) {
+        const result = await loadAllPages((token) => {
+          if (!isMounted) throw new Error("Loading cancelled");
+          return getProjects(Number(token || 0));
+        });
         if (isMounted) {
-          showToast(Toast.Style.Failure, "Failed to load projects", e instanceof Error ? e.message : String(e));
-          setLoading(false);
+          const uniqueProjects = Array.from(new Map(result.map((project) => [project.key, project])).values());
+          setProjects(uniqueProjects);
+          setSelectedProject((current) =>
+            uniqueProjects.some((project) => project.key === current) ? current : uniqueProjects[0]?.key,
+          );
         }
+      } catch (error) {
+        if (isMounted) {
+          const message = error instanceof Error ? error.message : String(error);
+          setProjectError(message);
+          await showToast(Toast.Style.Failure, "Failed to load projects", message);
+        }
+      } finally {
+        if (isMounted) setProjectsLoading(false);
       }
     };
-
-    fetchProjects();
-
+    void load();
     return () => {
       isMounted = false;
     };
-  }, [projects.length]);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     let isMounted = true;
-
-    const fetchIssues = async () => {
-      if (!selectedProject || issuesPageGot.current >= issuesPageTotal.current) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const result = await getIssues(issuesPageGot.current, selectedProject);
-        if (result.data.length > 0 && isMounted) {
-          setIssueCache((prev) => {
-            const updatedIssues = [...(prev.get(selectedProject) || []), ...result.data];
-            // Ensure unique keys and filter out undefined
-            const uniqueIssues = Array.from(new Set(updatedIssues.map((i) => i.key)))
-              .map((key) => updatedIssues.find((i) => i.key === key))
-              .filter((i): i is Issue => !!i);
-            return new Map(prev).set(selectedProject, uniqueIssues);
-          });
-          setIssues((prevIssues) => {
-            const allIssues = [...prevIssues, ...result.data];
-            // Ensure unique keys and filter out undefined
-            const uniqueIssues = Array.from(new Set(allIssues.map((i) => i.key)))
-              .map((key) => allIssues.find((i) => i.key === key))
-              .filter((i): i is Issue => !!i);
-            return uniqueIssues;
-          });
-
-          issuesPageTotal.current = result.total;
-          issuesPageGot.current += result.data.length;
-
-          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
-        } else {
-          setLoading(false);
-          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
-        }
-      } catch (e) {
-        if (isMounted) {
-          showToast(Toast.Style.Failure, "Failed to load issues", e instanceof Error ? e.message : String(e));
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchIssues();
-
-    return () => {
-      isMounted = false;
-      setLoading(false);
-    };
-  }, [selectedProject, issues.length]);
-
-  const resetIssue = (resetLength: boolean) => {
-    const list = issueCache.get(selectedProject) ?? [];
-    setIssues(list);
-    setSelectedIssue(list.length > 0 ? list[0] : null);
-    issuesPageGot.current = list.length;
-    if (resetLength) {
-      issuesPageTotal.current = Math.max(issuesPageTotal.current, list.length + 1);
+    setIssues([]);
+    setSelectedIssueKey(undefined);
+    if (!selectedProject) {
+      setIssuesLoading(false);
+      return;
     }
-  };
+    const project = selectedProject;
+    const cacheKey = JSON.stringify([project, userPrefs.customJQL]);
+    const cached = issueCache.current.get(cacheKey);
+    if (cached) {
+      setIssues(cached);
+      setSelectedIssueKey(cached[0]?.key);
+      setIssuesLoading(false);
+      return;
+    }
+    setIssuesLoading(true);
+    const load = async () => {
+      try {
+        const result = await loadAllPages((token) => {
+          if (!isMounted) throw new Error("Loading cancelled");
+          return getIssues(token, project);
+        });
+        if (isMounted) {
+          const uniqueIssues = Array.from(new Map(result.map((issue) => [issue.key, issue])).values());
+          issueCache.current.set(cacheKey, uniqueIssues);
+          setIssues(uniqueIssues);
+          setSelectedIssueKey(uniqueIssues[0]?.key);
+        }
+      } catch (error) {
+        if (isMounted)
+          await showToast(
+            Toast.Style.Failure,
+            "Failed to load issues",
+            error instanceof Error ? error.message : String(error),
+          );
+      } finally {
+        if (isMounted) setIssuesLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedProject, userPrefs.customJQL, refreshTrigger]);
 
-  useEffect(() => {
-    resetIssue(true);
-  }, [selectedProject]);
-
-  useEffect(() => {
-    resetIssue(false);
-  }, [issueCache]);
-
-  const handleSelectIssue = (issueKey: string) => {
-    const issue = issues.find((issue) => issue.key === issueKey);
-    setSelectedIssue(issue);
-  };
-
-  const cleanUp = () => {
-    setDescription("");
-    setTimeInput(""); // Reset the time input field
-    setTotalTimeWorked(0);
+  const handleSelectProject = (project: string) => {
+    if (project === selectedProject) return;
+    setIssues([]);
+    setSelectedIssueKey(undefined);
+    setSelectedProject(project);
   };
 
   const emptyMessage = `
@@ -227,7 +171,16 @@ Please check your permissions, jira account, or credentials and try again.
   `;
 
   if (!projects.length && !loading) {
-    return <Detail markdown={emptyMessage} />;
+    return (
+      <Detail
+        markdown={projectError ? `# Unable to Load Projects\n\n${projectError}` : emptyMessage}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" onAction={() => setRefreshTrigger((value) => value + 1)} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
@@ -240,10 +193,10 @@ Please check your permissions, jira account, or credentials and try again.
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="projectId" title="Project Id" value={selectedProject} onChange={setSelectedProject}>
+      <Form.Dropdown id="projectId" title="Project" value={selectedProject} onChange={handleSelectProject}>
         {projects?.map((item) => <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />)}
       </Form.Dropdown>
-      <Form.Dropdown id="issueId" title="Issue Key" defaultValue={selectedIssue?.key} onChange={handleSelectIssue}>
+      <Form.Dropdown id="issueId" title="Issue" value={selectedIssueKey} onChange={setSelectedIssueKey}>
         {issues.map((item) => (
           <Form.Dropdown.Item key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
         ))}
@@ -254,7 +207,7 @@ Please check your permissions, jira account, or credentials and try again.
         title="Date"
         value={startedAt}
         onChange={(date) => {
-          date && setStartedAt(date);
+          if (date) setStartedAt(date);
         }}
       />
       <Form.TextField
@@ -262,8 +215,12 @@ Please check your permissions, jira account, or credentials and try again.
         title="Time (e.g., 2h 15m 30s)"
         placeholder="Enter time as 'Xh Ym Zs'"
         value={timeInput}
-        onChange={handleTimeInput}
-        onBlur={() => parseTimeInput(timeInput)}
+        error={timeError}
+        onChange={(value) => {
+          setTimeInput(value);
+          setTimeError(undefined);
+        }}
+        onBlur={validateTime}
       />
       <Form.TextArea
         id="description"
