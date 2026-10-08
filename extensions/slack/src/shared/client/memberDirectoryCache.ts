@@ -6,7 +6,8 @@ import { toUserName } from "./member";
 const FRESH_MS = 60 * 60 * 1000;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-type Snapshot = { savedAt: number; members: SlackMember[] };
+/** `pages` keeps the layout of the scan that produced the snapshot (in memory only), so a search that began on the live scan can finish reading it by page index after the scan completes. */
+type Snapshot = { savedAt: number; members: SlackMember[]; pages?: SlackMember[][] };
 
 const cache = new Cache({ capacity: 20 * 1024 * 1024 });
 const memory = new Map<string, Snapshot>();
@@ -57,9 +58,9 @@ function read(key: string): Snapshot | undefined {
   }
 }
 
-function write(key: string, members: SlackMember[]) {
-  const snapshot = { savedAt: Date.now(), members };
-  memory.set(key, snapshot);
+function write(key: string, pages: SlackMember[][]) {
+  const snapshot = { savedAt: Date.now(), members: pages.flat() };
+  memory.set(key, { ...snapshot, pages });
   try {
     cache.set(key, JSON.stringify(snapshot));
   } catch {
@@ -91,7 +92,7 @@ function startLoad(key: string, fetchPage: FetchPage): Load {
         notify();
         cursor = page.nextCursor || undefined;
       } while (cursor);
-      write(key, load.pages.flat());
+      write(key, load.pages);
     } catch (error) {
       load.error = error;
     } finally {
@@ -132,9 +133,13 @@ export async function getMemberPage(
   const key = keyFor(token);
   const snapshot = read(key);
   const age = snapshot ? Date.now() - snapshot.savedAt : Infinity;
-  if (snapshot && age < FRESH_MS) return { items: index === 0 ? snapshot.members : [], hasMore: false };
+  if (snapshot && age < FRESH_MS) {
+    const pages = snapshot.pages ?? [snapshot.members];
+    return { items: pages[index] ?? [], hasMore: index + 1 < pages.length };
+  }
 
   const load = loads.get(key) ?? startLoad(key, fetchPage);
+  // A stale snapshot is served as one page: the refresh replaces it, and a page layout must not change mid-search.
   if (snapshot && age < MAX_AGE_MS) return { items: index === 0 ? snapshot.members : [], hasMore: false };
   return readLoadPage(load, index);
 }
