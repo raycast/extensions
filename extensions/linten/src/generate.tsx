@@ -24,17 +24,6 @@ function cleanDomain(input: string): string {
     .trim();
 }
 
-function isDomainLike(text: string): boolean {
-  const trimmed = text.trim();
-  if (!trimmed) return false;
-  return (
-    trimmed.includes(".") ||
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://") ||
-    trimmed.startsWith("localhost")
-  );
-}
-
 function FullManifestView({
   template,
   domain,
@@ -121,24 +110,22 @@ export default function GenerateCommand() {
   }, []);
 
   const trimmedSearch = searchText.trim();
-  const isTyping = trimmedSearch.length > 0;
-  const isDomainInput = isTyping && isDomainLike(trimmedSearch);
-  const cleanedTypedDomain = isDomainInput ? cleanDomain(trimmedSearch) : "";
-  const isValidTypedDomain =
-    isDomainInput &&
-    cleanedTypedDomain.length > 0 &&
-    (isValidUrlInput(trimmedSearch) || isValidUrlInput(cleanedTypedDomain));
+  const cleanedTyped = cleanDomain(trimmedSearch);
+  const isValidDomainInput =
+    trimmedSearch.length > 0 &&
+    cleanedTyped.length > 0 &&
+    (isValidUrlInput(trimmedSearch) || isValidUrlInput(cleanedTyped));
 
   // Determine active target domain
   const activeDomain = useMemo(() => {
-    if (isValidTypedDomain) {
-      return cleanedTypedDomain;
+    if (isValidDomainInput) {
+      return cleanedTyped;
     }
     if (clipboardDomain) {
       return clipboardDomain;
     }
     return "acme.com";
-  }, [isValidTypedDomain, cleanedTypedDomain, clipboardDomain]);
+  }, [isValidDomainInput, cleanedTyped, clipboardDomain]);
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -148,14 +135,9 @@ export default function GenerateCommand() {
   }, [templates]);
 
   // Filter templates:
-  // If user entered an invalid domain, return empty list to trigger the invalid domain EmptyView.
   // If user typed a valid domain, show all templates personalized for that domain.
-  // If user typed search keywords, filter templates by keyword match.
+  // Otherwise filter templates by keyword match (e.g. "saas", "api", "v2.0").
   const filteredTemplates = useMemo(() => {
-    if (isDomainInput && !isValidTypedDomain) {
-      return [];
-    }
-
     const query = trimmedSearch.toLowerCase();
 
     return templates.filter((t) => {
@@ -164,8 +146,8 @@ export default function GenerateCommand() {
         return false;
       }
 
-      // If user typed a valid domain, show all templates for that domain
-      if (isValidTypedDomain || !query) {
+      // If user typed a valid domain or query is empty, show all templates
+      if (isValidDomainInput || !query) {
         return true;
       }
 
@@ -177,13 +159,7 @@ export default function GenerateCommand() {
         t.description.toLowerCase().includes(query)
       );
     });
-  }, [
-    templates,
-    trimmedSearch,
-    selectedCategory,
-    isDomainInput,
-    isValidTypedDomain,
-  ]);
+  }, [templates, trimmedSearch, selectedCategory, isValidDomainInput]);
 
   return (
     <List
@@ -208,19 +184,11 @@ export default function GenerateCommand() {
         </List.Dropdown>
       }
     >
-      {isDomainInput && !isValidTypedDomain ? (
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title="Invalid Domain or URL"
-          description={`"${trimmedSearch}" is not a valid domain. Enter a valid domain (e.g. example.com) or search by keyword.`}
-        />
-      ) : (
-        <List.EmptyView
-          icon={Icon.Document}
-          title="No matching templates found"
-          description="Try searching for another industry keyword or clear the search filter."
-        />
-      )}
+      <List.EmptyView
+        icon={Icon.Document}
+        title="No matching templates found"
+        description="Try searching for another industry keyword or enter your domain to customize templates."
+      />
       {filteredTemplates.map((template) => {
         const personalized = personalizeTemplate(
           template.content,
