@@ -5,7 +5,9 @@ import {
   Grid,
   Icon,
   Toast,
+  closeMainWindow,
   environment,
+  showHUD,
   showToast,
   Keyboard,
 } from "@raycast/api";
@@ -57,13 +59,18 @@ export default function Command() {
         cachePath: join(environment.supportPath, "logos"),
       });
       if (shouldPaste) {
+        // Restore focus before pasting a file into the previous app.
+        // https://developers.raycast.com/api-reference/window-and-search-bar#closemainwindow
+        await toast.hide();
+        await closeMainWindow();
         await Clipboard.paste({ file });
+        await showHUD(`${company.name} logo pasted`);
       } else {
         await Clipboard.copy({ file });
+        toast.style = Toast.Style.Success;
+        toast.title = "Logo copied";
+        toast.message = company.name;
       }
-      toast.style = Toast.Style.Success;
-      toast.title = shouldPaste ? "Logo pasted" : "Logo copied";
-      toast.message = company.name;
     } catch (cause) {
       const error = createError({
         status: 500,
@@ -71,14 +78,15 @@ export default function Command() {
         why: String(cause),
         fix: "Check your connection and try again",
       });
+      let title = error.message;
+      let message = error.fix;
       if (cause instanceof Error && "fix" in cause) {
-        toast.title = cause.message;
-        toast.message = String(cause.fix);
-      } else {
-        toast.title = error.message;
-        toast.message = error.fix;
+        title = cause.message;
+        message = String(cause.fix);
       }
-      toast.style = Toast.Style.Failure;
+      // A fresh toast becomes a HUD when the main window has already closed.
+      // https://developers.raycast.com/api-reference/feedback/toast#showtoast
+      await showToast({ style: Toast.Style.Failure, title, message });
       console.error(error);
     } finally {
       isBusy.current = false;
