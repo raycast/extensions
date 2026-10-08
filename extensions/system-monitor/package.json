@@ -170,7 +170,7 @@
       "description": "Select cpu usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "CPU usage display mode",
+      "title": "CPU Usage Display Mode",
       "placeholder": "placeHolder",
       "data": [
         {
@@ -189,7 +189,7 @@
       "description": "Select battery usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "Battery usage display mode",
+      "title": "Battery Usage Display Mode",
       "placeholder": "placeHolder",
       "data": [
         {
@@ -208,7 +208,7 @@
       "description": "Select disk usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "Disk usage display mode",
+      "title": "Disk Usage Display Mode",
       "placeholder": "placeHolder",
       "data": [
         {
@@ -227,7 +227,7 @@
       "description": "Select memory usage display mode",
       "type": "dropdown",
       "required": false,
-      "title": "Memory usage display mode",
+      "title": "Memory Usage Display Mode",
       "placeholder": "placeHolder",
       "data": [
         {
