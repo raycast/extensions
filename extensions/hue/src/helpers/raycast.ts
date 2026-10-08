@@ -23,7 +23,7 @@ export function getTransitionTimeInMs(): number {
     return DEFAULT_TRANSITION_TIME_MS;
   }
 
-  return Math.round(transitionTime);
+  return transitionTime;
 }
 
 export async function applyUpdate(
