@@ -602,7 +602,7 @@ function ExpandedEmailView({
   deletesPermanently = false,
 }: ExpandedEmailViewProps) {
   const { push } = useNavigation();
-  const { loadRemoteImages } = getPreferenceValues<Preferences>();
+  const { loadRemoteImages } = getPreferenceValues<Preferences.ListEmails>();
   const [demoMode, setDemoMode] = useState(initialDemoMode || false);
   // Bodies stay in memory only: persisting them would write decrypted emails to disk
   const { data: body, isLoading } = usePromise(
@@ -871,7 +871,7 @@ function EmailActions({
   const handleCopyAsMarkdown = async () => {
     try {
       const body = await fetchEmailBody(folder, email.uid);
-      const { loadRemoteImages } = getPreferenceValues<Preferences>();
+      const { loadRemoteImages } = getPreferenceValues<Preferences.ListEmails>();
       const bodyText = emailBodyToMarkdown(body, { images: loadRemoteImages }) || email.preview || "";
 
       const markdown = `# ${email.subject}\n\n**From:** ${fromDisplay}\n**To:** ${toDisplay}${ccDisplay ? `\n**CC:** ${ccDisplay}` : ""}\n**Date:** ${email.date.toLocaleString()}\n\n---\n\n${bodyText}`;

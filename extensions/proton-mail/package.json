@@ -23,7 +23,18 @@
       "title": "Browse Email",
       "subtitle": "Proton Mail",
       "description": "View and manage your Proton Mail emails",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "loadRemoteImages",
+          "title": "Remote Images",
+          "label": "Load remote images",
+          "description": "Show images hosted by the sender in the expanded email view. Senders can use remote images to track when you open an email.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "compose-email",
@@ -105,15 +116,6 @@
           "value": "200"
         }
       ]
-    },
-    {
-      "name": "loadRemoteImages",
-      "title": "Remote Images",
-      "label": "Load remote images",
-      "description": "Show images hosted by the sender in the expanded email view. Senders can use remote images to track when you open an email.",
-      "type": "checkbox",
-      "required": false,
-      "default": false
     },
     {
       "name": "composeFormat",

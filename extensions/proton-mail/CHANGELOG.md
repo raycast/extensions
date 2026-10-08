@@ -5,7 +5,7 @@
 - Rewrite HTML to Markdown conversion: links show their text instead of raw tracking URLs, layout tables, hidden preheaders and tracking pixels are dropped
 - Plain text emails keep their line breaks and get short link labels
 - Images are sized to fit the detail view, small icons are skipped
-- Add a "Remote Images" preference (off by default) so opening an email no longer loads tracking images
+- Add a "Remote Images" preference to Browse Email (off by default) so opening an email no longer loads tracking images
 - Add "Open Original in Browser" action to view the full HTML email
 - Product cards no longer repeat their title when images are hidden, and long image descriptions are not used as link labels
 - Short links that follow each other (social networks, listing details, footer menus) are shown on one line, linked logos are hidden along with images, and newsletter headings are shown smaller
