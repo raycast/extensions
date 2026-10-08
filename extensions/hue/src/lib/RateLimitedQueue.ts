@@ -4,6 +4,8 @@ type QueueItem<T> = {
   reject: (error: unknown) => void;
 };
 
+export class RequestDroppedError extends Error {}
+
 export default class RateLimitedQueue {
   private queue: QueueItem<unknown>[] = [];
   private isProcessing = false;
@@ -22,7 +24,7 @@ export default class RateLimitedQueue {
       if (this.maxQueueLength !== undefined && this.queue.length >= this.maxQueueLength) {
         const droppedRequest = this.queue.shift();
         if (droppedRequest) {
-          droppedRequest.reject(new Error("Request dropped: queue at max capacity"));
+          droppedRequest.reject(new RequestDroppedError("Request dropped: queue at max capacity"));
         }
       }
 

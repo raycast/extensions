@@ -21,7 +21,8 @@ const GRID_ITEM_HEIGHT = 153;
 export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
-  const rateLimiter = useInputRateLimiter(3, 1000);
+  // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
+  const rateLimiter = useInputRateLimiter(1, 1000);
   const palettes = useMemo(
     () => new Map([...rooms, ...zones].map((group) => [group.id, getColorsFromGroup(lights, group)])),
     [rooms, zones, lights],
