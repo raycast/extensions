@@ -3,10 +3,10 @@ import {
   GroupedLight,
   GroupedLightRequest,
   HueEvent,
+  HueResource,
   HueResponse,
   Light,
   LightRequest,
-  Method,
   ResourceIdentifier,
   Room,
   Scene,
@@ -20,11 +20,6 @@ import { logError } from "../helpers/errors";
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
-type Response<T> = {
-  headers: IncomingHttpHeaders & IncomingHttpStatusHeader;
-  data: HueResponse<T>;
-};
-
 export default class HueClient {
   private readonly lightsQueue = new RateLimitedQueue(10);
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
@@ -34,29 +29,8 @@ export default class HueClient {
     private readonly http2Session: ClientHttp2Session,
   ) {}
 
-  public async getLights(): Promise<Light[]> {
-    const response = await this.makeRequest<Light>("GET", "/clip/v2/resource/light");
-    return response.data.data;
-  }
-
-  public async getGroupedLights(): Promise<GroupedLight[]> {
-    const response = await this.makeRequest<GroupedLight>("GET", "/clip/v2/resource/grouped_light");
-    return response.data.data;
-  }
-
-  public async getScenes(): Promise<Scene[]> {
-    const response = await this.makeRequest<Scene>("GET", "/clip/v2/resource/scene");
-    return response.data.data;
-  }
-
-  public async getRooms(): Promise<Room[]> {
-    const response = await this.makeRequest<Room>("GET", "/clip/v2/resource/room");
-    return response.data.data;
-  }
-
-  public async getZones(): Promise<Zone[]> {
-    const response = await this.makeRequest<Zone>("GET", "/clip/v2/resource/zone");
-    return response.data.data;
+  public getLights(): Promise<Light[]> {
+    return this.getAll<Light>("light");
   }
 
   // The bridge errors on parallel requests (as if an endpoint is missing), so fetch sequentially.
@@ -64,44 +38,38 @@ export default class HueClient {
   // The property names are useHueResources' useCachedState keys, which toggleAllLights also writes.
   public async getResources() {
     return {
-      rooms: await this.getRooms(),
-      zones: await this.getZones(),
-      scenes: await this.getScenes(),
-      groupedLights: await this.getGroupedLights(),
+      rooms: await this.getAll<Room>("room"),
+      zones: await this.getAll<Zone>("zone"),
+      scenes: await this.getAll<Scene>("scene"),
+      groupedLights: await this.getAll<GroupedLight>("grouped_light"),
       lights: await this.getLights(),
     };
   }
 
-  public async updateLight(light: Light, properties: LightRequest): Promise<ResourceIdentifier[]> {
-    const response = await this.lightsQueue.enqueueRequest(() =>
-      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/light/${light.id}`, properties),
-    );
-
-    return response.data.data;
+  private getAll<R extends HueResource>(type: R["type"]): Promise<R[]> {
+    return this.makeRequest<R>("GET", `/clip/v2/resource/${type}`);
   }
 
-  public async updateGroupedLight(
+  public updateLight(light: Light, properties: LightRequest): Promise<ResourceIdentifier[]> {
+    return this.lightsQueue.enqueueRequest(() =>
+      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/light/${light.id}`, properties),
+    );
+  }
+
+  public updateGroupedLight(
     groupedLight: GroupedLight,
     properties: GroupedLightRequest,
   ): Promise<ResourceIdentifier[]> {
-    const response = await this.groupedLightsQueue.enqueueRequest(() =>
+    return this.groupedLightsQueue.enqueueRequest(() =>
       this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
     );
-
-    return response.data.data;
   }
 
-  public async updateScene(scene: Scene, properties: SceneRequest): Promise<ResourceIdentifier[]> {
-    const response = await this.makeRequest<ResourceIdentifier>(
-      "PUT",
-      `/clip/v2/resource/scene/${scene.id}`,
-      properties,
-    );
-
-    return response.data.data;
+  public updateScene(scene: Scene, properties: SceneRequest): Promise<ResourceIdentifier[]> {
+    return this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
   }
 
-  private makeRequest<T>(method: Method, path: string, body?: object): Promise<Response<T>> {
+  private makeRequest<T>(method: "GET" | "PUT", path: string, body?: object): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const stream = this.http2Session.request({
         [HTTP2_HEADER_METHOD]: method,
@@ -118,16 +86,10 @@ export default class HueClient {
 
       stream.setEncoding("utf8");
 
-      const response: Response<T> = {
-        headers: {},
-        data: {
-          errors: [],
-          data: [],
-        },
-      };
+      let headers: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
 
-      stream.on("response", (responseHeaders: IncomingHttpHeaders & IncomingHttpStatusHeader) => {
-        response.headers = responseHeaders;
+      stream.on("response", (responseHeaders) => {
+        headers = responseHeaders;
       });
 
       stream.on("data", (chunk) => {
@@ -138,25 +100,25 @@ export default class HueClient {
         stream.close();
 
         try {
-          if (response.headers[":status"] !== 200 && response.headers["content-type"] === "text/html") {
+          if (headers[":status"] !== 200 && headers["content-type"] === "text/html") {
             // On non-200 responses, the body is an HTML page with an error message
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
-              const errorMessage = `Status ${response.headers[":status"]}: ${errorMatch[0]}`;
+              const errorMessage = `Status ${headers[":status"]}: ${errorMatch[0]}`;
               logError(errorMessage);
               return reject(new Error(errorMessage));
             }
           }
 
-          response.data = JSON.parse(data);
+          const response: HueResponse<T> = JSON.parse(data);
 
-          if (response.data.errors != null && response.data.errors.length > 0) {
-            const errorMessage = response.data.errors.map((error) => error.description).join(", ");
-            console.error({ headers: response.headers, message: errorMessage });
+          if (response.errors != null && response.errors.length > 0) {
+            const errorMessage = response.errors.map((error) => error.description).join(", ");
+            console.error({ headers, message: errorMessage });
             return reject(new Error(errorMessage));
           }
 
-          return resolve(response);
+          return resolve(response.data);
         } catch (error) {
           return reject(error);
         }

@@ -36,8 +36,6 @@ export interface HasId {
   id: Id;
 }
 
-export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
-
 export type HueApiService = {
   id: string;
   internalipaddress: string;
