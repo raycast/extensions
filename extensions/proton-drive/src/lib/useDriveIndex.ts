@@ -100,7 +100,13 @@ export async function refreshIndex(silent: boolean): Promise<void> {
     // Another command won the lock in the meantime: follow its progress instead.
     if (error instanceof IndexBusyError) follow();
     else if (isSignedOut(error)) await handleSignedOut();
-    else if (!(error instanceof IndexAbortedError)) await showError(error, "Indexing failed");
+    else if (!(error instanceof IndexAbortedError)) {
+      await showError(error, "Indexing failed");
+      // Fall back to what is saved on disk: it can be newer than memory, e.g. when a background
+      // build finished just before this one started.
+      const saved = await readIndex();
+      if (saved) update({ index: saved });
+    }
   } finally {
     building = false;
     if (!following) update({ progress: undefined });
