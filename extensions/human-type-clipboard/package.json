@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "human-type-clipboard",
+  "title": "Human Type Clipboard",
+  "description": "Human like typing",
+  "icon": "extension-icon.png",
+  "author": "Rayroxx",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "human-type-email",
+      "title": "Human Type Email",
+      "description": "Types the 5th most recent clipboard item",
+      "mode": "no-view"
+    },
+    {
+      "name": "human-type-dob",
+      "title": "Human Type Date of Birth",
+      "description": "Types the 4th most recent clipboard item",
+      "mode": "no-view"
+    },
+    {
+      "name": "human-type-name",
+      "title": "Human Type Name",
+      "description": "Types the 3rd most recent clipboard item",
+      "mode": "no-view"
+    },
+    {
+      "name": "human-type-password",
+      "title": "Human Type Password",
+      "description": "Types the 2nd most recent clipboard item",
+      "mode": "no-view"
+    },
+    {
+      "name": "human-type-nickname",
+      "title": "Human Type Nickname",
+      "description": "Types the most recent clipboard item",
+      "mode": "no-view"
+    },
+    {
+      "name": "human-type-latest",
+      "title": "Human Type Latest",
+      "description": "Types the most recently copied clipboard item",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
