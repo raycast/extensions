@@ -9,23 +9,18 @@ export class RequestDroppedError extends Error {}
 export default class RateLimitedQueue {
   private queue: QueueItem<unknown>[] = [];
   private isProcessing = false;
-  private readonly requestsPerSecond: number;
-  private readonly maxQueueLength?: number;
   private lastRequestTimestamp = 0;
 
-  constructor(requestsPerSecond: number, maxQueueLength?: number) {
-    this.requestsPerSecond = requestsPerSecond;
-    this.maxQueueLength = maxQueueLength;
-  }
+  constructor(
+    private readonly requestsPerSecond: number,
+    private readonly maxQueueLength = Infinity,
+  ) {}
 
-  async enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
+  enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       // If queue is at max capacity, reject the oldest request and replace it with the new one
-      if (this.maxQueueLength !== undefined && this.queue.length >= this.maxQueueLength) {
-        const droppedRequest = this.queue.shift();
-        if (droppedRequest) {
-          droppedRequest.reject(new RequestDroppedError("Request dropped: queue at max capacity"));
-        }
+      if (this.queue.length >= this.maxQueueLength) {
+        this.queue.shift()?.reject(new RequestDroppedError("Request dropped: queue at max capacity"));
       }
 
       this.queue.push({ request, resolve: resolve as (value: unknown) => void, reject });
