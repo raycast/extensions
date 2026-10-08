@@ -188,7 +188,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       const message = err instanceof Error ? err.message : "An unknown error occurred";
       // Items belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") updateItems([]);
-      if (itemsRef.current.length === 0) {
+      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
+      if (itemsRef.current.length === 0 || type === "not_installed") {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);
