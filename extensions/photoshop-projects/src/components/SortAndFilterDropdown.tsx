@@ -48,7 +48,7 @@ export function SortAndFilterDropdown({ isGrid, onViewModeChange, sortBy, onSort
   return (
     <List.Dropdown tooltip="View Layout & Sorting" value={sortBy} onChange={handleChange}>
       <List.Dropdown.Section title="Layout">
-        <List.Dropdown.Item title="Switch to Grid View" value="view_grid" icon={Icon.Grid} />
+        <List.Dropdown.Item title="Switch to Grid View" value="view_grid" icon={Icon.AppWindowGrid} />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Sort Documents">
         <List.Dropdown.Item title="Name (A to Z)" value="name-asc" icon={Icon.Text} />
