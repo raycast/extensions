@@ -65,12 +65,3 @@ The draft forms and AI tools support headings, bold, italic, links, lists, quote
 Put each image in its own paragraph and use a public HTTPS URL.
 Code blocks, tables, HTML, strikethrough, task lists, and local image uploads are not supported.
 These formats are rejected before draft creation.
-
-## Development
-
-Use Node.js 24.x for development.
-Install dependencies with `npm install` and run the extension with `npm run dev`.
-
-Run `npm run fix-lint` and `npm run build` before submitting changes.
-
-Actions use Raycast's common shortcuts for New, Edit, Open, Refresh, Copy, and Remove. Open the action panel to see the shortcuts for your platform. Forms keep Raycast's default submit shortcut, **⌘Enter** on macOS or **Ctrl+Enter** on Windows.
