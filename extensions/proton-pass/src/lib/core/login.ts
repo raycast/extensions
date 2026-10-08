@@ -20,7 +20,7 @@ const POLL_MS = 100;
 export const LOGIN_TIMEOUT_MS = 10 * 60_000;
 
 /** A login running on its own, saved so that the extension finds it again after Raycast stopped it. */
-interface SavedLogin {
+export interface SavedLogin {
   pid: number;
   attempt: string;
   startedAt: number;
@@ -265,6 +265,21 @@ export async function forgetLoginUrl(dir: string, saved: SavedLogin): Promise<vo
   } catch {
     // A login screen or a new login removed the folder meanwhile.
   }
+}
+
+/** The login attempt saved in `dir`, running or over. */
+export const savedDetachedLogin = readSavedLogin;
+
+/**
+ * Forgets the result of a login that's over, so that no login screen shows it anymore. Only this attempt's files go: a
+ * login started since keeps its own, and its saved state.
+ */
+export async function forgetDetachedLogin(dir: string, login: SavedLogin): Promise<void> {
+  await Promise.all(
+    [outputPath(dir, login.attempt), failurePath(dir, login.attempt), exitCodePath(dir, login.pid)].map((path) =>
+      rm(path, { force: true }),
+    ),
+  );
 }
 
 /** Stops the login started by startDetachedLogin, if it's still running, and removes its files. */
