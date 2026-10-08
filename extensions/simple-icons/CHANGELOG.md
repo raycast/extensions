@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-10-08
 
 - Check the selected icon package on every command launch and apply confirmed updates without restarting Raycast
 - Download the resolved package version to keep cached icon packs consistent
