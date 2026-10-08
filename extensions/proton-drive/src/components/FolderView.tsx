@@ -40,7 +40,8 @@ export function FolderView(props: { path: string; title?: string }) {
     },
   });
 
-  // Folder sizes exist only through a complete index (a partial one would undercount).
+  // Folder sizes come from a complete index (a partial one would undercount); folders that could not
+  // be listed, and their parents, get no size at all (see folderSizes).
   const sizes = useMemo(() => (index && !index.partial ? folderSizes(index) : undefined), [index]);
 
   const here = useMemo(() => {

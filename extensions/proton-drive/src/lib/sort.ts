@@ -14,11 +14,11 @@ const byName = (a: DriveNode, b: DriveNode) =>
 
 /**
  * Folders first, then files, each group in the chosen order. Newest and largest come first.
- * The CLI gives no folder sizes: `folderSizes` (from the search index) provides them when it exists;
- * without it, folders keep their name order when sorting by size.
+ * The CLI gives no folder sizes: `folderSizes` (from the search index) provides them when it exists.
+ * Folders without a known size come after the others, in name order.
  */
 export function sortNodes(nodes: DriveNode[], order: SortOrder, folderSizes?: Map<string, number>): DriveNode[] {
-  const size = (n: DriveNode) => (n.type === "folder" ? (folderSizes?.get(n.path) ?? 0) : (n.size ?? 0));
+  const size = (n: DriveNode) => (n.type === "folder" ? (folderSizes?.get(n.path) ?? -1) : (n.size ?? 0));
   const key = (n: DriveNode): number =>
     order === "modified" ? (n.modified ? Date.parse(n.modified) : 0) : order === "size" ? size(n) : 0;
   return [...nodes].sort(

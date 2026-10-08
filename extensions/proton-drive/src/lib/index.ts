@@ -125,7 +125,9 @@ const folderSizeCache = new WeakMap<DriveIndex, Map<string, number>>();
 
 /**
  * Total size of every indexed folder: all the files below it, in subfolders too. The CLI reports
- * sizes for files only. Computed once per index object (it is replaced on refresh).
+ * sizes for files only. Folders whose contents are not fully known (a folder that could not be
+ * listed, and every folder above it) are left out rather than given a total that is too small.
+ * Computed once per index object (it is replaced on refresh).
  */
 export function folderSizes(index: DriveIndex): Map<string, number> {
   const cached = folderSizeCache.get(index);
@@ -146,7 +148,14 @@ export function folderSizes(index: DriveIndex): Map<string, number> {
     for (let folder = parent; folder >= 0; folder = parentOf[folder]) totals[folder] += size;
   }
 
-  const sizes = new Map(index.folders.map((path, i) => [path, totals[i]]));
+  const incomplete = new Set<number>();
+  for (const path of index.failedFolders ?? []) {
+    for (let folder = folderOf.get(path) ?? -1; folder >= 0; folder = parentOf[folder]) incomplete.add(folder);
+  }
+  const sizes = new Map<string, number>();
+  index.folders.forEach((path, i) => {
+    if (!incomplete.has(i)) sizes.set(path, totals[i]);
+  });
   folderSizeCache.set(index, sizes);
   return sizes;
 }
