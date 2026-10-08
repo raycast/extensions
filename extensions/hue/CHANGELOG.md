@@ -11,6 +11,7 @@
 - Fix Set Scene opened from Control Groups not updating while open
 - Fix the loading indicator not showing after the first launch
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back
+- Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

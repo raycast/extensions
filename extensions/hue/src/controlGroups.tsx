@@ -204,8 +204,7 @@ function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; 
   return (
     <ActionPanel.Submenu
       title="Set Brightness"
-      // This should be 0-100, but the API returns 0-254
-      icon={getProgressIcon((props.groupedLight.dimming?.brightness ?? 0) / 254, Color.PrimaryText)}
+      icon={getProgressIcon((props.groupedLight.dimming?.brightness ?? 0) / 100, Color.PrimaryText)}
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "b" },
         Windows: { modifiers: ["ctrl", "shift"], key: "b" },
