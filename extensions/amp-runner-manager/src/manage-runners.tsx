@@ -39,6 +39,13 @@ async function openAmpRunnerSettings() {
   } catch (error) {
     const message = errorMessage(error);
     const permission = missingPermission(message);
+    const openAmp = {
+      title: "Open Amp",
+      onAction: (toast: Toast) => {
+        void open("/Applications/Amp.app");
+        void toast.hide();
+      },
+    };
     await showToast({
       style: Toast.Style.Failure,
       title: permission
@@ -55,7 +62,8 @@ async function openAmpRunnerSettings() {
               void toast.hide();
             },
           }
-        : undefined,
+        : openAmp,
+      secondaryAction: permission ? openAmp : undefined,
     });
   }
 }
