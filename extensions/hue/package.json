@@ -112,7 +112,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/chroma-js": "^3.1.2",
-    "@types/node-localstorage": "^1.3.3",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
     "eslint": "^10.4.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
