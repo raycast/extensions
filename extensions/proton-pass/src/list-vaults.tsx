@@ -13,7 +13,7 @@ import {
   setCachedVaults,
 } from "./lib/cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
-import { createListingSaves, listingSaves } from "./lib/refresh";
+import { createListingSaves, createRequestTracker, listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
 
@@ -34,19 +34,23 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
+  const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
     loadVaults();
   }, []);
 
   async function loadVaults() {
+    const isLatest = loads.start();
     setError(null);
+    setIsLoading(true);
 
     const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
     ]);
+    if (!isLatest()) return;
     if (cachedVaults && !hasLoadedFromCache.current) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       // The items cache only holds complete listings, so every cached vault gets a count.
@@ -69,6 +73,7 @@ export default function Command() {
         // Sharing only adds an icon: when it can't be listed, the saved sharing stays.
         listVaultSharing().catch(() => undefined),
       ]);
+      if (!isLatest()) return;
       const sharing = freshSharing ? mergeSharing(freshSharing, cachedSharing?.data) : (cachedSharing?.data ?? {});
       setVaults(withSharing(freshVaults, sharing));
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
@@ -77,12 +82,13 @@ export default function Command() {
       if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
       // items would count 0 items. Saves follow the order listings started, also across Search Items.
-      if (failed.size === 0) {
+      if (failed.size === 0 && isLatest()) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
         );
       }
     } catch (err: unknown) {
+      if (!isLatest()) return;
       // The counts of an ended session must not show up again.
       if (err instanceof PassCliError && err.type === "not_authenticated") setItemCounts(new Map());
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
@@ -94,7 +100,7 @@ export default function Command() {
         }
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 

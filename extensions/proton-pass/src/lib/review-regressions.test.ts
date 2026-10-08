@@ -1366,10 +1366,11 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
-test("an older List Vaults load can't replace newer sharing", async () => {
+test("an older List Vaults load can't replace newer sharing or displayed counts", async () => {
   const vault = { shareId: "vault", name: "Personal" };
   const savedSharing: unknown[] = [];
   const pending: ((sharing: Map<string, unknown>) => void)[] = [];
+  let listings = 0;
   const harness = hookHarness();
   const { default: Command } = loadView("../list-vaults.tsx", {
     react: harness.react,
@@ -1383,7 +1384,11 @@ test("an older List Vaults load can't replace newer sharing", async () => {
     },
     "./lib/pass-cli": {
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
-      listVaultsAndItems: async () => ({ vaults: [vault], items: [item], failedVaults: [] }),
+      listVaultsAndItems: async () => ({
+        vaults: [vault],
+        items: ++listings === 1 ? [item] : [item, { ...item, itemId: "second" }],
+        failedVaults: [],
+      }),
     },
     "./lib/types": { PassCliError },
     "./lib/search-items-view": {},
@@ -1416,6 +1421,11 @@ test("an older List Vaults load can't replace newer sharing", async () => {
   pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
   await new Promise(setImmediate);
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
+  const row = actions(harness.render(Command, {})).find((entry) => entry.title === vault.name)!;
+  assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [
+    { tooltip: "Shared with you · Viewer" },
+    { text: "2 items" },
+  ]);
 });
 
 test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
