@@ -212,6 +212,42 @@ export const TraktPlaybackMovieItem = z.object({
 
 export const TraktPlaybackMovieList = z.array(TraktPlaybackMovieItem);
 
+/** `/calendars/:start_date/:days` path parameters. Trakt reads `start_date` as a UTC date and caps `days` at 33. */
+export const TraktCalendarPathSchema = z.object({
+  startDate: z.string(),
+  days: z.coerce.number(),
+});
+
+/** An episode on the user's calendar. `first_aired` is a UTC timestamp, absent when Trakt has no air time. */
+export const TraktCalendarShowItem = z.object({
+  first_aired: z.string().nullable().optional(),
+  episode: z.object({
+    season: z.number(),
+    number: z.number(),
+    title: z.string().nullable().optional(),
+    ids: z.object({ trakt: z.number() }),
+  }),
+  show: z.object({
+    title: z.string(),
+    year: z.number().nullable().optional(),
+    ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+  }),
+});
+
+export const TraktCalendarShowList = z.array(TraktCalendarShowItem);
+
+/** A movie on the user's calendar. `released` is a plain date (YYYY-MM-DD), with no time or time zone. */
+export const TraktCalendarMovieItem = z.object({
+  released: z.string().nullable().optional(),
+  movie: z.object({
+    title: z.string(),
+    year: z.number().nullable().optional(),
+    ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+  }),
+});
+
+export const TraktCalendarMovieList = z.array(TraktCalendarMovieItem);
+
 export const TraktEpisodeListItem = z.object({
   season: z.number(),
   number: z.number(),
@@ -317,6 +353,8 @@ export const TraktMediaType = z.enum(["movie", "show"]);
 export type TraktMovieListItem = z.infer<typeof TraktMovieListItem>;
 export type TraktMovieList = z.infer<typeof TraktMovieList>;
 export type TraktPlaybackMovieItem = z.infer<typeof TraktPlaybackMovieItem>;
+export type TraktCalendarShowItem = z.infer<typeof TraktCalendarShowItem>;
+export type TraktCalendarMovieItem = z.infer<typeof TraktCalendarMovieItem>;
 export type TraktShowListItem = z.infer<typeof TraktShowListItem>;
 export type TraktShowList = z.infer<typeof TraktShowList>;
 export type TraktSeasonListItem = z.infer<typeof TraktSeasonListItem>;

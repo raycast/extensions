@@ -1,5 +1,11 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-10-08
+
+### Added
+
+- **Calendar AI tool**: Raycast AI can list upcoming episodes of the shows you follow and upcoming movie releases, for up to 32 days, with episode times in your local time zone. Each list returns 50 entries by default, up to 200.
+
 ## [Update] - 2026-10-07
 
 ### Fixed

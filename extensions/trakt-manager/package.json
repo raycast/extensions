@@ -93,6 +93,11 @@
       "description": "Get your Trakt Continue Watching list: the next episode of each show in progress and movies paused mid-playback"
     },
     {
+      "name": "get-calendar",
+      "title": "Get Calendar",
+      "description": "Get upcoming episodes of the shows you follow and upcoming movie releases on Trakt, in your local time"
+    },
+    {
       "name": "get-show-progress",
       "title": "Get Show Progress",
       "description": "Get watching progress, completed episode counts, and season details for a TV show on Trakt"

@@ -1,5 +1,14 @@
 # Changelog
 
+## [Reliable account connections] - 2026-10-08
+
+- Sign-in follows Teak’s current authentication provider automatically.
+- Account connections recover after authentication changes.
+- Keep Sign Out available when saved credentials cannot refresh or reconnect.
+- Uncertain sign-in responses keep saved credentials without reopening browser sign-in.
+- Confirmed WorkOS disconnect signs out Raycast across installations; reconnect can take about five minutes.
+- Sign Out explains when only this Mac was signed out and preserves credentials on uncertain failures.
+
 ## [Reliable search and favorites] - 2026-09-16
 
 - Search, favorites, and AI tools now use Teak's current card listing API

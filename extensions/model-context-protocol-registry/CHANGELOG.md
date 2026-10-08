@@ -4,6 +4,10 @@
 
 - Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
 
+## [Update Moved Repository Links] - 2026-10-08
+
+- Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
+
 ## [Add The Bridge MCP Server] - 2026-10-07
 
 - Add The Bridge to the official registry: complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant. Remote Streamable HTTP server at https://api.thebridge.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.

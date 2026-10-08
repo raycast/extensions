@@ -15,6 +15,9 @@ import {
   TraktWatchlistRemoveResponseSchema,
   TraktMovieList,
   TraktPlaybackMovieList,
+  TraktCalendarMovieList,
+  TraktCalendarPathSchema,
+  TraktCalendarShowList,
   TraktPlaybackQuerySchema,
   TraktMovieRecommendationList,
   TraktHistoryQuerySchema,
@@ -94,6 +97,15 @@ const TraktMovieContract = c.router({
       404: z.unknown(),
     },
     summary: "Remove a paused playback item",
+  },
+  getMyCalendarMovies: {
+    method: "GET",
+    path: "/calendars/my/movies/:startDate/:days",
+    pathParams: TraktCalendarPathSchema,
+    responses: {
+      200: TraktCalendarMovieList,
+    },
+    summary: "Get movies on the user's calendar released during a period",
   },
   getPlaybackMovies: {
     method: "GET",
@@ -465,6 +477,15 @@ const TraktShowContract = c.router({
     }),
     query: TraktExtendedSchema,
     summary: "Get seasons for a show",
+  },
+  getMyCalendarShows: {
+    method: "GET",
+    path: "/calendars/my/shows/:startDate/:days",
+    pathParams: TraktCalendarPathSchema,
+    responses: {
+      200: TraktCalendarShowList,
+    },
+    summary: "Get episodes of watched or watchlisted shows airing during a period",
   },
   getUpNextNitroShows: {
     method: "GET",
