@@ -23,7 +23,18 @@
       "title": "Browse Email",
       "subtitle": "Proton Mail",
       "description": "View and manage your Proton Mail emails",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showPreview",
+          "title": "Email Preview",
+          "label": "Show by default",
+          "description": "Show the selected email next to the list when Browse Email opens. ⌘D shows or hides it.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "compose-email",

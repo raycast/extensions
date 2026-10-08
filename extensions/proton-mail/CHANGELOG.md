@@ -2,7 +2,7 @@
 
 ## [Full-Width Email List] - {PR_MERGE_DATE}
 
-- The email list now uses the full width with Today / Yesterday / month sections, so subjects and senders are readable. Toggle the preview with ⌘D (remembered between launches)
+- The email list now uses the full width with Today / Yesterday / month sections, so subjects and senders are readable. Toggle the preview with ⌘D, or show it by default with Browse Email's new "Email Preview" preference
 - "Download Attachments" moves from ⌘D to ⌘⇧A
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05

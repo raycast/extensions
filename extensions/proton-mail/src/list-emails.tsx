@@ -17,7 +17,7 @@ import {
   Detail,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import {
   listFolders,
   fetchEmails,
@@ -116,7 +116,7 @@ function anonymizeEmail(email: Email, index: number): Email {
 }
 
 function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ListEmails>();
   const pageSize = parseInt(prefs.emailsToLoad || "50", 10);
 
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");
@@ -127,7 +127,8 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
-  const [showPreview, setShowPreview] = useCachedState("show-preview", false);
+  // Starts from the "Email Preview" preference; ⌘D shows or hides it until the command closes
+  const [showPreview, setShowPreview] = useState(prefs.showPreview);
 
   // Fetch folders
   const {
