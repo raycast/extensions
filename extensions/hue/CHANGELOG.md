@@ -10,6 +10,7 @@
 - Fix toggling all lights ignoring the manual bridge IP address and username preferences
 - Fix Set Scene opened from Control Groups not updating while open
 - Fix the loading indicator not showing after the first launch
+- Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01
 

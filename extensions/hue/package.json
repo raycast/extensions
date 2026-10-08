@@ -102,8 +102,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2",
     "@xstate/react": "^6.1.0",
     "bonjour-service": "^1.4.0",
     "chroma-js": "^3.2.0",
@@ -111,9 +111,9 @@
     "xstate": "^5.32.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node-localstorage": "^1.3.3",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/chroma-js": "^3.1.2",
+    "@types/node-localstorage": "^1.3.3",
     "eslint": "^10.4.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
