@@ -89,3 +89,31 @@ describe("fetchQueueResponse", () => {
     expect(graphql).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("fetchQueueResponse without a page limit", () => {
+  it("keeps reading until GitHub says there are no more pages", async () => {
+    let calls = 0;
+    graphql.mockImplementation(async () => {
+      calls++;
+      const last = calls === 15;
+      return {
+        ...page([entry(calls, ["build"], false)], !last),
+        repository: {
+          defaultBranchRef: { name: "main" },
+          mergeQueue: {
+            url: "",
+            entries: { pageInfo: { hasNextPage: !last, endCursor: `entries-${calls}` }, nodes: [entry(calls, ["build"], false)] },
+          },
+        },
+      };
+    });
+    const data = await fetchQueueResponse(config);
+    expect(data.repository!.mergeQueue!.entries.nodes).toHaveLength(15);
+  });
+
+  it("stops if GitHub repeats a cursor", async () => {
+    graphql.mockResolvedValue(page([entry(1, ["build"], false)], true));
+    await fetchQueueResponse(config);
+    expect(graphql).toHaveBeenCalledTimes(2);
+  });
+});

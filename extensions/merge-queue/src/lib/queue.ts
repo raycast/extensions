@@ -176,8 +176,6 @@ query($commit: ID!, $after: String) {
   }
 }`;
 
-const MAX_PAGES = 10;
-
 const FAILED_CONCLUSIONS = new Set(["FAILURE", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE"]);
 
 const STATE_ORDER: Record<CheckState, number> = { failure: 0, pending: 1, success: 2, neutral: 2, skipped: 2 };
@@ -373,19 +371,24 @@ export function parseQueue(
   };
 }
 
+function nextPage(pageInfo: PageInfo | undefined, cursor: string): PageInfo | undefined {
+  return pageInfo?.endCursor === cursor ? undefined : pageInfo;
+}
+
 async function fetchRemainingContexts(config: RepoConfig, entry: RawEntry): Promise<void> {
   const contexts = entry.headCommit?.statusCheckRollup?.contexts;
   const commit = entry.headCommit?.id;
   let pageInfo = contexts?.pageInfo;
-  for (let page = 1; contexts && commit && pageInfo?.hasNextPage && page < MAX_PAGES; page++) {
+  while (contexts && commit && pageInfo?.hasNextPage && pageInfo.endCursor) {
+    const cursor = pageInfo.endCursor;
     const data = await graphql<{ node: { statusCheckRollup: { contexts: RawContexts } | null } | null }>(
       config,
       MORE_CONTEXTS_QUERY,
-      { commit, after: pageInfo.endCursor ?? undefined },
+      { commit, after: cursor },
     );
     const more = data.node?.statusCheckRollup?.contexts;
     contexts.nodes.push(...(more?.nodes ?? []));
-    pageInfo = more?.pageInfo;
+    pageInfo = nextPage(more?.pageInfo, cursor);
   }
 }
 
@@ -400,10 +403,11 @@ export async function fetchQueueResponse(config: RepoConfig): Promise<QueueRespo
   const data = await request();
   const entries = data.repository?.mergeQueue?.entries;
   let pageInfo = entries?.pageInfo;
-  for (let page = 1; entries && pageInfo?.hasNextPage && page < MAX_PAGES; page++) {
-    const next = (await request(pageInfo.endCursor ?? undefined)).repository?.mergeQueue?.entries;
+  while (entries && pageInfo?.hasNextPage && pageInfo.endCursor) {
+    const cursor = pageInfo.endCursor;
+    const next = (await request(cursor)).repository?.mergeQueue?.entries;
     entries.nodes.push(...(next?.nodes ?? []));
-    pageInfo = next?.pageInfo;
+    pageInfo = nextPage(next?.pageInfo, cursor);
   }
   await Promise.all((entries?.nodes ?? []).map((entry) => fetchRemainingContexts(config, entry)));
   return data;
