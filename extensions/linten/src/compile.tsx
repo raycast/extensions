@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -259,6 +259,8 @@ export function CompiledArchiveView({
 export default function CompileCommand() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState<string>("");
+  const searchTextRef = useRef<string>("");
+  searchTextRef.current = searchText;
   const [clipboardContent, setClipboardContent] = useState<string>("");
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
     undefined,
@@ -271,7 +273,7 @@ export default function CompileCommand() {
         const clip = await Clipboard.readText();
         if (clip && clip.trim().length > 0) {
           setClipboardContent(clip.trim());
-          if (!searchText.trim()) {
+          if (!searchTextRef.current.trim()) {
             setSelectedItemId("clip-target");
           }
         }
@@ -347,6 +349,9 @@ export default function CompileCommand() {
       if (!res.ok || !res.fullContent) {
         throw new Error(res.error || "Failed to synthesize companion archive.");
       }
+
+      // Copy full compiled archive to clipboard as promised by extension command
+      await Clipboard.copy(res.fullContent);
 
       toast.style = Toast.Style.Success;
       toast.title = "llms-full.txt Compiled";

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   List,
   ActionPanel,
@@ -55,6 +55,8 @@ function buildBadgeDetail(domain: string): string {
 
 export default function BadgeCommand() {
   const [searchText, setSearchText] = useState("");
+  const searchTextRef = useRef<string>("");
+  searchTextRef.current = searchText;
   const [clipboardDomain, setClipboardDomain] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
     undefined,
@@ -69,7 +71,7 @@ export default function BadgeCommand() {
           if (isValidUrlInput(trimmed)) {
             const cleaned = cleanDomain(trimmed);
             setClipboardDomain(cleaned);
-            if (!searchText.trim()) {
+            if (!searchTextRef.current.trim()) {
               setSelectedItemId("clip-badge");
             }
           }
