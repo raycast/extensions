@@ -2,7 +2,7 @@
 
 ## [Fix Stop Command] - {PR_MERGE_DATE}
 
-- Fix Stop not stopping speech on Windows
+- Update native-say to fix Stop not stopping speech on Windows
 
 ## [Improvement] - 2026-10-08
 
