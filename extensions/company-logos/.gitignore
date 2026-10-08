@@ -1,0 +1,25 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.DS_Store
+*.log
+.env
+.env.*
+
+# Runtime downloads stay local. Only the original extension icon is bundled.
+cache/
+logos/
+.download-*/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.svg
+*.icns
+*.avif
+*.tif
+*.tiff
+!assets/extension-icon.png
+!media/company-logos.jpg
