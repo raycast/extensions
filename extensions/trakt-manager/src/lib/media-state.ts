@@ -102,3 +102,14 @@ export function withWatched(index: WatchedIndex, target: WatchedTarget, watched:
       : index.shows.filter((id) => id !== target.showId);
   return { ...index, episodes, shows };
 }
+
+/** A local change to a shared index, with when it was made. Each one sets a value, so replaying it is safe. */
+export type IndexEdit<T> = { at: number; apply: (index: T) => T };
+
+/**
+ * Replays on a freshly read index the local changes made since that read started. Without this, a slow
+ * read that started before an action would restore the state from before it.
+ */
+export function withEditsSince<T>(index: T, edits: IndexEdit<T>[], since: number): T {
+  return edits.filter((edit) => edit.at >= since).reduce((current, edit) => edit.apply(current), index);
+}

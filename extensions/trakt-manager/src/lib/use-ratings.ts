@@ -1,11 +1,15 @@
 import { useCachedState, usePromise } from "@raycast/utils";
 import { initTraktClient } from "./client";
-import { RatedType, RatingIndex, ratingOf, toRatingIndex, withRating } from "./media-state";
+import { IndexEdit, RatedType, RatingIndex, ratingOf, toRatingIndex, withEditsSince, withRating } from "./media-state";
 import { scanPageComplete, TraktUserRatingItem, withPagination } from "./schema";
 
 const PAGE_LIMIT = 100;
 const MAX_PAGES = 50;
 const CACHE_KEY = "trakt-rating-index";
+const EDIT_TTL_MS = 10 * 60 * 1000;
+
+/** Local rating changes, kept so a read that started before them does not undo them (see `withEditsSince`). */
+const ratingEdits: IndexEdit<RatingIndex>[] = [];
 
 /**
  * Reads the shared ratings. Like the watchlist ids, it is a cached state under one key, so a detail view
@@ -18,8 +22,13 @@ export function useRatingState() {
   return {
     known: index !== undefined,
     ratingOf: (type: RatedType, traktId: number) => (index ? ratingOf(index, type, traktId) : undefined),
-    setRating: (type: RatedType, traktId: number, rating: number | undefined) =>
-      setIndex((current) => (current ? withRating(current, type, traktId, rating) : current)),
+    setRating: (type: RatedType, traktId: number, rating: number | undefined) => {
+      const apply = (current: RatingIndex) => withRating(current, type, traktId, rating);
+      const now = Date.now();
+      ratingEdits.splice(0, ratingEdits.length, ...ratingEdits.filter((edit) => now - edit.at < EDIT_TTL_MS));
+      ratingEdits.push({ at: now, apply });
+      setIndex((current) => (current ? apply(current) : current));
+    },
     setIndex,
   };
 }
@@ -47,12 +56,13 @@ export function useRatingsSync() {
 
   usePromise(
     async () => {
+      const startedAt = Date.now();
       const [movies, shows, episodes] = await Promise.all([collect("movies"), collect("shows"), collect("episodes")]);
-      return toRatingIndex(movies, shows, episodes);
+      return { index: toRatingIndex(movies, shows, episodes), startedAt };
     },
     [],
     {
-      onData: setIndex,
+      onData: ({ index, startedAt }) => setIndex(withEditsSince(index, ratingEdits, startedAt)),
       // Without the full list the current score is unknown: Rate stays available, Remove Rating too.
       onError: () => setIndex(undefined),
       failureToastOptions: { title: "Could not read your ratings" },

@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isWatched, ratingOf, toRatingIndex, toWatchedIndex, withRating, withWatched } from "../lib/media-state";
+import {
+  IndexEdit,
+  isWatched,
+  ratingOf,
+  RatingIndex,
+  toRatingIndex,
+  toWatchedIndex,
+  WatchedIndex,
+  withEditsSince,
+  withRating,
+  withWatched,
+} from "../lib/media-state";
 
 const ids = (trakt: number) => ({ ids: { trakt } });
 
@@ -69,4 +80,24 @@ test("marking an episode watched marks its show watched", () => {
   const index = withWatched(toWatchedIndex([], []), { type: "episode", showId: 20, season: 1, number: 1 }, true);
   assert.equal(isWatched(index, { type: "show", traktId: 20 }), true);
   assert.equal(isWatched(index, { type: "episode", showId: 20, season: 1, number: 1 }), true);
+});
+
+test("a read that arrives after a local change keeps that change", () => {
+  // The read started at t=100 and still holds the old 6/10; the user re-rated at t=150, and an older
+  // change from before the read (t=50) is already in what Trakt returned.
+  const read = toRatingIndex([{ rating: 6, movie: ids(1) }], [], []);
+  const edits: IndexEdit<RatingIndex>[] = [
+    { at: 50, apply: (index) => withRating(index, "movie", 2, 3) },
+    { at: 150, apply: (index) => withRating(index, "movie", 1, 9) },
+  ];
+  const merged = withEditsSince(read, edits, 100);
+  assert.equal(ratingOf(merged, "movie", 1), 9);
+  assert.equal(ratingOf(merged, "movie", 2), undefined);
+
+  const watched = withEditsSince(
+    toWatchedIndex([{ plays: 1, movie: ids(7) }], []),
+    [{ at: 150, apply: (index: WatchedIndex) => withWatched(index, { type: "movie", traktId: 7 }, false) }],
+    100,
+  );
+  assert.equal(isWatched(watched, { type: "movie", traktId: 7 }), false);
 });

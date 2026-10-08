@@ -15,7 +15,7 @@ import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktMovieListItem, TraktShowListItem, withPagination } from "./lib/schema";
 import { useCheckinSync } from "./lib/use-checkin-state";
 import { useRatingsSync } from "./lib/use-ratings";
-import { useWatchedSync } from "./lib/use-watched";
+import { useWatchedState, useWatchedSync } from "./lib/use-watched";
 import { useWatchlistSync } from "./lib/use-watchlist-ids";
 
 type SearchMediaItem =
@@ -29,6 +29,7 @@ export default function Command() {
   useWatchlistSync();
   useRatingsSync();
   useWatchedSync();
+  const { setWatched } = useWatchedState();
   useCheckinSync();
   const {
     isLoading,
@@ -99,6 +100,9 @@ export default function Command() {
   const markFirstEpisodeWatchedAction = useCallback(
     async (show: TraktShowListItem) => {
       await markFirstEpisodeWatched(traktClient, show.show.ids.trakt, { signal: abortable.current?.signal });
+      const showId = show.show.ids.trakt;
+      setWatched({ type: "show", traktId: showId }, true);
+      setWatched({ type: "episode", showId, season: 1, number: 1 }, true);
     },
     [traktClient],
   );
