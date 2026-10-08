@@ -580,16 +580,19 @@ async function fetchSystemSnapshot(): Promise<SystemSnapshot> {
 
   const snapshot = JSON.parse(stdout.trim()) as SystemSnapshot;
 
-  // `if (...) { $adapter.addresses }` sends the array through the PowerShell
-  // pipeline, which unrolls a single address into a plain string.
-  const addresses: unknown = snapshot.network.addresses;
-  snapshot.network.addresses = Array.isArray(addresses)
-    ? addresses
-    : typeof addresses === "string"
-      ? [addresses]
-      : [];
+  snapshot.network.addresses = toAddressList(snapshot.network.addresses);
 
   return snapshot;
+}
+
+// `if (...) { $adapter.addresses }` sends the array through the PowerShell
+// pipeline, which unrolls a single address into a plain string.
+function toAddressList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return typeof value === "string" && value.length > 0 ? [value] : [];
 }
 
 function getInternetIcon(snapshot: SystemSnapshot) {
@@ -711,11 +714,12 @@ function buildInternetDetail(snapshot: SystemSnapshot) {
 **Status:** Offline`;
   }
 
+  // Normalized again here because a snapshot cached by an earlier version of
+  // the extension can still hold the unrolled string.
+  const addressList = toAddressList(snapshot.network.addresses);
   const addresses =
-    snapshot.network.addresses.length > 0
-      ? snapshot.network.addresses
-          .map((address) => `- \`${address}\``)
-          .join("\n")
+    addressList.length > 0
+      ? addressList.map((address) => `- \`${address}\``).join("\n")
       : "- None";
 
   return `# Internet
