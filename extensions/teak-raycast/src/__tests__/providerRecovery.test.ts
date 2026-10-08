@@ -23,8 +23,10 @@ mock.module("@raycast/api", () =>
       }
       authorizationRequest() {
         return Promise.resolve({
+          codeChallenge: "challenge",
           codeVerifier: "verifier",
           redirectURI: "https://raycast.com/redirect",
+          state: "state",
         });
       }
       async authorize() {
@@ -43,15 +45,11 @@ const createCardsResponse = (status = 200) =>
   );
 const withDiscovery = (
   transport: typeof fetch,
-  provider = () => "betterauth",
+  currentIssuer = () => "https://scholarly-hay-77.authkit.app",
 ): typeof fetch =>
   ((input, init) => {
     const url = String(input);
-    const mode = provider();
-    const issuer =
-      mode === "workos"
-        ? "https://scholarly-hay-77.authkit.app"
-        : "https://app.teakvault.com";
+    const issuer = currentIssuer();
     let metadata: unknown;
     if (url.includes("oauth-protected-resource")) {
       metadata = {
@@ -60,12 +58,12 @@ const withDiscovery = (
       };
     } else if (url.includes("teak-oauth-clients")) {
       metadata = {
-        primary: mode,
+        primary: "workos",
         issuer,
         clients: Object.fromEntries(
           ["cli", "raycast", "chrome", "firefox", "safari"].map((surface) => [
             surface,
-            mode === "workos" ? "client_raycast_workos" : "teak-raycast",
+            "client_01M47GV3CYKFW0H78W0XYKGTM5",
           ]),
         ),
       };
@@ -74,10 +72,9 @@ const withDiscovery = (
         issuer,
         code_challenge_methods_supported: ["S256"],
         authorization_endpoint: `${issuer}/authorize`,
-        token_endpoint: `${issuer}/token`,
-        revocation_endpoint: "https://teakvault.com/api/api/oauth/revoke",
+        token_endpoint: `${issuer}/oauth2/token`,
       };
-    } else if (url.endsWith("/token")) {
+    } else if (url.endsWith("/oauth2/token")) {
       return Promise.resolve(
         Response.json({
           access_token: new URLSearchParams(String(init?.body)).get("code"),
@@ -94,28 +91,28 @@ const originalFetch = globalThis.fetch;
 afterEach(() => {
   globalThis.fetch = originalFetch;
 });
-test("a401 provider flip reauthorizes with the newly discovered issuer", async () => {
+test("a 401 after an issuer change reauthorizes with the newly discovered issuer", async () => {
   getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "" }));
-  let mode = "betterauth";
+  let issuer = "https://scholarly-hay-77.authkit.app";
   const exchanges: Array<{ url: string; body: URLSearchParams }> = [];
   const seenTokens: string[] = [];
   let discoveryRounds = 0;
   const discovered = withDiscovery(
     mock((_input: RequestInfo | URL, init?: RequestInit) => {
       seenTokens.push(new Headers(init?.headers).get("authorization") ?? "");
-      if (mode === "betterauth") {
-        mode = "workos";
+      if (issuer === "https://scholarly-hay-77.authkit.app") {
+        issuer = "https://replacement-teak.authkit.app";
         return createCardsResponse(401);
       }
       return createCardsResponse();
     }) as unknown as typeof fetch,
-    () => mode,
+    () => issuer,
   );
   globalThis.fetch = ((input, init) => {
     if (String(input).includes("teak-oauth-clients")) {
       discoveryRounds++;
     }
-    if (String(input).endsWith("/token")) {
+    if (String(input).endsWith("/oauth2/token")) {
       exchanges.push({
         url: String(input),
         body: new URLSearchParams(String(init?.body)),
@@ -128,10 +125,12 @@ test("a401 provider flip reauthorizes with the newly discovered issuer", async (
     .mockImplementationOnce(() => Promise.resolve("new-access"));
   await searchCards({ limit: 1 });
   expect(exchanges.map(({ url }) => url)).toEqual([
-    "https://app.teakvault.com/token",
-    "https://scholarly-hay-77.authkit.app/token",
+    "https://scholarly-hay-77.authkit.app/oauth2/token",
+    "https://replacement-teak.authkit.app/oauth2/token",
   ]);
-  expect(exchanges[1].body.get("client_id")).toBe("client_raycast_workos");
+  expect(exchanges[1].body.get("client_id")).toBe(
+    "client_01M47GV3CYKFW0H78W0XYKGTM5",
+  );
   expect(exchanges[1].body.get("resource")).toBe("https://teakvault.com/api");
   expect(seenTokens).toEqual(["Bearer old-access", "Bearer new-access"]);
   expect(discoveryRounds).toBe(2);
