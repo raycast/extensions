@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-10-08
 
 - Add "(Read & Speak)" to Siri Voice tips in the documentation
 
