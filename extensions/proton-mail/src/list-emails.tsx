@@ -433,6 +433,18 @@ async function removeStaleOriginals() {
   );
 }
 
+// The page gets its own charset and policy, and every <meta> tag of the email goes. A refresh is a navigation the
+// policy doesn't cover, and its http-equiv value can be entity-encoded (&#114;efresh), so matching "refresh" isn't
+// enough. Removing the tag itself is: a tag cut short by a ">" inside a value is left as plain text.
+export function originalEmailPage(subject: string, html: string): string {
+  return (
+    `<!doctype html><meta charset="utf-8">` +
+    `<meta http-equiv="Content-Security-Policy" content="${ORIGINAL_EMAIL_CSP}">` +
+    `<title>${escapeHtml(subject)}</title>` +
+    html.replace(/<meta\b[^>]*>/gi, "")
+  );
+}
+
 // Raycast can only render Markdown, so hand the original HTML to the browser for full fidelity
 async function openOriginalInBrowser(folder: string, email: Email) {
   try {
@@ -446,13 +458,7 @@ async function openOriginalInBrowser(folder: string, email: Email) {
     // A private, unique directory: mkdtemp creates it readable by the current user only
     const directory = await mkdtemp(join(tmpdir(), ORIGINAL_FILE_PREFIX));
     const filePath = join(directory, "email.html");
-    const page =
-      `<!doctype html><meta charset="utf-8">` +
-      `<meta http-equiv="Content-Security-Policy" content="${ORIGINAL_EMAIL_CSP}">` +
-      `<title>${escapeHtml(email.subject)}</title>` +
-      // Meta refreshes are navigations, which the policy above doesn't cover
-      content.replace(/<meta[^>]+http-equiv\s*=\s*["']?refresh[^>]*>/gi, "");
-    await writeFile(filePath, page, { mode: 0o600 });
+    await writeFile(filePath, originalEmailPage(email.subject, content), { mode: 0o600 });
     await open(filePath);
     setTimeout(() => rm(directory, { recursive: true, force: true }).catch(() => undefined), ORIGINAL_FILE_LIFETIME_MS);
   } catch (error) {

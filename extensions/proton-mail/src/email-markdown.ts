@@ -97,20 +97,17 @@ function imageMarkdown(node: HtmlElement, options: EmailMarkdownOptions): string
   if ((width !== undefined && width <= ICON_SIZE) || (height !== undefined && height <= ICON_SIZE)) return "";
 
   const alt = (node.getAttribute("alt") || "").replace(/[[\]]/g, "").trim();
-  let sizedSrc = escapeUrl(src);
-  if (width !== undefined) {
-    const renderedWidth = Math.min(width, MAX_IMAGE_WIDTH);
-    const separator = sizedSrc.includes("?") ? "&" : "?";
-    sizedSrc += `${separator}raycast-width=${Math.round(renderedWidth)}`;
-    if (height !== undefined) {
-      sizedSrc += `&raycast-height=${Math.round((height * renderedWidth) / width)}`;
-    }
-  } else if (height !== undefined) {
-    const separator = sizedSrc.includes("?") ? "&" : "?";
-    sizedSrc += `${separator}raycast-height=${Math.round(Math.min(height, MAX_IMAGE_HEIGHT))}`;
-  }
-  // Without any size, Raycast shows the image at its natural size, scaled down to fit the pane
-  return `![${alt}](${sizedSrc})`;
+  // Shrink to fit both limits, keeping the image's shape. Without any size, Raycast shows the image at its natural
+  // size, scaled down to fit the pane.
+  const fit = (limit: number, value: number | undefined) => (value === undefined ? 1 : limit / value);
+  const scale = Math.min(1, fit(MAX_IMAGE_WIDTH, width), fit(MAX_IMAGE_HEIGHT, height));
+  const size = [
+    width !== undefined ? `raycast-width=${Math.round(width * scale)}` : "",
+    height !== undefined ? `raycast-height=${Math.round(height * scale)}` : "",
+  ].filter(Boolean);
+  const sizedSrc = escapeUrl(src);
+  const separator = sizedSrc.includes("?") ? "&" : "?";
+  return `![${alt}](${size.length ? `${sizedSrc}${separator}${size.join("&")}` : sizedSrc})`;
 }
 
 function createTurndown(options: EmailMarkdownOptions): TurndownService {
@@ -123,11 +120,6 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
   });
 
   turndown.remove(["style", "script", "head", "title", "meta", "link", "noscript", "iframe", "object", "form"]);
-
-  turndown.addRule("hidden", {
-    filter: (node) => isHidden(node as HtmlElement),
-    replacement: () => "",
-  });
 
   // Newsletters use headings for decoration; at full Markdown size they dwarf the text
   turndown.addRule("heading", {
@@ -170,6 +162,13 @@ function createTurndown(options: EmailMarkdownOptions): TurndownService {
 
       return `[${label}](${escapeUrl(href)})`;
     },
+  });
+
+  // Added last because Turndown tries the most recently added rule first: a hidden link, image or heading
+  // must be dropped rather than converted by the rules above
+  turndown.addRule("hidden", {
+    filter: (node) => isHidden(node as HtmlElement),
+    replacement: () => "",
   });
 
   return turndown;
