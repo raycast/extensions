@@ -200,7 +200,8 @@ export async function checkDetachedLogin(
   if (!saved) return { state: "none" };
 
   // Once the output is gone, pass-cli has exited (see forgetLoginUrl), even if its process ID is in use again.
-  const isRunning = (await exists(outputPath(dir, saved.attempt))) && isProcessRunning(saved.pid);
+  const isOver = !(await exists(outputPath(dir, saved.attempt)));
+  const isRunning = !isOver && isProcessRunning(saved.pid);
   const hasTimedOut = Date.now() - saved.startedAt > timeoutMs;
   if (isRunning && !hasTimedOut) {
     const output = await readText(outputPath(dir, saved.attempt));
@@ -219,13 +220,18 @@ export async function checkDetachedLogin(
     ownLogins.get(saved.pid)?.kill();
     return { state: "failed", error: new PassCliError("The login timed out. Try again.", "timeout") };
   }
+  if (isOver) {
+    // The login ended a while ago, and its session may have ended since, e.g. with Logout: the session tells. A
+    // failure shows only with pass-cli's reason, which forgetLoginUrl kept.
+    if (await isLoggedIn()) return { state: "succeeded" };
+    return failure ? { state: "failed", error: loginFailure(failure, "pass-cli") } : { state: "none" };
+  }
   if (/^SIG/.test(exitCode)) {
     const error = new PassCliError(`pass-cli was stopped (${exitCode}) before the login completed.`, "unknown");
     return { state: "failed", error };
   }
   const hasSucceeded = exitCode ? exitCode === "0" : await isLoggedIn();
-  const error = loginFailure(output || failure, "pass-cli");
-  return hasSucceeded ? { state: "succeeded" } : { state: "failed", error };
+  return hasSucceeded ? { state: "succeeded" } : { state: "failed", error: loginFailure(output, "pass-cli") };
 }
 
 /**
@@ -251,9 +257,10 @@ export async function forgetLoginUrl(dir: string, saved: SavedLogin): Promise<vo
   const output = outputPath(dir, saved.attempt);
   try {
     const [text, exitCode] = await Promise.all([readText(output), readText(exitCodePath(dir, saved.pid))]);
-    const failure = exitCode.trim() === "0" ? undefined : failureDetails(text);
-    // Written first, so that a login screen reading meanwhile finds either the output or why the login failed.
-    if (failure !== undefined) await writeFile(failurePath(dir, saved.attempt), failure, { mode: 0o600 });
+    const failure = exitCode.trim() === "0" ? "" : failureDetails(text);
+    // Written first, so that a login screen reading meanwhile finds either the output or why the login failed. Only
+    // when there's a reason: a cleanup overlapping another can read the output after the other removed it.
+    if (failure) await writeFile(failurePath(dir, saved.attempt), failure, { mode: 0o600 });
     await rm(output, { force: true });
   } catch {
     // A login screen or a new login removed the folder meanwhile.

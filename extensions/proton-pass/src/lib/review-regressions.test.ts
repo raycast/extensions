@@ -1414,3 +1414,39 @@ test("a browser login clears the previous account's cache, and is canceled when 
   // Nobody could finish that login, and while it ran, no other pass-cli command would.
   assert.deepEqual(events, ["clear cache", "start login", "cancel login"]);
 });
+
+test("Logout forgets a finished login, whose success would otherwise show on the next login screen", async () => {
+  const events: string[] = [];
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": {
+      environment: { isDevelopment: false, supportPath: "/fixture" },
+      getPreferenceValues: () => ({}),
+    },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {
+      clearCache: async () => {
+        events.push("clear cache");
+      },
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        logout: async () => {
+          events.push("log out");
+        },
+      }),
+    },
+    "./core/login": {
+      isDetachedLoginRunning: async () => false,
+      cancelDetachedLogin: async () => {
+        events.push("forget login");
+      },
+    },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { logout: () => Promise<void> };
+
+  await api.logout();
+  assert.deepEqual(events, ["log out", "clear cache", "forget login"]);
+});
