@@ -93,19 +93,11 @@ package final class MeasureWindow: OverlayWindow {
 
     /// When an arrow key skip moves an edge outside the visible zoomed viewport,
     /// auto-pan to reveal the edge, hold briefly, then pan back to cursor.
+    /// Past the last edge the line runs to the screen edge, so that's what it reveals.
     /// No-op at 1x zoom.
     private func peekToEdge(_ edges: DirectionalEdges, direction: EdgeDetector.Direction) {
         guard zoomState.isZoomed else { return }
-
-        // Determine which edge to check based on skip direction
-        let edge: EdgeHit?
-        switch direction {
-        case .left:   edge = edges.left
-        case .right:  edge = edges.right
-        case .top:    edge = edges.top
-        case .bottom: edge = edges.bottom
-        }
-        guard let edgeHit = edge else { return }
+        let distance = edges.edge(direction)?.distance
 
         // "Home" is the cursor-tracking pan. A peek already in flight has moved panOffset away
         // from it, so measure the cursor and the edge against home, not the peeked view.
@@ -113,7 +105,7 @@ package final class MeasureWindow: OverlayWindow {
         var homeState = zoomState
         homeState.panOffset = homePan
 
-        // Edge position is in capture-space (distance from cursor).
+        // Edge position is in capture-space (distance from cursor, or the screen edge).
         // Get the cursor in capture-space, then compute the edge's capture-space position.
         let cursorCapture = windowPointToCapturePoint(crosshairView.cursorPosition, zoomState: homeState, screenSize: screenBounds.size)
         let edgeCapturePos: CGFloat
@@ -121,16 +113,16 @@ package final class MeasureWindow: OverlayWindow {
 
         switch direction {
         case .left:
-            edgeCapturePos = cursorCapture.x - edgeHit.distance
+            edgeCapturePos = distance.map { cursorCapture.x - $0 } ?? 0
             isHorizontalAxis = true
         case .right:
-            edgeCapturePos = cursorCapture.x + edgeHit.distance
+            edgeCapturePos = distance.map { cursorCapture.x + $0 } ?? screenBounds.width
             isHorizontalAxis = true
         case .top:
-            edgeCapturePos = cursorCapture.y + edgeHit.distance  // AppKit: top = +y
+            edgeCapturePos = distance.map { cursorCapture.y + $0 } ?? screenBounds.height  // AppKit: top = +y
             isHorizontalAxis = false
         case .bottom:
-            edgeCapturePos = cursorCapture.y - edgeHit.distance  // AppKit: bottom = -y
+            edgeCapturePos = distance.map { cursorCapture.y - $0 } ?? 0  // AppKit: bottom = -y
             isHorizontalAxis = false
         }
 
@@ -383,6 +375,17 @@ package final class MeasureWindow: OverlayWindow {
     override package func mouseDown(with event: NSEvent) {
         onActivity?()
         let windowPoint = event.locationInWindow
+        trackCursorWithoutPanning(to: windowPoint)
+
+        // Take over from a peek, as a mouse move does. The crosshair travels with the peeked
+        // content, away from the hidden cursor: mapped with the peeked pan, the click would land
+        // that far from the crosshair, and the peek's return would pan the view mid-drag.
+        if isPeekAnimating {
+            cancelPeek()
+            CATransaction.instant {
+                contentLayer?.transform = zoomState.contentTransform
+            }
+        }
         let cp = capturePoint(from: windowPoint)
 
         // Reset stale drag state — if mouseUp was never delivered (e.g., system stole the event),
@@ -422,6 +425,9 @@ package final class MeasureWindow: OverlayWindow {
 
     override package func mouseDragged(with event: NSEvent) {
         onActivity?()
+        // The view holds still while dragging, so the selection follows the cursor on screen
+        // (panning would grow it zoom x faster than the cursor). The next move eases back in step
+        trackCursorWithoutPanning(to: event.locationInWindow)
         if !isDragging { return }
         let windowPoint = event.locationInWindow
         selectionManager.updateDrag(to: capturePoint(from: windowPoint))
@@ -429,6 +435,7 @@ package final class MeasureWindow: OverlayWindow {
 
     override package func mouseUp(with event: NSEvent) {
         onActivity?()
+        trackCursorWithoutPanning(to: event.locationInWindow)
         if !isDragging { return }
         isDragging = false
 

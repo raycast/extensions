@@ -100,6 +100,41 @@ package func panOffsetForZoom(
     )
 }
 
+/// Pan offset after the cursor moves from `previous` to `windowPoint`, for 1:1 tracking: the
+/// capture point under the cursor is the one it would be over at 1x, so the screen's edges reach
+/// the capture's edges. A drag holds the view still and leaves it out of step; the gap then closes
+/// in proportion to the distance moved toward the screen edge the cursor heads for, so the view
+/// never jumps and is back in step when the cursor gets there. In step, this is plain 1:1 tracking.
+package func panOffsetForMove(
+    from previous: NSPoint,
+    to windowPoint: NSPoint,
+    zoomState: ZoomState,
+    screenSize: CGSize
+) -> CGPoint {
+    let s = zoomState.level.rawValue
+    let underCursor = windowPointToCapturePoint(previous, zoomState: zoomState, screenSize: screenSize)
+    let target = NSPoint(
+        x: trackedCapture(underCursor.x, from: previous.x, to: windowPoint.x, length: screenSize.width),
+        y: trackedCapture(underCursor.y, from: previous.y, to: windowPoint.y, length: screenSize.height)
+    )
+    return clampPanOffset(
+        CGPoint(x: (windowPoint.x / s) - target.x, y: (windowPoint.y / s) - target.y),
+        zoomLevel: zoomState.level,
+        screenSize: screenSize
+    )
+}
+
+/// One axis of `panOffsetForMove`: the capture coordinate under the cursor once it moves from
+/// `from` to `to`, given `capture` under it before. Linear from the cursor to the screen edge it
+/// moves toward, where window and capture coordinates meet (0 and `length`).
+private func trackedCapture(_ capture: CGFloat, from: CGFloat, to: CGFloat, length: CGFloat) -> CGFloat {
+    let from = min(max(from, 0), length)
+    let to = min(max(to, 0), length)
+    if to < from { return capture * to / from }
+    if to > from { return length - (length - capture) * (length - to) / (length - from) }
+    return capture
+}
+
 /// Clamp pan offset so the visible viewport stays within capture bounds.
 /// At 1x, viewport equals screen size so offset is clamped to (0, 0).
 package func clampPanOffset(

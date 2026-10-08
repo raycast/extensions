@@ -18,4 +18,14 @@ package struct DirectionalEdges {
     package let right: EdgeHit?
     package let top: EdgeHit?
     package let bottom: EdgeHit?
+
+    /// The edge in `direction`, nil when the line runs to the screen edge.
+    package func edge(_ direction: EdgeDetector.Direction) -> EdgeHit? {
+        switch direction {
+        case .left:   return left
+        case .right:  return right
+        case .top:    return top
+        case .bottom: return bottom
+        }
+    }
 }

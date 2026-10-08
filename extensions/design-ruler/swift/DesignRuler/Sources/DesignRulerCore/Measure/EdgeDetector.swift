@@ -136,16 +136,30 @@ package final class EdgeDetector {
 
     package enum Direction { case left, right, top, bottom }
 
-    /// Arrow key: push edge further away. Returns updated edges.
+    /// Arrow key: push edge further away. Returns updated edges, or nil once the line already
+    /// runs to the screen edge in that direction.
     package func incrementSkip(_ direction: Direction) -> DirectionalEdges? {
-        switch direction {
-        case .left:   skipCounts.left += 1
-        case .right:  skipCounts.right += 1
-        case .top:    skipCounts.top += 1
-        case .bottom: skipCounts.bottom += 1
-        }
         guard let p = lastCursorPosition else { return nil }
-        return currentEdges(at: p)
+        let before = currentEdges(at: p)
+        changeSkip(direction, by: 1)
+        let after = currentEdges(at: p)
+        // No edge before or after: past the last edge. Stop at the screen edge, or presses pile up
+        // skips there that Shift+arrow has to take back one by one. Compares what's shown, not the
+        // count: Smart mode's two scans can disagree on where the last edge is
+        if before?.edge(direction) == nil && after?.edge(direction) == nil {
+            changeSkip(direction, by: -1)
+            return nil
+        }
+        return after
+    }
+
+    private func changeSkip(_ direction: Direction, by delta: Int) {
+        switch direction {
+        case .left:   skipCounts.left = max(0, skipCounts.left + delta)
+        case .right:  skipCounts.right = max(0, skipCounts.right + delta)
+        case .top:    skipCounts.top = max(0, skipCounts.top + delta)
+        case .bottom: skipCounts.bottom = max(0, skipCounts.bottom + delta)
+        }
     }
 
     /// Snap a user-drawn rectangle to detected edges.
@@ -190,15 +204,12 @@ package final class EdgeDetector {
         )
     }
 
-    /// Shift+Arrow: bring edge back closer. Returns updated edges.
+    /// Shift+Arrow: bring edge back closer. Returns updated edges, or nil when it's already the
+    /// nearest one.
     package func decrementSkip(_ direction: Direction) -> DirectionalEdges? {
-        switch direction {
-        case .left:   skipCounts.left = max(0, skipCounts.left - 1)
-        case .right:  skipCounts.right = max(0, skipCounts.right - 1)
-        case .top:    skipCounts.top = max(0, skipCounts.top - 1)
-        case .bottom: skipCounts.bottom = max(0, skipCounts.bottom - 1)
-        }
-        guard let p = lastCursorPosition else { return nil }
+        let counts = skipCounts
+        changeSkip(direction, by: -1)
+        guard let p = lastCursorPosition, skipCounts != counts else { return nil }
         return currentEdges(at: p)
     }
 }

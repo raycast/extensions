@@ -194,19 +194,15 @@ package class OverlayWindow: NSWindow, OverlayWindowProtocol {
         zoomDidChange()
     }
 
-    /// Update pan offset so the cursor tracks 1:1 while zoomed (ZOOM-04).
+    /// Update pan offset so the cursor tracks 1:1 while zoomed (ZOOM-04), easing back into step
+    /// after a drag held the view still (see `panOffsetForMove`).
     /// Called on mouse move before handleMouseMoved. Suppressed during zoom animation.
-    package func updateZoomPan(for windowPoint: NSPoint) {
+    package func updateZoomPan(from previous: NSPoint, to windowPoint: NSPoint) {
         guard zoomState.isZoomed, !isAnimatingZoom, !isPeekAnimating else { return }
-        // 1:1 cursor tracking: the cursor at windowPoint should map to the same
-        // capture-space point as it would at 1x (i.e., windowPoint itself).
-        let capturePoint = windowPoint  // At 1x, window coords = capture coords
-        let s = zoomState.level.rawValue
-        let newPanX = (windowPoint.x / s) - capturePoint.x
-        let newPanY = (windowPoint.y / s) - capturePoint.y
-        zoomState.panOffset = clampPanOffset(
-            CGPoint(x: newPanX, y: newPanY),
-            zoomLevel: zoomState.level,
+        zoomState.panOffset = panOffsetForMove(
+            from: previous,
+            to: windowPoint,
+            zoomState: zoomState,
             screenSize: screenBounds.size
         )
         CATransaction.instant {
@@ -259,12 +255,13 @@ package class OverlayWindow: NSWindow, OverlayWindowProtocol {
         }
 
         let windowPoint = event.locationInWindow
+        let previous = lastCursorPosition
         lastCursorPosition = windowPoint
 
         // Pan BEFORE the subclass converts windowPoint to capture space. With the previous
         // frame's pan, detection and hit-testing land (zoom - 1) x the mouse delta off the cursor.
         cancelPanAnimations()
-        updateZoomPan(for: windowPoint)
+        updateZoomPan(from: previous, to: windowPoint)
         handleMouseMoved(to: windowPoint)
 
         if hintBarView.superview != nil {
@@ -311,6 +308,12 @@ package class OverlayWindow: NSWindow, OverlayWindowProtocol {
     /// already processed the first move.
     package func markFirstMoveReceived() {
         hasReceivedFirstMove = true
+    }
+
+    /// Record the cursor for a mouse event that leaves the zoomed view still (Measure's drags), so
+    /// the next move pans on from here and Z zooms around it, instead of the point the drag began.
+    package func trackCursorWithoutPanning(to windowPoint: NSPoint) {
+        lastCursorPosition = windowPoint
     }
 
     /// Initialize lastCursorPosition from current mouse location (window-local coords).
