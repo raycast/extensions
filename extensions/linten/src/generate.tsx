@@ -21,7 +21,6 @@ function cleanDomain(input: string): string {
     input
       .trim()
       .replace(/^https?:\/\//i, "")
-      .replace(/^www\./i, "")
       .replace(/\/.*$/, "")
       .trim() || "acme.com"
   );
