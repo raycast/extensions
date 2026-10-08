@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   deleteReminder as apiDeleteReminder,
   setPriorityStatus,
@@ -32,6 +32,12 @@ import {
   isTomorrow,
   truncate,
 } from "./helpers";
+import {
+  findNextReminder,
+  formatRelativeDue,
+  MENU_BAR_LISTS_KEY,
+  parseMinutesPreference,
+} from "./helpers/next-reminder";
 import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
@@ -39,17 +45,34 @@ import { sortByDate } from "./hooks/useViewReminders";
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, displayListTitleForMenuBarReminders, view, countType } =
-    getPreferenceValues<Preferences.MenuBar>();
+  const {
+    titleType,
+    hideMenuBarCountWhenEmpty,
+    displayListTitleForMenuBarReminders,
+    view,
+    countType,
+    nextReminderShowBefore,
+    nextReminderHideAfter,
+    hideWhenNothingDue,
+  } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
-  const [listId, setListId] = useCachedState<string>("menu-bar-list");
-  const list = data?.lists.find((l) => l.id === listId);
+  // Lists shown in the menu bar; empty means all lists. Replaces the older single-list choice.
+  const [legacyListId, setLegacyListId] = useCachedState<string | undefined>("menu-bar-list");
+  const [listIds, setListIds] = useCachedState<string[]>(MENU_BAR_LISTS_KEY, legacyListId ? [legacyListId] : []);
+  useEffect(() => {
+    if (!legacyListId) return;
+    setListIds((ids) => (ids.includes(legacyListId) ? ids : [...ids, legacyListId]));
+    setLegacyListId(undefined);
+  }, [legacyListId]);
+  const selectedLists = data?.lists.filter((l) => listIds.includes(l.id)) ?? [];
 
   const reminders = useMemo(() => {
     if (!data || !data.reminders || !Array.isArray(data.reminders)) return [];
-    return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
-  }, [data, listId]);
+    return listIds.length
+      ? data.reminders.filter((reminder: Reminder) => reminder.list && listIds.includes(reminder.list.id))
+      : data.reminders;
+  }, [data, listIds]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -178,26 +201,75 @@ export default function Command() {
     return listName ? `${title} [${listName}]` : title;
   }
 
-  async function handleListChange(listId?: string) {
-    setListId(listId);
+  async function toggleList(listId?: string) {
+    if (!listId) setListIds([]);
+    else setListIds((ids) => (ids.includes(listId) ? ids.filter((id) => id !== listId) : [...ids, listId]));
     await mutate();
   }
+
+  // Calendar-style next reminder: shown from N minutes before it's due until it's hidden.
+  const nextReminder =
+    nextReminderShowBefore && nextReminderShowBefore !== "never"
+      ? findNextReminder(reminders, now, {
+          showBeforeMinutes: parseMinutesPreference(nextReminderShowBefore, 15),
+          hideAfterMinutes: parseMinutesPreference(nextReminderHideAfter, null),
+        })
+      : undefined;
 
   let title = "";
   if (titleType === "count") {
     title = hideMenuBarCountWhenEmpty && remindersCount === 0 ? "" : String(remindersCount);
   }
 
-  const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
-  if (displayReminderTitle) {
+  const displayReminderTitle = !nextReminder && titleType === "firstReminder" && remindersCount > 0;
+  if (nextReminder) {
+    title = truncate(`${addPriorityToTitle(nextReminder.reminder.title, nextReminder.reminder.priority)}`, 24);
+    title = `${title} · ${formatRelativeDue(nextReminder.due, now)}`;
+  } else if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
     const formattedTime = formatReminderTime(firstReminder);
     const timePrefix = formattedTime ? `${formattedTime}  ` : "";
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
+  if (hideWhenNothingDue && !isLoading && !nextReminder) return null;
+
+  const listsLabel =
+    selectedLists.length === 0
+      ? "All"
+      : selectedLists.length === 1
+        ? selectedLists[0].title
+        : `${selectedLists.length}`;
+
   return (
     <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
+      {nextReminder ? (
+        <MenuBarExtra.Section title={`${nextReminder.reminder.title} · ${formatRelativeDue(nextReminder.due, now)}`}>
+          <MenuBarExtra.Item
+            title="Complete"
+            icon={Icon.CheckCircle}
+            onAction={async () => {
+              const reminder = nextReminder.reminder;
+              try {
+                await toggleCompletionStatus(reminder.id);
+                await mutate();
+                await showToast({ style: Toast.Style.Success, title: "Completed Reminder", message: reminder.title });
+              } catch {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Unable to mark reminder as complete",
+                  message: reminder.title,
+                });
+              }
+            }}
+          />
+          <MenuBarExtra.Item
+            title="Open Reminder"
+            icon={{ fileIcon: REMINDERS_FILE_ICON }}
+            onAction={() => open(nextReminder.reminder.openUrl, "com.apple.reminders")}
+          />
+        </MenuBarExtra.Section>
+      ) : null}
       {displayReminderTitle ? (
         <MenuBarExtra.Item
           title="Complete"
@@ -364,16 +436,24 @@ export default function Command() {
         />
 
         <MenuBarExtra.Submenu
-          title={`Select List (${list?.title ?? "All"})`}
-          icon={list ? { source: Icon.Circle, tintColor: list.color } : Icon.Tray}
+          title={`Lists (${listsLabel})`}
+          icon={selectedLists.length === 1 ? { source: Icon.Circle, tintColor: selectedLists[0].color } : Icon.Tray}
         >
-          <MenuBarExtra.Item title="All" onAction={() => handleListChange(undefined)} icon={Icon.Tray} />
+          <MenuBarExtra.Item
+            title="All Lists"
+            onAction={() => toggleList(undefined)}
+            icon={listIds.length === 0 ? Icon.Checkmark : Icon.Tray}
+          />
           {data?.lists.map((list) => (
             <MenuBarExtra.Item
               key={list.id}
               title={list.title}
-              onAction={() => handleListChange(list.id)}
-              icon={{ source: Icon.Circle, tintColor: list.color }}
+              onAction={() => toggleList(list.id)}
+              icon={
+                listIds.includes(list.id)
+                  ? { source: Icon.CheckCircle, tintColor: list.color }
+                  : { source: Icon.Circle, tintColor: list.color }
+              }
             />
           ))}
         </MenuBarExtra.Submenu>

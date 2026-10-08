@@ -280,9 +280,125 @@
           "default": false,
           "required": false,
           "title": "Extra"
+        },
+        {
+          "name": "nextReminderShowBefore",
+          "title": "Next Reminder",
+          "description": "Show the next timed reminder in the menu bar, like Raycast shows calendar events. Overrides the title while it's shown.",
+          "type": "dropdown",
+          "required": false,
+          "default": "never",
+          "data": [
+            {
+              "title": "Never",
+              "value": "never"
+            },
+            {
+              "title": "When it's due",
+              "value": "0"
+            },
+            {
+              "title": "5 minutes before",
+              "value": "5"
+            },
+            {
+              "title": "10 minutes before",
+              "value": "10"
+            },
+            {
+              "title": "15 minutes before",
+              "value": "15"
+            },
+            {
+              "title": "30 minutes before",
+              "value": "30"
+            },
+            {
+              "title": "1 hour before",
+              "value": "60"
+            },
+            {
+              "title": "Always",
+              "value": "always"
+            }
+          ]
+        },
+        {
+          "name": "nextReminderHideAfter",
+          "title": "Hide Next Reminder",
+          "description": "When a shown reminder leaves the menu bar after it's due.",
+          "type": "dropdown",
+          "required": false,
+          "default": "completed",
+          "data": [
+            {
+              "title": "When completed",
+              "value": "completed"
+            },
+            {
+              "title": "5 minutes after",
+              "value": "5"
+            },
+            {
+              "title": "15 minutes after",
+              "value": "15"
+            },
+            {
+              "title": "1 hour after",
+              "value": "60"
+            }
+          ]
+        },
+        {
+          "name": "hideWhenNothingDue",
+          "label": "Hide when no reminder is due",
+          "description": "Remove the menu bar item while there's no next reminder to show.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
         }
       ],
-      "interval": "10m"
+      "interval": "1m"
+    },
+    {
+      "name": "next-reminder",
+      "title": "Next Reminder",
+      "subtitle": "Apple Reminders",
+      "description": "Shows your next timed reminder in its root search subtitle. Add it to Favorites to keep it at the top.",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showWithin",
+          "title": "Show Within",
+          "description": "How far ahead to look for the next reminder.",
+          "type": "dropdown",
+          "required": false,
+          "default": "60",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30"
+            },
+            {
+              "title": "1 hour",
+              "value": "60"
+            },
+            {
+              "title": "2 hours",
+              "value": "120"
+            },
+            {
+              "title": "Always show the next one",
+              "value": "always"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "quick-add-reminder",
