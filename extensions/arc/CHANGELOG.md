@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-08
 
 - Fixed `Access Spaces and Favorites` launching Arc in the background every 10 minutes when Arc is not running.
 - Updated `@raycast/api`, `@raycast/utils` and the ESLint config, and resolved dependency vulnerabilities.
