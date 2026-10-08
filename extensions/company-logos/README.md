@@ -61,9 +61,9 @@ Downloaded images are converted to PNG with macOS `sips`, then cached for seven 
 
 ## Source and images
 
-Source code is available under the [MIT license](LICENSE). **Individual company logo files are fetched at runtime and are not included in this repository or its releases.** The catalog contains company names, domains, and search keywords. Company logos appear in the UI screenshot only. The bundled extension icon is original geometric artwork.
+Source code is available under the [MIT license](LICENSE). **Individual company logo files are fetched at runtime and are not included in this repository or its releases.** The catalog contains company names, domains, and search keywords. Company logos appear in the README and Store screenshots only. The bundled extension icon is original geometric artwork.
 
-Keep downloaded logos and caches out of contributions. Image files are ignored by Git except for the extension's own icon and the README screenshot.
+Keep downloaded logos and caches out of contributions. Image files are ignored by Git except for the extension's own icon and the README and Store screenshots.
 
 ## Check
 
