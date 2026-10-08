@@ -15,9 +15,10 @@ export default async function RefreshArticlesCommand() {
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   try {
     const previousArticleIds = new Set((await readArticleArchive()).map((article) => article.id));
+    const forceBackfill = environment.launchType === LaunchType.UserInitiated;
     const [latestArticles, archivedArticles] = await Promise.all([
       refreshArticleCache(ARTICLE_COUNT),
-      refreshArticleArchiveStrict(retention),
+      refreshArticleArchiveStrict(retention, { forceBackfill }),
     ]);
     const limitMessage = await readArticleArchiveLimitMessage();
     if (limitMessage) {

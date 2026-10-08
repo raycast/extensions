@@ -1,6 +1,6 @@
 import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { Article, fetchArticleFeedPage } from "./articles";
 
@@ -15,9 +15,10 @@ const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
 const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
 const ARCHIVE_LIMIT_TITLE = "Article Archive Limit Reached";
 const ARCHIVE_UPDATE_LOCK_PATH = join(environment.supportPath, "article-archive-update.lock");
+const ARCHIVE_UPDATE_LOCK_HEARTBEAT_MS = 1_000;
 const ARCHIVE_UPDATE_LOCK_RETRY_MS = 50;
 const ARCHIVE_UPDATE_LOCK_TIMEOUT_MS = 10_000;
-const ARCHIVE_UPDATE_LOCK_STALE_MS = 5 * 60_000;
+const ARCHIVE_UPDATE_LOCK_STALE_MS = 5_000;
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
@@ -44,6 +45,15 @@ type ArticleBackfillResult = {
   limitMessage?: string;
 };
 
+type ArticleRefreshOptions = {
+  forceBackfill?: boolean;
+};
+
+type ArchiveLockOwner = {
+  id: string;
+  pid: number;
+};
+
 const retentionRank: Record<ArticleRetention, number> = {
   week: 0,
   month: 1,
@@ -68,17 +78,21 @@ export async function refreshArticleArchive(retention: ArticleRetention): Promis
   }
 }
 
-export async function refreshArticleArchiveStrict(retention: ArticleRetention): Promise<ArchivedArticle[]> {
-  return performArticleArchiveRefresh(retention);
+export async function refreshArticleArchiveStrict(
+  retention: ArticleRetention,
+  options: ArticleRefreshOptions = {},
+): Promise<ArchivedArticle[]> {
+  return performArticleArchiveRefresh(retention, options);
 }
 
-async function performArticleArchiveRefresh(retention: ArticleRetention): Promise<ArchivedArticle[]> {
+async function performArticleArchiveRefresh(
+  retention: ArticleRetention,
+  options: ArticleRefreshOptions,
+): Promise<ArchivedArticle[]> {
   const storedArchive = await readStoredArchive();
   const existingArticles = storedArchive?.articles ?? [];
   const shouldBackfill =
-    !storedArchive ||
-    retentionRank[retention] > retentionRank[storedArchive.retention] ||
-    Boolean(storedArchive.limitMessage);
+    !storedArchive || retentionRank[retention] > retentionRank[storedArchive.retention] || options.forceBackfill;
   const backfillResult = shouldBackfill ? await fetchArticlesForRetention(retention, existingArticles) : undefined;
   const fetchedArticles = backfillResult?.articles ?? (await fetchArticlesUntilKnown(existingArticles));
 
@@ -87,7 +101,8 @@ async function performArticleArchiveRefresh(retention: ArticleRetention): Promis
     const latestExistingArticles = latestStoredArchive?.articles ?? existingArticles;
     const mergeResult = mergeArticlesWithinLimits(latestExistingArticles, fetchedArticles, retention);
     const retainedArticles = mergeResult.articles;
-    const limitMessage = backfillResult?.limitMessage ?? mergeResult.limitMessage;
+    const currentLimitMessage = backfillResult?.limitMessage ?? mergeResult.limitMessage;
+    const limitMessage = currentLimitMessage ?? (!shouldBackfill ? latestStoredArchive?.limitMessage : undefined);
 
     await writeStoredArchive({
       articles: retainedArticles,
@@ -96,11 +111,11 @@ async function performArticleArchiveRefresh(retention: ArticleRetention): Promis
       updatedAt: new Date().toISOString(),
     });
 
-    if (limitMessage && environment.launchType === LaunchType.UserInitiated) {
+    if (currentLimitMessage && environment.launchType === LaunchType.UserInitiated) {
       await showToast({
         style: Toast.Style.Failure,
         title: ARCHIVE_LIMIT_TITLE,
-        message: limitMessage,
+        message: currentLimitMessage,
       });
     }
 
@@ -238,16 +253,20 @@ async function runArchiveUpdate<T>(update: () => Promise<T>): Promise<T> {
 }
 
 async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
-  const owner = randomUUID();
+  const owner: ArchiveLockOwner = { id: randomUUID(), pid: process.pid };
+  const serializedOwner = JSON.stringify(owner);
   const ownerPath = join(ARCHIVE_UPDATE_LOCK_PATH, "owner");
   const startedAt = Date.now();
+  let ownerFile: Awaited<ReturnType<typeof open>> | undefined;
 
   while (true) {
     try {
       await mkdir(ARCHIVE_UPDATE_LOCK_PATH);
       try {
-        await writeFile(ownerPath, owner, "utf8");
+        ownerFile = await open(ownerPath, "wx");
+        await ownerFile.writeFile(serializedOwner, "utf8");
       } catch (error) {
+        await ownerFile?.close();
         await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
         throw error;
       }
@@ -265,6 +284,16 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
     }
   }
 
+  if (!ownerFile) {
+    throw new Error("The article archive lock could not be created.");
+  }
+
+  const lockHeartbeat = setInterval(() => {
+    const heartbeatTime = new Date();
+    void ownerFile.utimes(heartbeatTime, heartbeatTime).catch(() => undefined);
+  }, ARCHIVE_UPDATE_LOCK_HEARTBEAT_MS);
+  lockHeartbeat.unref();
+
   let updateFailed = false;
   let updateError: unknown;
   let updateResult: T | undefined;
@@ -275,8 +304,12 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
     updateError = error;
   }
 
+  clearInterval(lockHeartbeat);
+  await ownerFile.close();
+
   try {
-    if ((await readFile(ownerPath, "utf8")) === owner) {
+    const currentOwner = parseArchiveLockOwner(await readFile(ownerPath, "utf8"));
+    if (currentOwner?.id === owner.id) {
       await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
     }
   } catch (error) {
@@ -293,14 +326,51 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
 
 async function removeStaleArchiveUpdateLock(): Promise<void> {
   try {
-    const lockStats = await stat(ARCHIVE_UPDATE_LOCK_PATH);
-    if (Date.now() - lockStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
+    const [storedOwner, ownerStats] = await Promise.all([readFileOwner(), statOwner()]);
+    if (!isProcessAlive(storedOwner.pid) || Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
       await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
     }
   } catch (error) {
     if (!isNodeError(error) || error.code !== "ENOENT") {
       throw error;
     }
+
+    const lockStats = await stat(ARCHIVE_UPDATE_LOCK_PATH).catch(() => undefined);
+    if (lockStats && Date.now() - lockStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS) {
+      await rm(ARCHIVE_UPDATE_LOCK_PATH, { force: true, recursive: true });
+    }
+  }
+}
+
+async function readFileOwner(): Promise<ArchiveLockOwner> {
+  const owner = parseArchiveLockOwner(await readFile(join(ARCHIVE_UPDATE_LOCK_PATH, "owner"), "utf8"));
+  if (!owner) {
+    throw Object.assign(new Error("The article archive lock has no owner."), { code: "ENOENT" });
+  }
+  return owner;
+}
+
+async function statOwner() {
+  return stat(join(ARCHIVE_UPDATE_LOCK_PATH, "owner"));
+}
+
+function parseArchiveLockOwner(value: string): ArchiveLockOwner | undefined {
+  try {
+    const parsedValue = JSON.parse(value) as Partial<ArchiveLockOwner>;
+    return typeof parsedValue.id === "string" && Number.isInteger(parsedValue.pid)
+      ? { id: parsedValue.id, pid: parsedValue.pid as number }
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return isNodeError(error) && error.code === "EPERM";
   }
 }
 
