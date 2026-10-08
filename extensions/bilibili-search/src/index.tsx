@@ -218,14 +218,14 @@ export default function Command() {
                         title="Remove from History"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={() => handleDeleteHistory(h)}
                       />
                       <Action
                         title="Clear All History"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                        shortcut={Keyboard.Shortcut.Common.RemoveAll}
                         onAction={handleClearAllHistory}
                       />
                     </ActionPanel.Section>
