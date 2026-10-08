@@ -8,6 +8,7 @@ import {
   cancelDetachedLogin,
   checkDetachedLogin,
   extractLoginUrl,
+  forgetLoginUrl,
   isDetachedLoginRunning,
   isProcessRunning,
   startDetachedLogin,
@@ -202,20 +203,12 @@ test("a canceled login exiting late can't replace a newer successful login's res
 });
 
 test("once a login is over, the next pass-cli command removes the login URL, and keeps why the login failed", async () => {
-  // Succeeded: nothing stays, since no login screen shows once logged in.
-  const succeeded = loginDir();
-  await startDetachedLogin(fakeCommand("login-ok"), succeeded, 2_000);
-  const succeededPid = savedPid(succeeded);
-  await waitUntil(() => !isProcessRunning(succeededPid));
-  await sleep(50);
-  assert.equal(await isDetachedLoginRunning(succeeded), false);
-  assert.equal(existsSync(succeeded), false);
-
-  // Otherwise the result waits for the login screen: a missing exit code, when Raycast closed first, isn't a success.
+  // No login screen shows once logged in to remove it. A missing exit code, when Raycast closed first, isn't a success.
   for (const { mode, missedExit, isLoggedIn, state } of [
+    { mode: "login-ok", missedExit: false, isLoggedIn: true, state: "succeeded" },
+    { mode: "login-ok", missedExit: true, isLoggedIn: true, state: "succeeded" },
     { mode: "login-url-fail", missedExit: false, isLoggedIn: false, state: "failed" },
     { mode: "login-url-fail", missedExit: true, isLoggedIn: false, state: "failed" },
-    { mode: "login-ok", missedExit: true, isLoggedIn: true, state: "succeeded" },
   ]) {
     const dir = loginDir();
     await startDetachedLogin(fakeCommand(mode), dir, 2_000);
@@ -228,11 +221,31 @@ test("once a login is over, the next pass-cli command removes the login URL, and
     for (const file of readdirSync(dir)) {
       assert.doesNotMatch(readFileSync(join(dir, file), "utf8"), /https?:|payload|TOKEN/i);
     }
+    // The login screen still gets the result.
     const status = await settle(dir, async () => isLoggedIn);
     assert.equal(status.state, state);
     if (status.state === "failed") assert.equal(status.error.message, "The login didn't complete. Try again.");
     assert.equal(existsSync(dir), false);
   }
+});
+
+test("cleaning up after a login that's over leaves a login started meanwhile alone", async () => {
+  const dir = loginDir();
+  await startDetachedLogin(fakeCommand("login-url-fail"), dir, 2_000);
+  const ended = JSON.parse(readFileSync(join(dir, "login.json"), "utf8"));
+  await waitUntil(() => !isProcessRunning(ended.pid));
+  await sleep(50);
+
+  // The cleanup read the ended login, then a new login replaced it before the cleanup changed anything.
+  await startDetachedLogin(fakeCommand("login-wait"), dir, 2_000);
+  await forgetLoginUrl(dir, ended);
+  assert.equal(await isDetachedLoginRunning(dir), true);
+  assert.deepEqual(await checkDetachedLogin(dir, loggedOut), {
+    state: "waiting",
+    url: FAKE_LOGIN_URL,
+    isFinishing: false,
+  });
+  await cancelDetachedLogin(dir);
 });
 
 test("when the extension missed pass-cli's exit, the session tells whether the login succeeded", async () => {
