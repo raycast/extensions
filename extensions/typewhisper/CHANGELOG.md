@@ -1,6 +1,6 @@
 # TypeWhisper Changelog
 
-## [Workflows, Recorder, Dictionary, Models, and API Token] - {PR_MERGE_DATE}
+## [Workflows, Recorder, Dictionary, Models, and API Token] - 2026-10-08
 
 - Add Dictate with Workflow to start a dictation that uses a specific workflow
 - Rename Switch Profile to Manage Workflows, since TypeWhisper profiles are now workflows, and start a dictation with the selected workflow from there
