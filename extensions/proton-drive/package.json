@@ -56,8 +56,9 @@
       "name": "cliPath",
       "type": "textfield",
       "title": "CLI Path",
-      "description": "Path to the proton-drive executable. Leave empty to auto-detect.",
-      "required": false
+      "description": "Command name or full path of the proton-drive executable. A name is looked up in /opt/homebrew/bin, /usr/local/bin, ~/.local/bin, ~/bin and PATH.",
+      "required": false,
+      "default": "proton-drive"
     },
     {
       "name": "primaryAction",
@@ -83,15 +84,6 @@
       "title": "Download Directory",
       "description": "Where Download saves files.",
       "default": "~/Downloads",
-      "required": false
-    },
-    {
-      "name": "enableBackgroundRefresh",
-      "type": "checkbox",
-      "title": "Search Index",
-      "label": "Refresh the search index in the background",
-      "description": "Lists every folder of your Drive once a day. On a large Drive this takes several minutes.",
-      "default": false,
       "required": false
     }
   ],

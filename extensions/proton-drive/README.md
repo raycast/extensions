@@ -23,8 +23,8 @@ Search, open, download and upload Proton Drive files from Raycast, using the off
    npm install && npm run dev
    ```
 
-The CLI is auto-detected in `~/.local/bin`, `/opt/homebrew/bin` and `/usr/local/bin`; set another
-path in the extension preferences if needed.
+The CLI Path preference defaults to `proton-drive`, looked up in `/opt/homebrew/bin`, `/usr/local/bin`,
+`~/.local/bin`, `~/bin` and `PATH`; set a full path there if the CLI is installed elsewhere.
 
 ## Commands
 
@@ -35,14 +35,13 @@ Named like the Proton Pass and Proton Mail extensions: an action as title, "Prot
 | **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. |
 | **Upload Files** | Uploads the Finder selection, or files you choose when nothing is selected, to a folder you pick (existing files are renamed, folders merged). |
 | **Login to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
-| **Refresh Search Index** | Rebuilds the index. Runs daily in the background only if enabled in preferences. |
+| **Refresh Search Index** | Rebuilds the index. Also runs daily while Raycast's Background Refresh is on for this command: off when installed from the Store, on once you run the command yourself, and switchable in the command's settings. |
 
 Actions on a file or folder: **Open** (downloads to a cache, then opens), **Download** (⌘D, to the
 download directory, never overwrites), **Show Enclosing Folder**, **Copy Public Link** (reuses an
 existing link, or asks before creating one), **Copy Drive Path**, **Copy Name**.
 
-Preferences: CLI Path, Primary Action (Open or Download on Enter), Download Directory, and
-Search Index (background refresh, off by default).
+Preferences: CLI Path, Primary Action (Open or Download on Enter) and Download Directory.
 
 ## How the index works
 
@@ -50,7 +49,7 @@ The CLI has no search and no recursive listing, and each call takes a few second
 decrypts on every run). The extension therefore crawls the Drive once, folder by folder, in parallel,
 and keeps the result in Raycast's support directory.
 
-- Nothing is indexed until you ask for it (Build Search Index, ⌘⇧R in Search Files, or the preference).
+- Nothing is indexed until you ask for it (Build Search Index, ⌘⇧R in Search Files, or Refresh Search Index).
 - On a large Drive the first crawl takes a long time. It is **resumable**: progress is saved every
   30 seconds, and the next run (opening Search Files, or the background refresh) continues from there.
 - During the first crawl, partial results are already searchable.

@@ -1,12 +1,11 @@
 import { environment, LaunchType, showHUD, updateCommandMetadata } from "@raycast/api";
 import { showError } from "./lib/errors";
 import { handleSignedOut, isSignedOut } from "./lib/session";
-import { backgroundRefreshEnabled, buildIndex, IndexAbortedError, IndexBusyError, isIndexing } from "./lib/index";
+import { buildIndex, IndexAbortedError, IndexBusyError, isIndexing } from "./lib/index";
 
 export default async function Command() {
+  // Scheduled runs are controlled by Raycast's own Background Refresh toggle for this command.
   const manual = environment.launchType === LaunchType.UserInitiated;
-  // The scheduled run is opt-in: a full crawl lists every folder of the Drive.
-  if (!manual && !backgroundRefreshEnabled()) return;
   if (await isIndexing()) {
     if (manual) await showHUD("Proton Drive is already being indexed");
     return;

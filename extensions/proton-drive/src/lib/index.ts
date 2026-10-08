@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { CliError, DriveNode, joinPath, listFolder, ROOT } from "./cli";
 import { isDemo } from "./demo";
 
@@ -139,19 +139,6 @@ export function entryToNode(index: DriveIndex, i: number): DriveNode {
     sharedByUrl: shared === 2,
     created: created ?? undefined,
   };
-}
-
-export function backgroundRefreshEnabled(): boolean {
-  return getPreferenceValues<Preferences>().enableBackgroundRefresh === true;
-}
-
-export function isStale(index: DriveIndex | undefined, maxAgeMs = 24 * 3600_000): boolean {
-  return (
-    !index ||
-    index.partial === true ||
-    Boolean(index.failedFolders?.length) ||
-    Date.now() - Date.parse(index.updatedAt) > maxAgeMs
-  );
 }
 
 /** True while another command (e.g. the background refresh) is already crawling. */

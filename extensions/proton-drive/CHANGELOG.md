@@ -7,4 +7,4 @@
 - Open, download, and copy a public link for any file or folder
 - Upload Files: send the Finder selection, or files chosen in Raycast, to a Drive folder
 - Login to Proton Drive: check the CLI session, log in through the browser, or log out
-- Refresh Search Index: rebuild the index manually, or daily in the background (opt-in)
+- Refresh Search Index: rebuild the index manually, or daily with Raycast's Background Refresh

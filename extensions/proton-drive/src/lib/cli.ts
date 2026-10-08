@@ -1,6 +1,6 @@
 import { execFile, ExecFileException } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { homedir } from "node:os";
 import { environment, getPreferenceValues } from "@raycast/api";
 import { demoDownload, demoLink, demoList, demoUpload, isDemo } from "./demo";
@@ -50,29 +50,36 @@ export class CliError extends Error {
   }
 }
 
-const CANDIDATES = [
-  `${homedir()}/.local/bin/proton-drive`,
-  "/opt/homebrew/bin/proton-drive",
-  "/usr/local/bin/proton-drive",
-];
+/** Where a bare command name is looked up (same folders as the Proton Pass extension), then PATH. */
+function searchDirs(): string[] {
+  const home = homedir();
+  const fromPath = (process.env.PATH ?? "").split(delimiter).filter(Boolean);
+  return ["/opt/homebrew/bin", "/usr/local/bin", `${home}/.local/bin`, `${home}/bin`, ...fromPath];
+}
 
+/**
+ * The CLI Path preference holds a command name (default "proton-drive"), looked up in the usual
+ * install folders, or a full path, used as is.
+ */
 export function cliPath(): string {
-  const { cliPath } = getPreferenceValues<Preferences>();
-  if (cliPath?.trim()) {
-    const custom = cliPath.trim().replace(/^~(?=\/)/, homedir());
-    if (!existsSync(custom)) {
+  const configured = getPreferenceValues<Preferences>().cliPath?.trim() || "proton-drive";
+  if (configured.includes("/")) {
+    const path = configured.replace(/^~(?=\/)/, homedir());
+    if (!existsSync(path)) {
       throw new CliError(
         "Proton Drive CLI not found",
-        `Nothing at ${custom}. Fix the CLI Path in the extension preferences.`,
+        `Nothing at ${path}. Fix the CLI Path in the extension preferences.`,
       );
     }
-    return custom;
+    return path;
   }
-  const found = CANDIDATES.find((p) => existsSync(p));
+  const found = searchDirs()
+    .map((dir) => join(dir, configured))
+    .find((path) => existsSync(path));
   if (!found) {
     throw new CliError(
       "Proton Drive CLI not found",
-      "Install it from proton.me/download/drive/cli or set its path in the extension preferences.",
+      `No "${configured}" in ${searchDirs().slice(0, 4).join(", ")} or PATH. Install it from proton.me/download/drive/cli or set its full path in the extension preferences.`,
     );
   }
   return found;

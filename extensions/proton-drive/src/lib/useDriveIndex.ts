@@ -2,16 +2,7 @@ import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { showError } from "./errors";
 import { handleSignedOut, isSignedOut, onSignedOut } from "./session";
-import {
-  backgroundRefreshEnabled,
-  buildIndex,
-  DriveIndex,
-  IndexAbortedError,
-  IndexBusyError,
-  isIndexing,
-  isStale,
-  readIndex,
-} from "./index";
+import { buildIndex, DriveIndex, IndexAbortedError, IndexBusyError, isIndexing, readIndex } from "./index";
 
 /**
  * Index state shared by every folder view of the command: building or refreshing the index from a
@@ -115,18 +106,18 @@ export async function refreshIndex(silent: boolean): Promise<void> {
 
 let initialized = false;
 
-/** Loads the index once per command run; resumes an interrupted first crawl, or refreshes if opted in. */
+/** Loads the index once per command run, and resumes an interrupted first crawl. */
 async function initialize() {
   if (initialized) return;
   initialized = true;
   const cached = await readIndex();
   update({ index: cached });
-  if (cached?.partial || (backgroundRefreshEnabled() && isStale(cached))) await refreshIndex(true);
+  if (cached?.partial) await refreshIndex(true);
 }
 
 /**
- * The optional whole-Drive search index. Crawling only happens when the user asks, to finish an
- * interrupted first crawl, or when background refresh is enabled in preferences.
+ * The optional whole-Drive search index. Crawling only happens when the user asks, or to finish an
+ * interrupted first crawl; scheduled refreshes run in the Refresh Search Index command.
  */
 export function useDriveIndex() {
   const [current, setCurrent] = useState(state);
