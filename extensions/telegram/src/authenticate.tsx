@@ -73,9 +73,7 @@ export default function Authenticate() {
       if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : "Failed to generate QR code");
     } finally {
-      if (!controller.signal.aborted) {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
     }
   }, []);
 
@@ -187,6 +185,7 @@ export default function Authenticate() {
             shortcut={{ modifiers: ["cmd"], key: "," }}
             onAction={() => {
               abortControllerRef.current?.abort();
+              setIsSubmitting(false);
               setAuthStep("setup");
             }}
           />

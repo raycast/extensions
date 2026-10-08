@@ -126,6 +126,7 @@ export interface SendMessageOptions {
 
 export interface AuthenticationResult {
   needsPassword: boolean;
+  success?: boolean;
 }
 
 let clientInstance: TelegramClient | null = null;
@@ -163,16 +164,21 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!sessionString;
 }
 
-async function completeAuthentication(client: TelegramClient): Promise<AuthenticationResult> {
+async function completeAuthentication(
+  client: TelegramClient,
+  isAborted?: () => boolean,
+): Promise<AuthenticationResult> {
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const session = client.session.save() as unknown as string;
   await LocalStorage.setItem(SESSION_KEY, session);
 
+  if (isAborted?.()) return { needsPassword: false, success: false };
   const me = await client.getMe();
   await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
 
   await LocalStorage.removeItem(AUTH_SESSION_KEY);
 
-  return { needsPassword: false };
+  return { needsPassword: false, success: true };
 }
 
 export async function authenticateWithPassword(
@@ -203,23 +209,28 @@ export interface QrCodeAuthCallbacks {
 async function handleLoginTokenResult(
   client: TelegramClient,
   result: Api.auth.TypeLoginToken,
+  isAborted?: () => boolean,
 ): Promise<AuthenticationResult> {
   if (result instanceof Api.auth.LoginTokenSuccess && result.authorization instanceof Api.auth.Authorization) {
-    return completeAuthentication(client);
+    if (isAborted?.()) return { needsPassword: false, success: false };
+    return completeAuthentication(client, isAborted);
   }
 
   if (result instanceof Api.auth.LoginTokenMigrateTo) {
+    if (isAborted?.()) return { needsPassword: false, success: false };
     await (client as unknown as { _switchDC: (dcId: number) => Promise<void> })._switchDC(result.dcId);
+    if (isAborted?.()) return { needsPassword: false, success: false };
     const migratedResult = await client.invoke(
       new Api.auth.ImportLoginToken({
         token: result.token,
       }),
     );
+    if (isAborted?.()) return { needsPassword: false, success: false };
     if (
       migratedResult instanceof Api.auth.LoginTokenSuccess &&
       migratedResult.authorization instanceof Api.auth.Authorization
     ) {
-      return completeAuthentication(client);
+      return completeAuthentication(client, isAborted);
     }
   }
 
@@ -242,11 +253,12 @@ export async function authenticateWithQr(
 
   const { abortSignal } = callbacks;
   if (abortSignal?.aborted) {
-    return { needsPassword: false };
+    return { needsPassword: false, success: false };
   }
 
-  let isScanningComplete = false;
-  const stopped = () => isScanningComplete || !!abortSignal?.aborted;
+  let isScanningFinished = false;
+  const isAborted = () => !!abortSignal?.aborted;
+  const isStopped = () => isScanningFinished || isAborted();
 
   let resolveAuth!: (result: AuthenticationResult) => void;
   let rejectAuth!: (err: unknown) => void;
@@ -256,18 +268,22 @@ export async function authenticateWithQr(
   });
 
   const handleAuthResult = async (result: Api.auth.TypeLoginToken) => {
+    if (isStopped()) return;
     try {
-      const authRes = await handleLoginTokenResult(client, result);
-      isScanningComplete = true;
+      const authRes = await handleLoginTokenResult(client, result, isAborted);
+      if (isStopped()) return;
+      isScanningFinished = true;
       resolveAuth(authRes);
     } catch (err: unknown) {
+      if (isStopped()) return;
       const errorText =
         err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
       const upper = errorText.toUpperCase();
       if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
-        isScanningComplete = true;
+        if (isAborted()) return;
+        isScanningFinished = true;
         await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
-        resolveAuth({ needsPassword: true });
+        resolveAuth({ needsPassword: true, success: false });
         return;
       }
       rejectAuth(err);
@@ -275,7 +291,7 @@ export async function authenticateWithQr(
   };
 
   void (async () => {
-    while (!stopped()) {
+    while (!isStopped()) {
       try {
         const result = await client.invoke(
           new Api.auth.ExportLoginToken({
@@ -285,7 +301,7 @@ export async function authenticateWithQr(
           }),
         );
 
-        if (stopped()) break;
+        if (isStopped()) break;
 
         if (result instanceof Api.auth.LoginToken) {
           const base64Url = Buffer.from(result.token).toString("base64url");
@@ -294,21 +310,22 @@ export async function authenticateWithQr(
             margin: 1,
             width: 200,
           });
-          if (stopped()) break;
+          if (isStopped()) break;
           await callbacks.onQrCode({ tgUrl, dataUrl });
         } else {
           await handleAuthResult(result);
           break;
         }
       } catch (err: unknown) {
-        if (stopped()) break;
+        if (isStopped()) break;
         const errorText =
           err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
         const upper = errorText.toUpperCase();
         if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
-          isScanningComplete = true;
+          if (isAborted()) break;
+          isScanningFinished = true;
           await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
-          resolveAuth({ needsPassword: true });
+          resolveAuth({ needsPassword: true, success: false });
           break;
         }
         rejectAuth(err);
@@ -320,9 +337,10 @@ export async function authenticateWithQr(
   })();
 
   const rawEvent = new events.Raw({});
+  let isProcessingUpdate = false;
   const onUpdate = async (update: unknown) => {
-    if (update instanceof Api.UpdateLoginToken && !stopped()) {
-      isScanningComplete = true;
+    if (update instanceof Api.UpdateLoginToken && !isStopped() && !isProcessingUpdate) {
+      isProcessingUpdate = true;
       try {
         const result = await client.invoke(
           new Api.auth.ExportLoginToken({
@@ -331,17 +349,23 @@ export async function authenticateWithQr(
             exceptIds: [],
           }),
         );
+        if (isStopped()) return;
         await handleAuthResult(result);
       } catch (err: unknown) {
+        if (isStopped()) return;
         const errorText =
           err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
         const upper = errorText.toUpperCase();
         if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
+          if (isStopped()) return;
+          isScanningFinished = true;
           await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
-          resolveAuth({ needsPassword: true });
+          resolveAuth({ needsPassword: true, success: false });
           return;
         }
         rejectAuth(err);
+      } finally {
+        isProcessingUpdate = false;
       }
     }
   };
@@ -351,8 +375,8 @@ export async function authenticateWithQr(
   let onAbortHandler: (() => void) | undefined;
   const abortPromise = new Promise<AuthenticationResult>((resolve) => {
     onAbortHandler = () => {
-      isScanningComplete = true;
-      resolve({ needsPassword: false });
+      isScanningFinished = true;
+      resolve({ needsPassword: false, success: false });
     };
     abortSignal?.addEventListener("abort", onAbortHandler, { once: true });
   });
@@ -360,7 +384,7 @@ export async function authenticateWithQr(
   try {
     return await Promise.race([authCompletedPromise, abortPromise]);
   } finally {
-    isScanningComplete = true;
+    isScanningFinished = true;
     client.removeEventHandler(onUpdate, rawEvent);
     if (onAbortHandler) {
       abortSignal?.removeEventListener("abort", onAbortHandler);

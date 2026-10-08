@@ -33,8 +33,8 @@ export const Toast = {
   },
 };
 
-export const showToast = async () => ({
-  style: "",
-  title: "",
-  message: "",
+export const showToast = async (options?: { style?: string; title?: string; message?: string }) => ({
+  style: options?.style || "",
+  title: options?.title || "",
+  message: options?.message || "",
 });

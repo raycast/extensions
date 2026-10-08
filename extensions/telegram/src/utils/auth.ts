@@ -114,6 +114,10 @@ export async function handleQrAuthFlow(callbacks: {
       abortSignal: callbacks.abortSignal,
     });
 
+    if (callbacks.abortSignal?.aborted || (!result.success && !result.needsPassword)) {
+      return { success: false, needsPassword: false };
+    }
+
     if (result.needsPassword) {
       if (toast) {
         toast.style = Toast.Style.Success;
