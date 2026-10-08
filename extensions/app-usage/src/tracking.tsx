@@ -1,30 +1,20 @@
-import { Action, ActionPanel, environment, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { ClearDataAction } from "./clear";
-import { isCollecting } from "./core/sampler";
-import { createStore } from "./core/store";
 
 /**
- * Collect Usage ticks once a minute. This leaves room for Raycast's scheduling
- * tolerance and for the first tick after waking from sleep.
+ * Shown when there is nothing at all to report.
+ *
+ * A Store install leaves Collect Usage's background refresh off until the command
+ * is opened once or enabled in preferences, and Raycast offers no way to ask
+ * which it is. Guessing from the age of the last sample misfires after sleep or a
+ * clear, so this says how to turn tracking on without claiming that it is off.
  */
-const STALE_AFTER_MS = 5 * 60_000;
-
-export async function loadCollecting(): Promise<boolean> {
-  const state = await createStore(environment.supportPath).readState();
-  return isCollecting(state, Date.now(), STALE_AFTER_MS);
-}
-
-/**
- * Shown in place of an empty report while Collect Usage is not running, which is
- * where a fresh Store install starts. Without it the views would wait for data
- * that never comes.
- */
-export function TrackingOffEmptyView({ onCleared }: { onCleared: () => void }) {
+export function NothingRecordedEmptyView({ onCleared }: { onCleared: () => void }) {
   return (
     <List.EmptyView
       icon={Icon.Clock}
-      title="Tracking is off"
-      description="Open the Collect Usage command once (or enable it in the extension preferences) to start tracking. Data appears a few minutes later."
+      title="Nothing recorded yet"
+      description="App Usage records the focused app once a minute in the background. If nothing appears within a few minutes, open the Collect Usage command once (or enable it in the extension preferences) to start tracking."
       actions={
         <ActionPanel>
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />

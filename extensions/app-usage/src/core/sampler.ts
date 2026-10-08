@@ -79,14 +79,3 @@ export function tick(
     nextState,
   };
 }
-
-/**
- * Whether Collect Usage is running in the background.
- *
- * A Store install leaves its background refresh off until the command is opened
- * once or enabled in preferences. Until then no tick runs, so the state file is
- * missing, or goes stale if tracking is switched off later.
- */
-export function isCollecting(state: SamplerState | null, now: number, staleAfterMs: number): boolean {
-  return state !== null && now - state.lastAt <= staleAfterMs;
-}

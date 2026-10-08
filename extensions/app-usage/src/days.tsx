@@ -17,7 +17,7 @@ import {
 import { ClearDataAction } from "./clear";
 import { createStore } from "./core/store";
 import { iconFor, loadIconPaths } from "./icons";
-import { loadCollecting, TrackingOffEmptyView } from "./tracking";
+import { NothingRecordedEmptyView } from "./tracking";
 
 /** How far back the list reaches. One row per day, newest first. */
 const RANGE: RangeId = "last7";
@@ -31,29 +31,20 @@ interface Day {
   report: Report;
 }
 
-interface Loaded {
-  days: Day[];
-  /** False until Collect Usage has run recently, e.g. on a fresh Store install. */
-  collecting: boolean;
-}
-
-async function load(): Promise<Loaded> {
+async function load(): Promise<Day[]> {
   const store = createStore(environment.supportPath);
   const now = Date.now();
 
-  const [days, collecting] = await Promise.all([
-    Promise.all(
-      rangeDates(RANGE, now).map(async (date) => ({
-        date,
-        title: dayTitle(date, now),
-        report: buildReport([{ date, file: await store.readDay(date) }]),
-      })),
-    ),
-    loadCollecting(),
-  ]);
+  const days = await Promise.all(
+    rangeDates(RANGE, now).map(async (date) => ({
+      date,
+      title: dayTitle(date, now),
+      report: buildReport([{ date, file: await store.readDay(date) }]),
+    })),
+  );
 
   // Newest first: today is what you came to look at.
-  return { days: days.reverse(), collecting };
+  return days.reverse();
 }
 
 function isTracked(report: Report): boolean {
@@ -120,19 +111,19 @@ export default function DailyUsage() {
   const { data, isLoading, revalidate } = usePromise(load);
   const { data: iconPaths } = usePromise(loadIconPaths);
 
-  const days = data?.days ?? [];
-  // A week of "Not tracked" rows would not say why. With nothing recorded and the
-  // collector not running, explain how to turn tracking on instead.
-  const trackingOff = data !== undefined && !data.collecting && !days.some((day) => isTracked(day.report));
+  const days = data ?? [];
+  // A week of "Not tracked" rows would not say why. With nothing recorded at all,
+  // explain how to turn tracking on instead.
+  const nothingRecorded = data !== undefined && !days.some((day) => isTracked(day.report));
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={showingDetail && days.length > 0 && !trackingOff}
+      isShowingDetail={showingDetail && days.length > 0 && !nothingRecorded}
       searchBarPlaceholder="Filter days"
     >
-      {trackingOff ? (
-        <TrackingOffEmptyView onCleared={revalidate} />
+      {nothingRecorded ? (
+        <NothingRecordedEmptyView onCleared={revalidate} />
       ) : (
         <List.Section title="Last 7 Days">
           {days.map((day) => {

@@ -32,8 +32,8 @@ you do one of these:
 - Open **Collect Usage** once from Raycast root search, or
 - Enable **Collect Usage** in the extension's preferences.
 
-Data appears a few minutes later. Until then, Usage Report and Daily Usage say that
-tracking is off and offer a shortcut to the preferences.
+Data appears a few minutes later. Until then, Usage Report and Daily Usage explain how
+to turn tracking on and offer a shortcut to the preferences.
 
 ## Screenshots
 
