@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "merge-queue",
+  "title": "Merge Queue",
+  "description": "See a GitHub merge queue, where your pull request sits in it, and what's failing, with drill-down into CI steps and logs.",
+  "icon": "icon.png",
+  "author": "dholliday",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "merge-queue",
+      "title": "Merge Queue",
+      "subtitle": "GitHub",
+      "description": "Pick a repository, browse its merge queue, drill into failing checks, and rerun jobs.",
+      "mode": "view",
+      "keywords": [
+        "github",
+        "merge queue",
+        "pull request",
+        "pr",
+        "ci",
+        "checks"
+      ]
+    },
+    {
+      "name": "merge-queue-menu-bar",
+      "title": "Merge Queue Menu Bar",
+      "subtitle": "GitHub",
+      "description": "Shows your position in the merge queue in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "github",
+        "merge queue",
+        "menu bar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ghPath",
+      "title": "GitHub CLI Path",
+      "description": "Absolute path to gh. Leave empty to find it in Homebrew's usual places.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "/opt/homebrew/bin/gh"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
