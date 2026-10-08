@@ -128,13 +128,20 @@ export function miredToHexString(mireds: number, brightness = 100) {
 
 /**
  * Converts a CIE (x, y) color to the color temperature of the nearest white, in mireds, by McCamy's approximation.
- * Colors far from white get temperatures outside the Hue range.
+ * Returns undefined for colors more than 0.02 Duv from the whites, where the approximation gives nonsense.
  *
  * @link https://en.wikipedia.org/wiki/Color_temperature#Approximation
+ * @link https://doi.org/10.1080/15502724.2014.839020 (Ohno's Duv approximation, from CIE 1960 u and v)
  */
-export function xyToMired({ x, y }: Xy) {
+export function xyToMired({ x, y }: Xy): number | undefined {
+  const d = 12 * y - 2 * x + 3;
+  const u = (4 * x) / d - 0.292;
+  const v = (6 * y) / d - 0.24;
+  const angle = Math.acos(u / Math.hypot(u, v));
+  const curve = [-0.471106, 1.925865, -2.4243787, 1.5317403, -0.5179722, 0.0893944, -0.00616793];
+  const duv = Math.hypot(u, v) - curve.reduce((sum, k, i) => sum + k * angle ** i, 0);
   const n = (x - 0.332) / (0.1858 - y);
-  return 1_000_000 / (449 * n ** 3 + 3525 * n ** 2 + 6823.3 * n + 5520.33);
+  return Math.abs(duv) <= 0.02 ? 1_000_000 / (449 * n ** 3 + 3525 * n ** 2 + 6823.3 * n + 5520.33) : undefined;
 }
 
 /**

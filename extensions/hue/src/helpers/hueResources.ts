@@ -41,9 +41,13 @@ export function getColorFromLight(light: Light): string {
   return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
 
-// In color mode a light has no color temperature, so the temperature actions start from the white nearest its color.
-export const getMiredFromLight = (light: Light): number =>
-  light.color_temperature?.mirek ?? (light.color ? xyToMired(light.color.xy) : MIRED_DEFAULT);
+// In color mode a light has no color temperature, so the temperature actions start from the white nearest its color,
+// or from the middle of the light's range when the color is far from white.
+export function getMiredFromLight({ color_temperature, color }: Light): number {
+  if (!color_temperature) return MIRED_DEFAULT;
+  const { mirek_minimum, mirek_maximum } = color_temperature.mirek_schema;
+  return color_temperature.mirek ?? (color && xyToMired(color.xy)) ?? (mirek_minimum + mirek_maximum) / 2;
+}
 
 export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
   getLightsFromGroup(lights, group)
