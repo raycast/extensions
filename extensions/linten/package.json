@@ -16,14 +16,14 @@
   "commands": [
     {
       "name": "audit",
-      "title": "Audit Llms.txt",
+      "title": "Audit llms.txt",
       "subtitle": "Linten",
       "description": "Audit Spec v2 syntax, probe 100-link reachability, budget token context, and compile companion archives.",
       "mode": "view"
     },
     {
       "name": "compile",
-      "title": "Compile Llms-Full.txt",
+      "title": "Compile llms-full.txt",
       "subtitle": "Linten",
       "description": "Compile companion full-text archive from an llms.txt URL or clipboard directly to clipboard.",
       "mode": "view"
@@ -37,7 +37,7 @@
     },
     {
       "name": "badge",
-      "title": "Copy Spec V2 Badge",
+      "title": "Copy Spec v2 Badge",
       "subtitle": "Linten",
       "description": "Generate and copy canonical Spec v2 compliance badge snippet for README.md.",
       "mode": "view"
