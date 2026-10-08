@@ -45,6 +45,8 @@ export class CliError extends Error {
     readonly stderr: string,
     /** The CLI has no valid session: the user needs to log in. */
     readonly signedOut = false,
+    /** The CLI's cache database was locked by another CLI process: worth trying again. */
+    readonly busy = false,
   ) {
     super(message);
   }
@@ -85,7 +87,29 @@ export function cliPath(): string {
   return found;
 }
 
-export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
+/** Commands that change nothing on the Drive, so they can safely be run again. */
+const READ_ONLY = new Set(["filesystem list", "filesystem info", "sharing status"]);
+/** Waits before each new attempt when the CLI's cache database is busy. */
+const BUSY_RETRY_DELAYS = [300, 1000, 2500];
+
+/**
+ * Runs the CLI. Its cache is an SQLite database that fails at once ("database is locked") instead of
+ * waiting when another CLI process uses it, e.g. during an index build or after a process was killed.
+ * Read-only commands are retried after a pause; others report it, since a retry could repeat an upload.
+ */
+export async function run(args: string[], timeout = 10 * 60_000): Promise<string> {
+  const retries = READ_ONLY.has(`${args[0]} ${args[1]}`) ? BUSY_RETRY_DELAYS : [];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await runOnce(args, timeout);
+    } catch (error) {
+      if (!(error instanceof CliError && error.busy) || attempt >= retries.length) throw error;
+      await new Promise((resolve) => setTimeout(resolve, retries[attempt]));
+    }
+  }
+}
+
+function runOnce(args: string[], timeout: number): Promise<string> {
   const bin = cliPath();
   return new Promise((resolve, reject) => {
     execFile(bin, args, { maxBuffer: 256 * 1024 * 1024, timeout }, (error, stdout, stderr) => {
@@ -102,15 +126,23 @@ export function run(args: string[], timeout = 10 * 60_000): Promise<string> {
           /need to log ?in|not (logged|signed) in|auth login|unauthori[sz]ed|no (active )?session|session (expired|not found)/i.test(
             detail,
           );
+        const busy = /database is locked|SQLITE_BUSY/i.test(detail);
         reject(
           new CliError(
-            loggedOut ? "Not signed in to Proton Drive" : errorLine(detail) || "Proton Drive CLI failed",
+            loggedOut
+              ? "Not signed in to Proton Drive"
+              : busy
+                ? "Proton Drive CLI is busy"
+                : errorLine(detail) || "Proton Drive CLI failed",
             loggedOut
               ? "Run `proton-drive auth login` in your terminal."
-              : error.signal
-                ? `The CLI was stopped (${error.signal}).`
-                : errorLine(detail) || `Exit code ${error.code}`,
+              : busy
+                ? "Another Proton Drive CLI command is using its cache. Try again in a moment."
+                : error.signal
+                  ? `The CLI was stopped (${error.signal}).`
+                  : errorLine(detail) || `Exit code ${error.code}`,
             loggedOut,
+            busy,
           ),
         );
         return;
@@ -186,9 +218,10 @@ export function listFolderCached(path: string, mode: "demo" | "live"): Promise<D
 export async function listFolder(path: string): Promise<DriveNode[]> {
   if (isDemo()) return demoList(path);
   const args = ["filesystem", "list", "--json", path];
-  // Listing is read-only: retry once, the CLI occasionally crashes for no lasting reason.
+  // Listing is read-only: retry once after an unexplained crash. A missing session won't fix itself,
+  // and a busy cache has already been retried by run().
   const out = await run(args).catch((error) => {
-    if (error instanceof CliError && error.signedOut) throw error;
+    if (error instanceof CliError && (error.signedOut || error.busy)) throw error;
     return run(args);
   });
   const raw = JSON.parse(out) as RawNode[];
