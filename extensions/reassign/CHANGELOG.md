@@ -19,7 +19,9 @@
   today by default and remembers the selected day/week view.
 - Compact block forms with optional Reassign AI previews. Scheduled blocks require
   a date and time; duration-only scheduling lists open slots to pick. If a slot
-  is taken, the list shows the nearest open slots.
+  is taken, the list shows the nearest open slots. After a failed reply, Find a
+  Time checks the schedule before it books again, so the block is not booked
+  twice.
 - Check off Kept or Skipped on a block from a past day in Agenda. Reassign
   accepts a check-off only after the day ends, so Now has no check-off.
 - Save to Inbox uses your default Source, the same as the Reassign app. When the

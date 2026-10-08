@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { BlockTiming, resolveBlockTiming, shiftWallMinutes, wallMinutes } from "./lib/block-timing";
 import { AiFillForm } from "./components/ai-fill-form";
 import type { BlockDraft } from "./lib/ai-draft";
@@ -20,6 +21,7 @@ import {
   type ApiResult,
   backlogCaptureText,
   type BatchReceipt,
+  bookSlot,
   type CreateOp,
   getFreeSlots,
   getSchedule,
@@ -590,7 +592,7 @@ interface FlexibleArgs {
 
 type CreateFields = FlexibleArgs["fields"];
 
-/** The one create op of Add Block, for an exact time and for a picked slot. */
+/** The one create op of Add Block for an exact time. */
 function createOp(name: string, span: { start: string; end: string }, fields: CreateFields): CreateOp {
   return { op: "create", start: span.start, end: span.end, name, ...fields };
 }
@@ -655,7 +657,9 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
     toast.title = "Showing tomorrow";
     toast.message = "Today's time window has passed.";
   } else await toast.hide();
-  args.push(<SlotsList name={args.name} fields={args.fields} initial={slots} onSaved={args.onSaved} />);
+  args.push(
+    <SlotsList name={args.name} minutes={args.minutes} fields={args.fields} initial={slots} onSaved={args.onSaved} />,
+  );
 }
 
 /**
@@ -711,24 +715,95 @@ function conflictOf(result: ApiResult<BatchReceipt> | undefined): { nearest?: Ti
   return row?.error?.code === "conflict" ? { nearest: nearestSlotsOf(row.error) } : undefined;
 }
 
-function SlotsList(props: { name: string; fields: CreateFields; initial: TimeSlot[]; onSaved: () => Promise<void> }) {
+function SlotsList(props: {
+  name: string;
+  minutes: number;
+  fields: CreateFields;
+  initial: TimeSlot[];
+  onSaved: () => Promise<void>;
+}) {
   const [slots, setSlots] = useState<TimeSlot[]>(props.initial);
   // One booking at a time. A double tap must never create the block twice.
   const booking = useRef(false);
   const saved = useRef(false);
+  // One requestId for each start. A retry after a lost reply then replays the
+  // first booking on the server and does not book the block again.
+  const requestIds = useRef(new Map<string, string>());
+
+  // The starts of the bookings that failed after the request could have landed.
+  // The replay window is 60 s and the client timeout is 65 s, so read them back.
+  const unsure = useRef(new Set<string>());
+
+  function requestIdFor(start: string): string {
+    let id = requestIds.current.get(start);
+    if (!id) requestIds.current.set(start, (id = randomUUID()));
+    return id;
+  }
+
+  /** True when the schedule shows this block at an unsure start; false when it does not; undefined on a failed read. */
+  async function landedEarlier(): Promise<boolean | undefined> {
+    const days = [...new Set([...unsure.current].map(datePart))];
+    for (const day of days) {
+      const read = await getSchedule(day);
+      if (!read.ok) return undefined;
+      const events = (read.data.days ?? []).flatMap((d) => d.events ?? []);
+      if (events.some((e) => e.name.trim() === props.name.trim() && unsure.current.has(e.start))) return true;
+    }
+    return false;
+  }
+
+  async function finishLanded(): Promise<void> {
+    saved.current = true;
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Scheduled “${props.name}”`,
+      message: "Reassign saved it before the reply failed.",
+    });
+    await props.onSaved();
+  }
 
   async function book(slot: TimeSlot): Promise<void> {
     if (booking.current || saved.current) return;
     booking.current = true;
     try {
+      // A failed reply can hide a landed booking. Check before a new write, also on another slot.
+      if (unsure.current.size > 0) {
+        const landed = await landedEarlier();
+        if (landed) return await finishLanded();
+        if (landed === undefined) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could not check the last booking",
+            message: "Check the schedule in Reassign, then try again.",
+          });
+          return;
+        }
+        unsure.current.clear();
+      }
       let reply: ApiResult<BatchReceipt> | undefined;
       const result = await runMutation("Scheduling…", `Scheduled “${props.name}”`, async () => {
-        reply = await writeEvents([createOp(props.name, slot, props.fields)]);
+        reply = await bookSlot({
+          name: props.name,
+          start: slot.start,
+          durationMinutes: props.minutes,
+          requestId: requestIdFor(slot.start),
+          ...props.fields,
+        });
         return reply;
       });
       if (result.ok) {
         saved.current = true;
         await props.onSaved();
+        return;
+      }
+      if (reply && !reply.ok && (reply.code === "network" || reply.code === "internal")) {
+        unsure.current.add(slot.start);
+        const landed = await landedEarlier();
+        if (landed) return await finishLanded();
+        if (landed === false) {
+          unsure.current.clear();
+          await showToast({ style: Toast.Style.Failure, title: "Not scheduled", message: "Pick the slot again." });
+        }
         return;
       }
       // Another block took the time: show the near free slots that the server sent.

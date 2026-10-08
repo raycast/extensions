@@ -72,8 +72,11 @@ schemas and response serializers, and the deployed public
 The extension's OAuth client, web redirect, resource audience and event scopes
 remain supported. Schedule, event writes, search, calendars, Inbox mutations,
 and Undo use the existing public API. Find a Time reads `freeSlots` with
-`minDuration` and books with an event `create`: reassign#1329 removed
-`/schedule/confirm`. No backend edits are required
+`minDuration` and books the picked slot with an exact `/schedule/plan` request
+and a `requestId`: reassign#1329 removed `/schedule/confirm`. A retry with the
+same `requestId` replays the first booking. After a lost reply, the picker
+reads the day back before it books again. reassign#1499 accepts
+`mirrorStyles` on that request. No backend edits are required
 for the reviewed workflows. Compatibility fixes in this extension handle:
 
 - `nextBacklogOffset` pagination (50 Inbox items per schedule response).
@@ -103,6 +106,10 @@ and the browser callback remain part of the pending live checks.
   the current description's draft. AI errors must leave manual entry available.
 - Save from the compact form and from a Find a Time slot. Both should
   return to Raycast root after success, while a failure should keep the draft.
+- Book a Find a Time slot and turn the network off after the request leaves.
+  Wait for the failure, turn the network on, and tap a slot again. If the first
+  booking landed, the list closes with "Reassign saved it before the reply
+  failed." Reassign must show one block, not two.
 
 - Type only a date in the native Start picker: this must remain an Inbox idea, not create an
   event at midnight. A scheduled event requires a concrete date and time.

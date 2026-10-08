@@ -9,6 +9,8 @@ const mock = vi.hoisted(() => ({
   fullDays: new WeakSet<Date>(),
   capture: vi.fn(),
   create: vi.fn(),
+  book: vi.fn(),
+  read: vi.fn(),
   free: vi.fn(),
   calendar: {} as Record<string, unknown>,
   root: vi.fn(),
@@ -61,10 +63,12 @@ vi.mock("@raycast/utils", () => ({
 }));
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {} }));
 // `mock.create` sees the single create op that the command sends to POST /events.
+// `mock.book` sees the one picked-slot booking that goes to POST /schedule/plan.
 vi.mock("../src/lib/api", async (importOriginal) => ({
   nearestSlotsOf: (await importOriginal<typeof import("../src/lib/api")>()).nearestSlotsOf,
-  getSchedule: vi.fn(),
+  getSchedule: mock.read,
   writeEvents: (ops: unknown[]) => mock.create(ops[0]),
+  bookSlot: mock.book,
   backlogCaptureText: mock.capture,
   getFreeSlots: mock.free,
 }));
@@ -122,13 +126,16 @@ beforeEach(() => {
   mock.cursor = 0;
   mock.fullDays = new WeakSet();
   mock.calendar = {};
-  for (const fn of [mock.capture, mock.create, mock.root, mock.free, mock.push, mock.toast]) fn.mockReset();
+  for (const fn of [mock.capture, mock.create, mock.book, mock.read, mock.root, mock.free, mock.push, mock.toast])
+    fn.mockReset();
   mock.toast.mockImplementation(async (options) => ({ ...options, hide: async () => undefined }));
   mock.capture.mockResolvedValue({
     ok: true,
     data: { results: [{ index: 0, status: "ok", result: { created: [{ id: "b1", name: "idea" }], source: "ai" } }] },
   });
   mock.create.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  mock.book.mockResolvedValue({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
+  mock.read.mockResolvedValue({ ok: true, data: { days: [] } });
   mock.free.mockResolvedValue({ ok: true, data: { days: [] } });
 });
 it("blank Add Block opens with Save to Inbox as primary", () => {
@@ -537,13 +544,20 @@ async function openSlots(freeSlots: { start: string; end: string }[]) {
 const MORNING = { start: at("07:00"), end: at("09:10") };
 const AFTERNOON = { start: at("12:10"), end: at("15:00") };
 const NIGHT = { start: at("21:00"), end: at("23:00") };
-const created = (start: string, end: string) => ({ op: "create", name: "idea", kind: "blocking", start, end });
+const booked = (start: string) => ({
+  name: "idea",
+  kind: "blocking",
+  start,
+  durationMinutes: 90,
+  requestId: expect.any(String),
+});
+const requestIdOf = (call: number) => (mock.book.mock.calls[call][0] as { requestId: string }).requestId;
 
 it("clips the free slots to the window and lists the starts where the block fits", async () => {
   const list = await openSlots([MORNING, AFTERNOON, NIGHT]);
   // 08:00–09:10 and 21:00–22:00 are too short after the clip. No request books a slot.
   expect(list().titles).toEqual(["12:10 → 13:40", "12:30 → 14:00", "13:00 → 14:30", "13:30 → 15:00"]);
-  expect(mock.create).not.toHaveBeenCalled();
+  expect(mock.book).not.toHaveBeenCalled();
 });
 
 it("takes each gap start first, then the half-hour marks, up to five slots", () => {
@@ -569,21 +583,21 @@ it("joins a gap split at midnight inside an overnight window", () => {
   ]);
 });
 
-it("books a picked slot with an exact create and the calendar fields of the exact path", async () => {
+it("books a picked slot at its exact start with the calendar fields of the exact path", async () => {
   mock.calendar = { calendarId: "work", mirrorCalendarIds: ["home"], mirrorStyles: { home: "busy" } };
   const list = await openSlots([AFTERNOON]);
-  mock.create.mockResolvedValueOnce({
+  mock.book.mockResolvedValueOnce({
     ok: true,
     data: { undoToken: "undo", results: [{ index: 0, status: "ok", result: { event: { id: "ev1" } } }] },
   });
   await list().picks[1]();
-  expect(mock.create).toHaveBeenCalledWith({ ...created(at("12:30"), at("14:00")), ...mock.calendar });
+  expect(mock.book).toHaveBeenCalledWith({ ...booked(at("12:30")), ...mock.calendar });
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 
 it("shows the nearest slots of a conflict, and books one of them", async () => {
   const list = await openSlots([AFTERNOON]);
-  mock.create.mockResolvedValueOnce({
+  mock.book.mockResolvedValueOnce({
     ok: false,
     code: "conflict",
     message: "That time is taken.",
@@ -594,14 +608,14 @@ it("shows the nearest slots of a conflict, and books one of them", async () => {
   expect(mock.root).not.toHaveBeenCalled();
   expect(list().titles).toEqual(["16:00 → 17:30"]);
   await list().picks[0]();
-  expect(mock.create).toHaveBeenLastCalledWith(created(at("16:00"), at("17:30")));
+  expect(mock.book).toHaveBeenLastCalledWith(booked(at("16:00")));
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 
 it("lists each nearest slot start once", async () => {
   const list = await openSlots([AFTERNOON]);
   const slot = { start: at("16:00"), end: at("17:30") };
-  mock.create.mockResolvedValueOnce({
+  mock.book.mockResolvedValueOnce({
     ok: false,
     code: "conflict",
     message: "Taken.",
@@ -614,7 +628,7 @@ it("lists each nearest slot start once", async () => {
 
 it("shows the empty state when a conflict has no nearby slot", async () => {
   const list = await openSlots([AFTERNOON]);
-  mock.create.mockResolvedValueOnce({ ok: false, code: "conflict", message: "Taken.", status: 409, nearestSlots: [] });
+  mock.book.mockResolvedValueOnce({ ok: false, code: "conflict", message: "Taken.", status: 409, nearestSlots: [] });
   await list().picks[0]();
   expect(list()).toMatchObject({ titles: [], picks: [], empty: true });
 });
@@ -622,7 +636,7 @@ it("shows the empty state when a conflict has no nearby slot", async () => {
 it.each([false, true])("keeps a sync conflict retryable (batch receipt: %s)", async (batchReceipt) => {
   const list = await openSlots([{ start: at("13:00"), end: at("14:30") }]);
   const error = { code: "conflict", message: "A sync is running. Try again shortly." };
-  mock.create.mockResolvedValueOnce(
+  mock.book.mockResolvedValueOnce(
     batchReceipt
       ? { ok: true, data: { results: [{ index: 0, status: "error", error }] } }
       : { ok: false, ...error, status: 409 },
@@ -633,13 +647,13 @@ it.each([false, true])("keeps a sync conflict retryable (batch receipt: %s)", as
   expect(toast.message).toBe(error.message);
   expect(mock.root).not.toHaveBeenCalled();
   await list().picks[0]();
-  expect(mock.create).toHaveBeenCalledTimes(2);
+  expect(mock.book).toHaveBeenCalledTimes(2);
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 
 it("reads replacement slots from a rejected row in a successful HTTP response", async () => {
   const list = await openSlots([AFTERNOON]);
-  mock.create.mockResolvedValueOnce({
+  mock.book.mockResolvedValueOnce({
     ok: true,
     data: {
       results: [
@@ -662,12 +676,60 @@ it("reads replacement slots from a rejected row in a successful HTTP response", 
 
 it("keeps the slots after a failure that is not a conflict, so the user can try again", async () => {
   const list = await openSlots([AFTERNOON]);
-  mock.create.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
+  mock.book.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
   await list().picks[0]();
   expect(list().titles).toHaveLength(4);
+  // The read-back shows no block, so the next tap books again.
+  expect(mock.read).toHaveBeenCalledWith("2026-09-22");
+  expect(mock.toast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "Not scheduled" }));
   await list().picks[0]();
-  expect(mock.create).toHaveBeenCalledTimes(2);
+  expect(mock.book).toHaveBeenCalledTimes(2);
   expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+const landedRead = (start: string) => ({
+  ok: true,
+  data: { days: [{ date: "2026-09-22", events: [{ id: "ev1", name: "idea", start, end: at("14:00") }] }] },
+});
+
+// The replay window (60 s) is shorter than the client timeout (65 s), so a
+// booking that landed before a lost reply must be found by a read.
+it("finishes when the read-back after a lost reply shows the block", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.book.mockResolvedValueOnce({ ok: false, code: "network", message: "Reassign did not answer in time." });
+  mock.read.mockResolvedValueOnce(landedRead(at("12:30")));
+  await list().picks[1]();
+  expect(mock.book).toHaveBeenCalledTimes(1);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+  expect(mock.toast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "Scheduled “idea”" }));
+});
+
+it("reads back before any new booking when the first read-back failed", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.book.mockResolvedValueOnce({ ok: false, code: "internal", message: "Busy", status: 503 });
+  mock.read.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
+  await list().picks[0]();
+  // The read fails again: no new booking, because the first one can have landed.
+  mock.read.mockResolvedValueOnce({ ok: false, code: "network", message: "offline" });
+  await list().picks[1]();
+  expect(mock.toast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "Could not check the last booking" }));
+  // Another slot also checks first, and the block from the first tap is there.
+  mock.read.mockResolvedValueOnce(landedRead(at("12:10")));
+  await list().picks[2]();
+  expect(mock.book).toHaveBeenCalledTimes(1);
+  expect(mock.root).toHaveBeenCalledTimes(1);
+});
+
+// The first booking can land and its reply still fail. The same requestId lets the
+// server replay that booking instead of a second block.
+it("sends the same requestId on a retry of one slot, and a new one for another slot", async () => {
+  const list = await openSlots([AFTERNOON]);
+  mock.book.mockResolvedValue({ ok: false, code: "network", message: "Reassign did not answer in time." });
+  await list().picks[0]();
+  await list().picks[0]();
+  await list().picks[1]();
+  expect(requestIdOf(1)).toBe(requestIdOf(0));
+  expect(requestIdOf(2)).not.toBe(requestIdOf(0));
 });
 
 it("pushes the empty state when no free slot fits", async () => {
@@ -675,16 +737,16 @@ it("pushes the empty state when no free slot fits", async () => {
   expect(list()).toMatchObject({ titles: [], empty: true });
 });
 
-it("sends one create for a double tap on a slot", async () => {
+it("sends one booking for a double tap on a slot", async () => {
   const list = await openSlots([AFTERNOON]);
   let answer: (value: unknown) => void = () => undefined;
-  mock.create.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+  mock.book.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
   const pick = list().picks[0];
   const taps = Promise.all([pick(), pick()]);
-  await vi.waitFor(() => expect(mock.create).toHaveBeenCalledTimes(1));
+  await vi.waitFor(() => expect(mock.book).toHaveBeenCalledTimes(1));
   answer({ ok: true, data: { results: [{ index: 0, status: "ok" }] } });
   await taps;
-  expect(mock.create).toHaveBeenCalledTimes(1);
+  expect(mock.book).toHaveBeenCalledTimes(1);
   expect(mock.root).toHaveBeenCalledTimes(1);
 });
 
@@ -696,13 +758,13 @@ it("allows no second booking while closing the list after success", async () => 
   await vi.waitFor(() => expect(mock.root).toHaveBeenCalledTimes(1));
   try {
     await list().picks.at(-1)!();
-    expect(mock.create).toHaveBeenCalledTimes(1);
+    expect(mock.book).toHaveBeenCalledTimes(1);
   } finally {
     close();
     await booking;
   }
   await list().picks[0]();
-  expect(mock.create).toHaveBeenCalledTimes(1);
+  expect(mock.book).toHaveBeenCalledTimes(1);
 });
 
 it("keeps a successful booking final even when closing the list fails", async () => {
@@ -710,7 +772,7 @@ it("keeps a successful booking final even when closing the list fails", async ()
   mock.root.mockRejectedValueOnce(new Error("Could not close Raycast"));
   await expect(list().picks[0]()).rejects.toThrow("Could not close Raycast");
   await list().picks[0]();
-  expect(mock.create).toHaveBeenCalledTimes(1);
+  expect(mock.book).toHaveBeenCalledTimes(1);
 });
 
 it("rounds the account clock offset to whole quarter hours", () => {

@@ -71,6 +71,7 @@ export function isMirrorStyle(value: unknown): value is MirrorStyle {
 
 export const PATHS = {
   schedule: "/schedule",
+  schedulePlan: "/schedule/plan",
   events: "/events",
   eventsSearch: "/events/search",
   actionsUndo: "/actions/undo",

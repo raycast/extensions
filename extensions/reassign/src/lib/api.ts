@@ -274,10 +274,14 @@ export function nearestSlotsOf(error: unknown): TimeSlot[] | undefined {
   );
 }
 
-/** A read, or a write that the server deduplicates by its `submissionId`. */
+/** A read, or a write that the server deduplicates by its `requestId` / `submissionId`. */
 function safeToRetry(method: "GET" | "POST", body: unknown): boolean {
   if (method === "GET") return true;
-  return typeof (body as { submissionId?: unknown } | undefined)?.submissionId === "string";
+  const b = body as { submissionId?: unknown; requests?: { requestId?: unknown }[] } | undefined;
+  if (typeof b?.submissionId === "string") return true;
+  return (
+    Array.isArray(b?.requests) && b.requests.length > 0 && b.requests.every((r) => typeof r?.requestId === "string")
+  );
 }
 
 /** The JSON body, or undefined. A non-JSON body (an HTML error page) is never a message. */
@@ -408,6 +412,23 @@ export function listCalendars(): Promise<ApiResult<CalendarsResponse>> {
 /** The one event write endpoint: create, update, shift, reflect, and delete ops. */
 export function writeEvents(ops: WriteOp[]): Promise<ApiResult<BatchReceipt>> {
   return request<BatchReceipt>("POST", PATHS.events, { ops });
+}
+
+/** One exact /schedule/plan booking. The calendar fields mean the same as on a `create` op. */
+export interface PlanBooking extends Pick<
+  EventFields,
+  "notes" | "areaId" | "activityTypeId" | "kind" | "calendarId" | "mirrorCalendarIds" | "mirrorStyles"
+> {
+  name: string;
+  start: string;
+  durationMinutes: number;
+  // A retry with the same id within 60 s replays the first booking and does not book again.
+  requestId: string;
+}
+
+/** Book one block at an exact start. A taken start is a `conflict` row with `nearestSlots`. */
+export function bookSlot(booking: PlanBooking): Promise<ApiResult<BatchReceipt>> {
+  return request<BatchReceipt>("POST", PATHS.schedulePlan, { requests: [booking] });
 }
 
 export function undo(tokens: string[]): Promise<ApiResult<BatchReceipt>> {

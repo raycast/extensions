@@ -8,6 +8,7 @@ vi.mock("../src/lib/oauth", () => {
   return { getAccessToken: vi.fn(async () => "token"), NotAuthorizedError, SignedOutError };
 });
 import {
+  bookSlot,
   getSchedule,
   getScheduleWithBacklog,
   getFreeSlots,
@@ -246,6 +247,20 @@ it("retries a 503 once for a body with a submissionId, with the same id", async 
   const ids = fetchMock.mock.calls.map((c) => JSON.parse(c[1].body).submissionId);
   expect(ids).toHaveLength(2);
   expect(ids[0]).toBe(ids[1]);
+});
+// The server replays a keyed booking, so the 503 retry cannot book the block twice.
+it("retries a 503 once for a slot booking, with the same requestId", async () => {
+  const receipt = { results: [{ index: 0, status: "ok", result: { event: { id: "ev1" } } }], undoToken: "u1" };
+  fetchMock.mockResolvedValueOnce(busy()).mockResolvedValueOnce(Response.json(receipt));
+  const booking = { name: "Read", start: "2026-09-21T09:00", durationMinutes: 60, requestId: "req-1" };
+  expect(await withFakeBackoff(() => bookSlot(booking))).toEqual({ ok: true, data: receipt });
+  expect(fetchMock.mock.calls.map((c) => c[0])).toEqual([
+    expect.stringMatching(/\/schedule\/plan$/),
+    expect.stringMatching(/\/schedule\/plan$/),
+  ]);
+  const bodies = fetchMock.mock.calls.map((c) => JSON.parse(c[1].body));
+  expect(bodies[0]).toEqual({ requests: [booking] });
+  expect(bodies[1]).toEqual(bodies[0]);
 });
 it("does not show a non-JSON error page as the message", async () => {
   const page = "<!DOCTYPE html><html><body>FUNCTION_INVOCATION_TIMEOUT</body></html>";
