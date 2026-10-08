@@ -16,6 +16,7 @@
 - Fix light icon symbols always being black; they're now black or white, whichever stands out more
 - Fix Control Lights loading forever when the bridge has no lights
 - Fix the names of the Steel Blue and Old Lace colors
+- Remove entertainment areas from the Control Groups description, as the command never listed them
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

@@ -32,10 +32,9 @@
       "subtitle": "Hue",
       "keywords": [
         "room",
-        "zone",
-        "entertainment"
+        "zone"
       ],
-      "description": "List, search and control rooms, zones and entertainment areas",
+      "description": "List, search and control rooms and zones",
       "mode": "view"
     },
     {
