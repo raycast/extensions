@@ -8,23 +8,6 @@ import * as path from "path";
 import QRCode from "qrcode";
 
 const QR_CODE_TIMEOUT = 30000;
-function sleepWithAbort(ms: number, signal?: AbortSignal): Promise<void> {
-  if (signal?.aborted) return Promise.resolve();
-  return new Promise<void>((resolve) => {
-    const onAbort = () => {
-      clearTimeout(timer);
-      signal?.removeEventListener("abort", onAbort);
-      resolve();
-    };
-
-    const timer = setTimeout(() => {
-      signal?.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-
-    signal?.addEventListener("abort", onAbort, { once: true });
-  });
-}
 
 const SESSION_KEY = "telegram_session";
 const AUTH_SESSION_KEY = "telegram_auth_session";
@@ -252,43 +235,28 @@ export async function authenticateWithQr(
   }
 
   const { abortSignal } = callbacks;
-  if (abortSignal?.aborted) {
+  const isAborted = () => !!abortSignal?.aborted;
+  if (isAborted()) {
     return { needsPassword: false, success: false };
   }
 
-  // Stage 1: Wait for scan event, loop result, or abort
-  let isListening = true;
-  let scanResult: Api.auth.TypeLoginToken | undefined;
-  let scanError: unknown | undefined;
-
-  let resolveScan!: () => void;
-  const scanPromise = new Promise<void>((resolve) => {
-    resolveScan = resolve;
-  });
+  let scanDetected = false;
+  let resolveScanWait: (() => void) | undefined;
 
   const rawEvent = new events.Raw({});
   const onUpdate = (update: unknown) => {
-    if (update instanceof Api.UpdateLoginToken && isListening) {
-      isListening = false;
-      resolveScan();
+    if (update instanceof Api.UpdateLoginToken) {
+      scanDetected = true;
+      resolveScanWait?.();
     }
   };
   client.addEventHandler(onUpdate, rawEvent);
 
-  let onAbort: (() => void) | undefined;
-  const abortPromise = new Promise<void>((resolve) => {
-    if (abortSignal?.aborted) {
-      resolve();
-      return;
-    }
-    onAbort = () => resolve();
-    abortSignal?.addEventListener("abort", onAbort, { once: true });
-  });
-
-  const refreshLoop = (async () => {
-    while (isListening && !abortSignal?.aborted) {
+  try {
+    while (!isAborted()) {
+      let result: Api.auth.TypeLoginToken;
       try {
-        const result = await client.invoke(
+        result = await client.invoke(
           new Api.auth.ExportLoginToken({
             apiId: config.apiId,
             apiHash: config.apiHash,
@@ -296,121 +264,93 @@ export async function authenticateWithQr(
           }),
         );
 
-        if (!isListening || abortSignal?.aborted) break;
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
 
-        if (result instanceof Api.auth.LoginToken) {
-          const base64Url = Buffer.from(result.token).toString("base64url");
-          const tgUrl = `tg://login?token=${base64Url}`;
-          const dataUrl = await QRCode.toDataURL(tgUrl, {
-            margin: 1,
-            width: 200,
-          });
-          if (!isListening || abortSignal?.aborted) break;
-          await callbacks.onQrCode({ tgUrl, dataUrl });
-        } else {
-          // Received LoginTokenSuccess or LoginTokenMigrateTo directly in refresh loop
-          scanResult = result;
-          isListening = false;
-          resolveScan();
-          break;
+        if (result instanceof Api.auth.LoginTokenSuccess || result instanceof Api.auth.LoginTokenMigrateTo) {
+          return await handleLoginTokenResult(client, result, isAborted);
         }
       } catch (err: unknown) {
-        if (!isListening || abortSignal?.aborted) break;
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
         const errorText =
           err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
         const upper = errorText.toUpperCase();
+
         if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
-          scanError = err;
-          isListening = false;
-          resolveScan();
-          break;
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
         }
+
         if (upper.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
-          // Token was already accepted on mobile while refresh was in flight
-          isListening = false;
-          resolveScan();
-          break;
+          if (await client.isUserAuthorized()) {
+            return completeAuthentication(client, isAborted);
+          }
+          await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
+          return { needsPassword: true, success: false };
         }
-        scanError = err;
-        isListening = false;
-        resolveScan();
-        break;
+
+        throw err;
       }
 
-      await sleepWithAbort(QR_CODE_TIMEOUT, abortSignal);
-    }
-  })();
+      if (result instanceof Api.auth.LoginToken) {
+        if (scanDetected) {
+          scanDetected = false;
+          continue;
+        }
 
-  try {
-    await Promise.race([scanPromise, refreshLoop, abortPromise]);
-  } finally {
-    isListening = false;
-    client.removeEventHandler(onUpdate, rawEvent);
-    if (onAbort) {
-      abortSignal?.removeEventListener("abort", onAbort);
-    }
-  }
+        const base64Url = Buffer.from(result.token).toString("base64url");
+        const tgUrl = `tg://login?token=${base64Url}`;
+        const dataUrl = await QRCode.toDataURL(tgUrl, {
+          margin: 1,
+          width: 200,
+        });
 
-  // Stage 2: Finalize Authentication (Single Sequential Execution Path)
-  const isAborted = () => !!abortSignal?.aborted;
-  if (isAborted()) {
+        if (isAborted()) {
+          return { needsPassword: false, success: false };
+        }
+
+        await callbacks.onQrCode({ tgUrl, dataUrl });
+
+        if (!scanDetected && !isAborted()) {
+          await new Promise<void>((resolve) => {
+            let timer: NodeJS.Timeout | undefined;
+            let onAbort: (() => void) | undefined;
+
+            const cleanup = () => {
+              if (timer !== undefined) {
+                clearTimeout(timer);
+                timer = undefined;
+              }
+              if (onAbort && abortSignal) {
+                abortSignal.removeEventListener("abort", onAbort);
+              }
+              resolveScanWait = undefined;
+            };
+
+            const done = () => {
+              cleanup();
+              resolve();
+            };
+
+            resolveScanWait = done;
+            timer = setTimeout(done, QR_CODE_TIMEOUT);
+
+            if (abortSignal) {
+              onAbort = done;
+              abortSignal.addEventListener("abort", onAbort, { once: true });
+            }
+          });
+        }
+      }
+    }
+
     return { needsPassword: false, success: false };
-  }
-
-  // Case A: 2FA was already caught by the refresh loop
-  if (scanError) {
-    const errorText =
-      scanError instanceof Error
-        ? scanError.message
-        : String((scanError as { errorMessage?: string })?.errorMessage || scanError);
-    const upper = errorText.toUpperCase();
-    if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
-      await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
-      return { needsPassword: true, success: false };
-    }
-    if (!upper.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
-      throw scanError;
-    }
-  }
-
-  // Case B & C: Finalize token exchange under unified 2FA / error handling
-  try {
-    const finalResult =
-      scanResult ??
-      (await client.invoke(
-        new Api.auth.ExportLoginToken({
-          apiId: config.apiId,
-          apiHash: config.apiHash,
-          exceptIds: [],
-        }),
-      ));
-
-    if (isAborted()) {
-      return { needsPassword: false, success: false };
-    }
-
-    return await handleLoginTokenResult(client, finalResult, isAborted);
-  } catch (err: unknown) {
-    if (isAborted()) {
-      return { needsPassword: false, success: false };
-    }
-
-    const errorText =
-      err instanceof Error ? err.message : String((err as { errorMessage?: string })?.errorMessage || err);
-    const upper = errorText.toUpperCase();
-
-    if (upper.includes("SESSION_PASSWORD_NEEDED") || upper.includes("ACCOUNT HAS 2FA ENABLED")) {
-      await LocalStorage.setItem(AUTH_SESSION_KEY, client.session.save() as unknown as string);
-      return { needsPassword: true, success: false };
-    }
-
-    if (upper.includes("AUTH_TOKEN_ALREADY_ACCEPTED")) {
-      if (await client.isUserAuthorized()) {
-        return completeAuthentication(client, isAborted);
-      }
-    }
-
-    throw err;
+  } finally {
+    client.removeEventHandler(onUpdate, rawEvent);
   }
 }
 
