@@ -109,7 +109,7 @@ export function PhotoshopActionPanel({
       <ActionPanel.Section title="View">
         <Action
           title={viewMode === "grid" ? "Switch to List View" : "Switch to Grid View"}
-          icon={viewMode === "grid" ? Icon.List : Icon.Grid}
+          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onAction={onToggleViewMode}
         />
