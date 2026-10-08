@@ -3,7 +3,7 @@
 ## [Browse Items] - {PR_MERGE_DATE}
 
 - Search Items and List Vaults become one command, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. Its Open On preference starts on the vaults instead
-- Primary Action, Fill Login and the Item List preferences move to Browse Items, the only command using them, so they may need to be set again once
+- Primary Action, Fill Login and the Item List preferences move to Browse Items, the only command using them. Raycast resets them to their defaults once, so they need to be set again
 - Hotkeys and aliases of Search Items keep working with Browse Items. Those of List Vaults need to be set again on Browse Items
 
 ## [Login Fixes] - {PR_MERGE_DATE}
