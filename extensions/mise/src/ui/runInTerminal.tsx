@@ -1,5 +1,5 @@
-import { Action, closeMainWindow, Icon, type Keyboard, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { Action, closeMainWindow, Icon, type Keyboard } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { terminalLaunches, type TerminalLaunch } from "../terminal/script";
 import { readPreferences } from "./preferences";
@@ -23,11 +23,7 @@ export async function runInTerminal(command: string): Promise<void> {
     await launchFirstThatWorks(terminalLaunches(terminalApp?.bundleId, command, shell));
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Could not open ${terminalApp?.name ?? "Terminal"}`,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: `Could not open ${terminalApp?.name ?? "Terminal"}` });
   }
 }
 

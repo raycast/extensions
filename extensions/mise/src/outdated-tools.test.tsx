@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MenuBarExtra, mocks } from "../test/raycast-api";
-import { useCachedPromiseFixtures } from "../test/raycast-utils";
+import { showFailureToast, useCachedPromiseFixtures } from "../test/raycast-utils";
 import { flush, render } from "../test/render";
 import { listOutdated, parseOutdated } from "./mise/outdated";
 import outdatedFixture from "./mise/fixtures/outdated.json";
@@ -21,6 +21,19 @@ describe("Tools Menu Bar", () => {
       type: "userInitiated",
       context: { upgrade: "gh" },
     });
+  });
+
+  it("shows a failure toast when Show Outdated Tools cannot be launched", async () => {
+    useCachedPromiseFixtures.set(listOutdated, parseOutdated(outdatedFixture));
+    const error = new Error("Command is disabled");
+    mocks.launchCommand.mockRejectedValueOnce(error);
+    const { root } = await render(<Command />);
+    const open = root
+      .findByType(MenuBarExtra)
+      .findAllByType(MenuBarExtra.Item)
+      .find((n) => n.props.title === "Open Outdated Tools");
+    await flush(() => open?.props.onAction());
+    expect(showFailureToast).toHaveBeenCalledWith(error, { title: "Could not open Show Outdated Tools" });
   });
 
   it("shows the failure with a retry when mise outdated fails, not an up-to-date menu", async () => {

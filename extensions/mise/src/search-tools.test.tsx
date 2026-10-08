@@ -86,7 +86,7 @@ describe("Search Tools", () => {
     );
   });
 
-  it("leads an installed row with Remove, which runs unuse then uninstall --all once confirmed", async () => {
+  it("leads an installed row with Remove, which uninstalls every version of an unconfigured tool once confirmed", async () => {
     setup();
     const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
     const { root } = await render(<Command {...launch} />);
@@ -99,7 +99,7 @@ describe("Search Tools", () => {
     expect(mocks.confirmAlert).toHaveBeenLastCalledWith(
       expect.objectContaining({
         title: "Remove jq?",
-        message: "Removes jq from your mise config and deletes 2 installed versions.",
+        message: "Deletes 2 installed versions.",
         primaryAction: expect.objectContaining({ title: "Remove", style: "destructive" }),
       }),
     );
@@ -107,12 +107,24 @@ describe("Search Tools", () => {
 
     mocks.confirmAlert.mockResolvedValue(true);
     await act(root, "jq", "Remove jq…");
-    expect(runMise.mock.calls.map((call) => call[1])).toEqual([
-      ["unuse", "jq"],
-      ["uninstall", "--all", "jq"],
-    ]);
+    expect(runMise.mock.calls.map((call) => call[1])).toEqual([["uninstall", "--all", "jq"]]);
     expect(mocks.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "jq removed" }));
     expect(useCachedPromiseFixtures.revalidateOf(listInstalled)).toHaveBeenCalledTimes(1);
+  });
+
+  it("removes a configured tool with unuse then uninstall --all", async () => {
+    setup();
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const { root } = await render(<Command {...launch} />);
+    mocks.confirmAlert.mockResolvedValue(true);
+    await act(root, "node", "Remove node…");
+    expect(mocks.confirmAlert).toHaveBeenLastCalledWith(
+      expect.objectContaining({ message: "Removes node from your mise config and deletes 8 installed versions." }),
+    );
+    expect(runMise.mock.calls.map((call) => call[1])).toEqual([
+      ["unuse", "node"],
+      ["uninstall", "--all", "node"],
+    ]);
   });
 
   it("hands mise use -g to the chosen terminal from Run in Terminal and closes the window", async () => {

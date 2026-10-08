@@ -87,11 +87,12 @@ export function uninstall(tool: string, version: string, options: UninstallOptio
 }
 
 // `mise unuse` drops the request from whichever config declares it and prunes only that version;
-// versions no config asked for stay installed until uninstall --all.
-export function remove(tool: string): MiseOperation {
+// versions no config asked for stay installed until uninstall --all. A tool no config declares
+// has nothing to unuse, so it goes straight to uninstall --all.
+export function remove(tool: string, { configured }: { configured: boolean }): MiseOperation {
+  const uninstallAll = ["uninstall", "--all", tool];
   return {
-    args: ["unuse", tool],
-    andThen: [["uninstall", "--all", tool]],
+    ...(configured ? { args: ["unuse", tool], andThen: [uninstallAll] } : { args: uninstallAll }),
     title: `Removing ${tool}…`,
     successTitle: `${tool} removed`,
     failureTitle: `Removing ${tool} failed`,

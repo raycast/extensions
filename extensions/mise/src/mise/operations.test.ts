@@ -139,10 +139,19 @@ describe("uninstall", () => {
 });
 
 describe("remove", () => {
-  it("drops the tool from config, then deletes every installed version", () => {
-    expect(remove("jq")).toEqual({
+  it("drops a configured tool from config, then deletes every installed version", () => {
+    expect(remove("jq", { configured: true })).toEqual({
       args: ["unuse", "jq"],
       andThen: [["uninstall", "--all", "jq"]],
+      title: "Removing jq…",
+      successTitle: "jq removed",
+      failureTitle: "Removing jq failed",
+    });
+  });
+
+  it("deletes every installed version of a tool no config declares without running unuse", () => {
+    expect(remove("jq", { configured: false })).toEqual({
+      args: ["uninstall", "--all", "jq"],
       title: "Removing jq…",
       successTitle: "jq removed",
       failureTitle: "Removing jq failed",

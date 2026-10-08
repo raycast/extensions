@@ -9,6 +9,8 @@ const revalidates = new Map<AnyFn, Mock<() => void>>();
 
 export const runAppleScript = vi.fn<(script: string) => Promise<string>>(async () => "");
 
+export const showFailureToast = vi.fn<(error: unknown, options?: { title?: string }) => Promise<void>>(async () => {});
+
 export const useCachedPromiseFixtures = {
   set<F extends AnyFn>(fn: F, data: Fixture<F>) {
     fixtures.set(fn, { data });

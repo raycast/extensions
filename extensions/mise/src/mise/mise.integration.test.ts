@@ -96,7 +96,7 @@ describe("operations dry-run against the real mise", () => {
   });
 
   it("remove runs unuse, which prunes by default, then uninstall --all", async () => {
-    const op = remove("jq");
+    const op = remove("jq", { configured: true });
     const unuse = await runMise(loc(), [op.args[0], "--help"]);
     expect(unuse.code).toBe(0);
     expect(unuse.stdout).toMatch(/prune/);

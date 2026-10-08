@@ -37,7 +37,7 @@ describe("runOperation", () => {
   it("runs a multi-step operation in order and reports success once the last step exits 0", async () => {
     const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
     const onSuccess = vi.fn();
-    expect(await runOperation(location, remove("jq"), onSuccess)).toMatchObject({ code: 0 });
+    expect(await runOperation(location, remove("jq", { configured: true }), onSuccess)).toMatchObject({ code: 0 });
     expect(runMise.mock.calls.map((call) => call[1])).toEqual([
       ["unuse", "jq"],
       ["uninstall", "--all", "jq"],
@@ -53,7 +53,7 @@ describe("runOperation", () => {
       .spyOn(exec, "runMise")
       .mockResolvedValueOnce({ code: 1, stdout: "", stderr: "mise ERROR jq is not in any config" });
     const onSuccess = vi.fn();
-    expect(await runOperation(location, remove("jq"), onSuccess)).toMatchObject({ code: 1 });
+    expect(await runOperation(location, remove("jq", { configured: true }), onSuccess)).toMatchObject({ code: 1 });
     expect(runMise).toHaveBeenCalledOnce();
     expect(mocks.showToast).toHaveBeenLastCalledWith(
       expect.objectContaining({

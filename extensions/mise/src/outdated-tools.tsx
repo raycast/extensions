@@ -1,5 +1,5 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import type { MiseLocation } from "./mise/locate";
 import { listOutdated } from "./mise/outdated";
@@ -20,12 +20,17 @@ export default function Command() {
   return <OutdatedTools location={mise.location} />;
 }
 
-function openOutdatedTools(upgrade?: string) {
-  return launchCommand({
-    name: "show-outdated",
-    type: LaunchType.UserInitiated,
-    context: upgrade ? { upgrade } : undefined,
-  });
+// launchCommand rejects when the user has disabled Show Outdated Tools.
+async function openOutdatedTools(upgrade?: string) {
+  try {
+    await launchCommand({
+      name: "show-outdated",
+      type: LaunchType.UserInitiated,
+      context: upgrade ? { upgrade } : undefined,
+    });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open Show Outdated Tools" });
+  }
 }
 
 function OutdatedTools({ location }: { location: MiseLocation }) {

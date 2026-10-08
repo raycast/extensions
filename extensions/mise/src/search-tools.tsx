@@ -72,12 +72,16 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
     runOperation(location, useGlobally(spec, configFile), installed.revalidate);
   const removeTool = async (tool: InstalledTool) => {
     const count = tool.versions.length;
+    const configured = tool.versions.some((v) => v.source);
+    const versions = `${count} installed version${count === 1 ? "" : "s"}`;
     const confirmed = await confirmAlert({
       title: `Remove ${tool.name}?`,
-      message: `Removes ${tool.name} from your mise config and deletes ${count} installed version${count === 1 ? "" : "s"}.`,
+      message: configured
+        ? `Removes ${tool.name} from your mise config and deletes ${versions}.`
+        : `Deletes ${versions}.`,
       primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
     });
-    if (confirmed) await runOperation(location, remove(tool.name), installed.revalidate);
+    if (confirmed) await runOperation(location, remove(tool.name, { configured }), installed.revalidate);
   };
   const itemProps = (spec: string) => ({
     installed: installedByName.get(spec),
