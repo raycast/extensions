@@ -7,11 +7,6 @@ import {
 } from "../services/telegram-client";
 import { getTelegramErrorMessage } from "./errors";
 
-export interface Preferences {
-  apiId: string;
-  apiHash: string;
-}
-
 export function getConfig(): TelegramConfig {
   const preferences = getPreferenceValues<Preferences>();
 
