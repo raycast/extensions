@@ -1,6 +1,6 @@
 # Local Amp Runners Changelog
 
-## [Fix Runner Settings] - {PR_MERGE_DATE}
+## [Fix Runner Settings] - 2026-10-08
 
 - Open Amp's App Settings → Runner tab directly.
 - Show a shortcut to grant Accessibility or Automation access when Raycast can't control Amp.
