@@ -13,6 +13,13 @@ export function parseWorkspaces(output: string): Workspace[] {
     });
 }
 
+export function resolveSelection(items: { key: string }[], chosen: string, preferred: string | undefined): string {
+  if (items.some((item) => item.key === chosen)) return chosen;
+  const preferredKey = preferred?.trim();
+  const match = items.find((item) => item.key === preferredKey);
+  return (match ?? items[0])?.key ?? "";
+}
+
 export function validateTaskForm(input: { title: string; workspaceKey: string; projectKey: string }): string | null {
   if (!input.title.trim()) return "Title is required";
   if (!input.workspaceKey || !input.projectKey) return "Workspace and project are required";

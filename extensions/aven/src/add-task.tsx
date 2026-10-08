@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { promisify } from "node:util";
 import { execFile as execFileCallback } from "node:child_process";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, getPreferenceValues } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { buildAddTaskArgs, parseWorkspaces, validateTaskForm, type Project } from "./lib";
+import { showFailureToast, useExec } from "@raycast/utils";
+import { buildAddTaskArgs, parseWorkspaces, resolveSelection, validateTaskForm, type Project } from "./lib";
 
 const execFile = promisify(execFileCallback);
 
-const AVEN_PATH = `${process.env.HOME}/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`;
+const AVEN_PATH = `${process.env.HOME}/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:${process.env.PATH ?? ""}`;
 const AVEN_ENV = { ...process.env, PATH: AVEN_PATH };
 
 const STATUSES = [
@@ -22,8 +22,8 @@ const STATUSES = [
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.AddTask>();
 
-  const [workspaceKey, setWorkspaceKey] = useState<string>("");
-  const [projectKey, setProjectKey] = useState<string>("");
+  const [chosenWorkspace, setChosenWorkspace] = useState<string>("");
+  const [chosenProject, setChosenProject] = useState<string>("");
   const [status, setStatus] = useState<string>("inbox");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -40,11 +40,7 @@ export default function Command() {
 
   const workspaces = useMemo(() => (workspacesOutput ? parseWorkspaces(workspacesOutput) : []), [workspacesOutput]);
 
-  useEffect(() => {
-    if (workspaceKey || workspaces.length === 0) return;
-    const preferred = workspaces.find((workspace) => workspace.key === preferences.defaultWorkspace);
-    setWorkspaceKey((preferred ?? workspaces[0]).key);
-  }, [workspaces, workspaceKey, preferences.defaultWorkspace]);
+  const workspaceKey = resolveSelection(workspaces, chosenWorkspace, preferences.defaultWorkspace);
 
   const {
     data: projectsOutput,
@@ -64,23 +60,20 @@ export default function Command() {
     }
   }, [projectsOutput]);
 
-  useEffect(() => {
-    if (projects.length === 0) {
-      if (projectKey !== "") setProjectKey("");
-      return;
-    }
-    if (projects.some((project) => project.key === projectKey)) return;
-    const preferred = projects.find((project) => project.key === preferences.defaultProject);
-    setProjectKey((preferred ?? projects[0]).key);
-  }, [projects, projectKey, preferences.defaultProject]);
+  const projectKey = resolveSelection(projects, chosenProject, preferences.defaultProject);
 
   const listError = workspacesError ?? projectsError;
+
+  function handleWorkspaceChange(key: string) {
+    setChosenWorkspace(key);
+    setChosenProject("");
+  }
 
   async function handleSubmit() {
     if (submitInFlight.current) return;
 
     if (listError) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to load from aven", message: listError.message });
+      await showFailureToast(listError, { title: "Failed to load from aven" });
       return;
     }
 
@@ -98,16 +91,17 @@ export default function Command() {
       await showToast({ style: Toast.Style.Success, title: "Task created" });
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create task",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Failed to create task" });
     } finally {
       setIsSubmitting(false);
       submitInFlight.current = false;
     }
   }
+
+  const isInitialLoad =
+    !listError && (workspacesOutput === undefined || (workspaces.length > 0 && projectsOutput === undefined));
+
+  if (isInitialLoad) return <Form isLoading />;
 
   return (
     <Form
@@ -119,12 +113,12 @@ export default function Command() {
       }
     >
       {listError && <Form.Description title="Error" text={listError.message} />}
-      <Form.Dropdown id="workspace" title="Workspace" value={workspaceKey} onChange={setWorkspaceKey}>
+      <Form.Dropdown id="workspace" title="Workspace" value={workspaceKey} onChange={handleWorkspaceChange}>
         {workspaces.map((workspace) => (
           <Form.Dropdown.Item key={workspace.key} value={workspace.key} title={workspace.name} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="project" title="Project" value={projectKey} onChange={setProjectKey}>
+      <Form.Dropdown id="project" title="Project" value={projectKey} onChange={setChosenProject}>
         {projects.map((project) => (
           <Form.Dropdown.Item key={project.key} value={project.key} title={project.name} />
         ))}

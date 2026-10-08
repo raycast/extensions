@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAddTaskArgs, parseWorkspaces, validateTaskForm } from "./lib";
+import { buildAddTaskArgs, parseWorkspaces, resolveSelection, validateTaskForm } from "./lib";
 
 describe("parseWorkspaces", () => {
   it("parses key and quoted name from each line", () => {
@@ -85,5 +85,34 @@ describe("buildAddTaskArgs", () => {
       description: "",
     });
     expect(args[1]).toBe("Fix `rm -rf /` in docs");
+  });
+});
+
+describe("resolveSelection", () => {
+  const items = [{ key: "a" }, { key: "b" }, { key: "c" }];
+
+  it("keeps a valid user choice over the preferred key", () => {
+    expect(resolveSelection(items, "c", "b")).toBe("c");
+  });
+
+  it("uses the preferred key when nothing is chosen", () => {
+    expect(resolveSelection(items, "", "b")).toBe("b");
+  });
+
+  it("trims whitespace around the preferred key", () => {
+    expect(resolveSelection(items, "", " b ")).toBe("b");
+  });
+
+  it("falls back to the first item when the preferred key is unknown or unset", () => {
+    expect(resolveSelection(items, "", "zzz")).toBe("a");
+    expect(resolveSelection(items, "", undefined)).toBe("a");
+  });
+
+  it("falls back to the preferred key when the chosen one no longer exists", () => {
+    expect(resolveSelection(items, "gone", "b")).toBe("b");
+  });
+
+  it("returns an empty string when there are no items", () => {
+    expect(resolveSelection([], "a", "b")).toBe("");
   });
 });

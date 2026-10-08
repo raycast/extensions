@@ -1,5 +1,5 @@
 # Aven Changelog
 
-## [Initial Version] - 2026-10-01
+## [Initial Version] - {PR_MERGE_DATE}
 
 Add `Add Task` command
