@@ -36,20 +36,19 @@ export async function getApexWSConnection(): Promise<Connection> {
   if (con) {
     return con;
   }
-  const instance = await apex.nearestURL();
-  const auth = createLongLivedTokenAuth(instance, apex.token);
-  const connection = await createConnection({ auth, createSocket: async () => createSocket(auth, apex.ignoreCerts) });
-  // The library's own reconnect logic keeps retrying the same host; if that
-  // keeps failing, the network likely changed (e.g. left home WiFi). Drop
-  // the cached connection so the next call re-resolves nearestURL() instead
-  // of being stuck on a host that's no longer reachable.
-  connection.addEventListener("reconnect-error", () => {
-    if (con === connection) {
-      con = undefined;
-      connection.close();
-    }
+  // The library calls this factory for the initial connect AND for every
+  // internal reconnect attempt, passing the same Connection through each
+  // time (preserving existing subscriptions). Resolving nearestURL() fresh
+  // on every call - instead of baking in one Auth up front - is what lets a
+  // reconnect follow a network change instead of retrying a host that's no
+  // longer reachable.
+  con = await createConnection({
+    createSocket: async () => {
+      const instance = await apex.nearestURL();
+      const auth = createLongLivedTokenAuth(instance, apex.token);
+      return createSocket(auth, apex.ignoreCerts);
+    },
   });
-  con = connection;
   return con;
 }
 
