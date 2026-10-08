@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
-import type { Group, Light, Scene } from "./lib/types";
+import type { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue, useHueResources } from "./hooks/useHue";
@@ -97,10 +97,10 @@ function Scene(props: {
 
 function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Scene) {
   const changesToLights = new Map(
-    scene.actions.map(({ target, action }) => [
+    scene.actions.map(({ target, action: { on, dimming, color, color_temperature } }) => [
       target.rid,
       // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
-      (action.color ? { ...action, color_temperature: { mirek: null, mirek_valid: false } } : action) as Partial<Light>,
+      { on, dimming, color, color_temperature: color ? { mirek: null, mirek_valid: false } : color_temperature },
     ]),
   );
   const changesToGroupedLights = new Map(

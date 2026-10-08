@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
-import { GroupedLight, HasId, Id, Light, Room, Scene, Zone } from "../lib/types";
+import { DeepPartial, GroupedLight, HueResource, Light, Room, Scene, Zone } from "../lib/types";
 import { useHueBridgeMachine } from "./useHueBridgeMachine";
 import { updateItems } from "../helpers/collections";
 import { Toast } from "@raycast/api";
@@ -34,12 +34,12 @@ export function useHue() {
     if (hueClient === undefined) return;
 
     const stopListening = hueClient.listenToEventSource((resources) => {
-      const apply = <T extends HasId>(type: string, setState: React.Dispatch<React.SetStateAction<T[]>>) => {
-        const changes = new Map<Id, Partial<T>>();
-        for (const resource of resources.filter((r) => r.type === type) as (Partial<T> & HasId)[]) {
-          changes.set(resource.id, { ...changes.get(resource.id), ...resource });
-        }
-        if (changes.size > 0) setState((items) => updateItems(items, changes));
+      const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
+        const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
+        if (changes.length === 0) return;
+        setState((items) =>
+          changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
+        );
       };
       apply("light", setLights);
       apply("grouped_light", setGroupedLights);

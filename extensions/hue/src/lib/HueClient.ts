@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   BridgeConfig,
   GroupedLight,
+  GroupedLightRequest,
+  HueEvent,
+  HueResponse,
   Light,
   LightRequest,
   Method,
+  ResourceIdentifier,
   Room,
   Scene,
   SceneRequest,
-  UpdateEvent,
   Zone,
 } from "./types";
 import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
@@ -19,12 +20,9 @@ import { logError } from "../helpers/errors";
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
-type Response = {
+type Response<T> = {
   headers: IncomingHttpHeaders & IncomingHttpStatusHeader;
-  data: {
-    errors: { description: string }[];
-    data: any[];
-  };
+  data: HueResponse<T>;
 };
 
 export default class HueClient {
@@ -37,27 +35,27 @@ export default class HueClient {
   ) {}
 
   public async getLights(): Promise<Light[]> {
-    const response = await this.makeRequest("GET", "/clip/v2/resource/light");
+    const response = await this.makeRequest<Light>("GET", "/clip/v2/resource/light");
     return response.data.data;
   }
 
   public async getGroupedLights(): Promise<GroupedLight[]> {
-    const response = await this.makeRequest("GET", "/clip/v2/resource/grouped_light");
+    const response = await this.makeRequest<GroupedLight>("GET", "/clip/v2/resource/grouped_light");
     return response.data.data;
   }
 
   public async getScenes(): Promise<Scene[]> {
-    const response = await this.makeRequest("GET", "/clip/v2/resource/scene");
+    const response = await this.makeRequest<Scene>("GET", "/clip/v2/resource/scene");
     return response.data.data;
   }
 
   public async getRooms(): Promise<Room[]> {
-    const response = await this.makeRequest("GET", "/clip/v2/resource/room");
+    const response = await this.makeRequest<Room>("GET", "/clip/v2/resource/room");
     return response.data.data;
   }
 
   public async getZones(): Promise<Zone[]> {
-    const response = await this.makeRequest("GET", "/clip/v2/resource/zone");
+    const response = await this.makeRequest<Zone>("GET", "/clip/v2/resource/zone");
     return response.data.data;
   }
 
@@ -74,29 +72,36 @@ export default class HueClient {
     };
   }
 
-  public async updateLight(light: Light, properties: LightRequest): Promise<Partial<Light>[]> {
+  public async updateLight(light: Light, properties: LightRequest): Promise<ResourceIdentifier[]> {
     const response = await this.lightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties),
+      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/light/${light.id}`, properties),
     );
 
     return response.data.data;
   }
 
-  public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<GroupedLight>): Promise<any> {
+  public async updateGroupedLight(
+    groupedLight: GroupedLight,
+    properties: GroupedLightRequest,
+  ): Promise<ResourceIdentifier[]> {
     const response = await this.groupedLightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
+      this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
     );
 
     return response.data.data;
   }
 
-  public async updateScene(scene: Scene, properties: SceneRequest): Promise<any> {
-    const response = await this.makeRequest("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
+  public async updateScene(scene: Scene, properties: SceneRequest): Promise<ResourceIdentifier[]> {
+    const response = await this.makeRequest<ResourceIdentifier>(
+      "PUT",
+      `/clip/v2/resource/scene/${scene.id}`,
+      properties,
+    );
 
     return response.data.data;
   }
 
-  private makeRequest(method: Method, path: string, body?: any): Promise<Response> {
+  private makeRequest<T>(method: Method, path: string, body?: object): Promise<Response<T>> {
     return new Promise((resolve, reject) => {
       const stream = this.http2Session.request({
         [HTTP2_HEADER_METHOD]: method,
@@ -113,7 +118,7 @@ export default class HueClient {
 
       stream.setEncoding("utf8");
 
-      const response: Response = {
+      const response: Response<T> = {
         headers: {},
         data: {
           errors: [],
@@ -165,7 +170,7 @@ export default class HueClient {
     });
   }
 
-  public listenToEventSource(onUpdate: (resources: UpdateEvent["data"]) => void): () => void {
+  public listenToEventSource(onUpdate: (resources: HueEvent["data"]) => void): () => void {
     const stream = this.http2Session.request({
       [HTTP2_HEADER_METHOD]: "GET",
       [HTTP2_HEADER_PATH]: "/eventstream/clip/v2",
@@ -184,7 +189,7 @@ export default class HueClient {
       for (const line of lines) {
         if (!line.startsWith(DATA_PREFIX)) continue;
         try {
-          (JSON.parse(line.slice(DATA_PREFIX.length)) as UpdateEvent[]).forEach((updateEvent) =>
+          (JSON.parse(line.slice(DATA_PREFIX.length)) as HueEvent[]).forEach((updateEvent) =>
             onUpdate(updateEvent.data),
           );
         } catch (error) {

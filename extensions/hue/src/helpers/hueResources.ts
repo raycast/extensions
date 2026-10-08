@@ -1,5 +1,5 @@
 import { Group, GroupedLight, Light, Palette, Scene } from "../lib/types";
-import { miredToHexString, xyToRgbHexString } from "./colors";
+import { miredToHexString, xyToMired, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
 import { environment } from "@raycast/api";
@@ -41,6 +41,10 @@ export function getColorFromLight(light: Light): string {
   return miredToHexString(MIRED_DEFAULT, light.dimming?.brightness);
 }
 
+// In color mode a light has no color temperature, so the temperature actions start from the white nearest its color.
+export const getMiredFromLight = (light: Light): number =>
+  light.color_temperature?.mirek ?? (light.color ? xyToMired(light.color.xy) : MIRED_DEFAULT);
+
 export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
   getLightsFromGroup(lights, group)
     .map(getColorFromLight)
@@ -56,7 +60,7 @@ export function getColorsFromScene(scene: Scene): Palette {
       const uniqueXY = new Set(colors.map((c) => c.color.xy));
       return colors
         .filter((c) => uniqueXY.has(c.color.xy))
-        .map((c) => xyToRgbHexString(c.color.xy, c.color.dimming?.brightness));
+        .map((c) => xyToRgbHexString(c.color.xy, c.dimming.brightness));
     },
     // 2. Action colors
     () => {

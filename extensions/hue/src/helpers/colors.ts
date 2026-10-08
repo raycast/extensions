@@ -127,6 +127,17 @@ export function miredToHexString(mireds: number, brightness = 100) {
 }
 
 /**
+ * Converts a CIE (x, y) color to the color temperature of the nearest white, in mireds, by McCamy's approximation.
+ * Colors far from white get temperatures outside the Hue range.
+ *
+ * @link https://en.wikipedia.org/wiki/Color_temperature#Approximation
+ */
+export function xyToMired({ x, y }: Xy) {
+  const n = (x - 0.332) / (0.1858 - y);
+  return 1_000_000 / (449 * n ** 3 + 3525 * n ** 2 + 6823.3 * n + 5520.33);
+}
+
+/**
  * Because the Hue API does not return the exact brightness value that was set,
  * we need to find the closest brightness so that we can update the UI accordingly.
  */

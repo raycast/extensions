@@ -1,4 +1,4 @@
-import { CssColor, GroupedLight, HasId, Id, Light } from "../lib/types";
+import { CssColor, DeepPartial, GroupedLight, HasId, Id, Light } from "../lib/types";
 import type HueClient from "../lib/HueClient";
 import type { useHue } from "../hooks/useHue";
 import React from "react";
@@ -26,12 +26,18 @@ export function getTransitionTimeInMs(): number {
   return transitionTime;
 }
 
+// Requests take a transition time, which the light's state doesn't hold.
+export const withTransition = <T extends object>(changes: T) => ({
+  ...changes,
+  dynamics: { duration: getTransitionTimeInMs() },
+});
+
 export async function applyUpdate(
   { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
   update: {
     rateLimiter?: { canExecute(): boolean };
-    lights?: Map<Id, Partial<Light>>;
-    groupedLights?: Map<Id, Partial<GroupedLight>>;
+    lights?: Map<Id, DeepPartial<Light>>;
+    groupedLights?: Map<Id, DeepPartial<GroupedLight>>;
     request: (hueClient: HueClient) => Promise<unknown>;
     success: string;
     failure: string;
@@ -63,7 +69,7 @@ export async function applyUpdate(
 }
 
 function optimisticUpdates<T extends HasId>(
-  changes: Map<Id, Partial<T>>,
+  changes: Map<Id, DeepPartial<T>>,
   setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
   let undoState: T[];

@@ -18,6 +18,9 @@
 - Fix the names of the Steel Blue and Old Lace colors
 - Remove entertainment areas from the Control Groups description, as the command never listed them
 - Fix the bridge screens calling the Unlink Saved Hue Bridge action by another name
+- Fix scene images ignoring the brightness of the scene's palette colors
+- Fix the color temperature actions forgetting a light's own limits after its temperature changes
+- Fix changing the color temperature of a light set to a color; it now starts from the nearest white instead of jumping to the coolest
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

@@ -11,7 +11,7 @@ import UnlinkAction from "./components/UnlinkAction";
 import { SetScene } from "./setScene";
 import { getColorsFromGroup, getGroupedLightFromGroup, getLightsFromGroup } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
-import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
+import { applyUpdate, withTransition } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -319,7 +319,6 @@ function handleSetBrightness(
   const changes = {
     on: { on: true },
     dimming: { brightness: brightness },
-    dynamics: { duration: getTransitionTimeInMs() },
   };
 
   const changesToGroupedLights = new Map([[groupedLight.id, changes]]);
@@ -329,7 +328,7 @@ function handleSetBrightness(
     rateLimiter,
     lights: changesToLights,
     groupedLights: changesToGroupedLights,
-    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, changes),
+    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
     success: `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${group.metadata.name}`,
   });
@@ -350,7 +349,6 @@ function handleBrightnessChange(
     // dimming_delta exists, but manually calculating the new value
     // enables the usage of the value in the optimistic update.
     dimming: { brightness: adjustedBrightness },
-    dynamics: { duration: getTransitionTimeInMs() },
   };
 
   const changesToGroupedLights = new Map([[groupedLight.id, changes]]);
@@ -360,7 +358,7 @@ function handleBrightnessChange(
     rateLimiter,
     lights: changesToLights,
     groupedLights: changesToGroupedLights,
-    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, changes),
+    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
     success: `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${group.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${group.metadata.name}`,
   });

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, environment, Grid, Icon } from "@raycast/api";
 import type { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
+import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./hooks/useHue";
@@ -13,9 +13,9 @@ import {
   getClosestBrightness,
   hexToXy,
 } from "./helpers/colors";
-import { getLightsFromGroup } from "./helpers/hueResources";
+import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
-import { applyUpdate, getIconForColor, getTransitionTimeInMs } from "./helpers/raycast";
+import { applyUpdate, getIconForColor, withTransition } from "./helpers/raycast";
 import { createLightIcon } from "./helpers/svgImages";
 
 export default function ControlLights() {
@@ -226,7 +226,8 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
 }
 
 function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () => void }) {
-  if (props.light.color_temperature.mirek <= (props.light.color_temperature.mirek_schema?.mirek_minimum ?? MIRED_MIN)) {
+  const { color_temperature } = props.light;
+  if (!color_temperature || getMiredFromLight(props.light) <= color_temperature.mirek_schema.mirek_minimum) {
     return null;
   }
 
@@ -244,7 +245,8 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
 }
 
 function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () => void }) {
-  if (props.light.color_temperature.mirek >= (props.light.color_temperature.mirek_schema?.mirek_maximum ?? MIRED_MAX)) {
+  const { color_temperature } = props.light;
+  if (!color_temperature || getMiredFromLight(props.light) >= color_temperature.mirek_schema.mirek_maximum) {
     return null;
   }
 
@@ -268,14 +270,13 @@ function handleToggle(
 ) {
   const changes = {
     on: { on: !light.on.on },
-    dynamics: { duration: getTransitionTimeInMs() },
     ...(light.dimming ? { dimming: { brightness: light.dimming?.brightness } } : {}),
   };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, changes),
+    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`,
     failure: `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
   });
@@ -290,13 +291,12 @@ function handleSetBrightness(
   const changes = {
     on: { on: true },
     dimming: { brightness: brightness },
-    dynamics: { duration: getTransitionTimeInMs() },
   };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, changes),
+    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${light.metadata.name}`,
   });
@@ -314,13 +314,12 @@ function handleBrightnessChange(
     // dimming_delta exists, but manually calculating the new value
     // enables the usage of the value in the optimistic update.
     dimming: { brightness: adjustedBrightness },
-    dynamics: { duration: getTransitionTimeInMs() },
   };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, changes),
+    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${light.metadata.name}`,
   });
@@ -339,13 +338,12 @@ function handleSetColor(
     on: { on: true },
     color: { xy: xy },
     dimming: { brightness: brightness },
-    dynamics: { duration: getTransitionTimeInMs() },
   };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, changes),
+    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Set color of ${light.metadata.name} to ${color.name}`,
     failure: "Failed setting color",
   });
@@ -357,19 +355,18 @@ function handleColorTemperatureChange(
   light: Light,
   direction: "increase" | "decrease",
 ) {
-  const adjustedColorTemperature = calculateAdjustedColorTemperature(light.color_temperature.mirek, direction);
+  const adjustedColorTemperature = calculateAdjustedColorTemperature(getMiredFromLight(light), direction);
   const changes = {
     on: { on: true },
     // color_temperature_delta exists, but manually calculating the new value
     // enables the usage of the value in the optimistic update.
     color_temperature: { mirek: adjustedColorTemperature },
-    dynamics: { duration: getTransitionTimeInMs() },
-  } as Partial<Light>;
+  };
 
   return applyUpdate(hue, {
     rateLimiter,
     lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, changes),
+    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`,
     failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${light.metadata.name}`,
   });

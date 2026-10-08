@@ -1,4 +1,4 @@
-import { AnyEventObject, assign, createMachine, fromPromise, StateValue } from "xstate";
+import { AnyEventObject, assign, createMachine, fromPromise, SnapshotFrom } from "xstate";
 import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
@@ -10,20 +10,9 @@ import * as net from "net";
 import { logError } from "../helpers/errors";
 import Style = Toast.Style;
 
-export type HueBridgeState = {
-  value: StateValue;
-  context: HueContext;
-  matches: (value: StateValue) => boolean;
-};
+export type HueBridgeState = SnapshotFrom<ReturnType<typeof hueBridgeMachine>>;
 
-export interface Preferences {
-  transitionTime?: string;
-  toggleAllLights?: "off" | "on";
-  bridgeIpAddress?: string;
-  bridgeUsername?: string;
-}
-
-export type HueContext = {
+type HueContext = {
   bridgeIpAddress?: string;
   bridgeUsername?: string;
   bridgeId?: string;
