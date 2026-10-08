@@ -1,10 +1,10 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Suparelay MCP Server] - {PR_MERGE_DATE}
+## [Add Suparelay MCP Server] - 2026-10-08
 
 - Add Suparelay to the official entries: international calls from your AI assistant, with the price per minute and a Call link to the browser dialer.
 
-## [Update MAQAMI Travel MCP Server] - {PR_MERGE_DATE}
+## [Update MAQAMI Travel MCP Server] - 2026-10-08
 
 - Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
 
