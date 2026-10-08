@@ -4,6 +4,7 @@
 
 - Older emails now load automatically when scrolling to the bottom of the list ("Load More Emails" and ⌘L still work)
 - "Emails to Load" moves from the extension preferences to Browse Email's, the only command that uses it
+- "Compose Format" is renamed "Writing Format", since it also applies to replies and forwards from Browse Email, not only to the Compose Email command
 
 ## [Fix Delete and Open in Proton Mail] - 2026-10-05
 
