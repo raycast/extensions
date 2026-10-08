@@ -3,19 +3,19 @@ import { getTotp } from "./pass-cli";
 import { generateTotp, getTotpPeriod, parseOtpauthUri } from "./totp";
 import { Item, ItemDetail } from "./types";
 
-/** A 2FA code, with the seconds it stays valid when its period is known. */
+/** A TOTP code, with the seconds it stays valid when its period is known. */
 export interface DisplayedCode {
   code: string;
   remainingSeconds?: number;
 }
 
-/** The current 2FA code, generated locally from the otpauth URI when possible. */
+/** The current TOTP code, generated locally from the otpauth URI when possible. */
 export async function getCurrentTotpCode(item: Item, detail?: ItemDetail): Promise<string> {
   const params = detail?.totpUri ? parseOtpauthUri(detail.totpUri) : undefined;
   return params ? generateTotp(params).code : getTotp(item.shareId, item.itemId);
 }
 
-/** 2FA code of the item shown in the details panel; `failed` when pass-cli couldn't provide it. */
+/** TOTP code of the item shown in the details panel; `failed` when pass-cli couldn't provide it. */
 export interface TotpState {
   code?: DisplayedCode;
   failed: boolean;

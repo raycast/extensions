@@ -52,7 +52,7 @@ pass-cli vault list
 ## Preferences
 
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
-- **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 
 ### Browse Items
@@ -80,9 +80,9 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 ## Filling Logins (macOS)
 
-**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
 
-For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
 Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
 

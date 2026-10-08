@@ -103,7 +103,7 @@ export function ItemList({
         keywords={getKeywords(item)}
         accessories={[
           ...(item.hasNote ? [{ icon: Icon.Document, tooltip: "Has a note" }] : []),
-          ...(item.hasTotp ? [{ icon: Icon.Clock, tooltip: "Has a 2FA code" }] : []),
+          ...(item.hasTotp ? [{ icon: Icon.Clock, tooltip: "Has a TOTP code" }] : []),
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={
