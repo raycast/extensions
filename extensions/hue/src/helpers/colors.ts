@@ -9,18 +9,18 @@ const CT_MIRED_ADJUSTMENT = -50;
 const CT_HUE_ADJUSTMENT = 8;
 
 /**
- * Converts an RGB value to a CIE (x, y) color representation
+ * Converts an RGB value to a CIE (x, y) color and brightness (0-100)
  *
  * @link https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/#Color-rgb-to-xy
  * @param {Rgb} rgb RGB object with values between 0 and 255
  */
-export function rgbToXyBri({ r, g, b }: Rgb): { xy: Xy; brightness: number } {
+function rgbToXyBri({ r, g, b }: Rgb): { xy: Xy; brightness: number } {
   function applyGammaCorrection(value: number) {
     return value > 0.04045 ? Math.pow((value + 0.055) / (1.0 + 0.055), 2.4) : value / 12.92;
   }
 
   // Apply a gamma correction to the RGB values, which makes the color more vivid
-  // and more the like the color displayed on the screen of your device
+  // and more like the color displayed on the screen of your device
   const red = applyGammaCorrection(r / 255);
   const green = applyGammaCorrection(g / 255);
   const blue = applyGammaCorrection(b / 255);
@@ -42,23 +42,22 @@ export function rgbToXyBri({ r, g, b }: Rgb): { xy: Xy; brightness: number } {
 }
 
 /**
- * Converts a hex color string to a CIE (x, y) color.
+ * Converts a hex color string to a CIE (x, y) color and brightness (0-100).
  */
 export function hexToXy(color: string): { xy: Xy; brightness: number } {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-  const [r, g, b] = result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+  const [r, g, b] = chroma(color).rgb();
   return rgbToXyBri({ r, g, b });
 }
 
 /**
- * Converts a CIE (x, y) color to an RGB color string.
+ * Converts a CIE (x, y) color to a hex color string.
  *
  * @link https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/#xy-to-rgb-color
  * @param {Xy} xy
  * @param brightness Brightness of the light (0 – 100)
  */
-export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
-  if (y === 0) return { r: 0, g: 0, b: 0 };
+export function xyToRgbHexString({ x, y }: Xy, brightness = 100) {
+  if (y === 0) return "#000000";
 
   function applyReverseGammaCorrection(value: number) {
     return value <= 0.0031308 ? 12.92 * value : (1.0 + 0.055) * Math.pow(value, 1.0 / 2.4) - 0.055;
@@ -107,51 +106,10 @@ export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
     blue = blue / max;
   }
 
-  const [r, g, b] = chroma
+  return chroma
     .rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255))
-    .darken(1 - (brightness ?? 100) / 100)
-    .rgb();
-
-  // Round the values to the nearest integer and divide by the brightness
-  return { r, g, b };
-}
-
-export function xyToRgbHexString(xy: Xy, brightness = 100) {
-  const { r, g, b } = xyBriToRgb(xy, brightness);
-  const redHex = (r || 0).toString(16).padStart(2, "0");
-  const greenHex = (g || 0).toString(16).padStart(2, "0");
-  const blueHex = (b || 0).toString(16).padStart(2, "0");
-  return `#${redHex}${greenHex}${blueHex}`;
-}
-
-/**
- * Converts color temperature in mireds to an RGB object
- *
- * @param {number} mireds Philips Hue color temperature value (153-500)
- * @param {number} brightness Brightness of the light (1-100)
- * @returns {string} RGB string
- */
-export function miredToRgb(mireds: number, brightness = 100): Rgb {
-  const hecTemp = 1_000_000 / (mireds + CT_MIRED_ADJUSTMENT);
-
-  const color = chroma.temperature(hecTemp);
-  const [r, g, b] = color
-    .set("hsl.h", color.get("hsl.h") + CT_HUE_ADJUSTMENT)
-    .darken(1 - (brightness ?? 100) / 100)
-    .rgb();
-
-  return { r, g, b };
-}
-
-/**
- * Converts color temperature in mireds to an RGB string
- *
- * @param {number} mireds Philips Hue color temperature value (153-500)
- * @param {number} brightness Brightness of the light (1-100)
- */
-export function miredToRgbString(mireds: number, brightness = 100) {
-  const rgb = miredToRgb(mireds, brightness);
-  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    .darken(1 - brightness / 100)
+    .hex();
 }
 
 /**
@@ -161,11 +119,11 @@ export function miredToRgbString(mireds: number, brightness = 100) {
  * @param brightness Brightness of the light (1-100)
  */
 export function miredToHexString(mireds: number, brightness = 100) {
-  const { r, g, b } = miredToRgb(mireds, brightness);
-  const redHex = (r || 0).toString(16).padStart(2, "0");
-  const greenHex = (g || 0).toString(16).padStart(2, "0");
-  const blueHex = (b || 0).toString(16).padStart(2, "0");
-  return `#${redHex}${greenHex}${blueHex}`;
+  const color = chroma.temperature(1_000_000 / (mireds + CT_MIRED_ADJUSTMENT));
+  return color
+    .set("hsl.h", color.get("hsl.h") + CT_HUE_ADJUSTMENT)
+    .darken(1 - brightness / 100)
+    .hex();
 }
 
 /**

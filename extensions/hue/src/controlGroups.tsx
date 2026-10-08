@@ -274,7 +274,7 @@ function handleToggle(
   const { groupedLights, lights, zones } = hue;
   const changesToGroup = {
     on: { on: !groupedLight.on?.on },
-    // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
+    // No dynamics when toggling groups, as that causes the brightness to be set to the lowest possible level,
     //   even when only applied to toggling off.
   };
   const otherLightsOn = lights.filter((light) => light.on.on && !groupLights.some(({ id }) => id === light.id));
