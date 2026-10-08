@@ -1,5 +1,4 @@
-import { showFailureToast } from "@raycast/utils";
-import { useHAStates } from "@components/hooks";
+import { useFailureToast, useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { State } from "@lib/apexapi";
@@ -39,9 +38,7 @@ export function ZonesList(): JSX.Element {
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "zone", "", allStates);
 
-  if (error) {
-    showFailureToast(error, { title: "Cannot fetch Apex Connect Zones" });
-  }
+  useFailureToast(error, { title: "Cannot fetch Apex Connect Zones" });
 
   if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
