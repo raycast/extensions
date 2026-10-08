@@ -62,6 +62,7 @@ export function CompiledArchiveView({
           headers: {
             "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
           },
+          signal: AbortSignal.timeout(10000),
         });
         if (!resp.ok)
           throw new Error(`Could not fetch ${cleanUrl} (HTTP ${resp.status})`);
@@ -94,20 +95,24 @@ export function CompiledArchiveView({
         shortcut={{ modifiers: ["cmd"], key: "f" }}
         onAction={handleFormatMarkdown}
       />
-      <Action.CopyToClipboard
-        title="Copy Spec v2 Badge Code"
-        icon={Icon.Tag}
-        shortcut={{ modifiers: ["cmd"], key: "b" }}
-        content={getBadgeMarkdown(target)}
-      />
-      <Action
-        title="Open in Linten Web Inspector"
-        icon={Icon.Globe}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
-        onAction={() =>
-          open(`${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`)
-        }
-      />
+      {isValidUrlInput(target) && (
+        <>
+          <Action.CopyToClipboard
+            title="Copy Spec v2 Badge Code"
+            icon={Icon.Tag}
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            content={getBadgeMarkdown(target)}
+          />
+          <Action
+            title="Open in Linten Web Inspector"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            onAction={() =>
+              open(`${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`)
+            }
+          />
+        </>
+      )}
       <Action
         title="Compile Another Target"
         icon={Icon.ArrowLeft}
@@ -140,7 +145,7 @@ export function CompiledArchiveView({
           actions={archiveActions}
           detail={
             <List.Item.Detail
-              markdown={`# Linten Companion Archive (llms-full.txt)\n\n**Source**: \`${target}\`\n\n**Status**: Successfully compiled and copied to macOS clipboard.\n\n---\n\n\`\`\`markdown\n${report.fullContent && report.fullContent.length > 800 ? report.fullContent.slice(0, 800) + "\n\n... [Remaining content in clipboard]" : report.fullContent || ""}\n\`\`\``}
+              markdown={`# Linten Companion Archive (llms-full.txt)\n\n**Source**: \`${target}\`\n\n**Status**: Successfully compiled and copied to clipboard.\n\n---\n\n\`\`\`markdown\n${report.fullContent && report.fullContent.length > 800 ? report.fullContent.slice(0, 800) + "\n\n... [Remaining content in clipboard]" : report.fullContent || ""}\n\`\`\``}
               metadata={
                 metrics ? (
                   <List.Item.Detail.Metadata>
@@ -196,6 +201,56 @@ export function CompiledArchiveView({
             />
           }
         />
+        {isValidUrlInput(target) && (
+          <List.Item
+            id="compiled-badge"
+            icon={{ source: Icon.Tag, tintColor: Color.Blue }}
+            title="Official Spec v2 Badge"
+            subtitle="Live shields badge code for README.md"
+            accessories={[{ text: "Press ↵ to copy code" }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard
+                  title="Copy Spec v2 Badge Code"
+                  icon={Icon.Tag}
+                  content={getBadgeMarkdown(target)}
+                />
+                <Action
+                  title="Open in Linten Web Inspector"
+                  icon={Icon.Globe}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  onAction={() =>
+                    open(
+                      `${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`,
+                    )
+                  }
+                />
+                <Action.CopyToClipboard
+                  title="Copy Full llms-full.txt"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  content={report.fullContent || ""}
+                />
+                <Action
+                  title="Compile Another Target"
+                  icon={Icon.ArrowLeft}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  onAction={pop}
+                />
+              </ActionPanel>
+            }
+            detail={
+              <List.Item.Detail
+                markdown={`# Spec v2 Compliance Badge\n\nAdd this real-time badge to your \`README.md\`:\n\n\`\`\`markdown\n${getBadgeMarkdown(target)}\n\`\`\`\n\n### HTML Snippet\n\`\`\`html\n<a href="${LINTEN_CLOUD_BASE}"><img src="${LINTEN_CLOUD_BASE}/badge?domain=${encodeURIComponent(
+                  target
+                    .replace(/^https?:\/\//i, "")
+                    .replace(/\/.*$/, "")
+                    .trim(),
+                )}" alt="llms.txt" /></a>\n\`\`\`\n\nPress **Return (↵)** to copy the Markdown snippet to your clipboard.`}
+              />
+            }
+          />
+        )}
       </List.Section>
     </List>
   );
@@ -205,6 +260,9 @@ export default function CompileCommand() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState<string>("");
   const [clipboardContent, setClipboardContent] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -213,6 +271,9 @@ export default function CompileCommand() {
         const clip = await Clipboard.readText();
         if (clip && clip.trim().length > 0) {
           setClipboardContent(clip.trim());
+          if (!searchText.trim()) {
+            setSelectedItemId("clip-target");
+          }
         }
       } catch {
         // Clipboard read error is non-fatal
@@ -221,6 +282,15 @@ export default function CompileCommand() {
     checkClipboard();
   }, []);
 
+  function handleSearchTextChange(text: string) {
+    setSearchText(text);
+    if (text.trim().length > 0) {
+      setSelectedItemId("search-target");
+    } else if (clipboardContent) {
+      setSelectedItemId("clip-target");
+    }
+  }
+
   async function runCompile(input: string) {
     const trimmed = input.trim();
     if (!trimmed) {
@@ -228,6 +298,20 @@ export default function CompileCommand() {
         style: Toast.Style.Failure,
         title: "Input Required",
         message: "Enter a valid URL or paste markdown.",
+      });
+      return;
+    }
+
+    if (
+      trimmed.startsWith("/") ||
+      trimmed.startsWith("~") ||
+      trimmed.startsWith("file://")
+    ) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Local Path Not Supported",
+        message:
+          "Linten Cloud compiles remote URLs (e.g. acme.com/llms.txt) or markdown text, not local filesystem paths.",
       });
       return;
     }
@@ -264,11 +348,8 @@ export default function CompileCommand() {
         throw new Error(res.error || "Failed to synthesize companion archive.");
       }
 
-      // Auto-copy companion archive to clipboard
-      await Clipboard.copy(res.fullContent);
-
       toast.style = Toast.Style.Success;
-      toast.title = "llms-full.txt Copied to Clipboard";
+      toast.title = "llms-full.txt Compiled";
       const tokenCount = res.metrics?.estimatedTokens || 0;
       toast.message = `Bundled ${res.linkCount || 0} links (~${tokenCount.toLocaleString()} tokens)`;
 
@@ -278,7 +359,12 @@ export default function CompileCommand() {
       const msg = err instanceof Error ? err.message : String(err);
       toast.style = Toast.Style.Failure;
       toast.title = "Synthesis Failed";
-      toast.message = msg;
+      if (msg.includes("No valid documentation links found")) {
+        toast.message =
+          "This llms.txt has no documentation links (- [Title](url)) to bundle into llms-full.txt.";
+      } else {
+        toast.message = msg;
+      }
     } finally {
       setLoading(false);
     }
@@ -313,11 +399,17 @@ export default function CompileCommand() {
     </ActionPanel>
   );
 
+  const isTyping = searchText.trim().length > 0;
+
   return (
     <List
       isLoading={loading}
+      filtering={false}
       searchBarPlaceholder="Enter URL (e.g. acme.com/llms.txt) or paste markdown..."
-      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      onSearchTextChange={handleSearchTextChange}
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       actions={initialActions}
     >
       <List.EmptyView
@@ -325,8 +417,8 @@ export default function CompileCommand() {
         title="Enter an llms.txt URL or paste markdown"
         description="Type in the search bar above to compile companion llms-full.txt to your clipboard."
       />
-      {searchText.trim().length > 0 && (
-        <List.Section title="Ready to Compile">
+      {isTyping && (
+        <List.Section title="Typed Target">
           <List.Item
             id="search-target"
             icon={Icon.MagnifyingGlass}
@@ -335,10 +427,26 @@ export default function CompileCommand() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Compile Entered Target"
+                  title="Compile Typed Target"
                   icon={Icon.Check}
                   onAction={() => runCompile(searchText.trim())}
                 />
+                {isValidUrlInput(searchText) && (
+                  <Action.CopyToClipboard
+                    title="Copy Spec v2 Badge Code"
+                    icon={Icon.Tag}
+                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    content={getBadgeMarkdown(searchText)}
+                  />
+                )}
+                {clipboardContent && (
+                  <Action
+                    title="Compile from Clipboard"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => runCompile(clipboardContent)}
+                  />
+                )}
               </ActionPanel>
             }
           />

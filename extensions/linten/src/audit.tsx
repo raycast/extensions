@@ -44,9 +44,7 @@ export function AuditReportView({
     });
 
     try {
-      const isUrl =
-        /^https?:\/\//i.test(target.trim()) ||
-        (target.trim().includes(".") && !target.includes("\n"));
+      const isUrl = isValidUrlInput(target);
       const res = await synthesizeCompanion(
         isUrl ? { url: target.trim() } : { content: target },
       );
@@ -75,9 +73,7 @@ export function AuditReportView({
 
     try {
       let rawText = target;
-      const isUrl =
-        /^https?:\/\//i.test(target.trim()) ||
-        (target.trim().includes(".") && !target.includes("\n"));
+      const isUrl = isValidUrlInput(target);
       if (isUrl) {
         let cleanUrl = target.trim();
         if (
@@ -89,10 +85,16 @@ export function AuditReportView({
         if (!cleanUrl.endsWith("/llms.txt") && !cleanUrl.includes("llms.txt")) {
           cleanUrl = cleanUrl.replace(/\/$/, "") + "/llms.txt";
         }
+        if (isLocalOrInternalUrl(cleanUrl)) {
+          throw new Error(
+            "Local and private network URLs cannot be loaded. Please paste markdown directly.",
+          );
+        }
         const resp = await fetch(cleanUrl, {
           headers: {
             "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
           },
+          signal: AbortSignal.timeout(10000),
         });
         if (!resp.ok)
           throw new Error(`Could not fetch ${cleanUrl} (HTTP ${resp.status})`);
@@ -144,20 +146,24 @@ export function AuditReportView({
         shortcut={{ modifiers: ["cmd"], key: "f" }}
         onAction={handleFormatMarkdown}
       />
-      <Action.CopyToClipboard
-        title="Copy Spec v2 Badge Code"
-        icon={Icon.Tag}
-        shortcut={{ modifiers: ["cmd"], key: "b" }}
-        content={getBadgeMarkdown(target)}
-      />
-      <Action
-        title="Open in Linten Web Inspector"
-        icon={Icon.Globe}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
-        onAction={() =>
-          open(`${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`)
-        }
-      />
+      {isValidUrlInput(target) && (
+        <>
+          <Action.CopyToClipboard
+            title="Copy Spec v2 Badge Code"
+            icon={Icon.Tag}
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            content={getBadgeMarkdown(target)}
+          />
+          <Action
+            title="Open in Linten Web Inspector"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            onAction={() =>
+              open(`${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`)
+            }
+          />
+        </>
+      )}
       <Action
         title="Audit Another Target"
         icon={Icon.ArrowLeft}
@@ -234,6 +240,56 @@ export function AuditReportView({
             />
           }
         />
+        {isValidUrlInput(target) && (
+          <List.Item
+            id="overview-badge"
+            icon={{ source: Icon.Tag, tintColor: Color.Blue }}
+            title="Official Spec v2 Badge"
+            subtitle="Live shields badge code for README.md"
+            accessories={[{ text: "Press ↵ to copy code" }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard
+                  title="Copy Spec v2 Badge Code"
+                  icon={Icon.Tag}
+                  content={getBadgeMarkdown(target)}
+                />
+                <Action
+                  title="Open in Linten Web Inspector"
+                  icon={Icon.Globe}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  onAction={() =>
+                    open(
+                      `${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(target)}`,
+                    )
+                  }
+                />
+                <Action
+                  title="Compile llms-full.txt to Clipboard"
+                  icon={Icon.Document}
+                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  onAction={handleCompileCompanion}
+                />
+                <Action
+                  title="Audit Another Target"
+                  icon={Icon.ArrowLeft}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  onAction={pop}
+                />
+              </ActionPanel>
+            }
+            detail={
+              <List.Item.Detail
+                markdown={`# Spec v2 Compliance Badge\n\nShowcase real-time Spec v2 compliance directly in your GitHub \`README.md\`:\n\n\`\`\`markdown\n${getBadgeMarkdown(target)}\n\`\`\`\n\n### HTML Snippet\n\`\`\`html\n<a href="${LINTEN_CLOUD_BASE}"><img src="${LINTEN_CLOUD_BASE}/badge?domain=${encodeURIComponent(
+                  target
+                    .replace(/^https?:\/\//i, "")
+                    .replace(/\/.*$/, "")
+                    .trim(),
+                )}" alt="llms.txt" /></a>\n\`\`\`\n\nPress **Return (↵)** to copy the Markdown snippet to your clipboard.`}
+              />
+            }
+          />
+        )}
       </List.Section>
 
       <List.Section title={`Diagnostics & Findings (${findings.length})`}>
@@ -331,6 +387,9 @@ export default function AuditCommand() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState<string>("");
   const [clipboardContent, setClipboardContent] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -339,6 +398,9 @@ export default function AuditCommand() {
         const clip = await Clipboard.readText();
         if (clip && clip.trim().length > 0) {
           setClipboardContent(clip.trim());
+          if (!searchText.trim()) {
+            setSelectedItemId("clip-target");
+          }
         }
       } catch {
         // Clipboard access failure is non-fatal
@@ -347,6 +409,15 @@ export default function AuditCommand() {
     checkClipboard();
   }, []);
 
+  function handleSearchTextChange(text: string) {
+    setSearchText(text);
+    if (text.trim().length > 0) {
+      setSelectedItemId("search-input");
+    } else if (clipboardContent) {
+      setSelectedItemId("clip-target");
+    }
+  }
+
   async function runAudit(input: string) {
     const trimmed = input.trim();
     if (!trimmed) {
@@ -354,6 +425,20 @@ export default function AuditCommand() {
         style: Toast.Style.Failure,
         title: "Input Required",
         message: "Enter a valid URL or paste markdown.",
+      });
+      return;
+    }
+
+    if (
+      trimmed.startsWith("/") ||
+      trimmed.startsWith("~") ||
+      trimmed.startsWith("file://")
+    ) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Local Path Not Supported",
+        message:
+          "Linten Cloud audits remote URLs (e.g. acme.com/llms.txt) or markdown text, not local filesystem paths.",
       });
       return;
     }
@@ -390,12 +475,12 @@ export default function AuditCommand() {
           );
         }
 
-        // Bounded download (4s timeout, max 2MB) running concurrently with cloud audit
+        // Bounded download (10s timeout, max 2MB) running concurrently with cloud audit
         async function fetchRemoteContentWithTimeout(
           url: string,
         ): Promise<string> {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 4000);
+          const timer = setTimeout(() => controller.abort(), 10000);
           try {
             const fetchResp = await fetch(url, {
               signal: controller.signal,
@@ -508,11 +593,17 @@ export default function AuditCommand() {
     </ActionPanel>
   );
 
+  const isTyping = searchText.trim().length > 0;
+
   return (
     <List
       isLoading={loading}
+      filtering={false}
       searchBarPlaceholder="Enter URL (e.g. acme.com/llms.txt) or paste markdown..."
-      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      onSearchTextChange={handleSearchTextChange}
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       actions={initialActions}
     >
       <List.EmptyView
@@ -520,8 +611,8 @@ export default function AuditCommand() {
         title="Enter an llms.txt URL or paste markdown"
         description="Type in the search bar above to audit Spec v2 syntax, link health, and token budgets."
       />
-      {searchText.trim().length > 0 && (
-        <List.Section title="Ready to Audit">
+      {isTyping && (
+        <List.Section title="Typed Target">
           <List.Item
             id="search-input"
             icon={Icon.MagnifyingGlass}
@@ -530,10 +621,26 @@ export default function AuditCommand() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Audit Entered Target"
+                  title="Audit Typed Target"
                   icon={Icon.Check}
                   onAction={() => runAudit(searchText.trim())}
                 />
+                {isValidUrlInput(searchText) && (
+                  <Action.CopyToClipboard
+                    title="Copy Spec v2 Badge Code"
+                    icon={Icon.Tag}
+                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    content={getBadgeMarkdown(searchText)}
+                  />
+                )}
+                {clipboardContent && (
+                  <Action
+                    title="Audit from Clipboard"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => runAudit(clipboardContent)}
+                  />
+                )}
               </ActionPanel>
             }
           />

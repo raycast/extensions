@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linten",
   "title": "Linten",
-  "description": "The definitive llms.txt auditor, 100-link health checker, token budgeter, and companion llms-full.txt compiler.",
+  "description": "Audit llms.txt Spec v2 syntax, probe 100-link reachability, calculate token budgets, and compile companion archives.",
   "icon": "icon.png",
   "author": "loopstate-admin",
   "owner": "loopstates",
@@ -25,7 +25,21 @@
       "name": "compile",
       "title": "Compile Llms-Full.txt",
       "subtitle": "Linten",
-      "description": "Compile companion full-text archive from an llms.txt URL or clipboard directly to macOS clipboard.",
+      "description": "Compile companion full-text archive from an llms.txt URL or clipboard directly to clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "generate",
+      "title": "Generate Starter Template",
+      "subtitle": "Linten",
+      "description": "Scaffold a Spec v2 llms.txt starter template for any domain from Linten Cloud.",
+      "mode": "view"
+    },
+    {
+      "name": "badge",
+      "title": "Copy Spec V2 Badge",
+      "subtitle": "Linten",
+      "description": "Generate and copy canonical Spec v2 compliance badge snippet for README.md.",
       "mode": "view"
     }
   ],

@@ -87,6 +87,7 @@ export async function auditRemoteUrl(url: string): Promise<AuditReport> {
       "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
       Accept: "application/json",
     },
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok && res.status !== 400 && res.status !== 404) {
@@ -110,6 +111,7 @@ export async function auditRawContent(content: string): Promise<AuditReport> {
       Accept: "application/json",
     },
     body: JSON.stringify({ content }),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok && res.status !== 400) {
@@ -137,6 +139,7 @@ export async function probeLinks(payload: {
       Accept: "application/json",
     },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok && res.status !== 400) {
@@ -155,8 +158,12 @@ export function isValidUrlInput(text: string): boolean {
 
 export function isLocalOrInternalUrl(urlStr: string): boolean {
   try {
-    const parsed = new URL(urlStr);
-    const host = parsed.hostname.toLowerCase();
+    const fullUrl =
+      urlStr.startsWith("http://") || urlStr.startsWith("https://")
+        ? urlStr
+        : `https://${urlStr}`;
+    const parsed = new URL(fullUrl);
+    const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
     return (
       host === "localhost" ||
       host === "127.0.0.1" ||
@@ -164,7 +171,12 @@ export function isLocalOrInternalUrl(urlStr: string): boolean {
       host.endsWith(".local") ||
       /^10\./.test(host) ||
       /^192\.168\./.test(host) ||
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+      /^169\.254\./.test(host) ||
+      host.startsWith("169.254.") ||
+      host.startsWith("fe80:") ||
+      host.startsWith("fc00:") ||
+      host.startsWith("fd00:")
     );
   } catch {
     return false;
@@ -195,6 +207,7 @@ export async function synthesizeCompanion(input: {
           "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
           Accept: "text/plain,text/markdown,*/*",
         },
+        signal: AbortSignal.timeout(10000),
       });
       if (fetchResp.ok) {
         content = await fetchResp.text();
@@ -222,6 +235,7 @@ export async function synthesizeCompanion(input: {
         Accept: "application/json",
       },
       body: JSON.stringify({ content, url }),
+      signal: AbortSignal.timeout(15000),
     });
   } else if (url) {
     const endpoint = `${LINTEN_CLOUD_BASE}/api/v1/synthesize?url=${encodeURIComponent(url)}&source=raycast`;
@@ -231,6 +245,7 @@ export async function synthesizeCompanion(input: {
         "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(15000),
     });
   } else {
     throw new Error("Missing target URL or markdown content to synthesize.");
@@ -245,16 +260,33 @@ export async function synthesizeCompanion(input: {
   return json;
 }
 
-/**
- * Returns canonical markdown badge snippet
- */
+export function getBadgeUrl(domain: string): string {
+  const cleanDomain =
+    domain
+      .replace(/^https?:\/\//i, "")
+      .replace(/\/.*$/, "")
+      .trim() || "acme.com";
+  return `${LINTEN_CLOUD_BASE}/badge?domain=${encodeURIComponent(cleanDomain)}`;
+}
+
 export function getBadgeMarkdown(domain: string): string {
-  const cleanDomain = domain
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/.*$/, "")
-    .trim();
-  const badgeUrl = `${LINTEN_CLOUD_BASE}/badge?domain=${encodeURIComponent(cleanDomain)}`;
+  const cleanDomain =
+    domain
+      .replace(/^https?:\/\//i, "")
+      .replace(/\/.*$/, "")
+      .trim() || "acme.com";
+  const badgeUrl = getBadgeUrl(cleanDomain);
   return `[![llms.txt](${badgeUrl})](${LINTEN_CLOUD_BASE})`;
+}
+
+export function getBadgeHtml(domain: string): string {
+  const cleanDomain =
+    domain
+      .replace(/^https?:\/\//i, "")
+      .replace(/\/.*$/, "")
+      .trim() || "acme.com";
+  const badgeUrl = getBadgeUrl(cleanDomain);
+  return `<a href="${LINTEN_CLOUD_BASE}"><img src="${badgeUrl}" alt="llms.txt" /></a>`;
 }
 
 /**
@@ -386,4 +418,49 @@ export function formatToSpecV2(raw: string): string {
   }
 
   return output.join("\n").trim() + "\n";
+}
+
+export interface GenerateTemplateResult {
+  ok: boolean;
+  content: string;
+  domain: string;
+  generator?: string;
+  error?: string;
+}
+
+/**
+ * Scaffolds an initial Spec v2 llms.txt manifest via the central Linten Cloud Scaffolder.
+ */
+export async function generateTemplate(
+  domain: string,
+): Promise<GenerateTemplateResult> {
+  const cleanDomain =
+    domain
+      .trim()
+      .replace(/^https?:\/\//i, "")
+      .replace(/\/.*$/, "") || "acme.com";
+  const url = `${LINTEN_CLOUD_BASE}/api/v1/generate?url=${encodeURIComponent(cleanDomain)}&source=raycast`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "User-Agent": "Linten-Raycast/1.0 (+https://loopstates.com)",
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(15000),
+  });
+
+  const json: any = await res.json();
+  if (!res.ok) {
+    throw new Error(
+      json.error || `Template generation failed (HTTP ${res.status})`,
+    );
+  }
+
+  return {
+    ok: true,
+    content: json.content || "",
+    domain: json.input || cleanDomain,
+    generator: json.generator,
+  };
 }
