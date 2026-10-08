@@ -1,5 +1,11 @@
 # Arc Changelog
 
+## [AI Tools Improvements] - {PR_MERGE_DATE}
+
+- Added the `get-focused-tab` AI tool, which returns the active tab of the frontmost window along with its Space.
+- `select-tab` and `close-tab` now wait for Arc to finish and return a clear error when the tab ID does not exist, instead of silently succeeding.
+- Moved the AI instructions and evals to `ai.yaml`, with evals covering all 13 tools.
+
 ## [Fix] - 2026-09-14
 
 - Fixed `Search Tabs` becoming slow with many tabs by batching the AppleScript calls used to look up each tab's Space name, instead of issuing one call per tab.

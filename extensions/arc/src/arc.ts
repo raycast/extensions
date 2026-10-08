@@ -159,6 +159,58 @@ export async function getTabsWithSpaceInfo(): Promise<Tab[] | undefined> {
   }
 }
 
+export async function getFocusedTab(): Promise<(Tab & { spaceId: string }) | undefined> {
+  await ensureArcIsRunning();
+  const response = await runAppleScript(`
+    on escape_value(this_text)
+      set AppleScript's text item delimiters to "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
+      set AppleScript's text item delimiters to "\\""
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\""
+      set this_text to the item_list as string
+      set AppleScript's text item delimiters to ""
+      return this_text
+    end escape_value
+
+    tell application "Arc"
+      tell front window
+        try
+          set _tab to properties of active tab
+        on error
+          return ""
+        end try
+
+        set _title to my escape_value(get title of _tab)
+        set _url to my escape_value(get URL of _tab)
+        set _id to get id of _tab
+        set _location to get location of _tab
+
+        set _active_space_id to id of active space
+        set _space_index to 1
+        set _space_title to ""
+        repeat with _space in spaces
+          if id of _space is equal to _active_space_id then
+            set _space_title to get title of _space
+            exit repeat
+          end if
+          set _space_index to _space_index + 1
+        end repeat
+        if _space_title is "" then
+          set _space_title to "Space " & _space_index
+        end if
+        set _space_title to my escape_value(_space_title)
+      end tell
+    end tell
+
+    return "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\", \\"spaceId\\": \\"" & _space_index & "\\", \\"spaceName\\": \\"" & _space_title & "\\" }"
+  `);
+
+  return response ? (JSON.parse(response) as Tab & { spaceId: string }) : undefined;
+}
+
 export async function findTab(url: string) {
   const response = await runAppleScript(`
   on escape_value(this_text)
