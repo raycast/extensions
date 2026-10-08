@@ -179,14 +179,8 @@ export function getClosestBrightness(brightness: number) {
 }
 
 export function calculateAdjustedBrightness(brightness: number, direction: "increase" | "decrease") {
-  const closestBrightness = getClosestBrightness(brightness);
-  const sortedBrightnesses = direction === "decrease" ? BRIGHTNESSES : [...BRIGHTNESSES].reverse();
-
-  return (
-    sortedBrightnesses.find((b) => {
-      return direction === "increase" ? b > closestBrightness : b < closestBrightness;
-    }) ?? closestBrightness
-  );
+  const index = BRIGHTNESSES.indexOf(getClosestBrightness(brightness));
+  return BRIGHTNESSES[index + (direction === "increase" ? -1 : 1)] ?? BRIGHTNESSES[index];
 }
 
 export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
