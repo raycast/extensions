@@ -338,6 +338,7 @@ export async function scanMessageViewChecks(
 ) {
   let saved: ScanMessages = {
     status: "ready",
+    unfinished: true,
     messages: [
       {
         id: "cloud",
@@ -345,6 +346,7 @@ export async function scanMessageViewChecks(
         recordedAt: 1000,
         message: "Synthetic linked folder warning",
       },
+      { id: "build-error", message: "Synthetic rebuild warning" },
     ],
   };
   let refresh: (() => void) | undefined;
@@ -419,6 +421,45 @@ export async function scanMessageViewChecks(
         actions[1].props.content.includes(saved.messages[0].message),
       "Settings renders the saved warning with full-message and copy actions",
     );
+    const successfulSnapshot = saved;
+    const failedSnapshot: ScanMessages = {
+      status: "failed",
+      messages: [
+        { id: "read-error", message: "Synthetic database lock timeout" },
+      ],
+    };
+    saved = failedSnapshot;
+    await act(() => refresh?.());
+    assert(
+      renderer!.root.findByProps({ title: "/example/cloud" }).props.subtitle ===
+        successfulSnapshot.messages[0].message &&
+        renderer!.root
+          .findByProps({ title: "/example/cloud" })
+          .props.accessories[0].date.getTime() === 1000 &&
+        renderer!.root.findByProps({ title: "Rebuild error" }).props
+          .subtitle === "Synthetic rebuild warning" &&
+        renderer!.root.findByProps({ title: "Scan running or interrupted" })
+          .props.subtitle === "Last saved state: no scan end time recorded" &&
+        renderer!.root.findByProps({ title: "Scan messages could not be read" })
+          .props.subtitle === failedSnapshot.messages[0].message,
+      "failed polls retain folder warnings, timestamps, rebuild errors, and last known scan state",
+    );
+    saved = {
+      status: "failed",
+      messages: [
+        { id: "read-error", message: "Synthetic second read failure" },
+      ],
+    };
+    await act(() => refresh?.());
+    const readErrors = renderer!.root.findAllByProps({
+      title: "Scan messages could not be read",
+    });
+    assert(
+      readErrors.length === 1 &&
+        readErrors[0].props.subtitle === "Synthetic second read failure" &&
+        renderer!.root.findAllByProps({ title: "/example/cloud" }).length === 1,
+      "repeated failed polls replace the read error without accumulating or losing warnings",
+    );
     saved = { status: "ready", messages: [] };
     await act(() => refresh?.());
     assert(
@@ -426,9 +467,50 @@ export async function scanMessageViewChecks(
         renderer!.root.findAllByProps({ title: "/example/cloud" }).length ===
           0 &&
         renderer!.root.findAllByProps({ title: "No saved scan warnings" })
-          .length === 1,
+          .length === 1 &&
+        renderer!.root.findAllByProps({
+          title: "Scan messages could not be read",
+        }).length === 0 &&
+        renderer!.root.findAllByProps({ title: "Scan running or interrupted" })
+          .length === 0,
       "Settings refreshes messages in place after a successful rescan",
     );
+    saved = successfulSnapshot;
+    await act(() => refresh?.());
+    saved = { status: "missing", messages: [] };
+    await act(() => refresh?.());
+    saved = failedSnapshot;
+    await act(() => refresh?.());
+    assert(
+      renderer!.root.findAllByProps({ title: "/example/cloud" }).length === 0 &&
+        renderer!.root.findAllByProps({ title: "Scan running or interrupted" })
+          .length === 0 &&
+        renderer!.root.findAllByProps({ title: "No saved scan messages yet" })
+          .length === 0,
+      "a missing database clears the snapshot and later failures do not resurrect deleted warnings",
+    );
+    saved = successfulSnapshot;
+    await act(() => refresh?.());
+    saved = failedSnapshot;
+    await act(() => {
+      renderer!.update(
+        React.createElement(module.exports.IndexScanMessages, {
+          file: "/example/other.sqlite",
+        }),
+      );
+    });
+    assert(
+      renderer!.root.findAllByProps({ title: "/example/cloud" }).length === 0 &&
+        renderer!.root.findAllByProps({ title: "Scan running or interrupted" })
+          .length === 0 &&
+        renderer!.root.findAllByProps({ title: "No saved scan warnings" })
+          .length === 0 &&
+        renderer!.root.findAllByProps({
+          title: "Scan messages could not be read",
+        }).length === 1,
+      "an initial failed read for another database shows only its error, not the old snapshot",
+    );
+    cleared = false;
   } finally {
     await act(() => renderer?.unmount());
     globals.IS_REACT_ACT_ENVIRONMENT = previous;

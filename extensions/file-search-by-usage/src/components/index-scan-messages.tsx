@@ -10,33 +10,66 @@ import { displayPath } from "../lib/read-dir";
 
 /** Poll metadata, not entry counts or the filesystem, while settings is open. */
 export function IndexScanMessages({ file }: { file: string }) {
-  const [saved, setSaved] = useState<ScanMessages>();
+  const [state, setState] = useState<{
+    file: string;
+    saved?: ScanMessages;
+    error?: ScanMessages;
+  }>();
   useEffect(() => {
-    const refresh = () => setSaved(readScanMessages(file));
+    const refresh = () => {
+      const next = readScanMessages(file);
+      setState((previous) =>
+        next.status === "failed"
+          ? {
+              file,
+              saved: previous?.file === file ? previous.saved : undefined,
+              error: next,
+            }
+          : { file, saved: next },
+      );
+    };
     refresh();
     const timer = setInterval(refresh, 3_000);
     return () => clearInterval(timer);
   }, [file]);
+  // A failed poll is not evidence that saved warnings or scan state disappeared.
+  // Never carry a snapshot across databases, including before the effect runs.
+  const saved = state?.file === file ? state.saved : undefined;
+  const error = state?.file === file ? state.error : undefined;
+  const messages = [saved, error].flatMap((snapshot) =>
+    (snapshot?.messages ?? []).map((item) => ({
+      item,
+      readFailed: snapshot?.status === "failed",
+    })),
+  );
   return (
     <List.Section
       title="Scan Messages"
-      subtitle="Saved per-folder results · updates every 3 seconds"
+      subtitle={
+        error && saved
+          ? "Refresh failed · showing last saved results"
+          : "Saved per-folder results · updates every 3 seconds"
+      }
     >
       {saved?.unfinished && (
         <List.Item
           icon={Icon.Clock}
           title="Scan running or interrupted"
-          subtitle="No scan end time recorded yet"
+          subtitle={
+            error
+              ? "Last saved state: no scan end time recorded"
+              : "No scan end time recorded yet"
+          }
         />
       )}
-      {saved?.messages.map((item) => (
+      {messages.map(({ item, readFailed }) => (
         <List.Item
-          key={item.id}
+          key={`${readFailed ? "read" : "saved"}:${item.id}`}
           icon={Icon.Warning}
           title={
             item.root
               ? displayPath(item.root)
-              : saved.status === "failed"
+              : readFailed
                 ? "Scan messages could not be read"
                 : "Rebuild error"
           }
@@ -78,7 +111,7 @@ export function IndexScanMessages({ file }: { file: string }) {
           }
         />
       ))}
-      {saved && saved.messages.length === 0 && (
+      {saved && !error && saved.messages.length === 0 && (
         <List.Item
           icon={Icon.Info}
           title={
