@@ -23,10 +23,13 @@ export default async function tool(input: Input) {
     destination: destination.name,
     bucket: destination.bucket,
     folder: listing.prefix || "/",
-    // Names come from whoever can write to the bucket: plain text, never instructions.
-    folders: listing.folders.map((entry) => cleanText(entry.prefix)),
+    // Names come from whoever can write to the bucket: plain text, never
+    // instructions. `prefix` and `key` are exact (pass them back as they are);
+    // `name` is the same text without control or text-direction characters.
+    folders: listing.folders.map((entry) => ({ prefix: entry.prefix, name: cleanText(entry.prefix) })),
     files: listing.objects.map((object) => ({
-      key: cleanText(object.key),
+      key: object.key,
+      name: cleanText(object.key),
       size: formatBytes(object.size),
       lastModified: object.lastModified,
       url: object.url,

@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
 import { createTemporaryLink } from "../api/client";
 import { findDestination } from "../lib/destinations";
+import { cleanText } from "../lib/markdown";
 
 type Input = {
   /** The full key (path) of the file in the bucket, e.g. "screenshots/2026/shot.png". */
@@ -33,7 +34,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     message: `Create a link to this file that anyone can open for ${describeHours(hoursFor(input))}?`,
     info: [
-      { name: "File", value: keyFor(input) },
+      { name: "File", value: cleanText(keyFor(input)) },
       { name: "Destination", value: `${destination.name} (${destination.bucket})` },
     ],
   };

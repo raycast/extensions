@@ -1,5 +1,4 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import http from "node:http";
@@ -13,7 +12,6 @@ const REQUEST_TIMEOUT_MS = 30_000;
 /** Bigger replies than any route sends; past this, something else is answering. */
 const MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
 /** How long a proof from /v1/hello is trusted before the app is asked again. */
-const VERIFIED_FOR_MS = 60_000;
 
 export type Connection = {
   port: number;
@@ -92,28 +90,16 @@ type RequestOptions = {
   anonymous?: boolean;
 };
 
-/** Ports and tokens whose app proved it's Aktar lately, by a hash of both. */
-const verified = new Map<string, { check: Promise<void>; at: number }>();
-
-const verifiedKey = (connection: Connection) =>
-  createHash("sha256").update(`${connection.port}\n${connection.token}`).digest("hex");
-
 /**
- * Asks the app on the connection's port to prove it has the token before
- * the token is sent, so a program squatting the port while Aktar isn't
- * running never gets the token or a file. A proof holds for a minute, and
- * until the connection fails.
+ * Asks the app on the connection's port to prove it has the token right
+ * before each request that sends the token, so a program squatting the port
+ * while Aktar isn't running never gets the token or a file. Nothing is
+ * cached: Aktar closes every connection after one reply, so a proof can't be
+ * tied to the connection that carries the token, and a fresh proof per
+ * request leaves no window in which a replaced listener is trusted.
  */
 function verify(connection: Connection): Promise<void> {
-  const key = verifiedKey(connection);
-  const known = verified.get(key);
-  if (known && Date.now() - known.at < VERIFIED_FOR_MS) return known.check;
-  const check = hello(connection);
-  verified.set(key, { check, at: Date.now() });
-  check.catch(() => {
-    if (verified.get(key)?.check === check) verified.delete(key);
-  });
-  return check;
+  return hello(connection);
 }
 
 async function hello(connection: Connection) {
@@ -205,8 +191,6 @@ async function request<T>(method: string, route: string, options: RequestOptions
 
     req.on("timeout", () => req.destroy(new Error("Aktar took too long to respond.")));
     req.on("error", (error: NodeJS.ErrnoException) => {
-      // Whatever answers next on this port proves itself again.
-      if (error.code === "ECONNREFUSED" || error.code === "ECONNRESET") verified.delete(verifiedKey(connection));
       if (error.code === "ECONNREFUSED") {
         reject(new AktarError("not-running", "Aktar isn't running, or its local API is turned off."));
       } else if (error.code === "EPIPE" || error.code === "ECONNRESET") {

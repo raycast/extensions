@@ -30,7 +30,8 @@ export default async function tool(input: Input) {
     count: uploads.length,
     uploads: uploads.map((upload) => ({
       filename: cleanText(upload.filename),
-      key: cleanText(upload.objectKey),
+      /** Exact object key: pass it back to other tools as it is. */
+      key: upload.objectKey,
       url: upload.url,
       markdown: upload.formats.markdown,
       destination: upload.destinationName,

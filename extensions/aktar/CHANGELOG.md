@@ -6,7 +6,8 @@
 - Raycast asks before the AI creates a temporary link, since anyone with it can download the file, even from a private bucket. AI links last 1 hour unless you ask for longer, and 24 hours at most
 - AI tools only use a destination you name exactly (its name or bucket), instead of the first one whose name contains the words
 - File names from your buckets show as plain text in previews, so a crafted name can't load an image from elsewhere, and links copied as Markdown stay whole when a key has spaces or parentheses
-- File names and keys the AI reads lose control and text-direction characters
+- File names the AI reads lose control and text-direction characters, while the exact keys stay separate so the AI always asks for the right file
+- The proof is checked again right before every request that carries the token, so a program that takes Aktar's port after Aktar quits is never trusted
 
 ## [Replace Files and Automatic Destination] - 2026-10-07
 
