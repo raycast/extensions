@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix crash on unpressed input buttons] - {PR_MERGE_DATE}
+## [Fix crash on unpressed input buttons] - 2026-10-08
 
 - Fix "Invalid time value" crash in entity lists when an `input_button` has never been pressed or is unavailable
 
