@@ -2,7 +2,6 @@
 
 ## [Login Fixes] - {PR_MERGE_DATE}
 
-- A canceled browser login cannot replace the result of a newer login when its process exits late
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
 - pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
 - While the login runs, the screen says what's left: log in in the browser, then the login finishing, with Open Login Page Again and Cancel Login. Once logged in, it says so while the items load, instead of showing an empty list. A failed login says why
