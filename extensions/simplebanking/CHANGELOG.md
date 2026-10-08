@@ -1,6 +1,6 @@
 # Simplebanking Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-08
 
 - Balance of every connected account, with a total per currency; accounts without a cached balance are shown as not available
 - Transactions of the last 30 days: pick an account first, then browse its bookings
