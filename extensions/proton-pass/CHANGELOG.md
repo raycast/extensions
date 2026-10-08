@@ -2,7 +2,6 @@
 
 ## [Item Counts and Shared Vaults] - {PR_MERGE_DATE}
 
-- Overlapping List Vaults retries keep the latest vaults, counts, sharing, loading state, and errors on screen
 - The vault menu of Search Items shows the number of items in each vault, and in all vaults. The selected one stays in the search bar
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
 - List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
