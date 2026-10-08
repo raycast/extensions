@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
-import type { Group, Id, Light, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
+import type { Group, Id, Light, Palette, PngUri, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
@@ -18,9 +18,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   const { hueBridgeState, sendHueMessage, isLoading, rooms, zones, scenes } = useHueObject;
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
-  const groupTypes = [rooms, zones];
   const { pop } = useNavigation();
-  const isSubView = props.group !== undefined;
 
   useMemo(() => {
     setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
@@ -29,80 +27,29 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
-  if (props.group !== undefined) {
-    const group = props.group;
-    const groupScenes = getScenesFromGroup(scenes, group);
-
-    return (
-      <Grid
-        navigationTitle={`Set Scene for ${props.group.metadata.name}`}
-        isLoading={isLoading}
-        aspectRatio="16/9"
-        filtering={{ keepSectionOrder: true }}
-      >
-        <Grid.Section title={group.metadata.name}>
-          {groupScenes.map((groupScene) => (
+  const groups = props.group ? [props.group] : [...rooms, ...zones];
+  return (
+    <Grid
+      navigationTitle={props.group && `Set Scene for ${props.group.metadata.name}`}
+      isLoading={isLoading}
+      aspectRatio="16/9"
+      filtering={{ keepSectionOrder: true }}
+    >
+      {groups.map((group) => (
+        <Grid.Section key={group.id} title={group.metadata.name}>
+          {getScenesFromGroup(scenes, group).map((scene) => (
             <Scene
-              key={groupScene.id}
-              scene={groupScene}
+              key={scene.id}
               group={group}
-              gradientUri={gradientUris.get(groupScene.id)}
-              onSetScene={() => {
-                if (isSubView) {
-                  pop();
-                }
-              }}
+              scene={scene}
+              gradientUri={gradientUris.get(scene.id)}
+              onSetScene={props.group && pop}
               useHue={useHueObject}
             />
           ))}
         </Grid.Section>
-      </Grid>
-    );
-  } else {
-    return (
-      <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
-        {groupTypes.map((groupType: Group[]): React.JSX.Element[] => {
-          return groupType.map((group: Group): React.JSX.Element => {
-            const groupScenes = getScenesFromGroup(scenes, group);
-
-            return (
-              <Group
-                key={group.id}
-                group={group}
-                scenes={groupScenes}
-                gradientUris={gradientUris}
-                useHue={useHueObject}
-              />
-            );
-          });
-        })}
-      </Grid>
-    );
-  }
-}
-
-function Group(props: {
-  group: Group;
-  scenes: Scene[];
-  gradientUris: PngUriCache;
-  onSetScene?: () => void;
-  useHue: ReturnType<typeof useHue>;
-}) {
-  return (
-    <Grid.Section key={props.group.id} title={props.group.metadata.name}>
-      {props.scenes.map(
-        (scene: Scene): React.JSX.Element => (
-          <Scene
-            key={scene.id}
-            group={props.group}
-            scene={scene}
-            gradientUri={props.gradientUris.get(scene.id)}
-            onSetScene={props.onSetScene}
-            useHue={props.useHue}
-          />
-        ),
-      )}
-    </Grid.Section>
+      ))}
+    </Grid>
   );
 }
 
@@ -121,10 +68,10 @@ function Scene(props: {
       content={props.gradientUri ?? ""}
       actions={
         <ActionPanel>
-          <SetSceneAction
-            group={props.group}
-            scene={props.scene}
-            onSet={() => {
+          <Action
+            title="Set Scene"
+            icon={Icon.Image}
+            onAction={() => {
               handleSetScene(props.useHue, props.group, props.scene).then();
               props.onSetScene?.();
             }}
@@ -136,10 +83,6 @@ function Scene(props: {
       }
     />
   );
-}
-
-function SetSceneAction(props: { group: Group; scene: Scene; onSet: () => void }) {
-  return <Action title="Set Scene" icon={Icon.Image} onAction={() => props.onSet()} />;
 }
 
 function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Scene) {
