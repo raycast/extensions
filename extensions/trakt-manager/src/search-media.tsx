@@ -14,6 +14,8 @@ import { getPosterUrl } from "./lib/helper";
 import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktMovieListItem, TraktShowListItem, withPagination } from "./lib/schema";
 import { useCheckinSync } from "./lib/use-checkin-state";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedSync } from "./lib/use-watched";
 import { useWatchlistSync } from "./lib/use-watchlist-ids";
 
 type SearchMediaItem =
@@ -25,6 +27,8 @@ export default function Command() {
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
   useCheckinSync();
   const {
     isLoading,

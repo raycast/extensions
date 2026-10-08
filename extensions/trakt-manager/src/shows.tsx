@@ -9,6 +9,8 @@ import { initTraktClient } from "./lib/client";
 import { getPosterUrl } from "./lib/helper";
 import { markFirstEpisodeWatched } from "./lib/media-mutations";
 import { TraktShowListItem } from "./lib/schema";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedSync } from "./lib/use-watched";
 import { useWatchlistSync } from "./lib/use-watchlist-ids";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
@@ -18,6 +20,8 @@ export default function Command() {
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
   const {
     isLoading,
     data: shows,

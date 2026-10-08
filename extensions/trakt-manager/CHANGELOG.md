@@ -1,5 +1,12 @@
 # Trakt Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+
+- **Rate titles from search**: "Rate…" (1 to 10, your current score checked) and "Remove Rating" on movie and show results, and on episodes when browsing seasons or searching episodes.
+- **Remove from History outside the History screen**: on movie and show results and on episodes, once you have watched them. It removes every play of the title, after a confirmation that says so.
+
 ## [Update] - 2026-10-08
 
 ### Added
