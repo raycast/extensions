@@ -1,12 +1,14 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { apiGet, apiPost, TypeWhisperError } from "./api";
+import {
+  apiGet,
+  apiPost,
+  DICTATION_START_TIMEOUT_MS,
+  TypeWhisperError,
+} from "./api";
 import { setLastDictationSessionId } from "./dictation-session";
-import type {
-  DictationStartResponse,
-  DictationStatusResponse,
-  DictationStopResponse,
-} from "./types";
+import { stopDictation } from "./workflow-dictation";
+import type { DictationStartResponse, DictationStatusResponse } from "./types";
 
 export default async function Command() {
   try {
@@ -15,14 +17,16 @@ export default async function Command() {
     );
 
     if (status.is_recording) {
-      const response =
-        await apiPost<DictationStopResponse>("/v1/dictation/stop");
-      await setLastDictationSessionId(response.id);
-      await closeMainWindow();
-      await showHUD("Dictation stopped");
+      await stopDictation();
     } else {
       await closeMainWindow();
-      await apiPost<DictationStartResponse>("/v1/dictation/start");
+      const response = await apiPost<DictationStartResponse>(
+        "/v1/dictation/start",
+        undefined,
+        { timeoutMs: DICTATION_START_TIMEOUT_MS },
+      );
+      // Track the session even if it is stopped outside Raycast.
+      await setLastDictationSessionId(response.id);
       await showHUD("Dictation started");
     }
   } catch (error) {
