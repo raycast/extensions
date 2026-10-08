@@ -15,6 +15,7 @@
 - Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
 - Fix light icon symbols always being black; they're now black or white, whichever stands out more
 - Fix Control Lights loading forever when the bridge has no lights
+- Fix the names of the Steel Blue and Old Lace colors
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01
