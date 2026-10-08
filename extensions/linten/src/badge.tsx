@@ -143,7 +143,7 @@ export default function BadgeCommand() {
     <List
       isShowingDetail={true}
       filtering={false}
-      searchBarPlaceholder="Enter domain (e.g. loopstates.com) or paste URL..."
+      searchBarPlaceholder="Enter domain (e.g. example.com) or paste URL..."
       searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
       selectedItemId={selectedItemId}
@@ -178,9 +178,9 @@ export default function BadgeCommand() {
                     `\`${searchText.trim()}\` is not recognized as a valid domain or URL.`,
                     "",
                     "### Expected Format",
-                    "- Standard domain: `loopstates.com`",
-                    "- Subdomain: `docs.loopstates.com`",
-                    "- Full URL: `https://loopstates.com`",
+                    "- Standard domain: `example.com`",
+                    "- Subdomain: `docs.example.com`",
+                    "- Full URL: `https://example.com`",
                   ].join("\n")}
                 />
               }

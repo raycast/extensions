@@ -45,12 +45,12 @@ function FullManifestView({
   content: string;
 }) {
   const { pop } = useNavigation();
-  const isPlaceholder = domain === "acme.com";
+  const hasCustomDomain = domain !== "acme.com";
 
   const markdown = [
-    isPlaceholder
-      ? `# ${template.name} (Starter Scaffold)`
-      : `# ${template.name} for \`${domain}\``,
+    hasCustomDomain
+      ? `# ${template.name} for \`${domain}\``
+      : `# ${template.name}`,
     "",
     `*Category*: **${template.category}** | *Specification*: **Spec v2** | *Cloud Scaffolder*: **Linten**`,
     "",
@@ -75,9 +75,9 @@ function FullManifestView({
             title="Open in Linten Cloud Scaffolder"
             icon={Icon.Globe}
             url={
-              isPlaceholder
-                ? LINTEN_CLOUD_BASE
-                : `${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(domain)}`
+              hasCustomDomain
+                ? `${LINTEN_CLOUD_BASE}/?url=${encodeURIComponent(domain)}`
+                : LINTEN_CLOUD_BASE
             }
           />
           <Action
@@ -189,7 +189,7 @@ export default function GenerateCommand() {
     <List
       isLoading={loading}
       isShowingDetail={true}
-      searchBarPlaceholder="Search templates or type product domain (e.g. loopstates.com)..."
+      searchBarPlaceholder="Search templates or type product domain (e.g. example.com)..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -212,7 +212,7 @@ export default function GenerateCommand() {
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Invalid Domain or URL"
-          description={`"${trimmedSearch}" is not a valid domain. Enter a valid domain (e.g. loopstates.com) or search by keyword.`}
+          description={`"${trimmedSearch}" is not a valid domain. Enter a valid domain (e.g. example.com) or search by keyword.`}
         />
       ) : (
         <List.EmptyView
@@ -234,8 +234,9 @@ export default function GenerateCommand() {
           "",
           `> ${template.description}`,
           "",
-          `**Target Domain**: \`${activeDomain === "acme.com" ? "acme.com (Template Preview)" : activeDomain}\``,
-          "",
+          ...(activeDomain !== "acme.com"
+            ? [`**Target Domain**: \`${activeDomain}\``, ""]
+            : []),
           "```markdown",
           personalized,
           "```",
@@ -264,14 +265,12 @@ export default function GenerateCommand() {
                       title="Industry Category"
                       text={template.category}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Active Target Domain"
-                      text={
-                        activeDomain === "acme.com"
-                          ? "acme.com (Template Preview)"
-                          : activeDomain
-                      }
-                    />
+                    {activeDomain !== "acme.com" && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Active Target Domain"
+                        text={activeDomain}
+                      />
+                    )}
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Character Count"
@@ -283,7 +282,7 @@ export default function GenerateCommand() {
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Cloud Source"
-                      text="linten.apps.loopstates.com"
+                      text="Linten Cloud"
                     />
                   </List.Item.Detail.Metadata>
                 }
