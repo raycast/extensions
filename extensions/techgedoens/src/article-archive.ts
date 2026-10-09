@@ -438,7 +438,10 @@ function getArchiveUpdateOwnerSocketPath(owner: ArchiveLockOwner): string {
 }
 
 async function startArchiveUpdateOwnerServer(owner: ArchiveLockOwner): Promise<Server> {
-  const server = createServer((socket) => socket.end());
+  const server = createServer((socket) => {
+    socket.on("error", () => undefined);
+    socket.end();
+  });
   await new Promise<void>((resolve, reject) => {
     const handleError = (error: Error) => reject(error);
     server.once("error", handleError);
