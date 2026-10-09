@@ -21,6 +21,11 @@ import {
   type ModelSelection,
 } from "./codex";
 import { useSessionHistory, type Page } from "./history";
+import {
+  DesktopWindowLauncher,
+  openDesktopWindow,
+  returnFromDesktopWindow,
+} from "./desktop-window";
 import { conversationMarkdown } from "./chat-text";
 import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
 import {
@@ -41,9 +46,23 @@ import {
   type ConversationLibrary,
 } from "./conversations";
 
-export default function AskCodex(
+export default function AskChatGPT(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
+  const preferences = getPreferenceValues<Preferences>();
+  const [useNative, setUseNative] = useState(false);
+  if (preferences.chatWindow === "desktop" && !useNative)
+    return (
+      <DesktopWindowLauncher
+        preferences={preferences}
+        launch={props}
+        onNative={() => setUseNative(true)}
+      />
+    );
+  return <NativeChat {...props} />;
+}
+
+function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
     props.fallbackText?.trim() || props.arguments?.prompt?.trim() || "";
@@ -331,10 +350,31 @@ export default function AskCodex(
       if (disposed) return;
       modelSelectionRef.current = selection;
       setModelSelection(selection);
-      const library = parseLibrary(
+      const desktop = await returnFromDesktopWindow();
+      let library = parseLibrary(
         await LocalStorage.getItem<string>(LIBRARY_KEY),
         await LocalStorage.getItem<string>(LEGACY_KEY),
       );
+      if (
+        desktop.conversation?.threadId &&
+        (desktop.conversation.messages.length || desktop.conversation.draft)
+      ) {
+        const active = library.sessions.find(
+          (session) => session.threadId === library.activeId,
+        );
+        if ((desktop.conversation.updatedAt || 0) > (active?.updatedAt || 0)) {
+          library = upsertConversation(library, desktop.conversation);
+          if (desktop.selection) {
+            selection = desktop.selection;
+            modelSelectionRef.current = selection;
+            setModelSelection(selection);
+            await LocalStorage.setItem(
+              MODEL_SELECTION_KEY,
+              JSON.stringify(selection),
+            );
+          }
+        }
+      }
       if (disposed) return;
       libraryRef.current = library;
       storageReadyRef.current = true;
@@ -706,6 +746,38 @@ export default function AskCodex(
     error.includes("未找到 Codex CLI") || error.includes("找不到指定的 Codex");
   const secondaryActions = (
     <>
+      <Action
+        title="打开专用聊天窗口（试用）"
+        icon={Icon.AppWindow}
+        onAction={async () => {
+          if (busy || requestPendingRef.current || switching) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "请先停止当前回答，再打开独立窗口",
+            });
+            return;
+          }
+          try {
+            await initRef.current.catch(() => undefined);
+            await openDesktopWindow({
+              preferences,
+              conversation: persistedRef.current || conversation,
+              selection: modelSelection,
+              beforeOpen: () => {
+                clientRef.current?.close();
+                readyRef.current = false;
+                setReady(false);
+              },
+            });
+          } catch (reason) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "独立窗口未能打开",
+              message: messageOf(reason),
+            });
+          }
+        }}
+      />
       {codexNotFound && (
         <Action.OpenInBrowser
           title="安装 Codex CLI"

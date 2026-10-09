@@ -62,10 +62,17 @@ Normally, **Codex Path** should remain empty so the extension can detect it auto
 
 If automatic detection fails, the answer page explains that Codex CLI is missing and provides an **Install Codex CLI** action linking to the official instructions. If Codex is already installed in a custom location, open extension settings and enter its absolute path instead.
 
+## Chat Window (macOS Trial)
+
+In extension settings, **聊天窗口 / Chat Window** lets you choose **Raycast 内聊天** or **独立聊天窗口（试用）**. Raycast remains the default. The independent window requires the locally installed `~/Applications/Ask ChatGPT.app`; this companion is not included in the Store package. If it is unavailable, the launcher offers to open the native chat for this launch.
+
+The trial window keeps its top composer visible, uses Markdown and KaTeX for replies, and places model selection and an effort slider in the footer. History and new chat are available at the top right. Switching between surfaces hands off the local Codex connection; stop any active reply before switching. A completed conversation from the trial window can be resumed in the native chat. Windows users should keep the native mode during this macOS trial.
+
 ## Preferences
 
 | Preference | Purpose |
 | --- | --- |
+| Chat Window | Chooses the native Raycast chat or the installed macOS trial window. |
 | Web Search | Allows Codex to retrieve current web information. |
 | Sandbox Mode | Chooses read-only, workspace-write, or full-access execution. Read-only is the default. |
 | Working Directory | Gives Codex repository context for a particular folder. |

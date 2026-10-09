@@ -2,6 +2,8 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
+- Choose native Raycast chat or an installed independent macOS trial window in extension preferences, with a native fallback.
+
 - Ask ChatGPT directly from Raycast Root Search through a locally authenticated Codex CLI.
 - Stream Markdown answers in a full-width view without a permanent sidebar.
 - Preserve Markdown headings, paragraphs, lists, tables, code, and formulas while typing, using the native detail pane with one current-conversation item.

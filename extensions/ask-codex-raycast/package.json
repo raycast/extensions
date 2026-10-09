@@ -40,6 +40,24 @@
   ],
   "preferences": [
     {
+      "name": "chatWindow",
+      "type": "dropdown",
+      "title": "聊天窗口 / Chat Window",
+      "description": "选择在 Raycast 内聊天，或打开已安装的 Ask ChatGPT 独立窗口（macOS 试用版）。",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast 内聊天",
+          "value": "raycast"
+        },
+        {
+          "title": "独立聊天窗口（试用）",
+          "value": "desktop"
+        }
+      ]
+    },
+    {
       "name": "liveSearch",
       "type": "checkbox",
       "title": "Web Search",
