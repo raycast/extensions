@@ -1,6 +1,6 @@
 # Datetime formatter Changelog
 
-## [Fix Empty Input] - {PR_MERGE_DATE}
+## [Fix Empty Input] - 2026-10-09
 
 - Show the current date and time when the input is empty, instead of "This is not a time format". Auto Paste now only fills in clipboard text that is a date or time.
 
