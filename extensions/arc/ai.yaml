@@ -11,6 +11,10 @@ evals:
           - callsTool: new-window
           - callsTool: new-blank-window
     mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
       new-window: Successfully called "new-window"
       new-blank-window: Successfully called "new-blank-window"
       get-spaces:
@@ -27,6 +31,10 @@ evals:
           arguments:
             spaceId: "2"
     mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
       new-window: Successfully called "new-window"
       get-spaces:
         - title: Personal
@@ -128,6 +136,10 @@ evals:
           arguments: {}
   - input: "@arc open a new tab in Work"
     mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
       new-tab:
         url: ""
         space: Work
@@ -226,6 +238,10 @@ evals:
             spaceId: "2"
   - input: "@arc what spaces do I have open?"
     mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Travel
       get-spaces:
         - title: Personal
           id: 1
@@ -281,6 +297,13 @@ evals:
       - includes: Hacker News
   - input: "@arc open pinned tab"
     mocks:
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
       get-active-space:
         id: 2
         isActive: true
@@ -439,6 +462,10 @@ evals:
             tabId: 9E4A15A7-C228-497E-9DE3-9CB1F99023B6
   - input: "@arc switch to the Personal space"
     mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
       get-spaces:
         - title: Personal
           id: 1
@@ -471,3 +498,26 @@ evals:
           - callsTool: get-active-space
           - callsTool: get-spaces
       - includes: Work
+  - input: "@arc list the tabs in my current space"
+    mocks:
+      get-active-space:
+        id: 2
+        isActive: true
+        title: Work
+      get-spaces:
+        - title: Personal
+          id: 1
+          isActive: false
+        - title: Work
+          id: 2
+          isActive: true
+      get-tabs:
+        - id: A144D0CC-D960-4642-85EE-E4D066EE2F51
+          location: unpinned
+          title: Raycast - Your shortcut to everything
+          url: https://www.raycast.com/
+    expected:
+      - callsTool:
+          name: get-tabs
+          arguments:
+            spaceId: "2"

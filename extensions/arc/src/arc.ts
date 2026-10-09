@@ -223,7 +223,12 @@ export async function getFocusedTab(): Promise<(Tab & { spaceId: string }) | und
     return "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\", \\"spaceId\\": \\"" & _space_index & "\\", \\"spaceName\\": \\"" & _space_title & "\\" }"
   `);
 
-  return response ? (JSON.parse(response) as Tab & { spaceId: string }) : undefined;
+  // The response is a single line, so any control character (e.g. a newline pasted in a Space name) is inside a
+  // string value and must be escaped for JSON.parse.
+  const json = Array.from(response ?? "", (char) =>
+    char < " " ? `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}` : char,
+  ).join("");
+  return json ? (JSON.parse(json) as Tab & { spaceId: string }) : undefined;
 }
 
 export async function findTab(url: string) {
