@@ -55,12 +55,43 @@ const mutationSchema = z.object({
   op_id: z.string(),
   items: z.array(z.object({ id: z.string() })),
 });
-const errorSchema = z.object({ error: z.object({ message: z.string() }) });
+const cliErrorSchema = z.object({
+  error: z.object({ kind: z.string().optional(), message: z.string() }),
+});
 const execErrorSchema = z.object({
   stderr: z.string().optional(),
   killed: z.boolean().optional(),
   code: z.union([z.string(), z.number()]).optional(),
   message: z.string(),
+});
+
+const doctorSchema = z.object({
+  schema_version: z.literal(2),
+  sign_in: z.object({ signed_in: z.boolean() }),
+  daemon: z.object({
+    running: z.boolean(),
+    ready: z.boolean(),
+    problem: z.string().optional(),
+  }),
+  database: z.object({ path: z.string(), bytes: z.number() }).nullable(),
+  syncing: z.boolean().nullable(),
+  scopes: z.array(
+    z.object({
+      scope: z.string(),
+      state: z.enum(["initial", "ready"]),
+      last_error: z
+        .object({ kind: z.string(), message: z.string() })
+        .nullable()
+        .optional(),
+    }),
+  ),
+});
+const syncSchema = z.object({
+  schema_version: z.literal(2),
+  waited: z.boolean(),
+  scopes: z.number(),
+  changed: z.number(),
+  generation: z.number(),
 });
 
 export type Task = z.infer<typeof taskSchema>;
@@ -91,7 +122,10 @@ export type Collection = Pick<
 >;
 
 export class CliError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly kind?: string,
+  ) {
     super(message);
     this.name = "CliError";
   }
@@ -137,14 +171,16 @@ export function findCli(
   return found;
 }
 
-function errorMessage(stderr: string, fallback: string): string {
+type CliErrorDetails = z.infer<typeof cliErrorSchema>["error"];
+
+function errorDetails(stderr: string, fallback: string): CliErrorDetails {
   try {
-    const parsed = errorSchema.safeParse(JSON.parse(stderr));
-    if (parsed.success) return parsed.data.error.message;
+    const parsed = cliErrorSchema.safeParse(JSON.parse(stderr));
+    if (parsed.success) return parsed.data.error;
   } catch {
     // Failures before CLI startup may not produce JSON.
   }
-  return stderr.trim() || fallback;
+  return { message: stderr.trim() || fallback };
 }
 
 function parseOutput<T>(
@@ -216,10 +252,52 @@ async function runCli<T>(
         "The ms-todo CLI disappeared. Check CLI Path in extension preferences.",
       );
     }
-    throw new CliError(
-      errorMessage(failure.data.stderr ?? "", failure.data.message),
+    const details = errorDetails(
+      failure.data.stderr ?? "",
+      failure.data.message,
     );
+    throw new CliError(details.message, details.kind);
   }
+}
+
+export type SetupDoctor = z.infer<typeof doctorSchema>;
+
+export function setupPhase(
+  doctor: SetupDoctor,
+): "sign-in" | "sync" | "ready" | "unavailable" {
+  if (!doctor.daemon.ready || doctor.database === null) return "unavailable";
+
+  const taskScopes = doctor.scopes.filter(({ scope }) =>
+    scope.startsWith("tasks:"),
+  );
+  if (taskScopes.some(({ state }) => state === "ready")) return "ready";
+  if (!doctor.sign_in.signed_in) return "sign-in";
+  if (doctor.syncing === true) return "sync";
+
+  const lists = doctor.scopes.find(({ scope }) => scope === "lists");
+  if (!lists || lists.state === "initial") return "sync";
+  if (taskScopes.some(({ state }) => state === "initial")) {
+    return "sync";
+  }
+  return "ready";
+}
+
+export async function inspectSetup(preferredPath = ""): Promise<SetupDoctor> {
+  return runCli(
+    ["doctor"],
+    doctorSchema,
+    "ms-todo returned incomplete setup diagnostics. Update the CLI.",
+    preferredPath,
+  );
+}
+
+export async function syncAndWait(preferredPath = ""): Promise<void> {
+  await runCli(
+    ["sync", "--wait"],
+    syncSchema,
+    "ms-todo returned an incomplete sync result. Update the CLI.",
+    preferredPath,
+  );
 }
 
 const COLLECTION_ERROR =
