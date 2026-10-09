@@ -1,4 +1,4 @@
-<img src=".github/banner.svg" alt="FSearch" width="100%">
+<img src="media/banner.png" alt="FSearch" width="100%">
 
 # FSearch for Raycast
 
