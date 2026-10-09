@@ -154,7 +154,7 @@
     {
       "name": "close-tab",
       "title": "Close Tab",
-      "description": "Close an open Dia tab or the focused tab"
+      "description": "Close an open Dia tab by its ID"
     }
   ],
   "dependencies": {
