@@ -1,5 +1,5 @@
 import { assertListAdded, ListItemKind, readListWrite, totalCount } from "../tools/list-write";
-import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "../tools/tool-client";
+import { executeToolCall, toolTraktClient } from "../tools/tool-client";
 import { TraktList, TraktListSchema } from "./schema";
 
 export type ListPrivacy = "private" | "link" | "friends" | "public";
@@ -37,18 +37,19 @@ export async function updatePersonalList(list: TraktList, fields: ListFields): P
   return parsed.data;
 }
 
-/** Deletes a list and every item on it, then checks it is gone: a 204 alone is not proof. */
+/**
+ * Deletes a list and every item on it. Trakt answers 204 with no body, and reading the list right after still
+ * returns it for a while, so the status is the only confirmation available (as in the `delete-list` tool).
+ */
 export async function deletePersonalList(list: TraktList): Promise<void> {
-  const id = listPathId(list);
-  await executeToolCall(
-    (signal) => toolTraktClient.users.deleteList({ params: { id: "me", listId: id }, fetchOptions: { signal } }),
+  const response = await executeToolCall(
+    (signal) =>
+      toolTraktClient.users.deleteList({ params: { id: "me", listId: listPathId(list) }, fetchOptions: { signal } }),
     `Could not delete the list "${list.name}"`,
   );
-  const still = await executeToolCallAllowingNotFound(
-    (signal) => toolTraktClient.users.getList({ params: { id: "me", listId: id }, fetchOptions: { signal } }),
-    `Could not check the list "${list.name}"`,
-  );
-  if (still) throw new Error(`Trakt still has the list "${list.name}".`);
+  if (response.status !== 204) {
+    throw new Error(`Trakt answered HTTP ${response.status} instead of confirming the deletion of "${list.name}".`);
+  }
 }
 
 /** Adds one movie or show to a list. Returns false when it was already there. */

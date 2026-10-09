@@ -112,7 +112,7 @@ const ListItems = ({ list, onChanged }: { list: TraktList; onChanged: () => void
 };
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(async () => (await fetchAllLists()).lists, [], {
+  const { data, isLoading, revalidate, mutate } = useCachedPromise(async () => (await fetchAllLists()).lists, [], {
     failureToastOptions: { title: "Could not read your lists" },
   });
 
@@ -126,10 +126,13 @@ export default function Command() {
 
     const toast = await showToast({ style: Toast.Style.Animated, title: `Deleting "${list.name}"` });
     try {
-      await deletePersonalList(list);
+      // Trakt keeps returning a deleted list for a while, so drop it locally instead of reloading.
+      await mutate(deletePersonalList(list), {
+        optimisticUpdate: (lists) => lists?.filter((other) => other.ids.trakt !== list.ids.trakt),
+        shouldRevalidateAfter: false,
+      });
       toast.style = Toast.Style.Success;
       toast.title = `Deleted "${list.name}"`;
-      revalidate();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = (error as Error).message;
