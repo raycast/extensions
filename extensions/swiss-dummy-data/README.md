@@ -30,7 +30,7 @@ Never use generated numbers outside of test data.
 | ----------------- | ---------------------------------- |
 | Copy to Clipboard | `↵`                                |
 | Copy Without Dots | `⌘ ⇧ C` (macOS), `⌃ ⇧ C` (Windows) |
-| Generate New SSN  | `⌘ R` (macOS), `⌃ R` (Windows)     |
+| Generate New SSN  | `⌘ N` (macOS), `⌃ N` (Windows)     |
 | Remove Entry      | `⌃ X`                              |
 | Clear History     | `⌃ ⇧ X`                            |
 

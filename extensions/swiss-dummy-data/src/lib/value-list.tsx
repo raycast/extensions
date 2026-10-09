@@ -92,7 +92,7 @@ export function ValueList({ generate, historyKey, noun, icon, extraActions }: Pr
     <Action
       title={`Generate New ${noun}`}
       icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
+      shortcut={Keyboard.Shortcut.Common.New}
       onAction={regenerate}
     />
   );

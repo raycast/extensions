@@ -10,7 +10,7 @@
     "macOS"
   ],
   "categories": [
-    "Developer Tools"
+    "Data"
   ],
   "license": "MIT",
   "commands": [
@@ -43,8 +43,7 @@
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
