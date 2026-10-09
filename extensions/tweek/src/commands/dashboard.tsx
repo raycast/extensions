@@ -7,7 +7,13 @@ import { useTasks } from "../hooks/useTasks";
 import { TaskFilterState } from "../types";
 
 /** Classic task-list dashboard (grouped by Overdue / Today / This Week…). */
-function TaskListDashboard() {
+function TaskListDashboard({
+  initialCalendarId,
+  onCalendarChange,
+}: {
+  initialCalendarId?: string;
+  onCalendarChange?: (calId: string) => void;
+}) {
   const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
@@ -20,7 +26,7 @@ function TaskListDashboard() {
     isLoading: isCalendarsLoading,
     isOffline: isCalendarsOffline,
     refreshCalendars,
-  } = useCalendars();
+  } = useCalendars(initialCalendarId);
 
   const {
     tasks,
@@ -80,8 +86,11 @@ function TaskListDashboard() {
         initialCalendarId={activeCalendarId}
         customColors={customColors}
       />,
+      () => {
+        void refreshTasks();
+      },
     );
-  }, [push, calendars, activeCalendarId, customColors]);
+  }, [push, calendars, activeCalendarId, customColors, refreshTasks]);
 
   return (
     <TaskList
@@ -96,6 +105,7 @@ function TaskListDashboard() {
       selectedTaskIds={selectedTaskIds}
       onSelectCalendar={(calId) => {
         setActiveCalendarId(calId);
+        onCalendarChange?.(calId);
         handleUpdateFilter({ calendarId: calId, somedayListId: "all" });
       }}
       onUpdateFilter={handleUpdateFilter}
@@ -118,9 +128,17 @@ function TaskListDashboard() {
 }
 
 /** Monthly calendar as the dashboard's root view (see `defaultToMonthView`). */
-function MonthDashboard({ onShowTaskList }: { onShowTaskList: () => void }) {
+function MonthDashboard({
+  initialCalendarId,
+  onCalendarChange,
+  onShowTaskList,
+}: {
+  initialCalendarId?: string;
+  onCalendarChange?: (calId: string) => void;
+  onShowTaskList: (calendarId: string) => void;
+}) {
   const { calendars, customColors, activeCalendarId, isLoading } =
-    useCalendars();
+    useCalendars(initialCalendarId);
 
   return (
     <MonthCalendarView
@@ -128,6 +146,7 @@ function MonthDashboard({ onShowTaskList }: { onShowTaskList: () => void }) {
       initialCalendarId={activeCalendarId}
       customColors={customColors}
       isLoadingCalendars={isLoading}
+      onCalendarChange={onCalendarChange}
       onShowTaskList={onShowTaskList}
     />
   );
@@ -138,10 +157,23 @@ export default function DashboardCommand() {
   const [view, setView] = useState<"month" | "list">(
     prefs.defaultToMonthView ? "month" : "list",
   );
+  const [selectedCalendarId, setSelectedCalendarId] = useState<
+    string | undefined
+  >(undefined);
 
   return view === "month" ? (
-    <MonthDashboard onShowTaskList={() => setView("list")} />
+    <MonthDashboard
+      initialCalendarId={selectedCalendarId}
+      onCalendarChange={setSelectedCalendarId}
+      onShowTaskList={(calId) => {
+        setSelectedCalendarId(calId);
+        setView("list");
+      }}
+    />
   ) : (
-    <TaskListDashboard />
+    <TaskListDashboard
+      initialCalendarId={selectedCalendarId}
+      onCalendarChange={setSelectedCalendarId}
+    />
   );
 }

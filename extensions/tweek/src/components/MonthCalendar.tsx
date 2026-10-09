@@ -153,8 +153,10 @@ export interface MonthCalendarViewProps {
   customColors: TweekCustomColor[];
   /** Show a loading indicator while calendars are still being fetched. */
   isLoadingCalendars?: boolean;
-  /** When provided, a "Show Task List" action switches back to the list view. */
-  onShowTaskList?: () => void;
+  /** When provided, a "Show Task List" action switches back to the list view for the selected calendar. */
+  onShowTaskList?: (calendarId: string) => void;
+  /** Callback fired whenever the user changes the active calendar in the dropdown. */
+  onCalendarChange?: (calendarId: string) => void;
 }
 
 /**
@@ -167,6 +169,7 @@ export function MonthCalendarView({
   customColors,
   isLoadingCalendars = false,
   onShowTaskList,
+  onCalendarChange,
 }: MonthCalendarViewProps) {
   const { push } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
@@ -295,7 +298,10 @@ export function MonthCalendarView({
           <Grid.Dropdown
             tooltip="Calendar"
             value={calendarId}
-            onChange={setCalendarId}
+            onChange={(calId) => {
+              setCalendarId(calId);
+              onCalendarChange?.(calId);
+            }}
           >
             {calendars.map((cal) => (
               <Grid.Dropdown.Item
@@ -368,7 +374,7 @@ export function MonthCalendarView({
                       title="Show Task List"
                       icon={Icon.List}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
-                      onAction={onShowTaskList}
+                      onAction={() => onShowTaskList(calendarId)}
                     />
                   )}
                   <Action

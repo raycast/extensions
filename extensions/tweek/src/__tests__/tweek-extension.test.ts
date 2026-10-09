@@ -99,8 +99,9 @@ describe("date-utils", () => {
     // Non-date @mention should not drop defaultDate
     const mentionParsed = parseQuickAddInput(
       "Email @sarah about the Q4 launch",
-      selectedDay,
+      undefined,
       refDate,
+      selectedDay,
     );
     expect(mentionParsed.cleanText).toBe("Email @sarah about the Q4 launch");
     expect(mentionParsed.date).toBe("2026-10-15");
@@ -108,12 +109,23 @@ describe("date-utils", () => {
     // Inline @date token overrides defaultDate
     const overrideParsed = parseQuickAddInput(
       "Email @sarah @tomorrow #pink",
-      selectedDay,
+      undefined,
       refDate,
+      selectedDay,
     );
     expect(overrideParsed.cleanText).toBe("Email @sarah");
     expect(overrideParsed.date).toBe("2026-09-27");
     expect(overrideParsed.color).toBe("pink");
+
+    // Dedicated explicitDate argument has highest precedence (e.g. from dedicated date argument field in Quick Add)
+    const explicitWon = parseQuickAddInput(
+      "Buy milk @today #pink",
+      "2026-10-15",
+      refDate,
+    );
+    expect(explicitWon.cleanText).toBe("Buy milk");
+    expect(explicitWon.date).toBe("2026-10-15");
+    expect(explicitWon.color).toBe("pink");
   });
 
   it("correctly identifies overdue tasks", () => {

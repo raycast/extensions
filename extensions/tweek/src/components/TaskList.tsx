@@ -220,7 +220,7 @@ export function TaskList({
   const handleQuickAddInline = async () => {
     const raw = filter.searchText.trim();
     if (!raw || !activeCalendarId) return;
-    const parsed = parseQuickAddInput(raw, defaultDate);
+    const parsed = parseQuickAddInput(raw, undefined, undefined, defaultDate);
     const resolvedListId =
       parsed.date === null && activeCalendar?.lists?.[0]
         ? activeCalendar.lists[0].id

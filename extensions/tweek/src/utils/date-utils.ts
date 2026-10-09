@@ -226,6 +226,7 @@ export function parseQuickAddInput(
   rawText: string,
   explicitDate?: string,
   referenceDate: Date = new Date(),
+  defaultDate?: string,
 ): {
   cleanText: string;
   date: string | null;
@@ -234,26 +235,26 @@ export function parseQuickAddInput(
   let text = rawText.trim();
   const todayISO = getTodayISO(referenceDate);
 
-  // Initialize base date from explicitDate if provided, otherwise default to today
+  // 1. Base date from defaultDate (e.g. opened day view in calendar), otherwise today
   let resolvedDate: string | null = todayISO;
-  if (explicitDate && explicitDate.trim()) {
-    const cleanExplicit = explicitDate.trim().toLowerCase();
-    if (cleanExplicit === "today") {
+  if (defaultDate && defaultDate.trim()) {
+    const cleanDefault = defaultDate.trim().toLowerCase();
+    if (cleanDefault === "today") {
       resolvedDate = todayISO;
-    } else if (cleanExplicit === "tomorrow") {
+    } else if (cleanDefault === "tomorrow") {
       resolvedDate = addDaysISO(todayISO, 1);
-    } else if (cleanExplicit === "nextweek") {
+    } else if (cleanDefault === "nextweek") {
       resolvedDate = addDaysISO(todayISO, 7);
-    } else if (cleanExplicit === "someday") {
+    } else if (cleanDefault === "someday") {
       resolvedDate = null;
-    } else if (/^\d{4}-\d{2}-\d{2}$/.test(cleanExplicit)) {
-      resolvedDate = cleanExplicit;
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDefault)) {
+      resolvedDate = cleanDefault;
     }
   }
 
   let resolvedColor: string | undefined;
 
-  // Extract #color token
+  // 2. Extract #color token
   const colorMatch =
     /(?:^|\s)#(blank|pink|yellowish|black|grey|cornflower|mango|greenish|lilac)\b/i.exec(
       text,
@@ -263,7 +264,7 @@ export function parseQuickAddInput(
     text = text.replace(colorMatch[0], " ").trim();
   }
 
-  // Extract @date token (overrides default/explicit date if user specifies an inline date token)
+  // 3. Extract @date token (overrides defaultDate fallback)
   const dateTokenMatch =
     /(?:^|\s)@(today|tomorrow|nextweek|someday|\d{4}-\d{2}-\d{2})\b/i.exec(
       text,
@@ -282,6 +283,22 @@ export function parseQuickAddInput(
       resolvedDate = token;
     }
     text = text.replace(dateTokenMatch[0], " ").trim();
+  }
+
+  // 4. Dedicated explicitDate argument has highest precedence (preserves dedicated field in Quick Add)
+  if (explicitDate && explicitDate.trim()) {
+    const cleanExplicit = explicitDate.trim().toLowerCase();
+    if (cleanExplicit === "today") {
+      resolvedDate = todayISO;
+    } else if (cleanExplicit === "tomorrow") {
+      resolvedDate = addDaysISO(todayISO, 1);
+    } else if (cleanExplicit === "nextweek") {
+      resolvedDate = addDaysISO(todayISO, 7);
+    } else if (cleanExplicit === "someday") {
+      resolvedDate = null;
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(cleanExplicit)) {
+      resolvedDate = cleanExplicit;
+    }
   }
 
   return {
