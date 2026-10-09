@@ -5,7 +5,7 @@ Upload files to your own S3-compatible storage (Amazon S3, Cloudflare R2, Backbl
 ## Requirements
 
 - macOS or Windows
-- [Aktar](https://getaktar.com) 0.4.0 or later for Mac, or 0.1.0 or later for Windows, with at least one destination added in its Settings
+- [Aktar](https://getaktar.com) 0.18.0 or later for Mac, or 0.11.0 or later for Windows, with at least one destination added in its Settings
 
 ## Setup
 
@@ -71,7 +71,7 @@ Mention `@aktar` to search your uploads, list what's in a bucket, or create a te
 - `@aktar what's in the design folder of my Demo bucket?`
 - `@aktar give me a 2-hour link to design/hero-background.jpg`
 
-The AI tools only read. They never upload, move, or delete anything.
+The AI tools only read. They never upload, move, or delete anything. A temporary link lets anyone who has it download the file, even from a private bucket, so Raycast asks you before the AI creates one. AI links last 1 hour unless you ask for longer, and 24 hours at most; for up to 7 days, use Browse Buckets. Name destinations exactly as Aktar shows them.
 
 ## Preferences
 
@@ -83,7 +83,9 @@ The AI tools only read. They never upload, move, or delete anything.
 
 - **"Can't Reach Aktar"**: make sure Aktar is running and **Allow local connections** is on in Aktar > Settings > Integrations.
 - **"Aktar Rejected the Connection"**: the token was regenerated in Aktar. Run **Connect to Aktar** again.
+- **"Couldn't Verify Aktar"**: the app answering on Aktar's port couldn't prove it has your token, so the extension didn't send it. If Aktar is running, its token may have changed: run **Connect to Aktar** again.
+- **"Update Aktar"**: this Aktar can't prove it's Aktar yet. Update to Aktar for Mac 0.18.0 or Aktar for Windows 0.11.0 or later.
 
 ## Privacy
 
-Your storage credentials never leave Aktar: they stay in the macOS Keychain or Windows Credential Manager, and the extension never sees them. The extension only talks to Aktar on `127.0.0.1`, using a token Aktar generates, and Aktar uploads files directly to your storage. There is no Aktar server in between.
+Your storage credentials never leave Aktar: they stay in the macOS Keychain or Windows Credential Manager, and the extension never sees them. The extension only talks to Aktar on `127.0.0.1`, using a token Aktar generates, and only after the app on that port proves it has the same token, so another program can't collect it while Aktar isn't running, and Aktar uploads files directly to your storage. There is no Aktar server in between.

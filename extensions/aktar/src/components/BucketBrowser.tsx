@@ -26,6 +26,7 @@ import {
 import type { BucketFolder, BucketObject, Destination } from "../api/types";
 import { showAktarFailure } from "../lib/errors";
 import { FORMAT_TITLES, formatBytes, formatLink, isImageName } from "../lib/format";
+import { escapeMarkdown, markdownURL } from "../lib/markdown";
 import { isWindows, primaryShortcut } from "../lib/platform";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
@@ -317,12 +318,14 @@ function ObjectDetail({
   // The date in the URL makes Raycast load a replaced image instead of its cached copy.
   const version = object.lastModified ? Date.parse(object.lastModified) : NaN;
   const imageURL = object.url && !Number.isNaN(version) ? `${object.url}?v=${version}` : object.url;
-  const image = imageURL && isImageName(object.name) ? `![](${imageURL})` : "";
+  const image = imageURL && isImageName(object.name) ? `![](${markdownURL(imageURL)})` : "";
   const thumbnail = preview ? thumbnailMarkdown(preview) : "";
   return (
     <List.Item.Detail
       markdown={
-        image || thumbnail || `### ${object.name}\n\n${preview === undefined ? "" : "No preview for this file."}`
+        image ||
+        thumbnail ||
+        `### ${escapeMarkdown(object.name)}\n\n${preview === undefined ? "" : "No preview for this file."}`
       }
       metadata={
         <List.Item.Detail.Metadata>

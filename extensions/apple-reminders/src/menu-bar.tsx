@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import {
   deleteReminder as apiDeleteReminder,
   setPriorityStatus,
@@ -59,6 +59,7 @@ export default function Command() {
   } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
+  const [, rerender] = useReducer((count: number) => count + 1, 0);
   // Lists shown in the menu bar; empty means all lists. Replaces the older single-list choice.
   const [legacyListId, setLegacyListId] = useCachedState<string | undefined>("menu-bar-list");
   const [listIds, setListIds] = useCachedState<string[]>(MENU_BAR_LISTS_KEY, legacyListId ? [legacyListId] : []);
@@ -123,6 +124,13 @@ export default function Command() {
     return sections.filter((section) => section.items.length > 0);
   }, [reminders, view]);
 
+  // Raycast waits for one more render after a menu bar action ends. When the action removes its own item
+  // (completing, deleting or moving a reminder), nothing renders again, so the action never ends and the
+  // next one fails with "Worker unloaded". Render once more after the action so it can end.
+  function renderAfterAction() {
+    setTimeout(rerender, 0);
+  }
+
   async function setPriority(reminderId: string, priority: Priority) {
     try {
       await setPriorityStatus({ reminderId, priority });
@@ -153,6 +161,8 @@ export default function Command() {
         style: Toast.Style.Failure,
         title: `Unable to set due date`,
       });
+    } finally {
+      renderAfterAction();
     }
   }
 
@@ -171,6 +181,8 @@ export default function Command() {
         title: "Unable to delete reminder",
         message: reminder.title,
       });
+    } finally {
+      renderAfterAction();
     }
   }
 
@@ -265,6 +277,8 @@ export default function Command() {
                   title: "Unable to mark reminder as complete",
                   message: reminder.title,
                 });
+              } finally {
+                renderAfterAction();
               }
             }}
           />
@@ -281,6 +295,7 @@ export default function Command() {
               const { reminder } = nextReminder;
               const kept = data ? pruneDismissed(dismissed, data.reminders) : dismissed;
               setDismissed({ ...kept, [reminder.id]: reminder.dueDate as string });
+              renderAfterAction();
             }}
           />
         </MenuBarExtra.Section>
@@ -305,6 +320,8 @@ export default function Command() {
                 title: "Unable to mark reminder as complete",
                 message: reminder.title,
               });
+            } finally {
+              renderAfterAction();
             }
           }}
         />
@@ -361,6 +378,8 @@ export default function Command() {
                         title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
                         message: reminder.title,
                       });
+                    } finally {
+                      renderAfterAction();
                     }
                   }}
                 />

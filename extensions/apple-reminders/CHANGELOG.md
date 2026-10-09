@@ -8,6 +8,10 @@
 - Dismiss the reminder shown in the menu bar without completing it; it shows again if it's rescheduled.
 - Clearer names and descriptions for the menu bar settings, grouped by what's in the menu bar, the upcoming reminder, and what's in the menu.
 
+## [Fix Menu Bar Actions] - 2026-10-09
+
+- Fix the "Worker unloaded" error when completing, deleting or rescheduling more than one reminder from the menu bar.
+
 ## [Search and Refresh Fixes] - 2026-10-01
 
 - Report deleted or unavailable lists instead of treating them as empty, and clear previous search results while new results load.
