@@ -18,3 +18,4 @@ A powerful Raycast extension for sharing and syncing selected Obsidian configura
 - **Bootstrap & Sync Profiles**: Run **Bootstrap New Vault** to create a fresh vault mirroring your ideal configuration, or create Sync Profiles for 1-click deployments of your favorite plugins and snippets to any vault.
 
 Existing live links reflect changes immediately, keeping your Obsidian environments perfectly in sync without the overhead of duplicate configurations!
+
