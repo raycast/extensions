@@ -10,6 +10,7 @@
 - **Discover command**: browse trending, popular and anticipated movies and shows, with the same actions as search.
 - **Search People command**: find actors and crew, then browse the movies and shows they worked on, with their roles.
 - **Dropped Shows command**: see the shows you dropped and restore one to Continue Watching and the calendar.
+- **Calendar command**: upcoming episodes of the shows you follow and movie releases, grouped by day in your time zone, for this week or the next 7, 14 or 32 days.
 
 ## [Update] - 2026-10-09
 

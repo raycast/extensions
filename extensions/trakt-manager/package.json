@@ -64,6 +64,18 @@
       "mode": "view"
     },
     {
+      "name": "calendar",
+      "title": "Calendar",
+      "subtitle": "Trakt Manager",
+      "description": "See upcoming episodes of the shows you follow and movie releases, by day in your time zone",
+      "keywords": [
+        "upcoming",
+        "airing",
+        "schedule"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "history",
       "title": "History",
       "subtitle": "Trakt Manager",

@@ -241,7 +241,7 @@ export const TraktCalendarShowItem = z.object({
   show: z.object({
     title: z.string(),
     year: z.number().nullable().optional(),
-    ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+    ids: z.object({ trakt: z.number(), slug: z.string().optional(), imdb: z.string().nullable().optional() }),
   }),
 });
 
