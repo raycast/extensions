@@ -8,6 +8,7 @@
 - **AI tools for Now Watching, Stop Check-In and Drop Show**: Raycast AI can check in to a movie or an episode, stop the check-in, and drop a show, each after a confirmation that names the title.
 - **Similar titles**: "Similar Titles" on movie and show results opens the titles Trakt relates to them, and the AI can answer "movies like Inception".
 - **Discover command**: browse trending, popular and anticipated movies and shows, with the same actions as search.
+- **Search People command**: find actors and crew, then browse the movies and shows they worked on, with their roles.
 
 ## [Update] - 2026-10-09
 

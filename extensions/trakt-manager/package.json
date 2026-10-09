@@ -76,6 +76,19 @@
       "mode": "view"
     },
     {
+      "name": "search-people",
+      "title": "Search People",
+      "subtitle": "Trakt Manager",
+      "description": "Search actors and crew, then browse the movies and shows they worked on",
+      "keywords": [
+        "actor",
+        "director",
+        "cast",
+        "crew"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "recommendations",
       "title": "Recommendations",
       "subtitle": "Trakt Manager",

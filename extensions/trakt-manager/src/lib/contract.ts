@@ -21,6 +21,9 @@ import {
   TraktAnticipatedMovieList,
   TraktTrendingShowList,
   TraktAnticipatedShowList,
+  TraktPersonSearchQuerySchema,
+  TraktPersonSearchList,
+  TraktPersonCreditsSchema,
   TraktPlaybackMovieList,
   TraktCalendarMovieList,
   TraktCalendarPathSchema,
@@ -790,6 +793,35 @@ const TraktSearchContract = c.router({
     }),
     query: TraktIdLookupQuerySchema,
     summary: "Look up a movie, show, season or episode by its Trakt ID",
+  },
+  searchPeople: {
+    method: "GET",
+    path: "/search/person",
+    responses: {
+      200: TraktPersonSearchList,
+    },
+    query: TraktPersonSearchQuerySchema,
+    summary: "Search people by name",
+  },
+  getPersonMovies: {
+    method: "GET",
+    path: "/people/:id/movies",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktPersonCreditsSchema,
+    },
+    query: TraktExtendedSchema,
+    summary: "Get the movies a person is credited on",
+  },
+  getPersonShows: {
+    method: "GET",
+    path: "/people/:id/shows",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktPersonCreditsSchema,
+    },
+    query: TraktExtendedSchema,
+    summary: "Get the shows a person is credited on",
   },
 });
 

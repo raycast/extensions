@@ -381,6 +381,37 @@ export const TraktTrendingMovieList = z.array(z.object({ watchers: z.number(), m
 export const TraktAnticipatedMovieList = z.array(z.object({ list_count: z.number(), movie: TraktMovieBaseItem }));
 export const TraktTrendingShowList = z.array(z.object({ watchers: z.number(), show: TraktShowBaseItem }));
 export const TraktAnticipatedShowList = z.array(z.object({ list_count: z.number(), show: TraktShowBaseItem }));
+
+export const TraktPersonSearchQuerySchema = TraktPaginationSchema.extend({
+  query: z.string(),
+  extended: z.enum(["full"]).optional(),
+});
+
+/** `/search/person`: people whose name matches. */
+export const TraktPersonSearchList = z.array(
+  z.object({
+    score: z.number().optional(),
+    person: z.object({
+      name: z.string(),
+      known_for_department: z.string().nullable().optional(),
+      ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+    }),
+  }),
+);
+export type TraktPersonSearchItem = z.infer<typeof TraktPersonSearchList>[number];
+
+const TraktCreditEntry = z.object({
+  characters: z.array(z.string()).nullable().optional(),
+  jobs: z.array(z.string()).nullable().optional(),
+  movie: TraktMovieBaseItem.optional(),
+  show: TraktShowBaseItem.optional(),
+});
+
+/** `/people/:id/movies` and `/people/:id/shows`: cast, and crew grouped by department. */
+export const TraktPersonCreditsSchema = z.object({
+  cast: z.array(TraktCreditEntry).nullable().optional(),
+  crew: z.record(z.string(), z.array(TraktCreditEntry)).nullable().optional(),
+});
 export type TraktShowBaseItem = z.infer<typeof TraktShowBaseItem>;
 
 export const TraktShowProgressQuerySchema = z.object({
