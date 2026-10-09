@@ -21,8 +21,8 @@ export type RowHandlers = {
   onUse: (entry: Entry) => void;
   /** ⌥⌘↓ navigates into a folder. */
   onDescend: (entry: Entry) => void;
-  /** Navigates to the parent; undefined at the filesystem root or global scope. */
-  onUp?: () => void;
+  /** Go up from the current folder, or open a global result's containing folder. */
+  onUp?: (entry?: Entry) => void;
   onReturnToStart?: () => void;
   /** Cycles query history with ⌘[ and ⌘]. */
   onHistoryBack: () => void;
@@ -290,7 +290,11 @@ function RowActions({
           />
         )}
         <NavigationActions
-          onUp={handlers.onUp}
+          onUp={
+            handlers.onUp && path.dirname(entry.path) !== entry.path
+              ? () => handlers.onUp?.(entry)
+              : undefined
+          }
           onReturnToStart={handlers.onReturnToStart}
         />
       </ActionPanel.Section>

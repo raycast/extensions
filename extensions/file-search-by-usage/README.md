@@ -73,7 +73,7 @@ Open, Open With, Show in Finder, Copy Path, Copy Name, Copy File, and entering a
 
 - `⏎` opens the selected item. For a folder it opens Finder.
 - `⌥⌘↓` browses inside a folder. Queries there match **direct children only**, never deeper.
-- `⌥⌘↑` goes up and selects the folder you just left.
+- `⌥⌘↑` goes up and selects the folder you just left. From global results, it opens the selected item's containing folder and selects that item.
 - `⇧⌘H` returns to Everywhere with an empty query. Sort, type, and session hidden-file choices stay as they were.
 
 Changing folders clears the query. No folder history is kept. Folder contents refresh on their own, with a five-second poll to catch change notifications that were missed. `⌘R` refreshes by hand.

@@ -361,7 +361,7 @@ export async function rowRenderChecks(
     onOpen: (entry: { path: string }) => calls.push(entry.path),
     onUse: (entry: { path: string }) => calls.push(`use:${entry.path}`),
     onDescend: (entry: { path: string }) => calls.push(`enter:${entry.path}`),
-    onUp: () => calls.push("up"),
+    onUp: (entry?: { path: string }) => calls.push(`up:${entry?.path}`),
     onHistoryBack: () => calls.push("previous"),
     onHistoryForward: () => calls.push("next"),
     onToggleHidden: () => calls.push("hidden"),
@@ -513,7 +513,7 @@ export async function rowRenderChecks(
     action("Navigate into Folder").props.onAction();
     action("Go to Parent Folder").props.onAction();
     assert(
-      calls.join(",") === "/foo/bar499,enter:/foo/bar499,up",
+      calls.join(",") === "/foo/bar499,enter:/foo/bar499,up:/foo/bar499",
       "deferred actions operate on the newly selected item",
     );
     assert(
@@ -601,6 +601,15 @@ export async function rowRenderChecks(
     isDirectory = false;
     await act(() => renderer!.update(rows()));
     checkPrimaryActions();
+    const fileParentAction = renderer!.root
+      .findAllByType("action")
+      .find((item) => item.props.title === "Go to Parent Folder")!;
+    fileParentAction.props.onAction();
+    assert(
+      calls.at(-1) === "up:/foo/bar499" &&
+        fileParentAction.props.shortcut === api.Keyboard.Shortcut.Common.MoveUp,
+      "a selected file passes its own entry to Option-Command-Up",
+    );
     handlers.onReturnToStart = undefined;
     await act(() => renderer!.update(rows()));
     assert(

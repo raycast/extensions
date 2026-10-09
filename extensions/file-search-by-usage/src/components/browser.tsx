@@ -780,9 +780,16 @@ function BrowserView({
         navigate(entry.path);
       },
       onUp:
-        dir && parent && parent !== dir
-          ? () => navigate(parent, dir)
-          : undefined,
+        dir !== undefined
+          ? parent && parent !== dir
+            ? () => navigate(parent, dir)
+            : undefined
+          : (entry?: Entry) => {
+              if (!entry) return;
+              const containingFolder = path.dirname(entry.path);
+              if (containingFolder !== entry.path)
+                navigate(containingFolder, entry.path);
+            },
       onHistoryBack: () => {
         const step = stepSearchHistory(history, historyIndex, "back");
         if (step.kind === "refuse")
@@ -1172,7 +1179,7 @@ function BrowserView({
        */}
       {noIndex ? rebuildAction : refreshAction}
       <NavigationActions
-        onUp={rowHandlers.onUp}
+        onUp={dir !== undefined ? rowHandlers.onUp : undefined}
         onReturnToStart={rowHandlers.onReturnToStart}
       />
       <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />

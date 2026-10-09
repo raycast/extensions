@@ -224,6 +224,7 @@ export async function browserChecks(
       "SearchHistoryActions",
       "rowHandlers",
       "noIndex",
+      "dir",
       emptyPanelCode,
     )(
       element,
@@ -242,7 +243,7 @@ export async function browserChecks(
       ),
       () => null,
       {
-        onUp: undefined,
+        onUp: () => {},
         onReturnToStart: undefined,
         onToggleHidden: () => {},
         onRebuildIndex: () => {},
@@ -252,6 +253,7 @@ export async function browserChecks(
         onHistoryForward: () => {},
       },
       noIndex,
+      undefined,
     );
     // Filter on the shape rather than the node type: these come from two
     // differently loaded Action bindings. Requiring onAction keeps section
@@ -404,17 +406,56 @@ export async function browserChecks(
     `return ({${between(source, "      onUp:", "      onHistoryBack:")}}).onUp;`,
     { loader: "ts" },
   ).code;
-  const onUp = new Function("dir", "parent", "navigate", upCode)(
+  const makeUp = new Function("dir", "parent", "navigate", "path", upCode);
+  const onUp = makeUp(
     "/foo/baz",
     "/foo",
     (dir: string, initialSelectionPath: string) => {
       target = { dir, initialSelectionPath };
     },
+    path,
   );
   onUp();
   assert(
     target.dir === "/foo" && target.initialSelectionPath === "/foo/baz",
-    "Command-Left opens the parent with the current folder selected",
+    "Option-Command-Up opens the parent with the current folder selected",
+  );
+  const globalUp = makeUp(
+    undefined,
+    undefined,
+    (dir: string, initialSelectionPath: string) => {
+      target = { dir, initialSelectionPath };
+    },
+    path,
+  );
+  globalUp({ path: "/example/project/report.tex", isDirectory: false });
+  assert(
+    target.dir === "/example/project" &&
+      target.initialSelectionPath === "/example/project/report.tex",
+    "global parent navigation opens a selected file's folder and selects the file",
+  );
+  globalUp({
+    path: "/example/provider/shortcut/report.tex",
+    storagePath: "/example/target/report.tex",
+    isDirectory: false,
+  });
+  assert(
+    target.dir === "/example/provider/shortcut" &&
+      target.initialSelectionPath === "/example/provider/shortcut/report.tex",
+    "global parent navigation preserves the visible shortcut route",
+  );
+  globalUp({ path: "/example/project", isDirectory: true });
+  assert(
+    target.dir === "/example" &&
+      target.initialSelectionPath === "/example/project",
+    "global parent navigation also selects a folder in its parent",
+  );
+  target = {};
+  globalUp();
+  globalUp({ path: "/", isDirectory: true });
+  assert(
+    target.dir === undefined && makeUp("/", "/", () => {}, path) === undefined,
+    "parent navigation does nothing without a selected item or above the filesystem root",
   );
   /*
    * The indexed search effect, evaluated from the real source.
