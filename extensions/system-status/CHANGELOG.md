@@ -1,4 +1,4 @@
-## [Fix networks with one address] - {PR_MERGE_DATE}
+## [Fix networks with one address] - 2026-10-09
 
 - Fixed the Internet details crashing with "addresses.map is not a function" when the network adapter has a single IP address
 
