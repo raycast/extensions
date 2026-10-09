@@ -1,7 +1,7 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { endedSessionError, listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
@@ -9,14 +9,10 @@ import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
-import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
-  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
-}
 
 function originOf(raw?: string): string | undefined {
   if (!raw) return undefined;
@@ -136,13 +132,15 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
+    // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
+    // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
+    // screen replaces them once it answers that the session has ended.
+    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
     const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
-      // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
-      // than items whose passwords can't load.
-      hasLoadedFromCache.current ? undefined : endedSessionError(),
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
@@ -158,6 +156,7 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
           }
         : sharedItems;
     if (!isLatest()) return;
+    let isFresh = false;
     if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
       // Show cached metadata once the session is confirmed, even when stale: listing everything can take
       // several seconds, so waiting for it before rendering anything feels broken.
@@ -168,14 +167,14 @@ export function SearchItemsView({ initialVault, allVaults = false }: SearchItems
       hasLoadedFromCache.current = true;
 
       const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
-      if (!isStale && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
+      isFresh = !isStale && !backgroundRefreshEnabled;
     }
 
     try {
-      if (sessionEnded) throw sessionEnded;
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      if (isFresh) return;
       if (initialVault && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {

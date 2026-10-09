@@ -93,3 +93,8 @@ export function createListingSaves() {
 
 /** Shared by the views of a command, e.g. the vault list and the item lists it opens. */
 export const listingSaves = createListingSaves();
+
+/** `promise`'s value, or nothing if it takes longer than `ms`. */
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
+}

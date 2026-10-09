@@ -1420,6 +1420,51 @@ test("an ended session shows the login screen at once, without showing the saved
   assert.equal(typeof render().props.reload, "function");
 });
 
+test("a slow session check doesn't hold the saved items back, and an ended session still shows the login screen", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  let endSession: (error: PassCliError) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          endSession = resolve;
+        }),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(shownSaved, true);
+  // The listing waits for the answer.
+  assert.equal(listings, 0);
+
+  endSession(new PassCliError("Not authenticated.", "not_authenticated"));
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(typeof render().props.reload, "function");
+  assert.equal(listings, 0);
+});
+
 test("the vault list saves sharing on its own, and vaults with items from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };

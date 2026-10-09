@@ -143,6 +143,12 @@ export async function checkAuth(): Promise<boolean> {
 }
 
 /**
+ * How long saved items wait for endedSessionError before showing anyway: pass-cli usually answers in under a second,
+ * but can take many seconds after a while unused.
+ */
+export const SESSION_CHECK_WAIT_MS = 1_000;
+
+/**
  * The error to show when pass-cli says the session has ended, so that saved items don't show meanwhile. Nothing when
  * the session is open, or when pass-cli can't tell, e.g. offline: saved items can still show then.
  */

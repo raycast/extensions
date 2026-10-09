@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { endedSessionError, listVaultSharing, listVaultsAndItems } from "./pass-cli";
+import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_WAIT_MS } from "./pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
 import { SearchItemsView } from "./search-items-view";
 import { NotLoggedInView } from "./login-view";
@@ -13,7 +13,7 @@ import {
   setCachedVaults,
 } from "./cache";
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
-import { createListingSaves, createRequestTracker, listingSaves } from "./refresh";
+import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
 import { platformShortcut } from "./shortcuts";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
@@ -63,14 +63,16 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (error?.type !== "not_authenticated") setError(null);
     setIsLoading(true);
 
+    // Saved vaults wait for pass-cli to confirm the session, as in the item list: an ended one shows the login screen.
+    const sessionCheck = hasLoadedFromCache.current ? Promise.resolve(undefined) : endedSessionError();
     const [cachedVaults, cachedItems, cachedSharing, sessionEnded] = await Promise.all([
       getCachedVaults(),
       getCachedItems(),
       getCachedSharing(),
-      // Saved vaults wait for pass-cli to confirm the session: an ended one shows the login screen right away.
-      hasLoadedFromCache.current ? undefined : endedSessionError(),
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
     if (!isLatest()) return;
+    let isFresh = false;
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       // The items cache only holds complete listings, so every cached vault gets a count.
@@ -78,14 +80,14 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       hasLoadedFromCache.current = true;
 
       // The item list renews the vaults it saves, but only the vault list lists sharing, so its age counts too.
-      if (!cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
+      isFresh = !cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled;
     }
 
     try {
-      if (sessionEnded) throw sessionEnded;
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      if (isFresh) return;
       // Items are listed too, for their number per vault; the listing also refreshes the item list's cache.
       const listing = listingSaves.start();
       const sharingListing = sharingSaves.start();
