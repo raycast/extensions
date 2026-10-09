@@ -64,6 +64,18 @@
       "mode": "view"
     },
     {
+      "name": "discover",
+      "title": "Discover",
+      "subtitle": "Trakt Manager",
+      "description": "Browse trending, popular and anticipated movies and shows on Trakt",
+      "keywords": [
+        "trending",
+        "popular",
+        "anticipated"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "recommendations",
       "title": "Recommendations",
       "subtitle": "Trakt Manager",

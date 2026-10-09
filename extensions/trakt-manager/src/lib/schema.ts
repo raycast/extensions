@@ -375,6 +375,12 @@ export type TraktMovieBaseItem = z.infer<typeof TraktMovieBaseItem>;
 export const TraktMovieBaseList = z.array(TraktMovieBaseItem);
 export const TraktShowBaseList = z.array(TraktShowBaseItem);
 export const TraktBrowseQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
+
+/** `/movies/trending` and `/movies/anticipated`: a movie with how many watch it now or list it. */
+export const TraktTrendingMovieList = z.array(z.object({ watchers: z.number(), movie: TraktMovieBaseItem }));
+export const TraktAnticipatedMovieList = z.array(z.object({ list_count: z.number(), movie: TraktMovieBaseItem }));
+export const TraktTrendingShowList = z.array(z.object({ watchers: z.number(), show: TraktShowBaseItem }));
+export const TraktAnticipatedShowList = z.array(z.object({ list_count: z.number(), show: TraktShowBaseItem }));
 export type TraktShowBaseItem = z.infer<typeof TraktShowBaseItem>;
 
 export const TraktShowProgressQuerySchema = z.object({
