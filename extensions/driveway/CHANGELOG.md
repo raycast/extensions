@@ -1,6 +1,6 @@
 # DriveWay Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-09
 
 - Save, mount, and unmount any number of network drives over SMB and WebDAV, each with an optional alias and username
 - WebDAV (insecure, no TLS) option for a trusted local network whose server has no valid certificate
