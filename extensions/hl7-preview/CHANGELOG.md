@@ -1,6 +1,6 @@
 # HL7 Preview Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-09
 
 - Paste an HL7 file, a file path or a raw message, or choose a file.
 - Read a message as one document: header, patient, orders with material, results with flags and notes, and every segment with named fields and components.
