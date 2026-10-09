@@ -61,7 +61,6 @@ function allowedPath(relativePath: string): string {
   if (parts.length === 2 && parts[0] === "plugins" && parts[1] !== ".git") return normalized;
   if (parts.length === 2 && parts[0] === "themes" && parts[1] !== ".git") return normalized;
   if (parts.length === 2 && parts[0] === "snippets" && parts[1].endsWith(".css")) return normalized;
-  if (parts.length === 2 && parts[0] === "latex-snippet-versions" && parts[1].endsWith(".js")) return normalized;
   throw new Error("Item path is outside the configuration allowlist");
 }
 

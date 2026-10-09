@@ -21,8 +21,7 @@ export function useVaultRefresh(defaultVault: string, targetVault: string, refre
           name.includes("Cache/") ||
           name.includes("IndexedDB/") ||
           name.includes("obsidian.css") ||
-          name.includes("plugins/obsidian-git") ||
-          name.includes("plugins/obsidian-latex-suite")
+          name.includes("plugins/obsidian-git")
         ) {
           return;
         }
