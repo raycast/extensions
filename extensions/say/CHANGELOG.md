@@ -1,5 +1,13 @@
 # Say - Text to Speech Changelog
 
+## [Fix Stop Command] - 2026-10-08
+
+- Update native-say to fix Stop not stopping speech on Windows
+
+## [Improvement] - 2026-10-08
+
+- Add "(Read & Speak)" to Siri Voice tips in the documentation
+
 ## [Maintenance] - 2026-04-16
 
 - Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`

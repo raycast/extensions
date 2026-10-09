@@ -1,3 +1,4 @@
+import { readSyncWrite, syncKindForMedia } from "../tools/sync-write";
 import { initTraktClient } from "./client";
 import {
   TraktCheckinConflictSchema,
@@ -242,6 +243,27 @@ export async function hideShowFromCalendar(traktClient: TraktClient, showTraktId
     fetchOptions: { signal },
   });
   return response.status === 200 || response.status === 201;
+}
+
+/**
+ * `DELETE /recommendations/{movies,shows}/:id` ("Not interested" on Trakt). Trakt answers 204 with
+ * no body, so the status is the only proof; anything else, network failures included (status 500), throws.
+ */
+export async function hideRecommendation(
+  traktClient: TraktClient,
+  type: "movie" | "show",
+  traktId: number,
+  { signal }: MutationOptions,
+) {
+  const request = { params: { id: traktId }, fetchOptions: { signal } };
+  const response =
+    type === "movie"
+      ? await traktClient.movies.hideMovieRecommendation(request)
+      : await traktClient.shows.hideShowRecommendation(request);
+
+  if (response.status !== 204) {
+    throw new Error(`Trakt did not hide this recommendation (HTTP ${response.status}). Try again.`);
+  }
 }
 
 /** Short, readable reason from an error body, if Trakt sent one. */
@@ -570,6 +592,59 @@ export async function removeMediaRating(
     body,
     fetchOptions: { signal },
   });
+}
+
+/** Rates a title and checks Trakt stored it: a 2xx with nothing added (or updated) is a failure. */
+export async function rateTitle(
+  traktClient: TraktClient,
+  type: "movie" | "show" | "episode",
+  traktId: number,
+  rating: number,
+  options: MutationOptions,
+) {
+  const response = await rateMedia(traktClient, { type, traktId, rating }, options);
+  const write = readSyncWrite(response.body, syncKindForMedia(type));
+  if ((response.status !== 200 && response.status !== 201) || write.added + write.existing === 0) {
+    throw new Error(`Trakt did not store the rating (HTTP ${response.status}). Try again.`);
+  }
+}
+
+/** Removes a rating and checks Trakt deleted one: nothing deleted means there was no rating to remove. */
+export async function unrateTitle(
+  traktClient: TraktClient,
+  type: "movie" | "show" | "episode",
+  traktId: number,
+  options: MutationOptions,
+) {
+  const response = await removeMediaRating(traktClient, { type, traktId }, options);
+  const write = readSyncWrite(response.body, syncKindForMedia(type));
+  if (response.status !== 200 || write.deleted === 0) {
+    throw new Error("Trakt had no rating to remove for this title.");
+  }
+}
+
+/**
+ * Removes every play of a movie, a whole show or one episode, and returns how many plays Trakt deleted.
+ * Nothing deleted means the title had no play: that is reported, not shown as a success.
+ */
+export async function removeTitleFromHistory(
+  traktClient: TraktClient,
+  type: "movie" | "show" | "episode",
+  traktId: number,
+  options: MutationOptions,
+) {
+  const response =
+    type === "movie"
+      ? await removeMovieIdFromHistory(traktClient, traktId, options)
+      : type === "show"
+        ? await removeShowIdFromHistory(traktClient, traktId, options)
+        : await removeEpisodeIdFromHistory(traktClient, traktId, options);
+  // History deletes are counted in episodes for a show: its plays are episode plays.
+  const write = readSyncWrite(response.body, type === "movie" ? "movies" : "episodes");
+  if (response.status !== 200 || write.deleted === 0) {
+    throw new Error("Trakt found no plays to remove for this title.");
+  }
+  return write.deleted;
 }
 
 export type ActiveCheckin = {

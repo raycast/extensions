@@ -1,5 +1,57 @@
 # Model Context Protocol Registry Changelog
 
+## [Add QRX MCP Server] - 2026-10-09
+
+- Add QRX to the official registry: turn a prompt and a link into a branded, print-ready QR code that is checked to scan, with a hosted qrx.to short link. Hosted remote Streamable HTTP server at https://qrx.codes/mcp through `mcp-remote`; QRX API key sent as an `Authorization: Bearer` header.
+
+## [Add A1 Gallery MCP Server] - 2026-10-09
+
+- Add A1 Gallery to the official registry: hand-curated web design references, inside your agent. Search real websites, sections, pages, fonts and designers, and read design tokens measured off each rendered page. 17 read-only tools. Hosted remote Streamable HTTP server at https://www.a1.gallery/api/mcp; OAuth 2.1 sign-in with dynamic client registration, free A1 account, no API key.
+
+## [Add BulkPublish MCP Server] - 2026-10-09
+
+- Add BulkPublish to the official registry: schedule, cross-post and analyze social media posts across 15 platforms, including Facebook, Instagram, X, TikTok, YouTube, LinkedIn and Bluesky, with media uploads, queue slots, post analytics and, on Pro and Business plans, DM and comment replies. Raycast connects directly to the remote Streamable HTTP server at https://mcp.bulkpublish.com/mcp, with `mcp-remote` as the fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-09
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
+## [Add Suparelay MCP Server] - 2026-10-08
+
+- Add Suparelay to the official entries: international calls from your AI assistant, with the price per minute and a Call link to the browser dialer.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-08
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
+## [Update Moved Repository Links] - 2026-10-08
+
+- Update the homepage links of the Perplexity, Stripe, Firecrawl, Talk to Figma and Monday entries to the repositories they now redirect to.
+
+## [Add The Bridge MCP Server] - 2026-10-07
+
+- Add The Bridge to the official registry: complete, hosted login, teams, billing and feature flags for your SaaS app, set up by your AI assistant. Remote Streamable HTTP server at https://api.thebridge.dev/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key.
+
+## [Add BOIM MCP Server] - 2026-10-07
+
+- Add BOIM (보임) to the official registry: a Korean business directory for AI agents covering 2.7M businesses across all industries, 75,000+ public-procurement vendor cards and open public bids from KONEPS, Defense e-Procurement, LH, K-water and Nuri-jangteo. Read-only. Raycast connects directly to the remote Streamable HTTP server at https://boim.io/api/mcp, with no sign-in and no API key for the free tier (up to 5 results per tool).
+
+## [Update Hermoso MCP Server] - 2026-10-07
+
+- Update the Hermoso entry's description to what the server does today: marketing on autopilot from your AI agent, with ad research, ad and post creation, publishing and scheduling to 10 social channels, autopilot posting, DM automations and campaign management on 12 ad platforms. The connection is unchanged.
+
+## [Add Aitho MCP Server] - 2026-10-07
+
+- Add Aitho to the community registry, for rehearsing and delivering presentations with your own slides. Create a talk from a PDF or PowerPoint deck, attach a speaker script, start a presentation and move between slides, and ask questions answered from your own material. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration and PKCE. Free plan; paid plans for more.
+
+## [Add MiningBridge Intelligence MCP Server] - 2026-10-06
+
+- Add MiningBridge Intelligence to the community registry: critical-mineral and rare-earth trade intelligence (commodity snapshots, trade flows, supplier screening, supply-risk scores, reports). Hosted remote Streamable HTTP server at https://intel.miningbridge.in/api/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE. Nine read-only tools.
+
+## [Add Search Fragments MCP Server] - 2026-10-06
+
+- Add Search Fragments to the community registry: resolves half-remembered books, films, songs and people into a cited answer, a shortlist or an explicit no, and checks specific factual claims against current web sources. Raycast connects directly to the remote Streamable HTTP server at https://searchfragments.com/api/mcp, with no sign-in and no API key.
+
 ## [Add Caly MCP Server] - 2026-10-06
 
 - Add Caly, a remote MCP server from Devino Solutions for scheduling, to the official registry. It is a hosted Streamable HTTP server connected through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE), no API key.

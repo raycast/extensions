@@ -29,6 +29,8 @@ export interface TaskFormProps {
   navigationTitle?: string;
   initialTask?: TweekTask;
   initialTitle?: string;
+  /** Pre-selected date (YYYY-MM-DD) for new tasks, e.g. a day picked in the month view. */
+  initialDate?: string;
   calendars: TweekCalendar[];
   defaultCalendarId: string;
   customColors: TweekCustomColor[];
@@ -47,6 +49,7 @@ export function TaskForm({
   navigationTitle,
   initialTask,
   initialTitle = "",
+  initialDate,
   calendars,
   defaultCalendarId,
   customColors,
@@ -88,7 +91,11 @@ export function TaskForm({
   );
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    initialTask?.date ? parseISODate(initialTask.date) : new Date(),
+    initialTask?.date
+      ? parseISODate(initialTask.date)
+      : initialDate
+        ? parseISODate(initialDate)
+        : new Date(),
   );
 
   const selectedCalendarObj = useMemo(

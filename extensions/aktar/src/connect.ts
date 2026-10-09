@@ -26,7 +26,8 @@ type PendingPairing = {
  * accepted when it answers a request started here: the deeplink carries a
  * one-time nonce (as fallbackText, which Aktar passes through untouched)
  * that must match the pending request, and the other end must then
- * identify itself as Aktar before anything is saved.
+ * prove it has the token (/v1/hello) and identify itself as Aktar before
+ * anything is saved.
  */
 export default async function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
   const handedOver = props.launchContext?.aktar;

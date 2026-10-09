@@ -15,6 +15,7 @@ import { formatWatchedAt, getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/he
 import { fetchCombinedMediaPage, fetchMediaPage, mediaListCacheOptions } from "./lib/media-pagination";
 import { removeEpisodeFromHistory, removeMovieFromHistory } from "./lib/media-mutations";
 import { TraktMovieHistoryListItem, TraktShowHistoryListItem } from "./lib/schema";
+import { useWatchedState } from "./lib/use-watched";
 
 type HistoryFilterType = "all" | "movie" | "show";
 
@@ -80,9 +81,13 @@ export default function Command() {
     mediaListCacheOptions(abortable),
   );
 
+  // Removing by id drops every play, so search must stop offering "Remove from History" for it.
+  const { setWatched } = useWatchedState();
+
   const removeMovieFromHistoryAction = useCallback(
     async (movie: TraktMovieHistoryListItem) => {
       await removeMovieFromHistory(traktClient, movie, { signal: abortable.current?.signal });
+      setWatched({ type: "movie", traktId: movie.movie.ids.trakt }, false);
     },
     [traktClient],
   );
@@ -90,6 +95,8 @@ export default function Command() {
   const removeEpisodeFromHistoryAction = useCallback(
     async (episode: TraktShowHistoryListItem) => {
       await removeEpisodeFromHistory(traktClient, episode, { signal: abortable.current?.signal });
+      const { season, number } = episode.episode;
+      setWatched({ type: "episode", showId: episode.show.ids.trakt, season, number }, false);
     },
     [traktClient],
   );

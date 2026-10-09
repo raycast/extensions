@@ -1,8 +1,14 @@
 # Arc Changelog
 
-## [Fix] - 2026-10-06
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed keyboard navigation in `Search Tabs` jumping over History straight to Suggestions while history was still loading. The tab sections now stay mounted during history search so the list keeps its selection anchor.
+
+## [Fix] - 2026-10-08
+
+- Fixed `Access Spaces and Favorites` launching Arc in the background every 10 minutes when Arc is not running.
+- Updated `@raycast/api`, `@raycast/utils` and the ESLint config, and resolved dependency vulnerabilities.
+- Replaced hand-written shortcuts with Raycast's common shortcuts and removed the reserved `Configure Command` shortcut.
 
 ## [Fix] - 2026-09-14
 

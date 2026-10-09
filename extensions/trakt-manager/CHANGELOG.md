@@ -1,5 +1,34 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-10-09
+
+### Added
+
+- **Rate titles from search**: "Rate…" (1 to 10, your current score checked) and "Remove Rating" on movie and show results, and on episodes when browsing seasons or searching episodes.
+- **Remove from History outside the History screen**: on movie and show results and on episodes, once you have watched them. It removes every play of the title, after a confirmation that says so.
+
+## [Update] - 2026-10-08
+
+### Added
+
+- **Calendar AI tool**: Raycast AI can list upcoming episodes of the shows you follow and upcoming movie releases, for up to 32 days, with episode times in your local time zone. Each list returns 50 entries by default, up to 200.
+
+## [Update] - 2026-10-07
+
+### Fixed
+
+- After an action finishes, only the detail view it started in closes: a detail you opened meanwhile stays open.
+
+## [Update] - 2026-10-06
+
+### Added
+
+- **"Not Interested" on Recommendations** stops Trakt from recommending a movie or show again, and removes it from the grid.
+
+### Changed
+
+- The Continue Watching AI tool (formerly "Get up Next Episodes") also returns the movies you paused mid-playback, with how far you got and the minutes left, so Raycast AI sees the same list as the Continue Watching command. It can be limited to shows or movies.
+
 ## [Update] - 2026-10-01
 
 ### Added

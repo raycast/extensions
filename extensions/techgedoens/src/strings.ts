@@ -54,6 +54,7 @@ export type Strings = {
   noStoredArticleText: string;
   published: string;
   noNewArticles: string;
+  archiveIncomplete: string;
   updateFailed: string;
   unreadCount: (count: number) => string;
   newArticles: (count: number) => string;
@@ -118,6 +119,7 @@ export const strings: Strings = {
   noStoredArticleText: "No article text is stored.",
   published: "Published",
   noNewArticles: "No new articles",
+  archiveIncomplete: "Archive incomplete - safety limit reached",
   updateFailed: "Update failed",
   unreadCount: (count) => (count === 1 ? "1 unread article" : `${count} unread articles`),
   newArticles: (count) => (count === 1 ? "1 new article" : `${count} new articles`),

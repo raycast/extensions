@@ -4,7 +4,7 @@ import { weatherConditionToIcon } from "@components/weather/utils";
 import { RGBtoString, changeRGBBrightness } from "@lib/color";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { sleep } from "@lib/utils";
+import { sleep, stringToDate } from "@lib/utils";
 import { Color, Image, getPreferenceValues } from "@raycast/api";
 
 /**
@@ -247,7 +247,9 @@ export function getStateValue(state: State, statesById?: ReadonlyMap<string, Sta
   } else if (state.entity_id.startsWith("binary_sensor")) {
     return getDeviceClassState(state);
   } else if (state.entity_id.startsWith("input_button")) {
-    return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+    // The state is the last press timestamp, or "unknown"/"unavailable" if never pressed
+    const lastPressed = stringToDate(state.state);
+    return lastPressed ? lastPressed.toISOString().replace("T", " ").replace("Z", "") : state.state;
   } else if (state.entity_id.startsWith("update")) {
     if (state.attributes.in_progress === true) {
       return "in progress";
