@@ -3,7 +3,7 @@ import { closeSync, openSync, readSync } from "node:fs";
 import { extname } from "node:path";
 import { useMemo } from "react";
 import type { Hit } from "../lib/fsearch";
-import { fileName, folderOf, formatDate, formatSize, modifiedDate } from "../lib/format";
+import { encodePath, fileName, folderOf, formatDate, formatSize, modifiedDate } from "../lib/format";
 
 const IMAGES = new Set([
   ".png",
@@ -59,11 +59,13 @@ function kindName(hit: Hit) {
 function preview(hit: Hit): string | undefined {
   if (hit.kind !== "file") return undefined;
   if (IMAGES.has(extname(hit.path).toLowerCase())) {
-    return `![](${encodeURI(`file://${hit.path}`)}?raycast-height=240)`;
+    return `![](file://${encodePath(hit.path)}?raycast-height=240)`;
   }
   const text = readHead(hit.path);
   if (text === undefined) return undefined;
-  const fence = text.includes("```") ? "````" : "```";
+  // Longer than any run of backticks in the file, so nothing in it can close the block and become Markdown.
+  const longestRun = Math.max(0, ...(text.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = "`".repeat(Math.max(3, longestRun + 1));
   return `${fence}\n${text}\n${fence}`;
 }
 

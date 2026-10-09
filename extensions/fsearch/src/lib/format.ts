@@ -45,3 +45,8 @@ export function modifiedDate(mtime: number) {
 export function pluralize(count: number, one: string, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
 }
+
+/** A path as a URL path, with every segment escaped so `#`, `?`, and `%` stay part of the name. */
+export function encodePath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}

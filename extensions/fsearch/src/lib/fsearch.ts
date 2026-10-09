@@ -8,6 +8,9 @@ import { join } from "node:path";
 /** The daemon's socket. One JSON object per line in, one per line out. */
 const SOCKET = join(homedir(), "Library/Application Support/FSearch/fsearch.sock");
 
+/** Name search answers in milliseconds and content search stops itself at 250 ms; anything slower is stuck. */
+const TIMEOUT_MS = 10_000;
+
 export type Kind = "file" | "dir" | "link" | "other";
 
 export interface Hit {
@@ -87,12 +90,21 @@ function send<T>(body: object, signal?: AbortSignal): Promise<T> {
     if (signal?.aborted) return reject(abortError());
     const socket = connect(SOCKET);
     let buffer = "";
-    const onAbort = () => {
+    let settled = false;
+    const settle = (result: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
       socket.destroy();
-      reject(abortError());
+      result();
     };
+    const onAbort = () => settle(() => reject(abortError()));
+    const timer = setTimeout(
+      () => settle(() => reject(new FSearchError("FSearch didn't answer in time", "unreachable"))),
+      TIMEOUT_MS,
+    );
     signal?.addEventListener("abort", onAbort, { once: true });
-    const finish = () => signal?.removeEventListener("abort", onAbort);
 
     socket.setEncoding("utf8");
     socket.on("connect", () => socket.write(JSON.stringify(body) + "\n"));
@@ -100,21 +112,22 @@ function send<T>(body: object, signal?: AbortSignal): Promise<T> {
       buffer += chunk;
       const end = buffer.indexOf("\n");
       if (end < 0) return;
-      finish();
-      socket.end();
-      try {
-        const response = JSON.parse(buffer.slice(0, end));
-        if (response.ok) return resolve(response as T);
-        const message = String(response.error ?? "FSearch returned an error");
-        reject(new FSearchError(message, message.startsWith("indexing") ? "indexing" : "query"));
-      } catch {
-        reject(new FSearchError("FSearch sent a response that couldn't be read", "unreachable"));
-      }
+      settle(() => {
+        try {
+          const response = JSON.parse(buffer.slice(0, end));
+          if (response.ok) return resolve(response as T);
+          const message = String(response.error ?? "FSearch returned an error");
+          reject(new FSearchError(message, message.startsWith("indexing") ? "indexing" : "query"));
+        } catch {
+          reject(new FSearchError("FSearch sent a response that couldn't be read", "unreachable"));
+        }
+      });
     });
-    socket.on("error", (error) => {
-      finish();
-      reject(error);
-    });
+    socket.on("error", (error) => settle(() => reject(error)));
+    // The daemon hung up before a full line arrived (it quit or restarted mid-search).
+    socket.on("close", () =>
+      settle(() => reject(new FSearchError("FSearch closed the connection before answering", "unreachable"))),
+    );
   });
 }
 

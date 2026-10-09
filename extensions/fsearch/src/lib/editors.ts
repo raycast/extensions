@@ -1,5 +1,6 @@
 import { getPreferenceValues, open } from "@raycast/api";
 import { execFile } from "node:child_process";
+import { encodePath } from "./format";
 
 export type Editor = Preferences.SearchContents["editor"];
 
@@ -25,7 +26,7 @@ export async function openAtLine(path: string, line: number, editor: Editor) {
     case "vscode":
     case "cursor":
     case "zed":
-      return open(`${editor}://file${encodeURI(path)}:${line}`);
+      return open(`${editor}://file${encodePath(path)}:${line}`);
     case "xcode":
       return new Promise<void>((resolve, reject) =>
         execFile("/usr/bin/xed", ["--line", String(line), path], (error) => (error ? reject(error) : resolve())),

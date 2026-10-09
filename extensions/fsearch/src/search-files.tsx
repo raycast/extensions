@@ -49,9 +49,7 @@ export default function Command({ fallbackText }: LaunchProps) {
         </List.Dropdown>
       }
     >
-      {error ? (
-        <StatusView error={error} onRetry={revalidate} />
-      ) : !execute ? (
+      {!execute ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Search Your Mac"
@@ -59,6 +57,8 @@ export default function Command({ fallbackText }: LaunchProps) {
             "Type part of a name. Typos are fine.\nNarrow it with in:~/Developer, ext:pdf, size:>5mb, or mtime:<7d."
           }
         />
+      ) : error ? (
+        <StatusView error={error} onRetry={revalidate} />
       ) : (
         <>
           <List.EmptyView

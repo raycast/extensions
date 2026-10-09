@@ -44,9 +44,7 @@ export default function Command({ fallbackText }: LaunchProps) {
         </List.Dropdown>
       }
     >
-      {error ? (
-        <StatusView error={error} onRetry={revalidate} />
-      ) : !execute ? (
+      {!execute ? (
         <List.EmptyView
           icon={Icon.Text}
           title="Search Inside Your Files"
@@ -54,6 +52,8 @@ export default function Command({ fallbackText }: LaunchProps) {
             "Type the text to find. Uppercase letters make it case-sensitive.\nNarrow it with ext:swift, type:code, or in:~/Developer."
           }
         />
+      ) : error ? (
+        <StatusView error={error} onRetry={revalidate} />
       ) : files.length === 0 ? (
         <List.EmptyView icon={Icon.Text} title={isLoading ? "Searching…" : "No Matches"} />
       ) : (
