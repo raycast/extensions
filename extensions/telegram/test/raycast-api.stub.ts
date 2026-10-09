@@ -38,3 +38,5 @@ export const showToast = async (options?: { style?: string; title?: string; mess
   title: options?.title || "",
   message: options?.message || "",
 });
+
+export const openExtensionPreferences = async () => {};

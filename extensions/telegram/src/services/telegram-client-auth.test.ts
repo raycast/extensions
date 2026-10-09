@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Api } from "teleproto/tl";
-import { authenticateWithQr } from "./telegram-client";
+import { authenticateWithQr, logOut } from "./telegram-client";
 import { LocalStorage } from "@raycast/api";
 
 const mockClient = {
@@ -117,5 +117,41 @@ describe("authenticateWithQr", () => {
 
     expect(result).toEqual({ needsPassword: true, success: false });
     expect(LocalStorage.setItem).toHaveBeenCalledWith("telegram_auth_session", "mock_session_string");
+  });
+});
+
+describe("logOut", () => {
+  const config = { apiId: 123456, apiHash: "abcdef" };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockClient.connected = false;
+    mockClient.invoke.mockReset().mockResolvedValue(undefined);
+    mockClient.disconnect.mockReset().mockResolvedValue(undefined);
+    mockClient.connect.mockReset().mockResolvedValue(undefined);
+    vi.spyOn(LocalStorage, "removeItem").mockResolvedValue(undefined);
+  });
+
+  it("invokes LogOut when authorized and removes session keys", async () => {
+    mockClient.isUserAuthorized.mockResolvedValue(true);
+
+    await logOut(config);
+
+    expect(mockClient.invoke).toHaveBeenCalledWith(expect.any(Api.auth.LogOut));
+    expect(mockClient.disconnect).toHaveBeenCalled();
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_session");
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_auth_session");
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_user_id");
+  });
+
+  it("removes session keys even if invoke LogOut throws an error", async () => {
+    mockClient.isUserAuthorized.mockResolvedValue(true);
+    mockClient.invoke.mockRejectedValue(new Error("RPCError: 401: AUTH_KEY_UNREGISTERED"));
+
+    await logOut(config);
+
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_session");
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_auth_session");
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_user_id");
   });
 });

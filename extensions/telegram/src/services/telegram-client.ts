@@ -133,8 +133,8 @@ export async function getClient(config: TelegramConfig): Promise<TelegramClient>
 
   const client = new TelegramClient(session, config.apiId, config.apiHash, {
     connectionRetries: 5,
-    deviceModel: "MacBook Pro",
-    systemVersion: "macOS",
+    deviceModel: "Raycast",
+    systemVersion: process.platform === "win32" ? "Windows" : "macOS",
     appVersion: "1.0.0",
   });
 
@@ -145,6 +145,35 @@ export async function getClient(config: TelegramConfig): Promise<TelegramClient>
 export async function isAuthenticated(): Promise<boolean> {
   const sessionString = await LocalStorage.getItem<string>(SESSION_KEY);
   return !!sessionString;
+}
+
+export async function logOut(config?: TelegramConfig): Promise<void> {
+  let client: TelegramClient | null = null;
+  try {
+    client = clientInstance || (config ? await getClient(config) : null);
+    if (client) {
+      if (!client.connected) {
+        await client.connect();
+      }
+      if (await client.isUserAuthorized()) {
+        await client.invoke(new Api.auth.LogOut());
+      }
+    }
+  } catch {
+    // Network or server error during logout -- proceed with clearing local storage
+  } finally {
+    if (client) {
+      try {
+        await client.disconnect();
+      } catch {
+        // Disconnect failed, ignore
+      }
+    }
+    clientInstance = null;
+    await LocalStorage.removeItem(SESSION_KEY);
+    await LocalStorage.removeItem(AUTH_SESSION_KEY);
+    await LocalStorage.removeItem(USER_ID_KEY);
+  }
 }
 
 async function completeAuthentication(

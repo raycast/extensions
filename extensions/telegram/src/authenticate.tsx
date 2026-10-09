@@ -1,15 +1,26 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Form, Detail, ActionPanel, Action, popToRoot, Icon } from "@raycast/api";
+import {
+  Form,
+  Detail,
+  ActionPanel,
+  Action,
+  popToRoot,
+  Icon,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import dedent from "dedent";
-import { handleQrAuthFlow, handlePasswordAuthFlow, getConfig } from "./utils/auth";
+import { handleQrAuthFlow, handlePasswordAuthFlow, handleLogOut, getConfig } from "./utils/auth";
+import { isAuthenticated } from "./services/telegram-client";
 
 interface AuthPasswordFormValues {
   password: string;
 }
 
 export default function Authenticate() {
-  const [authStep, setAuthStep] = useState<"qr" | "password" | "setup">("qr");
+  const [authStep, setAuthStep] = useState<"authenticated" | "qr" | "password" | "setup">("qr");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrInfo, setQrInfo] = useState<{ tgUrl: string; dataUrl: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,11 +45,18 @@ export default function Authenticate() {
     },
   });
 
-  const startQrAuth = useCallback(async () => {
+  const startQrAuth = useCallback(async (options?: { silentConfigError?: boolean }) => {
     try {
       getConfig();
-    } catch {
+    } catch (err) {
       setAuthStep("setup");
+      if (!options?.silentConfigError) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Configuration Error",
+          message: err instanceof Error ? err.message : "Please check your preferences",
+        });
+      }
       return;
     }
 
@@ -78,17 +96,66 @@ export default function Authenticate() {
   }, []);
 
   useEffect(() => {
-    try {
-      getConfig();
-      startQrAuth();
-    } catch {
-      setAuthStep("setup");
+    async function checkAuth() {
+      try {
+        getConfig();
+      } catch {
+        setAuthStep("setup");
+        return;
+      }
+
+      if (await isAuthenticated()) {
+        setAuthStep("authenticated");
+        return;
+      }
+
+      startQrAuth({ silentConfigError: true });
     }
+
+    checkAuth();
 
     return () => {
       abortControllerRef.current?.abort();
     };
   }, [startQrAuth]);
+
+  if (authStep === "authenticated") {
+    return (
+      <Detail
+        isLoading={isSubmitting}
+        markdown={dedent`
+          # Already Authenticated
+
+          You are currently signed in to your Telegram account.
+
+          To disconnect this session or sign in with a different account, click **Log Out** below.
+        `}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Log out"
+              icon={Icon.Logout}
+              style={Action.Style.Destructive}
+              onAction={async () => {
+                setIsSubmitting(true);
+                await handleLogOut();
+                setIsSubmitting(false);
+                setAuthStep("qr");
+                startQrAuth();
+              }}
+            />
+            <Action title="Back to Raycast" icon={Icon.ArrowLeft} onAction={popToRoot} />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+              onAction={openExtensionPreferences}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (authStep === "setup") {
     return (
@@ -96,7 +163,13 @@ export default function Authenticate() {
         isLoading={isSubmitting}
         actions={
           <ActionPanel>
-            <Action.SubmitForm icon={Icon.ArrowRight} title="Log in" onSubmit={startQrAuth} />
+            <Action.SubmitForm icon={Icon.ArrowRight} title="Log in" onSubmit={() => startQrAuth()} />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+              onAction={openExtensionPreferences}
+            />
             <Action.OpenInBrowser
               title="Get API Credentials"
               url="https://my.telegram.org/apps"
@@ -148,22 +221,32 @@ export default function Authenticate() {
 
   const markdown = error
     ? dedent`
-      ### Failed to Load QR Code
+      # Authenticate with Telegram
+
+      ### ⚠️ Failed to Load QR Code
 
       ${error}
 
-      Press **⌘+R** to reload, or check your API credentials in preferences (**⌘+,**).
+      <br/>
+
+      <sub>Press **⌘+R** to reload, or check your API credentials in preferences (**⌘+,**).</sub>
     `
     : qrInfo
       ? dedent`
-        ### Scan with Telegram: **Settings > Devices > Link Desktop Device**
+        # Authenticate with Telegram
 
-        ![Telegram Login QR Code](${qrInfo.dataUrl})
+        <sub>Scan with Telegram: **Settings > Devices > Link Desktop Device**</sub>
+
+        <br/>
+
+        <p align="center">
+          <img src="${qrInfo.dataUrl}" alt="Telegram Login QR Code" width="220" />
+        </p>
       `
       : dedent`
-        ### Generating QR Code...
+        # Authenticate with Telegram
 
-        Connecting to Telegram servers...
+        <sub>Generating QR code & connecting to Telegram servers...</sub>
       `;
 
   return (
@@ -180,9 +263,14 @@ export default function Authenticate() {
             onAction={startQrAuth}
           />
           <Action
-            title="Configure API Credentials"
+            title="Open Extension Preferences"
             icon={Icon.Gear}
             shortcut={{ modifiers: ["cmd"], key: "," }}
+            onAction={openExtensionPreferences}
+          />
+          <Action
+            title="View Setup Guide"
+            icon={Icon.QuestionMark}
             onAction={() => {
               abortControllerRef.current?.abort();
               setIsSubmitting(false);

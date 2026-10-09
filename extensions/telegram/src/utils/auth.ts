@@ -3,6 +3,7 @@ import {
   isAuthenticated,
   authenticateWithQr,
   authenticateWithPassword,
+  logOut,
   TelegramConfig,
 } from "../services/telegram-client";
 import { getTelegramErrorMessage } from "./errors";
@@ -146,5 +147,34 @@ export async function handleQrAuthFlow(callbacks: {
       });
     }
     throw new Error(message);
+  }
+}
+
+export async function handleLogOut(): Promise<boolean> {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Logging Out",
+    message: "Disconnecting Telegram session...",
+  });
+
+  try {
+    let config: TelegramConfig | undefined;
+    try {
+      config = getConfig();
+    } catch {
+      // If config cannot be read, still log out locally
+    }
+
+    await logOut(config);
+    toast.style = Toast.Style.Success;
+    toast.title = "Logged Out";
+    toast.message = "Successfully logged out of Telegram.";
+    return true;
+  } catch (error) {
+    console.error("[LOGOUT] Failed:", error);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Logout Failed";
+    toast.message = error instanceof Error ? error.message : "Unknown error";
+    return false;
   }
 }

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getConfig, handleQrAuthFlow, handlePasswordAuthFlow } from "./auth";
+import { getConfig, handleQrAuthFlow, handlePasswordAuthFlow, handleLogOut } from "./auth";
 import { __setPreferencesMock } from "../../test/raycast-api.stub";
 import * as telegramClient from "../services/telegram-client";
 
 vi.mock("../services/telegram-client", () => ({
   authenticateWithQr: vi.fn(),
   authenticateWithPassword: vi.fn(),
+  logOut: vi.fn(),
 }));
 
 describe("getConfig", () => {
@@ -169,5 +170,32 @@ describe("handlePasswordAuthFlow", () => {
     vi.mocked(telegramClient.authenticateWithPassword).mockRejectedValue(new Error("PASSWORD_HASH_INVALID"));
 
     await expect(handlePasswordAuthFlow("wrong-password")).rejects.toThrow("Incorrect 2-Step Verification password");
+  });
+});
+
+describe("handleLogOut", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    __setPreferencesMock({
+      apiId: "123456",
+      apiHash: "abcdef1234567890",
+    });
+  });
+
+  it("calls logOut and returns true on success", async () => {
+    vi.mocked(telegramClient.logOut).mockResolvedValue(undefined);
+
+    const result = await handleLogOut();
+
+    expect(result).toBe(true);
+    expect(telegramClient.logOut).toHaveBeenCalled();
+  });
+
+  it("returns false on error", async () => {
+    vi.mocked(telegramClient.logOut).mockRejectedValue(new Error("Network failed"));
+
+    const result = await handleLogOut();
+
+    expect(result).toBe(false);
   });
 });
