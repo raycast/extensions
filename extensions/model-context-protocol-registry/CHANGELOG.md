@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MedBillAnalyzer MCP Server] - 2026-10-09
+
+- Add MedBillAnalyzer to the official registry: Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.
+
 ## [Add Datacircle MCP Server] - 2026-10-09
 
 - Add Datacircle (https://api.datacircle.dev/mcp, remote, OAuth) to the official registry: Query your favorite B2B data APIs through us. Same request, same price, no markup.
