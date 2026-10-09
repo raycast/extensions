@@ -9,7 +9,6 @@ import {
   Keyboard,
   LocalStorage,
   openExtensionPreferences,
-  useNavigation,
   showToast,
   Toast,
   type LaunchProps,
@@ -22,8 +21,7 @@ import {
   type ModelSelection,
 } from "./codex";
 import { useSessionHistory, type Page } from "./history";
-import { conversationMarkdown, messageRows, rowTitle } from "./chat-text";
-import { renderMarkdown } from "./markdown";
+import { conversationMarkdown } from "./chat-text";
 import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
 import {
   asRecord,
@@ -46,7 +44,6 @@ import {
 export default function AskCodex(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
-  const { pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
     props.fallbackText?.trim() || props.arguments?.prompt?.trim() || "";
@@ -760,7 +757,6 @@ export default function AskCodex(
   const visibleMessages = conversation.messages.filter(
     (message) => message.content.trim() || message.status === "streaming",
   );
-  const newestMessages = [...visibleMessages].reverse();
   const accessory = (
     <List.Dropdown tooltip="聊天与会话管理" value={page} onChange={changePage}>
       <List.Dropdown.Item title="当前会话" value="chat" icon={Icon.Message} />
@@ -786,7 +782,7 @@ export default function AskCodex(
     onBack: () => changePage("chat"),
     onNew: newChat,
   });
-  const chatActions = (message?: ChatMessage) => (
+  const chatActions = () => (
     <ActionPanel
       title={[
         modelSelection?.model || currentModel.model,
@@ -831,52 +827,9 @@ export default function AskCodex(
         onRefresh={() => void refreshModels().catch(() => undefined)}
         onSelect={selectModel}
       />
-      {message && (
-        <Action.Push
-          title="阅读这条消息 · Markdown"
-          icon={Icon.AppWindow}
-          shortcut={Keyboard.Shortcut.Common.Open}
-          target={
-            <Detail
-              navigationTitle={message.role === "assistant" ? "ChatGPT" : "你"}
-              markdown={renderMarkdown(transcript([message]))}
-            />
-          }
-        />
-      )}
-      {message?.content && (
-        <Action.CopyToClipboard
-          title="复制这条消息"
-          content={message.content}
-        />
-      )}
-      <Action.Push
-        title="阅读当前对话 · Markdown"
-        icon={Icon.AppWindow}
-        target={
-          <Detail
-            navigationTitle="Ask ChatGPT · Markdown"
-            markdown={conversationMarkdown(
-              visibleMessages,
-              environment.assetsPath,
-              status,
-              error,
-            )}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="返回聊天输入"
-                  icon={Icon.ArrowLeft}
-                  onAction={pop}
-                />
-              </ActionPanel>
-            }
-          />
-        }
-      />
       {chatLayout === "input" && (
         <Action
-          title="返回紧凑回复"
+          title="返回全宽回复"
           icon={Icon.ArrowLeft}
           onAction={() => setChatLayout("compact")}
         />
@@ -915,55 +868,26 @@ export default function AskCodex(
         }
         filtering={false}
         throttle={false}
-        isLoading={(!ready && !error) || switching}
+        isShowingDetail
+        selectedItemId="chat"
+        isLoading={(!ready && !error) || busy || switching}
       >
-        <List.EmptyView
-          icon={error ? Icon.ExclamationMark : Icon.Message}
-          title={error ? "暂时无法连接" : "开始新对话"}
-          description={
-            error || "直接输入问题并按 Enter，之后可以在这里持续追问。"
+        <List.Item
+          id="chat"
+          title="当前对话"
+          icon="command-icon.png"
+          detail={
+            <List.Item.Detail
+              markdown={conversationMarkdown(
+                visibleMessages,
+                environment.assetsPath,
+                status,
+                error,
+              )}
+            />
           }
           actions={chatActions()}
         />
-        {newestMessages.map((message) => {
-          const rows = messageRows(message.content);
-          const speaker =
-            message.role === "assistant"
-              ? "ChatGPT"
-              : message.kind === "steer"
-                ? "你 · 补充要求"
-                : "你";
-          return (
-            <List.Section
-              key={message.id}
-              title={speaker}
-              subtitle={
-                message === newestMessages[0] ? error || status : undefined
-              }
-            >
-              {rows.map((row, index) => (
-                <List.Item
-                  key={`${message.id}-${index}`}
-                  id={`${message.id}-${index}`}
-                  icon={
-                    index === 0
-                      ? message.role === "assistant"
-                        ? "command-icon.png"
-                        : Icon.Person
-                      : "chat-line-spacer.svg"
-                  }
-                  title={rowTitle(row)}
-                  accessories={
-                    index === 0 && message.status === "streaming"
-                      ? [{ text: "正在回复…", icon: Icon.CircleProgress }]
-                      : undefined
-                  }
-                  actions={chatActions(message)}
-                />
-              ))}
-            </List.Section>
-          );
-        })}
       </List>
     );
   }

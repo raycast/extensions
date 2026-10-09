@@ -24,6 +24,7 @@ function readableParagraph(line: string): string {
 
 export function renderMarkdown(content: string): string {
   let fence: string | null = null;
+  let fencePrefix = "";
   let mathBlock: string | null = null;
   const lines = content.replace(/\r\n?/g, "\n").split("\n");
   const unquote = (line: string) => line.replace(/^(?: {0,3}> ?)+/, "");
@@ -39,6 +40,7 @@ export function renderMarkdown(content: string): string {
       const marker = source.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
       if (!fence && marker) {
         fence = marker[1];
+        fencePrefix = line.match(/^(?: {0,3}> ?)+/)?.[0] || "";
         return line;
       }
       if (fence) {
@@ -99,5 +101,5 @@ export function renderMarkdown(content: string): string {
     })
     .join("\n");
   // A streaming, unfinished code block must not absorb the next message header.
-  return fence ? `${markdown}\n${fence}` : markdown;
+  return fence ? `${markdown}\n${fencePrefix}${fence}` : markdown;
 }

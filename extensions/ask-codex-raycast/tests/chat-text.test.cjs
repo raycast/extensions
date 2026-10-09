@@ -1,41 +1,37 @@
 require("./load.cjs");
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { messageRows, rowTitle } = require("../src/chat-text.ts");
+const { conversationMarkdown } = require("../src/chat-text.ts");
 
-test("wrapped prose retains every character without adding bullets", () => {
-  const content = "这是一段比较长的中文回答，需要自动换行，同时保留完整内容。";
-  const rows = messageRows(content, 16);
-  assert.ok(rows.length > 1);
-  assert.equal(rows.join(""), content);
-  assert.ok(rows.every((row) => !row.startsWith("●")));
-  assert.ok(rows.every((row) => !/^[，。！？]/.test(row)));
+test("conversation preserves avatars and newest-first ordering without mutating history", () => {
+  const messages = [{ id: "1", role: "user", content: "Question" }, { id: "2", role: "assistant", content: "**Answer**" }];
+  const output = conversationMarkdown(messages, "/my assets", "", "");
+  assert.ok(output.indexOf("**Answer**") < output.indexOf("Question"));
+  assert.match(output, /command-icon\.png/);
+  assert.match(output, /user-avatar\.svg/);
+  assert.match(output, /my%20assets/);
+  assert.equal(messages[0].content, "Question");
 });
 
-test("English prose wraps at spaces instead of splitting ordinary words", () => {
-  const content = "Continue this conversation without breaking ordinary words across lines.";
-  const rows = messageRows(content, 28);
-  assert.equal(rows.join(" "), content);
-  assert.ok(rows.includes("Continue this conversation"));
+test("conversation renders code blocks with their original language and indentation", () => {
+  const output = conversationMarkdown([{ id: "1", role: "assistant", content: "### Example\n```python\ndef run():\n    return 2 ** 3\n```" }], "/assets", "", "");
+  assert.match(output, /### Example\n```python\ndef run\(\):\n    return 2 \*\* 3\n```/);
 });
 
-test("fenced code keeps indentation and literal Markdown characters", () => {
-  const content = "### Example\n```python\ndef run():\n    return 2 ** 3\n```\n**Done**";
-  assert.deepEqual(messageRows(content), [
-    "Example", "def run():", "    return 2 ** 3", "Done",
-  ]);
-  assert.equal(rowTitle("    return 2 ** 3"), "\u00a0\u00a0\u00a0\u00a0return 2 ** 3");
+test("streaming reply retains a thinking placeholder", () => {
+  const output = conversationMarkdown([{ id: "1", role: "assistant", content: "", status: "streaming" }], "/assets", "", "");
+  assert.match(output, /ChatGPT/);
+  assert.match(output, /正在思考…/);
 });
 
-test("streaming code without a closing fence retains its formatting", () => {
-  assert.deepEqual(messageRows("```ts\nfunction run() {\n\tconsole.log('hello')"), [
-    "function run() {", "    console.log('hello')",
-  ]);
+test("empty conversation explains the Enter input action", () => {
+  const output = conversationMarkdown([], "/assets", "", "");
+  assert.match(output, /开始新对话/);
+  assert.match(output, /按 Enter 输入问题/);
 });
 
-test("long tokens, Windows newlines and pending replies remain readable", () => {
-  const token = "a".repeat(200);
-  assert.equal(messageRows(token).join(""), token);
-  assert.deepEqual(messageRows("first\r\nsecond"), ["first", "second"]);
-  assert.deepEqual(messageRows("  \n"), ["正在思考…"]);
+test("connection errors take precedence over stale status", () => {
+  const output = conversationMarkdown([], "/assets", "已连接", "连接失败\n请重试");
+  assert.match(output, /^> 连接提示：连接失败 请重试/);
+  assert.ok(!output.includes("已连接"));
 });

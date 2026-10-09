@@ -4,9 +4,9 @@
 
 - Ask ChatGPT directly from Raycast Root Search through a locally authenticated Codex CLI.
 - Stream Markdown answers in a full-width view without a permanent sidebar.
-- Display replies as aligned plain text without decorative line icons, retaining code indentation and readable word wrapping.
+- Preserve Markdown headings, paragraphs, lists, tables, code, and formulas while typing, using the native detail pane with one current-conversation item.
 - Continue conversations directly from the top input field and steer an in-progress response.
-- Read Markdown replies and LaTeX formulas in a full-width reader with speaker avatars.
+- Read live Markdown replies and LaTeX formulas in a full-width reader with speaker avatars; retain drafts when switching views.
 - Preserve prose line breaks and improve paragraph spacing for older dense replies.
 - Request readable Markdown with natural paragraph breaks for new responses.
 - Select and remember model/effort combinations from the local Codex model catalog.

@@ -14,7 +14,7 @@ The extension uses `codex app-server` over local standard input/output as the br
 - A clear installation prompt and official installation link when Codex CLI cannot be found.
 - Draft preservation, reconnect actions, copy actions, clickable links, and clear connection status.
 - Model and effort selection from the local Codex model catalog, with remembered choices.
-- An optional full-width Markdown reader with native LaTeX formula rendering.
+- Native LaTeX formula rendering in both the full-width reader and the input view.
 - Optional live web search and configurable Codex sandbox mode.
 - Uses the Codex CLI authentication already stored and managed by Codex on the local computer.
 
@@ -32,7 +32,7 @@ For the fastest workflow, open Raycast Settings → Launcher → Fallback Comman
 
 The chat opens in a full-width Markdown reader, with the newest message first and each speaker identified by an avatar and name. Headings, emphasis, lists, tables, links, code blocks, and LaTeX retain their formatting. Inline `$...$` formulas are adapted to Raycast's supported `\(...\)` delimiters outside code. Visible prose line breaks are preserved. Older long, unformatted Chinese paragraphs are separated at sentence boundaries for readability; stored and copied text stays unchanged. Code indentation and source text are preserved. New replies are requested in readable Markdown with natural paragraph breaks.
 
-Press Enter to activate the top input field in the same chat. The conversation remains visible as a native list preview while composing; this preview uses plain text and Raycast's list spacing. Press Enter to send and automatically return to the formatted reply. Messages sent while a reply is in progress are steering instructions. Each launch reconnects to the last active conversation by default.
+Press Enter to activate the top input field in the same chat. The reply retains its Markdown and formulas in a native detail pane while composing; typing does not filter the conversation. Raycast's native layout reserves a left column containing one **当前对话** item in this input mode. The full-width reader has no left column. Press Enter to send and automatically return to the full-width reply, or use **Actions → 返回全宽回复** to return without sending; your draft is retained. Messages sent while a reply is in progress are steering instructions. Each launch reconnects to the last active conversation by default.
 
 ### Choose a Model
 
@@ -40,7 +40,7 @@ Open the bottom **Actions → 模型** menu, or press Cmd+M on macOS / Ctrl+M on
 
 ### Manage Sessions
 
-The chat has no permanent session sidebar. Use Actions to open history or start a new chat; the conversation dropdown is also available in input mode. History can continue previous conversations, rename them, archive them, or restore archived entries. The local Codex session view reads compatible CLI, editor, and app-server sessions only when requested. Renaming and archiving are extension metadata operations and do not delete Codex's original local records.
+History is not displayed in a permanent session sidebar; the input view has only the current-conversation item described above. Use Actions to open history or start a new chat; the conversation dropdown is also available in input mode. History can continue previous conversations, rename them, archive them, or restore archived entries. The local Codex session view reads compatible CLI, editor, and app-server sessions only when requested. Renaming and archiving are extension metadata operations and do not delete Codex's original local records.
 
 ## Windows and macOS
 
@@ -101,7 +101,7 @@ Ask ChatGPT 通过本机已经登录的 Codex CLI 连接 ChatGPT/OpenAI 服务�
 
 默认聊天页使用全宽、靠左的完整 Markdown 回复，最新消息在最上面，头像和说话人名称保留。标题、加粗、列表、表格、链接、代码块和公式按 Markdown 显示，不再把整条消息套进普通文本代码框。普通文字的单行换行会保留；旧回复中过长、没有格式的中文段落会按完整句子适当分段，原始记录和复制内容不变。新回复默认使用清晰的 Markdown 段落。
 
-按 Enter 切到同一聊天的顶部输入状态，输入后 Enter 发送，成功后自动回到 Markdown 回复。输入期间聊天内容以 Raycast 原生纯文本列表预览，无法同时显示完整 Markdown 排版。没有左侧会话栏，每次打开默认连接上次活动会话；历史和新建对话可从 Actions 打开。
+按 Enter 切到同一聊天的顶部输入状态，输入后 Enter 发送，成功后自动回到 Markdown 回复。输入期间右侧正文仍按完整 Markdown 显示，保留换行、代码和公式，输入文字不会筛选聊天。Raycast 原生布局在这个状态会保留左侧一个“当前对话”栏；全宽阅读状态没有左栏。可从 Actions → 返回全宽回复退出输入状态，未发送的草稿会保留。每次打开默认连接上次活动会话；历史和新建对话可从 Actions 打开。
 
 底部 Actions → 模型（macOS 可按 Cmd+M，Windows 可按 Ctrl+M）可以选择具体模型和档位，例如本机目录提供的 `gpt-6.1-sol · high`、`gpt-5.6-sol · xhigh`。只列出 Codex 返回的组合，选择会保存在本机，并从下一次回复生效；正在回答时发送补充要求仍使用原模型。公式使用 Raycast 原生 LaTeX 显示，普通文字中的 `$...$` 会转换为支持的行内公式语法，代码块保持原文。
 
