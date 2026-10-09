@@ -1,158 +1,180 @@
 import { Action, ActionPanel, Detail, showToast, Toast, useNavigation } from '@raycast/api';
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Card, CardField, CardFieldObj, Ease, ShortcutDictionary } from '../types';
+import { useState, useRef, useEffect } from 'react';
+import { Ease } from '../types';
 import { useCachedPromise } from '@raycast/utils';
 import cardActions from '../api/cardActions';
+import guiActions from '../api/guiActions';
 import useTurndown from '../hooks/useTurndown';
-import { AnkiError } from '../error/AnkiError';
+import { AnkiUncertainError } from '../error/AnkiError';
 
 interface Props {
   deckName: string;
 }
 
 export const StudyDeck = ({ deckName }: Props) => {
-  const { turndown } = useTurndown();
-
+  const { turndown, isLoading: mediaLoading, error: mediaError } = useTurndown();
   const { pop } = useNavigation();
   const {
     data: cards,
     isLoading: cardsLoading,
     error: cardsError,
   } = useCachedPromise(cardActions.findCards, [deckName]);
-
   const {
     data: cardsDueInfo,
     isLoading: cardsDueLoading,
     error: cardsDueError,
     revalidate,
-  } = useCachedPromise(cardActions.cardsDueInfo, [cards]);
-
-  const shortcuts = useMemo((): ShortcutDictionary => {
-    return {
-      againAction: { modifiers: ['ctrl'], key: '1' },
-      hardAction: { modifiers: ['ctrl'], key: '2' },
-      easyAction: { modifiers: ['ctrl'], key: '4' },
-      showCardInfo: { modifiers: ['cmd'], key: 'i' },
-    };
-  }, []);
+  } = useCachedPromise(cardActions.cardsDueInfo, [cards], { execute: cards !== undefined });
+  const [answerCardId, setAnswerCardId] = useState<number>();
+  const [isGrading, setIsGrading] = useState(false);
+  const [refreshReason, setRefreshReason] = useState<'saved' | 'uncertain'>();
+  const pending = useRef(false);
+  const generation = useRef(0);
+  const renderedGeneration = generation.current;
+  const currentCard = cardsDueInfo?.[0];
+  const requiresNativeReview =
+    currentCard !== undefined &&
+    /\[\[type:|<input\b[^>]*\bid\s*=\s*["']?typeans\b|<canvas\b[^>]*\bid\s*=\s*["']?image-occlusion-canvas\b|<anki-image-occlusion\b|anki\.imageOcclusion\.setup\s*\(/i.test(
+      currentCard.question
+    );
+  const showAnswer = currentCard !== undefined && answerCardId === currentCard.cardId;
+  const error = cardsError || cardsDueError || mediaError;
+  const isLoading = cardsLoading || cardsDueLoading || mediaLoading || isGrading;
+  const canStudy =
+    currentCard && turndown && !isLoading && !error && !refreshReason && !requiresNativeReview;
 
   useEffect(() => {
-    if (cardsError) {
-      const isAnkiError = cardsError instanceof AnkiError;
-      showToast({
-        title: isAnkiError ? 'Anki Error' : 'Error',
-        message: isAnkiError ? cardsError.message : 'Unknown error occured',
+    if (error && !refreshReason) {
+      void showToast({
+        title: 'Could Not Load Study Cards',
+        message: error.message,
         style: Toast.Style.Failure,
       });
     }
-  }, [cardsError]);
+  }, [error, refreshReason]);
 
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [showCardInfo, setShowCardInfo] = useState(false);
-  const [currentCard, setCurrentCard] = useState<Card | undefined>();
+  const refreshCards = async () => {
+    // useCachedPromise can resolve an Error instead of rejecting a failed refresh.
+    const refreshed = await revalidate();
+    if (!Array.isArray(refreshed)) throw new Error('Could not refresh the cards due.');
+    setRefreshReason(undefined);
+  };
 
-  const parseFields = useCallback((fields: CardFieldObj): Array<CardField> => {
-    return Object.entries(fields).map(([fieldName, field]) => ({
-      fieldName: fieldName,
-      value: field.value,
-    }));
-  }, []);
-
-  const renderMarkdownString = useCallback(
-    (fields: Array<CardField>, showAnswer: boolean) => {
-      if (!turndown) return;
-      const { value: questionValue } = fields[0];
-
-      const question = turndown.turndown(`${questionValue}\n`.replace(/\n/g, '<br>'));
-
-      const answers = fields.slice(1).map(answer => {
-        return turndown.turndown(`\n\n---\n\n${answer.value}\n`.replace(/\n/g, '<br>'));
+  const handleRefresh = async () => {
+    if (pending.current) return;
+    pending.current = true;
+    setIsGrading(true);
+    try {
+      await refreshCards();
+    } catch (error) {
+      await showToast({
+        title: 'Could Not Refresh Study Cards',
+        message: error instanceof Error ? error.message : String(error),
+        style: Toast.Style.Failure,
       });
-
-      return showAnswer ? question + answers.join('\n') : question;
-    },
-    [turndown]
-  );
-
-  useEffect(() => {
-    if (!cardsDueInfo) return;
-    setCurrentCard(cardsDueInfo[0]);
-  }, [cardsDueInfo]);
-
-  const cardView = useMemo(() => {
-    if (!cardsDueInfo || cardsDueLoading) return;
-
-    if (cardsDueError) {
-      showToast({
-        title: 'Error: cardsDueError',
-        message: `Getting cards due failed`,
-      });
+    } finally {
+      pending.current = false;
+      setIsGrading(false);
     }
-    if (!cardsDueInfo.length) return '## Congratulations! You have finished this deck for now.';
-    return renderMarkdownString(parseFields(cardsDueInfo[0].fields), showAnswer);
-  }, [showAnswer, cardsDueInfo, parseFields]);
+  };
 
-  const handleShowCardInfo = () => setShowCardInfo(!showCardInfo);
-  const handleShowAnswer = () => setShowAnswer(!showAnswer);
-  const handleAnswerCard = useCallback(
-    async (ease: Ease) => {
-      if (!currentCard) return;
-      try {
-        const success = await cardActions.answerCard(currentCard.cardId, ease);
-
-        if (!success) return;
-        setShowAnswer(false);
-        revalidate();
-      } catch (error) {
-        const isAnkiError = error instanceof AnkiError;
-        showToast({
-          title: isAnkiError ? 'Anki Error' : 'Error',
-          message: isAnkiError ? error.message : 'Unknown error occured',
-          style: Toast.Style.Failure,
-        });
+  const handleAnswerCard = async (ease: Ease) => {
+    if (!canStudy || !showAnswer || pending.current || renderedGeneration !== generation.current)
+      return;
+    pending.current = true;
+    setIsGrading(true);
+    let answered = false;
+    try {
+      const success = await cardActions.answerCard(currentCard.cardId, ease);
+      if (!success) throw new Error('Anki did not accept this answer.');
+      answered = true;
+      generation.current += 1;
+      setAnswerCardId(undefined);
+      setRefreshReason('saved');
+      await refreshCards();
+    } catch (error) {
+      let title = answered ? 'Answer Saved, Refresh Failed' : 'Could Not Save Answer';
+      if (!answered && error instanceof AnkiUncertainError) {
+        generation.current += 1;
+        setAnswerCardId(undefined);
+        setRefreshReason('uncertain');
+        title = 'Answer Status Unknown';
       }
-    },
-    [currentCard]
-  );
+      await showToast({
+        title,
+        message: error instanceof Error ? error.message : String(error),
+        style: Toast.Style.Failure,
+      });
+    } finally {
+      pending.current = false;
+      setIsGrading(false);
+    }
+  };
+
+  let markdown: string | undefined;
+  if (refreshReason && !isGrading) {
+    markdown =
+      refreshReason === 'saved'
+        ? '## Answer saved\n\nRefresh the study cards to continue.'
+        : '## Answer status unknown\n\nAnki may have saved this answer. Check Anki, then refresh the study cards before continuing.';
+  } else if (error) {
+    markdown = '## Could not load study cards\n\nCheck Anki and try again, or study in Anki.';
+  } else if (!isLoading && cardsDueInfo?.length === 0) {
+    markdown =
+      '## Congratulations! You have finished this deck for now.\n\nLearning cards may become due later. Choose Refresh Study Cards to check again.';
+  } else if (requiresNativeReview) {
+    markdown =
+      '## Study this card in Anki\n\nThis card uses image masks or typed answers that need Anki’s reviewer. Choose Study in Anki to continue.';
+  } else if (currentCard && turndown) {
+    markdown = turndown.turndown(showAnswer ? currentCard.answer : currentCard.question);
+  }
 
   return (
     <Detail
-      markdown={cardView}
-      isLoading={cardsLoading || cardsDueLoading}
+      markdown={markdown}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          {!showAnswer && cardsDueInfo?.length ? (
-            <Action title="Show Answer" onAction={handleShowAnswer} />
-          ) : cardsDueInfo?.length ? (
-            <>
-              <ActionPanel.Section title="Card Actions">
-                <Action title="Good" onAction={async () => await handleAnswerCard(Ease.Good)} />
-                <Action
-                  title="Again"
-                  shortcut={shortcuts.againAction}
-                  onAction={async () => await handleAnswerCard(Ease.Again)}
-                />
-                <Action
-                  title="Hard"
-                  shortcut={shortcuts.hardAction}
-                  onAction={async () => await handleAnswerCard(Ease.Hard)}
-                />
-                <Action
-                  title="Easy"
-                  shortcut={shortcuts.easyAction}
-                  onAction={async () => await handleAnswerCard(Ease.Easy)}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section />
+          {canStudy && !showAnswer ? (
+            <Action title="Show Answer" onAction={() => setAnswerCardId(currentCard.cardId)} />
+          ) : canStudy && showAnswer ? (
+            <ActionPanel.Section title="Card Actions">
+              <Action title="Good" onAction={() => handleAnswerCard(Ease.Good)} />
               <Action
-                title="Show Card Info"
-                shortcut={shortcuts.showCardInfo}
-                onAction={handleShowCardInfo}
+                title="Again"
+                shortcut={{ modifiers: ['ctrl'], key: '1' }}
+                onAction={() => handleAnswerCard(Ease.Again)}
               />
-            </>
-          ) : (
-            <Action title="Go Back" onAction={pop} />
-          )}
+              <Action
+                title="Hard"
+                shortcut={{ modifiers: ['ctrl'], key: '2' }}
+                onAction={() => handleAnswerCard(Ease.Hard)}
+              />
+              <Action
+                title="Easy"
+                shortcut={{ modifiers: ['ctrl'], key: '4' }}
+                onAction={() => handleAnswerCard(Ease.Easy)}
+              />
+            </ActionPanel.Section>
+          ) : null}
+          {!isLoading && (refreshReason || cardsDueInfo?.length === 0) ? (
+            <Action title="Refresh Study Cards" onAction={handleRefresh} />
+          ) : null}
+          <Action
+            title="Study in Anki"
+            onAction={async () => {
+              try {
+                await guiActions.guiDeckReview(deckName);
+              } catch (error) {
+                await showToast({
+                  title: 'Could Not Open Anki Reviewer',
+                  message: error instanceof Error ? error.message : String(error),
+                  style: Toast.Style.Failure,
+                });
+              }
+            }}
+          />
+          <Action title="Go Back" onAction={pop} />
         </ActionPanel>
       }
     />

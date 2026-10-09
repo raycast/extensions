@@ -75,9 +75,9 @@
         {
           "name": "allow_empty_card_fields",
           "type": "checkbox",
-          "label": "Allow empty card fields",
+          "label": "Allow Empty First Field",
           "required": false,
-          "description": "Enabling this will allow you to create cards with empty fields"
+          "description": "Skip the local first-field check in Add Card. Other fields are optional. Anki may still reject an empty note."
         }
       ]
     },
@@ -90,36 +90,74 @@
     }
   ],
   "dependencies": {
-    "@eslint/config-array": "latest",
-    "@eslint/object-schema": "latest",
-    "@raycast/api": "^1.87.4",
-    "@raycast/utils": "^1.17.0",
-    "@types/turndown": "^5.0.4",
-    "axios": "^1.18.0",
-    "glob": "^10.0.0",
-    "rimraf": "^5.0.0",
-    "rss-parser": "^3.13.0",
-    "turndown": "^7.2.0"
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2",
+    "axios": "^1.20.0",
+    "turndown": "^7.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs",
+    "typecheck": "tsc --noEmit",
+    "test:live": "node scripts/verify-live.cjs"
   },
   "platforms": [
     "macOS"
   ],
-  "overrides": {
-    "brace-expansion": "5.0.9"
-  }
+  "contributors": [
+    "0xdhrv"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "tools": [
+    {
+      "name": "list-decks",
+      "title": "List Decks",
+      "description": "List Anki decks and card counts."
+    },
+    {
+      "name": "list-note-types",
+      "title": "List Note Types",
+      "description": "List existing Anki note types and their ordered fields, including custom types."
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search Anki notes using Anki query syntax, with bounded pages."
+    },
+    {
+      "name": "get-note",
+      "title": "Get Note",
+      "description": "Get a note's current fields and tags by note ID."
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create an Anki note using an existing deck and note type. Supports custom fields and tags."
+    },
+    {
+      "name": "update-note",
+      "title": "Update Note",
+      "description": "Update specific fields or replace tags on an existing Anki note. Other fields stay unchanged."
+    },
+    {
+      "name": "create-deck",
+      "title": "Create Deck",
+      "description": "Create an Anki deck or return an existing deck with the same name."
+    }
+  ]
 }
