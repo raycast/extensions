@@ -234,18 +234,20 @@ export async function dropShow(traktClient: TraktClient, showTraktId: number, { 
 
 /**
  * Restores a dropped show (Trakt's "Restore"): it returns to Continue Watching and, since dropping also hid
- * it, to the calendar. Throws when Trakt removed nothing from the dropped list; a calendar step that fails
- * comes back as `calendarRestored: false`, since the show is already restored.
+ * it, to the calendar. A calendar step that fails comes back as `calendarRestored: false`, since the show is
+ * already restored. When the dropped list no longer holds the show, the calendar step still runs, so a retry
+ * finishes a restore whose calendar step failed; it throws only when neither step changed anything.
  */
 export async function restoreDroppedShow(traktClient: TraktClient, showTraktId: number, { signal }: MutationOptions) {
   const body = { shows: [{ ids: { trakt: showTraktId } }] };
   const response = await traktClient.shows.restoreDroppedShow({ body, fetchOptions: { signal } });
-  const deleted = response.status === 200 ? response.body.deleted.shows : undefined;
-  if (!(deleted && deleted > 0)) {
-    throw new Error("Trakt did not restore this show. It may no longer be dropped.");
-  }
+  if (response.status !== 200) throw new Error("Trakt did not restore this show. Try again.");
+  const restored = (response.body.deleted.shows ?? 0) > 0;
 
   const calendar = await traktClient.shows.unhideShowFromCalendar({ body, fetchOptions: { signal } });
+  if (!restored && !(calendar.status === 200 && (calendar.body.deleted.shows ?? 0) > 0)) {
+    throw new Error("Trakt did not restore this show. It may no longer be dropped.");
+  }
   return { calendarRestored: calendar.status === 200 };
 }
 
