@@ -35,6 +35,9 @@ async function pathExists(pathname: string): Promise<boolean> {
   }
 }
 
+/** Finder creates these in folders it has displayed; they hold no vault data. */
+const MACOS_METADATA_FILES = new Set([".DS_Store", ".localized"]);
+
 function containsPath(parent: string, child: string): boolean {
   const relative = path.relative(parent, child);
   return relative === "" || (relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative));
@@ -63,7 +66,8 @@ async function validateTarget(defaultVault: string, input: string): Promise<stri
   if (await pathExists(target)) {
     const stats = await lstat(target);
     if (!stats.isDirectory()) throw new Error("The target path is not a directory.");
-    if ((await readdir(target)).length > 0) {
+    const entries = (await readdir(target)).filter((name) => !MACOS_METADATA_FILES.has(name));
+    if (entries.length > 0) {
       throw new Error("Bootstrap requires a new or empty directory. Open an existing vault in the dashboard instead.");
     }
   }

@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises";
 import path from "node:path";
+import { linkPointsTo } from "./paths";
 
 const BACKUP_NAME = "snippets.symlink-manager-backup";
 
@@ -64,15 +65,13 @@ export async function getSnippetFolderMode(defaultVault: string, targetVault: st
     if (!backupStat.isDirectory() || backupStat.isSymbolicLink()) return "unavailable";
     if (!targetStat) return "restore-available";
     if (targetStat.isSymbolicLink()) {
-      const destination = path.resolve(path.dirname(target), await fs.readlink(target));
-      return destination === source ? "restore-available" : "unavailable";
+      return (await linkPointsTo(target, source)) ? "restore-available" : "unavailable";
     }
     return "unavailable";
   }
   if (!sourceStat?.isDirectory() || sourceStat.isSymbolicLink()) return "unavailable";
   if (targetStat?.isSymbolicLink()) {
-    const destination = path.resolve(path.dirname(target), await fs.readlink(target));
-    return destination === source ? "whole-folder" : "unavailable";
+    return (await linkPointsTo(target, source)) ? "whole-folder" : "unavailable";
   }
   if (targetStat?.isDirectory() && !targetStat.isSymbolicLink()) return "individual";
   if (!targetStat) return "missing";
@@ -111,10 +110,8 @@ export async function restoreSnippetFolder(defaultVault: string, targetVault: st
   if (targetStat && !targetStat.isSymbolicLink()) {
     throw new Error("The target snippets path is not the managed folder symlink; no changes were made.");
   }
-  if (targetStat) {
-    const destination = path.resolve(path.dirname(target), await fs.readlink(target));
-    if (destination !== source)
-      throw new Error("The target snippets link points somewhere else; no changes were made.");
+  if (targetStat && !(await linkPointsTo(target, source))) {
+    throw new Error("The target snippets link points somewhere else; no changes were made.");
   }
 
   if (targetStat) await fs.unlink(target);

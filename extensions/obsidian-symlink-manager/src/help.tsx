@@ -42,6 +42,7 @@ Save your favorite combinations of plugins and snippets as a "Profile" (e.g., "W
 ---
 
 ## ⚠️ Safety First
+
 * **Destructive Actions**: Deleting items or overwriting configurations always requires a manual confirmation.
 * **Backups**: When overwriting settings, the extension creates automatic recoverable \`.bak\` copies.
 * **Ignored Files**: \`workspace.json\` and \`graph.json\` are intentionally ignored by this manager to prevent corrupting your local vault states.

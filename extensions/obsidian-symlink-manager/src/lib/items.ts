@@ -3,6 +3,7 @@ import { createReadStream } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { commitItem } from "./git";
+import { linkPointsTo } from "./paths";
 
 async function hashFile(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -144,8 +145,7 @@ async function stateOf(defaultPath: string, targetPath: string, category: ItemCa
   );
   if (!target) return usableSource ? "available" : null;
   if (target.isSymbolicLink()) {
-    const destination = path.resolve(path.dirname(targetPath), await fs.readlink(targetPath));
-    if (destination !== defaultPath) return "foreign-link";
+    if (!(await linkPointsTo(targetPath, defaultPath))) return "foreign-link";
     return usableSource ? "linked" : "broken";
   }
   if (expectsDirectory ? !target.isDirectory() : !target.isFile()) return null;
@@ -167,8 +167,8 @@ export async function scanItems(defaultVaultPath: string, targetVaultPath: strin
       const targetFolder = path.join(targetVault, ".obsidian", "snippets");
       const targetFolderStat = await lstatOrNull(targetFolder);
       if (targetFolderStat?.isSymbolicLink()) {
-        const destination = path.resolve(path.dirname(targetFolder), await fs.readlink(targetFolder));
-        if (destination !== sourceFolder) throw new Error("Target snippets folder points outside the Default Vault.");
+        if (!(await linkPointsTo(targetFolder, sourceFolder)))
+          throw new Error("Target snippets folder points outside the Default Vault.");
         // The folder-level bootstrap link is intentionally not exposed as per-file items.
         continue;
       }

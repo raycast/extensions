@@ -3,6 +3,7 @@ import * as fs from "node:fs/promises";
 import path from "node:path";
 import { environment } from "@raycast/api";
 import { commitItem } from "./git";
+import { linkPointsTo } from "./paths";
 import { detachItem, scanItems } from "./items";
 import { parseHotkeyBindings, type HotkeyBinding } from "./hotkey-display";
 
@@ -266,8 +267,7 @@ export async function linkSettingsGroup(
     targetStat = null;
   }
   if (targetStat?.isSymbolicLink()) {
-    const destination = path.resolve(path.dirname(targetPath), await fs.readlink(targetPath));
-    if (destination === sourcePath) return { changed: false, backup: null };
+    if (await linkPointsTo(targetPath, sourcePath)) return { changed: false, backup: null };
     throw new Error(`${file} points to another location. Review that link before replacing it.`);
   }
   if (targetStat && !targetStat.isFile()) throw new Error(`${file} is not a regular file in the Target Vault.`);
