@@ -1,6 +1,6 @@
 # Foqus League Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-09
 
 - Show League, Show Recap, Browse Sessions and Menu Bar Stats commands
 - Export and import your sessions as one JSON file
