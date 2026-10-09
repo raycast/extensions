@@ -140,6 +140,23 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open a URL or a web search in a new Dia tab"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Switch to an open Dia tab"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close an open Dia tab or the focused tab"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.3",
