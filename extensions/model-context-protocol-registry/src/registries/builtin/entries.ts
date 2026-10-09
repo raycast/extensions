@@ -265,6 +265,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "datacircle",
+    title: "Datacircle",
+    description:
+      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's. Right now we have 2 live LinkedIn profile APIs that we trust: Up2Data and HarvestAPI.",
+    icon: "https://datacircle.dev/favicon.png",
+    homepage: "https://docs.datacircle.dev/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
+    },
+    remoteUrl: "https://api.datacircle.dev/mcp",
+  },
+  {
     name: "desearch",
     title: "Desearch",
     description:

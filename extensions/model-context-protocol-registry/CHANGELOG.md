@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Datacircle MCP Server] - 2026-10-09
+
+- Add Datacircle (https://api.datacircle.dev/mcp, remote, OAuth) to the official registry: Query your favorite B2B data APIs through us. Same request, same price, no markup.
+
 ## [Add QRX MCP Server] - 2026-10-09
 
 - Add QRX to the official registry: turn a prompt and a link into a branded, print-ready QR code that is checked to scan, with a hosted qrx.to short link. Hosted remote Streamable HTTP server at https://qrx.codes/mcp through `mcp-remote`; QRX API key sent as an `Authorization: Bearer` header.
