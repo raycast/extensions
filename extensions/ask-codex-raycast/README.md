@@ -28,7 +28,7 @@ For the fastest workflow, open Raycast Settings → Launcher → Fallback Comman
 
 ### Continue or Steer
 
-The message field stays available above the conversation. Type a message and press Enter to send it; if Codex is still responding, it is sent as steering. Messages stay visible while you type, with the newest message at the top. Each launch reconnects to the last active conversation by default.
+The message field stays available above the conversation. Type a message and press Enter to send it; if Codex is still responding, it is sent as steering. Messages stay visible while you type, with the newest message at the top. Replies use aligned plain text without decorative bullets or per-line icons. Long text wraps at word boundaries where possible, and code indentation is preserved. Each launch reconnects to the last active conversation by default.
 
 ### Manage Sessions
 
@@ -92,6 +92,8 @@ Run `npm run dev` to load the development extension in Raycast.
 Ask ChatGPT 通过本机已经登录的 Codex CLI 连接 ChatGPT/OpenAI 服务，并把 Raycast 根搜索里的文字直接交给它。它不是另一套要求你填写 API Key 的客户端，而是使用 `codex app-server` 作为本地连接桥梁。把 **Ask ChatGPT** 设置为第一项 Fallback Command 后，平时只需打开 Raycast、输入问题、向下选择一次并回车；插件会自动使用刚才的搜索文字，无需进入页面后重新输入。
 
 聊天页面使用全宽、靠左的消息列表，没有左侧会话栏；输入框固定在上方，最新消息排在最上面，继续聊天时也不会出现历史会话搜索。直接输入后按 Enter 发送；如果 ChatGPT 正在生成，也可以继续输入并按 Enter 发送补充要求。每次打开 Ask ChatGPT 默认自动连接上次活动会话。右上角会话菜单只在需要时打开历史或新建对话；历史支持继续、重命名、归档和恢复，也可以按需读取本机 CLI 会话。
+
+回复正文以靠左的纯文本展示，换行不添加圆点或图标；英文优先在单词之间换行，代码块保留缩进和原始字符。最新消息的连接或生成状态显示在消息标题旁，复制操作保留完整原文。
 
 Windows 会自动寻找 `codex.exe`、`codex.cmd` 和常见 npm 安装位置；macOS 会检查登录 shell、Apple Silicon/Intel Homebrew 路径及常见用户目录。两边都支持用户在设置中修改 Codex 路径和工作目录。如果没有检测到 CLI，界面会明确提示安装官方 Codex CLI，并提供安装入口；已经安装在特殊目录时则可以直接填写绝对路径。插件不内置 API Key，也不会把你的登录文件、聊天记录或本地路径打包发布。
 

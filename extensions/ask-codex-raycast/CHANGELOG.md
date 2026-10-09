@@ -4,6 +4,7 @@
 
 - Ask ChatGPT directly from Raycast Root Search through a locally authenticated Codex CLI.
 - Stream Markdown answers in a full-width view without a permanent sidebar.
+- Display replies as aligned plain text without decorative line icons, retaining code indentation and readable word wrapping.
 - Continue conversations and steer an in-progress response.
 - Search, rename, archive, restore, and resume extension sessions.
 - Discover and resume compatible local Codex sessions on demand.
