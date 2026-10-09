@@ -224,39 +224,44 @@ async function disconnectClient(): Promise<void> {
 }
 
 export async function listFolders({ withCounts = false }: { withCounts?: boolean } = {}): Promise<Folder[]> {
-  return withClient(async (client) => {
-    const list: ListResponse[] = await client.list(
-      withCounts ? { statusQuery: { messages: true, unseen: true } } : undefined,
-    );
+  return withClient(
+    async (client) => {
+      const list: ListResponse[] = await client.list(
+        withCounts ? { statusQuery: { messages: true, unseen: true } } : undefined,
+      );
 
-    const folders: Folder[] = list.map((item) => ({
-      path: item.path,
-      name: item.name,
-      delimiter: item.delimiter,
-      flags: Array.from(item.flags ?? []),
-      specialUse: item.specialUse,
-      messagesCount: item.status?.messages,
-      unseenCount: item.status?.unseen,
-    }));
+      const folders: Folder[] = list.map((item) => ({
+        path: item.path,
+        name: item.name,
+        delimiter: item.delimiter,
+        flags: Array.from(item.flags ?? []),
+        specialUse: item.specialUse,
+        messagesCount: item.status?.messages,
+        unseenCount: item.status?.unseen,
+      }));
 
-    // Sort folders: special folders first, then alphabetically
-    const specialOrder = ["\\Inbox", "\\Drafts", "\\Sent", "\\Archive", "\\Trash", "\\Junk"];
+      // Sort folders: special folders first, then alphabetically
+      const specialOrder = ["\\Inbox", "\\Drafts", "\\Sent", "\\Archive", "\\Trash", "\\Junk"];
 
-    return folders.sort((a, b) => {
-      const aSpecial = specialOrder.indexOf(a.specialUse || "");
-      const bSpecial = specialOrder.indexOf(b.specialUse || "");
+      return folders.sort((a, b) => {
+        const aSpecial = specialOrder.indexOf(a.specialUse || "");
+        const bSpecial = specialOrder.indexOf(b.specialUse || "");
 
-      if (aSpecial !== -1 && bSpecial !== -1) return aSpecial - bSpecial;
-      if (aSpecial !== -1) return -1;
-      if (bSpecial !== -1) return 1;
+        if (aSpecial !== -1 && bSpecial !== -1) return aSpecial - bSpecial;
+        if (aSpecial !== -1) return -1;
+        if (bSpecial !== -1) return 1;
 
-      // INBOX always first if no specialUse
-      if (a.path.toUpperCase() === "INBOX") return -1;
-      if (b.path.toUpperCase() === "INBOX") return 1;
+        // INBOX always first if no specialUse
+        if (a.path.toUpperCase() === "INBOX") return -1;
+        if (b.path.toUpperCase() === "INBOX") return 1;
 
-      return a.name.localeCompare(b.name);
-    });
-  }, "folders");
+        return a.name.localeCompare(b.name);
+      });
+      // Counts need a STATUS per folder, so they get their own connection. A plain list is quick and serves actions
+      // (finding Trash or Archive), which shouldn't wait for the counts.
+    },
+    withCounts ? "folders" : "actions",
+  );
 }
 
 function parseAddresses(addresses: { name?: string; address?: string }[] | undefined): EmailAddress[] {
@@ -562,12 +567,28 @@ function findSpecialFolder(folders: Folder[], specialUse: string, name: string):
   return folders.find((folder) => folder.specialUse === specialUse || folder.path.toLowerCase() === name);
 }
 
+// By special-use attribute, or by Bridge's name for it while the folder list hasn't loaded yet
+function isSpecialFolder(folderPath: string, folders: Folder[] | undefined, specialUse: string, name: string) {
+  const special = folders && findSpecialFolder(folders, specialUse, name);
+  return special ? special.path === folderPath : folderPath.toLowerCase() === name;
+}
+
 // Bridge only deletes emails for good when they're removed from Trash or Drafts. Removing one from any
 // other folder doesn't send it to Trash: it either loses its folder (left only in All Mail) or stays put.
-export function deletesPermanently(folderPath: string, folders: Folder[]): boolean {
-  return [findSpecialFolder(folders, "\\Trash", "trash"), findSpecialFolder(folders, "\\Drafts", "drafts")].some(
-    (folder) => folder?.path === folderPath,
+export function deletesPermanently(folderPath: string, folders: Folder[] | undefined): boolean {
+  return (
+    isSpecialFolder(folderPath, folders, "\\Trash", "trash") ||
+    isSpecialFolder(folderPath, folders, "\\Drafts", "drafts")
   );
+}
+
+export function isArchiveFolder(folderPath: string, folders: Folder[] | undefined): boolean {
+  return isSpecialFolder(folderPath, folders, "\\Archive", "archive");
+}
+
+// All Mail holds every email, so one that was archived or moved to Trash can still be in it
+export function holdsEverything(folderPath: string, folders: Folder[] | undefined): boolean {
+  return isSpecialFolder(folderPath, folders, "\\All", "all mail");
 }
 
 // Moves the email to Trash, or deletes it for good when it's already in Trash or Drafts
@@ -613,19 +634,8 @@ export async function fetchAttachments(folderPath: string, uid: number): Promise
   });
 }
 
-export function findArchiveFolder(folders: Folder[]): Folder | undefined {
-  return folders.find(
-    (f) => f.specialUse === "\\Archive" || f.path.toLowerCase() === "archive" || f.name.toLowerCase() === "archive",
-  );
-}
-
-// All Mail holds every email, so one that was archived or moved to Trash can still be in it
-export function holdsEverything(folderPath: string, folders: Folder[]): boolean {
-  return findSpecialFolder(folders, "\\All", "all mail")?.path === folderPath;
-}
-
 export async function archiveEmail(folderPath: string, uid: number): Promise<void> {
-  const archiveFolder = findArchiveFolder(await listFolders());
+  const archiveFolder = findSpecialFolder(await listFolders(), "\\Archive", "archive");
   if (!archiveFolder) {
     throw new Error("Archive folder not found");
   }

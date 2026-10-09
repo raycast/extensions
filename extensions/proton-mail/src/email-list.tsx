@@ -15,9 +15,9 @@ import {
   bridgeErrorReason,
   deletesPermanently,
   fetchEmails,
-  findArchiveFolder,
   holdConnections,
   holdsEverything,
+  isArchiveFolder,
 } from "./imap-client";
 import { BackAction, childFolders, folderDisplayName, FolderListItem, useFolders } from "./folders";
 import { copyEmailAsMarkdown, EmailContext, EmailUpdate, ManageActions, RespondActions } from "./email-actions";
@@ -124,10 +124,10 @@ export function EmailList({ folder, initialFilter }: { folder: string; initialFi
   const list: ListContext = {
     folder,
     quicklink,
-    deletesPermanently: deletesPermanently(folder, folders || []),
-    canArchive: findArchiveFolder(folders || [])?.path !== folder,
+    deletesPermanently: deletesPermanently(folder, folders),
+    canArchive: !isArchiveFolder(folder, folders),
     onUpdate: (update) => {
-      if ("removed" in update && holdsEverything(folder, folders || [])) {
+      if ("removed" in update && holdsEverything(folder, folders)) {
         revalidate();
         return;
       }
