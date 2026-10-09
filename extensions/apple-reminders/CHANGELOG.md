@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix Menu Bar Actions] - {PR_MERGE_DATE}
+## [Fix Menu Bar Actions] - 2026-10-09
 
 - Fix the "Worker unloaded" error when completing, deleting or rescheduling more than one reminder from the menu bar.
 
