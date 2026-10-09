@@ -45,7 +45,7 @@ For example, `/12` only draws from `10.0.0.0/8` and `172.16.0.0/12`.
 | Action              | Shortcut                       |
 | ------------------- | ------------------------------ |
 | Copy to Clipboard   | `↵`                            |
-| Generate New Prefix | `⌘ R` (macOS), `⌃ R` (Windows) |
+| Generate New Prefix | `⌘ N` (macOS), `⌃ N` (Windows) |
 | Remove Entry        | `⌃ X`                          |
 | Clear History       | `⌃ ⇧ X`                        |
 

@@ -103,7 +103,7 @@ export function PrefixList({ generate, defaultLength, historyKey, length: text, 
     <Action
       title="Generate New Prefix"
       icon={Icon.ArrowClockwise}
-      shortcut={Keyboard.Shortcut.Common.Refresh}
+      shortcut={Keyboard.Shortcut.Common.New}
       onAction={() => regenerate(pool)}
     />
   );
