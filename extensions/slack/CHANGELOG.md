@@ -5,7 +5,7 @@
 - Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
 - Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
 - Show the first page of people right away when opening the picker while the full list loads in the background.
-- Request smaller pages from Slack and stop retrying failed requests after a few attempts so errors show up instead of endless loading.
+- Request smaller pages from Slack. Timeouts and server errors stop retrying after a few attempts so they show up instead of loading forever; rate limits still wait for Slack's retry delay.
 
 ## [Add Canvas AI tools] - 2026-10-09
 

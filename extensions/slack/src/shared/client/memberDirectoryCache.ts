@@ -2,9 +2,7 @@ import { Cache } from "@raycast/api";
 import { createHash } from "node:crypto";
 import type { SlackMember } from "./slackTypes";
 import { toUserName } from "./member";
-
-const FRESH_MS = 60 * 60 * 1000;
-const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+import { planMemberDirectoryRead } from "./memberDirectoryRefresh";
 
 /** `pages` keeps the layout of the scan that produced the snapshot (in memory only), so a search that began on the live scan can finish reading it by page index after the scan completes. */
 type Snapshot = { savedAt: number; members: SlackMember[]; pages?: SlackMember[][] };
@@ -70,8 +68,14 @@ function write(key: string, pages: SlackMember[][]) {
 
 type FetchPage = (cursor?: string) => Promise<{ items: SlackMember[]; nextCursor?: string }>;
 
-/** One in-progress scan of users.list. Pages become readable as they arrive; the scan outlives any single search. */
-type Load = { pages: SlackMember[][]; finished: boolean; error?: unknown; listeners: Set<() => void> };
+/** One scan of users.list. Pages become readable as they arrive. A failed scan stays here until its backoff elapses. */
+type Load = {
+  pages: SlackMember[][];
+  finished: boolean;
+  error?: unknown;
+  failedAt?: number;
+  listeners: Set<() => void>;
+};
 
 const loads = new Map<string, Load>();
 
@@ -95,9 +99,11 @@ function startLoad(key: string, fetchPage: FetchPage): Load {
       write(key, load.pages);
     } catch (error) {
       load.error = error;
+      load.failedAt = Date.now();
     } finally {
       load.finished = true;
-      loads.delete(key);
+      // A failure stays registered so the next search can reuse it instead of starting another full scan.
+      if (!load.error) loads.delete(key);
       notify();
     }
   })();
@@ -125,8 +131,9 @@ export type MemberPage = { items: SlackMember[]; hasMore: boolean; error?: unkno
 /**
  * Returns page `index` of the workspace member list. users.list is scanned at most once per hour and the scan is
  * shared by every search, so a search can read matches as pages arrive instead of waiting for the whole workspace.
- * A stale snapshot is served immediately while a refresh runs in the background; if a refresh fails, the stale
- * snapshot keeps working. Only a complete scan is cached.
+ * A stale snapshot is served immediately while a refresh runs in the background. If that refresh fails, the stale
+ * snapshot keeps working and another scan waits out a short backoff instead of restarting on every search.
+ * Only a complete scan is cached.
  */
 export async function getMemberPage(
   token: string | undefined,
@@ -135,14 +142,26 @@ export async function getMemberPage(
 ): Promise<MemberPage> {
   const key = keyFor(token);
   const snapshot = read(key);
-  const age = snapshot ? Date.now() - snapshot.savedAt : Infinity;
-  if (snapshot && age < FRESH_MS) {
+  const now = Date.now();
+  const age = snapshot ? now - snapshot.savedAt : Infinity;
+  const plan = planMemberDirectoryRead({
+    hasSnapshot: snapshot !== undefined,
+    snapshotAgeMs: age,
+    load: loads.get(key),
+    now,
+  });
+
+  if (plan.discardFailedLoad) loads.delete(key);
+  if (plan.serve === "fresh" && snapshot) {
     const pages = snapshot.pages ?? [snapshot.members];
     return { items: pages[index] ?? [], hasMore: index + 1 < pages.length };
   }
 
-  const load = loads.get(key) ?? startLoad(key, fetchPage);
+  if (plan.startLoad && !loads.has(key)) startLoad(key, fetchPage);
   // A stale snapshot is served as one page: the refresh replaces it, and a page layout must not change mid-search.
-  if (snapshot && age < MAX_AGE_MS) return { items: index === 0 ? snapshot.members : [], hasMore: false };
+  if (plan.serve === "stale" && snapshot) return { items: index === 0 ? snapshot.members : [], hasMore: false };
+
+  const load = loads.get(key);
+  if (!load) throw new Error("Member directory is unavailable");
   return readLoadPage(load, index);
 }

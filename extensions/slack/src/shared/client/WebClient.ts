@@ -3,6 +3,7 @@ import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { createCanvasClient } from "./canvas";
+import { slackRetryConfig } from "./retryPolicy";
 
 export type { SlackConversation, SlackMember } from "./slackTypes";
 
@@ -34,9 +35,9 @@ export const slack = OAuthService.slack({
   onAuthorize({ token }) {
     currentToken = token;
     const agent = getProxyAgent();
-    // Let the SDK honor Retry-After silently, including during AI tool calls. Cap retries of other failures
-    // (HTTP 5xx, timeouts): the default policy retries for ~30 minutes, which looks like an endless loading state.
-    slackWebClient = new WebClient(token, { retryConfig: { retries: 2, factor: 2 }, ...(agent && { agent }) });
+    // Rate limits keep Slack's default retry budget and wait for Retry-After, including during AI tool calls.
+    // Timeouts and HTTP 5xx stop after two retries so they surface instead of loading for ~30 minutes.
+    slackWebClient = new WebClient(token, { retryConfig: slackRetryConfig(), ...(agent && { agent }) });
     canvasWebClient = createCanvasClient(token, agent);
   },
 });

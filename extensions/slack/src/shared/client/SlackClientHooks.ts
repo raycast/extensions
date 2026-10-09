@@ -2,7 +2,7 @@ import { handleError } from "../utils";
 import { SlackClient, type User } from "./SlackClient";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useMemo, useRef, useState } from "react";
-import { createDirectoryUserSearch, mergeDirectorySearchResults } from "./directory";
+import { createDirectoryUserSearch, directoryUsersToShow, mergeDirectorySearchResults } from "./directory";
 
 export const useChannels = () =>
   usePromise(
@@ -80,8 +80,7 @@ export const useDirectorySearch = (query: string) => {
     },
   );
 
-  const previewUsers = preview?.query === query ? preview.users : undefined;
-  const shownUsers = users.isLoading ? (previewUsers ?? users.data) : (users.data ?? previewUsers);
+  const shownUsers = directoryUsersToShow(query, users.isLoading, preview, users.data);
 
   return {
     data: mergeDirectorySearchResults(

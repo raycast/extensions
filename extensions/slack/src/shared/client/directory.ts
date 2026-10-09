@@ -43,6 +43,20 @@ export function mergeVisitedDirectoryItems<T extends { id: string }>(
   return [...rows, ...visited.filter((item) => !seen.has(item.id))];
 }
 
+/**
+ * While a query is loading, only a preview recorded for that same query is safe to show.
+ * Settled results belong to the previous query until this one finishes.
+ */
+export function directoryUsersToShow<User>(
+  query: string,
+  isLoading: boolean,
+  preview: { query: string; users: User[] } | undefined,
+  settled: User[] | undefined,
+): User[] | undefined {
+  const previewUsers = preview?.query === query ? preview.users : undefined;
+  return isLoading ? previewUsers : (settled ?? previewUsers);
+}
+
 /** Shares one bounded member scan between user rows and MPIM name resolution for a query. */
 export function createDirectoryUserSearch<User>(
   loadMembers: () => Promise<{ users: User[]; userNames: ReadonlyMap<string, string> }>,
