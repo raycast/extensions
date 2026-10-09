@@ -8,6 +8,8 @@ import { grep, type GrepFile, type GrepMode } from "./lib/fsearch";
 import { fileName, folderOf } from "./lib/format";
 import { useFSearch } from "./lib/use-fsearch";
 
+const NARROW = "The search stopped early. Add ext:, type:, or in: to search fewer files.";
+
 const MODES: { value: GrepMode; title: string; placeholder: string }[] = [
   { value: "literal", title: "Text", placeholder: "Find text in your files" },
   { value: "regex", title: "Regular Expression", placeholder: "Find a regular expression in your files" },
@@ -27,6 +29,8 @@ export default function Command({ fallbackText }: LaunchProps) {
   );
 
   const files = execute && !error ? (data?.files ?? []) : [];
+  // The daemon stops reading at its time budget; the best-ranked files come first.
+  const incomplete = execute && !error && !isLoading && data?.complete === false;
 
   return (
     <List
@@ -55,9 +59,22 @@ export default function Command({ fallbackText }: LaunchProps) {
       ) : error ? (
         <StatusView error={error} onRetry={revalidate} />
       ) : files.length === 0 ? (
-        <List.EmptyView icon={Icon.Text} title={isLoading ? "Searching…" : "No Matches"} />
+        <List.EmptyView
+          icon={Icon.Text}
+          title={isLoading ? "Searching…" : incomplete ? "No Matches Yet" : "No Matches"}
+          description={incomplete ? NARROW : undefined}
+        />
       ) : (
-        files.map((file) => <FileSection key={file.path} file={file} />)
+        <>
+          {files.map((file) => (
+            <FileSection key={file.path} file={file} />
+          ))}
+          {incomplete && (
+            <List.Section title="Some Files Weren't Searched">
+              <List.Item icon={Icon.Info} title={NARROW} />
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
