@@ -1,7 +1,14 @@
 import { environment, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { join } from "path";
 import { showFailureToast } from "@raycast/utils";
 import { FocusMode, FocusState, FullDiskAccessError, getFocusState, waitForActiveFocus } from "./focus-state";
-import { listHelperShortcutIds, runShortcut, trustedHelperIds, writeSignedHelperShortcut } from "./helper-shortcut";
+import {
+  listShortcuts,
+  newHelperName,
+  runShortcut,
+  trustedHelperIds,
+  writeSignedHelperShortcut,
+} from "./helper-shortcut";
 
 export const FULL_DISK_ACCESS_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles";
 export const FOCUS_SETTINGS = "x-apple.systempreferences:com.apple.Focus-Settings.extension";
@@ -13,9 +20,9 @@ async function getTrustedHelpers(): Promise<string[]> {
   return JSON.parse((await LocalStorage.getItem<string>(TRUSTED_HELPERS_KEY)) ?? "[]");
 }
 
-async function trustHelpers(ids: string[]) {
-  const trusted = (await getTrustedHelpers()).filter((id) => !ids.includes(id));
-  await LocalStorage.setItem(TRUSTED_HELPERS_KEY, JSON.stringify([...trusted, ...ids]));
+async function trustHelper(id: string, installed: string[]) {
+  const trusted = (await getTrustedHelpers()).filter((trustedId) => installed.includes(trustedId));
+  await LocalStorage.setItem(TRUSTED_HELPERS_KEY, JSON.stringify([...trusted, id]));
 }
 
 /**
@@ -23,7 +30,8 @@ async function trustHelpers(ids: string[]) {
  * installed or every copy was built before the requested mode existed.
  */
 async function runHelper(input: string): Promise<boolean> {
-  for (const id of trustedHelperIds(await listHelperShortcutIds(), await getTrustedHelpers())) {
+  const installed = (await listShortcuts()).map((shortcut) => shortcut.id);
+  for (const id of trustedHelperIds(installed, await getTrustedHelpers())) {
     if ((await runShortcut(id, input)) === "ok") return true;
   }
   return false;
@@ -33,27 +41,30 @@ async function runHelper(input: string): Promise<boolean> {
 async function runHelperWithSetup(input: string, modes: FocusMode[]): Promise<boolean> {
   if (await runHelper(input)) return true;
 
-  const installed = await listHelperShortcutIds();
-  const trusted = await getTrustedHelpers();
-  const file = await writeSignedHelperShortcut(modes, environment.supportPath);
+  const before = new Set((await listShortcuts()).map((shortcut) => shortcut.id));
+  const isUpdate = trustedHelperIds([...before], await getTrustedHelpers()).length > 0;
+  const name = newHelperName();
+  const file = await writeSignedHelperShortcut(modes, join(environment.supportPath, "helper"), name);
   await open(file, "com.apple.shortcuts");
-  if (installed.length === 0) {
-    await showHUD("Click “Add Shortcut” to finish setting up Focus Modes");
-  } else if (installed.every((id) => trusted.includes(id))) {
-    await showHUD("Click “Add Shortcut”, then “Replace” to update the Focus helper");
-  } else {
-    // Another shortcut already has the helper's name; "Keep Both" leaves it untouched.
-    await showHUD("Click “Add Shortcut”, then “Keep Both” to add the Focus helper");
-  }
+  await showHUD(
+    isUpdate
+      ? "Click “Add Shortcut” to update the Focus helper"
+      : "Click “Add Shortcut” to finish setting up Focus Modes",
+  );
 
-  // Only a shortcut that appears after opening the generated file is trusted as the helper.
-  const before = new Set(installed);
+  // The helper is the shortcut that appears with the generated name after its file was opened.
   const deadline = Date.now() + 90_000;
   while (Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    const added = (await listHelperShortcutIds()).filter((id) => !before.has(id));
-    if (added.length > 0) await trustHelpers(added);
-    if (await runHelper(input)) return true;
+    const installed = await listShortcuts();
+    const helper = installed.find((shortcut) => shortcut.name === name && !before.has(shortcut.id));
+    if (helper) {
+      await trustHelper(
+        helper.id,
+        installed.map((shortcut) => shortcut.id),
+      );
+      return runHelper(input);
+    }
   }
   return false;
 }

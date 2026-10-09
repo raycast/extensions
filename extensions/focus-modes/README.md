@@ -13,9 +13,9 @@ Switch between your macOS Focus modes, like Do Not Disturb, Work, Sleep, or any 
 macOS doesn't offer a public way for apps to change Focus, so this extension uses the built-in Shortcuts app. There are two one-time steps:
 
 1. **Full Disk Access**: macOS only lets apps with Full Disk Access read your list of Focus modes. If Raycast doesn't have it yet, the extension shows a button that opens **System Settings → Privacy & Security → Full Disk Access**. Turn on Raycast there (macOS may ask you to quit and reopen Raycast), then open the command again.
-2. **Helper shortcut**: The first time you change Focus, the extension creates a shortcut called **Raycast Focus Modes** from your Focus modes and opens it in Shortcuts. Click **Add Shortcut** and your Focus switches as soon as it's added.
+2. **Helper shortcut**: The first time you change Focus, the extension creates a shortcut from your Focus modes, named **Raycast Focus Modes** plus a short code (like `Raycast Focus Modes 4F7A2C`), and opens it in Shortcuts. Click **Add Shortcut** and your Focus switches as soon as it's added.
 
-If you add a new Focus later, Shortcuts will open again with an updated helper. Click **Add Shortcut**, then **Replace**. If you already had a different shortcut called **Raycast Focus Modes**, choose **Keep Both** instead: the extension only ever runs helper copies it added itself. If Shortcuts keeps more than one copy, the extension uses the newest one, and you can delete the others.
+If you add a new Focus later, Shortcuts will open again with an updated helper. Click **Add Shortcut**. The extension only runs helper shortcuts it added itself and always uses the newest one, so you can delete older copies.
 
 ## Privacy
 

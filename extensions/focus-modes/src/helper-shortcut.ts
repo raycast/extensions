@@ -1,6 +1,6 @@
 import { execFile, spawn } from "child_process";
-import { randomUUID } from "crypto";
-import { mkdir, writeFile } from "fs/promises";
+import { randomBytes, randomUUID } from "crypto";
+import { mkdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
@@ -96,42 +96,55 @@ export function buildHelperShortcut(modes: ShortcutFocusMode[]) {
   };
 }
 
-/** Writes a signed copy of the helper shortcut into `directory` and returns its path. */
-export async function writeSignedHelperShortcut(modes: ShortcutFocusMode[], directory: string): Promise<string> {
+/**
+ * A fresh name for a generated helper, such as "Raycast Focus Modes 4F7A2C". Shortcuts names an
+ * imported shortcut after its file, so a shortcut that appears with exactly this name right after
+ * its file was opened is the helper, and no other shortcut can be mistaken for it.
+ */
+export function newHelperName(): string {
+  return `${HELPER_SHORTCUT_NAME} ${randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+/** Writes a signed helper shortcut called `name` into an empty `directory` and returns its path. */
+export async function writeSignedHelperShortcut(
+  modes: ShortcutFocusMode[],
+  directory: string,
+  name: string,
+): Promise<string> {
+  await rm(directory, { recursive: true, force: true });
   await mkdir(directory, { recursive: true });
   const json = join(directory, "helper.json");
   const unsigned = join(directory, "helper-unsigned.shortcut");
-  const signed = join(directory, `${HELPER_SHORTCUT_NAME}.shortcut`);
+  const signed = join(directory, `${name}.shortcut`);
   await writeFile(json, JSON.stringify(buildHelperShortcut(modes)));
   await execFileAsync("/usr/bin/plutil", ["-convert", "binary1", "-o", unsigned, json]);
   await execFileAsync(SHORTCUTS, ["sign", "--mode", "people-who-know-me", "-i", unsigned, "-o", signed]);
   return signed;
 }
 
-/**
- * Identifiers of every shortcut named like the helper, in library order, from the output of
- * `shortcuts list --show-identifiers`. Re-importing the helper leaves the older copy behind
- * (sometimes renamed "… 1"), and running by name fails while names clash, so shortcuts are
- * always run by identifier.
- */
-export function parseHelperShortcutIds(listOutput: string): string[] {
-  const helperName = new RegExp(`^${HELPER_SHORTCUT_NAME}( \\d+)?$`);
-  const ids: string[] = [];
+export interface InstalledShortcut {
+  name: string;
+  id: string;
+}
+
+/** Parses `shortcuts list --show-identifiers`, which prints one "Name (IDENTIFIER)" per line. */
+export function parseShortcutList(listOutput: string): InstalledShortcut[] {
+  const shortcuts: InstalledShortcut[] = [];
   for (const line of listOutput.split("\n")) {
     const match = /^(.*) \(([0-9A-F-]{36})\)$/i.exec(line.trim());
-    if (match && helperName.test(match[1])) ids.push(match[2]);
+    if (match) shortcuts.push({ name: match[1], id: match[2] });
   }
-  return ids;
+  return shortcuts;
 }
 
-export async function listHelperShortcutIds(): Promise<string[]> {
+export async function listShortcuts(): Promise<InstalledShortcut[]> {
   const { stdout } = await execFileAsync(SHORTCUTS, ["list", "--show-identifiers"]);
-  return parseHelperShortcutIds(stdout);
+  return parseShortcutList(stdout);
 }
 
 /**
- * Another shortcut can share the helper's name, so only copies this extension added are ever run.
- * Returns the trusted identifiers (oldest first, as recorded) that are still installed, newest first.
+ * Only helper copies this extension added are ever run, and always by identifier. Returns the
+ * trusted identifiers (recorded oldest first) that are still installed, newest first.
  */
 export function trustedHelperIds(installed: string[], trusted: string[]): string[] {
   return [...trusted].reverse().filter((id) => installed.includes(id));

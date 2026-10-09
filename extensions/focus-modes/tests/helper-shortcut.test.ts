@@ -1,25 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { buildHelperShortcut, parseHelperShortcutIds, trustedHelperIds } from "../src/helper-shortcut";
+import { buildHelperShortcut, newHelperName, parseShortcutList, trustedHelperIds } from "../src/helper-shortcut";
 
 const A = "3E1873F3-879B-41ED-82AA-DF5AD443616E";
 const B = "98662C7A-815A-4836-9767-916743B48A0E";
 const C = "1AD0A429-0BE3-4EC9-9EB9-6F4C45CE9F57";
 
-describe("parseHelperShortcutIds", () => {
-  it("finds the helper and its renamed copies, but not other shortcuts", () => {
+describe("parseShortcutList", () => {
+  it("reads each shortcut's exact name and identifier", () => {
     const output = [
-      `Raycast Focus Modes (${A})`,
-      `Raycast Focus Modes 1 (${B})`,
-      `Raycast Focus Modes Backup (${C})`,
-      "Take a Break (41E9E173-1D60-4D06-BE08-DA9C24BB5A1D)",
+      `Raycast Focus Modes 4F7A2C (${A})`,
+      `Raycast Focus Modes (${B})`,
+      `Name (with) parentheses (${C})`,
       "",
     ].join("\n");
-    expect(parseHelperShortcutIds(output)).toEqual([A, B]);
+    expect(parseShortcutList(output)).toEqual([
+      { name: "Raycast Focus Modes 4F7A2C", id: A },
+      { name: "Raycast Focus Modes", id: B },
+      { name: "Name (with) parentheses", id: C },
+    ]);
+  });
+});
+
+describe("newHelperName", () => {
+  it("adds a random code so no existing shortcut shares the name", () => {
+    const names = Array.from({ length: 50 }, newHelperName);
+    for (const name of names) expect(name).toMatch(/^Raycast Focus Modes [0-9A-F]{6}$/);
+    expect(new Set(names).size).toBe(names.length);
   });
 });
 
 describe("trustedHelperIds", () => {
-  it("never returns a same-named shortcut the extension didn't add", () => {
+  it("never returns a shortcut the extension didn't add", () => {
     expect(trustedHelperIds([A, B], [B])).toEqual([B]);
     expect(trustedHelperIds([A, B], [])).toEqual([]);
   });
