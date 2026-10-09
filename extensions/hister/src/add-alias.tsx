@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { addAlias, countQueryMatches } from "./api";
+import { addAlias, countQueryMatches, getRules } from "./api";
 
 function pages(count: number): string {
   return `${count.toLocaleString()} page${count === 1 ? "" : "s"}`;
 }
 
-export function AddAliasForm({ existing, onDone }: { existing: Record<string, string>; onDone: () => void }) {
+export function AddAliasForm({ onDone }: { onDone: () => void }) {
   const { pop } = useNavigation();
   const [keyword, setKeyword] = useState("");
   const [query, setQuery] = useState("");
@@ -17,7 +17,8 @@ export function AddAliasForm({ existing, onDone }: { existing: Record<string, st
 
   // Hister swaps whole words of a search for aliases, so a keyword with a space never matches.
   const keywordError = /\s/.test(word) ? "One word, no spaces." : undefined;
-  const replaces = word && existing[word];
+  const { data: rules } = useCachedPromise(getRules, [], { onError: () => undefined });
+  const replaces = word && rules?.aliases[word];
 
   const {
     data: matched,

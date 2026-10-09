@@ -81,7 +81,7 @@ export function RulesList({
       title="Add Alias"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<AddAliasForm existing={rules?.aliases ?? {}} onDone={revalidate} />}
+      target={<AddAliasForm onDone={revalidate} />}
     />
   );
 
@@ -140,7 +140,7 @@ export function RulesList({
   );
 
   useEffect(() => {
-    if (startAddingAlias) push(<AddAliasForm existing={rules?.aliases ?? {}} onDone={revalidate} />);
+    if (startAddingAlias) push(<AddAliasForm onDone={revalidate} />);
   }, []);
 
   const search = (query: string) => {
