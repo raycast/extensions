@@ -128,6 +128,21 @@
       "description": "Mark an entire TV show (all seasons and episodes) as watched in your Trakt history"
     },
     {
+      "name": "check-in",
+      "title": "Now Watching",
+      "description": "Check in to a movie or an episode on Trakt, shown as watching now until its runtime ends"
+    },
+    {
+      "name": "stop-check-in",
+      "title": "Stop Check-In",
+      "description": "Stop the active Trakt check-in so it does not become a play"
+    },
+    {
+      "name": "drop-show",
+      "title": "Drop Show",
+      "description": "Drop a show so it leaves Continue Watching and the calendar, keeping its history and ratings"
+    },
+    {
       "name": "rate-media",
       "title": "Rate Media",
       "description": "Rate a movie, TV show, or episode on Trakt with a score from 1 to 10"

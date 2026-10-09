@@ -5,6 +5,7 @@
 ### Added
 
 - **Calendar week for the calendar AI tool**: "what's airing this week?" now covers today through Sunday instead of the next 7 days.
+- **AI tools for Now Watching, Stop Check-In and Drop Show**: Raycast AI can check in to a movie or an episode, stop the check-in, and drop a show, each after a confirmation that names the title.
 
 ## [Update] - 2026-10-09
 

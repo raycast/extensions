@@ -52,6 +52,8 @@ instructions: |
   - To mark a movie as watched, use `mark-movie-watched`.
   - To mark a specific TV episode as watched, use `mark-episode-watched` with `showTraktId`, `seasonNumber`, and `episodeNumber`.
   - To mark an ENTIRE TV series (all seasons and episodes) as watched, use `mark-show-watched`. Only use this when the user explicitly asks to mark the whole show as watched.
+  - When the user says they are watching something now ("I'm watching Severance S02E03", "start Inception"), use `check-in` with `movieTraktId`, or with `showTraktId`, `seasonNumber` and `episodeNumber`. It becomes a play when the runtime ends, so do not also call a mark-as-watched tool. Use `stop-check-in` to cancel it ("I stopped watching"); it takes no argument. Only one check-in can be active: if `check-in` reports another one, tell the user and offer `stop-check-in`.
+  - To drop a show ("drop Severance", "I gave up on X"), use `drop-show` with its `showTraktId`. It leaves Continue Watching and the calendar but keeps history and ratings; it is not a removal from history.
   - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
   - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
   - To remove a rating from a movie, TV show, or episode, use `remove-rating`. Season ratings can appear in `get-ratings` but cannot be added or removed through these tools.
@@ -506,6 +508,66 @@ evals:
             showTraktId: 154784
             seasonNumber: 2
             episodeNumber: 3
+
+  - input: "@trakt-manager I'm watching Severance S02E03 right now"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      check-in:
+        success: true
+        message: 'Checked in to "Severance" (2022) S02E03 "Who Is Alive?". It becomes a play at 2026-10-09T21:50:00.000Z unless the check-in is stopped.'
+        expiresAt: "2026-10-09T21:50:00.000Z"
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "check-in"
+          arguments:
+            showTraktId: 154784
+            seasonNumber: 2
+            episodeNumber: 3
+
+  - input: "@trakt-manager stop my check-in"
+    mocks:
+      stop-check-in:
+        success: true
+        message: 'Stopped the check-in to Severance · Who Is Alive?.'
+        stopped: "Severance · Who Is Alive?"
+    expected:
+      - callsTool:
+          name: "stop-check-in"
+
+  - input: "@trakt-manager drop Severance"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      drop-show:
+        success: true
+        calendarHidden: true
+        message: 'Dropped "Severance" (2022): it left Continue Watching and the calendar.'
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "drop-show"
+          arguments:
+            showTraktId: 154784
 
   - input: "@trakt-manager rate Severance 9 out of 10"
     mocks:
