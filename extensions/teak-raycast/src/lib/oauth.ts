@@ -1,6 +1,13 @@
 import { environment, LocalStorage, OAuth } from "@raycast/api";
-import { type AuthDiscovery, discoverAuthServer } from "teak-sdk";
-import { getApiBaseUrl, getAppBaseUrl } from "./constants";
+import {
+  type AuthDiscovery,
+  createConnectAuthorizeUrl,
+  disconnectConnectGrant,
+  discoverAuthServer,
+  requestConnectTokens,
+  WORKOS_CONNECT_SCOPE,
+} from "teak-sdk";
+import { getApiBaseUrl } from "./constants";
 
 export class TeakDiscoveryError extends Error {
   constructor() {
@@ -27,23 +34,17 @@ interface Provider {
 }
 const providers = new Map<string, Provider>();
 const discovery = (forceRefresh = false) =>
-  discoverAuthServer(getApiBaseUrl(), {
-    forceRefresh,
-    ...(environment.isDevelopment ? { localIssuer: getAppBaseUrl() } : {}),
-  });
+  discoverAuthServer(getApiBaseUrl(), { forceRefresh });
 const providerKey = (auth: AuthDiscovery) =>
   `${getApiBaseUrl()}|${auth.issuer}|${auth.clients.raycast}`;
-const audience = (auth: AuthDiscovery): Record<string, string> =>
-  auth.primary === "workos"
-    ? { resource: new URL("/api", auth.resource).href }
-    : {};
+// Keychain namespace that held pre-WorkOS (Better Auth) credentials.
+const legacyProviderId = "teak";
 
 interface SavedProvider {
   apiBaseUrl: string;
   clientId: string;
   issuer: string;
   providerId: string;
-  revocationEndpoint?: string;
 }
 const registryPrefix = () =>
   `teak.oauth.provider:${encodeURIComponent(getApiBaseUrl())}:`;
@@ -56,20 +57,15 @@ const nativeClient = (providerId: string) =>
     description: "Connect your Teak account to save and search cards.",
   });
 function savedProvider(auth: AuthDiscovery): SavedProvider {
-  const legacy =
-    !environment.isDevelopment &&
-    auth.primary === "betterauth" &&
-    auth.issuer === "https://app.teakvault.com" &&
-    auth.clients.raycast === "teak-raycast";
   return {
     apiBaseUrl: getApiBaseUrl(),
-    providerId: legacy ? "teak" : `teak:${providerKey(auth)}`,
+    providerId: `teak:${providerKey(auth)}`,
     issuer: auth.issuer,
     clientId: auth.clients.raycast,
-    revocationEndpoint:
-      auth.primary === "betterauth" ? auth.revocationEndpoint : undefined,
   };
 }
+const isWorkosClient = (record: SavedProvider) =>
+  record.clientId.startsWith("client_");
 function validateSavedProvider(
   raw: unknown,
   current: AuthDiscovery,
@@ -85,20 +81,24 @@ function validateSavedProvider(
     typeof raw.issuer !== "string" ||
     !("clientId" in raw) ||
     typeof raw.clientId !== "string" ||
-    !raw.clientId ||
-    ("revocationEndpoint" in raw && typeof raw.revocationEndpoint !== "string")
+    !raw.clientId
   ) {
     throw new Error("Invalid saved Teak connection");
   }
-  const issuer = new URL(raw.issuer);
-  const endpoint =
-    "revocationEndpoint" in raw
-      ? new URL(String(raw.revocationEndpoint))
-      : undefined;
-  const legacy = raw.providerId === "teak";
-  const expected = legacy
-    ? "teak"
-    : `teak:${raw.apiBaseUrl}|${raw.issuer}|${raw.clientId}`;
+  const record = {
+    apiBaseUrl: raw.apiBaseUrl,
+    providerId: raw.providerId,
+    issuer: raw.issuer,
+    clientId: raw.clientId,
+  };
+  const expected = `teak:${raw.apiBaseUrl}|${raw.issuer}|${raw.clientId}`;
+  if (!isWorkosClient(record)) {
+    // Pre-WorkOS records are only ever cleared locally, never contacted.
+    if (raw.providerId !== legacyProviderId && raw.providerId !== expected) {
+      throw new Error("Invalid saved Teak connection");
+    }
+    return record;
+  }
   const knownWorkos = environment.isDevelopment
     ? {
         apiBaseUrl: "https://reminiscent-kangaroo-59.convex.site/v1",
@@ -111,67 +111,29 @@ function validateSavedProvider(
         issuer: "https://scholarly-hay-77.authkit.app",
         clientId: "client_01M47GV3CYKFW0H78W0XYKGTM5",
       };
-  const workos = raw.clientId.startsWith("client_");
   const currentWorkos =
-    current.primary === "workos" &&
-    raw.issuer === current.issuer &&
-    raw.clientId === current.clients.raycast;
+    raw.issuer === current.issuer && raw.clientId === current.clients.raycast;
   const historicalWorkos =
     raw.apiBaseUrl === knownWorkos.apiBaseUrl &&
     raw.issuer === knownWorkos.issuer &&
     raw.clientId === knownWorkos.clientId;
-  if (
-    workos &&
-    (!(currentWorkos || historicalWorkos) || endpoint !== undefined)
-  ) {
+  if (!(currentWorkos || historicalWorkos)) {
     throw new Error("Saved WorkOS connection does not match this deployment");
   }
-  if (
-    !workos &&
-    (raw.clientId !== "teak-raycast" ||
-      raw.issuer !== getAppBaseUrl() ||
-      endpoint?.href !==
-        `${getApiBaseUrl().replace(/\/v1$/, "")}/api/oauth/revoke`)
-  ) {
-    throw new Error(
-      "Saved Better Auth connection does not match this deployment",
-    );
-  }
-
+  const issuer = new URL(raw.issuer);
   if (
     raw.providerId !== expected ||
+    issuer.protocol !== "https:" ||
     issuer.username ||
     issuer.password ||
     issuer.search ||
-    issuer.hash ||
-    endpoint?.username ||
-    endpoint?.password ||
-    endpoint?.search ||
-    endpoint?.hash ||
-    (legacy &&
-      (environment.isDevelopment ||
-        raw.issuer !== "https://app.teakvault.com" ||
-        raw.clientId !== "teak-raycast")) ||
-    (issuer.protocol !== "https:" &&
-      !(
-        environment.isDevelopment &&
-        issuer.origin === new URL(getAppBaseUrl()).origin
-      )) ||
-    (endpoint &&
-      endpoint.origin !== issuer.origin &&
-      endpoint.origin !== new URL(getApiBaseUrl()).origin)
+    issuer.hash
   ) {
     throw new Error("Invalid saved Teak connection");
   }
-  // Endpoint origin and native namespace share the persisted issuer/client pin:
-  // tampering with that pin cannot retrieve another issuer's Keychain tokens.
-  return {
-    apiBaseUrl: raw.apiBaseUrl,
-    providerId: raw.providerId,
-    issuer: raw.issuer,
-    clientId: raw.clientId,
-    revocationEndpoint: endpoint?.href,
-  };
+  // The native namespace shares the persisted issuer/client pin: tampering
+  // with that pin cannot retrieve another issuer's Keychain tokens.
+  return record;
 }
 async function rememberProvider(auth: AuthDiscovery) {
   const record = savedProvider(auth);
@@ -187,6 +149,9 @@ async function getProvider(forceRefresh = false): Promise<Provider> {
     auth = await discovery(forceRefresh);
   } catch {
     throw new TeakDiscoveryError();
+  }
+  if (auth.primary !== "workos") {
+    throw new Error("This Teak server uses an unsupported sign-in provider.");
   }
   const key = providerKey(auth);
   const cached = providers.get(key);
@@ -214,104 +179,38 @@ async function refetchAfterFailure() {
 
 async function exchange(
   provider: Provider,
-  params: Record<string, string>,
-  previousRefresh?: string,
-) {
-  const response = await fetch(provider.auth.tokenEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: provider.auth.clients.raycast,
-      ...audience(provider.auth),
-      ...params,
-    }),
-    redirect: "error",
-    signal: AbortSignal.timeout(10_000),
+  grant: Record<string, string>,
+): Promise<string> {
+  const result = await requestConnectTokens(provider.auth, {
+    clientId: provider.auth.clients.raycast,
+    grant,
+    local: environment.isDevelopment,
   });
-  if (response.status === 429 || response.status >= 500) {
+  if (result.ok) {
+    const { accessToken, expiresIn, refreshToken } = result.tokens;
+    await provider.client.setTokens({ accessToken, expiresIn, refreshToken });
+    return accessToken;
+  }
+  const { reason, status } = result;
+  if (reason === "failed" && (status === 429 || status >= 500)) {
     throw new TeakDiscoveryError();
   }
-  // Uncertain refresh failures must not trigger browser auth over saved tokens.
-  const bodyError = (message: string) =>
-    !response.ok && params.grant_type !== "refresh_token"
-      ? new TeakSessionExpiredError("Teak sign-in expired. Sign in again.")
-      : new Error(message);
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw bodyError("Invalid Teak sign-in response.");
-  }
-  const decoder = new TextDecoder();
-  let text = "";
-  let bytes = 0;
-  try {
-    for (;;) {
-      const chunk = await reader.read();
-      if (chunk.done) {
-        break;
-      }
-      bytes += chunk.value.byteLength;
-      if (bytes > 64 * 1024) {
-        await reader.cancel();
-        throw bodyError("Teak sign-in response is too large.");
-      }
-      text += decoder.decode(chunk.value, { stream: true });
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  let raw: unknown;
-  try {
-    raw = JSON.parse(text + decoder.decode());
-  } catch {
-    throw bodyError("Invalid Teak sign-in response.");
-  }
-  if (!response.ok) {
-    if (
-      params.grant_type === "refresh_token" &&
-      (response.status === 400 || response.status === 401) &&
-      raw !== null &&
-      typeof raw === "object" &&
-      "error" in raw
-    ) {
-      if (raw.error === "invalid_grant") {
-        throw new TeakRefreshRevokedError(
-          "Teak refresh credential was revoked.",
-        );
-      }
-      if (
-        raw.error === "invalid_client" ||
-        raw.error === "unauthorized_client"
-      ) {
-        // The client was rejected, not necessarily its remote grant revoked.
-        // Only explicit Sign Out may forget this local credential.
-        throw new TeakRefreshClientRejectedError("Teak client was rejected.");
-      }
-    }
-    throw bodyError("Teak token request was rejected. Try again.");
-  }
-  if (
-    !raw ||
-    typeof raw !== "object" ||
-    !("access_token" in raw) ||
-    typeof raw.access_token !== "string" ||
-    !raw.access_token ||
-    !("expires_in" in raw) ||
-    typeof raw.expires_in !== "number" ||
-    !Number.isFinite(raw.expires_in) ||
-    raw.expires_in <= 0 ||
-    ("refresh_token" in raw &&
-      (typeof raw.refresh_token !== "string" || !raw.refresh_token))
-  ) {
+  if (reason === "invalid_response") {
     throw new Error("Invalid Teak sign-in response.");
   }
-  const refreshToken =
-    "refresh_token" in raw ? String(raw.refresh_token) : previousRefresh;
-  await provider.client.setTokens({
-    accessToken: raw.access_token,
-    expiresIn: raw.expires_in,
-    refreshToken,
-  });
-  return raw.access_token;
+  // Uncertain refresh failures must not trigger browser auth over saved tokens.
+  if (grant.grant_type !== "refresh_token") {
+    throw new TeakSessionExpiredError("Teak sign-in expired. Sign in again.");
+  }
+  if (reason === "refresh_token_rejected") {
+    throw new TeakRefreshRevokedError("Teak refresh credential was revoked.");
+  }
+  if (reason === "client_rejected") {
+    // The client was rejected, not necessarily its remote grant revoked.
+    // Only explicit Sign Out may forget this local credential.
+    throw new TeakRefreshClientRejectedError("Teak client was rejected.");
+  }
+  throw new Error("Teak token request was rejected. Try again.");
 }
 
 let inFlightAuthorize: Promise<string> | null = null;
@@ -349,13 +248,17 @@ async function authorizeProvider(provider: Provider): Promise<string> {
     const request = await provider.client.authorizationRequest({
       endpoint: provider.auth.authorizationEndpoint,
       clientId: provider.auth.clients.raycast,
-      scope:
-        provider.auth.primary === "workos"
-          ? "openid profile email offline_access"
-          : "profile email offline_access",
-      extraParameters: audience(provider.auth),
+      scope: WORKOS_CONNECT_SCOPE,
     });
-    const { authorizationCode } = await provider.client.authorize(request);
+    const url = createConnectAuthorizeUrl(provider.auth, {
+      clientId: provider.auth.clients.raycast,
+      codeChallenge: request.codeChallenge,
+      redirectUri: request.redirectURI,
+      state: request.state,
+    });
+    const { authorizationCode } = await provider.client.authorize({
+      url: url.href,
+    });
     return await exchange(provider, {
       grant_type: "authorization_code",
       code: authorizationCode,
@@ -378,28 +281,26 @@ export function reauthorizeTeak(): Promise<string> {
     inFlightReauthorize = (async () => {
       await Promise.allSettled([inFlightAuthorize, inFlightStoredToken]);
       const provider = await getProvider(true);
-      if (provider.auth.primary === "workos") {
-        const tokens = await provider.client.getTokens();
-        if (tokens?.refreshToken) {
-          const renewed = exchange(
-            provider,
-            { grant_type: "refresh_token", refresh_token: tokens.refreshToken },
-            tokens.refreshToken,
-          );
-          // Background readers join this rotation instead of replaying the old
-          // refresh token while reauthorization is in flight.
-          inFlightStoredToken = renewed;
-          try {
-            return await renewed;
-          } finally {
-            if (inFlightStoredToken === renewed) inFlightStoredToken = null;
-          }
-        }
-        if (tokens) {
-          throw new TeakSignOutRequiredError();
+      const tokens = await provider.client.getTokens();
+      if (tokens?.refreshToken) {
+        const renewed = exchange(provider, {
+          grant_type: "refresh_token",
+          // Runtime credential from secure storage, not a hard-coded token.
+          // nosemgrep: codacy.yaml.security.hard-coded-tokens
+          refresh_token: tokens.refreshToken,
+        });
+        // Background readers join this rotation instead of replaying the old
+        // refresh token while reauthorization is in flight.
+        inFlightStoredToken = renewed;
+        try {
+          return await renewed;
+        } finally {
+          if (inFlightStoredToken === renewed) inFlightStoredToken = null;
         }
       }
-      await provider.client.removeTokens();
+      if (tokens) {
+        throw new TeakSignOutRequiredError();
+      }
       return authorizeProvider(provider);
     })().finally(() => {
       inFlightReauthorize = null;
@@ -426,15 +327,9 @@ async function revokeStoredSession(): Promise<SignOutResult> {
   const current = await getProvider();
   const saved = await LocalStorage.allItems();
   const records = new Map<string, SavedProvider>();
-  if (!environment.isDevelopment) {
-    records.set("teak", {
-      apiBaseUrl: getApiBaseUrl(),
-      providerId: "teak",
-      issuer: "https://app.teakvault.com",
-      clientId: "teak-raycast",
-      revocationEndpoint: "https://teakvault.com/api/api/oauth/revoke",
-    });
-  }
+  // Pre-WorkOS credentials can no longer authenticate anywhere, so Sign Out
+  // clears them locally without contacting a server.
+  const legacy = new Set([legacyProviderId]);
   const entries = Object.entries(saved).filter(([key]) =>
     key.startsWith(registryPrefix()),
   );
@@ -454,10 +349,14 @@ async function revokeStoredSession(): Promise<SignOutResult> {
       if (key !== `${registryPrefix()}${record.providerId}`) {
         throw new Error("Saved connection namespace mismatch");
       }
-      records.set(record.providerId, record);
+      if (isWorkosClient(record)) {
+        records.set(record.providerId, record);
+      } else {
+        legacy.add(record.providerId);
+      }
     } catch {
-      // Only discard the corrupt metadata. Never trust its namespace or endpoint
-      // enough to read/delete Keychain credentials or contact a remote server.
+      // Only discard the corrupt metadata. Never trust its namespace enough
+      // to read/delete Keychain credentials or contact a remote server.
       await LocalStorage.removeItem(key);
       invalidMetadata = true;
     }
@@ -465,42 +364,9 @@ async function revokeStoredSession(): Promise<SignOutResult> {
   for (const record of records.values()) {
     const client = nativeClient(record.providerId);
     const tokens = await client.getTokens();
-    const workos = record.clientId.startsWith("client_");
-    const token = workos
-      ? tokens?.accessToken
-      : tokens?.refreshToken || tokens?.accessToken;
-    if (tokens && !token && !workos) {
-      throw new Error("Your credentials are still saved. Try Sign Out again.");
-    }
-    if (token || (workos && tokens)) {
+    if (tokens) {
       try {
-        // Try an old token first so a completed disconnect can recover without
-        // refreshing a grant the provider has already revoked.
-        const endpoint = workos
-          ? `${getApiBaseUrl()}/oauth/disconnect`
-          : record.revocationEndpoint;
-        if (!endpoint) {
-          throw new Error("Revocation is unavailable");
-        }
-        const disconnect = (accessToken: string) =>
-          fetch(endpoint, {
-            method: "POST",
-            headers: workos
-              ? { Authorization: `Bearer ${accessToken}` }
-              : { "Content-Type": "application/x-www-form-urlencoded" },
-            ...(workos
-              ? {}
-              : {
-                  body: new URLSearchParams({
-                    client_id: record.clientId,
-                    token: token ?? "",
-                  }),
-                }),
-            redirect: "error",
-            signal: AbortSignal.timeout(10_000),
-          });
-        let response = token ? await disconnect(token) : undefined;
-        if (workos && (!token || response?.status === 401)) {
+        const refreshAccessToken = async () => {
           const provider = await getProvider(true);
           if (
             providerKey(provider.auth) !==
@@ -511,38 +377,45 @@ async function revokeStoredSession(): Promise<SignOutResult> {
             // may clear it locally without claiming provider revocation.
             throw new TeakLocalSignOutError();
           }
-          if (!tokens?.refreshToken) {
+          if (!tokens.refreshToken) {
             // No refresh credential can recover this rejected or absent access
             // token. Explicit Sign Out may forget this Mac, not the remote grant.
             throw new TeakLocalSignOutError();
           }
-          const renewed = await exchange(
-            provider,
-            {
-              grant_type: "refresh_token",
-              // Runtime credential from secure storage, not a hard-coded token.
-              // nosemgrep: codacy.yaml.security.hard-coded-tokens
-              refresh_token: tokens.refreshToken,
-            },
-            tokens.refreshToken,
-          );
-          // exchange atomically stores rotated tokens before retrying. Sign-out
-          // blocks new readers and has drained all in-flight refreshes.
-          response = await disconnect(renewed);
-        }
-        if (workos ? response?.status !== 204 : !response?.ok) {
-          throw new Error("Revocation failed");
+          // exchange stores rotated tokens before the retry. Sign-out blocks
+          // new readers and has drained all in-flight refreshes.
+          return exchange(provider, {
+            grant_type: "refresh_token",
+            // Runtime credential from secure storage, not a hard-coded token.
+            // nosemgrep: codacy.yaml.security.hard-coded-tokens
+            refresh_token: tokens.refreshToken,
+          });
+        };
+        const local = environment.isDevelopment;
+        // Try an old token first so a completed disconnect can recover without
+        // refreshing a grant the provider has already revoked.
+        const result = tokens.accessToken
+          ? await disconnectConnectGrant(getApiBaseUrl(), tokens.accessToken, {
+              local,
+              refreshAccessToken,
+            })
+          : await disconnectConnectGrant(
+              getApiBaseUrl(),
+              await refreshAccessToken(),
+              { local },
+            );
+        if (result !== "disconnected") {
+          throw new Error("Disconnect failed");
         }
       } catch (error) {
-        // A dead grant, rejected client or unusable local connection
-        // permits explicit local clearing. None claims remote revocation;
+        // A dead grant, rejected client or unusable local connection permits
+        // explicit local clearing without claiming remote revocation;
         // uncertain failures retain their credentials.
         if (
           !(
-            workos &&
-            (error instanceof TeakRefreshRevokedError ||
-              error instanceof TeakLocalSignOutError ||
-              error instanceof TeakRefreshClientRejectedError)
+            error instanceof TeakRefreshRevokedError ||
+            error instanceof TeakLocalSignOutError ||
+            error instanceof TeakRefreshClientRejectedError
           )
         ) {
           throw new Error(
@@ -554,6 +427,10 @@ async function revokeStoredSession(): Promise<SignOutResult> {
     }
     await client.removeTokens();
     await LocalStorage.removeItem(`${registryPrefix()}${record.providerId}`);
+  }
+  for (const providerId of legacy) {
+    await nativeClient(providerId).removeTokens();
+    await LocalStorage.removeItem(`${registryPrefix()}${providerId}`);
   }
   if (invalidMetadata) {
     throw new Error(
@@ -568,14 +445,8 @@ export async function hasStoredTeakSession(): Promise<boolean> {
     return false;
   }
   const provider = await getProvider();
-  const tokens = await provider.client.getTokens();
-  if (provider.auth.primary === "workos") {
-    // Even an unusable saved credential needs an explicit Sign Out action.
-    return Boolean(tokens);
-  }
-  return Boolean(
-    tokens?.accessToken && (!tokens.isExpired() || tokens.refreshToken),
-  );
+  // Even an unusable saved credential needs an explicit Sign Out action.
+  return Boolean(await provider.client.getTokens());
 }
 
 export function getStoredTeakAccessToken(): Promise<string | null> {
@@ -594,31 +465,25 @@ export function getStoredTeakAccessToken(): Promise<string | null> {
 async function resolveStoredTeakAccessToken(): Promise<string | null> {
   const provider = await getProvider();
   const tokens = await provider.client.getTokens();
-  if (!tokens || (!tokens.accessToken && provider.auth.primary !== "workos")) {
+  if (!tokens) {
     return null;
   }
   if (tokens.accessToken && !tokens.isExpired()) {
     return tokens.accessToken;
   }
   if (!tokens.refreshToken) {
-    if (provider.auth.primary === "workos") {
-      throw new TeakSignOutRequiredError();
-    }
-    return null;
+    throw new TeakSignOutRequiredError();
   }
   try {
-    return await exchange(
-      provider,
-      { grant_type: "refresh_token", refresh_token: tokens.refreshToken },
-      tokens.refreshToken,
-    );
+    return await exchange(provider, {
+      grant_type: "refresh_token",
+      // Runtime credential from secure storage, not a hard-coded token.
+      // nosemgrep: codacy.yaml.security.hard-coded-tokens
+      refresh_token: tokens.refreshToken,
+    });
   } catch (error) {
     await refetchAfterFailure();
-    if (
-      provider.auth.primary === "workos" &&
-      !tokens.accessToken &&
-      error instanceof TeakRefreshRevokedError
-    ) {
+    if (!tokens.accessToken && error instanceof TeakRefreshRevokedError) {
       throw new TeakSignOutRequiredError();
     }
     if (error instanceof TeakSessionExpiredError) {
