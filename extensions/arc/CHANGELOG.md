@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fix] - 2026-10-09
+
+- Fixed keyboard navigation in `Search Tabs` jumping over History straight to Suggestions while history was still loading. The tab sections now stay mounted during history search so the list keeps its selection anchor.
+
 ## [Fix] - 2026-10-08
 
 - Fixed `Access Spaces and Favorites` launching Arc in the background every 10 minutes when Arc is not running.
