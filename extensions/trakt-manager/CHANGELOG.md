@@ -11,6 +11,7 @@
 - **Search People command**: find actors and crew, then browse the movies and shows they worked on, with their roles.
 - **Dropped Shows command**: see the shows you dropped and restore one to Continue Watching and the calendar.
 - **Calendar command**: upcoming episodes of the shows you follow and movie releases, grouped by day in your time zone, for this week or the next 7, 14 or 32 days.
+- **Lists command and "Add to List…"**: create, edit and delete your personal lists, browse and remove their items, and add a movie or show to a list from search.
 
 ## [Update] - 2026-10-09
 

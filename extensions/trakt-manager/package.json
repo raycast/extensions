@@ -57,6 +57,13 @@
       "mode": "view"
     },
     {
+      "name": "lists",
+      "title": "Lists",
+      "subtitle": "Trakt Manager",
+      "description": "Create, edit and delete your personal lists, and browse or remove their items",
+      "mode": "view"
+    },
+    {
       "name": "dropped-shows",
       "title": "Dropped Shows",
       "subtitle": "Trakt Manager",
