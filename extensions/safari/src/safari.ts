@@ -70,68 +70,192 @@ export async function getCurrentTabURL() {
 
 export type ContentType = "text" | "source";
 
-export async function getCurrentTabContents(type: ContentType) {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of current tab in window 1`);
+export type TabContents = {
+  windowId: number;
+  index: number;
+  title: string;
+  url: string;
+  /** document.readyState, or "unknown" when Safari does not allow JavaScript from Apple Events */
+  readyState: string;
+  /** Length of the full content, before truncation */
+  length: number;
+  content: string;
+};
+
+const FIELD_SEPARATOR = String.fromCharCode(30);
+
+// Reads the tab's text or source, truncated inside AppleScript so huge pages never cross the bridge
+export async function readTabContents(
+  tab: { windowId: number; index: number } | undefined,
+  type: ContentType,
+  maxLength: number,
+): Promise<TabContents> {
+  if (tab && (!Number.isInteger(tab.windowId) || tab.windowId < 1 || !Number.isInteger(tab.index) || tab.index < 1)) {
+    throw new Error("windowId and index must be whole numbers starting at 1. Use get-all-tabs to list the open tabs.");
+  }
+  const locateTab = tab
+    ? `
+      if (count of windows) < ${tab.windowId} then return "missing-window" & sep & (count of windows)
+      set targetWindow to window ${tab.windowId}
+      if (count of tabs of targetWindow) < ${tab.index} then return "missing-tab" & sep & (count of tabs of targetWindow)
+      set targetTab to tab ${tab.index} of targetWindow`
+    : `
+      if (count of windows) = 0 then return "missing-window" & sep & 0
+      set targetWindow to window 1
+      set targetTab to current tab of targetWindow`;
+
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      set sep to character id 30
+      ${locateTab}
+      set tabTitle to name of targetTab
+      if tabTitle is missing value then set tabTitle to ""
+      set tabURL to URL of targetTab
+      if tabURL is missing value then set tabURL to ""
+      -- Needs "Allow JavaScript from Apple Events", which is off by default
+      set readyState to "unknown"
+      try
+        set readyState to do JavaScript "document.readyState" in targetTab
+      end try
+      set pageContent to ${type} of targetTab
+      if pageContent is missing value then set pageContent to ""
+      set contentLength to length of pageContent
+      if contentLength > ${maxLength} then set pageContent to text 1 thru ${maxLength} of pageContent
+      return "ok" & sep & (index of targetWindow) & sep & (index of targetTab) & sep & readyState & sep & contentLength & sep & tabTitle & sep & tabURL & sep & pageContent
+    end tell
+  `);
+
+  const [status, ...fields] = result.split(FIELD_SEPARATOR);
+  if (status === "missing-window") {
+    throw new Error(
+      `Safari has no window ${tab?.windowId ?? 1} (${fields[0]} open). Use get-all-tabs to list the open tabs.`,
+    );
+  }
+  if (status === "missing-tab") {
+    throw new Error(
+      `Safari window ${tab?.windowId} has no tab ${tab?.index} (${fields[0]} open). Use get-all-tabs to list the open tabs.`,
+    );
+  }
+  if (status !== "ok") {
+    throw new Error(`Unexpected response from Safari: ${result.slice(0, 200)}`);
+  }
+
+  const [windowId, index, readyState, length, title, url, ...content] = fields;
+  return {
+    windowId: Number(windowId),
+    index: Number(index),
+    title,
+    url,
+    readyState,
+    length: Number(length),
+    // The content itself may contain the separator
+    content: content.join(FIELD_SEPARATOR),
+  };
 }
 
-export async function getTabContents(windowId: number, tabIndex: number, type: ContentType) {
-  try {
-    return await runAppleScript(`
-      tell application "${safariAppIdentifier}"
-        if (count of windows) >= ${windowId} then
-          set targetWindow to window ${windowId}
-          if (count of tabs of targetWindow) >= ${tabIndex} then
-            set targetTab to tab ${tabIndex} of targetWindow
-            return ${type} of targetTab
-          else
-            return "Error: Tab index out of range"
-          end if
-        else
-          return "Error: Window ID out of range"
-        end if
-      end tell
-    `);
-  } catch (error) {
-    return `Error: ${error}`;
+// Returns the tab's title and URL, or why it does not exist, as "status:::a:::b"
+const describeTabScript = (windowId: number, tabIndex: number) => `
+  if (count of windows) < ${windowId} then return "missing-window:::" & (count of windows)
+  set targetWindow to window ${windowId}
+  if (count of tabs of targetWindow) < ${tabIndex} then return "missing-tab:::" & (count of tabs of targetWindow)
+  set targetTab to tab ${tabIndex} of targetWindow
+  set tabTitle to name of targetTab
+  if tabTitle is missing value then set tabTitle to ""
+  set tabURL to URL of targetTab
+  if tabURL is missing value then set tabURL to ""
+`;
+
+function assertTabPosition(windowId: number, tabIndex: number) {
+  if (!Number.isInteger(windowId) || windowId < 1 || !Number.isInteger(tabIndex) || tabIndex < 1) {
+    throw new Error("windowId and index must be whole numbers starting at 1. Use get-all-tabs to list the open tabs.");
   }
 }
 
+function parseTabResult(result: string, windowId: number, tabIndex: number) {
+  const [status, ...values] = result.split(":::");
+  if (status === "missing-window") {
+    throw new Error(`Safari has no window ${windowId} (${values[0]} open). Use get-all-tabs to list the open tabs.`);
+  }
+  if (status === "missing-tab") {
+    throw new Error(
+      `Safari window ${windowId} has no tab ${tabIndex} (${values[0]} open). Use get-all-tabs to list the open tabs.`,
+    );
+  }
+  if (status !== "ok") {
+    throw new Error(`Unexpected response from Safari: ${result}`);
+  }
+  return values;
+}
+
+export async function getTab(windowId: number, tabIndex: number): Promise<LocalTab> {
+  assertTabPosition(windowId, tabIndex);
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      ${describeTabScript(windowId, tabIndex)}
+      return "ok:::" & tabTitle & ":::" & tabURL
+    end tell
+  `);
+  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
+  return { uuid: `${windowId}-${tabIndex}`, title, url, window_id: windowId, index: tabIndex, is_local: true };
+}
+
+// Selecting a tab brings its window to the front, so it becomes window 1
+export async function selectTab(windowId: number, tabIndex: number): Promise<LocalTab> {
+  assertTabPosition(windowId, tabIndex);
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      ${describeTabScript(windowId, tabIndex)}
+      set current tab of targetWindow to targetTab
+      if ${windowId} > 1 then set index of targetWindow to 1
+      activate
+      set selectedTab to current tab of front window
+      if index of selectedTab is not ${tabIndex} then return "not-selected"
+      return "ok:::" & tabTitle & ":::" & tabURL
+    end tell
+  `);
+  if (result === "not-selected") {
+    throw new Error(`Safari did not switch to tab ${tabIndex} of window ${windowId}.`);
+  }
+  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
+  return { uuid: `1-${tabIndex}`, title, url, window_id: 1, index: tabIndex, is_local: true };
+}
+
+// Closing the last tab of a window closes the window, so check both counts
 export async function closeTab(windowId: number, tabIndex: number) {
-  try {
-    const result = await runAppleScript(`
-      tell application "${safariAppIdentifier}"
-        if (count of windows) >= ${windowId} then
-          set targetWindow to window ${windowId}
-          if (count of tabs of targetWindow) >= ${tabIndex} then
-            set targetTab to tab ${tabIndex} of targetWindow
-            close targetTab
-            return "Tab closed successfully"
-          else
-            return "Error: Tab index out of range"
-          end if
-        else
-          return "Error: Window ID out of range"
-        end if
-      end tell
-    `);
-    return result;
-  } catch (error) {
-    return `Error: ${error}`;
+  assertTabPosition(windowId, tabIndex);
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      ${describeTabScript(windowId, tabIndex)}
+      set windowCount to count of windows
+      set tabCount to count of tabs of targetWindow
+      close targetTab
+      delay 0.2
+      if (count of windows) = windowCount then
+        if (count of tabs of window ${windowId}) is not (tabCount - 1) then return "not-closed"
+      end if
+      return "ok:::" & tabTitle & ":::" & tabURL
+    end tell
+  `);
+  if (result === "not-closed") {
+    throw new Error(`Safari did not close tab ${tabIndex} of window ${windowId}.`);
   }
+  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
+  return { closedTab: { title, url } };
 }
 
 export async function closeCurrentTab() {
-  try {
-    const result = await runAppleScript(`
-      tell application "${safariAppIdentifier}"
-        close current tab of front window
-        return "Current tab closed successfully"
-      end tell
-    `);
-    return result;
-  } catch (error) {
-    return `Error: ${error}`;
+  const windowCount = parseInt(
+    await runAppleScript(`tell application "${safariAppIdentifier}" to return count of windows`),
+    10,
+  );
+  if (!windowCount) {
+    throw new Error("Safari has no open window.");
   }
+  const tabIndex = parseInt(
+    await runAppleScript(`tell application "${safariAppIdentifier}" to return index of current tab of window 1`),
+    10,
+  );
+  return await closeTab(1, tabIndex);
 }
 
 export async function getFocusedTab() {
@@ -142,10 +266,13 @@ export async function getFocusedTab() {
         set currentTab to current tab of frontWindow
         set tabIndex to index of currentTab
         set tabTitle to name of currentTab
+        if tabTitle is missing value then set tabTitle to ""
         set tabURL to URL of currentTab
-        set windowId to id of frontWindow
-        
-        return windowId & ":::" & tabIndex & ":::" & tabTitle & ":::" & tabURL
+        if tabURL is missing value then set tabURL to ""
+        set windowId to index of frontWindow
+
+        -- Start with text so & joins strings instead of building a list
+        return (windowId as text) & ":::" & tabIndex & ":::" & tabTitle & ":::" & tabURL
       end tell
     `;
 

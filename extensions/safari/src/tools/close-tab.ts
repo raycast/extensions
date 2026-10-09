@@ -1,4 +1,5 @@
-import { closeTab, closeCurrentTab } from "../safari";
+import { Action, Tool } from "@raycast/api";
+import { closeTab, closeCurrentTab, getFocusedTab, getTab } from "../safari";
 
 type Input = {
   /**
@@ -26,6 +27,7 @@ type Input = {
 /**
  * Closes a Safari tab, either a specific tab identified by window ID and tab index,
  * or the currently focused tab if no specific tab is provided.
+ * Returns the title and URL of the closed tab.
  */
 export default async function tool(input: Input) {
   const { tab } = input;
@@ -35,3 +37,18 @@ export default async function tool(input: Input) {
     return await closeCurrentTab();
   }
 }
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // A missing tab skips the confirmation; the tool then fails and closes nothing
+  const tab = await (input.tab ? getTab(input.tab.windowId, input.tab.index) : getFocusedTab()).catch(() => undefined);
+  if (!tab) return undefined;
+
+  return {
+    style: Action.Style.Destructive,
+    message: "Close this tab?",
+    info: [
+      { name: "Title", value: tab.title },
+      { name: "URL", value: tab.url },
+    ],
+  };
+};
