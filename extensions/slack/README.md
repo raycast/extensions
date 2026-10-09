@@ -96,6 +96,10 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # AI Tool: Add Reaction
          - reactions:write
 
+         # AI Tools: Read Canvas & Edit Canvas
+         - canvases:read
+         - canvases:write
+
          # Command: Set Status
          - users.profile:write
          - users.profile:read
@@ -143,4 +147,4 @@ The limits most relevant to this extension are:
 
 `users.list` and `conversations.list` are cursor-paginated, and every page is another request against that method's rate limit. Normal directory loading uses Slack's recommended 200-item page size. A focused directory search can request up to 999 items per transient page (Slack requires the value to remain below 1,000), immediately discarding the full API page after retaining only compact matches. This reduces request pressure in very large workspaces without rebuilding the previous unbounded in-memory directory.
 
-When a limit is exceeded, Slack responds with HTTP `429` and a `Retry-After` header containing the number of seconds to wait. The extension waits and retries automatically without showing a toast, including during AI tool calls. Although Slack applies limits per method, the Slack SDK pauses this client's request queue during the retry delay. See [Slack's rate-limit overview](https://docs.slack.dev/apis/web-api/rate-limits/) for the full tier definitions and current policy.
+When a limit is exceeded, Slack responds with HTTP `429` and a `Retry-After` header containing the number of seconds to wait. The extension waits and retries automatically without showing a toast, including during AI tool calls, except for Canvas tools, which return the wait time without retrying. Although Slack applies limits per method, the Slack SDK pauses this client's request queue during the retry delay. See [Slack's rate-limit overview](https://docs.slack.dev/apis/web-api/rate-limits/) for the full tier definitions and current policy.

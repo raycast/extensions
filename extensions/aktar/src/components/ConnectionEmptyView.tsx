@@ -11,7 +11,8 @@ export function ConnectionEmptyView({ error, onRetry }: { error: Error; onRetry:
   const { title, description } = aktarError
     ? describeConnectionError(aktarError)
     : { title: "Something Went Wrong", description: error.message };
-  const needsConnect = aktarError?.kind === "not-connected" || aktarError?.kind === "unauthorized";
+  const needsConnect =
+    aktarError?.kind === "not-connected" || aktarError?.kind === "unauthorized" || aktarError?.kind === "unverified";
 
   return (
     <List.EmptyView

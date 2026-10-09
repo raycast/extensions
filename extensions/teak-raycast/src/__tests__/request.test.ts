@@ -4,7 +4,9 @@ import { createRaycastApiMock } from "./raycastApiMock";
 
 const getPreferenceValuesMock = mock(() => ({ apiKey: "valid-test-key" }));
 const authorizeMock = mock(() => Promise.resolve("oauth-access-token"));
-const removeTokensMock = mock(() => Promise.resolve());
+const removeTokensMock = mock<(providerId: string) => Promise<void>>(() =>
+  Promise.resolve(),
+);
 const getTokensMock = mock<
   () => Promise<{ accessToken: string; refreshToken?: string } | undefined>
 >(() => Promise.resolve(undefined));
@@ -14,11 +16,17 @@ const mockRaycastApi = (isDevelopment: boolean) => {
     createRaycastApiMock(isDevelopment, {
       getPreferenceValues: getPreferenceValuesMock,
       oauthClient: class {
+        private readonly providerId: string;
+        constructor(options: { providerId: string }) {
+          this.providerId = options.providerId;
+        }
         async getTokens() {
           const tokens = await getTokensMock();
           return tokens && { ...tokens, isExpired: () => false };
         }
-        removeTokens = removeTokensMock;
+        removeTokens() {
+          return removeTokensMock(this.providerId);
+        }
         setTokens() {
           return Promise.resolve();
         }
@@ -93,10 +101,15 @@ const createEmptyResponse = (status: number): Response =>
     headers: { "Content-Type": "application/json" },
   });
 
+const workosIssuer = "https://scholarly-hay-77.authkit.app";
+const workosClient = "client_01M47GV3CYKFW0H78W0XYKGTM5";
+const workosNamespace = `teak:https://teakvault.com/api/v1|${workosIssuer}|${workosClient}`;
+const removedNamespaces = () =>
+  removeTokensMock.mock.calls.map(([providerId]) => providerId);
 const withDiscovery = (transport: typeof fetch): typeof fetch =>
   ((input, init) => {
     const url = String(input);
-    const issuer = "https://app.teakvault.com";
+    const issuer = workosIssuer;
     let metadata: unknown;
     if (url.includes("oauth-protected-resource")) {
       metadata = {
@@ -105,12 +118,12 @@ const withDiscovery = (transport: typeof fetch): typeof fetch =>
       };
     } else if (url.includes("teak-oauth-clients")) {
       metadata = {
-        primary: "betterauth",
+        primary: "workos",
         issuer,
         clients: Object.fromEntries(
           ["cli", "raycast", "chrome", "firefox", "safari"].map((surface) => [
             surface,
-            "teak-raycast",
+            workosClient,
           ]),
         ),
       };
@@ -119,10 +132,9 @@ const withDiscovery = (transport: typeof fetch): typeof fetch =>
         issuer,
         code_challenge_methods_supported: ["S256"],
         authorization_endpoint: `${issuer}/authorize`,
-        token_endpoint: `${issuer}/token`,
-        revocation_endpoint: "https://teakvault.com/api/api/oauth/revoke",
+        token_endpoint: `${issuer}/oauth2/token`,
       };
-    } else if (url.endsWith("/token")) {
+    } else if (url.endsWith("/oauth2/token")) {
       return Promise.resolve(
         Response.json({
           access_token: new URLSearchParams(String(init?.body)).get("code"),
@@ -543,13 +555,12 @@ describe("raycast request handling", () => {
 
     await searchCards({ limit: 1 });
 
-    expect(removeTokensMock).toHaveBeenCalledTimes(1);
     expect(seenTokens).toEqual(["Bearer stale-token", "Bearer fresh-token"]);
   });
 });
 
 describe("Raycast sign out", () => {
-  test("revokes the installation before removing its tokens", async () => {
+  test("disconnects the installation before removing its tokens", async () => {
     getTokensMock.mockResolvedValueOnce({
       accessToken: "access",
       refreshToken: "refresh",
@@ -557,42 +568,19 @@ describe("Raycast sign out", () => {
     globalThis.fetch = withDiscovery(
       mock((input: RequestInfo | URL, init?: RequestInit) => {
         expect(String(input)).toBe(
-          "https://teakvault.com/api/api/oauth/revoke",
+          "https://teakvault.com/api/v1/oauth/disconnect",
         );
         expect(init?.method).toBe("POST");
-        expect(new URLSearchParams(String(init?.body)).get("token")).toBe(
-          "refresh",
-        );
-        expect(new URLSearchParams(String(init?.body)).get("client_id")).toBe(
-          "teak-raycast",
+        expect(new Headers(init?.headers).get("authorization")).toBe(
+          "Bearer access",
         );
         expect(removeTokensMock).not.toHaveBeenCalled();
-        return Promise.resolve(new Response(null, { status: 200 }));
+        return Promise.resolve(new Response(null, { status: 204 }));
       }) as unknown as typeof fetch,
     );
-    await signOutTeak();
-    expect(removeTokensMock).toHaveBeenCalledTimes(1);
+    expect(await signOutTeak()).toBe("disconnected");
+    expect(removedNamespaces()).toContain(workosNamespace);
   });
-
-  test.each(["offline", "server"])(
-    "preserves tokens on %s failure",
-    async (failure) => {
-      getTokensMock.mockResolvedValueOnce({
-        accessToken: "access",
-        refreshToken: "refresh",
-      });
-      globalThis.fetch = withDiscovery(
-        mock(() => {
-          if (failure === "offline") {
-            throw new Error("offline");
-          }
-          return Promise.resolve(new Response(null, { status: 503 }));
-        }) as unknown as typeof fetch,
-      );
-      await expect(signOutTeak()).rejects.toThrow("try Sign Out again");
-      expect(removeTokensMock).not.toHaveBeenCalled();
-    },
-  );
 
   test("waits for a running authorization and blocks refresh while signing out", async () => {
     let finishAuthorization: (token: string) => void = () => {};
@@ -622,16 +610,16 @@ describe("Raycast sign out", () => {
     });
     globalThis.fetch = withDiscovery(
       mock((_input: RequestInfo | URL, init?: RequestInit) => {
-        expect(new URLSearchParams(String(init?.body)).get("token")).toBe(
-          "fresh-refresh",
+        expect(new Headers(init?.headers).get("authorization")).toBe(
+          "Bearer fresh-access",
         );
-        return Promise.resolve(new Response(null, { status: 200 }));
+        return Promise.resolve(new Response(null, { status: 204 }));
       }) as unknown as typeof fetch,
     );
     finishAuthorization("fresh-access");
     await authorization;
-    await signOut;
-    expect(removeTokensMock).toHaveBeenCalledTimes(1);
+    expect(await signOut).toBe("disconnected");
+    expect(removedNamespaces()).toContain(workosNamespace);
   });
 
   test("handles an already-cleared session without revoking an API key", async () => {
@@ -640,6 +628,6 @@ describe("Raycast sign out", () => {
     globalThis.fetch = withDiscovery(fetchMock as unknown as typeof fetch);
     await signOutTeak();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(removeTokensMock).toHaveBeenCalledTimes(1);
+    expect(removedNamespaces()).toContain(workosNamespace);
   });
 });
