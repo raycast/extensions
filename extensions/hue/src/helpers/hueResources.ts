@@ -1,4 +1,4 @@
-import { Group, GroupedLight, Light, Palette, Scene } from "../lib/types";
+import { DeepPartial, Group, GroupedLight, Id, Light, Palette, Scene } from "../lib/types";
 import { miredToHexString, xyToMired, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
@@ -14,6 +14,36 @@ export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
 
 export const getGroupedLightFromGroup = (groupedLights: GroupedLight[], group: Group) =>
   groupedLights.find((gl) => group.services.some((s) => s.rtype === "grouped_light" && s.rid === gl.id));
+
+// Like the bridge, a group is on while any of its lights is on, at the average brightness of those that are dimmable.
+// Returns that state for each group containing one of the changed lights.
+export function getGroupedLightChanges(
+  lights: Light[],
+  groups: Group[],
+  groupedLights: GroupedLight[],
+  changed: Set<Id>,
+) {
+  return new Map<Id, DeepPartial<GroupedLight>>(
+    groups.flatMap((group) => {
+      const groupLights = getLightsFromGroup(lights, group);
+      const groupedLight = getGroupedLightFromGroup(groupedLights, group);
+      if (groupedLight === undefined || !groupLights.some((light) => changed.has(light.id))) return [];
+      const brightnesses = groupLights.flatMap((light) =>
+        light.on.on && light.dimming ? [light.dimming.brightness] : [],
+      );
+      const brightness = brightnesses.reduce((sum, b) => sum + b, 0) / brightnesses.length;
+      return [
+        [
+          groupedLight.id,
+          {
+            on: { on: groupLights.some((light) => light.on.on) },
+            ...(brightnesses.length > 0 && { dimming: { brightness } }),
+          },
+        ],
+      ];
+    }),
+  );
+}
 
 export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
   scenes.filter((scene) => scene.group.rid === group.id).sort(byName);

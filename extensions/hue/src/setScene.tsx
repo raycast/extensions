@@ -96,15 +96,8 @@ function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Sce
       { on, dimming, color, color_temperature: color ? { mirek: null, mirek_valid: false } : color_temperature },
     ]),
   );
-  const changesToGroupedLights = new Map(
-    group.services
-      .filter((resource) => resource.rtype === "grouped_light")
-      .map((resource) => [resource.rid, { on: { on: scene.actions.some(({ action }) => action.on?.on) } }]),
-  );
-
   return applyUpdate(hue, {
     lights: changesToLights,
-    groupedLights: changesToGroupedLights,
     request: (hueClient) =>
       hueClient.updateScene(scene, {
         recall: {
