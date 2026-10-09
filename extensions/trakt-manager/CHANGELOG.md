@@ -9,6 +9,7 @@
 - **Similar titles**: "Similar Titles" on movie and show results opens the titles Trakt relates to them, and the AI can answer "movies like Inception".
 - **Discover command**: browse trending, popular and anticipated movies and shows, with the same actions as search.
 - **Search People command**: find actors and crew, then browse the movies and shows they worked on, with their roles.
+- **Dropped Shows command**: see the shows you dropped and restore one to Continue Watching and the calendar.
 
 ## [Update] - 2026-10-09
 

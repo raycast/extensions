@@ -57,6 +57,13 @@
       "mode": "view"
     },
     {
+      "name": "dropped-shows",
+      "title": "Dropped Shows",
+      "subtitle": "Trakt Manager",
+      "description": "See the shows you dropped and restore them to Continue Watching",
+      "mode": "view"
+    },
+    {
       "name": "history",
       "title": "History",
       "subtitle": "Trakt Manager",

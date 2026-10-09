@@ -159,6 +159,17 @@ export const TraktWatchlistRemoveResponseSchema = z.object({
 });
 
 /** Response of `POST /users/hidden/:section`. `added` counts the items Trakt hid. */
+/** `GET /users/hidden/dropped`: shows the user dropped, newest first. */
+export const TraktDroppedShowList = z.array(
+  z.object({ hidden_at: z.string(), type: z.string(), show: z.lazy(() => TraktShowBaseItem) }),
+);
+export type TraktDroppedShow = z.infer<typeof TraktDroppedShowList>[number];
+
+/** Response of `POST /users/hidden/:section/remove`. */
+export const TraktHiddenRemoveResponseSchema = z.object({
+  deleted: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+});
+
 export const TraktHiddenAddResponseSchema = z.object({
   added: z.object({ movies: z.number().optional(), shows: z.number().optional(), season: z.number().optional() }),
 });

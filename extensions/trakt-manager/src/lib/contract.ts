@@ -9,6 +9,8 @@ import {
   TraktMovieHistoryList,
   TraktCheckinConflictSchema,
   TraktHiddenAddResponseSchema,
+  TraktHiddenRemoveResponseSchema,
+  TraktDroppedShowList,
   TraktHistoryAddResponseSchema,
   TraktNoSharing,
   TraktWatchlistAddResponseSchema,
@@ -431,6 +433,33 @@ const TraktShowContract = c.router({
       shows: z.array(TraktIdSchema),
     }),
     summary: "Drop a show (hides it from Continue Watching)",
+  },
+  getDroppedShows: {
+    method: "GET",
+    path: "/users/hidden/dropped",
+    responses: {
+      200: TraktDroppedShowList,
+    },
+    query: TraktPaginationSchema.merge(TraktExtendedSchema).extend({ type: z.enum(["show"]) }),
+    summary: "Get the shows the user dropped",
+  },
+  restoreDroppedShow: {
+    method: "POST",
+    path: "/users/hidden/dropped/remove",
+    responses: {
+      200: TraktHiddenRemoveResponseSchema,
+    },
+    body: z.object({ shows: z.array(TraktIdSchema) }),
+    summary: "Restore a dropped show to Continue Watching",
+  },
+  unhideShowFromCalendar: {
+    method: "POST",
+    path: "/users/hidden/calendar/remove",
+    responses: {
+      200: TraktHiddenRemoveResponseSchema,
+    },
+    body: z.object({ shows: z.array(TraktIdSchema) }),
+    summary: "Show a show on the calendar again",
   },
   hideShowFromCalendar: {
     method: "POST",
