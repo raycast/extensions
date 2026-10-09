@@ -478,6 +478,12 @@ evals:
 
   - input: "@trakt-manager mark Inception as watched"
     mocks:
+      get-watchlist:
+        found: false
+        inWatchlist: false
+        exhaustive: true
+        message: '"Inception" is not in your watchlist.'
+        hasMore: false
       search-movies:
         data:
           - traktId: 16662
@@ -513,6 +519,19 @@ evals:
   # An episode write needs the show's ID, the season and the episode, not a title.
   - input: "@trakt-manager mark Severance S02E03 as watched"
     mocks:
+      get-up-next:
+        data:
+          - showTitle: "Severance"
+            showTraktId: 154784
+            nextEpisode:
+              traktId: 3959823
+              season: 2
+              number: 3
+              title: "Who Is Alive?"
+        movies: []
+        page: 1
+        hasMore: false
+        exhaustive: false
       search-shows:
         data:
           - traktId: 154784
