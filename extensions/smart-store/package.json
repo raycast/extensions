@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smart-store",
+  "title": "Smart Store",
+  "description": "Find Raycast extensions by describing what you need, read their descriptions in your language, and get a ready-to-use plan to build the ones that don't exist yet.",
+  "icon": "icon.png",
+  "author": "dncwarren",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-extensions",
+      "title": "Search Extensions",
+      "subtitle": "Smart Store",
+      "description": "Search the Raycast Store in plain language, with descriptions translated into your language.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Description Language",
+      "description": "Language used to display extension descriptions and AI explanations.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "System Language",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese (Simplified)",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "zh-TW"
+        }
+      ]
+    },
+    {
+      "name": "aiProvider",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Provider",
+      "description": "Powers plain-language search, translations and extension ideas. Without AI, search falls back to keywords and descriptions are translated with MyMemory.",
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast AI (requires Raycast Pro)",
+          "value": "raycast"
+        },
+        {
+          "title": "Anthropic (your API key)",
+          "value": "anthropic"
+        },
+        {
+          "title": "OpenAI (your API key)",
+          "value": "openai"
+        },
+        {
+          "title": "None (keyword search only)",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Only needed for the Anthropic or OpenAI provider."
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "required": false,
+      "title": "Model",
+      "description": "Optional model override for the Anthropic or OpenAI provider (defaults: claude-opus-5-5, gpt-5-mini).",
+      "placeholder": "Leave empty for the default model"
+    }
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
