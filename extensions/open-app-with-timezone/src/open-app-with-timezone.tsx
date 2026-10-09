@@ -14,15 +14,32 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { showFailureToast, useLocalStorage, usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { AppRecords, rankApps } from "./ranking";
+import { AppRecord, AppRecords, rankApps } from "./ranking";
 import { relaunchWithTimeZone } from "./relaunch";
+import { readJSON, updateJSON } from "./storage";
 import { cityName, localTime, systemTimeZone, TIME_ZONES, utcOffset } from "./time-zones";
 
 const RAYCAST_BUNDLE_IDS = new Set(["com.raycast.macos", "com.raycast.macos.internal"]);
+const RECORDS_KEY = "appRecords";
+const PINS_KEY = "pinnedApps";
+const opening = new Set<string>();
 
-async function openWithTimeZone(app: Application, timeZone: string, onOpened: () => Promise<void>) {
+async function openWithTimeZone(app: Application, timeZone: string, onOpened: () => Promise<unknown>) {
+  if (opening.has(app.path)) {
+    await showToast({ style: Toast.Style.Failure, title: `${app.name} is already being opened` });
+    return;
+  }
+  opening.add(app.path);
+  try {
+    await relaunch(app, timeZone, onOpened);
+  } finally {
+    opening.delete(app.path);
+  }
+}
+
+async function relaunch(app: Application, timeZone: string, onOpened: () => Promise<unknown>) {
   let toast: Promise<Toast> | undefined;
   const onProgress = (title: string) => {
     toast = toast ? toast.then((t) => Object.assign(t, { title })) : showToast({ style: Toast.Style.Animated, title });
@@ -54,26 +71,34 @@ export default function Command() {
     (await getApplications()).filter((app) => !RAYCAST_BUNDLE_IDS.has(app.bundleId ?? "")),
   );
   const {
-    value: records = {},
-    setValue: setRecords,
+    data: records = {},
+    mutate: mutateRecords,
     isLoading: isLoadingRecords,
-  } = useLocalStorage<AppRecords>("appRecords", {});
+  } = usePromise(() => readJSON<AppRecords>(RECORDS_KEY, {}));
   const {
-    value: pinnedPaths = [],
-    setValue: setPinnedPaths,
+    data: pinnedPaths = [],
+    mutate: mutatePins,
     isLoading: isLoadingPins,
-  } = useLocalStorage<string[]>("pinnedApps", []);
+  } = usePromise(() => readJSON<string[]>(PINS_KEY, []));
   const { pinned, frequent, rest } = useMemo(() => rankApps(apps, records, pinnedPaths), [apps, records, pinnedPaths]);
 
   const timeZoneOf = (app: Application) => {
     const tz = records[app.path]?.timeZone;
     return tz && TIME_ZONES.includes(tz) ? tz : systemTimeZone();
   };
+  const updateRecord = (app: Application, update: (record?: AppRecord) => AppRecord) =>
+    mutateRecords(updateJSON<AppRecords>(RECORDS_KEY, {}, (all) => ({ ...all, [app.path]: update(all[app.path]) })));
   const rememberTimeZone = (app: Application, timeZone: string) =>
-    setRecords({ ...records, [app.path]: { opens: records[app.path]?.opens ?? 0, timeZone } });
+    updateRecord(app, (record) => ({ opens: record?.opens ?? 0, timeZone }));
   const open = (app: Application, timeZone: string) =>
     openWithTimeZone(app, timeZone, () =>
-      setRecords({ ...records, [app.path]: { opens: (records[app.path]?.opens ?? 0) + 1, timeZone } }),
+      updateRecord(app, (record) => ({ opens: (record?.opens ?? 0) + 1, timeZone })),
+    );
+  const togglePin = (app: Application) =>
+    mutatePins(
+      updateJSON<string[]>(PINS_KEY, [], (paths) =>
+        paths.includes(app.path) ? paths.filter((path) => path !== app.path) : [...paths, app.path],
+      ),
     );
 
   function renderItem(app: Application, isPinned: boolean) {
@@ -116,9 +141,7 @@ export default function Command() {
               title={isPinned ? "Unpin App" : "Pin App"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              onAction={() =>
-                setPinnedPaths(isPinned ? pinnedPaths.filter((path) => path !== app.path) : [...pinnedPaths, app.path])
-              }
+              onAction={() => togglePin(app)}
             />
             <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
           </ActionPanel>
@@ -139,8 +162,8 @@ export default function Command() {
 function TimeZoneList(props: {
   app: Application;
   current: string;
-  onOpen: (tz: string) => Promise<void>;
-  onRemember: (tz: string) => Promise<void>;
+  onOpen: (tz: string) => Promise<unknown>;
+  onRemember: (tz: string) => Promise<unknown>;
 }) {
   const { app, current, onOpen, onRemember } = props;
   const { pop } = useNavigation();

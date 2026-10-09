@@ -24,7 +24,7 @@ async function readPlistKey(plist: string, key: string): Promise<string> {
 }
 
 async function mainPid(executable: string): Promise<number | undefined> {
-  const { stdout } = await run("/bin/ps", ["-Ao", "pid=,comm="], { maxBuffer: 16 * 1024 * 1024 });
+  const { stdout } = await run("/bin/ps", ["-ww", "-Ao", "pid=,comm="], { maxBuffer: 16 * 1024 * 1024 });
   for (const line of stdout.split("\n")) {
     const match = /^\s*(\d+) (.*)$/.exec(line);
     if (match?.[2] === executable) return Number(match[1]);
@@ -65,17 +65,25 @@ export async function relaunchWithTimeZone(
   if (runningPid !== undefined) {
     if (!(await confirmQuit())) return undefined;
     onProgress(`Quitting ${appName}…`);
+    const deadline = Date.now() + QUIT_TIMEOUT_MS;
+    const timedOut = new Error(`${appName} did not quit within 30s (unsaved-changes dialog?)`);
     try {
-      await run("/usr/bin/osascript", ["-e", `tell application id "${bundleId}" to quit`]);
-    } catch {
+      const script = ["on run argv", "tell application id (item 1 of argv) to quit", "end run"];
+      await run("/usr/bin/osascript", [...script.flatMap((line) => ["-e", line]), bundleId], {
+        timeout: QUIT_TIMEOUT_MS,
+      });
+    } catch (error) {
+      const { killed, stderr = "" } = error as { killed?: boolean; stderr?: string };
+      if (killed) throw timedOut;
+      if (stderr.includes("(-128)")) throw new Error(`Quitting ${appName} was canceled`);
       process.kill(runningPid, "SIGTERM");
     }
     const stillRunning = await waitFor(
       () => mainPid(executable),
       (pid) => pid === undefined,
-      QUIT_TIMEOUT_MS,
+      deadline - Date.now(),
     );
-    if (stillRunning !== undefined) throw new Error(`${appName} did not quit within 30s (unsaved-changes dialog?)`);
+    if (stillRunning !== undefined) throw timedOut;
   }
 
   onProgress(`Launching ${appName} with TZ=${tz}…`);
