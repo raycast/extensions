@@ -30,7 +30,7 @@
     },
     {
       "name": "turn-on-focus",
-      "title": "Turn on Focus",
+      "title": "Turn On Focus",
       "description": "Turn on a Focus mode by typing its name.",
       "mode": "no-view",
       "arguments": [
@@ -44,7 +44,7 @@
     },
     {
       "name": "turn-off-focus",
-      "title": "Turn off Focus",
+      "title": "Turn Off Focus",
       "description": "Turn off whichever Focus mode is on.",
       "mode": "no-view",
       "keywords": [

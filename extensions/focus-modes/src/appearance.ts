@@ -1,5 +1,5 @@
 import { Color, Icon, Image } from "@raycast/api";
-import { FocusMode } from "./focus";
+import { FocusMode } from "./focus-state";
 
 // Closest Raycast icon for the SF Symbol each Focus mode uses, keyed by the symbol's first word.
 const ICONS: Record<string, Icon> = {
@@ -24,7 +24,10 @@ const ICONS: Record<string, Icon> = {
   leaf: Icon.Leaf,
   tree: Icon.Tree,
   music: Icon.Music,
+  guitars: Icon.Music,
+  pianokeys: Icon.Music,
   headphones: Icon.Headphones,
+  mic: Icon.Microphone,
   paintbrush: Icon.Brush,
   paintpalette: Icon.Brush,
   pencil: Icon.Pencil,

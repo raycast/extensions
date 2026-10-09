@@ -1,89 +1,12 @@
 import { environment, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { readFile } from "fs/promises";
-import { homedir } from "os";
-import { join } from "path";
+import { FocusMode, FocusState, FullDiskAccessError, getFocusState } from "./focus-state";
 import { listHelperShortcutIds, runShortcut, writeSignedHelperShortcut } from "./helper-shortcut";
-
-export interface FocusMode {
-  id: string;
-  name: string;
-  symbol?: string;
-  tint?: string;
-}
-
-export interface FocusState {
-  modes: FocusMode[];
-  activeId?: string;
-}
 
 export const FULL_DISK_ACCESS_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles";
 export const FOCUS_SETTINGS = "x-apple.systempreferences:com.apple.Focus-Settings.extension";
 
-const DATABASE = join(homedir(), "Library/DoNotDisturb/DB");
-const DO_NOT_DISTURB_ID = "com.apple.donotdisturb.mode.default";
 const HELPER_ID_KEY = "helper-shortcut-id";
-
-/** macOS only lets apps with Full Disk Access read the Focus database. */
-export class FullDiskAccessError extends Error {
-  constructor() {
-    super("Raycast needs Full Disk Access to read your Focus modes");
-  }
-}
-
-interface ModeConfigurations {
-  data?: {
-    modeConfigurations?: Record<
-      string,
-      { mode?: { name?: string; modeIdentifier?: string; symbolImageName?: string; tintColorName?: string } }
-    >;
-  }[];
-}
-
-interface Assertions {
-  data?: {
-    storeAssertionRecords?: {
-      assertionStartDateTimestamp?: number;
-      assertionDetails?: { assertionDetailsModeIdentifier?: string };
-    }[];
-  }[];
-}
-
-async function readDatabase<T>(file: string): Promise<T | undefined> {
-  try {
-    return JSON.parse(await readFile(join(DATABASE, file), "utf8"));
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === "EPERM" || code === "EACCES") throw new FullDiskAccessError();
-    if (code === "ENOENT") return undefined;
-    throw error;
-  }
-}
-
-export async function getFocusState(): Promise<FocusState> {
-  const [configurations, assertions] = await Promise.all([
-    readDatabase<ModeConfigurations>("ModeConfigurations.json"),
-    readDatabase<Assertions>("Assertions.json"),
-  ]);
-
-  const modes = Object.entries(configurations?.data?.[0]?.modeConfigurations ?? {})
-    .map(([id, { mode }]) => ({
-      id: mode?.modeIdentifier ?? id,
-      name: mode?.name ?? id,
-      symbol: mode?.symbolImageName,
-      tint: mode?.tintColorName,
-    }))
-    // Do Not Disturb first, like in Control Center, then alphabetically.
-    .sort(
-      (a, b) => Number(b.id === DO_NOT_DISTURB_ID) - Number(a.id === DO_NOT_DISTURB_ID) || a.name.localeCompare(b.name),
-    );
-
-  // Each Focus that's turned on adds an assertion, so the newest one is the Focus that's on now.
-  const [newest] = [...(assertions?.data?.[0]?.storeAssertionRecords ?? [])].sort(
-    (a, b) => (b.assertionStartDateTimestamp ?? 0) - (a.assertionStartDateTimestamp ?? 0),
-  );
-  return { modes, activeId: newest?.assertionDetails?.assertionDetailsModeIdentifier };
-}
 
 /** Installed copies of the helper shortcut, the one this extension added most recently first. */
 async function getHelperIds(): Promise<string[]> {

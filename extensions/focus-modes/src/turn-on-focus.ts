@@ -1,5 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
-import { getFocusState, showFocusError, turnOnFocus } from "./focus";
+import { showFocusError, turnOnFocus } from "./focus";
+import { getFocusState } from "./focus-state";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.TurnOnFocus }>) {
   const query = props.arguments.focus.trim();

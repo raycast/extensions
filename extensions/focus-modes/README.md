@@ -5,8 +5,8 @@ Switch between your macOS Focus modes, like Do Not Disturb, Work, Sleep, or any 
 ## Commands
 
 - **Set Focus Mode**: See all your Focus modes and which one is on, then turn one on or off. Use **Create Quicklink** on any Focus to give it its own hotkey.
-- **Turn on Focus**: Type the name of a Focus (or just the start of it, like `wo` for Work) to turn it on.
-- **Turn off Focus**: Turn off whichever Focus is on.
+- **Turn On Focus**: Type the name of a Focus (or just the start of it, like `wo` for Work) to turn it on.
+- **Turn Off Focus**: Turn off whichever Focus is on.
 
 ## Setup
 

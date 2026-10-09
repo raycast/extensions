@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, List } from "@raycast/api";
 import { createDeeplink, showFailureToast, usePromise } from "@raycast/utils";
 import { focusColor, focusIcon } from "./appearance";
-import { FOCUS_SETTINGS, FULL_DISK_ACCESS_SETTINGS, FocusMode, FullDiskAccessError, getFocusState } from "./focus";
+import { FOCUS_SETTINGS, FULL_DISK_ACCESS_SETTINGS } from "./focus";
+import { FocusMode, FullDiskAccessError, getFocusState } from "./focus-state";
 
 // Switching is done by the no-view commands: they keep running while the first-time setup
 // waits in Shortcuts, which a list that has been closed can't rely on.
@@ -62,13 +63,13 @@ export default function Command() {
             actions={
               <ActionPanel>
                 {isOn ? (
-                  <Action title="Turn off" icon={Icon.XMarkCircle} onAction={turnOff} />
+                  <Action title="Turn Off" icon={Icon.XMarkCircle} onAction={turnOff} />
                 ) : (
-                  <Action title="Turn on" icon={Icon.Power} onAction={() => turnOn(mode)} />
+                  <Action title="Turn On" icon={Icon.Power} onAction={() => turnOn(mode)} />
                 )}
                 {!isOn && data?.activeId && (
                   <Action
-                    title="Turn off Focus"
+                    title="Turn Off Focus"
                     icon={Icon.XMarkCircle}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                     onAction={turnOff}
@@ -77,7 +78,7 @@ export default function Command() {
                 <Action.CreateQuicklink
                   title="Create Quicklink"
                   quicklink={{
-                    name: `Turn on ${mode.name}`,
+                    name: `Turn On ${mode.name}`,
                     link: createDeeplink({
                       command: "turn-on-focus",
                       launchType: LaunchType.Background,
