@@ -92,6 +92,30 @@ describe("date-utils", () => {
     expect(somedayParsed.color).toBe("yellowish");
   });
 
+  it("handles defaultDate with non-date @mentions and inline overrides", () => {
+    const refDate = new Date(2026, 8, 26, 12, 0, 0); // 2026-09-26
+    const selectedDay = "2026-10-15";
+
+    // Non-date @mention should not drop defaultDate
+    const mentionParsed = parseQuickAddInput(
+      "Email @sarah about the Q4 launch",
+      selectedDay,
+      refDate,
+    );
+    expect(mentionParsed.cleanText).toBe("Email @sarah about the Q4 launch");
+    expect(mentionParsed.date).toBe("2026-10-15");
+
+    // Inline @date token overrides defaultDate
+    const overrideParsed = parseQuickAddInput(
+      "Email @sarah @tomorrow #pink",
+      selectedDay,
+      refDate,
+    );
+    expect(overrideParsed.cleanText).toBe("Email @sarah");
+    expect(overrideParsed.date).toBe("2026-09-27");
+    expect(overrideParsed.color).toBe("pink");
+  });
+
   it("correctly identifies overdue tasks", () => {
     const refDate = new Date(2026, 8, 26, 12, 0, 0);
     expect(isOverdue("2026-09-25", false, refDate)).toBe(true);
