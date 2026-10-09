@@ -11,6 +11,7 @@ import { getData } from "swift:../swift/AppleReminders";
 
 import { truncate } from "./helpers";
 import {
+  DISMISSED_KEY,
   findNextReminder,
   formatRelativeDue,
   MENU_BAR_LISTS_KEY,
@@ -18,13 +19,13 @@ import {
 } from "./helpers/next-reminder";
 import { Data } from "./hooks/useData";
 
-function selectedListIds(): string[] {
+function readCached<T>(key: string, fallback: T, isValid: (value: unknown) => boolean): T {
   try {
-    const raw = new Cache().get(MENU_BAR_LISTS_KEY);
-    const ids = raw ? JSON.parse(raw) : [];
-    return Array.isArray(ids) ? ids : [];
+    const raw = new Cache().get(key);
+    const value = raw ? JSON.parse(raw) : fallback;
+    return isValid(value) ? value : fallback;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
@@ -42,7 +43,12 @@ export default async function Command() {
 
   const showBeforeMinutes = parseMinutesPreference(showWithin, 60);
   const match = findNextReminder(data.reminders ?? [], now, {
-    listIds: selectedListIds(),
+    listIds: readCached<string[]>(MENU_BAR_LISTS_KEY, [], Array.isArray),
+    dismissed: readCached<Record<string, string>>(
+      DISMISSED_KEY,
+      {},
+      (value) => typeof value === "object" && value !== null && !Array.isArray(value),
+    ),
     showBeforeMinutes,
     hideAfterMinutes: 15,
   });

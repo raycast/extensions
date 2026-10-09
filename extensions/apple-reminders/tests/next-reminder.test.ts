@@ -1,7 +1,12 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { findNextReminder, formatRelativeDue, parseMinutesPreference } from "../src/helpers/next-reminder";
+import {
+  findNextReminder,
+  formatRelativeDue,
+  parseMinutesPreference,
+  pruneDismissed,
+} from "../src/helpers/next-reminder";
 import type { Reminder } from "../src/hooks/useData";
 
 const now = new Date("2026-10-09T10:00:00Z");
@@ -69,6 +74,33 @@ describe("findNextReminder", () => {
     ];
     assert.strictEqual(findNextReminder(reminders, now, { ...options, listIds: ["work"] }), undefined);
     assert.strictEqual(findNextReminder(reminders, now, options)?.reminder.id, "home");
+  });
+});
+
+describe("dismissing", () => {
+  const options = { showBeforeMinutes: 15, hideAfterMinutes: null };
+
+  it("skips a dismissed reminder and shows the next one", () => {
+    const soon = reminder("soon", at(3));
+    const match = findNextReminder([soon, reminder("next", at(10))], now, {
+      ...options,
+      dismissed: { soon: soon.dueDate as string },
+    });
+    assert.strictEqual(match?.reminder.id, "next");
+  });
+
+  it("shows a dismissed reminder again once it's rescheduled", () => {
+    const match = findNextReminder([reminder("soon", at(3))], now, { ...options, dismissed: { soon: at(-60) } });
+    assert.strictEqual(match?.reminder.id, "soon");
+  });
+
+  it("forgets dismissals for completed, removed or rescheduled reminders", () => {
+    const kept = reminder("kept", at(3));
+    const pruned = pruneDismissed({ kept: kept.dueDate as string, gone: at(1), moved: at(2) }, [
+      kept,
+      reminder("moved", at(30)),
+    ]);
+    assert.deepStrictEqual(pruned, { kept: kept.dueDate });
   });
 });
 

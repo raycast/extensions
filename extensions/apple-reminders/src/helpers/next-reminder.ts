@@ -4,6 +4,9 @@ import type { Reminder } from "../hooks/useData";
 /** Cache key shared by the menu bar and Next Reminder for the selected lists (empty = all lists). */
 export const MENU_BAR_LISTS_KEY = "menu-bar-lists";
 
+/** Cache key for reminders dismissed from the menu bar: reminder id → due date when dismissed. */
+export const DISMISSED_KEY = "menu-bar-dismissed";
+
 export type NextReminderMatch = {
   reminder: Reminder;
   due: Date;
@@ -21,6 +24,8 @@ export type NextReminderOptions = {
    * or its due day ends, so an unfinished reminder from an earlier day never takes over.
    */
   hideAfterMinutes: number | null;
+  /** Reminders dismissed from the menu bar (id → due date at dismissal); they show again if rescheduled. */
+  dismissed?: Record<string, string>;
 };
 
 /**
@@ -52,8 +57,10 @@ export function findNextReminder(
   options: NextReminderOptions,
 ): NextReminderMatch | undefined {
   const listIds = options.listIds ?? [];
+  const dismissed = options.dismissed ?? {};
   const timed = reminders
     .filter((reminder) => !reminder.isCompleted && reminder.dueDate && !isFullDay(reminder.dueDate))
+    .filter((reminder) => dismissed[reminder.id] !== reminder.dueDate)
     .filter((reminder) => listIds.length === 0 || (reminder.list && listIds.includes(reminder.list.id)))
     .map((reminder) => ({ reminder, due: new Date(reminder.dueDate as string) }))
     .filter(({ due }) => !isNaN(due.getTime()));
@@ -90,4 +97,16 @@ export function formatRelativeDue(due: Date, now: Date): string {
   if (minutes < 1) return "now";
   const span = minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
   return diff > 0 ? `in ${span}` : `${span} ago`;
+}
+
+/**
+ * Keep only dismissals that still apply: the reminder exists, is open, and has the same due date.
+ *
+ * @param dismissed - Dismissed reminders.
+ * @param reminders - Current reminders.
+ * @returns Pruned dismissals.
+ */
+export function pruneDismissed(dismissed: Record<string, string>, reminders: Reminder[]): Record<string, string> {
+  const open = new Map(reminders.filter((r) => !r.isCompleted).map((r) => [r.id, r.dueDate]));
+  return Object.fromEntries(Object.entries(dismissed).filter(([id, due]) => open.get(id) === due));
 }

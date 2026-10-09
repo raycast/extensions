@@ -33,10 +33,12 @@ import {
   truncate,
 } from "./helpers";
 import {
+  DISMISSED_KEY,
   findNextReminder,
   formatRelativeDue,
   MENU_BAR_LISTS_KEY,
   parseMinutesPreference,
+  pruneDismissed,
 } from "./helpers/next-reminder";
 import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
@@ -66,6 +68,8 @@ export default function Command() {
     setLegacyListId(undefined);
   }, [legacyListId]);
   const selectedLists = data?.lists.filter((l) => listIds.includes(l.id)) ?? [];
+  // Reminders dismissed from the menu bar title, like Calendar's "Dismiss event".
+  const [dismissed, setDismissed] = useCachedState<Record<string, string>>(DISMISSED_KEY, {});
 
   const reminders = useMemo(() => {
     if (!data || !data.reminders || !Array.isArray(data.reminders)) return [];
@@ -213,6 +217,7 @@ export default function Command() {
       ? findNextReminder(reminders, now, {
           showBeforeMinutes: parseMinutesPreference(nextReminderShowBefore, 15),
           hideAfterMinutes: parseMinutesPreference(nextReminderHideAfter, null),
+          dismissed,
         })
       : undefined;
 
@@ -267,6 +272,16 @@ export default function Command() {
             title="Open Reminder"
             icon={{ fileIcon: REMINDERS_FILE_ICON }}
             onAction={() => open(nextReminder.reminder.openUrl, "com.apple.reminders")}
+          />
+          <MenuBarExtra.Item
+            title="Dismiss"
+            icon={Icon.EyeDisabled}
+            tooltip="Hide it from the menu bar without completing it. It shows again if it's rescheduled."
+            onAction={() => {
+              const { reminder } = nextReminder;
+              const kept = data ? pruneDismissed(dismissed, data.reminders) : dismissed;
+              setDismissed({ ...kept, [reminder.id]: reminder.dueDate as string });
+            }}
           />
         </MenuBarExtra.Section>
       ) : null}
