@@ -36,7 +36,8 @@ function useAnimationFrame(active: boolean): number {
 
 export default function Command() {
   const lang = useMemo(getLanguage, []);
-  const ai = useMemo(getAIStatus, []);
+  // Read on every render, like useSmartSearch, so both always agree on whether AI is on.
+  const ai = getAIStatus();
   const catalog = useCatalog();
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<BrowseFilter>("popular");
