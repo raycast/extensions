@@ -495,7 +495,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
 
 export default withAccessToken(reassignProvider)(Command);
 
-// A blip in the connection. A refusal for auth or Pro still takes the full screen.
+// A blip in the connection. A refusal for auth or subscription still takes the full screen.
 const TRANSIENT_CODES: ReadonlySet<string> = new Set(["network", "internal", "rate_limited"]);
 
 /**

@@ -4,15 +4,15 @@ import { batchFailure, BatchResultRow, rowError } from "./envelope";
 
 // Toast and error helpers shared by the mutating commands.
 
-export const PRO_REQUIRED_TITLE = "Reassign Pro required";
-export const PRO_REQUIRED_MESSAGE =
-  "Your account needs an active Pro plan to use this extension. Open Reassign to upgrade.";
+export const SUBSCRIPTION_REQUIRED_TITLE = "Active subscription required";
+export const SUBSCRIPTION_REQUIRED_MESSAGE =
+  "Your Reassign account needs an active subscription to use this extension. Open Reassign to manage your plan.";
 
 /** A short, human title for a refusal code. */
 export function describeError(error: ApiError): { title: string; message?: string } {
   switch (error.code) {
     case "permission":
-      return { title: PRO_REQUIRED_TITLE, message: PRO_REQUIRED_MESSAGE };
+      return { title: SUBSCRIPTION_REQUIRED_TITLE, message: SUBSCRIPTION_REQUIRED_MESSAGE };
     case "signed_out":
     case "unauthenticated":
     case "unauthorized":

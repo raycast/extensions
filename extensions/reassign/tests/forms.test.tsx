@@ -462,6 +462,17 @@ it("a scope refusal offers a manual sign-in, not a retry of the same request", a
   expect(mock.signIn).toHaveBeenCalledTimes(1);
   expect(onRecover).toHaveBeenCalledTimes(1);
 });
+it("a permission refusal links to the plan settings page", () => {
+  const element = refusalView({ ok: false, code: "permission", message: "refused" }, vi.fn());
+  const tree = (element.type as () => GateTreeLike)();
+  const empty = tree.props.children.props;
+  expect(empty.title).toBe("Active subscription required");
+  // `/settings/billing` is not a settings page id, so it gave a 404.
+  expect(empty.actions.props.children.props.url).toBe("https://reassign.app/settings/plan");
+});
+type GateTreeLike = {
+  props: { children: { props: { title: string; actions: { props: { children: { props: { url: string } } } } } } };
+};
 type ReactElementLike = {
   props: {
     children: {

@@ -399,7 +399,7 @@ function Command(props: LaunchProps<{ arguments: Arguments.Add; launchContext?: 
     if (result.ok) await onSaved();
   }
 
-  // A definitive auth or Pro refusal gates the form, like the other commands.
+  // A definitive auth or subscription refusal gates the form, like the other commands.
   // Other errors fall through — the pickers stay empty and the submit toast tells.
   if (taxonomy && !taxonomy.ok) {
     if (needsSignIn(taxonomy.code) || taxonomy.code === "permission") {

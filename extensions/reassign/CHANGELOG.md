@@ -26,3 +26,6 @@
   accepts a check-off only after the day ends, so Now has no check-off.
 - Save to Inbox uses your default Source, the same as the Reassign app. When the
   default is a task list, Reassign also adds the task to that app.
+- Without an active subscription, the command screens and the Now menu say
+  "Active subscription required" and link to the plan page in Reassign
+  settings. A refused save shows the same text in a toast.

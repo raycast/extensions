@@ -48,7 +48,7 @@ vi.mock("@raycast/api", () => ({
 }));
 
 vi.mock("../src/lib/oauth", () => ({ signIn: mock.signIn }));
-vi.mock("../src/lib/wire", () => ({ BILLING_URL: "https://example/billing" }));
+vi.mock("../src/lib/wire", () => ({ PLAN_URL: "https://example/settings/plan" }));
 vi.mock("../src/lib/api", () => ({}));
 
 import { refusalView } from "../src/components/states";

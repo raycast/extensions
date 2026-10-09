@@ -34,7 +34,7 @@ export function SearchView(props: { initialQuery?: string }) {
 
   const fresh = data && data.query === query ? data.result : undefined;
   const failure = fresh && !fresh.ok ? fresh : undefined;
-  // Only a sign-in or Pro refusal leaves the search. Other errors keep the query editable.
+  // Only a sign-in or subscription refusal leaves the search. Other errors keep the query editable.
   const gate = failure && (needsSignIn(failure.code) || failure.code === "permission") ? failure : undefined;
   // Act on the last settled verdict. A cached refusal on mount can be stale, and a
   // shown gate must stay mounted during its own revalidate, or ReauthView signs in again.

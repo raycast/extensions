@@ -9,7 +9,7 @@ export type { BatchReceipt, BatchResultRow } from "./envelope";
 
 // Typed client over /api/v1. It normalizes both refusal shapes to one result,
 // refreshes once on 401, retries a safe call once on a 503, and never retries a 429.
-// Only the `permission` code drives the Pro-required state — branch on `code`.
+// Only the `permission` code drives the subscription-required state — branch on `code`.
 
 export type ClientCode = ErrorCode | "network" | "unauthenticated" | "signed_out";
 
@@ -49,7 +49,7 @@ interface EventFields {
   areaId?: string | null; // null clears it
   activityTypeId?: string | null; // null clears it
   kind?: EventKind;
-  // Home calendar (`null` = Reassign only; omitted = the default) and one-way copies (Pro).
+  // Home calendar (`null` = Reassign only; omitted = the default) and one-way copies.
   calendarId?: string | null;
   mirrorCalendarIds?: string[];
   // The style of each copy, by calendar id. An omitted key keeps the calendar default.

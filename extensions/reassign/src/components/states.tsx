@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type { ApiError } from "../lib/api";
+import { SUBSCRIPTION_REQUIRED_MESSAGE, SUBSCRIPTION_REQUIRED_TITLE } from "../lib/feedback";
 import { signIn } from "../lib/oauth";
-import { BILLING_URL } from "../lib/wire";
+import { PLAN_URL } from "../lib/wire";
 
-/** Pick the screen for an API refusal: re-auth, the Pro gate, or a retry. */
+/** Pick the screen for an API refusal: re-auth, the subscription gate, or a retry. */
 export function refusalView(error: ApiError, onRecover: () => void) {
   // A retry repeats a `scope` 403. Only a new consent grants the missing scope.
   if (error.code === "signed_out" || error.code === "scope") {
@@ -13,7 +14,7 @@ export function refusalView(error: ApiError, onRecover: () => void) {
   if (error.code === "unauthenticated" || error.code === "unauthorized") {
     return <ReauthView onSignedIn={onRecover} />;
   }
-  if (error.code === "permission") return <ProRequiredView />;
+  if (error.code === "permission") return <SubscriptionRequiredView />;
   return <ErrorView message={error.message} onRetry={onRecover} />;
 }
 
@@ -59,17 +60,17 @@ function ReauthView(props: { onSignedIn: () => void; automatic?: boolean }) {
   );
 }
 
-/** Shown when the API refuses with `permission` (the Pro paywall). */
-export function ProRequiredView() {
+/** Shown when the API refuses with `permission` (no active subscription). */
+export function SubscriptionRequiredView() {
   return (
     <List>
       <List.EmptyView
         icon={{ source: Icon.Stars, tintColor: Color.Yellow }}
-        title="Reassign Pro required"
-        description="Your account needs an active Pro plan to use this extension. Open Reassign to upgrade."
+        title={SUBSCRIPTION_REQUIRED_TITLE}
+        description={SUBSCRIPTION_REQUIRED_MESSAGE}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Upgrade to Pro" url={BILLING_URL} />
+            <Action.OpenInBrowser title="Open Plan Settings" url={PLAN_URL} />
           </ActionPanel>
         }
       />

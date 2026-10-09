@@ -156,7 +156,10 @@ it("[scope re-mount] first commit with cached `scope` failure and in-flight re-f
 });
 
 it("[permission re-mount] first commit with cached `permission` failure and in-flight re-fetch must NOT call refusalView", () => {
-  m.laggy = { query: "abc", result: { ok: false, code: "permission", message: "Pro required." } };
+  m.laggy = {
+    query: "abc",
+    result: { ok: false, code: "permission", message: "Reassign needs an active subscription." },
+  };
   m.isLoadingState = true;
 
   const tree = render("abc");

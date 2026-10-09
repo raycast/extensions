@@ -75,7 +75,10 @@ vi.mock("@raycast/utils", () => ({
 
 vi.mock("../src/lib/oauth", () => ({ reassignProvider: {}, signIn: vi.fn() }));
 vi.mock("../src/lib/api", () => ({ getScheduleWithBacklog: vi.fn(), manageBacklog: mock.manage }));
-vi.mock("../src/lib/wire", () => ({ WEB_BASE: "https://reassign.app", BILLING_URL: "https://reassign.app/billing" }));
+vi.mock("../src/lib/wire", () => ({
+  WEB_BASE: "https://reassign.app",
+  PLAN_URL: "https://reassign.app/settings/plan",
+}));
 vi.mock("../src/components/agenda-actions", () => ({ AgendaNavActions: "AgendaNavActions" }));
 vi.mock("../src/components/backlog-schedule-form", () => ({ BacklogScheduleForm: "BacklogScheduleForm" }));
 

@@ -57,7 +57,7 @@ you already use: glance at your dial day, capture blocks, and check them off.
 
 ## Requirements
 
-- A Reassign account with an active Pro subscription or trial.
+- A Reassign account with an active subscription or trial.
 - Raycast 2.4.1 or later on macOS.
 
 ## License

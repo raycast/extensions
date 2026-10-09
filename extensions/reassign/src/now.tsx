@@ -13,6 +13,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getScheduleRange } from "./lib/api";
 import { needsSignIn } from "./lib/envelope";
+import { SUBSCRIPTION_REQUIRED_TITLE } from "./lib/feedback";
 import { addDaysISO, clockPart, humanDuration, localMinutesBetween, todayISO } from "./lib/format";
 import { maybeNotifyTransitions } from "./lib/notify";
 import { signOut } from "./lib/oauth";
@@ -26,7 +27,7 @@ import {
   ScheduleEvent,
   spanMinutes,
 } from "./lib/schedule-model";
-import { BILLING_URL, WEB_BASE, webDayUrl } from "./lib/wire";
+import { PLAN_URL, WEB_BASE, webDayUrl } from "./lib/wire";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
@@ -46,7 +47,7 @@ export default function Command() {
   }, [notifyPending, data]);
 
   if (!data || !data.ok) {
-    const proBlocked = data && !data.ok && data.code === "permission";
+    const noSubscription = data && !data.ok && data.code === "permission";
     return (
       <MenuBarExtra icon={Icon.Circle} isLoading={isLoading} tooltip="Reassign">
         {data && !data.ok && needsSignIn(data.code) && (
@@ -63,8 +64,8 @@ export default function Command() {
           />
         )}
         <MenuBarExtra.Item
-          title={proBlocked ? "Reassign Pro required" : "Open Reassign"}
-          onAction={() => open(proBlocked ? BILLING_URL : WEB_BASE)}
+          title={noSubscription ? SUBSCRIPTION_REQUIRED_TITLE : "Open Reassign"}
+          onAction={() => open(noSubscription ? PLAN_URL : WEB_BASE)}
         />
         <MenuBarExtra.Item title="Refresh Now" onAction={revalidate} />
       </MenuBarExtra>

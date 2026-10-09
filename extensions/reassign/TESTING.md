@@ -81,7 +81,18 @@ for the reviewed workflows. Compatibility fixes in this extension handle:
 
 - `nextBacklogOffset` pagination (50 Inbox items per schedule response).
 - Required feedback `kind` (`bug`, `idea`, or `other`).
-- Active trials as well as Pro subscriptions in the documented requirements.
+- Active trials as well as paid subscriptions in the documented requirements.
+- The `permission` gate opens `/settings/plan`. The old `/settings/billing`
+  link gave a 404.
+
+Sync anchor: reassign `5b5115d93` (#1520). Apart from #1499 (`mirrorStyles` on
+`/schedule/plan`, handled in #88), reassign#1468–#1520 change no field, error
+code, or status that the extension uses. The billing checkout
+routes alone return `checkout_unlinked` (409, #1512), and the extension does
+not call them. `GET /settings` (`weekStart`, #1515) is first-party only, and
+`reassign-raycast` is not in `FIRST_PARTY_ROUTE_CLIENTS`. reassign#1500 sorts
+nested keys in the `/schedule/plan` replay fingerprint. The extension sends the
+same body on a retry, so this change has no effect on it.
 
 The SDK is `@raycast/api` 2.4.1; the installed app is Raycast 2.4.1.
 The [OAuth docs](https://developers.raycast.com/api-reference/oauth) still recommend

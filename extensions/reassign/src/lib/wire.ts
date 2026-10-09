@@ -11,8 +11,8 @@ export const TOKEN_URL = `${WEB_BASE}/api/oauth/token`;
 export const SCOPES = "events:read events:write";
 export const RAYCAST_REDIRECT = "https://raycast.com/redirect?packageName=Extension";
 
-/** The upgrade page shown for the Pro-gate. */
-export const BILLING_URL = `${WEB_BASE}/settings/billing`;
+/** The plan settings page. A `permission` refusal links here to manage the subscription. */
+export const PLAN_URL = `${WEB_BASE}/settings/plan`;
 
 /**
  * Deep link to a day in the web app. Pass an event id to open that event —
@@ -23,7 +23,7 @@ export function webDayUrl(dateISO: string, eventId?: string): string {
   return eventId ? `${base}?event=${encodeURIComponent(eventId)}` : base;
 }
 
-// Full refusal-code vocabulary. Only `permission` triggers the Pro upsell.
+// Full refusal-code vocabulary. Only `permission` shows the subscription gate.
 export type ErrorCode =
   | "unauthorized"
   | "permission"
