@@ -1,6 +1,6 @@
 import { execFile, spawn } from "child_process";
 import { randomBytes, randomUUID } from "crypto";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
@@ -105,13 +105,15 @@ export function newHelperName(): string {
   return `${HELPER_SHORTCUT_NAME} ${randomBytes(3).toString("hex").toUpperCase()}`;
 }
 
-/** Writes a signed helper shortcut called `name` into an empty `directory` and returns its path. */
+/**
+ * Writes a signed helper shortcut called `name` into `directory` and returns its path. Each setup
+ * needs its own directory, so overlapping setups can't overwrite each other's files.
+ */
 export async function writeSignedHelperShortcut(
   modes: ShortcutFocusMode[],
   directory: string,
   name: string,
 ): Promise<string> {
-  await rm(directory, { recursive: true, force: true });
   await mkdir(directory, { recursive: true });
   const json = join(directory, "helper.json");
   const unsigned = join(directory, "helper-unsigned.shortcut");

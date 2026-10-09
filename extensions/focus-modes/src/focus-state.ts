@@ -104,7 +104,7 @@ export function scheduleWindowStart(trigger: ScheduleTrigger, now: Date): Date |
 /**
  * Turning a Focus on manually, by automation, or by sleep schedule adds an assertion record, but
  * a time schedule doesn't. So the Focus that's on is whichever started last: an assertion, or an
- * enabled schedule whose window is open, unless Focus was turned off after that window started.
+ * enabled schedule whose window is open. Turning Focus off ends everything that started before.
  */
 export function resolveFocusState(
   configurations: ModeConfigurations | undefined,
@@ -133,10 +133,14 @@ export function resolveFocusState(
       .map((request) => request.invalidationRequestDateTimestamp ?? -Infinity),
   );
 
-  const candidates: { id?: string; start: number }[] = (store?.storeAssertionRecords ?? []).map((record) => ({
-    id: record.assertionDetails?.assertionDetailsModeIdentifier,
-    start: record.assertionStartDateTimestamp ?? 0,
-  }));
+  // macOS normally removes the assertions an "any" invalidation ends; any record left over from
+  // before it is stale. One created at the same moment, when a Focus replaces another, still counts.
+  const candidates: { id?: string; start: number }[] = (store?.storeAssertionRecords ?? [])
+    .map((record) => ({
+      id: record.assertionDetails?.assertionDetailsModeIdentifier,
+      start: record.assertionStartDateTimestamp ?? 0,
+    }))
+    .filter((candidate) => candidate.start >= turnedOffAt);
   for (const [id, { mode, triggers }] of configs) {
     for (const trigger of triggers?.triggers ?? []) {
       if (trigger.class !== "DNDModeConfigurationScheduleTrigger" || trigger.enabledSetting !== TRIGGER_ENABLED) {

@@ -102,6 +102,17 @@ describe("resolveFocusState", () => {
     expect(activeId(configurations([schedule("07:52", "19:54", FRIDAY)]), store, at(9, 7, 55))).toBeUndefined();
   });
 
+  it("ignores an assertion left over from before Focus was turned off", () => {
+    const store = assertions([assertion(PERSONAL, at(9, 7, 0, 1))], [turnedOff(at(9, 7, 54, 13))]);
+    expect(activeId(configurations([schedule("07:52", "19:54", FRIDAY)]), store, at(9, 7, 55))).toBeUndefined();
+  });
+
+  it("counts a Focus turned on after, or in the same moment as, a turn-off", () => {
+    const store = (start: Date) => assertions([assertion(WORK, start)], [turnedOff(at(9, 8, 0))]);
+    expect(activeId(configurations(), store(at(9, 8, 5)), at(9, 8, 10))).toBe(WORK);
+    expect(activeId(configurations(), store(at(9, 8, 0)), at(9, 8, 10))).toBe(WORK);
+  });
+
   it("brings the schedule back in its next window after being turned off", () => {
     const store = assertions([], [turnedOff(at(9, 7, 54))]);
     expect(activeId(configurations([schedule("07:52", "19:54", FRIDAY)]), store, at(16, 8, 0))).toBe(PERFORMANCE);

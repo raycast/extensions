@@ -1,4 +1,5 @@
 import { environment, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
+import { rm } from "fs/promises";
 import { join } from "path";
 import { showFailureToast } from "@raycast/utils";
 import { FocusMode, FocusState, FullDiskAccessError, getFocusState, waitForActiveFocus } from "./focus-state";
@@ -44,29 +45,35 @@ async function runHelperWithSetup(input: string, modes: FocusMode[]): Promise<bo
   const before = new Set((await listShortcuts()).map((shortcut) => shortcut.id));
   const isUpdate = trustedHelperIds([...before], await getTrustedHelpers()).length > 0;
   const name = newHelperName();
-  const file = await writeSignedHelperShortcut(modes, join(environment.supportPath, "helper"), name);
-  await open(file, "com.apple.shortcuts");
-  await showHUD(
-    isUpdate
-      ? "Click “Add Shortcut” to update the Focus helper"
-      : "Click “Add Shortcut” to finish setting up Focus Modes",
-  );
+  // Named after the helper, so overlapping setups never share files.
+  const directory = join(environment.supportPath, "helpers", name);
+  try {
+    const file = await writeSignedHelperShortcut(modes, directory, name);
+    await open(file, "com.apple.shortcuts");
+    await showHUD(
+      isUpdate
+        ? "Click “Add Shortcut” to update the Focus helper"
+        : "Click “Add Shortcut” to finish setting up Focus Modes",
+    );
 
-  // The helper is the shortcut that appears with the generated name after its file was opened.
-  const deadline = Date.now() + 90_000;
-  while (Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    const installed = await listShortcuts();
-    const helper = installed.find((shortcut) => shortcut.name === name && !before.has(shortcut.id));
-    if (helper) {
-      await trustHelper(
-        helper.id,
-        installed.map((shortcut) => shortcut.id),
-      );
-      return runHelper(input);
+    // The helper is the shortcut that appears with the generated name after its file was opened.
+    const deadline = Date.now() + 90_000;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const installed = await listShortcuts();
+      const helper = installed.find((shortcut) => shortcut.name === name && !before.has(shortcut.id));
+      if (helper) {
+        await trustHelper(
+          helper.id,
+          installed.map((shortcut) => shortcut.id),
+        );
+        return runHelper(input);
+      }
     }
+    return false;
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
-  return false;
 }
 
 export async function showFocusError(error: unknown, title: string) {
