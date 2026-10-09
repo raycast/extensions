@@ -9,6 +9,17 @@
     "Finance",
     "Productivity"
   ],
+  "keywords": [
+    "mrr",
+    "sales",
+    "payments",
+    "subscriptions",
+    "menu bar",
+    "stripe",
+    "lemon squeezy",
+    "gumroad",
+    "paddle"
+  ],
   "license": "MIT",
   "platforms": [
     "macOS"
