@@ -43,6 +43,12 @@ import { applyTaskFilters, FilterBar } from "./FilterBar";
 import { TaskDetail, TaskItemDetailPane } from "./TaskDetail";
 import { TaskForm } from "./TaskForm";
 
+/** Shortcut for opening the monthly calendar (⌘ + ⌥ + M). */
+const MONTH_VIEW_SHORTCUT: Keyboard.Shortcut = {
+  modifiers: ["cmd", "opt"],
+  key: "m",
+};
+
 export interface TaskListProps {
   navigationTitle?: string;
   calendars: TweekCalendar[];
@@ -76,6 +82,10 @@ export interface TaskListProps {
   onBulkComplete: (done: boolean) => Promise<unknown>;
   onBulkUpdate: (fields: UpdateTaskInput) => Promise<unknown>;
   onBulkDelete: () => Promise<unknown>;
+  /** When provided, a "Open Monthly Calendar" action is shown. */
+  onOpenMonthView?: () => void;
+  /** Pre-selected date (YYYY-MM-DD) for tasks created from this list (e.g. a day view). */
+  defaultDate?: string;
 }
 
 export function TaskList({
@@ -104,6 +114,8 @@ export function TaskList({
   onBulkComplete,
   onBulkUpdate,
   onBulkDelete,
+  onOpenMonthView,
+  defaultDate,
 }: TaskListProps) {
   const { push } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
@@ -180,6 +192,7 @@ export function TaskList({
         isPushed={true}
         navigationTitle="Create Tweek Task"
         initialTitle={initialTitle}
+        initialDate={defaultDate}
         calendars={calendars}
         defaultCalendarId={activeCalendarId}
         customColors={customColors}
@@ -207,7 +220,11 @@ export function TaskList({
   const handleQuickAddInline = async () => {
     const raw = filter.searchText.trim();
     if (!raw || !activeCalendarId) return;
-    const parsed = parseQuickAddInput(raw);
+    const hasExplicitDate = /(?:^|\s)@\S/.test(raw);
+    const parsed = parseQuickAddInput(
+      raw,
+      defaultDate && !hasExplicitDate ? defaultDate : undefined,
+    );
     const resolvedListId =
       parsed.date === null && activeCalendar?.lists?.[0]
         ? activeCalendar.lists[0].id
@@ -520,6 +537,14 @@ export function TaskList({
                     )}
 
                     <ActionPanel.Section title="Quick Actions & Details">
+                      {onOpenMonthView && (
+                        <Action
+                          title="Open Monthly Calendar"
+                          icon={Icon.Calendar}
+                          shortcut={MONTH_VIEW_SHORTCUT}
+                          onAction={onOpenMonthView}
+                        />
+                      )}
                       <Action
                         title={
                           isShowingDetail
@@ -671,6 +696,14 @@ export function TaskList({
                 shortcut={Keyboard.Shortcut.Common.New}
                 onAction={() => openCreateModal(filter.searchText.trim())}
               />
+              {onOpenMonthView && (
+                <Action
+                  title="Open Monthly Calendar"
+                  icon={Icon.Calendar}
+                  shortcut={MONTH_VIEW_SHORTCUT}
+                  onAction={onOpenMonthView}
+                />
+              )}
               <Action
                 title="Reset Filters"
                 icon={Icon.RotateAntiClockwise}

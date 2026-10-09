@@ -1,12 +1,15 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, useNavigation } from "@raycast/api";
 import React, { useCallback, useState } from "react";
+import { MonthCalendarView } from "../components/MonthCalendar";
 import { TaskList } from "../components/TaskList";
 import { useCalendars } from "../hooks/useCalendars";
 import { useTasks } from "../hooks/useTasks";
 import { TaskFilterState } from "../types";
 
-export default function DashboardCommand() {
+/** Classic task-list dashboard (grouped by Overdue / Today / This Week…). */
+function TaskListDashboard() {
   const prefs = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
 
   const {
     calendars,
@@ -70,6 +73,16 @@ export default function DashboardCommand() {
     await Promise.all([refreshCalendars(), refreshTasks()]);
   }, [refreshCalendars, refreshTasks]);
 
+  const handleOpenMonthView = useCallback(() => {
+    push(
+      <MonthCalendarView
+        calendars={calendars}
+        initialCalendarId={activeCalendarId}
+        customColors={customColors}
+      />,
+    );
+  }, [push, calendars, activeCalendarId, customColors]);
+
   return (
     <TaskList
       calendars={calendars}
@@ -99,6 +112,36 @@ export default function DashboardCommand() {
       onBulkComplete={bulkComplete}
       onBulkUpdate={bulkUpdate}
       onBulkDelete={bulkDelete}
+      onOpenMonthView={handleOpenMonthView}
     />
+  );
+}
+
+/** Monthly calendar as the dashboard's root view (see `defaultToMonthView`). */
+function MonthDashboard({ onShowTaskList }: { onShowTaskList: () => void }) {
+  const { calendars, customColors, activeCalendarId, isLoading } =
+    useCalendars();
+
+  return (
+    <MonthCalendarView
+      calendars={calendars}
+      initialCalendarId={activeCalendarId}
+      customColors={customColors}
+      isLoadingCalendars={isLoading}
+      onShowTaskList={onShowTaskList}
+    />
+  );
+}
+
+export default function DashboardCommand() {
+  const prefs = getPreferenceValues<Preferences>();
+  const [view, setView] = useState<"month" | "list">(
+    prefs.defaultToMonthView ? "month" : "list",
+  );
+
+  return view === "month" ? (
+    <MonthDashboard onShowTaskList={() => setView("list")} />
+  ) : (
+    <TaskListDashboard />
   );
 }

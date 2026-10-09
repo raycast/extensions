@@ -80,6 +80,59 @@ export function getDashboardFetchWindowISO(referenceDate: Date = new Date()): {
   };
 }
 
+/** Returns the first day of the month (YYYY-MM-01) containing `isoDate`. */
+export function getMonthStartISO(isoDate: string): string {
+  const [yyyy, mm] = isoDate.split("-");
+  return `${yyyy}-${mm}-01`;
+}
+
+/**
+ * Adds (or subtracts) whole months, clamping the day to the target month's
+ * length (e.g. Jan 31 + 1 month = Feb 28/29).
+ */
+export function addMonthsISO(isoDate: string, months: number): string {
+  const source = parseISODate(isoDate);
+  const day = source.getDate();
+  const target = new Date(
+    source.getFullYear(),
+    source.getMonth() + months,
+    1,
+    12,
+    0,
+    0,
+    0,
+  );
+  const daysInTarget = new Date(
+    target.getFullYear(),
+    target.getMonth() + 1,
+    0,
+  ).getDate();
+  target.setDate(Math.min(day, daysInTarget));
+  return toISODateString(target);
+}
+
+/**
+ * Returns every day (YYYY-MM-DD) shown in a month grid: full weeks (5 or 6)
+ * that cover the month, including leading/trailing days of adjacent months.
+ */
+export function getMonthGridISO(
+  monthStartISO: string,
+  weekStartsOn: WeekStartPreference = "Monday",
+): string[] {
+  const first = parseISODate(getMonthStartISO(monthStartISO));
+  const daysInMonth = new Date(
+    first.getFullYear(),
+    first.getMonth() + 1,
+    0,
+  ).getDate();
+  const gridStart = getWeekBoundsISO(first, weekStartsOn).startISO;
+  const leading = Math.round(
+    (first.getTime() - parseISODate(gridStart).getTime()) / 86_400_000,
+  );
+  const weeks = Math.ceil((leading + daysInMonth) / 7);
+  return Array.from({ length: weeks * 7 }, (_, i) => addDaysISO(gridStart, i));
+}
+
 export function formatTaskDate(
   isoDate: string | null | undefined,
   format: DateFormatPreference = "dd/MM/yyyy",
