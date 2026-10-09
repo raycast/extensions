@@ -1,6 +1,6 @@
 # Screvi Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-09
 
 - Search Highlights: semantic search over your highlights, with tag filtering, a detail pane, Markdown-quote copying and favouriting
 - Browse Article Library: inbox, Later and archive triage for your saved articles, with reading time, progress and excerpts
