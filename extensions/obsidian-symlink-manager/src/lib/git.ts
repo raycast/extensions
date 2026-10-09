@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import type { VaultItem } from "./items";
@@ -259,7 +259,11 @@ export async function revertItem(
       await repoItemPath(defaultVault, item),
     ]);
     await commitItem(defaultVault, item, `Restored ${item} from ${hash.slice(0, 8)}`);
-    // Backup is deliberately kept here to preserve ignored files (e.g. plugin data) not tracked by Git.
+    if (hadPrevious) {
+      // Merge untracked/ignored files (e.g. plugin data) back into the restored folder
+      await cp(previous, destination, { recursive: true, force: false });
+      await rm(previous, { recursive: true });
+    }
   } catch (error) {
     if (await exists(destination)) await rm(destination, { recursive: true });
     if (hadPrevious) await rename(previous, destination);
