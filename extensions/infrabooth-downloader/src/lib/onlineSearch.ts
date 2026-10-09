@@ -1,4 +1,4 @@
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import { searchAlbums, searchPlaylists, searchTracks, type SearchPage } from "./api";
 import type { LibraryPlaylist } from "./mapping";
 import type { Results } from "./searchTypes";

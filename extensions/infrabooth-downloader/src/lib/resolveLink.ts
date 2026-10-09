@@ -1,7 +1,7 @@
-import type { PlaylistInfo, TrackInfo } from "@/bindings";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { PlaylistInfo, TrackInfo } from "../shared/bindings";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import type { LibraryPlaylist } from "./mapping";
-import { mapTrack } from "@remote/lib/trackMapping";
+import { mapTrack } from "../shared/trackMapping";
 
 export type ResolvedLinkJson = { kind: "track"; track: TrackInfo } | { kind: "playlist"; playlist: PlaylistInfo };
 

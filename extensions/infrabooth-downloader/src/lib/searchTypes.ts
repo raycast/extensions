@@ -1,5 +1,5 @@
 import { Icon, type Image } from "@raycast/api";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import { searchPlaylists, searchTracks } from "./api";
 import type { LibraryPlaylist, Mix } from "./mapping";
 

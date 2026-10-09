@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import type { ReactNode } from "react";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import type { OnlineView } from "../hooks/useOnlineSearch";
 import { onlineSections, type OnlineSearchResults } from "../lib/onlineSearch";
 import { systemPlaylistTracks, toLibraryPlaylist, type ResolvedLink } from "../lib/resolveLink";

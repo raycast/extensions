@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { TrackInfo } from "@/bindings";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { TrackInfo } from "../../shared/bindings";
+import type { RemoteTrack } from "../../shared/remote-protocol";
 import { ApiError } from "../api";
 import {
   buildDownloadCommand,

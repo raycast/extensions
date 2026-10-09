@@ -1,5 +1,5 @@
-import type { RemoteTrack } from "@/lib/remote-protocol";
-import { mapTrack, type TrackInfoJson } from "@remote/lib/trackMapping";
+import type { RemoteTrack } from "../shared/remote-protocol";
+import { mapTrack, type TrackInfoJson } from "../shared/trackMapping";
 
 export interface LibraryPlaylist {
   id: number;

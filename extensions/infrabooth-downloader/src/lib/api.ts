@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { posix, win32 } from "node:path";
-import type { RemoteCommand, RemoteState, RemoteTrack } from "@/lib/remote-protocol";
-import { filterPersonalMixes } from "@/lib/selections";
-import { mapTrack, type TrackInfoJson } from "@remote/lib/trackMapping";
+import type { RemoteCommand, RemoteState, RemoteTrack } from "../shared/remote-protocol";
+import { filterPersonalMixes } from "../shared/selections";
+import { mapTrack, type TrackInfoJson } from "../shared/trackMapping";
 import {
   mapMix,
   mapPlaylist,

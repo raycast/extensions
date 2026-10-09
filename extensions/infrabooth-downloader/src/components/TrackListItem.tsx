@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { playNow, sendWithToast } from "../lib/commands";
 import { formatDuration } from "../lib/format";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import type { ReactNode } from "react";
 import { DownloadTrackAction } from "./DownloadTrackAction";
 

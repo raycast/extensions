@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import { sendWithToast } from "../lib/commands";
 import { crossPlatformShortcut } from "../lib/shortcuts";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 
 export function DownloadTrackAction({ track }: { track: RemoteTrack }) {
   return (

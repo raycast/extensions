@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getStateSocketUrl } from "../lib/api";
-import type { RemoteState } from "@/lib/remote-protocol";
+import type { RemoteState } from "../shared/remote-protocol";
 
 const BACKOFF_MS = [1000, 2000, 4000, 8000, 8000];
 const INITIAL_FRAME_GRACE_MS = 250;

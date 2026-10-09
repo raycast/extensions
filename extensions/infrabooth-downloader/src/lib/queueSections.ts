@@ -1,4 +1,4 @@
-import type { RemoteState, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteState, RemoteTrack } from "../shared/remote-protocol";
 
 export interface QueueEntry {
   track: RemoteTrack;

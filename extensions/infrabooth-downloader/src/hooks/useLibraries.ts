@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import {
   getMixes,
   streamLibraryArtworks,

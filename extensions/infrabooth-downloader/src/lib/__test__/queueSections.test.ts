@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RemoteState, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteState, RemoteTrack } from "../../shared/remote-protocol";
 import { buildQueueSections } from "../queueSections";
 
 const track = (trackId: number): RemoteTrack => ({

@@ -1,5 +1,5 @@
 import { join, sep } from "node:path";
-import type { RemoteCommand } from "@/lib/remote-protocol";
+import type { RemoteCommand } from "../shared/remote-protocol";
 import { ApiError } from "./api";
 import type { ResolvedLink } from "./resolveLink";
 

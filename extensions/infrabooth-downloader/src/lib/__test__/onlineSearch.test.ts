@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../../shared/remote-protocol";
 
 vi.mock("../api", () => ({ searchTracks: vi.fn(), searchPlaylists: vi.fn(), searchAlbums: vi.fn() }));
 

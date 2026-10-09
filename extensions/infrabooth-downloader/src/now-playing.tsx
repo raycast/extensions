@@ -5,7 +5,7 @@ import { NowPlayingDetail } from "./components/NowPlayingDetail";
 import { OpenAppAction } from "./components/OpenAppAction";
 import { useLiveState } from "./hooks/useLiveState";
 import { APP_NOT_RUNNING_TITLE } from "./lib/feedback";
-import type { RemoteState, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteState, RemoteTrack } from "./shared/remote-protocol";
 import { buildQueueSections } from "./lib/queueSections";
 
 function OpenAppList({ title, icon }: { title: string; icon: Image.ImageLike }) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { TrackInfo } from "@/bindings";
+import type { TrackInfo } from "../../shared/bindings";
 import {
   mapResolvedLink,
   resolvedTitle,

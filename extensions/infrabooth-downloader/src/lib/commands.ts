@@ -4,7 +4,7 @@ import { buildDownloadCommand, formatTrackCount } from "./downloadLink";
 import { handleError } from "./feedback";
 import type { LibraryPlaylist } from "./mapping";
 import { resolvedTitle, type ResolvedLink } from "./resolveLink";
-import type { RemoteCommand, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteCommand, RemoteTrack } from "../shared/remote-protocol";
 
 const SEND_FAILED = "Could not reach InfraBooth Downloader";
 

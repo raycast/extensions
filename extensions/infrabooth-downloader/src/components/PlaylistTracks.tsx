@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useStreamedList } from "../hooks/useStreamedList";
 import { streamPlaylistTracks } from "../lib/api";
 import type { LibraryPlaylist } from "../lib/mapping";
-import type { RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteTrack } from "../shared/remote-protocol";
 import { TrackListItem } from "./TrackListItem";
 
 export function PlaylistTracks({ playlist }: { playlist: LibraryPlaylist }) {

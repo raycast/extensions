@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { sendControl } from "../lib/commands";
 import { crossPlatformShortcut } from "../lib/shortcuts";
-import type { RemoteState, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteState, RemoteTrack } from "../shared/remote-protocol";
 import { stepVolume, toggleMuteVolume } from "../lib/volume";
 import { DownloadTrackAction } from "./DownloadTrackAction";
 

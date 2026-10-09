@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { escapeMarkdown, formatProgressLine, formatVolume, toLargeArtworkUrl } from "../lib/format";
-import type { RemoteState, RemoteTrack } from "@/lib/remote-protocol";
+import type { RemoteState, RemoteTrack } from "../shared/remote-protocol";
 
 const STATUS_LABELS: Record<RemoteState["state"], string> = {
   stopped: "Stopped",
