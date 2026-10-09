@@ -26,9 +26,6 @@ export default function Command() {
     return searchIcons(filtered, searchText);
   }, [icons, filter, searchText]);
 
-  const main = visible.filter((icon) => icon.set === "icons");
-  const lab = visible.filter((icon) => icon.set === "lab");
-
   return (
     <Grid
       columns={8}
@@ -59,17 +56,27 @@ export default function Command() {
       ) : (
         !isLoading && <Grid.EmptyView icon={Icon.MagnifyingGlass} title="No Icons Found" />
       )}
-      <Grid.Section title="Icons" subtitle={main.length ? main.length.toLocaleString("en-US") : undefined}>
-        {main.map((icon) => (
-          <IconItem key={`icons/${icon.name}`} icon={icon} />
-        ))}
-      </Grid.Section>
-      <Grid.Section title="Lab" subtitle={lab.length ? lab.length.toLocaleString("en-US") : undefined}>
-        {lab.map((icon) => (
-          <IconItem key={`lab/${icon.name}`} icon={icon} />
-        ))}
-      </Grid.Section>
+      {searchText.trim() ? (
+        <IconSection title="Results" icons={visible} />
+      ) : (
+        <>
+          <IconSection title="Icons" icons={visible.filter((icon) => icon.set === "icons")} />
+          <IconSection title="Lab" icons={visible.filter((icon) => icon.set === "lab")} />
+        </>
+      )}
     </Grid>
+  );
+}
+
+// Sections with no items are left out so Grid.EmptyView can show.
+function IconSection({ title, icons }: { title: string; icons: FilledIcon[] }) {
+  if (icons.length === 0) return null;
+  return (
+    <Grid.Section title={title} subtitle={icons.length.toLocaleString("en-US")}>
+      {icons.map((icon) => (
+        <IconItem key={`${icon.set}/${icon.name}`} icon={icon} />
+      ))}
+    </Grid.Section>
   );
 }
 
@@ -77,6 +84,7 @@ function IconItem({ icon }: { icon: FilledIcon }) {
   return (
     <Grid.Item
       title={icon.name}
+      accessory={icon.set === "lab" ? { icon: Icon.Bolt, tooltip: "Lucide Lab" } : undefined}
       content={{ source: imageUrl(icon), tintColor: Color.PrimaryText }}
       actions={<IconActions icon={icon} />}
     />
@@ -119,7 +127,7 @@ function IconActions({ icon }: { icon: FilledIcon }) {
         key="copy-component"
         title="Copy Component"
         icon={Icon.Code}
-        content={toComponent(icon)}
+        content={toComponent(icon, framework)}
         shortcut={{
           macOS: { modifiers: ["cmd", "shift"], key: "r" },
           Windows: { modifiers: ["ctrl", "shift"], key: "r" },

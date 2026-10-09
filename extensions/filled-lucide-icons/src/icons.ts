@@ -81,9 +81,11 @@ function toPascalCase(name: string): string {
 }
 
 // Lab icons are icon nodes rendered through the framework's <Icon> component,
-// the same way @lucide/lab works.
-export function toComponent(icon: FilledIcon): string {
-  return icon.set === "lab" ? `<Icon iconNode={${toCamelCase(icon.name)}} />` : `<${toPascalCase(icon.name)} />`;
+// the same way @lucide/lab works. Vue templates bind the node with `:iconNode`.
+export function toComponent(icon: FilledIcon, framework: string): string {
+  if (icon.set !== "lab") return `<${toPascalCase(icon.name)} />`;
+  const node = toCamelCase(icon.name);
+  return framework === "vue" ? `<Icon :iconNode="${node}" />` : `<Icon iconNode={${node}} />`;
 }
 
 export function toImport(icon: FilledIcon, framework: string): string {
