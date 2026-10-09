@@ -10,7 +10,7 @@ import { useLibraries } from "./hooks/useLibraries";
 import { useOnlineSearch } from "./hooks/useOnlineSearch";
 import { handleError } from "./lib/feedback";
 import { prefetchSelectedPlaylist } from "./lib/prefetch";
-import { fetchSearch, filterResults, SEARCH_TYPES, type SearchType } from "./lib/searchTypes";
+import { fetchSearch, filterResults, SEARCH_TYPES, type SearchType, withoutLibraryPlaylists } from "./lib/searchTypes";
 
 export default function Search() {
   const [searchText, setSearchText] = useState("");
@@ -28,7 +28,10 @@ export default function Search() {
 
   const library = searchType === "online" ? undefined : libraries[searchType];
   const libraryResults = library && filterResults(library.results, query);
-  const searchResults = query !== "" && search.data?.kind === searchType ? search.data : undefined;
+  const searchResults = withoutLibraryPlaylists(
+    query !== "" && search.data?.kind === searchType ? search.data : undefined,
+    libraryResults,
+  );
   const isLoading = library ? library.isLoading || (query !== "" && search.isLoading) : online.isLoading;
 
   const current = SEARCH_TYPES[searchType];

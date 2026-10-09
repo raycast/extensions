@@ -15,11 +15,15 @@ export interface OnlineSearch {
   isLoading: boolean;
 }
 
+async function fetchResultsForQuery(query: string): Promise<{ query: string; results: OnlineSearchResults }> {
+  return { query, results: await fetchOnlineResults(query) };
+}
+
 export function useOnlineSearch(query: string, remoteQuery: string, enabled: boolean): OnlineSearch {
   const link = enabled ? extractSoundCloudLink(query) : undefined;
   const preview = useLinkPreview(link ?? "");
   const canSearch = enabled && remoteQuery !== "" && extractSoundCloudLink(remoteQuery) === undefined;
-  const search = useCachedPromise(fetchOnlineResults, [remoteQuery], {
+  const search = useCachedPromise(fetchResultsForQuery, [remoteQuery], {
     execute: canSearch,
     keepPreviousData: true,
     onError: (error) => void handleError(error, "Search failed"),
@@ -33,7 +37,11 @@ export function useOnlineSearch(query: string, remoteQuery: string, enabled: boo
   }
   if (query === "") return { view: { mode: "idle" }, isLoading: false };
   return {
-    view: { mode: "search", query: remoteQuery, results: canSearch ? search.data : undefined },
+    view: {
+      mode: "search",
+      query: search.data?.query ?? remoteQuery,
+      results: canSearch ? search.data?.results : undefined,
+    },
     isLoading: query !== remoteQuery || (canSearch && search.isLoading),
   };
 }

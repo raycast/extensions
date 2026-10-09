@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, discoveryFilePath, handleStreamLine, searchAlbums, searchPlaylists, searchTracks } from "../api";
+import {
+  ApiError,
+  discoveryFilePath,
+  handleStreamLine,
+  streamLibraryArtworks,
+  searchAlbums,
+  searchPlaylists,
+  searchTracks,
+} from "../api";
 
 vi.mock("node:fs/promises", () => ({
   readFile: vi.fn(async () => JSON.stringify({ port: 4321, token: "tok" })),
@@ -48,6 +56,31 @@ describe("ApiError detail", () => {
     const error = new ApiError("/api/resolve-link", 400, "Not a SoundCloud URL");
     expect(error.detail).toBe("Not a SoundCloud URL");
     expect(error.message).toBe("/api/resolve-link failed: Not a SoundCloud URL");
+  });
+});
+
+describe("streamLibraryArtworks", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("completes when the final done line has no trailing newline", async () => {
+    const body = '{"type":"batch","items":[1]}\n{"type":"done","items":[1,2]}';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(body, { status: 200 })),
+    );
+    const onBatch = vi.fn();
+    await expect(streamLibraryArtworks(onBatch)).resolves.toEqual([1, 2]);
+    expect(onBatch).toHaveBeenCalledWith([1]);
+  });
+
+  it("fails when the stream ends without a done line", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response('{"type":"batch","items":[1]}\n', { status: 200 })),
+    );
+    await expect(streamLibraryArtworks(vi.fn())).rejects.toThrow("stream ended before completion");
   });
 });
 

@@ -64,6 +64,15 @@ function matches(query: string, ...fields: string[]): boolean {
   return fields.some((field) => field.toLowerCase().includes(needle));
 }
 
+export function withoutLibraryPlaylists(
+  results: Results | undefined,
+  library: Results | undefined,
+): Results | undefined {
+  if (results?.kind !== "playlists" || library?.kind !== "playlists") return results;
+  const libraryIds = new Set(library.playlists.map((playlist) => playlist.id));
+  return { kind: "playlists", playlists: results.playlists.filter((playlist) => !libraryIds.has(playlist.id)) };
+}
+
 export function filterResults(results: Results, query: string): Results {
   if (query === "") return results;
   switch (results.kind) {

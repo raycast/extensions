@@ -177,14 +177,14 @@ async function streamJson<T>(
   let buffer = "";
   for (;;) {
     const { done, value } = await reader.read();
-    if (done) throw new ApiError(path, 500, "stream ended before completion");
-    buffer += decoder.decode(value, { stream: true });
+    buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
     const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
+    buffer = done ? "" : (lines.pop() ?? "");
     for (const line of lines.filter(Boolean)) {
       const result = handleStreamLine(path, line, onBatch);
       if (result) return result;
     }
+    if (done) throw new ApiError(path, 500, "stream ended before completion");
   }
 }
 
