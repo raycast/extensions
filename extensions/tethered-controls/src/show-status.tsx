@@ -115,7 +115,7 @@ export default function Command() {
 
   const markdown = status
     ? [
-        `# Tethered Status`,
+        `# Mac Status`,
         `Battery: ${status.batteryLevel < 0 ? "Unavailable" : `${Math.round(status.batteryLevel)}%`} (${status.isACConnected ? "AC" : "Battery"}, ${status.isCharging ? "Charging" : "Not charging"})`,
         `Power mode: ${powerModeLabel(status.powerMode)}`,
         `Caffeinate: ${yesNo(status.caffeinateActive)}`,
