@@ -1,6 +1,7 @@
 import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { mkdir, open, readdir, readFile, rename, rm, rmdir, stat } from "node:fs/promises";
+import { createConnection, createServer, Server } from "node:net";
 import { join } from "node:path";
 import { Article, fetchArticleFeedPage } from "./articles";
 
@@ -20,7 +21,10 @@ const ARCHIVE_UPDATE_LOCK_HEARTBEAT_MS = 1_000;
 const ARCHIVE_UPDATE_LOCK_RETRY_MS = 50;
 const ARCHIVE_UPDATE_LOCK_TIMEOUT_MS = 10_000;
 const ARCHIVE_UPDATE_LOCK_STALE_MS = 5_000;
+const ARCHIVE_UPDATE_OWNER_PROBE_TIMEOUT_MS = 250;
+const ARCHIVE_UPDATE_OWNER_PROBE_CACHE_MS = 1_000;
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
+const archiveUpdateOwnerProbeCache = new Map<string, number>();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
 
@@ -262,6 +266,14 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
     await removeArchiveUpdateClaim(claimPath, owner.id);
     throw error;
   }
+  let ownerServer: Server;
+  try {
+    ownerServer = await startArchiveUpdateOwnerServer(owner);
+  } catch (error) {
+    await ownerFile.close();
+    await removeArchiveUpdateClaim(claimPath, owner.id);
+    throw error;
+  }
 
   const lockHeartbeat = setInterval(() => {
     const heartbeatTime = new Date();
@@ -278,7 +290,11 @@ async function withArchiveUpdateLock<T>(update: () => Promise<T>): Promise<T> {
   } finally {
     clearInterval(lockHeartbeat);
     await ownerFile.close();
-    await removeArchiveUpdateClaim(hasActiveClaim ? ARCHIVE_UPDATE_ACTIVE_LOCK_PATH : claimPath, owner.id);
+    try {
+      await removeArchiveUpdateClaim(hasActiveClaim ? ARCHIVE_UPDATE_ACTIVE_LOCK_PATH : claimPath, owner.id);
+    } finally {
+      await stopArchiveUpdateOwnerServer(ownerServer, owner);
+    }
   }
 }
 
@@ -330,11 +346,14 @@ async function removeAbandonedArchiveUpdateClaim(): Promise<void> {
     const [serializedOwner, ownerStats] = await Promise.all([readFile(ownerPath, "utf8"), stat(ownerPath)]);
     const owner = parseArchiveLockOwner(serializedOwner);
     const isStale = Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
-    if (owner ? isProcessAlive(owner.pid) && !isStale : !isStale) {
+    if (owner ? await isArchiveUpdateOwnerAlive(owner, isStale) : !isStale) {
       return;
     }
 
     await rm(ownerPath, { force: true });
+    if (owner) {
+      await rm(getArchiveUpdateOwnerSocketPath(owner), { force: true });
+    }
     await removeEmptyArchiveUpdateClaim();
   } catch (error) {
     if (!isNodeError(error) || (error.code !== "ENOENT" && error.code !== "ENOTDIR")) {
@@ -358,11 +377,14 @@ async function removeAbandonedArchiveUpdateWaitingClaim(claimName: string): Prom
     const [serializedOwner, ownerStats] = await Promise.all([readFile(ownerPath, "utf8"), stat(ownerPath)]);
     const owner = parseArchiveLockOwner(serializedOwner);
     const isStale = Date.now() - ownerStats.mtimeMs >= ARCHIVE_UPDATE_LOCK_STALE_MS;
-    if (owner ? isProcessAlive(owner.pid) && !isStale : !isStale) {
+    if (owner ? await isArchiveUpdateOwnerAlive(owner, isStale) : !isStale) {
       return;
     }
 
     await removeArchiveUpdateClaim(claimPath, ownerId);
+    if (owner) {
+      await rm(getArchiveUpdateOwnerSocketPath(owner), { force: true });
+    }
   } catch (error) {
     if (!isNodeError(error) || error.code !== "ENOENT") {
       throw error;
@@ -409,6 +431,72 @@ function isProcessAlive(pid: number): boolean {
   } catch (error) {
     return isNodeError(error) && error.code === "EPERM";
   }
+}
+
+function getArchiveUpdateOwnerSocketPath(owner: ArchiveLockOwner): string {
+  return join("/tmp", `techgedoens-archive-${owner.pid}-${owner.id}.sock`);
+}
+
+async function startArchiveUpdateOwnerServer(owner: ArchiveLockOwner): Promise<Server> {
+  const server = createServer((socket) => socket.end());
+  await new Promise<void>((resolve, reject) => {
+    const handleError = (error: Error) => reject(error);
+    server.once("error", handleError);
+    server.listen(getArchiveUpdateOwnerSocketPath(owner), () => {
+      server.off("error", handleError);
+      resolve();
+    });
+  });
+  server.on("error", () => undefined);
+  server.unref();
+  return server;
+}
+
+async function stopArchiveUpdateOwnerServer(server: Server, owner: ArchiveLockOwner): Promise<void> {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  await rm(getArchiveUpdateOwnerSocketPath(owner), { force: true });
+}
+
+async function isArchiveUpdateOwnerAlive(owner: ArchiveLockOwner, isStale: boolean): Promise<boolean> {
+  if (!isProcessAlive(owner.pid)) {
+    return false;
+  }
+  if (!isStale) {
+    return true;
+  }
+
+  const lastSuccessfulProbe = archiveUpdateOwnerProbeCache.get(owner.id);
+  if (lastSuccessfulProbe && Date.now() - lastSuccessfulProbe < ARCHIVE_UPDATE_OWNER_PROBE_CACHE_MS) {
+    return true;
+  }
+
+  const isAlive = await canConnectToArchiveUpdateOwner(owner);
+  if (isAlive) {
+    archiveUpdateOwnerProbeCache.set(owner.id, Date.now());
+  } else {
+    archiveUpdateOwnerProbeCache.delete(owner.id);
+  }
+  return isAlive;
+}
+
+async function canConnectToArchiveUpdateOwner(owner: ArchiveLockOwner): Promise<boolean> {
+  return await new Promise<boolean>((resolve) => {
+    const socket = createConnection(getArchiveUpdateOwnerSocketPath(owner));
+    let settled = false;
+    const finish = (isAlive: boolean) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      socket.destroy();
+      resolve(isAlive);
+    };
+    const timeout = setTimeout(() => finish(false), ARCHIVE_UPDATE_OWNER_PROBE_TIMEOUT_MS);
+    timeout.unref();
+    socket.once("connect", () => finish(true));
+    socket.once("error", () => finish(false));
+  });
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
