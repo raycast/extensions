@@ -1,5 +1,11 @@
 # Trakt Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+
+- **Calendar week for the calendar AI tool**: "what's airing this week?" now covers today through Sunday instead of the next 7 days.
+
 ## [Update] - 2026-10-09
 
 ### Added

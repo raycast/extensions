@@ -28,7 +28,7 @@ instructions: |
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
   - For "what should I watch next?", "what can I finish tonight?" or "where was I?", use `get-up-next`: it is Trakt's Continue Watching. Shows in progress come back in `data` with their next episode, movies paused mid-playback in `movies` with `progressPercent` and `minutesLeft`. Pass `type: "shows"` or `type: "movies"` when the user asks for only one kind.
   - When `get-up-next` returns a `warning`, one of its two lists could not be loaded: tell the user, and never conclude that the missing list is empty.
-  - For "what's airing this week?" or "which movies come out soon?", use `get-calendar`. Omit `startDate` when the period starts today (this week, next N days, upcoming); only pass `startDate` (YYYY-MM-DD, in the user's local time) when the user names a specific date, and never guess the current date. For "this week" or "what's airing", use the default call and say the answer covers the next 7 days starting from `window.startDate`, not the calendar week. For a specific calendar week, pass `startDate` and `days` explicitly only when the user gives the date or a tool returned it. Pass `days` (max 32) for another length, and `type: "shows"` or `type: "movies"` for only one kind. Dates and times in the answer are already local: present them as is. The calendar only lists titles Trakt tracks for the user (shows they watched or watchlisted, minus shows hidden from the calendar), over 32 days at most. In a response that is not truncated, a title absent from it has nothing in that window among followed titles, which does not mean no episode or release is planned. When `truncated` is true, the lists stop at the date named in the message: never conclude that a missing title has nothing in the window, and offer to narrow it (fewer `days`, or a single `type`). Surface `warning` when present.
+  - For "what's airing this week?" or "which movies come out soon?", use `get-calendar`. Omit `startDate` when the period starts today (this week, next N days, upcoming); only pass `startDate` (YYYY-MM-DD, in the user's local time) when the user names a specific date, and never guess the current date. For "this week", pass `calendarWeek: true`: the tool covers today through the coming Sunday, so never compute `days` for it. For "what's airing" or "upcoming" without a week, keep the default and say the answer covers the next 7 days from `window.startDate`. Pass `days` (max 32) for another length, and `type: "shows"` or `type: "movies"` for only one kind. Dates and times in the answer are already local: present them as is. The calendar only lists titles Trakt tracks for the user (shows they watched or watchlisted, minus shows hidden from the calendar), over 32 days at most. In a response that is not truncated, a title absent from it has nothing in that window among followed titles, which does not mean no episode or release is planned. When `truncated` is true, the lists stop at the date named in the message: never conclude that a missing title has nothing in the window, and offer to narrow it (fewer `days`, or a single `type`). Surface `warning` when present.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
   - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
@@ -152,9 +152,10 @@ evals:
       get-calendar:
         window:
           startDate: "2026-10-08"
-          endDate: "2026-10-14"
-          days: 7
+          endDate: "2026-10-11"
+          days: 4
           timeZone: "Europe/Paris"
+          calendarWeek: true
         episodes:
           - localDate: "2026-10-09"
             localTime: "03:00"
@@ -165,10 +166,12 @@ evals:
             episodeTitle: "Hello Again"
             episodeTraktId: 4100001
         movies: []
-        message: "1 episode(s) and 0 movie(s) from 2026-10-08 to 2026-10-14 (Europe/Paris)."
+        message: "1 episode(s) and 0 movie(s) from 2026-10-08 to 2026-10-11 (Europe/Paris), the rest of this calendar week."
     expected:
       - callsTool:
           name: "get-calendar"
+          arguments:
+            calendarWeek: true
 
   - input: "@trakt-manager any movies coming out in the next two weeks?"
     mocks:

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   calendarWindow,
+  daysToWeekEnd,
   EPISODES_FAILED_WARNING,
   inWindow,
   MOVIES_FAILED_WARNING,
@@ -153,3 +154,11 @@ test("limit defaults to 50, is capped at 200, and rejects anything but a whole n
 function addDaysForTest(date: string, days: number) {
   return new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 86400000).toISOString().slice(0, 10);
 }
+
+test("the calendar week runs through the coming Sunday", () => {
+  assert.equal(daysToWeekEnd("2026-10-05"), 7); // Monday
+  assert.equal(daysToWeekEnd("2026-10-07"), 5); // Wednesday
+  assert.equal(daysToWeekEnd("2026-10-10"), 2); // Saturday
+  assert.equal(daysToWeekEnd("2026-10-11"), 1); // Sunday
+  assert.equal(calendarWindow("2026-10-07", daysToWeekEnd("2026-10-07"), PARIS).endDate, "2026-10-11");
+});
