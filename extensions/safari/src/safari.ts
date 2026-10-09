@@ -1,6 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { safariAppIdentifier } from "./utils";
 import { LocalTab } from "./types";
+import { TabSnapshot } from "./tab-snapshot";
 
 export async function getAllTabs() {
   const windowCountScript = `tell application "${safariAppIdentifier}" to return count of windows`;
@@ -214,6 +215,8 @@ export async function closePinnedTab(tab: PinnedTab) {
 }
 
 export type TabContents = {
+  /** The window's position when the content was read, 1 = front */
+  windowId: number;
   /** The current title, which can change while the page loads */
   title: string;
   /** document.readyState, or "unknown" when Safari does not allow JavaScript from Apple Events */
@@ -246,6 +249,7 @@ export async function readPinnedTabContents(
     const content = text(tab.${type === "text" ? "text" : "source"}());
     return JSON.stringify({
       status: "ok",
+      windowId: win.index(),
       title: text(tab.name()),
       readyState,
       length: content.length,
@@ -255,22 +259,27 @@ export async function readPinnedTabContents(
   `);
   if (result.status === "changed") throw tabChangedError(tab, "read");
   if (result.status !== "ok") throw new Error(`Unexpected response from Safari: ${result.status}`);
-  const { title, readyState, length, hasContent, content } = result;
-  return { title, readyState, length, hasContent, content };
+  const { windowId, title, readyState, length, hasContent, content } = result;
+  return { windowId, title, readyState, length, hasContent, content };
 }
 
-/** Counts the tabs of each window, to tell whether a new tab appeared. */
-export async function getTabCounts(): Promise<Record<number, number>> {
-  const result = await runSafariJxa<{ counts: Record<number, number> }>(`
-    const counts = {};
+/** Lists the tabs of each window, to tell exactly which tab a call opened. Throws if Safari can't be read. */
+export async function getTabSnapshot(): Promise<TabSnapshot> {
+  const result = await runSafariJxa<{ windows: TabSnapshot }>(`
+    const windows = [];
     for (const win of app.windows()) {
+      let tabs;
       try {
-        counts[win.id()] = win.tabs().length;
-      } catch (error) {}
+        tabs = win.tabs().map((tab) => ({ title: text(tab.name()), url: text(tab.url()) }));
+      } catch (error) {
+        continue;
+      }
+      windows.push({ windowRef: win.id(), windowId: win.index(), tabs });
     }
-    return JSON.stringify({ status: "ok", counts });
+    return JSON.stringify({ status: "ok", windows });
   `);
-  return result.status === "ok" ? result.counts : {};
+  if (result.status !== "ok") throw new Error(`Unexpected response from Safari: ${result.status}`);
+  return result.windows;
 }
 
 export async function getFocusedTab(): Promise<LocalTab> {

@@ -85,8 +85,8 @@ export default async function tool(input: Input) {
   return {
     title: page.title,
     url: tab.url,
-    windowId: tab.windowId,
-    index: tab.index,
+    // Position read with the content, so it is still valid if windows were reordered during the wait
+    ...(Number.isInteger(page.windowId) && page.windowId > 0 && { windowId: page.windowId, index: tab.index }),
     type,
     loading,
     truncated,
