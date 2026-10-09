@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { statSync } from "node:fs";
+import { realpathSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 import { promisify } from "node:util";
 
@@ -7,6 +7,7 @@ const run = promisify(execFile);
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const QUIT_TIMEOUT_MS = 30_000;
+const CANCELED_QUIT_GRACE_MS = 5_000;
 const LAUNCH_TIMEOUT_MS = 10_000;
 
 export function isValidTimeZone(tz: string): boolean {
@@ -57,16 +58,18 @@ export async function relaunchWithTimeZone(
   const appName = basename(appPath);
   if (!isValidTimeZone(tz)) throw new Error(`Unknown time zone: ${tz}`);
 
-  const info = join(appPath, "Contents", "Info.plist");
-  const executable = join(appPath, "Contents", "MacOS", await readPlistKey(info, "CFBundleExecutable"));
+  const bundlePath = realpathSync(appPath);
+  const info = join(bundlePath, "Contents", "Info.plist");
+  const executable = join(bundlePath, "Contents", "MacOS", await readPlistKey(info, "CFBundleExecutable"));
   const bundleId = await readPlistKey(info, "CFBundleIdentifier");
 
   const runningPid = await mainPid(executable);
   if (runningPid !== undefined) {
     if (!(await confirmQuit())) return undefined;
     onProgress(`Quitting ${appName}…`);
-    const deadline = Date.now() + QUIT_TIMEOUT_MS;
-    const timedOut = new Error(`${appName} did not quit within 30s (quit canceled or unsaved-changes dialog?)`);
+    let quitBy = Date.now() + QUIT_TIMEOUT_MS;
+    const timedOut = new Error(`${appName} did not quit within 30s (unsaved-changes dialog?)`);
+    let notQuit = timedOut;
     try {
       const script = ["on run argv", "tell application id (item 1 of argv) to quit", "end run"];
       await run("/usr/bin/osascript", [...script.flatMap((line) => ["-e", line]), bundleId], {
@@ -75,14 +78,19 @@ export async function relaunchWithTimeZone(
     } catch (error) {
       const { killed, stderr = "" } = error as { killed?: boolean; stderr?: string };
       if (killed) throw timedOut;
-      if (!stderr.includes("(-128)")) process.kill(runningPid, "SIGTERM");
+      if (stderr.includes("(-128)")) {
+        quitBy = Math.min(quitBy, Date.now() + CANCELED_QUIT_GRACE_MS);
+        notQuit = new Error(`Quitting ${appName} was canceled`);
+      } else {
+        process.kill(runningPid, "SIGTERM");
+      }
     }
     const stillRunning = await waitFor(
       () => mainPid(executable),
       (pid) => pid === undefined,
-      deadline - Date.now(),
+      quitBy - Date.now(),
     );
-    if (stillRunning !== undefined) throw timedOut;
+    if (stillRunning !== undefined) throw notQuit;
   }
 
   onProgress(`Launching ${appName} with TZ=${tz}…`);
