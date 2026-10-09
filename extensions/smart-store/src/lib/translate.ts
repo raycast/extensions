@@ -90,7 +90,10 @@ export function useTranslations(items: TextToTranslate[], lang: string) {
   const signature = items.map((item) => item.key).join("|");
 
   useEffect(() => {
-    if (lang === "en" || !items.length) return;
+    if (lang === "en" || !items.length) {
+      setIsTranslating(false);
+      return;
+    }
     const controller = new AbortController();
     setIsTranslating(true);
     translateTexts(items, lang, controller.signal)

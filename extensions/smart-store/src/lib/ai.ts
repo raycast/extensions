@@ -34,11 +34,12 @@ function modelFor(provider: Provider): string {
   return provider === "openai" ? DEFAULT_OPENAI_MODEL : DEFAULT_ANTHROPIC_MODEL;
 }
 
-let anthropicClient: Anthropic | undefined;
+let anthropicClient: { apiKey: string; client: Anthropic } | undefined;
+/** Rebuilds the client whenever the API key changes in preferences. */
 function anthropic(): Anthropic {
-  const { apiKey } = getPreferenceValues<Preferences>();
-  if (!anthropicClient) anthropicClient = new Anthropic({ apiKey: apiKey?.trim() });
-  return anthropicClient;
+  const apiKey = getPreferenceValues<Preferences>().apiKey?.trim() ?? "";
+  if (anthropicClient?.apiKey !== apiKey) anthropicClient = { apiKey, client: new Anthropic({ apiKey }) };
+  return anthropicClient.client;
 }
 
 /** Claude 5 generation models accept the `effort` setting; the server-side fallback only exists for some of them. */
