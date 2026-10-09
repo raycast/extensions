@@ -1,19 +1,30 @@
 import { DateTime } from "luxon";
 
 // Truncated to the minute, so polling it only yields a new value (and a re-render) once a minute.
+// Truncates the timestamp itself rather than the local clock fields, which would resolve to the wrong
+// instant during the repeated hour when daylight saving time ends.
 export function getCurrentMinuteISO(): string {
-  const now = new Date();
-  now.setSeconds(0, 0);
-  return now.toISOString();
+  return new Date(Math.floor(Date.now() / 60000) * 60000).toISOString();
 }
 
 // Moves to the next (direction 1) or previous (direction -1) multiple of stepMinutes on the local clock of
 // the given time, e.g. 14:20 snaps to 15:00 or 14:00 with a 60-minute step.
 export function snapToGrid(time: DateTime, stepMinutes: number, direction: 1 | -1): DateTime {
-  const msOfDay = ((time.hour * 60 + time.minute) * 60 + time.second) * 1000 + time.millisecond;
-  const stepMs = stepMinutes * 60 * 1000;
-  const steps = direction > 0 ? Math.floor(msOfDay / stepMs) + 1 : Math.ceil(msOfDay / stepMs) - 1;
-  return time.plus({ milliseconds: steps * stepMs - msOfDay });
+  const minuteOfDay = time.hour * 60 + time.minute + (time.second * 1000 + time.millisecond) / 60000;
+  let step = direction > 0 ? Math.floor(minuteOfDay / stepMinutes) + 1 : Math.ceil(minuteOfDay / stepMinutes) - 1;
+  const startOfDay = time.startOf("day");
+  // Grid points are set on the local clock, skipping ones that don't exist because a daylight saving time
+  // change jumps over them (e.g. 02:00 in a zone that moves from 02:00 to 02:30).
+  for (let attempt = 0; attempt < 48; attempt++, step += direction) {
+    const minutes = step * stepMinutes;
+    const days = Math.floor(minutes / 1440);
+    const localMinutes = minutes - days * 1440;
+    const candidate = startOfDay.plus({ days }).set({ hour: Math.floor(localMinutes / 60), minute: localMinutes % 60 });
+    const exists = candidate.hour * 60 + candidate.minute === localMinutes;
+    const isPast = direction > 0 ? candidate > time : candidate < time;
+    if (exists && isPast) return candidate;
+  }
+  return time.plus({ minutes: direction * stepMinutes });
 }
 
 export type ClockFormatPreference = "system" | "12-hour" | "24-hour";

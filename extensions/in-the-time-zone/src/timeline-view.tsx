@@ -93,22 +93,26 @@ export function TimelineView(props: TimelineViewProps) {
   const baseTime = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
   const appearance = environment.appearance;
 
-  // Sunrise/sunset only depend on the date, so they are keyed on the base date and the set of cities
-  // rather than recomputed on every cursor move.
-  const sunDate = baseTime.toISODate() ?? "";
-  const sunZoneKey = (baseCityId ? [baseCityId, ...selectedZoneIds] : selectedZoneIds).join("\n");
+  // Sunrise/sunset are shown for each city's local date at the cursor. They only change when one of those
+  // dates changes, so they are keyed on the (city, local date) pairs rather than recomputed on every cursor move.
+  const sunZoneIds = baseCityId ? [baseCityId, ...selectedZoneIds] : selectedZoneIds;
+  const sunDaysKey = JSON.stringify(
+    sunZoneIds.map((zoneId) => [zoneId, baseTime.setZone(getTimezone(zoneId)).toISODate() ?? ""]),
+  );
   const sunTimes = useMemo(() => {
-    const date = DateTime.fromISO(sunDate, { zone: baseZoneId }).set({ hour: 12 }).toJSDate();
     const result: Record<string, SunTimes> = {};
-    for (const zoneId of sunZoneKey.split("\n").filter(Boolean)) {
+    for (const [zoneId, localDate] of JSON.parse(sunDaysKey) as [string, string][]) {
       const city = lookupCity(zoneId);
+      const timezone = getTimezone(zoneId);
+      // SunCalc picks the solar day closest to the given instant, so local noon selects the city's local date.
+      const date = DateTime.fromISO(localDate, { zone: timezone }).set({ hour: 12 }).toJSDate();
       result[zoneId] =
         city && city.lat && city.lng
-          ? getSunTimes(city.lat, city.lng, date, getTimezone(zoneId), timeFormat)
+          ? getSunTimes(city.lat, city.lng, date, timezone, timeFormat)
           : { sunrise: "—", sunset: "—" };
     }
     return result;
-  }, [sunDate, baseZoneId, sunZoneKey, timeFormat]);
+  }, [sunDaysKey, timeFormat]);
 
   const markdown = useMemo(() => {
     return generateTimelineMarkdown({
