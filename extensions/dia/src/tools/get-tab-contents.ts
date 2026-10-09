@@ -36,7 +36,7 @@ type Input = {
   maxLength?: number;
 };
 
-type PageText = { readyState: string; length: number; text: string };
+type PageText = { title: string; url: string; readyState: string; length: number; text: string };
 
 /**
  * Returns the visible text of a Dia tab, or of the focused tab when no tab is specified.
@@ -51,10 +51,17 @@ export default async function tool(input: Input) {
     throw toReadError(error, tab.title);
   });
 
-  // Truncate inside the page so huge documents never cross the AppleScript bridge
+  // Read title and URL with the text, since the tab may have navigated since findTab.
+  // Truncate inside the page so huge documents never cross the AppleScript bridge.
   const javascript = `JSON.stringify((() => {
     const text = document.body ? document.body.innerText : "";
-    return { readyState: document.readyState, length: text.length, text: text.slice(0, ${maxLength}) };
+    return {
+      title: document.title,
+      url: location.href,
+      readyState: document.readyState,
+      length: text.length,
+      text: text.slice(0, ${maxLength}),
+    };
   })())`;
 
   let result: string;
@@ -80,13 +87,19 @@ export default async function tool(input: Input) {
     throw new Error(`Couldn't read "${tab.title}": the page returned no text. JavaScript may be blocked on this page.`);
   }
 
-  if (!page.text.trim() && (stillLoading || page.readyState === "loading")) {
-    throw new Error(`"${tab.title}" is still loading. Try again in a moment.`);
+  if (!page.text.trim()) {
+    if (stillLoading || page.readyState === "loading") {
+      throw new Error(`"${page.title || tab.title}" is still loading. Try again in a moment.`);
+    }
+    throw new Error(
+      `"${page.title || page.url}" has loaded, but the page has no readable text (it may contain only images or media). Its contents can't be summarized.`,
+    );
   }
 
   return {
-    title: tab.title,
-    url: tab.url,
+    tabId: tab.tabId,
+    title: page.title,
+    url: page.url,
     loading: stillLoading || page.readyState === "loading",
     truncated: page.length > page.text.length,
     text: page.text,
