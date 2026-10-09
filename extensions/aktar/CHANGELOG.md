@@ -1,6 +1,6 @@
 # Aktar Changelog
 
-## [Security Improvements] - {PR_MERGE_DATE}
+## [Security Improvements] - 2026-10-09
 
 - Before sending its token, the extension asks the app on Aktar's port to prove it has the same token, so if Aktar isn't running and another program listens on its port, that program gets neither the token nor your files. Needs Aktar for Mac 0.18.0 or Aktar for Windows 0.11.0 or later; older versions show a message asking you to update
 - Raycast asks before the AI creates a temporary link, since anyone with it can download the file, even from a private bucket. AI links last 1 hour unless you ask for longer, and 24 hours at most
