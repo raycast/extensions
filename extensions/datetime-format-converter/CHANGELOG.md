@@ -1,5 +1,9 @@
 # Datetime formatter Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed the "not a time format" error shown when the command opens with an empty search bar; it shows the current time again.
+
 ## [Enhancement] - 2025-10-07
 
 - Added `Auto Paste Clipboard Content` preference to set whether to automatically paste clipboard content when the command is executed.
