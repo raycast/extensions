@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fsearch",
+  "title": "FSearch",
+  "description": "Find any file on your Mac by name or contents in about a millisecond",
+  "icon": "icon.png",
+  "author": "paus_d_",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "FSearch",
+      "description": "Find files and folders anywhere on your Mac by name, with typos forgiven",
+      "mode": "view",
+      "keywords": [
+        "find",
+        "file",
+        "folder",
+        "fuzzy",
+        "spotlight"
+      ]
+    },
+    {
+      "name": "search-contents",
+      "title": "Search File Contents",
+      "subtitle": "FSearch",
+      "description": "Find text, a regular expression, or where a symbol is defined inside your files",
+      "mode": "view",
+      "keywords": [
+        "grep",
+        "text",
+        "inside",
+        "regex",
+        "symbol",
+        "code"
+      ],
+      "preferences": [
+        {
+          "name": "editor",
+          "title": "Open Matches In",
+          "description": "The app that opens a match at its line",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            { "title": "Default App", "value": "default" },
+            { "title": "Visual Studio Code", "value": "vscode" },
+            { "title": "Cursor", "value": "cursor" },
+            { "title": "Zed", "value": "zed" },
+            { "title": "Xcode", "value": "xcode" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binary",
+      "title": "FSearch Location",
+      "description": "Where the fsearch command is installed. It starts the search daemon when it isn't running.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.local/bin/fsearch"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
