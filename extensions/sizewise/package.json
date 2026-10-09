@@ -1,0 +1,278 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sizewise",
+  "title": "Sizewise",
+  "description": "Scan a folder or disk in Sizewise to see what's taking up space.",
+  "icon": "icon.png",
+  "author": "ethan-wickstrom",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Applications"
+  ],
+  "keywords": [
+    "disk usage",
+    "disk space",
+    "storage",
+    "treemap",
+    "disk analyzer",
+    "free up space",
+    "grandperspective"
+  ],
+  "commands": [
+    {
+      "name": "scan-folder",
+      "title": "Scan Folder",
+      "subtitle": "Sizewise",
+      "description": "Choose a disk, a common folder, or any folder by its path, and scan it in Sizewise.",
+      "mode": "view",
+      "keywords": [
+        "disk",
+        "volume",
+        "storage",
+        "space"
+      ]
+    },
+    {
+      "name": "scan-finder-selection",
+      "title": "Scan Finder Selection",
+      "subtitle": "Sizewise",
+      "description": "Scan the folder selected in Finder, or the front Finder window's folder when nothing is selected.",
+      "mode": "no-view",
+      "keywords": [
+        "finder",
+        "folder",
+        "storage",
+        "space"
+      ]
+    },
+    {
+      "name": "finder-folder-size",
+      "title": "Get Folder Size",
+      "subtitle": "Sizewise",
+      "description": "Show how much space the folder selected in Finder takes up, without opening Sizewise.",
+      "mode": "no-view",
+      "keywords": [
+        "finder",
+        "folder",
+        "size",
+        "storage",
+        "space"
+      ]
+    },
+    {
+      "name": "largest-files",
+      "title": "Largest Files",
+      "subtitle": "Sizewise",
+      "description": "List the largest files in your home folder or another folder, then reveal, preview, or move them to the Trash.",
+      "mode": "view",
+      "keywords": [
+        "large files",
+        "big files",
+        "clean up",
+        "free up space",
+        "trash",
+        "storage"
+      ],
+      "preferences": [
+        {
+          "name": "folder",
+          "title": "Folder",
+          "description": "The folder to search. Leave it empty to search your home folder.",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "disk-space",
+      "title": "Disk Space",
+      "subtitle": "Sizewise",
+      "description": "Show your startup disk's available space in the menu bar, and scan any disk in Sizewise from its menu.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "keywords": [
+        "menu bar",
+        "disk",
+        "storage",
+        "space"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-disk-space",
+      "title": "Get Disk Space",
+      "description": "Lists the disks on your Mac with each one's size and available space."
+    },
+    {
+      "name": "get-folder-size",
+      "title": "Get Folder Size",
+      "description": "Measures how much space a folder or disk takes up."
+    },
+    {
+      "name": "find-large-files",
+      "title": "Find Large Files",
+      "description": "Lists the largest files in a folder or your home folder, with each one's size."
+    },
+    {
+      "name": "open-in-sizewise",
+      "title": "Open in Sizewise",
+      "description": "Opens a folder or disk in Sizewise to show what's taking up space."
+    }
+  ],
+  "ai": {
+    "instructions": "Sizewise is a Mac app that shows what takes up space on a disk or in a folder as a treemap. When someone asks how big a folder is or how much space it takes up, call get-folder-size with its path and give the size exactly as the tool returns it. When its unreadableFolderCount is more than 0, say the folder takes up at least that size, and that that many folders inside couldn't be read. When someone asks which files are largest, or what they could delete, call find-large-files with the folder they name, or with no folder for their home folder, and list the files with their sizes exactly as the tool returns them. When it finds nothing, don't say the folder has no large files: say Spotlight may not index that folder, or may still be indexing it, and offer to open the folder in Sizewise instead. Never move files to the Trash or delete them; tell people they can do that from the Largest Files command. When someone asks what's using space in a folder or on a disk, call open-in-sizewise with its path, then tell them the results are in the Sizewise window. Common folders: ~ (home), ~/Downloads, ~/Desktop, ~/Documents, ~/Library, /Applications. Use get-disk-space for questions about how much space is free, available or used on a disk, and give sizes exactly as the tool returns them. Say \"available\", not \"free\", for space that can hold new files.",
+    "evals": [
+      {
+        "input": "@sizewise how much space do I have left?",
+        "mocks": {
+          "get-disk-space": [
+            {
+              "name": "Macintosh HD",
+              "path": "/",
+              "isStartupDisk": true,
+              "size": "994.66 GB",
+              "available": "212.35 GB",
+              "percentUsed": 79
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-disk-space"
+          }
+        ]
+      },
+      {
+        "input": "@sizewise how big is my Downloads folder?",
+        "mocks": {
+          "get-folder-size": {
+            "name": "Downloads",
+            "path": "/Users/alex/Downloads",
+            "size": "18.42 GB",
+            "unreadableFolderCount": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-folder-size"
+          }
+        ]
+      },
+      {
+        "input": "@sizewise what are my biggest files?",
+        "mocks": {
+          "find-large-files": [
+            {
+              "name": "macOS Installer.dmg",
+              "path": "/Users/alex/Downloads/macOS Installer.dmg",
+              "size": "14.2 GB"
+            },
+            {
+              "name": "Trip.mov",
+              "path": "/Users/alex/Movies/Trip.mov",
+              "size": "6.81 GB"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "find-large-files"
+          }
+        ]
+      },
+      {
+        "input": "@sizewise what are the largest files in my Downloads folder?",
+        "mocks": {
+          "find-large-files": [
+            {
+              "name": "macOS Installer.dmg",
+              "path": "/Users/alex/Downloads/macOS Installer.dmg",
+              "size": "14.2 GB"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-large-files",
+              "arguments": {
+                "folder": {
+                  "includes": "Downloads"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sizewise what's taking up space in my Downloads folder?",
+        "mocks": {
+          "open-in-sizewise": "Opened Downloads (/Users/alex/Downloads) in Sizewise, which is scanning it."
+        },
+        "expected": [
+          {
+            "callsTool": "open-in-sizewise"
+          }
+        ]
+      },
+      {
+        "input": "@sizewise scan my Backup drive",
+        "mocks": {
+          "get-disk-space": [
+            {
+              "name": "Macintosh HD",
+              "path": "/",
+              "isStartupDisk": true,
+              "size": "994.66 GB",
+              "available": "212.35 GB",
+              "percentUsed": 79
+            },
+            {
+              "name": "Backup",
+              "path": "/Volumes/Backup",
+              "isStartupDisk": false,
+              "size": "2 TB",
+              "available": "1.2 TB",
+              "percentUsed": 40
+            }
+          ],
+          "open-in-sizewise": "Opened Backup (/Volumes/Backup) in Sizewise, which is scanning it."
+        },
+        "expected": [
+          {
+            "callsTool": "get-disk-space"
+          },
+          {
+            "callsTool": "open-in-sizewise"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/bun": "^1.4.2",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "bun test",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
