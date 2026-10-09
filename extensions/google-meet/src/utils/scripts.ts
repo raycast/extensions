@@ -129,14 +129,12 @@ export function getWindowTitlesScript(bundleId: string): string {
   return `
     tell application "System Events"
       set titleList to {}
-      try
-        set titlesPerProcess to name of every window of (every process whose bundle identifier is "${bundleId}")
-        repeat with processTitles in titlesPerProcess
-          repeat with windowTitle in processTitles
-            if contents of windowTitle is not missing value then set end of titleList to (contents of windowTitle)
-          end repeat
+      set titlesPerProcess to name of every window of (every process whose bundle identifier is "${bundleId}")
+      repeat with processTitles in titlesPerProcess
+        repeat with windowTitle in processTitles
+          if contents of windowTitle is not missing value then set end of titleList to (contents of windowTitle)
         end repeat
-      end try
+      end repeat
       set AppleScript's text item delimiters to (ASCII character 31)
       set titleString to titleList as string
       set AppleScript's text item delimiters to ""
