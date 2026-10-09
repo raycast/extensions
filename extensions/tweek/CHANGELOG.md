@@ -1,6 +1,6 @@
 # Tweek Task Manager Changelog
 
-## [Monthly Calendar] - {PR_MERGE_DATE}
+## [Monthly Calendar] - 2026-10-09
 
 - **Monthly Calendar View**: New month grid in the Dashboard (`⌘ + ⌥ + M`) with color-coded task dots per day, month navigation, calendar switcher, and per-day task management.
 - **Preference**: New `Dashboard View` toggle to open the Dashboard as the monthly calendar by default.
