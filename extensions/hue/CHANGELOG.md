@@ -36,6 +36,7 @@
 - Draw whites in the Hue app's colors, from warm yellow to cool mint, and lights without color, like plugs, in its cream
 - Show lights, rooms and zones that are off like the Hue app's off cards instead of a crossed-out bulb
 - Update rooms and zones at once, at their new brightness, when turning a room or zone on or off, setting a scene, or changing a light
+- Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer, which can't be read the wrong way round
 - Update the Raycast API and utilities
 
 ## [Improvements] - 2026-06-01

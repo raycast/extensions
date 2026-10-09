@@ -116,19 +116,15 @@ function Light(props: {
               />
             )}
             {props.light.color_temperature !== undefined && (
-              <IncreaseColorTemperatureAction
+              <MakeWarmerAction
                 light={props.light}
-                onIncrease={() =>
-                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "increase")
-                }
+                onAction={() => handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "warmer")}
               />
             )}
             {props.light.color_temperature !== undefined && (
-              <DecreaseColorTemperatureAction
+              <MakeCoolerAction
                 light={props.light}
-                onDecrease={() =>
-                  handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "decrease")
-                }
+                onAction={() => handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "cooler")}
               />
             )}
           </ActionPanel.Section>
@@ -225,26 +221,8 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
   );
 }
 
-function IncreaseColorTemperatureAction(props: { light: Light; onIncrease: () => void }) {
-  const { color_temperature } = props.light;
-  if (!color_temperature || getMiredFromLight(props.light) <= color_temperature.mirek_schema.mirek_minimum) {
-    return null;
-  }
-
-  return (
-    <Action
-      title="Increase Color Temperature"
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
-      }}
-      icon={Icon.Plus}
-      onAction={props.onIncrease}
-    />
-  );
-}
-
-function DecreaseColorTemperatureAction(props: { light: Light; onDecrease: () => void }) {
+// Warmer is a higher mired, and a lower color temperature in Kelvin.
+function MakeWarmerAction(props: { light: Light; onAction: () => void }) {
   const { color_temperature } = props.light;
   if (!color_temperature || getMiredFromLight(props.light) >= color_temperature.mirek_schema.mirek_maximum) {
     return null;
@@ -252,13 +230,32 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease: () =>
 
   return (
     <Action
-      title="Decrease Color Temperature"
+      title="Make Warmer"
       shortcut={{
         macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
         Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
       }}
-      icon={Icon.Minus}
-      onAction={props.onDecrease}
+      icon={Icon.Sun}
+      onAction={props.onAction}
+    />
+  );
+}
+
+function MakeCoolerAction(props: { light: Light; onAction: () => void }) {
+  const { color_temperature } = props.light;
+  if (!color_temperature || getMiredFromLight(props.light) <= color_temperature.mirek_schema.mirek_minimum) {
+    return null;
+  }
+
+  return (
+    <Action
+      title="Make Cooler"
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
+      }}
+      icon={Icon.Snowflake}
+      onAction={props.onAction}
     />
   );
 }
@@ -353,7 +350,7 @@ function handleColorTemperatureChange(
   hue: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
-  direction: "increase" | "decrease",
+  direction: "warmer" | "cooler",
 ) {
   const adjustedColorTemperature = calculateAdjustedColorTemperature(getMiredFromLight(light), direction);
   const changes = {
@@ -367,7 +364,7 @@ function handleColorTemperatureChange(
     rateLimiter,
     lights: new Map([[light.id, changes]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
-    success: `${direction === "increase" ? "Increased" : "Decreased"} color temperature of ${light.metadata.name}`,
-    failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${light.metadata.name}`,
+    success: `Made ${light.metadata.name} ${direction}`,
+    failure: `Failed making ${light.metadata.name} ${direction}`,
   });
 }

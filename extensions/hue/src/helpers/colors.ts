@@ -158,7 +158,7 @@ export function calculateAdjustedBrightness(brightness: number, direction: "incr
   return BRIGHTNESSES[index + (direction === "increase" ? -1 : 1)] ?? BRIGHTNESSES[index];
 }
 
-export function calculateAdjustedColorTemperature(mired: number, direction: "increase" | "decrease") {
-  const newColorTemperature = direction === "increase" ? mired - MIRED_STEP : mired + MIRED_STEP;
+export function calculateAdjustedColorTemperature(mired: number, direction: "warmer" | "cooler") {
+  const newColorTemperature = direction === "warmer" ? mired + MIRED_STEP : mired - MIRED_STEP;
   return Math.round(Math.min(Math.max(MIRED_MIN, newColorTemperature), MIRED_MAX));
 }
