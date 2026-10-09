@@ -1,53 +1,59 @@
 import { environment, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { FocusMode, FocusState, FullDiskAccessError, getFocusState } from "./focus-state";
-import { listHelperShortcutIds, runShortcut, writeSignedHelperShortcut } from "./helper-shortcut";
+import { FocusMode, FocusState, FullDiskAccessError, getFocusState, waitForActiveFocus } from "./focus-state";
+import { listHelperShortcutIds, runShortcut, trustedHelperIds, writeSignedHelperShortcut } from "./helper-shortcut";
 
 export const FULL_DISK_ACCESS_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles";
 export const FOCUS_SETTINGS = "x-apple.systempreferences:com.apple.Focus-Settings.extension";
 
-const HELPER_ID_KEY = "helper-shortcut-id";
+const TRUSTED_HELPERS_KEY = "trusted-helper-ids";
 
-/** Installed copies of the helper shortcut, the one this extension added most recently first. */
-async function getHelperIds(): Promise<string[]> {
-  const ids = await listHelperShortcutIds();
-  const preferred = await LocalStorage.getItem<string>(HELPER_ID_KEY);
-  return preferred && ids.includes(preferred) ? [preferred, ...ids.filter((id) => id !== preferred)] : ids;
+/** Identifiers of the helper copies this extension added, oldest first. */
+async function getTrustedHelpers(): Promise<string[]> {
+  return JSON.parse((await LocalStorage.getItem<string>(TRUSTED_HELPERS_KEY)) ?? "[]");
+}
+
+async function trustHelpers(ids: string[]) {
+  const trusted = (await getTrustedHelpers()).filter((id) => !ids.includes(id));
+  await LocalStorage.setItem(TRUSTED_HELPERS_KEY, JSON.stringify([...trusted, ...ids]));
 }
 
 /**
- * Runs the helper and resolves with the copy that handled `input`. Resolves with undefined when
- * the helper isn't installed or was built before the requested mode existed.
+ * Runs the newest helper copy that can handle `input`. Returns false when no trusted copy is
+ * installed or every copy was built before the requested mode existed.
  */
-async function runHelper(input: string): Promise<string | undefined> {
-  for (const id of await getHelperIds()) {
-    if ((await runShortcut(id, input)) === "ok") return id;
+async function runHelper(input: string): Promise<boolean> {
+  for (const id of trustedHelperIds(await listHelperShortcutIds(), await getTrustedHelpers())) {
+    if ((await runShortcut(id, input)) === "ok") return true;
   }
+  return false;
 }
 
 /** Runs the helper, first installing or updating it if it can't handle `input` yet. */
-async function runHelperWithSetup(input: string, getModes: () => Promise<FocusMode[]>): Promise<boolean> {
+async function runHelperWithSetup(input: string, modes: FocusMode[]): Promise<boolean> {
   if (await runHelper(input)) return true;
 
-  const isUpdate = (await listHelperShortcutIds()).length > 0;
-  const file = await writeSignedHelperShortcut(await getModes(), environment.supportPath);
+  const installed = await listHelperShortcutIds();
+  const trusted = await getTrustedHelpers();
+  const file = await writeSignedHelperShortcut(modes, environment.supportPath);
   await open(file, "com.apple.shortcuts");
-  await showHUD(
-    isUpdate
-      ? "Click “Add Shortcut”, then “Replace” to update the Focus helper"
-      : "Click “Add Shortcut” to finish setting up Focus Modes",
-  );
+  if (installed.length === 0) {
+    await showHUD("Click “Add Shortcut” to finish setting up Focus Modes");
+  } else if (installed.every((id) => trusted.includes(id))) {
+    await showHUD("Click “Add Shortcut”, then “Replace” to update the Focus helper");
+  } else {
+    // Another shortcut already has the helper's name; "Keep Both" leaves it untouched.
+    await showHUD("Click “Add Shortcut”, then “Keep Both” to add the Focus helper");
+  }
 
-  // Even "Replace" adds the new helper as another copy with the same name, so instead of looking
-  // for it, keep retrying the request until some copy handles it, which also means it's done.
+  // Only a shortcut that appears after opening the generated file is trusted as the helper.
+  const before = new Set(installed);
   const deadline = Date.now() + 90_000;
   while (Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    const id = await runHelper(input);
-    if (id) {
-      await LocalStorage.setItem(HELPER_ID_KEY, id);
-      return true;
-    }
+    const added = (await listHelperShortcutIds()).filter((id) => !before.has(id));
+    if (added.length > 0) await trustHelpers(added);
+    if (await runHelper(input)) return true;
   }
   return false;
 }
@@ -62,13 +68,22 @@ export async function showFocusError(error: unknown, title: string) {
   });
 }
 
-async function switchFocus(input: string, getModes: () => Promise<FocusMode[]>, progress: string, done: string) {
+/** Runs `input` through the helper and reports success only once the Focus database shows `expectedActiveId`. */
+async function switchFocus(
+  input: string,
+  expectedActiveId: string | undefined,
+  modes: FocusMode[],
+  progress: string,
+  done: string,
+) {
   const toast = await showToast({ style: Toast.Style.Animated, title: progress });
   try {
-    if (await runHelperWithSetup(input, getModes)) {
+    if (!(await runHelperWithSetup(input, modes))) {
+      await showHUD("Focus Modes setup isn’t finished yet. Add the shortcut, then try again.");
+    } else if (await waitForActiveFocus(expectedActiveId, 5_000)) {
       await showHUD(done);
     } else {
-      await showHUD("Focus Modes setup isn’t finished yet. Add the shortcut, then try again.");
+      await showHUD("Focus didn’t change. Try again, or check Focus in Control Center.");
     }
   } catch (error) {
     await toast.hide();
@@ -77,18 +92,21 @@ async function switchFocus(input: string, getModes: () => Promise<FocusMode[]>, 
 }
 
 export async function turnOnFocus(mode: FocusMode, modes: FocusMode[]) {
-  await switchFocus(mode.id, async () => modes, `Turning on ${mode.name}…`, `${mode.name} is on`);
+  await switchFocus(mode.id, mode.id, modes, `Turning on ${mode.name}…`, `${mode.name} is on`);
 }
 
 export async function turnOffFocus() {
-  let state: FocusState | undefined;
+  let state: FocusState;
   try {
     state = await getFocusState();
-  } catch {
-    // Without Full Disk Access the active mode is unknown, but the helper can still turn every mode off.
+  } catch (error) {
+    await showFocusError(error, "Couldn’t turn off Focus");
+    return;
+  }
+  if (!state.activeId) {
+    await showHUD("No Focus is on");
+    return;
   }
   // Naming the active mode lets an outdated helper report a mode it doesn't know, so it gets updated.
-  const input = state?.activeId ? `off:${state.activeId}` : "off";
-  const getModes = async () => state?.modes ?? (await getFocusState()).modes;
-  await switchFocus(input, getModes, "Turning off Focus…", "Focus is off");
+  await switchFocus(`off:${state.activeId}`, undefined, state.modes, "Turning off Focus…", "Focus is off");
 }

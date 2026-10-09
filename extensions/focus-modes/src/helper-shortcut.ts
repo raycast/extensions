@@ -62,9 +62,9 @@ const stopAndOutput = (value: string) => action("is.workflow.actions.output", { 
 
 /**
  * Shortcuts' "Set Focus" action can't take its Focus from a variable, so the helper shortcut
- * hard-codes branches for each Focus mode. Its input is a mode identifier (turn that mode on),
- * "off:" and an identifier (turn that mode off), or "off" (turn every mode off). It outputs
- * "ok", or "unknown" for a mode it wasn't built with.
+ * hard-codes branches for each Focus mode. Its input is a mode identifier (turn that mode on)
+ * or "off:" and an identifier (turn that mode off). It outputs "ok", or "unknown" for a mode it
+ * wasn't built with.
  */
 export function buildHelperShortcut(modes: ShortcutFocusMode[]) {
   const inputUUID = randomUUID().toUpperCase();
@@ -87,7 +87,6 @@ export function buildHelperShortcut(modes: ShortcutFocusMode[]) {
           Value: { string: "￼", attachmentsByRange: { "{0, 1}": { Type: "ExtensionInput" } } },
         },
       }),
-      ...ifInputIs(inputUUID, "off", [...modes.map((mode) => setFocus(mode, false)), stopAndOutput("ok")]),
       ...modes.flatMap((mode) => [
         ...ifInputIs(inputUUID, mode.id, [setFocus(mode, true), stopAndOutput("ok")]),
         ...ifInputIs(inputUUID, `off:${mode.id}`, [setFocus(mode, false), stopAndOutput("ok")]),
@@ -110,19 +109,32 @@ export async function writeSignedHelperShortcut(modes: ShortcutFocusMode[], dire
 }
 
 /**
- * Identifiers of every installed copy of the helper, in library order. Re-importing the helper
- * can leave an older copy behind (or add one named "… 2"), and running by name fails while
- * names are ambiguous, so the helper is always run by identifier.
+ * Identifiers of every shortcut named like the helper, in library order, from the output of
+ * `shortcuts list --show-identifiers`. Re-importing the helper leaves the older copy behind
+ * (sometimes renamed "… 1"), and running by name fails while names clash, so shortcuts are
+ * always run by identifier.
  */
-export async function listHelperShortcutIds(): Promise<string[]> {
-  const { stdout } = await execFileAsync(SHORTCUTS, ["list", "--show-identifiers"]);
+export function parseHelperShortcutIds(listOutput: string): string[] {
   const helperName = new RegExp(`^${HELPER_SHORTCUT_NAME}( \\d+)?$`);
   const ids: string[] = [];
-  for (const line of stdout.split("\n")) {
+  for (const line of listOutput.split("\n")) {
     const match = /^(.*) \(([0-9A-F-]{36})\)$/i.exec(line.trim());
     if (match && helperName.test(match[1])) ids.push(match[2]);
   }
   return ids;
+}
+
+export async function listHelperShortcutIds(): Promise<string[]> {
+  const { stdout } = await execFileAsync(SHORTCUTS, ["list", "--show-identifiers"]);
+  return parseHelperShortcutIds(stdout);
+}
+
+/**
+ * Another shortcut can share the helper's name, so only copies this extension added are ever run.
+ * Returns the trusted identifiers (oldest first, as recorded) that are still installed, newest first.
+ */
+export function trustedHelperIds(installed: string[], trusted: string[]): string[] {
+  return [...trusted].reverse().filter((id) => installed.includes(id));
 }
 
 /** Runs a shortcut with `input` on stdin and resolves with its trimmed output. */

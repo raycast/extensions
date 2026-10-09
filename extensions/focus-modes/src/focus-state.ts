@@ -161,12 +161,14 @@ export async function getFocusState(): Promise<FocusState> {
 }
 
 /**
- * Resolves once the Focus database shows `activeId` as the active Focus (undefined meaning off),
- * or after `timeout` ms. The wait covers first-time setup, where the user adds the helper shortcut.
+ * Waits until the Focus database shows `activeId` as the active Focus (undefined meaning off).
+ * Resolves with false if it hasn't after `timeout` ms.
  */
-export async function waitForActiveFocus(activeId: string | undefined, timeout = 90_000): Promise<void> {
+export async function waitForActiveFocus(activeId: string | undefined, timeout = 90_000): Promise<boolean> {
   const deadline = Date.now() + timeout;
-  while (Date.now() < deadline && (await getFocusState()).activeId !== activeId) {
+  for (;;) {
+    if ((await getFocusState()).activeId === activeId) return true;
+    if (Date.now() >= deadline) return false;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }
