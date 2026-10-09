@@ -747,6 +747,13 @@ export default function AskCodex(
                 <List.Item
                   key={`${message.id}-${index}`}
                   id={`${message.id}-${index}`}
+                  icon={
+                    index === 0
+                      ? message.role === "assistant"
+                        ? "command-icon.png"
+                        : Icon.Person
+                      : "chat-line-spacer.svg"
+                  }
                   title={rowTitle(row)}
                   accessories={
                     index === 0 && message.status === "streaming"
