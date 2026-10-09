@@ -2,20 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, List } 
 import { createDeeplink, showFailureToast, usePromise } from "@raycast/utils";
 import { focusColor, focusIcon } from "./appearance";
 import { FOCUS_SETTINGS, FULL_DISK_ACCESS_SETTINGS } from "./focus";
-import { FocusMode, FullDiskAccessError, getFocusState } from "./focus-state";
-
-// Switching is done by the no-view commands: they keep running while the first-time setup
-// waits in Shortcuts, which a list that has been closed can't rely on.
-async function launch(name: string, args?: Record<string, string>) {
-  try {
-    await launchCommand({ name, type: LaunchType.UserInitiated, arguments: args });
-  } catch (error) {
-    await showFailureToast(error, { title: "Couldn’t change Focus" });
-  }
-}
-
-const turnOn = (mode: FocusMode) => launch("turn-on-focus", { focus: mode.id });
-const turnOff = () => launch("turn-off-focus");
+import { FocusMode, FullDiskAccessError, getFocusState, waitForActiveFocus } from "./focus-state";
 
 export default function Command() {
   const { data, isLoading, error, revalidate } = usePromise(getFocusState, [], {
@@ -23,6 +10,22 @@ export default function Command() {
       if (!(error instanceof FullDiskAccessError)) showFailureToast(error, { title: "Couldn’t read Focus modes" });
     },
   });
+
+  // Switching is done by the no-view commands: they keep running while the first-time setup
+  // waits in Shortcuts, which a list that has been closed can't rely on. The list then waits
+  // for the Focus database to show the change and reloads, so the On tag stays accurate.
+  async function launch(activeId: string | undefined, name: string, args?: Record<string, string>) {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated, arguments: args });
+      await waitForActiveFocus(activeId);
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn’t change Focus" });
+    }
+    revalidate();
+  }
+
+  const turnOn = (mode: FocusMode) => launch(mode.id, "turn-on-focus", { focus: mode.id });
+  const turnOff = () => launch(undefined, "turn-off-focus");
 
   if (error instanceof FullDiskAccessError) {
     return (

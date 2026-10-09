@@ -4,6 +4,11 @@ import { getFocusState } from "./focus-state";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.TurnOnFocus }>) {
   const query = props.arguments.focus.trim();
+  // Deeplinks can pass an empty argument, which would otherwise prefix-match the first Focus.
+  if (!query) {
+    await showHUD("Type the name of a Focus to turn on");
+    return;
+  }
   try {
     const { modes } = await getFocusState();
     const name = query.toLowerCase();
