@@ -56,10 +56,8 @@ export default function main() {
   React.useEffect(() => {
     const _input = input || clipboardText;
     console.log("input: " + _input);
-    setInput(_input);
-    if (_input) {
-      timeConverter(_input);
-    }
+    // An empty input means "now", so convert it too instead of leaving the error view up.
+    timeConverter(_input);
   }, [clipboardText]);
 
   function timeConverter(time: string) {
