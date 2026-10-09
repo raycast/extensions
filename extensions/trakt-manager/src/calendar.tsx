@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { SeasonGrid } from "./components/season-grid";
@@ -75,7 +75,16 @@ export default function Command() {
       return { days: sorted, warning };
     },
     [range],
-    { keepPreviousData: true, failureToastOptions: { title: "Could not load your calendar" } },
+    {
+      keepPreviousData: true,
+      failureToastOptions: { title: "Could not load your calendar" },
+      // One half failed: the other still shows, so say the calendar is incomplete. The warning's first
+      // clause names the missing half; the rest is guidance for the AI tool.
+      onData: ({ warning }) => {
+        if (!warning) return;
+        showToast({ style: Toast.Style.Failure, title: "Calendar incomplete", message: warning.split(";")[0] });
+      },
+    },
   );
 
   return (
