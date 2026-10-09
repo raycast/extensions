@@ -107,17 +107,20 @@ function startLoad(key: string, fetchPage: FetchPage): Load {
 async function readLoadPage(load: Load, index: number): Promise<MemberPage> {
   for (;;) {
     const items = load.pages[index];
-    if (items) return { items, hasMore: index + 1 < load.pages.length || !load.finished };
+    if (items) {
+      const hasMore = index + 1 < load.pages.length || !load.finished;
+      // Fetched pages stay readable. A finished scan that stopped short reports that on its last page.
+      return { items, hasMore, error: !hasMore && load.error ? load.error : undefined };
+    }
     if (load.finished) {
-      // Pages already delivered stay usable if a later page fails; a failure before any page is a real error.
-      if (load.error && load.pages.length === 0) throw load.error;
+      if (load.error) throw load.error;
       return { items: [], hasMore: false };
     }
     await new Promise<void>((resolve) => load.listeners.add(resolve));
   }
 }
 
-export type MemberPage = { items: SlackMember[]; hasMore: boolean };
+export type MemberPage = { items: SlackMember[]; hasMore: boolean; error?: unknown };
 
 /**
  * Returns page `index` of the workspace member list. users.list is scanned at most once per hour and the scan is

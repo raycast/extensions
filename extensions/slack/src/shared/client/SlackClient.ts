@@ -1,4 +1,5 @@
 import { Icon, Image } from "@raycast/api";
+import { handleError } from "../utils";
 import { getSlackToken, getSlackWebClient } from "./WebClient";
 import type { SlackMember } from "./slackTypes";
 import { formatRelative } from "date-fns";
@@ -8,7 +9,7 @@ import { getDirectorySearchPageSize } from "./directory";
 import { searchConversationDirectory, searchUserNames } from "./conversationSearch";
 import { toChannel, toGroup } from "./conversation";
 import type { Channel, Group } from "./conversation";
-import { searchMemberDirectory } from "./memberSearch";
+import { isMemberDirectoryScanError, searchMemberDirectory } from "./memberSearch";
 import { toUserName } from "./member";
 import { getMemberPage } from "./memberDirectoryCache";
 
@@ -106,7 +107,11 @@ const createMemberPageLoader = () => async (cursor?: string) => {
     },
     index,
   );
-  return { items: page.items, nextCursor: page.hasMore ? String(index + 1) : undefined };
+  return {
+    items: page.items,
+    nextCursor: page.hasMore ? String(index + 1) : undefined,
+    error: page.error,
+  };
 };
 
 export class SlackClient {
@@ -189,16 +194,29 @@ export class SlackClient {
     return (await SlackClient.searchDirectoryMembers(query, signal)).users;
   }
 
-  public static async searchDirectoryMembers(query: string, signal?: AbortSignal) {
-    const result = await searchMemberDirectory({
-      query,
-      maxResults: maxSearchResultsPerType,
-      toUser,
-      loadPage: createMemberPageLoader(),
-      signal,
-    });
-    result.users.sort((a, b) => sortNames(a.name, b.name));
-    return result;
+  public static async searchDirectoryMembers(query: string, signal?: AbortSignal, onUsers?: (users: User[]) => void) {
+    const finish = (result: { users: User[]; userNames: ReadonlyMap<string, string> }) => {
+      result.users.sort((a, b) => sortNames(a.name, b.name));
+      return result;
+    };
+    try {
+      return finish(
+        await searchMemberDirectory({
+          query,
+          maxResults: maxSearchResultsPerType,
+          toUser,
+          loadPage: createMemberPageLoader(),
+          signal,
+          onProgress: (partial) => {
+            onUsers?.([...partial.users].sort((a, b) => sortNames(a.name, b.name)));
+          },
+        }),
+      );
+    } catch (error) {
+      if (!isMemberDirectoryScanError<User>(error)) throw error;
+      await handleError(error.failure, "Could not load the full member directory");
+      return finish(error.partial);
+    }
   }
 
   public static async searchConversations(
@@ -214,13 +232,20 @@ export class SlackClient {
       types,
       loadUserNames:
         loadUserNames ??
-        (() =>
-          searchUserNames({
-            query,
-            maxResults: maxSearchResultsPerType,
-            loadPage: createMemberPageLoader(),
-            signal,
-          })),
+        (async () => {
+          try {
+            return await searchUserNames({
+              query,
+              maxResults: maxSearchResultsPerType,
+              loadPage: createMemberPageLoader(),
+              signal,
+            });
+          } catch (error) {
+            if (!isMemberDirectoryScanError(error)) throw error;
+            await handleError(error.failure, "Could not load the full member directory");
+            return error.partial.userNames;
+          }
+        }),
       loadConversationsPage: async (cursor) => {
         const response = await slackWebClient.conversations.list({
           exclude_archived: true,
