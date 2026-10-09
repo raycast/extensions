@@ -31,6 +31,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "a1-gallery",
+    title: "A1 Gallery",
+    description:
+      "Hand-curated web design references, inside your agent. Search 1,100+ real websites, their captured sections and interior pages, the fonts they use and the designers who made them, and read design tokens measured off each rendered page: type sizes, spacing, radius, container width and palette. 17 read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free A1 account (50 calls a day), no API key to paste.",
+    icon: "https://img.a1.gallery/brand/a1-app-icon-512.png",
+    homepage: "https://www.a1.gallery/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.a1.gallery/api/mcp"],
+    },
+    remoteUrl: "https://www.a1.gallery/api/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
