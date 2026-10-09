@@ -36,7 +36,7 @@ Press Enter to activate the top input field in the same chat. The reply retains 
 
 ### Choose a Model
 
-Open the bottom **Actions → 模型** menu, or press Cmd+M on macOS / Ctrl+M on Windows. Choose a combination such as `gpt-6.1-sol · high` or `gpt-5.6-sol · xhigh` when returned by your local Codex catalog. Model names and supported efforts are loaded dynamically; the extension remembers the selected combination on this computer. Selecting a different combination applies to the next response. Steering an answer already in progress continues with its original model. **沿用当前会话模型** clears the explicit override.
+In the top-input view, use the native dropdown at the top right to choose a model and effort combination. The same dropdown includes history, archived sessions, CLI sessions, and new chat. In the full-width reader, open **Actions → 模型**, or press Cmd+M on macOS / Ctrl+M on Windows. Choose a combination such as `gpt-6.1-sol · high` or `gpt-5.6-sol · xhigh` when returned by your local Codex catalog. Model names and supported efforts are loaded dynamically; both menus share the remembered selection on this computer. Selecting a different combination applies to the next response. Steering an answer already in progress continues with its original model. **会话默认** in the dropdown or **沿用当前会话模型** in Actions clears the explicit override.
 
 ### Manage Sessions
 
@@ -110,7 +110,7 @@ Ask ChatGPT 通过本机已经登录的 Codex CLI 连接 ChatGPT/OpenAI 服务�
 
 按 Enter 切到同一聊天的顶部输入状态，输入后 Enter 发送，成功后自动回到 Markdown 回复。输入期间右侧正文仍按完整 Markdown 显示，保留换行、代码和公式，输入文字不会筛选聊天。Raycast 原生布局在这个状态会保留左侧一个“当前对话”栏；全宽阅读状态没有左栏。可从 Actions → 返回全宽回复退出输入状态，未发送的草稿会保留。每次打开默认连接上次活动会话；历史和新建对话可从 Actions 打开。
 
-底部 Actions → 模型（macOS 可按 Cmd+M，Windows 可按 Ctrl+M）可以选择具体模型和档位，例如本机目录提供的 `gpt-6.1-sol · high`、`gpt-5.6-sol · xhigh`。只列出 Codex 返回的组合，选择会保存在本机，并从下一次回复生效；正在回答时发送补充要求仍使用原模型。公式使用 Raycast 原生 LaTeX 显示，普通文字中的 `$...$` 会转换为支持的行内公式语法，代码块保持原文。
+有顶部输入框时，可在右上角 Raycast 原生下拉框选择模型和智力档位；同一菜单也保留历史会话和新建对话。全宽回复页可从底部 Actions → 模型进入（macOS 可按 Cmd+M，Windows 可按 Ctrl+M）。例如本机目录提供的 `gpt-6.1-sol · high`、`gpt-5.6-sol · xhigh`。只列出 Codex 返回的可选组合，两个菜单共享本机保存的选择，并从下一次回复生效；正在回答时发送补充要求仍使用原模型。公式使用 Raycast 原生 LaTeX 显示，普通文字中的 `$...$` 会转换为支持的行内公式语法，代码块保持原文。
 
 Windows 会自动寻找 `codex.exe`、`codex.cmd` 和常见 npm 安装位置；macOS 会检查登录 shell、Apple Silicon/Intel Homebrew 路径及常见用户目录。两边都支持用户在设置中修改 Codex 路径和工作目录。如果没有检测到 CLI，界面会明确提示安装官方 Codex CLI，并提供安装入口；已经安装在特殊目录时则可以直接填写绝对路径。插件不内置 API Key，也不会把你的登录文件、聊天记录或本地路径打包发布。
 

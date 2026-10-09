@@ -3,7 +3,7 @@ import type { CodexModel, ModelSelection } from "./codex";
 
 export const MODEL_SELECTION_KEY = "ask-chatgpt.model-selection.v1";
 
-export function ModelMenu(props: {
+export type ModelMenuProps = {
   models: CodexModel[];
   selection: ModelSelection | null;
   current: ModelSelection;
@@ -12,7 +12,9 @@ export function ModelMenu(props: {
   ready: boolean;
   onRefresh: () => void;
   onSelect: (selection: ModelSelection | null) => void;
-}) {
+};
+
+export function ModelMenu(props: ModelMenuProps) {
   const selected = props.selection || props.current;
   const label = [selected.model, selected.effort].filter(Boolean).join(" · ");
   return (

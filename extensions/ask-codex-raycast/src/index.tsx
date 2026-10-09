@@ -28,6 +28,7 @@ import {
 } from "./desktop-window";
 import { conversationMarkdown } from "./chat-text";
 import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
+import { ChatDropdown } from "./chat-dropdown";
 import {
   asRecord,
   asString,
@@ -830,17 +831,18 @@ function NativeChat(props: LaunchProps<{ arguments: Arguments.Index }>) {
     (message) => message.content.trim() || message.status === "streaming",
   );
   const accessory = (
-    <List.Dropdown tooltip="聊天与会话管理" value={page} onChange={changePage}>
-      <List.Dropdown.Item title="当前会话" value="chat" icon={Icon.Message} />
-      <List.Dropdown.Item title="历史会话" value="history" icon={Icon.Clock} />
-      <List.Dropdown.Item title="已归档" value="archived" icon={Icon.Tray} />
-      <List.Dropdown.Item
-        title="本机 CLI 会话"
-        value="cli"
-        icon={Icon.Terminal}
-      />
-      <List.Dropdown.Item title="新建对话" value="new" icon={Icon.Plus} />
-    </List.Dropdown>
+    <ChatDropdown
+      page={page}
+      onPageChange={changePage}
+      models={models}
+      selection={modelSelection}
+      current={currentModel}
+      loading={modelsLoading}
+      error={modelsError}
+      ready={ready}
+      onRefresh={() => void refreshModels().catch(() => undefined)}
+      onSelect={selectModel}
+    />
   );
   const historyProps = useSessionHistory({
     page,
