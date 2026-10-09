@@ -194,6 +194,11 @@
       "description": "Drop a show so it leaves Continue Watching and the calendar, keeping its history and ratings"
     },
     {
+      "name": "restore-show",
+      "title": "Restore Show",
+      "description": "Restore a dropped show to Continue Watching and the calendar"
+    },
+    {
       "name": "rate-media",
       "title": "Rate Media",
       "description": "Rate a movie, TV show, or episode on Trakt with a score from 1 to 10"

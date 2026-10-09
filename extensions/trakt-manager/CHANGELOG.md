@@ -9,7 +9,7 @@
 - **Similar titles**: "Similar Titles" on movie and show results opens the titles Trakt relates to them, and the AI can answer "movies like Inception".
 - **Discover command**: browse trending, popular and anticipated movies and shows, with the same actions as search.
 - **Search People command**: find actors and crew, then browse the movies and shows they worked on, with their roles.
-- **Dropped Shows command**: see the shows you dropped and restore one to Continue Watching and the calendar.
+- **Dropped Shows command and Restore Show AI tool**: see the shows you dropped and restore one to Continue Watching and the calendar, from the command or by asking Raycast AI.
 - **Calendar command**: upcoming episodes of the shows you follow and movie releases, grouped by day in your time zone, for this week or the next 7, 14 or 32 days.
 - **Lists command and "Add to List…"**: create, edit and delete your personal lists, browse and remove their items, and add a movie or show to a list from search.
 
