@@ -30,9 +30,11 @@ export const confirmation: Tool.Confirmation<TabTarget> = async (input) => {
   // Nothing is closed without a tabId, so there is nothing to confirm
   if (!input.tabId) return undefined;
 
-  // Throw rather than skip the dialog: if the tab can't be shown, it must not be closed
-  const tab = await findTab({ tabId: input.tabId }).catch(() => {
-    throw new Error(`Couldn't confirm closing the tab with ID "${input.tabId}": it isn't open. Nothing was closed.`);
+  // Throw rather than skip the dialog: if the tab can't be shown, it must not be closed.
+  // Keep findTab's message, which tells a closed tab apart from a missing Automation permission.
+  const tab = await findTab({ tabId: input.tabId }).catch((error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${message} Nothing was closed.`);
   });
 
   return {

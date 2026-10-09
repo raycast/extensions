@@ -72,6 +72,15 @@ evals:
           name: close-tab
           arguments:
             tabId: "T9"
+  - input: "@dia close the tab with ID T5"
+    mocks:
+      close-tab: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again. Nothing was closed."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: "T5"
+      - includes: "Automation"
   - input: "@dia switch to my GitHub tab"
     mocks:
       select-tab: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
