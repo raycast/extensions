@@ -53,3 +53,9 @@ evals:
     expected:
       - callsTool: get-tab-contents
       - includes: "readable text"
+  - input: "@dia what's on this page?"
+    mocks:
+      get-tab-contents: 'Error: "New Tab" is a Dia internal page, such as a new tab or settings. Dia internal pages cannot be read.'
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "internal page"

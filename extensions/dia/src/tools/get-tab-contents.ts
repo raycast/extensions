@@ -36,7 +36,7 @@ type Input = {
   maxLength?: number;
 };
 
-type PageText = { title: string; url: string; readyState: string; length: number; text: string };
+type PageText = { title: string; url: string; readyState: string; length: number; isBlank: boolean; text: string };
 
 /**
  * Returns the visible text of a Dia tab, or of the focused tab when no tab is specified.
@@ -52,17 +52,20 @@ export default async function tool(input: Input) {
   });
 
   // Read title and URL with the text, since the tab may have navigated since findTab.
+  // Check for blank text before truncating, so a short excerpt of a readable page isn't mistaken for an empty page.
   // Truncate inside the page so huge documents never cross the AppleScript bridge.
-  const javascript = `JSON.stringify((() => {
+  // Return the object itself: Dia serializes the script's result to JSON.
+  const javascript = `(() => {
     const text = document.body ? document.body.innerText : "";
     return {
       title: document.title,
       url: location.href,
       readyState: document.readyState,
       length: text.length,
+      isBlank: text.trim().length === 0,
       text: text.slice(0, ${maxLength}),
     };
-  })())`;
+  })()`;
 
   let result: string;
   try {
@@ -80,14 +83,26 @@ export default async function tool(input: Input) {
     throw new Error(`Couldn't read "${tab.title}". Dia's own pages, such as settings or a new tab, can't be read.`);
   }
 
+  // Dia returns "missing value" instead of running scripts on its own pages, such as a new tab
+  if (result.trim() === "missing value") {
+    throw new Error(
+      `"${tab.title}" is a Dia internal page, such as a new tab or settings. Dia internal pages cannot be read.`,
+    );
+  }
+
   let page: PageText;
   try {
-    page = JSON.parse(result);
+    const parsed = JSON.parse(result);
+    // Tolerate a result serialized twice, in case a Dia version returns the JSON as a string
+    page = typeof parsed === "string" ? JSON.parse(parsed) : parsed;
   } catch {
     throw new Error(`Couldn't read "${tab.title}": the page returned no text. JavaScript may be blocked on this page.`);
   }
+  if (!page || typeof page.text !== "string") {
+    throw new Error(`Couldn't read "${tab.title}": the page returned no text. JavaScript may be blocked on this page.`);
+  }
 
-  if (!page.text.trim()) {
+  if (page.isBlank) {
     if (stillLoading || page.readyState === "loading") {
       throw new Error(`"${page.title || tab.title}" is still loading. Try again in a moment.`);
     }
