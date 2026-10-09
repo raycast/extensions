@@ -238,11 +238,13 @@ export async function connectClaudeBridge(options: BridgeInstall): Promise<void>
     const original = saved ? saved.value.original : current;
     if (original !== undefined && (record(original).type !== "command" || typeof record(original).command !== "string"))
       throw new Error("Your Claude status line uses an unsupported format. PromptCast has left it unchanged.");
-    const command = `${quote(options.nodePath)} ${quote(paths.script)} ${quote(paths.state)} ${quote(paths.snapshot)}`;
+    const fallback = typeof record(original).command === "string" ? record(original).command : "true";
+    const command = `if [ -x ${quote(options.nodePath)} ] && [ -f ${quote(paths.script)} ]; then exec ${quote(options.nodePath)} ${quote(paths.script)} ${quote(paths.state)} ${quote(paths.snapshot)}; fi; ${fallback}`;
     const installed = { ...record(original), type: "command", command };
     const state = {
       version: 1,
       connectionId: randomUUID(),
+      nodePath: options.nodePath,
       active: true,
       installed,
       hadOriginal: saved ? saved.value.hadOriginal : current !== undefined,

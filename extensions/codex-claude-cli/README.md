@@ -142,7 +142,7 @@ YOLO and `bypassPermissions` remove important safeguards. A CLI launched with ei
 
 ## Usage, MCPs, and Skills
 
-The usage viewer shows a visual readout for each limit and caches CLI results for five minutes. Stale observations, failed reads, and limits whose reset has passed are excluded from the menu-bar percentage. Codex shows its normal subscription windows, using the durations actually reported by the app server. The menu-bar command uses the original provider icons and can show Claude, Codex, the most restrictive provider, or both providers with a compact dual-logo mark. It independently configures the automatic/short-term/weekly limit, remaining/used percentage, and whether the bar shows the percentage, reset time, or both. Reset values are shown as compact text without clock glyphs, and the two providers use spacing instead of divider bars. Its menu also exposes compact submenus for favorite and live chats.
+The usage viewer shows a visual readout for each limit and caches CLI results for five minutes. Failed reads and limits whose reset has passed are excluded from the menu-bar percentage. In quota-only mode, Claude's last observed limits stay visible until reset, prefixed with `~` after five minutes; other stale readings are excluded. Codex shows its normal subscription windows, using the durations actually reported by the app server. The menu-bar command uses the original provider icons and can show Claude, Codex, the most restrictive provider, or both providers with a compact dual-logo mark. It independently configures the automatic/short-term/weekly limit, remaining/used percentage, and whether the bar shows the percentage, reset time, or both. Reset values are shown as compact text without clock glyphs, and the two providers use spacing instead of divider bars. Its menu also exposes compact submenus for favorite and live chats.
 
 MCP management hides environment-variable values, headers, and tokens. Skills management reads user, project, plugin, and managed definitions and only writes settings supported by the corresponding CLI.
 
@@ -152,7 +152,9 @@ MCP management hides environment-variable values, headers, and tokens. Skills ma
 2. Open **View Claude and Codex Usage**, select Claude, then choose **Connect Claude Code**.
 3. Restart Claude Code and continue a conversation. Its next status-line update supplies the 5-hour and weekly limits.
 
-Your existing status line keeps working. **Disconnect Claude Code** restores it. The connection saves quota numbers and reset times locally; refreshing reads that observation without starting Claude. Claude Code 2.1.251 or later and a subscription that reports status-line limits are required. Readings become stale after five minutes without an update.
+Your existing status line keeps working. **Disconnect Claude Code** restores it; use this before uninstalling PromptCast. If Raycast replaces its Node runtime, choose **Connect Claude Code** again to resume updates. The installed command falls back to your original status line if the runtime or wrapper is missing.
+
+The connection saves quota numbers and reset times locally; refreshing reads that observation without starting Claude. Claude Code 2.1.251 or later and a subscription that reports status-line limits are required. The viewer marks readings older than five minutes as last observed. In quota-only mode, the menu bar keeps those values until each window resets.
 
 Quota-only mode also hides the chat menus and skips history discovery in the usage commands. The existing chat commands remain available. With the setting off and Claude disconnected, PromptCast keeps its existing CLI usage lookup.
 

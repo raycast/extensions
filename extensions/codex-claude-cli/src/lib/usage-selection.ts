@@ -5,18 +5,38 @@ export type MenuBarWindow = "automatic" | "short-term" | "weekly";
 export interface LimitingWindow {
   provider: UsageProvider;
   window: UsageWindow;
+  lastObserved?: boolean;
 }
 
-/** Historical observations never participate, including an explicitly selected provider. */
+/** Only quota-only Claude bridge observations may outlive the normal cache age. */
 export function selectMenuBarWindow(
   states: ProviderUsageState[],
   provider: UsageProvider | undefined,
   selection: MenuBarWindow,
   now = Date.now(),
+  usageOnly = false,
 ): LimitingWindow | undefined {
   const candidates = states
     .filter((state) => !provider || state.provider === provider)
-    .flatMap((state) => currentUsageWindows(state, now).map((window) => ({ provider: state.provider, window })));
+    .flatMap((state) => {
+      const invalidBridge =
+        usageOnly &&
+        state.provider === "claude" &&
+        (!state.bridgeConnected ||
+          state.needsConnection ||
+          !state.data ||
+          !Number.isFinite(state.data.fetchedAt) ||
+          state.data.fetchedAt <= 0 ||
+          state.data.fetchedAt > now);
+      if (invalidBridge) return [];
+      const current = currentUsageWindows(state, now);
+      const retained = current.length ? [] : retainedClaudeWindows(state, usageOnly, now);
+      return (retained.length ? retained : current).map((window) => ({
+        provider: state.provider,
+        window,
+        lastObserved: retained.length > 0,
+      }));
+    });
   const matching = candidates.filter(({ window }) => {
     if (selection === "automatic") return true;
     if (selection === "short-term") return isShortTermWindow(window);
@@ -41,4 +61,23 @@ function isWeeklyWindow(window: UsageWindow): boolean {
     /week/i.test(window.title) ||
     (window.durationMinutes && window.durationMinutes >= 6 * 24 * 60 && window.durationMinutes <= 8 * 24 * 60),
   );
+}
+
+function retainedClaudeWindows(state: ProviderUsageState, usageOnly: boolean, now: number): UsageWindow[] {
+  if (
+    !usageOnly ||
+    state.provider !== "claude" ||
+    !state.bridgeConnected ||
+    state.needsConnection ||
+    state.error ||
+    !state.data ||
+    !["live", "cache", "stale"].includes(state.source) ||
+    !Number.isFinite(state.data.fetchedAt) ||
+    state.data.fetchedAt <= 0 ||
+    state.data.fetchedAt > now
+  )
+    return [];
+  // Validate percentages through the shared filter, but require an explicit unexpired reset.
+  const observed = currentUsageWindows({ ...state, source: "cache", data: { ...state.data, fetchedAt: now } }, now);
+  return observed.filter((window) => window.resetsAt !== undefined);
 }

@@ -49,6 +49,9 @@ export async function readClaudeStatusLineUsage(): Promise<ProviderUsageState | 
     if (JSON.stringify(settings?.value.statusLine) !== JSON.stringify(connection.value.installed)) {
       return { ...state, error: "Your Claude status line changed. Disconnect and reconnect to resume updates." };
     }
+    if (connection.value.nodePath !== process.execPath) {
+      return { ...state, needsConnection: true, error: "Reconnect Claude Code to use the current Raycast runtime." };
+    }
     const snapshot = await readBridgeDocument(paths.snapshot);
     // Legacy connections need an explicit reconnect; never treat an older
     // invocation's observation as belonging to the current connection.
@@ -87,12 +90,13 @@ export async function readClaudeStatusLineUsage(): Promise<ProviderUsageState | 
           "Connected. Send a message in Claude Code, then refresh. Requires Claude Code 2.1.251 or later with supported subscription limits.",
       };
     }
-    const stale = now - fetchedAt >= staleAfterMilliseconds || windows.every((window) => window.resetsAt! <= now);
+    const allReset = windows.every((window) => window.resetsAt! <= now);
+    const stale = now - fetchedAt >= staleAfterMilliseconds || allReset;
     return {
       ...state,
       source: stale ? "stale" : "live",
       data: { provider: "claude", fetchedAt, windows },
-      ...(stale ? { error: "Last observed usage is out of date. Send a message in Claude Code to update it." } : {}),
+      ...(allReset ? { error: "Last observed limits have reset. Send a message in Claude Code to update them." } : {}),
     };
   } catch {
     return {

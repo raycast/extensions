@@ -1,5 +1,5 @@
 import { Color, getPreferenceValues, Icon, LaunchType, LocalStorage, MenuBarExtra, launchCommand } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
 import { useChatSessions } from "./hooks/use-chat-sessions";
@@ -76,12 +76,18 @@ export default function Command() {
   ];
   const combinedWindows = providerOrder.map((provider) => ({
     provider,
-    window: selectMenuBarWindow(states, provider, windowSelection)?.window,
+    ...selectMenuBarWindow(states, provider, windowSelection, Date.now(), usageOnly),
   }));
   const limitingWindow =
     display === "both"
       ? undefined
-      : selectMenuBarWindow(states, display === "automatic" ? undefined : display, windowSelection);
+      : selectMenuBarWindow(
+          states,
+          display === "automatic" ? undefined : display,
+          windowSelection,
+          Date.now(),
+          usageOnly,
+        );
   const displayedProvider =
     display === "automatic" ? limitingWindow?.provider : display === "both" ? undefined : display;
   const reset = limitingWindow?.window.resetsAt ? formatCompactReset(limitingWindow.window.resetsAt) : undefined;
@@ -89,13 +95,23 @@ export default function Command() {
     display === "both"
       ? combinedMenuBarTitle(combinedWindows, percentage, content)
       : limitingWindow
-        ? menuBarTitle(limitingWindow.window, percentage, content, reset)
+        ? menuBarTitle(limitingWindow.window, percentage, content, reset, limitingWindow.lastObserved)
         : "—";
   const tooltip =
     display === "both"
-      ? combinedWindows.map(({ provider, window }) => menuBarTooltip(provider, window, percentage, states)).join("\n")
+      ? combinedWindows
+          .map(({ provider, window, lastObserved }) =>
+            menuBarTooltip(provider, window, percentage, states, lastObserved),
+          )
+          .join("\n")
       : limitingWindow
-        ? menuBarTooltip(limitingWindow.provider, limitingWindow.window, percentage, states)
+        ? menuBarTooltip(
+            limitingWindow.provider,
+            limitingWindow.window,
+            percentage,
+            states,
+            limitingWindow.lastObserved,
+          )
         : "Usage unavailable";
   const latestUpdate = Math.max(...states.map((state) => state.data?.fetchedAt || 0));
   const selectDisplay = async (nextDisplay: MenuBarDisplay) => {
@@ -148,7 +164,7 @@ export default function Command() {
             subtitle={
               display === state.provider
                 ? "Selected"
-                : providerSummaryTitle(state, percentage).replace(`${usageProviderName(state)} · `, "")
+                : providerSummaryTitle(state, percentage, usageOnly).replace(`${usageProviderName(state)} · `, "")
             }
             icon={usageMenuIcon(state.provider)}
             onAction={() => selectDisplay(state.provider)}
@@ -219,8 +235,8 @@ export default function Command() {
         {states.map((state) => (
           <MenuBarExtra.Item
             key={state.provider}
-            title={providerSummaryTitle(state, percentage)}
-            subtitle={providerSummarySubtitle(state)}
+            title={providerSummaryTitle(state, percentage, usageOnly)}
+            subtitle={providerSummarySubtitle(state, usageOnly)}
             icon={usageMenuIcon(state.provider)}
             onAction={openUsageCommand}
           />
@@ -256,7 +272,11 @@ export default function Command() {
           )}
           {!isUsageStateFresh(state) && state.data ? (
             <MenuBarExtra.Item
-              title={"Historical Reading · Excluded From Menu Bar"}
+              title={
+                selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly)?.lastObserved
+                  ? "Last Observed · Updates While Claude Is Active"
+                  : "Historical Reading · Excluded From Menu Bar"
+              }
               subtitle={state.error}
               icon={Icon.Warning}
               onAction={openUsageCommand}
@@ -287,15 +307,23 @@ export default function Command() {
 }
 
 async function openUsageCommand(): Promise<void> {
-  await launchCommand({ name: "cli-usage", type: LaunchType.UserInitiated });
+  try {
+    await launchCommand({ name: "cli-usage", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Usage Viewer" });
+  }
 }
 
 async function openPromptCastCommand(sessionKey?: string): Promise<void> {
-  await launchCommand({
-    name: "codex-claude-cli",
-    type: LaunchType.UserInitiated,
-    context: sessionKey ? { sessionKey } : undefined,
-  });
+  try {
+    await launchCommand({
+      name: "codex-claude-cli",
+      type: LaunchType.UserInitiated,
+      context: sessionKey ? { sessionKey } : undefined,
+    });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open PromptCast" });
+  }
 }
 
 function sessionKey(session: { provider: ChatProvider; id: string }): string {
@@ -329,23 +357,24 @@ function menuBarTitle(
   percentage: MenuBarPercentage,
   content: MenuBarContent,
   reset: string | undefined,
+  lastObserved = false,
 ): string {
-  const percentageText = formatPercent(windowPercent(window, percentage));
+  const percentageText = `${lastObserved ? "~" : ""}${formatPercent(windowPercent(window, percentage))}`;
   const resetText = reset;
   if (content === "percentage") return percentageText;
-  if (content === "reset") return resetText || percentageText;
+  if (content === "reset") return resetText ? `${lastObserved ? "~" : ""}${resetText}` : percentageText;
   return [percentageText, resetText].filter(Boolean).join(" ");
 }
 
 function combinedMenuBarTitle(
-  selections: { provider: ChatProvider; window: UsageWindow | undefined }[],
+  selections: { provider: UsageProvider; window?: UsageWindow; lastObserved?: boolean }[],
   percentage: MenuBarPercentage,
   content: MenuBarContent,
 ): string {
   return selections
-    .map(({ window }) => {
+    .map(({ window, lastObserved }) => {
       const reset = window?.resetsAt ? formatCompactReset(window.resetsAt) : undefined;
-      return window ? menuBarTitle(window, percentage, content, reset) : "—";
+      return window ? menuBarTitle(window, percentage, content, reset, lastObserved) : "—";
     })
     .join("   ");
 }
@@ -355,25 +384,31 @@ function menuBarTooltip(
   window: UsageWindow | undefined,
   percentage: MenuBarPercentage,
   states: ProviderUsageState[],
+  lastObserved = false,
 ): string {
   const name = usageProviderName(
     states.find((state) => state.provider === provider) || { provider, source: "unavailable" },
   );
   if (!window) return `${name} · ${"Usage unavailable"}`;
   const reset = window.resetsAt ? formatCompactReset(window.resetsAt) : undefined;
-  return `${name} · ${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}${reset ? ` · ${"resets in"} ${reset}` : ""}`;
+  return `${name}${lastObserved ? " · Last observed" : ""} · ${window.title} · ${formatPercent(windowPercent(window, percentage))} ${percentageLabel(percentage)}${reset ? ` · ${"resets in"} ${reset}` : ""}`;
 }
 
-function providerSummaryTitle(state: ProviderUsageState, percentage: MenuBarPercentage): string {
-  const remaining = selectMenuBarWindow([state], state.provider, "automatic")?.window.remainingPercent;
+function providerSummaryTitle(state: ProviderUsageState, percentage: MenuBarPercentage, usageOnly: boolean): string {
+  const selection = selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly);
+  const remaining = selection?.window.remainingPercent;
   const value = remaining === undefined ? undefined : percentage === "remaining" ? remaining : 100 - remaining;
-  return `${usageProviderName(state)} · ${value === undefined ? "—" : `${formatPercent(value)} ${percentageLabel(percentage)}`}`;
+  return `${usageProviderName(state)} · ${value === undefined ? "—" : `${selection?.lastObserved ? "~" : ""}${formatPercent(value)} ${percentageLabel(percentage)}`}`;
 }
 
-function providerSummarySubtitle(state: ProviderUsageState): string | undefined {
+function providerSummarySubtitle(state: ProviderUsageState, usageOnly: boolean): string | undefined {
   const parts: string[] = [];
   if (state.data?.plan) parts.push(planTitle(state.data.plan));
-  parts.push(sourceLabel(state));
+  parts.push(
+    selectMenuBarWindow([state], state.provider, "automatic", Date.now(), usageOnly)?.lastObserved
+      ? "Last observed"
+      : sourceLabel(state),
+  );
   if (!state.data && state.error) parts.push(state.error);
   return parts.filter(Boolean).join(" · ") || undefined;
 }

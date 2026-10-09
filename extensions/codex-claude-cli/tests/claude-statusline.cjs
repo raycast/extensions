@@ -78,6 +78,7 @@ const ts = require("typescript");
     await write(paths.snapshot, expired);
     const historical = await api.readClaudeStatusLineUsage();
     assert.equal(historical.source, "stale");
+    assert.match(historical.error, /reset/);
     assert.equal(historical.data.fetchedAt, Date.parse(saved.updatedAt));
     assert.deepEqual(
       historical.data.windows.map((window) => window.remainingPercent),
@@ -92,6 +93,7 @@ const ts = require("typescript");
     assert.equal(mixed.data.windows.length, 2);
     await write(paths.snapshot, { ...saved, updatedAt: new Date(Date.now() - 16 * 60000).toISOString() });
     assert.equal((await api.readClaudeStatusLineUsage()).source, "stale");
+    assert.equal((await api.readClaudeStatusLineUsage()).error, undefined);
     await write(paths.snapshot, { ...saved, updatedAt: new Date(Date.now() + 600000).toISOString() });
     assert.equal((await api.readClaudeStatusLineUsage()).source, "unavailable");
     await write(paths.snapshot, {
@@ -205,6 +207,59 @@ const ts = require("typescript");
     assert.equal((await read(paths.state)).hadOriginal, false);
     await api.disconnectClaudeStatusLine();
     assert.deepEqual(await read(paths.settings), { external: "preserved" });
+    // The installed command must preserve the original even after a runtime
+    // upgrade or uninstall removes the extension's executable or wrapper.
+    const fallbackOriginal = { type: "command", command: "printf '%s\\n' \"quoted ' status line\"; cat" };
+    await write(paths.settings, { statusLine: fallbackOriginal });
+    const runtime = path.join(root, "runtime with ' spaces");
+    await fs.symlink(process.execPath, runtime);
+    await bridge.connectClaudeBridge({
+      ...options,
+      assetPath: path.join(assetsPath, "claude-statusline.cjs"),
+      nodePath: runtime,
+    });
+    const runtimeState = await read(paths.state);
+    assert.equal(runtimeState.nodePath, runtime);
+    const mismatched = await api.readClaudeStatusLineUsage();
+    assert.equal(mismatched.needsConnection, true);
+    assert.equal(mismatched.bridgeConnected, true);
+    const fallbackCommand = (await read(paths.settings)).statusLine.command;
+    const expectedFallback = "quoted ' status line\n" + payload;
+    assert.equal(
+      execFileSync("/bin/sh", ["-c", fallbackCommand], { input: payload, encoding: "utf8" }),
+      expectedFallback,
+    );
+    await fs.unlink(runtime);
+    assert.equal(
+      execFileSync("/bin/sh", ["-c", fallbackCommand], { input: payload, encoding: "utf8" }),
+      expectedFallback,
+    );
+    await fs.symlink(process.execPath, runtime);
+    await fs.unlink(paths.script);
+    assert.equal(
+      execFileSync("/bin/sh", ["-c", fallbackCommand], { input: payload, encoding: "utf8" }),
+      expectedFallback,
+    );
+    await api.connectClaudeStatusLine();
+    assert.equal((await read(paths.state)).nodePath, process.execPath);
+    assert.notEqual((await api.readClaudeStatusLineUsage()).needsConnection, true);
+    assert.equal(await fs.stat(paths.script).then(() => true), true);
+    await api.disconnectClaudeStatusLine();
+    assert.deepEqual((await read(paths.settings)).statusLine, fallbackOriginal);
+    await write(paths.settings, {});
+    await bridge.connectClaudeBridge({
+      ...options,
+      assetPath: path.join(assetsPath, "claude-statusline.cjs"),
+      nodePath: path.join(root, "missing runtime"),
+    });
+    assert.equal(
+      execFileSync("/bin/sh", ["-c", (await read(paths.settings)).statusLine.command], {
+        input: payload,
+        encoding: "utf8",
+      }),
+      "",
+    );
+    await api.disconnectClaudeStatusLine();
     const unsafeState = path.join(root, "unsafe-state");
     const unsafeSnapshot = path.join(root, "unsafe-snapshot");
     await fs.symlink(paths.state, unsafeState);

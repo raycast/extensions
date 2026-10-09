@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, environment, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useRef } from "react";
 
 import { connectClaudeStatusLine, disconnectClaudeStatusLine } from "../lib/claude-statusline";
@@ -80,9 +81,9 @@ function UsageProviderItem({ state, onRefresh }: { state: ProviderUsageState; on
       toast.title = connect ? "Claude Code connected" : "Claude Code disconnected";
       if (connect) toast.message = "Restart Claude Code, then continue a conversation to update usage.";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = connect ? "Could not connect Claude Code" : "Could not disconnect Claude Code";
-      toast.message = error instanceof Error ? error.message : String(error);
+      await showFailureToast(error, {
+        title: connect ? "Could not connect Claude Code" : "Could not disconnect Claude Code",
+      });
     } finally {
       changingConnection.current = false;
     }

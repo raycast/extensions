@@ -167,3 +167,112 @@ test("a parsed custom weekly window remains selectable when its session reset ha
   assert.equal(selected.window.remainingPercent, 72);
   assert.equal(selectMenuBarWindow(providers, providers[0].provider, "weekly", now).window.remainingPercent, 72);
 });
+
+test("quota-only retains only connected Claude observations until each window resets", () => {
+  const { refreshUsageState, isUsageStateFresh } = load("usage");
+  const observed = state("claude", 40, { bridgeConnected: true });
+  observed.data.fetchedAt = now - 600000;
+  const aged = refreshUsageState(observed, now);
+  assert.equal(isUsageStateFresh(aged, now), false);
+  assert.equal(selectMenuBarWindow([aged], undefined, "automatic", now), undefined);
+  assert.equal(selectMenuBarWindow([aged], undefined, "automatic", now, true).lastObserved, true);
+  assert.equal(selectMenuBarWindow([aged], "claude", "automatic", now, true).window.remainingPercent, 40);
+  assert.equal(selectMenuBarWindow([aged], undefined, "automatic", now + 60000, true), undefined);
+  const weeklyReset = now + 86400000;
+  const mixed = {
+    ...aged,
+    data: {
+      ...aged.data,
+      windows: [
+        window(1, { resetsAt: now - 1 }),
+        window(65, { id: "weekly", title: "Weekly", durationMinutes: 10080, resetsAt: weeklyReset }),
+      ],
+    },
+  };
+  for (const preference of ["automatic", "weekly"]) {
+    const selected = selectMenuBarWindow([mixed], "claude", preference, now, true);
+    assert.equal(selected.window.id, "weekly");
+    assert.equal(selected.window.remainingPercent, 65);
+    assert.equal(selected.lastObserved, true);
+    assert.equal(selectMenuBarWindow([mixed], "claude", preference, weeklyReset, true), undefined);
+  }
+  for (const overrides of [
+    { error: "failed" },
+    { needsConnection: true },
+    { bridgeConnected: false },
+    { source: "unavailable" },
+    { provider: "codex" },
+    { provider: "custom-test" },
+  ]) {
+    assert.equal(selectMenuBarWindow([{ ...aged, ...overrides }], undefined, "automatic", now, true), undefined);
+  }
+  for (const fetchedAt of [NaN, 0, -1, now + 1]) {
+    assert.equal(
+      selectMenuBarWindow([{ ...aged, data: { ...aged.data, fetchedAt } }], undefined, "automatic", now, true),
+      undefined,
+    );
+  }
+  for (const resetsAt of [undefined, NaN, now]) {
+    assert.equal(
+      selectMenuBarWindow(
+        [{ ...aged, data: { ...aged.data, windows: [window(40, { resetsAt })] } }],
+        undefined,
+        "automatic",
+        now,
+        true,
+      ),
+      undefined,
+    );
+  }
+});
+
+test("retained menu title is marked and launch failures produce actionable toasts", async () => {
+  const module = { exports: {} };
+  const failures = [];
+  const code = ts.transpileModule(
+    readFileSync(join(__dirname, "../src/cli-usage-menu-bar.tsx"), "utf8") +
+      "\nexport { menuBarTitle, combinedMenuBarTitle, menuBarTooltip, openUsageCommand, openPromptCastCommand };",
+    {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
+    },
+  ).outputText;
+  vm.runInNewContext(code, {
+    module,
+    exports: module.exports,
+    Date,
+    require: (id) => {
+      if (id === "@raycast/api")
+        return {
+          LaunchType: { UserInitiated: "user" },
+          launchCommand: async () => {
+            throw Error("Launch failed");
+          },
+        };
+      if (id === "@raycast/utils")
+        return { showFailureToast: async (error, options) => failures.push([error.message, options.title]) };
+      if (id === "./lib/usage") return load("usage");
+      return {};
+    },
+  });
+  const api = module.exports;
+  assert.equal(api.menuBarTitle(window(40), "remaining", "percentage", undefined, true), "~40%");
+  assert.equal(api.menuBarTitle(window(40), "remaining", "reset", "1h", true), "~1h");
+  assert.match(api.menuBarTooltip("claude", window(40), "remaining", [state("claude", 40)], true), /Last observed/);
+  assert.equal(
+    api.combinedMenuBarTitle(
+      [
+        { provider: "claude", window: window(40), lastObserved: true },
+        { provider: "codex", window: window(70), lastObserved: false },
+      ],
+      "remaining",
+      "percentage",
+    ),
+    "~40%   70%",
+  );
+  await api.openUsageCommand();
+  await api.openPromptCastCommand("claude:test");
+  assert.deepEqual(failures, [
+    ["Launch failed", "Could Not Open Usage Viewer"],
+    ["Launch failed", "Could Not Open PromptCast"],
+  ]);
+});
