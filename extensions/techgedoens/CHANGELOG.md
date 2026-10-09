@@ -1,6 +1,6 @@
 # Changelog
 
-## [Archive Reliability] - {PR_MERGE_DATE}
+## [Archive Reliability] - 2026-10-09
 
 - Keep saved articles visible and apply the selected retention when a feed refresh fails.
 - Preserve newer read and favorite states during background refreshes.
