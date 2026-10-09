@@ -1,8 +1,8 @@
-import { Cache, Image } from "@raycast/api";
+import { Cache, environment, Image } from "@raycast/api";
 import chroma from "chroma-js";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { Group, GroupedLight, Light, Palette } from "../lib/types";
-import { getColorFromLight, getIconPathFromGroup, getIconPathFromLight } from "./hueResources";
+import { getColorFromLight } from "./hueResources";
 
 // Earlier versions cached their Jimp PNGs in these namespaces.
 new Cache({ namespace: "hue-scene-gradients" }).clear();
@@ -57,26 +57,29 @@ export function createGradientUri(colors: Palette, brightness: number): string |
   return svgUri(GRADIENT_WIDTH, GRADIENT_HEIGHT, content, true);
 }
 
-// Assets don't change while a command runs, so each file is read once.
-const pngFiles = new Map<string, Buffer>();
-
-function pngImage(path: string, x: number, y: number) {
-  const png = pngFiles.get(path) ?? readFileSync(path);
-  pngFiles.set(path, png);
-  // Width and height are the first two fields of a PNG's IHDR chunk.
-  const size = `width="${png.readUInt32BE(16)}" height="${png.readUInt32BE(20)}"`;
-  return `<image xlink:href="data:image/png;base64,${png.toString("base64")}" x="${x}" y="${y}" ${size}/>`;
-}
-
 type Glyph = (color: "black" | "white") => string;
 
+// The Hue app's cards draw the glyph's square at 18% of their width, 9% of their width in from the top and left, measured
+// on its screenshots. On a 271-wide tile that is 49 and 24; light tiles keep that size, as their units are the same.
 const GLYPH_OFFSET = 24;
+const GLYPH_SIZE = 49;
 
-// Raycast renders masks and filters at a lower resolution, so black glyphs come from black copies in icons-black.
-const glyphImage =
-  (path: (color: "black" | "white") => string): Glyph =>
-  (color) =>
-    pngImage(path(color), GLYPH_OFFSET, GLYPH_OFFSET);
+// Assets don't change while a command runs, so each glyph is read once.
+const glyphData = new Map<string, string>();
+
+// Glyphs are single-path SVGs in a 512-unit square, named after their archetype. They are drawn as filled paths, which
+// Raycast renders sharply, unlike masks and filters.
+function glyphPath(folder: "lights" | "rooms", archetype: string, fallback: string): Glyph {
+  const key = `${folder}/${archetype}`;
+  if (!glyphData.has(key)) {
+    const file = (name: string) => `${environment.assetsPath}/glyphs/${folder}/${name}.svg`;
+    const svg = readFileSync(existsSync(file(archetype)) ? file(archetype) : file(fallback), "utf8");
+    glyphData.set(key, svg.match(/ d="([^"]+)"/)?.[1] ?? "");
+  }
+  const transform = `translate(${GLYPH_OFFSET} ${GLYPH_OFFSET}) scale(${GLYPH_SIZE / 512})`;
+  return (color) =>
+    `<path transform="${transform}" fill="${color === "white" ? "#fff" : "#000"}" d="${glyphData.get(key)}"/>`;
+}
 
 // The glyph sits in the icon's top left quarter, so it is black or white, whichever stands out more at that quarter's
 // center. APCA, unlike WCAG 2's contrast ratio, rates white higher than black on saturated reds and purples.
@@ -110,14 +113,14 @@ function offIcon(width: number, height: number, glyph: Glyph): Image {
 const LIGHT_ICON_SIZE = 162;
 
 export function createLightIcon(light: Light): Image {
-  const glyph = glyphImage((color) => getIconPathFromLight(light, color));
+  const glyph = glyphPath("lights", light.metadata.archetype, "unknown_archetype");
   return light.on.on
     ? onIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, [getColorFromLight(light)], light.dimming?.brightness ?? 100, glyph)
     : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, glyph);
 }
 
 export function createGroupIcon(group: Group, colors: Palette, groupedLight: GroupedLight | undefined): Image {
-  const glyph = glyphImage((color) => getIconPathFromGroup(group, color));
+  const glyph = glyphPath("rooms", group.metadata.archetype, "other");
   return groupedLight?.on?.on && colors.length > 0
     ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, groupedLight.dimming?.brightness ?? 100, glyph)
     : offIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, glyph);

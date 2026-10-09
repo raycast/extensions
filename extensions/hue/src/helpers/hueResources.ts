@@ -2,8 +2,6 @@ import { Group, GroupedLight, Light, Palette, Scene } from "../lib/types";
 import { miredToHexString, xyToMired, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
-import { environment } from "@raycast/api";
-import { existsSync } from "fs";
 import chroma from "chroma-js";
 
 export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
@@ -19,19 +17,6 @@ export const getGroupedLightFromGroup = (groupedLights: GroupedLight[], group: G
 
 export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
   scenes.filter((scene) => scene.group.rid === group.id).sort(byName);
-
-function getIconPath(name: string, fallback: string, color: "black" | "white"): string {
-  const folder = `${environment.assetsPath}/${color === "black" ? "icons-black" : "icons"}`;
-  const iconPath = `${folder}/${name}.png`;
-  return existsSync(iconPath) ? iconPath : `${folder}/${fallback}.png`;
-}
-
-export const getIconPathFromLight = (light: Light, color: "black" | "white") =>
-  getIconPath(light.metadata.archetype, "question_mark", color);
-
-// The icon pack has no icons for the downstairs, upstairs and top_floor archetypes, so they fall back to other.
-export const getIconPathFromGroup = (group: Group, color: "black" | "white") =>
-  getIconPath(`rooms/${group.metadata.archetype}`, "rooms/other", color);
 
 // The Hue app's color for a light without color or color temperature, like a plug, read from its room cards.
 const PLAIN_LIGHT_COLOR = "#ffde8b";
