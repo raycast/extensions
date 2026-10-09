@@ -36,7 +36,10 @@ function readInput(input: Input) {
   if (hasMovie === hasEpisode) {
     throw new Error("Pass either `movieTraktId`, or `showTraktId` with `seasonNumber` and `episodeNumber`.");
   }
-  if (!hasMovie && (input.seasonNumber === undefined || input.episodeNumber === undefined)) {
+  if (
+    !hasMovie &&
+    (input.showTraktId === undefined || input.seasonNumber === undefined || input.episodeNumber === undefined)
+  ) {
     throw new Error("An episode check-in needs `showTraktId`, `seasonNumber` and `episodeNumber`.");
   }
 }
