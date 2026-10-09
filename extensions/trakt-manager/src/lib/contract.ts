@@ -34,6 +34,8 @@ import {
   TraktUpNextNitroQuerySchema,
   TraktPaginationSchema,
   TraktUserRatingListSchema,
+  TraktWatchedMovieListSchema,
+  TraktWatchedShowListSchema,
   TraktUserStatsSchema,
   TraktWatchingSchema,
   TraktIdLookupQuerySchema,
@@ -523,6 +525,22 @@ const TraktShowContract = c.router({
 });
 
 const TraktSyncContract = c.router({
+  getWatchedMovies: {
+    method: "GET",
+    path: "/sync/watched/movies",
+    responses: {
+      200: TraktWatchedMovieListSchema,
+    },
+    summary: "Get every movie the user has watched",
+  },
+  getWatchedShows: {
+    method: "GET",
+    path: "/sync/watched/shows",
+    responses: {
+      200: TraktWatchedShowListSchema,
+    },
+    summary: "Get every show the user has watched, with episodes by season and number",
+  },
   addRatings: {
     method: "POST",
     path: "/sync/ratings",

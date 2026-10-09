@@ -31,6 +31,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "a1-gallery",
+    title: "A1 Gallery",
+    description:
+      "Hand-curated web design references, inside your agent. Search 1,100+ real websites, their captured sections and interior pages, the fonts they use and the designers who made them, and read design tokens measured off each rendered page: type sizes, spacing, radius, container width and palette. 17 read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free A1 account (50 calls a day), no API key to paste.",
+    icon: "https://img.a1.gallery/brand/a1-app-icon-512.png",
+    homepage: "https://www.a1.gallery/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.a1.gallery/api/mcp"],
+    },
+    remoteUrl: "https://www.a1.gallery/api/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
@@ -136,6 +149,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         BRAVE_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "bulkpublish",
+    title: "BulkPublish",
+    description:
+      "Schedule, cross-post and analyze social media posts across 15 platforms: Facebook, Instagram, X, TikTok, YouTube, Threads, Bluesky, Pinterest, Google Business Profile, LinkedIn, Mastodon, Discord, Telegram, Tumblr and Snapchat. List channels, draft posts with per-platform captions, upload images and video, schedule or take the next queue slot, publish and retry, read post metrics and analytics, and on Pro and Business plans answer DMs and comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen; free plan available.",
+    icon: "https://www.bulkpublish.com/favicon.svg",
+    homepage: "https://www.bulkpublish.com/integrations/mcp-server/",
+    remoteUrl: "https://mcp.bulkpublish.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.bulkpublish.com/mcp"],
     },
   },
   {
@@ -934,6 +960,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "<personal-access-token>"],
+    },
+  },
+  {
+    name: "suparelay",
+    title: "Suparelay",
+    description:
+      "Make international calls from your AI assistant. Get the price per minute for a phone number or a country, and a Call link that opens the Suparelay browser dialer with the number ready; the person you call answers on their normal phone. Read-only. Hosted remote Streamable HTTP server at https://suparelay.app/mcp; no sign-in and no API key.",
+    icon: "https://suparelay.app/web-app-manifest-512x512.png",
+    homepage: "https://suparelay.app/ai/mcp",
+    remoteUrl: "https://suparelay.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
     },
   },
   {

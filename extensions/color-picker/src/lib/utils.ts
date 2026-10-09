@@ -1,6 +1,7 @@
 import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { Colors, Palette } from "color-namer";
 import { formatColor } from "./color-format";
+import { formatGroup } from "./groups";
 import uniqBy from "lodash/uniqBy";
 import { CopyColorsFormat, HistoryColor, HistoryItem } from "./types";
 import { ColorFormatType } from "./types";
@@ -45,6 +46,9 @@ export function getIcon(color: HistoryColor) {
 
 export function getAccessories(historyItem: HistoryItem) {
   const accessories = new Array<List.Item.Accessory>();
+  if (historyItem.group) {
+    accessories.push({ tag: formatGroup(historyItem.group) });
+  }
   accessories.push({ date: new Date(historyItem.date), tooltip: new Date(historyItem.date).toLocaleString() });
   return accessories;
 }

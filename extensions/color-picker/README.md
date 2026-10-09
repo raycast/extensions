@@ -8,6 +8,7 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 - Access your colors from the menu bar
 - View your favorite colors in a dedicated list
 - Organize your colors
+- Sort saved colors into groups, nest them with `Work/Calendar`, and copy a whole group as JSON or CSS
 - Generate colors using UI
 - Pick a color using AI
 - Pick a color with color wheel

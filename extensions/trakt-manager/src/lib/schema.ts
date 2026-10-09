@@ -456,6 +456,27 @@ export const TraktUserRatingItemSchema = z.object({
 });
 
 export const TraktUserRatingListSchema = z.array(TraktUserRatingItemSchema);
+
+/** `/sync/watched/movies`: every movie with at least one play. */
+export const TraktWatchedMovieListSchema = z.array(
+  z.object({ plays: z.number(), movie: z.object({ ids: z.object({ trakt: z.number() }) }) }),
+);
+
+/** `/sync/watched/shows`: watched shows, with their episodes by season and number (no episode ids). */
+export const TraktWatchedShowListSchema = z.array(
+  z.object({
+    plays: z.number(),
+    show: z.object({ ids: z.object({ trakt: z.number() }) }),
+    seasons: z
+      .array(
+        z.object({
+          number: z.number(),
+          episodes: z.array(z.object({ number: z.number(), plays: z.number() })),
+        }),
+      )
+      .optional(),
+  }),
+);
 export type TraktUserRatingItem = z.infer<typeof TraktUserRatingItemSchema>;
 
 export const TraktUserStatsSchema = z.object({

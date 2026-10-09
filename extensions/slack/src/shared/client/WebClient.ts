@@ -2,11 +2,13 @@ import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { createCanvasClient } from "./canvas";
 
 export type { SlackConversation, SlackMember } from "./slackTypes";
 
 const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<Preferences>();
 let slackWebClient: WebClient | null = null;
+let canvasWebClient: WebClient | null = null;
 let currentToken: string | undefined = accessToken;
 
 function getHttpProxy() {
@@ -27,13 +29,14 @@ export function getProxyAgent(): HttpsProxyAgent<string> | undefined {
 
 export const slack = OAuthService.slack({
   scope:
-    "users:read users:read.email channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read users.profile:read files:read files:write reactions:write",
+    "users:read users:read.email channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read users.profile:read files:read files:write reactions:write canvases:read canvases:write",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
     currentToken = token;
     const agent = getProxyAgent();
     // Let the SDK honor Retry-After silently, including during AI tool calls.
     slackWebClient = new WebClient(token, { ...(agent && { agent }) });
+    canvasWebClient = createCanvasClient(token, agent);
   },
 });
 
@@ -43,6 +46,11 @@ export function getSlackWebClient(): WebClient {
   }
 
   return slackWebClient;
+}
+
+export function getCanvasWebClient(): WebClient {
+  if (!canvasWebClient) throw new Error("No slack client initialized");
+  return canvasWebClient;
 }
 
 /**
