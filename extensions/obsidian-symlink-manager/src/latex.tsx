@@ -367,10 +367,10 @@ async function knownVaults(): Promise<string[]> {
 }
 
 export default function LatexHub({ initialTargetVault }: { initialTargetVault?: string }) {
-  const { defaultVaultPath, latexSnippetsFolder } = getPreferenceValues<{
-    defaultVaultPath: string;
-    latexSnippetsFolder?: string;
-  }>();
+  const { defaultVaultPath } = getPreferenceValues<Preferences>();
+  const latexSnippetsFolder: string | undefined = (
+    getPreferenceValues<Preferences>() as unknown as { latexSnippetsFolder?: string }
+  ).latexSnippetsFolder;
   const folder = latexSnippetsFolder ? path.resolve(latexSnippetsFolder) : "";
   const [files, setFiles] = useState<SnippetFile[]>([]);
   const [legacy, setLegacy] = useState<SnippetFile>();
