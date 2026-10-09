@@ -4,6 +4,7 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["es2021"],
+    "types": ["node"],
     "module": "commonjs",
     "target": "es2021",
     "strict": true,
