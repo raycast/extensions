@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
-import { randomUUID } from "node:crypto";
-import { cp, lstat, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import type { VaultItem } from "./items";
@@ -239,13 +238,11 @@ export async function revertItem(
   if (!/^[a-f0-9]{7,40}$/i.test(hash)) throw new Error("Invalid commit hash");
   await ensureGitRepo(defaultVault);
   const destination = await checkedItemPath(defaultVault, item, true);
-  const previous = `${destination}.symlink-manager-${randomUUID()}.backup`;
   const hadPrevious = await exists(destination);
   if (hadPrevious) {
     const sourceStats = await lstat(destination);
     if (sourceStats.isSymbolicLink()) throw new Error("The Default Vault item is a symlink");
     await commitItem(defaultVault, item, `Snapshot before restoring ${item}`);
-    await rename(destination, previous);
   }
   try {
     await mkdir(path.dirname(destination), { recursive: true });
@@ -258,14 +255,16 @@ export async function revertItem(
       await repoItemPath(defaultVault, item),
     ]);
     await commitItem(defaultVault, item, `Restored ${item} from ${hash.slice(0, 8)}`);
-    if (hadPrevious) {
-      // Merge untracked/ignored files (e.g. plugin data) back into the restored folder
-      await cp(previous, destination, { recursive: true, force: false });
-      await rm(previous, { recursive: true });
-    }
   } catch (error) {
-    if (await exists(destination)) await rm(destination, { recursive: true });
-    if (hadPrevious) await rename(previous, destination);
+    if (hadPrevious) {
+      await runGit(defaultVault, [
+        "restore",
+        "--source=HEAD",
+        "--worktree",
+        "--",
+        await repoItemPath(defaultVault, item),
+      ]).catch(() => {});
+    }
     throw error;
   }
 }
