@@ -1,8 +1,14 @@
 import { isFullDay } from "../helpers";
 import type { Reminder } from "../hooks/useData";
 
-/** Cache key shared by the menu bar and Next Reminder for the selected lists (empty = all lists). */
+/** Cache key shared by the menu bar and Next Reminder for the selected lists. */
 export const MENU_BAR_LISTS_KEY = "menu-bar-lists";
+
+/** Cache key of the single list the menu bar showed before several lists could be selected. */
+export const LEGACY_MENU_BAR_LIST_KEY = "menu-bar-list";
+
+/** Lists to show: "all", or the ids of the selected lists (empty when every list is unchecked). */
+export type ListSelection = "all" | string[];
 
 /** Cache key for reminders dismissed from the menu bar: reminder id → due date when dismissed. */
 export const DISMISSED_KEY = "menu-bar-dismissed";
@@ -15,8 +21,8 @@ export type NextReminderMatch = {
 };
 
 export type NextReminderOptions = {
-  /** Only reminders in these lists; empty means every list. */
-  listIds?: string[];
+  /** Only reminders in these lists; defaults to all lists. */
+  lists?: ListSelection;
   /** Show a reminder this many minutes before it's due; `null` always shows the next one. */
   showBeforeMinutes: number | null;
   /**
@@ -27,6 +33,66 @@ export type NextReminderOptions = {
   /** Reminders dismissed from the menu bar (id → due date at dismissal); they show again if rescheduled. */
   dismissed?: Record<string, string>;
 };
+
+/**
+ * Work out the selected lists from the cached values, falling back to the older single-list choice so
+ * it applies before the menu bar has migrated it.
+ *
+ * @param stored - Cached value of {@link MENU_BAR_LISTS_KEY}.
+ * @param legacyListId - Cached value of {@link LEGACY_MENU_BAR_LIST_KEY}.
+ * @returns The list selection.
+ */
+export function resolveListSelection(stored: unknown, legacyListId: unknown): ListSelection {
+  if (stored === "all") return "all";
+  if (Array.isArray(stored) && stored.every((id) => typeof id === "string")) return stored;
+  if (typeof legacyListId === "string" && legacyListId) return [legacyListId];
+  return "all";
+}
+
+/**
+ * Turn one list on or off. Turning a list on while all lists are shown selects only that list, and
+ * turning off the last list leaves none selected.
+ *
+ * @param selection - Current selection.
+ * @param listId - List to toggle, or undefined to show all lists.
+ * @returns The new selection.
+ */
+export function toggleListSelection(selection: ListSelection, listId: string | undefined): ListSelection {
+  if (listId === undefined) return "all";
+  if (selection === "all") return [listId];
+  return selection.includes(listId) ? selection.filter((id) => id !== listId) : [...selection, listId];
+}
+
+/**
+ * Whether a list is part of the selection.
+ *
+ * @param selection - Current selection.
+ * @param listId - List to check.
+ * @returns True when the list is selected.
+ */
+export function isListSelected(selection: ListSelection, listId: string | undefined): boolean {
+  if (selection === "all") return true;
+  return listId !== undefined && selection.includes(listId);
+}
+
+/**
+ * Whether the menu bar item should be hidden. "Only show for an upcoming reminder" applies only when
+ * Upcoming Reminder is on, and never while no list is selected, so the Lists menu stays reachable.
+ *
+ * @param options - Preference and state.
+ * @returns True to hide the menu bar item.
+ */
+export function shouldHideMenuBar(options: {
+  hideWhenNothingDue: boolean;
+  nextReminderEnabled: boolean;
+  isLoading: boolean;
+  hasNextReminder: boolean;
+  lists: ListSelection;
+}): boolean {
+  if (!options.hideWhenNothingDue || !options.nextReminderEnabled || options.isLoading) return false;
+  if (options.lists !== "all" && options.lists.length === 0) return false;
+  return !options.hasNextReminder;
+}
 
 /**
  * Parse a "minutes" preference value such as "15", "always" or "completed".
@@ -56,12 +122,12 @@ export function findNextReminder(
   now: Date,
   options: NextReminderOptions,
 ): NextReminderMatch | undefined {
-  const listIds = options.listIds ?? [];
+  const lists = options.lists ?? "all";
   const dismissed = options.dismissed ?? {};
   const timed = reminders
     .filter((reminder) => !reminder.isCompleted && reminder.dueDate && !isFullDay(reminder.dueDate))
     .filter((reminder) => dismissed[reminder.id] !== reminder.dueDate)
-    .filter((reminder) => listIds.length === 0 || (reminder.list && listIds.includes(reminder.list.id)))
+    .filter((reminder) => isListSelected(lists, reminder.list?.id))
     .map((reminder) => ({ reminder, due: new Date(reminder.dueDate as string) }))
     .filter(({ due }) => !isNaN(due.getTime()));
 

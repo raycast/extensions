@@ -36,9 +36,15 @@ import {
   DISMISSED_KEY,
   findNextReminder,
   formatRelativeDue,
+  isListSelected,
+  LEGACY_MENU_BAR_LIST_KEY,
+  ListSelection,
   MENU_BAR_LISTS_KEY,
   parseMinutesPreference,
   pruneDismissed,
+  resolveListSelection,
+  shouldHideMenuBar,
+  toggleListSelection,
 } from "./helpers/next-reminder";
 import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
@@ -60,24 +66,24 @@ export default function Command() {
 
   const { data, isLoading, mutate } = useData();
   const [, rerender] = useReducer((count: number) => count + 1, 0);
-  // Lists shown in the menu bar; empty means all lists. Replaces the older single-list choice.
-  const [legacyListId, setLegacyListId] = useCachedState<string | undefined>("menu-bar-list");
-  const [listIds, setListIds] = useCachedState<string[]>(MENU_BAR_LISTS_KEY, legacyListId ? [legacyListId] : []);
+  // Lists shown in the menu bar. Replaces the older single-list choice, which is migrated once.
+  const [legacyListId, setLegacyListId] = useCachedState<string | undefined>(LEGACY_MENU_BAR_LIST_KEY);
+  const [storedLists, setStoredLists] = useCachedState<ListSelection | undefined>(MENU_BAR_LISTS_KEY, undefined);
+  const lists = resolveListSelection(storedLists, legacyListId);
   useEffect(() => {
     if (!legacyListId) return;
-    setListIds((ids) => (ids.includes(legacyListId) ? ids : [...ids, legacyListId]));
+    setStoredLists(lists);
     setLegacyListId(undefined);
   }, [legacyListId]);
-  const selectedLists = data?.lists.filter((l) => listIds.includes(l.id)) ?? [];
+  const noListsSelected = lists !== "all" && lists.length === 0;
+  const selectedLists = lists === "all" ? [] : (data?.lists.filter((l) => lists.includes(l.id)) ?? []);
   // Reminders dismissed from the menu bar title, like Calendar's "Dismiss event".
   const [dismissed, setDismissed] = useCachedState<Record<string, string>>(DISMISSED_KEY, {});
 
   const reminders = useMemo(() => {
     if (!data || !data.reminders || !Array.isArray(data.reminders)) return [];
-    return listIds.length
-      ? data.reminders.filter((reminder: Reminder) => reminder.list && listIds.includes(reminder.list.id))
-      : data.reminders;
-  }, [data, listIds]);
+    return data.reminders.filter((reminder: Reminder) => isListSelected(lists, reminder.list?.id));
+  }, [data, lists]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -218,20 +224,19 @@ export default function Command() {
   }
 
   async function toggleList(listId?: string) {
-    if (!listId) setListIds([]);
-    else setListIds((ids) => (ids.includes(listId) ? ids.filter((id) => id !== listId) : [...ids, listId]));
+    setStoredLists(toggleListSelection(lists, listId));
     await mutate();
   }
 
   // Calendar-style next reminder: shown from N minutes before it's due until it's hidden.
-  const nextReminder =
-    nextReminderShowBefore && nextReminderShowBefore !== "never"
-      ? findNextReminder(reminders, now, {
-          showBeforeMinutes: parseMinutesPreference(nextReminderShowBefore, 15),
-          hideAfterMinutes: parseMinutesPreference(nextReminderHideAfter, null),
-          dismissed,
-        })
-      : undefined;
+  const nextReminderEnabled = Boolean(nextReminderShowBefore) && nextReminderShowBefore !== "never";
+  const nextReminder = nextReminderEnabled
+    ? findNextReminder(reminders, now, {
+        showBeforeMinutes: parseMinutesPreference(nextReminderShowBefore, 15),
+        hideAfterMinutes: parseMinutesPreference(nextReminderHideAfter, null),
+        dismissed,
+      })
+    : undefined;
 
   let title = "";
   if (titleType === "count") {
@@ -249,14 +254,20 @@ export default function Command() {
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
-  if (hideWhenNothingDue && !isLoading && !nextReminder) return null;
+  if (
+    shouldHideMenuBar({ hideWhenNothingDue, nextReminderEnabled, isLoading, hasNextReminder: !!nextReminder, lists })
+  ) {
+    return null;
+  }
 
   const listsLabel =
-    selectedLists.length === 0
+    lists === "all"
       ? "All"
-      : selectedLists.length === 1
-        ? selectedLists[0].title
-        : `${selectedLists.length}`;
+      : noListsSelected
+        ? "None"
+        : selectedLists.length === 1
+          ? selectedLists[0].title
+          : `${selectedLists.length}`;
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
@@ -325,6 +336,11 @@ export default function Command() {
             }
           }}
         />
+      ) : null}
+      {noListsSelected ? (
+        <MenuBarExtra.Section title="No lists selected">
+          <MenuBarExtra.Item title="Show All Lists" icon={Icon.Tray} onAction={() => toggleList(undefined)} />
+        </MenuBarExtra.Section>
       ) : null}
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
@@ -476,7 +492,7 @@ export default function Command() {
           <MenuBarExtra.Item
             title="All Lists"
             onAction={() => toggleList(undefined)}
-            icon={listIds.length === 0 ? Icon.Checkmark : Icon.Tray}
+            icon={lists === "all" ? Icon.Checkmark : Icon.Tray}
           />
           {data?.lists.map((list) => (
             <MenuBarExtra.Item
@@ -484,7 +500,7 @@ export default function Command() {
               title={list.title}
               onAction={() => toggleList(list.id)}
               icon={
-                listIds.includes(list.id)
+                lists !== "all" && lists.includes(list.id)
                   ? { source: Icon.CheckCircle, tintColor: list.color }
                   : { source: Icon.Circle, tintColor: list.color }
               }

@@ -195,15 +195,15 @@
           "type": "dropdown",
           "data": [
             {
-              "title": "Icon only",
+              "title": "Icon Only",
               "value": "nothing"
             },
             {
-              "title": "Number of reminders",
+              "title": "Number of Reminders",
               "value": "count"
             },
             {
-              "title": "First reminder",
+              "title": "First Reminder",
               "value": "firstReminder"
             }
           ],
@@ -217,15 +217,15 @@
           "type": "dropdown",
           "data": [
             {
-              "title": "Due today or overdue",
+              "title": "Due Today or Overdue",
               "value": "today"
             },
             {
-              "title": "Reminders with a due date",
+              "title": "Reminders with a Due Date",
               "value": "upcoming"
             },
             {
-              "title": "All open reminders",
+              "title": "All Open Reminders",
               "value": "all"
             }
           ],
@@ -255,31 +255,31 @@
               "value": "never"
             },
             {
-              "title": "At its due time",
+              "title": "At Its Due Time",
               "value": "0"
             },
             {
-              "title": "From 5 minutes before",
+              "title": "From 5 Minutes Before",
               "value": "5"
             },
             {
-              "title": "From 10 minutes before",
+              "title": "From 10 Minutes Before",
               "value": "10"
             },
             {
-              "title": "From 15 minutes before",
+              "title": "From 15 Minutes Before",
               "value": "15"
             },
             {
-              "title": "From 30 minutes before",
+              "title": "From 30 Minutes Before",
               "value": "30"
             },
             {
-              "title": "From 1 hour before",
+              "title": "From 1 Hour Before",
               "value": "60"
             },
             {
-              "title": "Always show the next one",
+              "title": "Always Show the Next One",
               "value": "always"
             }
           ]
@@ -293,19 +293,19 @@
           "default": "completed",
           "data": [
             {
-              "title": "Until I complete it (or the day ends)",
+              "title": "Until I Complete It (or the Day Ends)",
               "value": "completed"
             },
             {
-              "title": "5 minutes after it's due",
+              "title": "5 Minutes After It's Due",
               "value": "5"
             },
             {
-              "title": "15 minutes after it's due",
+              "title": "15 Minutes After It's Due",
               "value": "15"
             },
             {
-              "title": "1 hour after it's due",
+              "title": "1 Hour After It's Due",
               "value": "60"
             }
           ]
@@ -324,15 +324,15 @@
           "type": "dropdown",
           "data": [
             {
-              "title": "Today and overdue",
+              "title": "Today and Overdue",
               "value": "today"
             },
             {
-              "title": "Today, tomorrow and upcoming",
+              "title": "Today, Tomorrow and Upcoming",
               "value": "upcoming"
             },
             {
-              "title": "All, including no due date",
+              "title": "All, Including No Due Date",
               "value": "all"
             }
           ],
@@ -378,24 +378,50 @@
           "default": "60",
           "data": [
             {
-              "title": "15 minutes",
+              "title": "15 Minutes",
               "value": "15"
             },
             {
-              "title": "30 minutes",
+              "title": "30 Minutes",
               "value": "30"
             },
             {
-              "title": "1 hour",
+              "title": "1 Hour",
               "value": "60"
             },
             {
-              "title": "2 hours",
+              "title": "2 Hours",
               "value": "120"
             },
             {
-              "title": "Any time (always show the next one)",
+              "title": "Any Time (Always Show the Next One)",
               "value": "always"
+            }
+          ]
+        },
+        {
+          "name": "keepShown",
+          "title": "Keep It Shown",
+          "description": "How long a reminder stays in the subtitle once its time has passed.",
+          "type": "dropdown",
+          "required": false,
+          "default": "completed",
+          "data": [
+            {
+              "title": "Until I Complete It (or the Day Ends)",
+              "value": "completed"
+            },
+            {
+              "title": "5 Minutes After It's Due",
+              "value": "5"
+            },
+            {
+              "title": "15 Minutes After It's Due",
+              "value": "15"
+            },
+            {
+              "title": "1 Hour After It's Due",
+              "value": "60"
             }
           ]
         }

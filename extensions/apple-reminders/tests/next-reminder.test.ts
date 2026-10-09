@@ -4,8 +4,12 @@ import { describe, it } from "node:test";
 import {
   findNextReminder,
   formatRelativeDue,
+  isListSelected,
   parseMinutesPreference,
   pruneDismissed,
+  resolveListSelection,
+  shouldHideMenuBar,
+  toggleListSelection,
 } from "../src/helpers/next-reminder";
 import type { Reminder } from "../src/hooks/useData";
 
@@ -72,8 +76,12 @@ describe("findNextReminder", () => {
       reminder("allDay", "2026-10-09"),
       reminder("home", at(5), { list: { id: "home", title: "Home", color: "#0f0" } }),
     ];
-    assert.strictEqual(findNextReminder(reminders, now, { ...options, listIds: ["work"] }), undefined);
+    assert.strictEqual(findNextReminder(reminders, now, { ...options, lists: ["work"] }), undefined);
     assert.strictEqual(findNextReminder(reminders, now, options)?.reminder.id, "home");
+  });
+
+  it("shows nothing when no list is selected", () => {
+    assert.strictEqual(findNextReminder([reminder("soon", at(5))], now, { ...options, lists: [] }), undefined);
   });
 });
 
@@ -119,5 +127,65 @@ describe("parseMinutesPreference", () => {
     assert.strictEqual(parseMinutesPreference("always", 60), null);
     assert.strictEqual(parseMinutesPreference("completed", 5), null);
     assert.strictEqual(parseMinutesPreference(undefined, 60), 60);
+  });
+});
+
+describe("list selection", () => {
+  it("uses the stored selection, including an empty one", () => {
+    assert.deepStrictEqual(resolveListSelection(["work", "home"], undefined), ["work", "home"]);
+    assert.deepStrictEqual(resolveListSelection([], "work"), []);
+    assert.strictEqual(resolveListSelection("all", "work"), "all");
+  });
+
+  it("falls back to the older single-list choice before it's migrated", () => {
+    assert.deepStrictEqual(resolveListSelection(undefined, "work"), ["work"]);
+  });
+
+  it("shows all lists when nothing valid is stored", () => {
+    assert.strictEqual(resolveListSelection(undefined, undefined), "all");
+    assert.strictEqual(resolveListSelection([1, 2], ""), "all");
+    assert.strictEqual(resolveListSelection({ id: "work" }, null), "all");
+  });
+
+  it("toggles lists without falling back to all lists", () => {
+    assert.deepStrictEqual(toggleListSelection("all", "work"), ["work"]);
+    assert.deepStrictEqual(toggleListSelection(["work"], "home"), ["work", "home"]);
+    assert.deepStrictEqual(toggleListSelection(["work", "home"], "work"), ["home"]);
+    assert.deepStrictEqual(toggleListSelection(["work"], "work"), []);
+    assert.strictEqual(toggleListSelection([], undefined), "all");
+  });
+
+  it("matches lists against the selection", () => {
+    assert.strictEqual(isListSelected("all", undefined), true);
+    assert.strictEqual(isListSelected(["work"], "work"), true);
+    assert.strictEqual(isListSelected(["work"], "home"), false);
+    assert.strictEqual(isListSelected(["work"], undefined), false);
+    assert.strictEqual(isListSelected([], "work"), false);
+  });
+});
+
+describe("shouldHideMenuBar", () => {
+  const base = {
+    hideWhenNothingDue: true,
+    nextReminderEnabled: true,
+    isLoading: false,
+    hasNextReminder: false,
+    lists: "all" as const,
+  };
+
+  it("hides when nothing is due and the option is on", () => {
+    assert.strictEqual(shouldHideMenuBar(base), true);
+    assert.strictEqual(shouldHideMenuBar({ ...base, hasNextReminder: true }), false);
+    assert.strictEqual(shouldHideMenuBar({ ...base, hideWhenNothingDue: false }), false);
+  });
+
+  it("never hides while Upcoming Reminder is off", () => {
+    assert.strictEqual(shouldHideMenuBar({ ...base, nextReminderEnabled: false }), false);
+  });
+
+  it("stays visible while loading or when no list is selected", () => {
+    assert.strictEqual(shouldHideMenuBar({ ...base, isLoading: true }), false);
+    assert.strictEqual(shouldHideMenuBar({ ...base, lists: [] }), false);
+    assert.strictEqual(shouldHideMenuBar({ ...base, lists: ["work"] }), true);
   });
 });

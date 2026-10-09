@@ -14,23 +14,25 @@ import {
   DISMISSED_KEY,
   findNextReminder,
   formatRelativeDue,
+  LEGACY_MENU_BAR_LIST_KEY,
   MENU_BAR_LISTS_KEY,
   parseMinutesPreference,
+  resolveListSelection,
 } from "./helpers/next-reminder";
 import { Data } from "./hooks/useData";
 
-function readCached<T>(key: string, fallback: T, isValid: (value: unknown) => boolean): T {
+/** Read a value the menu bar stored with `useCachedState`; undefined when missing or unreadable. */
+function readCached(key: string): unknown {
   try {
     const raw = new Cache().get(key);
-    const value = raw ? JSON.parse(raw) : fallback;
-    return isValid(value) ? value : fallback;
+    return raw ? JSON.parse(raw) : undefined;
   } catch {
-    return fallback;
+    return undefined;
   }
 }
 
 export default async function Command() {
-  const { showWithin } = getPreferenceValues<Preferences.NextReminder>();
+  const { showWithin, keepShown } = getPreferenceValues<Preferences.NextReminder>();
   const now = new Date();
 
   let data: Data;
@@ -42,15 +44,12 @@ export default async function Command() {
   }
 
   const showBeforeMinutes = parseMinutesPreference(showWithin, 60);
+  const dismissed = readCached(DISMISSED_KEY);
   const match = findNextReminder(data.reminders ?? [], now, {
-    listIds: readCached<string[]>(MENU_BAR_LISTS_KEY, [], Array.isArray),
-    dismissed: readCached<Record<string, string>>(
-      DISMISSED_KEY,
-      {},
-      (value) => typeof value === "object" && value !== null && !Array.isArray(value),
-    ),
+    lists: resolveListSelection(readCached(MENU_BAR_LISTS_KEY), readCached(LEGACY_MENU_BAR_LIST_KEY)),
+    dismissed: isRecord(dismissed) ? dismissed : {},
     showBeforeMinutes,
-    hideAfterMinutes: 15,
+    hideAfterMinutes: parseMinutesPreference(keepShown, null),
   });
 
   if (match) {
@@ -71,4 +70,8 @@ export default async function Command() {
       await launchCommand({ name: "my-reminders", type: LaunchType.UserInitiated });
     }
   }
+}
+
+function isRecord(value: unknown): value is Record<string, string> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
