@@ -2,12 +2,14 @@ import {
   Action,
   ActionPanel,
   Detail,
+  environment,
   List,
   getPreferenceValues,
   Icon,
   Keyboard,
   LocalStorage,
   openExtensionPreferences,
+  useNavigation,
   showToast,
   Toast,
   type LaunchProps,
@@ -15,7 +17,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CodexAppServer, type CodexEvent } from "./codex";
 import { useSessionHistory, type Page } from "./history";
-import { messageRows, rowTitle } from "./chat-text";
+import { conversationMarkdown, messageRows, rowTitle } from "./chat-text";
 import {
   asRecord,
   asString,
@@ -24,7 +26,6 @@ import {
   emptyConversation,
   parseLibrary,
   upsertConversation,
-  conversationTitle,
   latestRound,
   messagesFromThread,
   transcript,
@@ -38,6 +39,7 @@ import {
 export default function AskCodex(
   props: LaunchProps<{ arguments: Arguments.Index }>,
 ) {
+  const { pop } = useNavigation();
   const preferences = getPreferenceValues<Preferences>();
   const initialPrompt =
     props.fallbackText?.trim() || props.arguments?.prompt?.trim() || "";
@@ -130,7 +132,7 @@ export default function AskCodex(
         return;
       if (event.method === "turn/started") {
         setBusy(true);
-        setStatus("正在思考 · 可直接输入补充要求");
+        setStatus("正在思考 · 输入后按 Enter 发送补充要求");
       }
       if (event.method === "item/started") {
         const type = asString(asRecord(params.item).type);
@@ -177,7 +179,7 @@ export default function AskCodex(
               : [...previous.messages, next],
           };
         });
-        setStatus("正在回答 · 可直接输入补充要求");
+        setStatus("正在回答 · 输入后按 Enter 发送补充要求");
       }
       if (event.method === "turn/completed") {
         const turn = asRecord(params.turn);
@@ -188,8 +190,8 @@ export default function AskCodex(
           turn.status === "failed"
             ? "本次回答失败，可重试"
             : turn.status === "interrupted"
-              ? "已停止 · 输入后回车继续"
-              : "已完成 · 输入后按 Enter 继续",
+              ? "已停止 · 输入后按 Enter 继续聊天"
+              : "已完成 · 输入后按 Enter 继续聊天",
         );
         setConversation((previous) => ({
           ...previous,
@@ -363,7 +365,7 @@ export default function AskCodex(
     activeReplyRef.current = replyId;
     itemIdsRef.current.clear();
     setBusy(true);
-    setStatus("正在思考 · 可直接输入补充要求");
+    setStatus("正在思考 · 输入后按 Enter 发送补充要求");
     setConversation((previous) => ({
       ...previous,
       messages: [
@@ -527,7 +529,7 @@ export default function AskCodex(
       setDraft(next.draft || "");
       setBusy(Boolean(client.currentTurnId));
       setError("");
-      setStatus("会话已恢复 · 可继续输入");
+      setStatus("会话已恢复 · 输入后按 Enter 继续聊天");
       save(next);
       setPage("chat");
     } catch (reason) {
@@ -700,13 +702,37 @@ export default function AskCodex(
           content={message.content}
         />
       )}
+      <Action.Push
+        title="紧凑阅读当前对话"
+        icon={Icon.AppWindow}
+        target={
+          <Detail
+            navigationTitle="Ask ChatGPT · 紧凑阅读"
+            markdown={conversationMarkdown(
+              visibleMessages,
+              environment.assetsPath,
+              status,
+              error,
+            )}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="返回聊天输入"
+                  icon={Icon.ArrowLeft}
+                  onAction={pop}
+                />
+              </ActionPanel>
+            }
+          />
+        }
+      />
       {secondaryActions}
     </ActionPanel>
   );
   if (page === "chat") {
     return (
       <List
-        navigationTitle={conversationTitle(conversation)}
+        navigationTitle="Ask ChatGPT"
         searchBarAccessory={accessory}
         searchText={draft}
         onSearchTextChange={setDraft}
@@ -773,13 +799,6 @@ export default function AskCodex(
     <List
       navigationTitle="Ask ChatGPT"
       searchBarAccessory={accessory}
-      searchText={draft}
-      onSearchTextChange={setDraft}
-      searchBarPlaceholder={
-        busy
-          ? "继续输入补充要求，Enter 发送给正在回答的 ChatGPT…"
-          : "输入问题或追问，Enter 发送…"
-      }
       filtering={false}
       throttle={false}
       isShowingDetail

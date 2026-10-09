@@ -1,3 +1,5 @@
+import type { ChatMessage } from "./conversations";
+
 function displayWidth(value: string) {
   return Array.from(value).reduce(
     (width, character) =>
@@ -6,7 +8,7 @@ function displayWidth(value: string) {
   );
 }
 
-// Native List rows do not wrap. Keep each line short enough to remain visible,
+// Keep each monospace line short enough to remain visible,
 // preferring word boundaries and keeping closing punctuation on its line.
 function wrapLine(value: string, limit: number, code: boolean) {
   const rows: string[] = [];
@@ -77,8 +79,36 @@ export function messageRows(content: string, limit = 78): string[] {
   return rows.length ? rows : ["正在思考…"];
 }
 
-// Raycast trims leading ASCII whitespace in titles. Preserve code indentation
-// visually; copy actions continue to use the original, unchanged message.
+export function conversationMarkdown(
+  messages: ChatMessage[],
+  assetsPath: string,
+  status: string,
+  error: string,
+) {
+  const cards = [...messages].reverse().map((message) => {
+    const speaker =
+      message.role === "assistant"
+        ? "ChatGPT"
+        : message.kind === "steer"
+          ? "你 · 补充要求"
+          : "你";
+    const avatar =
+      message.role === "assistant" ? "command-icon.png" : "user-avatar.svg";
+    const body = messageRows(message.content, 86).join("\n");
+    // Longer fences keep literal backticks inside a reply from ending its card.
+    const runs = body.match(/`+/g) || [];
+    const fence = "`".repeat(Math.max(3, ...runs.map((run) => run.length + 1)));
+    return `![${speaker}](${encodeURI(assetsPath)}/${avatar}?raycast-width=22&raycast-height=22) **${speaker}**\n\n${fence}text\n${body}\n${fence}`;
+  });
+  const notice = error ? `连接提示：${error}` : status;
+  const header = notice ? `> ${notice.replace(/\r?\n/g, " ")}\n\n` : "";
+  return (
+    header +
+    (cards.join("\n\n") ||
+      "## 开始新对话\n\n按 Enter 输入问题，发送后会回到这里显示回复。")
+  );
+}
+
 export function rowTitle(row: string) {
   return row.replace(/^ +/, (spaces) => "\u00a0".repeat(spaces.length));
 }
