@@ -41,9 +41,19 @@ function describeEntry(entry: TraktListEntry): { kind: ListItemKind; traktId?: n
 
 const ListItems = ({ list, onChanged }: { list: TraktList; onChanged: () => void }) => {
   const { data, isLoading, revalidate } = useCachedPromise(
-    async (id: string) => (await fetchListItems(id, list.name)).items,
+    (id: string) => fetchListItems(id, list.name),
     [String(list.ids.trakt)],
-    { failureToastOptions: { title: `Could not read "${list.name}"` } },
+    {
+      failureToastOptions: { title: `Could not read "${list.name}"` },
+      onData: ({ items, totalItems, exhaustive }) => {
+        if (exhaustive) return;
+        showToast({
+          style: Toast.Style.Failure,
+          title: "List partly loaded",
+          message: `Showing ${items.length} of ${totalItems} items.`,
+        });
+      },
+    },
   );
 
   const remove = async (entry: TraktListEntry) => {
@@ -71,7 +81,7 @@ const ListItems = ({ list, onChanged }: { list: TraktList; onChanged: () => void
   return (
     <List isLoading={isLoading} navigationTitle={list.name} searchBarPlaceholder={`Filter "${list.name}"`}>
       <List.EmptyView title="This list is empty" description="Add titles with “Add to List…” from search." />
-      {data?.map((entry) => {
+      {data?.items.map((entry) => {
         const { title, icon, kind, traktId } = describeEntry(entry);
         const year = entry.movie?.year ?? (kind === "shows" ? entry.show?.year : undefined);
         return (
