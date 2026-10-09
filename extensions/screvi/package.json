@@ -10,6 +10,9 @@
     "Media",
     "Web"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "keywords": [
     "screvi",
     "highlights",
