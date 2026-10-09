@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-09
 
 - Add client and internal project management.
 - Add custom project categories that can be created, renamed, and safely deleted.
