@@ -11,18 +11,26 @@ export function getCurrentMinuteISO(): string {
 // the given time, e.g. 14:20 snaps to 15:00 or 14:00 with a 60-minute step.
 export function snapToGrid(time: DateTime, stepMinutes: number, direction: 1 | -1): DateTime {
   const minuteOfDay = time.hour * 60 + time.minute + (time.second * 1000 + time.millisecond) / 60000;
-  let step = direction > 0 ? Math.floor(minuteOfDay / stepMinutes) + 1 : Math.ceil(minuteOfDay / stepMinutes) - 1;
+  // Starts one grid point early: in the hour repeated when daylight saving time ends, the second occurrence
+  // of an earlier clock time can still lie ahead.
+  let step = direction > 0 ? Math.floor(minuteOfDay / stepMinutes) : Math.ceil(minuteOfDay / stepMinutes);
   const startOfDay = time.startOf("day");
-  // Grid points are set on the local clock, skipping ones that don't exist because a daylight saving time
-  // change jumps over them (e.g. 02:00 in a zone that moves from 02:00 to 02:30).
   for (let attempt = 0; attempt < 48; attempt++, step += direction) {
     const minutes = step * stepMinutes;
     const days = Math.floor(minutes / 1440);
     const localMinutes = minutes - days * 1440;
-    const candidate = startOfDay.plus({ days }).set({ hour: Math.floor(localMinutes / 60), minute: localMinutes % 60 });
-    const exists = candidate.hour * 60 + candidate.minute === localMinutes;
-    const isPast = direction > 0 ? candidate > time : candidate < time;
-    if (exists && isPast) return candidate;
+    const day = startOfDay.plus({ days });
+    const target = day.set({ hour: Math.floor(localMinutes / 60), minute: localMinutes % 60 });
+    // A local clock time occurs twice in the hour repeated when daylight saving time ends, and not at all in
+    // the hour it skips (e.g. 02:00 in a zone that moves from 02:00 to 02:30), so each offset in effect
+    // around the target is tried, and the occurrence closest to the time in the requested direction wins.
+    const offsets = new Set([target.minus({ hours: 6 }).offset, target.plus({ hours: 6 }).offset]);
+    const occurrences = [...offsets]
+      .map((offset) => DateTime.fromMillis(target.toMillis() + (target.offset - offset) * 60000, { zone: time.zone }))
+      .filter((t) => t.hasSame(day, "day") && t.hour * 60 + t.minute === localMinutes)
+      .filter((t) => (direction > 0 ? t > time : t < time))
+      .sort((a, b) => direction * (a.toMillis() - b.toMillis()));
+    if (occurrences.length > 0) return occurrences[0];
   }
   return time.plus({ minutes: direction * stepMinutes });
 }
