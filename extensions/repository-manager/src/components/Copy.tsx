@@ -1,3 +1,4 @@
+import { projectShortcut } from '../platform'
 import { Action, ActionPanel, Icon } from '@raycast/api'
 import { Project } from '../project'
 
@@ -10,7 +11,7 @@ export function Copy({ project }: CopyProps) {
         <ActionPanel.Submenu
             title="Copy Info"
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ['cmd'], key: '.' }}
+            shortcut={projectShortcut('.')}
         >
             <Action.CopyToClipboard
                 title="Copy Name"

@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "preferences": [
     {
@@ -20,8 +21,11 @@
       "title": "Projects Path",
       "description": "The path to the folder containing your projects",
       "required": true,
-      "default": "~/dev",
-      "placeholder": "~/dev"
+      "default": {
+        "macOS": "~/dev",
+        "Windows": "~\\dev"
+      },
+      "placeholder": "Choose your projects folder"
     },
     {
       "type": "dropdown",
@@ -107,9 +111,12 @@
       "type": "appPicker",
       "name": "terminalApp",
       "title": "Terminal App",
-      "description": "The terminal app to use",
+      "description": "The terminal app to use. On Windows, supported terminals are Windows Terminal, Windows PowerShell, PowerShell 7, and Command Prompt.",
       "required": true,
-      "default": "Terminale"
+      "default": {
+        "macOS": "Terminale",
+        "Windows": "Windows Terminal"
+      }
     },
     {
       "type": "appPicker",
@@ -117,7 +124,10 @@
       "title": "Browser App",
       "description": "The browser app to use",
       "required": true,
-      "default": "Google Chrome"
+      "default": {
+        "macOS": "Google Chrome",
+        "Windows": "Microsoft Edge"
+      }
     },
     {
       "type": "textfield",
@@ -132,14 +142,14 @@
       "type": "checkbox",
       "label": "Resize Editor Window After Launch",
       "name": "resizeEditorWindowAfterLaunch",
-      "description": "Resize the editor window after launching a project",
+      "description": "Resize the editor window after launching a project (macOS only)",
       "required": false
     },
     {
       "type": "dropdown",
       "name": "windowResizeMode",
       "title": "Resize Mode",
-      "description": "The mode to use when resizing the editor window",
+      "description": "The mode to use when resizing the editor window (macOS only)",
       "required": false,
       "default": "almost-maximize",
       "placeholder": "almost-maximize",
@@ -208,24 +218,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.4",
-    "@raycast/utils": "^1.19.1",
-    "parse-git-config": "^3.0.0"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.2",
+    "parse-git-config": "^3.0.0",
+    "cross-spawn": "^7.0.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.15.29",
+    "@types/node": "22.19.17",
     "@types/parse-git-config": "^3.0.4",
-    "@types/react": "^19.1.6",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@types/cross-spawn": "^6.0.6",
+    "tsx": "^4.20.6"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
   }
 }

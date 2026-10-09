@@ -1,5 +1,6 @@
+import { projectShortcut } from './platform'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Action, ActionPanel, List, Icon, openExtensionPreferences } from '@raycast/api'
+import { Keyboard, Action, ActionPanel, List, Icon, openExtensionPreferences } from '@raycast/api'
 import { useCachedPromise, useCachedState } from '@raycast/utils'
 import { existsSync } from 'fs'
 
@@ -303,7 +304,7 @@ export default function Command() {
             <Action
                 title="Refresh Repositories"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={revalidate}
             />
             {selectedTags.length > 0 && (
@@ -322,14 +323,14 @@ export default function Command() {
             <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
+                shortcut={projectShortcut(',', ['shift'])}
                 onAction={openExtensionPreferences}
             />
             {preferences.enableProjectsCaching && (
                 <Action
                     title="Clear Cache"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'delete' }}
+                    shortcut={projectShortcut('delete', ['shift'])}
                     onAction={handleClearCache}
                 />
             )}
