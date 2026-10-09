@@ -15,17 +15,24 @@ import { homedir } from "node:os";
 import { dirname } from "node:path";
 import { useState } from "react";
 import { formatBytes } from "./format";
-import { LargeFile, largeFiles, minimumSizes, spotlightFiles } from "./large-files";
-import { expandPath, folderName } from "./paths";
+import { LargeFile, largeFiles, minimumSizes, searchedFolder, spotlightFiles } from "./large-files";
+import { folderName } from "./paths";
 import { scanOrShowFailure } from "./sizewise";
 
-/** What another command or a deeplink can pass: a folder to search instead of the preference's. */
+/**
+ * What another command or a deeplink can pass: a folder to search instead of the preference's, as
+ * an absolute path, used as it is. Names can hold backslashes and spaces, so it isn't read the way
+ * a typed or pasted path is.
+ */
 export type LargestFilesContext = { folder?: string };
 
 export default function Command(props: LaunchProps<{ launchContext?: LargestFilesContext }>) {
   const home = homedir();
-  const folder =
-    expandPath(props.launchContext?.folder ?? "") ?? (getPreferenceValues<Preferences.LargestFiles>().folder || home);
+  const folder = searchedFolder(
+    props.launchContext?.folder,
+    getPreferenceValues<Preferences.LargestFiles>().folder,
+    home,
+  );
   const { push } = useNavigation();
   const [minimumBytes, setMinimumBytes] = useState<number>(minimumSizes[0]);
   const {

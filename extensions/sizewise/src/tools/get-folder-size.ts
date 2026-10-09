@@ -12,8 +12,10 @@ type Input = {
 
 /**
  * Measures how much space a folder or disk takes up, counting the space its files take on disk.
- * `unreadableFolderCount` is how many folders inside couldn't be read and aren't counted, so when
- * it's more than 0 the folder takes up at least `size`. It doesn't say what's inside: for that,
+ * `unreadableFolderCount` is how many folders inside couldn't be read and aren't counted.
+ * `skipsOtherAppsData` is true when other apps' data inside, which macOS keeps private, isn't
+ * counted. `isAtLeast` is true when either left something out, so the folder takes up at least
+ * `size`: say "at least" then. It doesn't say what's inside: for that,
  * open the folder in Sizewise.
  */
 export default async function tool(input: Input) {
@@ -32,6 +34,13 @@ export default async function tool(input: Input) {
     case "folder":
       break;
   }
-  const { bytes, unreadableFolderCount } = await measureFolder(path);
-  return { name, path, size: formatBytes(bytes), unreadableFolderCount };
+  const { bytes, unreadableFolderCount, skipsOtherAppsData } = await measureFolder(path);
+  return {
+    name,
+    path,
+    size: formatBytes(bytes),
+    isAtLeast: unreadableFolderCount > 0 || skipsOtherAppsData,
+    unreadableFolderCount,
+    skipsOtherAppsData,
+  };
 }
