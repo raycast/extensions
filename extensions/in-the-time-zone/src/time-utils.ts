@@ -1,38 +1,45 @@
 import { DateTime } from "luxon";
 
-// Truncated to the minute, so polling it only yields a new value (and a re-render) once a minute.
-// Truncates the timestamp itself rather than the local clock fields, which would resolve to the wrong
-// instant during the repeated hour when daylight saving time ends.
+// Truncated to the minute, so polling it only yields a new value (and a re-render) once a minute. The
+// timestamp itself is truncated: truncating the local clock fields would resolve to the wrong instant during
+// the repeated hour when daylight saving time ends.
 export function getCurrentMinuteISO(): string {
   return new Date(Math.floor(Date.now() / 60000) * 60000).toISOString();
 }
 
-// Moves to the next (direction 1) or previous (direction -1) multiple of stepMinutes on the local clock of
-// the given time, e.g. 14:20 snaps to 15:00 or 14:00 with a 60-minute step.
+// Moves to the nearest multiple of stepMinutes on the local clock of the given time, strictly after it
+// (direction 1) or before it (direction -1), e.g. 14:20 snaps to 15:00 or 14:00 with a 60-minute step.
 export function snapToGrid(time: DateTime, stepMinutes: number, direction: 1 | -1): DateTime {
   const minuteOfDay = time.hour * 60 + time.minute + (time.second * 1000 + time.millisecond) / 60000;
-  // Starts one grid point early: in the hour repeated when daylight saving time ends, the second occurrence
-  // of an earlier clock time can still lie ahead.
-  let step = direction > 0 ? Math.floor(minuteOfDay / stepMinutes) : Math.ceil(minuteOfDay / stepMinutes);
+  const first = direction > 0 ? Math.floor(minuteOfDay / stepMinutes) : Math.ceil(minuteOfDay / stepMinutes);
   const startOfDay = time.startOf("day");
-  for (let attempt = 0; attempt < 48; attempt++, step += direction) {
-    const minutes = step * stepMinutes;
-    const days = Math.floor(minutes / 1440);
-    const localMinutes = minutes - days * 1440;
-    const day = startOfDay.plus({ days });
-    const target = day.set({ hour: Math.floor(localMinutes / 60), minute: localMinutes % 60 });
-    // A local clock time occurs twice in the hour repeated when daylight saving time ends, and not at all in
-    // the hour it skips (e.g. 02:00 in a zone that moves from 02:00 to 02:30), so each offset in effect
-    // around the target is tried, and the occurrence closest to the time in the requested direction wins.
-    const offsets = new Set([target.minus({ hours: 6 }).offset, target.plus({ hours: 6 }).offset]);
-    const occurrences = [...offsets]
-      .map((offset) => DateTime.fromMillis(target.toMillis() + (target.offset - offset) * 60000, { zone: time.zone }))
-      .filter((t) => t.hasSame(day, "day") && t.hour * 60 + t.minute === localMinutes)
-      .filter((t) => (direction > 0 ? t > time : t < time))
-      .sort((a, b) => direction * (a.toMillis() - b.toMillis()));
-    if (occurrences.length > 0) return occurrences[0];
+  // Around a daylight saving time change, the nearest grid point is not always the next one in clock order:
+  // in the repeated hour, an earlier clock time can still lie ahead, and skipped clock times don't exist.
+  // So grid points within three hours on both sides are checked, and the nearest valid one wins.
+  const window = Math.ceil(180 / stepMinutes);
+  let nearest: DateTime | undefined;
+  for (let i = -window; i <= window; i++) {
+    for (const occurrence of localOccurrences(startOfDay, (first + i * direction) * stepMinutes)) {
+      const distance = direction * (occurrence.toMillis() - time.toMillis());
+      if (distance > 0 && (!nearest || distance < direction * (nearest.toMillis() - time.toMillis()))) {
+        nearest = occurrence;
+      }
+    }
   }
-  return time.plus({ minutes: direction * stepMinutes });
+  return nearest ?? time.plus({ minutes: direction * stepMinutes });
+}
+
+// The instants at which the local clock shows the given minutes after the start of the day: usually one, two
+// in the hour repeated when daylight saving time ends, and none in the hour it skips.
+function localOccurrences(startOfDay: DateTime, minutes: number): DateTime[] {
+  const days = Math.floor(minutes / 1440);
+  const localMinutes = minutes - days * 1440;
+  const day = startOfDay.plus({ days });
+  const target = day.set({ hour: Math.floor(localMinutes / 60), minute: localMinutes % 60 });
+  const offsets = new Set([target.minus({ hours: 6 }).offset, target.plus({ hours: 6 }).offset]);
+  return [...offsets]
+    .map((offset) => DateTime.fromMillis(target.toMillis() + (target.offset - offset) * 60000, { zone: day.zone }))
+    .filter((t) => t.hasSame(day, "day") && t.hour * 60 + t.minute === localMinutes);
 }
 
 export type ClockFormatPreference = "system" | "12-hour" | "24-hour";
