@@ -321,12 +321,14 @@ export class CodexAppServer {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
+        const optionalDiscovery =
+          method === "model/list" || method === "thread/list";
         const error = new Error(
-          `Codex 请求超时（${method}）。请重新连接后重试。`,
+          `Codex 请求超时（${method}）。${optionalDiscovery ? "请稍后重试。" : "请重新连接后重试。"}`,
         );
-        // Optional, read-only model discovery should not disconnect a usable chat.
+        // Optional, read-only discovery should not disconnect a usable chat.
         // A timed-out send may have been accepted; close to avoid duplicate turns.
-        if (method !== "model/list") {
+        if (!optionalDiscovery) {
           this.onEvent({
             method: "process/exited",
             params: { stderr: error.message },

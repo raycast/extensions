@@ -45,13 +45,13 @@ export function ChatDropdown(
         <List.Dropdown.Item
           title={`会话默认${modelLabel(props.current) ? ` · ${modelLabel(props.current)}` : ""}`}
           value="session"
-          icon={Icon.Chip}
+          icon={Icon.ComputerChip}
         />
         {unavailable && (
           <List.Dropdown.Item
             title={`${modelLabel(selected)} · 待确认可用性`}
             value={selectionValue}
-            icon={Icon.Chip}
+            icon={Icon.ComputerChip}
           />
         )}
       </List.Dropdown.Section>
@@ -64,7 +64,7 @@ export function ChatDropdown(
                 key={modelValue(selection)}
                 title={modelLabel(selection)}
                 value={modelValue(selection)}
-                icon={Icon.Chip}
+                icon={Icon.ComputerChip}
               />
             );
           })}

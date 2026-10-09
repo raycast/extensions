@@ -20,7 +20,7 @@ export function ModelMenu(props: ModelMenuProps) {
   return (
     <ActionPanel.Submenu
       title={`模型：${label || "自动"}`}
-      icon={Icon.Chip}
+      icon={Icon.ComputerChip}
       shortcut={{
         modifiers: [process.platform === "darwin" ? "cmd" : "ctrl"],
         key: "m",
@@ -45,7 +45,7 @@ export function ModelMenu(props: ModelMenuProps) {
               icon={
                 selected.model === model.model && selected.effort === effort
                   ? Icon.Checkmark
-                  : Icon.Chip
+                  : Icon.ComputerChip
               }
               onAction={() => props.onSelect({ model: model.model, effort })}
             />

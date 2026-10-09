@@ -13,6 +13,8 @@
 - Request readable Markdown with natural paragraph breaks for new responses.
 - Select and remember model/effort combinations from the local Codex model catalog.
 - Choose model and effort combinations from Raycast's native top-right dropdown in the input view, alongside history and new chat.
+- Keep active replies connected when optional model or CLI session discovery times out.
+- Use portable file URLs for speaker avatars on Windows and macOS.
 - Search, rename, archive, restore, and resume extension sessions.
 - Discover and resume compatible local Codex sessions on demand.
 - Automatically discover Codex installations on Windows and macOS.

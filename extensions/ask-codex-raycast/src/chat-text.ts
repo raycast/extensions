@@ -1,3 +1,5 @@
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import type { ChatMessage } from "./conversations";
 import { renderMarkdown } from "./markdown";
 
@@ -16,8 +18,10 @@ export function conversationMarkdown(
           : "你";
     const avatar =
       message.role === "assistant" ? "command-icon.png" : "user-avatar.svg";
+    const avatarURL = pathToFileURL(join(assetsPath, avatar));
+    avatarURL.search = "raycast-width=22&raycast-height=22";
     const body = renderMarkdown(message.content) || "正在思考…";
-    return `![${speaker}](${encodeURI(assetsPath)}/${avatar}?raycast-width=22&raycast-height=22) **${speaker}**\n\n${body}`;
+    return `![${speaker}](<${avatarURL.href}>) **${speaker}**\n\n${body}`;
   });
   const notice = error ? `连接提示：${error}` : status;
   const header = notice ? `> ${notice.replace(/\r?\n/g, " ")}\n\n` : "";
