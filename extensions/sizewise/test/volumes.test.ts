@@ -18,7 +18,7 @@ describe("formatBytes", () => {
 const startupDisk: Volume = {
   path: "/",
   name: "Macintosh HD",
-  totalCapacity: 994_662_584_320,
+  totalCapacity: 1_000_000_000_000,
   availableCapacity: 212_345_678_901,
   isStartupDisk: true,
 };
@@ -58,8 +58,8 @@ describe("parseVolumes", () => {
 
 describe("available space", () => {
   test("summarizes available space like Sizewise's disk list", () => {
-    expect(availableSpaceSummary(startupDisk)).toBe("212.35 GB of 994.66 GB available");
-    expect(availableSpaceSummary({ ...startupDisk, availableCapacity: null })).toBe("994.66 GB");
+    expect(availableSpaceSummary(startupDisk)).toBe("212.35 GB of 1 TB available");
+    expect(availableSpaceSummary({ ...startupDisk, availableCapacity: null })).toBe("1 TB");
   });
 
   test("gives the share in use, when it's known", () => {
@@ -75,7 +75,7 @@ describe("diskSpace", () => {
       name: "Macintosh HD",
       path: "/",
       isStartupDisk: true,
-      size: "994.66 GB",
+      size: "1 TB",
       available: "212.35 GB",
       percentUsed: 79,
     });
@@ -86,7 +86,7 @@ describe("diskSpace", () => {
       name: "Macintosh HD",
       path: "/",
       isStartupDisk: true,
-      size: "994.66 GB",
+      size: "1 TB",
       available: undefined,
       percentUsed: undefined,
     });

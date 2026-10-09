@@ -46,6 +46,13 @@ To avoid macOS permission prompts, measuring skips other apps' data. Folders Ray
 aren't counted, and the answer then says the folder takes up at least that much. For the full
 picture, open the folder in Sizewise, which can read more with Full Disk Access.
 
+It can also answer from the scans you save in Sizewise with **File > Save Scan…**, as in
+`@sizewise what grew since my last scan?`: what's in a folder, its largest files at any depth, the
+space each kind of file takes up, and what changed between two scans. For these, it asks the same
+reader Sizewise gives Claude and other AI assistants, so turn on **Let AI assistants read scan
+results** in Sizewise's Settings first. The reader only reads saved scans: it can't change or
+delete anything.
+
 ## Permissions
 
 The first time you run **Scan Finder Selection** or **Get Folder Size**, macOS asks whether

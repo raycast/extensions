@@ -122,10 +122,35 @@
       "name": "open-in-sizewise",
       "title": "Open in Sizewise",
       "description": "Opens a folder or disk in Sizewise to show what's taking up space."
+    },
+    {
+      "name": "find-saved-scans",
+      "title": "Find Saved Scans",
+      "description": "Lists the scans you saved in Sizewise, newest first, with when each one ran."
+    },
+    {
+      "name": "list-scan-folder",
+      "title": "List Folder in Saved Scan",
+      "description": "Lists what's in a folder of a saved scan, largest first, with each item's size and kind."
+    },
+    {
+      "name": "largest-files-in-scan",
+      "title": "Largest Files in Saved Scan",
+      "description": "Lists the largest files in a folder of a saved scan, at any depth."
+    },
+    {
+      "name": "space-by-kind",
+      "title": "Space by Kind",
+      "description": "Says how much of a folder in a saved scan each kind of file takes up."
+    },
+    {
+      "name": "compare-saved-scans",
+      "title": "Compare Saved Scans",
+      "description": "Says what changed between two saved scans of the same folder."
     }
   ],
   "ai": {
-    "instructions": "Sizewise is a Mac app that shows what takes up space on a disk or in a folder as a treemap. When someone asks how big a folder is or how much space it takes up, call get-folder-size with its path and give the size exactly as the tool returns it. When its isAtLeast is true, say the folder takes up at least that size, and why: that unreadableFolderCount folders inside couldn't be read, or, when skipsOtherAppsData is true, that other apps' data inside isn't counted. When someone asks which files are largest, or what they could delete, call find-large-files with the folder they name, or with no folder for their home folder, and list the files with their sizes exactly as the tool returns them. When it finds nothing, don't say the folder has no large files: say Spotlight may not index that folder, or may still be indexing it, and offer to open the folder in Sizewise instead. Never move files to the Trash or delete them; tell people they can do that from the Largest Files command. When someone asks what's using space in a folder or on a disk, call open-in-sizewise with its path, then tell them the results are in the Sizewise window. Common folders: ~ (home), ~/Downloads, ~/Desktop, ~/Documents, ~/Library, /Applications. Use get-disk-space for questions about how much space is free, available or used on a disk, and give sizes exactly as the tool returns them. Say \"available\", not \"free\", for space that can hold new files.",
+    "instructions": "Sizewise is a Mac app that shows what takes up space on a disk or in a folder as a treemap. When someone asks how big a folder is or how much space it takes up, call get-folder-size with its path and give the size exactly as the tool returns it. When its isAtLeast is true, say the folder takes up at least that size, and why: that unreadableFolderCount folders inside couldn't be read, or, when skipsOtherAppsData is true, that other apps' data inside isn't counted. When someone asks which files are largest, or what they could delete, call find-large-files with the folder they name, or with no folder for their home folder, and list the files with their sizes exactly as the tool returns them. When it finds nothing, don't say the folder has no large files: say Spotlight may not index that folder, or may still be indexing it, and offer to open the folder in Sizewise instead. Never move files to the Trash or delete them; tell people they can do that from the Largest Files command. When someone asks what's using space in a folder or on a disk, call open-in-sizewise with its path, then tell them the results are in the Sizewise window. Common folders: ~ (home), ~/Downloads, ~/Desktop, ~/Documents, ~/Library, /Applications. Use get-disk-space for questions about how much space is free, available or used on a disk, and give sizes exactly as the tool returns them. Say \"available\", not \"free\", for space that can hold new files. Sizewise can also answer from scans saved in the app (File > Save Scan…). When someone asks what grew or changed since a scan, what kinds of files fill a folder, or about a scan they saved, call find-saved-scans first, then pass a scan's path to list-scan-folder, largest-files-in-scan, space-by-kind, or compare-saved-scans. To compare, pass the older scan of the folder as older and the newer one as newer. A saved scan shows the folder as it was when it was saved, so say when the scan ran. When a saved-scan tool says AI assistants aren't allowed, pass on what it says to turn them on.",
     "evals": [
       {
         "input": "@sizewise how much space do I have left?",
@@ -135,7 +160,7 @@
               "name": "Macintosh HD",
               "path": "/",
               "isStartupDisk": true,
-              "size": "994.66 GB",
+              "size": "1 TB",
               "available": "212.35 GB",
               "percentUsed": 79
             }
@@ -230,7 +255,7 @@
               "name": "Macintosh HD",
               "path": "/",
               "isStartupDisk": true,
-              "size": "994.66 GB",
+              "size": "1 TB",
               "available": "212.35 GB",
               "percentUsed": 79
             },
@@ -251,6 +276,31 @@
           },
           {
             "callsTool": "open-in-sizewise"
+          }
+        ]
+      },
+      {
+        "input": "@sizewise what grew since my last scan?",
+        "mocks": {
+          "find-saved-scans": "2 saved scans, newest first:\n- ~/Documents/Home Oct 9.sizewise · ~ · scanned Oct 9, 2026 at 8:00 AM\n- ~/Documents/Home Oct 2.sizewise · ~ · scanned Oct 2, 2026 at 9:00 AM",
+          "compare-saved-scans": "~ · 412 GB · scanned Oct 9, 2026 at 8:00 AM\nIt grew by 12.4 GB since the scan of Oct 2, 2026 at 9:00 AM.\n- 214 new files, 9.1 GB\n- 88 files grew, by 3.6 GB\n\nThe files that changed the most:\n1. ~/Movies/Trip.mov · new, 6.2 GB"
+        },
+        "expected": [
+          {
+            "callsTool": "find-saved-scans"
+          },
+          {
+            "callsTool": {
+              "name": "compare-saved-scans",
+              "arguments": {
+                "older": {
+                  "includes": "Oct 2"
+                },
+                "newer": {
+                  "includes": "Oct 9"
+                }
+              }
+            }
           }
         ]
       }
