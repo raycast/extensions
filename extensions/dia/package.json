@@ -140,6 +140,13 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Return the visible text of a Dia tab or the focused tab"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.3",

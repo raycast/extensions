@@ -1,0 +1,49 @@
+instructions: |
+  # dia-ai-tab-contents
+  Dia is a web browser by The Browser Company. Use get-tab-contents to read a page before summarizing it or answering questions about it. Call it without a target for "this page" or "the current tab", or pass a short query matching the tab's title or URL.
+  If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If the text is truncated, say that the answer is based on the beginning of the page.
+
+evals:
+  # dia-ai-tab-contents
+  - input: "@dia summarize this page in 3 bullet points"
+    mocks:
+      get-tab-contents:
+        title: "Meet the new Raycast Notes"
+        url: "https://www.raycast.com/blog/raycast-notes"
+        loading: false
+        truncated: false
+        text: "Raycast Notes is a fast, light and frictionless note-taking experience. Notes open from anywhere with a hotkey, support Markdown, and sync across devices."
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "Markdown"
+  - input: "@dia what does the GitHub tab say about installation?"
+    mocks:
+      get-tab-contents:
+        title: "raycast/extensions"
+        url: "https://github.com/raycast/extensions"
+        loading: false
+        truncated: false
+        text: "Installation: run npm install, then npm run dev inside the extension folder."
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            query:
+              includes: "github"
+      - includes: "npm"
+  - input: "@dia read the current page"
+    mocks:
+      get-tab-contents: "Error: Reading page contents requires Dia to allow JavaScript from AppleScript. Quit Dia, then reopen it from Terminal with: open -a Dia --args --enable-applescript-javascript"
+    expected:
+      - callsTool: get-tab-contents
+      - includes: "enable-applescript-javascript"
+  - input: "@dia summarize the Hacker News tab"
+    mocks:
+      get-tab-contents: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            query:
+              includes: "hacker news"
+      - includes: "Automation"

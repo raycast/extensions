@@ -1,5 +1,10 @@
 # Dia Changelog
 
+## [AI Tool: Read Tab Contents] - {PR_MERGE_DATE}
+
+- Added an AI tool that reads the visible text of a tab or the focused tab, truncated to 20,000 characters by default.
+- Requires Dia to be launched with `--enable-applescript-javascript`; the tool explains how when it isn't.
+
 ## [Security: Address dependabot alert] - 2026-08-19
 
 - Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383
