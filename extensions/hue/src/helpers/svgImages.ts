@@ -1,4 +1,4 @@
-import { Cache, environment, Image } from "@raycast/api";
+import { Cache, Image } from "@raycast/api";
 import chroma from "chroma-js";
 import { readFileSync } from "fs";
 import { Group, GroupedLight, Light, Palette } from "../lib/types";
@@ -60,13 +60,12 @@ export function createGradientUri(colors: Palette, brightness: number): string |
 // Assets don't change while a command runs, so each file is read once.
 const pngFiles = new Map<string, Buffer>();
 
-// Draws the PNG at its own size unless given one.
-function pngImage(path: string, x: number, y: number, size?: { width: number; height: number }) {
+function pngImage(path: string, x: number, y: number) {
   const png = pngFiles.get(path) ?? readFileSync(path);
   pngFiles.set(path, png);
   // Width and height are the first two fields of a PNG's IHDR chunk.
-  const { width, height } = size ?? { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
-  return `<image xlink:href="data:image/png;base64,${png.toString("base64")}" x="${x}" y="${y}" width="${width}" height="${height}"/>`;
+  const size = `width="${png.readUInt32BE(16)}" height="${png.readUInt32BE(20)}"`;
+  return `<image xlink:href="data:image/png;base64,${png.toString("base64")}" x="${x}" y="${y}" ${size}/>`;
 }
 
 type Glyph = (color: "black" | "white") => string;
@@ -93,26 +92,33 @@ function onIcon(width: number, height: number, colors: Palette, brightness: numb
   };
 }
 
-// The off tiles are light in the light theme and dark in the dark theme, so their glyphs are black and white.
-function offIcon(width: number, height: number, tile: string, glyph: Glyph): Image {
-  const iconUri = (file: string, color: "black" | "white") =>
-    svgUri(width, height, pngImage(`${environment.assetsPath}/${file}`, 0, 0, { width, height }) + glyph(color));
-  return { source: { light: iconUri(`${tile}.png`, "black"), dark: iconUri(`${tile}@dark.png`, "white") } };
+// The Hue app's off cards lay 11% white over its dark page, with white glyphs, measured from its screenshots. The tile
+// stays translucent so Raycast's background shows through. Raycast's dark theme takes 8% to look the same, and the light
+// theme mirrors it in black.
+function offIcon(width: number, height: number, glyph: Glyph): Image {
+  const tile = (color: "black" | "white") =>
+    svgUri(
+      width,
+      height,
+      `<rect width="${width}" height="${height}" ${color === "white" ? 'fill="#fff" fill-opacity="0.08"' : 'fill="#000" fill-opacity="0.11"'}/>` +
+        glyph(color),
+    );
+  return { source: { light: tile("black"), dark: tile("white") } };
 }
 
-// Matches an 8-column grid item and light-off.png.
+// Matches an 8-column grid item.
 const LIGHT_ICON_SIZE = 162;
 
 export function createLightIcon(light: Light): Image {
   const glyph = glyphImage((color) => getIconPathFromLight(light, color));
   return light.on.on
     ? onIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, [getColorFromLight(light)], light.dimming?.brightness ?? 100, glyph)
-    : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, "light-off", glyph);
+    : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, glyph);
 }
 
 export function createGroupIcon(group: Group, colors: Palette, groupedLight: GroupedLight | undefined): Image {
   const glyph = glyphImage((color) => getIconPathFromGroup(group, color));
   return groupedLight?.on?.on && colors.length > 0
     ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, groupedLight.dimming?.brightness ?? 100, glyph)
-    : offIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, "group-off", glyph);
+    : offIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, glyph);
 }
