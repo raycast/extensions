@@ -370,6 +370,11 @@ export type TraktMovieHistoryList = z.infer<typeof TraktMovieHistoryList>;
 export type TraktMovieRecommendationList = z.infer<typeof TraktMovieRecommendationList>;
 export type TraktShowRecommendationList = z.infer<typeof TraktShowRecommendationList>;
 export type TraktMovieBaseItem = z.infer<typeof TraktMovieBaseItem>;
+
+/** Paginated lists of plain movie or show objects (`/related`, `/popular`). */
+export const TraktMovieBaseList = z.array(TraktMovieBaseItem);
+export const TraktShowBaseList = z.array(TraktShowBaseItem);
+export const TraktBrowseQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
 export type TraktShowBaseItem = z.infer<typeof TraktShowBaseItem>;
 
 export const TraktShowProgressQuerySchema = z.object({

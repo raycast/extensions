@@ -158,6 +158,11 @@
       "description": "Remove a movie, TV show, or episode from your Trakt watch history"
     },
     {
+      "name": "get-related",
+      "title": "Get Similar Titles",
+      "description": "Get movies or shows similar to a given title on Trakt"
+    },
+    {
       "name": "get-recommendations",
       "title": "Get Recommendations",
       "description": "Get personalized movie and TV show recommendations based on your Trakt habits"

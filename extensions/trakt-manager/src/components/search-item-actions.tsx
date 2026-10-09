@@ -15,6 +15,7 @@ import { useWatchlistState } from "../lib/use-watchlist-ids";
 import { CheckinActions } from "./checkin-actions";
 import { RemoveFromHistoryAction } from "./history-actions";
 import { RatingActions } from "./rating-actions";
+import { RelatedGrid } from "./related-grid";
 import { MarkWatchedOnActions } from "./watch-actions";
 
 type TraktClient = ReturnType<typeof initTraktClient>;
@@ -123,6 +124,11 @@ export const MovieSearchActions = ({
         signal={signal}
         run={run}
       />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="movie" traktId={traktId} title={movie.movie.title} />}
+      />
     </>
   );
 };
@@ -207,6 +213,11 @@ export const ShowSearchActions = ({ item: show, client, signal, run }: SearchIte
         client={client}
         signal={signal}
         run={run}
+      />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="show" traktId={traktId} title={show.show.title} />}
       />
     </>
   );

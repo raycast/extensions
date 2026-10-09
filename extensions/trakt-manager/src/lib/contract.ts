@@ -14,6 +14,9 @@ import {
   TraktWatchlistAddResponseSchema,
   TraktWatchlistRemoveResponseSchema,
   TraktMovieList,
+  TraktMovieBaseList,
+  TraktShowBaseList,
+  TraktBrowseQuerySchema,
   TraktPlaybackMovieList,
   TraktCalendarMovieList,
   TraktCalendarPathSchema,
@@ -127,6 +130,16 @@ const TraktMovieContract = c.router({
     },
     query: TraktPaginationSchema,
     summary: "Get the Trakt ids of the movies in the watchlist",
+  },
+  getRelatedMovies: {
+    method: "GET",
+    path: "/movies/:id/related",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktMovieBaseList,
+    },
+    query: TraktBrowseQuerySchema,
+    summary: "Get movies related to a movie",
   },
   getRecommendedMovies: {
     method: "GET",
@@ -270,6 +283,16 @@ const TraktShowContract = c.router({
     },
     query: TraktPaginationWithSortingSchema,
     summary: "Get shows in watchlist",
+  },
+  getRelatedShows: {
+    method: "GET",
+    path: "/shows/:id/related",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktShowBaseList,
+    },
+    query: TraktBrowseQuerySchema,
+    summary: "Get shows related to a show",
   },
   getRecommendedShows: {
     method: "GET",

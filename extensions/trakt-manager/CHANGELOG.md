@@ -6,6 +6,7 @@
 
 - **Calendar week for the calendar AI tool**: "what's airing this week?" now covers today through Sunday instead of the next 7 days.
 - **AI tools for Now Watching, Stop Check-In and Drop Show**: Raycast AI can check in to a movie or an episode, stop the check-in, and drop a show, each after a confirmation that names the title.
+- **Similar titles**: "Similar Titles" on movie and show results opens the titles Trakt relates to them, and the AI can answer "movies like Inception".
 
 ## [Update] - 2026-10-09
 
