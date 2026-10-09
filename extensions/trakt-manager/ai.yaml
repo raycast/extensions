@@ -550,6 +550,21 @@ evals:
             season: 2
             number: 3
             title: "Who Is Alive?"
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: true
+        wasWatched: true
+        message: 'Found watch events for "Severance" (2022), none for S02E03.'
+        hasMore: false
+        history: []
+        checked:
+          - type: "show"
+            title: "Severance"
+            year: 2022
+            traktId: 154784
+            watched: true
+            plays: 9
       mark-episode-watched:
         success: true
         message: 'Severance (2022) S02E03 has been successfully marked as watched in your Trakt history.'
