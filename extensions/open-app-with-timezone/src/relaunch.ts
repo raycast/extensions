@@ -66,7 +66,7 @@ export async function relaunchWithTimeZone(
     if (!(await confirmQuit())) return undefined;
     onProgress(`Quitting ${appName}…`);
     const deadline = Date.now() + QUIT_TIMEOUT_MS;
-    const timedOut = new Error(`${appName} did not quit within 30s (unsaved-changes dialog?)`);
+    const timedOut = new Error(`${appName} did not quit within 30s (quit canceled or unsaved-changes dialog?)`);
     try {
       const script = ["on run argv", "tell application id (item 1 of argv) to quit", "end run"];
       await run("/usr/bin/osascript", [...script.flatMap((line) => ["-e", line]), bundleId], {
@@ -75,8 +75,7 @@ export async function relaunchWithTimeZone(
     } catch (error) {
       const { killed, stderr = "" } = error as { killed?: boolean; stderr?: string };
       if (killed) throw timedOut;
-      if (stderr.includes("(-128)")) throw new Error(`Quitting ${appName} was canceled`);
-      process.kill(runningPid, "SIGTERM");
+      if (!stderr.includes("(-128)")) process.kill(runningPid, "SIGTERM");
     }
     const stillRunning = await waitFor(
       () => mainPid(executable),
