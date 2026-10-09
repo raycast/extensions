@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomofocus",
+  "title": "PomoFocus",
+  "description": "Simple Pomodoro Focus Interface",
+  "icon": "extension-icon.png",
+  "author": "fedork",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "focus",
+      "title": "Focus",
+      "subtitle": "Start a 25 Minute Focus Timer",
+      "description": "Start a 25 Minute Focus Timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "break",
+      "title": "Break",
+      "subtitle": "Take a 5 Minute Break",
+      "description": "Start a 5 Minute Break Timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "long-break",
+      "title": "Long Break",
+      "subtitle": "Take a 15 Minute Break",
+      "description": "Start a 15 Minute Break Timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "custom-focus",
+      "title": "Custom Focus",
+      "subtitle": "Start a Focus Timer of Any Length",
+      "description": "Start a Focus Timer With a Custom Duration in Minutes",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Pause / Resume",
+      "subtitle": "Pause or Resume the Current Timer",
+      "description": "Pauses a running timer or resumes a paused one. Also runs in the background to notify when a timer ends.",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "pomo",
+      "title": "Pomo",
+      "subtitle": "Show the Current Timer",
+      "description": "Live Countdown of the Current Timer",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
