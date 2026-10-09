@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-09
 
 - Fixed keyboard navigation in `Search Tabs` jumping over History straight to Suggestions while history was still loading. The tab sections now stay mounted during history search so the list keeps its selection anchor.
 
