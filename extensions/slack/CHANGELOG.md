@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Add Canvas AI tools] - {PR_MERGE_DATE}
+## [Add Canvas AI tools] - 2026-10-09
 
 - Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
 - Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
