@@ -5,6 +5,7 @@
 - Add a Next Reminder command that keeps your next timed reminder and its countdown in its root search subtitle. Add it to Favorites to see it when Raycast opens.
 - Show the next timed reminder in the menu bar like Raycast shows calendar events: choose how long before it's due it appears and when it's hidden, and optionally hide the menu bar item when nothing is due.
 - Select several lists for the menu bar instead of one.
+- Clearer names and descriptions for the menu bar settings, grouped by what's in the menu bar, the upcoming reminder, and what's in the menu.
 
 ## [Search and Refresh Fixes] - 2026-10-01
 
