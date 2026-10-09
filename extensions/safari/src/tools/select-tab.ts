@@ -21,5 +21,5 @@ type Input = {
  * Returns the selected tab. Its window becomes window 1, so window IDs from earlier results may have changed.
  */
 export default async function tool(input: Input) {
-  return await selectTab(input.windowId, input.index);
+  return await selectTab({ windowId: input.windowId, index: input.index });
 }

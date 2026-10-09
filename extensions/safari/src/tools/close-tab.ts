@@ -1,5 +1,9 @@
-import { Action, Tool } from "@raycast/api";
-import { closeTab, closeCurrentTab, getFocusedTab, getTab } from "../safari";
+import { Action, LocalStorage, Tool } from "@raycast/api";
+import { closePinnedTab, PinnedTab, resolveTab } from "../safari";
+
+// The confirmation and the tool run separately, so the confirmed tab is handed over through LocalStorage
+const CONFIRMED_TAB_KEY = "close-tab:confirmed";
+const CONFIRMED_TAB_MAX_AGE_MS = 10 * 60 * 1000;
 
 type Input = {
   /**
@@ -24,24 +28,28 @@ type Input = {
   };
 };
 
+type ConfirmedTab = { target: string; tab: PinnedTab; confirmedAt: number };
+
+const targetKey = (input: Input) => JSON.stringify(input.tab ? [input.tab.windowId, input.tab.index] : "current");
+
 /**
  * Closes a Safari tab, either a specific tab identified by window ID and tab index,
  * or the currently focused tab if no specific tab is provided.
+ * Closes exactly the tab that was confirmed, and fails without closing anything if it moved or changed page.
  * Returns the title and URL of the closed tab.
  */
 export default async function tool(input: Input) {
-  const { tab } = input;
-  if (tab) {
-    return await closeTab(tab.windowId, tab.index);
-  } else {
-    return await closeCurrentTab();
-  }
+  const tab = (await takeConfirmedTab(input)) ?? (await resolveTab(input.tab));
+  return await closePinnedTab(tab);
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   // A missing tab skips the confirmation; the tool then fails and closes nothing
-  const tab = await (input.tab ? getTab(input.tab.windowId, input.tab.index) : getFocusedTab()).catch(() => undefined);
+  const tab = await resolveTab(input.tab).catch(() => undefined);
   if (!tab) return undefined;
+
+  const confirmed: ConfirmedTab = { target: targetKey(input), tab, confirmedAt: Date.now() };
+  await LocalStorage.setItem(CONFIRMED_TAB_KEY, JSON.stringify(confirmed));
 
   return {
     style: Action.Style.Destructive,
@@ -52,3 +60,16 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     ],
   };
 };
+
+async function takeConfirmedTab(input: Input): Promise<PinnedTab | undefined> {
+  const stored = await LocalStorage.getItem<string>(CONFIRMED_TAB_KEY);
+  await LocalStorage.removeItem(CONFIRMED_TAB_KEY);
+  if (!stored) return undefined;
+  try {
+    const confirmed = JSON.parse(stored) as ConfirmedTab;
+    const isFresh = Date.now() - confirmed.confirmedAt < CONFIRMED_TAB_MAX_AGE_MS;
+    return isFresh && confirmed.target === targetKey(input) ? confirmed.tab : undefined;
+  } catch {
+    return undefined;
+  }
+}

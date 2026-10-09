@@ -3,9 +3,9 @@ instructions: |
   Use search-history for pages the user visited, search-bookmarks for saved bookmarks and search-reading-list for the Reading List. Only pass searchText when the user names something to look for, and keep it to the essential keywords. Pass searchLimit only when the user asks for a number of results. When a search result has truncated: true, say that more matches exist and offer to narrow the search.
   If a search tool reports that Raycast needs Full Disk Access, tell the user how to grant it instead of retrying.
   Use select-tab to switch to a tab. It brings that tab's window to the front, so the window becomes window 1 and other window IDs shift: call get-all-tabs again before reusing window IDs from earlier results.
-  open-url only opens http and https addresses. If it returns verified: false, tell the user that Safari shows a different address than the one requested.
+  open-url only opens http and https addresses. Pass the address as the user wrote it, including any port such as localhost:3000; do not add or change the scheme. It returns verified: true only when a new tab opened on the requested site. If it returns verified: false, tell the user the reason it gives instead of claiming the page opened.
   Use get-tab-contents to read a page before summarizing it or answering questions about it. Use type "source" only when the user asks about the HTML. When the user asks for only part of a page, such as the first 500 characters, pass that number as maxLength. If the result has truncated: true, say that the answer is based on the beginning of the page. If get-tab-contents reports that the page is still loading or has no text, tell the user instead of guessing what the page says.
-  If select-tab, close-tab or get-tab-contents reports that a tab does not exist, tell the user instead of retrying with another tab. Only close the tab the user explicitly asked to close.
+  If select-tab, close-tab or get-tab-contents reports that a tab does not exist, or that it moved or changed page, tell the user instead of retrying with another tab. Only close the tab the user explicitly asked to close.
 
 evals:
   # evals moved from package.json
@@ -18,19 +18,37 @@ evals:
         window_id: 1
         index: 1
         is_local: true
-      get-tab-contents: "Raycast is very cool let's goooooo"
+      get-tab-contents:
+        title: "Raycast - Supercharged productivity"
+        url: "https://www.raycast.com/"
+        windowId: 1
+        index: 1
+        type: "text"
+        loading: false
+        truncated: false
+        length: 34
+        content: "Raycast is very cool let's goooooo"
     expected:
       - callsTool: get-tab-contents
   - input: "@safari open the latest item in my reading list"
     mocks:
-      open-url: Successfully called "open-url"
-      search-reading-list:
-        - description: "Fast, light, and frictionless note-taking experience."
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-2"
           title: "Meet the new Raycast Notes"
           url: "https://www.raycast.com/blog/raycast-notes"
-          domain: "raycast.com"
-          uuid: "XXXXXXXX-B021-4EAC-83E1-D1059804C2E5"
-      open: Successfully called "open"
+          window_id: 1
+          index: 2
+          is_local: true
+      search-reading-list:
+        results:
+          - description: "Fast, light, and frictionless note-taking experience."
+            title: "Meet the new Raycast Notes"
+            url: "https://www.raycast.com/blog/raycast-notes"
+            domain: "raycast.com"
+            uuid: "XXXXXXXX-B021-4EAC-83E1-D1059804C2E5"
+        truncated: false
     expected:
       - callsTool: search-reading-list
       - callsTool:
@@ -40,28 +58,32 @@ evals:
   - input: "@safari what is my latest bookmark?"
     mocks:
       search-bookmarks:
-        - title: "Raycast"
-          folder: "BookmarksBar"
-          url: "https://raycast.com/"
-          domain: "raycast.com"
-          uuid: "XXXXXXXX-XXXX-4BA7-9E78-06E283535F16"
+        results:
+          - title: "Raycast"
+            folder: "BookmarksBar"
+            url: "https://raycast.com/"
+            domain: "raycast.com"
+            uuid: "XXXXXXXX-XXXX-4BA7-9E78-06E283535F16"
+        truncated: false
     expected:
       - callsTool: search-bookmarks
   - input: "@safari find raycast in history"
     mocks:
       search-history:
-        - id: 74
-          title: "Meet the new Raycast Notes - Raycast Blog"
-          lastVisited: "2025-02-06 20:22:18"
-          url: "https://www.raycast.com/blog/raycast-notes"
-        - id: 73
-          title: "Raycast - Your shortcut to everything"
-          lastVisited: "2025-02-05 19:30:25"
-          url: "https://www.raycast.com/"
-        - id: 72
-          title: ""
-          lastVisited: "2025-02-05 19:30:25"
-          url: "http://raycast.com/"
+        results:
+          - id: 74
+            title: "Meet the new Raycast Notes - Raycast Blog"
+            lastVisited: "2025-02-06 20:22:18"
+            url: "https://www.raycast.com/blog/raycast-notes"
+          - id: 73
+            title: "Raycast - Your shortcut to everything"
+            lastVisited: "2025-02-05 19:30:25"
+            url: "https://www.raycast.com/"
+          - id: 72
+            title: ""
+            lastVisited: "2025-02-05 19:30:25"
+            url: "http://raycast.com/"
+        truncated: false
     expected:
       - callsTool:
           name: search-history
@@ -70,11 +92,13 @@ evals:
   - input: "@safari show reading list"
     mocks:
       search-reading-list:
-        - description: "Fast, light, and frictionless note-taking experience."
-          title: "Meet the new Raycast Notes"
-          url: "https://www.raycast.com/blog/raycast-notes"
-          domain: "raycast.com"
-          uuid: "964BBF14-XXXX-XXXX-83E1-D1059804C2E5"
+        results:
+          - description: "Fast, light, and frictionless note-taking experience."
+            title: "Meet the new Raycast Notes"
+            url: "https://www.raycast.com/blog/raycast-notes"
+            domain: "raycast.com"
+            uuid: "964BBF14-XXXX-XXXX-83E1-D1059804C2E5"
+        truncated: false
     expected:
       - callsTool: search-reading-list
   - input: "@safari show me all my open tabs"
@@ -96,7 +120,16 @@ evals:
       - callsTool: get-all-tabs
   - input: "@safari get the content of the second tab in my first window"
     mocks:
-      get-tab-contents: "This is the content of the Raycast Extensions tab"
+      get-tab-contents:
+        title: "Raycast Extensions"
+        url: "https://www.raycast.com/extensions"
+        windowId: 1
+        index: 2
+        type: "text"
+        loading: false
+        truncated: false
+        length: 49
+        content: "This is the content of the Raycast Extensions tab"
       get-all-tabs:
         - uuid: "1-1"
           title: "Raycast - Supercharged productivity"
@@ -118,7 +151,10 @@ evals:
             tab.index: 2
   - input: "@safari close the second tab in my first window"
     mocks:
-      close-tab: "Tab closed successfully"
+      close-tab:
+        closedTab:
+          title: "Raycast Extensions"
+          url: "https://www.raycast.com/extensions"
       get-all-tabs:
         - uuid: "1-1"
           title: "Raycast - Supercharged productivity"
@@ -140,7 +176,10 @@ evals:
             tab.index: 2
   - input: "@safari close the current tab"
     mocks:
-      close-tab: "Current tab closed successfully"
+      close-tab:
+        closedTab:
+          title: "Raycast - Supercharged productivity"
+          url: "https://www.raycast.com/"
     expected:
       - callsTool: close-tab
   - input: "@safari what tab am I currently on?"
@@ -156,7 +195,16 @@ evals:
       - callsTool: get-focused-tab
   - input: "@safari show me the HTML source of the tab I'm currently viewing"
     mocks:
-      get-tab-contents: "<!DOCTYPE html><html><head><title>Raycast</title></head><body>...</body></html>"
+      get-tab-contents:
+        title: "Raycast"
+        url: "https://www.raycast.com/"
+        windowId: 1
+        index: 1
+        type: "source"
+        loading: false
+        truncated: false
+        length: 79
+        content: "<!DOCTYPE html><html><head><title>Raycast</title></head><body>...</body></html>"
     expected:
       - callsTool:
           name: get-tab-contents
@@ -276,7 +324,16 @@ evals:
         window_id: 1
         index: 2
         is_local: true
-      get-tab-contents: "Hacker News. Show HN: A Raycast extension for Safari. 120 points."
+      get-tab-contents:
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        windowId: 1
+        index: 2
+        type: "text"
+        loading: false
+        truncated: false
+        length: 65
+        content: "Hacker News. Show HN: A Raycast extension for Safari. 120 points."
     expected:
       - callsTool: get-tab-contents
       - includes: "Raycast extension"
@@ -453,6 +510,91 @@ evals:
       - or:
           - includes: "4"
           - includes: "four"
+  - input: "@safari open localhost:3000"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "My App"
+          url: "http://localhost:3000/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "localhost:3000"
+  - input: "@safari open [::1]:3000"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "My App"
+          url: "http://[::1]:3000/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "[::1]:3000"
+  - input: "@safari open http://intranet/"
+    mocks:
+      open-url:
+        verified: true
+        tab:
+          uuid: "1-3"
+          title: "Intranet"
+          url: "http://intranet/"
+          window_id: 1
+          index: 3
+          is_local: true
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "http://intranet"
+  - input: "@safari open https://www.raycast.com/blog"
+    mocks:
+      open-url:
+        verified: false
+        reason: "Safari did not open a new tab."
+        requestedUrl: "https://www.raycast.com/blog"
+        tab:
+          uuid: "1-1"
+          title: "Raycast - Your shortcut to everything"
+          url: "https://www.raycast.com/"
+          window_id: 1
+          index: 1
+          is_local: true
+    expected:
+      - callsTool: open-url
+      - or:
+          - includes: "did not"
+          - includes: "didn't"
+          - includes: "not open"
+          - includes: "couldn't"
+          - includes: "could not"
+  - input: "@safari close the current tab"
+    mocks:
+      close-tab: "Error: The tab \"Hacker News\" is no longer at position 2 of its window, or it now shows another page. Nothing was closed. Use get-all-tabs to find it again."
+    expected:
+      - callsTool: close-tab
+      - not:
+          callsTool: select-tab
+      - or:
+          - includes: "Nothing was closed"
+          - includes: "nothing was closed"
+          - includes: "not closed"
+          - includes: "wasn't closed"
+          - includes: "no longer"
   # get-tab-contents
   - input: "@safari summarize this page in 3 bullet points"
     mocks:

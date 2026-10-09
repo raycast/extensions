@@ -70,231 +70,219 @@ export async function getCurrentTabURL() {
 
 export type ContentType = "text" | "source";
 
-export type TabContents = {
+/**
+ * A tab resolved once and then acted on exactly. `windowRef` is Safari's window ID, which stays the
+ * same while the window is open, unlike `windowId` (the window's position, 1 = front).
+ */
+export type PinnedTab = {
+  windowRef: number;
   windowId: number;
   index: number;
   title: string;
   url: string;
+};
+
+export type TabPosition = { windowId: number; index: number };
+
+type JxaResult<T> = ({ status: "ok" } & T) | { status: "missing-window" | "missing-tab" | "changed"; count?: number };
+
+// JXA returns JSON, so titles, URLs and page contents never need a separator
+async function runSafariJxa<T>(body: string): Promise<JxaResult<T>> {
+  const result = await runAppleScript(
+    `(() => {
+      const app = Application(${JSON.stringify(safariAppIdentifier)});
+      const text = (value) => (typeof value === "string" ? value : "");
+      ${body}
+    })()`,
+    { language: "JavaScript" },
+  );
+  return JSON.parse(result) as JxaResult<T>;
+}
+
+function assertTabPosition(position: TabPosition) {
+  const { windowId, index } = position;
+  if (!Number.isInteger(windowId) || windowId < 1 || !Number.isInteger(index) || index < 1) {
+    throw new Error("windowId and index must be whole numbers starting at 1. Use get-all-tabs to list the open tabs.");
+  }
+}
+
+function throwIfMissing(result: JxaResult<unknown>, position: TabPosition | undefined) {
+  if (result.status === "missing-window") {
+    throw new Error(
+      position
+        ? `Safari has no window ${position.windowId} (${result.count} open). Use get-all-tabs to list the open tabs.`
+        : "Safari has no open window.",
+    );
+  }
+  if (result.status === "missing-tab") {
+    throw new Error(
+      `Safari window ${position?.windowId} has no tab ${position?.index} (${result.count} open). Use get-all-tabs to list the open tabs.`,
+    );
+  }
+}
+
+/** Resolves a tab by position, or the current tab of the front window, once. */
+export async function resolveTab(position?: TabPosition): Promise<PinnedTab> {
+  if (position) assertTabPosition(position);
+  const result = await runSafariJxa<PinnedTab>(`
+    const windows = app.windows();
+    let win, tab;
+    ${
+      position
+        ? `if (windows.length < ${position.windowId}) return JSON.stringify({ status: "missing-window", count: windows.length });
+    win = windows[${position.windowId - 1}];
+    const tabs = win.tabs();
+    if (tabs.length < ${position.index}) return JSON.stringify({ status: "missing-tab", count: tabs.length });
+    tab = tabs[${position.index - 1}];`
+        : `if (windows.length === 0) return JSON.stringify({ status: "missing-window", count: 0 });
+    win = windows[0];
+    tab = win.currentTab();`
+    }
+    return JSON.stringify({
+      status: "ok",
+      windowRef: win.id(),
+      windowId: win.index(),
+      index: tab.index(),
+      title: text(tab.name()),
+      url: text(tab.url()),
+    });
+  `);
+  throwIfMissing(result, position);
+  if (result.status !== "ok") throw new Error(`Unexpected response from Safari: ${result.status}`);
+  const { windowRef, windowId, index, title, url } = result;
+  return { windowRef, windowId, index, title, url };
+}
+
+const tabChangedError = (tab: PinnedTab, action: string) =>
+  new Error(
+    `The tab "${tab.title || tab.url}" is no longer at position ${tab.index} of its window, or it now shows another page. Nothing was ${action}. Use get-all-tabs to find it again.`,
+  );
+
+const appleScriptString = (value: string) => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+
+// Finds the pinned tab by window ID and position, and checks it still shows the same page
+const pinnedTabScript = (tab: PinnedTab, { checkTitle }: { checkTitle: boolean }) => `
+  if not (exists window id ${tab.windowRef}) then return "changed"
+  set targetWindow to window id ${tab.windowRef}
+  if (count of tabs of targetWindow) < ${tab.index} then return "changed"
+  set targetTab to tab ${tab.index} of targetWindow
+  set tabURL to URL of targetTab
+  if tabURL is missing value then set tabURL to ""
+  set tabTitle to name of targetTab
+  if tabTitle is missing value then set tabTitle to ""
+  considering case
+    if tabURL is not ${appleScriptString(tab.url)} then return "changed"
+    ${checkTitle ? `if tabTitle is not ${appleScriptString(tab.title)} then return "changed"` : ""}
+  end considering
+`;
+
+// Selecting a tab brings its window to the front, so it becomes window 1
+export async function selectTab(position: TabPosition): Promise<LocalTab> {
+  const tab = await resolveTab(position);
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      ${pinnedTabScript(tab, { checkTitle: false })}
+      set current tab of targetWindow to targetTab
+      set index of targetWindow to 1
+      activate
+      if index of current tab of front window is not ${tab.index} then return "not-selected"
+      return "ok"
+    end tell
+  `);
+  if (result === "changed") throw tabChangedError(tab, "selected");
+  if (result !== "ok") throw new Error(`Safari did not switch to tab ${tab.index} of window ${tab.windowId}.`);
+  return { uuid: `1-${tab.index}`, title: tab.title, url: tab.url, window_id: 1, index: tab.index, is_local: true };
+}
+
+// Closing the last tab of a window closes the window, so check both counts
+export async function closePinnedTab(tab: PinnedTab) {
+  const result = await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      ${pinnedTabScript(tab, { checkTitle: true })}
+      set tabCount to count of tabs of targetWindow
+      close targetTab
+      delay 0.2
+      if exists window id ${tab.windowRef} then
+        if (count of tabs of window id ${tab.windowRef}) is not (tabCount - 1) then return "not-closed"
+      end if
+      return "ok"
+    end tell
+  `);
+  if (result === "changed") throw tabChangedError(tab, "closed");
+  if (result !== "ok") throw new Error(`Safari did not close "${tab.title || tab.url}".`);
+  return { closedTab: { title: tab.title, url: tab.url } };
+}
+
+export type TabContents = {
+  /** The current title, which can change while the page loads */
+  title: string;
   /** document.readyState, or "unknown" when Safari does not allow JavaScript from Apple Events */
   readyState: string;
   /** Length of the full content, before truncation */
   length: number;
+  /** Whether the full content, before truncation, has any non-whitespace character */
+  hasContent: boolean;
   content: string;
 };
 
-const FIELD_SEPARATOR = String.fromCharCode(30);
-
-// Reads the tab's text or source, truncated inside AppleScript so huge pages never cross the bridge
-export async function readTabContents(
-  tab: { windowId: number; index: number } | undefined,
+/** Reads the pinned tab's text or source, truncated before it leaves osascript. */
+export async function readPinnedTabContents(
+  tab: PinnedTab,
   type: ContentType,
   maxLength: number,
 ): Promise<TabContents> {
-  if (tab && (!Number.isInteger(tab.windowId) || tab.windowId < 1 || !Number.isInteger(tab.index) || tab.index < 1)) {
-    throw new Error("windowId and index must be whole numbers starting at 1. Use get-all-tabs to list the open tabs.");
-  }
-  const locateTab = tab
-    ? `
-      if (count of windows) < ${tab.windowId} then return "missing-window" & sep & (count of windows)
-      set targetWindow to window ${tab.windowId}
-      if (count of tabs of targetWindow) < ${tab.index} then return "missing-tab" & sep & (count of tabs of targetWindow)
-      set targetTab to tab ${tab.index} of targetWindow`
-    : `
-      if (count of windows) = 0 then return "missing-window" & sep & 0
-      set targetWindow to window 1
-      set targetTab to current tab of targetWindow`;
-
-  const result = await runAppleScript(`
-    tell application "${safariAppIdentifier}"
-      set sep to character id 30
-      ${locateTab}
-      set tabTitle to name of targetTab
-      if tabTitle is missing value then set tabTitle to ""
-      set tabURL to URL of targetTab
-      if tabURL is missing value then set tabURL to ""
-      -- Needs "Allow JavaScript from Apple Events", which is off by default
-      set readyState to "unknown"
-      try
-        set readyState to do JavaScript "document.readyState" in targetTab
-      end try
-      set pageContent to ${type} of targetTab
-      if pageContent is missing value then set pageContent to ""
-      set contentLength to length of pageContent
-      if contentLength > ${maxLength} then set pageContent to text 1 thru ${maxLength} of pageContent
-      return "ok" & sep & (index of targetWindow) & sep & (index of targetTab) & sep & readyState & sep & contentLength & sep & tabTitle & sep & tabURL & sep & pageContent
-    end tell
+  const result = await runSafariJxa<TabContents>(`
+    const win = app.windows.byId(${tab.windowRef});
+    if (!win.exists()) return JSON.stringify({ status: "changed" });
+    const tabs = win.tabs();
+    if (tabs.length < ${tab.index}) return JSON.stringify({ status: "changed" });
+    const tab = tabs[${tab.index - 1}];
+    if (text(tab.url()) !== ${JSON.stringify(tab.url)}) return JSON.stringify({ status: "changed" });
+    // Needs "Allow JavaScript from Apple Events", which is off by default; a missing value stays "unknown"
+    let readyState = "unknown";
+    try {
+      readyState = text(app.doJavaScript("document.readyState", { in: tab })) || "unknown";
+    } catch (error) {}
+    const content = text(tab.${type === "text" ? "text" : "source"}());
+    return JSON.stringify({
+      status: "ok",
+      title: text(tab.name()),
+      readyState,
+      length: content.length,
+      hasContent: content.trim().length > 0,
+      content: content.slice(0, ${maxLength}),
+    });
   `);
-
-  const [status, ...fields] = result.split(FIELD_SEPARATOR);
-  if (status === "missing-window") {
-    throw new Error(
-      `Safari has no window ${tab?.windowId ?? 1} (${fields[0]} open). Use get-all-tabs to list the open tabs.`,
-    );
-  }
-  if (status === "missing-tab") {
-    throw new Error(
-      `Safari window ${tab?.windowId} has no tab ${tab?.index} (${fields[0]} open). Use get-all-tabs to list the open tabs.`,
-    );
-  }
-  if (status !== "ok") {
-    throw new Error(`Unexpected response from Safari: ${result.slice(0, 200)}`);
-  }
-
-  const [windowId, index, readyState, length, title, url, ...content] = fields;
-  return {
-    windowId: Number(windowId),
-    index: Number(index),
-    title,
-    url,
-    readyState,
-    length: Number(length),
-    // The content itself may contain the separator
-    content: content.join(FIELD_SEPARATOR),
-  };
+  if (result.status === "changed") throw tabChangedError(tab, "read");
+  if (result.status !== "ok") throw new Error(`Unexpected response from Safari: ${result.status}`);
+  const { title, readyState, length, hasContent, content } = result;
+  return { title, readyState, length, hasContent, content };
 }
 
-// Returns the tab's title and URL, or why it does not exist, as "status:::a:::b"
-const describeTabScript = (windowId: number, tabIndex: number) => `
-  if (count of windows) < ${windowId} then return "missing-window:::" & (count of windows)
-  set targetWindow to window ${windowId}
-  if (count of tabs of targetWindow) < ${tabIndex} then return "missing-tab:::" & (count of tabs of targetWindow)
-  set targetTab to tab ${tabIndex} of targetWindow
-  set tabTitle to name of targetTab
-  if tabTitle is missing value then set tabTitle to ""
-  set tabURL to URL of targetTab
-  if tabURL is missing value then set tabURL to ""
-`;
-
-function assertTabPosition(windowId: number, tabIndex: number) {
-  if (!Number.isInteger(windowId) || windowId < 1 || !Number.isInteger(tabIndex) || tabIndex < 1) {
-    throw new Error("windowId and index must be whole numbers starting at 1. Use get-all-tabs to list the open tabs.");
-  }
-}
-
-function parseTabResult(result: string, windowId: number, tabIndex: number) {
-  const [status, ...values] = result.split(":::");
-  if (status === "missing-window") {
-    throw new Error(`Safari has no window ${windowId} (${values[0]} open). Use get-all-tabs to list the open tabs.`);
-  }
-  if (status === "missing-tab") {
-    throw new Error(
-      `Safari window ${windowId} has no tab ${tabIndex} (${values[0]} open). Use get-all-tabs to list the open tabs.`,
-    );
-  }
-  if (status !== "ok") {
-    throw new Error(`Unexpected response from Safari: ${result}`);
-  }
-  return values;
-}
-
-export async function getTab(windowId: number, tabIndex: number): Promise<LocalTab> {
-  assertTabPosition(windowId, tabIndex);
-  const result = await runAppleScript(`
-    tell application "${safariAppIdentifier}"
-      ${describeTabScript(windowId, tabIndex)}
-      return "ok:::" & tabTitle & ":::" & tabURL
-    end tell
-  `);
-  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
-  return { uuid: `${windowId}-${tabIndex}`, title, url, window_id: windowId, index: tabIndex, is_local: true };
-}
-
-// Selecting a tab brings its window to the front, so it becomes window 1
-export async function selectTab(windowId: number, tabIndex: number): Promise<LocalTab> {
-  assertTabPosition(windowId, tabIndex);
-  const result = await runAppleScript(`
-    tell application "${safariAppIdentifier}"
-      ${describeTabScript(windowId, tabIndex)}
-      set current tab of targetWindow to targetTab
-      if ${windowId} > 1 then set index of targetWindow to 1
-      activate
-      set selectedTab to current tab of front window
-      if index of selectedTab is not ${tabIndex} then return "not-selected"
-      return "ok:::" & tabTitle & ":::" & tabURL
-    end tell
-  `);
-  if (result === "not-selected") {
-    throw new Error(`Safari did not switch to tab ${tabIndex} of window ${windowId}.`);
-  }
-  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
-  return { uuid: `1-${tabIndex}`, title, url, window_id: 1, index: tabIndex, is_local: true };
-}
-
-// Closing the last tab of a window closes the window, so check both counts
-export async function closeTab(windowId: number, tabIndex: number) {
-  assertTabPosition(windowId, tabIndex);
-  const result = await runAppleScript(`
-    tell application "${safariAppIdentifier}"
-      ${describeTabScript(windowId, tabIndex)}
-      set windowCount to count of windows
-      set tabCount to count of tabs of targetWindow
-      close targetTab
-      delay 0.2
-      if (count of windows) = windowCount then
-        if (count of tabs of window ${windowId}) is not (tabCount - 1) then return "not-closed"
-      end if
-      return "ok:::" & tabTitle & ":::" & tabURL
-    end tell
-  `);
-  if (result === "not-closed") {
-    throw new Error(`Safari did not close tab ${tabIndex} of window ${windowId}.`);
-  }
-  const [title, url = ""] = parseTabResult(result, windowId, tabIndex);
-  return { closedTab: { title, url } };
-}
-
-export async function closeCurrentTab() {
-  const windowCount = parseInt(
-    await runAppleScript(`tell application "${safariAppIdentifier}" to return count of windows`),
-    10,
-  );
-  if (!windowCount) {
-    throw new Error("Safari has no open window.");
-  }
-  const tabIndex = parseInt(
-    await runAppleScript(`tell application "${safariAppIdentifier}" to return index of current tab of window 1`),
-    10,
-  );
-  return await closeTab(1, tabIndex);
-}
-
-export async function getFocusedTab() {
-  try {
-    const script = `
-      tell application "${safariAppIdentifier}"
-        set frontWindow to front window
-        set currentTab to current tab of frontWindow
-        set tabIndex to index of currentTab
-        set tabTitle to name of currentTab
-        if tabTitle is missing value then set tabTitle to ""
-        set tabURL to URL of currentTab
-        if tabURL is missing value then set tabURL to ""
-        set windowId to index of frontWindow
-
-        -- Start with text so & joins strings instead of building a list
-        return (windowId as text) & ":::" & tabIndex & ":::" & tabTitle & ":::" & tabURL
-      end tell
-    `;
-
-    const result = await runAppleScript(script);
-
-    if (result) {
-      const [windowId, index, title, url] = result.split(":::");
-
-      return {
-        uuid: `${windowId}-${index}`,
-        title,
-        url: url || "",
-        window_id: parseInt(windowId, 10),
-        index: parseInt(index, 10),
-        is_local: true,
-      };
+/** Counts the tabs of each window, to tell whether a new tab appeared. */
+export async function getTabCounts(): Promise<Record<number, number>> {
+  const result = await runSafariJxa<{ counts: Record<number, number> }>(`
+    const counts = {};
+    for (const win of app.windows()) {
+      try {
+        counts[win.id()] = win.tabs().length;
+      } catch (error) {}
     }
+    return JSON.stringify({ status: "ok", counts });
+  `);
+  return result.status === "ok" ? result.counts : {};
+}
 
-    throw new Error("Could not get focused tab information");
-  } catch (error) {
-    throw new Error(`Failed to get focused tab: ${error}`);
-  }
+export async function getFocusedTab(): Promise<LocalTab> {
+  const tab = await resolveTab();
+  return {
+    uuid: `${tab.windowId}-${tab.index}`,
+    title: tab.title,
+    url: tab.url,
+    window_id: tab.windowId,
+    index: tab.index,
+    is_local: true,
+  };
 }
 
 export async function closeOtherTabs() {

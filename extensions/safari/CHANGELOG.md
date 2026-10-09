@@ -5,10 +5,10 @@
 - Added the `select-tab` AI tool, which switches to a tab by window and index and brings its window to the front.
 - `search-history`, `search-bookmarks` and `search-reading-list` return 50 results by default, up to 100 with `searchLimit`, and report `truncated` when more matches exist. `searchText` is now optional.
 - `search-history`, `search-bookmarks` and `search-reading-list` explain how to grant Full Disk Access when Raycast cannot read Safari's data.
-- `open-url` rejects invalid and non-web URLs, opens bare domains over https, and returns the tab that shows the page, with `verified: false` when Safari shows another address.
-- `close-tab` asks for confirmation with the tab's title and URL, returns the closed tab, and fails clearly when the tab does not exist instead of reporting success.
-- `get-tab-contents` returns at most 20,000 characters by default, up to 50,000 with `maxLength`, and reports `truncated` when the page is longer. It waits up to 5 seconds for a loading page, fails clearly when the page has no text or the tab does not exist, and returns the tab's title, URL and position.
-- Fixed `get-focused-tab` returning malformed values (comma-padded title and URL, no tab index). It now returns the window's position (1 for the front window) instead of Safari's internal window ID, matching the other tools.
+- `open-url` accepts bare hosts with a port (`example.com:8080`), local addresses (`localhost:3000`, `[::1]:3000`) and intranet URLs with an explicit scheme (`http://intranet/`), and rejects other schemes. It returns the tab that shows the page, with `verified: true` only when a new tab opened on the requested site.
+- `close-tab` asks for confirmation with the tab's title and URL, then closes exactly that tab. It fails without closing anything when the tab does not exist, or when it moved or changed page after the confirmation.
+- `get-tab-contents` returns at most 20,000 characters by default, up to 50,000 with `maxLength`, and reports `truncated` when the page is longer. It waits up to 5 seconds for a loading page while reading exactly the same tab, and fails clearly when the page has no text, the tab does not exist, or the tab changed page during the wait.
+- Fixed `get-focused-tab` returning malformed values (comma-padded title and URL, no tab index). It now returns the window's position (1 for the front window) instead of Safari's internal window ID, matching the other tools. Tab titles and URLs are read as JSON, so titles containing separators such as `:::` are returned intact.
 - Moved the AI evals from `package.json` to `ai.yaml`, fixed the three that could not pass, and added AI instructions and evals covering all 10 tools.
 
 ## [New Command] - 2026-09-17

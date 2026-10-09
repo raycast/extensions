@@ -1,5 +1,5 @@
 import { setTimeout } from "timers/promises";
-import { ContentType, readTabContents, TabContents } from "../safari";
+import { ContentType, readPinnedTabContents, resolveTab, TabContents } from "../safari";
 
 const DEFAULT_MAX_LENGTH = 20000;
 const MAX_LENGTH_CAP = 50000;
@@ -54,37 +54,39 @@ type Input = {
  * `truncated` is true when the content was cut at maxLength.
  */
 export default async function tool(input: Input) {
-  const { tab, type = "text" } = input;
+  const { type = "text" } = input;
   const maxLength = Number.isFinite(input.maxLength)
     ? Math.min(Math.max(Math.floor(input.maxLength as number), 1), MAX_LENGTH_CAP)
     : DEFAULT_MAX_LENGTH;
 
-  // Wait for a loading page, or for an empty page to render when its state is unknown
+  // Resolve the tab once, then read exactly that tab while waiting for it to load
+  const tab = await resolveTab(input.tab);
   const deadline = Date.now() + LOADING_TIMEOUT_MS;
   let page: TabContents;
   for (;;) {
-    page = await readTabContents(tab, type, maxLength);
-    const waiting = page.readyState === "loading" || (page.readyState === "unknown" && !page.content.trim());
+    page = await readPinnedTabContents(tab, type, maxLength);
+    const waiting = page.readyState === "loading" || (page.readyState === "unknown" && !page.hasContent);
     if (!waiting || Date.now() >= deadline) break;
     await setTimeout(LOADING_POLL_MS);
   }
 
   const loading = page.readyState === "loading";
-  if (!page.content.trim()) {
+  // Check the full content, not the truncated prefix, which may be only whitespace
+  if (!page.hasContent) {
     if (loading) {
-      throw new Error(`"${page.title}" is still loading. Try again in a moment.`);
+      throw new Error(`"${page.title || tab.url}" is still loading. Try again in a moment.`);
     }
     throw new Error(
-      `Couldn't read "${page.title || page.url}": the page has no ${type === "text" ? "visible text" : "source"}. It may still be loading, need JavaScript that is turned off in Safari, or be a Safari page such as the Start Page, which can't be read.`,
+      `Couldn't read "${page.title || tab.url}": the page has no ${type === "text" ? "visible text" : "source"}. It may still be loading, need JavaScript that is turned off in Safari, or be a Safari page such as the Start Page, which can't be read.`,
     );
   }
 
   const truncated = page.length > maxLength;
   return {
     title: page.title,
-    url: page.url,
-    windowId: page.windowId,
-    index: page.index,
+    url: tab.url,
+    windowId: tab.windowId,
+    index: tab.index,
     type,
     loading,
     truncated,
