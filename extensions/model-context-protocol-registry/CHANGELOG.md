@@ -1,6 +1,30 @@
 # Model Context Protocol Registry Changelog
 
-## [Update MAQAMI Travel MCP Server] - {PR_MERGE_DATE}
+## [Add Datacircle MCP Server] - 2026-10-09
+
+- Add Datacircle (https://api.datacircle.dev/mcp, remote, OAuth) to the official registry: Query your favorite B2B data APIs through us. Same request, same price, no markup.
+
+## [Add QRX MCP Server] - 2026-10-09
+
+- Add QRX to the official registry: turn a prompt and a link into a branded, print-ready QR code that is checked to scan, with a hosted qrx.to short link. Hosted remote Streamable HTTP server at https://qrx.codes/mcp through `mcp-remote`; QRX API key sent as an `Authorization: Bearer` header.
+
+## [Add A1 Gallery MCP Server] - 2026-10-09
+
+- Add A1 Gallery to the official registry: hand-curated web design references, inside your agent. Search real websites, sections, pages, fonts and designers, and read design tokens measured off each rendered page. 17 read-only tools. Hosted remote Streamable HTTP server at https://www.a1.gallery/api/mcp; OAuth 2.1 sign-in with dynamic client registration, free A1 account, no API key.
+
+## [Add BulkPublish MCP Server] - 2026-10-09
+
+- Add BulkPublish to the official registry: schedule, cross-post and analyze social media posts across 15 platforms, including Facebook, Instagram, X, TikTok, YouTube, LinkedIn and Bluesky, with media uploads, queue slots, post analytics and, on Pro and Business plans, DM and comment replies. Raycast connects directly to the remote Streamable HTTP server at https://mcp.bulkpublish.com/mcp, with `mcp-remote` as the fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-09
+
+- Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
+
+## [Add Suparelay MCP Server] - 2026-10-08
+
+- Add Suparelay to the official entries: international calls from your AI assistant, with the price per minute and a Call link to the browser dialer.
+
+## [Update MAQAMI Travel MCP Server] - 2026-10-08
 
 - Update MAQAMI Travel's description: the server searches hotels and flights and gives the customer a secure checkout link on book.maqami.co, where they pay. It no longer books or takes payment details in a tool call, and the places and weather tools are gone.
 

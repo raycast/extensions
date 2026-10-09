@@ -44,7 +44,8 @@
     "tama_harrison",
     "pavelas",
     "mchoun",
-    "yoann_aubineau"
+    "yoann_aubineau",
+    "0xdhrv"
   ],
   "pastContributors": [
     "pomdtr",
@@ -563,8 +564,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2",
     "cross-fetch": "^3.1.6",
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
@@ -575,14 +576,12 @@
     "semver": "^7.3.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
-    "@types/nanoid": "^3.0.0",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.4",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
     "@types/semver": "^7.3.13",
-    "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
@@ -597,7 +596,7 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }

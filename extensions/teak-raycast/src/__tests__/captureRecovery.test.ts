@@ -52,7 +52,7 @@ test.each(["expired", "empty", "revoked-refresh-only"])(
             clients: Object.fromEntries(
               ["cli", "raycast", "chrome", "firefox", "safari"].map((name) => [
                 name,
-                "client_raycast",
+                "client_01M47GV3CYKFW0H78W0XYKGTM5",
               ]),
             ),
           }),

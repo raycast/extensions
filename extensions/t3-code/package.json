@@ -55,9 +55,8 @@
       "type": "textfield",
       "required": false,
       "title": "App Name",
-      "default": "T3 Code",
-      "description": "macOS application name used to launch and focus T3 Code.",
-      "placeholder": "T3 Code (Nightly)"
+      "description": "macOS application name used to launch and focus T3 Code. Leave empty to pick T3 Code (Alpha) or T3 Code (Nightly) from the running server.",
+      "placeholder": "T3 Code (Alpha)"
     }
   ],
   "dependencies": {

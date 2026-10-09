@@ -135,6 +135,7 @@ export const {
   ytdlPath: ytdlPathPreference,
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
+  fastRemux = true,
 } = getPreferenceValues<ExtensionPreferences>();
 
 // The directory preference can hold a literal "~/..." path (its default is
@@ -369,9 +370,18 @@ export const getFormats = (video?: Video) => {
 
 export const getFormatValue = (format: Format) => {
   const { hasAcodec } = hasCodec(format);
-  const audio = hasAcodec ? "" : "+bestaudio";
+  const id = format.format_id;
   const targetExt = `#${format.ext}`;
-  return format.format_id + audio + targetExt;
+  if (hasAcodec) {
+    return `${id}${targetExt}`;
+  }
+
+  const downloadFormat =
+    format.ext === "webm"
+      ? `${id}+ba[ext=webm]/${id}+ba[acodec^=opus]/${id}+ba[acodec^=vorbis]/${id}+bestaudio`
+      : `${id}+bestaudio`;
+
+  return `${downloadFormat}${targetExt}`;
 };
 
 export const getFormatTitle = (format: Format) =>

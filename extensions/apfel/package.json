@@ -5,7 +5,8 @@
   "description": "Interact with Apfel CLI from Raycast!",
   "author": "eggsy",
   "contributors": [
-    "florisdobber"
+    "florisdobber",
+    "shanto462"
   ],
   "platforms": [
     "macOS"

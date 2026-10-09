@@ -1,5 +1,10 @@
 # Video Downloader Changelog
 
+## [Improvement] - 2026-10-09
+
+- Add "Fast Remux" preference (enabled by default) to package streams directly into the target container (`--remux-video`) instead of re-encoding (`--recode-video`), delivering near-instant downloads with zero CPU transcoding overhead and no quality loss
+- Fix progress toast getting falsely stuck on "Formatting Video: 100%" during stream downloads and post-processing
+
 ## [Fix] - 2026-09-23
 
 - Fixed unlisted Vimeo links (`vimeo.com/<id>/<hash>`) failing with "The web client only works when logged-in". They are now downloaded through the public player URL, so no Vimeo login or browser cookies are needed.

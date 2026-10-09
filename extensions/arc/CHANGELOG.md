@@ -6,6 +6,16 @@
 - `select-tab` and `close-tab` now wait for Arc to finish and return a clear error when the tab ID does not exist, instead of silently succeeding.
 - Moved the AI instructions and evals to `ai.yaml`, with evals covering all 13 tools.
 
+## [Fix] - 2026-10-09
+
+- Fixed keyboard navigation in `Search Tabs` jumping over History straight to Suggestions while history was still loading. The tab sections now stay mounted during history search so the list keeps its selection anchor.
+
+## [Fix] - 2026-10-08
+
+- Fixed `Access Spaces and Favorites` launching Arc in the background every 10 minutes when Arc is not running.
+- Updated `@raycast/api`, `@raycast/utils` and the ESLint config, and resolved dependency vulnerabilities.
+- Replaced hand-written shortcuts with Raycast's common shortcuts and removed the reserved `Configure Command` shortcut.
+
 ## [Fix] - 2026-09-14
 
 - Fixed `Search Tabs` becoming slow with many tabs by batching the AppleScript calls used to look up each tab's Space name, instead of issuing one call per tab.
