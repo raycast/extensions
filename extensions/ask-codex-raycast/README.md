@@ -30,7 +30,7 @@ For the fastest workflow, open Raycast Settings → Launcher → Fallback Comman
 
 ### Continue or Steer
 
-The chat opens in a full-width Markdown reader, with the newest message first and each speaker identified by an avatar and name. Headings, emphasis, lists, tables, links, code blocks, and LaTeX retain their formatting. Inline `$...$` formulas are adapted to Raycast's supported `\(...\)` delimiters outside code. Code indentation and source text are preserved.
+The chat opens in a full-width Markdown reader, with the newest message first and each speaker identified by an avatar and name. Headings, emphasis, lists, tables, links, code blocks, and LaTeX retain their formatting. Inline `$...$` formulas are adapted to Raycast's supported `\(...\)` delimiters outside code. Visible prose line breaks are preserved. Older long, unformatted Chinese paragraphs are separated at sentence boundaries for readability; stored and copied text stays unchanged. Code indentation and source text are preserved. New replies are requested in readable Markdown with natural paragraph breaks.
 
 Press Enter to activate the top input field in the same chat. The conversation remains visible as a native list preview while composing; this preview uses plain text and Raycast's list spacing. Press Enter to send and automatically return to the formatted reply. Messages sent while a reply is in progress are steering instructions. Each launch reconnects to the last active conversation by default.
 
@@ -99,7 +99,7 @@ Run `npm run dev` to load the development extension in Raycast.
 
 Ask ChatGPT 通过本机已经登录的 Codex CLI 连接 ChatGPT/OpenAI 服务，并把 Raycast 根搜索里的文字直接交给它。它不是另一套要求你填写 API Key 的客户端，而是使用 `codex app-server` 作为本地连接桥梁。把 **Ask ChatGPT** 设置为第一项 Fallback Command 后，平时只需打开 Raycast、输入问题、向下选择一次并回车；插件会自动使用刚才的搜索文字，无需进入页面后重新输入。
 
-默认聊天页使用全宽、靠左的完整 Markdown 回复，最新消息在最上面，头像和说话人名称保留。标题、加粗、列表、表格、链接、代码块和公式按原始格式显示，不再把整条消息套进普通文本代码框。
+默认聊天页使用全宽、靠左的完整 Markdown 回复，最新消息在最上面，头像和说话人名称保留。标题、加粗、列表、表格、链接、代码块和公式按 Markdown 显示，不再把整条消息套进普通文本代码框。普通文字的单行换行会保留；旧回复中过长、没有格式的中文段落会按完整句子适当分段，原始记录和复制内容不变。新回复默认使用清晰的 Markdown 段落。
 
 按 Enter 切到同一聊天的顶部输入状态，输入后 Enter 发送，成功后自动回到 Markdown 回复。输入期间聊天内容以 Raycast 原生纯文本列表预览，无法同时显示完整 Markdown 排版。没有左侧会话栏，每次打开默认连接上次活动会话；历史和新建对话可从 Actions 打开。
 

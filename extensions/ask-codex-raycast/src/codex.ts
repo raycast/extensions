@@ -28,6 +28,13 @@ export type CodexModel = {
   efforts: string[];
 };
 
+const RESPONSE_FORMAT = [
+  "Use readable Markdown for replies in this chat UI.",
+  "Separate natural paragraphs with blank lines. For long answers, use meaningful sections or lists where useful; avoid one dense wall of text.",
+  "Keep code in fenced code blocks. Use \\( ... \\) for inline math and \\[ ... \\] for display math.",
+  "Do not wrap an entire ordinary reply in a code block. Honor the user's explicitly requested output format.",
+].join(" ");
+
 type PendingRequest = {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
@@ -168,6 +175,7 @@ export class CodexAppServer {
       // Preserve the original session's cwd and model instead of overriding them.
       sandbox: this.sandbox,
       approvalPolicy: "never",
+      developerInstructions: RESPONSE_FORMAT,
     });
     const thread = asRecord(result).thread;
     const id = asString(asRecord(thread).id) || threadId;
@@ -300,6 +308,7 @@ export class CodexAppServer {
       sandbox: this.sandbox,
       approvalPolicy: "never",
       serviceName: "ask_codex_raycast",
+      developerInstructions: RESPONSE_FORMAT,
     };
   }
 
