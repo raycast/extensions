@@ -17,25 +17,29 @@
       "name": "dashboard",
       "title": "Manage Vault Symlinks",
       "description": "Inspect and sync vault configurations",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     },
     {
       "name": "bootstrap",
       "title": "Bootstrap New Vault",
       "description": "Create a vault with selected links",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     },
     {
       "name": "profiles",
       "title": "Manage Sync Profiles",
       "description": "Create and apply sync profiles",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     },
     {
       "name": "help",
       "title": "Help & Guide",
       "description": "Learn how to use Obsidian Symlink Manager and understand its terminology.",
-      "mode": "view"
+      "mode": "view",
+      "icon": "extension-icon.png"
     }
   ],
   "preferences": [

@@ -87,7 +87,7 @@ async function linkCssSnippetsFolder(defaultVault: string, targetVault: string):
 }
 
 export default function BootstrapVault() {
-  const { defaultVaultPath } = getPreferenceValues<{ defaultVaultPath: string }>();
+  const { defaultVaultPath } = getPreferenceValues<Preferences>();
   const [targetPath, setTargetPath] = useState("");
   const [items, setItems] = useState<SourceItem[]>([]);
   const [linkAllSnippets, setLinkAllSnippets] = useState(false);
@@ -194,7 +194,11 @@ export default function BootstrapVault() {
         (id) => id.startsWith("settings/") && !linkedSettings.some((file) => id.startsWith(`settings/${file}/`)),
       );
       const settingsResult = mirrorCoreSettings
-        ? await mirrorSettings(defaultVaultPath, target, mirrorFiles)
+        ? await mirrorSettings(
+            defaultVaultPath,
+            target,
+            mirrorFiles.filter((f) => !linkedSettings.includes(f)),
+          )
         : await syncSettingChoices(defaultVaultPath, target, settingIds);
       for (const id of [...chosen]) if (id.startsWith("settings/")) chosen.delete(id);
 

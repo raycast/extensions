@@ -45,7 +45,7 @@ import { getRegisteredVaults, getSelectedVault, registerVault, removeVault, setS
 import ItemInspector from "./inspector";
 import CoreSettings from "./core-settings";
 import { categoryOverviewVisual } from "./lib/inspector-visuals";
-import { generateThemePreviewSvg } from "./lib/theme-preview";
+
 import { useVaultRefresh } from "./lib/use-vault-refresh";
 
 const execFileAsync = promisify(execFile);
@@ -287,29 +287,11 @@ function categoryOverviewMarkdown(
   items: VaultItem[],
   snippetFolderMode?: string,
   visualPath?: string,
-  themePreviews?: { item: VaultItem; path: string | undefined }[],
 ): string {
   const categoryItems = items.filter((item) => item.category === category.key);
 
   if (visualPath && (category.key === "plugins" || category.key === "snippets" || category.key === "themes")) {
     const blocks = [`# ${category.title}`];
-
-    if (category.key === "themes" && themePreviews) {
-      const validPreviews = themePreviews.filter((p) => p.path);
-      if (validPreviews.length > 0) {
-        if (validPreviews.length === 1) {
-          blocks.push(`## Preview · ${validPreviews[0].item.name}`);
-          blocks.push(`![Preview of ${validPreviews[0].item.name}](<${validPreviews[0].path}>)`);
-        } else {
-          blocks.push(`## Previews`);
-          for (const p of validPreviews) {
-            blocks.push(`### ${p.item.name}`);
-            blocks.push(`![Preview of ${p.item.name}](<${p.path}>)`);
-          }
-        }
-      }
-    }
-
     blocks.push(`![${category.title} presence in each vault](<${visualPath}>)`);
 
     return blocks.join("\n\n");
@@ -664,11 +646,7 @@ export function VaultDashboard({ defaultVault, targetVault }: { defaultVault: st
         categoryOverviewVisual("snippets", items, origin, target, mode).catch(() => undefined),
         categoryOverviewVisual("themes", items, origin, target).catch(() => undefined),
       ]);
-      const themeItems = items.filter((i) => i.category === "themes");
-      const themePreviews = await Promise.all(
-        themeItems.map(async (item) => ({ item, path: await generateThemePreviewSvg(item).catch(() => undefined) })),
-      );
-      return { target, items, snippetMode: mode, visuals: { plugins, snippets, themes, themePreviews } };
+      return { target, items, snippetMode: mode, visuals: { plugins, snippets, themes } };
     },
     [defaultVault, activeTarget],
   );
@@ -752,13 +730,7 @@ export function VaultDashboard({ defaultVault, targetVault }: { defaultVault: st
                   markdown={
                     scanError
                       ? `# Could not scan this vault\n\n${String(scanError)}`
-                      : categoryOverviewMarkdown(
-                          category,
-                          items,
-                          overviewSnippetMode ?? snippetFolderMode,
-                          visualPath,
-                          scan?.visuals?.themePreviews,
-                        )
+                      : categoryOverviewMarkdown(category, items, overviewSnippetMode ?? snippetFolderMode, visualPath)
                   }
                 />
               }
@@ -1118,7 +1090,7 @@ export function VaultList({ defaultVault, explanation }: { defaultVault: string;
 }
 
 export default function Dashboard() {
-  const { defaultVaultPath } = getPreferenceValues<{ defaultVaultPath?: string }>();
+  const { defaultVaultPath } = getPreferenceValues<Preferences>();
   const { data: validDefaultVault, isLoading: checkingDefaultVault } = usePromise(
     isVaultDirectory,
     [defaultVaultPath ?? ""],

@@ -259,7 +259,7 @@ export async function revertItem(
       await repoItemPath(defaultVault, item),
     ]);
     await commitItem(defaultVault, item, `Restored ${item} from ${hash.slice(0, 8)}`);
-    if (hadPrevious) await rm(previous, { recursive: true });
+    // Backup is deliberately kept here to preserve ignored files (e.g. plugin data) not tracked by Git.
   } catch (error) {
     if (await exists(destination)) await rm(destination, { recursive: true });
     if (hadPrevious) await rename(previous, destination);

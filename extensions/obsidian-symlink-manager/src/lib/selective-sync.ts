@@ -276,6 +276,15 @@ export async function applySelectiveChange(
     mode: destination ? (await fs.lstat(destinationPath)).mode : undefined,
   });
   try {
+    if (destination) {
+      const currentDestination = await physicalFile(destinationPath).catch(() => null);
+      if (
+        currentDestination &&
+        hash(currentDestination) !== (from === "default" ? change.targetHash : change.defaultHash)
+      ) {
+        throw new Error("The destination was modified while preparing the change. Refresh and try again.");
+      }
+    }
     await fs.rename(temp, destinationPath);
   } catch (error) {
     await fs.rm(temp, { force: true });

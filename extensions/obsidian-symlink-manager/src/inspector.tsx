@@ -20,7 +20,6 @@ import { useState } from "react";
 import { getCommitDiff, getItemDiff, getItemHistory, revertItem, type GitCommit } from "./lib/git";
 import { detachItem, pullCopyItem, pullItem, pushItem, refreshItem, unlinkItem, type VaultItem } from "./lib/items";
 import { relationshipVisual, sideBySideDiffs, type DiffVisuals } from "./lib/inspector-visuals";
-import { generateThemePreviewSvg } from "./lib/theme-preview";
 import SelectiveSync from "./selective-sync";
 
 function relativeItemPath(item: VaultItem): string {
@@ -111,19 +110,12 @@ function stateInfo(item: VaultItem): StateInfo {
   }
 }
 
-function overview(
-  item: VaultItem,
-  historyCount: number,
-  relationPath?: string,
-  comparison?: string,
-  themePreviewPath?: string,
-): string {
+function overview(item: VaultItem, historyCount: number, relationPath?: string, comparison?: string): string {
   const state = stateInfo(item);
   const itemLocation = ".obsidian/" + relativeItemPath(item).replaceAll("\\", "/");
   return [
     "# " + plain(item.name),
     "**" + plain(item.category) + "** · Target: " + plain(basename(item.targetVault)),
-    ...(themePreviewPath ? [`![Theme Preview](<${themePreviewPath}?t=${Date.now()}>)`] : []),
     "## " + state.label,
     relationPath
       ? `![Relationship between the Default and Target vaults](<${relationPath}?t=${Date.now()}>)`
@@ -401,9 +393,6 @@ export default function ItemInspector({
     revalidate: refreshHistory,
   } = usePromise(getItemHistory, [item.defaultVault, relativePath]);
   const { data: relationPath } = usePromise(relationshipVisual, [item]);
-  const { data: themePreviewPath } = usePromise(generateThemePreviewSvg, [item], {
-    execute: item.category === "themes",
-  });
   const { data: graphPath, isLoading: graphLoading } = usePromise(writeHistoryGraph, [item, history], {
     execute: !historyLoading && history.length > 0,
   });
@@ -486,7 +475,6 @@ export default function ItemInspector({
                     visualDiff(liveDiff, "A text diff is unavailable for these copies."),
                   )
                 : undefined,
-            themePreviewPath,
           );
 
   const actions = (

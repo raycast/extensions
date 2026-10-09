@@ -29,7 +29,7 @@ import {
 
 function ProfileEditor({ initial, onSave }: { initial?: Profile; onSave: (profile: Profile) => Promise<void> }) {
   const { pop } = useNavigation();
-  const { defaultVaultPath } = getPreferenceValues<{ defaultVaultPath: string }>();
+  const { defaultVaultPath } = getPreferenceValues<Preferences>();
   const [items, setItems] = useState<SourceItem[]>([]);
   const [name, setName] = useState(initial?.name ?? "");
   const [selectedItems, setSelectedItems] = useState<string[]>(
@@ -174,7 +174,7 @@ function ProfileEditor({ initial, onSave }: { initial?: Profile; onSave: (profil
 }
 
 export default function Profiles() {
-  const { defaultVaultPath } = getPreferenceValues<{ defaultVaultPath: string }>();
+  const { defaultVaultPath } = getPreferenceValues<Preferences>();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
