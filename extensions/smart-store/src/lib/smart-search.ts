@@ -34,7 +34,18 @@ const RankingSchema = z.object({
 });
 
 const CANDIDATES = 40;
-const memory = new Map<string, { results: SmartResult[]; verdict?: Verdict; isSmart: boolean }>();
+type Remembered = { results: SmartResult[]; verdict?: Verdict; isSmart: boolean };
+/** Results remembered per catalog, so a catalog refresh starts from a clean slate. */
+const memories = new WeakMap<StoreExtension[], Map<string, Remembered>>();
+
+function memoryFor(items: StoreExtension[]): Map<string, Remembered> {
+  let memory = memories.get(items);
+  if (!memory) {
+    memory = new Map();
+    memories.set(items, memory);
+  }
+  return memory;
+}
 
 function describeCandidate(ref: string, item: StoreExtension) {
   const commands = item.commands
@@ -87,19 +98,25 @@ async function runKeywordSearch(query: string, items: StoreExtension[], lang: st
 
 /** Debounced search: understands plain-language requests with AI, keywords otherwise. */
 export function useSmartSearch(query: string, items: StoreExtension[], lang: string): SmartSearchState {
-  const [state, setState] = useState<SmartSearchState>({ results: [], isSmart: false, isLoading: false });
+  // `query` records which search the state belongs to, so results of a previous query never show for a new one.
+  const [state, setState] = useState<SmartSearchState & { query?: string }>({
+    results: [],
+    isSmart: false,
+    isLoading: false,
+  });
 
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed || !items.length) {
-      setState({ results: [], isSmart: false, isLoading: false });
+      setState({ results: [], isSmart: false, isLoading: false, query: trimmed });
       return;
     }
     const ai = getAIStatus();
     const key = `${ai.available ? ai.provider : "keywords"}:${lang}:${trimmed.toLowerCase()}`;
+    const memory = memoryFor(items);
     const remembered = memory.get(key);
     if (remembered) {
-      setState({ ...remembered, isLoading: false });
+      setState({ ...remembered, isLoading: false, query: trimmed });
       return;
     }
 
@@ -113,13 +130,16 @@ export function useSmartSearch(query: string, items: StoreExtension[], lang: str
             : await runKeywordSearch(trimmed, items, lang, controller.signal);
           if (controller.signal.aborted) return;
           memory.set(key, result);
-          setState({ ...result, isLoading: false });
+          setState({ ...result, isLoading: false, query: trimmed });
         } catch (error) {
           if (controller.signal.aborted) return;
+          // Same fallback as without AI, including translating the query into English.
+          const fallback = await runKeywordSearch(trimmed, items, lang, controller.signal);
+          if (controller.signal.aborted) return;
           setState({
-            results: keywordSearch(items, [trimmed], 50).map((r) => ({ item: r.item })),
-            isSmart: false,
+            ...fallback,
             isLoading: false,
+            query: trimmed,
             error: error instanceof Error ? error : new Error(String(error)),
           });
         }
@@ -133,5 +153,7 @@ export function useSmartSearch(query: string, items: StoreExtension[], lang: str
     };
   }, [query, items, lang]);
 
+  const trimmed = query.trim();
+  if (trimmed && state.query !== trimmed) return { results: [], isSmart: false, isLoading: true };
   return state;
 }

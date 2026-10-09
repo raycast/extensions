@@ -29,12 +29,8 @@
       "required": false,
       "title": "Description Language",
       "description": "Language used to display extension descriptions and AI explanations.",
-      "default": "auto",
+      "default": "en",
       "data": [
-        {
-          "title": "System Language",
-          "value": "auto"
-        },
         {
           "title": "English",
           "value": "en"
@@ -135,14 +131,13 @@
       "type": "textfield",
       "required": false,
       "title": "Model",
-      "description": "Optional model override for the Anthropic or OpenAI provider (defaults: claude-opus-5-5, gpt-5-mini).",
+      "description": "Optional model override for the Anthropic or OpenAI provider (defaults: claude-opus-5-5, gpt-5.4-mini).",
       "placeholder": "Leave empty for the default model"
     }
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",
     "@raycast/api": "^2.7.3",
-    "@raycast/utils": "^2.3.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {

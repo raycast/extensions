@@ -87,7 +87,7 @@ export async function translateTexts(
 export function useTranslations(items: TextToTranslate[], lang: string) {
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [isTranslating, setIsTranslating] = useState(false);
-  const signature = items.map((item) => item.key).join("|");
+  const signature = items.map((item) => `${item.key}\u0000${item.text}`).join("\u0001");
 
   useEffect(() => {
     if (lang === "en" || !items.length) {

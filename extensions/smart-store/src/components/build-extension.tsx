@@ -30,7 +30,7 @@ The macOS mechanisms, CLIs, files or web APIs it would rely on, and any permissi
 Easy, medium or hard for a beginner, and why, in two or three sentences.
 
 ## Prompt for your AI coding assistant
-A single fenced code block (\`\`\`text) containing a complete prompt, in English, that someone can paste into Claude, ChatGPT or Cursor to build this as a Raycast extension with TypeScript, React and the @raycast/api package, ready to publish on the Raycast Store. Ask the assistant to explain each step for a beginner.`;
+A single fenced code block opened with exactly four backticks and the word prompt (\`\`\`\`prompt) and closed with four backticks (keep this marker unchanged whatever language you write in, and use it nowhere else) containing a complete prompt, in English, that someone can paste into Claude, ChatGPT or Cursor to build this as a Raycast extension with TypeScript, React and the @raycast/api package, ready to publish on the Raycast Store. Ask the assistant to explain each step for a beginner.`;
 }
 
 function offlinePlan(query: string) {
@@ -43,14 +43,17 @@ No AI provider is configured, so here is a generic starting prompt. Configure Ra
 
 ## Prompt for your AI coding assistant
 
-\`\`\`text
+\`\`\`\`prompt
 ${prompt}
-\`\`\``;
+\`\`\`\``;
 }
 
+/**
+ * The prompt is the four-backtick block tagged `prompt`, a marker the AI is told never to translate or reuse.
+ * Four backticks let the prompt itself contain ordinary ``` code fences.
+ */
 function extractPrompt(markdown: string): string | undefined {
-  const section = markdown.split(/##\s+Prompt for your AI coding assistant/i)[1] ?? markdown;
-  return section.match(/```[a-z]*\n([\s\S]*?)```/)?.[1]?.trim();
+  return markdown.match(/````prompt[^\S\n]*\n([\s\S]*?)\n````/)?.[1]?.trim() || undefined;
 }
 
 export function BuildExtension(props: { query: string; lang: string; closest?: StoreExtension[] }) {

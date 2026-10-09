@@ -3,7 +3,7 @@
 Find Raycast extensions by describing what you need, in any language.
 
 - **Plain-language search**: type "manage the apps that open when I log in" instead of guessing an extension's exact name. AI turns your request into search terms, looks through titles, descriptions and commands, then ranks the results and explains why each one fits.
-- **Descriptions in your language**: extension and command descriptions are translated into the language of your choice (your macOS language by default). Translations are cached locally.
+- **Descriptions in your language**: extension and command descriptions are translated into the language you pick in preferences. Translations are cached locally.
 - **Build what doesn't exist**: when no extension does what you need, Smart Store writes a plan and a ready-to-paste prompt for Claude, ChatGPT or Cursor, so you can build it yourself.
 - **Everything you expect from the Store**: browse by popularity, recent additions, recent updates, category or installed extensions, see screenshots and commands, and open any extension in the Raycast Store to install it.
 
@@ -11,7 +11,7 @@ Find Raycast extensions by describing what you need, in any language.
 
 Open the extension preferences to choose:
 
-- **Description Language**: the language used for descriptions and AI explanations.
+- **Description Language**: the language used for descriptions and AI explanations (English by default).
 - **AI Provider**:
   - **Raycast AI** (default) requires Raycast Pro.
   - **Anthropic** or **OpenAI** use your own API key. Paste it in **API Key**. You can change the model in **Model**.
@@ -19,4 +19,4 @@ Open the extension preferences to choose:
 
 ## Privacy
 
-Your search requests are sent to the AI provider you choose. Extension data comes from the public Raycast Store listing. Nothing else leaves your Mac.
+Your search requests are sent to the AI provider you choose. When AI is turned off or unavailable and your description language is not English, your search queries are sent to MyMemory to translate them into English. Extension and command descriptions are sent to the available AI provider or to MyMemory for translation. Extension data comes from the public Raycast Store listing.

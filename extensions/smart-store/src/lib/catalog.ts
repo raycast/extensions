@@ -160,10 +160,21 @@ export function useCatalog() {
   return { items, isLoading, error, refresh };
 }
 
-/** Installed store extensions live in ~/.config/raycast/extensions/<store id>. */
+/**
+ * Config folder of the running Raycast build, derived from its bundle id in the support path:
+ * com.raycast.macos → raycast, com.raycast-x.macos.internal → raycast-x-internal.
+ */
+function raycastConfigDirName(): string {
+  const bundleId = environment.supportPath.split(path.sep).find((segment) => segment.startsWith("com.raycast"));
+  const [, app, , variant] = bundleId?.split(".") ?? [];
+  if (!app) return "raycast";
+  return variant ? `${app}-${variant}` : app;
+}
+
+/** Installed store extensions live in ~/.config/<raycast build>/extensions/<store id>. */
 export function getInstalledIds(): Set<string> {
   try {
-    return new Set(fs.readdirSync(path.join(os.homedir(), ".config", "raycast", "extensions")));
+    return new Set(fs.readdirSync(path.join(os.homedir(), ".config", raycastConfigDirName(), "extensions")));
   } catch {
     return new Set();
   }

@@ -37,10 +37,13 @@ function useAnimationFrame(active: boolean): number {
 export default function Command() {
   const lang = useMemo(getLanguage, []);
   const ai = useMemo(getAIStatus, []);
-  const installed = useMemo(getInstalledIds, []);
   const catalog = useCatalog();
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<BrowseFilter>("popular");
+  const [installed, setInstalled] = useState(getInstalledIds);
+  // Re-read installed extensions when the catalog reloads or the user searches or browses again,
+  // so extensions installed from the Store meanwhile get their badge.
+  useEffect(() => setInstalled(getInstalledIds()), [catalog.items, filter, searchText]);
   const categories = useMemo(() => allCategories(catalog.items), [catalog.items]);
 
   const query = searchText.trim();
@@ -60,19 +63,19 @@ export default function Command() {
   const aiMode = Boolean(query) && ai.available;
   const aiThinking = aiMode && smart.isLoading;
   const aiRows: Row[] = aiMode && !smart.isLoading && smart.isSmart ? smart.results : [];
+  // Without AI, or when the AI failed, the smart search returns translated keyword results.
+  const keywordFallback = !smart.isLoading && !smart.isSmart && (!aiMode || Boolean(smart.error));
   const keywordRows: Row[] = !query
     ? browsed
-    : aiMode
-      ? instant.filter((row) => !aiRows.some((r) => r.item.id === row.item.id))
-      : smart.isLoading
-        ? instant
-        : smart.results;
+    : keywordFallback
+      ? smart.results
+      : instant.filter((row) => !aiRows.some((r) => r.item.id === row.item.id));
   const frame = useAnimationFrame(aiThinking);
 
   const visible = [...aiRows, ...keywordRows].slice(0, TRANSLATED_ROWS);
   const texts = useMemo(
     () => visible.map((row) => ({ key: row.item.id, text: row.item.description })),
-    [visible.map((row) => row.item.id).join("|")],
+    [visible.map((row) => `${row.item.id}\u0000${row.item.description}`).join("\u0001")],
   );
   const { translations, isTranslating } = useTranslations(texts, lang);
 
