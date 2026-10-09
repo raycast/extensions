@@ -15,9 +15,16 @@ import {
   type LaunchProps,
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CodexAppServer, type CodexEvent } from "./codex";
+import {
+  CodexAppServer,
+  type CodexEvent,
+  type CodexModel,
+  type ModelSelection,
+} from "./codex";
 import { useSessionHistory, type Page } from "./history";
 import { conversationMarkdown, messageRows, rowTitle } from "./chat-text";
+import { renderMarkdown } from "./markdown";
+import { ModelMenu, MODEL_SELECTION_KEY } from "./model-menu";
 import {
   asRecord,
   asString,
@@ -51,9 +58,24 @@ export default function AskCodex(
   const [status, setStatus] = useState("正在连接 Codex…");
   const [error, setError] = useState("");
   const [page, setPage] = useState<Page>("chat");
+  const [chatLayout, setChatLayout] = useState<"compact" | "input">("compact");
   const [sessions, setSessions] = useState<StoredConversation[]>([]);
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [switching, setSwitching] = useState(false);
+  const [models, setModels] = useState<CodexModel[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState("");
+  const [modelSelection, setModelSelection] = useState<ModelSelection | null>(
+    null,
+  );
+  const [currentModel, setCurrentModel] = useState<ModelSelection>({
+    model: "",
+    effort: "",
+  });
+  const modelSelectionRef = useRef<ModelSelection | null>(null);
+  const modelsRef = useRef<CodexModel[]>([]);
+  const modelsRequestRef = useRef<Promise<CodexModel[]> | null>(null);
+  const modelSaveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
   const libraryRef = useRef<ConversationLibrary>({
     version: 2,
     activeId: null,
@@ -114,6 +136,58 @@ export default function AskCodex(
     persistLibrary();
   }
 
+  async function refreshModels(): Promise<CodexModel[]> {
+    const client = clientRef.current;
+    if (!client || !readyRef.current) return [];
+    if (modelsRequestRef.current) return modelsRequestRef.current;
+    setModelsLoading(true);
+    setModelsError("");
+    const request = client.listModels();
+    modelsRequestRef.current = request;
+    try {
+      const catalog = await request;
+      if (mountedRef.current && clientRef.current === client) {
+        modelsRef.current = catalog;
+        setModels(catalog);
+      }
+      return catalog;
+    } catch (reason) {
+      if (mountedRef.current && clientRef.current === client)
+        setModelsError(messageOf(reason));
+      throw reason;
+    } finally {
+      if (modelsRequestRef.current === request) modelsRequestRef.current = null;
+      if (mountedRef.current && clientRef.current === client)
+        setModelsLoading(false);
+    }
+  }
+
+  function selectModel(selection: ModelSelection | null) {
+    modelSelectionRef.current = selection;
+    setModelSelection(selection);
+    modelSaveQueueRef.current = modelSaveQueueRef.current
+      .catch(() => undefined)
+      .then(() =>
+        LocalStorage.setItem(MODEL_SELECTION_KEY, JSON.stringify(selection)),
+      );
+    void modelSaveQueueRef.current.catch((reason) =>
+      showToast({
+        style: Toast.Style.Failure,
+        title: "模型选择保存失败",
+        message: messageOf(reason),
+      }),
+    );
+    void showToast({
+      style: Toast.Style.Success,
+      title: selection
+        ? [selection.model, selection.effort].filter(Boolean).join(" · ")
+        : "沿用当前会话模型",
+      message: busy
+        ? "下一次回复使用；当前回答的补充要求仍使用原模型。"
+        : "下一条消息使用此设置。",
+    });
+  }
+
   useEffect(() => {
     let disposed = false;
     mountedRef.current = true;
@@ -121,6 +195,11 @@ export default function AskCodex(
     setReady(false);
     setError("");
     setStatus("正在连接 Codex…");
+    modelsRequestRef.current = null;
+    modelsRef.current = [];
+    setModels([]);
+    setModelsLoading(false);
+    setModelsError("");
     const handleEvent = (event: CodexEvent) => {
       if (disposed) return;
       const params = event.params;
@@ -238,6 +317,23 @@ export default function AskCodex(
     clientRef.current = client;
     const initialize = async () => {
       await saveQueueRef.current.catch(() => undefined);
+      await modelSaveQueueRef.current.catch(() => undefined);
+      const savedModel =
+        await LocalStorage.getItem<string>(MODEL_SELECTION_KEY);
+      let selection: ModelSelection | null = null;
+      try {
+        const saved = asRecord(savedModel ? JSON.parse(savedModel) : null);
+        if (asString(saved.model))
+          selection = {
+            model: asString(saved.model),
+            effort: asString(saved.effort),
+          };
+      } catch {
+        /* A malformed picker preference must not prevent opening chat. */
+      }
+      if (disposed) return;
+      modelSelectionRef.current = selection;
+      setModelSelection(selection);
       const library = parseLibrary(
         await LocalStorage.getItem<string>(LIBRARY_KEY),
         await LocalStorage.getItem<string>(LEGACY_KEY),
@@ -294,9 +390,11 @@ export default function AskCodex(
       // Unsent drafts survive an empty, not-yet-persisted server thread.
       if (threadId !== stored.threadId && stored.messages.length) setDraft("");
       setBusy(Boolean(client.currentTurnId));
+      setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
       setReady(true);
       setStatus("已连接 · 输入后按 Enter 发送");
+      void refreshModels().catch(() => undefined);
     };
     initRef.current = initialize();
     void initRef.current.catch((reason: unknown) => {
@@ -328,7 +426,7 @@ export default function AskCodex(
     return () => clearTimeout(timer);
   }, [conversation, draft]);
 
-  async function deliver(prompt: string) {
+  async function deliver(prompt: string, selection: ModelSelection | null) {
     await initRef.current;
     if (!mountedRef.current) return;
     const client = clientRef.current;
@@ -360,6 +458,20 @@ export default function AskCodex(
         if (client.currentTurnId) throw reason;
       }
     }
+    if (selection) {
+      const catalog = modelsRef.current.length
+        ? modelsRef.current
+        : await refreshModels();
+      const model = catalog.find((item) => item.model === selection.model);
+      if (
+        !model ||
+        (selection.effort && !model.efforts.includes(selection.effort))
+      ) {
+        throw new Error(
+          "所选模型或档位已不可用，请在底部 Actions 中重新选择模型。",
+        );
+      }
+    }
     const userId = makeId();
     const replyId = makeId();
     activeReplyRef.current = replyId;
@@ -381,7 +493,8 @@ export default function AskCodex(
       ],
     }));
     try {
-      await client.startTurn(prompt);
+      await client.startTurn(prompt, selection);
+      if (mountedRef.current) setCurrentModel(client.currentModelSelection);
     } catch (reason) {
       setBusy(false);
       setConversation((previous) => ({
@@ -396,7 +509,10 @@ export default function AskCodex(
 
   function enqueue(prompt: string) {
     // Serialize start/steer acknowledgements, not the whole answer.
-    const next = sendQueueRef.current.then(() => deliver(prompt));
+    const selection = modelSelectionRef.current
+      ? { ...modelSelectionRef.current }
+      : null;
+    const next = sendQueueRef.current.then(() => deliver(prompt, selection));
     sendQueueRef.current = next.catch(() => undefined);
     return next;
   }
@@ -437,6 +553,7 @@ export default function AskCodex(
     setDraft("");
     try {
       await enqueue(text);
+      setChatLayout("compact");
       return true;
     } catch (reason) {
       await reportFailure(reason, text);
@@ -462,6 +579,7 @@ export default function AskCodex(
       if (!client || !readyRef.current) throw new Error("服务尚未连接");
       if (persistedRef.current) save(persistedRef.current);
       const threadId = await client.startThread();
+      setCurrentModel(client.currentModelSelection);
       const next = {
         threadId,
         messages: [],
@@ -530,6 +648,7 @@ export default function AskCodex(
       setBusy(Boolean(client.currentTurnId));
       setError("");
       setStatus("会话已恢复 · 输入后按 Enter 继续聊天");
+      setCurrentModel(client.currentModelSelection);
       save(next);
       setPage("chat");
     } catch (reason) {
@@ -668,7 +787,14 @@ export default function AskCodex(
     onNew: newChat,
   });
   const chatActions = (message?: ChatMessage) => (
-    <ActionPanel>
+    <ActionPanel
+      title={[
+        modelSelection?.model || currentModel.model,
+        modelSelection?.effort ?? currentModel.effort,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
+    >
       {!ready && error ? (
         <Action
           title="重新连接"
@@ -677,21 +803,43 @@ export default function AskCodex(
         />
       ) : (
         <Action
-          title={busy ? "发送补充要求" : "发送消息"}
-          icon={Icon.ArrowRight}
+          title={
+            chatLayout === "compact"
+              ? busy
+                ? "输入补充要求"
+                : "输入追问"
+              : busy
+                ? "发送补充要求"
+                : "发送消息"
+          }
+          icon={chatLayout === "compact" ? Icon.Pencil : Icon.ArrowRight}
           shortcut={{ modifiers: [], key: "return" }}
-          onAction={() => void sendPrompt(draft)}
+          onAction={() =>
+            chatLayout === "compact"
+              ? setChatLayout("input")
+              : void sendPrompt(draft)
+          }
         />
       )}
+      <ModelMenu
+        models={models}
+        selection={modelSelection}
+        current={currentModel}
+        loading={modelsLoading}
+        error={modelsError}
+        ready={ready}
+        onRefresh={() => void refreshModels().catch(() => undefined)}
+        onSelect={selectModel}
+      />
       {message && (
         <Action.Push
-          title="展开这条消息"
+          title="阅读这条消息 · Markdown"
           icon={Icon.AppWindow}
           shortcut={Keyboard.Shortcut.Common.Open}
           target={
             <Detail
               navigationTitle={message.role === "assistant" ? "ChatGPT" : "你"}
-              markdown={transcript([message])}
+              markdown={renderMarkdown(transcript([message]))}
             />
           }
         />
@@ -703,11 +851,11 @@ export default function AskCodex(
         />
       )}
       <Action.Push
-        title="紧凑阅读当前对话"
+        title="阅读当前对话 · Markdown"
         icon={Icon.AppWindow}
         target={
           <Detail
-            navigationTitle="Ask ChatGPT · 紧凑阅读"
+            navigationTitle="Ask ChatGPT · Markdown"
             markdown={conversationMarkdown(
               visibleMessages,
               environment.assetsPath,
@@ -726,10 +874,34 @@ export default function AskCodex(
           />
         }
       />
+      {chatLayout === "input" && (
+        <Action
+          title="返回紧凑回复"
+          icon={Icon.ArrowLeft}
+          onAction={() => setChatLayout("compact")}
+        />
+      )}
       {secondaryActions}
     </ActionPanel>
   );
   if (page === "chat") {
+    if (chatLayout === "compact") {
+      return (
+        <Detail
+          navigationTitle="Ask ChatGPT"
+          markdown={conversationMarkdown(
+            visibleMessages,
+            environment.assetsPath,
+            ready
+              ? `${status.split(" · ")[0]} · 按 Enter 输入${busy ? "补充要求" : "追问"}`
+              : status,
+            error,
+          )}
+          isLoading={(!ready && !error) || busy || switching}
+          actions={chatActions()}
+        />
+      );
+    }
     return (
       <List
         navigationTitle="Ask ChatGPT"

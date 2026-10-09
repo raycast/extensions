@@ -20,6 +20,14 @@ type JsonRpcMessage = {
   error?: { message?: string; code?: number; data?: unknown };
 };
 
+export type ModelSelection = { model: string; effort: string };
+export type CodexModel = {
+  model: string;
+  displayName: string;
+  defaultEffort: string;
+  efforts: string[];
+};
+
 type PendingRequest = {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
@@ -42,6 +50,7 @@ export class CodexAppServer {
   private closed = false;
   private completedTurns = new Set<string>();
   private snapshot: Record<string, unknown> = {};
+  private modelSelection: ModelSelection = { model: "", effort: "" };
 
   constructor(options: {
     onEvent: (event: CodexEvent) => void;
@@ -67,6 +76,10 @@ export class CodexAppServer {
 
   get threadSnapshot(): Record<string, unknown> {
     return this.snapshot;
+  }
+
+  get currentModelSelection(): ModelSelection {
+    return { ...this.modelSelection };
   }
 
   async connect(): Promise<void> {
@@ -141,6 +154,10 @@ export class CodexAppServer {
 
     this.threadId = id;
     this.snapshot = asRecord(thread);
+    this.modelSelection = {
+      model: asString(result.model),
+      effort: asString(result.reasoningEffort),
+    };
     this.activeTurnId = null;
     return id;
   }
@@ -157,6 +174,10 @@ export class CodexAppServer {
 
     this.threadId = id;
     this.snapshot = asRecord(thread);
+    this.modelSelection = {
+      model: asString(result.model),
+      effort: asString(result.reasoningEffort),
+    };
     const turns = Array.isArray(this.snapshot.turns) ? this.snapshot.turns : [];
     const active = turns
       .map(asRecord)
@@ -182,7 +203,42 @@ export class CodexAppServer {
     };
   }
 
-  async startTurn(prompt: string): Promise<void> {
+  async listModels(): Promise<CodexModel[]> {
+    const models = new Map<string, CodexModel>();
+    const seen = new Set<string>();
+    let cursor = "";
+    do {
+      const result = await this.request("model/list", {
+        limit: 100,
+        includeHidden: false,
+        ...(cursor ? { cursor } : {}),
+      });
+      for (const value of Array.isArray(result.data) ? result.data : []) {
+        const item = asRecord(value);
+        const model = asString(item.model);
+        if (!model || item.hidden === true) continue;
+        models.set(model, {
+          model,
+          displayName: asString(item.displayName) || model,
+          defaultEffort: asString(item.defaultReasoningEffort),
+          efforts: Array.isArray(item.supportedReasoningEfforts)
+            ? item.supportedReasoningEfforts
+                .map((option) => asString(asRecord(option).reasoningEffort))
+                .filter(Boolean)
+            : [],
+        });
+      }
+      cursor = asString(result.nextCursor);
+      if (seen.has(cursor)) break;
+      seen.add(cursor);
+    } while (cursor);
+    return [...models.values()];
+  }
+
+  async startTurn(
+    prompt: string,
+    selection?: ModelSelection | null,
+  ): Promise<void> {
     if (!this.threadId) {
       await this.startThread();
     }
@@ -190,7 +246,10 @@ export class CodexAppServer {
     const result = await this.request("turn/start", {
       threadId: this.threadId,
       input: [{ type: "text", text: prompt }],
+      ...(selection?.model ? { model: selection.model } : {}),
+      ...(selection?.effort ? { effort: selection.effort } : {}),
     });
+    if (selection) this.modelSelection = { ...selection };
     const turn = asRecord(result).turn;
     const id = asString(asRecord(turn).id);
     if (id && !this.completedTurns.has(id)) this.activeTurnId = id;
@@ -256,12 +315,15 @@ export class CodexAppServer {
         const error = new Error(
           `Codex 请求超时（${method}）。请重新连接后重试。`,
         );
-        // A timed-out send may have been accepted. Closing avoids duplicate turns on retry.
-        this.onEvent({
-          method: "process/exited",
-          params: { stderr: error.message },
-        });
-        this.close();
+        // Optional, read-only model discovery should not disconnect a usable chat.
+        // A timed-out send may have been accepted; close to avoid duplicate turns.
+        if (method !== "model/list") {
+          this.onEvent({
+            method: "process/exited",
+            params: { stderr: error.message },
+          });
+          this.close();
+        }
         reject(error);
       }, 30_000);
       this.pending.set(id, {

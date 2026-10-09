@@ -1,4 +1,5 @@
 import type { ChatMessage } from "./conversations";
+import { renderMarkdown } from "./markdown";
 
 function displayWidth(value: string) {
   return Array.from(value).reduce(
@@ -94,18 +95,15 @@ export function conversationMarkdown(
           : "你";
     const avatar =
       message.role === "assistant" ? "command-icon.png" : "user-avatar.svg";
-    const body = messageRows(message.content, 86).join("\n");
-    // Longer fences keep literal backticks inside a reply from ending its card.
-    const runs = body.match(/`+/g) || [];
-    const fence = "`".repeat(Math.max(3, ...runs.map((run) => run.length + 1)));
-    return `![${speaker}](${encodeURI(assetsPath)}/${avatar}?raycast-width=22&raycast-height=22) **${speaker}**\n\n${fence}text\n${body}\n${fence}`;
+    const body = renderMarkdown(message.content) || "正在思考…";
+    return `![${speaker}](${encodeURI(assetsPath)}/${avatar}?raycast-width=22&raycast-height=22) **${speaker}**\n\n${body}`;
   });
   const notice = error ? `连接提示：${error}` : status;
   const header = notice ? `> ${notice.replace(/\r?\n/g, " ")}\n\n` : "";
   return (
     header +
-    (cards.join("\n\n") ||
-      "## 开始新对话\n\n按 Enter 输入问题，发送后会回到这里显示回复。")
+    (cards.join("\n\n---\n\n") ||
+      "## 开始新对话\n\n按 Enter 返回聊天，在顶部输入问题。")
   );
 }
 

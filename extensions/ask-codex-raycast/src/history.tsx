@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { CodexAppServer } from "./codex";
+import { renderMarkdown } from "./markdown";
 import {
   asString,
   conversationTitle,
@@ -246,7 +247,9 @@ export function useSessionHistory({
             }
             detail={
               page !== "cli" ? (
-                <List.Item.Detail markdown={transcript(session.messages)} />
+                <List.Item.Detail
+                  markdown={renderMarkdown(transcript(session.messages))}
+                />
               ) : undefined
             }
             actions={
@@ -269,7 +272,7 @@ export function useSessionHistory({
                     target={
                       <Detail
                         navigationTitle={conversationTitle(session)}
-                        markdown={transcript(session.messages)}
+                        markdown={renderMarkdown(transcript(session.messages))}
                       />
                     }
                   />
