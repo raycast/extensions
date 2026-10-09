@@ -3,6 +3,7 @@ import { DEMO_REPO, DEMO_REQUIRED_CHECKS, demoQueue } from "../src/lib/demo";
 import { GhError, parseRepository, setupCommand } from "../src/lib/gh";
 import {
   failingRunIds,
+  selectedCheckKey,
   parseQueue,
   primaryFailingJob,
   QueueResponse,
@@ -165,4 +166,30 @@ describe("requiredContexts", () => {
     ).toEqual(["build", "e2e", "deploy"]));
 
   it("is empty for an unprotected branch", () => expect(requiredContexts([], {})).toEqual([]));
+});
+
+describe("selectedCheckKey", () => {
+  const checks = [
+    { name: "lint", state: "success" as const, required: true, workflow: "CI", jobId: 1 },
+    { name: "e2e", state: "pending" as const, required: true, workflow: "CI", jobId: 7 },
+  ];
+
+  it("keeps the selected check", () => expect(selectedCheckKey(checks, "CI/e2e/7")).toBe("CI/e2e/7"));
+  it("follows a check whose job changed, as after a rerun", () =>
+    expect(selectedCheckKey(checks, "CI/e2e/3")).toBe("CI/e2e/7"));
+  it("follows a check that didn't have a job yet", () => expect(selectedCheckKey(checks, "CI/e2e/")).toBe("CI/e2e/7"));
+  it("falls back to the first check", () => {
+    expect(selectedCheckKey(checks, undefined)).toBe("CI/lint/1");
+    expect(selectedCheckKey(checks, "CI/gone/9")).toBe("CI/lint/1");
+  });
+  it("tells checks with slashes in their names apart", () =>
+    expect(
+      selectedCheckKey(
+        [
+          { name: "a", state: "success", required: true, workflow: "CI", jobId: 1 },
+          { name: "a/b", state: "success", required: true, workflow: "CI", jobId: 2 },
+        ],
+        "CI/a/b/9",
+      ),
+    ).toBe("CI/a/b/2"));
 });

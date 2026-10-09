@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useMergeQueue, useSelection } from "../data";
 import { truncate } from "../lib/format";
-import { Check, QueueEntry } from "../lib/queue";
+import { Check, checkKey, QueueEntry, selectedCheckKey } from "../lib/queue";
 import { buildCopyText, buildPreviewMarkdown } from "../lib/report";
 import { ListMetadata, metadataRows, useJobReport } from "./failure";
 import { JobDetail } from "./JobDetail";
@@ -125,10 +125,6 @@ function CheckItem(props: {
   );
 }
 
-function checkKey(check: Check): string {
-  return `${check.workflow ?? ""}/${check.name}/${check.jobId ?? ""}`;
-}
-
 export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: string }) {
   const { selection } = useSelection();
   const { data, isLoading, revalidate } = useMergeQueue(selection);
@@ -139,9 +135,8 @@ export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: str
   const view: ViewActions = { revalidate };
   const initialCheck = entry.checks.find((check) => check.name === props.initialCheck);
   const initialSelection = initialCheck ? checkKey(initialCheck) : undefined;
-  const [selectedId, setSelectedId] = useState(
-    initialSelection ?? (entry.checks[0] ? checkKey(entry.checks[0]) : undefined),
-  );
+  const [selectedId, setSelectedId] = useState(initialSelection);
+  const activeId = selectedCheckKey(entry.checks, selectedId);
 
   useEffect(() => {
     const timer = setInterval(revalidate, POLL_MS);
@@ -160,7 +155,11 @@ export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: str
       navigationTitle={`#${entry.pr.number} · ${truncate(entry.pr.title, 48)}${leftQueue ? " · left the queue" : ""}`}
       searchBarPlaceholder={`Filter ${entry.checks.length} checks`}
       selectedItemId={initialSelection}
-      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+      onSelectionChange={(id) => {
+        if (id) {
+          setSelectedId(id);
+        }
+      }}
     >
       {entry.checks.length === 0 ? (
         <List.EmptyView
@@ -182,7 +181,7 @@ export function ChecksList(props: { initialEntry: QueueEntry; initialCheck?: str
           entry={entry}
           repo={repo}
           view={view}
-          selected={checkKey(check) === selectedId}
+          selected={checkKey(check) === activeId}
         />
       ))}
     </List>
