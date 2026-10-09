@@ -4,6 +4,7 @@ import { getPreferences } from "./preferences";
 
 export interface TeakAuthState {
   isAuthenticated: boolean;
+  error: string | null;
   isLoading: boolean;
   refresh: () => void;
 }
@@ -18,6 +19,7 @@ export interface TeakAuthState {
  * `isLoading` is true.
  */
 export function useTeakAuth(): TeakAuthState {
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [reloadNonce, setReloadNonce] = useState(0);
@@ -32,6 +34,7 @@ export function useTeakAuth(): TeakAuthState {
 
     const resolve = async () => {
       setIsLoading(true);
+      setError(null);
 
       // Grandfathered API key takes precedence — no browser sign-in needed.
       if (getPreferences().apiKey?.trim()) {
@@ -48,7 +51,9 @@ export function useTeakAuth(): TeakAuthState {
         // navigation never triggers the OAuth overlay as a side effect.
         authorized = await hasStoredTeakSession();
       } catch {
-        authorized = false;
+        if (active) {
+          setError("Unable to reach Teak. Check your connection and retry.");
+        }
       }
 
       if (active) {
@@ -64,5 +69,5 @@ export function useTeakAuth(): TeakAuthState {
     };
   }, [reloadNonce]);
 
-  return { isAuthenticated, isLoading, refresh };
+  return { isAuthenticated, isLoading, refresh, error };
 }

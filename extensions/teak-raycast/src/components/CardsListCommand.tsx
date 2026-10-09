@@ -113,6 +113,7 @@ export function CardsListCommand({
 
   const {
     isAuthenticated,
+    error: authError,
     isLoading: isCheckingAuth,
     refresh: refreshAuth,
   } = useTeakAuth();
@@ -213,7 +214,7 @@ export function CardsListCommand({
   }
 
   if (!isAuthenticated) {
-    return <MissingApiKeyDetail onSignedIn={refreshAuth} />;
+    return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
   }
 
   return (

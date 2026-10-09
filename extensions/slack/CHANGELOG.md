@@ -7,6 +7,11 @@
 - Show the first page of people right away when opening the picker while the full list loads in the background.
 - Request smaller pages from Slack and stop retrying failed requests after a few attempts so errors show up instead of endless loading.
 
+## [Add Canvas AI tools] - 2026-10-09
+
+- Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
+- Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
+
 ## [Archive Channels AI Tool] - 2026-10-05
 
 - Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.

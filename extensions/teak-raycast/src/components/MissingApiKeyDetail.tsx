@@ -5,9 +5,25 @@ import { SignInWithBrowserAction } from "./SignInWithBrowserAction";
 
 interface MissingApiKeyDetailProps {
   onSignedIn?: () => void;
+  error?: string | null;
 }
 
-export function MissingApiKeyDetail({ onSignedIn }: MissingApiKeyDetailProps) {
+export function MissingApiKeyDetail({
+  onSignedIn,
+  error,
+}: MissingApiKeyDetailProps) {
+  if (error) {
+    return (
+      <Detail
+        actions={
+          <ActionPanel>
+            <Action title="Retry Connection" onAction={onSignedIn} />
+          </ActionPanel>
+        }
+        markdown={`# Connection unavailable\n\n${error}`}
+      />
+    );
+  }
   return (
     <Detail
       actions={

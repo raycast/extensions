@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023", "DOM"],
+    "types": ["node"],
     "module": "Preserve",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",

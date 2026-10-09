@@ -38,6 +38,7 @@ function TagCardsView({ tag }: { tag: string }) {
 export default function TagsCommand() {
   const {
     isAuthenticated,
+    error: authError,
     isLoading: isCheckingAuth,
     refresh: refreshAuth,
   } = useTeakAuth();
@@ -102,7 +103,7 @@ export default function TagsCommand() {
   }
 
   if (!isAuthenticated) {
-    return <MissingApiKeyDetail onSignedIn={refreshAuth} />;
+    return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
   }
 
   return (

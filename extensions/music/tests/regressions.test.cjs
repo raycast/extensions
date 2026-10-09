@@ -185,6 +185,20 @@ test("a regular playlist named Favorite Songs still receives a duplicate", async
   assert.ok(scripts[1].includes("duplicate (item 1 of existingTracks) to targetPlaylist"));
 });
 
+test("subscription tracks are added to the library source before the playlist", async () => {
+  const scripts = [];
+  const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
+    scripts.push(script);
+    return "";
+  });
+
+  assert.equal((await currentTrack.addToPlaylist("Road Trip")())._tag, "Right");
+  assert.match(
+    scripts[0],
+    /duplicate playingTrack to library playlist 1\s+on error number -10006\s+duplicate playingTrack to source 1/,
+  );
+});
+
 test("subprocess execution drains stdout and stderr concurrently", async () => {
   const { execute } = loadSource("src/util/exec.ts");
   const output = await execute(

@@ -15,6 +15,9 @@ import {
   TraktWatchlistRemoveResponseSchema,
   TraktMovieList,
   TraktPlaybackMovieList,
+  TraktCalendarMovieList,
+  TraktCalendarPathSchema,
+  TraktCalendarShowList,
   TraktPlaybackQuerySchema,
   TraktMovieRecommendationList,
   TraktHistoryQuerySchema,
@@ -31,6 +34,8 @@ import {
   TraktUpNextNitroQuerySchema,
   TraktPaginationSchema,
   TraktUserRatingListSchema,
+  TraktWatchedMovieListSchema,
+  TraktWatchedShowListSchema,
   TraktUserStatsSchema,
   TraktWatchingSchema,
   TraktIdLookupQuerySchema,
@@ -94,6 +99,15 @@ const TraktMovieContract = c.router({
       404: z.unknown(),
     },
     summary: "Remove a paused playback item",
+  },
+  getMyCalendarMovies: {
+    method: "GET",
+    path: "/calendars/my/movies/:startDate/:days",
+    pathParams: TraktCalendarPathSchema,
+    responses: {
+      200: TraktCalendarMovieList,
+    },
+    summary: "Get movies on the user's calendar released during a period",
   },
   getPlaybackMovies: {
     method: "GET",
@@ -466,6 +480,15 @@ const TraktShowContract = c.router({
     query: TraktExtendedSchema,
     summary: "Get seasons for a show",
   },
+  getMyCalendarShows: {
+    method: "GET",
+    path: "/calendars/my/shows/:startDate/:days",
+    pathParams: TraktCalendarPathSchema,
+    responses: {
+      200: TraktCalendarShowList,
+    },
+    summary: "Get episodes of watched or watchlisted shows airing during a period",
+  },
   getUpNextNitroShows: {
     method: "GET",
     path: "/sync/progress/up_next_nitro",
@@ -502,6 +525,22 @@ const TraktShowContract = c.router({
 });
 
 const TraktSyncContract = c.router({
+  getWatchedMovies: {
+    method: "GET",
+    path: "/sync/watched/movies",
+    responses: {
+      200: TraktWatchedMovieListSchema,
+    },
+    summary: "Get every movie the user has watched",
+  },
+  getWatchedShows: {
+    method: "GET",
+    path: "/sync/watched/shows",
+    responses: {
+      200: TraktWatchedShowListSchema,
+    },
+    summary: "Get every show the user has watched, with episodes by season and number",
+  },
   addRatings: {
     method: "POST",
     path: "/sync/ratings",

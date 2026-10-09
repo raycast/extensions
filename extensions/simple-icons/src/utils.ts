@@ -35,7 +35,6 @@ export const {
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   githubToken,
-  releaseVersion,
   shuffleOnStart,
   usePasteInsteadOfCopy,
 } = getPreferenceValues<ExtensionPreferences>();
@@ -185,7 +184,7 @@ const pacoteAssetPack = async (version: string) => {
     `.pack-staging-${version}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
   );
   try {
-    await pacote.extract(releaseVersion, staging);
+    await pacote.extract(version, staging);
     await assertAssetPackComplete(staging, version);
     await fs.writeFile(path.join(staging, assetPackCompleteMarker), version, "utf8");
     await fs.mkdir(path.dirname(destination), { recursive: true });
@@ -306,7 +305,7 @@ const removeSupersededPacks = async (currentVersion: string) => {
   }
 };
 
-export const cacheAssetPack = async (version: string) => {
+export const cacheAssetPack = async (version: string, signal?: AbortSignal) => {
   const destination = getAssetPackDestination(version);
   // Sweep before the early return: a crash between the two renames leaves a
   // .pack-stale-* directory that would otherwise never be reclaimed while
@@ -315,6 +314,9 @@ export const cacheAssetPack = async (version: string) => {
   // is fine.
   await reclaimDeadStaging().catch(() => {});
   if (!(await hasCompleteAssetPack(destination))) await pacoteAssetPack(version);
+  // An old load may finish after the user accepts a different version.
+  // Keep its downloaded pack, but do not overwrite the active version.
+  if (signal?.aborted) return;
   // Persist on both paths: the pack may already have been installed by another
   // instance, and a launch that skips the download still needs the version to
   // start offline next time.
@@ -333,9 +335,13 @@ export const loadCachedVersion = () => {
 };
 
 export const loadLatestVersion = async () => {
+  // Read preferences for each check: Raycast can reuse the loaded module
+  // between command launches after the user changes the selected package.
+  const releaseVersion = getPreferenceValues<ExtensionPreferences>().releaseVersion?.trim() || "simple-icons";
   await showToast({
     style: Toast.Style.Animated,
     title: "Checking latest version",
+    message: releaseVersion,
   });
 
   const [left, right] = releaseVersion.split(":");
@@ -347,7 +353,7 @@ export const loadLatestVersion = async () => {
       ].join(" "),
     );
   }
-  const { name, version } = await pacote.manifest(releaseVersion);
+  const { name, version } = await pacote.manifest(releaseVersion, { preferOnline: true });
   return `${name}@${version}`;
 };
 
@@ -362,32 +368,31 @@ export const loadRecentReleases = async () =>
     })
     .json<Release[]>();
 
-export const useVersion = ({ launchContext }: { launchContext?: LaunchContext }) => {
-  const cachedVersion = loadCachedVersion();
-  const [version, setVersion] = useState(cachedVersion);
+export const useVersion = () => {
+  const [version, setVersion] = useState(loadCachedVersion);
   useEffect(() => {
+    let cancelled = false;
+    const cachedVersion = loadCachedVersion();
     loadLatestVersion()
       .then(async (latestVersion) => {
-        if (cachedVersion !== latestVersion) {
-          if (cachedVersion) {
-            cache.set("cached-version", "");
-            const confirmed = await confirmAlert({
-              title: "New version available",
-              message: "Do you want to reload the command to apply updates?",
-            });
-            if (confirmed) {
-              open(
-                `${raycastProtocol}://extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
-              );
-            }
-          } else {
-            setVersion(latestVersion);
-          }
+        if (cancelled || cachedVersion === latestVersion) return;
+        if (cachedVersion) {
+          const confirmed = await confirmAlert({
+            title: "New version available",
+            message: `Do you want to load ${latestVersion}?`,
+          });
+          if (!confirmed || cancelled) return;
         }
+        // Apply in this command instead of relying on a deeplink to restart
+        // it. cacheAssetPack persists the new version after a successful load.
+        setVersion(latestVersion);
       })
       .catch((error) => {
-        showFailureToast(error, { title: "Failed to load latest version" });
+        if (!cancelled) showFailureToast(error, { title: "Failed to load latest version" });
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
   return version;
 };
