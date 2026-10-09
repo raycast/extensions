@@ -16,7 +16,10 @@ export type NextReminderOptions = {
   listIds?: string[];
   /** Show a reminder this many minutes before it's due; `null` always shows the next one. */
   showBeforeMinutes: number | null;
-  /** Keep showing a reminder this many minutes after it's due; `null` keeps it until completed. */
+  /**
+   * Keep showing a reminder this many minutes after it's due; `null` keeps it until it's completed
+   * or its due day ends, so an unfinished reminder from an earlier day never takes over.
+   */
   hideAfterMinutes: number | null;
 };
 
@@ -59,7 +62,9 @@ export function findNextReminder(
   const current = timed
     .filter(({ due }) => {
       if (due.getTime() > t) return false;
-      return options.hideAfterMinutes === null || t < due.getTime() + options.hideAfterMinutes * 60_000;
+      if (options.hideAfterMinutes !== null) return t < due.getTime() + options.hideAfterMinutes * 60_000;
+      const endOfDueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate() + 1).getTime();
+      return t < endOfDueDay;
     })
     .sort((a, b) => b.due.getTime() - a.due.getTime())[0];
   if (current) return { ...current, status: "current" };

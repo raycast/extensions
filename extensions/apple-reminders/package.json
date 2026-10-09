@@ -292,7 +292,7 @@
           "default": "completed",
           "data": [
             {
-              "title": "Until I complete it",
+              "title": "Until I complete it (or the day ends)",
               "value": "completed"
             },
             {

@@ -49,6 +49,13 @@ describe("findNextReminder", () => {
     assert.strictEqual(findNextReminder(due, now, { ...options, hideAfterMinutes: 15 }), undefined);
   });
 
+  it("drops an unfinished reminder from an earlier day, even when kept until completed", () => {
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(20, 0, 0, 0);
+    assert.strictEqual(findNextReminder([reminder("old", yesterday.toISOString())], now, options), undefined);
+  });
+
   it("prefers the reminder that's due now over an upcoming one", () => {
     const match = findNextReminder([reminder("next", at(5)), reminder("now", at(-2))], now, options);
     assert.strictEqual(match?.reminder.id, "now");
