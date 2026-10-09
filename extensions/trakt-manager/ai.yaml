@@ -493,6 +493,16 @@ evals:
         matchesForTitle: 1
         truncated: false
         hasMore: false
+      get-season-episodes:
+        showTitle: "Severance"
+        showTraktId: 154784
+        seasonNumber: 2
+        totalEpisodes: 10
+        episodes:
+          - traktId: 3959823
+            season: 2
+            number: 3
+            title: "Who Is Alive?"
       mark-episode-watched:
         success: true
         message: 'Severance (2022) S02E03 has been successfully marked as watched in your Trakt history.'
