@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, showHUD, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Color, Icon, List, showHUD } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { Call, readSummary, readTranscript, searchCalls } from "./lib/calls";
 import { KaikuNotInstalledError, RELEASES_URL, openKaiku, showNotInstalled } from "./lib/kaiku";
@@ -15,11 +15,7 @@ async function copy(call: Call, what: "Transcript" | "Summary") {
     await Clipboard.copy(text);
     await showHUD(`${what} copied`);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Could not copy the ${what.toLowerCase()}`,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: `Could not copy the ${what.toLowerCase()}` });
   }
 }
 
