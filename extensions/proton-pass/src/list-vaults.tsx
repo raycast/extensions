@@ -1,43 +1,96 @@
-import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, Keyboard } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import { listVaults } from "./lib/pass-cli";
-import { Vault, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
+import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
 import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
-import { getCachedVaults, setCachedVaults } from "./lib/cache";
+import {
+  getCachedItems,
+  getCachedSharing,
+  getCachedVaults,
+  setCachedItems,
+  setCachedSharing,
+  setCachedVaults,
+} from "./lib/cache";
+import { countItemsByVault, formatItemCount, refreshItemCounts } from "./lib/item-counts";
+import { createListingSaves, createRequestTracker, listingSaves } from "./lib/refresh";
 import { platformShortcut } from "./lib/shortcuts";
+import { mergeSharing, sharedVaultTooltip, withSharing } from "./lib/vault-sharing";
+
+/** Only List Vaults lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
+const sharingSaves = createListingSaves();
+
+/** Marks shared vaults, whether you shared them or they were shared with you. */
+function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
+  const tooltip = sharedVaultTooltip(vault);
+  return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
+}
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>([]);
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
+  const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
     loadVaults();
   }, []);
 
   async function loadVaults() {
+    const isLatest = loads.start();
     setError(null);
+    setIsLoading(true);
 
-    const cachedVaults = await getCachedVaults();
+    const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
+      getCachedVaults(),
+      getCachedItems(),
+      getCachedSharing(),
+    ]);
+    if (!isLatest()) return;
     if (cachedVaults && !hasLoadedFromCache.current) {
-      setVaults(cachedVaults.data);
+      setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
+      // The items cache only holds complete listings, so every cached vault gets a count.
+      if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
-      if (!cachedVaults.isStale && !backgroundRefreshEnabled) {
+      // Search Items renews the vaults it saves, but only List Vaults lists sharing, so its age counts too.
+      if (!cachedVaults.isStale && cachedSharing?.isStale === false && !backgroundRefreshEnabled) {
         setIsLoading(false);
         return;
       }
     }
 
     try {
-      const freshVaults = await listVaults();
-      setVaults(freshVaults);
-      await setCachedVaults(freshVaults);
+      // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
+      const listing = listingSaves.start();
+      const sharingListing = sharingSaves.start();
+      const [{ vaults: freshVaults, items, failedVaults }, freshSharing] = await Promise.all([
+        listVaultsAndItems(),
+        // Sharing only adds an icon: when it can't be listed, the saved sharing stays.
+        listVaultSharing().catch(() => undefined),
+      ]);
+      if (!isLatest()) return;
+      const sharing = freshSharing ? mergeSharing(freshSharing, cachedSharing?.data) : (cachedSharing?.data ?? {});
+      setVaults(withSharing(freshVaults, sharing));
+      const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
+      setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      // Sharing is saved on its own, so it stays up to date even when some items can't be listed.
+      if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
+      // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
+      // items would count 0 items. Saves follow the order listings started, also across Search Items.
+      if (failed.size === 0 && isLatest()) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(items, true), setCachedVaults(freshVaults)]),
+        );
+      }
     } catch (err: unknown) {
+      if (!isLatest()) return;
+      // The counts of an ended session must not show up again.
+      if (err instanceof PassCliError && err.type === "not_authenticated") setItemCounts(new Map());
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
@@ -47,39 +100,14 @@ export default function Command() {
         }
       }
     } finally {
-      setIsLoading(false);
+      if (isLatest()) setIsLoading(false);
     }
   }
 
-  function getRoleIcon(role: VaultRole): Icon {
-    switch (role) {
-      case "owner":
-        return Icon.Crown;
-      case "manager":
-        return Icon.PersonCircle;
-      case "editor":
-        return Icon.Pencil;
-      case "viewer":
-        return Icon.Eye;
-      default:
-        return Icon.Eye;
-    }
-  }
-
-  function getRoleColor(role: VaultRole): Color {
-    switch (role) {
-      case "owner":
-        return Color.Yellow;
-      case "manager":
-        return Color.Blue;
-      case "editor":
-        return Color.Green;
-      case "viewer":
-        return Color.SecondaryText;
-      default:
-        return Color.SecondaryText;
-    }
-  }
+  const shownVaults = useMemo(
+    () => vaults.map((vault) => ({ ...vault, itemCount: itemCounts.get(vault.shareId) ?? vault.itemCount })),
+    [vaults, itemCounts],
+  );
 
   if (error?.type === "not_installed") {
     return (
@@ -181,25 +209,14 @@ export default function Command() {
           description="You don't have any vaults yet or they couldn't be loaded."
         />
       ) : (
-        vaults.map((vault) => (
+        shownVaults.map((vault) => (
           <List.Item
             key={vault.shareId}
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
-              vault.itemCount === undefined
-                ? undefined
-                : { text: `${vault.itemCount} ${vault.itemCount === 1 ? "item" : "items"}` },
-              vault.role === undefined
-                ? undefined
-                : {
-                    tag: {
-                      value: vault.role,
-                      color: getRoleColor(vault.role),
-                    },
-                    icon: getRoleIcon(vault.role),
-                    tooltip: `Role: ${vault.role}`,
-                  },
+              sharedAccessory(vault),
+              vault.itemCount === undefined ? undefined : { text: formatItemCount(vault.itemCount) },
             ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>
