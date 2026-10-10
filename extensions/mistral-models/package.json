@@ -1,7 +1,7 @@
 {
   "name": "mistral-models",
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "title": "Mistral Provider",
+  "title": "Mistral Models",
   "icon": "extension-icon.png",
   "author": "m1n",
   "platforms": [
@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "dev": "ray develop",
-    "publish": "bunx @raycast/api@latest publish",
+    "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist -o dist",
     "typecheck": "tsc --noEmit",
     "lint": "ray lint",
@@ -51,6 +51,7 @@
   "dependencies": {
     "@ai-sdk/mistral": "^4.0.52",
     "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2",
     "ai": "^7.0.118",
     "eventsource-parser": "^3.1.1"
   },

@@ -3,7 +3,6 @@ import { modelTitle } from "../src/model-title";
 
 test.each([
   ["mistral-medium-3-5", "Mistral Medium 3.5"],
-  ["zai-glm-5-3", "GLM 5.3"],
   ["mistral-large-latest", "Mistral Large (Latest)"],
   ["mistral-small-2603", "Mistral Small (2603)"],
   ["ministral-8b-2512", "Ministral 8B (2512)"],

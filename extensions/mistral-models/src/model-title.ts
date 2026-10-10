@@ -1,10 +1,7 @@
 const words: Record<string, string> = {
-  glm: "GLM",
   nemo: "NeMo",
   fim: "FIM",
-  oss: "OSS",
   api: "API",
-  cli: "CLI",
 };
 
 /** Format catalog slugs without changing the identifier used for inference. */
@@ -13,7 +10,7 @@ export function modelTitle(id: string, name?: string): string {
   // Keep curated upstream display names and opaque fine-tuning identifiers intact.
   if (/\s/.test(label) || label.includes(":")) return label;
 
-  let slug = label.replace(/^zai-/, "");
+  let slug = label;
   let suffix = "";
   if (slug.endsWith("-latest")) {
     slug = slug.slice(0, -7);

@@ -14,7 +14,7 @@ function record(value: unknown): Record<string, unknown> | undefined {
 }
 
 export async function discoverModels(apiKey: string): Promise<AI.RegisteredModel[]> {
-  if (!apiKey.trim()) throw new Error("Add your Mistral API key in the Mistral Provider extension preferences.");
+  if (!apiKey.trim()) throw new Error("Add your Mistral API key in the Mistral Models extension preferences.");
 
   const signal = AbortSignal.timeout(15000);
   let response: Response;

@@ -1,4 +1,4 @@
-# Connect Mistral Provider
+# Connect Mistral Models
 
 Requires Raycast 2.5 or later and Raycast Pro. Mistral bills requests against your API account.
 

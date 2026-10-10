@@ -1,4 +1,4 @@
-# Mistral Provider
+# Mistral Models
 
 Use Mistral API models in Raycast AI Chat, Quick AI, and AI Commands with your own API key.
 
@@ -7,7 +7,7 @@ Use Mistral API models in Raycast AI Chat, Quick AI, and AI Commands with your o
 Requires Raycast 2.5 or later, Raycast Pro, and a Mistral API key.
 
 1. Create a key in [Mistral Studio](https://console.mistral.ai).
-2. Open Raycast Settings → Extensions → Mistral Provider.
+2. Open Raycast Settings → Extensions → Mistral Models.
 3. Enter the key in the Mistral API Key password field.
 4. Enable Allow AI Models.
 5. Run Refresh Mistral Models.
@@ -29,36 +29,12 @@ Recovery stops when tool-call streaming starts or the provider sends an explicit
 
 Enter credentials only in the Raycast password preference. The extension does not read keys from `providers.yaml` or environment variables. It sends the conversation, system instructions, attachments, and tool definitions and results to Mistral. It has no custom analytics or conversation storage. Raycast and Mistral manage their own data handling.
 
-## Development
-
-Requires Bun and Node.js 22.22.2 or later.
-
-1. Install dependencies from the submitted npm lockfile:
-
-   ```sh
-   npm ci
-   ```
-
-2. Load the extension into Raycast with hot reload:
-
-   ```sh
-   bun run dev
-   ```
-
-3. Validate and build before submission:
-
-   ```sh
-   bun run release:check
-   ```
-
-The checks cover formatting, TypeScript, tests, Raycast validation, and the production build. The build generates preference types before the standalone type check. It writes to `dist/` without publishing. Tests mock HTTP requests and do not use API credits. They do not verify account access or Raycast behavior.
-
-Bun runs the development scripts and tests. The Store submission includes `package-lock.json`, not the local `bun.lock`.
-
-Follow the [release checklist](RELEASE.md) for live testing and submission.
-
 ## References
 
 - [Raycast model provider API](https://developers.raycast.com/ai/provide-ai-models)
 - [Mistral Chat API](https://docs.mistral.ai/api/endpoint/chat)
 - [Mistral billing and API usage](https://docs.mistral.ai/admin/billing-usage/subscriptions)
+
+## Icon
+
+The extension icon is the Mistral logo from the [Raycast Mistral extension](https://github.com/raycast/extensions/tree/main/extensions/mistral), released under the MIT license by Colin Lienard and contributors. Mistral's logo and brand remain their owner's property.

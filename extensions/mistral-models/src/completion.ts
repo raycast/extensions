@@ -11,7 +11,7 @@ export function complete(
   options: { maxRetries?: number; abortSignal?: AbortSignal; guard?: boolean } = {},
 ) {
   if (!apiKey.trim()) {
-    throw new Error("Add your Mistral API key in the Mistral Provider extension preferences.");
+    throw new Error("Add your Mistral API key in the Mistral Models extension preferences.");
   }
 
   const tools: ToolSet | undefined = request.tools

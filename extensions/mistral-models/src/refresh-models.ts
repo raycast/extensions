@@ -1,4 +1,5 @@
 import { AI, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing Mistral models" });
@@ -7,8 +8,7 @@ export default async function command() {
     toast.style = Toast.Style.Success;
     toast.title = "Mistral models refreshed";
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could not refresh Mistral models";
-    toast.message = error instanceof Error ? error.message : "Try again from the AI model picker.";
+    await toast.hide();
+    await showFailureToast(error, { title: "Could not refresh Mistral models" });
   }
 }
