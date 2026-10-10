@@ -22,6 +22,7 @@ export interface TimelinePalette {
   now: string;
   badgeGmt: string;
   badgeDelta: string;
+  badgeLocal: string;
 }
 
 export const LIGHT_PALETTE: TimelinePalette = {
@@ -38,6 +39,7 @@ export const LIGHT_PALETTE: TimelinePalette = {
   now: "#1a9e6b",
   badgeGmt: "#2b6fd6",
   badgeDelta: "#a23fc0",
+  badgeLocal: "#1a9e6b",
 };
 
 export const DARK_PALETTE: TimelinePalette = {
@@ -54,4 +56,5 @@ export const DARK_PALETTE: TimelinePalette = {
   now: "#4cd08f",
   badgeGmt: "#6ab0ff",
   badgeDelta: "#d58ae8",
+  badgeLocal: "#4cd08f",
 };

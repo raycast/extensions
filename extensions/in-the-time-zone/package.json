@@ -49,6 +49,15 @@
       "required": false
     },
     {
+      "name": "showLocalTimezone",
+      "type": "checkbox",
+      "title": "Local Time Zone",
+      "label": "Show my local time zone",
+      "description": "When a pinned base city is in a different time zone from you, also show a Local row for where you are now.",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "cityOrder",
       "type": "dropdown",
       "title": "City Order",

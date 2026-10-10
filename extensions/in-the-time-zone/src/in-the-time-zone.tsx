@@ -23,7 +23,14 @@ import {
   snapToGrid,
 } from "./time-utils";
 import { SnapTimeSection, TimelineView } from "./timeline-view";
-import { CityOrderPreference, DEFAULT_TIME_ZONES, getCityName, getTimezone, sortZoneIds } from "./timezones";
+import {
+  CityOrderPreference,
+  DEFAULT_TIME_ZONES,
+  getCityName,
+  getTimezone,
+  resolveLocalCityId,
+  sortZoneIds,
+} from "./timezones";
 
 const STORAGE_KEY = "selectedTimeZones";
 const BASE_CITY_KEY = "baseCityId";
@@ -43,6 +50,7 @@ export default function Command() {
   const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
   const timeFormat = resolveTimeFormat(preferences.timeFormat as ClockFormatPreference);
   const cityOrder = (preferences.cityOrder as CityOrderPreference) ?? "offset-asc";
+  const showLocalTimezone = preferences.showLocalTimezone ?? true;
 
   useEffect(() => {
     const load = async () => {
@@ -126,15 +134,18 @@ export default function Command() {
     if (from === -1) return;
     let to = from + delta;
     // Skip over the base city, which is displayed in its own section
-    while (to >= 0 && to < currentIds.length && currentIds[to] === baseCityId) to += delta;
+    while (to >= 0 && to < currentIds.length && currentIds[to] === effectiveBaseId) to += delta;
     if (to < 0 || to >= currentIds.length) return;
     currentIds.splice(from, 1);
     currentIds.splice(to, 0, cityId);
     await saveSelectedZones(currentIds);
   }
 
-  // Use selected base city or fall back to system timezone
-  const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // Where the user is now: a listed city in the system time zone, or the system zone itself
+  const localCityId = useMemo(() => resolveLocalCityId(selectedZoneIds ?? []), [selectedZoneIds]);
+  // Use the pinned base city or fall back to the local one
+  const effectiveBaseId = baseCityId ?? localCityId;
+  const baseZoneId = getTimezone(effectiveBaseId);
   const baseISO = cursorISO ?? nowISO;
   const base = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
 
@@ -146,8 +157,21 @@ export default function Command() {
 
   // Filter out the base city from the list (it's shown separately)
   const otherCities = useMemo(() => {
-    return sortedZoneIds.filter((id) => id !== baseCityId);
-  }, [sortedZoneIds, baseCityId]);
+    return sortedZoneIds.filter((id) => id !== effectiveBaseId);
+  }, [sortedZoneIds, effectiveBaseId]);
+
+  // When a pinned base is somewhere else, the timeline also shows a row for where the user is now,
+  // unless that place is already in the list. It is never saved with the selected cities.
+  const timelineZoneIds = useMemo(() => {
+    const showExtraLocal =
+      showLocalTimezone &&
+      baseCityId !== null &&
+      getTimezone(localCityId) !== getTimezone(baseCityId) &&
+      !(selectedZoneIds ?? []).includes(localCityId);
+    if (!showExtraLocal) return sortedZoneIds;
+    if (cityOrder === "custom") return [localCityId, ...sortedZoneIds];
+    return sortZoneIds([...(selectedZoneIds ?? []), localCityId], baseISO, cityOrder);
+  }, [showLocalTimezone, baseCityId, localCityId, selectedZoneIds, sortedZoneIds, baseISO, cityOrder]);
 
   // Search results
   const searchResults = useMemo(() => {
@@ -174,7 +198,7 @@ export default function Command() {
   }, [baseISO, base.offset, otherCities, timeFormat]);
 
   const baseRow = useMemo(() => {
-    const cityName = baseCityId ? getCityName(baseCityId) : getCityName(baseZoneId);
+    const cityName = getCityName(effectiveBaseId);
     const paddedTime = padTime(base.toFormat(timeFormat));
     const isSystemTz = !baseCityId;
     return {
@@ -184,7 +208,7 @@ export default function Command() {
       timeColor: getTimeColor(base.hour),
       isSystemTz,
     };
-  }, [base, baseZoneId, baseCityId, timeFormat]);
+  }, [base, effectiveBaseId, baseCityId, timeFormat]);
 
   function shiftMinutes(delta: number) {
     setCursorISO((prev) => {
@@ -218,8 +242,9 @@ export default function Command() {
       <TimelineView
         baseISO={baseISO}
         nowISO={nowISO}
-        baseCityId={baseCityId}
-        selectedZoneIds={sortedZoneIds}
+        baseCityId={effectiveBaseId}
+        localCityId={localCityId}
+        selectedZoneIds={timelineZoneIds}
         isLoading={isLoading}
         onShiftMinutes={shiftMinutes}
         onSnapMinutes={snapMinutes}

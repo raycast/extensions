@@ -39,3 +39,16 @@ export function getCityName(id: string): string {
   // Fallback: use the city name from the ID
   return parseCityId(id).cityName;
 }
+
+export function getSystemTimezone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+// The city that stands for the user's current location: a listed city in the system time zone if there is one
+// (keeping its name and sunrise data), otherwise the bare system zone ID, whose city name comes from the zone.
+export function resolveLocalCityId(zoneIds: string[]): string {
+  const systemTz = getSystemTimezone();
+  const canonical = (tz: string) => DateTime.local().setZone(tz).zoneName ?? tz;
+  const systemZone = canonical(systemTz);
+  return zoneIds.find((id) => canonical(getTimezone(id)) === systemZone) ?? systemTz;
+}

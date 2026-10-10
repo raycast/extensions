@@ -10,6 +10,7 @@ Visualize and scrub time across multiple time zones. Perfect for coordinating me
 - **Colors** — Blue for sleep (22-6), strong yellow for work (9-17), pale yellow for the hours in between
 - **Sunrise/Sunset** — Know when the sun rises and sets in each city
 - **Any City** — Search and add any city in the world
+- **Local Time Zone** — Your current time zone is always on the timeline: it's the base when no city is pinned, and gets its own "Local" row when you've pinned a city somewhere else (turn this off in preferences)
 
 ## Usage
 

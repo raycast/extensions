@@ -13,6 +13,7 @@
 - The date and the color legend are drawn in the timeline itself, replacing the sidebar
 - City search ranks cities whose own name matches the query first (then by population), so "New York" finds New York City instead of burying it under other cities in New York state
 - Move Up / Move Down, Copy Base ISO and Reset to Now (now ⌘R) use Raycast's standard shortcuts
+- Fixed the local (system) time zone not showing in the timeline: with no pinned base city it is now the base row, and when a pinned base is in a different time zone, a "Local" row shows where you are now (toggle with the new "Local Time Zone" preference). If it matches a city in your list, that city is used instead of a duplicate row
 - Fixed timeline rendering on macOS 27: black bars behind the hour cells, misaligned "+1" day markers, missing bold text, and text sitting too high in tags and cells
 
 ## [City Ordering] - 2026-09-08

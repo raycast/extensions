@@ -3,11 +3,13 @@ import { release } from "os";
 import { DARK_PALETTE, getHourType, HourType, LIGHT_PALETTE, TimelinePalette } from "./palette";
 import { SunTimes } from "./sun-times";
 import { formatDelta, formatGmtOffset } from "./time-utils";
-import { getCityName, getTimezone } from "./timezones";
+import { getCityName, getSystemTimezone, getTimezone } from "./timezones";
 
 export interface TimelineConfig {
   baseISO: string;
   baseCityId: string | null;
+  // The row for where the user is now (system time zone), tagged "Local"
+  localCityId?: string;
   selectedZoneIds: string[];
   timeFormat: string;
   appearance: "light" | "dark";
@@ -40,6 +42,7 @@ interface TimelineRow {
   offsetMinutes: number;
   dayDiff: string;
   isBase: boolean;
+  isLocal: boolean;
   sun: SunTimes;
 }
 
@@ -116,6 +119,7 @@ function stylesheet(palette: TimelinePalette): string {
     .badge { font-size: 11px; text-anchor: middle; fill-opacity: 0.85; }
     .gmt { fill: ${palette.badgeGmt}; }
     .delta { fill: ${palette.badgeDelta}; }
+    .local { fill: ${palette.badgeLocal}; }
     .sun { font-size: 12px; fill: ${palette.muted}; }
     .sun-icon { fill: none; stroke: ${palette.muted}; stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; }
     .cursor-label { font-size: 12px; fill: ${palette.cursorText}; }
@@ -245,6 +249,7 @@ function renderRow(
     const delta = formatDelta(row.offsetMinutes, "text");
     badges.push({ text: delta, kind: "delta", width: badgeWidth(delta) });
   }
+  if (row.isLocal) badges.push({ text: "Local", kind: "local", width: badgeWidth("Local") });
   let badgeX = layout.badgeX;
   for (const badge of badges) {
     markup += svg`<rect class="badge-bg ${badge.kind}" x="${badgeX}" y="${baseline - 15}" width="${badge.width}" height="19" rx="5"/>`;
@@ -303,10 +308,10 @@ function renderRow(
 }
 
 export function generateTimelineSvg(config: TimelineConfig): string {
-  const { baseISO, baseCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes } = config;
+  const { baseISO, baseCityId, localCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes } = config;
   const palette = appearance === "dark" ? DARK_PALETTE : LIGHT_PALETTE;
 
-  const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const baseZoneId = baseCityId ? getTimezone(baseCityId) : getSystemTimezone();
   const cursor = DateTime.fromISO(baseISO).setZone(baseZoneId);
   const cursorMs = cursor.toMillis();
   const baseHourStart = cursor.startOf("hour");
@@ -328,6 +333,7 @@ export function generateTimelineSvg(config: TimelineConfig): string {
       offsetMinutes: localCursor.offset - cursor.offset,
       dayDiff: getDayDiff(localNow, now.setZone(baseZoneId)),
       isBase: !!baseCityId && zoneId === baseCityId,
+      isLocal: zoneId === localCityId,
       sun: sunTimes[zoneId] ?? { sunrise: "—", sunset: "—" },
     };
   });
