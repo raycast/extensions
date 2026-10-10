@@ -291,7 +291,11 @@ export default function Command() {
           const key = thumbKey(s.app_id, s.session_index, s.title, s.artist);
           try {
             const thumb = await session_thumbnail(s.app_id, s.session_index, s.title, s.artist);
-            return [key, thumb] as const;
+            // Empty results never clobber displayed art: mid-transition
+            // reads routinely come back artless, and cementing blank would
+            // stick until the track changes.
+            if (thumb.path) return [key, thumb] as const;
+            return [key, thumbsRef.current[key] ?? thumb] as const;
           } catch {
             // Never clobber good art with a transient failure.
             return [key, thumbsRef.current[key] ?? { path: "", width: 0, height: 0, hash: "" }] as const;
@@ -312,11 +316,13 @@ export default function Command() {
         else if (v.hash !== e.init || now > e.until) delete settlingRef.current[k];
       }
     };
+    // Register genuinely new tracks only. Settled or expired keys stay out:
+    // re-adding them would resurrect the fast lane on every refresh.
     const now = Date.now();
     for (const s of shown) {
       if (!(s.title.trim() || s.artist.trim())) continue;
       const k = thumbKey(s.app_id, s.session_index, s.title, s.artist);
-      settlingRef.current[k] ??= { init: null, until: now + SETTLE_MS };
+      if (!(k in thumbsRef.current)) settlingRef.current[k] ??= { init: null, until: now + SETTLE_MS };
     }
     void fetchThumbs(shown);
     // Pruning also lives in the tick below so a disabled auto-refresh
