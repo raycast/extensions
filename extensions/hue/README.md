@@ -8,12 +8,13 @@ Before using the extension, you need to link with your Philips Hue bridge.
 
 ### Automatic setup
 
-Use any of the commands except the "Toggle all Lights" command and follow the instructions.
+Use any of the commands except the "Toggle All Lights" command and follow the instructions.
 
 ### Manual setup
 
 1. Find the IP address of your Hue Bridge
-2. Go to the extension’s settings and enter the IP address
+2. Go to the extension’s settings and enter the IP address, and a username if you already have one
+3. Use any of the commands except "Toggle All Lights". Without a username, it asks you to press the bridge’s link button
 
 ## Icons
 
