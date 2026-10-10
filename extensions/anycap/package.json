@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anycap",
+  "title": "Anycap",
+  "description": "Capture links and notes, search your library, and browse folders and collections in Anycap.",
+  "icon": "icon.png",
+  "author": "ipang",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "keywords": [
+    "bookmark",
+    "read later",
+    "capture",
+    "notes",
+    "pocket"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-form",
+      "title": "Capture",
+      "subtitle": "Anycap",
+      "description": "Save a link or note with a title, folder and tags.",
+      "mode": "view"
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Anycap",
+      "description": "Save the page in front of your browser to Anycap.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search Anycap",
+      "description": "Search your captures, or see the newest when nothing is typed.",
+      "mode": "view"
+    },
+    {
+      "name": "capture",
+      "title": "Quick Capture",
+      "subtitle": "Anycap",
+      "description": "Save a link or a note to Anycap.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Link or note",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard",
+      "subtitle": "Anycap",
+      "description": "Save the link or text on the clipboard to Anycap.",
+      "mode": "no-view"
+    },
+    {
+      "name": "folders",
+      "title": "Browse Folders",
+      "subtitle": "Anycap",
+      "description": "Your Anycap folders and what is filed in each.",
+      "mode": "view"
+    },
+    {
+      "name": "collections",
+      "title": "Browse Collections",
+      "subtitle": "Anycap",
+      "description": "Your Anycap collections, and their briefs.",
+      "mode": "view"
+    },
+    {
+      "name": "open-latest",
+      "title": "Open Latest Capture",
+      "subtitle": "Anycap",
+      "description": "Open the page or note you saved last.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    { "name": "save-capture", "title": "Save Capture", "description": "Save a user's link or note to their local Anycap library, with optional title, existing folder and tags. Asks for confirmation before saving. Preserve the user's words." },
+    { "name": "list-folders", "title": "List Folders", "description": "List available Anycap folders and counts before choosing a folder for a capture." }
+  ],
+  "preferences": [
+    {
+      "name": "appPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Anycap.app path",
+      "default": "/Applications/Anycap.app",
+      "description": "Where Anycap.app lives. The commands talk to the MCP binary inside it; no server, no account.",
+      "placeholder": "/Applications/Anycap.app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
