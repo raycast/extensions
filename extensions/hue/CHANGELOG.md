@@ -13,7 +13,7 @@
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back
 - Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
 - Fix plugs, and rooms and zones of only plugs, offering brightness actions
-- Fix Set Scene opened from Control Groups not updating while open
+- Fix Set Scene opened from Control Groups not updating while open, and failing to set scenes when opened while connecting
 - Fix live updates from the bridge stopping or skipping changes
 - Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
 - Show the bridge's error message when an action fails

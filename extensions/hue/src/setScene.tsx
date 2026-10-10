@@ -47,7 +47,8 @@ export function SetScene(props: { group?: Group; hue: Hue }) {
               scene={scene}
               gradientUri={gradientUris.get(scene.id)}
               onSetScene={props.group && pop}
-              hue={props.hue}
+              // A pushed view's props stay as pushed, so the scenes come from this view's own hook.
+              hue={{ ...props.hue, scenes }}
             />
           ))}
         </Grid.Section>

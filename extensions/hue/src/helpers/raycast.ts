@@ -34,7 +34,7 @@ export const withTransition = <T extends object>(changes: T) => ({
 });
 
 export async function applyUpdate(
-  { hueClient, lights, scenes, setLights, setScenes }: Hue,
+  { hueBridgeActor, lights, scenes, setLights, setScenes }: Hue,
   update: {
     canExecute?: () => boolean;
     lights: Map<Id, DeepPartial<Light>>;
@@ -45,6 +45,8 @@ export async function applyUpdate(
   },
 ) {
   try {
+    // A pushed Set Scene holds the Hue object it was pushed with, so the client is read as it is now.
+    const { hueClient } = hueBridgeActor.getSnapshot().context;
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (update.canExecute && !update.canExecute()) return;
     // Rooms and zones follow from their lights while rendering.

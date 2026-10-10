@@ -29,7 +29,7 @@ export function useHue() {
   const { setRooms, setZones, ...resources } = useHueResources();
   const { setLights, setScenes } = resources;
 
-  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
+  const [hueBridgeState, send, hueBridgeActor] = useMachine(hueBridgeMachine);
   const { hueClient } = hueBridgeState.context;
 
   // Declared before the fetch, so it listens before the fetch starts.
@@ -64,5 +64,5 @@ export function useHue() {
   });
 
   // usePromise isn't loading while there is no client to fetch with, but the bridge is still connecting.
-  return { hueBridgeState, hueClient, send, isLoading: isLoading || hueClient === undefined, ...resources };
+  return { hueBridgeState, hueBridgeActor, send, isLoading: isLoading || hueClient === undefined, ...resources };
 }
