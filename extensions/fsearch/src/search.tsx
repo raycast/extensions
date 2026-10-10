@@ -70,7 +70,7 @@ import {
 } from "./fsearch";
 import {
   FSEARCH_REPO,
-  hasRust,
+  findCargo,
   installCommand,
   runInTerminal,
 } from "./install";
@@ -159,6 +159,8 @@ const sorts = [
   { title: "Largest First", value: "size" },
 ];
 const THUMBNAIL_CACHE = join(environment.supportPath, "thumbnails");
+/** How often a search is repeated while the content index is still building. */
+const INDEX_POLL_MS = 3000;
 const THUMBNAIL_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // Created once per launch; thumbnails of files edited since are keyed by
 // mtime and never reused, so anything untouched for a month is dropped.
@@ -474,6 +476,23 @@ interface PreviewBody {
   details?: string;
 }
 
+/** The text of a Word, RTF, or OpenDocument file, opened at the first query term when one is found. */
+async function richTextMarkdown(
+  path: string,
+  size: number,
+  terms: string[],
+  signal: AbortSignal,
+): Promise<string | undefined> {
+  const content = await richTextContent(path, signal);
+  if (!content) return undefined;
+  const found = findTermLines(content.text, terms);
+  const markdown =
+    found.length > 0
+      ? await matchContextMarkdown(path, size, found, content.text)
+      : undefined;
+  return markdown ?? codeBlock(content.text);
+}
+
 async function previewBody(
   path: string,
   info: Stats,
@@ -500,6 +519,11 @@ async function previewBody(
           markdown: imageMarkdown(fileUrl(thumbnail.path), thumbnail.size),
         };
       }
+    }
+    // RTFD documents are folders holding the RTF file and its attachments.
+    if (RICH_TEXT_EXTENSIONS.includes(extension)) {
+      const markdown = await richTextMarkdown(path, info.size, terms, signal);
+      if (markdown) return { markdown };
     }
     return {
       markdown: await iconMarkdown(path, true, info.mtimeMs, signal),
@@ -528,15 +552,8 @@ async function previewBody(
     };
   }
   if (RICH_TEXT_EXTENSIONS.includes(extension)) {
-    const content = await richTextContent(path, signal);
-    if (content) {
-      const found = findTermLines(content.text, terms);
-      const markdown =
-        found.length > 0
-          ? await matchContextMarkdown(path, info.size, found, content.text)
-          : undefined;
-      return { markdown: markdown ?? codeBlock(content.text) };
-    }
+    const markdown = await richTextMarkdown(path, info.size, terms, signal);
+    if (markdown) return { markdown };
   }
   if (ARCHIVE_EXTENSIONS.includes(extension)) {
     const listing = await archiveListing(path, signal);
@@ -618,6 +635,9 @@ export default function Search(
   const [query, setQuery] = useState(launch.query ?? props.fallbackText ?? "");
   const [filter, setFilter] = useState(launch.filter ?? "");
   const [scope, setScope] = useState(launch.scope ?? defaultScope);
+  // A folder picked by the user (or carried by a deeplink) starts a search on
+  // its own, even when it is the configured default; the default alone does not.
+  const [scopeChosen, setScopeChosen] = useState(launch.scope !== undefined);
   const [sort, setSort] = useState("relevance");
   const [limit, setLimit] = useState(defaultLimit);
   const [result, setResult] = useState<SearchResult>();
@@ -625,6 +645,10 @@ export default function Search(
   const [loading, setLoading] = useState(false);
   const [retry, setRetry] = useState(0);
   const [autoRetries, setAutoRetries] = useState(0);
+  // Bumped while a result says the content index is still building, so the
+  // search re-runs until it is complete. Kept apart from `retry` so the
+  // preview pane is not rebuilt on every poll.
+  const [indexPoll, setIndexPoll] = useState(0);
   const [showDetails, setShowDetails] = useState(
     preferences.showDetails ?? true,
   );
@@ -643,7 +667,9 @@ export default function Search(
   // Why the daemon cannot be reached yet: drives the setup rows on the home screen.
   const [setupError, setSetupError] = useState<SearchErrorKind>();
   const lastSetupError = useRef<SearchErrorKind | undefined>(undefined);
-  const [rust, setRust] = useState(true);
+  // The cargo executable to build with: assumed on PATH until the check runs,
+  // its found path afterwards, or undefined when Rust has to be installed first.
+  const [cargo, setCargo] = useState<string | undefined>("cargo");
   const [rebuilding, setRebuilding] = useState(false);
   // The app behind Raycast, the target of the Paste to … actions.
   const [frontApp, setFrontApp] = useState<Application>();
@@ -662,9 +688,7 @@ export default function Search(
   const lastErrorKind = useRef<SearchError["kind"] | undefined>(undefined);
 
   // The configured default folder alone keeps the home screen; an explicit choice starts a search.
-  const active = Boolean(
-    query.trim() || filter || (scope && scope !== defaultScope),
-  );
+  const active = Boolean(query.trim() || filter || scopeChosen);
 
   useEffect(() => {
     getFrontmostApplication().then(
@@ -693,7 +717,10 @@ export default function Search(
     (next: Partial<SavedSearch> & { sort?: string }) => {
       if (next.query !== undefined) setQuery(next.query);
       if (next.filter !== undefined) setFilter(next.filter);
-      if (next.scope !== undefined) setScope(next.scope);
+      if (next.scope !== undefined) {
+        setScope(next.scope);
+        setScopeChosen(true);
+      }
       if (next.sort !== undefined) setSort(next.sort);
       setLimit(defaultLimit);
       setAutoRetries(0);
@@ -801,8 +828,8 @@ export default function Search(
   useEffect(() => {
     if (setupError !== "missing") return;
     let disposed = false;
-    hasRust().then((value) => {
-      if (!disposed) setRust(value);
+    findCargo().then((value) => {
+      if (!disposed) setCargo(value);
     });
     return () => {
       disposed = true;
@@ -871,7 +898,28 @@ export default function Search(
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query, filter, scope, limit, retry, active, binaryPath, searchKey]);
+  }, [
+    query,
+    filter,
+    scope,
+    limit,
+    retry,
+    indexPoll,
+    active,
+    binaryPath,
+    searchKey,
+  ]);
+
+  useEffect(() => {
+    // The daemon answered from a content index it is still building: ask
+    // again until it is complete, so early results fill in on their own.
+    if (!result?.indexing || loading) return;
+    const timer = setTimeout(
+      () => setIndexPoll((value) => value + 1),
+      INDEX_POLL_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [result, loading]);
 
   useEffect(() => {
     if (!error) return;
@@ -974,6 +1022,7 @@ export default function Search(
       scope: defaultScope,
       sort: "relevance",
     });
+    setScopeChosen(false);
     setSelectedPath(null);
     setForcedSelection(null);
   };
@@ -1095,13 +1144,13 @@ export default function Search(
   );
 
   const installInTerminal = async () => {
-    const command = installCommand(rust);
+    const command = installCommand(cargo);
     try {
       await runInTerminal(command);
       await showToast({
         style: Toast.Style.Success,
         title: "Installing FSearch in Terminal",
-        message: rust
+        message: cargo
           ? "About a minute. This screen updates when it finishes."
           : "Rust first, then FSearch. This screen updates when it finishes.",
       });
@@ -1132,7 +1181,7 @@ export default function Search(
       />
       <Action.CopyToClipboard
         title="Copy Install Command"
-        content={installCommand(rust)}
+        content={installCommand(cargo)}
       />
       <Action.OpenInBrowser title="Open FSearch on GitHub" url={FSEARCH_REPO} />
     </>
@@ -1266,7 +1315,7 @@ export default function Search(
             icon: Icon.Download,
             tint: Color.Orange,
             title: "FSearch Not Installed",
-            description: `${error.message}\n\nInstall it with one Terminal command${rust ? "" : " (Rust is installed first)"}, or point the extension at an existing executable in preferences.`,
+            description: `${error.message}\n\nInstall it with one Terminal command${cargo ? "" : " (Rust is installed first)"}, or point the extension at an existing executable in preferences.`,
           };
         case "indexing":
           return {
@@ -1429,7 +1478,7 @@ export default function Search(
               <List.Item
                 title="Install FSearch"
                 subtitle={
-                  rust
+                  cargo
                     ? "One Terminal command, about a minute"
                     : "Installs Rust, then FSearch, in Terminal"
                 }

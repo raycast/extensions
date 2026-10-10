@@ -81,6 +81,15 @@ The type menu adds a `type:` or `kind:` filter; leave it on Everything when writ
 
 Everything runs locally. The extension talks to the fsearch daemon over its Unix socket and spawns `fsearch stdio` only to start it. Previews use tools shipped with macOS (`qlmanage`, `textutil`, `unzip`, `tar`, `plutil`, `mdls`). Only saved searches are stored.
 
-## Source
+## Development
 
-https://github.com/qunash/fsearch-raycast-extension
+```sh
+bun install
+bun run dev        # live reload in Raycast
+bun run typecheck
+bun test
+bun run build
+bun run format:check
+```
+
+Source: https://github.com/qunash/fsearch-raycast-extension
