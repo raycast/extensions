@@ -2,8 +2,6 @@
 
 ## [Login Fixes] - {PR_MERGE_DATE}
 
-- List Vaults shows fetched vaults and item counts without waiting for optional sharing lookups
-- Sharing refresh rechecks for an active browser login before each vault member command
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
 - pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
 - While the login runs, the screen says what's left: log in in the browser, then the login finishing, with Open Login Page Again and Cancel Login. Once logged in, it says so while the items load, instead of showing an empty list. A failed login says why
@@ -11,6 +9,7 @@
 - The Login command has a Logout action, after a confirmation, with Force Logout when ending the session on Proton's servers fails
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
+- List Vaults shows fetched vaults and item counts without waiting for optional sharing lookups
 
 ## [Item Counts and Shared Vaults] - 2026-10-10
 
