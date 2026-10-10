@@ -31,6 +31,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "a1-gallery",
+    title: "A1 Gallery",
+    description:
+      "Hand-curated web design references, inside your agent. Search 1,100+ real websites, their captured sections and interior pages, the fonts they use and the designers who made them, and read design tokens measured off each rendered page: type sizes, spacing, radius, container width and palette. 17 read-only tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free A1 account (50 calls a day), no API key to paste.",
+    icon: "https://img.a1.gallery/brand/a1-app-icon-512.png",
+    homepage: "https://www.a1.gallery/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.a1.gallery/api/mcp"],
+    },
+    remoteUrl: "https://www.a1.gallery/api/mcp",
+  },
+  {
     name: "aiapplyd",
     title: "AI Applyd",
     description:
@@ -139,6 +152,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bulkpublish",
+    title: "BulkPublish",
+    description:
+      "Schedule, cross-post and analyze social media posts across 15 platforms: Facebook, Instagram, X, TikTok, YouTube, Threads, Bluesky, Pinterest, Google Business Profile, LinkedIn, Mastodon, Discord, Telegram, Tumblr and Snapchat. List channels, draft posts with per-platform captions, upload images and video, schedule or take the next queue slot, publish and retry, read post metrics and analytics, and on Pro and Business plans answer DMs and comments. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, pasting a BulkPublish API key once on the consent screen; free plan available.",
+    icon: "https://www.bulkpublish.com/favicon.svg",
+    homepage: "https://www.bulkpublish.com/integrations/mcp-server/",
+    remoteUrl: "https://mcp.bulkpublish.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.bulkpublish.com/mcp"],
+    },
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -237,6 +263,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "datacircle",
+    title: "Datacircle",
+    description:
+      "Datacircle is a data co-op. Query your favorite B2B data APIs through us. Same request, same price, no markup. Every morning, you get the flat file of your data plus everyone else's. Right now we have 2 live LinkedIn profile APIs that we trust: Up2Data and HarvestAPI.",
+    icon: "https://datacircle.dev/favicon.png",
+    homepage: "https://docs.datacircle.dev/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.datacircle.dev/mcp"],
+    },
+    remoteUrl: "https://api.datacircle.dev/mcp",
   },
   {
     name: "desearch",
@@ -578,6 +617,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "medbillanalyzer",
+    title: "MedBillAnalyzer",
+    description:
+      "Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.",
+    icon: "https://medbillanalyzer.com/icon-512.png",
+    homepage: "https://medbillanalyzer.com",
+    remoteUrl: "https://app.medbillanalyzer.com/mcp/apps",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.medbillanalyzer.com/mcp/apps"],
+    },
+  },
+  {
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
@@ -672,6 +724,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "qrx",
+    title: "QRX",
+    description:
+      "Branded, print-ready art QR codes that always scan. Describe a look and give a link: QRX paints an artistic QR code, checks that it decodes, and returns the image with a hosted qrx.to short link that can be re-pointed later. Start a code, wait for the image, list your codes, change where a code points, check your daily allowance and list styles. Hosted remote Streamable HTTP server through `mcp-remote`; QRX API key as an `Authorization: Bearer` header (free account, 42 codes a day).",
+    icon: "https://qrx.codes/images/brand/qrx-code-512.png",
+    homepage: "https://qrx.codes/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://qrx.codes/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "quibbly",
     title: "Quibbly",
     description:
@@ -763,6 +827,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote@0.14.3", "https://api.truthifi.com/mcp"],
+    },
+  },
+  {
+    name: "bankbridge",
+    title: "BankBridge",
+    description:
+      "Read-only access to your own US bank, credit card and investment accounts: balances, transactions, spending by category or merchant, recurring charges, monthly cashflow and holdings. Data is fetched live from your banks on each call and not stored. Remote Streamable HTTP server with BankBridge OAuth 2.1 sign-in (dynamic client registration, PKCE) through `mcp-remote`; no API key needed. Paid: $5/mo per connected bank. It can't move money.",
+    icon: "https://github.com/bankbridge-money.png",
+    homepage: "https://bankbridge.money/docs/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://bankbridge.money/api/mcp"],
     },
   },
   {
@@ -923,6 +999,32 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "<personal-access-token>"],
     },
+  },
+  {
+    name: "suparelay",
+    title: "Suparelay",
+    description:
+      "Make international calls from your AI assistant. Get the price per minute for a phone number or a country, and a Call link that opens the Suparelay browser dialer with the number ready; the person you call answers on their normal phone. Read-only. Hosted remote Streamable HTTP server at https://suparelay.app/mcp; no sign-in and no API key.",
+    icon: "https://suparelay.app/web-app-manifest-512x512.png",
+    homepage: "https://suparelay.app/ai/mcp",
+    remoteUrl: "https://suparelay.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
+    },
+  },
+  {
+    name: "tapetide",
+    title: "Tapetide",
+    description:
+      "Indian stock market research for about 8,200 NSE and BSE listed companies: quotes, quarterly and annual financials, shareholding, a 326-ratio fundamental screener, technical screens, FII/DII flows, end-of-day index option chains, Tapetide Score, company filings and your own Tapetide portfolio and watchlist. 55 tools. Hosted remote Streamable HTTP server; OAuth 2.1 Google sign-in with dynamic client registration and PKCE, no API key to paste; free plan with 50 tool calls a day. Research data, not investment advice.",
+    icon: "https://github.com/Tapetide-hq.png",
+    homepage: "https://tapetide.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tapetide.com/mcp"],
+    },
+    remoteUrl: "https://mcp.tapetide.com/mcp",
   },
   {
     name: "tavily",

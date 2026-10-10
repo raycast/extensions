@@ -4,6 +4,7 @@ import {
   inWindow,
   MAX_CALENDAR_DAYS,
   MAX_CALENDAR_LIMIT,
+  daysToWeekEnd,
   parseStartDate,
   resolveDays,
   resolveLimit,
@@ -32,9 +33,14 @@ type Input = {
    */
   startDate?: string;
   /**
-   * Number of days to cover, starting at `startDate` (default: 7, max: 32).
+   * Number of days to cover, starting at `startDate` (default: 7, max: 32). Ignored with `calendarWeek`.
    */
   days?: number;
+  /**
+   * True covers the calendar week: from `startDate` (today by default) through the coming Sunday.
+   * Use it for "this week" instead of computing `days`.
+   */
+  calendarWeek?: boolean;
   /**
    * Maximum entries per list, episodes and movies each, earliest first (default: 50, max: 200).
    */
@@ -50,6 +56,8 @@ type Output = {
     timeZone: string;
     daysCapped?: boolean;
     limitCapped?: boolean;
+    /** Set when the window is the rest of the calendar week. */
+    calendarWeek?: boolean;
   };
   /** Episodes airing in the window, in local date and time order, at most `limit`. Empty when `type` is "movies". */
   episodes: CompactCalendarEpisode[];
@@ -77,7 +85,8 @@ export default async function tool(input: Input): Promise<Output> {
   const { type = "all" } = input;
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const startDate = parseStartDate(input.startDate, timeZone);
-  const { days, capped } = resolveDays(input.days);
+  const week = input.calendarWeek === true;
+  const { days, capped } = week ? { days: daysToWeekEnd(startDate), capped: false } : resolveDays(input.days);
   const { limit, capped: limitCapped } = resolveLimit(input.limit);
   const window = calendarWindow(startDate, days, timeZone);
   const params = toTraktQuery(window);
@@ -118,7 +127,7 @@ export default async function tool(input: Input): Promise<Output> {
     type !== "shows" ? `${movies.total} movie(s)` : undefined,
   ].filter(Boolean);
   const message = [
-    `${counts.join(" and ")} from ${window.startDate} to ${window.endDate} (${timeZone}).`,
+    `${counts.join(" and ")} from ${window.startDate} to ${window.endDate} (${timeZone})${week ? ", the rest of this calendar week" : ""}.`,
     "Only titles Trakt tracks for this account appear: shows they watched or watchlisted (minus shows hidden from the calendar) and their movies. An empty result does not mean nothing else comes out.",
     truncationNote("Episodes", episodes),
     truncationNote("Movies", movies),
@@ -130,7 +139,12 @@ export default async function tool(input: Input): Promise<Output> {
     .join(" ");
 
   return {
-    window: { ...window, ...(capped && { daysCapped: true }), ...(limitCapped && { limitCapped: true }) },
+    window: {
+      ...window,
+      ...(capped && { daysCapped: true }),
+      ...(limitCapped && { limitCapped: true }),
+      ...(week && { calendarWeek: true }),
+    },
     episodes: episodes.items,
     movies: movies.items,
     totalEpisodes: episodes.total,

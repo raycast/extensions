@@ -142,6 +142,21 @@
   ],
   "tools": [
     {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open a URL or a web search in a new Dia tab"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Switch to an open Dia tab"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close an open Dia tab by its ID"
+    },
+    {
       "name": "get-tabs",
       "title": "Get Tabs",
       "description": "Return the open tabs across all Dia windows"

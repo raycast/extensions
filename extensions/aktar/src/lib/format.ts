@@ -1,6 +1,7 @@
 import { Icon, Image } from "@raycast/api";
 import path from "node:path";
 import type { BucketObject, Destination, OutputFormat, Upload } from "../api/types";
+import { escapeLinkText, markdownURL } from "./markdown";
 
 const IMAGE_EXTENSIONS = new Set([
   "png",
@@ -47,7 +48,7 @@ export function formatLink(url: string, filename: string, format: OutputFormat) 
   const image = isImageName(filename);
   switch (format) {
     case "markdown":
-      return image ? `![](${url})` : `[${escapeMarkdown(filename)}](${url})`;
+      return image ? `![](${markdownURL(url)})` : `[${escapeLinkText(filename)}](${markdownURL(url)})`;
     case "html":
       return image
         ? `<img src="${escapeHTML(url)}" alt="">`
@@ -55,10 +56,6 @@ export function formatLink(url: string, filename: string, format: OutputFormat) 
     default:
       return url;
   }
-}
-
-function escapeMarkdown(text: string) {
-  return text.replace(/[\\[\]]/g, "\\$&");
 }
 
 function escapeHTML(text: string) {

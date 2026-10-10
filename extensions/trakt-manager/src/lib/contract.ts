@@ -9,11 +9,23 @@ import {
   TraktMovieHistoryList,
   TraktCheckinConflictSchema,
   TraktHiddenAddResponseSchema,
+  TraktHiddenRemoveResponseSchema,
+  TraktDroppedShowList,
   TraktHistoryAddResponseSchema,
   TraktNoSharing,
   TraktWatchlistAddResponseSchema,
   TraktWatchlistRemoveResponseSchema,
   TraktMovieList,
+  TraktMovieBaseList,
+  TraktShowBaseList,
+  TraktBrowseQuerySchema,
+  TraktTrendingMovieList,
+  TraktAnticipatedMovieList,
+  TraktTrendingShowList,
+  TraktAnticipatedShowList,
+  TraktPersonSearchQuerySchema,
+  TraktPersonSearchList,
+  TraktPersonCreditsSchema,
   TraktPlaybackMovieList,
   TraktCalendarMovieList,
   TraktCalendarPathSchema,
@@ -34,6 +46,8 @@ import {
   TraktUpNextNitroQuerySchema,
   TraktPaginationSchema,
   TraktUserRatingListSchema,
+  TraktWatchedMovieListSchema,
+  TraktWatchedShowListSchema,
   TraktUserStatsSchema,
   TraktWatchingSchema,
   TraktIdLookupQuerySchema,
@@ -125,6 +139,37 @@ const TraktMovieContract = c.router({
     },
     query: TraktPaginationSchema,
     summary: "Get the Trakt ids of the movies in the watchlist",
+  },
+  getTrendingMovies: {
+    method: "GET",
+    path: "/movies/trending",
+    responses: { 200: TraktTrendingMovieList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the movies most watched over the last 24 hours",
+  },
+  getPopularMovies: {
+    method: "GET",
+    path: "/movies/popular",
+    responses: { 200: TraktMovieBaseList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the most popular movies",
+  },
+  getAnticipatedMovies: {
+    method: "GET",
+    path: "/movies/anticipated",
+    responses: { 200: TraktAnticipatedMovieList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the movies on the most lists",
+  },
+  getRelatedMovies: {
+    method: "GET",
+    path: "/movies/:id/related",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktMovieBaseList,
+    },
+    query: TraktBrowseQuerySchema,
+    summary: "Get movies related to a movie",
   },
   getRecommendedMovies: {
     method: "GET",
@@ -269,6 +314,37 @@ const TraktShowContract = c.router({
     query: TraktPaginationWithSortingSchema,
     summary: "Get shows in watchlist",
   },
+  getTrendingShows: {
+    method: "GET",
+    path: "/shows/trending",
+    responses: { 200: TraktTrendingShowList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the shows most watched over the last 24 hours",
+  },
+  getPopularShows: {
+    method: "GET",
+    path: "/shows/popular",
+    responses: { 200: TraktShowBaseList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the most popular shows",
+  },
+  getAnticipatedShows: {
+    method: "GET",
+    path: "/shows/anticipated",
+    responses: { 200: TraktAnticipatedShowList },
+    query: TraktBrowseQuerySchema,
+    summary: "Get the shows on the most lists",
+  },
+  getRelatedShows: {
+    method: "GET",
+    path: "/shows/:id/related",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktShowBaseList,
+    },
+    query: TraktBrowseQuerySchema,
+    summary: "Get shows related to a show",
+  },
   getRecommendedShows: {
     method: "GET",
     path: "/recommendations/shows",
@@ -357,6 +433,33 @@ const TraktShowContract = c.router({
       shows: z.array(TraktIdSchema),
     }),
     summary: "Drop a show (hides it from Continue Watching)",
+  },
+  getDroppedShows: {
+    method: "GET",
+    path: "/users/hidden/dropped",
+    responses: {
+      200: TraktDroppedShowList,
+    },
+    query: TraktPaginationSchema.merge(TraktExtendedSchema).extend({ type: z.enum(["show"]) }),
+    summary: "Get the shows the user dropped",
+  },
+  restoreDroppedShow: {
+    method: "POST",
+    path: "/users/hidden/dropped/remove",
+    responses: {
+      200: TraktHiddenRemoveResponseSchema,
+    },
+    body: z.object({ shows: z.array(TraktIdSchema) }),
+    summary: "Restore a dropped show to Continue Watching",
+  },
+  unhideShowFromCalendar: {
+    method: "POST",
+    path: "/users/hidden/calendar/remove",
+    responses: {
+      200: TraktHiddenRemoveResponseSchema,
+    },
+    body: z.object({ shows: z.array(TraktIdSchema) }),
+    summary: "Show a show on the calendar again",
   },
   hideShowFromCalendar: {
     method: "POST",
@@ -523,6 +626,22 @@ const TraktShowContract = c.router({
 });
 
 const TraktSyncContract = c.router({
+  getWatchedMovies: {
+    method: "GET",
+    path: "/sync/watched/movies",
+    responses: {
+      200: TraktWatchedMovieListSchema,
+    },
+    summary: "Get every movie the user has watched",
+  },
+  getWatchedShows: {
+    method: "GET",
+    path: "/sync/watched/shows",
+    responses: {
+      200: TraktWatchedShowListSchema,
+    },
+    summary: "Get every show the user has watched, with episodes by season and number",
+  },
   addRatings: {
     method: "POST",
     path: "/sync/ratings",
@@ -703,6 +822,35 @@ const TraktSearchContract = c.router({
     }),
     query: TraktIdLookupQuerySchema,
     summary: "Look up a movie, show, season or episode by its Trakt ID",
+  },
+  searchPeople: {
+    method: "GET",
+    path: "/search/person",
+    responses: {
+      200: TraktPersonSearchList,
+    },
+    query: TraktPersonSearchQuerySchema,
+    summary: "Search people by name",
+  },
+  getPersonMovies: {
+    method: "GET",
+    path: "/people/:id/movies",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktPersonCreditsSchema,
+    },
+    query: TraktExtendedSchema,
+    summary: "Get the movies a person is credited on",
+  },
+  getPersonShows: {
+    method: "GET",
+    path: "/people/:id/shows",
+    pathParams: z.object({ id: z.coerce.number() }),
+    responses: {
+      200: TraktPersonCreditsSchema,
+    },
+    query: TraktExtendedSchema,
+    summary: "Get the shows a person is credited on",
   },
 });
 

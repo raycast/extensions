@@ -10,6 +10,8 @@ import { initTraktClient } from "./lib/client";
 import { getPosterUrl } from "./lib/helper";
 import { TraktMovieListItem } from "./lib/schema";
 import { useCheckinSync } from "./lib/use-checkin-state";
+import { useRatingsSync } from "./lib/use-ratings";
+import { useWatchedSync } from "./lib/use-watched";
 import { useWatchlistSync } from "./lib/use-watchlist-ids";
 import { abortSearch, createSearchFetcher } from "./lib/search";
 
@@ -19,6 +21,8 @@ export default function Command() {
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   useWatchlistSync();
+  useRatingsSync();
+  useWatchedSync();
   useCheckinSync();
   const {
     isLoading,

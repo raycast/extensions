@@ -111,7 +111,7 @@ function AuthView() {
 test("real auth hook reports discovery failure and Retry recovers saved credentials", async () => {
   let available = false;
   let discoveryRequests = 0;
-  const issuer = "https://app.teakvault.com";
+  const issuer = "https://scholarly-hay-77.authkit.app";
   globalThis.fetch = ((input) => {
     discoveryRequests += 1;
     if (!available) return Promise.resolve(new Response(null, { status: 503 }));
@@ -124,10 +124,10 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
       : url.includes("teak-oauth-clients")
         ? {
             issuer,
-            primary: "betterauth",
+            primary: "workos",
             clients: Object.fromEntries(
               ["cli", "raycast", "chrome", "firefox", "safari"].map(
-                (surface) => [surface, "teak-raycast"],
+                (surface) => [surface, "client_01M47GV3CYKFW0H78W0XYKGTM5"],
               ),
             ),
           }
@@ -135,7 +135,7 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
             issuer,
             code_challenge_methods_supported: ["S256"],
             authorization_endpoint: `${issuer}/authorize`,
-            token_endpoint: `${issuer}/token`,
+            token_endpoint: `${issuer}/oauth2/token`,
           };
     return Promise.resolve(Response.json(body));
   }) as typeof fetch;

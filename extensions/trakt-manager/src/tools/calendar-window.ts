@@ -122,6 +122,15 @@ export function truncationNote(label: string, list: ReturnType<typeof truncateLi
   return list.truncated ? `${label} truncated at ${list.lastDate} (${list.items.length} of ${list.total}).` : undefined;
 }
 
+/**
+ * Days from `localDate` through the coming Sunday, both included: the rest of the calendar week
+ * (Monday 7, Wednesday 5, Sunday 1). Weeks end on Sunday, as ISO 8601 and most of Europe count them.
+ */
+export function daysToWeekEnd(localDate: string) {
+  const weekday = new Date(utcMidnight(localDate)).getUTCDay();
+  return weekday === 0 ? 1 : 8 - weekday;
+}
+
 export function calendarWindow(startDate: string, days: number, timeZone: string): CalendarWindow {
   return { startDate, endDate: addDays(startDate, days - 1), days, timeZone };
 }

@@ -23,6 +23,7 @@ export type HistoryItem = {
   color: HistoryColor;
   title?: string;
   isFavorite?: boolean;
+  group?: string;
 };
 
 export type LaunchOptions = Parameters<typeof launchCommand>[0];

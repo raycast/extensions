@@ -36,7 +36,7 @@ type Output = {
   episodeTraktId: number;
 };
 
-function episodeCode(seasonNumber: number, episodeNumber: number): string {
+export function episodeCode(seasonNumber: number, episodeNumber: number): string {
   return `S${String(seasonNumber).padStart(2, "0")}E${String(episodeNumber).padStart(2, "0")}`;
 }
 
@@ -47,7 +47,7 @@ function episodeCode(seasonNumber: number, episodeNumber: number): string {
  * caller, so the episode written to the history is necessarily the one named in the
  * confirmation dialog.
  */
-async function resolveEpisode(showTraktId: number, seasonNumber: number, episodeNumber: number) {
+export async function resolveEpisode(showTraktId: number, seasonNumber: number, episodeNumber: number) {
   const response = await executeToolCall(
     (signal) =>
       toolTraktClient.shows.getEpisode({
