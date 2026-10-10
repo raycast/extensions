@@ -15,7 +15,6 @@ import {
 } from "./types";
 import {
   ClientHttp2Session,
-  constants,
   IncomingHttpHeaders,
   IncomingHttpStatusHeader,
   OutgoingHttpHeaders,
@@ -26,7 +25,6 @@ import RateLimitedQueue from "./RateLimitedQueue";
 import { logError } from "../helpers/errors";
 
 const DATA_PREFIX = "data: ";
-const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
 
 export const authHeaders = (username: string) => ({
   "hue-application-key": username,
@@ -124,12 +122,15 @@ export default class HueClient {
   }
 
   public listenToEventSource(onUpdate: (resources: HueEvent["data"]) => void): () => void {
-    const stream = this.http2Session.request({
-      [HTTP2_HEADER_METHOD]: "GET",
-      [HTTP2_HEADER_PATH]: "/eventstream/clip/v2",
-      [HTTP2_HEADER_ACCEPT]: "text/event-stream",
-      ...authHeaders(this.bridgeConfig.username),
-    });
+    const stream = this.http2Session.request(
+      {
+        ":method": "GET",
+        ":path": "/eventstream/clip/v2",
+        accept: "text/event-stream",
+        ...authHeaders(this.bridgeConfig.username),
+      },
+      { endStream: true },
+    );
 
     let buffer = "";
 
@@ -150,12 +151,7 @@ export default class HueClient {
       }
     });
 
-    stream.on("end", () => stream.close());
-
-    stream.on("error", (error) => {
-      stream.close();
-      logError(error);
-    });
+    stream.on("error", logError);
 
     return () => stream.close();
   }
