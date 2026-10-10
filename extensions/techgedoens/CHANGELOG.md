@@ -1,6 +1,6 @@
 # Changelog
 
-## [Search Selected Text] - {PR_MERGE_DATE}
+## [Search Selected Text] - 2026-10-10
 
 - Search the public Techgedöns archive using text selected in the frontmost application.
 
