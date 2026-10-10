@@ -20,7 +20,7 @@ const script = (header: string[]) =>
   ].join("\n");
 
 const reparse = (contents: string) =>
-  parseScriptCommand({ path: "/tmp/work.linear.sprint-board.sh", body: contents, isExecutable: true });
+  parseScriptCommand({ path: "/tmp/linear.sprint-board.sh", body: contents, isExecutable: true });
 
 describe("subtitleFormOf", () => {
   it("moves the scope onto the subtitle, after the brand", () => {

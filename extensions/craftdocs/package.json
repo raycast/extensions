@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "craftdocs",
   "title": "Craft",
-  "description": "Search Blocks, browse and add to Daily Notes, and manage Spaces in Craft",
+  "description": "Search Blocks, browse and add to Daily Notes, and manage Spaces in Craft. Includes AI tools to search and write to Craft.",
   "icon": "command-icon.png",
   "author": "sfkmk",
   "platforms": [
@@ -11,7 +11,8 @@
   "contributors": [
     "bgnfu7re",
     "mafredri",
-    "0x77dev"
+    "0x77dev",
+    "alhassanaraouf"
   ],
   "license": "MIT",
   "categories": [
@@ -25,6 +26,76 @@
       "title": "Application to search in",
       "description": "Choose which Craft installation to use. If you leave it empty, the extension auto-detects an installed Craft app.",
       "placeholder": "com.lukilabs.lukiapp"
+    },
+    {
+      "title": "Append Position",
+      "name": "appendPosition",
+      "type": "dropdown",
+      "required": false,
+      "default": "end",
+      "data": [
+        {
+          "title": "Add at End",
+          "value": "end"
+        },
+        {
+          "title": "Add at Beginning",
+          "value": "beginning"
+        }
+      ],
+      "description": "Choose whether to add content at the beginning or end of the Daily Note"
+    },
+    {
+      "title": "Add Timestamp",
+      "name": "addTimestamp",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Add timestamp to content",
+      "description": "Automatically add current time before your content"
+    },
+    {
+      "title": "Time Format",
+      "name": "timeFormat",
+      "type": "textfield",
+      "required": false,
+      "default": "HH:mm",
+      "placeholder": "HH:mm",
+      "description": "Custom time format pattern. Examples: HH:mm (14:30), h:mm A (2:30 PM), HH:mm:ss (14:30:45). Patterns: H/HH=24h, h/hh=12h, mm=minutes, ss=seconds, A/a=AM/PM"
+    },
+    {
+      "title": "Prefix",
+      "name": "contentPrefix",
+      "type": "textfield",
+      "required": false,
+      "default": ": ",
+      "placeholder": "Enter prefix text",
+      "description": "Text to add after timestamp (if enabled) and before your content"
+    },
+    {
+      "title": "Suffix",
+      "name": "contentSuffix",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Enter suffix text",
+      "description": "Text to add after your content"
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Craft API URL",
+      "placeholder": "https://connect.craft.do/links/.../api/v1",
+      "description": "Optional. Lets Raycast AI edit, delete and move content, and manage tasks, collections and folders. Create an API connection in Craft (Imagine tab) and paste its URL."
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Craft API Key",
+      "placeholder": "pdk_...",
+      "description": "Optional. Only needed if your Craft API connection requires a key."
     }
   ],
   "commands": [
@@ -58,63 +129,7 @@
       "title": "Add to Daily Note",
       "subtitle": "Craft",
       "description": "Add content to your Daily Note",
-      "mode": "view",
-      "preferences": [
-        {
-          "title": "Append Position",
-          "name": "appendPosition",
-          "type": "dropdown",
-          "required": false,
-          "default": "end",
-          "data": [
-            {
-              "title": "Add at End",
-              "value": "end"
-            },
-            {
-              "title": "Add at Beginning",
-              "value": "beginning"
-            }
-          ],
-          "description": "Choose whether to add content at the beginning or end of the Daily Note"
-        },
-        {
-          "title": "Add Timestamp",
-          "name": "addTimestamp",
-          "type": "checkbox",
-          "required": false,
-          "default": true,
-          "label": "Add timestamp to content",
-          "description": "Automatically add current time before your content"
-        },
-        {
-          "title": "Time Format",
-          "name": "timeFormat",
-          "type": "textfield",
-          "required": false,
-          "default": "HH:mm",
-          "placeholder": "HH:mm",
-          "description": "Custom time format pattern. Examples: HH:mm (14:30), h:mm A (2:30 PM), HH:mm:ss (14:30:45). Patterns: H/HH=24h, h/hh=12h, mm=minutes, ss=seconds, A/a=AM/PM"
-        },
-        {
-          "title": "Prefix",
-          "name": "contentPrefix",
-          "type": "textfield",
-          "required": false,
-          "default": ": ",
-          "placeholder": "Enter prefix text",
-          "description": "Text to add after timestamp (if enabled) and before your content"
-        },
-        {
-          "title": "Suffix",
-          "name": "contentSuffix",
-          "type": "textfield",
-          "required": false,
-          "default": "",
-          "placeholder": "Enter suffix text",
-          "description": "Text to add after your content"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "manageSpaces",
@@ -145,5 +160,47 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run"
-  }
+  },
+  "tools": [
+    {
+      "name": "list-spaces",
+      "title": "List Spaces",
+      "description": "List Craft spaces with their IDs, names and status"
+    },
+    {
+      "name": "search-blocks",
+      "title": "Search Blocks",
+      "description": "Search Craft documents and blocks"
+    },
+    {
+      "name": "get-document",
+      "title": "Get Document",
+      "description": "Read the text blocks of a Craft document or Daily Note. Blocks are not in document order; use craft-api GET /blocks for ordered content when configured"
+    },
+    {
+      "name": "create-document",
+      "title": "Create Document",
+      "description": "Create a new Craft document"
+    },
+    {
+      "name": "append-to-document",
+      "title": "Append to Document",
+      "description": "Add content to an existing Craft document"
+    },
+    {
+      "name": "add-to-daily-note",
+      "title": "Add to Daily Note",
+      "description": "Add content to a Craft Daily Note"
+    },
+    {
+      "name": "manage-space",
+      "title": "Manage Space",
+      "description": "Rename, enable or disable a Craft space"
+    },
+    {
+      "name": "craft-api",
+      "title": "Craft API",
+      "description": "Read and edit Craft content through the Craft API: update, delete and move blocks, tasks, collections, folders and more"
+    }
+  ]
 }

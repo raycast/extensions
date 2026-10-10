@@ -1,4 +1,4 @@
-import { runAppleScript, showFailureToast, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
+import { executeSQL, runAppleScript, showFailureToast, useCachedPromise, usePromise, useSQL } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
@@ -105,9 +105,9 @@ async function searchBookmarks(searchText: string): Promise<Bookmark[]> {
   }
 }
 
-function getHistoryQuery(searchText?: string, limit = 100) {
-  // Skip filtered query for single-char searches (too broad, wastes I/O)
-  const effectiveSearch = searchText && searchText.trim().length >= 2 ? searchText : undefined;
+function getHistoryQuery(searchText?: string, limit = 100, minSearchLength = 2) {
+  // Skip filtered query for single-char searches while typing (too broad, wastes I/O)
+  const effectiveSearch = searchText && searchText.trim().length >= minSearchLength ? searchText : undefined;
   const whereClause = effectiveSearch
     ? effectiveSearch
         .split(" ")
@@ -150,6 +150,29 @@ export function useSearchHistory(searchText?: string, options: { limit?: number 
     return { isLoading: false, error, data: [], permissionView: null, revalidate: () => {} };
   }
   return result;
+}
+
+export const FULL_DISK_ACCESS_MESSAGE =
+  "Raycast needs Full Disk Access to read Dia's data. Enable Raycast in System Settings → Privacy & Security → Full Disk Access, then try again.";
+
+/** Async variant of useSearchHistory for AI tools, where hooks are unavailable. */
+export async function searchHistory(searchText?: string, limit?: number): Promise<HistoryItem[]> {
+  const historyPath = getHistoryPath();
+  if (!existsSync(historyPath)) {
+    // Without Full Disk Access the file can look missing rather than unreadable, so mention both causes
+    throw new Error(
+      `Dia's history database was not found. Make sure Dia has been opened at least once. ${FULL_DISK_ACCESS_MESSAGE}`,
+    );
+  }
+
+  try {
+    return await executeSQL<HistoryItem>(historyPath, getHistoryQuery(searchText, limit, 1));
+  } catch (error) {
+    if (error instanceof Error && (error.name === "PermissionError" || /EPERM|EACCES/.test(error.message))) {
+      throw new Error(FULL_DISK_ACCESS_MESSAGE);
+    }
+    throw error;
+  }
 }
 
 /** Escapes unescaped " inside JSON string values so JSON.parse succeeds (AppleScript may miss some). */
@@ -199,7 +222,7 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
   return result;
 }
 
-async function getTabs(): Promise<Tab[]> {
+export async function getTabs(): Promise<Tab[]> {
   // JXA (JavaScript for Automation) is significantly faster than AppleScript
   // for complex data extraction: native JSON, no O(n^2) string concat.
   // If JXA fails (e.g. Dia doesn't expose JXA dictionary), fall back to
@@ -371,6 +394,15 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
     ...t,
     url: t.url || undefined,
   }));
+}
+
+/** Returns the focused tab, preferring the frontmost window when several windows report one. */
+export async function getFocusedTab(): Promise<Tab | undefined> {
+  const focusedTabs = (await getTabs()).filter((tab) => tab.isFocused);
+  if (focusedTabs.length <= 1) return focusedTabs[0];
+
+  const frontWindowId = (await runAppleScript(`tell application "Dia" to return id of window 1`)).trim();
+  return focusedTabs.find((tab) => tab.windowId === frontWindowId) ?? focusedTabs[0];
 }
 
 export function useTabs() {

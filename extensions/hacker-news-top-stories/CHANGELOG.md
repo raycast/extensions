@@ -1,5 +1,9 @@
 # Hacker News Top Stories Changelog
 
+## [Remove Mark as Read Tool] - 2026-10-06
+
+Removes the Raycast AI tool for marking stories as read.
+
 ## [Raycast AI Tools] - 2026-10-05
 
 Adds Raycast AI tools to summarize your unread stories with their top comments and links, read a story's comments, search comments, read the linked article (from an open browser tab when there is one), and mark stories as read.

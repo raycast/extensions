@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import getObsidianFiles from "../helpers/get-obsidian-files";
 import { getLocalStorageFiles } from "../helpers/localstorage-files";
 import { File } from "../types";
@@ -7,12 +7,19 @@ export type FilesHook = {
   files: File[];
   loading: boolean;
   backgroundLoading: boolean;
+  updateFile: (file: File) => void;
 };
 
 export default function useFiles(): FilesHook {
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [backgroundLoading, setBackgroundLoading] = useState(true);
+  const updatedPaths = useRef(new Set<string>());
+
+  const updateFile = useCallback((updated: File) => {
+    updatedPaths.current.add(updated.fullPath);
+    setFiles((current) => current.map((file) => (file.fullPath === updated.fullPath ? updated : file)));
+  }, []);
 
   useEffect(() => {
     async function loadFiles() {
@@ -23,11 +30,16 @@ export default function useFiles(): FilesHook {
         setLoading(false);
 
         // Process files and update as they complete
-        const loadedFiles: File[] = [];
-        await getObsidianFiles(localFiles, (file) => {
-          loadedFiles.push(file);
-          setFiles([...loadedFiles]);
+        const scanned = await getObsidianFiles(localFiles, (file) => {
+          if (updatedPaths.current.has(file.fullPath)) return;
+          setFiles((current) =>
+            current.some((f) => f.fullPath === file.fullPath)
+              ? current.map((f) => (f.fullPath === file.fullPath ? file : f))
+              : [...current, file]
+          );
         });
+        const paths = new Set(scanned.map((file) => file.fullPath));
+        setFiles((current) => current.filter((file) => paths.has(file.fullPath)));
       } catch (error) {
         console.error("Error loading files:", error);
       } finally {
@@ -43,5 +55,6 @@ export default function useFiles(): FilesHook {
     files,
     loading,
     backgroundLoading,
+    updateFile,
   };
 }

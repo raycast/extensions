@@ -1,6 +1,6 @@
 # Cloudflare R2 File Uploader
 
-Upload any files to Cloudflare R2 storage service with optional AVIF conversion for images.
+Upload any files to Cloudflare R2 storage service with optional AVIF or WebP conversion for images.
 
 ## Contact
 
@@ -59,6 +59,11 @@ For AVIF conversion:
 brew install libavif
 ```
 
+For WebP conversion:
+```bash
+brew install webp
+```
+
 
 ## Configuration Options
 
@@ -66,13 +71,16 @@ brew install libavif
 2. **R2 Access Key ID** - Your Cloudflare R2 access key ID
 3. **R2 Secret Access Key** - Your Cloudflare R2 secret access key
 4. **R2 Account ID** - Your Cloudflare account ID (the part before .r2.cloudflarestorage.com in your R2 URL)
-5. **Custom Domain** (optional) - Custom domain for accessing files
+5. **R2 Public Domain** - Already-configured public domain for accessing uploaded files
 6. **File Name Format** (optional) - Custom filename format
 7. **Upload Path Prefix** (optional) - Folder path to store files under, instead of the bucket root
 8. **Convert to AVIF** - Convert images to AVIF format before uploading
 9. **AVIF Quality** - Quality setting for AVIF conversion (0-100, default: 80)
 10. **AVIF Encoder Path** (optional) - Path to avifenc command (default: `/opt/homebrew/bin/avifenc`)
-11. **Link Format** - Format used when copying the uploaded link to the clipboard: Plain URL, Markdown, or HTML (default: Plain URL)
+11. **Convert to WebP** - Convert images to WebP format before uploading
+12. **WebP Quality** - Quality setting for WebP conversion (0-100, default: 80)
+13. **WebP Encoder Path** (optional) - Path to cwebp command (default: `/opt/homebrew/bin/cwebp`)
+14. **Link Format** - Format used when copying the uploaded link to the clipboard: Plain URL, Markdown, or HTML (default: Plain URL)
 
 ## Image Conversion
 
@@ -81,6 +89,12 @@ brew install libavif
 - Provides superior compression compared to JPEG
 - Requires external tool installation
 - Quality setting: 0-100 (default: 80)
+
+### WebP Conversion
+- Uses the `cwebp` tool from the WebP package
+- Requires external tool installation
+- Quality setting: 0-100 (default: 80)
+- AVIF and WebP conversion cannot be enabled at the same time
 
 ## Custom Filename Format
 
@@ -140,12 +154,13 @@ The "Browse R2 Files" command lets you navigate your bucket like a file manager:
    - R2 Access Key ID
    - R2 Secret Access Key
    - R2 Account ID (the part before .r2.cloudflarestorage.com in your R2 URL)
+   - R2 Public Domain (your already-configured public domain)
 4. (Optional) Install conversion tools:
    - For AVIF: `brew install libavif`
+   - For WebP: `brew install webp`
 5. (Optional) Configure additional settings:
-   - Custom Domain
    - File Name Format
-   - Convert to AVIF
+   - Convert to AVIF or WebP
    - Quality settings for conversions
    - Encoder paths (if different from default)
    - Link Format (Plain URL by default)
@@ -155,7 +170,7 @@ The "Browse R2 Files" command lets you navigate your bucket like a file manager:
 2. Open Raycast (Cmd + Space) and search for "Upload File to R2"
 3. Press Enter to execute the command
 4. The extension will:
-   - (If enabled and file is an image) Convert the image to AVIF format
+   - (If enabled and file is an image) Convert the image to AVIF or WebP format
    - Upload the file to your R2 bucket
    - Generate a link (Markdown or plain URL)
    - Copy the link to your clipboard
@@ -167,8 +182,9 @@ The "Browse R2 Files" command lets you navigate your bucket like a file manager:
 If you encounter a "conversion tool not found" error:
 1. Ensure the required tool is installed:
    - For AVIF: `brew install libavif`
+   - For WebP: `brew install webp`
 2. Check that the encoder path setting points to the correct command
-3. Run `which avifenc` in terminal to find the correct path
+3. Run `which avifenc` or `which cwebp` in terminal to find the correct path
 
 ### Upload Failed
 If the upload fails:

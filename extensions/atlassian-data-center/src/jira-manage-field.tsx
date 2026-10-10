@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 
 import { withQuery, CacheActions } from "@/components";
 import { useJiraFieldsQuery, useRefetchWithToast, useJiraSelectedFieldsCachedState } from "@/hooks";
@@ -130,7 +130,7 @@ function JiraManageFields() {
                         <Action
                           title="Refresh"
                           icon={Icon.ArrowClockwise}
-                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
                           onAction={refetchWithToast}
                         />
                         <CacheActions />
@@ -178,7 +178,7 @@ function JiraManageFields() {
                         <Action
                           title="Refresh"
                           icon={Icon.ArrowClockwise}
-                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
                           onAction={refetchWithToast}
                         />
                         <CacheActions />

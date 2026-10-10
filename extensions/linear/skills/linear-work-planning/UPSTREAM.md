@@ -11,7 +11,7 @@ This skill adapts [OpenAI's public Linear skill](https://github.com/openai/skill
 
 ## Changes for Raycast
 
-The adaptation uses the extension's existing tool names and input contracts. It follows `ai.yaml` by preferring `list-*`, `get-*`, and `save-*` tools over older overlapping tools. The skill adds spec deduplication, explicit team scope for status and cycle changes, full-label preservation, pagination before totals, selected report fields, and checks after partially successful mutations. Reporting and proposals stay in chat unless the user requests writes.
+The adaptation uses the extension's existing tool names and input contracts. It follows `ai.yaml`, which routes writes through the `save-*` tools. The skill adds spec deduplication, explicit team scope for status and cycle changes, full-label preservation, pagination before totals, selected report fields, and checks after partially successful mutations. Reporting and proposals stay in chat unless the user requests writes.
 
 The public skill's MCP setup and CLI instructions are omitted. Its sprint-planning example creates a cycle, but this extension has no cycle-creation tool. Existing cycles can be listed and assigned. Cycle membership history is also unavailable, so the report describes current members and statuses without claiming historical scope changes, velocity, or spillover.
 
@@ -19,7 +19,7 @@ The public skill's MCP setup and CLI instructions are omitted. Its sprint-planni
 
 The extension also has `list-agent-skills` and `get-agent-skill` for authenticated Linear workspace skills. Those are separate from public reusable sources and are not fetched or bundled by this change. [Linear's own release-setup skill](https://github.com/linear/linear-release/blob/main/skills/linear-release-setup/SKILL.md) targets a CLI and CI release workflow, so it is outside this task-planning scope.
 
-All 78 files in `src/tools/` and the manifest were reviewed. [TOOLS.md](TOOLS.md) lists all 71 registered tools and their inputs. Five files are helpers; `create-project-update.ts` and `get-initiatives.ts` are not registered AI tools and are not used by this skill.
+[TOOLS.md](TOOLS.md) lists all registered tools and their inputs.
 
 ## Public API validation
 

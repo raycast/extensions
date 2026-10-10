@@ -1,5 +1,18 @@
 # Link Commands Changelog
 
+## [Work Toggle Subtitle Only] - 2026-10-06
+
+### Changed
+
+- **Environment** on the create form only scopes the subtitle (`Linear · @work`) — it no longer prefixes the filename, so a work command is `linear.sprint-board.sh` whether it is scoped or not. The subtitle is searched too, so typing `@work` still finds them.
+- Picking a **Directory** under a `work` folder ticks **Environment** to Work, and picking any other directory unticks it back to None — until the control is changed by hand, which stops the syncing.
+
+## [Name row in detail] - 2026-10-05
+
+### Fixed
+
+- The detail pane now shows the command's full name at the top of the metadata, because the narrowed list column truncates long titles.
+
 ## [Readable brand suggestion] - 2026-10-05
 
 ### Added

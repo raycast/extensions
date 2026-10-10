@@ -157,6 +157,7 @@ export interface EvolutionSpecies {
 
 export interface PokemonSpeciesName extends Name {
   genus: string;
+  name: string;
   language_id: number;
 }
 
@@ -175,6 +176,7 @@ export interface PokemonForm {
   weight: number;
   pokemonforms: PokemonFormType[];
   pokemonabilities: PokemonAbility[];
+  pokemonstats: PokemonStat[];
   pokemontypes: PokemonType[];
 }
 
@@ -257,20 +259,6 @@ export interface Move {
   pokemonmoves: PokemonMove[];
 }
 
-export interface TypeChartType {
-  id: number;
-  name: string;
-  typenames: Name[];
-  typeefficacies: {
-    damage_factor: number;
-    target_type_id: number;
-    target_type: {
-      name: string;
-      typenames: Name[];
-    };
-  }[];
-}
-
 export interface Nature {
   id: number;
   name: string;
@@ -291,10 +279,10 @@ export interface Item {
   id: number;
   name: string;
   itemnames: Name[];
-  cost: number;
   itemcategory: ItemCategory;
   itemeffecttexts: Effect[];
   itemflavortexts: FlavorText[];
+  itemprices: ItemPrice[];
 }
 
 export interface ItemCategory {
@@ -307,6 +295,19 @@ export interface ItemCategory {
 export interface ItemPocket {
   name: string;
   itempocketnames: Name[];
+}
+
+export interface ItemPrice {
+  purchase_price: number;
+  sell_price: number;
+  currency_id: number;
+  currency: Currency;
+  versiongroup: VersionGroup;
+}
+
+export interface Currency {
+  name: string;
+  currencynames: Name[];
 }
 
 export interface PokemonDex {

@@ -13,12 +13,14 @@ A Raycast extension to quickly switch between DNS presets, create custom DNS con
 ## Usage
 
 ### Switch to a Preset
+
 1. Open the extension
 2. Select a preset from the \"DNS Presets\" section
 3. Press Enter to apply it
 4. macOS will prompt for your password
 
 ### Create a New Preset
+
 1. Select \"Add DNS Preset\" in the Quick Actions section
 2. Enter a preset name (e.g., `home`, `work`, `filtered`)
 3. Enter comma-separated DNS server IPs (e.g., `1.1.1.1, 1.0.0.1`)
@@ -26,10 +28,12 @@ A Raycast extension to quickly switch between DNS presets, create custom DNS con
 5. Press Enter to save
 
 ### Edit or Delete Presets
+
 - Press `⌘E` to edit a preset
 - Press `⌃X` to delete a preset
 
 ### View Network Details
+
 - Select \"Network Interface in Use\" and press Enter to see full network information
 
 ## Keyboard Shortcuts

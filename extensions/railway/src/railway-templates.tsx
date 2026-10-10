@@ -1,13 +1,26 @@
 import { useState } from "react";
 import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { fetchTemplates, fetchTemplateDetail, templatePageUrl, templateDeployUrl, TemplateGQL } from "./railway";
+import {
+  fetchTemplates,
+  fetchTemplateDetail,
+  fetchWorkspaces,
+  fetchWorkspaceTemplates,
+  hasApiToken,
+  templatePageUrl,
+  templateDeployUrl,
+  TemplateGQL,
+  WorkspaceTemplateGQL,
+} from "./railway";
 
-type VerifiedFilter = "all" | "verified";
+type TemplateFilter = "all" | "verified" | `workspace:${string}`;
+
+const workspaceFilterPrefix = "workspace:";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [filter, setFilter] = useState<VerifiedFilter>("all");
+  const [filter, setFilter] = useState<TemplateFilter>("all");
+  const workspaceId = filter.startsWith(workspaceFilterPrefix) ? filter.slice(workspaceFilterPrefix.length) : undefined;
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
@@ -27,8 +40,33 @@ export default function Command() {
     [searchText],
     {
       keepPreviousData: true,
+      execute: !workspaceId,
       onError: (error) => {
         showFailureToast(error, { title: "Failed to load templates" });
+      },
+    },
+  );
+
+  // Workspace templates need an account or workspace token; without one only the marketplace is searched
+  const { data: workspaces = [] } = useCachedPromise(fetchWorkspaces, [], {
+    execute: hasApiToken(),
+    onError: () => undefined,
+  });
+
+  const {
+    isLoading: isLoadingWorkspaceTemplates,
+    data: workspaceTemplates = [],
+    pagination: workspacePagination,
+  } = useCachedPromise(
+    (id: string) => async (options: { page: number; cursor?: string }) => {
+      const result = await fetchWorkspaceTemplates(id, options.cursor);
+      return { data: result.templates, hasMore: result.hasNextPage, cursor: result.endCursor ?? undefined };
+    },
+    [workspaceId ?? ""],
+    {
+      execute: Boolean(workspaceId),
+      onError: (error) => {
+        showFailureToast(error, { title: "Failed to load workspace templates" });
       },
     },
   );
@@ -52,45 +90,86 @@ export default function Command() {
     return true;
   });
   const sectionTitle = searchText ? "Results" : "Popular Templates";
+  const toggleDetail = () => setIsShowingDetail((v) => !v);
+  const visibleCount = workspaceId ? workspaceTemplates.length : visible.length;
 
   return (
     <List
-      isLoading={isLoading}
-      isShowingDetail={isShowingDetail && visible.length > 0}
-      searchBarPlaceholder="Search Railway templates"
+      isLoading={workspaceId ? isLoadingWorkspaceTemplates : isLoading}
+      isShowingDetail={isShowingDetail && visibleCount > 0}
+      searchBarPlaceholder={workspaceId ? "Filter workspace templates" : "Search Railway templates"}
       onSearchTextChange={setSearchText}
-      pagination={pagination}
+      // Workspace templates are filtered locally, marketplace templates are searched on Railway
+      filtering={Boolean(workspaceId)}
+      pagination={workspaceId ? workspacePagination : pagination}
       onSelectionChange={(id) => {
         const t = templates.find((tpl) => tpl.id === id);
         setSelectedCode(t?.code ?? null);
       }}
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter templates" value={filter} onChange={(v) => setFilter(v as VerifiedFilter)}>
+        <List.Dropdown tooltip="Filter templates" value={filter} onChange={(v) => setFilter(v as TemplateFilter)}>
           <List.Dropdown.Item title="All Templates" value="all" icon={Icon.AppWindowGrid3x3} />
           <List.Dropdown.Item
             title="Verified Only"
             value="verified"
             icon={{ source: Icon.CheckCircle, tintColor: Color.Blue }}
           />
+          {workspaces.length > 0 && (
+            <List.Dropdown.Section title="Workspace Templates">
+              {workspaces.map((w) => (
+                <List.Dropdown.Item
+                  key={w.id}
+                  title={w.name}
+                  value={`${workspaceFilterPrefix}${w.id}`}
+                  icon={Icon.TwoPeople}
+                />
+              ))}
+            </List.Dropdown.Section>
+          )}
         </List.Dropdown>
       }
     >
-      {!isLoading && visible.length === 0 && (
+      {!(workspaceId ? isLoadingWorkspaceTemplates : isLoading) && visibleCount === 0 && (
         <List.EmptyView
           title="No templates found"
-          description={filter === "verified" ? "Try switching to All Templates" : "Try a different search term"}
+          description={
+            workspaceId
+              ? "This workspace has no templates"
+              : filter === "verified"
+              ? "Try switching to All Templates"
+              : "Try a different search term"
+          }
           icon={Icon.MagnifyingGlass}
         />
       )}
-      <List.Section title={sectionTitle}>
-        {visible.map((t) => (
+      {workspaceId && (
+        <List.Section title="Workspace Templates">
+          {workspaceTemplates.map((t) => (
+            <List.Item
+              key={t.id}
+              id={t.id}
+              icon={t.image ? { source: t.image, fallback: Icon.Box } : Icon.Box}
+              title={t.name}
+              subtitle={isShowingDetail ? undefined : t.category ?? undefined}
+              keywords={[t.category, t.description].filter((s): s is string => Boolean(s))}
+              accessories={[{ tag: workspaceTemplateStatusTag(t) }]}
+              detail={<List.Item.Detail markdown={buildMarkdown(t, t.readme)} />}
+              actions={
+                <TemplateActions code={t.code} isShowingDetail={isShowingDetail} onToggleDetail={toggleDetail} />
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={workspaceId ? undefined : sectionTitle}>
+        {(workspaceId ? [] : visible).map((t) => (
           <List.Item
             key={t.id}
             id={t.id}
             icon={t.image ? { source: t.image, fallback: Icon.Box } : Icon.Box}
             title={t.name}
-            subtitle={isShowingDetail ? undefined : t.creatorName}
+            subtitle={isShowingDetail ? undefined : t.creatorName ?? undefined}
             keywords={[t.creatorName, t.description].filter((s): s is string => Boolean(s))}
             accessories={isShowingDetail ? undefined : buildAccessories(t)}
             detail={
@@ -99,32 +178,7 @@ export default function Command() {
                 metadata={buildMetadata(t)}
               />
             }
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser title="Deploy on Railway" url={templateDeployUrl(t.code)} />
-                <Action.OpenInBrowser
-                  title="View Template"
-                  url={templatePageUrl(t.code)}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
-                <Action
-                  title={isShowingDetail ? "Hide Details" : "Show Details"}
-                  icon={Icon.Sidebar}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  onAction={() => setIsShowingDetail((v) => !v)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Template URL"
-                  content={templatePageUrl(t.code)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Deploy URL"
-                  content={templateDeployUrl(t.code)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                />
-              </ActionPanel>
-            }
+            actions={<TemplateActions code={t.code} isShowingDetail={isShowingDetail} onToggleDetail={toggleDetail} />}
           />
         ))}
       </List.Section>
@@ -132,7 +186,58 @@ export default function Command() {
   );
 }
 
-function buildMarkdown(t: TemplateGQL, readme: string | null | undefined): string {
+function TemplateActions({
+  code,
+  isShowingDetail,
+  onToggleDetail,
+}: {
+  code: string;
+  isShowingDetail: boolean;
+  onToggleDetail: () => void;
+}) {
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser title="Deploy on Railway" url={templateDeployUrl(code)} />
+      <Action.OpenInBrowser
+        title="View Template"
+        url={templatePageUrl(code)}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+      />
+      <Action
+        title={isShowingDetail ? "Hide Details" : "Show Details"}
+        icon={Icon.Sidebar}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        onAction={onToggleDetail}
+      />
+      <Action.CopyToClipboard
+        title="Copy Template URL"
+        content={templatePageUrl(code)}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Deploy URL"
+        content={templateDeployUrl(code)}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+      />
+    </ActionPanel>
+  );
+}
+
+function workspaceTemplateStatusTag(t: WorkspaceTemplateGQL): { value: string; color: Color } {
+  switch (t.status) {
+    case "PUBLISHED":
+      return { value: "Published", color: Color.Green };
+    case "HIDDEN":
+      return { value: "Hidden", color: Color.Orange };
+    default:
+      return { value: "Unpublished", color: Color.SecondaryText };
+  }
+}
+
+function buildMarkdown(
+  t: { name: string; image: string | null; description: string | null },
+  readme: string | null | undefined,
+): string {
   if (readme) return readme;
   const parts: string[] = [`# ${t.name}`];
   if (t.image) parts.push(`![${t.name}](${t.image})`);
@@ -143,7 +248,7 @@ function buildMarkdown(t: TemplateGQL, readme: string | null | undefined): strin
 function buildMetadata(t: TemplateGQL) {
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Creator" text={t.creatorName} />
+      {t.creatorName && <List.Item.Detail.Metadata.Label title="Creator" text={t.creatorName} />}
       <List.Item.Detail.Metadata.Label
         title="Verified"
         icon={

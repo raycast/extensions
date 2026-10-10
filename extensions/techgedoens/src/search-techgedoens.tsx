@@ -21,6 +21,7 @@ import {
   setArticleReadStatusForArticle,
 } from "./article-archive";
 import { createArticleDetailMarkdown } from "./article-detail";
+import { ArticleCopyActions } from "./article-copy-actions";
 import { Article, ARTICLES_PER_FEED_PAGE, fetchArticleSearchPage } from "./articles";
 import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./strings";
 
@@ -56,6 +57,7 @@ export default function SearchTechgedoensCommand() {
     const currentRequestId = ++requestId.current;
     setError(undefined);
     setHasMore(false);
+    setIsLoadingMore(false);
     setNextPage(2);
 
     if (query.length < MINIMUM_SEARCH_LENGTH) {
@@ -307,11 +309,7 @@ function SearchArticleItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenWith title={translations.openWith} path={article.url} />
-            <Action.CopyToClipboard
-              title={translations.copyArticleLink}
-              content={article.url}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
+            <ArticleCopyActions article={article} translations={translations} />
             <Action title={translations.openSettings} icon={Icon.Gear} onAction={openCommandPreferences} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -355,11 +353,7 @@ function SearchArticleDetail({
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => onFavoriteStatusChange(article, !article.isFavorite)}
           />
-          <Action.CopyToClipboard
-            title={translations.copyArticleLink}
-            content={article.url}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ArticleCopyActions article={article} translations={translations} />
         </ActionPanel>
       }
     />

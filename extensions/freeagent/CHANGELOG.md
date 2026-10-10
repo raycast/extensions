@@ -1,5 +1,9 @@
 # FreeAgent Changelog
 
+## [Prefill task billing rate from project] - 2026-10-07
+
+- Create Task now fills in the billing rate and period from the selected project's normal billing rate
+
 ## [Add Create Expense command] - 2026-07-01
 
 - Added a Create Expense command to record out-of-pocket expenses against a category
