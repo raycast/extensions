@@ -1,5 +1,5 @@
 import { assign, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
-import { getPreferenceValues, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
 import {
@@ -77,9 +77,9 @@ export const hueBridgeMachine = setup({
     }),
     unlink: fromPromise(clearBridgeConfig),
     toast: fromCallback(({ input }: { input: Toast.Options }) => {
-      const toast = new Toast(input);
-      enqueueToastRequest(() => toast.show());
-      return () => enqueueToastRequest(() => toast.hide());
+      let toast: Toast | undefined;
+      enqueueToastRequest(async () => void (toast = await showToast(input)));
+      return () => enqueueToastRequest(async () => toast?.hide());
     }),
   },
   guards: {
