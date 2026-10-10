@@ -26,11 +26,13 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
   const [status, setStatus] = useState<LoginStatus>({ state: "checking" });
   /** The check in flight, if any. */
   const checking = useRef<Promise<void> | undefined>(undefined);
-  const isStarting = useRef(false);
+  /** Whether a login is being started or canceled. */
+  const isChanging = useRef(false);
 
   function check(): Promise<void> {
-    // A login being started reports itself: a check meanwhile would report the login before it.
-    if (isStarting.current) return Promise.resolve();
+    // A login being started or canceled reports itself: a check meanwhile would report the login before it, or put
+    // the canceled one back on screen.
+    if (isChanging.current) return Promise.resolve();
     checking.current ??= readStatus().finally(() => {
       checking.current = undefined;
     });
@@ -69,8 +71,8 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
    * flash two screens just as Raycast closes.
    */
   async function start() {
-    if (isStarting.current) return;
-    isStarting.current = true;
+    if (isChanging.current) return;
+    isChanging.current = true;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Opening the Login Page" });
     try {
       // A check in flight is about the login before this one: left to finish, or it would remove this login's files
@@ -91,15 +93,21 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
       toast.message = failure.message;
       setStatus({ state: "failed", error: failure });
     } finally {
-      isStarting.current = false;
+      isChanging.current = false;
     }
   }
 
   async function cancel() {
-    // A check in flight would otherwise put the canceled login back on screen.
-    await checking.current;
-    await cancelBrowserLogin();
-    setStatus({ state: "none" });
+    if (isChanging.current) return;
+    isChanging.current = true;
+    try {
+      // As in start(), the check in flight finishes first.
+      await checking.current;
+      await cancelBrowserLogin();
+      setStatus({ state: "none" });
+    } finally {
+      isChanging.current = false;
+    }
   }
 
   /** Back to the Not Logged In screen, e.g. after logging out. */
