@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Quick Capture Validation] - {PR_MERGE_DATE}
+
+- Restrict Quick Capture to existing regular Markdown files inside the vault
+- Keep multiline captures in one list item and document route setup and append behavior
+
 ## [Quick Capture] - 2026-10-02
 
 - Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
