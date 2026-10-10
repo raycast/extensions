@@ -23,6 +23,9 @@
 - Fix the Failed to link with bridge toast showing as a success
 - Ask to press the bridge's link button when only the bridge IP preference is set, instead of failing to link
 - Validate the bridge IP preference again after Unlink
+- Fix Done after linking connecting to the bridge a second time
+- Stop using the unlinked bridge's connection after Unlink
+- Show an error instead of crashing when the saved bridge configuration can't be read or saved
 - Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
 - Fix the names of the Steel Blue and Old Lace colors and the Unlink Saved Hue Bridge action
 

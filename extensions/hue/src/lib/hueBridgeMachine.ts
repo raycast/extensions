@@ -19,6 +19,8 @@ type HueContext = {
   errorMessage?: string;
 };
 
+type LinkInput = { ipAddress?: string; id?: string; username?: string };
+
 export type HueBridgeEvent = { type: "LINK" } | { type: "RETRY" } | { type: "DONE" } | { type: "UNLINK" };
 export type SendHueBridgeEvent = (event: HueBridgeEvent) => void;
 export type HueBridgeState = SnapshotFrom<typeof hueBridgeMachine>;
@@ -32,25 +34,36 @@ export const hueBridgeMachine = setup({
   types: {} as { context: HueContext; events: HueBridgeEvent },
   actors: {
     loadBridgeConfig: fromPromise(loadBridgeConfig),
-    connect: fromPromise(async ({ input }: { input: { bridgeConfig?: BridgeConfig } }) => {
+    connect: fromPromise(async ({ input, signal }: { input: { bridgeConfig?: BridgeConfig }; signal: AbortSignal }) => {
       if (input.bridgeConfig === undefined) {
         throw Error("Bridge configuration is undefined when trying to connect");
       }
 
-      return createHueClient(input.bridgeConfig);
+      const hueClient = await createHueClient(input.bridgeConfig);
+      // Unlink stops this actor while it connects, which leaves nothing else to close the client.
+      if (signal.aborted) {
+        hueClient.close();
+        throw signal.reason;
+      }
+      return hueClient;
     }),
     discoverUsingMdns: fromPromise(discoverBridgeUsingMdns),
     discoverUsingPublicApi: fromPromise(discoverBridgeUsingHuePublicApi),
-    link: fromPromise(async ({ input }: { input: { ipAddress?: string; id?: string; username?: string } }) => {
+    link: fromPromise(async ({ input, signal }: { input: LinkInput; signal: AbortSignal }) => {
       if (input.ipAddress === undefined) throw Error("No bridge IP address");
       const bridgeConfig = await linkWithBridge(input.ipAddress, input.id, input.username);
-      return { bridgeConfig, hueClient: await createHueClient(bridgeConfig) };
-    }),
-    saveBridgeConfig: fromPromise(async ({ input }: { input: { bridgeConfig?: BridgeConfig } }) => {
-      if (input.bridgeConfig === undefined) {
-        throw Error("Bridge configuration is undefined when trying to save it");
+      const hueClient = await createHueClient(bridgeConfig);
+      // Unlink stops this actor while it links: saving after that would undo its clear,
+      // and nothing else closes the client.
+      try {
+        signal.throwIfAborted();
+        await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(bridgeConfig));
+        signal.throwIfAborted();
+        return { bridgeConfig, hueClient };
+      } catch (error) {
+        hueClient.close();
+        throw error;
       }
-      await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(input.bridgeConfig));
     }),
     unlink: fromPromise(() => LocalStorage.clear()),
     toast: fromCallback(({ input }: { input: Toast.Options }) => {
@@ -71,13 +84,17 @@ export const hueBridgeMachine = setup({
       bridgeIpAddress: params.ipAddress,
       bridgeId: params.id,
     })),
+    closeClient: ({ context }) => context.hueClient?.close(),
   },
 }).createMachine({
   id: "manage-hue-bridge",
   initial: "loadingPreferences",
   context: {},
   on: {
-    UNLINK: ".unlinking",
+    UNLINK: {
+      target: ".unlinking",
+      actions: ["closeClient", assign({ hueClient: undefined, bridgeId: undefined, bridgeConfig: undefined })],
+    },
   },
   states: {
     loadingPreferences: {
@@ -119,6 +136,13 @@ export const hueBridgeMachine = setup({
           { guard: "hasIpAddress", target: "waitingForLinkButton" },
           { target: "discovering" },
         ],
+        onError: {
+          target: "failedToLoadPreferences",
+          actions: [
+            { type: "logError", params: ({ event }) => ({ error: event.error }) },
+            { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
+          ],
+        },
       },
     },
     connecting: {
@@ -228,18 +252,15 @@ export const hueBridgeMachine = setup({
       on: { RETRY: "linking" },
     },
     linked: {
-      invoke: {
-        src: "saveBridgeConfig",
-        input: ({ context }) => ({ bridgeConfig: context.bridgeConfig }),
-      },
-      on: { DONE: "connecting" },
+      on: { DONE: "connected" },
     },
     unlinking: {
       invoke: {
         src: "unlink",
-        onDone: {
+        onDone: "loadingPreferences",
+        onError: {
           target: "loadingPreferences",
-          actions: assign({ bridgeId: undefined, bridgeConfig: undefined }),
+          actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
         },
       },
     },

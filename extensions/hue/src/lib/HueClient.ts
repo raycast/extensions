@@ -34,6 +34,11 @@ export default class HueClient {
     private readonly http2Session: ClientHttp2Session,
   ) {}
 
+  // Ends the session once its open streams, like the event stream, close.
+  public close() {
+    this.http2Session.close();
+  }
+
   public getLights(): Promise<Light[]> {
     return this.getAll<Light>("light");
   }

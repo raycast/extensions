@@ -35,6 +35,8 @@ export function useHue() {
 
   useEffect(() => {
     if (hueClient === undefined) return;
+    // Unlink or a relink replaces the client while its fetch may still be running, so only the current one applies it.
+    let active = true;
     // Show the spinner again when a relink in the same session fetches.
     setIsLoading(true);
 
@@ -55,11 +57,13 @@ export function useHue() {
     (async () => {
       try {
         const resources = await hueClient.getResources();
+        if (!active) return;
         setLights(resources.lights);
         setRooms(resources.rooms);
         setZones(resources.zones);
         setScenes(resources.scenes);
       } catch (error) {
+        if (!active) return;
         const message = error instanceof Error ? error.message : String(error);
         new Toast({
           title: "Error",
@@ -73,7 +77,10 @@ export function useHue() {
       setIsLoading(false);
     })();
 
-    return stopListening;
+    return () => {
+      active = false;
+      stopListening();
+    };
   }, [hueClient]);
 
   return { hueBridgeState, hueClient, send, isLoading, ...resources };
