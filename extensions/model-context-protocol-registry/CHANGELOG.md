@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add BankBridge MCP Server] - {PR_MERGE_DATE}
+## [Add BankBridge MCP Server] - 2026-10-10
 
 - Add BankBridge to the official registry: read-only access to your own US bank, credit card and investment accounts (balances, transactions, spending summaries, recurring charges, cashflow and holdings), fetched live from your banks on each call. Hosted remote Streamable HTTP server at https://bankbridge.money/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Paid, $5/mo per connected bank. It can't move money.
 
