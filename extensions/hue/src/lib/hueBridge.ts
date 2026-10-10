@@ -116,6 +116,15 @@ export async function loadBridgeConfig(): Promise<BridgeConfig | undefined> {
   };
 }
 
+export function saveBridgeConfig(bridgeConfig: BridgeConfig): Promise<void> {
+  return LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(bridgeConfig));
+}
+
+// Also clears the bridgeIpAddress and bridgeUsername keys that version 1 stored
+export function clearBridgeConfig(): Promise<void> {
+  return LocalStorage.clear();
+}
+
 async function createUsername(ipAddress: string, bridgeId: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(

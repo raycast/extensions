@@ -1,14 +1,15 @@
 import { assign, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
-import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
-import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
+import { getPreferenceValues, Toast } from "@raycast/api";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
 import {
+  clearBridgeConfig,
   createHueClient,
   discoverBridgeUsingHuePublicApi,
   discoverBridgeUsingMdns,
   linkWithBridge,
   loadBridgeConfig,
+  saveBridgeConfig,
 } from "./hueBridge";
 import * as net from "net";
 import { logError } from "../helpers/errors";
@@ -67,7 +68,7 @@ export const hueBridgeMachine = setup({
       // and nothing else closes the client.
       try {
         signal.throwIfAborted();
-        await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(bridgeConfig));
+        await saveBridgeConfig(bridgeConfig);
         signal.throwIfAborted();
         return { bridgeConfig, hueClient };
       } catch (error) {
@@ -75,7 +76,7 @@ export const hueBridgeMachine = setup({
         throw error;
       }
     }),
-    unlink: fromPromise(() => LocalStorage.clear()),
+    unlink: fromPromise(clearBridgeConfig),
     toast: fromCallback(({ input }: { input: Toast.Options }) => {
       const toast = new Toast(input);
       enqueueToastRequest(() => toast.show());
