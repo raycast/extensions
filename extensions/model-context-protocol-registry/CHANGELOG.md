@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Datacircle MCP Server] - {PR_MERGE_DATE}
+
+- Update Datacircle's description.
+
 ## [Add Korean Law MCP and kordoc MCP Servers] - 2026-10-10
 
 - Add Korean Law MCP to the community registry: Korean statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations from the official 법제처 Open API, plus citation verification for statutes and precedents. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; works without a key through a shared, rate-limited key, or with your own free key as `?oc=YOUR_KEY`.
