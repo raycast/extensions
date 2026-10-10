@@ -253,7 +253,7 @@ export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
       VAULT_LIST_CONCURRENCY,
       async ([shareId, role]): Promise<[string, VaultSharing]> => {
         if (role !== "owner") return [shareId, { role, isShared: true }];
-        const members = await adapter.countVaultMembers(shareId).catch(() => undefined);
+        const members = await (await getAdapter()).countVaultMembers(shareId).catch(() => undefined);
         return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
       },
     ),

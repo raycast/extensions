@@ -402,6 +402,56 @@ test("only the user's own vaults have their members counted, to know whether the
   ]);
 });
 
+for (const stalled of ["roles", "members"]) {
+  test(`sharing refresh starts no member commands after login begins during ${stalled}`, async () => {
+    let release!: () => void;
+    const pause = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let loginRunning = false;
+    const counted: boolean[] = [];
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({}),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": {},
+      "./cli": { ensureCli: async () => "/fixture-cli" },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          listVaultRoles: async () => {
+            if (stalled === "roles") await pause;
+            return new Map(Array.from({ length: 9 }, (_, i) => [`vault-${i}`, "owner"]));
+          },
+          countVaultMembers: async () => {
+            counted.push(loginRunning);
+            if (stalled === "members") await pause;
+            return 2;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => loginRunning },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { listVaultSharing: () => Promise<Map<string, unknown>> };
+
+    const result = api.listVaultSharing().then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    await new Promise(setImmediate);
+    assert.equal(counted.length, stalled === "roles" ? 0 : 8);
+    loginRunning = true;
+    release();
+    const error = await result;
+    assert.equal(counted.filter(Boolean).length, 0);
+    assert.ok(error instanceof PassCliError);
+    assert.equal(error.type, "not_authenticated");
+  });
+}
+
 test("opening a vault offline preserves its earlier per-vault item cache", async () => {
   const other = { ...item, shareId: "other" };
   const newer = { ...item, itemId: "new", title: "Newer saved login" };
@@ -1307,10 +1357,11 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
   return { harness, SearchItemsView };
 }
 
-test("List Vaults saves sharing on its own, and vaults with items from complete listings only", async () => {
+test("List Vaults shows and saves items before optional sharing, from complete listings only", async () => {
   const personal = { shareId: "vault", name: "Personal" };
   const added = { shareId: "added", name: "Added" };
   const saved: string[] = [];
+  const pendingSharing: ((sharing: Map<string, unknown>) => void)[] = [];
   let failing = true;
   const harness = hookHarness();
   const { default: Command } = loadView("../list-vaults.tsx", {
@@ -1324,7 +1375,7 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
       getPreferenceValues: () => ({}),
     },
     "./lib/pass-cli": {
-      listVaultSharing: async () => new Map([["vault", { role: "owner", isShared: true }]]),
+      listVaultSharing: () => new Promise((resolve) => pendingSharing.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
         items: [item],
@@ -1357,11 +1408,27 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
+  const view = harness.render(Command, {});
+  assert.equal(view.props.isLoading, false);
+  const row = actions(view).find((entry) => entry.title === personal.name)!;
+  assert.ok(row);
+  assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [{ text: "1 item" }]);
+  assert.deepEqual(saved, []);
+  pendingSharing[0](new Map([["vault", { role: "owner", isShared: true }]]));
+  await new Promise(setImmediate);
+  const sharedRow = actions(harness.render(Command, {})).find((entry) => entry.title === personal.name)!;
+  assert.deepEqual(JSON.parse(JSON.stringify(sharedRow.accessories)), [
+    { tooltip: "Shared by you" },
+    { text: "1 item" },
+  ]);
   // Saved without its items, the vault that failed would count 0 items on the next open.
   assert.deepEqual(saved, ["sharing"]);
 
   failing = false;
   load();
+  await new Promise(setImmediate);
+  assert.deepEqual(saved.sort(), ["items", "sharing", "vaults"]);
+  pendingSharing[1](new Map([["vault", { role: "owner", isShared: true }]]));
   await new Promise(setImmediate);
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
