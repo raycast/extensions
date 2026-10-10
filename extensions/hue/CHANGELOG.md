@@ -20,6 +20,7 @@
 - Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
 - Show the bridge's error message when an action fails
 - Say when the connection to the bridge is lost or the bridge is busy, instead of showing parsing errors
+- Try again twice when the bridge is busy before reporting it
 - Offer Retry when loading from the bridge fails
 - Fail a change after 5 seconds when the bridge doesn't answer it, instead of holding up every later change
 - Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures

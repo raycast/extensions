@@ -21,6 +21,7 @@ import {
   sensitiveHeaders,
 } from "http2";
 import { text } from "stream/consumers";
+import { setTimeout as sleep } from "timers/promises";
 import RateLimitedQueue from "./RateLimitedQueue";
 import { logError } from "../helpers/errors";
 import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
@@ -128,16 +129,23 @@ export default class HueClient {
     return this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
   }
 
-  private async makeRequest<T>(method: "GET" | "PUT", path: string, body?: object): Promise<T[]> {
+  private async makeRequest<T>(method: "GET" | "PUT", path: string, body?: object, attempt = 1): Promise<T[]> {
     const { headers, data } = await request(
       this.http2Session,
       { ":method": method, ":path": path, ...authHeaders(this.bridgeConfig.username) },
       body,
     );
+    const status = headers[":status"];
+
+    // The bridge turns requests away with 429 when more than 8 are in flight, also from other commands, and with 503 when
+    // busy, before handling them, so retrying is safe, also for changes.
+    if ((status === 429 || status === 503) && attempt < 3) {
+      await sleep(250 * attempt);
+      return this.makeRequest<T>(method, path, body, attempt + 1);
+    }
 
     // Whatever went wrong, the bridge sends the same HTML page, even with status 200, so only the status tells.
     if (headers["content-type"] === "text/html") {
-      const status = headers[":status"];
       if (status === 403) {
         // Reconnecting leads to the Link Again screen.
         this.close();
