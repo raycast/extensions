@@ -1,6 +1,6 @@
 # Lark Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-10-10
 
 - Fix the extension failing to load on Raycast 2.7
 - Update @raycast/api to 2.7.3
