@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Contributors] - 2026-10-10
+
+- Added Berenger to the contributors, for the AI tools improvements.
+
 ## [AI Tools Improvements] - 2026-10-10
 
 - Added the `select-tab` AI tool, which switches to a tab by window and index and brings its window to the front.
