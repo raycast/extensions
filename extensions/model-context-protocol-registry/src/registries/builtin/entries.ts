@@ -1945,6 +1945,31 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kordoc",
+    title: "kordoc",
+    description:
+      "Parse Korean and office documents into Markdown and structured data: HWP 3.x/5.x, HWPX, HWPML, PDF, DOCX, XLS/XLSX, PPTX and PNG/JPG/WebP images. Also compares two documents, fills forms, applies format-preserving HWPX/HWP patches, generates HWPX from Markdown and renders previews. 17 tools that work on local file paths. Local stdio server from the `kordoc` npm package (MIT) through `npx`; no API key, Node.js 20+.",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/kordoc",
+    configuration: {
+      command: "npx",
+      args: ["-y", "kordoc", "mcp"],
+    },
+  },
+  {
+    name: "korean-law",
+    title: "Korean Law MCP",
+    description:
+      "Search and read Korean law through the official Open API of Korea's Ministry of Government Legislation (법제처): statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations, plus citation verification that checks statute and precedent citations in AI-written answers against the official database. 10 tools. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; it works without a key through a shared, rate-limited key, or add your own free 법제처 Open API key as `?oc=YOUR_KEY`. Open source (MIT).",
+    icon: "https://github.com/chrisryugj.png",
+    homepage: "https://github.com/chrisryugj/korean-law-mcp",
+    remoteUrl: "https://mcp.gomdori.app/law",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gomdori.app/law"],
+    },
+  },
+  {
     name: "kyma",
     title: "Kyma API",
     description:
