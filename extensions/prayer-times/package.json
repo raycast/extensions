@@ -1,0 +1,377 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prayer-times",
+  "title": "Prayer Times",
+  "description": "Prayer times in root search and the menu bar, kept in Apple Reminders two weeks ahead with start, jamaat and ending notifications.",
+  "icon": "icon.png",
+  "author": "smrehan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "next-prayer",
+      "title": "Next Prayer",
+      "subtitle": "Prayer Times",
+      "description": "Keeps the next prayer in its root search subtitle and keeps prayer reminders filled ahead. Open it to see today's prayers.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Prayer Menu Bar",
+      "subtitle": "Prayer Times",
+      "description": "Shows the prayer in the menu bar when it starts, before jamaat, and before it ends until you mark it prayed.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "today",
+      "title": "Today's Prayers",
+      "subtitle": "Prayer Times",
+      "description": "Start and jamaat times for today, prayed status, and the last 7 days.",
+      "mode": "view"
+    },
+    {
+      "name": "set-location",
+      "title": "Set Prayer Location",
+      "subtitle": "Prayer Times",
+      "description": "Pick your country and city from searchable lists, or use your current location, refreshed 30 minutes before each prayer.",
+      "mode": "view"
+    },
+    {
+      "name": "prayer-alert",
+      "title": "Prayer Alert",
+      "subtitle": "Prayer Times",
+      "description": "Optional Raycast popup for prayer start, jamaat and ending, with snooze. Off unless Alert Style includes the popup.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "method",
+      "title": "Calculation Method",
+      "description": "Fajr and Isha angles.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Karachi",
+      "data": [
+        {
+          "title": "University of Islamic Sciences, Karachi",
+          "value": "Karachi"
+        },
+        {
+          "title": "Muslim World League",
+          "value": "MuslimWorldLeague"
+        },
+        {
+          "title": "Egyptian",
+          "value": "Egyptian"
+        },
+        {
+          "title": "Umm al-Qura",
+          "value": "UmmAlQura"
+        },
+        {
+          "title": "Dubai",
+          "value": "Dubai"
+        },
+        {
+          "title": "Qatar",
+          "value": "Qatar"
+        },
+        {
+          "title": "Kuwait",
+          "value": "Kuwait"
+        },
+        {
+          "title": "Moonsighting Committee",
+          "value": "MoonsightingCommittee"
+        },
+        {
+          "title": "Singapore",
+          "value": "Singapore"
+        },
+        {
+          "title": "Turkey",
+          "value": "Turkey"
+        },
+        {
+          "title": "Tehran",
+          "value": "Tehran"
+        },
+        {
+          "title": "North America (ISNA)",
+          "value": "NorthAmerica"
+        }
+      ]
+    },
+    {
+      "name": "madhab",
+      "title": "Asr Calculation",
+      "description": "Hanafi puts Asr later (shadow twice the object's length).",
+      "type": "dropdown",
+      "required": false,
+      "default": "hanafi",
+      "data": [
+        {
+          "title": "Hanafi",
+          "value": "hanafi"
+        },
+        {
+          "title": "Shafi'i, Maliki, Hanbali",
+          "value": "shafi"
+        }
+      ]
+    },
+    {
+      "name": "adjustments",
+      "title": "Minute Adjustments",
+      "description": "Shift start times to match your local timetable: Fajr,Dhuhr,Asr,Maghrib,Isha in minutes, e.g. 0,2,0,3,0.",
+      "type": "textfield",
+      "required": false,
+      "default": "0,0,0,0,0"
+    },
+    {
+      "name": "ishaEnd",
+      "title": "Isha Ends At",
+      "description": "Used for the ending reminder and for counting Isha as on time.",
+      "type": "dropdown",
+      "required": false,
+      "default": "midnight",
+      "data": [
+        {
+          "title": "Islamic midnight",
+          "value": "midnight"
+        },
+        {
+          "title": "Fajr",
+          "value": "fajr"
+        }
+      ]
+    },
+    {
+      "name": "dhuhrEndsAtShafiAsr",
+      "title": "Dhuhr Ends At",
+      "label": "End Dhuhr at the earlier (Shafi'i) Asr time",
+      "description": "Dhuhr's time, its ending reminder and on-time check end when the shadow equals the object's length, even when Asr itself starts at the Hanafi time.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "jamaatFajr",
+      "title": "Fajr Jamaat",
+      "description": "Fixed HH:MM (24h), +N minutes after start, floor5+N (round start down to 5 min, add N), ceil5+N, end-N (N minutes before the prayer time ends), or empty for none.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatDhuhr",
+      "title": "Dhuhr Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatJumuah",
+      "title": "Jumu'ah Jamaat",
+      "description": "Friday Dhuhr. Empty uses the Dhuhr rule.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "jamaatAsr",
+      "title": "Asr Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatMaghrib",
+      "title": "Maghrib Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "+5"
+    },
+    {
+      "name": "jamaatIsha",
+      "title": "Isha Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "dueAt",
+      "title": "Reminder Due Time",
+      "description": "When each prayer reminder is due. Jamaat falls back to start for prayers without a jamaat rule.",
+      "type": "dropdown",
+      "required": false,
+      "default": "start",
+      "data": [
+        {
+          "title": "Prayer start",
+          "value": "start"
+        },
+        {
+          "title": "Jamaat",
+          "value": "jamaat"
+        }
+      ]
+    },
+    {
+      "name": "headsUpMinutes",
+      "title": "Heads-up (min)",
+      "description": "Extra notification this many minutes before the due time (start or jamaat); the menu bar countdown turns yellow from then. 0 turns it off.",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
+      "name": "startWindowMinutes",
+      "title": "Just Started (min)",
+      "description": "For this many minutes after a prayer starts, its menu bar count (e.g. \"Asr +3\") shows in green, then blue.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "endingReminderMinutes",
+      "title": "Ending Reminder (min)",
+      "description": "Notify this many minutes before the prayer time ends. The menu bar keeps showing it until marked prayed.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "jamaatReminderMinutes",
+      "title": "Jamaat Reminder (min)",
+      "description": "Notify this many minutes before jamaat; the menu bar shows it from then.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "useReminders",
+      "title": "Apple Reminders",
+      "label": "Keep prayers in Apple Reminders",
+      "description": "Off: prayed status and history stay in Raycast only, and no reminders are created.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "alerts",
+      "title": "Notifications",
+      "description": "Reminders alarms work on your iPhone and without Raycast running. The popup has Mark as Prayed and Snooze, but only while Raycast runs. The banner is the extension's own macOS notification, also only while Raycast runs.",
+      "type": "dropdown",
+      "required": false,
+      "default": "reminders",
+      "data": [
+        {
+          "title": "Reminders alarms",
+          "value": "reminders"
+        },
+        {
+          "title": "Raycast popup",
+          "value": "popup"
+        },
+        {
+          "title": "Reminders alarms + Raycast popup",
+          "value": "both"
+        },
+        {
+          "title": "macOS banner",
+          "value": "banner"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "menuBarShowNext",
+      "label": "Always show the next prayer in the menu bar",
+      "description": "A started prayer shows (e.g. \"Asr +12\") until marked prayed or its time ends. The next prayer's countdown (\"Maghrib -5\") shows during the heads-up window, or all the time with this on.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Menu Bar"
+    },
+    {
+      "name": "remindersList",
+      "title": "Reminders List",
+      "description": "Apple Reminders list for prayer reminders. Created if missing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Prayer"
+    },
+    {
+      "name": "reminderTitles",
+      "title": "Reminder Titles",
+      "description": "Comma-separated names for Fajr,Dhuhr,Asr,Maghrib,Isha, used in the menu bar, alerts and reminder titles. Any language works, e.g. فجر,ظہر,عصر,مغرب,عشاء.",
+      "type": "textfield",
+      "required": false,
+      "default": "Fajr,Dhuhr,Asr,Maghrib,Isha"
+    },
+    {
+      "name": "jumuahTitle",
+      "title": "Jumu'ah Title",
+      "description": "Name for Dhuhr on Fridays, e.g. Jumu'ah or جمعہ.",
+      "type": "textfield",
+      "required": false,
+      "default": "Jumu'ah"
+    },
+    {
+      "name": "daysAhead",
+      "title": "Days Ahead",
+      "description": "How many days of reminders to keep filled, starting today (1–31).",
+      "type": "textfield",
+      "required": false,
+      "default": "14"
+    },
+    {
+      "name": "cleanMissedAfterDays",
+      "title": "Clean Missed After (days)",
+      "description": "A missed prayer stays dated, showing as overdue in Reminders and Calendar, for this many days. After that its date is removed; it still counts as missed in history. 0 never removes it.",
+      "type": "textfield",
+      "required": false,
+      "default": "7"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2",
+    "adhan": "^4.4.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "~26.1.1",
+    "@types/react": "^19.2.17",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "TZ=Asia/Karachi vitest run",
+    "coverage": "TZ=Asia/Karachi vitest run --coverage --coverage.include=src/lib/jamaat.ts --coverage.include=src/lib/prayers.ts --coverage.include=src/lib/settings.ts --coverage.include=src/lib/state.ts --coverage.include=src/lib/plan.ts"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
