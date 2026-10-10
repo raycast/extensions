@@ -182,8 +182,17 @@ describe("handleLogOut", () => {
     });
   });
 
-  it("calls logOut and returns true on success", async () => {
-    vi.mocked(telegramClient.logOut).mockResolvedValue(undefined);
+  it("calls logOut and returns true on success when remoteRevoked is true", async () => {
+    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: true });
+
+    const result = await handleLogOut();
+
+    expect(result).toBe(true);
+    expect(telegramClient.logOut).toHaveBeenCalled();
+  });
+
+  it("calls logOut and returns true when remoteRevoked is false", async () => {
+    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: false });
 
     const result = await handleLogOut();
 

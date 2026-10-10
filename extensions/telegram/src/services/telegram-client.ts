@@ -142,13 +142,26 @@ export async function getClient(config: TelegramConfig): Promise<TelegramClient>
   return client;
 }
 
+export async function clearPendingAuthSession(): Promise<void> {
+  if (clientInstance) {
+    try {
+      await clientInstance.disconnect();
+    } catch {
+      // Disconnect failed, allow recreation
+    }
+    clientInstance = null;
+  }
+  await LocalStorage.removeItem(AUTH_SESSION_KEY);
+}
+
 export async function isAuthenticated(): Promise<boolean> {
   const sessionString = await LocalStorage.getItem<string>(SESSION_KEY);
   return !!sessionString;
 }
 
-export async function logOut(config?: TelegramConfig): Promise<void> {
+export async function logOut(config?: TelegramConfig): Promise<{ remoteRevoked: boolean }> {
   let client: TelegramClient | null = null;
+  let remoteRevoked = false;
   try {
     client = clientInstance || (config ? await getClient(config) : null);
     if (client) {
@@ -157,10 +170,11 @@ export async function logOut(config?: TelegramConfig): Promise<void> {
       }
       if (await client.isUserAuthorized()) {
         await client.invoke(new Api.auth.LogOut());
+        remoteRevoked = true;
       }
     }
   } catch {
-    // Network or server error during logout -- proceed with clearing local storage
+    // Network or server error during remote logout -- local storage is still cleared
   } finally {
     if (client) {
       try {
@@ -174,6 +188,7 @@ export async function logOut(config?: TelegramConfig): Promise<void> {
     await LocalStorage.removeItem(AUTH_SESSION_KEY);
     await LocalStorage.removeItem(USER_ID_KEY);
   }
+  return { remoteRevoked };
 }
 
 async function completeAuthentication(
@@ -253,6 +268,7 @@ export async function authenticateWithQr(
   config: TelegramConfig,
   callbacks: QrCodeAuthCallbacks,
 ): Promise<AuthenticationResult> {
+  await clearPendingAuthSession();
   const client = await getClient(config);
 
   if (!client.connected) {

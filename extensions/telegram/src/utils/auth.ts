@@ -165,10 +165,15 @@ export async function handleLogOut(): Promise<boolean> {
       // If config cannot be read, still log out locally
     }
 
-    await logOut(config);
+    const { remoteRevoked } = await logOut(config);
     toast.style = Toast.Style.Success;
-    toast.title = "Logged Out";
-    toast.message = "Successfully logged out of Telegram.";
+    if (remoteRevoked) {
+      toast.title = "Logged Out";
+      toast.message = "Successfully logged out of Telegram.";
+    } else {
+      toast.title = "Logged Out Locally";
+      toast.message = "Local session cleared. Telegram could not be reached to revoke the remote session.";
+    }
     return true;
   } catch (error) {
     console.error("[LOGOUT] Failed:", error);

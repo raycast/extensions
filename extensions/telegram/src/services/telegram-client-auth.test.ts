@@ -35,6 +35,17 @@ describe("authenticateWithQr", () => {
     mockClient.connected = false;
     vi.spyOn(LocalStorage, "setItem").mockResolvedValue(undefined);
     vi.spyOn(LocalStorage, "getItem").mockResolvedValue(undefined);
+    vi.spyOn(LocalStorage, "removeItem").mockResolvedValue(undefined);
+  });
+
+  it("clears pending 2FA auth session before starting QR auth", async () => {
+    mockClient.isUserAuthorized.mockResolvedValue(true);
+
+    await authenticateWithQr(config, {
+      onQrCode: vi.fn(),
+    });
+
+    expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_auth_session");
   });
 
   it("returns unauthenticated when abortSignal is already aborted", async () => {
@@ -132,11 +143,12 @@ describe("logOut", () => {
     vi.spyOn(LocalStorage, "removeItem").mockResolvedValue(undefined);
   });
 
-  it("invokes LogOut when authorized and removes session keys", async () => {
+  it("invokes LogOut when authorized, revokes remotely, and removes session keys", async () => {
     mockClient.isUserAuthorized.mockResolvedValue(true);
 
-    await logOut(config);
+    const result = await logOut(config);
 
+    expect(result).toEqual({ remoteRevoked: true });
     expect(mockClient.invoke).toHaveBeenCalledWith(expect.any(Api.auth.LogOut));
     expect(mockClient.disconnect).toHaveBeenCalled();
     expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_session");
@@ -144,12 +156,13 @@ describe("logOut", () => {
     expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_user_id");
   });
 
-  it("removes session keys even if invoke LogOut throws an error", async () => {
+  it("removes session keys and reports remoteRevoked false even if invoke LogOut throws an error", async () => {
     mockClient.isUserAuthorized.mockResolvedValue(true);
     mockClient.invoke.mockRejectedValue(new Error("RPCError: 401: AUTH_KEY_UNREGISTERED"));
 
-    await logOut(config);
+    const result = await logOut(config);
 
+    expect(result).toEqual({ remoteRevoked: false });
     expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_session");
     expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_auth_session");
     expect(LocalStorage.removeItem).toHaveBeenCalledWith("telegram_user_id");
