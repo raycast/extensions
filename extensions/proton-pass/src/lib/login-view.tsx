@@ -24,12 +24,20 @@ function asPassCliError(error: unknown): PassCliError {
  */
 export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
   const [status, setStatus] = useState<LoginStatus>({ state: "checking" });
-  const isChecking = useRef(false);
+  /** The check in flight, if any. */
+  const checking = useRef<Promise<void> | undefined>(undefined);
   const isStarting = useRef(false);
 
-  async function check() {
-    if (isChecking.current) return;
-    isChecking.current = true;
+  function check(): Promise<void> {
+    // A login being started reports itself: a check meanwhile would report the login before it.
+    if (isStarting.current) return Promise.resolve();
+    checking.current ??= readStatus().finally(() => {
+      checking.current = undefined;
+    });
+    return checking.current;
+  }
+
+  async function readStatus() {
     try {
       const next = await checkBrowserLogin();
       setStatus(next);
@@ -42,8 +50,6 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
       }
     } catch (error) {
       setStatus({ state: "failed", error: asPassCliError(error) });
-    } finally {
-      isChecking.current = false;
     }
   }
 
@@ -67,6 +73,9 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
     isStarting.current = true;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Opening the Login Page" });
     try {
+      // A check in flight is about the login before this one: left to finish, or it would remove this login's files
+      // and report its own result over this login's.
+      await checking.current;
       const url = await startBrowserLogin();
       void toast.hide();
       if (url) {
@@ -87,6 +96,8 @@ export function useBrowserLogin(onLoggedIn: () => void | Promise<void>) {
   }
 
   async function cancel() {
+    // A check in flight would otherwise put the canceled login back on screen.
+    await checking.current;
     await cancelBrowserLogin();
     setStatus({ state: "none" });
   }
