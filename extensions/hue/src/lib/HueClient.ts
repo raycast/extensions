@@ -39,14 +39,13 @@ export default class HueClient {
   }
 
   // The bridge errors on parallel requests (as if an endpoint is missing), so fetch sequentially.
-  // Lights and grouped lights load last: useHue applies all five at once, and older snapshots undo optimistic updates.
+  // Lights load last: useHue applies all four at once, and older snapshots undo optimistic updates.
   // The property names are useHueResources' useCachedState keys, which toggleAllLights also writes.
   public async getResources() {
     return {
       rooms: await this.getAll<Room>("room"),
       zones: await this.getAll<Zone>("zone"),
       scenes: await this.getAll<Scene>("scene"),
-      groupedLights: await this.getAll<GroupedLight>("grouped_light"),
       lights: await this.getLights(),
     };
   }
@@ -62,7 +61,7 @@ export default class HueClient {
   }
 
   public updateGroupedLight(
-    groupedLight: GroupedLight,
+    groupedLight: Pick<GroupedLight, "id">,
     properties: GroupedLightRequest,
   ): Promise<ResourceIdentifier[]> {
     return this.groupedLightsQueue.enqueueRequest(() =>

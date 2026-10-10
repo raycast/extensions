@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
-import { DeepPartial, GroupedLight, HueResource, Light, Room, Scene, Zone } from "../lib/types";
+import { DeepPartial, HueResource, Light, Room, Scene, Zone } from "../lib/types";
 import { useHueBridgeMachine } from "./useHueBridgeMachine";
 import { updateItems } from "../helpers/collections";
 import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
@@ -15,24 +15,20 @@ export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
 export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHueResources() {
-  // Holding a brightness or color shortcut changes these many times a second. Rooms, zones and scenes aren't
+  // Holding a brightness or color shortcut changes lights many times a second. Rooms, zones and scenes aren't
   // debounced: the pushed Set Scene reads them through its own hook instance, which only sees flushed writes.
   const cache = { cacheNamespace: RESOURCES_CACHE_NAMESPACE };
   const [lights, setLights] = useCachedState("lights", [] as Light[], { ...cache, cacheWriteDebounce: 1000 });
-  const [groupedLights, setGroupedLights] = useCachedState("groupedLights", [] as GroupedLight[], {
-    ...cache,
-    cacheWriteDebounce: 1000,
-  });
   const [rooms, setRooms] = useCachedState("rooms", [] as Room[], cache);
   const [zones, setZones] = useCachedState("zones", [] as Zone[], cache);
   const [scenes, setScenes] = useCachedState("scenes", [] as Scene[], cache);
-  return { lights, setLights, groupedLights, setGroupedLights, rooms, setRooms, zones, setZones, scenes, setScenes };
+  return { lights, setLights, rooms, setRooms, zones, setZones, scenes, setScenes };
 }
 
 export function useHue() {
   const [isLoading, setIsLoading] = useState(true);
   const resources = useHueResources();
-  const { setLights, setGroupedLights, setRooms, setZones, setScenes } = resources;
+  const { setLights, setRooms, setZones, setScenes } = resources;
 
   const { hueBridgeState, sendHueMessage } = useHueBridgeMachine();
   const { hueClient } = hueBridgeState.context;
@@ -49,7 +45,6 @@ export function useHue() {
         );
       };
       apply("light", setLights);
-      apply("grouped_light", setGroupedLights);
       apply("room", setRooms);
       apply("zone", setZones);
       apply("scene", setScenes);
@@ -59,7 +54,6 @@ export function useHue() {
       try {
         const resources = await hueClient.getResources();
         setLights(resources.lights);
-        setGroupedLights(resources.groupedLights);
         setRooms(resources.rooms);
         setZones(resources.zones);
         setScenes(resources.scenes);

@@ -1,4 +1,4 @@
-import { CssColor, DeepPartial, GroupedLight, HasId, Id, Light } from "../lib/types";
+import { CssColor, DeepPartial, HasId, Id, Light } from "../lib/types";
 import type HueClient from "../lib/HueClient";
 import type { useHue } from "../hooks/useHue";
 import React from "react";
@@ -6,7 +6,6 @@ import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api
 import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
 import { updateItems } from "./collections";
 import { logError } from "./errors";
-import { getGroupedLightChanges } from "./hueResources";
 import { RequestDroppedError } from "../lib/RateLimitedQueue";
 
 export function getIconForColor(color: CssColor): Image {
@@ -34,11 +33,10 @@ export const withTransition = <T extends object>(changes: T) => ({
 });
 
 export async function applyUpdate(
-  { hueBridgeState, lights, groupedLights, rooms, zones, setLights, setGroupedLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   update: {
     rateLimiter?: { canExecute(): boolean };
-    lights?: Map<Id, DeepPartial<Light>>;
-    groupedLights?: Map<Id, DeepPartial<GroupedLight>>;
+    lights: Map<Id, DeepPartial<Light>>;
     request: (hueClient: HueClient) => Promise<unknown>;
     success: string;
     failure: string;
@@ -48,25 +46,11 @@ export async function applyUpdate(
     const { hueClient } = hueBridgeState.context;
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (update.rateLimiter && !update.rateLimiter.canExecute()) return;
-    // Rooms and zones follow the lights the update changes, merged with the update's own changes to them.
-    const changesToGroupedLights = update.lights
-      ? getGroupedLightChanges(
-          updateItems<Light>(lights, update.lights, { existingOnly: true }),
-          [...rooms, ...zones],
-          groupedLights,
-          new Set(update.lights.keys()),
-        )
-      : new Map<Id, DeepPartial<GroupedLight>>();
-    for (const [id, change] of update.groupedLights ?? []) {
-      changesToGroupedLights.set(id, { ...changesToGroupedLights.get(id), ...change });
-    }
-    const undos = [
-      optimisticUpdates(changesToGroupedLights, setGroupedLights),
-      update.lights && optimisticUpdates(update.lights, setLights),
-    ];
+    // Rooms and zones follow from their lights while rendering.
+    const undo = optimisticUpdates(update.lights, setLights);
     await update.request(hueClient).catch((error) => {
       // The queue replaced this request with a newer one, whose optimistic update already includes this one's.
-      if (!(error instanceof RequestDroppedError)) undos.forEach((undo) => undo?.());
+      if (!(error instanceof RequestDroppedError)) undo();
       throw error;
     });
     await showToast({ style: Toast.Style.Success, title: update.success });

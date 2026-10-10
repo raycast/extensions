@@ -1,8 +1,8 @@
 import { Cache, environment, Image } from "@raycast/api";
 import chroma from "chroma-js";
 import { existsSync, readFileSync } from "fs";
-import { Group, GroupedLight, Light, Palette } from "../lib/types";
-import { getColorFromLight } from "./hueResources";
+import { Group, Light, Palette } from "../lib/types";
+import { getColorFromLight, GroupedLightState } from "./hueResources";
 
 // Earlier versions cached their Jimp PNGs in these namespaces.
 new Cache({ namespace: "hue-scene-gradients" }).clear();
@@ -119,7 +119,7 @@ export function createLightIcon(light: Light): Image {
     : offIcon(LIGHT_ICON_SIZE, LIGHT_ICON_SIZE, glyph);
 }
 
-export function createGroupIcon(group: Group, colors: Palette, groupedLight: GroupedLight | undefined): Image {
+export function createGroupIcon(group: Group, colors: Palette, groupedLight: GroupedLightState | undefined): Image {
   const glyph = glyphPath("rooms", group.metadata.archetype, "other");
   return groupedLight?.on?.on && colors.length > 0
     ? onIcon(GRADIENT_WIDTH, GRADIENT_HEIGHT, colors, groupedLight.dimming?.brightness ?? 100, glyph)
