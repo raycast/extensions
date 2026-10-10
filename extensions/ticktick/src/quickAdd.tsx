@@ -1,5 +1,5 @@
 import { closeMainWindow, getPreferenceValues, LaunchProps, Toast } from "@raycast/api";
-import { addTask } from "./service/osScript";
+import { addTask, supportsNLP } from "./service/osScript";
 import { getProjects, initGlobalProjectInfo } from "./service/project";
 import { getDefaultDate } from "./service/preference";
 import { formatToServerDate } from "./utils/date";
@@ -10,28 +10,28 @@ export default async function QuickAddTask(props: LaunchProps) {
   try {
     const { nlpEnabled = true } = getPreferenceValues<Preferences.QuickAdd>();
     await initGlobalProjectInfo();
+    const useNLP = nlpEnabled && (await supportsNLP().catch(() => false));
     const title = (props.arguments.text ?? props.fallbackText).replace(/"/g, `\\"`);
     const description = props.arguments.description?.replace(/"/g, `\\"`);
     const result = await addTask({
       projectId: getProjects().find((project) => project.name === "Inbox")?.id || "",
       title,
       description,
+      dueDate: useNLP ? undefined : formatToServerDate(getDefaultDate()),
       isAllDay: false,
-      // The TickTick macOS app handles NLP and does not return the parsed date to this extension.
-      // Omit the default date to avoid competing with NLP; ideally, use it when NLP finds no date
-      ...(nlpEnabled ? { nlp: true } : { dueDate: formatToServerDate(getDefaultDate()) }),
+      nlp: useNLP,
     });
 
     switch (result) {
-      case "added-without-nlp": {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Task added without NLP";
-        toast.message = "Upgrade TickTick to enable natural language recognition.";
-        break;
-      }
       case true: {
-        toast.style = Toast.Style.Success;
-        toast.title = "Add success";
+        if (nlpEnabled && !useNLP) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Task added without NLP";
+          toast.message = "Upgrade TickTick to enable natural language recognition.";
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = "Add success";
+        }
         break;
       }
       case false: {

@@ -8,7 +8,7 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-const supportsNLP = async () => {
+export const supportsNLP = async () => {
   const appPath = await runAppleScript('POSIX path of (path to application "TickTick")');
   const { stdout } = await execFileAsync("/usr/bin/sdef", [appPath]);
   const addTaskCommand = stdout.match(/<command\b[^>]*\bname="add task"[^>]*>[\s\S]*?<\/command>/)?.[0];
@@ -199,19 +199,18 @@ export const addTask = async (data: {
   if (!installed) return undefined;
 
   try {
-    const useNLP = nlp === true && (await supportsNLP().catch(() => false));
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
       dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
-    } ${priority ? ` priority "${priority}"` : ""}${useNLP ? " nlp true" : ""} from "raycast"
+    } ${priority ? ` priority "${priority}"` : ""}${nlp ? " nlp true" : ""} from "raycast"
     end tell
   `)) as string;
     if (result === "missing value") {
       return false;
     }
-    if (result === "true") return nlp && !useNLP ? "added-without-nlp" : true;
+    if (result === "true") return true;
     return false;
   } catch (e) {
     errorHandler(e);
