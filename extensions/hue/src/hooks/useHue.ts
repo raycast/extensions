@@ -56,7 +56,7 @@ export function useHue() {
   }, [hueClient]);
 
   // Unlink or a relink replaces the client while its fetch may still be running, and usePromise drops that result.
-  const { isLoading } = usePromise((hueClient: HueClient) => hueClient.getResources(), [hueClient!], {
+  const { isLoading, revalidate } = usePromise((hueClient: HueClient) => hueClient.getResources(), [hueClient!], {
     execute: hueClient !== undefined,
     onData: ({ lights, rooms, zones, scenes }) => {
       setLights(lights);
@@ -64,7 +64,13 @@ export function useHue() {
       setZones(zones);
       setScenes(scenes);
     },
-    onError: (error) => void showToast({ style: Toast.Style.Failure, title: "Error", message: error.message }),
+    onError: (error) =>
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load from bridge",
+        message: error.message,
+        primaryAction: { title: "Retry", onAction: (toast) => void toast.hide().then(revalidate) },
+      }),
   });
 
   // usePromise isn't loading while there is no client to fetch with, but the bridge is still connecting.
