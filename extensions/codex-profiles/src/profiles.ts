@@ -53,7 +53,7 @@ function validName(name: string): string {
 }
 
 function validId(id: unknown): id is string {
-  return typeof id === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id);
+  return typeof id === "string" && id !== "default" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id);
 }
 
 async function pathExists(path: string): Promise<boolean> {
@@ -99,8 +99,7 @@ async function readRegistry(): Promise<ProfileRegistry> {
       Boolean(profile) &&
       validId(profile.id) &&
       typeof profile.name === "string" &&
-      Boolean(profile.name.trim()) &&
-      profile.id !== "default",
+      Boolean(profile.name.trim()),
   );
   return registry;
 }
@@ -184,20 +183,24 @@ export async function createProfile(rawName: string): Promise<CodexProfile> {
     const profiles = profilesFromRegistry(registry);
     ensureUniqueName(name, profiles);
 
+    // Reserve the required profile ID and every registered ID, even when its folder is missing.
+    const registeredIds = new Set(profiles.map((profile) => profile.id));
     const baseId = slugForName(name);
     let id = baseId;
     let suffix = 2;
     let path = join(PROFILES_HOME, id);
     while (true) {
-      try {
-        await mkdir(path);
-        break;
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        id = `${baseId}-${suffix}`;
-        suffix += 1;
-        path = join(PROFILES_HOME, id);
+      if (!registeredIds.has(id)) {
+        try {
+          await mkdir(path);
+          break;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        }
       }
+      id = `${baseId}-${suffix}`;
+      suffix += 1;
+      path = join(PROFILES_HOME, id);
     }
 
     registry.profiles.push({ id, name });
