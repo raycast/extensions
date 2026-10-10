@@ -1,6 +1,6 @@
 # Proton Mail Changelog
 
-## [Readable Emails] - {PR_MERGE_DATE}
+## [Readable Emails] - 2026-10-10
 
 - Emails are converted to clean Markdown: links show their text instead of tracking URLs, and hidden preheaders, tracking pixels, layout tables and repeated product links are dropped. Short links that follow each other share a line, and newsletter headings are shown smaller
 - Plain text emails keep their line breaks and get short link labels
