@@ -64,10 +64,10 @@ function SceneItem(props: {
   onSetScene?: () => void;
   hue: Hue;
 }) {
-  const activeEmoji = props.scene.status.active !== "inactive" ? "💡 " : "";
   return (
     <Grid.Item
-      title={activeEmoji + props.scene.metadata.name}
+      title={props.scene.metadata.name}
+      accessory={props.scene.status.active !== "inactive" ? { icon: Icon.LightBulb, tooltip: "Active" } : undefined}
       keywords={[props.group.metadata.name]}
       content={props.gradientUri ?? ""}
       actions={

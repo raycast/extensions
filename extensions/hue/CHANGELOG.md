@@ -7,6 +7,7 @@
 - Show each color once in room, zone and scene images, and only those of lights that are on
 - Fix room and zone images showing their colors out of order when a light is set to a white from Set Color
 - Show scenes at their own brightness instead of all looking dim
+- Mark active scenes with a light bulb icon below the tile instead of an emoji in their name
 - Show images instantly
 - Update lights, rooms, zones and the active scene at once when setting a scene, turning a room or zone on or off, or changing a light
 - Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer
