@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Korean Law MCP and kordoc MCP Servers] - 2026-10-10
+
+- Add Korean Law MCP to the community registry: Korean statutes, precedents, administrative rules, local ordinances, treaties and legal interpretations from the official 법제처 Open API, plus citation verification for statutes and precedents. Hosted remote Streamable HTTP server at https://mcp.gomdori.app/law; works without a key through a shared, rate-limited key, or with your own free key as `?oc=YOUR_KEY`.
+- Add kordoc to the community registry: parse HWP, HWPX, HWPML, PDF, DOCX, XLS/XLSX, PPTX and images into Markdown and structured data, compare documents, fill forms and apply format-preserving HWPX/HWP patches. Local stdio server `kordoc` (MIT) through `npx`; no API key.
+
 ## [Add Tapetide MCP Server] - 2026-10-10
 
 - Add Tapetide to the official registry: Indian stock market research for about 8,200 NSE and BSE listed companies (quotes, financials, shareholding, screeners, FII/DII flows, option chains, filings, portfolio and watchlist), 55 tools. Hosted remote Streamable HTTP server at https://mcp.tapetide.com/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.

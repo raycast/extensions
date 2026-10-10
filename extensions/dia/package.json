@@ -157,6 +157,11 @@
       "description": "Close an open Dia tab by its ID"
     },
     {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Return the visible text of a Dia tab or the focused tab"
+    },
+    {
       "name": "get-tabs",
       "title": "Get Tabs",
       "description": "Return the open tabs across all Dia windows"
