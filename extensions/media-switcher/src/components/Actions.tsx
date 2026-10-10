@@ -102,6 +102,10 @@ export function PauseAction({ appId, sessionIndex, titlePrefix, artistPrefix, re
       title="Pause"
       icon={Icon.Pause}
       onAction={() => handlePause(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "return" },
+        Windows: { modifiers: ["ctrl"], key: "return" },
+      }}
     />
   );
 }
@@ -112,6 +116,10 @@ export function PlayAction({ appId, sessionIndex, titlePrefix, artistPrefix, rev
       title="Play"
       icon={Icon.Play}
       onAction={() => handlePlay(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "return" },
+        Windows: { modifiers: ["ctrl"], key: "return" },
+      }}
     />
   );
 }
@@ -238,6 +246,45 @@ export function CopyTrackInfoAction({ title, artist }: TrackInfoProps) {
       title="Copy Track Info"
       content={artist ? `${title} — ${artist}` : title}
       shortcut={Keyboard.Shortcut.Common.Copy}
+    />
+  );
+}
+
+export function TogglePinAction({
+  isPinned,
+  togglePin,
+  sessionAppId,
+}: {
+  isPinned: boolean;
+  togglePin: (appId: string) => Promise<void>;
+  sessionAppId: string;
+}) {
+  return (
+    <Action
+      title={isPinned ? "Unpin" : "Pin"}
+      icon={isPinned ? Icon.TackDisabled : Icon.Tack}
+      shortcut={Keyboard.Shortcut.Common.Pin}
+      onAction={() => togglePin(sessionAppId)}
+    />
+  );
+}
+
+export function ToggleDetailAction({
+  isShowingDetail,
+  setIsShowingDetail,
+}: {
+  isShowingDetail: boolean;
+  setIsShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  return (
+    <Action
+      title={isShowingDetail ? "Hide Detail" : "Show Detail"}
+      icon={Icon.AppWindowSidebarLeft}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "i" },
+        Windows: { modifiers: ["ctrl"], key: "i" },
+      }}
+      onAction={() => setIsShowingDetail((v) => !v)}
     />
   );
 }
