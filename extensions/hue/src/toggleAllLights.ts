@@ -8,7 +8,7 @@ import {
   Toast,
   updateCommandMetadata,
 } from "@raycast/api";
-import createHueClient, { loadBridgeConfig } from "./lib/createHueClient";
+import { createHueClient, loadBridgeConfig } from "./lib/hueBridge";
 import HueClient from "./lib/HueClient";
 import { logError } from "./helpers/errors";
 import { RESOURCES_CACHE_NAMESPACE } from "./helpers/constants";

@@ -1,28 +1,13 @@
-import { APP_NAME, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
-import { connect, PeerCertificate } from "tls";
-import * as https from "https";
-import { HueApiService, LinkResponse } from "./types";
+import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
 import Bonjour from "bonjour-service";
-import { isIPv4 } from "net";
-import { environment } from "@raycast/api";
 import fs from "fs";
-
-/**
- * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
- * The endpoint allows one request per 15 minutes per client.
- */
-export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
-  console.info("Discovering bridge using MeetHue's public API…");
-
-  const response = await fetch("https://discovery.meethue.com", { signal: AbortSignal.timeout(CONNECTION_TIMEOUT_MS) });
-  if (!response.ok) throw new Error(`Status ${response.status} from MeetHue's public API`);
-
-  const [bridge] = (await response.json()) as HueApiService[];
-  if (bridge === undefined) throw new Error("Could not find a Hue Bridge using MeetHue's public API");
-
-  console.info(`Discovered Hue Bridge using MeetHue's public API: ${bridge.internalipaddress}, ${bridge.id}`);
-  return { ipAddress: bridge.internalipaddress, id: bridge.id };
-}
+import * as http2 from "http2";
+import * as https from "https";
+import { isIPv4 } from "net";
+import * as tls from "tls";
+import { APP_NAME, BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
+import HueClient, { authHeaders } from "./HueClient";
+import { BridgeConfig, HueApiService, LinkResponse } from "./types";
 
 /**
  * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
@@ -51,7 +36,87 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   });
 }
 
-export async function getUsernameFromBridge(ipAddress: string, bridgeId: string): Promise<string> {
+/**
+ * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
+ * The endpoint allows one request per 15 minutes per client.
+ */
+export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
+  console.info("Discovering bridge using MeetHue's public API…");
+
+  const response = await fetch("https://discovery.meethue.com", { signal: AbortSignal.timeout(CONNECTION_TIMEOUT_MS) });
+  if (!response.ok) throw new Error(`Status ${response.status} from MeetHue's public API`);
+
+  const [bridge] = (await response.json()) as HueApiService[];
+  if (bridge === undefined) throw new Error("Could not find a Hue Bridge using MeetHue's public API");
+
+  console.info(`Discovered Hue Bridge using MeetHue's public API: ${bridge.internalipaddress}, ${bridge.id}`);
+  return { ipAddress: bridge.internalipaddress, id: bridge.id };
+}
+
+export async function linkWithBridge(
+  bridgeIpAddress: string,
+  bridgeId?: string,
+  bridgeUsername?: string,
+): Promise<BridgeConfig> {
+  const id = bridgeId ?? (await fetchBridgeId(bridgeIpAddress));
+  return {
+    ipAddress: bridgeIpAddress,
+    username: bridgeUsername ? bridgeUsername : await createUsername(bridgeIpAddress, id),
+    id,
+  };
+}
+
+export async function createHueClient(bridgeConfig: BridgeConfig) {
+  const http2Session = await new Promise<http2.ClientHttp2Session>((resolve, reject) => {
+    console.log("Connecting to the Hue Bridge…");
+
+    const session = http2.connect(`https://${bridgeConfig.ipAddress}`, bridgeTlsOptions(bridgeConfig.id));
+
+    session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
+      return reject(new Error("Connection timed out."));
+    });
+
+    session.once("connect", () => {
+      // Make a request to the Hue Bridge to check if the username is valid
+      const stream = session.request({
+        ":method": "GET",
+        ":path": "/clip/v2/resource/bridge",
+        ...authHeaders(bridgeConfig.username),
+      });
+
+      stream.on("response", (response) => {
+        // Only the status matters, and an open stream would keep HueClient.close() from ending the session
+        stream.close();
+        if (response[":status"] === 403) {
+          return reject(new Error("Please check your username."));
+        } else if (response[":status"] !== 200) {
+          return reject(new Error(`Status ${response[":status"]}`));
+        }
+        return resolve(session);
+      });
+    });
+
+    session.once("error", (error) => {
+      return reject(error);
+    });
+  });
+
+  return new HueClient(bridgeConfig, http2Session);
+}
+
+// The bridge IP address and username preferences override the saved configuration
+export async function loadBridgeConfig(): Promise<BridgeConfig | undefined> {
+  const saved = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
+  if (saved === undefined) return undefined;
+  const { bridgeIpAddress, bridgeUsername } = getPreferenceValues<Preferences>();
+  return {
+    ...JSON.parse(saved),
+    ...(bridgeIpAddress && { ipAddress: bridgeIpAddress }),
+    ...(bridgeUsername && { username: bridgeUsername }),
+  };
+}
+
+async function createUsername(ipAddress: string, bridgeId: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
       {
@@ -59,10 +124,7 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
         path: "/api",
         hostname: ipAddress,
         port: 443,
-        agent: new https.Agent({
-          ca: getCaCertificate(),
-          checkServerIdentity: (_hostname, peerCertificate) => checkBridgeIdentity(peerCertificate, bridgeId),
-        }),
+        agent: new https.Agent(bridgeTlsOptions(bridgeId)),
         timeout: CONNECTION_TIMEOUT_MS,
         headers: {
           "Content-Type": "application/json",
@@ -106,22 +168,13 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
   });
 }
 
-export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
+function fetchBridgeId(ipAddress: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const socket = connect(
-      {
-        host: ipAddress,
-        port: 443,
-        ca: getCaCertificate(),
-        // The ID is what this reads, so there is nothing to check it against. The ca option still checks the chain.
-        checkServerIdentity: () => undefined,
-      },
-      () => {
-        const cert = socket.getPeerCertificate();
-        socket.destroy();
-        resolve(getCommonName(cert));
-      },
-    );
+    const socket = tls.connect({ host: ipAddress, port: 443, ...bridgeTlsOptions() }, () => {
+      const cert = socket.getPeerCertificate();
+      socket.destroy();
+      resolve(getCommonName(cert));
+    });
 
     socket.setTimeout(CONNECTION_TIMEOUT_MS, () => {
       socket.destroy();
@@ -136,32 +189,38 @@ export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
 }
 
 /**
+ * The ca option checks the chain against the bundled root certificates. The bridge certificate's subject Common Name
+ * is the bridge ID, not its IP address, so checking it replaces Node's hostname check, as Signify's "Using HTTPS"
+ * guide describes. Without a bridge ID, which fetchBridgeId reads from the certificate, only the chain is checked.
+ * checkServerIdentity returns its error like tls.checkServerIdentity does: a thrown error is uncaught and the
+ * connection carries on.
+ * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
+ */
+function bridgeTlsOptions(bridgeId?: string) {
+  return {
+    ca: loadCaCertificate(),
+    checkServerIdentity: (_hostname: string, certificate: tls.PeerCertificate) => {
+      if (bridgeId !== undefined && getCommonName(certificate).toLowerCase() !== bridgeId.toLowerCase()) {
+        return new Error(
+          "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
+        );
+      }
+    },
+  };
+}
+
+/**
  * A certificate's Common Name (CN) may be a string, an array of strings, or undefined.
  * The Hue Bridge certificate always uses a single CN, so it is normalized to a string.
  */
-function getCommonName(certificate: PeerCertificate): string {
+function getCommonName(certificate: tls.PeerCertificate): string {
   const commonName = certificate.subject.CN;
   return Array.isArray(commonName) ? (commonName[0] ?? "") : (commonName ?? "");
 }
 
-/**
- * The bridge certificate's subject Common Name is the bridge ID, so this replaces Node's hostname check, as Signify's
- * "Using HTTPS" guide describes. The ca option already checks the chain against the bundled root certificates.
- * Returns the error like tls.checkServerIdentity does: a thrown error is uncaught and the connection carries on.
- * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
- */
-export function checkBridgeIdentity(certificate: PeerCertificate, bridgeId: string): Error | undefined {
-  if (getCommonName(certificate).toLowerCase() !== bridgeId.toLowerCase()) {
-    return new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
-  }
-}
+let caCertificate: Buffer | undefined;
 
-let _caCertificate: Buffer | null = null;
-
-export function getCaCertificate(): Buffer {
-  if (_caCertificate) return _caCertificate;
-
-  _caCertificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
-
-  return _caCertificate;
+function loadCaCertificate(): Buffer {
+  caCertificate ??= fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
+  return caCertificate;
 }

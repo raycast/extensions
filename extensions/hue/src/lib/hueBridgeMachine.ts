@@ -3,9 +3,13 @@ import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
-import createHueClient, { loadBridgeConfig } from "./createHueClient";
-import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "./hueBridge";
-import { linkWithBridge } from "./linkWithBridge";
+import {
+  createHueClient,
+  discoverBridgeUsingHuePublicApi,
+  discoverBridgeUsingMdns,
+  linkWithBridge,
+  loadBridgeConfig,
+} from "./hueBridge";
 import * as net from "net";
 import { logError } from "../helpers/errors";
 import Style = Toast.Style;
