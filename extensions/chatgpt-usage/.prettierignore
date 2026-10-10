@@ -1,0 +1,5 @@
+package-lock.json
+raycast-env.d.ts
+dist/
+build/
+.raycast-build-*/
