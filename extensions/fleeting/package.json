@@ -1,0 +1,228 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fleeting",
+  "title": "Fleeting",
+  "description": "Launch synthetic workplace meetings from Fleeting and block matching calendar time. Unofficial companion extension.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-meeting",
+      "title": "Start Meeting",
+      "subtitle": "Fleeting",
+      "description": "Search and open a synthetic Fleeting meeting in your browser.",
+      "mode": "view"
+    },
+    {
+      "name": "block-calendar",
+      "title": "Block Calendar",
+      "subtitle": "Fleeting",
+      "description": "Create a calendar event that links to a Fleeting meeting.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-meeting",
+      "title": "Quick Meeting",
+      "subtitle": "Fleeting",
+      "description": "Instantly open your preferred (or a random) Fleeting meeting.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "name",
+      "type": "textfield",
+      "title": "Your Name",
+      "description": "Passed to Fleeting as the name parameter.",
+      "required": false,
+      "placeholder": "Dhruv"
+    },
+    {
+      "name": "preferredMeeting",
+      "type": "dropdown",
+      "title": "Preferred Meeting",
+      "description": "Used by Quick Meeting and as the Block Calendar default.",
+      "required": false,
+      "default": "standup",
+      "data": [
+        {
+          "title": "Engineering Standup",
+          "value": "standup"
+        },
+        {
+          "title": "Client Sales Call",
+          "value": "sales"
+        },
+        {
+          "title": "API Design Review",
+          "value": "api"
+        },
+        {
+          "title": "AppSec Review",
+          "value": "appsec"
+        },
+        {
+          "title": "Scoping Call",
+          "value": "scoping"
+        },
+        {
+          "title": "Project Status Meeting",
+          "value": "pm"
+        },
+        {
+          "title": "Vendor Security Review",
+          "value": "vendor"
+        },
+        {
+          "title": "Quarterly All-Hands",
+          "value": "allhands"
+        },
+        {
+          "title": "IT Incident War Room",
+          "value": "incident"
+        },
+        {
+          "title": "Before the Host Joins",
+          "value": "gossip"
+        },
+        {
+          "title": "Healthy Workplace Working Group",
+          "value": "wellbeing"
+        },
+        {
+          "title": "Offsite Planning Sync",
+          "value": "flirt"
+        },
+        {
+          "title": "Ops Weekly (Flight Deck Edition)",
+          "value": "pilots"
+        },
+        {
+          "title": "Ransomware Crisis Bridge",
+          "value": "ransomware"
+        }
+      ]
+    },
+    {
+      "name": "quickLaunchMode",
+      "type": "dropdown",
+      "title": "Quick Meeting Mode",
+      "description": "What Quick Meeting opens.",
+      "required": false,
+      "default": "preferred",
+      "data": [
+        {
+          "title": "Preferred Meeting",
+          "value": "preferred"
+        },
+        {
+          "title": "Random Meeting",
+          "value": "random"
+        }
+      ]
+    },
+    {
+      "name": "preferredCalendar",
+      "type": "dropdown",
+      "title": "Preferred Calendar",
+      "description": "Primary action in Block Calendar.",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google Calendar",
+          "value": "google"
+        },
+        {
+          "title": "Outlook",
+          "value": "outlook"
+        },
+        {
+          "title": "Calendar File (.ics)",
+          "value": "ics"
+        }
+      ]
+    },
+    {
+      "name": "defaultDuration",
+      "type": "dropdown",
+      "title": "Default Duration",
+      "description": "Default event length.",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        },
+        {
+          "title": "90 minutes",
+          "value": "90"
+        },
+        {
+          "title": "120 minutes",
+          "value": "120"
+        }
+      ]
+    },
+    {
+      "name": "defaultPrivate",
+      "type": "checkbox",
+      "title": "Event Visibility",
+      "label": "Private by default",
+      "description": "Request private visibility where the calendar supports it.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "includeJoinLink",
+      "type": "checkbox",
+      "title": "Join Link",
+      "label": "Include join link by default",
+      "description": "Add the Fleeting URL to the event location and description.",
+      "required": false,
+      "default": true
+    }
+  ]
+}
