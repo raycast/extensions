@@ -1,5 +1,10 @@
 # Dia Changelog
 
+## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
+
+- Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
+- History and bookmark searches return 50 results by default, up to 100.
+
 ## [AI Tool: Read Tab Contents] - 2026-10-10
 
 - Added an AI tool that reads the visible text of a tab or the focused tab, truncated to 20,000 characters by default.
