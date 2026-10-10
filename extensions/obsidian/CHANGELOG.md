@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Quick Capture Validation] - {PR_MERGE_DATE}
+## [Quick Capture Validation] - 2026-10-10
 
 - Restrict Quick Capture to existing regular Markdown files inside the vault
 - Keep multiline captures in one list item and document route setup and append behavior
