@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import {
   authCheckArgs,
+  logoutArgs,
   createPassCliAdapter,
   itemListArgs,
   itemTotpArgs,
@@ -85,6 +86,8 @@ test("checks authentication with info", async () => {
 
   assert.equal(await adapter.checkAuth(), true);
   assert.deepEqual(authCheckArgs(), ["info"]);
+  assert.deepEqual(logoutArgs(false), ["logout"]);
+  assert.deepEqual(logoutArgs(true), ["logout", "--force"]);
 });
 
 test("returns false for the real unauthenticated CLI failure", async () => {

@@ -10,6 +10,10 @@ const expectedArgs = {
   "login-bad-host": ["login"],
   "login-garbage": ["login"],
   "login-hang": ["login"],
+  "login-wait": ["login"],
+  "login-slow-stop": ["login"],
+  "login-url-fail": ["login"],
+  "login-finishing": ["login"],
   "login-fail": ["login"],
   "login-fail-unknown": ["login"],
   "malformed-json": ["vault", "list", "--output", "json"],
@@ -143,6 +147,35 @@ switch (mode) {
   case "login-hang":
     process.on("SIGTERM", () => process.exit(0));
     setInterval(() => {}, 1_000);
+    break;
+  case "login-wait":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-slow-stop":
+    console.log(`Please open the following URL in your browser:\n${loginUrl}\n`);
+    process.on("SIGTERM", () => setTimeout(() => process.exit(1), 500));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-finishing":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => console.log("Web authentication complete, setting up your account"), 50);
+    process.on("SIGTERM", () => process.exit(0));
+    setInterval(() => {}, 1_000);
+    break;
+  case "login-url-fail":
+    console.log(
+      `Please open the following URL in your browser:\n${loginUrl}\nWaiting for authentication to complete...`,
+    );
+    setTimeout(() => {
+      console.error("Error: This operation requires an authenticated client");
+      process.exitCode = 1;
+    }, 50);
     break;
   case "login-fail":
     console.error("Error: This operation requires an authenticated client");

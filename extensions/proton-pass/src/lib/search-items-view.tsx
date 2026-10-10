@@ -5,7 +5,7 @@ import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
-import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
+import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
@@ -122,7 +122,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   async function loadItems() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
+    setIsLoading(true);
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
@@ -161,7 +164,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       }
     }
 
-    setIsLoading(true);
     try {
       if (initialVault && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
@@ -170,7 +172,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
           return []; // The full listing below reports the failure.
         });
         if (!isLatest()) return;
-        if (vaultItems.length > 0) updateItems(vaultItems);
+        if (vaultItems.length > 0) {
+          updateItems(vaultItems);
+          setError(null);
+        }
       }
 
       const listing = listingSaves.start();
@@ -184,6 +189,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       setItemCounts((previous) =>
         refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
       );
+      setError(null);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
       if (failureMessage) throw new Error(failureMessage);
@@ -208,9 +214,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
       const message = err instanceof Error ? err.message : "An unknown error occurred";
-      // Items belong to the session that listed them: once it has ended, they must not show up again.
+      // Items, vaults and counts belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") {
         updateItems([]);
+        setVaults([]);
         setItemCounts(new Map());
       }
       if (itemsRef.current.length === 0) {
@@ -242,7 +249,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} />;
+    return <NotLoggedInView reload={loadItems} />;
   }
   const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { listVaultSharing, listVaultsAndItems } from "./lib/pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { SearchItemsView } from "./lib/search-items-view";
-import { NotLoggedInView, loginWithBrowserAndReload } from "./lib/login-view";
+import { NotLoggedInView } from "./lib/login-view";
 import {
   getCachedItems,
   getCachedSharing,
@@ -34,6 +34,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
+  // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
   const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
@@ -42,7 +43,8 @@ export default function Command() {
 
   async function loadVaults() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
     setIsLoading(true);
 
     const [cachedVaults, cachedItems, cachedSharing] = await Promise.all([
@@ -68,18 +70,23 @@ export default function Command() {
       // Items are listed too, for their number per vault; the listing also refreshes Search Items' cache.
       const listing = listingSaves.start();
       const sharingListing = sharingSaves.start();
-      const [{ vaults: freshVaults, items, failedVaults }, freshSharing] = await Promise.all([
-        listVaultsAndItems(),
-        // Sharing only adds an icon: when it can't be listed, the saved sharing stays.
-        listVaultSharing().catch(() => undefined),
-      ]);
+      // Sharing only adds an icon: don't hold up the vaults or items while its member commands run.
+      const freshSharing = listVaultSharing().catch(() => undefined);
+      const { vaults: freshVaults, items, failedVaults } = await listVaultsAndItems();
       if (!isLatest()) return;
-      const sharing = freshSharing ? mergeSharing(freshSharing, cachedSharing?.data) : (cachedSharing?.data ?? {});
-      setVaults(withSharing(freshVaults, sharing));
+      setVaults(withSharing(freshVaults, cachedSharing?.data ?? {}));
+      setError(null);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
-      // Sharing is saved on its own, so it stays up to date even when some items can't be listed.
-      if (freshSharing) await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
+      // Add and save optional sharing when ready, only if this is still the latest load.
+      void freshSharing
+        .then(async (fresh) => {
+          if (!fresh || !isLatest()) return;
+          const sharing = mergeSharing(fresh, cachedSharing?.data);
+          setVaults(withSharing(freshVaults, sharing));
+          await sharingSaves.save(sharingListing, () => setCachedSharing(sharing));
+        })
+        .catch(() => undefined);
       // Vaults and items are saved together, from complete listings only: a saved vault missing from the saved
       // items would count 0 items. Saves follow the order listings started, also across Search Items.
       if (failed.size === 0 && isLatest()) {
@@ -89,8 +96,11 @@ export default function Command() {
       }
     } catch (err: unknown) {
       if (!isLatest()) return;
-      // The counts of an ended session must not show up again.
-      if (err instanceof PassCliError && err.type === "not_authenticated") setItemCounts(new Map());
+      // The vaults and counts of an ended session must not show up again, e.g. while Check Again runs.
+      if (err instanceof PassCliError && err.type === "not_authenticated") {
+        setVaults([]);
+        setItemCounts(new Map());
+      }
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
         if (err instanceof PassCliError) {
           setError(err);
@@ -127,7 +137,7 @@ export default function Command() {
   }
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadVaults)} />;
+    return <NotLoggedInView reload={loadVaults} />;
   }
 
   if (error?.type === "keyring_error") {
