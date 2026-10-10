@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Tapetide MCP Server] - {PR_MERGE_DATE}
+## [Add Tapetide MCP Server] - 2026-10-10
 
 - Add Tapetide to the official registry: Indian stock market research for about 8,200 NSE and BSE listed companies (quotes, financials, shareholding, screeners, FII/DII flows, option chains, filings, portfolio and watchlist), 55 tools. Hosted remote Streamable HTTP server at https://mcp.tapetide.com/mcp; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key.
 
