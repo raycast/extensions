@@ -63,12 +63,54 @@ test("does not verify when the snapshot before opening failed", () => {
   const after: TabSnapshot = [{ ...before[0], tabs: [...before[0].tabs, tab("https://example.com/")] }, before[1]];
   const check = checkOpenedTab(undefined, after, requested);
   assert.equal(check.verified, false);
-  assert.match(check.verified ? "" : check.reason, /before opening/);
+  assert.match(check.verified ? "" : check.reason, /^Incomplete snapshot: .*before opening/);
 });
 
 test("does not verify when the snapshot after opening failed", () => {
   const check = checkOpenedTab(before, undefined, requested);
   assert.equal(check.verified, false);
+  assert.match(check.verified ? "" : check.reason, /^Incomplete snapshot: .*after opening/);
+});
+
+test("an existing one-tab window missing from an incomplete snapshot is not taken for a new window", () => {
+  // getTabSnapshot now throws instead of dropping an unreadable window, so the tool gets no snapshot at all
+  const after: TabSnapshot = [...before, { windowRef: 40, windowId: 3, tabs: [tab("https://example.com/old")] }];
+  const check = checkOpenedTab(undefined, after, requested);
+  assert.equal(check.verified, false);
+});
+
+test("an ambiguous window cancels verification even if another window gained a matching tab", () => {
+  const dupBefore: TabSnapshot = [...before, { windowRef: 50, windowId: 3, tabs: [tab("https://example.com/")] }];
+  const after: TabSnapshot = [
+    { ...before[0], tabs: [...before[0].tabs, tab("https://example.com/other")] },
+    before[1],
+    { windowRef: 50, windowId: 3, tabs: [tab("https://example.com/"), tab("https://example.com/")] },
+  ];
+  assert.equal(findNewTab(dupBefore, after), undefined);
+  assert.equal(checkOpenedTab(dupBefore, after, requested).verified, false);
+});
+
+test("a window that gained a tab and also changed cancels verification", () => {
+  const after: TabSnapshot = [
+    { ...before[0], tabs: [...before[0].tabs, tab("https://example.com/")] },
+    { ...before[1], tabs: [tab("https://www.raycast.com/store"), tab("https://example.com/x")] },
+  ];
+  assert.equal(findNewTab(before, after), undefined);
+});
+
+test("a new window with several tabs cancels verification", () => {
+  const after: TabSnapshot = [
+    ...before,
+    { windowRef: 60, windowId: 3, tabs: [tab("https://example.com/"), tab("https://a.example/")] },
+  ];
+  assert.equal(findNewTab(before, after), undefined);
+});
+
+test("a new tab still without an address gets its own reason", () => {
+  const after: TabSnapshot = [{ ...before[0], tabs: [...before[0].tabs, tab("")] }, before[1]];
+  const check = checkOpenedTab(before, after, requested);
+  assert.equal(check.verified, false);
+  assert.equal(check.verified ? "" : check.reason, "The new tab has no address yet.");
 });
 
 test("does not verify when two windows each gained a tab", () => {
@@ -93,11 +135,4 @@ test("does not verify when an existing tab changed page at the same time", () =>
     before[1],
   ];
   assert.equal(findNewTab(before, after), undefined);
-});
-
-test("keeps waiting while the new tab has no address yet", () => {
-  const after: TabSnapshot = [{ ...before[0], tabs: [...before[0].tabs, tab("")] }, before[1]];
-  const check = checkOpenedTab(before, after, requested);
-  assert.equal(check.verified, false);
-  assert.equal(check.tab?.index, 3);
 });

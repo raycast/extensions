@@ -6,6 +6,7 @@ instructions: |
   open-url only opens http and https addresses. Pass the address as the user wrote it, including any port such as localhost:3000; do not add or change the scheme. It returns verified: true only when exactly one new tab opened on the requested site, and that tab is the one returned. If it returns verified: false, tell the user the reason it gives instead of claiming the page opened.
   Use get-tab-contents to read a page before summarizing it or answering questions about it. Use type "source" only when the user asks about the HTML. When the user asks for only part of a page, such as the first 500 characters, pass that number as maxLength. If the result has truncated: true, say that the answer is based on the beginning of the page. If get-tab-contents reports that the page is still loading or has no text, tell the user instead of guessing what the page says.
   If select-tab, close-tab or get-tab-contents reports that a tab does not exist, or that it moved or changed page, tell the user instead of retrying with another tab. Only close the tab the user explicitly asked to close.
+  close-tab only closes the tab shown in its confirmation. If it reports that there is no matching confirmation, nothing was closed: tell the user and let them ask again instead of calling close-tab again yourself.
 
 evals:
   # evals moved from package.json
@@ -575,11 +576,13 @@ evals:
           - includes: "not open"
           - includes: "couldn't"
           - includes: "could not"
+          - includes: "wasn't able"
+          - includes: "no new tab"
   - input: "@safari open https://news.ycombinator.com"
     mocks:
       open-url:
         verified: false
-        reason: "Safari's tabs could not be read before opening the page."
+        reason: "Incomplete snapshot: Safari's tabs could not all be read before opening the page."
         requestedUrl: "https://news.ycombinator.com/"
     expected:
       - callsTool: open-url
@@ -604,6 +607,44 @@ evals:
           - includes: "no longer"
           - includes: "moved"
           - includes: "changed"
+  - input: "@safari open https://www.swift.org"
+    mocks:
+      open-url:
+        verified: false
+        reason: "The new tab has no address yet."
+        requestedUrl: "https://www.swift.org/"
+        tab:
+          uuid: "1-4"
+          title: ""
+          url: ""
+          window_id: 1
+          index: 4
+          is_local: true
+    expected:
+      - callsTool: open-url
+      - not:
+          includes: "another site"
+      - or:
+          - includes: "address"
+          - includes: "loading"
+          - includes: "not confirm"
+          - includes: "couldn't confirm"
+          - includes: "could not confirm"
+  - input: "@safari close the tab in window 1 at index 3"
+    mocks:
+      close-tab: "Error: Nothing was closed: there is no matching confirmation for this tab (it is missing, expired, or was given for another tab). Ask to close the tab again."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tab.windowId: 1
+            tab.index: 3
+      - or:
+          - includes: "Nothing was closed"
+          - includes: "nothing was closed"
+          - includes: "not closed"
+          - includes: "wasn't closed"
+          - includes: "confirm"
   # get-tab-contents
   - input: "@safari summarize this page in 3 bullet points"
     mocks:

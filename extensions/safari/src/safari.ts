@@ -85,7 +85,9 @@ export type PinnedTab = {
 
 export type TabPosition = { windowId: number; index: number };
 
-type JxaResult<T> = ({ status: "ok" } & T) | { status: "missing-window" | "missing-tab" | "changed"; count?: number };
+type JxaResult<T> =
+  | ({ status: "ok" } & T)
+  | { status: "missing-window" | "missing-tab" | "changed" | "incomplete"; count?: number };
 
 // JXA returns JSON, so titles, URLs and page contents never need a separator
 async function runSafariJxa<T>(body: string): Promise<JxaResult<T>> {
@@ -263,23 +265,31 @@ export async function readPinnedTabContents(
   return { windowId, title, readyState, length, hasContent, content };
 }
 
-/** Lists the tabs of each window, to tell exactly which tab a call opened. Throws if Safari can't be read. */
+/**
+ * Lists the tabs of each window, to tell exactly which tab a call opened.
+ * Throws if any window can't be read, because a missing window would later look like a new one.
+ */
 export async function getTabSnapshot(): Promise<TabSnapshot> {
   const result = await runSafariJxa<{ windows: TabSnapshot }>(`
     const windows = [];
     for (const win of app.windows()) {
-      let tabs;
       try {
-        tabs = win.tabs().map((tab) => ({ title: text(tab.name()), url: text(tab.url()) }));
+        const tabs = win.tabs().map((tab) => ({ title: text(tab.name()), url: text(tab.url()) }));
+        windows.push({ windowRef: win.id(), windowId: win.index(), tabs });
       } catch (error) {
-        continue;
+        return JSON.stringify({ status: "incomplete" });
       }
-      windows.push({ windowRef: win.id(), windowId: win.index(), tabs });
     }
     return JSON.stringify({ status: "ok", windows });
   `);
-  if (result.status !== "ok") throw new Error(`Unexpected response from Safari: ${result.status}`);
+  if (result.status !== "ok") throw new IncompleteSnapshotError();
   return result.windows;
+}
+
+export class IncompleteSnapshotError extends Error {
+  constructor() {
+    super("Safari's tabs could not all be read (incomplete snapshot).");
+  }
 }
 
 export async function getFocusedTab(): Promise<LocalTab> {
