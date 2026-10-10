@@ -1,4 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { chmod, mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -122,8 +123,7 @@ async function restoreRunningProfileWindow(profile: CodexProfile, pid: number): 
     // Never start a second instance when the existing process could not be
     // inspected or activated; leave it alone and report the recovery failure.
     if (!(await getProfilePIDs(profile)).includes(pid)) return false;
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: `Couldn't restore ${profile.name} window`,
       message: errorMessage(error),
     });
@@ -228,10 +228,8 @@ export async function openProfileWindow(profile: CodexProfile): Promise<void> {
       }),
     );
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: `Couldn't open ${profile.name}`,
-      message: error instanceof Error ? error.message : String(error),
     });
   }
 }

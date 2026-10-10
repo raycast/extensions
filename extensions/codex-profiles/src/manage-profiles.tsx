@@ -10,6 +10,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { openProfileWindow } from "./launch-profile";
 import {
@@ -49,10 +50,8 @@ function ProfileForm({ profile, onSaved }: ProfileFormProps) {
       });
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: profile ? "Couldn't rename profile" : "Couldn't create profile",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -100,10 +99,8 @@ function ReattachProfileForm({ folder, onSaved }: ReattachProfileFormProps) {
       });
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Couldn't re-add profile folder",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -135,10 +132,8 @@ export default function ManageProfiles() {
       setProfiles(loadedProfiles);
       setUnlinkedFolders(folders);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Couldn't load profiles",
-        message: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setIsLoading(false);
@@ -170,10 +165,8 @@ export default function ManageProfiles() {
         message: "The profile folder and its data were left untouched.",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Couldn't remove profile",
-        message: error instanceof Error ? error.message : String(error),
       });
     }
   }

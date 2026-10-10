@@ -17,33 +17,35 @@
     {
       "name": "switch-profile",
       "title": "Switch Profile",
-      "subtitle": "Work / Personal",
+      "subtitle": "Codex Profiles",
       "description": "Open a separate ChatGPT window with its own local profile state.",
       "mode": "view"
     },
     {
       "name": "manage-profiles",
       "title": "Manage Profiles",
+      "subtitle": "Codex Profiles",
       "description": "Create, rename, and remove local Codex profiles.",
       "mode": "view"
     },
     {
       "name": "open-first-profile",
       "title": "Switch to Profile 1",
-      "subtitle": "Required profile",
+      "subtitle": "Codex Profiles",
       "description": "Open the required first profile directly; assign a Raycast hotkey for quick access.",
       "mode": "no-view"
     },
     {
       "name": "open-second-profile",
       "title": "Switch to Profile 2",
-      "subtitle": "The next profile in the list",
+      "subtitle": "Codex Profiles",
       "description": "Open the second profile directly; assign a Raycast hotkey for quick access.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.5.3"
+    "@raycast/api": "^2.5.3",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",

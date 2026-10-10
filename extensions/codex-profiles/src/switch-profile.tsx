@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { displayProfilePath, getProfiles, type CodexProfile } from "./profiles";
 import { openProfileWindow } from "./launch-profile";
@@ -11,10 +12,8 @@ export default function Command() {
     getProfiles()
       .then(setProfiles)
       .catch((error: unknown) => {
-        void showToast({
-          style: Toast.Style.Failure,
+        void showFailureToast(error, {
           title: "Couldn't load profiles",
-          message: error instanceof Error ? error.message : String(error),
         });
       })
       .finally(() => setIsLoading(false));
@@ -34,7 +33,13 @@ export default function Command() {
               <Action
                 title="Manage Profiles"
                 icon={Icon.Gear}
-                onAction={() => launchCommand({ name: "manage-profiles", type: LaunchType.UserInitiated })}
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: "manage-profiles", type: LaunchType.UserInitiated });
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Could not open Manage Profiles" });
+                  }
+                }}
               />
             </ActionPanel>
           }

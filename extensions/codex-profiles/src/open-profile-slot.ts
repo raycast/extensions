@@ -1,4 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getProfiles } from "./profiles";
 import { openProfileWindow } from "./launch-profile";
 
@@ -16,10 +17,8 @@ export async function openProfileAtIndex(index: number): Promise<void> {
     }
     await openProfileWindow(profile);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Couldn't load profiles",
-      message: error instanceof Error ? error.message : String(error),
     });
   }
 }
