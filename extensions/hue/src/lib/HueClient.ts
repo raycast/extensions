@@ -58,7 +58,7 @@ export default class HueClient {
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
 
   constructor(
-    private readonly bridgeConfig: BridgeConfig,
+    readonly bridgeConfig: BridgeConfig,
     private readonly http2Session: ClientHttp2Session,
   ) {}
 

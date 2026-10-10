@@ -72,6 +72,25 @@ export async function linkWithBridge(ipAddress: string, bridgeId?: string, bridg
   }
 }
 
+// When the saved address doesn't answer, the bridge may have been given another one: this finds it again, and the
+// certificate check confirms it's the same bridge, so its username still works. A manual IP preference stays as it is.
+export async function connectToBridge(bridgeConfig: BridgeConfig): Promise<HueClient> {
+  try {
+    return await createHueClient(bridgeConfig);
+  } catch (error) {
+    if (error instanceof UnauthorizedError || getPreferenceValues<Preferences>().bridgeIpAddress) throw error;
+    const found = await discoverBridgeUsingMdns()
+      .catch(discoverBridgeUsingHuePublicApi)
+      .catch(() => undefined);
+    if (found === undefined || found.ipAddress === bridgeConfig.ipAddress) throw error;
+    const hueClient = await createHueClient({ ...bridgeConfig, ipAddress: found.ipAddress }).catch(() => {
+      throw error;
+    });
+    await saveBridgeIpAddress(found.ipAddress);
+    return hueClient;
+  }
+}
+
 export async function createHueClient(bridgeConfig: BridgeConfig, session?: http2.ClientHttp2Session) {
   session ??= await connect(bridgeConfig.ipAddress, bridgeConfig.id);
   try {
@@ -122,6 +141,12 @@ export async function loadBridgeConfig(): Promise<BridgeConfig | undefined> {
 
 export function saveBridgeConfig(bridgeConfig: BridgeConfig): Promise<void> {
   return LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(bridgeConfig));
+}
+
+// Leaves the saved username, which the username preference overrides when loading, as it is. After Unlink, saves nothing.
+async function saveBridgeIpAddress(ipAddress: string): Promise<void> {
+  const saved = await LocalStorage.getItem<string>(BRIDGE_CONFIG_KEY);
+  if (saved !== undefined) await saveBridgeConfig({ ...JSON.parse(saved), ipAddress });
 }
 
 // Also clears the bridgeIpAddress and bridgeUsername keys that version 1 stored

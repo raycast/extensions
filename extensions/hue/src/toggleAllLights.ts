@@ -7,7 +7,7 @@ import {
   Toast,
   updateCommandMetadata,
 } from "@raycast/api";
-import { createHueClient, loadBridgeConfig } from "./lib/hueBridge";
+import { connectToBridge, createHueClient, loadBridgeConfig } from "./lib/hueBridge";
 import HueClient from "./lib/HueClient";
 import { logError } from "./helpers/errors";
 import { RESOURCES_CACHE_NAMESPACE } from "./helpers/constants";
@@ -16,7 +16,10 @@ export default async function ToggleAllLights() {
   try {
     const bridgeConfig = await loadBridgeConfig();
     if (bridgeConfig === undefined) throw Error("No Hue Bridge configured");
-    const hueClient = await createHueClient(bridgeConfig);
+    // Background runs don't look for a bridge that moved, as MeetHue's discovery allows one request per 15 minutes.
+    const hueClient = await (environment.launchType === "userInitiated" ? connectToBridge : createHueClient)(
+      bridgeConfig,
+    );
 
     if (environment.launchType === "userInitiated") {
       await toggleLightsAndNotifyUser(hueClient);

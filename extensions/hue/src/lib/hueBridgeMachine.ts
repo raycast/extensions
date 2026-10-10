@@ -4,7 +4,7 @@ import HueClient, { UnauthorizedError } from "./HueClient";
 import { BridgeConfig } from "./types";
 import {
   clearBridgeConfig,
-  createHueClient,
+  connectToBridge,
   discoverBridgeUsingHuePublicApi,
   discoverBridgeUsingMdns,
   linkWithBridge,
@@ -50,7 +50,7 @@ export const hueBridgeMachine = setup({
         throw Error("Bridge configuration is undefined when trying to connect");
       }
 
-      const hueClient = await createHueClient(input.bridgeConfig);
+      const hueClient = await connectToBridge(input.bridgeConfig);
       // Unlink stops this actor while it connects, which leaves nothing else to close the client.
       if (signal.aborted) {
         hueClient.close();
@@ -159,7 +159,8 @@ export const hueBridgeMachine = setup({
           input: ({ context }) => ({ bridgeConfig: context.bridgeConfig }),
           onDone: {
             target: "connected",
-            actions: assign({ hueClient: ({ event }) => event.output }),
+            // Keeps the address the bridge was found at, should it have changed.
+            actions: assign(({ event }) => ({ hueClient: event.output, bridgeConfig: event.output.bridgeConfig })),
           },
           onError: [
             {
