@@ -1,19 +1,19 @@
-# CommandCode AI
+# Command Code AI
 
-Use your [CommandCode](https://commandcode.ai) subscription in Raycast — as models in AI Chat, Quick AI, and AI Commands, and through the standalone **Ask CommandCode AI** command.
+Use your [Command Code](https://commandcode.ai) subscription in Raycast — as models in AI Chat, Quick AI, and AI Commands, and through the standalone **Ask Command Code AI** command.
 
 ## Setup
 
-- If you use the CommandCode CLI and ran `cmd login`, there's nothing to do: the extension reads the key from `~/.commandcode/auth.json`.
-- Otherwise, paste a CommandCode API key into the extension's **API Key** preference.
+- Create an API key in [Command Code Studio](https://commandcode.ai) and paste it into the extension's **API Key** preference.
+- Or, if you use the Command Code CLI and ran `cmd login`, leave the preference empty: the extension reads the key from `~/.commandcode/auth.json`.
 
 ## Commands
 
-- **Ask CommandCode AI**: ask a question, keep asking follow-ups in the same thread, and copy questions, answers, or whole conversations.
-- **Refresh Models**: fetch the latest CommandCode model list and update Raycast AI's model picker.
+- **Ask Command Code AI**: ask a question, keep asking follow-ups in the same thread, and copy questions, answers, or whole conversations.
+- **Refresh Models**: fetch the latest Command Code model list and update Raycast AI's model picker.
 
 ## Notes
 
-- CommandCode has no public model-list endpoint, so the model list is read from the latest published `command-code` npm package and cached until a new version ships.
-- Models outside your plan show up in the list but return a "not in plan" error.
-- Your API key is sent only to `https://api.commandcode.ai`.
+- Requests go through Command Code's official [Provider API](https://commandcode.ai/docs/provider). Your API key is sent only to `https://api.commandcode.ai`.
+- The **Go** plan has no API access, so requests fail on it. Upgrade to GOAT or higher to use this extension.
+- Models outside your plan show up in the list but return an error when used.

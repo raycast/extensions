@@ -51,7 +51,8 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
         setIsGenerating(false);
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to get response";
-        toast.message = error instanceof Error ? error.message : "Please check your CommandCode API key and try again.";
+        toast.message =
+          error instanceof Error ? error.message : "Please check your Command Code API key and try again.";
         setViewState("form");
       }
     },
@@ -91,7 +92,7 @@ export function AskQuestionView({ initialQuestion = "", addConversation, updateC
       <QuestionForm
         navigationTitle="New Conversation"
         questionTitle="Question"
-        questionPlaceholder="Ask CommandCode AI anything…"
+        questionPlaceholder="Ask Command Code AI anything…"
         defaultQuestion={userQuestion || initialQuestion}
         onSubmit={handleSubmit}
       />

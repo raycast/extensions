@@ -1,20 +1,16 @@
 import { AI, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { fetchCatalog } from "./models";
+import { fetchModels } from "./models";
 
 export default async function Command() {
   try {
-    const { version, models, staleReason } = await fetchCatalog();
+    const { models, staleReason } = await fetchModels();
     await AI.refreshModels();
     if (staleReason) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Using cached CommandCode models (v${version})`,
-        message: staleReason,
-      });
+      await showToast({ style: Toast.Style.Failure, title: "Using cached Command Code models", message: staleReason });
       return;
     }
-    await showHUD(`Refreshed ${models.length} CommandCode models (v${version})`);
+    await showHUD(`Refreshed ${models.length} Command Code models`);
   } catch (error) {
     await showFailureToast(error, { title: "Failed to refresh models" });
   }

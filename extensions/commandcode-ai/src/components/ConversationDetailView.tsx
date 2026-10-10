@@ -129,7 +129,7 @@ export function ConversationDetailView({ conversation, updateConversation }: Con
       <QuestionForm
         navigationTitle={`Continue: ${conversation.title}`}
         questionTitle="Continue asking..."
-        questionPlaceholder="Ask CommandCode AI anything…"
+        questionPlaceholder="Ask Command Code AI anything…"
         defaultQuestion={userQuestion}
         defaultModel={model}
         onSubmit={handleAskQuestion}

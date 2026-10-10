@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commandcode-ai",
-  "title": "CommandCode AI",
-  "description": "Use your CommandCode subscription in Raycast — CommandCode models in AI Chat, Quick AI and AI Commands",
+  "title": "Command Code AI",
+  "description": "Use your Command Code subscription in Raycast — Command Code models in AI Chat, Quick AI and AI Commands",
   "icon": "extension-icon.png",
   "author": "alhassanaraouf",
   "platforms": [
@@ -17,16 +17,16 @@
   "commands": [
     {
       "name": "ask-commandcode-ai",
-      "title": "Ask CommandCode AI",
-      "subtitle": "CommandCode",
-      "description": "Ask questions using CommandCode models, with conversation history",
+      "title": "Ask Command Code AI",
+      "subtitle": "Command Code",
+      "description": "Ask questions using Command Code models, with conversation history",
       "mode": "view"
     },
     {
       "name": "refresh-models",
       "title": "Refresh Models",
-      "subtitle": "CommandCode",
-      "description": "Fetch the latest CommandCode model list and update Raycast AI's model picker",
+      "subtitle": "Command Code",
+      "description": "Fetch the latest Command Code model list and update Raycast AI's model picker",
       "mode": "no-view"
     }
   ],
@@ -36,7 +36,7 @@
       "name": "COMMANDCODE_API_KEY",
       "type": "password",
       "required": false,
-      "description": "CommandCode API key. Leave empty to use the key from the CommandCode CLI (`cmd login`, stored in ~/.commandcode/auth.json)."
+      "description": "Command Code API key from Command Code Studio. Leave empty to use the key from the Command Code CLI (`cmd login`, stored in ~/.commandcode/auth.json)."
     },
     {
       "title": "Default Model",
@@ -44,15 +44,18 @@
       "type": "textfield",
       "required": false,
       "default": "deepseek/deepseek-v4-flash",
-      "description": "Model preselected in Ask CommandCode AI, e.g. deepseek/deepseek-v4-flash or claude-sonnet-5"
+      "description": "Model preselected in Ask Command Code AI, e.g. deepseek/deepseek-v4-flash or claude-sonnet-5"
     }
   ],
   "ai": {
     "modelProvider": "models"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.78",
+    "@ai-sdk/openai-compatible": "^3.0.67",
     "@raycast/api": "^2.5.1",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/utils": "^2.2.7",
+    "ai": "^7.0.137"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

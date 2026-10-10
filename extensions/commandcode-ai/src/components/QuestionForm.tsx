@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { DEFAULT_MODEL, fetchCatalog } from "../models";
+import { DEFAULT_MODEL, fetchModels } from "../models";
 import type { FormValues } from "../types";
 
 interface QuestionFormProps {
@@ -30,9 +30,9 @@ export function QuestionForm({
   const preferences = getPreferenceValues<Preferences>();
   const fallbackModel = defaultModel || preferences.COMMANDCODE_MODEL || DEFAULT_MODEL;
 
-  const { data: catalogModels, isLoading } = useCachedPromise(async () => (await fetchCatalog()).models, []);
+  const { data: listedModels, isLoading } = useCachedPromise(async () => (await fetchModels()).models, []);
 
-  const availableModels = catalogModels?.length ? catalogModels : [{ id: fallbackModel, label: fallbackModel }];
+  const availableModels = listedModels?.length ? listedModels : [{ id: fallbackModel, name: fallbackModel }];
   const modelToDisplay = availableModels.some((m) => m.id === fallbackModel) ? fallbackModel : availableModels[0].id;
 
   return (
@@ -55,7 +55,7 @@ export function QuestionForm({
       />
       <Form.Dropdown id="model" title="Model" defaultValue={modelToDisplay}>
         {availableModels.map((model) => (
-          <Form.Dropdown.Item key={model.id} value={model.id} title={model.label} />
+          <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
         ))}
       </Form.Dropdown>
       {additionalDescription && (

@@ -1,29 +1,28 @@
 import { Cache, getPreferenceValues, type AI } from "@raycast/api";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { jsonSchema, streamText, tool, type ModelMessage, type ToolSet } from "ai";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export const API_URL = "https://api.commandcode.ai/alpha/generate";
+// Command Code's official Provider API: https://commandcode.ai/docs/provider
+export const BASE_URL = "https://api.commandcode.ai/provider/v1";
 export const DEFAULT_MODEL = "deepseek/deepseek-v4-flash";
-// Sent as x-command-code-version until the catalog has been fetched once.
-const FALLBACK_CLI_VERSION = "1.74.1";
 const MAX_TOOL_NAME_LENGTH = 64;
+// Anthropic requires max_tokens; the SDK's fallback for unknown model IDs is only 4096.
+const ANTHROPIC_MAX_OUTPUT_TOKENS = 32_000;
 
-interface CatalogModel {
+interface ProviderModel {
   id: string;
-  label: string;
-  description?: string;
-  vendor?: string;
-  vision: boolean;
-  contextWindow?: number;
-  maxOutputTokens?: number;
-  reasoningEfforts?: string[];
+  name: string;
+  context_length?: number;
+  supported_endpoints: string[];
 }
 
-interface Catalog {
-  version: string;
-  models: CatalogModel[];
-  /** Set when the latest catalog couldn't be fetched and this is the cached one. */
+interface ModelList {
+  models: ProviderModel[];
+  /** Set when the latest list couldn't be fetched and this is the cached one. */
   staleReason?: string;
 }
 
@@ -38,185 +37,98 @@ export function getApiKey(): string {
   } catch {
     // fall through
   }
-  throw new Error("No CommandCode API key. Set one in extension preferences, or run `cmd login`.");
+  throw new Error("No Command Code API key. Set one in extension preferences, or run `cmd login`.");
 }
 
-function readCachedCatalog(): Catalog | undefined {
-  const raw = cache.get("catalog");
-  return raw ? (JSON.parse(raw) as Catalog) : undefined;
+function readCachedModels(): ProviderModel[] | undefined {
+  const raw = cache.get("models");
+  return raw ? (JSON.parse(raw) as ProviderModel[]) : undefined;
 }
 
-/**
- * CommandCode has no model-list endpoint: the catalog ships inside the `command-code` CLI bundle.
- * Pull it from the latest published version, re-downloading only when that version changes.
- */
-export async function fetchCatalog(): Promise<Catalog> {
-  const cached = readCachedCatalog();
-  let version: string;
+export async function fetchModels(): Promise<ModelList> {
   try {
-    const res = await fetch("https://registry.npmjs.org/command-code/latest", { signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    version = ((await res.json()) as { version: string }).version;
-  } catch (error) {
-    const message = `Could not check the latest CommandCode version: ${error instanceof Error ? error.message : error}`;
-    if (cached) return { ...cached, staleReason: message };
-    throw new Error(message);
-  }
-  if (cached?.version === version) return cached;
-
-  try {
-    const res = await fetch(`https://cdn.jsdelivr.net/npm/command-code@${version}/dist/cli.mjs`, {
-      signal: AbortSignal.timeout(60_000),
+    const res = await fetch(`${BASE_URL}/models`, {
+      headers: { Authorization: `Bearer ${getApiKey()}` },
+      signal: AbortSignal.timeout(15_000),
     });
-    if (!res.ok) throw new Error(`Could not download the CommandCode model catalog (HTTP ${res.status}).`);
-    const models = parseCatalog(await res.text());
-    // ponytail: scrapes the minified CLI bundle; switch to a real endpoint if CommandCode ever ships one.
-    if (models.length === 0) throw new Error(`Could not read the model catalog from command-code@${version}.`);
-    const catalog = { version, models };
-    cache.set("catalog", JSON.stringify(catalog));
-    return catalog;
+    if (!res.ok) throw new Error(await errorMessage(res));
+    const { data } = (await res.json()) as { data: ProviderModel[] };
+    cache.set("models", JSON.stringify(data));
+    return { models: data };
   } catch (error) {
-    // A stale list beats an empty picker; the next refresh retries the new version.
-    if (cached) return { ...cached, staleReason: error instanceof Error ? error.message : String(error) };
+    // A stale list beats an empty picker; the next refresh retries.
+    const cached = readCachedModels();
+    if (cached) return { models: cached, staleReason: error instanceof Error ? error.message : String(error) };
     throw error;
   }
 }
 
-export function parseCatalog(bundle: string): CatalogModel[] {
-  const models: CatalogModel[] = [];
-  const entry = /\{id:"([^"]+)",inputModalities:\[([^\]]*)\]/g;
-  for (let match = entry.exec(bundle); match; match = entry.exec(bundle)) {
-    let end = match.index + 1;
-    for (let depth = 1; depth > 0 && end < bundle.length; end++) {
-      if (bundle[end] === "{") depth++;
-      else if (bundle[end] === "}") depth--;
-    }
-    const body = bundle.slice(match.index, end);
-    if (/[,{]hidden:!0/.test(body)) continue;
-    const str = (key: string) => body.match(new RegExp(`[,{]${key}:"([^"]*)"`))?.[1];
-    const num = (key: string) => {
-      const value = Number(body.match(new RegExp(`[,{]${key}:([\\d.e]+)`))?.[1]);
-      return Number.isFinite(value) && value > 0 ? value : undefined;
-    };
-    const efforts = body.match(/[,{]reasoningEfforts:\[([^\]]*)\]/)?.[1].match(/[a-z]+/g) ?? undefined;
-    models.push({
-      id: match[1],
-      label: str("label") ?? match[1],
-      description: str("description"),
-      vendor: str("vendorLabel"),
-      vision: match[2].includes('"image"'),
-      contextWindow: num("contextWindow"),
-      maxOutputTokens: num("maxOutputTokens"),
-      reasoningEfforts: efforts,
-    });
-  }
-  return models;
-}
+// ponytail: /models has no vision flag; prefix match on families known to accept images.
+const hasVision = (id: string) => /^(claude-|gpt-|google\/gemini-)/.test(id);
 
 export const getModels: AI.GetModels = async () => {
-  const { models } = await fetchCatalog();
+  const { models } = await fetchModels();
   return models.map((m) => ({
     id: m.id,
-    title: m.label,
+    title: m.name,
     icon: "extension-icon.png",
-    description: m.description,
-    contextWindow: m.contextWindow,
+    contextWindow: m.context_length,
     capabilities: {
       systemMessage: { supported: true },
       streaming: { supported: true },
       temperature: { supported: true },
       tools: { supported: true },
-      ...(m.vision ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
-      ...(m.reasoningEfforts?.length
-        ? {
-            reasoningEffort: {
-              supported: true,
-              options: m.reasoningEfforts,
-              default: m.reasoningEfforts.includes("medium") ? "medium" : m.reasoningEfforts[0],
-            },
-          }
-        : {}),
+      ...(hasVision(m.id) ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
     },
   }));
 };
 
-type GenerateRequest = Omit<AI.ModelRequest, "providerOptions"> & { reasoningEffort?: string };
+export const streamCompletion: AI.StreamCompletion = (model, request) => generate(model.id, request);
 
-export const streamCompletion: AI.StreamCompletion = (model, request) =>
-  generate(model.id, { ...request, reasoningEffort: request.providerOptions?.raycast?.reasoningEffort });
+/** Claude models only answer on /messages; everything else uses /chat/completions. */
+function languageModel(modelId: string) {
+  const apiKey = getApiKey();
+  const info = readCachedModels()?.find((m) => m.id === modelId);
+  const anthropic = info ? info.supported_endpoints.includes("/messages") : modelId.startsWith("claude-");
+  return anthropic
+    ? createAnthropic({ baseURL: BASE_URL, apiKey })(modelId)
+    : createOpenAICompatible({ name: "commandcode", baseURL: BASE_URL, apiKey })(modelId);
+}
+
+type GenerateRequest = Omit<AI.ModelRequest, "providerOptions">;
 
 export async function* generate(modelId: string, request: GenerateRequest): AsyncGenerator<AI.ModelStreamPart> {
-  const catalog = readCachedCatalog();
-  const info = catalog?.models.find((m) => m.id === modelId);
-  const { system, messages, restoreName, tools } = toWire(request);
-  const effort = request.reasoningEffort;
-
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getApiKey()}`,
-      "User-Agent": "cli",
-      "x-command-code-version": catalog?.version ?? FALLBACK_CLI_VERSION,
-      "x-cli-environment": "production",
-    },
-    body: JSON.stringify({
-      config: {
-        workingDir: homedir(),
-        date: new Date().toISOString().slice(0, 10),
-        environment: "raycast",
-        structure: [],
-        isGitRepo: false,
-        currentBranch: "",
-        mainBranch: "",
-        gitStatus: "",
-        recentCommits: [],
-      },
-      memory: null,
-      taste: null,
-      skills: null,
-      permissionMode: "standard",
-      params: {
-        model: modelId,
-        messages,
-        tools,
-        system,
-        max_tokens: info?.maxOutputTokens ?? 64_000,
-        stream: true,
-        ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-        ...(effort && info?.reasoningEfforts?.includes(effort) ? { reasoning_effort: effort } : {}),
-      },
-    }),
+  const model = languageModel(modelId);
+  const { tools, restoreName } = toTools(request.tools);
+  const result = streamText({
+    model,
+    system: request.system,
+    messages: toMessages(request.messages ?? []),
+    temperature: request.temperature,
+    tools,
+    toolChoice: request.toolChoice,
+    maxOutputTokens: model.provider.startsWith("anthropic") ? ANTHROPIC_MAX_OUTPUT_TOKENS : undefined,
+    maxRetries: 0,
+    // Errors are yielded below; skip the SDK's default console logging.
+    onError: () => {},
   });
-  if (!res.ok || !res.body) throw new Error(await errorMessage(res));
-
-  // The API streams AI SDK stream parts as newline-delimited JSON — the same shape Raycast expects.
-  const decoder = new TextDecoder();
-  let buffer = "";
-  const parse = (line: string): AI.ModelStreamPart | undefined => {
-    try {
-      const part = JSON.parse(line);
-      if (typeof part.toolName === "string" && restoreName.has(part.toolName)) {
-        part.toolName = restoreName.get(part.toolName);
-      }
-      if (part.type === "tool-call" && part.input === undefined) part.input = part.args;
-      return part;
-    } catch {
-      return undefined;
+  for await (const part of result.fullStream) {
+    if (part.type === "error") {
+      yield { type: "error", error: friendlyError(part.error) };
+      continue;
     }
-  };
-  for await (const chunk of res.body as AsyncIterable<Uint8Array>) {
-    buffer += decoder.decode(chunk, { stream: true });
-    let newline = buffer.indexOf("\n");
-    while (newline >= 0) {
-      const part = parse(buffer.slice(0, newline).trim());
-      buffer = buffer.slice(newline + 1);
-      if (part) yield part;
-      newline = buffer.indexOf("\n");
+    if ("toolName" in part && restoreName.has(part.toolName)) {
+      yield { ...part, toolName: restoreName.get(part.toolName)! } as AI.ModelStreamPart;
+    } else {
+      yield part as AI.ModelStreamPart;
     }
   }
-  const last = parse(buffer.trim());
-  if (last) yield last;
+}
+
+function friendlyError(error: unknown): string {
+  const status = (error as { statusCode?: number })?.statusCode;
+  if (status === 401) return "Command Code rejected the API key. Check extension preferences or run `cmd login`.";
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function errorMessage(res: Response): Promise<string> {
@@ -227,8 +139,8 @@ async function errorMessage(res: Response): Promise<string> {
   } catch {
     // not JSON
   }
-  if (res.status === 401) return "CommandCode rejected the API key. Check extension preferences or run `cmd login`.";
-  return `CommandCode request failed (HTTP ${res.status})${text ? `: ${text.slice(0, 200)}` : ""}`;
+  if (res.status === 401) return "Command Code rejected the API key. Check extension preferences or run `cmd login`.";
+  return `Command Code request failed (HTTP ${res.status})${text ? `: ${text.slice(0, 200)}` : ""}`;
 }
 
 /** Tool names are capped at 64 chars upstream; shorten deterministically and map back. */
@@ -239,59 +151,37 @@ function toWireToolName(name: string): string {
   return `${name.slice(0, MAX_TOOL_NAME_LENGTH - 9)}_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
-function toDataUrl(data: string | Uint8Array | ArrayBuffer | URL, mediaType: string): string {
-  if (data instanceof URL) return data.href;
-  if (typeof data === "string") return /^(data:|https?:)/.test(data) ? data : `data:${mediaType};base64,${data}`;
-  return `data:${mediaType};base64,${Buffer.from(data instanceof ArrayBuffer ? new Uint8Array(data) : data).toString("base64")}`;
-}
-
-function toWire(request: GenerateRequest) {
+function toTools(defs: AI.ModelToolSet | undefined) {
   const restoreName = new Map<string, string>();
-  const tools = Object.entries(request.tools ?? {}).map(([name, definition]) => {
+  if (!defs || Object.keys(defs).length === 0) return { tools: undefined, restoreName };
+  // Raycast executes tools itself and sends their results on the next request.
+  const tools: ToolSet = {};
+  for (const [name, definition] of Object.entries(defs)) {
     const wireName = toWireToolName(name);
     if (wireName !== name) restoreName.set(wireName, name);
-    return {
-      name: wireName,
-      description: definition.description ?? "",
-      input_schema: definition.inputSchema ?? { type: "object", properties: {} },
-    };
-  });
-
-  const system = request.system ? [request.system] : [];
-  const messages: unknown[] = [];
-  for (const message of request.messages ?? []) {
-    if (message.role === "system") {
-      system.push(message.content);
-    } else if (message.role === "user") {
-      messages.push({
-        role: "user",
-        content: message.content.map((p) =>
-          p.type === "file" ? { type: "image", image: toDataUrl(p.data, p.mediaType), mimeType: p.mediaType } : p,
-        ),
-      });
-    } else if (message.role === "assistant") {
-      // Reasoning is dropped: Raycast doesn't keep the provider signatures it would need.
-      const content = message.content.flatMap((p): unknown[] => {
-        if (p.type === "text") return [p];
-        if (p.type === "tool-call") return [{ ...p, toolName: toWireToolName(p.toolName) }];
-        return [];
-      });
-      if (content.length) messages.push({ role: "assistant", content });
-    } else {
-      messages.push({
-        role: "tool",
-        content: message.content.map((p) => ({
-          type: "tool-result",
-          toolCallId: p.toolCallId,
-          toolName: toWireToolName(p.toolName),
-          output: {
-            type: "text",
-            value: typeof p.output.value === "string" ? p.output.value : JSON.stringify(p.output.value),
-          },
-        })),
-      });
-    }
+    tools[wireName] = tool({
+      description: definition.description,
+      inputSchema: jsonSchema(
+        (definition.inputSchema ?? { type: "object", properties: {} }) as Parameters<typeof jsonSchema>[0],
+      ),
+    });
   }
+  return { tools, restoreName };
+}
 
-  return { system: system.join("\n\n") || undefined, messages, tools, restoreName };
+function toMessages(messages: AI.ModelMessage[]): ModelMessage[] {
+  return messages.map((message) => {
+    if (message.role === "assistant") {
+      return {
+        ...message,
+        content: message.content.map((p) =>
+          p.type === "tool-call" ? { ...p, toolName: toWireToolName(p.toolName) } : p,
+        ),
+      };
+    }
+    if (message.role === "tool") {
+      return { ...message, content: message.content.map((p) => ({ ...p, toolName: toWireToolName(p.toolName) })) };
+    }
+    return message;
+  }) as ModelMessage[];
 }
