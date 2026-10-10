@@ -133,7 +133,11 @@ export default class HueClient {
     // Whatever went wrong, the bridge sends the same HTML page, even with status 200, so only the status tells.
     if (headers["content-type"] === "text/html") {
       const status = headers[":status"];
-      if (status === 403) throw new UnauthorizedError("Hue Bridge rejected the username");
+      if (status === 403) {
+        // Reconnecting leads to the Link Again screen.
+        this.close();
+        throw new UnauthorizedError("Hue Bridge rejected the username");
+      }
       if (status === 429 || status === 503) throw new Error("Hue Bridge is busy, try again");
       throw new Error(`Status ${status} from Hue Bridge`);
     }
