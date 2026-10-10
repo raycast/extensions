@@ -124,7 +124,7 @@
       "preferences": [
         {
           "name": "nlpEnabled",
-          "description": "Recognize dates and times (tomorrow 3pm), priorities (!High, !Medium, !Low, !None), tags (#tag), and lists (~list) in the task title.",
+          "description": "Recognize dates and times (tomorrow 3pm), priorities (!High, !Medium, !Low, !None), tags (#tag), and lists (~list) in the task title. When enabled, the Default Date preference is ignored, even if the title contains no date.",
           "type": "checkbox",
           "default": true,
           "label": "Enable NLP",
