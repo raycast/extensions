@@ -655,6 +655,10 @@ export default function Search(
   // The poll count the search effect last ran for: a run with a new count and
   // the same search keeps the list as it is, with no loading indicator.
   const seenPoll = useRef(0);
+  // Whether a search request is in flight, including a quiet poll that shows
+  // no indicator: the next poll waits for it, so a slow daemon reply is not
+  // aborted by the timer that would have asked again.
+  const [inFlight, setInFlight] = useState(false);
   const [showDetails, setShowDetails] = useState(
     preferences.showDetails ?? true,
   );
@@ -849,6 +853,7 @@ export default function Search(
       setResult(undefined);
       setError(undefined);
       setLoading(false);
+      setInFlight(false);
       lastSearchKey.current = undefined;
       return () => controller.abort();
     }
@@ -857,6 +862,7 @@ export default function Search(
       indexPoll !== seenPoll.current && lastSearchKey.current === searchKey;
     seenPoll.current = indexPoll;
     if (!isPoll) setLoading(true);
+    setInFlight(true);
     // Wait for a pause in typing; each obsolete request is aborted before it can update the list.
     const timer = setTimeout(async () => {
       try {
@@ -901,7 +907,10 @@ export default function Search(
           setError(searchError);
         }
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+          setInFlight(false);
+        }
       }
     }, 180);
     return () => {
@@ -922,9 +931,10 @@ export default function Search(
 
   useEffect(() => {
     // A content search was answered from an index still being built: ask
-    // again, quietly, until it is complete, so early results fill in on
-    // their own. Name searches do not wait on the content index.
-    if (!result?.indexing || loading) return;
+    // again, quietly, once the current request is done and until the index
+    // is complete, so early results fill in on their own. Name searches do
+    // not wait on the content index.
+    if (!result?.indexing || inFlight) return;
     if (!isContentSearch(`${query} ${filter}`)) return;
     if (indexPoll >= INDEX_POLL_LIMIT) return;
     const timer = setTimeout(
@@ -932,7 +942,7 @@ export default function Search(
       INDEX_POLL_MS,
     );
     return () => clearTimeout(timer);
-  }, [result, loading, query, filter, indexPoll]);
+  }, [result, inFlight, query, filter, indexPoll]);
 
   useEffect(() => {
     if (!error) return;
