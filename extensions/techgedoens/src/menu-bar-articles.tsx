@@ -10,11 +10,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArchivedArticle,
   normalizeArticleRetention,
   readArticleArchive,
+  readArticleArchiveRevision,
   refreshArticleArchive,
   setArticleReadStatusForArticle,
 } from "./article-archive";
@@ -33,6 +34,7 @@ export default function MenuBarArticlesCommand() {
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error>();
+  const archiveRevision = useRef<string | undefined>(undefined);
   const dateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
 
   useEffect(() => {
@@ -41,12 +43,14 @@ export default function MenuBarArticlesCommand() {
     async function loadArticles() {
       try {
         const storedArticles = await readArticleArchive();
+        archiveRevision.current = await readArticleArchiveRevision();
         if (!cancelled) {
           setArticles(storedArticles);
         }
 
         if (environment.launchType === LaunchType.Background || storedArticles.length === 0) {
           const refreshedArticles = await refreshArticleArchive(retention);
+          archiveRevision.current = await readArticleArchiveRevision();
           if (!cancelled) {
             setArticles(refreshedArticles);
           }
@@ -71,10 +75,14 @@ export default function MenuBarArticlesCommand() {
   useEffect(() => {
     let cancelled = false;
     const interval = setInterval(() => {
-      void readArticleArchive()
-        .then((storedArticles) => {
-          if (!cancelled) {
-            setArticles(storedArticles);
+      void readArticleArchiveRevision()
+        .then(async (latestRevision) => {
+          if (latestRevision && latestRevision !== archiveRevision.current) {
+            const storedArticles = await readArticleArchive();
+            if (!cancelled) {
+              archiveRevision.current = latestRevision;
+              setArticles(storedArticles);
+            }
           }
         })
         .catch((syncError) => {
@@ -105,10 +113,12 @@ export default function MenuBarArticlesCommand() {
       );
       try {
         await setArticleReadStatusForArticle(article, true);
+        archiveRevision.current = await readArticleArchiveRevision();
       } catch (saveError) {
         setError(toError(saveError));
         try {
           setArticles(await readArticleArchive());
+          archiveRevision.current = await readArticleArchiveRevision();
         } catch {
           setArticles((currentArticles) =>
             currentArticles.map((currentArticle) =>
@@ -132,6 +142,7 @@ export default function MenuBarArticlesCommand() {
 
     try {
       setArticles(await refreshArticleArchive(retention));
+      archiveRevision.current = await readArticleArchiveRevision();
     } catch (reloadError) {
       setError(toError(reloadError));
     } finally {
