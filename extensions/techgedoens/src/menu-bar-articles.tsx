@@ -42,7 +42,7 @@ export default function MenuBarArticlesCommand() {
 
     async function loadArticles() {
       try {
-        const storedSnapshot = await readArticleArchiveSnapshot();
+        const storedSnapshot = await readArticleArchiveSnapshot(retention);
         if (!cancelled) {
           archiveRevision.current = storedSnapshot.revision;
           setArticles(storedSnapshot.articles);
@@ -50,7 +50,7 @@ export default function MenuBarArticlesCommand() {
 
         if (environment.launchType === LaunchType.Background || storedSnapshot.articles.length === 0) {
           await refreshArticleArchive(retention);
-          const refreshedSnapshot = await readArticleArchiveSnapshot();
+          const refreshedSnapshot = await readArticleArchiveSnapshot(retention);
           if (!cancelled) {
             archiveRevision.current = refreshedSnapshot.revision;
             setArticles(refreshedSnapshot.articles);
@@ -79,7 +79,7 @@ export default function MenuBarArticlesCommand() {
       void readArticleArchiveRevision()
         .then(async (latestRevision) => {
           if (latestRevision && latestRevision !== archiveRevision.current) {
-            const storedSnapshot = await readArticleArchiveSnapshot();
+            const storedSnapshot = await readArticleArchiveSnapshot(retention);
             if (!cancelled) {
               archiveRevision.current = storedSnapshot.revision;
               setArticles(storedSnapshot.articles);
@@ -97,7 +97,7 @@ export default function MenuBarArticlesCommand() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [retention]);
 
   const sortedArticles = [...articles].sort(
     (first, second) => second.publishedAt.getTime() - first.publishedAt.getTime(),
@@ -114,13 +114,13 @@ export default function MenuBarArticlesCommand() {
       );
       try {
         await setArticleReadStatusForArticle(article, true);
-        const storedSnapshot = await readArticleArchiveSnapshot();
+        const storedSnapshot = await readArticleArchiveSnapshot(retention);
         archiveRevision.current = storedSnapshot.revision;
         setArticles(storedSnapshot.articles);
       } catch (saveError) {
         setError(toError(saveError));
         try {
-          const storedSnapshot = await readArticleArchiveSnapshot();
+          const storedSnapshot = await readArticleArchiveSnapshot(retention);
           archiveRevision.current = storedSnapshot.revision;
           setArticles(storedSnapshot.articles);
         } catch {
@@ -146,7 +146,7 @@ export default function MenuBarArticlesCommand() {
 
     try {
       await refreshArticleArchive(retention);
-      const storedSnapshot = await readArticleArchiveSnapshot();
+      const storedSnapshot = await readArticleArchiveSnapshot(retention);
       archiveRevision.current = storedSnapshot.revision;
       setArticles(storedSnapshot.articles);
     } catch (reloadError) {
