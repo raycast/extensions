@@ -37,7 +37,7 @@ export default function Command() {
       {items?.map((item, index) => (
         <List.Item
           key={item.guid ?? item.link ?? index}
-          icon={{ source: Icon.MugSteam, mask: Image.Mask.Circle, tintColor: Color.Blue }}
+          icon={{ source: Icon.Document, mask: Image.Mask.Circle, tintColor: Color.Blue }}
           title={item.title ?? "Untitled"}
           actions={<Actions item={item} />}
           accessories={item.pubDate ? [{ date: new Date(item.pubDate), tooltip: item.pubDate }] : []}

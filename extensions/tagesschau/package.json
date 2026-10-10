@@ -8,6 +8,7 @@
   "categories": [
     "News"
   ],
+  "platforms": ["macOS", "Windows"],
   "license": "MIT",
   "commands": [
     {
