@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix user search stalling] - {PR_MERGE_DATE}
+## [Fix user search stalling] - 2026-10-10
 
 - Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
 - Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
