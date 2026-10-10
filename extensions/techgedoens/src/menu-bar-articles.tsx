@@ -14,8 +14,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArchivedArticle,
   normalizeArticleRetention,
-  readArticleArchive,
   readArticleArchiveRevision,
+  readArticleArchiveSnapshot,
   refreshArticleArchive,
   setArticleReadStatusForArticle,
 } from "./article-archive";
@@ -42,17 +42,18 @@ export default function MenuBarArticlesCommand() {
 
     async function loadArticles() {
       try {
-        const storedArticles = await readArticleArchive();
-        archiveRevision.current = await readArticleArchiveRevision();
+        const storedSnapshot = await readArticleArchiveSnapshot();
         if (!cancelled) {
-          setArticles(storedArticles);
+          archiveRevision.current = storedSnapshot.revision;
+          setArticles(storedSnapshot.articles);
         }
 
-        if (environment.launchType === LaunchType.Background || storedArticles.length === 0) {
-          const refreshedArticles = await refreshArticleArchive(retention);
-          archiveRevision.current = await readArticleArchiveRevision();
+        if (environment.launchType === LaunchType.Background || storedSnapshot.articles.length === 0) {
+          await refreshArticleArchive(retention);
+          const refreshedSnapshot = await readArticleArchiveSnapshot();
           if (!cancelled) {
-            setArticles(refreshedArticles);
+            archiveRevision.current = refreshedSnapshot.revision;
+            setArticles(refreshedSnapshot.articles);
           }
         }
       } catch (loadError) {
@@ -78,10 +79,10 @@ export default function MenuBarArticlesCommand() {
       void readArticleArchiveRevision()
         .then(async (latestRevision) => {
           if (latestRevision && latestRevision !== archiveRevision.current) {
-            const storedArticles = await readArticleArchive();
+            const storedSnapshot = await readArticleArchiveSnapshot();
             if (!cancelled) {
-              archiveRevision.current = latestRevision;
-              setArticles(storedArticles);
+              archiveRevision.current = storedSnapshot.revision;
+              setArticles(storedSnapshot.articles);
             }
           }
         })
@@ -113,12 +114,15 @@ export default function MenuBarArticlesCommand() {
       );
       try {
         await setArticleReadStatusForArticle(article, true);
-        archiveRevision.current = await readArticleArchiveRevision();
+        const storedSnapshot = await readArticleArchiveSnapshot();
+        archiveRevision.current = storedSnapshot.revision;
+        setArticles(storedSnapshot.articles);
       } catch (saveError) {
         setError(toError(saveError));
         try {
-          setArticles(await readArticleArchive());
-          archiveRevision.current = await readArticleArchiveRevision();
+          const storedSnapshot = await readArticleArchiveSnapshot();
+          archiveRevision.current = storedSnapshot.revision;
+          setArticles(storedSnapshot.articles);
         } catch {
           setArticles((currentArticles) =>
             currentArticles.map((currentArticle) =>
@@ -141,8 +145,10 @@ export default function MenuBarArticlesCommand() {
     setError(undefined);
 
     try {
-      setArticles(await refreshArticleArchive(retention));
-      archiveRevision.current = await readArticleArchiveRevision();
+      await refreshArticleArchive(retention);
+      const storedSnapshot = await readArticleArchiveSnapshot();
+      archiveRevision.current = storedSnapshot.revision;
+      setArticles(storedSnapshot.articles);
     } catch (reloadError) {
       setError(toError(reloadError));
     } finally {

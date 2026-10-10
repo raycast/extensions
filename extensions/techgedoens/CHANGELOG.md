@@ -1,5 +1,9 @@
 # Changelog
 
+## [Reliable Menu Bar Synchronization] - {PR_MERGE_DATE}
+
+- Keep menu bar article state consistent when multiple Raycast commands update the archive at the same time.
+
 ## [AI Tools, Sharing, and Menu Bar] - 2026-10-10
 
 - Ask Techgedöns questions directly from Raycast AI with live results from the public blog archive.
