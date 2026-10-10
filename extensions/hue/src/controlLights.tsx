@@ -339,7 +339,8 @@ function handleSetColor(
 
   return applyUpdate(hue, {
     rateLimiter,
-    lights: new Map([[light.id, changes]]),
+    // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
+    lights: new Map([[light.id, { ...changes, color_temperature: { mirek: null, mirek_valid: false } }]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Set color of ${light.metadata.name} to ${color.name}`,
     failure: "Failed setting color",
