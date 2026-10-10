@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [AI Tools: Tabs, History and Bookmarks] - {PR_MERGE_DATE}
+## [AI Tools: Tabs, History and Bookmarks] - 2026-10-10
 
 - Added AI tools to list open tabs, get the focused tab, and search browsing history and bookmarks.
 - History and bookmark searches return 50 results by default, up to 100.
