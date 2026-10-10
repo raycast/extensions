@@ -1624,6 +1624,63 @@ test("a login started while a check is in flight lets it finish, and keeps its o
   assert.equal(login().status.state, "waiting");
 });
 
+test("no check runs while a login is canceled, which would put it back on screen", async () => {
+  const harness = hookHarness();
+  const waiting = { state: "waiting", url: "https://account.proton.me/desktop/login?app=pass", isFinishing: false };
+  let checks = 0;
+  let finishCancel = () => {};
+  const { NotLoggedInView } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => ({ hide: async () => undefined }),
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => waiting.url,
+      // Still running for the extension, until its files are removed.
+      checkBrowserLogin: async () => {
+        checks++;
+        return waiting;
+      },
+      cancelBrowserLogin: () =>
+        new Promise<void>((done) => {
+          finishCancel = done;
+        }),
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const login = () =>
+    harness.render(NotLoggedInView, { reload: () => undefined }).props.login as {
+      cancel: () => Promise<void>;
+      status: { state: string };
+    };
+
+  login();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(login().status.state, "waiting");
+
+  const canceling = login().cancel();
+  await new Promise(setImmediate);
+  // The view checks on the login every second while it waits.
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(checks, 1);
+
+  finishCancel();
+  await canceling;
+  assert.equal(login().status.state, "none");
+});
+
 test("no pass-cli command starts while a browser login is saving its session", async () => {
   let adapters = 0;
   const api = loadView("pass-cli.ts", {
