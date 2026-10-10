@@ -260,6 +260,7 @@ async function waitForTurnCompletion(options: {
   const completionAbort = new AbortController();
   const earlyDeltas: AgentMessageDeltaNotification[] = [];
   const earlyItems: ItemCompletedNotification[] = [];
+  const earlyCompletions: TurnCompletedNotification[] = [];
 
   const appendDelta = (params: AgentMessageDeltaNotification) => {
     if (params.threadId !== options.threadId || params.turnId !== turnId || !params.delta) return;
@@ -298,7 +299,14 @@ async function waitForTurnCompletion(options: {
     // Subscribe before turn/start: a fast turn can finish before its request resolves.
     const completion = options.client.waitForNotification<TurnCompletedNotification>(
       "turn/completed",
-      (params) => params.threadId === options.threadId,
+      (params) => {
+        if (params.threadId !== options.threadId) return false;
+        if (turnId === null) {
+          earlyCompletions.push(params);
+          return false;
+        }
+        return params.turn.id === turnId;
+      },
       options.signal ? AbortSignal.any([options.signal, completionAbort.signal]) : completionAbort.signal,
     );
     void completion.catch(() => undefined);
@@ -319,8 +327,9 @@ async function waitForTurnCompletion(options: {
     earlyDeltas.forEach(appendDelta);
     earlyItems.forEach(captureItem);
     if (options.signal?.aborted) await onAbort();
-    const completed = await completion;
-    if (completed.turn.id !== turnId) throw new Error("Codex returned completion for a different turn.");
+    const earlyCompletion = earlyCompletions.find((event) => event.turn.id === turnId);
+    if (earlyCompletion) completionAbort.abort();
+    const completed = earlyCompletion ?? (await completion);
 
     if (completed.turn.status === "failed") {
       throw new Error(formatTurnError(completed.turn.error));

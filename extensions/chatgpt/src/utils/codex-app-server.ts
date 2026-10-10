@@ -491,21 +491,12 @@ async function bootstrapCodexRuntime(): Promise<CodexCommand> {
   const pathDir = path.join(runtimeRoot, "vendor", target.targetTriple, "codex-path");
 
   if (!(await fileExists(binaryPath))) {
-    const bundledArchivePath = path.join(
-      environment.assetsPath,
-      "codex-runtime",
-      `${target.targetTriple}-${CODEX_VERSION}.tgz`,
-    );
-    if (await fileExists(bundledArchivePath)) {
-      await installCodexRuntimeFromArchive(runtimeRoot, bundledArchivePath);
-    } else {
-      const archivePath = path.join(environment.supportPath, `codex-${target.targetTriple}-${CODEX_VERSION}.tgz`);
-      try {
-        await downloadCodexArchive(target.targetTriple, archivePath);
-        await installCodexRuntimeFromArchive(runtimeRoot, archivePath);
-      } finally {
-        await fs.rm(archivePath, { force: true });
-      }
+    const archivePath = path.join(environment.supportPath, `codex-${target.targetTriple}-${CODEX_VERSION}.tgz`);
+    try {
+      await downloadCodexArchive(target.targetTriple, archivePath);
+      await installCodexRuntimeFromArchive(runtimeRoot, archivePath);
+    } finally {
+      await fs.rm(archivePath, { force: true });
     }
   }
 
