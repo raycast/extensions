@@ -28,6 +28,8 @@ export default async function createHueClient(bridgeConfig: BridgeConfig) {
       });
 
       stream.on("response", (response) => {
+        // Only the status matters, and an open stream would keep HueClient.close() from ending the session
+        stream.close();
         if (response[":status"] === 403) {
           return reject(new Error("Please check your username."));
         } else if (response[":status"] !== 200) {
