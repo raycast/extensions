@@ -15,8 +15,11 @@ import {
 
 export const RPC_CODE = {
   connectionClosed: -32_000,
-  // TablePro before 0.67 answered a denied call with -32007.
+  // TablePro 0.38 to 0.66 answered a lockout with 429 and its generic -32000.
+  legacyRateLimited: -32_000,
+  // TablePro before 0.67 answered a denied call, and a bad token, with -32007.
   legacyForbidden: -32_007,
+  legacyExpired: -32_008,
   methodNotFound: -32_601,
   unsupportedProtocolVersion: -32_022,
   sessionNotFound: -33_001,
@@ -81,6 +84,7 @@ function errorForRpcCode(
     case RPC_CODE.legacyForbidden:
       return new ExternalAccessDeniedError(message);
     case RPC_CODE.expired:
+    case RPC_CODE.legacyExpired:
       return new TokenExpiredError();
     case RPC_CODE.unauthenticated:
       return new TokenRevokedError();
@@ -92,28 +96,31 @@ function errorForRpcCode(
       return new UpdateRequiredError(MIN_TABLEPRO_VERSION);
     case RPC_CODE.sessionNotFound:
       return new MCPSessionExpiredError(message);
-    case RPC_CODE.connectionClosed:
-      return new MCPNotRunningError();
     default:
       return undefined;
   }
 }
 
+// The status decides 401 and 429: TablePro before 0.67 sent them with -32007 and -32000,
+// codes that mean something else elsewhere.
 function translateHttpError(err: StreamableHTTPError): Error {
   const body = parseRpcErrorBody(err.message);
   const message = body?.message ?? err.message;
+  if (err.code === 401) {
+    return body?.code === RPC_CODE.expired ||
+      body?.code === RPC_CODE.legacyExpired
+      ? new TokenExpiredError()
+      : new TokenRevokedError();
+  }
+  if (err.code === 429) return new RateLimitedError();
   const byCode = errorForRpcCode(body?.code, message);
   if (byCode) return byCode;
   switch (err.code) {
-    case 401:
-      return new TokenRevokedError();
     case 403:
       return new ExternalAccessDeniedError(message);
     case 404:
       if (body?.code === RPC_CODE.methodNotFound) return new Error(message);
       return new MCPSessionExpiredError(message);
-    case 429:
-      return new RateLimitedError();
     default:
       return new Error(message);
   }
@@ -126,6 +133,7 @@ function stripMcpErrorPrefix(message: string): string {
 export function translateError(err: unknown): Error {
   if (err instanceof StreamableHTTPError) return translateHttpError(err);
   if (err instanceof McpError) {
+    if (err.code === RPC_CODE.connectionClosed) return new MCPNotRunningError();
     const message = stripMcpErrorPrefix(err.message);
     const byCode = errorForRpcCode(err.code, message);
     if (byCode) return byCode;

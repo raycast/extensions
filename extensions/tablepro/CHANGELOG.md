@@ -8,6 +8,9 @@
 - A turned-off MCP server or an outdated TablePro shows its own message.
 - The extension no longer reads or deletes TablePro's handshake file.
 - TablePro is found by its bundle ID. A new MCP Port preference replaces the TablePro App preference.
+- On TablePro 0.38 to 0.66, a revoked or expired token and a lockout show their own messages.
+- After TablePro refuses the API token, the extension stops sending it until you pair again, so it no longer locks other MCP clients out.
+- A query no longer fails with "Session not found" after TablePro restarts or ends an idle session.
 
 ## [Initial Version] - 2026-05-22
 

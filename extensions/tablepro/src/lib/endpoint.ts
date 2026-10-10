@@ -161,6 +161,7 @@ async function probe(
   // The code only picks the message; no credential goes to this server.
   switch (parseRpcErrorBody(text)?.code) {
     case RPC_CODE.rateLimited:
+    case RPC_CODE.legacyRateLimited:
       return response.status === 429
         ? { kind: "rate-limited" }
         : { kind: "other" };

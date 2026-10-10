@@ -2,6 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
   StreamableHTTPClientTransport,
   StreamableHTTPError,
+  StreamableHTTPReconnectionOptions,
 } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import {
@@ -38,12 +39,26 @@ import {
   verifiedEndpoint,
 } from "./endpoint";
 import { parseRpcErrorBody, parseToolError, translateError } from "./protocol";
-import { readStoredApiToken } from "./storage";
+import {
+  TokenRejection,
+  readStoredApiToken,
+  rejectionOf,
+  rememberRejectedToken,
+} from "./storage";
 
 export type { ProgressEvent } from "./types";
 
 const DEFAULT_ROW_LIMIT = 200;
 const PAIRING_EXCHANGE_TIMEOUT_MS = 10_000;
+// The SDK's own reconnect sends the token to whatever holds the port by then, unverified.
+const NO_RECONNECT: StreamableHTTPReconnectionOptions = {
+  initialReconnectionDelay: 1_000,
+  maxReconnectionDelay: 30_000,
+  reconnectionDelayGrowFactor: 1.5,
+  maxRetries: 0,
+};
+// The SDK's onerror text when TablePro 0.37 to 0.66 ends the GET stream: the session or the app is gone.
+const STREAM_ENDED = /^(SSE stream disconnected|Maximum reconnection attempts)/;
 
 export interface MCPCallOptions {
   signal?: AbortSignal;
@@ -56,10 +71,16 @@ export interface SearchHistoryOptions {
   signal?: AbortSignal;
 }
 
+interface Connected {
+  client: Client;
+  // Undefined when TablePro allows anonymous access and no token went out.
+  token?: string;
+}
+
 // The identity check lives and dies with one client, so a new client always probes first.
 interface LiveClient {
   port: number;
-  client: Promise<Client>;
+  connected: Promise<Connected>;
 }
 
 let live: LiveClient | null = null;
@@ -68,9 +89,12 @@ function liveClient(): LiveClient {
   const target = endpoint();
   if (live && live.port === target.port) return live;
   resetClient();
-  const client = createClient(target, () => dropClient(entry));
-  const entry: LiveClient = { port: target.port, client };
-  client.catch(() => dropClient(entry));
+  const connected = createClient(target, {
+    onClose: () => dropClient(entry),
+    onStreamEnd: () => forgetClient(entry),
+  });
+  const entry: LiveClient = { port: target.port, connected };
+  connected.catch(() => dropClient(entry));
   live = entry;
   return entry;
 }
@@ -78,9 +102,14 @@ function liveClient(): LiveClient {
 function dropClient(entry: LiveClient): void {
   if (live !== entry) return;
   live = null;
-  entry.client
-    .then((client) => client.close().catch(() => undefined))
+  entry.connected
+    .then(({ client }) => client.close().catch(() => undefined))
     .catch(() => undefined);
+}
+
+// Not closed: closing rejects a call still in flight as "Connection closed".
+function forgetClient(entry: LiveClient): void {
+  if (live === entry) live = null;
 }
 
 export function resetClient(): void {
@@ -108,27 +137,37 @@ function keepsClient(err: unknown, translated: Error): boolean {
 
 async function createClient(
   target: Endpoint,
-  onClose: () => void,
-): Promise<Client> {
+  hooks: { onClose: () => void; onStreamEnd: () => void },
+): Promise<Connected> {
   const app = await requireTablePro();
   await assertInstalledVersionSupported(app);
-  const token = await getApiToken();
+  const stored = await getApiToken();
+  // Probing for a token TablePro already refused only adds failed logins toward its lockout.
+  const rejection = await rejectionOf(stored);
+  if (rejection === "expired") throw new TokenExpiredError();
+  if (rejection === "revoked") throw new TokenRevokedError();
   const server = await verifiedEndpoint({ allowAutoStart: true, target });
-  const transport = new StreamableHTTPClientTransport(
-    new URL(server.mcpUrl),
-    server.anonymous
-      ? undefined
-      : { requestInit: { headers: { Authorization: `Bearer ${token}` } } },
-  );
+  const token = server.anonymous ? undefined : stored;
+  const transport = new StreamableHTTPClientTransport(new URL(server.mcpUrl), {
+    reconnectionOptions: NO_RECONNECT,
+    requestInit: token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : undefined,
+  });
   const client = new Client(
     { name: CLIENT_NAME, version: CLIENT_VERSION },
     { capabilities: {} },
   );
+  client.onerror = (error) => {
+    if (STREAM_ENDED.test(error.message)) hooks.onStreamEnd();
+  };
   try {
     await client.connect(transport);
   } catch (err) {
     await transport.close().catch(() => undefined);
-    throw translateError(err);
+    const translated = translateError(err);
+    await rememberRejection(token, translated);
+    throw translated;
   }
   try {
     assertTableProServer(client, server);
@@ -136,9 +175,20 @@ async function createClient(
     await client.close().catch(() => undefined);
     throw err;
   }
-  // No transport.onerror reset: closing there fails a 403 call as "Connection closed".
-  client.onclose = onClose;
-  return client;
+  client.onclose = hooks.onClose;
+  return { client, token };
+}
+
+async function rememberRejection(
+  token: string | undefined,
+  err: Error,
+): Promise<void> {
+  if (!token) return;
+  let reason: TokenRejection;
+  if (err instanceof TokenExpiredError) reason = "expired";
+  else if (err instanceof TokenRevokedError) reason = "revoked";
+  else return;
+  await rememberRejectedToken(token, reason).catch(() => undefined);
 }
 
 function assertTableProServer(client: Client, server: VerifiedEndpoint): void {
@@ -206,34 +256,42 @@ async function invokeTool<T>(
   retried: boolean,
 ): Promise<T> {
   let entry: LiveClient;
-  let client: Client;
+  let connected: Connected;
   try {
     entry = liveClient();
-    client = await entry.client;
+    connected = await entry.connected;
   } catch (err) {
     throw translateError(err);
   }
   let envelope: ToolCallEnvelope;
   try {
     const onProgress = options.onProgress;
-    envelope = (await client.callTool({ name, arguments: args }, undefined, {
-      signal: options.signal,
-      onprogress: onProgress
-        ? (progress) =>
-            onProgress({
-              progress: progress.progress,
-              total: progress.total,
-              message: progress.message,
-            })
-        : undefined,
-    })) as ToolCallEnvelope;
+    envelope = (await connected.client.callTool(
+      { name, arguments: args },
+      undefined,
+      {
+        signal: options.signal,
+        onprogress: onProgress
+          ? (progress) =>
+              onProgress({
+                progress: progress.progress,
+                total: progress.total,
+                message: progress.message,
+              })
+          : undefined,
+      },
+    )) as ToolCallEnvelope;
   } catch (err) {
     const translated = translateError(err);
     if (keepsClient(err, translated)) throw translated;
     dropClient(entry);
-    // A refused connection sent nothing, so even a write can go again.
+    await rememberRejection(connected.token, translated);
+    // A refused connection sent nothing, and TablePro looks up the session before it runs
+    // anything, so even a write can go again. A dropped socket may come after the work.
     const retry =
-      isConnectionRefused(err) || (idempotent && isSessionLost(translated));
+      isConnectionRefused(err) ||
+      translated instanceof MCPSessionExpiredError ||
+      (idempotent && translated instanceof MCPNotRunningError);
     if (!retry || retried) throw translated;
     return invokeTool<T>(name, args, options, idempotent, true);
   }
