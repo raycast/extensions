@@ -10,7 +10,6 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { mkdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { useState } from "react";
@@ -24,7 +23,7 @@ import {
   outlookCalendarUrl,
   validateEvent,
 } from "./lib/calendar";
-import { buildIcs, icsFileName } from "./lib/ics";
+import { writeIcsFile } from "./lib/ics";
 import { meetingUrl, resolveMeetingId } from "./lib/urls";
 
 type Provider = "google" | "outlook" | "ics";
@@ -72,10 +71,7 @@ function toEvent(v: Values): CalendarEvent | undefined {
 }
 
 async function saveIcs(event: CalendarEvent): Promise<string> {
-  const dir = join(homedir(), "Downloads");
-  await mkdir(dir, { recursive: true });
-  const path = join(dir, icsFileName(event));
-  await writeFile(path, buildIcs(event), "utf8");
+  const path = await writeIcsFile(event, join(homedir(), "Downloads"));
   await open(path);
   return path;
 }

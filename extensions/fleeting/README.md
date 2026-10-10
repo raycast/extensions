@@ -28,4 +28,4 @@ Fleeting is an unofficial Raycast companion that launches fictional workplace me
 - Outlook: compose links cannot carry recurrence or privacy; repeating events fall back to `.ics`.
 - `.ics`: sets `CLASS:PRIVATE`/`TRANSP:OPAQUE`. Recurring events use floating local time so they hold their wall-clock time across DST.
 - Raycast has no time-only picker, so date and start time are one date-time field.
-- URL: `https://iminafleeting.com/?m=<id>&v=en-US`, plus `&name=<Your Name>` when the Your Name preference is set. Accent selection is not exposed until the parameter is verified.
+- URL: `https://iminafleeting.com/?m=<id>&v=en-US`. Set your name on the Fleeting website; the site remembers it in your browser.

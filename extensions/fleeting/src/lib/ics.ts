@@ -1,9 +1,15 @@
 import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { CalendarEvent, eventDescription, eventLocation, formatLocal, formatUtc, rrule } from "./calendar";
 import { meetingUrl } from "./urls";
 
 export function escapeText(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r\n|\r|\n/g, "\\n");
 }
 
 /** Folds a content line at 75 octets, never splitting a multi-byte character. */
@@ -42,7 +48,8 @@ export function buildIcs(event: CalendarEvent, now: Date = new Date()): string {
     `UID:${randomUUID()}@fleeting-raycast`,
     `DTSTAMP:${formatUtc(now)}`,
     `DTSTART:${stamp(event.start)}`,
-    `DTEND:${stamp(event.end)}`,
+    // An elapsed duration avoids equal or stretched local end times at DST changes.
+    recurring ? `DURATION:PT${(event.end.getTime() - event.start.getTime()) / 1000}S` : `DTEND:${stamp(event.end)}`,
     `SUMMARY:${escapeText(event.title)}`,
     `DESCRIPTION:${escapeText(eventDescription(event))}`,
   ];
@@ -72,5 +79,12 @@ export function icsFileName(event: CalendarEvent): string {
       .slice(0, 40) || "meeting";
   const d = event.start;
   const p = (n: number) => String(n).padStart(2, "0");
-  return `fleeting-${slug}-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.ics`;
+  return `fleeting-${slug}-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}-${randomUUID()}.ics`;
+}
+
+export async function writeIcsFile(event: CalendarEvent, directory: string): Promise<string> {
+  await mkdir(directory, { recursive: true });
+  const path = join(directory, icsFileName(event));
+  await writeFile(path, buildIcs(event), { encoding: "utf8", flag: "wx" });
+  return path;
 }

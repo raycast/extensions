@@ -1,4 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
 import { DEFAULT_MEETING_ID, MEETINGS, MeetingId, isMeetingId } from "../data/meetings";
 
 export const BASE_URL = "https://iminafleeting.com/";
@@ -10,8 +9,6 @@ export function meetingUrl(id: MeetingId): string {
   const url = new URL(BASE_URL);
   url.searchParams.set("m", id);
   url.searchParams.set("v", DEFAULT_VOICE);
-  const name = getPreferenceValues<Preferences>().name?.trim();
-  if (name) url.searchParams.set("name", name);
   return url.toString();
 }
 

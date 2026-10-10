@@ -75,8 +75,8 @@ export function googleCalendarUrl(event: CalendarEvent): string {
   const p = url.searchParams;
   p.set("action", "TEMPLATE");
   p.set("text", event.title);
-  // Local times plus ctz keep recurring events stable across DST changes.
-  p.set("dates", `${formatLocal(event.start)}/${formatLocal(event.end)}`);
+  // UTC instants disambiguate DST transitions; ctz sets the event's local time zone.
+  p.set("dates", `${formatUtc(event.start)}/${formatUtc(event.end)}`);
   p.set("ctz", event.timeZone);
   p.set("details", eventDescription(event));
   const location = eventLocation(event);
