@@ -5,28 +5,17 @@ import {
   Icon,
   LaunchProps,
   getPreferenceValues,
-  open,
   showToast,
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { useState } from "react";
 import { MEETINGS, MeetingId, getMeeting, isMeetingId } from "./data/meetings";
-import {
-  CalendarEvent,
-  RECURRENCE_LABELS,
-  Recurrence,
-  googleCalendarUrl,
-  localTimeZone,
-  outlookCalendarUrl,
-  validateEvent,
-} from "./lib/calendar";
-import { writeIcsFile } from "./lib/ics";
+import { CalendarEvent, RECURRENCE_LABELS, Recurrence, localTimeZone, validateEvent } from "./lib/calendar";
+import { CalendarProvider, exportCalendarEvent } from "./lib/calendar-export";
 import { meetingUrl, resolveMeetingId } from "./lib/urls";
 
-type Provider = "google" | "outlook" | "ics";
+type Provider = CalendarProvider;
 
 type Values = {
   meeting: string;
@@ -70,12 +59,6 @@ function toEvent(v: Values): CalendarEvent | undefined {
   };
 }
 
-async function saveIcs(event: CalendarEvent): Promise<string> {
-  const path = await writeIcsFile(event, join(homedir(), "Downloads"));
-  await open(path);
-  return path;
-}
-
 async function exportEvent(provider: Provider, values: Values): Promise<void> {
   const event = toEvent(values);
   const error = event ? validateEvent(event) : "Fill in all required fields";
@@ -85,28 +68,20 @@ async function exportEvent(provider: Provider, values: Values): Promise<void> {
   }
 
   try {
-    if (provider === "outlook" && event.recurrence !== "none") {
-      // Outlook compose links cannot carry a recurrence rule.
-      await saveIcs(event);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Saved .ics instead",
-        message: "Outlook links can't repeat events. Open the file in Outlook to import it.",
-      });
-      return;
-    }
-    if (provider === "ics") {
-      const path = await saveIcs(event);
-      await showToast({ style: Toast.Style.Success, title: "Calendar invite saved", message: path });
-      return;
-    }
-    await open(provider === "google" ? googleCalendarUrl(event) : outlookCalendarUrl(event));
+    const result = await exportCalendarEvent(provider, event);
     await showToast({
       style: Toast.Style.Success,
-      title: provider === "google" ? "Opened Google Calendar" : "Opened Outlook",
-      message: event.isPrivate
-        ? "This link can't set Private; adjust visibility in the event. Busy is requested where supported."
-        : undefined,
+      title:
+        result.status === "invite-saved"
+          ? provider === "outlook"
+            ? "Saved .ics instead"
+            : "Calendar invite saved"
+          : provider === "google"
+            ? "Opened Google Calendar"
+            : "Opened Outlook",
+      message: [result.status === "invite-saved" ? result.path : undefined, ...result.warnings]
+        .filter(Boolean)
+        .join("\n"),
     });
   } catch (e) {
     await showToast({

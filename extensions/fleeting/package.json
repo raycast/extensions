@@ -36,7 +36,33 @@
       "mode": "no-view"
     }
   ],
-  "tools": [],
+  "tools": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "Search fictional Fleeting meetings, get join links, list favorites, and read launch and calendar preferences."
+    },
+    {
+      "name": "open-meeting",
+      "title": "Open Meeting",
+      "description": "Open a fictional Fleeting meeting in the browser. Supports specific, preferred, random, and Quick Meeting selections."
+    },
+    {
+      "name": "copy-meeting-link",
+      "title": "Copy Meeting Link",
+      "description": "Copy a fictional Fleeting meeting's join link to the clipboard."
+    },
+    {
+      "name": "set-favorite",
+      "title": "Set Favorite",
+      "description": "Add or remove a Fleeting meeting from the favorites shown in Start Meeting."
+    },
+    {
+      "name": "block-calendar",
+      "title": "Block Calendar",
+      "description": "Open a prefilled Google Calendar or Outlook draft, or save a calendar invite file for a fictional meeting. The user must save or import the event to block time."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.7"

@@ -21,9 +21,23 @@ Fleeting is an unofficial Raycast companion that launches fictional workplace me
 - **Block Calendar** – form that opens a prefilled Google Calendar / Outlook event or saves an `.ics` to `~/Downloads`. Supports repeat (daily, weekdays, weekly, monthly).
 - **Quick Meeting** – no-view; opens your preferred (or a random) meeting. Assign a hotkey.
 
+## Raycast AI
+
+Mention `@fleeting` in Raycast AI to search scenarios, launch a specific, preferred, or random meeting, copy a join link, manage favorites, or prepare a calendar block.
+
+- "@fleeting what security meetings are available?"
+- "@fleeting open a random meeting"
+- "@fleeting copy the API Design Review link"
+- "@fleeting add Engineering Standup to my favorites"
+- "@fleeting block 30 minutes for Engineering Standup tomorrow at 10am in Google Calendar"
+
+AI tools use the same preferences and favorites as the commands. Calendar blocks open a draft or save an invite file. Save the draft or import the file to add it to your calendar. Recurrence follows your device's local time zone. Calendar links cannot set private visibility, and recurring Outlook blocks use `.ics` files.
+
+Tool instructions and evals follow the [Raycast AI extension format](https://developers.raycast.com/ai/learn-core-concepts-of-ai-extensions). Run `npx ray evals` to check the suggested prompts with mocked tool results.
+
 ## Notes and limits
 
-- Local only: no accounts, no network calls besides opening links, no calendar read access, no analytics.
+- Meeting and calendar actions run locally: no accounts, no network calls besides opening links, no calendar read access, no analytics. When using Raycast AI, tool inputs and results are handled by Raycast AI.
 - Google Calendar: requests Busy (`trp=true`); the template URL cannot set Private. Recurrence uses the widely used (undocumented) `recur` parameter.
 - Outlook: compose links cannot carry recurrence or privacy; repeating events fall back to `.ics`.
 - `.ics`: sets `CLASS:PRIVATE`/`TRANSP:OPAQUE`. Recurring events use floating local time so they hold their wall-clock time across DST.
