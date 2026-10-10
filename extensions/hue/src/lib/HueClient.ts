@@ -130,6 +130,8 @@ export default class HueClient {
   }
 
   public listenToEventSource(onUpdate: (resources: HueEvent["data"]) => void): () => void {
+    // Node 22 throws, inside the effect that listens, when the session closed before the effect ran.
+    if (this.http2Session.closed || this.http2Session.destroyed) return () => {};
     const stream = this.http2Session.request(
       {
         ":method": "GET",
