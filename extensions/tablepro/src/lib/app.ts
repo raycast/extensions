@@ -15,7 +15,6 @@ export const MIN_TABLEPRO_VERSION = "0.37.0";
 const execFileAsync = promisify(execFile);
 
 let tableProPromise: Promise<Application | undefined> | null = null;
-const versionByPath = new Map<string, Promise<string | undefined>>();
 
 function isTableProBundle(app: Application): boolean {
   return app.bundleId?.toLowerCase() === BUNDLE_ID.toLowerCase();
@@ -69,16 +68,6 @@ async function readBundleVersion(appPath: string): Promise<string | undefined> {
   }
 }
 
-export function installedVersion(
-  app: Application,
-): Promise<string | undefined> {
-  const cached = versionByPath.get(app.path);
-  if (cached) return cached;
-  const promise = readBundleVersion(app.path);
-  versionByPath.set(app.path, promise);
-  return promise;
-}
-
 function versionParts(version: string): number[] {
   return version
     .split(/[-+]/)[0]!
@@ -108,7 +97,8 @@ export function assertSupportedVersion(version: string | undefined): void {
 export async function assertInstalledVersionSupported(
   app: Application,
 ): Promise<void> {
-  assertSupportedVersion(await installedVersion(app));
+  // Read on every check, so an update shows up without reopening the command.
+  assertSupportedVersion(await readBundleVersion(app.path));
 }
 
 export async function openInTablePro(url: string): Promise<void> {

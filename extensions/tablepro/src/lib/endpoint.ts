@@ -1,13 +1,15 @@
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { assertSupportedVersion } from "./app";
+import { MIN_TABLEPRO_VERSION, assertSupportedVersion } from "./app";
 import { startMCPDeeplink } from "./deeplink";
 import { RPC_CODE, parseRpcErrorBody } from "./protocol";
 import {
   InvalidPortError,
   MCPNotRunningError,
   RateLimitedError,
+  ServerDisabledError,
   ServerUnreachableError,
+  UpdateRequiredError,
 } from "./types";
 import packageJson from "../../package.json";
 
@@ -37,6 +39,8 @@ type ProbeResult =
   | { kind: "tablepro"; anonymous: boolean; version?: string }
   | { kind: "refused" }
   | { kind: "rate-limited" }
+  | { kind: "server-disabled" }
+  | { kind: "update-required" }
   | { kind: "other" };
 
 export function mcpPort(): number {
@@ -59,7 +63,7 @@ export function endpoint(): Endpoint {
   };
 }
 
-function isConnectionRefused(err: unknown): boolean {
+export function isConnectionRefused(err: unknown): boolean {
   let current: unknown = err;
   for (let depth = 0; depth < 5 && current; depth += 1) {
     if (
@@ -154,10 +158,16 @@ async function probe(
   }
 
   const text = await response.text().catch(() => "");
-  if (response.status === 429) {
-    return parseRpcErrorBody(text)?.code === RPC_CODE.rateLimited
-      ? { kind: "rate-limited" }
-      : { kind: "other" };
+  // The code only picks the message; no credential goes to this server.
+  switch (parseRpcErrorBody(text)?.code) {
+    case RPC_CODE.rateLimited:
+      return response.status === 429
+        ? { kind: "rate-limited" }
+        : { kind: "other" };
+    case RPC_CODE.serverDisabled:
+      return { kind: "server-disabled" };
+    case RPC_CODE.unsupportedProtocolVersion:
+      return { kind: "update-required" };
   }
   if (!response.ok) return { kind: "other" };
 
@@ -232,34 +242,29 @@ async function startAndWait(
   }
 }
 
-// A tokenless probe counts as a failed login in TablePro, so a worker probes a port once.
-const verifiedByPort = new Map<number, VerifiedEndpoint>();
-
-export function forgetVerifiedEndpoint(port: number): void {
-  verifiedByPort.delete(port);
-}
-
+// Probes on every call and caches nothing: TablePro counts a tokenless probe as a failed
+// login, so callers verify once per new connection and send credentials only to it.
 export async function verifiedEndpoint(options: {
   allowAutoStart: boolean;
   signal?: AbortSignal;
+  target?: Endpoint;
 }): Promise<VerifiedEndpoint> {
-  const target = endpoint();
-  const known = verifiedByPort.get(target.port);
-  if (known) return known;
+  const target = options.target ?? endpoint();
   let result = await probe(target, options.signal);
   if (result.kind === "refused") {
     if (!options.allowAutoStart) throw new MCPNotRunningError();
     result = await startAndWait(target, options.signal);
   }
   switch (result.kind) {
-    case "tablepro": {
+    case "tablepro":
       assertSupportedVersion(result.version);
-      const verified = { ...target, anonymous: result.anonymous };
-      verifiedByPort.set(target.port, verified);
-      return verified;
-    }
+      return { ...target, anonymous: result.anonymous };
     case "rate-limited":
       throw new RateLimitedError();
+    case "server-disabled":
+      throw new ServerDisabledError();
+    case "update-required":
+      throw new UpdateRequiredError(MIN_TABLEPRO_VERSION);
     case "refused":
     case "other":
       throw new ServerUnreachableError(target.port);

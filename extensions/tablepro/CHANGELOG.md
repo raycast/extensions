@@ -5,6 +5,7 @@
 - Access errors from current TablePro versions show as Access Denied.
 - A failed query shows its error.
 - Denying in TablePro ends pairing with a message.
+- A turned-off MCP server or an outdated TablePro shows its own message.
 - The extension no longer reads or deletes TablePro's handshake file.
 - TablePro is found by its bundle ID. A new MCP Port preference replaces the TablePro App preference.
 

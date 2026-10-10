@@ -1,5 +1,9 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPError,
+} from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import {
   ColumnInfo,
   Connection,
@@ -26,12 +30,14 @@ import {
 import {
   CLIENT_NAME,
   CLIENT_VERSION,
+  Endpoint,
   VerifiedEndpoint,
-  forgetVerifiedEndpoint,
+  endpoint,
+  isConnectionRefused,
   mcpPort,
   verifiedEndpoint,
 } from "./endpoint";
-import { parseToolError, translateError } from "./protocol";
+import { parseRpcErrorBody, parseToolError, translateError } from "./protocol";
 import { readStoredApiToken } from "./storage";
 
 export type { ProgressEvent } from "./types";
@@ -50,48 +56,64 @@ export interface SearchHistoryOptions {
   signal?: AbortSignal;
 }
 
-interface ClientHandle {
-  client: Client;
+// The identity check lives and dies with one client, so a new client always probes first.
+interface LiveClient {
   port: number;
+  client: Promise<Client>;
 }
 
-let clientPromise: Promise<ClientHandle> | null = null;
+let live: LiveClient | null = null;
 
-async function getClient(): Promise<ClientHandle> {
-  if (clientPromise) return clientPromise;
-  const promise: Promise<ClientHandle> = createClient(() => {
-    if (clientPromise === promise) resetClient();
-  });
-  clientPromise = promise;
-  promise.catch(() => {
-    if (clientPromise === promise) clientPromise = null;
-  });
-  return promise;
+function liveClient(): LiveClient {
+  const target = endpoint();
+  if (live && live.port === target.port) return live;
+  resetClient();
+  const client = createClient(target, () => dropClient(entry));
+  const entry: LiveClient = { port: target.port, client };
+  client.catch(() => dropClient(entry));
+  live = entry;
+  return entry;
 }
 
-export function resetClient(): void {
-  const previous = clientPromise;
-  clientPromise = null;
-  if (!previous) return;
-  previous
-    .then(({ client }) => client.close().catch(() => undefined))
+function dropClient(entry: LiveClient): void {
+  if (live !== entry) return;
+  live = null;
+  entry.client
+    .then((client) => client.close().catch(() => undefined))
     .catch(() => undefined);
 }
 
-function invalidatesIdentity(err: Error): boolean {
+export function resetClient(): void {
+  if (live) dropClient(live);
+}
+
+// Only TablePro's own JSON-RPC answers keep a client; any other failure may mean
+// another program now holds the port.
+function keepsClient(err: unknown, translated: Error): boolean {
+  if (translated.name === "AbortError") return true;
+  if (
+    isSessionLost(translated) ||
+    translated instanceof TokenRevokedError ||
+    translated instanceof TokenExpiredError
+  ) {
+    return false;
+  }
+  if (err instanceof McpError) return true;
   return (
-    err instanceof MCPNotRunningError ||
-    err instanceof TokenRevokedError ||
-    err instanceof TokenExpiredError ||
-    err instanceof ServerUnreachableError
+    err instanceof StreamableHTTPError &&
+    (err.code === 403 || err.code === 429) &&
+    parseRpcErrorBody(err.message)?.code !== undefined
   );
 }
 
-async function createClient(onClose: () => void): Promise<ClientHandle> {
+async function createClient(
+  target: Endpoint,
+  onClose: () => void,
+): Promise<Client> {
   const app = await requireTablePro();
   await assertInstalledVersionSupported(app);
   const token = await getApiToken();
-  const server = await verifiedEndpoint({ allowAutoStart: true });
+  const server = await verifiedEndpoint({ allowAutoStart: true, target });
   const transport = new StreamableHTTPClientTransport(
     new URL(server.mcpUrl),
     server.anonymous
@@ -106,20 +128,17 @@ async function createClient(onClose: () => void): Promise<ClientHandle> {
     await client.connect(transport);
   } catch (err) {
     await transport.close().catch(() => undefined);
-    const translated = translateError(err);
-    if (invalidatesIdentity(translated)) forgetVerifiedEndpoint(server.port);
-    throw translated;
+    throw translateError(err);
   }
   try {
     assertTableProServer(client, server);
   } catch (err) {
-    forgetVerifiedEndpoint(server.port);
     await client.close().catch(() => undefined);
     throw err;
   }
   // No transport.onerror reset: closing there fails a 403 call as "Connection closed".
   client.onclose = onClose;
-  return { client, port: server.port };
+  return client;
 }
 
 function assertTableProServer(client: Client, server: VerifiedEndpoint): void {
@@ -186,13 +205,14 @@ async function invokeTool<T>(
   idempotent: boolean,
   retried: boolean,
 ): Promise<T> {
-  let handle: ClientHandle;
+  let entry: LiveClient;
+  let client: Client;
   try {
-    handle = await getClient();
+    entry = liveClient();
+    client = await entry.client;
   } catch (err) {
     throw translateError(err);
   }
-  const { client, port } = handle;
   let envelope: ToolCallEnvelope;
   try {
     const onProgress = options.onProgress;
@@ -209,13 +229,12 @@ async function invokeTool<T>(
     })) as ToolCallEnvelope;
   } catch (err) {
     const translated = translateError(err);
-    if (invalidatesIdentity(translated)) {
-      forgetVerifiedEndpoint(port);
-      resetClient();
-    }
-    if (!isSessionLost(translated)) throw translated;
-    resetClient();
-    if (!idempotent || retried) throw translated;
+    if (keepsClient(err, translated)) throw translated;
+    dropClient(entry);
+    // A refused connection sent nothing, so even a write can go again.
+    const retry =
+      isConnectionRefused(err) || (idempotent && isSessionLost(translated));
+    if (!retry || retried) throw translated;
     return invokeTool<T>(name, args, options, idempotent, true);
   }
   return parseToolResult<T>(envelope);
@@ -608,7 +627,6 @@ export async function exchangePairingCode(
     });
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;
-    forgetVerifiedEndpoint(server.port);
     throw new ServerUnreachableError(server.port);
   }
   if (!response.ok) {
