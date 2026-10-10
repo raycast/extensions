@@ -10,6 +10,8 @@ Click it to see remaining percentages, quota-window reset times, last update tim
 
 Enable **Hide Dial Icon** in extension preferences for a text-only menu-bar item. It only hides the menu-bar dial, not the icons inside the menu. **Icon Only** mode keeps the dial visible so the item remains accessible, and error indicators are always shown.
 
+![ChatGPT usage in Raycast's menu bar](media/chatgpt-usage-menu-bar.png)
+
 Run **View Plan Usage** in the launcher to see both limits inline, with progress bars, reset times, and plan/update details. You can also open this view from the menu-bar item's **View Plan Usage** action. Press **⌘R** to refresh. Both commands share cached readings and show errors without hiding the last successful result.
 
 All dashboard links open [ChatGPT's usage overview](https://chatgpt.com/settings/usage?tab=overview).
@@ -102,3 +104,5 @@ The bundled icon can be regenerated on macOS with `swift scripts/generate-icon.s
 The native helper is bundled, so normal builds don't require a Swift compiler. After modifying its source, run `npm run build:helper` with Xcode Command Line Tools installed to rebuild and ad-hoc sign the universal binary. Commit the helper binary together with its source when distributing the extension.
 
 Linting checks all source and test files with ESLint and Prettier. Before publishing to the Store, set `author` in `package.json` to your registered Raycast Store handle, then run `npm run lint:store` for full manifest and metadata validation. A Store account isn't needed for local installation.
+
+Store screenshot CI is stricter than `lint:store`: it checks Raycast window detection, approximately 12.5% symmetric padding, and consistent backgrounds. Use Raycast **Window Capture → Save to Metadata** when available, and validate the complete image set with [`scripts/check_metadata_images.py`](https://github.com/raycast/extensions/blob/main/scripts/check_metadata_images.py) in the Raycast extensions repository before submitting. Menu-bar-only captures belong in `media/` for documentation, not in Store `metadata/`.
