@@ -5,22 +5,19 @@ Search, open, download and upload Proton Drive files from Raycast, using the off
 
 ## Setup
 
-1. Install the CLI (single binary, no installer):
+1. Install the CLI: download it from the [Proton Drive CLI download page](https://proton.me/download/drive/cli/index.html)
+   (`macos/arm64` for Apple silicon, `macos/x64` for Intel). It is a single binary, with no installer:
+   put it in a folder such as `~/.local/bin` (create it if needed) and make it executable:
 
    ```bash
-   curl -fL -o ~/.local/bin/proton-drive https://proton.me/download/drive/cli/0.8.0/darwin-arm64/proton-drive && chmod +x ~/.local/bin/proton-drive
+   mkdir -p ~/.local/bin && mv ~/Downloads/proton-drive ~/.local/bin/ && chmod +x ~/.local/bin/proton-drive
    ```
 
-2. Sign in once (opens your browser; the session is stored in the macOS Keychain):
+2. Sign in once (opens your browser; the session is stored in the macOS Keychain), either with the
+   **Log In to Proton Drive** command or in a terminal:
 
    ```bash
    proton-drive auth login
-   ```
-
-3. Run the extension in development mode:
-
-   ```bash
-   npm install && npm run dev
    ```
 
 The CLI Path preference defaults to `proton-drive`, looked up in `/opt/homebrew/bin`, `/usr/local/bin`,
@@ -28,13 +25,11 @@ The CLI Path preference defaults to `proton-drive`, looked up in `/opt/homebrew/
 
 ## Commands
 
-Named like the Proton Pass and Proton Mail extensions: an action as title, "Proton Drive" as subtitle.
-
 | Command | What it does |
 | --- | --- |
 | **Search Files** | Opens on your Drive's root; navigate folder by folder with a detail panel on the right. Typing filters the current folder and, if the search index exists, the whole Drive. Folders already visited show instantly from cache. Sort by name, date modified or size; folder sizes (all files below a folder) come from the search index, so without it folders keep their name order. |
 | **Upload Files** | Uploads the Finder selection, or files you choose when nothing is selected, to a folder you pick (existing files are renamed, folders merged). |
-| **Login to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
+| **Log In to Proton Drive** | Checks the CLI session; logs in through the browser (Terminal fallback) or logs out. |
 | **Refresh Search Index** | Rebuilds the index. Also runs daily while Raycast's Background Refresh is on for this command: off when installed from the Store, on once you run the command yourself, and switchable in the command's settings. |
 
 Actions on a file or folder: **Open** (downloads to a cache, then opens), **Download** (⌘D, to the
@@ -70,7 +65,7 @@ Only `/my-files` is indexed; "Shared with me", Photos and the trash are not.
 - Downloaded files get the macOS quarantine attribute, so Gatekeeper checks apps and scripts
   from your Drive before they run, as it does for browser downloads.
 - Creating a public link always asks for confirmation first.
-- Logging out (Login to Proton Drive → Log Out) deletes all of it: index, cached listings and
+- Logging out (Log In to Proton Drive → Log Out) deletes all of it: index, cached listings and
   opened files. If the CLI session ends another way (`proton-drive auth logout`, expiry), the
   extension deletes the same data as soon as the CLI reports it, and shows nothing from the Drive.
 

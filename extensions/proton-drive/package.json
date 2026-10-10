@@ -65,9 +65,9 @@
     },
     {
       "name": "login",
-      "title": "Login to Proton Drive",
+      "title": "Log In to Proton Drive",
       "subtitle": "Proton Drive",
-      "description": "Check authentication status and login",
+      "description": "Check authentication status and log in",
       "mode": "view"
     },
     {

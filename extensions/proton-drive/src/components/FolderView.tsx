@@ -83,9 +83,9 @@ export function FolderView(props: { path: string; title?: string }) {
       filtering={false}
       onSearchTextChange={setQuery}
       throttle
-      // The command name stays in the navigation title; the folder shows in the search bar placeholder.
-      navigationTitle={progress ? `Indexing — ${progress}` : undefined}
-      searchBarPlaceholder={`Search in ${props.title ?? displayPath(props.path)}${index ? " and the whole Drive" : ""}…`}
+      // No navigationTitle: Raycast shows the command title there. The current folder and, while it
+      // runs, the indexing progress go in the search bar placeholder.
+      searchBarPlaceholder={`Search in ${props.title ?? displayPath(props.path)}${index ? " and the whole Drive" : ""}…${progress ? ` (${progress})` : ""}`}
       onSelectionChange={onSelectionChange}
       searchBarAccessory={
         <List.Dropdown tooltip="Sort By" storeValue onChange={(v) => setSort(v as SortOrder)}>

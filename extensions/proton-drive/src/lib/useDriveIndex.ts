@@ -14,7 +14,7 @@ interface IndexState {
   progress?: string;
 }
 
-const BACKGROUND = "Indexing in the background…";
+const BACKGROUND = "Indexing in the background";
 
 let state: IndexState = {};
 const listeners = new Set<(state: IndexState) => void>();
@@ -68,7 +68,7 @@ export async function refreshIndex(silent: boolean): Promise<void> {
     let shown = 0;
     const fresh = await buildIndex((done, left, partial) => {
       const text = `${done} folders listed · ${left} to go · ${partial.entries.length} items`;
-      update({ progress: text });
+      update({ progress: `Indexing: ${text}` });
       if (toast) toast.message = text;
       // During the very first crawl, make results searchable as they come in.
       if (partial.entries.length - shown > 500) {

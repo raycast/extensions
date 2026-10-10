@@ -11,7 +11,7 @@ export function SignedOutView() {
         actions={
           <ActionPanel>
             <Action
-              title="Log in"
+              title="Log In"
               icon={Icon.Key}
               onAction={() => launchCommand({ name: "login", type: LaunchType.UserInitiated })}
             />

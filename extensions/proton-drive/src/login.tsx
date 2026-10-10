@@ -125,7 +125,7 @@ export default function Command() {
       return;
     }
     const confirmed = await confirmAlert({
-      title: "Log out of Proton Drive?",
+      title: "Log Out of Proton Drive?",
       message:
         "The CLI session stored in your Keychain will be removed, along with the search index, cached folder listings and opened files.",
       primaryAction: { title: "Log Out", style: Alert.ActionStyle.Destructive },
@@ -159,7 +159,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               {refresh}
-              <Action title="Log out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={logout} />
+              <Action title="Log Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={logout} />
             </ActionPanel>
           }
         />
@@ -171,8 +171,8 @@ export default function Command() {
           icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           actions={
             <ActionPanel>
-              <Action title="Login" icon={Icon.Key} onAction={login} />
-              <Action title="Login in Terminal (Fallback)" icon={Icon.Terminal} onAction={loginInTerminal} />
+              <Action title="Log In" icon={Icon.Key} onAction={login} />
+              <Action title="Log In in Terminal (Fallback)" icon={Icon.Terminal} onAction={loginInTerminal} />
               {refresh}
             </ActionPanel>
           }
@@ -186,7 +186,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               {refresh}
-              <Action title="Login" icon={Icon.Key} onAction={login} />
+              <Action title="Log In" icon={Icon.Key} onAction={login} />
             </ActionPanel>
           }
         />
