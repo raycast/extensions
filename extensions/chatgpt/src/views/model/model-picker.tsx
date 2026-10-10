@@ -9,7 +9,7 @@ type ModelPickerProps = Pick<
 };
 
 export function ModelPicker({ models, ...props }: ModelPickerProps) {
-  const options = getModelOptions(models);
+  const options = getModelOptions(props.value ? [...models, props.value] : models);
 
   return (
     <Form.Dropdown

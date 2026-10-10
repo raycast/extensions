@@ -65,7 +65,7 @@ Add an OpenAI API key in Raycast preferences or use **Sign in with ChatGPT** in 
 
 # Local development
 
-Run `npm run build` once to bundle Codex runtimes for Intel and Apple Silicon macOS and Windows, then run `npm run dev`. Open a ChatGPT command under **Development** in Raycast.
+Run `npm run build`, then `npm run dev`. Open a ChatGPT command under **Development** in Raycast. On first ChatGPT sign-in, the extension downloads the platform's Codex runtime from the official npm registry, checks its pinned SHA-256 hash, and installs it in Raycast's support directory. The API-key path does not require Codex.
 
 # Support
 

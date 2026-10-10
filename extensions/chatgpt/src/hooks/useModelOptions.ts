@@ -4,6 +4,7 @@ import { listCodexAppServerModels } from "../utils/codex-app-server";
 import { resolveAuthStatus } from "../utils/auth";
 import { normalizeAvailableOptions } from "../utils/model-support";
 import { useChatGPT } from "./useChatGPT";
+import { getConfiguration } from "./useChatGPT";
 
 export function useModelOptions() {
   const client = useChatGPT({ allowMissingApiKey: true });
@@ -18,7 +19,9 @@ export function useModelOptions() {
         const auth = await resolveAuthStatus();
         const models =
           auth.provider === "apiKey" && client
-            ? (await client.models.list()).data.map((model) => model.id)
+            ? getConfiguration().useAzure
+              ? [getConfiguration().azureDeployment].filter((value): value is string => !!value)
+              : (await client.models.list()).data.map((model) => model.id)
             : (await listCodexAppServerModels())
                 .filter((model) => !model.hidden)
                 .map((model) => model.model || model.id);

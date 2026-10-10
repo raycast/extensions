@@ -147,31 +147,51 @@ function VisionViewWithAuth(props: AskImageProps) {
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toast_title);
 
-    const resp = await getChatResponse(user_prompt);
-    if (!resp) return;
-
-    let response_ = "";
-    function appendResponse(part: string) {
-      response_ += part;
-      setResponse(response_);
-      setResponseTokenCount(countToken(response_));
-    }
-
-    if (typeof resp === "string") {
-      appendResponse(resp);
-    } else if (useStream) {
-      for await (const event of resp as AsyncIterable<{ type: string; delta?: string }>) {
-        if (event.type === "response.output_text.delta") appendResponse(event.delta ?? "");
+    try {
+      const resp = await getChatResponse(user_prompt);
+      if (!resp) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Image request failed";
+        return;
       }
-    } else if ("output_text" in resp) {
-      appendResponse(resp.output_text);
-    }
 
-    setLoading(false);
-    const done = new Date();
-    duration = (done.getTime() - now.getTime()) / 1000;
-    toast.style = Toast.Style.Success;
-    toast.title = `Finished in ${duration} seconds`;
+      let response_ = "";
+      function appendResponse(part: string) {
+        response_ += part;
+        setResponse(response_);
+        setResponseTokenCount(countToken(response_));
+      }
+
+      if (typeof resp === "string") {
+        appendResponse(resp);
+      } else if (useStream) {
+        for await (const event of resp as AsyncIterable<{
+          type: string;
+          delta?: string;
+          message?: string;
+          response?: { error?: { message?: string } | null };
+        }>) {
+          if (event.type === "response.output_text.delta") appendResponse(event.delta ?? "");
+          if (event.type === "response.failed")
+            throw new Error(event.response?.error?.message || "Image response failed.");
+          if (event.type === "error") throw new Error(event.message || "Image response failed.");
+        }
+      } else if ("output_text" in resp) {
+        appendResponse(resp.output_text);
+      }
+
+      setLoading(false);
+      const done = new Date();
+      duration = (done.getTime() - now.getTime()) / 1000;
+      toast.style = Toast.Style.Success;
+      toast.title = `Finished in ${duration} seconds`;
+    } catch (error) {
+      setLoading(false);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Image request failed";
+      toast.message = error instanceof Error ? error.message : String(error);
+      setResponse(`## ⚠️ Could not understand the image.\n\n${toast.message}`);
+    }
   }
 
   useEffect(() => {

@@ -84,10 +84,13 @@ export async function resolveAuthStatus(preferences?: Preferences): Promise<Auth
   resolveAuthStatusPromise = (async () => {
     const config = preferences ?? getPreferenceValues<Preferences>();
     const initial = getInitialAuthStatus(config);
+    // An API key remains usable if the Codex runtime is temporarily unavailable.
     const account =
       initial.hasApiKey && getConnectionMode(config) === "apiKey"
-        ? await readChatGPTAccountSafe().catch(() => null)
-        : await readChatGPTAccountSafe();
+        ? null
+        : initial.hasApiKey
+          ? await readChatGPTAccountSafe().catch(() => null)
+          : await readChatGPTAccountSafe();
     const hasChatGPTSession = !!account;
 
     return {
@@ -112,6 +115,10 @@ export async function resolveAuthStatus(preferences?: Preferences): Promise<Auth
   }
 }
 
+export async function hasChatGPTAccount(): Promise<boolean> {
+  return (await readChatGPTAccountSafe()) !== null;
+}
+
 export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
   return withCodexAppServer(async (client) => {
     const response = await client.request<LoginStartResponse>("account/login/start", { type: "chatgpt" });
@@ -119,12 +126,22 @@ export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
       throw new Error("Codex app-server did not return a ChatGPT login URL.");
     }
 
-    await open(response.authUrl);
-
-    const completed = await client.waitForNotification<LoginCompletedNotification>(
+    const loginAbort = new AbortController();
+    const loginSignal = AbortSignal.any([loginAbort.signal, AbortSignal.timeout(5 * 60 * 1000)]);
+    const completion = client.waitForNotification<LoginCompletedNotification>(
       "account/login/completed",
       (params) => params.loginId === response.loginId,
+      loginSignal,
     );
+    void completion.catch(() => undefined);
+    try {
+      await open(response.authUrl);
+    } catch (error) {
+      loginAbort.abort();
+      await completion.catch(() => undefined);
+      throw error;
+    }
+    const completed = await completion;
 
     if (!completed.success) {
       throw new Error(completed.error?.trim() || "ChatGPT sign-in did not complete.");

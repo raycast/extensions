@@ -1,10 +1,12 @@
 import { environment } from "@raycast/api";
 import { ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, createWriteStream } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import * as readline from "node:readline";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import * as tar from "tar";
 import runtime from "../../codex-runtime.json";
 
@@ -82,6 +84,10 @@ export class CodexAppServerClient {
   private nextId = 0;
   private stderr = "";
   private closed = false;
+
+  get isClosed(): boolean {
+    return this.closed;
+  }
 
   private constructor(proc: ChildProcessWithoutNullStreams) {
     this.proc = proc;
@@ -355,6 +361,9 @@ async function acquireSharedCodexAppServerClient(): Promise<CodexAppServerClient
     sharedCodexAppServerIdleTimer = null;
   }
 
+  if (sharedCodexAppServerClientPromise && (await sharedCodexAppServerClientPromise).isClosed) {
+    sharedCodexAppServerClientPromise = null;
+  }
   if (!sharedCodexAppServerClientPromise) {
     sharedCodexAppServerClientPromise = CodexAppServerClient.create().catch((error) => {
       sharedCodexAppServerClientPromise = null;
@@ -363,7 +372,12 @@ async function acquireSharedCodexAppServerClient(): Promise<CodexAppServerClient
   }
 
   sharedCodexAppServerUsageCount += 1;
-  return sharedCodexAppServerClientPromise;
+  try {
+    return await sharedCodexAppServerClientPromise;
+  } catch (error) {
+    sharedCodexAppServerUsageCount -= 1;
+    throw error;
+  }
 }
 
 function releaseSharedCodexAppServerClient(): void {
@@ -485,9 +499,13 @@ async function bootstrapCodexRuntime(): Promise<CodexCommand> {
     if (await fileExists(bundledArchivePath)) {
       await installCodexRuntimeFromArchive(runtimeRoot, bundledArchivePath);
     } else {
-      throw new Error(
-        `Bundled Codex runtime is missing for ${target.targetTriple}. Run npm run build to package all platforms.`,
-      );
+      const archivePath = path.join(environment.supportPath, `codex-${target.targetTriple}-${CODEX_VERSION}.tgz`);
+      try {
+        await downloadCodexArchive(target.targetTriple, archivePath);
+        await installCodexRuntimeFromArchive(runtimeRoot, archivePath);
+      } finally {
+        await fs.rm(archivePath, { force: true });
+      }
     }
   }
 
@@ -539,7 +557,7 @@ async function installCodexRuntimeFromArchive(runtimeRoot: string, archivePath: 
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(archivePath)) hash.update(chunk);
   if (hash.digest("hex") !== runtime.sha256[target as keyof typeof runtime.sha256]) {
-    throw new Error(`Bundled Codex archive failed integrity verification for ${target}.`);
+    throw new Error(`Codex archive failed integrity verification for ${target}.`);
   }
   await fs.mkdir(path.dirname(runtimeRoot), { recursive: true });
   const tempRoot = await fs.mkdtemp(path.join(path.dirname(runtimeRoot), "codex-runtime-stage-"));
@@ -570,6 +588,19 @@ async function installCodexRuntimeFromArchive(runtimeRoot: string, archivePath: 
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
   }
+}
+
+async function downloadCodexArchive(target: string, destination: string): Promise<void> {
+  const suffix = runtime.packages[target as keyof typeof runtime.packages];
+  if (!suffix) throw new Error(`No Codex runtime package for ${target}.`);
+  const url = `https://registry.npmjs.org/@openai/codex/-/codex-${CODEX_VERSION}-${suffix}.tgz`;
+  const timeout = AbortSignal.timeout(120_000);
+  const response = await fetch(url, { signal: timeout });
+  if (!response.ok || !response.body) {
+    throw new Error(`Codex runtime download failed (${response.status} ${response.statusText}).`);
+  }
+  await fs.mkdir(path.dirname(destination), { recursive: true });
+  await pipeline(Readable.fromWeb(response.body as never), createWriteStream(destination), { signal: timeout });
 }
 
 async function fileExists(filePath: string): Promise<boolean> {

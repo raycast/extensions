@@ -73,6 +73,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
   });
   worker.on("message", async (message) => {
     if (message.kind === "ready") return events.emit("ready");
+    if (message.kind === "child-process") return;
     if (message.kind === "result") {
       const waiter = pending.get(message.id);
       pending.delete(message.id);

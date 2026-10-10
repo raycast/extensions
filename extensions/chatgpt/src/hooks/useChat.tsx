@@ -35,7 +35,11 @@ function toResponseInput(messages: Message[]): ResponseInput {
     });
 }
 
-export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: string | null): ChatHook {
+export function useChat<T extends Chat>(
+  props: T[],
+  initialCodexThreadId?: string | null,
+  initialInstructions = "",
+): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -50,7 +54,7 @@ export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: strin
   const abortControllerRef = useRef<AbortController | null>(null);
   const codexThreadRef = useRef<{ threadId: string | null; instructions: string }>({
     threadId: initialCodexThreadId ?? null,
-    instructions: "",
+    instructions: initialInstructions,
   });
 
   const [isHistoryPaused] = useState<boolean>(() => {
@@ -131,7 +135,7 @@ export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: strin
       const modelOption = resolveModelOption(model.option, availableOptions);
 
       const messages: Message[] = [
-        ...chatTransformer([...data].reverse(), model.prompt),
+        ...chatTransformer(data, model.prompt),
         { role: "user", content: buildUserMessage(question, auth.provider === "chatgpt" ? [] : files) },
       ];
 
@@ -188,29 +192,53 @@ export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: strin
           throw new Error("OpenAI API key is missing. Add it in extension preferences.");
         }
 
-        const request = {
-          model: modelOption,
-          instructions: model.prompt,
-          input: toResponseInput(messages),
-          ...(model.enableReasoningEffortChange ? { reasoning: { effort: selectedReasoningEffort } } : {}),
-          store: false,
-        } as const;
-        if (useStream) {
-          const stream = await chatGPT.responses.create({ ...request, stream: true }, requestOptions);
-          for await (const event of stream) {
-            if (event.type === "response.output_text.delta") {
-              chat.answer += event.delta;
-              setStreamData({ ...chat, answer: chat.answer });
-            } else if (event.type === "response.failed") {
-              throw new Error(event.response.error?.message || "OpenAI response failed.");
-            } else if (event.type === "error") {
-              throw new Error(event.message);
+        if (getConfiguration().useAzure) {
+          const azureMessages = messages.filter((message) => message.role !== "developer");
+          if (useStream) {
+            const stream = await chatGPT.chat.completions.create(
+              { model: getConfiguration().azureDeployment || modelOption, messages: azureMessages, stream: true },
+              requestOptions,
+            );
+            for await (const chunk of stream) {
+              const delta = chunk.choices[0]?.delta?.content;
+              if (delta) {
+                chat.answer += delta;
+                setStreamData({ ...chat, answer: chat.answer });
+              }
             }
+            setStreamData(undefined);
+          } else {
+            const completion = await chatGPT.chat.completions.create(
+              { model: getConfiguration().azureDeployment || modelOption, messages: azureMessages, stream: false },
+              requestOptions,
+            );
+            chat = { ...chat, answer: completion.choices[0]?.message.content ?? "" };
           }
-          setStreamData(undefined);
         } else {
-          const response = await chatGPT.responses.create({ ...request, stream: false }, requestOptions);
-          chat = { ...chat, answer: response.output_text };
+          const request = {
+            model: modelOption,
+            instructions: model.prompt,
+            input: toResponseInput(messages),
+            ...(model.enableReasoningEffortChange ? { reasoning: { effort: selectedReasoningEffort } } : {}),
+            store: false,
+          } as const;
+          if (useStream) {
+            const stream = await chatGPT.responses.create({ ...request, stream: true }, requestOptions);
+            for await (const event of stream) {
+              if (event.type === "response.output_text.delta") {
+                chat.answer += event.delta;
+                setStreamData({ ...chat, answer: chat.answer });
+              } else if (event.type === "response.failed") {
+                throw new Error(event.response.error?.message || "OpenAI response failed.");
+              } else if (event.type === "error") {
+                throw new Error(event.message);
+              }
+            }
+            setStreamData(undefined);
+          } else {
+            const response = await chatGPT.responses.create({ ...request, stream: false }, requestOptions);
+            chat = { ...chat, answer: response.output_text };
+          }
         }
       }
 

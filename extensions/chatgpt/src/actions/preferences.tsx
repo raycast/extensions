@@ -1,20 +1,27 @@
 import { Action, ActionPanel, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { clearCodexAuthSession, resolveAuthStatus, signInWithCodexAuth } from "../utils/auth";
+import {
+  clearCodexAuthSession,
+  getConfiguredApiKey,
+  getConnectionMode,
+  hasChatGPTAccount,
+  signInWithCodexAuth,
+} from "../utils/auth";
 import { getErrorMessage } from "../utils/error";
 
 export const PreferencesActionSection = () => {
+  const apiKeyPreferred = getConnectionMode() === "apiKey" && !!getConfiguredApiKey();
   const [isBusy, setBusy] = useState(false);
   const [isChatGPTAuthorized, setChatGPTAuthorized] = useState(false);
 
   const refreshAuthState = useCallback(async () => {
+    if (apiKeyPreferred) return;
     try {
-      const auth = await resolveAuthStatus();
-      setChatGPTAuthorized(auth.hasChatGPTSession);
+      setChatGPTAuthorized(await hasChatGPTAccount());
     } catch {
       setChatGPTAuthorized(false);
     }
-  }, []);
+  }, [apiKeyPreferred]);
 
   useEffect(() => {
     refreshAuthState();
@@ -33,6 +40,7 @@ export const PreferencesActionSection = () => {
 
     try {
       await signInWithCodexAuth();
+      setChatGPTAuthorized(true);
       toast.style = Toast.Style.Success;
       toast.title = "Signed in with ChatGPT";
       toast.message = "ChatGPT is now connected through Codex app-server.";
@@ -54,9 +62,11 @@ export const PreferencesActionSection = () => {
     setBusy(true);
     try {
       await clearCodexAuthSession();
+      setChatGPTAuthorized(false);
       await refreshAuthState();
       await showToast({ style: Toast.Style.Success, title: "Signed out of ChatGPT" });
     } catch (error) {
+      setChatGPTAuthorized(false);
       await showToast({
         style: Toast.Style.Failure,
         title: "Sign-out failed",
@@ -83,6 +93,10 @@ export const PreferencesActionSection = () => {
           onAction={handleSignInWithChatGPT}
           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         />
+      )}
+
+      {apiKeyPreferred && !isChatGPTAuthorized && (
+        <Action icon={Icon.XMarkCircle} title="Sign out" onAction={handleSignOutFromChatGPT} />
       )}
 
       <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />

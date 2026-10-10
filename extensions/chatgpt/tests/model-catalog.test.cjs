@@ -61,7 +61,7 @@ test("Ask lists available provider models and resolves a direct selection", asyn
   assert.equal(selectedChatModel(snapshot, "gpt-5-nano", undefined, options).option, "gpt-6-luna");
 });
 
-test("saved built-in command defaults using Sol migrate to Luna", async () => {
+test("saved built-in command selection remains Sol", async () => {
   const command = DEFAULT_COMMANDS["default-summarize-webpage"];
   const catalog = {
     version: 1,
@@ -71,8 +71,8 @@ test("saved built-in command defaults using Sol migrate to Luna", async () => {
   const io = storage({ [CATALOG_STORAGE_KEY]: JSON.stringify(catalog) });
   const store = factory(io);
   await store.load();
-  assert.equal(store.getSnapshot().catalog.commands[command.id].model, "gpt-6-luna");
-  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).commands[command.id].model, "gpt-6-luna");
+  assert.equal(store.getSnapshot().catalog.commands[command.id].model, "gpt-6-sol");
+  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).commands[command.id].model, "gpt-6-sol");
 });
 async function configured(io = storage()) {
   const store = factory(io);

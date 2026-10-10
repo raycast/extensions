@@ -41,6 +41,16 @@ async function provider(t) {
     let raw = "";
     for await (const chunk of req) raw += chunk;
     requests.push({ path: req.url, body: JSON.parse(raw) });
+    if (req.url.includes("/chat/completions")) {
+      res.end(
+        JSON.stringify({
+          id: "chatcmpl_fixture",
+          object: "chat.completion",
+          choices: [{ index: 0, message: { role: "assistant", content: "Fixture answer" }, finish_reason: "stop" }],
+        }),
+      );
+      return;
+    }
     res.end(
       JSON.stringify({
         id: "resp_fixture",
@@ -78,7 +88,10 @@ test("model picker lists every available provider model", native, async (t) => {
   await action(app, "Create Model");
   await app.waitFor(page("Create Model"));
   const modelField = await app.waitFor(
-    (tree) => field(tree, "option")?.menu?.sections?.length && field(tree, "option"),
+    (tree) =>
+      field(tree, "option-available")?.menu?.sections?.some((section) =>
+        section.items.some((item) => item.id === "gpt-5-nano"),
+      ) && field(tree, "option-available"),
   );
   const options = modelField.menu.sections.flatMap((section) => section.items).map((item) => item.id);
   assert.deepEqual(options, ["gpt-6-astra", "gpt-6-sol", "gpt-6-luna", "gpt-5-nano"]);
@@ -96,6 +109,24 @@ test("Ask uses GPT-6 Luna and the Responses API", native, async (t) => {
   assert.equal(api.requests[0].path, "/v1/responses");
   assert.equal(api.requests[0].body.model, "gpt-6-luna");
   assert.equal(api.requests[0].body.temperature, undefined);
+});
+
+test("Azure Ask keeps the Chat Completions endpoint", native, async (t) => {
+  const api = await provider(t);
+  const azureEndpoint = api.prefs.apiEndpoint.replace(/\/v1$/, "");
+  const app = await launch("ask", {}, {
+    ...api.prefs,
+    useAzure: true,
+    azureEndpoint,
+    azureDeployment: "test-deployment",
+  });
+  t.after(app.close);
+  await app.waitFor(page("Ask"));
+  await app.callback(body(app.tree).onSearchTextChange, { value: "Hello", eventCount: 1 });
+  await action(app, "Get Answer");
+  await app.waitFor((tree) => body(tree).kind === "List" && JSON.stringify(tree).includes("Fixture answer"));
+  assert.match(api.requests[0].path, /\/openai\/deployments\/test-deployment\/chat\/completions/);
+  assert.equal(api.requests[0].body.model, "test-deployment");
 });
 
 test("AI Commands send selected text through GPT-6 Responses", native, async (t) => {

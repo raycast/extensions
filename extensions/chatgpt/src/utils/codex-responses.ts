@@ -151,17 +151,12 @@ async function runCodexTurn(options: {
       threadId = await resumeCodexThread(options.client, threadId, options.model);
     }
 
-    const turn = await options.client.request<TurnStartResponse>("turn/start", {
-      threadId,
-      input: options.turnInput,
-      model: options.model,
-      ...(options.effort ? { effort: options.effort } : {}),
-    });
-
     const text = await waitForTurnCompletion({
       client: options.client,
       threadId,
-      turnId: turn.turn.id,
+      model: options.model,
+      effort: options.effort,
+      input: options.turnInput,
       stream: options.stream,
       signal: options.signal,
       onDelta: options.onDelta,
@@ -185,17 +180,12 @@ async function runCodexTurn(options: {
       options.instructions,
       options.historyItems,
     );
-    const turn = await options.client.request<TurnStartResponse>("turn/start", {
-      threadId: freshThreadId,
-      input: options.turnInput,
-      model: options.model,
-      ...(options.effort ? { effort: options.effort } : {}),
-    });
-
     const text = await waitForTurnCompletion({
       client: options.client,
       threadId: freshThreadId,
-      turnId: turn.turn.id,
+      model: options.model,
+      effort: options.effort,
+      input: options.turnInput,
       stream: options.stream,
       signal: options.signal,
       onDelta: options.onDelta,
@@ -257,61 +247,80 @@ function shouldRetryWithFreshThread(error: unknown): boolean {
 async function waitForTurnCompletion(options: {
   client: CodexAppServerClient;
   threadId: string;
-  turnId: string;
+  model: string;
+  effort?: ReasoningEffort;
+  input: TurnInputItem[];
   stream: boolean;
   signal?: AbortSignal;
   onDelta?: (delta: string) => void;
 }): Promise<string> {
   let answer = "";
   let finalAgentMessage: string | null = null;
+  let turnId: string | null = null;
+  const completionAbort = new AbortController();
+  const earlyDeltas: AgentMessageDeltaNotification[] = [];
+  const earlyItems: ItemCompletedNotification[] = [];
 
+  const appendDelta = (params: AgentMessageDeltaNotification) => {
+    if (params.threadId !== options.threadId || params.turnId !== turnId || !params.delta) return;
+    answer += params.delta;
+    if (options.stream) options.onDelta?.(params.delta);
+  };
   const removeDeltaListener = options.client.onNotification("item/agentMessage/delta", (raw) => {
     const params = raw as AgentMessageDeltaNotification;
-    if (params.threadId !== options.threadId || params.turnId !== options.turnId || !params.delta) {
-      return;
-    }
-
-    answer += params.delta;
-    if (options.stream) {
-      options.onDelta?.(params.delta);
-    }
+    if (turnId === null) earlyDeltas.push(params);
+    else appendDelta(params);
   });
 
-  const removeItemCompletedListener = options.client.onNotification("item/completed", (raw) => {
-    const params = raw as ItemCompletedNotification;
-    if (params.threadId !== options.threadId || params.turnId !== options.turnId) {
-      return;
-    }
-
+  const captureItem = (params: ItemCompletedNotification) => {
+    if (params.threadId !== options.threadId || params.turnId !== turnId) return;
     if (params.item.type === "agentMessage" && typeof params.item.text === "string") {
       finalAgentMessage = params.item.text;
     }
+  };
+  const removeItemCompletedListener = options.client.onNotification("item/completed", (raw) => {
+    const params = raw as ItemCompletedNotification;
+    if (turnId === null) earlyItems.push(params);
+    else captureItem(params);
   });
 
   const onAbort = async () => {
     try {
-      await options.client.request("turn/interrupt", {
-        threadId: options.threadId,
-        turnId: options.turnId,
-      });
+      if (turnId) await options.client.request("turn/interrupt", { threadId: options.threadId, turnId });
     } catch {
       // The process is about to close anyway.
     }
   };
 
-  if (options.signal?.aborted) {
-    await onAbort();
-    throw createAbortError();
-  }
-
-  options.signal?.addEventListener("abort", onAbort, { once: true });
-
   try {
-    const completed = await options.client.waitForNotification<TurnCompletedNotification>(
+    if (options.signal?.aborted) throw createAbortError();
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+    // Subscribe before turn/start: a fast turn can finish before its request resolves.
+    const completion = options.client.waitForNotification<TurnCompletedNotification>(
       "turn/completed",
-      (params) => params.threadId === options.threadId && params.turn.id === options.turnId,
-      options.signal,
+      (params) => params.threadId === options.threadId,
+      options.signal ? AbortSignal.any([options.signal, completionAbort.signal]) : completionAbort.signal,
     );
+    void completion.catch(() => undefined);
+    let turn: TurnStartResponse;
+    try {
+      turn = await options.client.request<TurnStartResponse>("turn/start", {
+        threadId: options.threadId,
+        input: options.input,
+        model: options.model,
+        ...(options.effort ? { effort: options.effort } : {}),
+      });
+    } catch (error) {
+      completionAbort.abort();
+      await completion.catch(() => undefined);
+      throw error;
+    }
+    turnId = turn.turn.id;
+    earlyDeltas.forEach(appendDelta);
+    earlyItems.forEach(captureItem);
+    if (options.signal?.aborted) await onAbort();
+    const completed = await completion;
+    if (completed.turn.id !== turnId) throw new Error("Codex returned completion for a different turn.");
 
     if (completed.turn.status === "failed") {
       throw new Error(formatTurnError(completed.turn.error));
@@ -329,6 +338,7 @@ async function waitForTurnCompletion(options: {
     }
     throw error;
   } finally {
+    completionAbort.abort();
     options.signal?.removeEventListener("abort", onAbort);
     removeDeltaListener();
     removeItemCompletedListener();

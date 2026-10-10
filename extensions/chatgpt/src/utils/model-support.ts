@@ -17,6 +17,7 @@ export function normalizeAvailableOptions(availableOptions?: string[]): string[]
 export function resolveModelOption(option: string, availableOptions?: string[]): string {
   const options = normalizeAvailableOptions(availableOptions);
   const id = option.trim();
+  if (availableOptions === undefined) return isModelId(id) ? id : DEFAULT_MODEL_OPTION;
   return options.includes(id)
     ? id
     : options.includes(DEFAULT_MODEL_OPTION)

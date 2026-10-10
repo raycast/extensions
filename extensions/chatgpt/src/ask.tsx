@@ -37,7 +37,11 @@ function AskContent(props: { conversation?: Conversation; initialQuestion?: stri
   const modelsLoading = snapshot.isLoading;
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : [], props.conversation?.codexThreadId);
+  const chats = useChat<Chat>(
+    props.conversation ? props.conversation.chats : [],
+    props.conversation?.codexThreadId,
+    props.conversation?.model.prompt,
+  );
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
 
   const explicitModel = props.initialModel ?? props.conversation?.model;

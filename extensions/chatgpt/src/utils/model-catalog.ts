@@ -66,16 +66,9 @@ export function migrateCatalog(
 ): Catalog {
   let catalog: Catalog = { version: 1, models: normalizeModels(storedModels, timestamp), commands: {} };
   for (const command of Object.values({ ...DEFAULT_COMMANDS, ...storedCommands })) {
-    catalog = attachCommand(catalog, migrateBuiltInCommandDefault(command), timestamp);
+    catalog = attachCommand(catalog, command, timestamp);
   }
   return catalog;
-}
-
-function migrateBuiltInCommandDefault(command: Command): Command {
-  const builtIn = DEFAULT_COMMANDS[command.id];
-  return builtIn && command.model === "gpt-6-sol" && command.prompt === builtIn.prompt
-    ? { ...command, model: DEFAULT_MODEL.option }
-    : command;
 }
 
 export function mapCommandToModel(command: Command, models: Record<string, Model>): Model {
@@ -147,7 +140,7 @@ export function createModelCatalog(storage: Storage, now: () => Date = () => new
             id,
             {
               ...command,
-              model: isModelId(command.model) ? migrateBuiltInCommandDefault(command).model : DEFAULT_MODEL.option,
+              model: isModelId(command.model) ? command.model : DEFAULT_MODEL.option,
             },
           ]),
         ),
