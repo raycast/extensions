@@ -17,6 +17,7 @@
 - The Login command has a Logout action, after a confirmation, with Force Logout when ending the session on Proton's servers fails
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
+- List Vaults shows fetched vaults and item counts without waiting for optional sharing lookups
 
 ## [Item Counts and Shared Vaults] - 2026-10-10
 
