@@ -12,11 +12,25 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
-import { AVIFENC_DEFAULT_PATH } from "./utils/constants";
+import { AVIFENC_DEFAULT_PATH, CWEBP_DEFAULT_PATH } from "./utils/constants";
 import { isSupportedImageFormat } from "./utils/mime-types";
-import { convertToAvif } from "./utils/convert";
+import { convertToAvif, convertToWebp } from "./utils/convert";
 import { uploadToR2 } from "./utils/uploadToR2";
 import { generateFileName } from "./utils/generate-fileName";
+
+async function isCwebpAvailable(cwebpPath: string): Promise<boolean> {
+  try {
+    execFileSync(cwebpPath, ["-version"]);
+    return true;
+  } catch {
+    try {
+      execFileSync("cwebp", ["-version"]);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
 
 async function isAvifencAvailable(avifencPath: string): Promise<boolean> {
   try {
@@ -37,7 +51,11 @@ async function isAvifencAvailable(avifencPath: string): Promise<boolean> {
 
 function isPreferencesConfigured(preferences: PreferenceValues): boolean {
   return Boolean(
-    preferences.r2BucketName && preferences.r2AccessKeyId && preferences.r2SecretAccessKey && preferences.r2AccountId,
+    preferences.r2BucketName &&
+      preferences.r2AccessKeyId &&
+      preferences.r2SecretAccessKey &&
+      preferences.r2AccountId &&
+      preferences.customDomain,
   );
 }
 
@@ -108,6 +126,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       fileNameFormat,
       convertToAvif: shouldConvertToAvif,
       avifencPath: avifencPathPreference,
+      convertToWebp: shouldConvertToWebp,
+      cwebpPath: cwebpPathPreference,
       linkFormat,
     } = preferences;
 
@@ -120,7 +140,14 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     let newFilePath = inputFilePath;
 
-    if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif) {
+    if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif && shouldConvertToWebp) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Choose one image conversion format",
+        message: "AVIF and WebP conversion cannot be enabled at the same time",
+      });
+      return;
+    } else if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif) {
       const avifencPath = avifencPathPreference || AVIFENC_DEFAULT_PATH;
       if (!isAvifencAvailable(avifencPath)) {
         await showToast({
@@ -136,6 +163,25 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
           newFilePath = await convertToAvif(inputFilePath, avifencPath, quality);
         } catch (conversionError) {
           await showFailureToast(conversionError, { title: "Conversion failed" });
+          newFilePath = inputFilePath;
+        }
+      }
+    } else if (isSupportedImageFormat(inputFilePath) && shouldConvertToWebp) {
+      const cwebpPath = cwebpPathPreference || CWEBP_DEFAULT_PATH;
+      if (!(await isCwebpAvailable(cwebpPath))) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "WebP conversion tool not found",
+          message: "Please install WebP using 'brew install webp' or check the path in extension preferences",
+        });
+      } else {
+        try {
+          const webpQuality = preferences.webpQuality ? parseInt(preferences.webpQuality, 10) : 80;
+          const quality = Math.max(0, Math.min(100, isNaN(webpQuality) ? 80 : webpQuality));
+
+          newFilePath = await convertToWebp(inputFilePath, cwebpPath, quality);
+        } catch (conversionError) {
+          await showFailureToast(conversionError, { title: "WebP conversion failed" });
           newFilePath = inputFilePath;
         }
       }
