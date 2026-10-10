@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Login Fixes] - {PR_MERGE_DATE}
+## [Login Fixes] - 2026-10-10
 
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
 - pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
