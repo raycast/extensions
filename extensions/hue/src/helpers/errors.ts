@@ -10,7 +10,7 @@ function isExpectedError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return (
     /ETIMEDOUT|ECONNREFUSED|ECONNRESET|EHOSTUNREACH|ENOTFOUND/.test(message) ||
-    /Connection timed out|aborted due to timeout/.test(message) ||
+    /Connection timed out|aborted due to timeout|Lost connection to Hue Bridge|Hue Bridge is busy/.test(message) ||
     /\bStatus (429|503)\b/.test(message) ||
     // Bridge returns non-JSON responses during firmware updates, causing a SyntaxError on JSON.parse
     /\binit_ota\b/.test(message) ||

@@ -35,14 +35,19 @@ export const authHeaders = (username: string) => ({
 // A request the bridge never answers would otherwise hold up the rate-limited queues for good.
 export async function request(session: ClientHttp2Session, headers: OutgoingHttpHeaders, body?: object) {
   const signal = AbortSignal.timeout(CONNECTION_TIMEOUT_MS);
-  const stream = session.request(headers, { endStream: body === undefined, signal });
-  if (body !== undefined) stream.end(JSON.stringify(body));
-  let responseHeaders: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
-  stream.once("response", (received) => (responseHeaders = received));
-  const data = await text(stream).catch((error) => {
-    throw signal.aborted ? new Error("Request to Hue Bridge timed out", { cause: error }) : error;
-  });
-  return { headers: responseHeaders, data };
+  try {
+    const stream = session.request(headers, { endStream: body === undefined, signal });
+    if (body !== undefined) stream.end(JSON.stringify(body));
+    let responseHeaders: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
+    stream.once("response", (received) => (responseHeaders = received));
+    const data = await text(stream);
+    // A connection the bridge closes ends the stream without a response.
+    if (responseHeaders[":status"] === undefined) throw new Error("No response");
+    return { headers: responseHeaders, data };
+  } catch (error) {
+    if (signal.aborted) throw new Error("Request to Hue Bridge timed out", { cause: error });
+    throw new Error("Lost connection to Hue Bridge", { cause: error });
+  }
 }
 
 export default class HueClient {
@@ -105,14 +110,12 @@ export default class HueClient {
       body,
     );
 
-    if (headers[":status"] !== 200 && headers["content-type"] === "text/html") {
-      // On non-200 responses, the body is an HTML page with an error message
-      const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
-      if (errorMatch && errorMatch[0]) {
-        const errorMessage = `Status ${headers[":status"]}: ${errorMatch[0]}`;
-        logError(errorMessage);
-        throw new Error(errorMessage);
-      }
+    // Whatever went wrong, the bridge sends the same HTML page, even with status 200, so only the status tells.
+    if (headers["content-type"] === "text/html") {
+      const status = headers[":status"];
+      if (status === 403) throw new Error("Hue Bridge rejected the username");
+      if (status === 429 || status === 503) throw new Error("Hue Bridge is busy, try again");
+      throw new Error(`Status ${status} from Hue Bridge`);
     }
 
     const response: HueResponse<T> = JSON.parse(data);
