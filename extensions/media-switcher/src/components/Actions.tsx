@@ -104,7 +104,7 @@ export function PauseAction({ appId, sessionIndex, titlePrefix, artistPrefix, re
       onAction={() => handlePause(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
       shortcut={{
         macOS: { modifiers: ["cmd"], key: "return" },
-        Windows: { modifiers: ["ctrl"], key: "return" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
       }}
     />
   );
@@ -118,7 +118,7 @@ export function PlayAction({ appId, sessionIndex, titlePrefix, artistPrefix, rev
       onAction={() => handlePlay(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
       shortcut={{
         macOS: { modifiers: ["cmd"], key: "return" },
-        Windows: { modifiers: ["ctrl"], key: "return" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
       }}
     />
   );
