@@ -1,6 +1,6 @@
 # TablePro Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-10-10
 
 - Access errors from current TablePro versions show as Access Denied.
 - A failed query shows its error.
