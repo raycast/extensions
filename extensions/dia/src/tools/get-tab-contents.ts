@@ -80,7 +80,8 @@ export default async function tool(input: Input) {
     if (message.includes("-1743") || message.includes("-1728")) {
       throw toReadError(error, tab.title);
     }
-    throw new Error(`Couldn't read "${tab.title}". Dia's own pages, such as settings or a new tab, can't be read.`);
+    // Internal pages return "missing value" and are handled below; anything else here is an unexpected failure
+    throw new Error(`Couldn't read this tab ("${tab.title}"): ${message.trim()}`);
   }
 
   // Dia returns "missing value" instead of running scripts on its own pages, such as a new tab

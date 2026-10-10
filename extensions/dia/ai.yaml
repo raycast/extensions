@@ -6,7 +6,7 @@ instructions: |
   If a tool reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or claiming the action succeeded.
   # dia-ai-tab-contents
   Use get-tab-contents to read a page before summarizing it or answering questions about it. Call it without a target for "this page" or "the current tab", or pass a short query matching the tab's title or URL.
-  If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If it reports that the page has no readable text, tell the user the page has no readable text and don't describe or guess its contents. If it reports a Dia internal page, tell the user it's a Dia internal page that can't be read, without guessing its contents. If the text is truncated, say that the answer is based on the beginning of the page.
+  If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If it reports that the page has no readable text, tell the user the page has no readable text and don't describe or guess its contents. If it reports a Dia internal page, tell the user it's a Dia internal page that can't be read, without guessing its contents. If it reports that it couldn't read this tab for another reason, you may retry once; if it fails again, tell the user you couldn't read this tab and share the error, without guessing its contents. If the text is truncated, say that the answer is based on the beginning of the page.
 
 evals:
   # dia-ai-actions
@@ -149,3 +149,13 @@ evals:
     expected:
       - callsTool: get-tab-contents
       - includes: "internal"
+  - input: "@dia summarize the Docs tab"
+    mocks:
+      get-tab-contents: 'Error: Couldn''t read this tab ("Docs"): execution error: Dia got an error: AppleEvent timed out. (-1712)'
+    expected:
+      - callsTool:
+          name: get-tab-contents
+          arguments:
+            query:
+              includes: "docs"
+      - includes: "couldn't read"
