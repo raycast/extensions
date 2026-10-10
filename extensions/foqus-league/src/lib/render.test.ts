@@ -8,6 +8,7 @@ import { CHART_WIDTH } from "./svg.ts";
 import { dark, light, tiersFor, type Theme } from "./theme.ts";
 import type { DayCell, Stats } from "./types.ts";
 import { formatDay } from "./format.ts";
+import { PREDICATE } from "./log.ts";
 import { periodRange } from "./stats.ts";
 import { renderWrapped, wrappedFacts, type WrappedFacts } from "./wrappedPoster.ts";
 
@@ -406,20 +407,20 @@ test("each note gets its own row, and only a note with a Return action draws the
 
 test("a long error wraps onto more lines instead of being cut, and its row grows to fit", () => {
   const error =
-    'Could not read the log: Command failed: /usr/bin/log show --predicate subsystem == "com.raycast.macos" ' +
-    "--info --style ndjson log: Cannot open log archive";
+    `Could not read the log: Command failed: /usr/bin/log show --predicate ${PREDICATE} ` +
+    "--info --style ndjson --start 2026-10-03 09:00:00+0300\nlog: Cannot open log archive";
   const markup = renderNotices(statusNotes({ syncError: error, totalOnRecord: 40 }, false), dark);
 
   assert.doesNotMatch(markup, /…/, "the whole message stays readable");
   assert.match(markup, /Cannot open log archive/, "including the part that says what went wrong");
+  assert.match(markup, /\+0300( |<\/tspan>)/, "a line break in the error still separates its words");
   assert.ok(Number(/height="(\d+)"/.exec(markup)![1]) > 34, "the row is taller than a one-line row");
   assertWellFormed(markup, CHART_WIDTH);
 });
 
-test("past three lines a message is cut, and so is one word too long for any line", () => {
-  const lines = wrapBody("word ".repeat(200).trim(), 300, 600);
-  assert.equal(lines.length, 3);
-  assert.match(lines[2], /…$/);
+test("a message of any length is drawn in full, and only a word too long for any line is cut", () => {
+  const body = "word ".repeat(200).trim();
+  assert.equal(wrapBody(body, 300, 600).join(" "), body);
 
   const [path] = wrapBody(`/${"a".repeat(400)}`, 300, 600);
   assert.match(path, /…$/, "a long file path is cut rather than drawn past the row");

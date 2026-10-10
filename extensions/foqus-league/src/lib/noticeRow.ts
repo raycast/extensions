@@ -5,7 +5,6 @@ import type { Theme } from "./theme.ts";
 const PAD = 2;
 const ROW = 34;
 const LINE = 18;
-const MAX_LINES = 3;
 const GAP = 6;
 const INSET = 14;
 const SIZE = 13;
@@ -23,7 +22,7 @@ const TONE: Record<StatusNote["kind"], "calm" | "problem"> = {
 export function wrapBody(body: string, first: number, rest: number): string[] {
   const lines: string[] = [];
   let line = "";
-  for (const word of body.split(" ")) {
+  for (const word of body.split(/\s+/)) {
     const next = line ? `${line} ${word}` : word;
     if (line && textWidth(next, SIZE) > (lines.length ? rest : first)) {
       lines.push(line);
@@ -31,10 +30,7 @@ export function wrapBody(body: string, first: number, rest: number): string[] {
     } else line = next;
   }
   if (line) lines.push(line);
-
-  const kept = lines.slice(0, MAX_LINES);
-  if (lines.length > MAX_LINES) kept[MAX_LINES - 1] = lines.slice(MAX_LINES - 1).join(" ");
-  return kept.map((l, i) => truncateToWidth(l, { maxWidth: i ? rest : first, fontSize: SIZE }));
+  return lines.map((l, i) => truncateToWidth(l, { maxWidth: i ? rest : first, fontSize: SIZE }));
 }
 
 function returnKey(x: number, mid: number, theme: Theme): string {
