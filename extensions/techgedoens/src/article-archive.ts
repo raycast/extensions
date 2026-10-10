@@ -7,6 +7,7 @@ import { Article, fetchArticleFeedPage } from "./articles";
 
 const ARTICLE_ARCHIVE_KEY = "article-archive-v1";
 const ARTICLE_ARCHIVE_LIMIT_KEY = "article-archive-limit-v1";
+const ARTICLE_ARCHIVE_REVISION_KEY = "article-archive-revision-v1";
 const ARTICLE_READ_STATUS_KEY = "article-read-status-v1";
 const ARTICLE_FAVORITE_STATUS_KEY = "article-favorite-status-v1";
 const MAX_INCREMENTAL_FEED_PAGES = 20;
@@ -123,6 +124,10 @@ async function performArticleArchiveRefresh(
 
 export async function readArticleArchive(): Promise<ArchivedArticle[]> {
   return (await readStoredArchive())?.articles ?? [];
+}
+
+export async function readArticleArchiveRevision(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>(ARTICLE_ARCHIVE_REVISION_KEY);
 }
 
 export async function readArticleArchiveLimitMessage(): Promise<string | undefined> {
@@ -752,6 +757,7 @@ async function writeStoredArchive(archive: {
   }
 
   await LocalStorage.setItem(ARTICLE_ARCHIVE_KEY, serializedArchive);
+  await LocalStorage.setItem(ARTICLE_ARCHIVE_REVISION_KEY, archive.updatedAt);
   if (archive.limitMessage) {
     await LocalStorage.setItem(ARTICLE_ARCHIVE_LIMIT_KEY, archive.limitMessage);
   } else {
