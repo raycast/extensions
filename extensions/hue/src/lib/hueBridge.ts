@@ -72,15 +72,20 @@ export async function linkWithBridge(ipAddress: string, bridgeId?: string, bridg
 
 export async function createHueClient(bridgeConfig: BridgeConfig, session?: http2.ClientHttp2Session) {
   session ??= await connect(bridgeConfig.ipAddress, bridgeConfig.id);
-  // Checks the username
-  const { headers } = await request(session, {
-    ":method": "GET",
-    ":path": "/clip/v2/resource/bridge",
-    ...authHeaders(bridgeConfig.username),
-  });
-  if (headers[":status"] === 403) throw new Error("Please check your username.");
-  if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]}`);
-  return new HueClient(bridgeConfig, session);
+  try {
+    // Checks the username
+    const { headers } = await request(session, {
+      ":method": "GET",
+      ":path": "/clip/v2/resource/bridge",
+      ...authHeaders(bridgeConfig.username),
+    });
+    if (headers[":status"] === 403) throw new Error("Please check your username.");
+    if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]}`);
+    return new HueClient(bridgeConfig, session);
+  } catch (error) {
+    session.close();
+    throw error;
+  }
 }
 
 function connect(ipAddress: string, bridgeId?: string): Promise<http2.ClientHttp2Session> {
