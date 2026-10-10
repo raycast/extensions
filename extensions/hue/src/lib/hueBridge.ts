@@ -1,7 +1,7 @@
-import { APP_NAME, CONNECTION_TIMEOUT_MS } from "./constants";
+import { APP_NAME, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 import { connect, PeerCertificate } from "tls";
 import * as https from "https";
-import { HueApiService, LinkResponse } from "../lib/types";
+import { HueApiService, LinkResponse } from "./types";
 import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
 import { environment } from "@raycast/api";

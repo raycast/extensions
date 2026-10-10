@@ -1,5 +1,5 @@
 import { BridgeConfig } from "./types";
-import { getBridgeIdFromCertificate, getUsernameFromBridge } from "../helpers/hueNetworking";
+import { getBridgeIdFromCertificate, getUsernameFromBridge } from "./hueBridge";
 
 export async function linkWithBridge(
   bridgeIpAddress: string,

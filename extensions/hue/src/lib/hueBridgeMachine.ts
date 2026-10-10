@@ -4,7 +4,7 @@ import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
 import createHueClient, { loadBridgeConfig } from "./createHueClient";
-import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
+import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "./hueBridge";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
 import { logError } from "../helpers/errors";

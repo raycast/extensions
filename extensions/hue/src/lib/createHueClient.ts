@@ -2,7 +2,7 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { ClientHttp2Session, connect } from "http2";
 import { BridgeConfig } from "./types";
 import HueClient, { authHeaders } from "./HueClient";
-import { checkBridgeIdentity, getCaCertificate } from "../helpers/hueNetworking";
+import { checkBridgeIdentity, getCaCertificate } from "./hueBridge";
 import { BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 export default async function createHueClient(bridgeConfig: BridgeConfig) {
