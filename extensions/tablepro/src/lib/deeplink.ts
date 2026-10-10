@@ -57,5 +57,7 @@ export async function pairDeeplink(params: {
   if (params.connectionIds && params.connectionIds.length > 0) {
     search.set("connection-ids", params.connectionIds.join(","));
   }
-  await openInTablePro(`${SCHEME}://integrations/pair?${search.toString()}`);
+  // URLSearchParams writes a space as "+", which TablePro keeps as a literal "+".
+  const query = search.toString().replace(/\+/g, "%20");
+  await openInTablePro(`${SCHEME}://integrations/pair?${query}`);
 }
