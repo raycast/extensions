@@ -85,6 +85,7 @@ export function isListSelected(selection: ListSelection, listId: string | undefi
 export function shouldHideMenuBar(options: {
   hideWhenNothingDue: boolean;
   nextReminderEnabled: boolean;
+  /** True until any reminders, cached or fresh, are available. */
   isLoading: boolean;
   hasNextReminder: boolean;
   lists: ListSelection;

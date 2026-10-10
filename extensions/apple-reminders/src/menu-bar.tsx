@@ -243,21 +243,30 @@ export default function Command() {
     title = hideMenuBarCountWhenEmpty && remindersCount === 0 ? "" : String(remindersCount);
   }
 
-  const displayReminderTitle = !nextReminder && titleType === "firstReminder" && remindersCount > 0;
+  // The first reminder the dropdown lists. The count can include reminders the dropdown doesn't show, so it
+  // isn't used to decide whether there is one.
+  const firstReminder = !nextReminder && titleType === "firstReminder" ? sections[0]?.items[0] : undefined;
   if (nextReminder) {
     title = truncate(`${addPriorityToTitle(nextReminder.reminder.title, nextReminder.reminder.priority)}`, 24);
     title = `${title} · ${formatRelativeDue(nextReminder.due, now)}`;
-  } else if (displayReminderTitle) {
-    const firstReminder = sections[0].items[0];
+  } else if (firstReminder) {
     const formattedTime = formatReminderTime(firstReminder);
     const timePrefix = formattedTime ? `${formattedTime}  ` : "";
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
+  // Decide from cached reminders while fresh ones load, so a hidden item doesn't flash on every refresh.
   if (
-    shouldHideMenuBar({ hideWhenNothingDue, nextReminderEnabled, isLoading, hasNextReminder: !!nextReminder, lists })
+    shouldHideMenuBar({
+      hideWhenNothingDue,
+      nextReminderEnabled,
+      isLoading: !data,
+      hasNextReminder: !!nextReminder,
+      lists,
+    })
   ) {
-    return null;
+    // An empty loading item keeps the command running until the refresh lands; returning null would unload it.
+    return isLoading ? <MenuBarExtra isLoading /> : null;
   }
 
   const listsLabel =
@@ -311,12 +320,12 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       ) : null}
-      {displayReminderTitle ? (
+      {firstReminder ? (
         <MenuBarExtra.Item
           title="Complete"
           icon={Icon.CheckCircle}
           onAction={async () => {
-            const reminder = sections[0].items[0];
+            const reminder = firstReminder;
             try {
               await toggleCompletionStatus(reminder.id);
               await mutate();
