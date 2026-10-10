@@ -1,4 +1,5 @@
 import { getTabs } from "../dia";
+import { AUTOMATION_PERMISSION_MESSAGE } from "../find-tab";
 import { filterTabs } from "../utils";
 
 type Input = {
@@ -17,5 +18,9 @@ type Input = {
  */
 export default async function tool(input: Input) {
   const tabs = await getTabs();
+  // Tab fetching swallows errors, so a denied Automation permission also returns no tabs
+  if (tabs.length === 0) {
+    throw new Error(`No open tabs found in Dia. Make sure Dia is open. ${AUTOMATION_PERMISSION_MESSAGE}`);
+  }
   return input.query?.trim() ? (filterTabs(tabs, input.query.trim()) ?? []) : tabs;
 }

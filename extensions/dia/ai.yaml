@@ -8,6 +8,7 @@ instructions: |
   Use get-focused-tab when the user refers to "this tab", "the current tab" or "the page I'm on", and get-tabs for questions about open tabs.
   Use search-history for pages the user visited before and search-bookmarks for saved bookmarks. Only pass searchText when the user names something to look for, and keep it to the essential keywords.
   Never show tab or window IDs to the user unless they ask for them.
+  If get-tabs or get-focused-tab reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or saying there are no tabs.
 
 evals:
   # dia-ai-actions
@@ -36,15 +37,41 @@ evals:
       select-tab:
         title: "Hacker News"
         url: "https://news.ycombinator.com/"
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T3"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          isPinned: false
+          isFocused: false
     expected:
-      - callsTool:
-          name: select-tab
-          arguments:
-            query:
-              includes: "hacker news"
+      - or:
+          - callsTool:
+              name: select-tab
+              arguments:
+                query:
+                  includes: "hacker news"
+          - callsTool:
+              name: select-tab
+              arguments:
+                tabId: "T3"
   - input: "@dia close the current tab"
     mocks:
       close-tab: "Nothing was closed. Candidate: tabId T2, title Hacker News, url https://news.ycombinator.com/. Call close-tab again with tabId T2 to close it."
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T2"
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+        isPinned: false
+        isFocused: true
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T2"
+          title: "Hacker News"
+          url: "https://news.ycombinator.com/"
+          isPinned: false
+          isFocused: true
     expected:
       - callsTool:
           name: close-tab
@@ -53,12 +80,21 @@ evals:
   - input: "@dia close the YouTube tab"
     mocks:
       close-tab: "Nothing was closed. Candidate: tabId T7, title Lo-fi beats - YouTube, url https://www.youtube.com/watch?v=abc. Call close-tab again with tabId T7 to close it."
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T7"
+          title: "Lo-fi beats - YouTube"
+          url: "https://www.youtube.com/watch?v=abc"
+          isPinned: false
+          isFocused: false
     expected:
-      - callsTool:
-          name: close-tab
-          arguments:
-            query:
-              includes: "youtube"
+      - or:
+          - callsTool:
+              name: close-tab
+              arguments:
+                query:
+                  includes: "youtube"
+          - callsTool: get-tabs
       - callsTool:
           name: close-tab
           arguments:
@@ -88,12 +124,15 @@ evals:
   - input: "@dia switch to my GitHub tab"
     mocks:
       select-tab: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
+      get-tabs: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
     expected:
-      - callsTool:
-          name: select-tab
-          arguments:
-            query:
-              includes: "github"
+      - or:
+          - callsTool:
+              name: select-tab
+              arguments:
+                query:
+                  includes: "github"
+          - callsTool: get-tabs
       - includes: "Automation"
   # dia-ai-read
   - input: "@dia what tabs do I have open?"
@@ -176,3 +215,9 @@ evals:
             searchText:
               includes: "react"
       - includes: "react.dev"
+  - input: "@dia list my open tabs"
+    mocks:
+      get-tabs: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
+    expected:
+      - callsTool: get-tabs
+      - includes: "Automation"
