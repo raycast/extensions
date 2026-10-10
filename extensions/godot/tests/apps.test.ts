@@ -194,4 +194,25 @@ describe("getRunProblem", () => {
     const unknown: GodotApp = { path: "/Applications/Engine.app", name: "Engine", isDotnet: false };
     expect(getRunProblem(info({ configVersion: 4 }), unknown)).toBeUndefined();
   });
+
+  it("refuses a C# project in a build without .NET", () => {
+    expect(getRunProblem(info({ isCSharp: true }), godot45)).toBe(
+      "This project uses C#, but Godot 4.5 is not the .NET build, so it can't run the C# scripts. Install the .NET build of Godot, or choose it in the extension preferences.",
+    );
+  });
+
+  it("refuses a C# project in a build without .NET even when the app version is unknown", () => {
+    const unknown: GodotApp = { path: "/Applications/Engine.app", name: "Engine", isDotnet: false };
+    expect(getRunProblem(info({ isCSharp: true }), unknown)).toContain("is not the .NET build");
+  });
+
+  it("runs a C# project in the .NET build", () => {
+    expect(getRunProblem(info({ isCSharp: true }), godot45Dotnet)).toBeUndefined();
+  });
+
+  it("reports the version problem first for a Godot 3 C# project in a build without .NET", () => {
+    expect(getRunProblem(info({ configVersion: 4, engineVersion: "3.x", isCSharp: true }), godot45)).toContain(
+      "made with Godot 3",
+    );
+  });
 });

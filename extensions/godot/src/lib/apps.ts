@@ -97,14 +97,22 @@ function describeMaker(configVersion: number): string {
   return configVersion === GODOT3_CONFIG_VERSION ? "Godot 3" : "an older version of Godot";
 }
 
-/** Why the app can't run the project: Godot only runs projects in its own settings format. */
+/**
+ * Why the app can't run the project: Godot only runs projects in its own settings format,
+ * and only the .NET build runs C# scripts.
+ */
 export function getRunProblem(project: ProjectInfo, app: GodotApp): string | undefined {
   const appConfigVersion = getAppConfigVersion(app);
-  if (appConfigVersion === undefined || project.configVersion === appConfigVersion) return undefined;
-  if (project.configVersion < appConfigVersion) {
+  if (appConfigVersion !== undefined && project.configVersion < appConfigVersion) {
     return `This project was made with ${describeMaker(project.configVersion)}, so ${describeApp(app)} can't run it. Open it in the editor to convert it first.`;
   }
-  return `This project was made with a newer version of Godot, so ${describeApp(app)} can't run it.`;
+  if (appConfigVersion !== undefined && project.configVersion > appConfigVersion) {
+    return `This project was made with a newer version of Godot, so ${describeApp(app)} can't run it.`;
+  }
+  if (project.isCSharp && !app.isDotnet) {
+    return `This project uses C#, but ${describeApp(app)} is not the .NET build, so it can't run the C# scripts. Install the .NET build of Godot, or choose it in the extension preferences.`;
+  }
+  return undefined;
 }
 
 /**
