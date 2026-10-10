@@ -57,10 +57,61 @@
       "mode": "view"
     },
     {
+      "name": "lists",
+      "title": "Lists",
+      "subtitle": "Trakt Manager",
+      "description": "Create, edit and delete your personal lists, and browse or remove their items",
+      "mode": "view"
+    },
+    {
+      "name": "dropped-shows",
+      "title": "Dropped Shows",
+      "subtitle": "Trakt Manager",
+      "description": "See the shows you dropped and restore them to Continue Watching",
+      "mode": "view"
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "subtitle": "Trakt Manager",
+      "description": "See upcoming episodes of the shows you follow and movie releases, by day in your time zone",
+      "keywords": [
+        "upcoming",
+        "airing",
+        "schedule"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "history",
       "title": "History",
       "subtitle": "Trakt Manager",
       "description": "Lists movies and shows that are in your history",
+      "mode": "view"
+    },
+    {
+      "name": "discover",
+      "title": "Discover",
+      "subtitle": "Trakt Manager",
+      "description": "Browse trending, popular and anticipated movies and shows on Trakt",
+      "keywords": [
+        "trending",
+        "popular",
+        "anticipated"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "subtitle": "Trakt Manager",
+      "description": "Search actors and crew, then browse the movies and shows they worked on",
+      "keywords": [
+        "actor",
+        "director",
+        "cast",
+        "crew"
+      ],
       "mode": "view"
     },
     {
@@ -89,8 +140,13 @@
     },
     {
       "name": "get-up-next",
-      "title": "Get up Next Episodes",
-      "description": "Get the next unwatched episodes for TV series you are currently watching on Trakt"
+      "title": "Get Continue Watching",
+      "description": "Get your Trakt Continue Watching list: the next episode of each show in progress and movies paused mid-playback"
+    },
+    {
+      "name": "get-calendar",
+      "title": "Get Calendar",
+      "description": "Get upcoming episodes of the shows you follow and upcoming movie releases on Trakt, in your local time"
     },
     {
       "name": "get-show-progress",
@@ -123,6 +179,26 @@
       "description": "Mark an entire TV show (all seasons and episodes) as watched in your Trakt history"
     },
     {
+      "name": "check-in",
+      "title": "Now Watching",
+      "description": "Check in to a movie or an episode on Trakt, shown as watching now until its runtime ends"
+    },
+    {
+      "name": "stop-check-in",
+      "title": "Stop Check-In",
+      "description": "Stop the active Trakt check-in so it does not become a play"
+    },
+    {
+      "name": "drop-show",
+      "title": "Drop Show",
+      "description": "Drop a show so it leaves Continue Watching and the calendar, keeping its history and ratings"
+    },
+    {
+      "name": "restore-show",
+      "title": "Restore Show",
+      "description": "Restore a dropped show to Continue Watching and the calendar"
+    },
+    {
       "name": "rate-media",
       "title": "Rate Media",
       "description": "Rate a movie, TV show, or episode on Trakt with a score from 1 to 10"
@@ -136,6 +212,11 @@
       "name": "remove-from-history",
       "title": "Remove from History",
       "description": "Remove a movie, TV show, or episode from your Trakt watch history"
+    },
+    {
+      "name": "get-related",
+      "title": "Get Similar Titles",
+      "description": "Get movies or shows similar to a given title on Trakt"
     },
     {
       "name": "get-recommendations",

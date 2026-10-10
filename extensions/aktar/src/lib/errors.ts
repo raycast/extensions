@@ -33,6 +33,10 @@ export function describeConnectionError(error: AktarError) {
         title: "Aktar Rejected the Connection",
         description: "The token changed or was regenerated in Aktar. Connect again to get a new one.",
       };
+    case "unverified":
+      return { title: "Couldn't Verify Aktar", description: error.message };
+    case "outdated":
+      return { title: "Update Aktar", description: error.message };
     case "not-running":
       return {
         title: "Can't Reach Aktar",
@@ -60,9 +64,12 @@ export async function showAktarFailure(error: unknown, title: string) {
   const message = error instanceof Error ? error.message : String(error);
   const toast: Toast.Options = { style: Toast.Style.Failure, title, message };
   if (error instanceof AktarError) {
-    if (error.kind === "not-connected" || error.kind === "unauthorized") {
+    if (error.kind === "not-connected" || error.kind === "unauthorized" || error.kind === "unverified") {
       toast.title = describeConnectionError(error).title;
       toast.primaryAction = { title: "Connect to Aktar", onAction: () => connectToAktar() };
+    } else if (error.kind === "outdated") {
+      toast.title = describeConnectionError(error).title;
+      toast.primaryAction = { title: "Download Aktar", onAction: () => open(AKTAR_DOWNLOAD_URL) };
     } else if (error.kind === "not-running") {
       toast.title = describeConnectionError(error).title;
       toast.primaryAction = { title: "Open Aktar Settings", onAction: () => openAktarSettings() };

@@ -7,8 +7,9 @@ import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from
 import { renderErrorView } from "./error-views";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
+import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
-import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./refresh";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -36,12 +37,15 @@ const ALL_VAULTS_VALUE = "all";
 
 interface VaultDropdownProps {
   vaults: Vault[];
+  /** Number of items in each vault, once known. */
+  itemCounts: Map<string, number>;
   /** Vault to show, for a vault opened from List Vaults. Otherwise the last selection is restored. */
   value?: string;
   onVaultChange: (vaultId: string) => void;
 }
 
-function VaultDropdown({ vaults, value, onVaultChange }: VaultDropdownProps) {
+function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdownProps) {
+  // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
   return (
     <List.Dropdown
       tooltip="Select Vault"
@@ -50,10 +54,19 @@ function VaultDropdown({ vaults, value, onVaultChange }: VaultDropdownProps) {
       defaultValue={value === undefined ? ALL_VAULTS_VALUE : undefined}
       onChange={onVaultChange}
     >
-      <List.Dropdown.Item title="All Vaults" value={ALL_VAULTS_VALUE} icon={Icon.Globe} />
+      <List.Dropdown.Item
+        title={titleWithCount("All Vaults", totalItemCount(vaults, itemCounts))}
+        value={ALL_VAULTS_VALUE}
+        icon={Icon.Globe}
+      />
       <List.Dropdown.Section title="Vaults">
         {vaults.map((vault) => (
-          <List.Dropdown.Item key={vault.shareId} title={vault.name} value={vault.shareId} icon={Icon.Folder} />
+          <List.Dropdown.Item
+            key={vault.shareId}
+            title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
+            value={vault.shareId}
+            icon={Icon.Folder}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
@@ -64,6 +77,10 @@ function VaultDropdown({ vaults, value, onVaultChange }: VaultDropdownProps) {
 export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
+  // A vault opened from List Vaults brings its count, kept if its own listing fails.
+  const [itemCounts, setItemCounts] = useState<Map<string, number>>(
+    new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
+  );
   const [selectedVaultId, setSelectedVaultId] = useState<string>(initialVault?.shareId ?? ALL_VAULTS_VALUE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
@@ -102,7 +119,6 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   // A slower, older load must not overwrite a newer one (e.g. Retry during a refresh).
   const loads = useMemo(createRequestTracker, []);
-  const cacheWrites = useMemo(createSerialQueue, []);
 
   async function loadItems() {
     const isLatest = loads.start();
@@ -137,6 +153,8 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
+      // The shared cache only holds complete listings, so every cached vault gets a count.
+      if (sharedItems && cachedVaults) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
       hasLoadedFromCache.current = true;
 
       const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
@@ -160,6 +178,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         }
       }
 
+      const listing = listingSaves.start();
       const { vaults: freshVaults, items: freshItems, failedVaults: failures } = await listVaultsAndItems();
       if (!isLatest()) return;
       setFailedVaults(failures);
@@ -167,17 +186,20 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       const { items: nextItems, isComplete, failureMessage } = getRefreshResult(freshItems, itemsRef.current, failures);
       updateItems(nextItems);
       setVaults(freshVaults);
+      setItemCounts((previous) =>
+        refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
+      );
       setError(null);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
       if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
-      // Writes run in request order and only for the latest load, so an older load can't overwrite a newer one.
-      if (isComplete) {
-        await cacheWrites.run(async () => {
-          if (isLatest()) await Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]);
-        });
+      // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
+      if (isComplete && isLatest()) {
+        await listingSaves.save(listing, () =>
+          Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
+        );
       }
       if (!isLatest()) return;
       if (failures.length > 0) {
@@ -192,10 +214,11 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
       const message = err instanceof Error ? err.message : "An unknown error occurred";
-      // Items and vaults belong to the session that listed them: once it has ended, they must not show up again.
+      // Items, vaults and counts belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") {
         updateItems([]);
         setVaults([]);
+        setItemCounts(new Map());
       }
       if (itemsRef.current.length === 0) {
         setError({ type, message });
@@ -243,6 +266,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
         <VaultDropdown
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
+          itemCounts={itemCounts}
           value={initialVault ? selectedVaultId : undefined}
           onVaultChange={setSelectedVaultId}
         />

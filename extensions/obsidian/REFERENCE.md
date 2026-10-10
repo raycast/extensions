@@ -131,6 +131,19 @@ Many commands use a note list.
   - [ ] prepend option -> prepends instead of appends text if enabled
   - [ ] silent mode -> does not switch between notes in Obsidian if enabled
 
+## Quick Capture Command
+
+- [ ] select the configured vault, or use the first available vault when omitted
+- [ ] configure only the routes in use with vault-relative paths to existing Markdown files
+- [ ] expand date templates such as `Daily Notes/{date}.md`
+- [ ] append Daily Note and Shopping as bullets, and To Do as an unchecked task
+- [ ] keep additional input lines indented within the same item
+- [ ] work without Advanced URI
+- [ ] reject blank text and unconfigured routes without changing files
+- [ ] reject missing targets without creating files
+- [ ] reject non-Markdown files and directories
+- [ ] reject absolute paths, traversal outside the vault, and symbolic links to outside or non-Markdown targets
+
 ## Append Task Command
 
 - [ ] see vault selection

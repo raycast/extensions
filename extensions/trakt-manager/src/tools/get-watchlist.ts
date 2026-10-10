@@ -11,6 +11,7 @@ type Input = {
    */
   type?: "movies" | "shows" | "all";
   /**
+   * The title only, without its year (e.g. "Dune", not "Dune 1989"): pass the year in `year`.
    * Search for a specific title or keyword directly within your watchlist.
    * ALWAYS use this when checking if a movie or TV show is in the watchlist (e.g. "is DTF in my watchlist?").
    * The scan is local (it pages through the watchlist and filters here), not a server-side
@@ -24,8 +25,8 @@ type Input = {
    */
   traktId?: number;
   /**
-   * Optional release year. Use it when several identically named titles are on the
-   * watchlist. A year stuffed into `query` ("Dune 1989") is parsed the same way.
+   * Release year, whenever the user gives one ("Dune 1989" → `query: "Dune"`, `year: 1989`). Use it when several
+   * identically named titles exist. A year left inside `query` is still parsed, as a fallback only.
    */
   year?: number;
   /**

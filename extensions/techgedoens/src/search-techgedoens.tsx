@@ -56,6 +56,7 @@ export default function SearchTechgedoensCommand() {
     const currentRequestId = ++requestId.current;
     setError(undefined);
     setHasMore(false);
+    setIsLoadingMore(false);
     setNextPage(2);
 
     if (query.length < MINIMUM_SEARCH_LENGTH) {
