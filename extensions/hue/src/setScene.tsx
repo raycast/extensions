@@ -41,7 +41,7 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
       {groups.map((group) => (
         <Grid.Section key={group.id} title={group.metadata.name}>
           {getScenesFromGroup(scenes, group).map((scene) => (
-            <Scene
+            <SceneItem
               key={scene.id}
               group={group}
               scene={scene}
@@ -56,7 +56,7 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
   );
 }
 
-function Scene(props: {
+function SceneItem(props: {
   scene: Scene;
   group: Group;
   gradientUri: string | undefined;

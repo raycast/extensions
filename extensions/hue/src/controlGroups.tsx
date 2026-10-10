@@ -4,7 +4,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import React, { useMemo } from "react";
 import { createGroupIcon } from "./helpers/svgImages";
-import useInputRateLimiter from "./hooks/useInputRateLimiter";
+import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import BrightnessActions from "./components/BrightnessActions";
 import { SetScene } from "./setScene";
@@ -46,7 +46,7 @@ export default function ControlGroups() {
           groups.length > 0 && (
             <Grid.Section key={title} title={title}>
               {[...groups].sort(byName).map((group) => (
-                <Group
+                <GroupItem
                   key={group.id}
                   group={group}
                   groupLights={getLightsFromGroup(lights, group)}
@@ -63,7 +63,7 @@ export default function ControlGroups() {
   );
 }
 
-function Group(props: {
+function GroupItem(props: {
   groupLights: Light[];
   groupedLight?: GroupedLightState;
   group: Group;

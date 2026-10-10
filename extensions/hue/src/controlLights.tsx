@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import BrightnessActions from "./components/BrightnessActions";
 import { useHue } from "./hooks/useHue";
-import useInputRateLimiter from "./hooks/useInputRateLimiter";
+import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
 import { calculateAdjustedColorTemperature, hexToXy } from "./helpers/colors";
 import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
@@ -29,7 +29,7 @@ export default function ControlLights() {
           {getLightsFromGroup(lights, group)
             .sort(byName)
             .map((light) => (
-              <Light key={light.id} light={light} group={group} useHue={useHueObject} canExecute={canExecute} />
+              <LightItem key={light.id} light={light} group={group} useHue={useHueObject} canExecute={canExecute} />
             ))}
         </Grid.Section>
       ))}
@@ -37,7 +37,12 @@ export default function ControlLights() {
   );
 }
 
-function Light(props: { light: Light; group: Group; useHue: ReturnType<typeof useHue>; canExecute: () => boolean }) {
+function LightItem(props: {
+  light: Light;
+  group: Group;
+  useHue: ReturnType<typeof useHue>;
+  canExecute: () => boolean;
+}) {
   return (
     <Grid.Item
       title={props.light.metadata.name}
