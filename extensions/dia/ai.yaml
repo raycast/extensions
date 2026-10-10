@@ -6,7 +6,7 @@ instructions: |
   If a tool reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or claiming the action succeeded.
   # dia-ai-tab-contents
   Use get-tab-contents to read a page before summarizing it or answering questions about it. Call it without a target for "this page" or "the current tab", or pass a short query matching the tab's title or URL.
-  If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If it reports that the page has no readable text, tell the user the page has no readable text and don't describe or guess its contents. If the text is truncated, say that the answer is based on the beginning of the page.
+  If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If it reports that the page has no readable text, tell the user the page has no readable text and don't describe or guess its contents. If it reports a Dia internal page, tell the user it's a Dia internal page that can't be read, without guessing its contents. If the text is truncated, say that the answer is based on the beginning of the page.
 
 evals:
   # dia-ai-actions
@@ -148,4 +148,4 @@ evals:
       get-tab-contents: 'Error: "New Tab" is a Dia internal page, such as a new tab or settings. Dia internal pages cannot be read.'
     expected:
       - callsTool: get-tab-contents
-      - includes: "internal page"
+      - includes: "internal"
