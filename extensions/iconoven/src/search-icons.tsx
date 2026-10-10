@@ -1,33 +1,38 @@
-import { useMemo, useState } from "react";
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
-import type { Variant } from "@iconoven/icons";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  environment,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import {
   FORMATS,
   PRO_URL,
+  STYLES,
+  hasStyle,
   isPro,
   search,
+  setProData,
   svgDataUri,
   toSnippet,
-  type Corners,
   type Format,
   type IndexEntry,
   type SnippetOptions,
   type StrokeWidth,
 } from "./lib";
-
-interface Preferences {
-  format?: Format;
-  strokeWidth?: string;
-  corners?: Corners;
-  variant?: Variant;
-}
+import { loadPro } from "./pro";
 
 const INK = { light: "#18181B", dark: "#ECEFF0" };
 
 function IconItem({ e, opts, format }: { e: IndexEntry; opts: SnippetOptions; format: Format }) {
   const pro = isPro(opts.variant);
-  const formatLabel = FORMATS.find((f) => f.id === format)?.label ?? "SVG markup";
-  const preview = svgDataUri(e.name, { ...opts, size: 160 }, INK.light);
+  const styleLabel = STYLES.find((s) => s.id === opts.variant)?.label ?? "Stroke";
+  const formatLabel = FORMATS.find((f) => f.id === format)?.label ?? "SVG Markup";
+  // the detail pane sits on the theme background, so the large preview follows the appearance
+  const preview = svgDataUri(e.name, { ...opts, size: 160 }, INK[environment.appearance]);
   return (
     <List.Item
       id={e.name}
@@ -49,7 +54,7 @@ function IconItem({ e, opts, format }: { e: IndexEntry; opts: SnippetOptions; fo
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Style"
-                text={pro ? `${opts.variant} (IconOven Pro licence)` : "Stroke (free, MIT)"}
+                text={pro ? `${styleLabel} (IconOven Pro)` : "Stroke (free, MIT)"}
               />
             </List.Item.Detail.Metadata>
           }
@@ -78,7 +83,6 @@ function IconItem({ e, opts, format }: { e: IndexEntry; opts: SnippetOptions; fo
               <Action.CopyToClipboard key={f.id} title={`Copy ${f.label}`} content={toSnippet(e.name, f.id, opts)} />
             ))}
           </ActionPanel.Section>
-          {pro ? <Action.OpenInBrowser title="View IconOven Pro Licence" url={PRO_URL} /> : null}
         </ActionPanel>
       }
     />
@@ -86,25 +90,61 @@ function IconItem({ e, opts, format }: { e: IndexEntry; opts: SnippetOptions; fo
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.SearchIcons>();
   const opts: SnippetOptions = {
     variant: prefs.variant ?? "stroke",
     strokeWidth: (Number(prefs.strokeWidth) || 1.5) as StrokeWidth,
     corners: prefs.corners ?? "rounded",
   };
   const format = prefs.format ?? "svg";
+  const key = prefs.licenceKey?.trim() ?? "";
+  const pro = isPro(opts.variant);
   const [query, setQuery] = useState("");
-  const results = useMemo(() => search(query, 120), [query]);
+  // a Pro style never falls back to Stroke: until its data is loaded the list shows why instead of icons
+  const [proState, setProState] = useState<{ ready: boolean; error?: string }>({
+    ready: !pro || hasStyle(opts.variant),
+  });
+  useEffect(() => {
+    if (proState.ready) return;
+    if (!key) {
+      setProState({ ready: false, error: "Add your IconOven Pro licence key in the extension preferences." });
+      return;
+    }
+    let live = true;
+    loadPro(key).then((r) => {
+      if (!live) return;
+      if ("roles" in r) setProData({ roles: r.roles });
+      setProState("roles" in r ? { ready: true } : { ready: false, error: r.error });
+    });
+    return () => {
+      live = false;
+    };
+  }, [key]);
+  const results = useMemo(() => (proState.ready ? search(query, 120) : []), [query, proState.ready]);
+  const styleLabel = STYLES.find((s) => s.id === opts.variant)?.label ?? "Stroke";
 
   return (
     <List
-      isShowingDetail
+      isShowingDetail={proState.ready && results.length > 0}
+      isLoading={!proState.ready && !proState.error}
       filtering={false}
       throttle
       searchBarPlaceholder="Search IconOven icons"
       onSearchTextChange={setQuery}
     >
-      {results.length === 0 ? (
+      {proState.error ? (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title={`${styleLabel} needs IconOven Pro`}
+          description={`${proState.error} Or set Style to Stroke, which is free.`}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser title="Get IconOven Pro" url={PRO_URL} />
+            </ActionPanel>
+          }
+        />
+      ) : proState.ready && results.length === 0 ? (
         <List.EmptyView title="No icons match" description="Try a shorter word, a tag or an old icon name." />
       ) : null}
       {results.map((e) => (

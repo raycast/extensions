@@ -10,13 +10,13 @@ export type Corners = "rounded" | "sharp";
 export type StrokeWidth = 1 | 1.5 | 2;
 
 export const FORMATS: { id: Format; label: string; detail: string }[] = [
-  { id: "svg", label: "SVG markup", detail: "Inline <svg> element" },
+  { id: "svg", label: "SVG Markup", detail: "Inline <svg> element" },
   { id: "jsx", label: "React JSX", detail: "@iconoven/react component and import" },
   { id: "vue", label: "Vue", detail: "@iconoven/vue component and import" },
   { id: "svelte", label: "Svelte", detail: "@iconoven/svelte component and import" },
   { id: "angular", label: "Angular", detail: "@iconoven/angular ioIcon and import" },
-  { id: "webcomponent", label: "Web component", detail: "<iconoven-icon> custom element" },
-  { id: "name", label: "Icon name", detail: "Plain kebab-case name" },
+  { id: "webcomponent", label: "Web Component", detail: "<iconoven-icon> custom element" },
+  { id: "name", label: "Icon Name", detail: "Plain kebab-case name" },
 ];
 
 export { VARIANTS };
@@ -318,7 +318,9 @@ export function snippetParts(name: string, format: Format, opts: SnippetOptions 
     case "angular": {
       const d = camel(name);
       return {
-        imports: `import { IconComponent, ${d} } from '@iconoven/angular'`,
+        imports:
+          `import { IconComponent, ${d} } from '@iconoven/angular'\n\n` +
+          `// In your @Component: imports: [IconComponent]; in the class: ${d} = ${d};`,
         usage: `<svg ioIcon [icon]="${d}"${props(opts, "angular")}></svg>`,
       };
     }

@@ -10,8 +10,13 @@ Search every IconOven icon from Raycast and copy or paste it as SVG, React, Vue,
 
 ## Preferences
 
-- **Paste As**: SVG markup, React JSX, Vue, Svelte, Angular, web component or icon name.
+- **Paste As**: SVG Markup, React JSX, Vue, Svelte, Angular, Web Component or Icon Name.
 - **Stroke Width**: 1, 1.5 or 2.
 - **Corners**: rounded or sharp.
 - **Style**: Stroke is free under MIT. The other 11 styles here need an [IconOven Pro licence](https://iconoven.com/icons/pro).
+- **Pro Licence Key**: your `iok_…` key from your order page. With a Pro style set and no valid key, the list explains what's missing instead of showing icons.
+
+## Angular
+
+The Angular snippet imports `IconComponent` and the icon data. Add `IconComponent` to your component's `imports`, and put the icon on a class field with the same name (the snippet's comment line shows both).
 

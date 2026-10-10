@@ -32,7 +32,7 @@
       "default": "svg",
       "data": [
         {
-          "title": "SVG markup",
+          "title": "SVG Markup",
           "value": "svg"
         },
         {
@@ -52,11 +52,11 @@
           "value": "angular"
         },
         {
-          "title": "Web component",
+          "title": "Web Component",
           "value": "webcomponent"
         },
         {
-          "title": "Icon name",
+          "title": "Icon Name",
           "value": "name"
         }
       ]
@@ -104,7 +104,7 @@
     {
       "name": "variant",
       "title": "Style",
-      "description": "Stroke is free under MIT. The other 11 styles here need an IconOven Pro licence (iconoven.com/icons/pro).",
+      "description": "Stroke is free under MIT. The other 11 styles here need an IconOven Pro licence key (iconoven.com/icons/pro).",
       "type": "dropdown",
       "required": false,
       "default": "stroke",
@@ -158,6 +158,13 @@
           "value": "color-outline"
         }
       ]
+    },
+    {
+      "name": "licenceKey",
+      "title": "Pro Licence Key",
+      "description": "Your IconOven Pro key (iok_…), from your order page. Needed for every style except Stroke.",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
