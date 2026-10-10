@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MedBillAnalyzer MCP Server] - 2026-10-10
+
+- Add MedBillAnalyzer to the official registry: Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.
+
 ## [Add BankBridge MCP Server] - 2026-10-10
 
 - Add BankBridge to the official registry: read-only access to your own US bank, credit card and investment accounts (balances, transactions, spending summaries, recurring charges, cashflow and holdings), fetched live from your banks on each call. Hosted remote Streamable HTTP server at https://bankbridge.money/api/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key. Paid, $5/mo per connected bank. It can't move money.
