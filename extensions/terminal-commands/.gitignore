@@ -10,3 +10,6 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# agent instructions (not shipped to the Store)
+CLAUDE.md

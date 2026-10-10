@@ -6,7 +6,11 @@ import { runInTerminal } from "./terminal";
 export default async function Command(props: LaunchProps<{ launchContext?: { id?: string } }>) {
   const id = props.launchContext?.id;
   if (!id) {
-    await launchCommand({ name: "commands", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "commands", type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not open My Commands" });
+    }
     return;
   }
 

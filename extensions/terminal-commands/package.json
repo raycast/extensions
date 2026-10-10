@@ -16,12 +16,14 @@
     {
       "name": "commands",
       "title": "My Commands",
+      "subtitle": "Terminal Commands",
       "description": "List your saved commands, run them in Terminal, or create new ones.",
       "mode": "view"
     },
     {
       "name": "run-command",
       "title": "Run Saved Command",
+      "subtitle": "Terminal Commands",
       "description": "Runs a saved command in Terminal. Target of the quicklinks created from My Commands; opens My Commands when launched directly.",
       "mode": "no-view"
     }

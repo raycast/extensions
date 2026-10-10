@@ -4,21 +4,5 @@ Raycast extension to save your own commands and run them in Terminal. The **My C
 
 ## Quicklinks
 
-To run a saved command straight from Raycast's root search, open its actions (`⌘K`) in **My Commands** and choose **Create Quicklink**. The quicklink runs the command in Terminal without showing any Raycast screen. It points to the command by id, so it always runs the latest saved version.
+To run a saved command straight from Raycast's root search, open its actions (`⌘K`) in **My Commands** and choose **Save as Quicklink**. The quicklink runs the command in Terminal without showing any Raycast screen. It points to the command by id, so it always runs the latest saved version.
 
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-`npm run dev` opens the extension in Raycast in development mode with hot reload.
-
-## Publishing
-
-```bash
-npm run lint
-npm run build
-npm run publish
-```
