@@ -185,7 +185,8 @@ function rankArticles(articles: Article[], searchTerms: string[]): Article[] {
         (termVariants) =>
           containsTerm(title, termVariants) ||
           containsTerm(categories, termVariants) ||
-          containsTerm(excerpt, termVariants),
+          containsTerm(excerpt, termVariants) ||
+          containsTerm(content, termVariants),
       ).length;
       const score = normalizedTerms.reduce((total, termVariants) => {
         const titleScore = containsTerm(title, termVariants) ? 12 : 0;

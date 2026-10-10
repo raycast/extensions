@@ -7,6 +7,8 @@ import {
   LaunchType,
   MenuBarExtra,
   open,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -20,6 +22,7 @@ import { strings, translateCategory } from "./strings";
 
 const MENU_ARTICLE_COUNT = 5;
 const MAX_MENU_ARTICLE_TITLE_LENGTH = 70;
+const ARCHIVE_SYNC_INTERVAL = 5_000;
 
 export default function MenuBarArticlesCommand() {
   const preferences = getPreferenceValues<Preferences.MenuBarArticles>();
@@ -65,6 +68,28 @@ export default function MenuBarArticlesCommand() {
     };
   }, [retention]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const interval = setInterval(() => {
+      void readArticleArchive()
+        .then((storedArticles) => {
+          if (!cancelled) {
+            setArticles(storedArticles);
+          }
+        })
+        .catch((syncError) => {
+          if (!cancelled) {
+            setError(toError(syncError));
+          }
+        });
+    }, ARCHIVE_SYNC_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   const sortedArticles = [...articles].sort(
     (first, second) => second.publishedAt.getTime() - first.publishedAt.getTime(),
   );
@@ -78,7 +103,25 @@ export default function MenuBarArticlesCommand() {
           currentArticle.id === article.id ? { ...currentArticle, isRead: true } : currentArticle,
         ),
       );
-      await setArticleReadStatusForArticle(article, true);
+      try {
+        await setArticleReadStatusForArticle(article, true);
+      } catch (saveError) {
+        setError(toError(saveError));
+        try {
+          setArticles(await readArticleArchive());
+        } catch {
+          setArticles((currentArticles) =>
+            currentArticles.map((currentArticle) =>
+              currentArticle.id === article.id ? { ...currentArticle, isRead: false } : currentArticle,
+            ),
+          );
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: translations.readStatusUpdateFailed,
+          message: toError(saveError).message,
+        });
+      }
     }
     await open(article.url);
   }

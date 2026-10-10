@@ -23,6 +23,7 @@ export type Strings = {
   noArticlesFound: string;
   feedHasNoArticles: string;
   archiveUpdateFailed: string;
+  readStatusUpdateFailed: string;
   checkConnection: string;
   noUnreadArticles: string;
   noStoredArticlesForSelection: string;
@@ -80,6 +81,7 @@ export const strings: Strings = {
   noArticlesFound: "No Articles Found",
   feedHasNoArticles: "The Techgedoens.de feed currently contains no articles.",
   archiveUpdateFailed: "Could Not Update Article Archive",
+  readStatusUpdateFailed: "Could Not Update Read Status",
   checkConnection: "Check your internet connection and try again.",
   noUnreadArticles: "There are no unread articles.",
   noStoredArticlesForSelection: "There are no stored articles for this selection.",
