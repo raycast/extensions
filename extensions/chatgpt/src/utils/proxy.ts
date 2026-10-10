@@ -1,4 +1,6 @@
-import { ProxyAgent, fetch as undiciFetch } from "undici";
+import { ProxyAgent } from "proxy-agent";
+import nodeFetch from "node-fetch";
+import { Readable } from "node:stream";
 
 export function proxyClientOptions(preferences: Preferences) {
   if (!preferences.useProxy || !preferences.proxyProtocol || !preferences.proxyHost || !preferences.proxyPort) {
@@ -9,8 +11,18 @@ export function proxyClientOptions(preferences: Preferences) {
   if (preferences.proxyUsername) url.username = preferences.proxyUsername;
   if (preferences.proxyPassword) url.password = preferences.proxyPassword;
 
-  return {
-    fetch: undiciFetch as unknown as typeof fetch,
-    fetchOptions: { dispatcher: new ProxyAgent(url.toString()) },
+  const agent = new ProxyAgent({ getProxyForUrl: () => url.toString() });
+  const fetchThroughProxy: typeof fetch = async (input, init) => {
+    const response = await nodeFetch(String(input), { ...init, agent } as Parameters<typeof nodeFetch>[1]);
+    return new Response(
+      response.body ? (Readable.toWeb(response.body as unknown as Readable) as ReadableStream) : null,
+      {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+      },
+    );
   };
+
+  return { fetch: fetchThroughProxy };
 }
