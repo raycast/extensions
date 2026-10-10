@@ -116,7 +116,7 @@ export const hueBridgeMachine = setup({
             target: "connecting",
             actions: assign({ bridgeConfig: ({ event }) => event.output }),
           },
-          { guard: "hasIpAddress", target: "linking" },
+          { guard: "hasIpAddress", target: "waitingForLinkButton" },
           { target: "discovering" },
         ],
       },
@@ -237,26 +237,10 @@ export const hueBridgeMachine = setup({
     unlinking: {
       invoke: {
         src: "unlink",
-        onDone: [
-          {
-            guard: () => !!getPreferenceValues<Preferences>().bridgeIpAddress,
-            target: "linking",
-            actions: assign({
-              bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername || undefined,
-              bridgeId: undefined,
-              bridgeConfig: undefined,
-            }),
-          },
-          {
-            target: "discovering",
-            actions: assign({
-              bridgeIpAddress: undefined,
-              bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername || undefined,
-              bridgeId: undefined,
-              bridgeConfig: undefined,
-            }),
-          },
-        ],
+        onDone: {
+          target: "loadingPreferences",
+          actions: assign({ bridgeId: undefined, bridgeConfig: undefined }),
+        },
       },
     },
   },

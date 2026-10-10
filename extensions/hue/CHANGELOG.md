@@ -21,6 +21,8 @@
 - Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
 - Show each bridge setup toast once and hide it when its step ends, also when unlinking midway
 - Fix the Failed to link with bridge toast showing as a success
+- Ask to press the bridge's link button when only the bridge IP preference is set, instead of failing to link
+- Validate the bridge IP preference again after Unlink
 - Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
 - Fix the names of the Steel Blue and Old Lace colors and the Unlink Saved Hue Bridge action
 
