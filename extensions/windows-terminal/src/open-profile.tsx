@@ -66,7 +66,7 @@ function launchElevated(name: string) {
     "-NoProfile",
     "-Command",
     "Start-Process",
-    `"${wtPath}"`,
+    `'${wtPath.replace(/'/g, "''")}'`,
     "-ArgumentList",
     argumentList,
     "-WorkingDirectory",
