@@ -1,5 +1,9 @@
 # Changelog
 
+## [Search Selected Text] - 2026-10-10
+
+- Search the public Techgedöns archive using text selected in the frontmost application.
+
 ## [Respect Menu Bar Retention] - 2026-10-10
 
 - Keep expired articles hidden in the menu bar when a feed refresh fails.
