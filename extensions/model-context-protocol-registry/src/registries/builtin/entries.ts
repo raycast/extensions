@@ -1014,6 +1014,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "tapetide",
+    title: "Tapetide",
+    description:
+      "Indian stock market research for about 8,200 NSE and BSE listed companies: quotes, quarterly and annual financials, shareholding, a 326-ratio fundamental screener, technical screens, FII/DII flows, end-of-day index option chains, Tapetide Score, company filings and your own Tapetide portfolio and watchlist. 55 tools. Hosted remote Streamable HTTP server; OAuth 2.1 Google sign-in with dynamic client registration and PKCE, no API key to paste; free plan with 50 tool calls a day. Research data, not investment advice.",
+    icon: "https://github.com/Tapetide-hq.png",
+    homepage: "https://tapetide.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tapetide.com/mcp"],
+    },
+    remoteUrl: "https://mcp.tapetide.com/mcp",
+  },
+  {
     name: "tavily",
     title: "Tavily",
     description:
