@@ -147,8 +147,8 @@ function handleToggle(
 ) {
   const changesToGroup = {
     on: { on: !groupedLight.on?.on },
-    // No dynamics when toggling groups, as that causes the brightness to be set to the lowest possible level,
-    //   even when only applied to toggling off.
+    // No dynamics when toggling groups: with a duration, the bridge turns them off at once and back on at the lowest
+    // brightness. Its default transition fades both ways.
   };
   const changesToLights = new Map(groupLights.map((light) => [light.id, changesToGroup]));
 
