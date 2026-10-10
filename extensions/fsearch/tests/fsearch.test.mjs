@@ -6,6 +6,7 @@ import { join } from "node:path";
 import {
   findBinary,
   getStatus,
+  isContentSearch,
   parseResponse,
   parseStatus,
   resolveBinary,
@@ -346,4 +347,11 @@ test("install command runs the found cargo by path, adds Rust only when it is mi
     `"${installCommand(undefined).replace(/"/g, '\\"')}"`,
   );
   assert.equal(appleScriptString('a\\b "c"'), '"a\\\\b \\"c\\""');
+});
+
+test("content searches are the ones that read inside files", () => {
+  assert.equal(isContentSearch("grep:hello ext:md"), true);
+  assert.equal(isContentSearch("regex:^TODO"), true);
+  assert.equal(isContentSearch("sym:main"), true);
+  assert.equal(isContentSearch("invoice ext:pdf mtime:<30d"), false);
 });

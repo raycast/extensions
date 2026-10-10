@@ -60,6 +60,7 @@ import {
   findUnindexedProtectedFolders,
   getStatus,
   IndexStatus,
+  isContentSearch,
   PROTECTED_FOLDERS,
   rebuildIndex,
   SearchError,
@@ -159,8 +160,10 @@ const sorts = [
   { title: "Largest First", value: "size" },
 ];
 const THUMBNAIL_CACHE = join(environment.supportPath, "thumbnails");
-/** How often a search is repeated while the content index is still building. */
+/** How often a content search is repeated while the content index is still building. */
 const INDEX_POLL_MS = 3000;
+/** Polls per search before leaving the rest to Refresh Results, so a long build is not followed forever. */
+const INDEX_POLL_LIMIT = 40;
 const THUMBNAIL_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // Created once per launch; thumbnails of files edited since are keyed by
 // mtime and never reused, so anything untouched for a month is dropped.
@@ -645,10 +648,13 @@ export default function Search(
   const [loading, setLoading] = useState(false);
   const [retry, setRetry] = useState(0);
   const [autoRetries, setAutoRetries] = useState(0);
-  // Bumped while a result says the content index is still building, so the
+  // Bumped while a content search says the index is still building, so the
   // search re-runs until it is complete. Kept apart from `retry` so the
   // preview pane is not rebuilt on every poll.
   const [indexPoll, setIndexPoll] = useState(0);
+  // The poll count the search effect last ran for: a run with a new count and
+  // the same search keeps the list as it is, with no loading indicator.
+  const seenPoll = useRef(0);
   const [showDetails, setShowDetails] = useState(
     preferences.showDetails ?? true,
   );
@@ -724,6 +730,7 @@ export default function Search(
       if (next.sort !== undefined) setSort(next.sort);
       setLimit(defaultLimit);
       setAutoRetries(0);
+      setIndexPoll(0);
     },
     [defaultLimit],
   );
@@ -846,7 +853,10 @@ export default function Search(
       return () => controller.abort();
     }
     // Keep the previous error visible while retrying so the empty state does not flicker.
-    setLoading(true);
+    const isPoll =
+      indexPoll !== seenPoll.current && lastSearchKey.current === searchKey;
+    seenPoll.current = indexPoll;
+    if (!isPoll) setLoading(true);
     // Wait for a pause in typing; each obsolete request is aborted before it can update the list.
     const timer = setTimeout(async () => {
       try {
@@ -911,15 +921,18 @@ export default function Search(
   ]);
 
   useEffect(() => {
-    // The daemon answered from a content index it is still building: ask
-    // again until it is complete, so early results fill in on their own.
+    // A content search was answered from an index still being built: ask
+    // again, quietly, until it is complete, so early results fill in on
+    // their own. Name searches do not wait on the content index.
     if (!result?.indexing || loading) return;
+    if (!isContentSearch(`${query} ${filter}`)) return;
+    if (indexPoll >= INDEX_POLL_LIMIT) return;
     const timer = setTimeout(
       () => setIndexPoll((value) => value + 1),
       INDEX_POLL_MS,
     );
     return () => clearTimeout(timer);
-  }, [result, loading]);
+  }, [result, loading, query, filter, indexPoll]);
 
   useEffect(() => {
     if (!error) return;
@@ -1461,6 +1474,7 @@ export default function Search(
         setQuery(text);
         setLimit(defaultLimit);
         setAutoRetries(0);
+        setIndexPoll(0);
       }}
       searchBarPlaceholder={
         scope

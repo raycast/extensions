@@ -506,6 +506,11 @@ async function exchange(
 
 const CONTENT_FILTERS = ["grep:", "regex:", "sym:", "content:", "symbol:"];
 
+/** Whether a query reads inside files, and so depends on the content index. */
+export function isContentSearch(query: string): boolean {
+  return CONTENT_FILTERS.some((filter) => query.includes(filter));
+}
+
 export async function searchFiles(
   binaryPath: string,
   query: string,
@@ -515,14 +520,11 @@ export async function searchFiles(
   content: ContentOptions = {},
 ): Promise<SearchResult> {
   const binary = await findBinary(binaryPath);
-  const isContentSearch = CONTENT_FILTERS.some((filter) =>
-    query.includes(filter),
-  );
   const request = {
     q: query,
     limit,
     ...(root ? { in: root } : {}),
-    ...(isContentSearch && content.budgetMs
+    ...(isContentSearch(query) && content.budgetMs
       ? { budget_ms: content.budgetMs }
       : {}),
   };
