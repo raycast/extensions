@@ -1,4 +1,4 @@
-import { CssColor, DeepPartial, HasId, Id, Light } from "../lib/types";
+import { CssColor, DeepPartial, HasId, Id, Light, Scene } from "../lib/types";
 import type HueClient from "../lib/HueClient";
 import type { useHue } from "../hooks/useHue";
 import React from "react";
@@ -6,6 +6,7 @@ import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api
 import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
 import { updateItems } from "./collections";
 import { logError } from "./errors";
+import { getSceneChanges } from "./hueResources";
 import { RequestDroppedError } from "../lib/RateLimitedQueue";
 
 export function getIconForColor(color: CssColor): Image {
@@ -33,10 +34,11 @@ export const withTransition = <T extends object>(changes: T) => ({
 });
 
 export async function applyUpdate(
-  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, lights, scenes, setLights, setScenes }: ReturnType<typeof useHue>,
   update: {
     rateLimiter?: { canExecute(): boolean };
     lights: Map<Id, DeepPartial<Light>>;
+    scene?: Scene;
     request: (hueClient: HueClient) => Promise<unknown>;
     success: string;
     failure: string;
@@ -47,10 +49,13 @@ export async function applyUpdate(
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (update.rateLimiter && !update.rateLimiter.canExecute()) return;
     // Rooms and zones follow from their lights while rendering.
-    const undo = optimisticUpdates(update.lights, setLights);
+    const undos = [
+      optimisticUpdates(update.lights, setLights),
+      optimisticUpdates(getSceneChanges(scenes, lights, update.lights, update.scene), setScenes),
+    ];
     await update.request(hueClient).catch((error) => {
       // The queue replaced this request with a newer one, whose optimistic update already includes this one's.
-      if (!(error instanceof RequestDroppedError)) undo();
+      if (!(error instanceof RequestDroppedError)) undos.forEach((undo) => undo());
       throw error;
     });
     await showToast({ style: Toast.Style.Success, title: update.success });
@@ -69,6 +74,9 @@ function optimisticUpdates<T extends HasId>(
   changes: Map<Id, DeepPartial<T>>,
   setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
+  // Setting cached state writes the whole list to the cache, even when nothing changes.
+  if (changes.size === 0) return () => {};
+
   let undoState: T[];
 
   setState((prevState: T[]) => {

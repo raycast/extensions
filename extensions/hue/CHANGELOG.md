@@ -7,7 +7,7 @@
 - Show each color once in room, zone and scene images, and only those of lights that are on
 - Show scenes at their own brightness instead of all looking dim
 - Show images instantly
-- Update lights, rooms and zones at once when setting a scene, turning a room or zone on or off, or changing a light
+- Update lights, rooms, zones and the active scene at once when setting a scene, turning a room or zone on or off, or changing a light
 - Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer
 - Fix Make Cooler and Make Warmer losing a light's own range after a change, and jumping to the coolest white from a color
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back

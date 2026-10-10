@@ -98,6 +98,7 @@ function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Sce
   );
   return applyUpdate(hue, {
     lights: changesToLights,
+    scene,
     request: (hueClient) =>
       hueClient.updateScene(scene, {
         recall: {

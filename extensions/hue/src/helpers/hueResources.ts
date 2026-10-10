@@ -1,4 +1,4 @@
-import { Group, GroupedLight, Light, Palette, Scene } from "../lib/types";
+import { DeepPartial, Group, GroupedLight, Id, Light, Palette, Scene } from "../lib/types";
 import { miredToHexString, xyToMired, xyToRgbHexString } from "./colors";
 import { MIRED_DEFAULT } from "./constants";
 import { byName } from "./collections";
@@ -32,6 +32,32 @@ export function getGroupedLightFromGroup(lights: Light[], group: Group): Grouped
 
 export const getScenesFromGroup = (scenes: Scene[], group: Group) =>
   scenes.filter((scene) => scene.group.rid === group.id).sort(byName);
+
+// The bridge marks a recalled scene static, and every other active scene with one of its lights inactive. Without a
+// recall, active scenes end when one of their lights is switched on or off or changes color, but not when it dims.
+export function getSceneChanges(
+  scenes: Scene[],
+  lights: Light[],
+  changes: Map<Id, DeepPartial<Light>>,
+  recalled?: Scene,
+) {
+  const ending = new Set(
+    lights.flatMap((light) => {
+      const change = changes.get(light.id);
+      if (change === undefined) return [];
+      const isSwitched = change.on !== undefined && change.on.on !== light.on.on;
+      const isEnding = recalled || isSwitched || change.color !== undefined || change.color_temperature !== undefined;
+      return isEnding ? [light.id] : [];
+    }),
+  );
+  return new Map(
+    scenes.flatMap((scene): [Id, DeepPartial<Scene>][] => {
+      if (scene.id === recalled?.id) return [[scene.id, { status: { active: "static" } }]];
+      const isEnded = scene.status.active !== "inactive" && scene.actions.some(({ target }) => ending.has(target.rid));
+      return isEnded ? [[scene.id, { status: { active: "inactive" } }]] : [];
+    }),
+  );
+}
 
 // The Hue app's color for a light without color or color temperature, like a plug, read from its room cards.
 const PLAIN_LIGHT_COLOR = "#ffde8b";
