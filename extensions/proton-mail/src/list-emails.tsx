@@ -433,15 +433,16 @@ async function removeStaleOriginals() {
   );
 }
 
-// The page gets its own charset and policy, and every <meta> tag of the email goes. A refresh is a navigation the
-// policy doesn't cover, and its http-equiv value can be entity-encoded (&#114;efresh), so matching "refresh" isn't
-// enough. Removing the tag itself is: a tag cut short by a ">" inside a value is left as plain text.
+// The page gets its own charset and policy, and no <meta> tag of the email survives. A refresh is a navigation
+// the policy doesn't cover, and its http-equiv value can be entity-encoded (&#114;efresh), so matching "refresh"
+// isn't enough. The tags are removed, then any "<meta" still there is turned into text: removing a tag can put
+// the pieces of another one together (<me<meta x>ta http-equiv=refresh …>).
 export function originalEmailPage(subject: string, html: string): string {
   return (
     `<!doctype html><meta charset="utf-8">` +
     `<meta http-equiv="Content-Security-Policy" content="${ORIGINAL_EMAIL_CSP}">` +
     `<title>${escapeHtml(subject)}</title>` +
-    html.replace(/<meta\b[^>]*>/gi, "")
+    html.replace(/<meta\b[^>]*>/gi, "").replace(/<(?=meta\b)/gi, "&lt;")
   );
 }
 
