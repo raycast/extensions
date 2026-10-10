@@ -2,11 +2,8 @@ import { closeMainWindow, getPreferenceValues, getSelectedFinderItems, showToast
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { getCurrentFinderPath } from "./utils/apple-scripts";
 import { getCurrentExplorerPath } from "./utils/win-scripts";
-
-const isWin = process.platform === "win32";
-const isMac = process.platform === "darwin";
+import { wtPath } from "./utils/constants";
 
 function resolveDirectory(selectedPath: string): string {
   try {
@@ -23,7 +20,7 @@ function resolveDirectory(selectedPath: string): string {
 function launchTerminal(directory: string, quake: boolean): Promise<void> {
   const args = quake ? ["-w", "_quake", "new-tab", "-d", directory] : ["-d", directory];
   return new Promise((resolve, reject) => {
-    execFile("wt.exe", args, (error) => {
+    execFile(wtPath, args, (error) => {
       if (error) {
         reject(error);
       } else {
@@ -39,28 +36,14 @@ export default async function main() {
 
     let selectedItems: { path: string }[] = [];
 
-    if (isMac) {
-      selectedItems = await getSelectedFinderItems();
+    selectedItems = await getSelectedFinderItems();
 
-      if (selectedItems.length === 0) {
-        const currentPath = await getCurrentFinderPath();
-        if (currentPath.length === 0) {
-          throw new Error("Not a valid directory. Select a file or folder in Finder first.");
-        }
-        selectedItems = [{ path: currentPath }];
+    if (selectedItems.length === 0) {
+      const currentPath = await getCurrentExplorerPath();
+      if (currentPath.length === 0) {
+        throw new Error("Not a valid directory. Select a file or folder in File Explorer first.");
       }
-    } else if (isWin) {
-      selectedItems = await getSelectedFinderItems();
-
-      if (selectedItems.length === 0) {
-        const currentPath = await getCurrentExplorerPath();
-        if (currentPath.length === 0) {
-          throw new Error("Not a valid directory. Select a file or folder in File Explorer first.");
-        }
-        selectedItems = [{ path: currentPath }];
-      }
-    } else {
-      throw new Error("This command is only supported on Windows and macOS.");
+      selectedItems = [{ path: currentPath }];
     }
 
     for (const item of selectedItems) {

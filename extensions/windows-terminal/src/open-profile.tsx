@@ -6,6 +6,7 @@ import {
   List,
   Toast,
   closeMainWindow,
+  environment,
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
@@ -14,6 +15,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { useEffect, useMemo } from "react";
 import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
+import { profilesPath, wtPath } from "./utils/constants";
 
 interface WindowsTerminalSettings {
   defaultProfile?: string;
@@ -23,12 +25,7 @@ interface WindowsTerminalSettings {
   newTabMenu?: NewTabMenuEntry[];
 }
 
-const PROFILES = JSON.parse(
-  fs.readFileSync(
-    `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
-    "utf8",
-  ),
-) as WindowsTerminalSettings;
+const PROFILES = JSON.parse(fs.readFileSync(profilesPath, "utf8")) as WindowsTerminalSettings;
 
 function getWindowsTerminalEnv() {
   const env = { ...process.env };
@@ -70,7 +67,7 @@ function launchElevated(name: string) {
     "-NoProfile",
     "-Command",
     "Start-Process",
-    "wt.exe",
+    wtPath,
     "-ArgumentList",
     argumentList,
     "-WorkingDirectory",
@@ -93,7 +90,7 @@ function Actions(props: { name: string; quake: boolean }) {
           const args = props.quake
             ? ["-w", "_quake", "new-tab", "-p", props.name]
             : ["-w", "0", "new-tab", "-p", props.name];
-          execFile("wt.exe", args, getSpawnOptions());
+          execFile(wtPath, args, getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -103,7 +100,7 @@ function Actions(props: { name: string; quake: boolean }) {
         onAction={async () => {
           // -w -1 forces a new window even if the user set windowingBehavior to
           // useExisting/useAnyExisting.
-          execFile("wt.exe", ["-w", "-1", "new-tab", "-p", props.name], getSpawnOptions());
+          execFile(wtPath, ["-w", "-1", "new-tab", "-p", props.name], getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -124,7 +121,7 @@ function Actions(props: { name: string; quake: boolean }) {
           icon={Icon.Code}
           shortcut={Keyboard.Shortcut.Common.Edit}
           title="Open settings.json"
-          target={`C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`}
+          target={profilesPath}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -177,6 +174,8 @@ function ProfileItem(props: { item: Profile; quake: boolean }) {
 
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
+
+  console.log(environment.supportPath);
 
   // A matchProfiles pattern this extension can't evaluate (valid for Windows Terminal, but past
   // what the matcher implements or affords) means the resolved order can't be trusted — so fall
