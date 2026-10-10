@@ -51,6 +51,18 @@ export function normalizeVault(raw: unknown): Vault {
   };
 }
 
+/** The user's role on each share, by share ID, from `share list`. Custom roles, printed as objects, are left out. */
+export function normalizeShareRoles(rawShares: unknown[]): Map<string, VaultRole> {
+  const roles = new Map<string, VaultRole>();
+  for (const raw of rawShares) {
+    if (!isRecord(raw)) continue;
+    const shareId = trimOrUndefined(raw.id ?? raw.share_id);
+    const role = normalizeVaultRole(raw.share_role ?? raw.role);
+    if (shareId && role) roles.set(shareId, role);
+  }
+  return roles;
+}
+
 /** pass-cli prints timestamps without a zone ("2025-06-01T12:34:56"), which are treated as UTC. Unix seconds are accepted too. */
 function normalizeTimestamp(value: unknown): string | undefined {
   if (typeof value === "number" && Number.isFinite(value)) {

@@ -2,7 +2,7 @@ import { Item, ItemDetail, Vault } from "./types";
 
 export const MOCK_VAULTS: Vault[] = [
   { shareId: "vault-1", name: "Personal", itemCount: 12, role: "owner" },
-  { shareId: "vault-2", name: "Work", itemCount: 8, role: "owner" },
+  { shareId: "vault-2", name: "Work", itemCount: 8, role: "owner", isShared: true },
   { shareId: "vault-3", name: "Family", itemCount: 5, role: "manager" },
   { shareId: "vault-4", name: "Shared Projects", itemCount: 3, role: "editor" },
 ];

@@ -617,6 +617,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "medbillanalyzer",
+    title: "MedBillAnalyzer",
+    description:
+      "Check a medical bill against the Explanation of Benefits (EOB) your insurer sent for the same care: the free scan shows how many lines disagree and the dollars in question; a $10 unlock gives each finding, a dispute letter and a phone script. Documents are never stored and cases delete after 30 days. Remote Streamable HTTP server at https://app.medbillanalyzer.com/mcp/apps; no sign-in, no API key.",
+    icon: "https://medbillanalyzer.com/icon-512.png",
+    homepage: "https://medbillanalyzer.com",
+    remoteUrl: "https://app.medbillanalyzer.com/mcp/apps",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.medbillanalyzer.com/mcp/apps"],
+    },
+  },
+  {
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
@@ -817,6 +830,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bankbridge",
+    title: "BankBridge",
+    description:
+      "Read-only access to your own US bank, credit card and investment accounts: balances, transactions, spending by category or merchant, recurring charges, monthly cashflow and holdings. Data is fetched live from your banks on each call and not stored. Remote Streamable HTTP server with BankBridge OAuth 2.1 sign-in (dynamic client registration, PKCE) through `mcp-remote`; no API key needed. Paid: $5/mo per connected bank. It can't move money.",
+    icon: "https://github.com/bankbridge-money.png",
+    homepage: "https://bankbridge.money/docs/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://bankbridge.money/api/mcp"],
+    },
+  },
+  {
     name: "webhound",
     title: "Webhound",
     description:
@@ -987,6 +1012,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
     },
+  },
+  {
+    name: "tapetide",
+    title: "Tapetide",
+    description:
+      "Indian stock market research for about 8,200 NSE and BSE listed companies: quotes, quarterly and annual financials, shareholding, a 326-ratio fundamental screener, technical screens, FII/DII flows, end-of-day index option chains, Tapetide Score, company filings and your own Tapetide portfolio and watchlist. 55 tools. Hosted remote Streamable HTTP server; OAuth 2.1 Google sign-in with dynamic client registration and PKCE, no API key to paste; free plan with 50 tool calls a day. Research data, not investment advice.",
+    icon: "https://github.com/Tapetide-hq.png",
+    homepage: "https://tapetide.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tapetide.com/mcp"],
+    },
+    remoteUrl: "https://mcp.tapetide.com/mcp",
   },
   {
     name: "tavily",

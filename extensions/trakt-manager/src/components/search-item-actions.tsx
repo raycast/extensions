@@ -12,9 +12,11 @@ import {
 import { TraktMovieListItem, TraktShowListItem } from "../lib/schema";
 import { useWatchedState } from "../lib/use-watched";
 import { useWatchlistState } from "../lib/use-watchlist-ids";
+import { AddToListActions } from "./add-to-list-actions";
 import { CheckinActions } from "./checkin-actions";
 import { RemoveFromHistoryAction } from "./history-actions";
 import { RatingActions } from "./rating-actions";
+import { RelatedGrid } from "./related-grid";
 import { MarkWatchedOnActions } from "./watch-actions";
 
 type TraktClient = ReturnType<typeof initTraktClient>;
@@ -123,6 +125,12 @@ export const MovieSearchActions = ({
         signal={signal}
         run={run}
       />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="movie" traktId={traktId} title={movie.movie.title} />}
+      />
+      <AddToListActions kind="movies" traktId={traktId} title={movie.movie.title} />
     </>
   );
 };
@@ -208,6 +216,12 @@ export const ShowSearchActions = ({ item: show, client, signal, run }: SearchIte
         signal={signal}
         run={run}
       />
+      <Action.Push
+        title="Similar Titles"
+        icon={Icon.LightBulb}
+        target={<RelatedGrid mediaType="show" traktId={traktId} title={show.show.title} />}
+      />
+      <AddToListActions kind="shows" traktId={traktId} title={show.show.title} />
     </>
   );
 };
