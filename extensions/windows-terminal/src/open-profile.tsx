@@ -6,7 +6,6 @@ import {
   List,
   Toast,
   closeMainWindow,
-  environment,
   getPreferenceValues,
   showToast,
 } from "@raycast/api";
@@ -67,7 +66,7 @@ function launchElevated(name: string) {
     "-NoProfile",
     "-Command",
     "Start-Process",
-    wtPath,
+    `"${wtPath}"`,
     "-ArgumentList",
     argumentList,
     "-WorkingDirectory",
