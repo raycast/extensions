@@ -1,6 +1,6 @@
 # Changelog
 
-## [Reliable Menu Bar Synchronization] - {PR_MERGE_DATE}
+## [Reliable Menu Bar Synchronization] - 2026-10-10
 
 - Keep menu bar article state consistent when multiple Raycast commands update the archive at the same time.
 
