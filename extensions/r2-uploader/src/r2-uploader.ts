@@ -53,11 +53,7 @@ async function isAvifencAvailable(avifencPath: string): Promise<boolean> {
 
 function isPreferencesConfigured(preferences: PreferenceValues): boolean {
   return Boolean(
-    preferences.r2BucketName &&
-      preferences.r2AccessKeyId &&
-      preferences.r2SecretAccessKey &&
-      preferences.r2AccountId &&
-      preferences.customDomain,
+    preferences.r2BucketName && preferences.r2AccessKeyId && preferences.r2SecretAccessKey && preferences.r2AccountId,
   );
 }
 
@@ -94,6 +90,21 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
         style: Toast.Style.Failure,
         title: "R2 configuration required",
         message: "Please configure your R2 credentials in extension preferences",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => {
+            openExtensionPreferences();
+          },
+        },
+      });
+      return;
+    }
+
+    if (!preferences.customDomain) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "R2 public domain required",
+        message: "Please configure your R2 Public Domain in extension preferences",
         primaryAction: {
           title: "Open Preferences",
           onAction: () => {
