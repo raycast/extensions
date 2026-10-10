@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [AI Tools Improvements] - {PR_MERGE_DATE}
+## [AI Tools Improvements] - 2026-10-10
 
 - Added the `select-tab` AI tool, which switches to a tab by window and index and brings its window to the front.
 - `search-history`, `search-bookmarks` and `search-reading-list` return 50 results by default, up to 100 with `searchLimit`, and report `truncated` when more matches exist. `searchText` is now optional.
