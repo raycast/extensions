@@ -1,6 +1,14 @@
-import os from "node:os";
+import { getPreferenceValues } from "@raycast/api";
 
-const localAppdata = `C:/Users/${os.userInfo().username}/AppData/Local`;
+const localAppData = `${process.env.HOME}/AppData/Local`;
+const { windowsTerminalPath } = getPreferenceValues<Preferences>()
+const isSystem = typeof windowsTerminalPath !== "string" || windowsTerminalPath.trim() === ""
 
-export const profilesPath = `${localAppdata}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`;
-export const wtPath = `${localAppdata}/Microsoft/WindowsApps/Microsoft.WindowsTerminal_8wekyb3d8bbwe/wt.exe`;
+const systemProfilesPath = `${localAppData}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`;
+const sytemWtPath = `${localAppData}/Microsoft/WindowsApps/Microsoft.WindowsTerminal_8wekyb3d8bbwe/wt.exe`;
+
+const portableProfilesPath = `${localAppData}/Microsoft/Windows Terminal/settings.json`
+const portbaleWtPath = `${windowsTerminalPath}/wt.exe`
+
+export const profilesPath = isSystem ? systemProfilesPath : portableProfilesPath
+export const wtPath = isSystem ? sytemWtPath : portbaleWtPath

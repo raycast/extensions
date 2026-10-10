@@ -4,6 +4,7 @@
 
 - Uses static path for `wt.exe` in case the alias is not in the path
 - Removed macOS logic since it's not needed
+- Added support for portable Windows Terminal setups
 
 ## [Open with Terminal command] - 2026-09-27
 

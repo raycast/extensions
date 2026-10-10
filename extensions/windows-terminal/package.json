@@ -38,6 +38,14 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "windowsTerminalPath",
+      "title": "Windows Terminal Path",
+      "label": "Use a portable install of Windows Terminal",
+      "description": "When set the extension will use the portable version of Windows Terminal",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
