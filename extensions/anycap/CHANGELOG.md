@@ -10,3 +10,7 @@
 - Raycast AI: Save Capture with confirmation, and List Folders.
 - Browse Folders and Browse Collections, with Copy Brief.
 - Open Latest Capture.
+- Keep Save Current Tab on the selected browser when Automation fails.
+- Refresh lists and detail metadata after Move, Archive and Undo.
+- Show helper errors in folder and collection browsing.
+- Find the latest capture without a one-year cutoff.

@@ -23,9 +23,15 @@ export async function frontTab(): Promise<Tab> {
   const front = await getFrontmostApplication().catch(() => undefined);
   const script = front?.bundleId ? scripts[front.bundleId] : undefined;
   if (script) {
-    const raw = await runAppleScript(script, { humanReadableOutput: false }).catch(() => "");
+    let raw: string;
+    try {
+      raw = await runAppleScript(script, { humanReadableOutput: false });
+    } catch {
+      throw new Error(`Could not read the tab in ${front?.name}. Check Raycast's browser Automation permission.`);
+    }
     const tab = parseAppleScriptPair(raw);
     if (tab) return tab;
+    throw new Error(`No readable http or https page in ${front?.name}.`);
   }
   if (environment.canAccess(BrowserExtension)) {
     const tabs = await BrowserExtension.getTabs().catch(() => []);

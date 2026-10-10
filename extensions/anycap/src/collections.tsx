@@ -4,11 +4,18 @@ import { callTool, parseCollections } from "./anycap";
 import { CaptureList } from "./captures";
 
 export default function BrowseCollections() {
-  const { data, isLoading } = useCachedPromise(async () => parseCollections(await callTool("collections", {})), []);
+  const { data, isLoading, error } = useCachedPromise(
+    async () => parseCollections(await callTool("collections", {})),
+    [],
+  );
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter collections">
-      <List.EmptyView icon={Icon.Layers} title="No collections yet" description="Gather one in Anycap." />
-      {(data ?? []).map((collection) => (
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title="Anycap did not answer" description={error.message} />
+      ) : (
+        <List.EmptyView icon={Icon.Layers} title="No collections yet" description="Gather one in Anycap." />
+      )}
+      {(error ? [] : (data ?? [])).map((collection) => (
         <List.Item
           key={collection.name}
           icon={collection.emoji ?? Icon.Layers}

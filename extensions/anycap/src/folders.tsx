@@ -4,10 +4,15 @@ import { callTool, parseFolders } from "./anycap";
 import { CaptureList } from "./captures";
 
 export default function BrowseFolders() {
-  const { data, isLoading } = useCachedPromise(async () => parseFolders(await callTool("categories", {})), []);
+  const { data, isLoading, error } = useCachedPromise(async () => parseFolders(await callTool("categories", {})), []);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter folders">
-      {(data ?? []).map((folder) => (
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title="Anycap did not answer" description={error.message} />
+      ) : (
+        <List.EmptyView icon={Icon.Folder} title="No folders yet" description="Create a folder in Anycap." />
+      )}
+      {(error ? [] : (data ?? [])).map((folder) => (
         <List.Item
           key={folder.name}
           icon={folder.emoji ?? (folder.name === "Inbox" ? Icon.Tray : Icon.Folder)}

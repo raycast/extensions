@@ -123,7 +123,7 @@ export function CaptureActions(props: { row: CaptureRow; onChange?: () => void; 
             title="Show Details"
             icon={Icon.Sidebar}
             shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-            target={<CaptureDetail row={row} />}
+            target={<CaptureDetail row={row} onChange={props.onChange} />}
           />
         )}
       </ActionPanel.Section>
@@ -212,9 +212,13 @@ function MoveAction(props: { row: CaptureRow; onChange?: () => void }) {
 
 /// The capture as Anycap describes it: what it is, where it is filed, and
 /// (with Pro) its text, excerpt and summary. Its whole text opens in Anycap.
-export function CaptureDetail(props: { row: CaptureRow }) {
+export function CaptureDetail(props: { row: CaptureRow; onChange?: () => void }) {
   const { row } = props;
-  const { data, isLoading } = useCachedPromise(loadDetail, [row.id]);
+  const { data, isLoading, revalidate } = useCachedPromise(loadDetail, [row.id]);
+  const refresh = () => {
+    revalidate();
+    props.onChange?.();
+  };
   const fields = data?.fields ?? {};
   return (
     <Detail
@@ -248,7 +252,7 @@ export function CaptureDetail(props: { row: CaptureRow }) {
           {row.url ? <Detail.Metadata.Link title="Source" target={row.url} text={host(row.url) ?? row.url} /> : null}
         </Detail.Metadata>
       }
-      actions={<CaptureActions row={row} inDetail />}
+      actions={<CaptureActions row={row} inDetail onChange={refresh} />}
     />
   );
 }

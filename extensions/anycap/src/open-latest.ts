@@ -4,7 +4,7 @@ import { callTool, deepLink, parseCaptureLines } from "./anycap";
 /// The newest capture: its page when it has one, else the item in Anycap.
 export default async function main() {
   try {
-    const [latest] = parseCaptureLines(await callTool("recent", { days: 365, limit: 1 }));
+    const [latest] = parseCaptureLines(await callTool("search", { query: "", limit: 1 }));
     if (!latest) {
       await showHUD("Nothing captured yet");
       return;
