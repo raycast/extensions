@@ -1,6 +1,6 @@
 # Media Switcher Changelog
 
-## [Detail view and enhancements] - {PR_MERGE_DATE}
+## [Detail view and enhancements] - 2026-10-10
 
 ✨ New
 
