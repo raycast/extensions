@@ -964,6 +964,14 @@ export default function Search(
     sortedFiles.find((file) => file.path === selectedPath) ?? sortedFiles[0];
   const previewPath = active && showDetails ? selectedFile?.path : undefined;
   const selectedMatches = selectedFile?.matches;
+  // Every response carries fresh match arrays; the preview is rebuilt only
+  // when their contents change, so a poll during indexing leaves it alone.
+  const selectedMatchesKey = useMemo(
+    () => JSON.stringify(selectedMatches ?? null),
+    [selectedMatches],
+  );
+  const selectedMatchesRef = useRef(selectedMatches);
+  selectedMatchesRef.current = selectedMatches;
   // Scrolling to the end asks for more results; for a partial content
   // search the larger limit also buys a longer read budget.
   const canLoadMore =
@@ -988,7 +996,7 @@ export default function Search(
         await thumbnailCacheReady;
         const preview = await buildPreview(
           previewPath,
-          selectedMatches,
+          selectedMatchesRef.current,
           termsKey ? termsKey.split("\u0000") : [],
           controller.signal,
         );
@@ -1009,7 +1017,7 @@ export default function Search(
       controller.abort();
       clearTimeout(timer);
     };
-  }, [previewPath, selectedMatches, termsKey, retry]);
+  }, [previewPath, selectedMatchesKey, termsKey, retry]);
 
   const loadMore = () => {
     setLimit((value) => Math.min(value + LOAD_MORE_STEP, MAX_LIMIT));
