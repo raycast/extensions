@@ -66,7 +66,8 @@ kern_return_t IOHIDGetModifierLockState(io_connect_t connection, int selector, b
         return KERN_FAILURE;
     }
     const char *marker = getenv("CAPS_LOCK_TEST_HOLD_MARKER");
-    if (marker) {
+    const char *hold_read = getenv("CAPS_LOCK_TEST_HOLD_READ");
+    if (marker && (!hold_read || reads == atoi(hold_read))) {
         int file = open(marker, O_CREAT | O_WRONLY, 0600);
         if (file == -1) {
             return KERN_FAILURE;

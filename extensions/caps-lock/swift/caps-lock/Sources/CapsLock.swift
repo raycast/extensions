@@ -1,4 +1,5 @@
 import Darwin
+import Dispatch
 import Foundation
 import IOKit
 import IOKit.hidsystem
@@ -6,6 +7,24 @@ import RaycastSwiftMacros
 
 private func failure(_ message: String) -> NSError {
   NSError(domain: "com.raycast.caps-lock", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+}
+
+// End this invocation even if a synchronous keyboard call or the file lock stalls.
+// Process exit releases the lock; rejecting only the JavaScript promise would not.
+private func startWatchdog() -> DispatchSourceTimer {
+  let timer = DispatchSource.makeTimerSource(
+    queue: DispatchQueue(label: "com.raycast.caps-lock.watchdog", qos: .userInitiated)
+  )
+  timer.schedule(deadline: .now() + .seconds(5))
+  timer.setEventHandler {
+    let message = "Caps Lock operation timed out; the final state may have changed. Check Caps Lock before trying again.\n"
+    message.withCString { bytes in
+      _ = Darwin.write(STDERR_FILENO, bytes, strlen(bytes))
+    }
+    _exit(EXIT_FAILURE)
+  }
+  timer.resume()
+  return timer
 }
 
 // Keep the inode in place: unlinking it could let waiting processes use different locks.
@@ -44,6 +63,9 @@ private func acquireLock() throws -> Int32 {
 
 // Change the real modifier lock without synthesizing key presses or changing mappings.
 @raycast func toggleCapsLock() throws -> Bool {
+  let watchdog = startWatchdog()
+  defer { watchdog.cancel() }
+
   let descriptor = try acquireLock()
   defer { close(descriptor) }
 

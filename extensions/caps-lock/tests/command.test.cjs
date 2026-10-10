@@ -68,7 +68,7 @@ test("bridge failure and invalid return values report toggle failure", async () 
     assert.equal(calls.filter(([name]) => name === "hud").length, 0);
     const toast = calls.find(([name]) => name === "toast")[1];
     assert.equal(toast.style, "failure");
-    assert.equal(toast.title, "Could not toggle Caps Lock");
+    assert.equal(toast.title, "Could not confirm Caps Lock");
     assert.ok(toast.message);
   }
 });

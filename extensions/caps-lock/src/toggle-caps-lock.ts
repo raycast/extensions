@@ -11,7 +11,7 @@ export default async function Command() {
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Could not toggle Caps Lock",
+      title: "Could not confirm Caps Lock",
       message: error instanceof Error ? error.message : String(error),
     });
     return;

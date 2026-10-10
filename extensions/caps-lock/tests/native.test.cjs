@@ -21,6 +21,7 @@ const run = promisify(execFile);
 const root = resolve(__dirname, "..");
 let buildDirectory;
 let helper;
+let lockHolder;
 
 before(() => {
   assert.equal(process.platform, "darwin", "The native tests require the macOS SDK");
@@ -46,6 +47,27 @@ before(() => {
   const mock = join(buildDirectory, "mock-iokit.o");
   execFileSync("xcrun", ["clang", "-Wall", "-Wextra", "-Werror", "-c", join(root, "tests/mock-iokit.c"), "-o", mock]);
   execFileSync("xcrun", ["swiftc", "-warnings-as-errors", nativeSource, main, mock, "-o", helper]);
+  // An independent process can hold the shared lock longer than a helper's watchdog.
+  const holderSource = join(buildDirectory, "lock-holder.c");
+  lockHolder = join(buildDirectory, "lock-holder");
+  writeFileSync(
+    holderSource,
+    `
+    #include <fcntl.h>
+    #include <sys/file.h>
+    #include <unistd.h>
+    int main(int argc, char **argv) {
+      if (argc != 3) return 1;
+      int lock = open(argv[1], O_CREAT | O_RDWR, 0600);
+      if (lock == -1 || flock(lock, LOCK_EX) == -1) return 1;
+      int marker = open(argv[2], O_CREAT | O_WRONLY, 0600);
+      if (marker == -1) return 1;
+      close(marker);
+      for (;;) pause();
+    }
+  `,
+  );
+  execFileSync("xcrun", ["clang", "-Wall", "-Wextra", "-Werror", holderSource, "-o", lockHolder]);
 });
 
 after(() => {
@@ -62,7 +84,7 @@ function fixture(t) {
     directory,
     state,
     env,
-    invoke: (command, extra = {}) => run(helper, [command], { env: { ...env, ...extra }, timeout: 5000 }),
+    invoke: (command, extra = {}, timeout = 5000) => run(helper, [command], { env: { ...env, ...extra }, timeout }),
   };
 }
 
@@ -100,6 +122,53 @@ test("process death releases the lock for a blocked helper", async (t) => {
   holder.kill("SIGKILL");
   await exited;
   assert.equal((await waiter).stdout, "on\n");
+});
+
+function assertWatchdogExit(error) {
+  assert.equal(error.code, 1, "the helper exits itself with failure");
+  assert.equal(error.signal, null, "the test runner did not kill the helper");
+  assert.equal(error.killed, false);
+  assert.equal(error.stdout, "", "an uncertain result is never reported as success");
+  assert.match(error.stderr, /operation timed out/);
+  assert.match(error.stderr, /final state may have changed/);
+  assert.match(error.stderr, /Check Caps Lock before trying again/);
+  return true;
+}
+
+test("watchdog ends stalled keyboard calls and releases the lock without retrying", async (t) => {
+  for (const read of [1, 2]) {
+    const { directory, state, invoke } = fixture(t);
+    const marker = join(directory, "stalled-keyboard");
+    await assert.rejects(
+      invoke("toggle", { CAPS_LOCK_TEST_HOLD_MARKER: marker, CAPS_LOCK_TEST_HOLD_READ: String(read) }, 10000),
+      assertWatchdogExit,
+    );
+    assert.ok(existsSync(marker), "the mock reached the stalled keyboard call while holding the lock");
+    const expectedState = read === 1 ? "0" : "1";
+    assert.equal(readFileSync(state, "utf8"), expectedState, "the watchdog never retries or rolls back the toggle");
+    assert.equal(
+      (await invoke("toggle")).stdout,
+      read === 1 ? "on\n" : "off\n",
+      "a later invocation acquires the lock",
+    );
+  }
+});
+
+test("watchdog also ends an invocation blocked before acquiring the lock", async (t) => {
+  const { directory, state, invoke } = fixture(t);
+  const marker = join(directory, "external-lock-holder");
+  const holder = spawn(lockHolder, [join(directory, "com.raycast.caps-lock.lock"), marker], { stdio: "ignore" });
+  const exited = once(holder, "exit");
+  t.after(() => holder.kill("SIGKILL"));
+  const deadline = Date.now() + 3000;
+  while (!existsSync(marker) && Date.now() < deadline) await delay(10);
+  assert.ok(existsSync(marker), "an independent process holds the lock");
+  await assert.rejects(invoke("toggle", {}, 10000), assertWatchdogExit);
+  assert.equal(holder.exitCode, null, "the helper timeout does not kill the independent lock holder");
+  assert.equal(readFileSync(state, "utf8"), "0", "the timed-out waiter never changes the keyboard");
+  holder.kill("SIGKILL");
+  await exited;
+  assert.equal((await invoke("toggle")).stdout, "on\n");
 });
 
 test("a failed keyboard operation releases the lock and does not report success", async (t) => {
