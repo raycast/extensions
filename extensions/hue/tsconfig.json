@@ -1,6 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 18",
   "include": [
     "src/**/*",
     "raycast-env.d.ts"
@@ -13,10 +12,7 @@
     "types": ["node"],
     "strict": true,
     "isolatedModules": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "jsx": "react-jsx"
   }
 }
