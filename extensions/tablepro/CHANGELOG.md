@@ -1,5 +1,13 @@
 # TablePro Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Access errors from current TablePro versions show as Access Denied.
+- A failed query shows its error.
+- Denying in TablePro ends pairing with a message.
+- The extension no longer reads or deletes TablePro's handshake file.
+- TablePro is found by its bundle ID. A new MCP Port preference replaces the TablePro App preference.
+
 ## [Initial Version] - 2026-05-22
 
 First release. Pair the extension with TablePro and drive the app from Raycast and Raycast AI.

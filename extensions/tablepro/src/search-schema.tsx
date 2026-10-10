@@ -11,8 +11,7 @@ import { useRef } from "react";
 import { Connection } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { listDatabases, listSchemas } from "./lib/mcp";
-import { tableProInstalled } from "./lib/paths";
-import { TableProNotInstalledError } from "./lib/types";
+import { requireTablePro } from "./lib/app";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
 import SearchTablesView from "./search-tables";
@@ -26,7 +25,7 @@ export default function SearchSchema() {
     revalidate,
   } = useCachedPromise(
     async () => {
-      if (!tableProInstalled()) throw new TableProNotInstalledError();
+      await requireTablePro();
       return loadConnections();
     },
     [],
