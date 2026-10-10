@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { release } from "os";
 import { DARK_PALETTE, getHourType, HourType, LIGHT_PALETTE, TimelinePalette } from "./palette";
 import { SunTimes } from "./sun-times";
 import { formatDelta, formatGmtOffset } from "./time-utils";
@@ -63,28 +64,66 @@ function svg(strings: TemplateStringsArray, ...values: (string | number)[]): str
   }, "");
 }
 
+// Raycast's SVG renderer on macOS 27 ignores font-weight in the stylesheet and dominant-baseline, and draws
+// text about 0.2em above its baseline. So text is drawn through text(), which sets the weight as an attribute
+// and moves the baseline down to compensate.
+const TEXT_SHIFT_EM = Number(release().split(".")[0]) >= 27 ? 0.2 : 0;
+
+const TEXT_STYLES: Record<string, { size: number; weight?: number }> = {
+  title: { size: 17, weight: 700 },
+  time: { size: 15, weight: 700 },
+  city: { size: 15, weight: 600 },
+  "day-diff": { size: 12, weight: 600 },
+  badge: { size: 11, weight: 600 },
+  sun: { size: 12 },
+  "cursor-label": { size: 12, weight: 800 },
+  "now-label": { size: 11, weight: 600 },
+  hour: { size: 13 },
+  weekday: { size: 11, weight: 700 },
+  legend: { size: 12 },
+};
+
+// Draws a text element. The first class picks the size and weight from TEXT_STYLES; `bold` overrides the weight.
+function text(
+  classes: string,
+  x: number,
+  y: number,
+  content: string,
+  options: { bold?: boolean; attrs?: string } = {},
+): string {
+  const style = TEXT_STYLES[classes.split(" ")[0]];
+  const weight = options.bold ? 700 : style.weight;
+  const shiftedY = y + style.size * TEXT_SHIFT_EM;
+  return (
+    svg`<text class="${classes}" x="${x}" y="${shiftedY}"` +
+    // Raycast's renderer only understands the "bold" keyword, not numeric weights.
+    (weight ? ` font-weight="${weight >= 700 ? "bold" : weight}"` : "") +
+    (options.attrs ? ` ${options.attrs}` : "") +
+    `>${escapeXml(content)}</text>`
+  );
+}
+
 // Text and color styles, so elements only need a class instead of repeating the same attributes.
 // Only plain class selectors are used, for compatibility with simple SVG renderers.
 function stylesheet(palette: TimelinePalette): string {
   return `<style>
     text { font-family: ${FONT}; }
-    .title { font-size: 17px; font-weight: 700; fill: ${palette.text}; }
-    .time { font-size: 15px; font-weight: 700; text-anchor: end; fill: ${palette.text}; }
-    .city { font-size: 15px; font-weight: 600; fill: ${palette.text}; }
-    .day-diff { font-size: 11px; font-weight: 600; fill: ${palette.accent}; }
+    .title { font-size: 17px; fill: ${palette.text}; }
+    .time { font-size: 15px; fill: ${palette.text}; }
+    .city { font-size: 15px; fill: ${palette.text}; }
+    .day-diff { font-size: 12px; fill: ${palette.accent}; }
     .badge-bg { fill-opacity: 0.18; }
-    .badge { font-size: 11px; font-weight: 600; text-anchor: middle; fill-opacity: 0.85; }
+    .badge { font-size: 11px; text-anchor: middle; fill-opacity: 0.85; }
     .gmt { fill: ${palette.badgeGmt}; }
     .delta { fill: ${palette.badgeDelta}; }
     .sun { font-size: 12px; fill: ${palette.muted}; }
     .sun-icon { fill: none; stroke: ${palette.muted}; stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; }
-    .cursor-label { font-size: 12px; font-weight: 800; fill: ${palette.cursorText}; }
-    .now-label { font-size: 11px; font-weight: 600; text-anchor: middle; fill: ${palette.now}; }
+    .cursor-label { font-size: 12px; fill: ${palette.cursorText}; }
+    .now-label { font-size: 11px; text-anchor: middle; fill: ${palette.now}; }
     .now-line { stroke: ${palette.now}; stroke-width: 1.5; }
     .cursor-line { stroke: ${palette.accent}; stroke-width: 1.5; }
     .hour { font-size: 13px; text-anchor: middle; }
-    .current { font-weight: 700; }
-    .weekday { font-size: 11px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+    .weekday { font-size: 11px; text-anchor: middle; }
     .sleep { fill: ${palette.cells.sleep.fill}; }
     .sleep-text { fill: ${palette.cells.sleep.text}; }
     .marginal { fill: ${palette.cells.marginal.fill}; }
@@ -113,6 +152,7 @@ function estimateTextWidth(text: string, fontSize: number): number {
   for (const char of text) {
     if (/[0-9]/.test(char)) width += 0.6;
     else if (/[ilj.,:'|!tf]/.test(char)) width += 0.28;
+    else if (char === "r") width += 0.38;
     else if (/[mwMW]/.test(char)) width += 0.88;
     else if (/[A-Z]/.test(char)) width += 0.68;
     else if (char === " ") width += 0.28;
@@ -146,6 +186,29 @@ function placeCursorLabel(
   return { x: Math.max(right.x, minX), anchor: "start" };
 }
 
+// Horizontal positions shared by every row's header, so the city names and badges each line up in a column.
+interface HeaderLayout {
+  cityX: number;
+  badgeX: number;
+  gmtWidth: number;
+}
+
+const badgeWidth = (text: string) => estimateTextWidth(text, 11) * 1.1 + 16;
+
+function getHeaderLayout(rows: TimelineRow[], timeFormat: string): HeaderLayout {
+  const timeColumnWidth = estimateTextWidth(timeFormat.includes("HH") ? "00:00" : "00:00 AM", 15) * 1.06;
+  const cityX = PAD_X + timeColumnWidth + 8;
+  const headerEnds = rows.map(
+    (row) =>
+      cityX + estimateTextWidth(row.cityName, 15) + (row.dayDiff ? 6 + estimateTextWidth(row.dayDiff.trim(), 12) : 0),
+  );
+  return {
+    cityX,
+    badgeX: Math.max(...headerEnds) + 12,
+    gmtWidth: Math.max(...rows.map((row) => badgeWidth(formatGmtOffset(row.localCursor.offset)))),
+  };
+}
+
 function renderRow(
   row: TimelineRow,
   rowIndex: number,
@@ -153,6 +216,7 @@ function renderRow(
   cursorMs: number,
   lines: { cursorX: number | null; nowX: number | null },
   timeFormat: string,
+  layout: HeaderLayout,
 ): string {
   const top = TOP + rowIndex * ROW_H;
   const cellTop = top + CELL_TOP;
@@ -165,26 +229,27 @@ function renderRow(
   const baseline = top + HEADER_BASELINE;
 
   let markup = "";
-  // Times are right-aligned in a fixed column so the colons and city names line up across rows.
-  const timeColumnWidth = estimateTextWidth(timeFormat.includes("HH") ? "00:00" : "00:00 AM", 15) * 1.06;
-  const cityX = chartLeft + timeColumnWidth + 8;
-  markup += svg`<text class="time" x="${chartLeft + timeColumnWidth}" y="${baseline}">${escapeXml(timeText)}</text>`;
-  markup += svg`<text class="city" x="${cityX}" y="${baseline}">${escapeXml(row.cityName)}`;
-  let headerEnd = cityX + estimateTextWidth(row.cityName, 15) * 1.04;
+  // Times start at the chart's left edge; city names and badges sit in columns shared by all rows.
+  markup += text("time", chartLeft + 1, baseline, timeText);
+  markup += text("city", layout.cityX, baseline, row.cityName);
+  // The day difference is a separate <text> rather than a <tspan>: some Raycast versions shift the whole
+  // line's baseline down when a text element mixes font sizes, misaligning the city name with the time.
   if (row.dayDiff) {
-    markup += svg`<tspan class="day-diff" dx="5">${escapeXml(row.dayDiff.trim())}</tspan>`;
-    headerEnd += 5 + estimateTextWidth(row.dayDiff.trim(), 11);
+    const dayDiffX = layout.cityX + estimateTextWidth(row.cityName, 15) + 6;
+    markup += text("day-diff", dayDiffX, baseline, row.dayDiff.trim());
   }
-  markup += "</text>";
 
-  const badges = [{ text: gmt, kind: "gmt" }];
-  if (!row.isBase) badges.push({ text: formatDelta(row.offsetMinutes, "text"), kind: "delta" });
-  let badgeX = headerEnd + 10;
+  // Badges are vertically centered on the capital letters of the time and city name.
+  const badges = [{ text: gmt, kind: "gmt", width: layout.gmtWidth }];
+  if (!row.isBase) {
+    const delta = formatDelta(row.offsetMinutes, "text");
+    badges.push({ text: delta, kind: "delta", width: badgeWidth(delta) });
+  }
+  let badgeX = layout.badgeX;
   for (const badge of badges) {
-    const width = estimateTextWidth(badge.text, 11) + 14;
-    markup += svg`<rect class="badge-bg ${badge.kind}" x="${badgeX}" y="${top + 1}" width="${width}" height="19" rx="5"/>`;
-    markup += svg`<text class="badge ${badge.kind}" x="${badgeX + width / 2}" y="${top + 14.5}">${escapeXml(badge.text)}</text>`;
-    badgeX += width + 6;
+    markup += svg`<rect class="badge-bg ${badge.kind}" x="${badgeX}" y="${baseline - 15}" width="${badge.width}" height="19" rx="5"/>`;
+    markup += text(`badge ${badge.kind}`, badgeX + badge.width / 2, baseline - 1.6, badge.text);
+    badgeX += badge.width + 6;
   }
 
   const sunTimeWidth = estimateTextWidth(timeFormat.includes("HH") ? "00:00" : "00:00 AM", 12);
@@ -192,45 +257,52 @@ function renderRow(
   const sunsetX = chartRight - sunItemWidth;
   const sunriseX = sunsetX - 14 - sunItemWidth;
   markup += sunIcon("rise", sunriseX, top + 3);
-  markup += svg`<text class="sun" x="${sunriseX + 20}" y="${baseline}">${escapeXml(row.sun.sunrise)}</text>`;
+  markup += text("sun", sunriseX + 20, baseline, row.sun.sunrise);
   markup += sunIcon("set", sunsetX, top + 3);
-  markup += svg`<text class="sun" x="${sunsetX + 20}" y="${baseline}">${escapeXml(row.sun.sunset)}</text>`;
+  markup += text("sun", sunsetX + 20, baseline, row.sun.sunset);
 
   if (lines.cursorX !== null) {
     const cursorText = row.localCursor.toFormat(timeFormat);
     const width = estimateTextWidth(cursorText, 12) * 1.1;
     const label = placeCursorLabel(lines.cursorX, lines.nowX, width, badgeX + 4, sunriseX - 10);
-    markup += svg`<text class="cursor-label" x="${label.x}" y="${baseline}" text-anchor="${label.anchor}">${escapeXml(cursorText)}</text>`;
+    markup += text("cursor-label", label.x, baseline, cursorText, { attrs: `text-anchor="${label.anchor}"` });
   }
 
   // Each row is laid out on its own local hour grid, positioned by absolute time, so zones with
   // fractional offsets (e.g. +5:30) stay aligned with the shared cursor column.
   const anchor = DateTime.fromMillis(bandCenterMs).setZone(row.tz).startOf("hour");
-  const clipId = `clip${rowIndex}`;
-  markup += svg`<clipPath id="${clipId}"><rect x="${chartLeft}" y="${cellTop - 12}" width="${CHART_W}" height="${CELL_H + 12}"/></clipPath>`;
-  markup += svg`<g clip-path="url(#${clipId})">`;
 
+  // Cells are clipped to the chart by hand rather than with <clipPath>: some Raycast versions render
+  // a clipPath's rect as a filled black box instead of using it as a clip.
   for (let j = -CURSOR_COLUMN - 2; j <= HOURS_VISIBLE - CURSOR_COLUMN + 1; j++) {
     const start = anchor.plus({ hours: j });
     const hour = start.hour;
     const x = chartLeft + CURSOR_COLUMN * CELL_W + ((start.toMillis() - baseHourStart.toMillis()) / 3600000) * CELL_W;
+    const left = Math.max(x + CELL_GAP / 2, chartLeft);
+    const right = Math.min(x + CELL_W - CELL_GAP / 2, chartRight);
+    if (right - left < 1) continue;
+
     const cellClass = hour === 0 ? "day-start" : getHourType(hour);
     const isCursor = start.toMillis() <= cursorMs && cursorMs < start.plus({ hours: 1 }).toMillis();
     const centerX = x + CELL_W / 2;
     const centerY = cellTop + CELL_H / 2;
 
-    markup += svg`<rect class="${cellClass}" x="${x + CELL_GAP / 2}" y="${cellTop}" width="${CELL_W - CELL_GAP}" height="${CELL_H}" rx="5"/>`;
+    markup += svg`<rect class="${cellClass}" x="${left}" y="${cellTop}" width="${right - left}" height="${CELL_H}" rx="${Math.min(5, (right - left) / 2)}"/>`;
+    // Labels are only drawn on fully visible cells, so they never spill past the chart edges.
+    if (right - left < CELL_W - CELL_GAP - 0.5) continue;
     markup +=
       hour === 0
-        ? svg`<text class="weekday ${cellClass}-text" x="${centerX}" y="${centerY}" transform="rotate(-90 ${centerX} ${centerY})">${escapeXml(start.toFormat("ccc"))}</text>`
-        : svg`<text class="hour ${cellClass}-text${isCursor ? " current" : ""}" x="${centerX}" y="${cellTop + 20}">${hour}</text>`;
+        ? // Baseline sits half a cap height below the center (dominant-baseline is not supported everywhere).
+          text(`weekday ${cellClass}-text`, centerX, centerY + 4, start.toFormat("ccc"), {
+            attrs: svg`transform="rotate(-90 ${centerX} ${centerY})"`,
+          })
+        : text(`hour ${cellClass}-text`, centerX, cellTop + 20, String(hour), { bold: isCursor });
   }
 
-  markup += "</g>";
   return markup;
 }
 
-export function generateTimelineMarkdown(config: TimelineConfig): string {
+export function generateTimelineSvg(config: TimelineConfig): string {
   const { baseISO, baseCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes } = config;
   const palette = appearance === "dark" ? DARK_PALETTE : LIGHT_PALETTE;
 
@@ -265,7 +337,7 @@ export function generateTimelineMarkdown(config: TimelineConfig): string {
 
   let markup = svg`<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}">`;
   markup += stylesheet(palette);
-  markup += svg`<text class="title" x="${PAD_X}" y="20">${escapeXml(cursor.toFormat("cccc, LLLL d, yyyy"))}</text>`;
+  markup += text("title", PAD_X, 20, cursor.toFormat("cccc, LLLL d, yyyy"));
   const msToX = (ms: number) => PAD_X + CURSOR_COLUMN * CELL_W + ((ms - baseHourStart.toMillis()) / 3600000) * CELL_W;
   const lineBottom = chartHeight - 2;
   const chartRight = PAD_X + CHART_W;
@@ -273,13 +345,14 @@ export function generateTimelineMarkdown(config: TimelineConfig): string {
   // When the cursor is at the current time, only the "now" line is drawn.
   const cursorX = cursorMs !== nowMs ? msToX(cursorMs) : null;
 
+  const layout = getHeaderLayout(rows, timeFormat);
   rows.forEach((row, i) => {
-    markup += renderRow(row, i, baseHourStart, cursorMs, { cursorX, nowX }, timeFormat);
+    markup += renderRow(row, i, baseHourStart, cursorMs, { cursorX, nowX }, timeFormat, layout);
   });
 
   if (nowX !== null) {
     markup += svg`<line class="now-line" x1="${nowX}" y1="${TOP - 6}" x2="${nowX}" y2="${lineBottom}"/>`;
-    markup += svg`<text class="now-label" x="${Math.min(Math.max(nowX, PAD_X + 10), chartRight - 10)}" y="${TOP - 9}">now</text>`;
+    markup += text("now-label", Math.min(Math.max(nowX, PAD_X + 10), chartRight - 10), TOP - 9, "now");
   }
   if (cursorX !== null) {
     markup += svg`<line class="cursor-line" x1="${cursorX}" y1="${TOP - 6}" x2="${cursorX}" y2="${lineBottom}"/>`;
@@ -293,10 +366,9 @@ export function generateTimelineMarkdown(config: TimelineConfig): string {
   let legendX = PAD_X;
   for (const item of legendItems) {
     markup += svg`<rect class="${item.type}" x="${legendX}" y="${chartHeight + 8}" width="14" height="14" rx="3.5"/>`;
-    markup += svg`<text class="legend" x="${legendX + 20}" y="${chartHeight + 19}">${escapeXml(item.label)}</text>`;
+    markup += text("legend", legendX + 20, chartHeight + 19, item.label);
     legendX += 20 + estimateTextWidth(item.label, 12) + 18;
   }
   markup += "</svg>";
-
-  return `![Timeline](data:image/svg+xml;base64,${Buffer.from(markup).toString("base64")})`;
+  return markup;
 }

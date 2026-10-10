@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, environment, Icon, Keyboard } from "@rayca
 import { DateTime } from "luxon";
 import { useMemo } from "react";
 import { lookupCity } from "./citySearch";
-import { generateTimelineMarkdown } from "./timeline-renderer";
+import { generateTimelineSvg, TimelineConfig } from "./timeline-renderer";
 import { getSunTimes, SunTimes } from "./sun-times";
 import { getTimezone } from "./timezones";
 
@@ -114,17 +114,14 @@ export function TimelineView(props: TimelineViewProps) {
     return result;
   }, [sunDaysKey, timeFormat]);
 
-  const markdown = useMemo(() => {
-    return generateTimelineMarkdown({
-      baseISO,
-      baseCityId,
-      selectedZoneIds,
-      timeFormat,
-      appearance,
-      nowISO,
-      sunTimes,
-    });
-  }, [baseISO, baseCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes]);
+  const config: TimelineConfig = useMemo(
+    () => ({ baseISO, baseCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes }),
+    [baseISO, baseCityId, selectedZoneIds, timeFormat, appearance, nowISO, sunTimes],
+  );
+  const markdown = useMemo(
+    () => `![Timeline](data:image/svg+xml;base64,${Buffer.from(generateTimelineSvg(config)).toString("base64")})`,
+    [config],
+  );
 
   return (
     <Detail
