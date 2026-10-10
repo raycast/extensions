@@ -4,7 +4,6 @@ import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS } from "./helpers/
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import { useHue } from "./hooks/useHue";
-import React from "react";
 import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import {
@@ -30,41 +29,16 @@ export default function ControlLights() {
 
   return (
     <Grid isLoading={isLoading} filtering={{ keepSectionOrder: true }} columns={8}>
-      {groups.map((group: Group) => {
-        return (
-          <Group
-            key={group.id}
-            group={group}
-            lights={getLightsFromGroup(lights, group).sort(byName)}
-            useHue={useHueObject}
-            rateLimiter={rateLimiter}
-          />
-        );
-      })}
+      {groups.map((group) => (
+        <Grid.Section key={group.id} title={group.metadata.name}>
+          {getLightsFromGroup(lights, group)
+            .sort(byName)
+            .map((light) => (
+              <Light key={light.id} light={light} group={group} useHue={useHueObject} rateLimiter={rateLimiter} />
+            ))}
+        </Grid.Section>
+      ))}
     </Grid>
-  );
-}
-
-function Group(props: {
-  group: Group;
-  lights: Light[];
-  useHue: ReturnType<typeof useHue>;
-  rateLimiter: ReturnType<typeof useInputRateLimiter>;
-}) {
-  return (
-    <Grid.Section title={props.group.metadata.name}>
-      {props.lights.map(
-        (light: Light): React.JSX.Element => (
-          <Light
-            key={light.id}
-            light={light}
-            group={props.group}
-            useHue={props.useHue}
-            rateLimiter={props.rateLimiter}
-          />
-        ),
-      )}
-    </Grid.Section>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Icon, Image } from "@raycast/api";
 import type { Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -99,7 +99,11 @@ function Group(props: {
                 handleToggle(props.useHue, props.rateLimiter, props.groupLights, groupedLight, props.group)
               }
             />
-            <SetSceneAction group={props.group} useHue={props.useHue} />
+            <Action.Push
+              title="Set Scene"
+              icon={Icon.Image}
+              target={<SetScene group={props.group} useHue={props.useHue} />}
+            />
             <ActionPanel.Section>
               <SetBrightnessAction
                 group={props.group}
@@ -161,18 +165,6 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLightStat
       title={`Turn ${props.group.metadata.name} ${props.groupedLight.on?.on ? "Off" : "On"}`}
       icon={props.groupedLight.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
-    />
-  );
-}
-
-function SetSceneAction(props: { group: Group; useHue: ReturnType<typeof useHue> }) {
-  const { push } = useNavigation();
-
-  return (
-    <Action
-      title="Set Scene"
-      icon={Icon.Image}
-      onAction={() => push(<SetScene group={props.group} useHue={props.useHue} />)}
     />
   );
 }
