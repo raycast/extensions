@@ -19,6 +19,18 @@ test("without custom proxy the client retains the runtime fetch", () => {
   assert.deepEqual(proxyClientOptions({ useProxy: false }), {});
 });
 
+for (const protocol of ["socks4", "socks5"]) {
+  test(`${protocol} remains a supported proxy protocol`, () => {
+    const options = proxyClientOptions({
+      useProxy: true,
+      proxyProtocol: protocol,
+      proxyHost: "127.0.0.1",
+      proxyPort: "1080",
+    });
+    assert.equal(typeof options.fetch, "function");
+  });
+}
+
 test("custom HTTP proxy carries a fetch request", async (t) => {
   let requestedUrl;
   const proxy = http.createServer((request, response) => {

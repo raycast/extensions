@@ -14,10 +14,9 @@ export function proxyClientOptions(preferences: Preferences) {
   if (preferences.proxyPassword) url.password = preferences.proxyPassword;
 
   const proxyUrl = url.toString();
-  const httpAgent =
-    preferences.proxyProtocol === "socks5" ? new SocksProxyAgent(proxyUrl) : new HttpProxyAgent(proxyUrl);
-  const httpsAgent =
-    preferences.proxyProtocol === "socks5" ? new SocksProxyAgent(proxyUrl) : new HttpsProxyAgent(proxyUrl);
+  const isSocksProxy = preferences.proxyProtocol.startsWith("socks");
+  const httpAgent = isSocksProxy ? new SocksProxyAgent(proxyUrl) : new HttpProxyAgent(proxyUrl);
+  const httpsAgent = isSocksProxy ? new SocksProxyAgent(proxyUrl) : new HttpsProxyAgent(proxyUrl);
   const fetchThroughProxy: typeof fetch = async (input, init) => {
     const destination = String(input);
     const agent = destination.startsWith("https:") ? httpsAgent : httpAgent;
