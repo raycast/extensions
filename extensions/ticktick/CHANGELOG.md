@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Added] - {PR_MERGE_DATE}
+## [Added] - 2026-10-10
 
 - Quick Add Task now supports natural language recognition for dates, priorities, tags, and lists, enabled by default.
 
