@@ -1,6 +1,5 @@
 import {
   Cache,
-  closeMainWindow,
   environment,
   getPreferenceValues,
   showHUD,
@@ -35,18 +34,14 @@ export default async function ToggleAllLights() {
         : onCount === resources.lights.length
           ? "All lights are on"
           : `${onCount} of ${resources.lights.length} lights are on`;
-    updateCommandMetadata({ subtitle }).then();
+    await updateCommandMetadata({ subtitle });
   } catch (error) {
     if (environment.launchType !== "userInitiated" || !(error instanceof Error)) {
       throw error;
     }
 
     logError(error);
-    showHUD(error.message).then();
-  } finally {
-    if (environment.launchType === "userInitiated") {
-      await closeMainWindow();
-    }
+    await showHUD(error.message);
   }
 }
 
@@ -66,11 +61,11 @@ async function toggleLightsAndNotifyUser(hueClient: HueClient): Promise<void> {
   );
   const failed = results.filter((result) => result.status === "rejected").length;
 
-  showHUD(
+  await showHUD(
     failed > 0
       ? `Turned ${onOrOff} ${results.length - failed} lights, failed turning ${onOrOff} ${failed}.`
       : toggleOn
         ? `Turned on all ${lights.length} lights.`
         : `Turned off all ${onCount} lights that were on.`,
-  ).then();
+  );
 }
