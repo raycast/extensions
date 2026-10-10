@@ -44,6 +44,7 @@ const ICONS_KEY = "icons-v1";
 const PINNED_KEY = "pinned-app-ids";
 // 7-day map TTL; misses rescan after a 1-hour cooldown.
 const SHORTCUTS_TTL_MS = 7 * 24 * 3600 * 1000;
+const ICONS_TTL_MS = 7 * 24 * 3600 * 1000;
 const RESCAN_COOLDOWN_MS = 3600 * 1000;
 const SETTLE_MS = 30000;
 const SETTLE_TICK_MS = 2000;
@@ -92,11 +93,15 @@ async function refreshShortcutsIfStale(): Promise<ShortcutMaps | undefined> {
   }
 }
 
-function readIcons(): Record<string, string> {
+function readIcons(): { icons: Record<string, string>; ts: number } | undefined {
   try {
-    return JSON.parse(cache.get(ICONS_KEY) ?? "{}") as Record<string, string>;
+    const raw = cache.get(ICONS_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { icons: Record<string, string>; ts: number };
+    if (!parsed.icons || typeof parsed.ts !== "number") return undefined;
+    return parsed;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
@@ -125,7 +130,15 @@ async function enrichSessions<T extends { app_id: string; app_name: string; exe_
     if (miss) maps = (await refreshShortcutsIfStale()) ?? maps;
   }
 
-  const icons = readIcons();
+  // Icon paths go stale when a Store app updates (package folder moves) and
+  // empty results may have been transient failures: re-resolve weekly.
+  const storedIcons = readIcons();
+  const icons: Record<string, string> = {};
+  let iconsTs = Date.now();
+  if (storedIcons && Date.now() - storedIcons.ts < ICONS_TTL_MS) {
+    Object.assign(icons, storedIcons.icons);
+    iconsTs = storedIcons.ts;
+  }
   const missingIcons = unknownIcons.filter((id) => !(id in icons));
   if (missingIcons.length > 0) {
     await Promise.all(
@@ -137,7 +150,7 @@ async function enrichSessions<T extends { app_id: string; app_name: string; exe_
         }
       }),
     );
-    cache.set(ICONS_KEY, JSON.stringify(icons));
+    cache.set(ICONS_KEY, JSON.stringify({ icons, ts: iconsTs }));
   }
 
   return sessions.map((s) => {
@@ -160,9 +173,13 @@ function thumbKey(app_id: string, session_index: number, title: string, artist: 
   return `${app_id}-${session_index}-${title}-${artist}`;
 }
 
+function escapeMarkdown(s: string) {
+  return s.replace(/[\r\n]+/g, " ").replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
+}
+
 function detailMarkdown(title: string, artist: string, appName: string, thumb: SessionThumbnail | undefined) {
-  const t = (title || "No title").replace(/[\r\n]+/g, " ");
-  const a = (artist || appName).replace(/[\r\n]+/g, " ");
+  const t = escapeMarkdown(title || "No title");
+  const a = escapeMarkdown(artist || appName);
   // Titles past ~3 lines (landscape) or ~1 line (square/portrait) shrink
   // one heading level. No art, no constraint.
   const landscape = thumb && thumb.width > thumb.height * 1.1;
@@ -261,11 +278,13 @@ export default function Command() {
       if (!liveKeys.has(k)) delete settlingRef.current[k];
     }
     const fetchThumbs = async (sessions: typeof shown) => {
-      const due = (sessions ?? []).filter(
-        (s) =>
-          (s.title.trim() || s.artist.trim()) &&
-          !(thumbKey(s.app_id, s.session_index, s.title, s.artist) in thumbsRef.current),
-      );
+      // Settling keys re-fetch even when already present: the first fetch
+      // may have caught pre-arrival art or a transient error.
+      const due = (sessions ?? []).filter((s) => {
+        if (!(s.title.trim() || s.artist.trim())) return false;
+        const k = thumbKey(s.app_id, s.session_index, s.title, s.artist);
+        return !(k in thumbsRef.current) || k in settlingRef.current;
+      });
       if (due.length === 0) return;
       const entries = await Promise.all(
         due.map(async (s) => {
@@ -378,7 +397,7 @@ export default function Command() {
               ? { value: session.artist, tooltip: session.artist }
               : { value: session.app_name, tooltip: session.app_name }
         }
-        keywords={[session.app_name, session.artist]}
+        keywords={[session.title, session.app_name, session.artist]}
         accessories={
           isShowingDetail
             ? [

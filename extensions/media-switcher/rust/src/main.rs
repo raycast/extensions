@@ -167,7 +167,7 @@ fn switch_session(
     // One snapshot for resolve + pause: a second GetSessions() between the
     // two would reintroduce a race window.
     let entries = snapshot_sessions()?;
-    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title, &target_artist)
+    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title, &target_artist, false)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
     // Track every ACCEPTED pause, confirmed or not: an accepted request can
@@ -360,13 +360,14 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 // session. Empty fields must stay empty; two sessions with identical
 // metadata are indistinguishable — SMTC exposes no session ID.
 //   1. Exact match. 2. Unique metadata match at a shifted ordinal.
-//   3. Single-session app (see single_app_session).
+//   3. Single-session app, only when the caller opts in (see below).
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
     target_title: &str,
     target_artist: &str,
+    allow_single: bool,
 ) -> Option<usize> {
     if target_title.is_empty() {
         if target_artist.is_empty() {
@@ -388,7 +389,10 @@ fn resolve_target_index(
         if artist_matches.len() == 1 {
             return artist_matches[0].into();
         }
-        return single_app_session(entries, target_app_id);
+        if allow_single {
+            return single_app_session(entries, target_app_id);
+        }
+        return None;
     }
 
     let mut title_matches: Vec<usize> = Vec::new();
@@ -414,13 +418,18 @@ fn resolve_target_index(
         return title_matches[0].into();
     }
 
-    single_app_session(entries, target_app_id)
+    if allow_single {
+        return single_app_session(entries, target_app_id);
+    }
+    None
 }
 
-// 3. Last resort: the app has exactly one session, so app (+ ordinal)
+// 3. Opt-in last resort: the app has exactly one session, so app (+ ordinal)
 // already identifies it — the metadata only drifted because the app moved
 // faster than the UI refreshed (rapid prev/next). Zero sessions means it
-// closed; two or more without a metadata match stays ambiguous.
+// closed; two or more without a metadata match stays ambiguous. Scoped to
+// momentary single-target actions: switch_session stays strict because it
+// pauses other apps on the strength of a possibly stale click.
 fn single_app_session(entries: &[SessionEntry], target_app_id: &str) -> Option<usize> {
     let mut found: Option<usize> = None;
     for (i, entry) in entries.iter().enumerate() {
@@ -442,7 +451,7 @@ fn pause_session(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     session.TryPauseAsync()
         .map_err(|e| format!("TryPauseAsync failed: {}", e))?
         .get()
@@ -473,7 +482,7 @@ fn play_session(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     session.TryPlayAsync()
         .map_err(|e| format!("TryPlayAsync failed: {}", e))?
         .get()
@@ -504,7 +513,7 @@ fn previous_track(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipPreviousAsync()
         .map_err(|e| format!("TrySkipPreviousAsync failed: {}", e))?
@@ -521,7 +530,7 @@ fn next_track(
     target_title: String,
     target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipNextAsync()
         .map_err(|e| format!("TrySkipNextAsync failed: {}", e))?
@@ -564,9 +573,10 @@ fn find_session_by_index(
     target_index: u32,
     target_title: &str,
     target_artist: &str,
+    allow_single: bool,
 ) -> Result<GlobalSystemMediaTransportControlsSession, String> {
     let entries = snapshot_sessions()?;
-    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title, target_artist)
+    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title, target_artist, allow_single)
         .ok_or_else(|| {
         format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing")
     })?;
@@ -700,7 +710,7 @@ fn session_thumbnail(
     use windows::core::Interface;
     use windows::Storage::Streams::{DataReader, IInputStream};
 
-    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist, true)?;
     let props = session
         .TryGetMediaPropertiesAsync()
         .map_err(|e| format!("TryGetMediaPropertiesAsync failed: {}", e))?
@@ -880,17 +890,18 @@ fn collect_shortcuts(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
 }
 
 // Built on demand by scan_shortcuts; the caller caches it (one-shot
-// process, so the memo only dedupes within a single invocation).
-fn start_menu_shortcuts() -> std::collections::HashMap<String, (String, String)> {
-    static CACHE: std::sync::Mutex<Option<std::collections::HashMap<String, (String, String)>>> =
-        std::sync::Mutex::new(None);
+// process, so the memo only dedupes within a single invocation). One entry
+// per shortcut — several shortcuts may share an executable under different
+// names, and the caller indexes every name.
+fn start_menu_shortcuts() -> Vec<ShortcutEntry> {
+    static CACHE: std::sync::Mutex<Option<Vec<ShortcutEntry>>> = std::sync::Mutex::new(None);
     if let Ok(guard) = CACHE.lock() {
-        if let Some(map) = guard.as_ref() {
-            return map.clone();
+        if let Some(entries) = guard.as_ref() {
+            return entries.clone();
         }
     }
 
-    let mut by_exe: std::collections::HashMap<String, (String, String)> = std::collections::HashMap::new();
+    let mut entries: Vec<ShortcutEntry> = Vec::new();
     use std::os::windows::ffi::OsStrExt;
     unsafe {
         use windows::core::{Interface, PCWSTR};
@@ -917,11 +928,11 @@ fn start_menu_shortcuts() -> std::collections::HashMap<String, (String, String)>
 
         let link: IShellLinkW = match CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER) {
             Ok(l) => l,
-            Err(_) => return by_exe,
+            Err(_) => return entries,
         };
         let persist: IPersistFile = match link.cast() {
             Ok(p) => p,
-            Err(_) => return by_exe,
+            Err(_) => return entries,
         };
         for lnk in files {
             let wide: Vec<u16> = lnk.as_os_str().encode_wide().chain(Some(0)).collect();
@@ -934,24 +945,23 @@ fn start_menu_shortcuts() -> std::collections::HashMap<String, (String, String)>
                 continue;
             }
             let len = target.iter().position(|c| *c == 0).unwrap_or(target.len());
-            let orig_path = String::from_utf16_lossy(&target[..len]);
-            let exe_key = orig_path.to_lowercase();
-            if exe_key.is_empty() || !exe_key.ends_with(".exe") {
+            let exe_path = String::from_utf16_lossy(&target[..len]);
+            if exe_path.is_empty() || !exe_path.to_lowercase().ends_with(".exe") {
                 continue;
             }
             if let Some(stem) = lnk.file_stem().and_then(|s| s.to_str()) {
-                by_exe.entry(exe_key).or_insert_with(|| (stem.to_string(), orig_path));
+                entries.push(ShortcutEntry { exe_path, name: stem.to_string() });
             }
         }
     }
 
     if let Ok(mut guard) = CACHE.lock() {
-        *guard = Some(by_exe.clone());
+        *guard = Some(entries.clone());
     }
-    by_exe
+    entries
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct ShortcutEntry {
     pub exe_path: String,
     pub name: String,
@@ -961,12 +971,7 @@ pub struct ShortcutEntry {
 // maps cross the bridge as entries and the caller rebuilds both directions.
 #[raycast]
 fn scan_shortcuts() -> Result<Vec<ShortcutEntry>, String> {
-    let by_exe = start_menu_shortcuts();
-    let mut entries = Vec::with_capacity(by_exe.len());
-    for (_, (name, exe_path)) in by_exe {
-        entries.push(ShortcutEntry { exe_path, name });
-    }
-    Ok(entries)
+    Ok(start_menu_shortcuts())
 }
 
 #[raycast]
