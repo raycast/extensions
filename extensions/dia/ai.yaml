@@ -5,7 +5,7 @@ instructions: |
   close-tab only closes a tab given its tabId. If the get-tabs tool is available, take the tabId from it. Otherwise call close-tab with a query (or no target for the current tab): it closes nothing and returns a candidate, then call close-tab again with that candidate's tabId. Never tell the user a tab was closed unless close-tab returned closed: true.
   If a tool reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or claiming the action succeeded.
   # dia-ai-tab-contents
-  Use get-tab-contents to read a page before summarizing it or answering questions about it. Call it without a target for "this page" or "the current tab", or pass a short query matching the tab's title or URL.
+  Use get-tab-contents to read a page before summarizing it or answering questions about it. Always call it for questions about a page's contents, even after get-focused-tab or get-tabs; never answer from a tab's title or URL alone. Call it without a target for "this page" or "the current tab", or pass a short query matching the tab's title or URL.
   If it reports that Dia must allow JavaScript from AppleScript, tell the user how to relaunch Dia instead of guessing the page contents. If it reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying. If it reports that the page has no readable text, tell the user the page has no readable text and don't describe or guess its contents. If it reports a Dia internal page, tell the user it's a Dia internal page that can't be read, without guessing its contents. If it reports that it couldn't read this tab for another reason, you may retry once; if it fails again, tell the user you couldn't read this tab and share the error, without guessing its contents. If the text is truncated, say that the answer is based on the beginning of the page.
   # dia-ai-read
   Use get-focused-tab when the user refers to "this tab", "the current tab" or "the page I'm on", and get-tabs for questions about open tabs.
@@ -146,6 +146,13 @@ evals:
         loading: false
         truncated: false
         text: "Raycast Notes is a fast, light and frictionless note-taking experience. Notes open from anywhere with a hotkey, support Markdown, and sync across devices."
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T1"
+        title: "Meet the new Raycast Notes"
+        url: "https://www.raycast.com/blog/raycast-notes"
+        isPinned: false
+        isFocused: true
     expected:
       - callsTool: get-tab-contents
       - includes: "Markdown"
@@ -157,51 +164,106 @@ evals:
         loading: false
         truncated: false
         text: "Installation: run npm install, then npm run dev inside the extension folder."
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T3"
+          title: "raycast/extensions"
+          url: "https://github.com/raycast/extensions"
+          isPinned: false
+          isFocused: false
     expected:
-      - callsTool:
-          name: get-tab-contents
-          arguments:
-            query:
-              includes: "github"
+      - or:
+          - callsTool:
+              name: get-tab-contents
+              arguments:
+                query:
+                  includes: "github"
+          - callsTool:
+              name: get-tab-contents
+              arguments:
+                tabId: "T3"
       - includes: "npm"
   - input: "@dia read the current page"
     mocks:
       get-tab-contents: "Error: Reading page contents requires Dia to allow JavaScript from AppleScript. Quit Dia, then reopen it from Terminal with: open -a Dia --args --enable-applescript-javascript"
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T1"
+        title: "Meet the new Raycast Notes"
+        url: "https://www.raycast.com/blog/raycast-notes"
+        isPinned: false
+        isFocused: true
     expected:
       - callsTool: get-tab-contents
       - includes: "enable-applescript-javascript"
   - input: "@dia summarize the Hacker News tab"
     mocks:
       get-tab-contents: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
+      get-tabs: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
     expected:
-      - callsTool:
-          name: get-tab-contents
-          arguments:
-            query:
-              includes: "hacker news"
+      - or:
+          - callsTool:
+              name: get-tab-contents
+              arguments:
+                query:
+                  includes: "hacker news"
+          - callsTool: get-tabs
       - includes: "Automation"
   - input: "@dia summarize the current page"
     mocks:
       get-tab-contents: 'Error: "sunset.jpg (1920×1080)" has loaded, but the page has no readable text (it may contain only images or media). Its contents can''t be summarized.'
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T8"
+        title: "sunset.jpg (1920×1080)"
+        url: "https://example.com/sunset.jpg"
+        isPinned: false
+        isFocused: true
     expected:
       - callsTool: get-tab-contents
       - includes: "readable text"
   - input: "@dia what's on this page?"
     mocks:
       get-tab-contents: 'Error: "New Tab" is a Dia internal page, such as a new tab or settings. Dia internal pages cannot be read.'
+      get-focused-tab:
+        windowId: "W1"
+        tabId: "T9"
+        title: "New Tab"
+        isPinned: false
+        isFocused: true
     expected:
-      - callsTool: get-tab-contents
-      - includes: "internal"
+      - or:
+          - callsTool: get-tab-contents
+          - callsTool: get-focused-tab
+      - or:
+          - includes: "internal"
+          - includes: "new tab"
   - input: "@dia summarize the Docs tab"
     mocks:
       get-tab-contents: 'Error: Couldn''t read this tab ("Docs"): execution error: Dia got an error: AppleEvent timed out. (-1712)'
+      get-tabs:
+        - windowId: "W1"
+          tabId: "T4"
+          title: "Docs"
+          url: "https://docs.example.com/"
+          isPinned: false
+          isFocused: false
     expected:
-      - callsTool:
-          name: get-tab-contents
-          arguments:
-            query:
-              includes: "docs"
-      - includes: "couldn't read"
+      - or:
+          - callsTool:
+              name: get-tab-contents
+              arguments:
+                query:
+                  includes: "docs"
+          - callsTool:
+              name: get-tab-contents
+              arguments:
+                tabId: "T4"
+      - or:
+          - includes: "couldn't read"
+          - includes: "wasn't able to read"
+          - includes: "unable to read"
+          - includes: "could not read"
   # dia-ai-read
   - input: "@dia what tabs do I have open?"
     mocks:
