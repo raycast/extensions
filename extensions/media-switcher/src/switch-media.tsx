@@ -324,7 +324,17 @@ export default function Command() {
       const k = thumbKey(s.app_id, s.session_index, s.title, s.artist);
       if (!(k in thumbsRef.current)) settlingRef.current[k] ??= { init: null, until: now + SETTLE_MS };
     }
-    void fetchThumbs(shown);
+    // One fetch at a time: overlapping runs can complete out of order, and
+    // a stale winner would stick (its key may already have settled).
+    let fetching = false;
+    const guardedFetch = (sessions: typeof shown) => {
+      if (fetching) return;
+      fetching = true;
+      void fetchThumbs(sessions).finally(() => {
+        fetching = false;
+      });
+    };
+    guardedFetch(shown);
     // Pruning also lives in the tick below so a disabled auto-refresh
     // can't leak the interval into forever.
     const id = setInterval(() => {
@@ -332,7 +342,7 @@ export default function Command() {
       const cur = shownRef.current ?? [];
       const targets = cur.filter((s) => thumbKey(s.app_id, s.session_index, s.title, s.artist) in settlingRef.current);
       if (targets.length > 0) {
-        void fetchThumbs(targets);
+        guardedFetch(targets);
         return;
       }
       const n = Date.now();
