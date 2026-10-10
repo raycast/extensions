@@ -1,6 +1,6 @@
 # Changelog
 
-## [AI Tools, Sharing, and Menu Bar] - {PR_MERGE_DATE}
+## [AI Tools, Sharing, and Menu Bar] - 2026-10-10
 
 - Ask Techgedöns questions directly from Raycast AI with live results from the public blog archive.
 - Search articles, retrieve the latest posts, and load complete articles through dedicated AI tools.
