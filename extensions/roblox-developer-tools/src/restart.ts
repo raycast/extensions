@@ -12,27 +12,27 @@ export default async function Command() {
     const { closeAllVersions, confirmRestart } =
       getPreferenceValues<Preferences.Restart>();
     if (confirmRestart) {
-      let name: string;
+      let name = "";
       try {
         const response = await fetch(
           `https://games.roblox.com/v1/games?universeIds=${universeId}`,
-          { signal: AbortSignal.timeout(10_000) },
+          { signal: AbortSignal.timeout(3_000) },
         );
-        if (!response.ok) throw new Error();
-        const { data } = await response.json();
-        const game = data.find(
-          (game: { id: number }) => String(game.id) === universeId,
-        );
-        if (typeof game?.name !== "string" || !game.name.trim())
-          throw new Error();
-        name = game.name;
+        if (response.ok) {
+          const { data } = await response.json();
+          const game = data.find(
+            (game: { id: number }) => String(game.id) === universeId,
+          );
+          if (typeof game?.name === "string") name = game.name.trim();
+        }
       } catch {
-        throw new Error("Couldn't load the game name. Try again.");
+        name = "";
       }
+      const game = name ? `"${name}"` : "this game";
       if (
         !(await confirmAlert({
           title: "Restart servers?",
-          message: `This will restart ${closeAllVersions ? "all servers" : "all outdated servers"} of "${name}"`,
+          message: `This will restart ${closeAllVersions ? "all servers" : "all outdated servers"} of ${game}`,
           primaryAction: {
             title: "Restart",
             style: Alert.ActionStyle.Destructive,
