@@ -14,6 +14,23 @@ export function formatDuration(minutes: number): string {
   return `${value}${unit}`;
 }
 
+export function formatDurationLong(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  const h = Math.floor(m / 60);
+  const count = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+  if (h === 0) return count(m, "minute");
+  return m % 60 === 0 ? count(h, "hour") : `${count(h, "hour")} ${count(m % 60, "minute")}`;
+}
+
+export function parseDuration(text: string): number | null {
+  const t = text.trim().toLowerCase();
+  const clock = /^(\d+):([0-5]\d)$/.exec(t);
+  if (clock) return Number(clock[1]) * 60 + Number(clock[2]);
+  const units = /^(?:(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?)?\s*(?:(\d+)\s*(?:m(?:in(?:ute)?s?)?)?)?$/.exec(t);
+  if (!units || (!units[1] && !units[2])) return null;
+  return Math.round(Number(units[1] ?? 0) * 60) + Number(units[2] ?? 0);
+}
+
 const toDate = (value: number | string | Date): Date =>
   value instanceof Date ? value : typeof value === "string" ? dateOfDayKey(value) : new Date(value);
 

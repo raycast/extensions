@@ -1,5 +1,14 @@
 # Foqus League Changelog
 
+## [Menu Bar Stats Setup and Duration Field] - {PR_MERGE_DATE}
+
+- New icon
+- Show League and Show Recap offer to turn on Menu Bar Stats when it isn't running
+- Starting or finishing a Focus session no longer asks you to run Menu Bar Stats
+- Notes such as "No sessions yet" now sit above the board and the recap
+- Add Session and Edit Session take a duration like "45 min", "1:30" or "2 hours"
+- Escape in Browse Sessions goes back to Show League when you opened it from there
+
 ## [Initial Version] - 2026-10-09
 
 - Show League, Show Recap, Browse Sessions and Menu Bar Stats commands

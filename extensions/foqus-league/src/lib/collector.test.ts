@@ -11,7 +11,8 @@ import {
   collectorStatus,
   ensureCollector,
   isOurCollector,
-  MENU_BAR_DEEPLINK,
+  MENU_BAR_URL,
+  POKE_MINUTES,
   readStream,
   rotateStream,
   WRAPPER,
@@ -243,7 +244,7 @@ test("rotateStream moves the stream aside and clears the PID file so the wrapper
 
 const quickWrapper = () => WRAPPER.replace("sleep 2\n", "sleep 0.2\n").replace("sleep 30\n", "sleep 0.2\n");
 
-async function pokeHarness(logScript: string) {
+async function pokeHarness(logScript: string, menuBar: "on" | "stale" | "never ran" = "on") {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "foqus-poke-"));
   const paths = collectorPaths(dir);
   const bin = path.join(dir, "bin");
@@ -252,6 +253,11 @@ async function pokeHarness(logScript: string) {
 
   await fs.writeFile(path.join(bin, "open"), `#!/bin/sh\necho "$@" >> "${calls}"\n`, { mode: 0o755 });
   await fs.writeFile(path.join(bin, "log"), logScript, { mode: 0o755 });
+  if (menuBar !== "never ran") await fs.writeFile(paths.heartbeat, "");
+  if (menuBar === "stale") {
+    const old = new Date(Date.now() - (POKE_MINUTES + 5) * 60_000);
+    await fs.utimes(paths.heartbeat, old, old);
+  }
 
   const run = new Promise<void>((resolve, reject) => {
     const child = nodeSpawn("/bin/sh", ["-c", quickWrapper()], {
@@ -261,7 +267,9 @@ async function pokeHarness(logScript: string) {
         OUT: paths.out,
         ERR: paths.err,
         PIDFILE: paths.pid,
-        POKE: MENU_BAR_DEEPLINK,
+        HEARTBEAT: paths.heartbeat,
+        PING: paths.ping,
+        POKE: MENU_BAR_URL,
       },
       stdio: "ignore",
     });
@@ -294,13 +302,38 @@ test("a burst of lines pokes the menu bar once, after it settles, so one run see
 
   assert.deepEqual(
     await h.pokes(),
-    [`-g ${MENU_BAR_DEEPLINK}`, `-g ${MENU_BAR_DEEPLINK}`],
+    [`-g ${MENU_BAR_URL}`, `-g ${MENU_BAR_URL}`],
     "lines 1 and 2 share a poke; line 3, a second later, gets its own",
   );
   assert.deepEqual(await h.strays(), [], "the wrapper takes tail and the reader down with it");
   await assert.rejects(fs.stat(`${h.paths.pid}.poke`), "and clears the FIFO behind it");
   await fs.rm(h.dir, { recursive: true, force: true });
 });
+
+test("a poke is a normal run, so Raycast has no background launch from outside to ask about", async () => {
+  const h = await pokeHarness(`#!/bin/sh\nsleep 0.5\necho line-1\nsleep 1.8\n`);
+  await h.run;
+
+  const pokes = await h.pokes();
+  assert.equal(pokes.length, 1);
+  assert.doesNotMatch(pokes[0], /launchType/, "a background launch from outside brings up Raycast's sheet");
+  assert.ok(
+    (await fs.stat(h.paths.ping)).mtimeMs > Date.now() - 60_000,
+    "the ping file is touched first, so the run it starts knows it was poked",
+  );
+  await fs.rm(h.dir, { recursive: true, force: true });
+});
+
+for (const menuBar of ["stale", "never ran"] as const) {
+  test(`no poke while Menu Bar Stats is off (heartbeat ${menuBar}), since a normal run would turn it back on`, async () => {
+    const h = await pokeHarness(`#!/bin/sh\nsleep 0.5\necho line-1\nsleep 1.8\n`, menuBar);
+    await h.run;
+
+    assert.deepEqual(await h.pokes(), []);
+    await assert.rejects(fs.stat(h.paths.ping), "and nothing claims a poke happened");
+    await fs.rm(h.dir, { recursive: true, force: true });
+  });
+}
 
 test("a watcher orphaned by a dead wrapper retires instead of poking for a collector that is gone", async () => {
   const h = await pokeHarness(`#!/bin/sh\nsleep 0.5\necho line-1\nsleep 5\n`);
@@ -312,7 +345,7 @@ test("a watcher orphaned by a dead wrapper retires instead of poking for a colle
 
   await fs.appendFile(h.paths.out, "line-2\n");
   await new Promise((r) => setTimeout(r, 1500));
-  assert.deepEqual(await h.pokes(), [`-g ${MENU_BAR_DEEPLINK}`], "no poke after the wrapper it belonged to died");
+  assert.deepEqual(await h.pokes(), [`-g ${MENU_BAR_URL}`], "no poke after the wrapper it belonged to died");
 
   assert.deepEqual(await h.tails(), [], "the retiring reader takes tail with it rather than leaving it tailing");
 

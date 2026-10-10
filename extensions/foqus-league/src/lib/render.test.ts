@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
+import { noticesMarkdown, renderNotices, wrapBody } from "./noticeRow.ts";
 import { renderBoard } from "./statsBoard.ts";
+import { statusNotes } from "./statusNotes.ts";
 import { CHART_WIDTH } from "./svg.ts";
 import { dark, light, tiersFor, type Theme } from "./theme.ts";
 import type { DayCell, Stats } from "./types.ts";
@@ -372,4 +374,83 @@ test("a past month that ends on a Sunday does not average in the next month's em
     "May 31 is a Sunday, so June 1 starts a week May never reaches",
   );
   assert.equal(facts.weeklyAverage, 45);
+});
+
+const OFF = statusNotes({ totalOnRecord: 0, menuBarOff: true }, false);
+const PROBLEMS = statusNotes(
+  { syncError: "boom", totalOnRecord: 40, menuBarOff: false, collector: { running: false } },
+  false,
+);
+
+for (const theme of [light, dark]) {
+  test(`renderNotices draws well-formed rows in ${theme.name}`, () => {
+    assertWellFormed(renderNotices([...OFF, ...PROBLEMS], theme), CHART_WIDTH);
+  });
+}
+
+test("each note gets its own row, and only a note with a Return action draws the key", () => {
+  const rows = (markup: string) => markup.match(/rx="8"/g)?.length ?? 0;
+  const keys = (markup: string) => markup.match(/<path /g)?.length ?? 0;
+
+  const off = renderNotices(OFF, dark);
+  assert.equal(rows(off), 1);
+  assert.equal(keys(off), 1);
+  assert.match(off, />Turn it on</, "the key is labelled like an action-bar item");
+
+  const problems = renderNotices(PROBLEMS, dark);
+  assert.equal(rows(problems), 2);
+  assert.equal(keys(problems), 0, "a note with nothing for Return to do shows no key");
+  assert.equal(problems.match(new RegExp(`fill="${dark.league[2]}"`, "g"))?.length, 2, "problems get the amber dot");
+  assert.doesNotMatch(off, new RegExp(`fill="${dark.league[2]}"`), "a setup step does not");
+});
+
+test("a long error wraps onto more lines instead of being cut, and its row grows to fit", () => {
+  const error =
+    'Could not read the log: Command failed: /usr/bin/log show --predicate subsystem == "com.raycast.macos" ' +
+    "--info --style ndjson log: Cannot open log archive";
+  const markup = renderNotices(statusNotes({ syncError: error, totalOnRecord: 40 }, false), dark);
+
+  assert.doesNotMatch(markup, /…/, "the whole message stays readable");
+  assert.match(markup, /Cannot open log archive/, "including the part that says what went wrong");
+  assert.ok(Number(/height="(\d+)"/.exec(markup)![1]) > 34, "the row is taller than a one-line row");
+  assertWellFormed(markup, CHART_WIDTH);
+});
+
+test("past three lines a message is cut, and so is one word too long for any line", () => {
+  const lines = wrapBody("word ".repeat(200).trim(), 300, 600);
+  assert.equal(lines.length, 3);
+  assert.match(lines[2], /…$/);
+
+  const [path] = wrapBody(`/${"a".repeat(400)}`, 300, 600);
+  assert.match(path, /…$/, "a long file path is cut rather than drawn past the row");
+});
+
+test("a note with an empty line still draws a full one-line row", () => {
+  const markup = renderNotices([{ kind: "empty", title: "No sessions yet", body: "" }], dark);
+  assert.equal(/height="(\d+)"/.exec(markup)![1], "34", "the title must not spill out of a squashed row");
+  assertWellFormed(markup, CHART_WIDTH);
+});
+
+test("a short note stays on one line", () => {
+  assert.deepEqual(wrapBody("Without it, your sessions aren't counted.", 300, 600), [
+    "Without it, your sessions aren't counted.",
+  ]);
+  const markup = renderNotices(OFF, light);
+  assert.equal(/height="(\d+)"/.exec(markup)![1], "34");
+  assert.doesNotMatch(markup, /dy="/);
+});
+
+test("the notices image carries the full sentence as its alt text, and no notes means no image", () => {
+  assert.equal(noticesMarkdown([], dark), "");
+  assert.match(
+    noticesMarkdown(OFF, dark),
+    /^!\[Menu Bar Stats is off\. Without it, your sessions aren't counted\. Press Return to turn it on\.\]\(data:image\/svg\+xml;base64,/,
+  );
+});
+
+test("an error with a stray bracket or a blank line still ends the alt text where the image says", () => {
+  const error = "Command failed: /usr/bin/log show\n\nlog: unexpected ] near [1";
+  const markdown = noticesMarkdown(statusNotes({ syncError: error, totalOnRecord: 40 }, false), dark);
+  assert.match(markdown, /^!\[[^[\]\n]*\]\(data:image\/svg\+xml;base64,/);
+  assert.match(markdown, /log: unexpected near 1/, "the words survive, only the brackets go");
 });

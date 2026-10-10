@@ -1,6 +1,7 @@
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import type { CollectorStatus } from "./collector.ts";
-import { collectorStatus, getPreferences, store, syncIfStale, syncSessions } from "./runtime.ts";
+import { collectorStatus, getPreferences, menuBarRanAt, store, syncIfStale, syncSessions } from "./runtime.ts";
+import { isMenuBarOff } from "./menuBarHeartbeat.ts";
 import { CALENDAR_WEEKS, computeStats } from "./stats.ts";
 import { COLLECTOR_DOWN } from "./sync.ts";
 import type { Session, Stats } from "./types.ts";
@@ -13,6 +14,7 @@ export type StatsBundle = {
   syncError?: string;
   log?: { records: number; parsed: number };
   collector?: CollectorStatus;
+  menuBarOff?: boolean;
 };
 
 type StoredStats = Pick<StatsBundle, "stats" | "sessions" | "totalOnRecord" | "firstOnRecord">;
@@ -74,11 +76,14 @@ export function useStats(from = 0, to = Number.MAX_SAFE_INTEGER) {
     },
   });
 
+  const heartbeat = usePromise(menuBarRanAt);
+
   const data: StatsBundle | undefined = stored.data && {
     ...stored.data,
     syncError: sync.data?.syncError,
     log: sync.data?.log,
     collector: sync.data?.collector,
+    menuBarOff: heartbeat.isLoading ? undefined : isMenuBarOff(heartbeat.data),
   };
 
   return {
@@ -87,6 +92,7 @@ export function useStats(from = 0, to = Number.MAX_SAFE_INTEGER) {
     revalidate: () => {
       stored.revalidate();
       sync.revalidate();
+      heartbeat.revalidate();
     },
   };
 }
