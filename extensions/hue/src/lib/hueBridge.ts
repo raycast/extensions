@@ -15,7 +15,9 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   console.info("Discovering bridge using mDNS…");
 
   return new Promise((resolve, reject) => {
-    const bonjour = new Bonjour();
+    // A failure to bind port 5353 falls back to MeetHue once bonjour-service calls errorCallback (onlxltd/bonjour-service
+    // 0a90809, unreleased as of 1.4.4). Until then it is an uncaught error.
+    const bonjour = new Bonjour({}, reject);
     // Calls back with null after the timeout
     const browser = bonjour.findOne(
       { type: "hue" },
