@@ -159,9 +159,17 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!sessionString;
 }
 
-export async function logOut(config?: TelegramConfig): Promise<{ remoteRevoked: boolean }> {
+export interface LogOutResult {
+  remoteRevoked: boolean;
+  sessionExpired: boolean;
+  error?: Error;
+}
+
+export async function logOut(config?: TelegramConfig): Promise<LogOutResult> {
   let client: TelegramClient | null = null;
   let remoteRevoked = false;
+  let sessionExpired = false;
+  let logoutError: Error | undefined;
   try {
     client = clientInstance || (config ? await getClient(config) : null);
     if (client) {
@@ -171,10 +179,12 @@ export async function logOut(config?: TelegramConfig): Promise<{ remoteRevoked: 
       if (await client.isUserAuthorized()) {
         await client.invoke(new Api.auth.LogOut());
         remoteRevoked = true;
+      } else {
+        sessionExpired = true;
       }
     }
-  } catch {
-    // Network or server error during remote logout -- local storage is still cleared
+  } catch (err) {
+    logoutError = err instanceof Error ? err : new Error(String(err));
   } finally {
     if (client) {
       try {
@@ -188,7 +198,7 @@ export async function logOut(config?: TelegramConfig): Promise<{ remoteRevoked: 
     await LocalStorage.removeItem(AUTH_SESSION_KEY);
     await LocalStorage.removeItem(USER_ID_KEY);
   }
-  return { remoteRevoked };
+  return { remoteRevoked, sessionExpired, error: logoutError };
 }
 
 async function completeAuthentication(

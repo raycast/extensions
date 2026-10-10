@@ -183,7 +183,7 @@ describe("handleLogOut", () => {
   });
 
   it("calls logOut and returns true on success when remoteRevoked is true", async () => {
-    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: true });
+    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: true, sessionExpired: false });
 
     const result = await handleLogOut();
 
@@ -191,8 +191,8 @@ describe("handleLogOut", () => {
     expect(telegramClient.logOut).toHaveBeenCalled();
   });
 
-  it("calls logOut and returns true when remoteRevoked is false", async () => {
-    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: false });
+  it("calls logOut and returns true when session was expired", async () => {
+    vi.mocked(telegramClient.logOut).mockResolvedValue({ remoteRevoked: false, sessionExpired: true });
 
     const result = await handleLogOut();
 
@@ -200,8 +200,21 @@ describe("handleLogOut", () => {
     expect(telegramClient.logOut).toHaveBeenCalled();
   });
 
-  it("returns false on error", async () => {
-    vi.mocked(telegramClient.logOut).mockRejectedValue(new Error("Network failed"));
+  it("calls logOut and returns true when error occurred during remote revoke", async () => {
+    vi.mocked(telegramClient.logOut).mockResolvedValue({
+      remoteRevoked: false,
+      sessionExpired: false,
+      error: new Error("Network unreachable"),
+    });
+
+    const result = await handleLogOut();
+
+    expect(result).toBe(true);
+    expect(telegramClient.logOut).toHaveBeenCalled();
+  });
+
+  it("returns false on unexpected thrown error", async () => {
+    vi.mocked(telegramClient.logOut).mockRejectedValue(new Error("Fatal crash"));
 
     const result = await handleLogOut();
 
