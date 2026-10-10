@@ -569,6 +569,120 @@
       "templater": {
         "afterCapture": "none"
       }
+    },
+    {
+      "id": "e2e-current",
+      "name": "Capture to the current note",
+      "type": "Capture",
+      "command": false,
+      "appendLink": false,
+      "copyLinkToClipboard": false,
+      "captureTo": "",
+      "captureToActiveFile": true,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- current: {{VALUE}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
+    },
+    {
+      "id": "e2e-link",
+      "name": "Capture with a link",
+      "type": "Capture",
+      "command": false,
+      "appendLink": {
+        "enabled": true,
+        "placement": "newLine",
+        "requireActiveFile": false
+      },
+      "copyLinkToClipboard": false,
+      "captureTo": "Output/Inbox.md",
+      "captureToActiveFile": false,
+      "captureToCanvasNodeId": "",
+      "activeFileWritePosition": "bottom",
+      "createFileIfItDoesntExist": {
+        "enabled": true,
+        "createWithTemplate": false,
+        "template": ""
+      },
+      "format": {
+        "enabled": true,
+        "format": "- linked: {{VALUE}} {{LINKCURRENT}}\n"
+      },
+      "insertAfter": {
+        "enabled": false,
+        "after": "",
+        "insertAtEnd": false,
+        "considerSubsections": false,
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top",
+        "inline": false,
+        "replaceExisting": false,
+        "blankLineAfterMatchMode": "auto",
+        "promptHeading": false
+      },
+      "insertBefore": {
+        "enabled": false,
+        "before": "",
+        "createIfNotFound": false,
+        "createIfNotFoundLocation": "top"
+      },
+      "newLineCapture": {
+        "enabled": false,
+        "direction": "below"
+      },
+      "prepend": false,
+      "task": false,
+      "openFile": false,
+      "fileOpening": {
+        "location": "tab",
+        "direction": "vertical",
+        "mode": "default",
+        "focus": true
+      },
+      "templater": {
+        "afterCapture": "none"
+      }
     }
   ],
   "inputPrompt": "single-line",

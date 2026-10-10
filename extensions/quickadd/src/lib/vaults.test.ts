@@ -96,6 +96,7 @@ describe("sameNameConflict", () => {
 
 describe("ensureVaultReady", () => {
   const vault = vaultAt("/Users/me/e2e-vault");
+  const listed = { id: "e2e-text", name: "Capture text", currentNote: "none" };
 
   function obsidian({
     open,
@@ -124,7 +125,7 @@ describe("ensureVaultReady", () => {
         }
         lists++;
         if (lists <= failedLists) return "";
-        return JSON.stringify({ ok: true, choices: [{ id: "e2e-text" }] });
+        return JSON.stringify({ ok: true, choices: [listed] });
       },
       sleep: async (ms) => {
         clock += ms;
@@ -139,6 +140,7 @@ describe("ensureVaultReady", () => {
     await expect(ensureVaultReady(vault, "e2e-text", deps)).resolves.toEqual({
       ok: true,
       opened: false,
+      choices: [listed],
     });
     expect(opened).toEqual([]);
   });
@@ -148,6 +150,7 @@ describe("ensureVaultReady", () => {
     await expect(ensureVaultReady(vault, "e2e-text", deps)).resolves.toEqual({
       ok: true,
       opened: true,
+      choices: [listed],
     });
     expect(opened).toEqual(["obsidian://open?vault=e2e-vault"]);
   });
@@ -160,6 +163,7 @@ describe("ensureVaultReady", () => {
     await expect(ensureVaultReady(vault, "e2e-text", deps)).resolves.toEqual({
       ok: true,
       opened: true,
+      choices: [listed],
     });
     expect(opened).toEqual(["obsidian://open?vault=e2e-vault"]);
     expect(elapsed()).toBe(2000);

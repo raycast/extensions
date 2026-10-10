@@ -75,12 +75,13 @@ function reply(prompt: PromptSpec): unknown {
   }
 }
 
-async function start(choiceId: string, vars?: object) {
+async function start(choiceId: string, vars?: object, current?: string) {
   const started = JSON.parse(
     obsidian(
       "quickadd:interactive",
       `id=${choiceId}`,
       ...(vars ? [`vars=${JSON.stringify(vars)}`] : []),
+      ...(current ? [`current=${current}`] : []),
     ),
   );
   if (!started.ok) throw new Error(started.error);
@@ -95,8 +96,8 @@ async function nextEvent(at: (path: string) => string): Promise<SessionEvent> {
   }
 }
 
-async function run(choiceId: string, vars?: object) {
-  const at = await start(choiceId, vars);
+async function run(choiceId: string, vars?: object, current?: string) {
+  const at = await start(choiceId, vars, current);
   for (;;) {
     const event = await nextEvent(at);
     if (event.kind === "error") throw new Error(event.error);
@@ -115,6 +116,10 @@ async function run(choiceId: string, vars?: object) {
 
 function note(path: string): string {
   return readFileSync(new URL(path, VAULT_DIR), "utf8");
+}
+
+function hasLine(path: string, line: string): boolean {
+  return note(path).split("\n").includes(line);
 }
 
 // What a Quicklink argument carries into the run as `value`.
@@ -168,6 +173,9 @@ obsidian(
     if (out) await app.vault.delete(out, true);
     await app.vault.createFolder("Output");
     await app.vault.create("Output/Picked.md", "# Picked\\n");
+    await app.vault.create("Output/Current.md", "# Current\\n");
+    const decoy = await app.vault.create("Output/Decoy.md", "# Decoy\\n");
+    await app.workspace.getLeaf().openFile(decoy);
   })()`,
 );
 await sleep(1500);
@@ -191,7 +199,82 @@ for (const [id, path, expected, vars] of cases) {
     console.log(`  FAIL ${error instanceof Error ? error.message : error}`);
   }
 }
-const aborts: Array<[name: string, check: () => Promise<void>]> = [
+const checks: Array<[name: string, check: () => Promise<void>]> = [
+  [
+    "list which choices use the current note",
+    async () => {
+      const { choices } = JSON.parse(obsidian("quickadd:list")) as {
+        choices: Array<{ id: string; currentNote?: string }>;
+      };
+      const use = (id: string) => choices.find((c) => c.id === id)?.currentNote;
+      const got = [use("e2e-current"), use("e2e-link"), use("e2e-text")];
+      if (got.join() !== "required,optional,none") {
+        throw new Error(`currentNote is ${JSON.stringify(got)}`);
+      }
+    },
+  ],
+  [
+    "capture into the named current note, not the open tab",
+    async () => {
+      await run("e2e-current", undefined, "Output/Current.md");
+      await sleep(300);
+      if (!hasLine("Output/Current.md", "- current: Text to capture answer")) {
+        throw new Error(`Output/Current.md: ${note("Output/Current.md")}`);
+      }
+    },
+  ],
+  [
+    "refuse a capture to the current note with current=none",
+    async () => {
+      const before = note("Output/Current.md");
+      const failure = await run("e2e-current", undefined, "none").then(
+        () => "",
+        (error: Error) => error.message,
+      );
+      if (!failure.includes("no active file")) {
+        throw new Error(`expected the no-active-file error, got: ${failure}`);
+      }
+      if (note("Output/Current.md") !== before) {
+        throw new Error("Output/Current.md changed");
+      }
+    },
+  ],
+  [
+    "link the named current note",
+    async () => {
+      await run("e2e-link", undefined, "Output/Current.md");
+      await sleep(300);
+      if (
+        !hasLine("Output/Inbox.md", "- linked: Enter value answer [[Current]]")
+      ) {
+        throw new Error(`Output/Inbox.md: ${note("Output/Inbox.md")}`);
+      }
+      if (!note("Output/Current.md").includes("[[Inbox]]")) {
+        throw new Error(`no link in Output/Current.md`);
+      }
+    },
+  ],
+  [
+    "leave the link empty with current=none",
+    async () => {
+      const before = note("Output/Current.md");
+      await run("e2e-link", undefined, "none");
+      await sleep(300);
+      if (!hasLine("Output/Inbox.md", "- linked: Enter value answer ")) {
+        throw new Error(`Output/Inbox.md: ${note("Output/Inbox.md")}`);
+      }
+      if (note("Output/Current.md") !== before) {
+        throw new Error("Output/Current.md changed");
+      }
+    },
+  ],
+  [
+    "never touch the open tab",
+    async () => {
+      const decoy = note("Output/Decoy.md");
+      if (decoy !== "# Decoy\n") throw new Error(`Output/Decoy.md: ${decoy}`);
+    },
+  ],
   [
     "abort while the run is mid-work",
     async () => {
@@ -229,7 +312,7 @@ const aborts: Array<[name: string, check: () => Promise<void>]> = [
     },
   ],
 ];
-for (const [name, check] of aborts) {
+for (const [name, check] of checks) {
   console.log(name);
   try {
     await check();
@@ -240,6 +323,6 @@ for (const [name, check] of aborts) {
   }
 }
 
-const total = cases.length + aborts.length;
+const total = cases.length + checks.length;
 console.log(failed ? `${failed} of ${total} failed` : `all ${total} passed`);
 process.exit(failed ? 1 : 0);

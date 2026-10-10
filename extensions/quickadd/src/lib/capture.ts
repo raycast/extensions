@@ -1,8 +1,9 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { doneMessage } from "./interactive";
-import { listChoices, prepareVault, runChoice } from "./obsidianCli";
+import { prepareVault, runChoice } from "./obsidianCli";
 import { resolveCaptureChoice } from "./capture-choice";
+import { headlessCurrentNote } from "./current-note";
 import { chooseVault, readRegistry } from "./vaults";
 
 export interface CaptureContext {
@@ -32,10 +33,10 @@ export async function capture(
     }
     const ready = await prepareVault(chosen.vault, undefined, registry);
     if (!ready.ok) throw new Error(ready.message);
-    const listed = await listChoices(chosen.vault);
-    const choice = resolveCaptureChoice(listed.choices ?? [], captureChoice);
+    const choice = resolveCaptureChoice(ready.choices, captureChoice);
     const result = await runChoice(chosen.vault, choice.id, {
       vars: { value: text },
+      current: headlessCurrentNote(choice),
     });
     if (!result.ok) {
       throw new Error(result.error ?? "Capture failed");

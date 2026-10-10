@@ -5,6 +5,9 @@ export type ChoiceType = "Template" | "Capture" | "Macro" | "Multi";
 /** Sent by QuickAdd >= 2.20. */
 export type ChoiceEffect = "created" | "changed" | "unchanged" | "unknown";
 
+/** Whether a choice reads the current note. QuickAdd before `current=` omits it, which means "none". */
+export type CurrentNoteUse = "none" | "optional" | "required";
+
 export interface ChoiceSummary {
   id: string;
   name: string;
@@ -13,12 +16,14 @@ export interface ChoiceSummary {
   /** Full path through Multi folders, e.g. "📥 Add... / ✍ Note (title)". */
   path: string;
   runnable: boolean;
+  currentNote?: CurrentNoteUse;
 }
 
 export interface ChoiceRef {
   id: string;
   name: string;
   type: ChoiceType;
+  currentNote?: CurrentNoteUse;
 }
 
 export interface ListResponse {

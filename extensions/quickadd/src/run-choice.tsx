@@ -17,18 +17,22 @@ import {
 import {
   createDeeplink,
   showFailureToast,
-  useCachedPromise,
   useCachedState,
   useFrecencySorting,
 } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import {
-  listChoices,
   obsidianOpenUrl,
   prepareVault,
   runChoice,
   startInteractive,
 } from "./lib/obsidianCli";
+import { CurrentNotePicker } from "./completion-pickers";
+import {
+  type CurrentNote,
+  asksForCurrentNote,
+  currentFor,
+} from "./lib/current-note";
 import { choiceIcon } from "./lib/format";
 import { quicklinkWithArgument } from "./lib/quicklink";
 import { STALL_MS, InteractiveSessionView } from "./interactive-session";
@@ -178,30 +182,28 @@ function VaultGate({
       </List>
     );
   }
-  return choiceId ? (
-    <DirectChoice vault={vault} choiceId={choiceId} value={value} />
+  const choice =
+    choiceId && readiness.choices.find(({ id }) => id === choiceId);
+  return choice ? (
+    <DirectChoice vault={vault} choice={choice} value={value} />
   ) : (
-    <ChoiceList vault={vault} />
+    <ChoiceList vault={vault} choices={readiness.choices} />
   );
 }
 
-function ChoiceList({ vault }: { vault: Vault }) {
-  const { data, isLoading, error } = useCachedPromise(
-    async (vault: Vault) => {
-      const response = await listChoices(vault);
-      if (!response.ok || !response.choices) {
-        throw new Error(response.error ?? "QuickAdd returned no choices");
-      }
-      return response.choices.filter((choice) => choice.runnable);
-    },
-    [vault],
-  );
+function ChoiceList({
+  vault,
+  choices,
+}: {
+  vault: Vault;
+  choices: ChoiceSummary[];
+}) {
+  const runnable = choices.filter((choice) => choice.runnable);
   // The hook sorts in place and cannot tell visited items from the rest, so it
   // gets a copy and the visited ids are kept beside it.
-  const { data: byFrecency, visitItem } = useFrecencySorting(
-    data && [...data],
-    { namespace: vault.path },
-  );
+  const { data: byFrecency, visitItem } = useFrecencySorting([...runnable], {
+    namespace: vault.path,
+  });
   const [visited, setVisited] = useCachedState<string[]>(
     `visited-choices:${vault.path}`,
     [],
@@ -211,28 +213,13 @@ function ChoiceList({ vault }: { vault: Vault }) {
     setVisited((ids) => (ids.includes(choice.id) ? ids : [...ids, choice.id]));
   };
 
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Could not reach QuickAdd"
-          description={error.message}
-        />
-      </List>
-    );
-  }
-
   const recent = byFrecency
     .filter((choice) => visited.includes(choice.id))
     .slice(0, 5);
-  const sections = groupByParent(data ?? []);
+  const sections = groupByParent(runnable);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search QuickAdd choices..."
-    >
+    <List searchBarPlaceholder="Search QuickAdd choices...">
       <List.Section title="Recent">
         {recent.map((choice) => (
           <ChoiceItem
@@ -265,16 +252,18 @@ function ChoiceList({ vault }: { vault: Vault }) {
  */
 function DirectChoice({
   vault,
-  choiceId,
+  choice,
   value,
 }: {
   vault: Vault;
-  choiceId: string;
+  choice: ChoiceSummary;
   value?: string;
 }) {
+  const [current, setCurrent] = useState<CurrentNote>();
+  const asking = asksForCurrentNote(choice) && current === undefined;
   const [view, setView] = useState<
     | { phase: "loading" }
-    | { phase: "attach"; session: InteractiveSession; choiceName: string }
+    | { phase: "attach"; session: InteractiveSession }
     | { phase: "error"; message: string }
   >({ phase: "loading" });
   // Raycast double-invokes effects (StrictMode); without the ref the choice
@@ -282,16 +271,15 @@ function DirectChoice({
   const startRef = useRef<ReturnType<typeof startInteractive> | null>(null);
 
   useEffect(() => {
+    if (asking) return;
     let cancelled = false;
-    startRef.current ??= startInteractive(
-      vault,
-      choiceId,
-      value === undefined ? undefined : { value },
-    );
+    startRef.current ??= startInteractive(vault, choice.id, {
+      vars: value === undefined ? undefined : { value },
+      current: currentFor(choice, current),
+    });
     startRef.current.then(
-      ({ session, choice }) => {
-        if (!cancelled)
-          setView({ phase: "attach", session, choiceName: choice.name });
+      ({ session }) => {
+        if (!cancelled) setView({ phase: "attach", session });
       },
       (error) => {
         if (cancelled) return;
@@ -305,19 +293,23 @@ function DirectChoice({
     return () => {
       cancelled = true;
     };
-  }, [choiceId]);
+  }, [asking]);
 
+  if (asking) {
+    return (
+      <CurrentNotePicker vault={vault} choice={choice} onPick={setCurrent} />
+    );
+  }
   if (view.phase === "attach") {
-    const { choiceName } = view;
     return (
       <InteractiveSessionView
         vault={vault}
         session={view.session}
-        choiceName={choiceName}
+        choiceName={choice.name}
         onEnd={(end) =>
           void showHUD(
             end.state === "done"
-              ? doneMessage(choiceName, end.result)
+              ? doneMessage(choice.name, end.result)
               : "Canceled",
           )
         }
@@ -367,14 +359,16 @@ function ChoiceItem({
 }) {
   const { push, pop } = useNavigation();
 
-  async function runInteractive() {
+  async function runInteractive(current?: CurrentNote) {
     onRun(choice);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Running ${choice.name}...`,
     });
     try {
-      const { session } = await startInteractive(vault, choice.id);
+      const { session } = await startInteractive(vault, choice.id, {
+        current: currentFor(choice, current),
+      });
       const first = await firstEvent(session, STALL_MS);
       if (first.kind === "error") throw new Error(first.error);
       await toast.hide();
@@ -447,7 +441,28 @@ function ChoiceItem({
       keywords={choice.path.split(" / ")}
       actions={
         <ActionPanel>
-          <Action title="Run" icon={Icon.Play} onAction={runInteractive} />
+          {asksForCurrentNote(choice) ? (
+            <Action.Push
+              title="Run"
+              icon={Icon.Play}
+              target={
+                <CurrentNotePicker
+                  vault={vault}
+                  choice={choice}
+                  onPick={(current) => {
+                    pop();
+                    void runInteractive(current);
+                  }}
+                />
+              }
+            />
+          ) : (
+            <Action
+              title="Run"
+              icon={Icon.Play}
+              onAction={() => runInteractive()}
+            />
+          )}
           <Action
             title="Run in Obsidian"
             icon={Icon.AppWindow}

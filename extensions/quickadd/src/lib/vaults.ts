@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import type { ChoiceSummary, ListResponse } from "./types";
 
 /** `name` is what the CLI's `vault=` and `obsidian://` URIs address the vault by. */
 export interface Vault {
@@ -80,7 +81,8 @@ export interface ReadyDeps {
 }
 
 export type Readiness =
-  { ok: true; opened: boolean } | { ok: false; message: string };
+  | { ok: true; opened: boolean; choices: ChoiceSummary[] }
+  | { ok: false; message: string };
 
 const POLL_MS = 500;
 const OPEN_TIMEOUT_MS = 20_000;
@@ -115,31 +117,28 @@ export async function ensureVaultReady(
     vaultAt(
       (await deps.runCli([`vault=${vault.name}`, "vault", "info=path"])).trim(),
     ).path === vault.path;
-  const quickAddAnswers = async () => {
+  const listedChoices = async () => {
     try {
-      const list = JSON.parse(
+      const { ok, choices = [] } = JSON.parse(
         await deps.runCli([`vault=${vault.name}`, "quickadd:list"]),
-      ) as { ok?: boolean; choices?: { id: string }[] };
-      return (
-        list.ok === true &&
-        (!choiceId || (list.choices ?? []).some(({ id }) => id === choiceId))
-      );
+      ) as ListResponse;
+      const listed = !choiceId || choices.some(({ id }) => id === choiceId);
+      return ok === true && listed ? choices : undefined;
     } catch {
-      return false;
+      return undefined;
     }
   };
 
-  if (entry.open && (await servesVault()) && (await quickAddAnswers())) {
-    return { ok: true, opened: false };
-  }
+  const choices =
+    entry.open && (await servesVault()) && (await listedChoices());
+  if (choices) return { ok: true, opened: false, choices };
 
   await deps.open(`obsidian://open?vault=${encodeURIComponent(vault.name)}`);
   const deadline = deps.now() + OPEN_TIMEOUT_MS;
   while (deps.now() < deadline) {
     await deps.sleep(POLL_MS);
-    if ((await servesVault()) && (await quickAddAnswers())) {
-      return { ok: true, opened: true };
-    }
+    const choices = (await servesVault()) && (await listedChoices());
+    if (choices) return { ok: true, opened: true, choices };
   }
   return {
     ok: false,

@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect } from "react";
+import { type CurrentNote, noteItems } from "./lib/current-note";
 import {
   type LinkItem,
   type TagItem,
   suggestLinks,
   suggestTags,
 } from "./lib/suggest";
+import type { ChoiceSummary } from "./lib/types";
 import type { Vault } from "./lib/vaults";
 
 interface PickerProps<T> {
@@ -92,6 +94,73 @@ export function TagPicker({ vault, onPick, onClose }: PickerProps<TagItem>) {
           }
         />
       ))}
+    </List>
+  );
+}
+
+async function suggestNotes(vault: Vault): Promise<LinkItem[]> {
+  return noteItems(await suggestLinks(vault));
+}
+
+export function CurrentNotePicker({
+  vault,
+  choice,
+  onPick,
+}: {
+  vault: Vault;
+  choice: Pick<ChoiceSummary, "name" | "currentNote">;
+  onPick: (current: CurrentNote) => void;
+}) {
+  // A toast, because the "No current note" row would hide an empty view.
+  const { data, isLoading } = usePromise(suggestNotes, [vault], {
+    onError: (error) => {
+      void showFailureToast(error, { title: "Could not load notes" });
+    },
+  });
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={`Current Note for ${choice.name}`}
+      searchBarPlaceholder="Search notes"
+    >
+      {choice.currentNote === "optional" && (
+        <List.Section>
+          <List.Item
+            icon={Icon.Circle}
+            title="No current note"
+            subtitle={`${choice.name} runs without linking to or reading from a note`}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Run Without a Current Note"
+                  icon={Icon.Play}
+                  onAction={() => onPick("none")}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+      <List.Section title="Notes">
+        {data?.map((item) => (
+          <List.Item
+            key={item.path}
+            icon={Icon.Document}
+            {...linkLabel(item)}
+            keywords={[item.path]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Run with This Note"
+                  icon={Icon.Play}
+                  onAction={() => onPick(item.path)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

@@ -6,9 +6,9 @@ This extension is a thin front end over [QuickAdd](https://github.com/chhoumann/
 
 Obsidian ships a command-line interface (Settings → General → Command line interface). QuickAdd registers handlers on it, so anything you can trigger in the plugin is reachable from a subprocess that returns JSON:
 
-- `quickadd:list [type=...] [commands]` - the flattened choice tree: `id`, `name`, `type`, `path` (`Multi / child`), `command`, `runnable` (a Multi is a folder, not runnable).
-- `quickadd:interactive id=<id> [vars=<json>]` - starts a choice and returns at once with the choice (`id`, `name`, `type`) and the address of a local prompt server (`host`, `port`, `sessionId`, `token`). QuickAdd then sends each prompt to that server instead of opening a modal.
-- `quickadd:run choice=<name>|id=<id> [vars=<json>] [ui] [verify]` - runs a choice to completion. **Run in Obsidian** passes `ui` so QuickAdd prompts inside the app. Quick Capture, Capture Selection, and Capture Clipboard pass their text through `vars`. `verify` returns the created file path and an honest success or failure for Template and Capture choices.
+- `quickadd:list [type=...] [commands]` - the flattened choice tree: `id`, `name`, `type`, `path` (`Multi / child`), `command`, `runnable` (a Multi is a folder, not runnable), and `currentNote` (`none`, `optional`, or `required`: whether the choice reads the current note).
+- `quickadd:interactive id=<id> [vars=<json>] [current=<path>|none]` - starts a choice and returns at once with the choice (`id`, `name`, `type`) and the address of a local prompt server (`host`, `port`, `sessionId`, `token`). QuickAdd then sends each prompt to that server instead of opening a modal.
+- `quickadd:run choice=<name>|id=<id> [vars=<json>] [current=<path>|none] [ui] [verify]` - runs a choice to completion. **Run in Obsidian** passes `ui` so QuickAdd prompts inside the app. Quick Capture, Capture Selection, and Capture Clipboard pass their text through `vars`. `verify` returns the created file path and an honest success or failure for Template and Capture choices.
 - `quickadd:suggest kind=links|tags` - completion items for text fields. `links` returns one item per note, attachment, and alias, each with `text` (what goes inside `[[...]]`) and `path`, plus `alias` on alias items. `tags` returns each tag without its `#` and its `count`, most used first. The CLI does no filtering; Raycast's `List` filters as the user types.
 
 The extension shells out with `execFile` (each argument is a separate argv entry, so no shell quoting is needed for values with spaces or newlines) and parses the JSON envelope.
@@ -43,10 +43,12 @@ Before it runs anything, `ensureVaultReady` checks that Obsidian serves the vaul
 ## Per-choice flow: one interactive run
 
 1. `quickadd:list` fills the searchable list, grouped by Multi folder.
-2. **Run** calls `quickadd:interactive` for the selected choice.
+2. **Run** calls `quickadd:interactive` for the selected choice. When its `currentNote` is `optional` or `required`, `CurrentNotePicker` (`src/completion-pickers.tsx`) asks for the note first and the run gets `current=<path>`, or `current=none` from the **No current note** row that an optional choice offers.
 3. The extension long-polls the prompt server's `/poll`. Each event is a `prompt`, `done`, `error`, or an `idle` keepalive. The list stays on screen until the first prompt arrives, so a choice without prompts finishes with just a toast. If nothing arrives within three seconds, the list hands its poll to the run's view.
 4. Each prompt renders as a native control, and the answer goes back through `/reply`. QuickAdd collects a choice's declared inputs first, as one `form` prompt. Prompts that a macro script raises later arrive one at a time.
 5. The `done` event names the file and its `effect`, so the finish message reads "Created <file>" or "Added to <file>" and offers **Open in Obsidian**. Without a created or changed file it reads "Ran <choice>".
+
+Without `current=`, QuickAdd takes the current note from Obsidian's active tab, which from Raycast is whatever tab happens to be open, so every run sends `current=`: the pick, or `none` when the choice does not ask. A pinned Quicklink asks for the note the same way. `ensureVaultReady` returns the choices it listed, so the list and the Quicklink view decide from a fresh `currentNote`, never a cached one. A `current` in the launch context skips the picker, and the relaunch after opening a closed vault keeps it. **Run in Obsidian** passes no `current=`, because there the active tab is the user's. The capture commands cannot ask: a `required` choice fails with a message that points to **Run QuickAdd Choice**, and an `optional` one runs with `current=none`.
 
 A pinned Quicklink opens the run's view at once instead of waiting on the list. A Quicklink pinned with an argument carries it as `value` in the launch context, and the run starts with `vars={"value": ...}`. Its link puts Raycast's `{argument | json-stringify}` placeholder in the URL-encoded context JSON; Raycast percent-encodes the quoted text, so the context still parses (`src/lib/quicklink.ts`). When the view has waited three seconds with no prompt, it says QuickAdd may be asking something inside Obsidian (a Templater prompt, for example) and offers **Open Obsidian** (⌘O).
 
@@ -80,5 +82,7 @@ Form item ids are positional (`field-0`), not field ids, because QuickAdd field 
 The `verify` flag that **Run in Obsidian** and the capture commands pass needs **QuickAdd >= 2.14**. Older versions ignore it, and some captures can report success without writing.
 
 `[[` and `#` completion needs **QuickAdd >= 2.31**, which added `quickadd:suggest`. Before it, the picker says which version it needs.
+
+Asking for the current note needs **QuickAdd >= 2.32**, which added `current=` and `currentNote`. Older versions send no `currentNote`, so the extension asks for nothing and the run uses the active tab.
 
 In the one-page form, note pickers start empty only with **QuickAdd >= 2.31**, which marks them with `picker: "file"`. Older versions send them as plain suggesters, so they keep the first note picked.

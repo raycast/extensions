@@ -3,13 +3,9 @@ import { execFile } from "node:child_process";
 import { accessSync, constants } from "node:fs";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
+import type { CurrentNote } from "./current-note";
 import type { InteractiveSession } from "./interactive";
-import type {
-  ChoiceRef,
-  InteractiveResponse,
-  ListResponse,
-  RunResponse,
-} from "./types";
+import type { ChoiceRef, InteractiveResponse, RunResponse } from "./types";
 import {
   type Readiness,
   type Registry,
@@ -134,19 +130,16 @@ export async function prepareVault(
   }
 }
 
-export async function listChoices(vault: Vault): Promise<ListResponse> {
-  return invoke<ListResponse>(vault, "quickadd:list", {});
-}
-
 export async function startInteractive(
   vault: Vault,
   choiceId: string,
-  vars?: Record<string, string>,
+  options: { vars?: Record<string, string>; current?: CurrentNote } = {},
 ): Promise<{ session: InteractiveSession; choice: ChoiceRef }> {
+  const { vars, current } = options;
   const response = await invoke<InteractiveResponse>(
     vault,
     "quickadd:interactive",
-    { id: choiceId, vars: vars && JSON.stringify(vars) },
+    { id: choiceId, vars: vars && JSON.stringify(vars), current },
   );
   const { port, sessionId, token, choice } = response;
   if (!response.ok || !port || !sessionId || !token || !choice) {
@@ -166,6 +159,7 @@ export interface RunOptions {
   ui?: boolean;
   /** Values may be arrays (multi-select variables); passed verbatim via vars JSON. */
   vars?: Record<string, unknown>;
+  current?: CurrentNote;
 }
 
 function runParams(options: RunOptions): Record<string, string | undefined> {
@@ -175,6 +169,7 @@ function runParams(options: RunOptions): Record<string, string | undefined> {
         ? JSON.stringify(options.vars)
         : undefined,
     ui: options.ui ? "" : undefined,
+    current: options.current,
     // Verified outcome (QuickAdd >= 2.14): honest failures + created file
     // path for Template/Capture. Older versions ignore the flag.
     verify: "",
