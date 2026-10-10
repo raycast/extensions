@@ -232,20 +232,32 @@ async function startAndWait(
   }
 }
 
+// A tokenless probe counts as a failed login in TablePro, so a worker probes a port once.
+const verifiedByPort = new Map<number, VerifiedEndpoint>();
+
+export function forgetVerifiedEndpoint(port: number): void {
+  verifiedByPort.delete(port);
+}
+
 export async function verifiedEndpoint(options: {
   allowAutoStart: boolean;
   signal?: AbortSignal;
 }): Promise<VerifiedEndpoint> {
   const target = endpoint();
+  const known = verifiedByPort.get(target.port);
+  if (known) return known;
   let result = await probe(target, options.signal);
   if (result.kind === "refused") {
     if (!options.allowAutoStart) throw new MCPNotRunningError();
     result = await startAndWait(target, options.signal);
   }
   switch (result.kind) {
-    case "tablepro":
+    case "tablepro": {
       assertSupportedVersion(result.version);
-      return { ...target, anonymous: result.anonymous };
+      const verified = { ...target, anonymous: result.anonymous };
+      verifiedByPort.set(target.port, verified);
+      return verified;
+    }
     case "rate-limited":
       throw new RateLimitedError();
     case "refused":

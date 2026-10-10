@@ -14,7 +14,9 @@ import {
   SchemaInfo,
   ServerUnreachableError,
   TableInfo,
+  TokenExpiredError,
   TokenMissingError,
+  TokenRevokedError,
 } from "./types";
 import {
   assertInstalledVersionSupported,
@@ -25,6 +27,7 @@ import {
   CLIENT_NAME,
   CLIENT_VERSION,
   VerifiedEndpoint,
+  forgetVerifiedEndpoint,
   mcpPort,
   verifiedEndpoint,
 } from "./endpoint";
@@ -47,11 +50,16 @@ export interface SearchHistoryOptions {
   signal?: AbortSignal;
 }
 
-let clientPromise: Promise<Client> | null = null;
+interface ClientHandle {
+  client: Client;
+  port: number;
+}
 
-async function getClient(): Promise<Client> {
+let clientPromise: Promise<ClientHandle> | null = null;
+
+async function getClient(): Promise<ClientHandle> {
   if (clientPromise) return clientPromise;
-  const promise: Promise<Client> = createClient(() => {
+  const promise: Promise<ClientHandle> = createClient(() => {
     if (clientPromise === promise) resetClient();
   });
   clientPromise = promise;
@@ -66,11 +74,20 @@ export function resetClient(): void {
   clientPromise = null;
   if (!previous) return;
   previous
-    .then((client) => client.close().catch(() => undefined))
+    .then(({ client }) => client.close().catch(() => undefined))
     .catch(() => undefined);
 }
 
-async function createClient(onClose: () => void): Promise<Client> {
+function invalidatesIdentity(err: Error): boolean {
+  return (
+    err instanceof MCPNotRunningError ||
+    err instanceof TokenRevokedError ||
+    err instanceof TokenExpiredError ||
+    err instanceof ServerUnreachableError
+  );
+}
+
+async function createClient(onClose: () => void): Promise<ClientHandle> {
   const app = await requireTablePro();
   await assertInstalledVersionSupported(app);
   const token = await getApiToken();
@@ -89,17 +106,20 @@ async function createClient(onClose: () => void): Promise<Client> {
     await client.connect(transport);
   } catch (err) {
     await transport.close().catch(() => undefined);
-    throw translateError(err);
+    const translated = translateError(err);
+    if (invalidatesIdentity(translated)) forgetVerifiedEndpoint(server.port);
+    throw translated;
   }
   try {
     assertTableProServer(client, server);
   } catch (err) {
+    forgetVerifiedEndpoint(server.port);
     await client.close().catch(() => undefined);
     throw err;
   }
   // No transport.onerror reset: closing there fails a 403 call as "Connection closed".
   client.onclose = onClose;
-  return client;
+  return { client, port: server.port };
 }
 
 function assertTableProServer(client: Client, server: VerifiedEndpoint): void {
@@ -166,12 +186,13 @@ async function invokeTool<T>(
   idempotent: boolean,
   retried: boolean,
 ): Promise<T> {
-  let client: Client;
+  let handle: ClientHandle;
   try {
-    client = await getClient();
+    handle = await getClient();
   } catch (err) {
     throw translateError(err);
   }
+  const { client, port } = handle;
   let envelope: ToolCallEnvelope;
   try {
     const onProgress = options.onProgress;
@@ -188,6 +209,10 @@ async function invokeTool<T>(
     })) as ToolCallEnvelope;
   } catch (err) {
     const translated = translateError(err);
+    if (invalidatesIdentity(translated)) {
+      forgetVerifiedEndpoint(port);
+      resetClient();
+    }
     if (!isSessionLost(translated)) throw translated;
     resetClient();
     if (!idempotent || retried) throw translated;
@@ -583,6 +608,7 @@ export async function exchangePairingCode(
     });
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;
+    forgetVerifiedEndpoint(server.port);
     throw new ServerUnreachableError(server.port);
   }
   if (!response.ok) {
