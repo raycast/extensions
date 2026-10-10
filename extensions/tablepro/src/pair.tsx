@@ -192,7 +192,6 @@ function PairForm() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Pair with TablePro"
       actions={
         <ActionPanel>
           <Action.SubmitForm
