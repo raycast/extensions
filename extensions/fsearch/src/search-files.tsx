@@ -26,19 +26,20 @@ export default function Command() {
   );
 
   // The first run crawls the whole disk; the daemon answers "indexing: …" until it's done.
-  const isIndexing = error?.message.startsWith("indexing") ?? false;
-  useEffect(() => {
-    if (!isIndexing) return;
-    const timer = setTimeout(revalidate, 2000);
-    return () => clearTimeout(timer);
-  }, [isIndexing, error, revalidate]);
-
   const trimmed = query.trim();
   const result = trimmed ? data : undefined;
   const isContent = result?.type === "content";
+  const isIndexing = error?.message.startsWith("indexing") ?? false;
+  const isContentIndexing = result?.type === "content" && result.indexing;
+  useEffect(() => {
+    if (!isIndexing && !isContentIndexing) return;
+    const timer = setTimeout(revalidate, 2000);
+    return () => clearTimeout(timer);
+  }, [isIndexing, isContentIndexing, error, data, revalidate]);
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search files, or use ext:, in:, grep:, sym:…"
@@ -173,6 +174,7 @@ function ErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
         actions={
           <ActionPanel>
             <Action title="Install in Terminal" icon={Icon.Terminal} onAction={installInTerminal} />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
             <Action.OpenInBrowser title="Open Installation Guide" url={REPO_URL} />
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>

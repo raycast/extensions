@@ -19,6 +19,8 @@ export type SearchResult =
   | { type: "names"; hits: NameHit[]; tookUs: number }
   | { type: "content"; files: ContentFile[]; tookUs: number; complete: boolean; indexing: boolean };
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export class BinaryNotFoundError extends Error {
   constructor(readonly binaryPath: string) {
     super(`fsearch is not installed (expected at ${binaryPath}). Run the "Install fsearch" command in Raycast.`);
@@ -50,12 +52,18 @@ export function request(payload: FsearchRequest, signal?: AbortSignal) {
     let stderr = "";
     let settled = false;
 
-    const finish = (fn: () => void) => {
+    const timer = setTimeout(
+      () => finish(() => reject(new Error(`fsearch did not respond within ${REQUEST_TIMEOUT_MS / 1000}s`))),
+      REQUEST_TIMEOUT_MS,
+    );
+
+    function finish(fn: () => void) {
       if (settled) return;
       settled = true;
+      clearTimeout(timer);
       child.kill();
       fn();
-    };
+    }
 
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
@@ -78,6 +86,7 @@ export function request(payload: FsearchRequest, signal?: AbortSignal) {
       finish(() => reject(new Error(stderr.trim() || `fsearch exited with code ${code} without a response`))),
     );
 
+    child.stdin.on("error", (error) => finish(() => reject(error)));
     child.stdin.end(JSON.stringify(payload) + "\n");
   });
 }
