@@ -12,6 +12,8 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
+import fs from "fs";
+import path from "path";
 import { AVIFENC_DEFAULT_PATH, CWEBP_DEFAULT_PATH } from "./utils/constants";
 import { isSupportedImageFormat, isWebpConvertibleImageFormat } from "./utils/mime-types";
 import { convertToAvif, convertToWebp } from "./utils/convert";
@@ -139,6 +141,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     });
 
     let newFilePath = inputFilePath;
+    let temporaryFilePath: string | undefined;
 
     if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif && shouldConvertToWebp) {
       await showToast({
@@ -180,6 +183,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
           const quality = Math.max(0, Math.min(100, isNaN(webpQuality) ? 80 : webpQuality));
 
           newFilePath = await convertToWebp(inputFilePath, cwebpPath, quality);
+          temporaryFilePath = newFilePath;
         } catch (conversionError) {
           await showFailureToast(conversionError, { title: "WebP conversion failed" });
           newFilePath = inputFilePath;
@@ -191,13 +195,19 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       customFileName = await generateFileName(newFilePath, fileNameFormat);
     }
 
-    const { url, markdown, html, key } = await uploadToR2(newFilePath, customFileName, uploadFolder);
+    try {
+      const { url, markdown, html, key } = await uploadToR2(newFilePath, customFileName, uploadFolder);
 
-    const textToCopy = linkFormat === "markdown" ? markdown : linkFormat === "html" ? html : url;
-    await Clipboard.copy(textToCopy);
-    toastUploading.style = Toast.Style.Success;
-    toastUploading.title = "Upload completed!";
-    toastUploading.message = `Copied to clipboard · ${key}`;
+      const textToCopy = linkFormat === "markdown" ? markdown : linkFormat === "html" ? html : url;
+      await Clipboard.copy(textToCopy);
+      toastUploading.style = Toast.Style.Success;
+      toastUploading.title = "Upload completed!";
+      toastUploading.message = `Copied to clipboard · ${key}`;
+    } finally {
+      if (temporaryFilePath) {
+        await fs.promises.rm(path.dirname(temporaryFilePath), { recursive: true, force: true });
+      }
+    }
   } catch (error) {
     await showFailureToast(error, { title: "Error uploading to R2" });
   }

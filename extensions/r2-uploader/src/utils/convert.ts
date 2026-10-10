@@ -1,6 +1,6 @@
+import fs from "fs";
 import os from "os";
 import path from "path";
-import { randomUUID } from "crypto";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { showFailureToast } from "@raycast/utils";
@@ -13,16 +13,23 @@ export async function convertToWebp(
   cwebpPath: string = CWEBP_DEFAULT_PATH,
   quality: number = 80,
 ): Promise<string> {
+  let temporaryDirectory: string | undefined;
+  let outputPath: string | undefined;
+
   try {
-    const outputPath = path.join(
-      os.tmpdir(),
-      `${path.basename(inputPath, path.extname(inputPath))}-${randomUUID()}.webp`,
-    );
+    temporaryDirectory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "r2-uploader-"));
+    outputPath = path.join(temporaryDirectory, path.basename(inputPath, path.extname(inputPath)) + ".webp");
 
     await execFileAsync(cwebpPath, [inputPath, "-q", quality.toString(), "-o", outputPath]);
 
     return outputPath;
   } catch (error: unknown) {
+    if (outputPath) {
+      await fs.promises.rm(outputPath, { force: true }).catch(() => undefined);
+    }
+    if (temporaryDirectory) {
+      await fs.promises.rm(temporaryDirectory, { recursive: true, force: true }).catch(() => undefined);
+    }
     console.error("WebP conversion error:", error);
     await showFailureToast(error, { title: "WebP conversion failed" });
     throw error;
