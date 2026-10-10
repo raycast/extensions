@@ -48,7 +48,12 @@ export async function request(session: ClientHttp2Session, headers: OutgoingHttp
     if (responseHeaders[":status"] === undefined) throw new Error("No response");
     return { headers: responseHeaders, data };
   } catch (error) {
-    if (signal.aborted) throw new Error("Request to Hue Bridge timed out", { cause: error });
+    if (signal.aborted) {
+      // A busy bridge answers 429 or 503 at once, so silence means a dead connection, after the network changed or the
+      // computer slept. Destroying the session lets the client reconnect.
+      session.destroy();
+      throw new Error("Request to Hue Bridge timed out", { cause: error });
+    }
     throw new Error("Lost connection to Hue Bridge", { cause: error });
   }
 }

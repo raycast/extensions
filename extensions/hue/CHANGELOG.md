@@ -32,7 +32,7 @@
 - Offer to link again when the bridge no longer accepts the extension, keeping its saved address, instead of only unlinking
 - Validate the bridge IP preference again after Unlink
 - Fix Done after linking connecting to the bridge a second time
-- Reconnect when the connection to the bridge drops, for example when it restarts, instead of failing every change and missing updates until the command is opened again
+- Reconnect when the connection to the bridge drops, for example when it restarts, or goes silent after a network change or sleep, instead of failing every change and missing updates until the command is opened again
 - Stop using the unlinked bridge's connection after Unlink
 - Show an error instead of crashing when the saved bridge configuration can't be read or saved
 - Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
