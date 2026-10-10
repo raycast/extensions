@@ -77,14 +77,15 @@ function optimisticUpdates<T extends HasId>(
   // Setting cached state writes the whole list to the cache, even when nothing changes.
   if (changes.size === 0) return () => {};
 
-  let undoState: T[];
+  let previous = new Map<Id, T>();
 
-  setState((prevState: T[]) => {
-    undoState = prevState;
-    return updateItems(prevState, changes, { existingOnly: true });
+  setState((items: T[]) => {
+    previous = new Map(items.filter((item) => changes.has(item.id)).map((item) => [item.id, item]));
+    return updateItems(items, changes, { existingOnly: true });
   });
 
+  // Restores only the items this update changed, keeping what the event stream changed in the meantime.
   return (): void => {
-    setState(undoState);
+    setState((items: T[]) => items.map((item) => previous.get(item.id) ?? item));
   };
 }
