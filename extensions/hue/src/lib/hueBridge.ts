@@ -18,9 +18,9 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   return new Promise((resolve, reject) => {
     const bonjour = new Bonjour();
     // Calls back with null after the timeout
-    bonjour.findOne(
-      { type: "hue", protocol: "tcp" },
-      10000,
+    const browser = bonjour.findOne(
+      { type: "hue" },
+      3000,
       (service: { addresses?: string[]; txt?: { bridgeid: string } } | null) => {
         bonjour.destroy();
 
@@ -33,6 +33,8 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
         resolve({ ipAddress, id });
       },
     );
+    // The browser queries once, and a lost packet would otherwise run out the timeout. After destroy() this does nothing.
+    setTimeout(() => browser.update(), 1000);
   });
 }
 

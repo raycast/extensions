@@ -19,6 +19,7 @@
 - Show the bridge's error message when an action fails
 - Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures
 - Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
+- Fall back to MeetHue's discovery after 3 instead of 10 seconds when the local network doesn't answer, and ask the local network twice
 - Show each bridge setup toast once and hide it when its step ends, also when unlinking midway
 - Fix the Failed to link with bridge toast showing as a success
 - Ask to press the bridge's link button when only the bridge IP preference is set, instead of failing to link
