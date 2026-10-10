@@ -152,7 +152,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       return;
     } else if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif) {
       const avifencPath = avifencPathPreference || AVIFENC_DEFAULT_PATH;
-      if (!isAvifencAvailable(avifencPath)) {
+      if (!(await isAvifencAvailable(avifencPath))) {
         await showToast({
           style: Toast.Style.Failure,
           title: "AVIF conversion tool not found",
@@ -184,8 +184,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
           newFilePath = await convertToWebp(inputFilePath, cwebpPath, quality);
           temporaryFilePath = newFilePath;
-        } catch (conversionError) {
-          await showFailureToast(conversionError, { title: "WebP conversion failed" });
+        } catch {
           newFilePath = inputFilePath;
         }
       }

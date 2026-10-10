@@ -71,7 +71,7 @@
     {
       "name": "customDomain",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "R2 Public Domain",
       "description": "Your already-configured public domain for accessing uploaded files",
       "placeholder": "https://cdn.example.com"

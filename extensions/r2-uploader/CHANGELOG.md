@@ -5,6 +5,7 @@
 - Add optional WebP conversion using the `cwebp` command
 - Update the Raycast extension author to `ypp`
 - Update extension metadata screenshots
+- R2 Public Domain is now required for copied links to point to the configured public URL
 
 ## [Browse R2 Files] - 2026-07-23
 
