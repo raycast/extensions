@@ -14,7 +14,7 @@ export default function SetSceneCommand() {
 }
 
 export function SetScene(props: { group?: Group; hue: Hue }) {
-  const { hueBridgeState, sendHueMessage, isLoading } = props.hue;
+  const { hueBridgeState, send, isLoading } = props.hue;
   const { rooms, zones, scenes } = useHueResources();
   const gradientUris = useMemo(
     () =>
@@ -26,7 +26,7 @@ export function SetScene(props: { group?: Group; hue: Hue }) {
   const { pop } = useNavigation();
 
   // When pushed, the parent handles the bridge state.
-  const manageHueBridgeElement = props.group ? null : ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement = props.group ? null : ManageHueBridge(hueBridgeState, send);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   const groups = props.group ? [props.group] : [...rooms, ...zones];
@@ -80,7 +80,7 @@ function SceneItem(props: {
             }}
           />
           <ActionPanel.Section>
-            <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
+            <UnlinkAction send={props.hue.send} />
           </ActionPanel.Section>
         </ActionPanel>
       }

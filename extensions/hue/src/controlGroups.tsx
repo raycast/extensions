@@ -19,7 +19,7 @@ import { applyUpdate, withTransition } from "./helpers/raycast";
 
 export default function ControlGroups() {
   const hue = useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = hue;
+  const { hueBridgeState, send, isLoading, lights, rooms, zones } = hue;
   // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
   const canExecute = useInputRateLimiter(1000);
   const icons = useMemo(
@@ -33,7 +33,7 @@ export default function ControlGroups() {
     [rooms, zones, lights],
   );
 
-  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, send);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
@@ -119,7 +119,7 @@ function GroupItem(props: {
             </ActionPanel.Section>
 
             <ActionPanel.Section>
-              <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
+              <UnlinkAction send={props.hue.send} />
             </ActionPanel.Section>
           </ActionPanel>
         )

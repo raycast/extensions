@@ -14,12 +14,12 @@ import { createLightIcon } from "./helpers/svgImages";
 
 export default function ControlLights() {
   const hue = useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = hue;
+  const { hueBridgeState, send, isLoading, lights, rooms, zones } = hue;
   const canExecute = useInputRateLimiter(100);
 
   const groups = [...rooms, ...zones].sort(byName);
 
-  const manageHueBridgeElement = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement = ManageHueBridge(hueBridgeState, send);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
@@ -80,7 +80,7 @@ function LightItem(props: { light: Light; group: Group; hue: Hue; canExecute: ()
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
+            <UnlinkAction send={props.hue.send} />
           </ActionPanel.Section>
         </ActionPanel>
       }

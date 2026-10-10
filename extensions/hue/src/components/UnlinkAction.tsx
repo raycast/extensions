@@ -1,8 +1,8 @@
 import { Action, Alert, confirmAlert, Icon } from "@raycast/api";
-import { SendHueMessage } from "../hooks/useHue";
+import { SendHueBridgeEvent } from "../lib/hueBridgeMachine";
 import ActionStyle = Alert.ActionStyle;
 
-export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) {
+export default function UnlinkAction(props: { send: SendHueBridgeEvent }) {
   return (
     <Action
       title="Unlink Saved Hue Bridge"
@@ -13,7 +13,7 @@ export default function UnlinkAction(props: { sendHueMessage: SendHueMessage }) 
           primaryAction: {
             title: "Remove",
             style: ActionStyle.Destructive,
-            onAction: () => props.sendHueMessage("UNLINK"),
+            onAction: () => props.send({ type: "UNLINK" }),
           },
         })
       }

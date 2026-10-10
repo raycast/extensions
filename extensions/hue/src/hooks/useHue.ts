@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { DeepPartial, HueResource, Light, Room, Scene, Zone } from "../lib/types";
-import { useHueBridgeMachine } from "./useHueBridgeMachine";
+import { useMachine } from "@xstate/react";
+import { hueBridgeMachine } from "../lib/hueBridgeMachine";
 import { updateItems } from "../helpers/collections";
 import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
 import { Cache, Toast } from "@raycast/api";
@@ -10,9 +11,6 @@ import Style = Toast.Style;
 // Earlier versions cached the resources in the default namespace, in shapes that no longer match the types.
 const defaultCache = new Cache();
 ["isLoading", "lights", "groupedLights", "rooms", "zones", "scenes"].forEach((key) => defaultCache.remove(key));
-
-export type HueMessage = "LINK" | "RETRY" | "DONE" | "UNLINK";
-export type SendHueMessage = (message: HueMessage) => void;
 
 export function useHueResources() {
   // Holding a brightness or color shortcut changes lights many times a second. Rooms, zones and scenes aren't
@@ -32,7 +30,7 @@ export function useHue() {
   const { setRooms, setZones, ...resources } = useHueResources();
   const { setLights, setScenes } = resources;
 
-  const { hueBridgeState, sendHueMessage } = useHueBridgeMachine();
+  const [hueBridgeState, send] = useMachine(hueBridgeMachine);
   const { hueClient } = hueBridgeState.context;
 
   useEffect(() => {
@@ -78,5 +76,5 @@ export function useHue() {
     return stopListening;
   }, [hueClient]);
 
-  return { hueBridgeState, hueClient, sendHueMessage, isLoading, ...resources };
+  return { hueBridgeState, hueClient, send, isLoading, ...resources };
 }

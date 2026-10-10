@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Detail, environment, Icon, Toast } from "@raycast/api";
-import { HueBridgeState } from "../lib/hueBridgeMachine";
-import { SendHueMessage } from "../hooks/useHue";
+import { HueBridgeState, SendHueBridgeEvent } from "../lib/hueBridgeMachine";
 import { pathToFileURL } from "url";
 import Style = Toast.Style;
 import React from "react";
@@ -75,12 +74,12 @@ You can remove your saved Hue Bridge by using the ‘Unlink Saved Hue Bridge’ 
 
 type StateConfig = {
   markdown?: string;
-  actions?: (sendHueMessage: SendHueMessage) => React.JSX.Element[];
+  actions?: (send: SendHueBridgeEvent) => React.JSX.Element[];
   toast?: { title?: string; message?: string; show?: boolean; hide?: boolean };
 };
 
-const retry = (sendHueMessage: SendHueMessage) => (
-  <Action key="retry" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />
+const retry = (send: SendHueBridgeEvent) => (
+  <Action key="retry" title="Retry" onAction={() => send({ type: "RETRY" })} icon={Icon.Repeat} />
 );
 
 const STATE_CONFIGS: Record<string, StateConfig> = {
@@ -88,7 +87,7 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
   failedToLoadPreferences: { markdown: failedToLoadPreferencesMessage },
   failedToConnect: {
     markdown: failedToConnectMessage,
-    actions: (sendHueMessage) => [retry(sendHueMessage), <UnlinkAction key="unlink" sendHueMessage={sendHueMessage} />],
+    actions: (send) => [retry(send), <UnlinkAction key="unlink" send={send} />],
   },
   discoveringUsingMdns: {
     markdown: discoveringMessage,
@@ -97,13 +96,13 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
   discoveringUsingPublicApi: { markdown: discoveringMessage },
   noBridgeFound: {
     markdown: noBridgeFoundMessage,
-    actions: (sendHueMessage) => [retry(sendHueMessage)],
+    actions: (send) => [retry(send)],
     toast: { hide: true },
   },
-  linkWithBridge: {
+  waitingForLinkButton: {
     markdown: linkWithBridgeMessage,
-    actions: (sendHueMessage) => [
-      <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
+    actions: (send) => [
+      <Action key="link" title="Link with Hue Bridge" onAction={() => send({ type: "LINK" })} icon={Icon.Plug} />,
     ],
     toast: { hide: true },
   },
@@ -113,13 +112,13 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
   },
   failedToLink: {
     markdown: failedToLinkMessage,
-    actions: (sendHueMessage) => [retry(sendHueMessage)],
+    actions: (send) => [retry(send)],
   },
   linked: {
     markdown: linkedMessage,
-    actions: (sendHueMessage) => [
-      <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
-      <UnlinkAction key="unlink" sendHueMessage={sendHueMessage} />,
+    actions: (send) => [
+      <Action key="done" title="Done" onAction={() => send({ type: "DONE" })} icon={Icon.Check} />,
+      <UnlinkAction key="unlink" send={send} />,
     ],
     toast: { hide: true },
   },
@@ -128,7 +127,7 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
 /** Returns a Detail view for machine states that need user interaction, otherwise null. */
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
-  sendHueMessage: SendHueMessage,
+  send: SendHueBridgeEvent,
 ): React.JSX.Element | null {
   const config = STATE_CONFIGS[hueBridgeState.value as keyof typeof STATE_CONFIGS];
   if (config?.toast) {
@@ -142,7 +141,7 @@ export default function ManageHueBridge(
     <Detail
       key={`${hueBridgeState.value}`}
       markdown={config.markdown}
-      actions={<ActionPanel>{config.actions?.(sendHueMessage)}</ActionPanel>}
+      actions={<ActionPanel>{config.actions?.(send)}</ActionPanel>}
     />
   );
 }
