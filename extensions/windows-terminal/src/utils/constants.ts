@@ -7,6 +7,7 @@ const isSystem = typeof windowsTerminalPath !== "string" || windowsTerminalPath.
 const systemProfilesPath = `${localAppData}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`;
 const sytemWtPath = `${localAppData}/Microsoft/WindowsApps/Microsoft.WindowsTerminal_8wekyb3d8bbwe/wt.exe`;
 
+// while odd behaviour windows terminal portable install uses this path for the settings.json
 const portableProfilesPath = `${localAppData}/Microsoft/Windows Terminal/settings.json`;
 const portbaleWtPath = `${windowsTerminalPath}/wt.exe`;
 
