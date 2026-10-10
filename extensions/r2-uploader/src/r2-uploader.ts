@@ -13,21 +13,21 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
 import { AVIFENC_DEFAULT_PATH, CWEBP_DEFAULT_PATH } from "./utils/constants";
-import { isSupportedImageFormat } from "./utils/mime-types";
+import { isSupportedImageFormat, isWebpConvertibleImageFormat } from "./utils/mime-types";
 import { convertToAvif, convertToWebp } from "./utils/convert";
 import { uploadToR2 } from "./utils/uploadToR2";
 import { generateFileName } from "./utils/generate-fileName";
 
-async function isCwebpAvailable(cwebpPath: string): Promise<boolean> {
+async function resolveCwebpPath(cwebpPath: string): Promise<string | undefined> {
   try {
     execFileSync(cwebpPath, ["-version"]);
-    return true;
+    return cwebpPath;
   } catch {
     try {
       execFileSync("cwebp", ["-version"]);
-      return true;
+      return "cwebp";
     } catch {
-      return false;
+      return undefined;
     }
   }
 }
@@ -166,9 +166,9 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
           newFilePath = inputFilePath;
         }
       }
-    } else if (isSupportedImageFormat(inputFilePath) && shouldConvertToWebp) {
-      const cwebpPath = cwebpPathPreference || CWEBP_DEFAULT_PATH;
-      if (!(await isCwebpAvailable(cwebpPath))) {
+    } else if (isWebpConvertibleImageFormat(inputFilePath) && shouldConvertToWebp) {
+      const cwebpPath = await resolveCwebpPath(cwebpPathPreference || CWEBP_DEFAULT_PATH);
+      if (!cwebpPath) {
         await showToast({
           style: Toast.Style.Failure,
           title: "WebP conversion tool not found",

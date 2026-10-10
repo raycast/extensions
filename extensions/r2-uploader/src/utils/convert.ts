@@ -1,4 +1,6 @@
+import os from "os";
 import path from "path";
+import { randomUUID } from "crypto";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { showFailureToast } from "@raycast/utils";
@@ -12,7 +14,10 @@ export async function convertToWebp(
   quality: number = 80,
 ): Promise<string> {
   try {
-    const outputPath = path.join(path.dirname(inputPath), path.basename(inputPath, path.extname(inputPath)) + ".webp");
+    const outputPath = path.join(
+      os.tmpdir(),
+      `${path.basename(inputPath, path.extname(inputPath))}-${randomUUID()}.webp`,
+    );
 
     await execFileAsync(cwebpPath, [inputPath, "-q", quality.toString(), "-o", outputPath]);
 

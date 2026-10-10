@@ -1,5 +1,11 @@
 # R2 Uploader Changelog
 
+## [WebP Conversion and Metadata Updates] - {PR_MERGE_DATE}
+
+- Add optional WebP conversion using the `cwebp` command
+- Update the Raycast extension author to `ypp`
+- Update extension metadata screenshots
+
 ## [Browse R2 Files] - 2026-07-23
 
 - Add a **Browse R2 Files** command to navigate your bucket's folders, preview files (inline image preview via a short-lived signed URL, works even on private buckets), copy their link, and delete individual files with a confirmation prompt
