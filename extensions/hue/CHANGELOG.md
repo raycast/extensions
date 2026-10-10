@@ -1,43 +1,26 @@
 # Hue Changelog
 
-## [Optimistic scene updates] - {PR_MERGE_DATE}
+## [Hue app look and bug fixes] - {PR_MERGE_DATE}
 
-- Show the selected scene on its room immediately
-- Show room, scene and light images instantly
-- Show the bridge's error message when changing a light, room or scene fails
-- Show connection errors in a HUD when toggling all lights fails
-- Fix live updates from the bridge stopping or skipping changes
-- Fix zones showing as off after turning off a room while other lights in them are on
-- Fix toggling all lights ignoring the manual bridge IP address and username preferences
-- Fix Set Scene opened from Control Groups not updating while open
-- Fix the loading indicator not showing after the first launch
+- Restyle tiles after the Hue app: its colors and whites, shading that darkens with brightness, and its translucent off cards instead of a crossed-out bulb
+- Show each room and zone's icon on its Control Groups tile, and draw all icons as sharp vector shapes from the Hue app, in black or white, whichever stands out
+- Show each color once in room, zone and scene images, and only those of lights that are on
+- Show scenes at their own brightness instead of all looking dim
+- Show images instantly
+- Update lights, rooms and zones at once when setting a scene, turning a room or zone on or off, or changing a light
+- Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer
+- Fix Make Cooler and Make Warmer losing a light's own range after a change, and jumping to the coolest white from a color
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back
 - Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
-- Fix light icon symbols always being black; they're now black or white, whichever stands out more
-- Fix Control Lights loading forever when the bridge has no lights
-- Fix the names of the Steel Blue and Old Lace colors
-- Remove entertainment areas from the Control Groups description, as the command never listed them
-- Fix the bridge screens calling the Unlink Saved Hue Bridge action by another name
-- Fix scene images ignoring the brightness of the scene's palette colors
-- Fix the color temperature actions forgetting a light's own limits after its temperature changes
-- Fix changing the color temperature of a light set to a color; it now starts from the nearest white, or the middle for strong colors, instead of jumping to the coolest
-- Fix plugs offering brightness actions after a room's brightness changes, and color-only lights offering color temperature actions after a scene is set
-- Show a certificate error at once when the bridge's certificate doesn't match, instead of timing out
-- Keep connecting to bridges after Signify moves them to its secondary root certificate
-- Fix bridge discovery hanging when MeetHue's discovery service returns an unexpected response
-- Find the bridge with mDNS first, as Philips recommends, with MeetHue's discovery service as the fallback
-- Fix the Toggle All Lights message when some lights fail, which said "Turned on" when turning off and miscounted the failures
-- Show each color once in room, zone and scene images, like the Hue app, so a color several lights share no longer fills most of the image, even when their settings differ slightly
-- Shade room, scene and light images like the Hue app, darker as brightness drops, with colors from warm to cool and the outer ones in full
-- Show only the colors of lights that are on in room and zone images
-- Show scenes at their own brightness instead of all looking dim
-- Show each room and zone's icon on its Control Groups tile, as in the Hue app
-- Draw light, room and zone icons as sharp vector shapes from the Hue app, including icons for the floor zones
-- Draw whites in the Hue app's colors, from warm yellow to cool mint, and lights without color, like plugs, in its cream
-- Show lights, rooms and zones that are off like the Hue app's off cards instead of a crossed-out bulb
-- Update rooms and zones at once, at their new brightness, when turning a room or zone on or off, setting a scene, or changing a light
-- Rename Increase and Decrease Color Temperature to Make Cooler and Make Warmer, which can't be read the wrong way round
-- Update the Raycast API and utilities
+- Fix plugs offering brightness actions after a room's brightness changes
+- Fix Set Scene opened from Control Groups not updating while open
+- Fix live updates from the bridge stopping or skipping changes
+- Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
+- Show the bridge's error message when an action fails
+- Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures
+- Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
+- Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
+- Fix the names of the Steel Blue and Old Lace colors and the Unlink Saved Hue Bridge action
 
 ## [Improvements] - 2026-06-01
 
