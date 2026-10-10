@@ -89,7 +89,12 @@ export async function searchRelevantArticles(question: string, limit = DEFAULT_R
     return [];
   }
 
-  const searchQueries = createSearchQueries(searchTerms);
+  const candidates = await fetchSearchCandidates(createSearchQueries(searchTerms));
+
+  return rankArticles(candidates, searchTerms).slice(0, limit);
+}
+
+async function fetchSearchCandidates(searchQueries: string[]): Promise<Article[]> {
   const firstPages = await Promise.all(searchQueries.map((query) => fetchArticleSearchPage(query, 1)));
   const additionalPages = await Promise.all(
     firstPages.map((articles, index) =>
@@ -106,7 +111,7 @@ export async function searchRelevantArticles(question: string, limit = DEFAULT_R
     }
   }
 
-  return rankArticles([...uniqueArticles.values()], searchTerms).slice(0, limit);
+  return [...uniqueArticles.values()];
 }
 
 export async function findArticle(reference: string): Promise<Article | undefined> {
@@ -117,7 +122,16 @@ export async function findArticle(reference: string): Promise<Article | undefine
 
   const referencedUrl = parseTechgedoensUrl(normalizedReference);
   const searchText = referencedUrl ? searchTextFromUrl(referencedUrl) : normalizedReference;
-  const candidates = await searchRelevantArticles(searchText, ARTICLES_PER_FEED_PAGE * MAX_SEARCH_PAGES);
+  const searchTerms = extractSearchTerms(searchText);
+  if (searchTerms.length === 0) {
+    return undefined;
+  }
+
+  const searchQueries = [searchText, ...createSearchQueries(searchTerms)]
+    .map((query) => query.trim())
+    .filter((query, index, queries) => query.length > 0 && queries.indexOf(query) === index)
+    .slice(0, MAX_SEARCH_QUERIES);
+  const candidates = await fetchSearchCandidates(searchQueries);
 
   if (referencedUrl) {
     const normalizedUrl = normalizeUrl(referencedUrl.toString());
@@ -125,7 +139,7 @@ export async function findArticle(reference: string): Promise<Article | undefine
   }
 
   const normalizedTitle = normalizeSearchValue(normalizedReference);
-  return candidates.find((article) => normalizeSearchValue(article.title) === normalizedTitle) ?? candidates[0];
+  return candidates.find((article) => normalizeSearchValue(article.title) === normalizedTitle);
 }
 
 function createSearchQueries(searchTerms: string[]): string[] {

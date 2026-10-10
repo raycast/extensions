@@ -83,6 +83,19 @@ export default function MenuBarArticlesCommand() {
     await open(article.url);
   }
 
+  async function reloadArticles() {
+    setIsLoading(true);
+    setError(undefined);
+
+    try {
+      setArticles(await refreshArticleArchive(retention));
+    } catch (reloadError) {
+      setError(toError(reloadError));
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <MenuBarExtra
       icon="icon.png"
@@ -135,11 +148,7 @@ export default function MenuBarArticlesCommand() {
           icon={Icon.Star}
           onAction={() => launchCommand({ name: "saved-articles", type: LaunchType.UserInitiated })}
         />
-        <MenuBarExtra.Item
-          title={translations.reload}
-          icon={Icon.RotateClockwise}
-          onAction={() => launchCommand({ name: "refresh-articles", type: LaunchType.Background })}
-        />
+        <MenuBarExtra.Item title={translations.reload} icon={Icon.RotateClockwise} onAction={reloadArticles} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
