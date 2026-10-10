@@ -45,7 +45,7 @@ export default function ControlGroups() {
         ({ title, groups }) =>
           groups.length > 0 && (
             <Grid.Section key={title} title={title}>
-              {[...groups].sort(byName).map((group) => (
+              {groups.toSorted(byName).map((group) => (
                 <GroupItem
                   key={group.id}
                   group={group}

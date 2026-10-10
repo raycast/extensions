@@ -5,10 +5,10 @@
     "raycast-env.d.ts"
   ],
   "compilerOptions": {
-    "lib": ["es2021"],
+    "lib": ["es2024"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "target": "es2021",
+    "target": "es2024",
     "types": ["node"],
     "strict": true,
     "isolatedModules": true,
