@@ -13,7 +13,15 @@ import {
   SceneRequest,
   Zone,
 } from "./types";
-import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
+import {
+  ClientHttp2Session,
+  constants,
+  IncomingHttpHeaders,
+  IncomingHttpStatusHeader,
+  OutgoingHttpHeaders,
+  sensitiveHeaders,
+} from "http2";
+import { text } from "stream/consumers";
 import RateLimitedQueue from "./RateLimitedQueue";
 import { logError } from "../helpers/errors";
 
@@ -24,6 +32,15 @@ export const authHeaders = (username: string) => ({
   "hue-application-key": username,
   [sensitiveHeaders]: ["hue-application-key"],
 });
+
+export async function request(session: ClientHttp2Session, headers: OutgoingHttpHeaders, body?: object) {
+  const stream = session.request(headers, { endStream: body === undefined });
+  if (body !== undefined) stream.end(JSON.stringify(body));
+  let responseHeaders: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
+  stream.once("response", (received) => (responseHeaders = received));
+  const data = await text(stream);
+  return { headers: responseHeaders, data };
+}
 
 export default class HueClient {
   private readonly lightsQueue = new RateLimitedQueue(10);
@@ -78,66 +95,32 @@ export default class HueClient {
     return this.makeRequest<ResourceIdentifier>("PUT", `/clip/v2/resource/scene/${scene.id}`, properties);
   }
 
-  private makeRequest<T>(method: "GET" | "PUT", path: string, body?: object): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      const stream = this.http2Session.request({
-        [HTTP2_HEADER_METHOD]: method,
-        [HTTP2_HEADER_PATH]: path,
-        ...authHeaders(this.bridgeConfig.username),
-      });
+  private async makeRequest<T>(method: "GET" | "PUT", path: string, body?: object): Promise<T[]> {
+    const { headers, data } = await request(
+      this.http2Session,
+      { ":method": method, ":path": path, ...authHeaders(this.bridgeConfig.username) },
+      body,
+    );
 
-      let data = "";
-
-      if (body !== undefined) {
-        stream.write(JSON.stringify(body), "utf8");
+    if (headers[":status"] !== 200 && headers["content-type"] === "text/html") {
+      // On non-200 responses, the body is an HTML page with an error message
+      const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
+      if (errorMatch && errorMatch[0]) {
+        const errorMessage = `Status ${headers[":status"]}: ${errorMatch[0]}`;
+        logError(errorMessage);
+        throw new Error(errorMessage);
       }
+    }
 
-      stream.setEncoding("utf8");
+    const response: HueResponse<T> = JSON.parse(data);
 
-      let headers: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
+    if (response.errors != null && response.errors.length > 0) {
+      const errorMessage = response.errors.map((error) => error.description).join(", ");
+      console.error({ headers, message: errorMessage });
+      throw new Error(errorMessage);
+    }
 
-      stream.on("response", (responseHeaders) => {
-        headers = responseHeaders;
-      });
-
-      stream.on("data", (chunk) => {
-        data += chunk;
-      });
-
-      stream.on("end", () => {
-        stream.close();
-
-        try {
-          if (headers[":status"] !== 200 && headers["content-type"] === "text/html") {
-            // On non-200 responses, the body is an HTML page with an error message
-            const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
-            if (errorMatch && errorMatch[0]) {
-              const errorMessage = `Status ${headers[":status"]}: ${errorMatch[0]}`;
-              logError(errorMessage);
-              return reject(new Error(errorMessage));
-            }
-          }
-
-          const response: HueResponse<T> = JSON.parse(data);
-
-          if (response.errors != null && response.errors.length > 0) {
-            const errorMessage = response.errors.map((error) => error.description).join(", ");
-            console.error({ headers, message: errorMessage });
-            return reject(new Error(errorMessage));
-          }
-
-          return resolve(response.data);
-        } catch (error) {
-          return reject(error);
-        }
-      });
-
-      stream.on("error", (error) => {
-        return reject(error);
-      });
-
-      stream.end();
-    });
+    return response.data;
   }
 
   public listenToEventSource(onUpdate: (resources: HueEvent["data"]) => void): () => void {
