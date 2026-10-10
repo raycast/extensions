@@ -3,6 +3,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { jsonSchema, streamText, tool, type ModelMessage, type ToolSet } from "ai";
 import { readFileSync } from "node:fs";
+import { loadCapabilities, lookupCapabilities } from "./capabilities";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -63,42 +64,54 @@ export async function fetchModels(): Promise<ModelList> {
   }
 }
 
-// ponytail: /models has no vision flag; prefix match on families known to accept images.
-const hasVision = (id: string) => /^(claude-|gpt-|google\/gemini-)/.test(id);
-
 export const getModels: AI.GetModels = async () => {
-  const { models } = await fetchModels();
-  return models.map((m) => ({
-    id: m.id,
-    title: m.name,
-    icon: "extension-icon.png",
-    contextWindow: m.context_length,
-    capabilities: {
-      systemMessage: { supported: true },
-      streaming: { supported: true },
-      temperature: { supported: true },
-      tools: { supported: true },
-      ...(hasVision(m.id) ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
-    },
-  }));
+  const [{ models }, capabilities] = await Promise.all([fetchModels(), loadCapabilities()]);
+  return models.map((m) => {
+    const caps = lookupCapabilities(capabilities, m.id);
+    return {
+      id: m.id,
+      title: m.name,
+      icon: "extension-icon.png",
+      contextWindow: m.context_length,
+      capabilities: {
+        systemMessage: { supported: true },
+        streaming: { supported: true },
+        temperature: { supported: true },
+        tools: { supported: true },
+        ...(caps?.vision ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
+        ...(caps?.efforts
+          ? {
+              reasoningEffort: {
+                supported: true,
+                options: caps.efforts,
+                default: ["medium", "high"].find((e) => caps.efforts!.includes(e)) ?? caps.efforts[0],
+              },
+            }
+          : {}),
+      },
+    };
+  });
 };
 
-export const streamCompletion: AI.StreamCompletion = (model, request) => generate(model.id, request);
+export const streamCompletion: AI.StreamCompletion = (model, request) =>
+  generate(model.id, { ...request, reasoningEffort: request.providerOptions?.raycast?.reasoningEffort });
 
-/** Claude models only answer on /messages; everything else uses /chat/completions. */
-function languageModel(modelId: string) {
+/** Each model lists the endpoints it answers on: Claude only on /messages, the rest on /chat/completions. */
+async function languageModel(modelId: string) {
   const apiKey = getApiKey();
-  const info = readCachedModels()?.find((m) => m.id === modelId);
-  const anthropic = info ? info.supported_endpoints.includes("/messages") : modelId.startsWith("claude-");
-  return anthropic
+  const models = readCachedModels() ?? (await fetchModels()).models;
+  const endpoints = models.find((m) => m.id === modelId)?.supported_endpoints ?? [];
+  return endpoints.includes("/messages") && !endpoints.includes("/chat/completions")
     ? createAnthropic({ baseURL: BASE_URL, apiKey })(modelId)
     : createOpenAICompatible({ name: "commandcode", baseURL: BASE_URL, apiKey })(modelId);
 }
 
-type GenerateRequest = Omit<AI.ModelRequest, "providerOptions">;
+type GenerateRequest = Omit<AI.ModelRequest, "providerOptions"> & { reasoningEffort?: string };
 
 export async function* generate(modelId: string, request: GenerateRequest): AsyncGenerator<AI.ModelStreamPart> {
-  const model = languageModel(modelId);
+  const model = await languageModel(modelId);
+  const anthropic = model.provider.startsWith("anthropic");
+  const effort = request.reasoningEffort;
   const { tools, restoreName } = toTools(request.tools);
   const result = streamText({
     model,
@@ -107,7 +120,12 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
     temperature: request.temperature,
     tools,
     toolChoice: request.toolChoice,
-    maxOutputTokens: model.provider.startsWith("anthropic") ? ANTHROPIC_MAX_OUTPUT_TOKENS : undefined,
+    maxOutputTokens: anthropic ? ANTHROPIC_MAX_OUTPUT_TOKENS : undefined,
+    providerOptions: effort
+      ? anthropic
+        ? { anthropic: { thinking: { type: "adaptive" }, effort } }
+        : { commandcode: { reasoningEffort: effort } }
+      : undefined,
     maxRetries: 0,
     // Errors are yielded below; skip the SDK's default console logging.
     onError: () => {},
