@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Contributors] - {PR_MERGE_DATE}
+## [Contributors] - 2026-10-10
 
 - Added Berenger to the contributors, for the AI tools improvements.
 
