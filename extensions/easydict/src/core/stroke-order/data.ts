@@ -2,9 +2,9 @@
 
 import { Cache } from "@raycast/api";
 
-import { normalizeError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError } from "@/utils/logger";
+import { normalizeError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logError } from "@/shared/logger";
 
 import { MAX_RENDERED_STROKE_PATH_LENGTH, MAX_STROKE_COUNT } from "./svg";
 

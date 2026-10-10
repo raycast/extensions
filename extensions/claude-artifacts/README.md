@@ -95,7 +95,7 @@ Registration takes effect in a **new** Claude Code session — restart it before
 
 The hook only records artifacts published _after_ you install it. To backfill, ask Claude Code in an interactive session:
 
-> List my artifacts and write them to `~/.claude/artifacts.json` using the schema in this repo's README.
+> List my artifacts and write them to `~/.claude/artifacts.json` using the schema in this repo's README. Set each row's `id` to the **last path segment of the artifact's URL** — not to any internal artifact id the publishing tool reports, which is a different value.
 
 **3. Search**
 
@@ -104,6 +104,8 @@ Open Raycast → **Search Artifacts**. Sorted most-recent-first, because the one
 ### Index format
 
 `~/.claude/artifacts.json`. Only `id`, `title`, and `url` are required; the rest are optional, because shared artifacts carry no date and seeded rows have no project.
+
+`id` is the **last path segment of `url`**, always. The publishing tool also reports an internal artifact id; it is a different value and using it here creates a second row for an artifact the hook will later record under its URL tail.
 
 ```jsonc
 {
@@ -127,7 +129,7 @@ The reader is deliberately forgiving: it accepts a bare array, skips unusable ro
 
 ### When the list stops growing — the Run Doctor command
 
-The recording hook is best-effort **by contract**: it must never fail a Claude Code turn, so every failure path in it exits 0. That makes silence its only failure mode. It happened for real on 2026-09-10 — artifact URLs changed from `claude.ai/code/artifact/<uuid>` to `claude.ai/artifact/<slug>`, the hook no longer recognised its own payload, and it went on running cleanly on every publish while recording nothing for nine days. The script was installed, executable, registered, and firing the whole time.
+The recording hook is best-effort **by contract**: it must never fail a Claude Code turn, so every failure path in it exits 0. That makes silence its only failure mode. It happened for real on 2026-09-10 — artifact URLs changed from `claude.ai/code/artifact/<uuid>` to `claude.ai/artifact/<slug>`, the hook no longer recognized its own payload, and it went on running cleanly on every publish while recording nothing for nine days. The script was installed, executable, registered, and firing the whole time.
 
 **Run Doctor** exists because none of those facts were evidence. It checks the chain end to end:
 
@@ -140,7 +142,7 @@ The recording hook is best-effort **by contract**: it must never fail a Claude C
 | Artifact Index                    | The index is missing or unreadable                                 |
 | Index Coverage                    | Your transcripts contain publishes the index never got             |
 
-The fourth one is the only check that could have caught the outage, and it is the only one that tests _behaviour_: it runs **your** installed hook, with `HOME` pointed at a temporary directory, against a current-format artifact URL, and looks at whether a row came out. Your real index is never opened.
+The fourth one is the only check that could have caught the outage, and it is the only one that tests _behavior_: it runs **your** installed hook, with `HOME` pointed at a temporary directory, against a current-format artifact URL, and looks at whether a row came out. Your real index is never opened.
 
 **Backfill Missing Artifacts** (⌘⇧R) then recovers what was lost. Claude Code writes a transcript of every session to `~/.claude/projects/`, and a publish leaves its URL, title, and working directory there — so the artifacts are recoverable locally, with no network call. Backfill is strictly append-only: it adds rows whose `id` the index does not already have, and never modifies or removes one that is already there — so a row the hook wrote while you were reading this screen wins over the older copy in the scan. It copies the index aside first, and takes the same kernel lock the recorder uses, so it cannot lose a row to a publish landing mid-write.
 
@@ -174,7 +176,7 @@ This extension maintains a **local mirror**, not a live view. Be clear-eyed abou
 - **It only records artifacts published after you install the hook**, from **machines where the hook is installed.** The one-time seed backfills your history up to setup; the hook covers everything after. If the hook ever misses a stretch, **Run Doctor** can recover it from your local Claude Code transcripts.
 - **Renames and deletions don't propagate.** If you rename an artifact on claude.ai, the index keeps the old title until that artifact is republished. Over months, the index will drift from reality.
 - **Artifacts created outside Claude Code** — in the Claude desktop app or on claude.ai directly — won't be captured by the hook.
-- **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts, published under `claude.ai/artifact/…` (and `claude.ai/code/artifact/…` before the scheme changed in September 2026 — both are recognised). Chat artifacts have no sanctioned programmatic access at all.
+- **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts, published under `claude.ai/artifact/…` (and `claude.ai/code/artifact/…` before the scheme changed in September 2026 — both are recognized). Chat artifacts have no sanctioned programmatic access at all.
 
 Because of those last two, every state in this extension — including "no artifacts" and "no matches" — offers **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which jump to `claude.ai/code/artifacts` and `claude.ai/artifacts`. When an artifact isn't in the index, it usually isn't missing — it was published somewhere the hook can't see, and that gallery is where it actually lives.
 

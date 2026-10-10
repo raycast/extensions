@@ -80,8 +80,12 @@ export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(Trak
 
 export const TraktHistoryQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
 
-export const TraktUpNextQuerySchema = TraktPaginationWithSortingSchema.extend({
-  include_stats: z.coerce.boolean(),
+/**
+ * Query for `/sync/progress/up_next_nitro`. Unlike `/sync/progress/up_next`, it takes `intent`
+ * (`continue` = shows being watched) and has no `extended` param.
+ */
+export const TraktUpNextNitroQuerySchema = TraktPaginationSchema.extend({
+  intent: z.enum(["all", "continue", "start", "completed"]),
 });
 
 export const TraktImageListItem = z.object({
@@ -142,6 +146,118 @@ export const TraktMovieListItem = z.object({
 });
 
 export const TraktMovieList = z.array(TraktMovieListItem);
+
+/** Response of `POST /sync/watchlist`. An item already listed counts under `existing`, not `added`. */
+export const TraktWatchlistAddResponseSchema = z.object({
+  added: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+  existing: z.object({ movies: z.number().optional(), shows: z.number().optional() }).optional(),
+});
+
+/** Response of `POST /sync/watchlist/remove`. `deleted` counts the items that were on the watchlist. */
+export const TraktWatchlistRemoveResponseSchema = z.object({
+  deleted: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+});
+
+/** Response of `POST /users/hidden/:section`. `added` counts the items Trakt hid. */
+/** `GET /users/hidden/dropped`: shows the user dropped, newest first. */
+export const TraktDroppedShowList = z.array(
+  z.object({ hidden_at: z.string(), type: z.string(), show: z.lazy(() => TraktShowBaseItem) }),
+);
+export type TraktDroppedShow = z.infer<typeof TraktDroppedShowList>[number];
+
+/** Response of `POST /users/hidden/:section/remove`. */
+export const TraktHiddenRemoveResponseSchema = z.object({
+  deleted: z.object({ movies: z.number().optional(), shows: z.number().optional() }),
+});
+
+export const TraktHiddenAddResponseSchema = z.object({
+  added: z.object({ movies: z.number().optional(), shows: z.number().optional(), season: z.number().optional() }),
+});
+
+/** Response of `GET /users/:id/watching`: what the user is watching right now. `204` (no body) means nothing. */
+export const TraktWatchingSchema = z.object({
+  type: z.enum(["movie", "episode"]),
+  expires_at: z.string(),
+  action: z.string().optional(),
+  movie: z.object({ title: z.string(), ids: z.object({ trakt: z.number() }) }).nullish(),
+  episode: z.object({ title: z.string().nullish(), ids: z.object({ trakt: z.number() }) }).nullish(),
+  show: z.object({ title: z.string() }).nullish(),
+});
+
+/** Body of `409` from `POST /checkin`: another check-in is active until `expires_at`. */
+export const TraktCheckinConflictSchema = z.object({ expires_at: z.string() });
+
+/**
+ * `sharing` is optional and falls back to the user's settings, which can post to connected networks.
+ * Every key is sent as `false` so a check-in made from here never publishes anything.
+ */
+export const TraktNoSharing = { twitter: false, mastodon: false, tumblr: false } as const;
+
+/**
+ * Response of `POST /sync/history`. `added` counts the plays Trakt stored; ids it could not match
+ * come back under `not_found`. A 2xx with `added` at zero stored nothing.
+ */
+export const TraktHistoryAddResponseSchema = z.object({
+  added: z.object({ movies: z.number(), episodes: z.number() }),
+  not_found: z
+    .object({ movies: z.array(z.unknown()).optional(), episodes: z.array(z.unknown()).optional() })
+    .optional(),
+});
+
+/**
+ * Query for `/sync/playback/movies`. Pagination is opt-in there: without `page` or `limit`
+ * Trakt returns the whole set and sends no `X-Pagination-*` headers, so callers always send both.
+ */
+export const TraktPlaybackQuerySchema = TraktPaginationSchema.extend({
+  extended: z.enum(["full", "images", "full,images"]),
+});
+
+/** A movie paused mid-playback. `progress` is 0–100, `id` is the playback id. */
+export const TraktPlaybackMovieItem = z.object({
+  id: z.number(),
+  type: z.literal("movie"),
+  progress: z.number(),
+  paused_at: z.string(),
+  movie: TraktMovieBaseItem,
+});
+
+export const TraktPlaybackMovieList = z.array(TraktPlaybackMovieItem);
+
+/** `/calendars/:start_date/:days` path parameters. Trakt reads `start_date` as a UTC date and caps `days` at 33. */
+export const TraktCalendarPathSchema = z.object({
+  startDate: z.string(),
+  days: z.coerce.number(),
+});
+
+/** An episode on the user's calendar. `first_aired` is a UTC timestamp, absent when Trakt has no air time. */
+export const TraktCalendarShowItem = z.object({
+  first_aired: z.string().nullable().optional(),
+  episode: z.object({
+    season: z.number(),
+    number: z.number(),
+    title: z.string().nullable().optional(),
+    ids: z.object({ trakt: z.number() }),
+  }),
+  show: z.object({
+    title: z.string(),
+    year: z.number().nullable().optional(),
+    ids: z.object({ trakt: z.number(), slug: z.string().optional(), imdb: z.string().nullable().optional() }),
+  }),
+});
+
+export const TraktCalendarShowList = z.array(TraktCalendarShowItem);
+
+/** A movie on the user's calendar. `released` is a plain date (YYYY-MM-DD), with no time or time zone. */
+export const TraktCalendarMovieItem = z.object({
+  released: z.string().nullable().optional(),
+  movie: z.object({
+    title: z.string(),
+    year: z.number().nullable().optional(),
+    ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+  }),
+});
+
+export const TraktCalendarMovieList = z.array(TraktCalendarMovieItem);
 
 export const TraktEpisodeListItem = z.object({
   season: z.number(),
@@ -247,6 +363,9 @@ export const TraktMediaType = z.enum(["movie", "show"]);
 
 export type TraktMovieListItem = z.infer<typeof TraktMovieListItem>;
 export type TraktMovieList = z.infer<typeof TraktMovieList>;
+export type TraktPlaybackMovieItem = z.infer<typeof TraktPlaybackMovieItem>;
+export type TraktCalendarShowItem = z.infer<typeof TraktCalendarShowItem>;
+export type TraktCalendarMovieItem = z.infer<typeof TraktCalendarMovieItem>;
 export type TraktShowListItem = z.infer<typeof TraktShowListItem>;
 export type TraktShowList = z.infer<typeof TraktShowList>;
 export type TraktSeasonListItem = z.infer<typeof TraktSeasonListItem>;
@@ -262,6 +381,48 @@ export type TraktMovieHistoryList = z.infer<typeof TraktMovieHistoryList>;
 export type TraktMovieRecommendationList = z.infer<typeof TraktMovieRecommendationList>;
 export type TraktShowRecommendationList = z.infer<typeof TraktShowRecommendationList>;
 export type TraktMovieBaseItem = z.infer<typeof TraktMovieBaseItem>;
+
+/** Paginated lists of plain movie or show objects (`/related`, `/popular`). */
+export const TraktMovieBaseList = z.array(TraktMovieBaseItem);
+export const TraktShowBaseList = z.array(TraktShowBaseItem);
+export const TraktBrowseQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
+
+/** `/movies/trending` and `/movies/anticipated`: a movie with how many watch it now or list it. */
+export const TraktTrendingMovieList = z.array(z.object({ watchers: z.number(), movie: TraktMovieBaseItem }));
+export const TraktAnticipatedMovieList = z.array(z.object({ list_count: z.number(), movie: TraktMovieBaseItem }));
+export const TraktTrendingShowList = z.array(z.object({ watchers: z.number(), show: TraktShowBaseItem }));
+export const TraktAnticipatedShowList = z.array(z.object({ list_count: z.number(), show: TraktShowBaseItem }));
+
+export const TraktPersonSearchQuerySchema = TraktPaginationSchema.extend({
+  query: z.string(),
+  extended: z.enum(["full"]).optional(),
+});
+
+/** `/search/person`: people whose name matches. */
+export const TraktPersonSearchList = z.array(
+  z.object({
+    score: z.number().optional(),
+    person: z.object({
+      name: z.string(),
+      known_for_department: z.string().nullable().optional(),
+      ids: z.object({ trakt: z.number(), slug: z.string().optional() }),
+    }),
+  }),
+);
+export type TraktPersonSearchItem = z.infer<typeof TraktPersonSearchList>[number];
+
+const TraktCreditEntry = z.object({
+  characters: z.array(z.string()).nullable().optional(),
+  jobs: z.array(z.string()).nullable().optional(),
+  movie: TraktMovieBaseItem.optional(),
+  show: TraktShowBaseItem.optional(),
+});
+
+/** `/people/:id/movies` and `/people/:id/shows`: cast, and crew grouped by department. */
+export const TraktPersonCreditsSchema = z.object({
+  cast: z.array(TraktCreditEntry).nullable().optional(),
+  crew: z.record(z.string(), z.array(TraktCreditEntry)).nullable().optional(),
+});
 export type TraktShowBaseItem = z.infer<typeof TraktShowBaseItem>;
 
 export const TraktShowProgressQuerySchema = z.object({
@@ -348,6 +509,27 @@ export const TraktUserRatingItemSchema = z.object({
 });
 
 export const TraktUserRatingListSchema = z.array(TraktUserRatingItemSchema);
+
+/** `/sync/watched/movies`: every movie with at least one play. */
+export const TraktWatchedMovieListSchema = z.array(
+  z.object({ plays: z.number(), movie: z.object({ ids: z.object({ trakt: z.number() }) }) }),
+);
+
+/** `/sync/watched/shows`: watched shows, with their episodes by season and number (no episode ids). */
+export const TraktWatchedShowListSchema = z.array(
+  z.object({
+    plays: z.number(),
+    show: z.object({ ids: z.object({ trakt: z.number() }) }),
+    seasons: z
+      .array(
+        z.object({
+          number: z.number(),
+          episodes: z.array(z.object({ number: z.number(), plays: z.number() })),
+        }),
+      )
+      .optional(),
+  }),
+);
 export type TraktUserRatingItem = z.infer<typeof TraktUserRatingItemSchema>;
 
 export const TraktUserStatsSchema = z.object({

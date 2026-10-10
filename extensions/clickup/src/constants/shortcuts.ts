@@ -10,4 +10,5 @@ export const Shortcuts = {
   NextStatus: { key: "n", modifiers: ["cmd", "shift"] },
   OpenInBrowser: { key: "return", modifiers: ["shift"] },
   ShowSubtasks: { key: "s", modifiers: ["cmd", "shift"] },
+  ToggleDueDateFilter: { key: "d", modifiers: ["cmd"] },
 } as const satisfies Record<string, Keyboard.Shortcut>;

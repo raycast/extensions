@@ -15,7 +15,7 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
-import { useMemo } from "react";
+import { useMemo, useReducer } from "react";
 import {
   deleteReminder as apiDeleteReminder,
   setPriorityStatus,
@@ -32,6 +32,7 @@ import {
   isTomorrow,
   truncate,
 } from "./helpers";
+import { openAttachedUrls } from "./helpers/open-attached-urls";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -42,6 +43,7 @@ export default function Command() {
     getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
+  const [, rerender] = useReducer((count: number) => count + 1, 0);
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
   const list = data?.lists.find((l) => l.id === listId);
 
@@ -95,6 +97,13 @@ export default function Command() {
     return sections.filter((section) => section.items.length > 0);
   }, [reminders, view]);
 
+  // Raycast waits for one more render after a menu bar action ends. When the action removes its own item
+  // (completing, deleting or moving a reminder), nothing renders again, so the action never ends and the
+  // next one fails with "Worker unloaded". Render once more after the action so it can end.
+  function renderAfterAction() {
+    setTimeout(rerender, 0);
+  }
+
   async function setPriority(reminderId: string, priority: Priority) {
     try {
       await setPriorityStatus({ reminderId, priority });
@@ -125,6 +134,8 @@ export default function Command() {
         style: Toast.Style.Failure,
         title: `Unable to set due date`,
       });
+    } finally {
+      renderAfterAction();
     }
   }
 
@@ -143,6 +154,8 @@ export default function Command() {
         title: "Unable to delete reminder",
         message: reminder.title,
       });
+    } finally {
+      renderAfterAction();
     }
   }
 
@@ -217,6 +230,8 @@ export default function Command() {
                 title: "Unable to mark reminder as complete",
                 message: reminder.title,
               });
+            } finally {
+              renderAfterAction();
             }
           }}
         />
@@ -251,25 +266,7 @@ export default function Command() {
                   <MenuBarExtra.Item
                     title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
                     icon={Icon.Link}
-                    onAction={async () => {
-                      let failedCount = 0;
-                      for (const url of attachedUrls) {
-                        try {
-                          await open(url);
-                        } catch (error) {
-                          console.error("Failed to open URL", url, error);
-                          failedCount++;
-                        }
-                      }
-
-                      if (failedCount > 0) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
-                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
-                        });
-                      }
-                    }}
+                    onAction={() => openAttachedUrls(attachedUrls)}
                   />
                 ) : null}
 
@@ -291,6 +288,8 @@ export default function Command() {
                         title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
                         message: reminder.title,
                       });
+                    } finally {
+                      renderAfterAction();
                     }
                   }}
                 />

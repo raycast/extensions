@@ -16,7 +16,7 @@ interface ThemeProps {
 }
 
 /**
- * A swatch for the colour, when Raycast can render one.
+ * A swatch for the color, when Raycast can render one.
  *
  * `Image.Mask`-free coloured dots only accept a hex value, so a token written as
  * `oklch(...)` or `color-mix(...)` gets a neutral icon rather than a wrong one.
@@ -28,8 +28,8 @@ export function swatchFor(value: string, computed?: string): Image.ImageLike {
   const hex = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(trimmed);
   if (!hex) return { source: Icon.Circle };
 
-  // Raycast tints have no alpha channel, so a translucent colour could only be
-  // shown as its opaque RGB — a different colour. Hollow circle instead; the
+  // Raycast tints have no alpha channel, so a translucent color could only be
+  // shown as its opaque RGB — a different color. Hollow circle instead; the
   // exact value is still printed on the row.
   const alpha = hex[1].length === 8 ? hex[1].slice(6) : hex[1].length === 4 ? hex[1].slice(3) : undefined;
   if (alpha !== undefined && alpha.toLowerCase() !== "ff" && alpha.toLowerCase() !== "f") {
@@ -41,7 +41,7 @@ export function swatchFor(value: string, computed?: string): Image.ImageLike {
     source: Icon.CircleFilled,
     // `adjustContrast` defaults to TRUE, which lightens dark tints and darkens
     // light ones so they stay legible against the background. That is right for
-    // an icon and wrong for a swatch: it would show a colour the site does not
+    // an icon and wrong for a swatch: it would show a color the site does not
     // use. Same fix the tw-colorsearch extension applies.
     tintColor: { light: swatch, dark: swatch, adjustContrast: false },
   };
@@ -52,7 +52,7 @@ export function swatchFor(value: string, computed?: string): Image.ImageLike {
  *
  * Raycast gives the title as much width as it wants and truncates the VALUE, so
  * base-ui.com's `(prefers-color-scheme: light) and (min-width: 1024px)` reduced
- * `oklch(95% 0.25% 264)` to `o…)`. The colour is the point of the row; the query
+ * `oklch(95% 0.25% 264)` to `o…)`. The color is the point of the row; the query
  * is the qualifier.
  */
 function describeMedia(media: string): string {
@@ -68,7 +68,7 @@ function describeMedia(media: string): string {
   if (/prefers-contrast\s*:\s*more/i.test(media)) parts.push("high contrast");
   if (/prefers-reduced-motion/i.test(media)) parts.push("reduced motion");
 
-  // Nothing recognised: keep the query, but short enough to leave the value room.
+  // Nothing recognized: keep the query, but short enough to leave the value room.
   if (parts.length === 0) return media.length > 24 ? `${media.slice(0, 23)}…` : media;
   return parts.join(" · ");
 }
@@ -108,6 +108,7 @@ export function Theme({ data, onRefresh, progress }: ThemeProps) {
             data={data}
             url={data.url}
             onRefresh={onRefresh}
+            sectionActionsFirst
             sectionActions={
               theme && (theme.tokens.length > 0 || stylesheetUrls.length > 0) ? (
                 <Action.Push
@@ -153,10 +154,7 @@ function ThemeDetail({ theme, isLoading, hasData }: { theme?: ThemeData; isLoadi
               text="No theme declared"
               icon={{ source: Icon.Xmark, tintColor: Color.Red }}
             />
-            <List.Item.Detail.Metadata.Label
-              title=""
-              text="This page declares no theme-color, color-scheme, or color tokens in its markup."
-            />
+            <List.Item.Detail.Metadata.Label title="" text="No theme-color, color-scheme, or tokens in markup." />
           </List.Item.Detail.Metadata>
         }
       />

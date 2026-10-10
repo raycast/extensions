@@ -67,6 +67,32 @@
           "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
         }
       ]
+    },
+    {
+      "name": "cmd-connect-browser-worktree",
+      "title": "Connect to Worktree from Browser",
+      "subtitle": "Sesh",
+      "description": "Open a worktree for the GitHub issue or pull request in your active browser tab, creating it if needed.",
+      "icon": "command-icon.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -93,6 +119,6 @@
   ],
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
+    "js-yaml@4": "4.3.2"
   }
 }

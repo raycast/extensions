@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { type ReactElement, useEffect, useMemo, useState } from "react";
+import { type ReactElement, useMemo, useState } from "react";
 import { type Paper, renderPaperDetailMarkdown } from "./paper-utils";
 import { useFavoritePapers } from "./favorite-utils";
 import { getPaperStateKey, useReadPapers } from "./read-utils";
 import { useReadingQueue } from "./reading-queue-utils";
 
-const READ_AFTER_MS = 5000;
+import { useAutoRead } from "./use-auto-read";
+import { PaperEmptyView } from "./paper-empty-view";
 
 type SubtitleMode = "authors" | "date-and-authors";
 
@@ -22,6 +23,7 @@ type PaperListViewProps = {
   showOpenFavoritesAction?: boolean;
   showOpenQueueAction?: boolean;
   searchBarPlaceholder?: string;
+  searchText?: string;
   onSearchTextChange?: (text: string) => void;
 };
 
@@ -232,6 +234,7 @@ export function PaperListView({
   showOpenFavoritesAction = true,
   showOpenQueueAction = true,
   searchBarPlaceholder,
+  searchText,
   onSearchTextChange,
 }: PaperListViewProps): ReactElement {
   const { favorites, isLoading, isFavorite, addFavorite, removeFavorite } = useFavoritePapers();
@@ -240,28 +243,20 @@ export function PaperListView({
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const papersById = useMemo(() => new Map(papers.map((paper) => [getPaperStateKey(paper), paper])), [papers]);
 
-  useEffect(() => {
-    if (!selectedItemId) {
-      return;
-    }
-
-    const selectedPaper = papersById.get(selectedItemId);
-    if (!selectedPaper || isRead(selectedPaper)) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      void markAsRead(selectedPaper);
-    }, READ_AFTER_MS);
-
-    return () => clearTimeout(timer);
-  }, [selectedItemId, papersById, isRead, markAsRead]);
+  const readActions = useAutoRead(
+    papersById.get(selectedItemId ?? ""),
+    !isReadLoading,
+    isRead,
+    markAsRead,
+    markAsUnread,
+  );
 
   return (
     <List
       isShowingDetail
       isLoading={externalIsLoading || isLoading || isQueueLoading || isReadLoading}
       searchBarPlaceholder={searchBarPlaceholder}
+      searchText={searchText}
       onSearchTextChange={onSearchTextChange}
       onSelectionChange={setSelectedItemId}
     >
@@ -312,8 +307,8 @@ export function PaperListView({
                 removeFavorite={removeFavorite}
                 addToQueue={addToQueue}
                 removeFromQueue={removeFromQueue}
-                markAsRead={markAsRead}
-                markAsUnread={markAsUnread}
+                markAsRead={readActions.markAsRead}
+                markAsUnread={readActions.markAsUnread}
                 showOpenFavoritesAction={showOpenFavoritesAction}
                 showOpenQueueAction={showOpenQueueAction}
               />
@@ -326,28 +321,19 @@ export function PaperListView({
 }
 
 export function FavoritePapersView(): ReactElement {
-  const { favorites, isLoading, addFavorite, removeFavorite } = useFavoritePapers();
+  const { favorites, isLoading, error, reloadFavorites, addFavorite, removeFavorite } = useFavoritePapers();
   const { queue, isLoading: isQueueLoading, isQueued, addToQueue, removeFromQueue } = useReadingQueue();
   const { isLoading: isReadLoading, isRead, markAsRead, markAsUnread } = useReadPapers();
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const favoritesById = useMemo(() => new Map(favorites.map((paper) => [getPaperStateKey(paper), paper])), [favorites]);
 
-  useEffect(() => {
-    if (!selectedItemId) {
-      return;
-    }
-
-    const selectedPaper = favoritesById.get(selectedItemId);
-    if (!selectedPaper || isRead(selectedPaper)) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      void markAsRead(selectedPaper);
-    }, READ_AFTER_MS);
-
-    return () => clearTimeout(timer);
-  }, [selectedItemId, favoritesById, isRead, markAsRead]);
+  const readActions = useAutoRead(
+    favoritesById.get(selectedItemId ?? ""),
+    !isReadLoading,
+    isRead,
+    markAsRead,
+    markAsUnread,
+  );
 
   return (
     <List
@@ -355,11 +341,21 @@ export function FavoritePapersView(): ReactElement {
       isLoading={isLoading || isQueueLoading || isReadLoading}
       onSelectionChange={setSelectedItemId}
     >
-      {favorites.length === 0 && (
-        <List.EmptyView
-          title="No favorites yet"
-          description="Add papers to favorites from Today Papers, Recent Papers, or Search Papers."
+      {error ? (
+        <PaperEmptyView
+          title="Could not load favorites"
+          description={error}
+          onRetry={() => {
+            void reloadFavorites().catch(() => undefined);
+          }}
         />
+      ) : (
+        favorites.length === 0 && (
+          <List.EmptyView
+            title="No favorites yet"
+            description="Add papers to favorites from Today Papers, Recent Papers, or Search Papers."
+          />
+        )
       )}
       {favorites.map((paper) => (
         <List.Item
@@ -393,8 +389,8 @@ export function FavoritePapersView(): ReactElement {
               removeFavorite={removeFavorite}
               addToQueue={addToQueue}
               removeFromQueue={removeFromQueue}
-              markAsRead={markAsRead}
-              markAsUnread={markAsUnread}
+              markAsRead={readActions.markAsRead}
+              markAsUnread={readActions.markAsUnread}
               showOpenFavoritesAction={false}
               showOpenQueueAction={true}
             />
@@ -406,28 +402,19 @@ export function FavoritePapersView(): ReactElement {
 }
 
 export function ReadingQueueView(): ReactElement {
-  const { queue, isLoading, isQueued, addToQueue, removeFromQueue } = useReadingQueue();
+  const { queue, isLoading, error, reloadQueue, isQueued, addToQueue, removeFromQueue } = useReadingQueue();
   const { favorites, isLoading: isFavoriteLoading, isFavorite, addFavorite, removeFavorite } = useFavoritePapers();
   const { isLoading: isReadLoading, isRead, markAsRead, markAsUnread } = useReadPapers();
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const queueById = useMemo(() => new Map(queue.map((paper) => [getPaperStateKey(paper), paper])), [queue]);
 
-  useEffect(() => {
-    if (!selectedItemId) {
-      return;
-    }
-
-    const selectedPaper = queueById.get(selectedItemId);
-    if (!selectedPaper || isRead(selectedPaper)) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      void markAsRead(selectedPaper);
-    }, READ_AFTER_MS);
-
-    return () => clearTimeout(timer);
-  }, [selectedItemId, queueById, isRead, markAsRead]);
+  const readActions = useAutoRead(
+    queueById.get(selectedItemId ?? ""),
+    !isReadLoading,
+    isRead,
+    markAsRead,
+    markAsUnread,
+  );
 
   return (
     <List
@@ -435,11 +422,21 @@ export function ReadingQueueView(): ReactElement {
       isLoading={isLoading || isFavoriteLoading || isReadLoading}
       onSelectionChange={setSelectedItemId}
     >
-      {queue.length === 0 && (
-        <List.EmptyView
-          title="Reading queue is empty"
-          description="Add papers to the reading queue from Today Papers, Recent Papers, Search Papers, or Favorites."
+      {error ? (
+        <PaperEmptyView
+          title="Could not load reading queue"
+          description={error}
+          onRetry={() => {
+            void reloadQueue().catch(() => undefined);
+          }}
         />
+      ) : (
+        queue.length === 0 && (
+          <List.EmptyView
+            title="Reading queue is empty"
+            description="Add papers to the reading queue from Today Papers, Recent Papers, Search Papers, or Favorites."
+          />
+        )
       )}
       {queue.map((paper) => (
         <List.Item
@@ -481,8 +478,8 @@ export function ReadingQueueView(): ReactElement {
               removeFavorite={removeFavorite}
               addToQueue={addToQueue}
               removeFromQueue={removeFromQueue}
-              markAsRead={markAsRead}
-              markAsUnread={markAsUnread}
+              markAsRead={readActions.markAsRead}
+              markAsUnread={readActions.markAsUnread}
               showOpenFavoritesAction={true}
               showOpenQueueAction={false}
             />

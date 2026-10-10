@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, showInFinder, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { downloadToFile, Exportable, ExportFormat, toFormat } from "../utils/exportUtils";
+import { failToast } from "../utils/toastUtils";
 
 interface ResourceExportActionsProps {
   /** The resource to export, or undefined while its body is still loading. */
@@ -50,22 +50,20 @@ export function ResourceExportActions({ resource }: ResourceExportActionsProps) 
         // extension declares Windows, where "Show in Finder" is wrong. Wording
         // verified against the installed types (@raycast/api v2.1.3).
         title: process.platform === "darwin" ? "Show in Finder" : "File Explorer",
-        shortcut: { modifiers: ["cmd"], key: "o" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } },
         onAction: () => showInFinder(path),
       };
       toast.secondaryAction = {
         title: "Copy Path",
-        shortcut: { modifiers: ["cmd"], key: "c" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } },
         onAction: async (t) => {
           await Clipboard.copy(path);
           t.message = "Path copied to clipboard";
         },
       };
     } catch (error) {
-      // Not `toast.style = Failure`: showFailureToast attaches the Copy Error
-      // action, and a failure the user cannot copy is one they cannot report.
-      await toast.hide();
-      await showFailureToast(error, { title: `Could not save ${LABEL[format]}` });
+      // A failure the user cannot copy is one they cannot report.
+      failToast(toast, `Could not save ${LABEL[format]}`, error);
     }
   };
 

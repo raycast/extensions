@@ -1,5 +1,10 @@
 # Val Town Changelog
 
+## [Fix AI tools] - 2026-10-01
+
+- AI tools, blobs and SQLite work again after Val Town changed how it returns their results
+- The API token preference says which permissions the token needs
+
 ## [Windows support] - 2026-08-23
 
 - Runs on Raycast for Windows as well as macOS

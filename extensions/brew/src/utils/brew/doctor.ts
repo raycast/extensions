@@ -135,7 +135,7 @@ function listsEveryCommand(remediation: DoctorRemediation): boolean {
 
 /**
  * The whole report as one Markdown document, in `report.findings` order —
- * brew serialises findings in check order (cmd/doctor.rb) and Fix All runs them
+ * brew serializes findings in check order (cmd/doctor.rb) and Fix All runs them
  * in that same order, so the document must not re-sort them. Each finding gets a
  * `### <first line> — Tier N` heading; the tier travels with the finding instead
  * of a grouping heading.

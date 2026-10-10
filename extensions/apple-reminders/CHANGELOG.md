@@ -1,5 +1,52 @@
 # Apple Reminders Changelog
 
+## [Fix Menu Bar Actions] - 2026-10-09
+
+- Fix the "Worker unloaded" error when completing, deleting or rescheduling more than one reminder from the menu bar.
+
+## [Search and Refresh Fixes] - 2026-10-01
+
+- Report deleted or unavailable lists instead of treating them as empty, and clear previous search results while new results load.
+- Wait until typing pauses before searching, and match the English month names displayed in reminder rows on every system locale.
+- Filter by list and smart view before applying the result limit, so unrelated reminders no longer hide items in Today or after moving them between lists.
+- Search the full reminder collection, including completed reminders, before applying the 1,000-result limit. Show a prompt to narrow results when the limit is reached.
+- Refresh completed reminders with `Cmd + R`, allow refreshing empty views, and refresh My Reminders after creating an item from its action panel.
+- Add list and search filters to the Get Reminders and Get Completed Reminders AI tools.
+
+## [Create Calendar Event from Reminder] - 2026-09-25
+
+- Add "Create Calendar Event" action (`Cmd + Shift + E`) in "My Reminders" action panel to turn any reminder into an Apple Calendar event.
+- Support pre-filling event title, notes, location, start and end dates from reminder due date, and reminder deep-link URL.
+- Allow selecting target Apple Calendar and toggling all-day events.
+- Support viewing and editing reminder due date and time directly in the "Edit Reminder" form (`Cmd + E`).
+
+## [Natural Language Recurrence in Create Reminder] - 2026-09-25
+
+- Support natural language recurrence patterns (e.g. `every day`, `every Friday 10am`, `every 2 weeks`, `weekdays`, `monthly`) in the Create Reminder free-text date field.
+- Automatically populate recurrence frequency, interval, and start date from text input.
+
+## [Create Reminder from Selected Email] - 2026-09-25
+
+- Add "Create Reminder from Selected Email" command to create reminders directly from the active email in Apple Mail.
+- Attach native `message://` URL link to created reminders for 1-click opening of the email thread in Apple Mail.
+- Support interactive form mode with pre-filled title and email URL as well as instant background reminder creation.
+- Add "Default Due Date & Time" and "Default List" preferences for email reminders.
+
+## [Weekly Review and Action Capture Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review completed and outstanding reminders and capture supplied action items without inventing deadlines.
+
+## [Date Format Preference] - 2026-09-24
+
+- Add extension-level "Date Format" preference (`Month / Day (MM/DD)` and `Day / Month (DD/MM)`).
+- Interpret ambiguous numeric dates (such as `1/11`) according to the selected format across Quick Add and Create Reminder date parsing.
+
+## [Move reminder to list action] - 2026-09-24
+
+- Add "Move to List" action submenu (`Cmd + Shift + M`) to easily move reminders between lists in My Reminders.
+- Support moving reminders to a different list via AI update tool.
+
 ## [Default list for Quick Add] - 2026-09-23
 
 - Add "Default List" preference to the "Quick Add Reminder" command to automatically assign reminders to a specified list when no list is mentioned.

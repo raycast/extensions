@@ -1,5 +1,33 @@
 # Linear Changelog
 
+## [Simplify AI Tools] - 2026-10-07
+
+- Remove 17 older AI tools that overlapped with the newer `list-*`, `get-*`, and `save-*` tools, so Raycast AI picks the right tool more reliably.
+- **List Cycles**, **List Issue Statuses**, and **List Milestones** now work without a team or project and list across the workspace. **List Cycles** takes a team name, key, or ID.
+- **Get Status Updates** no longer requires `type`, and **Save Milestone** updates a milestone by ID without its project.
+- **Add Label** and **Remove Label** accept label names, and **Save Comment** can attach local files.
+- **Get Notifications** returns compact, paginated results and can return only unread notifications.
+- **List Issues** matches a status name such as "In Progress" across all teams when no team is given, instead of failing.
+- Fix **List Projects** and **List Releases** failing with "Argument Validation Error" when filtering by a status or stage name instead of an ID.
+- Clarify AI instructions and tool descriptions for choosing between the issue list, search, and filter tools.
+- Fix publishing failing while extracting the **Get Notifications** tool schema with Ray CLI 2.7.0.
+
+## [Fix AI Tool Errors] - 2026-10-02
+
+- Fix AI tools failing with "POST body missing, invalid Content-Type, or JSON object has no keys". For tools such as **Save Issue**, the change had already been saved, so retrying created duplicates.
+- AI tools now return plain, explicitly shaped data instead of Linear SDK objects. Related entities like assignees, teams, states, and labels are returned as compact references.
+- **List Projects** now includes members and milestones when `includeMembers` or `includeMilestones` is set, even without listing them in `fields`.
+
+## [Fix Preferred Team in Create Issue for Myself] - 2026-09-28
+
+- Fix **Create Issue for Myself** ignoring the Preferred Team in workspaces with more than 50 teams. The team is now looked up by key directly instead of searching the first page of teams, and the key is matched case-insensitively.
+- When no Preferred Team is set (or it isn't found), fall back to the first team you are a member of.
+
+## [Plan and Review Work Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Added a skill for turning specs into tasks, triaging issues, and reporting cycle status with linked evidence and clear scope.
+
 ## [Favorites Crash Fix] - 2026-09-14
 
 - Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.

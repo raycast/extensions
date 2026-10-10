@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
   deleteReminder,
+  moveToList,
   setPriorityStatus,
   toggleCompletionStatus,
   setDueDate as setReminderDueDate,
@@ -11,10 +12,13 @@ import {
 
 import { CreateReminderForm } from "../create-reminder";
 import { getAttachedUrls, getPriorityIcon } from "../helpers";
+import { openAttachedUrls } from "../helpers/open-attached-urls";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
 import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
+import CompletedRemindersAction from "./CompletedRemindersAction";
+import CreateCalendarEvent from "./CreateCalendarEvent";
 import EditReminder from "./EditReminder";
 import LocationForm from "./LocationForm";
 
@@ -22,12 +26,68 @@ type ReminderActionsProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: TList[] } | undefined>;
   listId?: string;
+  lists?: TList[];
   viewProps: ViewProps;
 };
 
-export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
+export default function ReminderActions({ reminder, listId, lists = [], viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
   const attachedUrls = getAttachedUrls(reminder);
+
+  async function moveReminderToList(targetList: TList) {
+    if (targetList.id === reminder.list?.id) return;
+
+    try {
+      if (reminder.isCompleted && viewProps.completed.mutate) {
+        await viewProps.completed.mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return data.map((r) => {
+              if (reminder.id === r.id) {
+                return {
+                  ...r,
+                  list: targetList,
+                };
+              }
+              return r;
+            });
+          },
+        });
+      } else {
+        await mutate(moveToList({ reminderId: reminder.id, listId: targetList.id }), {
+          optimisticUpdate(data) {
+            if (!data) return;
+
+            return {
+              ...data,
+              reminders: data.reminders.map((r) => {
+                if (reminder.id === r.id) {
+                  return {
+                    ...r,
+                    list: targetList,
+                  };
+                }
+
+                return r;
+              }),
+            };
+          },
+        });
+      }
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved Reminder",
+        message: `Moved to ${targetList.title}`,
+      });
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to move reminder",
+      });
+    }
+  }
 
   async function toggleReminder() {
     async function toggle() {
@@ -220,25 +280,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action
           title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
           icon={Icon.Link}
-          onAction={async () => {
-            let failedCount = 0;
-            for (const url of attachedUrls) {
-              try {
-                await open(url);
-              } catch (error) {
-                console.error("Failed to open URL", url, error);
-                failedCount++;
-              }
-            }
-
-            if (failedCount > 0) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
-                message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
-              });
-            }
-          }}
+          onAction={() => openAttachedUrls(attachedUrls)}
         />
       ) : null}
 
@@ -285,6 +327,24 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           />
         </ActionPanel.Submenu>
 
+        {lists.length > 0 ? (
+          <ActionPanel.Submenu
+            title="Move to List"
+            icon={Icon.Folder}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          >
+            {lists.map((list) => (
+              <Action
+                key={list.id}
+                title={list.title}
+                icon={{ source: Icon.Circle, tintColor: list.color }}
+                autoFocus={list.id === reminder.list?.id}
+                onAction={() => moveReminderToList(list)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : null}
+
         <Action
           title="Delete Reminder"
           style={Action.Style.Destructive}
@@ -295,12 +355,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <Action
-          title={`${viewProps.completed.value ? "Hide" : "Display"} Completed Reminders`}
-          icon={viewProps.completed.value ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-          onAction={() => viewProps.completed.toggle()}
-        />
+        <CompletedRemindersAction completed={viewProps.completed} />
 
         {viewProps.groupBy ? (
           <ActionPanel.Submenu
@@ -365,7 +420,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           title="Create Reminder"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
-          target={<CreateReminderForm listId={listId} />}
+          target={<CreateReminderForm listId={listId} mutate={mutate} />}
         />
       </ActionPanel.Section>
 
@@ -389,11 +444,22 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Calendar}
+          title="Create Calendar Event"
+          target={<CreateCalendarEvent reminder={reminder} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={() => mutate()}
+          onAction={async () => {
+            await Promise.all([mutate(), viewProps.completed.value ? viewProps.completed.mutate?.() : undefined]);
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>

@@ -25,6 +25,7 @@ import {
   markAsRead,
   markAsUnread,
   deleteEmail,
+  deletesPermanently,
   archiveEmail,
   disconnectClient,
 } from "./imap-client";
@@ -135,6 +136,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
   } = useCachedPromise(async () => {
     return await listFolders();
   }, []);
+  const permanentDelete = deletesPermanently(selectedFolder, folders || []);
 
   // Fetch emails for selected folder
   const {
@@ -260,6 +262,7 @@ function EmailList({ initialFolder, initialFilter }: EmailListProps = {}) {
             onLoadMore={hasMore ? handleLoadMore : undefined}
             isLoadingMore={isLoadingMore}
             emailCount={loadedEmails.length}
+            deletesPermanently={permanentDelete}
             demoMode={demoMode}
             onToggleDemoMode={() => setDemoMode(!demoMode)}
           />
@@ -341,11 +344,39 @@ function getFolderIcon(folder: Folder): Icon {
   }
 }
 
+// Bridge exposes Proton's message ID, so open the email itself; other servers fall back to a subject search
+function protonMailUrl(email: Email): string {
+  if (email.protonId) {
+    return `https://mail.proton.me/u/0/almost-all-mail/${email.protonId}`;
+  }
+  return `https://mail.proton.me/u/0/almost-all-mail#keyword=${encodeURIComponent(email.subject)}`;
+}
+
+async function deleteWithFeedback(folder: string, email: Email, permanently: boolean): Promise<boolean> {
+  if (permanently) {
+    const confirmed = await confirmAlert({
+      title: "Delete Permanently",
+      message: `"${email.subject}" will be deleted for good. This can't be undone.`,
+      primaryAction: { title: "Delete Permanently", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return false;
+  }
+  try {
+    const result = await deleteEmail(folder, email.uid);
+    showToast({ style: Toast.Style.Success, title: result === "trashed" ? "Moved to Trash" : "Deleted permanently" });
+    return true;
+  } catch (error) {
+    showToast({ style: Toast.Style.Failure, title: "Failed to delete email", message: String(error) });
+    return false;
+  }
+}
+
 interface EmailListItemProps {
   email: Email;
   folder: string;
   filter: EmailFilter;
   isSelected: boolean;
+  deletesPermanently: boolean;
   onRefresh: () => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
@@ -452,6 +483,7 @@ function EmailListItem({
   folder,
   filter,
   isSelected,
+  deletesPermanently,
   onRefresh,
   onLoadMore,
   isLoadingMore,
@@ -482,6 +514,7 @@ function EmailListItem({
           onLoadMore={onLoadMore}
           isLoadingMore={isLoadingMore}
           emailCount={emailCount}
+          deletesPermanently={deletesPermanently}
           demoMode={demoMode}
           onToggleDemoMode={onToggleDemoMode}
         />
@@ -552,9 +585,16 @@ interface ExpandedEmailViewProps {
   folder: string;
   onRefresh?: () => void;
   initialDemoMode?: boolean;
+  deletesPermanently?: boolean;
 }
 
-function ExpandedEmailView({ email, folder, onRefresh, initialDemoMode }: ExpandedEmailViewProps) {
+function ExpandedEmailView({
+  email,
+  folder,
+  onRefresh,
+  initialDemoMode,
+  deletesPermanently = false,
+}: ExpandedEmailViewProps) {
   const { push } = useNavigation();
   const [demoMode, setDemoMode] = useState(initialDemoMode || false);
   const { data: body, isLoading } = useCachedPromise(
@@ -640,24 +680,13 @@ function ExpandedEmailView({ email, folder, onRefresh, initialDemoMode }: Expand
   };
 
   const handleDelete = async () => {
-    const confirmed = await confirmAlert({
-      title: "Delete Email",
-      message: "Are you sure you want to delete this email?",
-    });
-    if (confirmed) {
-      try {
-        await deleteEmail(folder, email.uid);
-        showToast({ style: Toast.Style.Success, title: "Deleted" });
-        onRefresh?.();
-      } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to delete", message: String(error) });
-      }
+    if (await deleteWithFeedback(folder, email, deletesPermanently)) {
+      onRefresh?.();
     }
   };
 
   const handleOpenInProtonMail = async () => {
-    const searchQuery = encodeURIComponent(email.subject);
-    await open(`https://mail.proton.me/u/0/almost-all-mail#keyword=${searchQuery}`);
+    await open(protonMailUrl(email));
   };
 
   const handleDownloadAttachments = () => {
@@ -747,7 +776,7 @@ function ExpandedEmailView({ email, folder, onRefresh, initialDemoMode }: Expand
               shortcut={{ modifiers: ["cmd"], key: "e" }}
             />
             <Action
-              title="Delete"
+              title={deletesPermanently ? "Delete Permanently" : "Move to Trash"}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={handleDelete}
@@ -792,6 +821,7 @@ interface EmailActionsProps {
   email: Email;
   folder: string;
   filter: EmailFilter;
+  deletesPermanently: boolean;
   onRefresh: () => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
@@ -804,6 +834,7 @@ function EmailActions({
   email,
   folder,
   filter,
+  deletesPermanently,
   onRefresh,
   onLoadMore,
   isLoadingMore,
@@ -889,23 +920,8 @@ function EmailActions({
   };
 
   const handleDelete = async () => {
-    const confirmed = await confirmAlert({
-      title: "Delete Email",
-      message: `Are you sure you want to delete "${email.subject}"?`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      try {
-        await deleteEmail(folder, email.uid);
-        showToast({ style: Toast.Style.Success, title: "Email deleted" });
-        onRefresh();
-      } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to delete email", message: String(error) });
-      }
+    if (await deleteWithFeedback(folder, email, deletesPermanently)) {
+      onRefresh();
     }
   };
 
@@ -932,9 +948,7 @@ function EmailActions({
   };
 
   const handleOpenInProtonMail = async () => {
-    // Use search URL with subject to find the email in Proton Mail web
-    const searchQuery = encodeURIComponent(email.subject);
-    await open(`https://mail.proton.me/u/0/almost-all-mail#keyword=${searchQuery}`);
+    await open(protonMailUrl(email));
   };
 
   const handleDownloadAttachments = () => {
@@ -942,7 +956,15 @@ function EmailActions({
   };
 
   const handleExpandEmail = () => {
-    push(<ExpandedEmailView email={email} folder={folder} onRefresh={onRefresh} initialDemoMode={demoMode} />);
+    push(
+      <ExpandedEmailView
+        email={email}
+        folder={folder}
+        onRefresh={onRefresh}
+        initialDemoMode={demoMode}
+        deletesPermanently={deletesPermanently}
+      />,
+    );
   };
 
   const handleCompose = () => {
@@ -1011,7 +1033,7 @@ function EmailActions({
         )}
         <Action title="Archive" icon={Icon.Box} onAction={handleArchive} shortcut={{ modifiers: ["cmd"], key: "e" }} />
         <Action
-          title="Delete"
+          title={deletesPermanently ? "Delete Permanently" : "Move to Trash"}
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           onAction={handleDelete}

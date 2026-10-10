@@ -20,6 +20,7 @@ type ReminderListItemProps = {
   reminder: Reminder;
   mutate: MutatePromise<{ reminders: Reminder[]; lists: TList[] } | undefined>;
   listId?: string;
+  lists?: TList[];
   displayCompletionDate: boolean;
   viewProps: ViewProps;
 };
@@ -27,6 +28,7 @@ type ReminderListItemProps = {
 export default function ReminderListItem({
   reminder,
   listId,
+  lists,
   displayCompletionDate,
   viewProps,
   mutate,
@@ -134,7 +136,9 @@ export default function ReminderListItem({
       subtitle={reminder.notes}
       accessories={accessories}
       keywords={keywords}
-      actions={<ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} mutate={mutate} />}
+      actions={
+        <ReminderActions reminder={reminder} viewProps={viewProps} listId={listId} lists={lists} mutate={mutate} />
+      }
     />
   );
 }

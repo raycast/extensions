@@ -1,0 +1,23 @@
+instructions: |
+  Use find-shortcuts to look up configured Leader Key shortcuts by alias, label, or value.
+evals:
+  - input: "@leader-key Which shortcut opens Slack?"
+    mocks:
+      find-shortcuts:
+        - alias: s
+          label: Slack
+          type: application
+          value: /Applications/Slack.app
+    expected:
+      - callsTool: find-shortcuts
+      - includes: "s"
+  - input: "@leader-key What is the shortcut for GitHub?"
+    mocks:
+      find-shortcuts:
+        - alias: gh
+          label: GitHub
+          type: url
+          value: https://github.com
+    expected:
+      - callsTool: find-shortcuts
+      - includes: "gh"

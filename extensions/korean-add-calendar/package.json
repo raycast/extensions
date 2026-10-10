@@ -18,28 +18,36 @@
       "title": "Create Korean Schedule Item",
       "subtitle": "Korean -> Calendar/Reminder",
       "description": "Parse Korean schedule text and create an Apple Calendar event or Apple Reminder",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sentence",
+          "placeholder": "Korean schedule sentence",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "^2.6.1",
     "react": "^19.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.13.9",
     "@types/react": "^19.2.14",
-    "eslint": "^8.57.1",
+    "eslint": "^10.11.0",
     "prettier": "^3.5.3",
     "typescript": "^5.7.3",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish",
+    "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   }

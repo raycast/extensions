@@ -11,9 +11,12 @@ const {
   clearSessionBaseline,
   getInternetSpeed,
 } = await import("../src/services/speedService.ts");
-const { parseSubinterfaceBytes } = await import(
-  "../src/services/platform/windows.ts"
-);
+const {
+  parseSubinterfaceBytes,
+  isLocationPermissionOutput,
+  isLocationPermissionError,
+  WifiLocationPermissionError,
+} = await import("../src/services/platform/windows.ts");
 const { isLatestSsidRequest } = await import("../src/utils/wifiState.ts");
 
 console.log("==================================================");
@@ -513,6 +516,51 @@ assert.equal(
 );
 
 console.log("✓ stale SSID request rejection tests passed!");
+
+// ---------------------------------------------------------------
+// 7. Test Location permission detection (Windows 11 24H2+)
+// ---------------------------------------------------------------
+console.log("\n--- 7. Testing Location permission detection ---");
+
+const netshLocationNotice = `Interface name : Wi-Fi
+Network shell commands need location permission to access WLAN information. Turn on Location services on the Location page in Privacy & security settings.
+Here is the URI for the Location page in the Settings app: ms-settings:privacy-location
+To open the Location page in the Settings app, run the following command:
+start ms-settings:privacy-location
+
+The requested operation requires elevation (Run as administrator).`;
+
+assert.equal(isLocationPermissionOutput(netshLocationNotice), true);
+assert.equal(
+  isLocationPermissionOutput(
+    "Les commandes netsh ont besoin de l'autorisation de localisation.\nms-settings:privacy-location",
+  ),
+  true,
+  "Detection must not depend on the English prose",
+);
+assert.equal(
+  isLocationPermissionOutput(
+    "SSID 1 : Home\n    Authentication          : WPA2-Personal",
+  ),
+  false,
+);
+assert.equal(isLocationPermissionOutput(""), false);
+assert.equal(isLocationPermissionOutput(undefined), false);
+
+assert.equal(isLocationPermissionError(new WifiLocationPermissionError()), true);
+assert.equal(
+  isLocationPermissionError(
+    new Error("Failed to query Windows Wi-Fi networks", {
+      cause: new WifiLocationPermissionError(),
+    }),
+  ),
+  true,
+  "Wrapped location errors must still be detected",
+);
+assert.equal(isLocationPermissionError(new Error("netsh failed")), false);
+assert.equal(isLocationPermissionError(undefined), false);
+
+console.log("✓ Location permission detection tests passed!");
 
 console.log("\n==================================================");
 console.log("ALL VERIFICATION TESTS PASSED SUCCESSFULLY! 🎉");

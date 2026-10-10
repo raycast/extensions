@@ -37,17 +37,17 @@ export function filterNotesFuzzy(notes: Note[], input: string): Note[] {
  * @param input - Search input
  * @returns - A list of media filtered according to the input search string
  */
-export function filterMedia(mediaList: Media[], input: string) {
-  if (input?.length === 0) {
+export function filterMedia(mediaList: Media[], input?: string) {
+  if (!input) {
     return mediaList;
   }
 
-  input = input.toLowerCase();
+  const query = input.toLowerCase();
 
   // notes = notes.filter((note) => note.title.toLowerCase().includes(input));
 
   return mediaList.filter((media) => {
-    return media.title.toLowerCase().includes(input) || media.path.toLowerCase().includes(input);
+    return media.title.toLowerCase().includes(query) || media.path.toLowerCase().includes(query);
     // Filter media that is mentioned in a note which has the searched title
     // TODO: add information about where the media is linked during indexing
     // notes.some((note) => note.content.includes(media.title))

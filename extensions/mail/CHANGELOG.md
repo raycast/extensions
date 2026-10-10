@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Fix] - 2026-10-07
+
+- Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
+
 ## [Fix] - 2026-06-15
 
 - Fix sending composed messages when the subject or other message fields contain double quotes.

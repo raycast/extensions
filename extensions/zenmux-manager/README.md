@@ -9,6 +9,7 @@ ZenMux is an LLM API aggregation platform that provides unified access to models
 - View your ZenMux plan, account status, Flow rate, and PAYG balance.
 - Track 5-hour, 7-day rolling, and monthly subscription quota.
 - Ask Raycast AI about your current ZenMux account and quota status.
+- Use ZenMux chat models in AI Chat, Quick AI, and AI Commands.
 - Open the ZenMux subscription, PAYG, logs, and Platform API consoles from Raycast.
 
 ## Setup
@@ -20,6 +21,14 @@ ZenMux is an LLM API aggregation platform that provides unified access to models
 5. Paste the key into **Platform API Key**.
 
 Standard ZenMux API keys are not accepted by the account endpoints. This extension requires a Platform API key because it reads subscription and PAYG account data.
+
+To use ZenMux models inside Raycast AI, also add a model key:
+
+1. Create a [Subscription API key](https://zenmux.ai/platform/subscription) (`sk-ss-v1-...`) or a [PAYG API key](https://zenmux.ai/platform/pay-as-you-go) (`sk-ai-v1-...`).
+2. Paste it into **Model API Key** in this extension's preferences.
+3. In Raycast's model picker, allow ZenMux Manager to provide models.
+
+The Model API Key and the Platform API Key are not interchangeable. Model calls go to `https://zenmux.ai/api/v1`. Account calls stay on the Platform API. Extension-provided models require Raycast Pro.
 
 ## Commands
 
@@ -37,7 +46,9 @@ This extension includes AI tools that let Raycast AI answer questions about your
 - `How does provider routing work?`
 - `Which API endpoint should I use for Anthropic Messages?`
 
-Raycast AI features may require Raycast Pro access and are currently unavailable on Raycast for Windows. On Windows, use the account commands and links; AI chat tools are available on macOS only.
+Raycast AI features may require Raycast Pro access and are currently unavailable on Raycast for Windows. On Windows, use the account commands and links; AI chat tools and extension-provided models are available on macOS only.
+
+ZenMux models stream text and reasoning, and accept image attachments when the catalog declares image input. Image generation is not supported. Tool calling is enabled for chat models unless the catalog explicitly marks it unsupported. ZenMux currently omits tool-capability metadata, so this is a compatibility default, not a guarantee for every model. Models with reasoning enabled in the ZenMux catalog offer Minimal, Low, Medium, and High effort in Raycast. Medium is the default. Accepted effort levels vary by model and are not listed in the catalog; a model may reject a selected level. Raycast does not pass a provider's reasoning signature back to the extension, so a later tool-calling turn can fail on a model that requires that signature.
 
 ## Links
 

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "privmask",
+  "title": "Privacy Mask",
+  "description": "Find personal information in text and mask it before you share it, entirely on your Mac — Japanese names, addresses and My Numbers included.",
+  "icon": "privmask-icon.png",
+  "author": "snaka",
+  "categories": [
+    "Security",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "mask-text",
+      "title": "Mask Text",
+      "description": "Review the personal information found in your selection or clipboard, then copy the masked text.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useModel",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Detection",
+      "label": "Use the on-device language model",
+      "description": "The main source of Japanese personal names. Requires macOS 26 with Apple Intelligence; without it, names are found only by the privmask name model, when that is installed."
+    },
+    {
+      "name": "useNameModel",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use the privmask name model when installed",
+      "description": "A trained model for Japanese personal names that comes with the privmask CLI (brew install snaka/tap/privmask). It runs on any macOS 13 or later, so names are still found without Apple Intelligence."
+    },
+    {
+      "name": "nameModelPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Name Model",
+      "placeholder": "/opt/homebrew/share/privmask/ner",
+      "description": "The directory holding ner.mlmodelc. Leave empty to use the one installed with the privmask CLI by Homebrew."
+    },
+    {
+      "name": "dictionaryPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Term List",
+      "placeholder": "~/.config/privmask/terms.txt",
+      "description": "A plain text file, one term per line: customer names, company names, project code names. Shared with the privmask CLI."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

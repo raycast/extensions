@@ -2,13 +2,17 @@ import type { Tool } from "@raycast/api";
 import { updateReminder } from "swift:../../swift/AppleReminders";
 
 import type { Frequency } from "../create-reminder";
-import { parseTags } from "../helpers";
+import { getRecurrenceConfirmationInfo, normalizeReminderToolInput } from "../helpers/reminder-tools";
 
 type Input = {
   /**
    * The ID of the reminder to update.
    */
   reminderId: string;
+  /**
+   * The ID of the list to move the reminder to.
+   */
+  listId?: string;
   /**
    * The new title of the reminder.
    */
@@ -66,24 +70,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     message: "Apply recurrence changes to this reminder?",
     info: [
       { name: "Reminder ID", value: input.reminderId },
-      { name: "Frequency", value: input.recurrence.frequency },
-      { name: "Interval", value: String(input.recurrence.interval) },
-      { name: "Due Date", value: input.dueDate },
-      { name: "Recurrence End Date", value: input.recurrence.endDate },
+      ...getRecurrenceConfirmationInfo(input.recurrence, input.dueDate),
     ],
   };
 };
 
 export default async function (input: Input) {
-  if (input.dueDate && input.dueDate.includes("T")) {
-    input.dueDate = new Date(input.dueDate).toISOString();
-  }
-
-  const payload = {
-    ...input,
-    tags: input.tags ? parseTags(input.tags) : undefined,
-  };
-
-  const reminder = await updateReminder(payload);
-  return reminder;
+  return updateReminder(normalizeReminderToolInput(input));
 }

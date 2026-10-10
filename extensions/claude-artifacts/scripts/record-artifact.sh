@@ -92,7 +92,7 @@ CANDIDATE="$(
 
 URL="$(printf '%s' "${CANDIDATE}" | grep -oE "${URL_PATTERN}" | head -1)"
 
-# Unrecognised response shape — search every string ANYWHERE under
+# Unrecognized response shape — search every string ANYWHERE under
 # `tool_response`, at any depth.
 #
 # Scoped to `tool_response` deliberately: `tool_input` carries the user's own
@@ -181,7 +181,7 @@ mkdir -p "$(dirname "${INDEX}")" 2>/dev/null || exit 0
 # lock for exactly as long as it runs. `alarm` bounds the wait so a stuck holder
 # degrades to a skipped record rather than a hung Claude Code turn.
 #
-# No perl → fall back to serialising nothing. A missing interpreter must not
+# No perl → fall back to serializing nothing. A missing interpreter must not
 # fail the turn, and a lost row is better than a corrupt index.
 LOCK="${INDEX}.lock"
 LOCK_TIMEOUT=10
@@ -223,7 +223,7 @@ ARTIFACT_ID="${ID}" \
     set -u
     INDEX="${ARTIFACT_INDEX}"
 
-    # Initialise atomically. A direct redirection here can be interrupted
+    # Initialize atomically. A direct redirection here can be interrupted
     # mid-write and leave a malformed file that later runs will not repair,
     # because they only check that it is non-empty.
     if [ ! -s "${INDEX}" ]; then

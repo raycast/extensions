@@ -1,10 +1,11 @@
 import { Detail } from "@raycast/api";
-import { getBannerUrl, getIMDbUrl, getScreenshotUrl, getTraktUrl } from "./helper";
+import { formatWatchedAt, getBannerUrl, getIMDbUrl, getScreenshotUrl, getTraktUrl } from "./helper";
 import {
   TraktEpisodeListItem,
   TraktMovieBaseItem,
   TraktMovieHistoryListItem,
   TraktMovieListItem,
+  TraktPlaybackMovieItem,
   TraktShowBaseItem,
 } from "./schema";
 
@@ -72,7 +73,7 @@ export const createEpisodeMarkdown = (episode: TraktEpisodeListItem, show?: Trak
 };
 
 export const createMovieMetadata = (
-  movie: TraktMovieBaseItem | TraktMovieListItem | TraktMovieHistoryListItem,
+  movie: TraktMovieBaseItem | TraktMovieListItem | TraktMovieHistoryListItem | TraktPlaybackMovieItem,
 ): Detail.Props["metadata"] => {
   const movieData = "movie" in movie ? movie.movie : movie;
   const baseFields = getMovieMetadataFields(movieData);
@@ -91,14 +92,14 @@ export const createMovieMetadata = (
             <Detail.Metadata.Label title="Times Watched" text={movie.plays.toString()} />
           )}
           {"last_watched_at" in movie && movie.last_watched_at && typeof movie.last_watched_at === "string" && (
-            <Detail.Metadata.Label title="Last Watched" text={new Date(movie.last_watched_at).toLocaleDateString()} />
+            <Detail.Metadata.Label title="Last Watched" text={formatWatchedAt(movie.last_watched_at)} />
           )}
         </>
       )}
       {"watched_at" in movie && movie.watched_at && typeof movie.watched_at === "string" && (
         <>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Watched" text={new Date(movie.watched_at).toLocaleDateString()} />
+          <Detail.Metadata.Label title="Watched" text={formatWatchedAt(movie.watched_at)} />
         </>
       )}
       <Detail.Metadata.Separator />

@@ -54,6 +54,7 @@ export default function QuickSaveCommand() {
 
   const {
     isAuthenticated,
+    error: authError,
     isLoading: isCheckingAuth,
     refresh: refreshAuth,
   } = useTeakAuth();
@@ -123,7 +124,7 @@ export default function QuickSaveCommand() {
   }
 
   if (!isAuthenticated) {
-    return <MissingApiKeyDetail onSignedIn={refreshAuth} />;
+    return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
   }
 
   return (

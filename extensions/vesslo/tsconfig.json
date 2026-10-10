@@ -7,7 +7,7 @@
       "target": "ES2021",
       "strict": true,
       "esModuleInterop": true,
-      "skipLibCheck": true,
+      "skipLibCheck": false,
       "forceConsistentCasingInFileNames": true,
       "resolveJsonModule": true,
       "jsx": "react-jsx",

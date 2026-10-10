@@ -46,8 +46,13 @@ import { MP3_FORMAT_ID } from "./utils.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
-const { downloadPath, autoLoadUrlFromClipboard, autoLoadUrlFromSelectedText, enableBrowserExtensionSupport } =
-  getPreferenceValues<ExtensionPreferences>();
+const {
+  downloadPath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  fastRemux = true,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export default function DownloadVideo() {
   const { push } = useNavigation();
@@ -83,7 +88,9 @@ export default function DownloadVideo() {
         options.push("--audio-quality", "0");
       } else {
         options.push("--format", downloadFormat);
-        options.push("--recode-video", recodeFormat);
+        const hasWebmAudio = video?.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
+        const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
+        options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
       }
 
       const toast = await showToast({
@@ -126,20 +133,23 @@ export default function DownloadVideo() {
       };
 
       downloadProcess.stdout.on("data", (data) => {
-        const line = data.toString() as string;
+        const text = data.toString() as string;
 
-        const progress = Number(/\[download\]\s+(\d+(\.\d+)?)%.*/.exec(line)?.[1]);
-        if (progress) {
-          const currentProgress = Number(toast.message?.replace("%", ""));
-
-          if (progress < currentProgress) {
-            toast.title = `Formatting ${medium}`;
-          }
-          toast.message = `${Math.floor(progress)}%`;
+        if (/\[(Merger|VideoConvertor|Remux|ExtractAudio|Fixup)/i.test(text)) {
+          toast.title = `Packaging ${medium}`;
+          toast.message = "Finalizing...";
         }
 
-        if (looksLikeFilePath(line)) {
-          filePath = line.trim();
+        const progressMatch = /\[download\]\s+(\d+(\.\d+)?)%.*/.exec(text);
+        if (progressMatch) {
+          toast.title = `Downloading ${medium}`;
+          toast.message = `${Math.floor(Number(progressMatch[1]))}%`;
+        }
+
+        for (const line of text.split("\n")) {
+          if (looksLikeFilePath(line.trim())) {
+            filePath = line.trim();
+          }
         }
       });
 

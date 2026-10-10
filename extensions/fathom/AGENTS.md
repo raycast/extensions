@@ -21,8 +21,11 @@ meetings, teams, and team members, and to download meeting recordings.
 
 **Commands** (`package.json` → `commands`): `search-meetings`, `search-team-members`.
 
-**Preferences**: `fathomApiKey`, `exportDirectory`, `notifyOnDownloadFinish`,
-`useRaycastNotification`, `verboseLogging`.
+**AI tools** (`package.json` → `tools`, sources in `src/tools/`): `list-meetings`,
+`get-meeting-details`, `list-team-members`.
+
+**Preferences**: `fathomApiKey`, `exportDirectory`, `openMeetingsIn`, `notifyOnDownloadFinish`,
+`useRaycastNotification`, `verboseLogging`, `strictRedaction`.
 
 ## Architecture
 
@@ -37,6 +40,24 @@ meetings, teams, and team members, and to download meeting recordings.
 - **Types** — `src/types/Types.ts`
 - **Commands** — top-level `src/*.tsx`
 - **Actions** — `src/actions/*`
+
+### Open in Fathom
+
+"Open in Fathom" (⌘O, `src/actions/MeetingActions.tsx`) honors `openMeetingsIn`. On
+`desktop` it opens `fathom://open-window/desktop_app/pages/calls/<callId>/details` — the link
+fathom.video's own "open in desktop app" page hands the app — and falls back to the web URL when
+no app with bundle ID `video.fathom.electron` is installed, the app scan fails, or the URL has
+no call ID.
+
+- **Desktop opening is macOS-only.** The check matches the macOS bundle ID, and Raycast reports
+  Windows apps under `windowsAppId` instead, so on Windows it always opens the web. That is
+  deliberate: neither the Windows app ID nor whether `fathom://` is registered there has been
+  verified.
+
+- The deep link takes the **call ID**, parsed from the web URL's `/calls/<id>` path. It is not
+  the `recording_id`; the two are different numbers for the same meeting.
+- `contentProtection` is deliberately omitted from the link, so opening a meeting cannot
+  override the user's own Fathom content-protection setting.
 
 ### Caching
 
@@ -70,9 +91,13 @@ meetings, teams, and team members, and to download meeting recordings.
 Two phases, and the distinction matters for anything touching this code:
 
 1. **Generation** — `POST /recordings/{id}/download` returns a `download_id`; the job is
-   polled until a signed URL appears (~30–40s). This poll runs in the **command's own event
-   loop**, so dismissing Raycast stops it. The `download_id` is persisted to LocalStorage
-   immediately so re-triggering rejoins the same job instead of starting a new one.
+   polled until a signed URL appears — ~30–40s for a 30–46 minute recording, longer for longer
+   ones (`generationExpectation`). This poll runs in the **command's own event loop**, so it
+   dies when Raycast unloads the command (not at the instant the window closes — it has been
+   seen still polling 31s after dismissal). The `download_id` is persisted to LocalStorage
+   immediately so re-triggering rejoins the same job instead of starting a new one, which is
+   what the toast tells the user. The toast's Cancel (⌘.) aborts the poll through an
+   `AbortSignal`; Fathom keeps the job, so a later download rejoins it.
 2. **Transfer** — the signed URL is handed to a **detached** helper process from
    `@chrismessina/raycast-downloader`, which survives the command being unloaded.
    Recordings run 250–650 MB.
@@ -104,7 +129,10 @@ npm run fix-lint
 npm run build            # runs copy-runner, then ray build
 npm run publish          # submit to the Raycast Store
 npm run copy-runner      # refresh the bundled runner asset
+npm run verify-runner    # fail if the asset differs from the installed package's bundle
 ```
+
+`npm run publish` runs `verify-runner` first, so a stale runner asset blocks submission.
 
 `ray build` does **not** typecheck. Run `npx tsc --noEmit` separately; it is a gate.
 
@@ -127,7 +155,7 @@ Vitest, or test files.
 
 - A `Toast.Style.Failure` that reports an **error** carries a Copy Error action — use
   `showError` from `@chrismessina/raycast-kit` rather than hand-rolling it. Three existing
-  toasts deliberately do not: "Download Cancelled", "No members to export", and "No members
+  toasts deliberately do not: "Download Canceled", "No members to export", and "No members
   to copy" are outcomes the user asked for or empty states, with no error to copy.
 - Shortcuts use `Keyboard.Shortcut.Common` by semantics, or are platform-explicit
   (`{ macOS, Windows }`) when no `Common` constant fits.
@@ -138,9 +166,9 @@ Vitest, or test files.
 - **API key**: a `password` preference (`fathomApiKey`), read via
   `getPreferenceValues<Preferences>()`. Never hardcode or log it.
 - **Signed download URLs are bearer credentials.** They live ~24h and must never reach
-  argv, a log line, a status file, LocalStorage, or a toast. The helper passes the URL
-  through a `0600` payload file and a `curl -K` config; `ps` is world-readable, which is
-  why it is not an argument. Server-supplied strings that get logged (for example a job's
+  argv, a log line, a status file, LocalStorage, a toast, or any file on disk. As of
+  `@chrismessina/raycast-downloader` 0.2.1 the URL reaches the runner on its stdin and curl
+  on curl's stdin (`curl -K -`); `ps` is world-readable, which is why it is not an argument. Server-supplied strings that get logged (for example a job's
   `failure_reason`) are run through `redactString(s, { level: "strict" })` from
   `@chrismessina/raycast-logger` first.
 - **Logging**: use `@chrismessina/raycast-logger`. A field named `code` is treated as

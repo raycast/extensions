@@ -1,42 +1,38 @@
 # Linak Desk Controller
 
-Control the height of your Linak desk using bluetooth, for example the Ikea Idasen desk.
+Control the height of your Linak desk over Bluetooth, for example the IKEA IDÅSEN desk. Everything runs inside the extension, so there's nothing else to install.
 
-This extension is a wrapper around [linak-controller](https://github.com/rhyst/linak-controller) and requires python 3 to be installed on your system.
+## Setup
 
-For supported devices please check the list here: [Supported desks](https://github.com/rhyst/linak-controller/blob/master/README.md#working-desks)
+### 1. Pair your desk
 
-## Installation
+The desk only accepts Bluetooth connections from devices it's paired with, so the first time you use it with this Mac:
 
-1. Install [linak-controller](https://github.com/rhyst/linak-controller) and make sure it's available in your path.
+1. **Press and hold the Bluetooth button** on the desk controller until the blue light starts blinking. The desk is now in pairing mode.
+2. While the light is blinking, run **Select Desk** in Raycast and select your desk (IKEA desks show up as "Desk" followed by a number). Then run **Sit Down** or **Stand Up** to complete the pairing.
 
-```
-pip3 install linak-controller
-```
+You only need to do this once. If your desk is paired with another device, such as the Desk Control app on your phone, disconnect it there first. If a command later says the desk didn't accept the connection, pair it again.
 
-2. Set your desk to pairing mode (usually by holding down the bluetooth button) and pair your desk with your computer using [Bluetility](https://github.com/jnross/Bluetility) by clicking on it in the device list.
+The first time you use the extension, macOS also asks for permission to use Bluetooth.
 
-3. Copy the UUID of the desk by right clicking on the device in Bluetility and selecting "Copy device identifier".
-   ![Bluetility screenshot](media/bluetility.png)
-4. Run the extension and add the UUID and your preferred standing and sitting heights to the extension settings.
-5. (Optional) Set up keyboard shortcuts to toggle between your preferred heights 🥳
+### 2. Set your heights
 
-## Server Mode
+Set your preferred sitting and standing heights (in cm) in the extension preferences. Then set up keyboard shortcuts for **Sit Down** and **Stand Up** 🥳
 
-You can run the extension in server mode in order to keep a persistent connection making the response time a lot quicker.
+## Commands
 
-1. Enable server mode in the extension settings
-2. Start the server in your terminal by running `linak-controller --server`
+- **Stand Up** and **Sit Down** move to your saved heights.
+- **Move Desk to Custom Height** moves to any height in cm.
+- **Raise Desk** and **Lower Desk** move a few cm at a time (5 cm by default).
+- **Stop Desk** stops a desk that's moving.
+- **Select Desk** finds nearby desks and lets you choose one.
+- **Move Desk** is a menu bar command that shows the current height and all of the above.
 
-See the [Using the Server](https://github.com/rhyst/linak-controller?tab=readme-ov-file#using-the-server) for more information on server mode.
+Running a new command while the desk is moving takes over from the previous one.
 
 ## Troubleshooting
 
-Make sure that `linak-controller` is installed and available in your path. If linak-controller is installed and works in your terminal but not in Raycast run `which linak-controller` in your terminal and add the python bin path to the extension settings .i.e.
-
-```bash
-which linak-controller
-/opt/homebrew/bin/linak-controller
-```
-
-In this case you would add `/opt/homebrew/bin/` to the extension settings.
+- **The desk doesn't accept the connection:** the desk isn't paired with this Mac. Make sure it isn't connected to another device, such as the Desk Control app on your phone. Then hold the Bluetooth button on the controller until the light blinks and run the command again.
+- **"Couldn't find your desk":** if you set a Desk identifier for an older version of the extension, it may no longer match your desk. Clear it in the preferences, or run **Select Desk** to choose your desk.
+- **The reported height is off by a constant amount:** change **Lowest height** in the preferences to your desk's height at its lowest position (62 cm for IDÅSEN).
+- **Raycast can't use Bluetooth:** allow Raycast in System Settings → Privacy & Security → Bluetooth.

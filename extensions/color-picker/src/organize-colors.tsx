@@ -14,11 +14,14 @@ import {
   showToast,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
+import MultipleColorActions from "./components/MultipleColorActions";
 import { EditTitle } from "./components/EditTitle";
+import { GroupForm } from "./components/GroupForm";
 import { useColorsSelection } from "./hooks/useColorsSelection";
-import { useHistory } from "./lib/history";
+import { formatGroup, getGroups, isRenameTaken } from "./lib/groups";
+import { getHistoryItemKey, useHistory } from "./lib/history";
 import { HistoryItem, SelectMode, UseColorsSelectionObject } from "./lib/types";
 import { COPY_FORMATS, copySelectedColors, getFormattedColor, getIcon, getPreviewColor } from "./lib/utils";
 
@@ -49,13 +52,14 @@ const PickColorAction = () => (
 export default function Command() {
   const { history } = useHistory();
   const [selectMode, setSelectMode] = useState<SelectMode>("single");
-  // Stable reference so useColorsSelection's cleanup effect doesn't re-run every render.
-  // Combine date + formattedColor so distinct history entries that format to the same color
-  // (e.g. legacy data with duplicate picks) get distinct selection keys.
-  const getItemKey = useCallback((item: HistoryItem) => `${item.date}-${getFormattedColor(item.color)}`, []);
-  const { selection } = useColorsSelection<HistoryItem>(history ?? [], getItemKey);
-  const favoriteHistory = history?.filter((item) => item.isFavorite) ?? [];
-  const regularHistory = history?.filter((item) => !item.isFavorite) ?? [];
+  const { selection } = useColorsSelection<HistoryItem>(history ?? [], getHistoryItemKey);
+  const favoriteHistory = history?.filter((item) => item.isFavorite && !item.group) ?? [];
+  const regularHistory = history?.filter((item) => !item.isFavorite && !item.group) ?? [];
+  const groups = getGroups(history ?? []);
+  const groupSections = groups.map((group) => ({
+    title: formatGroup(group),
+    history: history?.filter((item) => item.group === group) ?? [],
+  }));
 
   if (selectMode === "multi") {
     return (
@@ -81,8 +85,29 @@ export default function Command() {
             </ActionPanel>
           }
         />
-        <ListHistorySection title="Favorites" history={favoriteHistory} selectMode={selectMode} selection={selection} />
-        <ListHistorySection title="History" history={regularHistory} selectMode={selectMode} selection={selection} />
+        <ListHistorySection
+          title="Favorites"
+          history={favoriteHistory}
+          groups={groups}
+          selectMode={selectMode}
+          selection={selection}
+        />
+        {groupSections.map((section) => (
+          <ListHistorySection
+            key={section.title}
+            {...section}
+            groups={groups}
+            selectMode={selectMode}
+            selection={selection}
+          />
+        ))}
+        <ListHistorySection
+          title="History"
+          history={regularHistory}
+          groups={groups}
+          selectMode={selectMode}
+          selection={selection}
+        />
       </List>
     );
   }
@@ -106,8 +131,29 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      <GridHistorySection title="Favorites" history={favoriteHistory} selectMode={selectMode} selection={selection} />
-      <GridHistorySection title="History" history={regularHistory} selectMode={selectMode} selection={selection} />
+      <GridHistorySection
+        title="Favorites"
+        history={favoriteHistory}
+        groups={groups}
+        selectMode={selectMode}
+        selection={selection}
+      />
+      {groupSections.map((section) => (
+        <GridHistorySection
+          key={section.title}
+          {...section}
+          groups={groups}
+          selectMode={selectMode}
+          selection={selection}
+        />
+      ))}
+      <GridHistorySection
+        title="History"
+        history={regularHistory}
+        groups={groups}
+        selectMode={selectMode}
+        selection={selection}
+      />
     </Grid>
   );
 }
@@ -115,11 +161,12 @@ export default function Command() {
 type HistorySectionProps = {
   title: string;
   history: HistoryItem[];
+  groups: string[];
   selectMode: SelectMode;
   selection: UseColorsSelectionObject<HistoryItem>;
 };
 
-function GridHistorySection({ title, history, selectMode, selection }: HistorySectionProps) {
+function GridHistorySection({ title, history, groups, selectMode, selection }: HistorySectionProps) {
   if (history.length === 0) {
     return null;
   }
@@ -135,12 +182,20 @@ function GridHistorySection({ title, history, selectMode, selection }: HistorySe
           <Grid.Item
             key={`${title}-${historyItem.date}-${formattedColor}`}
             content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
-            title={`${formattedColor} ${historyItem.title ?? ""}`}
+            title={`${getFavoriteMark(historyItem)}${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
               timeStyle: "short",
             })}
-            actions={<Actions historyItem={historyItem} selectMode={selectMode} selection={selection} />}
+            actions={
+              <Actions
+                historyItem={historyItem}
+                sectionHistory={history}
+                groups={groups}
+                selectMode={selectMode}
+                selection={selection}
+              />
+            }
           />
         );
       })}
@@ -148,7 +203,7 @@ function GridHistorySection({ title, history, selectMode, selection }: HistorySe
   );
 }
 
-function ListHistorySection({ title, history, selectMode, selection }: HistorySectionProps) {
+function ListHistorySection({ title, history, groups, selectMode, selection }: HistorySectionProps) {
   if (history.length === 0) {
     return null;
   }
@@ -164,12 +219,20 @@ function ListHistorySection({ title, history, selectMode, selection }: HistorySe
           <List.Item
             key={`${title}-${historyItem.date}-${formattedColor}`}
             icon={getIcon(previewColor)}
-            title={`${isSelected ? "✓ " : ""}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
+            title={`${isSelected ? "✓ " : ""}${getFavoriteMark(historyItem)}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
               timeStyle: "short",
             })}
-            actions={<Actions historyItem={historyItem} selectMode={selectMode} selection={selection} />}
+            actions={
+              <Actions
+                historyItem={historyItem}
+                sectionHistory={history}
+                groups={groups}
+                selectMode={selectMode}
+                selection={selection}
+              />
+            }
           />
         );
       })}
@@ -177,14 +240,31 @@ function ListHistorySection({ title, history, selectMode, selection }: HistorySe
   );
 }
 
+function getFavoriteMark(historyItem: HistoryItem) {
+  return historyItem.isFavorite && historyItem.group ? "★ " : "";
+}
+
 type ActionsProps = {
   historyItem: HistoryItem;
+  sectionHistory: HistoryItem[];
+  groups: string[];
   selectMode: SelectMode;
   selection: UseColorsSelectionObject<HistoryItem>;
 };
 
-function Actions({ historyItem, selectMode, selection }: ActionsProps) {
-  const { history, remove, clear, edit, addToFavorites, removeFromFavorites, moveFavorite } = useHistory();
+function Actions({ historyItem, sectionHistory, groups, selectMode, selection }: ActionsProps) {
+  const {
+    history,
+    remove,
+    clear,
+    edit,
+    addToFavorites,
+    removeFromFavorites,
+    moveFavorite,
+    setGroup,
+    renameGroup,
+    deleteGroup,
+  } = useHistory();
   const { data: frontmostApp } = usePromise(async () => {
     try {
       return await getFrontmostApplication();
@@ -193,16 +273,22 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
     }
   }, []);
 
-  const { toggleSelection, selectAll, clearSelection } = selection.actions;
-  const { anySelected, allSelected, selectedItems, countSelected } = selection.selected;
-  const isSelected = selection.helpers.getIsItemSelected(historyItem);
-
   const color = historyItem.color;
   const formattedColor = getFormattedColor(color);
-  const favoriteHistory = history?.filter((item) => item.isFavorite) ?? [];
+  const favoriteHistory = history?.filter((item) => item.isFavorite && !item.group) ?? [];
   const favoriteIndex = favoriteHistory.findIndex((item) => getFormattedColor(item.color) === formattedColor);
   const canMoveFavoriteUp = favoriteIndex > 0;
   const canMoveFavoriteDown = favoriteIndex !== -1 && favoriteIndex < favoriteHistory.length - 1;
+  const { countSelected, selectedItems } = selection.selected;
+  const targets = selectMode === "multi" && countSelected > 0 ? selectedItems : [historyItem];
+  const targetsLabel = targets.length === 1 ? "Color" : `${targets.length} Colors`;
+  const group = historyItem.group;
+  const hasSubgroups = Boolean(group && groups.some((name) => name.startsWith(`${group}/`)));
+
+  const moveToGroup = async (name: string) => {
+    setGroup(targets, name);
+    await showToast({ title: `Moved to ${formatGroup(name)}` });
+  };
 
   return (
     <ActionPanel>
@@ -274,52 +360,7 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
         )}
       </ActionPanel.Section>
 
-      {selectMode === "multi" && (
-        <ActionPanel.Section title="Multiple Colors">
-          {countSelected > 0 && (
-            <ActionPanel.Submenu
-              title="Copy Selected Colors"
-              icon={Icon.CopyClipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            >
-              <Action.CopyToClipboard
-                title="Copy to Clipboard"
-                content={selectedItems.map((item) => getFormattedColor(item.color)).join(";")}
-              />
-              {COPY_FORMATS.map(({ format, title, icon }) => (
-                <Action.CopyToClipboard
-                  key={format}
-                  title={title}
-                  content={copySelectedColors(selectedItems, format)}
-                  icon={icon}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
-          <Action
-            icon={isSelected ? Icon.Checkmark : Icon.Circle}
-            title={isSelected ? `Deselect Color ${formattedColor}` : `Select Color ${formattedColor}`}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={() => toggleSelection(historyItem)}
-          />
-          {!allSelected && (
-            <Action
-              icon={Icon.Checkmark}
-              title="Select All Colors"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-              onAction={selectAll}
-            />
-          )}
-          {anySelected && (
-            <Action
-              icon={Icon.XMarkCircle}
-              title="Clear Selection"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
-              onAction={clearSelection}
-            />
-          )}
-        </ActionPanel.Section>
-      )}
+      {selectMode === "multi" && <MultipleColorActions item={historyItem} selection={selection} />}
 
       <ActionPanel.Section>
         <Action
@@ -365,6 +406,93 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
             }
           }}
         />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Groups">
+        <ActionPanel.Submenu
+          icon={Icon.Folder}
+          title={`Move ${targetsLabel} to Group`}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
+        >
+          {groups
+            .filter((name) => targets.some((item) => item.group !== name))
+            .map((name) => (
+              <Action key={name} title={formatGroup(name)} onAction={() => moveToGroup(name)} />
+            ))}
+          <Action.Push
+            icon={Icon.Plus}
+            title="New Group"
+            target={<GroupForm submitTitle="Move to Group" onSubmit={moveToGroup} />}
+          />
+        </ActionPanel.Submenu>
+        {targets.some((item) => item.group) && (
+          <Action
+            icon={Icon.XMarkCircle}
+            title={`Remove ${targetsLabel} from Group`}
+            onAction={async () => {
+              setGroup(targets, undefined);
+              await showToast({ title: "Removed from group" });
+            }}
+          />
+        )}
+        {group && (
+          <>
+            <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Group">
+              <Action.CopyToClipboard
+                title="Copy to Clipboard"
+                content={sectionHistory.map((item) => getFormattedColor(item.color)).join(";")}
+              />
+              {COPY_FORMATS.map(({ format, title, icon }) => (
+                <Action.CopyToClipboard
+                  key={format}
+                  title={title}
+                  content={copySelectedColors(sectionHistory, format)}
+                  icon={icon}
+                />
+              ))}
+            </ActionPanel.Submenu>
+            <Action.Push
+              icon={Icon.Pencil}
+              title="Rename Group"
+              target={
+                <GroupForm
+                  submitTitle="Rename Group"
+                  defaultValue={group}
+                  validate={(newGroup) =>
+                    isRenameTaken(groups, group, newGroup) ? "A group with this name already exists" : undefined
+                  }
+                  onSubmit={async (newGroup) => {
+                    renameGroup(group, newGroup);
+                    await showToast({ title: `Renamed to ${formatGroup(newGroup)}` });
+                  }}
+                />
+              }
+            />
+            <Action
+              icon={Icon.Trash}
+              title="Delete Group"
+              style={Action.Style.Destructive}
+              onAction={async () => {
+                const confirmed = await confirmAlert({
+                  title: "Delete Group",
+                  message: `Delete ${formatGroup(group)}${hasSubgroups ? " and its subgroups" : ""}? The colors stay in your history.`,
+                  primaryAction: {
+                    title: "Delete",
+                    style: Alert.ActionStyle.Destructive,
+                  },
+                });
+
+                if (confirmed) {
+                  deleteGroup(group);
+                  await showToast({ title: "Deleted group" });
+                }
+              }}
+            />
+          </>
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );

@@ -66,11 +66,12 @@ export function getProfilesPath() {
   return join(getOrionBasePath(), "profiles");
 }
 
-export const executeJxa = async (script: string) => {
+export const executeJxa = async (script: string, options?: { silent?: boolean }) => {
   try {
     return await runAppleScript(script, { language: "JavaScript", humanReadableOutput: false });
   } catch (err: unknown) {
     console.log(err);
+    if (options?.silent) return undefined;
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {

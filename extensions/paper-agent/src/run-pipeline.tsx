@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, open, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  getPreferenceValues,
+  open,
+  openExtensionPreferences,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import * as path from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
@@ -24,17 +34,18 @@ function parseSkipMessage(output: string): string | undefined {
   return undefined;
 }
 
-const coreNotFoundMarkdown = `# Core not found
+const coreNotFoundMarkdown = `# Check Paper Agent setup
 
-Install Paper Agent core first, then set **Config File Path** and **Paper Directory** in extension Preferences.
+Check **Config File Path**, **Paper Directory**, and **Python Executable** in extension Preferences.
 
-- **Install:** [${CORE_INSTALL_URL}](${CORE_INSTALL_URL})
-- Or run the **bootstrap command** (use the Copy action below), then configure Preferences.
+If the core is not installed, use the [installation guide](${CORE_INSTALL_URL}) or copy the bootstrap command below.
 `;
 
 function RunPipelineView() {
-  const prefs = useMemo(() => getPreferenceValues<Preferences.RunPipeline>(), []);
-  const [status, setStatus] = useState<"checking" | "core-missing" | "running">("checking");
+  const [retry, setRetry] = useState(0);
+  const prefs = useMemo(() => getPreferenceValues<Preferences.RunPipeline>(), [retry]);
+  const [status, setStatus] = useState<"checking" | "core-missing" | "running" | "failed">("checking");
+  const [runError, setRunError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -49,21 +60,20 @@ function RunPipelineView() {
       });
       if (cancelled) return;
       if (!core.ok) {
+        setRunError(core.error ?? "Check your core installation.");
         setStatus("core-missing");
         return;
       }
 
       setStatus("running");
+      let started = false;
       try {
         const schedulePaths = getSchedulePaths();
         const activePid = getActiveRunLockPid(schedulePaths.stateDir);
         if (activePid !== undefined) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Paper Agent already running",
-            message: `Current run PID: ${activePid}`,
-          });
-          return;
+          throw new Error(
+            `Another Paper Agent run is already active (PID ${activePid}). Check Run Status before retrying.`,
+          );
         }
         const prepared = prepareRun(prefs, {
           // Detached manual runs must not depend on an auto-cleaned temp config file.
@@ -82,6 +92,7 @@ function RunPipelineView() {
         if (cancelled) return;
         const { success, stderr, stdout, detached } = result;
         if (success) {
+          started = true;
           if (detached) {
             await showToast({
               style: Toast.Style.Success,
@@ -103,25 +114,18 @@ function RunPipelineView() {
           const message = count !== undefined ? `${count} new paper(s)` : undefined;
           await showToast({ style: Toast.Style.Success, title: "Paper Agent finished", message });
         } else {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Paper Agent failed",
-            message: stderr ? stderr.slice(0, 200) : undefined,
-          });
+          throw new Error(stderr || "Paper Agent could not start.");
         }
       } catch (err) {
         if (!cancelled) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Paper Agent failed",
-            message: err instanceof Error ? err.message : String(err),
-          });
+          setRunError(err instanceof Error ? err.message : String(err));
+          setStatus("failed");
         }
       } finally {
         if (cleanup) {
           cleanup();
         }
-        if (!cancelled) {
+        if (!cancelled && started) {
           await popToRoot({ clearSearchBar: true });
         }
       }
@@ -136,15 +140,21 @@ function RunPipelineView() {
     return <Detail isLoading={true} markdown="Checking Paper Agent core…" navigationTitle="Run Paper Agent" />;
   }
 
-  if (status === "core-missing") {
+  if (status === "core-missing" || status === "failed") {
     const configPath = prefs.configPath?.trim() ?? "";
     const configDir = configPath ? path.dirname(configPath) : "";
     return (
       <Detail
-        markdown={coreNotFoundMarkdown}
+        markdown={
+          status === "core-missing"
+            ? `${coreNotFoundMarkdown}\n\n${runError}`
+            : `# Could not start Paper Agent\n\n${runError}`
+        }
         navigationTitle="Run Paper Agent"
         actions={
           <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Retry" onAction={() => setRetry((value) => value + 1)} />
             <Action.CopyToClipboard title="Copy Bootstrap Command" content={getBootstrapCopyText()} />
             {configDir ? <Action title="Open Config Directory" onAction={() => open(configDir)} /> : null}
             <Action title="Open GitHub" onAction={() => open(CORE_INSTALL_URL)} />

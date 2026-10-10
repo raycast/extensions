@@ -1,13 +1,7 @@
 import * as assert from "node:assert";
 import { beforeEach, describe, it } from "node:test";
 
-import {
-  applyTagsToNotes,
-  extractTagsFromNotes,
-  extractTagsFromText,
-  formatTags,
-  parseTags,
-} from "../src/helpers";
+import { applyTagsToNotes, extractTagsFromNotes, extractTagsFromText, formatTags, parseTags } from "../src/helpers";
 import { parseAIResponse, resolveQuickAddReminder } from "../src/quick-add-reminder-parser";
 import createReminderTool from "../src/tools/create-reminder";
 import updateReminderTool from "../src/tools/update-reminder";
@@ -58,7 +52,10 @@ describe("Tag Helpers", () => {
     assert.strictEqual(applyTagsToNotes(undefined, "work"), "#work");
     assert.strictEqual(applyTagsToNotes("", "work"), "#work");
     assert.strictEqual(applyTagsToNotes("Important task", ["work", "urgent"]), "Important task\n\n#work #urgent");
-    assert.strictEqual(applyTagsToNotes("Important task\n\n#old", ["work", "urgent"]), "Important task\n\n#work #urgent");
+    assert.strictEqual(
+      applyTagsToNotes("Important task\n\n#old", ["work", "urgent"]),
+      "Important task\n\n#work #urgent",
+    );
     assert.strictEqual(applyTagsToNotes("Important task\n\n#old", ""), "Important task");
     assert.strictEqual(applyTagsToNotes("#old", ""), undefined);
     assert.strictEqual(applyTagsToNotes("Existing notes", undefined), "Existing notes");
@@ -212,6 +209,17 @@ describe("Reminder Update Tool", () => {
     assert.deepStrictEqual(updatedReminders[0].payload.tags, ["updated", "work"]);
   });
 
+  it("updates a reminder's listId", async () => {
+    const reminder = await updateReminderTool({
+      reminderId: "rem-789",
+      listId: "list-work",
+    });
+
+    assert.strictEqual(reminder.id, "rem-789");
+    assert.strictEqual(reminder.list?.id, "list-work");
+    assert.strictEqual(updatedReminders[0].payload.listId, "list-work");
+  });
+
   it("preserves existing fields when updating without priority and tags", async () => {
     const reminder = await updateReminderTool({
       reminderId: "rem-456",
@@ -287,11 +295,7 @@ describe("Quick Add Natural Language Resolution with Tags", () => {
     assert.strictEqual(res1.title, "Buy milk");
     assert.strictEqual(res1.listId, "work-id");
 
-    const res2 = resolveQuickAddReminder(
-      { title: "Buy milk #Work, and bread" },
-      "Buy milk #Work, and bread",
-      lists,
-    );
+    const res2 = resolveQuickAddReminder({ title: "Buy milk #Work, and bread" }, "Buy milk #Work, and bread", lists);
     assert.strictEqual(res2.title, "Buy milk, and bread");
     assert.strictEqual(res2.listId, "work-id");
 
@@ -474,5 +478,3 @@ describe("Reminder List Item Tag Display", () => {
     ]);
   });
 });
-
-

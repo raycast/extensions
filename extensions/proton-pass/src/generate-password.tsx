@@ -15,58 +15,17 @@ import { PasswordScore, PassCliError, PassCliErrorType, PasswordType } from "./l
 import { getPasswordStrengthLabel, getPasswordStrengthIcon, maskPassword } from "./lib/utils";
 import { renderErrorView } from "./lib/error-views";
 import { platformShortcut } from "./lib/shortcuts";
-
-const MIN_RANDOM_LENGTH = 8;
-const MAX_RANDOM_LENGTH = 128;
-const MIN_PASSPHRASE_WORDS = 3;
-const MAX_PASSPHRASE_WORDS = 10;
-const DEFAULT_RANDOM_LENGTH = 20;
-const DEFAULT_PASSPHRASE_WORDS = 4;
-const PASSPHRASE_SEPARATORS = [
-  "hyphens",
-  "spaces",
-  "periods",
-  "commas",
-  "underscores",
-  "numbers",
-  "numbers-and-symbols",
-] as const;
-
-type PassphraseSeparator = (typeof PASSPHRASE_SEPARATORS)[number];
-
-interface GeneratorSettings {
-  type: PasswordType;
-  length: number;
-  words: number;
-  includeNumbers: boolean;
-  includeUppercase: boolean;
-  includeSymbols: boolean;
-  separator: PassphraseSeparator;
-  capitalize: boolean;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function parseDefaultLength(value: string): number {
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed)) return DEFAULT_RANDOM_LENGTH;
-  return clamp(parsed, MIN_RANDOM_LENGTH, MAX_RANDOM_LENGTH);
-}
-
-function getInitialSettings(preferences: Preferences.GeneratePassword): GeneratorSettings {
-  return {
-    type: preferences.defaultPasswordType === "passphrase" ? "passphrase" : "random",
-    length: parseDefaultLength(preferences.defaultPasswordLength ?? String(DEFAULT_RANDOM_LENGTH)),
-    words: DEFAULT_PASSPHRASE_WORDS,
-    includeNumbers: true,
-    includeUppercase: true,
-    includeSymbols: true,
-    separator: "hyphens",
-    capitalize: true,
-  };
-}
+import {
+  clamp,
+  GeneratorSettings,
+  getInitialSettings,
+  MAX_PASSPHRASE_WORDS,
+  MAX_RANDOM_LENGTH,
+  MIN_PASSPHRASE_WORDS,
+  MIN_RANDOM_LENGTH,
+  PASSPHRASE_SEPARATORS,
+  PassphraseSeparator,
+} from "./lib/generator-defaults";
 
 function areSettingsEqual(a: GeneratorSettings, b: GeneratorSettings): boolean {
   return (
@@ -176,7 +135,7 @@ export default function Command() {
       return;
     }
 
-    await Clipboard.copy(password, { transient: preferences.copyPasswordTransient ?? true });
+    await Clipboard.copy(password, { concealed: preferences.copyPasswordTransient ?? true });
     showToast({
       style: Toast.Style.Success,
       title: "Password Copied",

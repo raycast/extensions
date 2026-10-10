@@ -1,0 +1,13 @@
++-o AppleSmartBattery  <class AppleSmartBattery, id 0x100000abc, registered, matched, active, busy 0 (0 ms), retain 8>
+    {
+      "ExternalConnected" = Yes
+      "Temperature" = 3056
+      "PowerTelemetryData" = {"SystemLoad"=9800,"SystemPowerIn"=10400}
+      "MaxCapacity" = 100
+      "CurrentCapacity" = 80
+      "CycleCount" = 35
+      "ChargerData" = {"NotChargingReason"=4,"IsCharging"=0}
+      "BatteryData" = {"FullChargeCapacity"=8333,"DesignCapacity"=8579}
+      "FullyCharged" = No
+      "IsCharging" = No
+    }

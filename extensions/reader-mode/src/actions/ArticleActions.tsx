@@ -20,6 +20,7 @@ import { ArchiveSource } from "../utils/paywall-hopper";
 import { getStyleLabel } from "../utils/summarizer";
 import { markdownToHtml } from "../utils/html-export";
 import { isMacOS } from "../utils/host-api";
+import { SUMMARY_MODELS, SummaryModelKey } from "../config/ai";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
@@ -39,6 +40,8 @@ interface ArticleActionsProps {
   canAccessAI: boolean;
   isSummarizing?: boolean;
   onSummarize: (style: SummaryStyle) => void;
+  summaryModel: SummaryModelKey;
+  onRegenerate: (model: SummaryModelKey) => void;
   onStopSummarizing?: () => void;
   onReimportFromBrowser?: () => void;
   archiveSource?: ArchiveSource;
@@ -101,10 +104,15 @@ export function ArticleActions({
   canAccessAI,
   isSummarizing,
   onSummarize,
+  summaryModel,
+  onRegenerate,
   onStopSummarizing,
   onReimportFromBrowser,
   archiveSource,
 }: ArticleActionsProps) {
+  // The model that wrote the current summary is left out: picking it would only repeat it.
+  const regenerateModels = SUMMARY_MODELS.filter((m) => m.key !== summaryModel);
+
   return (
     <ActionPanel>
       {/* AI Summary Section */}
@@ -125,6 +133,29 @@ export function ArticleActions({
         >
           {SUMMARY_STYLES.map(({ style, icon }) => (
             <Action key={style} title={getStyleLabel(style)} icon={icon} onAction={() => onSummarize(style)} />
+          ))}
+        </ActionPanel.Submenu>
+      )}
+      {canAccessAI && currentSummary && !isSummarizing && (
+        <Action
+          title="Regenerate"
+          icon={Icon.RotateClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={() => onRegenerate(summaryModel)}
+        />
+      )}
+      {canAccessAI && currentSummary && !isSummarizing && (
+        <ActionPanel.Submenu
+          title="Regenerate with Model…"
+          icon={Icon.RotateClockwise}
+          // Raycast AI Chat's bindings: ⌘R regenerates, ⇧⌘R regenerates with a model.
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
+        >
+          {regenerateModels.map(({ key, title }) => (
+            <Action key={key} title={title} icon={Icon.Stars} onAction={() => onRegenerate(key)} />
           ))}
         </ActionPanel.Submenu>
       )}
@@ -181,12 +212,7 @@ export function ArticleActions({
       {/* Open & Share Section */}
       <ActionPanel.Section title="Open & Share">
         {onReimportFromBrowser && (
-          <Action
-            title="Import from Browser Tab"
-            icon={Icon.Globe}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={onReimportFromBrowser}
-          />
+          <Action title="Import from Browser Tab" icon={Icon.Globe} onAction={onReimportFromBrowser} />
         )}
         <Action.OpenInBrowser title="Open in Browser" url={articleUrl} shortcut={Keyboard.Shortcut.Common.Open} />
       </ActionPanel.Section>
