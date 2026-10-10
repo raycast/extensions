@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Detail, environment, Icon, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, environment, Icon } from "@raycast/api";
 import { HueBridgeState, SendHueBridgeEvent } from "../lib/hueBridgeMachine";
 import { pathToFileURL } from "url";
-import Style = Toast.Style;
 import React from "react";
 import UnlinkAction from "./UnlinkAction";
 
@@ -72,44 +71,37 @@ The extension is now linked to your Hue Bridge.
 You can remove your saved Hue Bridge by using the ‘Unlink Saved Hue Bridge’ action.
 `;
 
-type StateConfig = {
-  markdown?: string;
-  actions?: (send: SendHueBridgeEvent) => React.JSX.Element[];
-  toast?: { title?: string; message?: string; show?: boolean; hide?: boolean };
-};
+type View = { markdown: string; actions?: (send: SendHueBridgeEvent) => React.JSX.Element[] };
+
+// A nested state's value is an object keyed by its parent's name.
+type StateName = HueBridgeState["value"] extends infer V ? (V extends string ? V : keyof V) : never;
 
 const retry = (send: SendHueBridgeEvent) => (
   <Action key="retry" title="Retry" onAction={() => send({ type: "RETRY" })} icon={Icon.Repeat} />
 );
 
-const STATE_CONFIGS: Record<string, StateConfig> = {
-  connecting: { toast: { message: "Connecting to Hue Bridge…", show: true } },
+const VIEWS: Record<StateName, View | null> = {
+  loadingPreferences: null,
   failedToLoadPreferences: { markdown: failedToLoadPreferencesMessage },
+  loadingConfiguration: null,
+  connecting: null,
+  connected: null,
   failedToConnect: {
     markdown: failedToConnectMessage,
     actions: (send) => [retry(send), <UnlinkAction key="unlink" send={send} />],
   },
-  discoveringUsingMdns: {
-    markdown: discoveringMessage,
-    toast: { title: "Discovering Hue Bridges…", show: true },
-  },
-  discoveringUsingPublicApi: { markdown: discoveringMessage },
+  discovering: { markdown: discoveringMessage },
   noBridgeFound: {
     markdown: noBridgeFoundMessage,
     actions: (send) => [retry(send)],
-    toast: { hide: true },
   },
   waitingForLinkButton: {
     markdown: linkWithBridgeMessage,
     actions: (send) => [
       <Action key="link" title="Link with Hue Bridge" onAction={() => send({ type: "LINK" })} icon={Icon.Plug} />,
     ],
-    toast: { hide: true },
   },
-  linking: {
-    markdown: linkWithBridgeMessage,
-    toast: { title: "Linking with Hue Bridge…", show: true },
-  },
+  linking: { markdown: linkWithBridgeMessage },
   failedToLink: {
     markdown: failedToLinkMessage,
     actions: (send) => [retry(send)],
@@ -120,8 +112,8 @@ const STATE_CONFIGS: Record<string, StateConfig> = {
       <Action key="done" title="Done" onAction={() => send({ type: "DONE" })} icon={Icon.Check} />,
       <UnlinkAction key="unlink" send={send} />,
     ],
-    toast: { hide: true },
   },
+  unlinking: null,
 };
 
 /** Returns a Detail view for machine states that need user interaction, otherwise null. */
@@ -129,19 +121,10 @@ export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
   send: SendHueBridgeEvent,
 ): React.JSX.Element | null {
-  const config = STATE_CONFIGS[hueBridgeState.value as keyof typeof STATE_CONFIGS];
-  if (config?.toast) {
-    const toast = new Toast({ style: Style.Animated, title: config.toast.title ?? "", message: config.toast.message });
-    if (config.toast.show) toast.show().then();
-    if (config.toast.hide) toast.hide().then();
-  }
-  if (!config?.markdown) return null;
+  const { value } = hueBridgeState;
+  const name = (typeof value === "string" ? value : Object.keys(value)[0]) as StateName;
+  const view = VIEWS[name];
+  if (view === null) return null;
 
-  return (
-    <Detail
-      key={`${hueBridgeState.value}`}
-      markdown={config.markdown}
-      actions={<ActionPanel>{config.actions?.(send)}</ActionPanel>}
-    />
-  );
+  return <Detail key={name} markdown={view.markdown} actions={<ActionPanel>{view.actions?.(send)}</ActionPanel>} />;
 }

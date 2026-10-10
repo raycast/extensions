@@ -1,4 +1,4 @@
-import { assign, fromPromise, setup, SnapshotFrom } from "xstate";
+import { assign, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
 import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
@@ -16,6 +16,7 @@ type HueContext = {
   bridgeId?: string;
   bridgeConfig?: BridgeConfig;
   hueClient?: HueClient;
+  errorMessage?: string;
 };
 
 export type HueBridgeEvent = { type: "LINK" } | { type: "RETRY" } | { type: "DONE" } | { type: "UNLINK" };
@@ -36,11 +37,7 @@ export const hueBridgeMachine = setup({
         throw Error("Bridge configuration is undefined when trying to connect");
       }
 
-      const hueClient = await createHueClient(input.bridgeConfig);
-
-      new Toast({ title: "" }).hide().then();
-
-      return hueClient;
+      return createHueClient(input.bridgeConfig);
     }),
     discoverUsingMdns: fromPromise(discoverBridgeUsingMdns),
     discoverUsingPublicApi: fromPromise(discoverBridgeUsingHuePublicApi),
@@ -56,6 +53,11 @@ export const hueBridgeMachine = setup({
       await LocalStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(input.bridgeConfig));
     }),
     unlink: fromPromise(() => LocalStorage.clear()),
+    toast: fromCallback(({ input }: { input: Toast.Options }) => {
+      const toast = new Toast(input);
+      toast.show().catch(logError);
+      return () => toast.hide().catch(logError);
+    }),
   },
   guards: {
     hasUsername: ({ context }) => context.bridgeUsername !== undefined,
@@ -64,9 +66,7 @@ export const hueBridgeMachine = setup({
   },
   actions: {
     logError: (_, params: { error: unknown }) => logError(params.error),
-    showToast: (_, params: Toast.Options) => {
-      new Toast(params).show().then();
-    },
+    rememberError: assign({ errorMessage: (_, params: { error: unknown }) => getErrorMessage(params.error) }),
     assignBridge: assign((_, params: { ipAddress: string; id?: string }) => ({
       bridgeIpAddress: params.ipAddress,
       bridgeId: params.id,
@@ -90,18 +90,23 @@ export const hueBridgeMachine = setup({
           guard: "hasInvalidIpAddress",
           target: "failedToLoadPreferences",
           actions: {
-            type: "showToast",
-            params: {
-              style: Style.Failure,
-              title: "Failed to load preferences",
-              message: "Bridge IP address is not a valid IPv4 address",
-            },
+            type: "rememberError",
+            params: { error: "Bridge IP address is not a valid IPv4 address" },
           },
         },
         { target: "loadingConfiguration" },
       ],
     },
-    failedToLoadPreferences: {},
+    failedToLoadPreferences: {
+      invoke: {
+        src: "toast",
+        input: ({ context }) => ({
+          style: Style.Failure,
+          title: "Failed to load preferences",
+          message: context.errorMessage,
+        }),
+      },
+    },
     loadingConfiguration: {
       invoke: {
         src: "loadBridgeConfig",
@@ -112,96 +117,114 @@ export const hueBridgeMachine = setup({
             actions: assign({ bridgeConfig: ({ event }) => event.output }),
           },
           { guard: "hasIpAddress", target: "linking" },
-          { target: "discoveringUsingMdns" },
+          { target: "discovering" },
         ],
       },
     },
     connecting: {
-      invoke: {
-        src: "connect",
-        input: ({ context }) => ({ bridgeConfig: context.bridgeConfig }),
-        onDone: {
-          target: "connected",
-          actions: assign({ hueClient: ({ event }) => event.output }),
+      invoke: [
+        { src: "toast", input: { style: Style.Animated, title: "Connecting to Hue Bridge…" } },
+        {
+          src: "connect",
+          input: ({ context }) => ({ bridgeConfig: context.bridgeConfig }),
+          onDone: {
+            target: "connected",
+            actions: assign({ hueClient: ({ event }) => event.output }),
+          },
+          onError: {
+            target: "failedToConnect",
+            actions: [
+              { type: "logError", params: ({ event }) => ({ error: event.error }) },
+              { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
+            ],
+          },
         },
-        onError: {
-          target: "failedToConnect",
-          actions: [
-            { type: "logError", params: ({ event }) => ({ error: event.error }) },
-            {
-              type: "showToast",
-              params: ({ event }) => ({
-                style: Style.Failure,
-                title: "Failed to connect to bridge",
-                message: getErrorMessage(event.error),
-              }),
-            },
-          ],
-        },
-      },
+      ],
     },
     connected: {},
     failedToConnect: {
+      invoke: {
+        src: "toast",
+        input: ({ context }) => ({
+          style: Style.Failure,
+          title: "Failed to connect to bridge",
+          message: context.errorMessage,
+        }),
+      },
       on: { RETRY: "connecting" },
     },
-    discoveringUsingMdns: {
-      invoke: {
-        src: "discoverUsingMdns",
-        onDone: {
-          target: "waitingForLinkButton",
-          actions: { type: "assignBridge", params: ({ event }) => event.output },
+    discovering: {
+      invoke: { src: "toast", input: { style: Style.Animated, title: "Discovering Hue Bridges…" } },
+      initial: "usingMdns",
+      states: {
+        usingMdns: {
+          invoke: {
+            src: "discoverUsingMdns",
+            onDone: {
+              target: "#manage-hue-bridge.waitingForLinkButton",
+              actions: { type: "assignBridge", params: ({ event }) => event.output },
+            },
+            onError: {
+              target: "usingPublicApi",
+              actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
+            },
+          },
         },
-        onError: {
-          target: "discoveringUsingPublicApi",
-          actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
-        },
-      },
-    },
-    discoveringUsingPublicApi: {
-      invoke: {
-        src: "discoverUsingPublicApi",
-        onDone: {
-          target: "waitingForLinkButton",
-          actions: { type: "assignBridge", params: ({ event }) => event.output },
-        },
-        onError: {
-          target: "noBridgeFound",
-          actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
+        usingPublicApi: {
+          invoke: {
+            src: "discoverUsingPublicApi",
+            onDone: {
+              target: "#manage-hue-bridge.waitingForLinkButton",
+              actions: { type: "assignBridge", params: ({ event }) => event.output },
+            },
+            onError: {
+              target: "#manage-hue-bridge.noBridgeFound",
+              actions: { type: "logError", params: ({ event }) => ({ error: event.error }) },
+            },
+          },
         },
       },
     },
     noBridgeFound: {
-      on: { RETRY: "discoveringUsingMdns" },
+      on: { RETRY: "discovering" },
     },
     waitingForLinkButton: {
       always: { guard: "hasUsername", target: "linking" },
       on: { LINK: "linking" },
     },
     linking: {
-      invoke: {
-        src: "link",
-        input: ({ context }) => ({
-          ipAddress: context.bridgeIpAddress,
-          id: context.bridgeId,
-          username: context.bridgeUsername,
-        }),
-        onDone: {
-          target: "linked",
-          actions: assign(({ event }) => event.output),
+      invoke: [
+        { src: "toast", input: { style: Style.Animated, title: "Linking with Hue Bridge…" } },
+        {
+          src: "link",
+          input: ({ context }) => ({
+            ipAddress: context.bridgeIpAddress,
+            id: context.bridgeId,
+            username: context.bridgeUsername,
+          }),
+          onDone: {
+            target: "linked",
+            actions: assign(({ event }) => event.output),
+          },
+          onError: {
+            target: "failedToLink",
+            actions: [
+              { type: "logError", params: ({ event }) => ({ error: event.error }) },
+              { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
+            ],
+          },
         },
-        onError: {
-          target: "failedToLink",
-          actions: [
-            {
-              type: "showToast",
-              params: ({ event }) => ({ title: "Failed to link with bridge", message: getErrorMessage(event.error) }),
-            },
-            { type: "logError", params: ({ event }) => ({ error: event.error }) },
-          ],
-        },
-      },
+      ],
     },
     failedToLink: {
+      invoke: {
+        src: "toast",
+        input: ({ context }) => ({
+          style: Style.Failure,
+          title: "Failed to link with bridge",
+          message: context.errorMessage,
+        }),
+      },
       on: { RETRY: "linking" },
     },
     linked: {
@@ -225,7 +248,7 @@ export const hueBridgeMachine = setup({
             }),
           },
           {
-            target: "discoveringUsingMdns",
+            target: "discovering",
             actions: assign({
               bridgeIpAddress: undefined,
               bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername || undefined,

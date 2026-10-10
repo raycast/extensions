@@ -19,6 +19,8 @@
 - Show the bridge's error message when an action fails
 - Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures
 - Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
+- Show each bridge setup toast once and hide it when its step ends, also when unlinking midway
+- Fix the Failed to link with bridge toast showing as a success
 - Keep connecting to bridges after Signify moves them to its secondary root certificate, and report a certificate mismatch at once instead of timing out
 - Fix the names of the Steel Blue and Old Lace colors and the Unlink Saved Hue Bridge action
 
