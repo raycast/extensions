@@ -229,7 +229,7 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
           onChange={(value) => changeSetting("reasoningEffort", value as ReasoningEffort)}
           info={settingInfo("reasoningEffort")}
         >
-          {(["none", "low", "medium", "high"] as const).map((effort) => (
+          {(["none", "low", "medium", "high", "xhigh", "max"] as const).map((effort) => (
             <Form.Dropdown.Item value={effort} title={effort} key={effort} />
           ))}
         </Form.Dropdown>

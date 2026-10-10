@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 import { useState } from "react";
 import { getConfigUrl } from "../utils";
+import { proxyClientOptions } from "../utils/proxy";
 
 interface UseChatGPTOptions {
   allowMissingApiKey?: boolean;
@@ -25,6 +26,7 @@ export function useChatGPT(options: UseChatGPTOptions = {}): OpenAI | null {
     return new OpenAI({
       apiKey,
       baseURL: getConfigUrl(preferences),
+      ...proxyClientOptions(preferences),
     });
   });
   return chatGPT;

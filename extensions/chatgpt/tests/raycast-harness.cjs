@@ -119,7 +119,8 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           value = { items: [] };
           break;
         case "clipboardRead":
-          value = { text: "", file: undefined };
+        case "getClipboard":
+          value = { text: "", file: options.clipboardFile };
           break;
         case "browserExtensionGetTabs":
           value = { value: [{ tabId: 1, title: "Fixture page", url: "https://example.com/", active: true }] };

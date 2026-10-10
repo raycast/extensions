@@ -129,6 +129,31 @@ test("Azure Ask keeps the Chat Completions endpoint", native, async (t) => {
   assert.equal(api.requests[0].body.model, "test-deployment");
 });
 
+test("Azure image command uses Chat Completions with image input", native, async (t) => {
+  const api = await provider(t);
+  const imagePath = path.join(os.tmpdir(), `raycast-chatgpt-image-${process.pid}.png`);
+  fs.writeFileSync(
+    imagePath,
+    Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9KjXcAAAAASUVORK5CYII=", "base64"),
+  );
+  t.after(() => fs.rmSync(imagePath, { force: true }));
+  const app = await launch(
+    "ask-clipboard-image",
+    {},
+    {
+      ...api.prefs,
+      useAzure: true,
+      azureEndpoint: api.prefs.apiEndpoint.replace(/\/v1$/, ""),
+      azureDeployment: "test-deployment",
+    },
+    { clipboardFile: imagePath },
+  );
+  t.after(app.close);
+  await app.waitFor((tree) => body(tree)?.kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
+  assert.match(api.requests[0].path, /\/openai\/deployments\/test-deployment\/chat\/completions/);
+  assert.match(JSON.stringify(api.requests[0].body.messages), /image_url/);
+});
+
 test("AI Commands send selected text through GPT-6 Responses", native, async (t) => {
   const api = await provider(t);
   const app = await launch("search-ai-command", {}, api.prefs);
@@ -147,19 +172,20 @@ test("AI Commands send selected text through GPT-6 Responses", native, async (t)
   assert.match(JSON.stringify(api.requests[0].body.input), /Text to rewrite/);
 });
 
-test("unauthenticated Models shows sign-in before catalog content", native, async (t) => {
+test("unauthenticated Models hides catalog while checking sign-in", native, async (t) => {
   const codexHome = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-codex-logged-out-"));
   t.after(() => fs.rmSync(codexHome, { recursive: true, force: true }));
   const app = await launch("model", {}, { apiKey: "" }, { env: { CODEX_HOME: codexHome } });
   t.after(app.close);
-  await app.waitFor((tree) => JSON.stringify(tree).includes("Sign-in Required"));
+  await app.waitFor((tree) => body(tree)?.isLoading === true);
   assert.ok(!app.storage.has(CATALOG_STORAGE_KEY));
 });
 
-test("unauthenticated image command shows sign-in before reading an image", native, async (t) => {
+test("unauthenticated image command hides image content while checking sign-in", native, async (t) => {
   const codexHome = fs.mkdtempSync(path.join(os.tmpdir(), "raycast-image-logged-out-"));
   t.after(() => fs.rmSync(codexHome, { recursive: true, force: true }));
   const app = await launch("ask-clipboard-image", {}, { apiKey: "" }, { env: { CODEX_HOME: codexHome } });
   t.after(app.close);
-  await app.waitFor((tree) => JSON.stringify(tree).includes("Sign-in Required"));
+  await app.waitFor((tree) => body(tree)?.isLoading === true);
+  assert.ok(!app.methods.some(({ method }) => method === "clipboardRead"));
 });

@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LocalStorage, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import {
   clearCodexAuthSession,
+  CHATGPT_SESSION_MARKER,
   getConfiguredApiKey,
   getConnectionMode,
   hasChatGPTAccount,
@@ -15,7 +16,10 @@ export const PreferencesActionSection = () => {
   const [isChatGPTAuthorized, setChatGPTAuthorized] = useState(false);
 
   const refreshAuthState = useCallback(async () => {
-    if (apiKeyPreferred) return;
+    if (apiKeyPreferred && !(await LocalStorage.getItem(CHATGPT_SESSION_MARKER))) {
+      setChatGPTAuthorized(false);
+      return;
+    }
     try {
       setChatGPTAuthorized(await hasChatGPTAccount());
     } catch {
@@ -93,10 +97,6 @@ export const PreferencesActionSection = () => {
           onAction={handleSignInWithChatGPT}
           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         />
-      )}
-
-      {apiKeyPreferred && !isChatGPTAuthorized && (
-        <Action icon={Icon.XMarkCircle} title="Sign out" onAction={handleSignOutFromChatGPT} />
       )}
 
       <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />

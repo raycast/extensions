@@ -23,7 +23,7 @@ export function AuthGate({
   allowChatGPTSignIn = true,
 }: AuthGateProps) {
   const [auth, setAuth] = useState<AuthStatus>(() => getInitialAuthStatus());
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState<boolean>(() => getInitialAuthStatus().provider === "none");
   const [authError, setAuthError] = useState<string | null>(null);
 
   const refreshAuth = useCallback(async (showLoading = false) => {

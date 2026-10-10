@@ -47,6 +47,7 @@ interface LoginCompletedNotification {
 }
 
 const AUTH_STATUS_CACHE_MS = 15 * 1000;
+export const CHATGPT_SESSION_MARKER = "chatgpt-session-present";
 
 let cachedChatGPTAccount: {
   account: ChatGPTAccount | null;
@@ -92,6 +93,7 @@ export async function resolveAuthStatus(preferences?: Preferences): Promise<Auth
           ? await readChatGPTAccountSafe().catch(() => null)
           : await readChatGPTAccountSafe();
     const hasChatGPTSession = !!account;
+    if (account) await LocalStorage.setItem(CHATGPT_SESSION_MARKER, true);
 
     return {
       provider: selectAuthProvider(getConnectionMode(config), initial.hasApiKey, hasChatGPTSession),
@@ -153,6 +155,7 @@ export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
     }
 
     primeCachedChatGPTAccount(account);
+    await LocalStorage.setItem(CHATGPT_SESSION_MARKER, true);
 
     return {
       email: account.email,
@@ -170,6 +173,7 @@ export async function clearCodexAuthSession(): Promise<void> {
   } finally {
     clearCachedChatGPTAccount();
     await LocalStorage.removeItem("chatgpt-auth-status-cache");
+    await LocalStorage.removeItem(CHATGPT_SESSION_MARKER);
   }
 }
 

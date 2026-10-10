@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { useChatGPT } from "../hooks/useChatGPT";
+import { getConfiguration, useChatGPT } from "../hooks/useChatGPT";
 import { AskImageProps, Model } from "../type";
 import { resolveAuthStatus } from "../utils/auth";
 import { toUnit } from "../utils";
@@ -113,6 +113,36 @@ function VisionViewWithAuth(props: AskImageProps) {
       if (!chatGPT) throw new Error("Add an API key or sign in with ChatGPT to use image commands.");
       const imageUrl = bufferToDataUrl(`image/${data.type}`, data.data);
 
+      if (getConfiguration().useAzure) {
+        const azureRequest = {
+          model: preferences.azureDeployment || VISION_MODEL.option,
+          messages: [
+            { role: "system" as const, content: VISION_MODEL.prompt },
+            {
+              role: "user" as const,
+              content: [
+                { type: "text" as const, text: prompt || "Describe this image:" },
+                { type: "image_url" as const, image_url: { url: imageUrl } },
+              ],
+            },
+          ],
+        };
+        const requestOptions = {
+          query: { "api-version": "2023-06-01-preview" },
+          headers: { "api-key": preferences.apiKey ?? "" },
+        };
+        if (useStream) {
+          const stream = await chatGPT.chat.completions.create({ ...azureRequest, stream: true }, requestOptions);
+          return (async function* () {
+            for await (const chunk of stream) {
+              yield { type: "response.output_text.delta", delta: chunk.choices[0]?.delta?.content ?? "" };
+            }
+          })();
+        }
+        const completion = await chatGPT.chat.completions.create({ ...azureRequest, stream: false }, requestOptions);
+        return { output_text: completion.choices[0]?.message.content ?? "" };
+      }
+
       const request = {
         model: VISION_MODEL.option,
         instructions: VISION_MODEL.prompt,
@@ -219,7 +249,6 @@ function VisionViewWithAuth(props: AskImageProps) {
       metadata={
         imageMeta.size || imageMeta.width || imageMeta.height ? (
           <Detail.Metadata>
-            {imageMeta.size || imageMeta.width || (imageMeta.height && <Detail.Metadata.Separator />)}
             {imageMeta.size && <Detail.Metadata.Label title="Size" text={toUnit(imageMeta.size)} />}
             {imageMeta.width && <Detail.Metadata.Label title="Width" text={String(imageMeta.width)} />}
             {imageMeta.height && <Detail.Metadata.Label title="Height" text={String(imageMeta.height)} />}

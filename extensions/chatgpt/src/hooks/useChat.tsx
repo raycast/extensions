@@ -11,7 +11,6 @@ import { resolveModelOption, normalizeAvailableOptions } from "../utils/model-su
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
-import { useProxy } from "./useProxy";
 import { ResponseInput, ResponseInputContent } from "openai/resources/responses/responses";
 
 function toResponseInput(messages: Message[]): ResponseInput {
@@ -65,7 +64,6 @@ export function useChat<T extends Chat>(
 
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
-  const proxy = useProxy();
   const chatGPT = useChatGPT({ allowMissingApiKey: true });
 
   async function ask(question: string, files: string[], model: Model) {
@@ -109,7 +107,6 @@ export function useChat<T extends Chat>(
     const { signal: abortSignal } = abortControllerRef.current;
     const headers = getHeaders();
     const requestOptions = {
-      httpAgent: proxy,
       // https://github.com/openai/openai-node/blob/master/examples/azure.ts
       // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
       query: { ...headers.params },
