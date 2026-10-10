@@ -163,6 +163,24 @@
       ]
     },
     {
+      "name": "search-selected-text",
+      "title": "Search Selected Text",
+      "subtitle": "Techgedöns.de",
+      "description": "Searches Techgedöns.de for text selected in the frontmost application",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "auswahl",
+        "markierter text",
+        "suchen",
+        "selected text",
+        "search"
+      ]
+    },
+    {
       "name": "search-techgedoens",
       "title": "Search Techgedöns",
       "subtitle": "Techgedöns.de",

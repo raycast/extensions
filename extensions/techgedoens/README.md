@@ -9,6 +9,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 - **Latest Articles** - Shows the latest nine articles in a compact numbered list.
 - **Open Techgedöns.de** - Opens the website directly in the default browser.
 - **Refresh Articles** - Updates the latest articles and the local archive manually or through Raycast Background Refresh.
+- **Search Selected Text** - Searches the public blog archive for text selected in the frontmost application.
 - **Search Techgedöns** - Searches all published articles in the public Techgedöns.de blog archive.
 - **Techgedöns Menu Bar** - Optionally shows the unread count and five latest articles in the macOS menu bar.
 
@@ -16,6 +17,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 
 - `@Techgedöns` AI extension for searching the archive, retrieving the latest posts, and loading complete articles in Raycast AI
 - Full-text search across the local archive and the complete public blog archive
+- Search the public blog archive directly using text selected in another application
 - Article previews with images, publication dates, topics, and rendered article content
 - Read, unread, and favorite status with an unread count in Raycast root search
 - Configurable Return key action for reading in Raycast or opening the default browser

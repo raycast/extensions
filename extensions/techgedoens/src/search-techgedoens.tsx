@@ -7,6 +7,7 @@ import {
   Icon,
   Image,
   Keyboard,
+  type LaunchProps,
   List,
   open,
   openCommandPreferences,
@@ -27,11 +28,15 @@ import { CATEGORY_OPTIONS, strings, translateCategory, type Strings } from "./st
 
 type ArticleEnterAction = "browser" | "reader";
 type ArticleCategoryFilter = "__all_categories__" | (typeof CATEGORY_OPTIONS)[number];
+type SearchLaunchContext = { searchText?: string };
 
 const MINIMUM_SEARCH_LENGTH = 2;
 const SEARCH_DELAY_MS = 400;
 const FILTER_ALL_CATEGORIES = "__all_categories__";
-export default function SearchTechgedoensCommand() {
+export default function SearchTechgedoensCommand({
+  fallbackText,
+  launchContext,
+}: LaunchProps<{ launchContext: SearchLaunchContext }>) {
   const preferences = getPreferenceValues<Preferences.SearchTechgedoens>();
   const translations = strings;
   const enterAction = preferences.articleEnterAction === "browser" ? "browser" : "reader";
@@ -40,7 +45,7 @@ export default function SearchTechgedoensCommand() {
     timeStyle: "short",
   });
   const listDateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(() => launchContext?.searchText?.trim() || fallbackText?.trim() || "");
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategoryFilter>(FILTER_ALL_CATEGORIES);
   const [loadedQuery, setLoadedQuery] = useState("");
   const [articles, setArticles] = useState<ArchivedArticle[]>([]);
