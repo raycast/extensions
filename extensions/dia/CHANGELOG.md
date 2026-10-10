@@ -1,5 +1,10 @@
 # Dia Changelog
 
+## [AI Tool: Read Tab Contents] - 2026-10-10
+
+- Added an AI tool that reads the visible text of a tab or the focused tab, truncated to 20,000 characters by default.
+- Requires Dia to be launched with `--enable-applescript-javascript`; the tool explains how when it isn't.
+
 ## [AI Tools: Open URLs and Manage Tabs] - 2026-10-10
 
 - Added AI tools to open a URL or web search, switch to a tab, and close a tab.
