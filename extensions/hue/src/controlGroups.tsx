@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Grid, Icon, Image, useNavigation } from "@raycast/api";
-import type { Group, Light, Room, Zone } from "./lib/types";
+import type { Group, Light } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
@@ -40,45 +40,26 @@ export default function ControlGroups() {
 
   return (
     <Grid isLoading={isLoading} aspectRatio="16/9" fit={Grid.Fit.Fill} filtering={{ keepSectionOrder: true }}>
-      {rooms.length > 0 && (
-        <Grid.Section title="Rooms">
-          {[...rooms].sort(byName).map((room: Room) => {
-            const groupLights = getLightsFromGroup(lights, room);
-            const groupedLight = getGroupedLightFromGroup(lights, room);
-
-            return (
-              <Group
-                key={room.id}
-                groupLights={groupLights}
-                groupedLight={groupedLight}
-                group={room}
-                icon={icons.get(room.id)}
-                useHue={useHueObject}
-                rateLimiter={rateLimiter}
-              />
-            );
-          })}
-        </Grid.Section>
-      )}
-      {zones.length > 0 && (
-        <Grid.Section title="Zones">
-          {[...zones].sort(byName).map((zone: Zone) => {
-            const groupLights = getLightsFromGroup(lights, zone);
-            const groupedLight = getGroupedLightFromGroup(lights, zone);
-
-            return (
-              <Group
-                key={zone.id}
-                group={zone}
-                groupLights={groupLights}
-                groupedLight={groupedLight}
-                icon={icons.get(zone.id)}
-                useHue={useHueObject}
-                rateLimiter={rateLimiter}
-              />
-            );
-          })}
-        </Grid.Section>
+      {[
+        { title: "Rooms", groups: rooms },
+        { title: "Zones", groups: zones },
+      ].map(
+        ({ title, groups }) =>
+          groups.length > 0 && (
+            <Grid.Section key={title} title={title}>
+              {[...groups].sort(byName).map((group) => (
+                <Group
+                  key={group.id}
+                  group={group}
+                  groupLights={getLightsFromGroup(lights, group)}
+                  groupedLight={getGroupedLightFromGroup(lights, group)}
+                  icon={icons.get(group.id)}
+                  useHue={useHueObject}
+                  rateLimiter={rateLimiter}
+                />
+              ))}
+            </Grid.Section>
+          ),
       )}
     </Grid>
   );
