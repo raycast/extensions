@@ -11,8 +11,11 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef } from "react";
+import FocusSessions from "./focus-sessions.tsx";
 import { HowItWorks } from "./lib/HowItWorks.tsx";
+import { noticesMarkdown } from "./lib/noticeRow.ts";
 import { SetUpCategory } from "./lib/SetUpCategory.tsx";
+import { TurnOnMenuBarAction } from "./lib/TurnOnMenuBarAction.tsx";
 import { getPreferences, SUPPORT_URL } from "./lib/runtime.ts";
 import { renderBoard } from "./lib/statsBoard.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
@@ -23,7 +26,7 @@ import { useStats } from "./lib/useStats.ts";
 type Context = { setUp?: string };
 
 export default function FocusStats({ launchContext }: LaunchProps<{ launchContext?: Context }>) {
-  const { data, isLoading } = useStats();
+  const { data, isLoading, revalidate } = useStats();
   const { push } = useNavigation();
   const opened = useRef(false);
 
@@ -41,12 +44,13 @@ export default function FocusStats({ launchContext }: LaunchProps<{ launchContex
 
   let markdown = "";
   if (stats) {
-    markdown = markdownImage(
+    const notices = noticesMarkdown(statusNotes(data, isLoading), theme, width);
+    if (notices) markdown += `${notices}\n\n`;
+    markdown += markdownImage(
       "Today, this week, streak, quests and the focus calendar",
       renderBoard(stats, theme, prefs.dailyGoal, tiersFor(prefs.leagues), width),
       width,
     );
-    for (const note of statusNotes(data, isLoading)) markdown += `\n\n> ${note.title}. ${note.body}`;
   }
 
   return (
@@ -56,6 +60,7 @@ export default function FocusStats({ launchContext }: LaunchProps<{ launchContex
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {data?.menuBarOff && <TurnOnMenuBarAction onDone={revalidate} />}
             <Action
               title="Show Recap"
               icon={Icon.Stars}
@@ -65,15 +70,7 @@ export default function FocusStats({ launchContext }: LaunchProps<{ launchContex
                 )
               }
             />
-            <Action
-              title="Browse Sessions"
-              icon={Icon.List}
-              onAction={() =>
-                launchCommand({ name: "focus-sessions", type: LaunchType.UserInitiated }).catch((error) =>
-                  showFailureToast(error, { title: "Could not open Browse Sessions" }),
-                )
-              }
-            />
+            <Action.Push title="Browse Sessions" icon={Icon.List} target={<FocusSessions />} onPop={revalidate} />
             {stats && (
               <Action.Push
                 title="How It Works"

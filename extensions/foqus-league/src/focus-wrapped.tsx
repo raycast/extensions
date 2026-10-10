@@ -15,12 +15,14 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import * as path from "node:path";
 import { useMemo, useState } from "react";
+import { noticesMarkdown } from "./lib/noticeRow.ts";
 import { getPreferences } from "./lib/runtime.ts";
 import { periodRange, type Period } from "./lib/stats.ts";
 import { statusNotes } from "./lib/statusNotes.ts";
 import { DOWNLOADS, posterFilename, renderPosterPng, saveNew } from "./lib/shareImage.ts";
 import { markdownImage } from "./lib/svg.ts";
 import { themeFor, tiersFor } from "./lib/theme.ts";
+import { TurnOnMenuBarAction } from "./lib/TurnOnMenuBarAction.tsx";
 import { useStats } from "./lib/useStats.ts";
 import { renderSharePoster, renderWrapped, SHARE_ASPECT, wrappedFacts } from "./lib/wrappedPoster.ts";
 
@@ -36,7 +38,7 @@ export default function FocusWrapped() {
   const [period, setPeriod] = useState<Period>("month");
   const [offset, setOffset] = useState(0);
   const range = useMemo(() => periodRange(period, offset), [period, offset]);
-  const { data, isLoading } = useStats(range.from, range.to);
+  const { data, isLoading, revalidate } = useStats(range.from, range.to);
   const prefs = getPreferences();
   const theme = themeFor(environment.appearance);
   const tiers = tiersFor(prefs.leagues);
@@ -83,14 +85,14 @@ export default function FocusWrapped() {
     }
   }
 
-  const note = statusNotes(data, isLoading)
-    .map((n) => `> ${n.title}. ${n.body}`)
-    .join("\n\n");
+  const notices = noticesMarkdown(statusNotes(data, isLoading), theme);
 
   const unit = PERIODS.find((p) => p.id === period);
   const steps = period !== "all";
 
-  const markdown = facts ? [markdownImage(`Foqus Recap, ${range.label}`, poster), "", note].join("\n") : "";
+  const markdown = facts
+    ? [notices, markdownImage(`Foqus Recap, ${range.label}`, poster)].filter(Boolean).join("\n\n")
+    : "";
 
   return (
     <Detail
@@ -98,6 +100,7 @@ export default function FocusWrapped() {
       markdown={markdown}
       actions={
         <ActionPanel>
+          {data?.menuBarOff && <TurnOnMenuBarAction onDone={revalidate} />}
           <Action
             title="Show League"
             icon={Icon.BarChart}

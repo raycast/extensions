@@ -10,10 +10,12 @@ import {
   getPreferences,
   isRaycast2,
   learnGoalBlocks,
+  markMenuBarRan,
   RAYCAST_FOCUS,
   rememberQuickStart,
   resumeRecording,
   SUPPORT_URL,
+  wasPoked,
 } from "./lib/runtime.ts";
 import { useStats } from "./lib/useStats.ts";
 
@@ -32,20 +34,31 @@ const resume = () =>
     .catch((error) => showHUD(`Could not resume recording: ${reason(error)}`));
 
 export default function FocusMenuBar() {
+  useEffect(() => {
+    markMenuBarRan().catch(() => undefined);
+  }, []);
+
   const { data, isLoading, revalidate } = useStats();
   const prefs = getPreferences();
   const { data: learned } = useCachedPromise(learnGoalBlocks, [], { keepPreviousData: true });
   const { data: categories } = useCachedPromise(readCategories, [], { keepPreviousData: true });
 
   const stats = data?.stats;
+  const [celebrates, setCelebrates] = useState<boolean | undefined>(BACKGROUND || undefined);
+  useEffect(() => {
+    if (!BACKGROUND)
+      wasPoked()
+        .then(setCelebrates)
+        .catch(() => setCelebrates(false));
+  }, []);
   const [announced, setAnnounced] = useState(false);
   useEffect(() => {
-    if (!BACKGROUND || isLoading || announced) return;
+    if (!celebrates || isLoading || announced) return;
     announce()
       .catch(() => undefined)
       .finally(() => setAnnounced(true));
-  }, [isLoading, announced]);
-  const announcing = BACKGROUND && !announced;
+  }, [celebrates, isLoading, announced]);
+  const announcing = celebrates !== false && !announced;
 
   const title = (() => {
     if (!stats) return "…";
