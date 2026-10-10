@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [AI Tools: Open URLs and Manage Tabs] - {PR_MERGE_DATE}
+## [AI Tools: Open URLs and Manage Tabs] - 2026-10-10
 
 - Added AI tools to open a URL or web search, switch to a tab, and close a tab.
 - Closing a tab asks for confirmation first.
