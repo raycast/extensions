@@ -1,17 +1,12 @@
-import { Action, ActionPanel, environment, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import type { CssColor, Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS } from "./helpers/constants";
+import { COLORS } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
+import BrightnessActions from "./components/BrightnessActions";
 import { useHue } from "./hooks/useHue";
-import { getProgressIcon } from "@raycast/utils";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
-import {
-  calculateAdjustedBrightness,
-  calculateAdjustedColorTemperature,
-  getClosestBrightness,
-  hexToXy,
-} from "./helpers/colors";
+import { calculateAdjustedColorTemperature, hexToXy } from "./helpers/colors";
 import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, getIconForColor, withTransition } from "./helpers/raycast";
@@ -60,24 +55,10 @@ function Light(props: {
               light={props.light}
               onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.light)}
             />
-            {props.light.dimming !== undefined && (
-              <SetBrightnessAction
-                light={props.light}
-                onSet={(percentage: number) =>
-                  handleSetBrightness(props.useHue, props.rateLimiter, props.light, percentage)
-                }
-              />
-            )}
-            {props.light.dimming !== undefined && (
-              <IncreaseBrightnessAction
-                light={props.light}
-                onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
-              />
-            )}
-            {props.light.dimming !== undefined && (
-              <DecreaseBrightnessAction
-                light={props.light}
-                onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
+            {props.light.dimming && (
+              <BrightnessActions
+                brightness={props.light.dimming.brightness}
+                onSet={(brightness) => handleSetBrightness(props.useHue, props.rateLimiter, props.light, brightness)}
               />
             )}
           </ActionPanel.Section>
@@ -118,62 +99,6 @@ function ToggleLightAction(props: { light: Light; onToggle: () => void }) {
       title={`Turn ${props.light.metadata.name} ${props.light.on.on ? "Off" : "On"}`}
       icon={props.light.on.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
-    />
-  );
-}
-
-function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) => void }) {
-  return (
-    <ActionPanel.Submenu
-      title="Set Brightness"
-      icon={getProgressIcon(
-        (props.light.dimming?.brightness ?? 0) / 100,
-        environment.appearance === "light" ? "#000" : "#fff",
-      )}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "b" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "b" },
-      }}
-    >
-      {BRIGHTNESSES.map((brightness) => (
-        <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
-      ))}
-    </ActionPanel.Submenu>
-  );
-}
-
-function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void }) {
-  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) >= BRIGHTNESS_MAX) {
-    return null;
-  }
-
-  return (
-    <Action
-      title="Increase Brightness"
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
-      }}
-      icon={Icon.Plus}
-      onAction={props.onIncrease}
-    />
-  );
-}
-
-function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void }) {
-  if (props.light.dimming === undefined || getClosestBrightness(props.light.dimming.brightness) <= BRIGHTNESS_MIN) {
-    return null;
-  }
-
-  return (
-    <Action
-      title="Decrease Brightness"
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
-      }}
-      icon={Icon.Minus}
-      onAction={props.onDecrease}
     />
   );
 }
@@ -270,29 +195,6 @@ function handleSetBrightness(
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${light.metadata.name}`,
-  });
-}
-
-function handleBrightnessChange(
-  hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light,
-  direction: "increase" | "decrease",
-) {
-  const adjustedBrightness = calculateAdjustedBrightness(light.dimming?.brightness ?? 0, direction);
-  const changes = {
-    on: { on: true },
-    // dimming_delta exists, but manually calculating the new value
-    // enables the usage of the value in the optimistic update.
-    dimming: { brightness: adjustedBrightness },
-  };
-
-  return applyUpdate(hue, {
-    rateLimiter,
-    lights: new Map([[light.id, changes]]),
-    request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
-    success: `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`,
-    failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${light.metadata.name}`,
   });
 }
 

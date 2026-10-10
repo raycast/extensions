@@ -1,13 +1,12 @@
-import { Action, ActionPanel, Color, Grid, Icon, Image } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Image } from "@raycast/api";
 import type { Group, Light } from "./lib/types";
-import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
-import { getProgressIcon } from "@raycast/utils";
 import React, { useMemo } from "react";
 import { createGroupIcon } from "./helpers/svgImages";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
+import BrightnessActions from "./components/BrightnessActions";
 import { SetScene } from "./setScene";
 import {
   getColorsFromGroup,
@@ -17,7 +16,6 @@ import {
 } from "./helpers/hueResources";
 import { byName } from "./helpers/collections";
 import { applyUpdate, withTransition } from "./helpers/raycast";
-import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
 
 export default function ControlGroups() {
   const useHueObject = useHue();
@@ -105,48 +103,21 @@ function Group(props: {
               target={<SetScene group={props.group} useHue={props.useHue} />}
             />
             <ActionPanel.Section>
-              <SetBrightnessAction
-                group={props.group}
-                groupedLight={groupedLight}
-                onSet={(brightness: number) =>
-                  handleSetBrightness(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    groupedLight,
-                    props.group,
-                    brightness,
-                  )
-                }
-              />
-              <IncreaseBrightnessAction
-                group={props.group}
-                groupedLight={groupedLight}
-                onIncrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    groupedLight,
-                    props.group,
-                    "increase",
-                  )
-                }
-              />
-              <DecreaseBrightnessAction
-                group={props.group}
-                groupedLight={groupedLight}
-                onDecrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    groupedLight,
-                    props.group,
-                    "decrease",
-                  )
-                }
-              />
+              {groupedLight.dimming && (
+                <BrightnessActions
+                  brightness={groupedLight.dimming.brightness}
+                  onSet={(brightness) =>
+                    handleSetBrightness(
+                      props.useHue,
+                      props.rateLimiter,
+                      props.groupLights,
+                      groupedLight,
+                      props.group,
+                      brightness,
+                    )
+                  }
+                />
+              )}
             </ActionPanel.Section>
 
             <ActionPanel.Section>
@@ -165,69 +136,6 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLightStat
       title={`Turn ${props.group.metadata.name} ${props.groupedLight.on?.on ? "Off" : "On"}`}
       icon={props.groupedLight.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
-    />
-  );
-}
-
-function SetBrightnessAction(props: {
-  group: Group;
-  groupedLight: GroupedLightState;
-  onSet: (brightness: number) => void;
-}) {
-  return (
-    <ActionPanel.Submenu
-      title="Set Brightness"
-      icon={getProgressIcon((props.groupedLight.dimming?.brightness ?? 0) / 100, Color.PrimaryText)}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "b" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "b" },
-      }}
-    >
-      {BRIGHTNESSES.map((brightness) => (
-        <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
-      ))}
-    </ActionPanel.Submenu>
-  );
-}
-
-function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLightState; onIncrease: () => void }) {
-  if (
-    props.groupedLight.dimming === undefined ||
-    getClosestBrightness(props.groupedLight.dimming.brightness) >= BRIGHTNESS_MAX
-  ) {
-    return null;
-  }
-
-  return (
-    <Action
-      title="Increase Brightness"
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
-      }}
-      icon={Icon.Plus}
-      onAction={props.onIncrease}
-    />
-  );
-}
-
-function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLightState; onDecrease: () => void }) {
-  if (
-    props.groupedLight.dimming === undefined ||
-    getClosestBrightness(props.groupedLight.dimming.brightness) <= BRIGHTNESS_MIN
-  ) {
-    return null;
-  }
-
-  return (
-    <Action
-      title="Decrease Brightness"
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
-      }}
-      icon={Icon.Minus}
-      onAction={props.onDecrease}
     />
   );
 }
@@ -279,33 +187,5 @@ function handleSetBrightness(
     request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
     success: `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
     failure: `Failed setting brightness of ${group.metadata.name}`,
-  });
-}
-
-function handleBrightnessChange(
-  hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  groupLights: Light[],
-  groupedLight: GroupedLightState,
-  group: Group,
-  direction: "increase" | "decrease",
-) {
-  const adjustedBrightness = calculateAdjustedBrightness(groupedLight.dimming?.brightness ?? 0, direction);
-
-  const changes = {
-    on: { on: true },
-    // dimming_delta exists, but manually calculating the new value
-    // enables the usage of the value in the optimistic update.
-    dimming: { brightness: adjustedBrightness },
-  };
-
-  const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
-
-  return applyUpdate(hue, {
-    rateLimiter,
-    lights: changesToLights,
-    request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
-    success: `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${group.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`,
-    failure: `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${group.metadata.name}`,
   });
 }

@@ -12,7 +12,7 @@
 - Fix Make Cooler and Make Warmer losing a light's own range after a change, and jumping to the coolest white from a color
 - Fix holding a room or zone's brightness shortcut showing errors and jumping back
 - Fix the Set Brightness icon of rooms and zones showing less than the actual brightness
-- Fix plugs offering brightness actions after a room's brightness changes
+- Fix plugs, and rooms and zones of only plugs, offering brightness actions
 - Fix Set Scene opened from Control Groups not updating while open
 - Fix live updates from the bridge stopping or skipping changes
 - Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
