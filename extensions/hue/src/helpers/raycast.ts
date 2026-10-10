@@ -36,7 +36,7 @@ export const withTransition = <T extends object>(changes: T) => ({
 export async function applyUpdate(
   { hueBridgeState, lights, scenes, setLights, setScenes }: ReturnType<typeof useHue>,
   update: {
-    rateLimiter?: { canExecute(): boolean };
+    canExecute?: () => boolean;
     lights: Map<Id, DeepPartial<Light>>;
     scene?: Scene;
     request: (hueClient: HueClient) => Promise<unknown>;
@@ -47,7 +47,7 @@ export async function applyUpdate(
   try {
     const { hueClient } = hueBridgeState.context;
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
-    if (update.rateLimiter && !update.rateLimiter.canExecute()) return;
+    if (update.canExecute && !update.canExecute()) return;
     // Rooms and zones follow from their lights while rendering.
     const undos = [
       optimisticUpdates(update.lights, setLights),

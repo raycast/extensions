@@ -21,7 +21,7 @@ export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
   // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
-  const rateLimiter = useInputRateLimiter(1, 1000);
+  const canExecute = useInputRateLimiter(1000);
   const icons = useMemo(
     () =>
       new Map(
@@ -53,7 +53,7 @@ export default function ControlGroups() {
                   groupedLight={getGroupedLightFromGroup(lights, group)}
                   icon={icons.get(group.id)}
                   useHue={useHueObject}
-                  rateLimiter={rateLimiter}
+                  canExecute={canExecute}
                 />
               ))}
             </Grid.Section>
@@ -69,7 +69,7 @@ function Group(props: {
   group: Group;
   icon?: Image;
   useHue: ReturnType<typeof useHue>;
-  rateLimiter: ReturnType<typeof useInputRateLimiter>;
+  canExecute: () => boolean;
 }) {
   const { groupedLight } = props;
   const lightsOnCount = props.groupLights.filter((light) => light.on.on).length;
@@ -94,7 +94,7 @@ function Group(props: {
               group={props.group}
               groupedLight={groupedLight}
               onToggle={() =>
-                handleToggle(props.useHue, props.rateLimiter, props.groupLights, groupedLight, props.group)
+                handleToggle(props.useHue, props.canExecute, props.groupLights, groupedLight, props.group)
               }
             />
             <Action.Push
@@ -109,7 +109,7 @@ function Group(props: {
                   onSet={(brightness) =>
                     handleSetBrightness(
                       props.useHue,
-                      props.rateLimiter,
+                      props.canExecute,
                       props.groupLights,
                       groupedLight,
                       props.group,
@@ -142,7 +142,7 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLightStat
 
 function handleToggle(
   hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  canExecute: () => boolean,
   groupLights: Light[],
   groupedLight: GroupedLightState,
   group: Group,
@@ -155,7 +155,7 @@ function handleToggle(
   const changesToLights = new Map(groupLights.map((light) => [light.id, changesToGroup]));
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     lights: changesToLights,
     request: (hueClient) =>
       hueClient.updateGroupedLight(groupedLight, changesToGroup).catch((error: Error) => {
@@ -168,7 +168,7 @@ function handleToggle(
 
 function handleSetBrightness(
   hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  canExecute: () => boolean,
   groupLights: Light[],
   groupedLight: GroupedLightState,
   group: Group,
@@ -182,7 +182,7 @@ function handleSetBrightness(
   const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     lights: changesToLights,
     request: (hueClient) => hueClient.updateGroupedLight(groupedLight, withTransition(changes)),
     success: `Set brightness of ${group.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,

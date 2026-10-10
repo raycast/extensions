@@ -15,7 +15,7 @@ import { createLightIcon } from "./helpers/svgImages";
 export default function ControlLights() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
-  const rateLimiter = useInputRateLimiter(10, 1000);
+  const canExecute = useInputRateLimiter(100);
 
   const groups = [...rooms, ...zones].sort(byName);
 
@@ -29,7 +29,7 @@ export default function ControlLights() {
           {getLightsFromGroup(lights, group)
             .sort(byName)
             .map((light) => (
-              <Light key={light.id} light={light} group={group} useHue={useHueObject} rateLimiter={rateLimiter} />
+              <Light key={light.id} light={light} group={group} useHue={useHueObject} canExecute={canExecute} />
             ))}
         </Grid.Section>
       ))}
@@ -37,12 +37,7 @@ export default function ControlLights() {
   );
 }
 
-function Light(props: {
-  light: Light;
-  group: Group;
-  useHue: ReturnType<typeof useHue>;
-  rateLimiter: ReturnType<typeof useInputRateLimiter>;
-}) {
+function Light(props: { light: Light; group: Group; useHue: ReturnType<typeof useHue>; canExecute: () => boolean }) {
   return (
     <Grid.Item
       title={props.light.metadata.name}
@@ -53,12 +48,12 @@ function Light(props: {
           <ActionPanel.Section>
             <ToggleLightAction
               light={props.light}
-              onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.light)}
+              onToggle={() => handleToggle(props.useHue, props.canExecute, props.light)}
             />
             {props.light.dimming && (
               <BrightnessActions
                 brightness={props.light.dimming.brightness}
-                onSet={(brightness) => handleSetBrightness(props.useHue, props.rateLimiter, props.light, brightness)}
+                onSet={(brightness) => handleSetBrightness(props.useHue, props.canExecute, props.light, brightness)}
               />
             )}
           </ActionPanel.Section>
@@ -67,19 +62,19 @@ function Light(props: {
             {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.useHue, props.rateLimiter, props.light, color)}
+                onSet={(color: CssColor) => handleSetColor(props.useHue, props.canExecute, props.light, color)}
               />
             )}
             {props.light.color_temperature !== undefined && (
               <MakeWarmerAction
                 light={props.light}
-                onAction={() => handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "warmer")}
+                onAction={() => handleColorTemperatureChange(props.useHue, props.canExecute, props.light, "warmer")}
               />
             )}
             {props.light.color_temperature !== undefined && (
               <MakeCoolerAction
                 light={props.light}
-                onAction={() => handleColorTemperatureChange(props.useHue, props.rateLimiter, props.light, "cooler")}
+                onAction={() => handleColorTemperatureChange(props.useHue, props.canExecute, props.light, "cooler")}
               />
             )}
           </ActionPanel.Section>
@@ -159,18 +154,14 @@ function MakeCoolerAction(props: { light: Light; onAction: () => void }) {
   );
 }
 
-function handleToggle(
-  hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light,
-) {
+function handleToggle(hue: ReturnType<typeof useHue>, canExecute: () => boolean, light: Light) {
   const changes = {
     on: { on: !light.on.on },
     ...(light.dimming ? { dimming: { brightness: light.dimming.brightness } } : {}),
   };
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     lights: new Map([[light.id, changes]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Turned ${light.on.on ? "off" : "on"} ${light.metadata.name}`,
@@ -180,7 +171,7 @@ function handleToggle(
 
 function handleSetBrightness(
   hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  canExecute: () => boolean,
   light: Light,
   brightness: number,
 ) {
@@ -190,7 +181,7 @@ function handleSetBrightness(
   };
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     lights: new Map([[light.id, changes]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`,
@@ -198,12 +189,7 @@ function handleSetBrightness(
   });
 }
 
-function handleSetColor(
-  hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light,
-  color: CssColor,
-) {
+function handleSetColor(hue: ReturnType<typeof useHue>, canExecute: () => boolean, light: Light, color: CssColor) {
   const { xy, brightness } = hexToXy(color.value);
 
   // Darker colors will result in a lower brightness value to better match the color.
@@ -214,7 +200,7 @@ function handleSetColor(
   };
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     // Clear the color temperature like the bridge does in color mode, as getColorFromLight prefers it over color.
     lights: new Map([[light.id, { ...changes, color_temperature: { mirek: null, mirek_valid: false } }]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
@@ -225,7 +211,7 @@ function handleSetColor(
 
 function handleColorTemperatureChange(
   hue: ReturnType<typeof useHue>,
-  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  canExecute: () => boolean,
   light: Light,
   direction: "warmer" | "cooler",
 ) {
@@ -238,7 +224,7 @@ function handleColorTemperatureChange(
   };
 
   return applyUpdate(hue, {
-    rateLimiter,
+    canExecute,
     lights: new Map([[light.id, changes]]),
     request: (hueClient) => hueClient.updateLight(light, withTransition(changes)),
     success: `Made ${light.metadata.name} ${direction}`,
