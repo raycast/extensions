@@ -1,5 +1,10 @@
 # Google Search Changelog
 
+## [Add AI Search Mode] - 2026-10-03
+
+- Add dedicated AI Search Mode command
+- Add shortcut (Shift+Enter) to open queries directly in Google AI mode from regular search
+
 ## [Update] - 2026-07-13
 
 - Update Google G icon

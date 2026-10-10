@@ -11,7 +11,8 @@
     "jlokos",
     "YourMCGeek",
     "alexi.build",
-    "tofrankie"
+    "tofrankie",
+    "yashdoescode"
   ],
   "license": "MIT",
   "categories": [
@@ -22,6 +23,13 @@
       "name": "index",
       "title": "Google Search",
       "description": "Google search with autosuggestions",
+      "mode": "view"
+    },
+    {
+      "name": "aiSearch",
+      "title": "AI Search Mode",
+      "description": "Search Google in AI mode with autosuggestions",
+      "icon": "AI Search Mode.png",
       "mode": "view"
     },
     {

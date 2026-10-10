@@ -5,6 +5,8 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 ## Features
 
 - Google search with autosuggestions
+- Dedicated Google AI search mode
+- Quick switch between regular search and AI mode via Shift+Enter
 - Search selected text directly
 - Search history management
 - Clipboard fallback when no text is selected
