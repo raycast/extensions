@@ -5,7 +5,7 @@ import * as http2 from "http2";
 import { isIPv4 } from "net";
 import type { PeerCertificate, TLSSocket } from "tls";
 import { APP_NAME, BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
-import HueClient, { authHeaders, request } from "./HueClient";
+import HueClient, { authHeaders, request, UnauthorizedError } from "./HueClient";
 import { BridgeConfig, HueApiService, LinkResponse } from "./types";
 
 /**
@@ -81,7 +81,7 @@ export async function createHueClient(bridgeConfig: BridgeConfig, session?: http
       ":path": "/clip/v2/resource/bridge",
       ...authHeaders(bridgeConfig.username),
     });
-    if (headers[":status"] === 403) throw new Error("Please check your username.");
+    if (headers[":status"] === 403) throw new UnauthorizedError("Hue Bridge rejected the username");
     if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]}`);
     return new HueClient(bridgeConfig, session);
   } catch (error) {

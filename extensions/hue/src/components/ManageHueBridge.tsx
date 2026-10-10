@@ -57,6 +57,16 @@ Please check your network connection and make sure you are connected to the same
 You can remove your saved Hue Bridge by using the ‘Unlink Saved Hue Bridge’ action.
 `;
 
+const unauthorizedMessage = `
+# Link with your Hue Bridge again
+
+![Failure](bridge-failure.png)
+
+Your Hue Bridge no longer accepts this extension, for example because it was removed in the Hue app or the bridge was reset.
+
+Link again to keep using your saved Hue Bridge.
+`;
+
 const linkedMessage = `
 # Linked with your Hue Bridge
 
@@ -85,6 +95,13 @@ const VIEWS: Record<StateName, View | null> = {
   loadingConfiguration: null,
   connecting: null,
   connected: null,
+  unauthorized: {
+    markdown: unauthorizedMessage,
+    actions: (send) => [
+      <Action key="link" title="Link Again" onAction={() => send({ type: "LINK" })} icon={Icon.Plug} />,
+      <UnlinkAction key="unlink" send={send} />,
+    ],
+  },
   failedToConnect: {
     markdown: failedToConnectMessage,
     actions: (send) => [retry(send), <UnlinkAction key="unlink" send={send} />],

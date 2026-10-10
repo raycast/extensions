@@ -28,6 +28,7 @@
 - Show each bridge setup toast once and hide it when its step ends, also when unlinking midway
 - Fix the Failed to link with bridge toast showing as a success
 - Ask to press the bridge's link button when only the bridge IP preference is set, instead of failing to link
+- Offer to link again when the bridge no longer accepts the extension, keeping its saved address, instead of only unlinking
 - Validate the bridge IP preference again after Unlink
 - Fix Done after linking connecting to the bridge a second time
 - Stop using the unlinked bridge's connection after Unlink

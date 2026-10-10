@@ -1,6 +1,6 @@
 import { assign, enqueueActions, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import HueClient from "./HueClient";
+import HueClient, { UnauthorizedError } from "./HueClient";
 import { BridgeConfig } from "./types";
 import {
   clearBridgeConfig,
@@ -161,10 +161,23 @@ export const hueBridgeMachine = setup({
             target: "connected",
             actions: assign({ hueClient: ({ event }) => event.output }),
           },
-          onError: {
-            target: "failedToConnect",
-            actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
-          },
+          onError: [
+            {
+              guard: ({ event }) => event.error instanceof UnauthorizedError,
+              target: "unauthorized",
+              actions: [
+                { type: "logError", params: ({ event }) => ({ error: event.error }) },
+                assign(({ context }) => ({
+                  bridgeIpAddress: context.bridgeConfig?.ipAddress,
+                  bridgeId: context.bridgeConfig?.id,
+                })),
+              ],
+            },
+            {
+              target: "failedToConnect",
+              actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
+            },
+          ],
         },
       ],
     },
@@ -211,6 +224,10 @@ export const hueBridgeMachine = setup({
           },
         },
       },
+    },
+    // Linking again keeps the bridge's address and ID.
+    unauthorized: {
+      on: { LINK: "waitingForLinkButton" },
     },
     noBridgeFound: {
       on: { RETRY: "discovering" },
