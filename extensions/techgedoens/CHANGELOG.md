@@ -1,5 +1,9 @@
 # Changelog
 
+## [Respect Menu Bar Retention] - {PR_MERGE_DATE}
+
+- Keep expired articles hidden in the menu bar when a feed refresh fails.
+
 ## [Reliable Menu Bar Synchronization] - 2026-10-10
 
 - Keep menu bar article state consistent when multiple Raycast commands update the archive at the same time.

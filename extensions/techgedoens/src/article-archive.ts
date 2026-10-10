@@ -131,13 +131,13 @@ export async function readArticleArchiveRevision(): Promise<string | undefined> 
   return await LocalStorage.getItem<string>(ARTICLE_ARCHIVE_REVISION_KEY);
 }
 
-export async function readArticleArchiveSnapshot(): Promise<{
+export async function readArticleArchiveSnapshot(retention: ArticleRetention): Promise<{
   articles: ArchivedArticle[];
   revision: string | undefined;
 }> {
   for (let attempt = 0; attempt < ARTICLE_ARCHIVE_SNAPSHOT_RETRY_COUNT; attempt += 1) {
     const revisionBeforeRead = await readArticleArchiveRevision();
-    const articles = await readArticleArchive();
+    const articles = applyRetention(await readArticleArchive(), retention);
     const revisionAfterRead = await readArticleArchiveRevision();
 
     if (revisionBeforeRead === revisionAfterRead) {
@@ -145,7 +145,7 @@ export async function readArticleArchiveSnapshot(): Promise<{
     }
   }
 
-  return { articles: await readArticleArchive(), revision: undefined };
+  return { articles: applyRetention(await readArticleArchive(), retention), revision: undefined };
 }
 
 export async function readArticleArchiveLimitMessage(): Promise<string | undefined> {
