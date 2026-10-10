@@ -27,6 +27,12 @@ export type HueBridgeState = SnapshotFrom<typeof hueBridgeMachine>;
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
+// Raycast hides whichever toast is showing, so a state's hide must reach it before the next state's show.
+let toastRequests = Promise.resolve();
+const enqueueToastRequest = (request: () => Promise<void>) => {
+  toastRequests = toastRequests.then(request).catch(logError);
+};
+
 /**
  * @see https://stately.ai/viz/5dacdcc5-0f75-4620-9330-3455876b2e50
  */
@@ -68,8 +74,8 @@ export const hueBridgeMachine = setup({
     unlink: fromPromise(() => LocalStorage.clear()),
     toast: fromCallback(({ input }: { input: Toast.Options }) => {
       const toast = new Toast(input);
-      toast.show().catch(logError);
-      return () => toast.hide().catch(logError);
+      enqueueToastRequest(() => toast.show());
+      return () => enqueueToastRequest(() => toast.hide());
     }),
   },
   guards: {
