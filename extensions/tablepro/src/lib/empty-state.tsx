@@ -7,10 +7,74 @@ import {
   LaunchType,
   openExtensionPreferences,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ErrorScenario, describeScenario } from "./errors";
+import { launchTablePro } from "./app";
+import { startMCPDeeplink } from "./deeplink";
 
 interface Props {
   scenario: ErrorScenario;
+}
+
+function PairAction() {
+  return (
+    <Action
+      title="Pair with TablePro"
+      icon={Icon.Key}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      onAction={async () => {
+        try {
+          await launchCommand({
+            name: "pair",
+            type: LaunchType.UserInitiated,
+          });
+        } catch (err) {
+          await showFailureToast(err, { title: "Could not start pairing" });
+        }
+      }}
+    />
+  );
+}
+
+function OpenTableProAction({
+  startServer = false,
+}: {
+  startServer?: boolean;
+}) {
+  return (
+    <Action
+      title="Open TablePro"
+      icon={Icon.AppWindow}
+      onAction={async () => {
+        try {
+          if (startServer) await startMCPDeeplink();
+          else await launchTablePro();
+        } catch (err) {
+          await showFailureToast(err, { title: "Could not open TablePro" });
+        }
+      }}
+    />
+  );
+}
+
+function PreferencesAction() {
+  return (
+    <Action
+      title="Open Extension Preferences"
+      icon={Icon.Gear}
+      onAction={openExtensionPreferences}
+    />
+  );
+}
+
+function DownloadAction({ title }: { title: string }) {
+  return (
+    <Action.OpenInBrowser
+      title={title}
+      icon={Icon.Globe}
+      url="https://tablepro.app"
+    />
+  );
 }
 
 export function ScenarioEmptyView({ scenario }: Props) {
@@ -25,11 +89,21 @@ export function ScenarioEmptyView({ scenario }: Props) {
           description={description}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open TablePro Website"
-                icon={Icon.Globe}
-                url="https://tablepro.app"
-              />
+              <DownloadAction title="Open TablePro Website" />
+            </ActionPanel>
+          }
+        />
+      );
+    case "update-required":
+      return (
+        <List.EmptyView
+          icon={Icon.Download}
+          title={title}
+          description={description}
+          actions={
+            <ActionPanel>
+              <OpenTableProAction />
+              <DownloadAction title="Download TablePro" />
             </ActionPanel>
           }
         />
@@ -42,11 +116,34 @@ export function ScenarioEmptyView({ scenario }: Props) {
           description={description}
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open TablePro"
-                icon={Icon.AppWindow}
-                target="tablepro://integrations/start-mcp"
-              />
+              <OpenTableProAction startServer />
+            </ActionPanel>
+          }
+        />
+      );
+    case "unreachable":
+      return (
+        <List.EmptyView
+          icon={Icon.Plug}
+          title={title}
+          description={description}
+          actions={
+            <ActionPanel>
+              <PreferencesAction />
+              <OpenTableProAction />
+            </ActionPanel>
+          }
+        />
+      );
+    case "invalid-port":
+      return (
+        <List.EmptyView
+          icon={Icon.Gear}
+          title={title}
+          description={description}
+          actions={
+            <ActionPanel>
+              <PreferencesAction />
             </ActionPanel>
           }
         />
@@ -59,27 +156,14 @@ export function ScenarioEmptyView({ scenario }: Props) {
           description={description}
           actions={
             <ActionPanel>
-              <Action
-                title="Pair with TablePro"
-                icon={Icon.Key}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={async () => {
-                  await launchCommand({
-                    name: "pair",
-                    type: LaunchType.UserInitiated,
-                  });
-                }}
-              />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <PairAction />
+              <PreferencesAction />
             </ActionPanel>
           }
         />
       );
     case "token-revoked":
+    case "token-expired":
       return (
         <List.EmptyView
           icon={Icon.XMarkCircle}
@@ -87,34 +171,20 @@ export function ScenarioEmptyView({ scenario }: Props) {
           description={description}
           actions={
             <ActionPanel>
-              <Action
-                title="Pair with TablePro"
-                icon={Icon.Key}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={async () => {
-                  await launchCommand({
-                    name: "pair",
-                    type: LaunchType.UserInitiated,
-                  });
-                }}
-              />
+              <PairAction />
             </ActionPanel>
           }
         />
       );
-    case "remote-unsupported":
+    case "server-disabled":
       return (
         <List.EmptyView
-          icon={Icon.Globe}
+          icon={Icon.Plug}
           title={title}
           description={description}
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open TablePro Settings"
-                icon={Icon.Gear}
-                target="tablepro://settings"
-              />
+              <OpenTableProAction />
             </ActionPanel>
           }
         />
@@ -123,6 +193,14 @@ export function ScenarioEmptyView({ scenario }: Props) {
       return (
         <List.EmptyView
           icon={Icon.Lock}
+          title={title}
+          description={description}
+        />
+      );
+    case "rate-limited":
+      return (
+        <List.EmptyView
+          icon={Icon.Clock}
           title={title}
           description={description}
         />

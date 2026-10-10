@@ -1,11 +1,13 @@
-import { open } from "@raycast/api";
+import { openInTablePro } from "./app";
 
 const SCHEME = "tablepro";
+
+export type PairScope = "readWrite" | "fullAccess";
 
 export async function openConnectionDeeplink(
   connectionId: string,
 ): Promise<void> {
-  await open(`${SCHEME}://connect/${connectionId}`);
+  await openInTablePro(`${SCHEME}://connect/${connectionId}`);
 }
 
 export async function openTableDeeplink(
@@ -23,37 +25,39 @@ export async function openTableDeeplink(
   } else {
     url = `${SCHEME}://connect/${connectionId}/table/${encodedTable}`;
   }
-  await open(url);
+  await openInTablePro(url);
 }
 
 export async function openQueryDeeplink(
   connectionId: string,
   sql: string,
 ): Promise<void> {
-  await open(
+  await openInTablePro(
     `${SCHEME}://connect/${connectionId}/query?sql=${encodeURIComponent(sql)}`,
   );
 }
 
 export async function startMCPDeeplink(): Promise<void> {
-  await open(`${SCHEME}://integrations/start-mcp`);
+  await openInTablePro(`${SCHEME}://integrations/start-mcp`);
 }
 
 export async function pairDeeplink(params: {
   client: string;
   challenge: string;
   redirect: string;
-  scopes: string[];
+  scope?: PairScope;
   connectionIds?: string[];
 }): Promise<void> {
   const search = new URLSearchParams({
     client: params.client,
     challenge: params.challenge,
     redirect: params.redirect,
-    scopes: params.scopes.join(","),
   });
+  if (params.scope) search.set("scopes", params.scope);
   if (params.connectionIds && params.connectionIds.length > 0) {
     search.set("connection-ids", params.connectionIds.join(","));
   }
-  await open(`${SCHEME}://integrations/pair?${search.toString()}`);
+  // URLSearchParams writes a space as "+", which TablePro keeps as a literal "+".
+  const query = search.toString().replace(/\+/g, "%20");
+  await openInTablePro(`${SCHEME}://integrations/pair?${query}`);
 }
