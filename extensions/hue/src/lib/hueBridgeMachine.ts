@@ -1,4 +1,4 @@
-import { assign, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
+import { assign, enqueueActions, fromCallback, fromPromise, setup, SnapshotFrom } from "xstate";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import HueClient from "./HueClient";
 import { BridgeConfig } from "./types";
@@ -89,7 +89,10 @@ export const hueBridgeMachine = setup({
   },
   actions: {
     logError: (_, params: { error: unknown }) => logError(params.error),
-    rememberError: assign({ errorMessage: (_, params: { error: unknown }) => getErrorMessage(params.error) }),
+    reportError: enqueueActions(({ enqueue }, params: { error: unknown }) => {
+      enqueue(() => logError(params.error));
+      enqueue.assign({ errorMessage: getErrorMessage(params.error) });
+    }),
     assignBridge: assign((_, params: { ipAddress: string; id?: string }) => ({
       bridgeIpAddress: params.ipAddress,
       bridgeId: params.id,
@@ -116,10 +119,7 @@ export const hueBridgeMachine = setup({
         {
           guard: "hasInvalidIpAddress",
           target: "failedToLoadPreferences",
-          actions: {
-            type: "rememberError",
-            params: { error: "Bridge IP address is not a valid IPv4 address" },
-          },
+          actions: assign({ errorMessage: "Bridge IP address is not a valid IPv4 address" }),
         },
         { target: "loadingConfiguration" },
       ],
@@ -148,10 +148,7 @@ export const hueBridgeMachine = setup({
         ],
         onError: {
           target: "failedToLoadPreferences",
-          actions: [
-            { type: "logError", params: ({ event }) => ({ error: event.error }) },
-            { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
-          ],
+          actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
         },
       },
     },
@@ -167,10 +164,7 @@ export const hueBridgeMachine = setup({
           },
           onError: {
             target: "failedToConnect",
-            actions: [
-              { type: "logError", params: ({ event }) => ({ error: event.error }) },
-              { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
-            ],
+            actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
           },
         },
       ],
@@ -242,10 +236,7 @@ export const hueBridgeMachine = setup({
           },
           onError: {
             target: "failedToLink",
-            actions: [
-              { type: "logError", params: ({ event }) => ({ error: event.error }) },
-              { type: "rememberError", params: ({ event }) => ({ error: event.error }) },
-            ],
+            actions: { type: "reportError", params: ({ event }) => ({ error: event.error }) },
           },
         },
       ],
