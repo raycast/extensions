@@ -67,7 +67,7 @@ export const hueBridgeMachine = setup({
     discoverUsingPublicApi: fromPromise(discoverBridgeUsingHuePublicApi),
     link: fromPromise(async ({ input, signal }: { input: LinkInput; signal: AbortSignal }) => {
       if (input.ipAddress === undefined) throw Error("No bridge IP address");
-      const { bridgeConfig, hueClient } = await linkWithBridge(input.ipAddress, input.id, input.username);
+      const { bridgeConfig, hueClient } = await linkWithBridge(input.ipAddress, input.id, input.username, signal);
       // Unlink stops this actor while it links: saving after that would undo its clear,
       // and nothing else closes the client.
       try {
@@ -91,7 +91,6 @@ export const hueBridgeMachine = setup({
     }),
   },
   guards: {
-    hasUsername: ({ context }) => context.bridgeUsername !== undefined,
     hasIpAddress: ({ context }) => context.bridgeIpAddress !== undefined,
     hasInvalidIpAddress: ({ context }) => context.bridgeIpAddress !== undefined && !net.isIP(context.bridgeIpAddress),
   },
@@ -254,13 +253,10 @@ export const hueBridgeMachine = setup({
     noBridgeFound: {
       on: { RETRY: "discovering" },
     },
+    // Links as soon as the button is pressed, or at once with a username preference.
     waitingForLinkButton: {
-      always: { guard: "hasUsername", target: "linking" },
-      on: { LINK: "linking" },
-    },
-    linking: {
       invoke: [
-        { src: "toast", input: { style: Style.Animated, title: "Linking with Hue Bridge…" } },
+        { src: "toast", input: { style: Style.Animated, title: "Waiting for the link button…" } },
         {
           src: "link",
           input: ({ context }) => ({
@@ -288,7 +284,7 @@ export const hueBridgeMachine = setup({
           message: context.errorMessage,
         }),
       },
-      on: { RETRY: "linking" },
+      on: { RETRY: "waitingForLinkButton" },
     },
     linked: {
       on: { DONE: "connected" },

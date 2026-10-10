@@ -26,7 +26,7 @@ const linkWithBridgeMessage = `
 
 ![Press Button](bridge-button.png)
 
-Press the link button in the center of the bridge and press enter.
+Press the link button in the center of the bridge.
 `;
 
 const failedToLoadPreferencesMessage = `
@@ -44,7 +44,7 @@ const failedToLinkMessage = `
 
 ![Failure](bridge-failure.png)
 
-Press the button in the center and use the ‘Retry’ action to connect.
+Use the ‘Retry’ action and press the link button in the center of the bridge.
 `;
 
 const failedToConnectMessage = `
@@ -111,13 +111,7 @@ const VIEWS: Record<StateName, View | null> = {
     markdown: noBridgeFoundMessage,
     actions: (send) => [retry(send)],
   },
-  waitingForLinkButton: {
-    markdown: linkWithBridgeMessage,
-    actions: (send) => [
-      <Action key="link" title="Link with Hue Bridge" onAction={() => send({ type: "LINK" })} icon={Icon.Plug} />,
-    ],
-  },
-  linking: { markdown: linkWithBridgeMessage },
+  waitingForLinkButton: { markdown: linkWithBridgeMessage },
   failedToLink: {
     markdown: failedToLinkMessage,
     actions: (send) => [retry(send)],

@@ -3,6 +3,7 @@ import Bonjour from "bonjour-service";
 import fs from "fs";
 import * as http2 from "http2";
 import { isIPv4 } from "net";
+import { setTimeout as sleep } from "timers/promises";
 import type { PeerCertificate, TLSSocket } from "tls";
 import { APP_NAME, BRIDGE_CONFIG_KEY, CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 import HueClient, { authHeaders, request, UnauthorizedError } from "./HueClient";
@@ -57,13 +58,18 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 }
 
 // Without a bridge ID, the certificate's Common Name supplies it, and without a username, the link button creates one.
-export async function linkWithBridge(ipAddress: string, bridgeId?: string, bridgeUsername?: string) {
+export async function linkWithBridge(
+  ipAddress: string,
+  bridgeId?: string,
+  bridgeUsername?: string,
+  signal?: AbortSignal,
+) {
   const session = await connect(ipAddress, bridgeId);
   try {
     const bridgeConfig = {
       ipAddress,
       id: bridgeId ?? getCommonName((session.socket as TLSSocket).getPeerCertificate()),
-      username: bridgeUsername || (await createUsername(session)),
+      username: bridgeUsername || (await createUsername(session, signal)),
     };
     return { bridgeConfig, hueClient: await createHueClient(bridgeConfig, session) };
   } catch (error) {
@@ -154,18 +160,24 @@ export function clearBridgeConfig(): Promise<void> {
   return LocalStorage.clear();
 }
 
-// The link button must have been pressed in the last 30 seconds.
-async function createUsername(session: http2.ClientHttp2Session): Promise<string> {
-  const { headers, data } = await request(
-    session,
-    { ":method": "POST", ":path": "/api", "content-type": "application/json" },
-    { devicetype: APP_NAME, generateclientkey: true },
-  );
-  if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]} from Hue Bridge`);
-  const [response]: LinkResponse[] = JSON.parse(data);
-  if (response?.success) return response.success.username;
-  const description = response?.error?.description ?? "Unexpected response from Hue Bridge";
-  throw new Error(description.charAt(0).toUpperCase() + description.slice(1));
+// Asks once a second, on one session, until the link button is pressed, for up to 5 minutes or until signal aborts.
+async function createUsername(session: http2.ClientHttp2Session, signal?: AbortSignal): Promise<string> {
+  for (let attempt = 1; ; attempt++) {
+    const { headers, data } = await request(
+      session,
+      { ":method": "POST", ":path": "/api", "content-type": "application/json" },
+      { devicetype: APP_NAME, generateclientkey: true },
+    );
+    if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]} from Hue Bridge`);
+    const [response]: LinkResponse[] = JSON.parse(data);
+    if (response?.success) return response.success.username;
+    const description = response?.error?.description ?? "Unexpected response from Hue Bridge";
+    // Error 101: the link button wasn't pressed in the last 30 seconds
+    if (response?.error?.type !== 101 || attempt === 300) {
+      throw new Error(description.charAt(0).toUpperCase() + description.slice(1));
+    }
+    await sleep(1000, undefined, { signal });
+  }
 }
 
 /**
