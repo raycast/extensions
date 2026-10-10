@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update LinkMCP MCP Server] - {PR_MERGE_DATE}
+## [Update LinkMCP MCP Server] - 2026-10-10
 
 - Add a listing tag to LinkMCP's server URL (https://app.linkmcp.io/api/mcp?ref=raycast), so LinkMCP can see which sign-ups come from Raycast. The server works the same way.
 
