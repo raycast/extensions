@@ -7,6 +7,7 @@ import {
   open,
   updateCommandMetadata,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getData } from "swift:../swift/AppleReminders";
 
 import { truncate } from "./helpers";
@@ -67,7 +68,11 @@ export default async function Command() {
     if (match) {
       await open(match.reminder.openUrl, "com.apple.reminders");
     } else {
-      await launchCommand({ name: "my-reminders", type: LaunchType.UserInitiated });
+      try {
+        await launchCommand({ name: "my-reminders", type: LaunchType.UserInitiated });
+      } catch (error) {
+        await showFailureToast(error, { title: "Could not open My Reminders" });
+      }
     }
   }
 }
