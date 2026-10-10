@@ -1,7 +1,16 @@
 const assert = require("node:assert/strict");
 const { execFile, execFileSync, spawn } = require("node:child_process");
 const { once } = require("node:events");
-const { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } = require("node:fs");
+const {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  linkSync,
+  mkdirSync,
+  writeFileSync,
+} = require("node:fs");
 const { tmpdir } = require("node:os");
 const { join, resolve } = require("node:path");
 const { after, before, test } = require("node:test");
@@ -17,17 +26,26 @@ before(() => {
   assert.equal(process.platform, "darwin", "The native tests require the macOS SDK");
   buildDirectory = mkdtempSync(join(tmpdir(), "caps-lock-test-build-"));
   helper = join(buildDirectory, "caps-lock-mock");
-  execFileSync("xcrun", [
-    "clang",
-    "-Wall",
-    "-Wextra",
-    "-Werror",
-    "-Dconfstr=caps_lock_test_confstr",
-    join(root, "native/caps-lock.c"),
-    join(root, "tests/mock-iokit.c"),
-    "-o",
-    helper,
-  ]);
+  // Compile the production Swift logic; only the export macro is removed.
+  // The C symbols below replace the keyboard APIs, so no real state is changed.
+  const source = readFileSync(join(root, "swift/caps-lock/Sources/CapsLock.swift"), "utf8")
+    .replace("import RaycastSwiftMacros\n", "")
+    .replace("@raycast ", "");
+  const nativeSource = join(buildDirectory, "CapsLock.swift");
+  writeFileSync(nativeSource, source);
+  const main = join(buildDirectory, "main.swift");
+  writeFileSync(
+    main,
+    `
+    import Darwin
+    import Foundation
+    do { print(try toggleCapsLock() ? "on" : "off") }
+    catch { FileHandle.standardError.write(Data((error.localizedDescription + "\\n").utf8)); exit(1) }
+  `,
+  );
+  const mock = join(buildDirectory, "mock-iokit.o");
+  execFileSync("xcrun", ["clang", "-Wall", "-Wextra", "-Werror", "-c", join(root, "tests/mock-iokit.c"), "-o", mock]);
+  execFileSync("xcrun", ["swiftc", "-warnings-as-errors", nativeSource, main, mock, "-o", helper]);
 });
 
 after(() => {
@@ -55,14 +73,6 @@ test("overlapping processes preserve every toggle and return alternating confirm
   assert.equal(results.filter(({ stdout }) => stdout === "off\n").length, 6);
   assert.equal(readFileSync(state, "utf8"), "0");
   assert.equal((await invoke("toggle")).stdout, "on\n");
-  assert.equal((await invoke("state")).stdout, "on\n");
-});
-
-test("explicit on/off commands remain idempotent", async (t) => {
-  const { invoke } = fixture(t);
-  for (const command of ["on", "on", "off", "off"]) {
-    assert.equal((await invoke(command)).stdout, `${command}\n`);
-  }
 });
 
 test("process death releases the lock for a blocked helper", async (t) => {
@@ -94,15 +104,17 @@ test("process death releases the lock for a blocked helper", async (t) => {
 
 test("a failed keyboard operation releases the lock and does not report success", async (t) => {
   const { invoke, state } = fixture(t);
-  for (const failure of ["service", "open", "read", "write", "verify"]) {
+  for (const failure of ["service", "open", "read", "write", "verify", "verify-read"]) {
     await assert.rejects(invoke("toggle", { CAPS_LOCK_TEST_FAILURE: failure }), (error) => {
       assert.equal(error.code, 1);
       assert.equal(error.stdout, "");
       assert.ok(error.stderr.length > 0);
       return true;
     });
-    assert.equal(readFileSync(state, "utf8"), "0");
-    assert.equal((await invoke("state")).stdout, "off\n");
+    assert.equal(readFileSync(state, "utf8"), failure === "verify-read" ? "1" : "0");
+    writeFileSync(state, "0");
+    assert.equal((await invoke("toggle")).stdout, "on\n");
+    assert.equal((await invoke("toggle")).stdout, "off\n");
   }
 });
 
@@ -117,13 +129,19 @@ test("refuses a symlink lock without changing the simulated keyboard", async (t)
   assert.equal(readFileSync(state, "utf8"), "0");
 });
 
-test("invalid arguments fail without creating a lock or changing state", async (t) => {
-  const { directory, state, invoke } = fixture(t);
-  await assert.rejects(invoke("invalid"), (error) => {
-    assert.equal(error.code, 1);
-    assert.match(error.stderr, /Usage:/);
-    return true;
-  });
-  assert.equal(existsSync(join(directory, "com.raycast.caps-lock.lock")), false);
+test("refuses a hard-linked or directory lock without changing the keyboard", async (t) => {
+  for (const kind of ["hardlink", "directory"]) {
+    const { directory, state, invoke } = fixture(t);
+    const lock = join(directory, "com.raycast.caps-lock.lock");
+    if (kind === "hardlink") linkSync(state, lock);
+    else mkdirSync(lock);
+    await assert.rejects(invoke("toggle"));
+    assert.equal(readFileSync(state, "utf8"), "0");
+  }
+});
+
+test("missing user temp directory fails before keyboard access", async (t) => {
+  const { invoke, state } = fixture(t);
+  await assert.rejects(invoke("toggle", { CAPS_LOCK_TEST_DIRECTORY: "" }), /Cannot locate/);
   assert.equal(readFileSync(state, "utf8"), "0");
 });

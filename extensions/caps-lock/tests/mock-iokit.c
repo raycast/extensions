@@ -11,10 +11,10 @@
 
 const mach_port_t kIOMainPortDefault = MACH_PORT_NULL;
 
-size_t caps_lock_test_confstr(int name, char *buffer, size_t size) {
+size_t confstr(int name, char *buffer, size_t size) {
     (void)name;
     const char *directory = getenv("CAPS_LOCK_TEST_DIRECTORY");
-    if (!directory) {
+    if (!directory || !*directory) {
         return 0;
     }
     if (size > 0) {
@@ -60,7 +60,9 @@ kern_return_t IOServiceClose(io_connect_t connection) {
 kern_return_t IOHIDGetModifierLockState(io_connect_t connection, int selector, bool *state) {
     (void)connection;
     (void)selector;
-    if (failure_is("read")) {
+    static int reads = 0;
+    reads++;
+    if (failure_is("read") || (failure_is("verify-read") && reads == 2)) {
         return KERN_FAILURE;
     }
     const char *marker = getenv("CAPS_LOCK_TEST_HOLD_MARKER");

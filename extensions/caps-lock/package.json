@@ -39,12 +39,11 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "npm run build:native && ray build",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npm run build:native && npx @raycast/api@latest publish",
-    "build:native": "sh native/build.sh",
+    "publish": "npx @raycast/api@latest publish",
     "test": "node --test tests/*.test.cjs"
   }
 }

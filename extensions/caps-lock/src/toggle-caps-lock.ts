@@ -1,20 +1,11 @@
-import { environment, showHUD, showToast, Toast } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { chmod } from "node:fs/promises";
-import { join } from "node:path";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
+import { showHUD, showToast, Toast } from "@raycast/api";
+import { toggleCapsLock } from "swift:../swift/caps-lock";
 
 export default async function Command() {
-  let state: string;
+  let state: boolean;
   try {
-    const helperPath = join(environment.assetsPath, "caps-lock");
-    // Extension archives may not preserve the helper's executable bit.
-    await chmod(helperPath, 0o755);
-    const { stdout } = await execFileAsync(helperPath, ["toggle"], { timeout: 5000 });
-    state = stdout.trim();
-    if (state !== "on" && state !== "off") {
+    state = await toggleCapsLock();
+    if (typeof state !== "boolean") {
       throw new Error("macOS did not return a confirmed Caps Lock state");
     }
   } catch (error) {
@@ -26,7 +17,7 @@ export default async function Command() {
     return;
   }
 
-  const title = `Caps Lock ${state === "on" ? "On" : "Off"}`;
+  const title = `Caps Lock ${state ? "On" : "Off"}`;
   try {
     // showHUD also hides the main window. A display failure must not imply
     // the confirmed state change failed and encourage another toggle.
