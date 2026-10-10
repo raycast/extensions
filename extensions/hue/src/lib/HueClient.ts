@@ -23,6 +23,7 @@ import {
 import { text } from "stream/consumers";
 import RateLimitedQueue from "./RateLimitedQueue";
 import { logError } from "../helpers/errors";
+import { CONNECTION_TIMEOUT_MS } from "../helpers/constants";
 
 const DATA_PREFIX = "data: ";
 
@@ -31,12 +32,16 @@ export const authHeaders = (username: string) => ({
   [sensitiveHeaders]: ["hue-application-key"],
 });
 
+// A request the bridge never answers would otherwise hold up the rate-limited queues for good.
 export async function request(session: ClientHttp2Session, headers: OutgoingHttpHeaders, body?: object) {
-  const stream = session.request(headers, { endStream: body === undefined });
+  const signal = AbortSignal.timeout(CONNECTION_TIMEOUT_MS);
+  const stream = session.request(headers, { endStream: body === undefined, signal });
   if (body !== undefined) stream.end(JSON.stringify(body));
   let responseHeaders: IncomingHttpHeaders & IncomingHttpStatusHeader = {};
   stream.once("response", (received) => (responseHeaders = received));
-  const data = await text(stream);
+  const data = await text(stream).catch((error) => {
+    throw signal.aborted ? new Error("Request to Hue Bridge timed out", { cause: error }) : error;
+  });
   return { headers: responseHeaders, data };
 }
 

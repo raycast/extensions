@@ -17,6 +17,7 @@
 - Fix live updates from the bridge stopping or skipping changes
 - Fix the loading indicator not showing after the first launch, and Control Lights loading forever without lights
 - Show the bridge's error message when an action fails
+- Fail a change after 5 seconds when the bridge doesn't answer it, instead of holding up every later change
 - Fix Toggle All Lights ignoring the manual bridge preferences, hiding connection errors, and misreporting partial failures
 - Find the bridge on the local network first, so Retry no longer uses up MeetHue's discovery limit, and fix discovery hanging on an unexpected MeetHue response
 - Fall back to MeetHue's discovery after 3 instead of 10 seconds when the local network doesn't answer, and ask the local network twice

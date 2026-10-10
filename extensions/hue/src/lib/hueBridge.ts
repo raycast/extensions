@@ -80,18 +80,19 @@ export async function createHueClient(bridgeConfig: BridgeConfig, session?: http
   });
   if (headers[":status"] === 403) throw new Error("Please check your username.");
   if (headers[":status"] !== 200) throw new Error(`Status ${headers[":status"]}`);
-  // The client's session stays open while idle
-  session.setTimeout(0);
   return new HueClient(bridgeConfig, session);
 }
 
-// Times out when the bridge goes quiet, also after connecting, until createHueClient accepts the session.
 function connect(ipAddress: string, bridgeId?: string): Promise<http2.ClientHttp2Session> {
   return new Promise((resolve, reject) => {
     console.log("Connecting to the Hue Bridge…");
     const session = http2.connect(`https://${ipAddress}`, bridgeTlsOptions(bridgeId));
+    // Requests have their own deadline, and the client's session stays open while idle.
     session.setTimeout(CONNECTION_TIMEOUT_MS, () => session.destroy(new Error("Connection timed out.")));
-    session.once("connect", () => resolve(session));
+    session.once("connect", () => {
+      session.setTimeout(0);
+      resolve(session);
+    });
     session.once("error", reject);
   });
 }
