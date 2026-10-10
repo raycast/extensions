@@ -1,6 +1,6 @@
 # Foqus League Changelog
 
-## [Menu Bar Stats Setup and Duration Field] - {PR_MERGE_DATE}
+## [Menu Bar Stats Setup and Duration Field] - 2026-10-10
 
 - New icon
 - Show League and Show Recap offer to turn on Menu Bar Stats when it isn't running
