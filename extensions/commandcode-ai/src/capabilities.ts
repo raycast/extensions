@@ -8,6 +8,10 @@ const TTL = 60 * 60 * 1000;
 
 export interface Capabilities {
   vision: boolean;
+  tools: boolean;
+  temperature: boolean;
+  /** Most commonly listed output token limit. */
+  maxOutputTokens?: number;
   /** Reasoning effort levels, when the model takes an effort setting. */
   efforts?: string[];
 }
@@ -16,6 +20,9 @@ type Index = Record<string, Capabilities>;
 
 interface ModelsDevModel {
   modalities?: { input?: string[] };
+  tool_call?: boolean;
+  temperature?: boolean;
+  limit?: { output?: number };
   reasoning_options?: { type?: string; values?: (string | null)[] }[];
 }
 
@@ -71,7 +78,20 @@ export function buildIndex(catalog: ModelsDev): Index {
 
   const index: Index = {};
   for (const [key, models] of listings) {
-    const vision = models.filter((m) => m.modalities?.input?.includes("image")).length * 2 > models.length;
+    const vision = majority(models, (m) => m.modalities?.input?.includes("image"));
+    // Listings that leave these out don't count against them.
+    const tools = majority(
+      models.filter((m) => m.tool_call !== undefined),
+      (m) => m.tool_call,
+      true,
+    );
+    const temperature = majority(
+      models.filter((m) => m.temperature !== undefined),
+      (m) => m.temperature,
+      true,
+    );
+    const outputs = models.flatMap((m) => (m.limit?.output ? [String(m.limit.output)] : []));
+    const maxOutputTokens = outputs.length ? Number(mostCommon(outputs)) : undefined;
     // Only offer effort levels when most listings with reasoning options describe an effort setting
     // (rather than e.g. a token budget), then take the most commonly listed set of levels.
     const withOptions = models.filter((m) => m.reasoning_options?.length);
@@ -80,9 +100,13 @@ export function buildIndex(catalog: ModelsDev): Index {
       return values?.length ? [values.join(",")] : [];
     });
     const efforts = effortSets.length * 2 > withOptions.length ? mostCommon(effortSets).split(",") : undefined;
-    index[key] = efforts ? { vision, efforts } : { vision };
+    index[key] = { vision, tools, temperature, maxOutputTokens, efforts };
   }
   return index;
+}
+
+function majority(models: ModelsDevModel[], test: (m: ModelsDevModel) => boolean | undefined, empty = false) {
+  return models.length ? models.filter(test).length * 2 > models.length : empty;
 }
 
 function mostCommon(values: string[]): string {

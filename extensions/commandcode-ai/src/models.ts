@@ -11,7 +11,8 @@ import { join } from "node:path";
 export const BASE_URL = "https://api.commandcode.ai/provider/v1";
 export const DEFAULT_MODEL = "deepseek/deepseek-v4-flash";
 const MAX_TOOL_NAME_LENGTH = 64;
-// Anthropic requires max_tokens; the SDK's fallback for unknown model IDs is only 4096.
+// Anthropic requires max_tokens, and the SDK's fallback for unknown model IDs is only 4096;
+// used when models.dev doesn't list the model's output limit.
 const ANTHROPIC_MAX_OUTPUT_TOKENS = 32_000;
 
 interface ProviderModel {
@@ -76,8 +77,10 @@ export const getModels: AI.GetModels = async () => {
       capabilities: {
         systemMessage: { supported: true },
         streaming: { supported: true },
-        temperature: { supported: true },
-        tools: { supported: true },
+        // Unknown to models.dev → assume supported, as most models are.
+        temperature: { supported: caps?.temperature !== false },
+        // Raycast only sends its tools (web search, read page, charts, extension tools) when this is set.
+        tools: { supported: caps?.tools !== false },
         ...(caps?.vision ? { vision: { mediaTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"] } } : {}),
         ...(caps?.efforts
           ? {
@@ -112,15 +115,16 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
   const model = await languageModel(modelId);
   const anthropic = model.provider.startsWith("anthropic");
   const effort = request.reasoningEffort;
+  const caps = lookupCapabilities(await loadCapabilities(), modelId);
   const { tools, restoreName } = toTools(request.tools);
   const result = streamText({
     model,
     system: request.system,
     messages: toMessages(request.messages ?? []),
-    temperature: request.temperature,
+    temperature: caps?.temperature === false ? undefined : request.temperature,
     tools,
     toolChoice: request.toolChoice,
-    maxOutputTokens: anthropic ? ANTHROPIC_MAX_OUTPUT_TOKENS : undefined,
+    maxOutputTokens: anthropic ? (caps?.maxOutputTokens ?? ANTHROPIC_MAX_OUTPUT_TOKENS) : undefined,
     providerOptions: effort
       ? anthropic
         ? { anthropic: { thinking: { type: "adaptive" }, effort } }
