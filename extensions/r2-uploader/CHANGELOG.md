@@ -1,6 +1,6 @@
 # R2 Uploader Changelog
 
-## [WebP Conversion and Metadata Updates] - {PR_MERGE_DATE}
+## [WebP Conversion and Metadata Updates] - 2026-10-10
 
 - Add optional WebP conversion using the `cwebp` command
 - Update the Raycast extension author to `ypp`
