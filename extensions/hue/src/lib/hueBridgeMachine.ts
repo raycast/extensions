@@ -34,7 +34,7 @@ const enqueueToastRequest = (request: () => Promise<void>) => {
 };
 
 /**
- * @see https://stately.ai/viz/5dacdcc5-0f75-4620-9330-3455876b2e50
+ * @see https://stately.ai/registry/editor/fb75a44c-277d-49c0-932b-8b447a677ad3?machineId=6977dcc4-09bf-4ae8-b68a-685472f2f9e7
  */
 export const hueBridgeMachine = setup({
   types: {} as { context: HueContext; events: HueBridgeEvent },
