@@ -173,7 +173,7 @@ function ProfileItem(props: { item: Profile; quake: boolean }) {
 
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
-  
+
   // A matchProfiles pattern this extension can't evaluate (valid for Windows Terminal, but past
   // what the matcher implements or affords) means the resolved order can't be trusted — so fall
   // back to the default sections below and say which pattern, instead of quietly dropping or
