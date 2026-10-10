@@ -94,8 +94,12 @@ function connect(ipAddress: string, bridgeId?: string): Promise<http2.ClientHttp
   return new Promise((resolve, reject) => {
     console.log("Connecting to the Hue Bridge…");
     const session = http2.connect(`https://${ipAddress}`, bridgeTlsOptions(bridgeId));
-    // Requests have their own deadline, and the client's session stays open while idle.
-    session.setTimeout(CONNECTION_TIMEOUT_MS, () => session.destroy(new Error("Connection timed out.")));
+    // Requests have their own deadline, and the client's session stays open while idle. Rejects before destroying, as
+    // destroying a socket that is still connecting waits for TCP to give up, 75 seconds on macOS.
+    session.setTimeout(CONNECTION_TIMEOUT_MS, () => {
+      reject(new Error("Connection timed out."));
+      session.destroy();
+    });
     session.once("connect", () => {
       session.setTimeout(0);
       resolve(session);
