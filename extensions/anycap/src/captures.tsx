@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { callTool, CaptureRow, deepLink, Folder, openInAnycap, parseCaptureLines, parseFolders } from "./anycap";
 import { loadDetail } from "./detail";
@@ -91,10 +91,7 @@ function CaptureItem(props: { row: CaptureRow; onChange: () => void }) {
     <List.Item
       icon={
         row.url
-          ? {
-              source: `https://www.google.com/s2/favicons?sz=64&domain=${host(row.url)}`,
-              fallback: kindIcon[row.kind] ?? Icon.Circle,
-            }
+          ? getFavicon(row.url, { fallback: kindIcon[row.kind] ?? Icon.Circle })
           : (kindIcon[row.kind] ?? Icon.Circle)
       }
       title={row.title}

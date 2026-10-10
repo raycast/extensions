@@ -31,7 +31,7 @@ export default function BrowseCollections() {
                     navigationTitle={collection.name}
                     placeholder={`Filter ${collection.name}`}
                     filtering
-                    load={() => callTool("list", { collection: collection.name, limit: 200 })}
+                    load={() => callTool("list", { collection: collection.name, limit: Number.MAX_SAFE_INTEGER })}
                     emptyTitle={() => "Nothing in this collection"}
                   />
                 }

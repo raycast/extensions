@@ -53,7 +53,7 @@ require a Raycast Pro subscription.
 
 Commands read and write your local Anycap library through the bundled MCP helper. The
 extension has no analytics and sends no capture text to an extension server. Link lists
-request favicons from Google's favicon service using the source domain. Saving a link
+request favicons using Raycast's preferred favicon provider and the source domain. Saving a link
 can cause Anycap to fetch its metadata or use the intelligence providers you enabled
 in Anycap's settings.
 Preview copies are cached in this extension's local support folder, up to 40 images.

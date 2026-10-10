@@ -31,8 +31,8 @@ export default function BrowseFolders() {
                     filtering
                     load={() =>
                       folder.name === "Inbox"
-                        ? callTool("recent", { days: 3650, category: "Inbox", limit: 200 })
-                        : callTool("list", { folder: folder.name, limit: 200 })
+                        ? callTool("recent", { days: 3650, category: "Inbox", limit: Number.MAX_SAFE_INTEGER })
+                        : callTool("list", { folder: folder.name, limit: Number.MAX_SAFE_INTEGER })
                     }
                     emptyTitle={() => "Nothing in this folder"}
                   />

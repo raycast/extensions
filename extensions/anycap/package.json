@@ -94,7 +94,7 @@
       "name": "appPath",
       "type": "textfield",
       "required": false,
-      "title": "Anycap.app path",
+      "title": "Anycap.app Path",
       "default": "/Applications/Anycap.app",
       "description": "Where Anycap.app lives. The commands talk to the MCP binary inside it; no server, no account.",
       "placeholder": "/Applications/Anycap.app"

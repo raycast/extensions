@@ -14,3 +14,6 @@
 - Refresh lists and detail metadata after Move, Archive and Undo.
 - Show helper errors in folder and collection browsing.
 - Find the latest capture without a one-year cutoff.
+- Browse complete folders and collections without a 200-capture cutoff.
+- Respect Raycast's favicon provider preference.
+- Report premature helper exits immediately and settle each request once.

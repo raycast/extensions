@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Anycap.app path - Where Anycap.app lives. The commands talk to the MCP binary inside it; no server, no account. */
+  /** Anycap.app Path - Where Anycap.app lives. The commands talk to the MCP binary inside it; no server, no account. */
   "appPath": string
 }
 

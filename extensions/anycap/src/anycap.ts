@@ -39,19 +39,22 @@ export async function callToolResult(
   return await new Promise((resolve, reject) => {
     const child = spawn(bin, [], { stdio: ["pipe", "pipe", "ignore"], env: cleanEnvironment() });
     let buffer = "";
-    const timer = setTimeout(() => {
-      child.kill();
-      reject(new Error("Anycap did not answer."));
-    }, 15000);
+    let settled = false;
+    const timer = setTimeout(() => finish(() => reject(new Error("Anycap did not answer."))), 15000);
     const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timer);
       child.kill();
       fn();
     };
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk) => {
+      if (settled) return;
       buffer += chunk.toString();
-      for (const line of buffer.split("\n")) {
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
         if (!line.trim()) continue;
         let message;
         try {
@@ -67,6 +70,12 @@ export async function callToolResult(
       }
     });
     child.on("error", (error) => finish(() => reject(error)));
+    child.stdin.on("error", (error) => finish(() => reject(error)));
+    child.on("close", (code, signal) =>
+      finish(() =>
+        reject(new Error(`Anycap helper stopped before replying (${signal ?? `exit ${code ?? "unknown"}`}).`)),
+      ),
+    );
     child.stdin.write(
       JSON.stringify({
         jsonrpc: "2.0",
