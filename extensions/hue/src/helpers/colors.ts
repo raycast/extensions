@@ -86,20 +86,9 @@ export function xyToRgbHexString({ x, y }: Xy) {
   green = applyReverseGammaCorrection(green);
   blue = applyReverseGammaCorrection(blue);
 
-  // Bring all negative components to zero
-  red = Math.max(red, 0);
-  green = Math.max(green, 0);
-  blue = Math.max(blue, 0);
-
-  // If one component is greater than 1, weight components by that value
-  const max = Math.max(red, green, blue);
-  if (max > 1) {
-    red = red / max;
-    green = green / max;
-    blue = blue / max;
-  }
-
-  return chroma.rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255)).hex();
+  // If one component is greater than 1, weight components by that value. chroma clips negative components to zero.
+  const max = Math.max(red, green, blue, 1);
+  return chroma.gl(red / max, green / max, blue / max).hex();
 }
 
 /**
