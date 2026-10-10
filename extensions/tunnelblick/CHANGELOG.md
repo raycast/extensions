@@ -1,6 +1,6 @@
 # Tunnelblick Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-10
 
 - Fix the command failing with "Cannot read properties of undefined (reading 'then')" after loading the configurations
 
