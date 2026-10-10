@@ -62,8 +62,7 @@ export const hueBridgeMachine = setup({
     discoverUsingPublicApi: fromPromise(discoverBridgeUsingHuePublicApi),
     link: fromPromise(async ({ input, signal }: { input: LinkInput; signal: AbortSignal }) => {
       if (input.ipAddress === undefined) throw Error("No bridge IP address");
-      const bridgeConfig = await linkWithBridge(input.ipAddress, input.id, input.username);
-      const hueClient = await createHueClient(bridgeConfig);
+      const { bridgeConfig, hueClient } = await linkWithBridge(input.ipAddress, input.id, input.username);
       // Unlink stops this actor while it links: saving after that would undo its clear,
       // and nothing else closes the client.
       try {
