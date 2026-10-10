@@ -1,5 +1,10 @@
 # Lark Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fix the extension failing to load on Raycast 2.7
+- Update @raycast/api to 2.7.3
+
 ## [Update] - 2026-01-20
 
 - Support for parent folder display

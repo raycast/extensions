@@ -1,14 +1,13 @@
 import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useAtomValue } from "jotai";
 import { parse } from "tough-cookie";
-import { isAuthenticatedAtom } from "../../hooks/atoms";
+import { useIsAuthenticated } from "../../hooks/auth-state";
 import { checkAuthState, setAuthData } from "../../services/shared";
 import { DOMAIN } from "../../utils/config";
 import { QRLogin } from "./qr-login";
 
 const AuthGuard = ({ children }: React.PropsWithChildren) => {
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+  const isAuthenticated = useIsAuthenticated();
   const [checked, setChecked] = useState(isAuthenticated);
   const [, refresh] = useState(0);
 
