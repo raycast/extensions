@@ -1566,6 +1566,64 @@ test("Login with Browser shows what's left to do, then reloads once the login su
   assert.equal(typeof action("Login with Browser")?.onAction, "function");
 });
 
+test("a login started while a check is in flight lets it finish, and keeps its own status", async () => {
+  const harness = hookHarness();
+  const events: string[] = [];
+  let finishCheck: (status: unknown) => void = () => undefined;
+  const { NotLoggedInView } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => ({ hide: async () => undefined }),
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => {
+        events.push("start login");
+        return "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+      },
+      checkBrowserLogin: () => {
+        events.push("check");
+        return new Promise((resolve) => {
+          finishCheck = (status) => {
+            events.push("check done");
+            resolve(status);
+          };
+        });
+      },
+      cancelBrowserLogin: async () => undefined,
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const login = () =>
+    harness.render(NotLoggedInView, { reload: () => undefined }).props.login as {
+      start: () => Promise<void>;
+      status: { state: string };
+    };
+
+  login();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  // As Re-Run Browser Login does, in the Login command, while the check of an earlier login is still running.
+  const starting = login().start();
+  await new Promise(setImmediate);
+  // That check would remove the new login's files, and report its own result over the new login's.
+  assert.deepEqual(events, ["check"]);
+
+  finishCheck({ state: "none" });
+  await starting;
+  assert.deepEqual(events, ["check", "check done", "start login"]);
+  assert.equal(login().status.state, "waiting");
+});
+
 test("no pass-cli command starts while a browser login is saving its session", async () => {
   let adapters = 0;
   const api = loadView("pass-cli.ts", {
