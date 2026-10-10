@@ -35,6 +35,8 @@ export function useHue() {
 
   useEffect(() => {
     if (hueClient === undefined) return;
+    // Show the spinner again when a relink in the same session fetches.
+    setIsLoading(true);
 
     const stopListening = hueClient.listenToEventSource((resources) => {
       const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
