@@ -830,6 +830,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bankbridge",
+    title: "BankBridge",
+    description:
+      "Read-only access to your own US bank, credit card and investment accounts: balances, transactions, spending by category or merchant, recurring charges, monthly cashflow and holdings. Data is fetched live from your banks on each call and not stored. Remote Streamable HTTP server with BankBridge OAuth 2.1 sign-in (dynamic client registration, PKCE) through `mcp-remote`; no API key needed. Paid: $5/mo per connected bank. It can't move money.",
+    icon: "https://github.com/bankbridge-money.png",
+    homepage: "https://bankbridge.money/docs/raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote@0.14.3", "https://bankbridge.money/api/mcp"],
+    },
+  },
+  {
     name: "webhound",
     title: "Webhound",
     description:
