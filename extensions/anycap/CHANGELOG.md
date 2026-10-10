@@ -17,3 +17,4 @@
 - Browse complete folders and collections without a 200-capture cutoff.
 - Respect Raycast's favicon provider preference.
 - Report premature helper exits immediately and settle each request once.
+- Accept a complete final helper reply at EOF without a trailing newline.

@@ -48,6 +48,19 @@ export async function callToolResult(
       child.kill();
       fn();
     };
+    const consume = (line: string) => {
+      if (settled || !line.trim()) return;
+      let message;
+      try {
+        message = JSON.parse(line);
+      } catch {
+        return;
+      }
+      if (message?.id !== 2) return;
+      const text: string = message.result?.content?.[0]?.text ?? message.error?.message ?? "";
+      if (message.result?.isError || message.error) finish(() => reject(new Error(text || "Anycap error")));
+      else finish(() => resolve(message.result ?? { content: [] }));
+    };
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk) => {
       if (settled) return;
@@ -55,27 +68,19 @@ export async function callToolResult(
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? "";
       for (const line of lines) {
-        if (!line.trim()) continue;
-        let message;
-        try {
-          message = JSON.parse(line);
-        } catch {
-          continue;
-        }
-        if (message.id !== 2) continue;
-        const text: string = message.result?.content?.[0]?.text ?? message.error?.message ?? "";
-        if (message.result?.isError || message.error) finish(() => reject(new Error(text || "Anycap error")));
-        else finish(() => resolve(message.result ?? { content: [] }));
-        return;
+        consume(line);
+        if (settled) return;
       }
     });
     child.on("error", (error) => finish(() => reject(error)));
     child.stdin.on("error", (error) => finish(() => reject(error)));
-    child.on("close", (code, signal) =>
+    child.on("close", (code, signal) => {
+      // The final complete reply may end at EOF instead of a newline.
+      consume(buffer);
       finish(() =>
         reject(new Error(`Anycap helper stopped before replying (${signal ?? `exit ${code ?? "unknown"}`}).`)),
-      ),
-    );
+      );
+    });
     child.stdin.write(
       JSON.stringify({
         jsonrpc: "2.0",
