@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update DC Hub MCP Server] - {PR_MERGE_DATE}
+## [Update DC Hub MCP Server] - 2026-10-10
 
 - Update DC Hub's description: the server now has 94 tools.
 
