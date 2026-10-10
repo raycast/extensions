@@ -97,7 +97,6 @@ export const hueBridgeMachine = setup({
       bridgeIpAddress: params.ipAddress,
       bridgeId: params.id,
     })),
-    closeClient: ({ context }) => context.hueClient?.close(),
   },
 }).createMachine({
   id: "manage-hue-bridge",
@@ -106,7 +105,7 @@ export const hueBridgeMachine = setup({
   on: {
     UNLINK: {
       target: ".unlinking",
-      actions: ["closeClient", assign({ hueClient: undefined, bridgeId: undefined, bridgeConfig: undefined })],
+      actions: assign({ hueClient: undefined, bridgeId: undefined, bridgeConfig: undefined }),
     },
   },
   states: {

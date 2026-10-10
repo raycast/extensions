@@ -32,24 +32,28 @@ export function useHue() {
   const [hueBridgeState, send, hueBridgeActor] = useMachine(hueBridgeMachine);
   const { hueClient } = hueBridgeState.context;
 
-  // Declared before the fetch, so it listens before the fetch starts.
-  useEffect(
-    () =>
-      hueClient?.listenToEventSource((resources) => {
-        const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
-          const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
-          if (changes.length === 0) return;
-          setState((items) =>
-            changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
-          );
-        };
-        apply("light", setLights);
-        apply("room", setRooms);
-        apply("zone", setZones);
-        apply("scene", setScenes);
-      }),
-    [hueClient],
-  );
+  // Declared before the fetch, so it listens before the fetch starts. Closes the client when Unlink drops it or the
+  // command closes: stopping the machine runs no exit actions.
+  useEffect(() => {
+    if (hueClient === undefined) return;
+    const stopListening = hueClient.listenToEventSource((resources) => {
+      const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
+        const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
+        if (changes.length === 0) return;
+        setState((items) =>
+          changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
+        );
+      };
+      apply("light", setLights);
+      apply("room", setRooms);
+      apply("zone", setZones);
+      apply("scene", setScenes);
+    });
+    return () => {
+      stopListening();
+      hueClient.close();
+    };
+  }, [hueClient]);
 
   // Unlink or a relink replaces the client while its fetch may still be running, and usePromise drops that result.
   const { isLoading } = usePromise((hueClient: HueClient) => hueClient.getResources(), [hueClient!], {
