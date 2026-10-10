@@ -1,6 +1,6 @@
 # Changelog
 
-## [Respect Menu Bar Retention] - {PR_MERGE_DATE}
+## [Respect Menu Bar Retention] - 2026-10-10
 
 - Keep expired articles hidden in the menu bar when a feed refresh fails.
 
