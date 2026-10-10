@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useCachedState } from "@raycast/utils";
+import React, { useEffect } from "react";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { DeepPartial, HueResource, Light, Room, Scene, Zone } from "../lib/types";
 import { useMachine } from "@xstate/react";
 import { hueBridgeMachine } from "../lib/hueBridgeMachine";
+import HueClient from "../lib/HueClient";
 import { updateItems } from "../helpers/collections";
 import { RESOURCES_CACHE_NAMESPACE } from "../helpers/constants";
-import { Cache, Toast } from "@raycast/api";
-import Style = Toast.Style;
+import { Cache, showToast, Toast } from "@raycast/api";
 
 // Earlier versions cached the resources in the default namespace, in shapes that no longer match the types.
 const defaultCache = new Cache();
@@ -26,62 +26,43 @@ export function useHueResources() {
 export type Hue = ReturnType<typeof useHue>;
 
 export function useHue() {
-  const [isLoading, setIsLoading] = useState(true);
   const { setRooms, setZones, ...resources } = useHueResources();
   const { setLights, setScenes } = resources;
 
   const [hueBridgeState, send] = useMachine(hueBridgeMachine);
   const { hueClient } = hueBridgeState.context;
 
-  useEffect(() => {
-    if (hueClient === undefined) return;
-    // Unlink or a relink replaces the client while its fetch may still be running, so only the current one applies it.
-    let active = true;
-    // Show the spinner again when a relink in the same session fetches.
-    setIsLoading(true);
+  // Declared before the fetch, so it listens before the fetch starts.
+  useEffect(
+    () =>
+      hueClient?.listenToEventSource((resources) => {
+        const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
+          const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
+          if (changes.length === 0) return;
+          setState((items) =>
+            changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
+          );
+        };
+        apply("light", setLights);
+        apply("room", setRooms);
+        apply("zone", setZones);
+        apply("scene", setScenes);
+      }),
+    [hueClient],
+  );
 
-    const stopListening = hueClient.listenToEventSource((resources) => {
-      const apply = <R extends HueResource>(type: R["type"], setState: React.Dispatch<React.SetStateAction<R[]>>) => {
-        const changes = resources.filter((r) => r.type === type) as (DeepPartial<R> & { id: string })[];
-        if (changes.length === 0) return;
-        setState((items) =>
-          changes.reduce((result, change) => updateItems(result, new Map([[change.id, change]])), items),
-        );
-      };
-      apply("light", setLights);
-      apply("room", setRooms);
-      apply("zone", setZones);
-      apply("scene", setScenes);
-    });
+  // Unlink or a relink replaces the client while its fetch may still be running, and usePromise drops that result.
+  const { isLoading } = usePromise((hueClient: HueClient) => hueClient.getResources(), [hueClient!], {
+    execute: hueClient !== undefined,
+    onData: ({ lights, rooms, zones, scenes }) => {
+      setLights(lights);
+      setRooms(rooms);
+      setZones(zones);
+      setScenes(scenes);
+    },
+    onError: (error) => void showToast({ style: Toast.Style.Failure, title: "Error", message: error.message }),
+  });
 
-    (async () => {
-      try {
-        const resources = await hueClient.getResources();
-        if (!active) return;
-        setLights(resources.lights);
-        setRooms(resources.rooms);
-        setZones(resources.zones);
-        setScenes(resources.scenes);
-      } catch (error) {
-        if (!active) return;
-        const message = error instanceof Error ? error.message : String(error);
-        new Toast({
-          title: "Error",
-          style: Style.Failure,
-          message,
-        })
-          .show()
-          .then();
-      }
-
-      setIsLoading(false);
-    })();
-
-    return () => {
-      active = false;
-      stopListening();
-    };
-  }, [hueClient]);
-
-  return { hueBridgeState, hueClient, send, isLoading, ...resources };
+  // usePromise isn't loading while there is no client to fetch with, but the bridge is still connecting.
+  return { hueBridgeState, hueClient, send, isLoading: isLoading || hueClient === undefined, ...resources };
 }
