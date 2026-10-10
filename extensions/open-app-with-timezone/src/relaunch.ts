@@ -19,9 +19,20 @@ export function isValidTimeZone(tz: string): boolean {
   }
 }
 
-async function readPlistKey(plist: string, key: string): Promise<string> {
-  const { stdout } = await run("/usr/libexec/PlistBuddy", ["-c", `Print :${key}`, plist]);
-  return stdout.trim();
+async function readBundle(bundlePath: string): Promise<{ executable?: string; bundleId?: string }> {
+  const script = [
+    "function run(argv) {",
+    "  const bundle = $.NSBundle.bundleWithPath(argv[0]);",
+    "  return JSON.stringify(bundle ? { executable: bundle.executablePath.js, bundleId: bundle.bundleIdentifier.js } : {});",
+    "}",
+  ];
+  const { stdout } = await run("/usr/bin/osascript", [
+    "-l",
+    "JavaScript",
+    ...script.flatMap((line) => ["-e", line]),
+    bundlePath,
+  ]);
+  return JSON.parse(stdout);
 }
 
 async function mainPid(executable: string): Promise<number | undefined> {
@@ -59,9 +70,8 @@ export async function relaunchWithTimeZone(
   if (!isValidTimeZone(tz)) throw new Error(`Unknown time zone: ${tz}`);
 
   const bundlePath = realpathSync(appPath);
-  const info = join(bundlePath, "Contents", "Info.plist");
-  const executable = join(bundlePath, "Contents", "MacOS", await readPlistKey(info, "CFBundleExecutable"));
-  const bundleId = await readPlistKey(info, "CFBundleIdentifier");
+  const { executable, bundleId } = await readBundle(bundlePath);
+  if (!executable || !bundleId) throw new Error(`${appName} has no executable or bundle identifier`);
 
   const runningPid = await mainPid(executable);
   if (runningPid !== undefined) {
