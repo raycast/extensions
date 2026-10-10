@@ -4,7 +4,7 @@ import { COLORS } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import UnlinkAction from "./components/UnlinkAction";
 import BrightnessActions from "./components/BrightnessActions";
-import { useHue } from "./hooks/useHue";
+import { Hue, useHue } from "./hooks/useHue";
 import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
 import { calculateAdjustedColorTemperature, hexToXy } from "./helpers/colors";
 import { getLightsFromGroup, getMiredFromLight } from "./helpers/hueResources";
@@ -13,8 +13,8 @@ import { applyUpdate, getIconForColor, withTransition } from "./helpers/raycast"
 import { createLightIcon } from "./helpers/svgImages";
 
 export default function ControlLights() {
-  const useHueObject = useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
+  const hue = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = hue;
   const canExecute = useInputRateLimiter(100);
 
   const groups = [...rooms, ...zones].sort(byName);
@@ -29,7 +29,7 @@ export default function ControlLights() {
           {getLightsFromGroup(lights, group)
             .sort(byName)
             .map((light) => (
-              <LightItem key={light.id} light={light} group={group} useHue={useHueObject} canExecute={canExecute} />
+              <LightItem key={light.id} light={light} group={group} hue={hue} canExecute={canExecute} />
             ))}
         </Grid.Section>
       ))}
@@ -37,12 +37,7 @@ export default function ControlLights() {
   );
 }
 
-function LightItem(props: {
-  light: Light;
-  group: Group;
-  useHue: ReturnType<typeof useHue>;
-  canExecute: () => boolean;
-}) {
+function LightItem(props: { light: Light; group: Group; hue: Hue; canExecute: () => boolean }) {
   return (
     <Grid.Item
       title={props.light.metadata.name}
@@ -53,12 +48,12 @@ function LightItem(props: {
           <ActionPanel.Section>
             <ToggleLightAction
               light={props.light}
-              onToggle={() => handleToggle(props.useHue, props.canExecute, props.light)}
+              onToggle={() => handleToggle(props.hue, props.canExecute, props.light)}
             />
             {props.light.dimming && (
               <BrightnessActions
                 brightness={props.light.dimming.brightness}
-                onSet={(brightness) => handleSetBrightness(props.useHue, props.canExecute, props.light, brightness)}
+                onSet={(brightness) => handleSetBrightness(props.hue, props.canExecute, props.light, brightness)}
               />
             )}
           </ActionPanel.Section>
@@ -67,25 +62,25 @@ function LightItem(props: {
             {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.useHue, props.canExecute, props.light, color)}
+                onSet={(color: CssColor) => handleSetColor(props.hue, props.canExecute, props.light, color)}
               />
             )}
             {props.light.color_temperature !== undefined && (
               <MakeWarmerAction
                 light={props.light}
-                onAction={() => handleColorTemperatureChange(props.useHue, props.canExecute, props.light, "warmer")}
+                onAction={() => handleColorTemperatureChange(props.hue, props.canExecute, props.light, "warmer")}
               />
             )}
             {props.light.color_temperature !== undefined && (
               <MakeCoolerAction
                 light={props.light}
-                onAction={() => handleColorTemperatureChange(props.useHue, props.canExecute, props.light, "cooler")}
+                onAction={() => handleColorTemperatureChange(props.hue, props.canExecute, props.light, "cooler")}
               />
             )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
+            <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -159,7 +154,7 @@ function MakeCoolerAction(props: { light: Light; onAction: () => void }) {
   );
 }
 
-function handleToggle(hue: ReturnType<typeof useHue>, canExecute: () => boolean, light: Light) {
+function handleToggle(hue: Hue, canExecute: () => boolean, light: Light) {
   const changes = {
     on: { on: !light.on.on },
     ...(light.dimming ? { dimming: { brightness: light.dimming.brightness } } : {}),
@@ -174,12 +169,7 @@ function handleToggle(hue: ReturnType<typeof useHue>, canExecute: () => boolean,
   });
 }
 
-function handleSetBrightness(
-  hue: ReturnType<typeof useHue>,
-  canExecute: () => boolean,
-  light: Light,
-  brightness: number,
-) {
+function handleSetBrightness(hue: Hue, canExecute: () => boolean, light: Light, brightness: number) {
   const changes = {
     on: { on: true },
     dimming: { brightness: brightness },
@@ -194,7 +184,7 @@ function handleSetBrightness(
   });
 }
 
-function handleSetColor(hue: ReturnType<typeof useHue>, canExecute: () => boolean, light: Light, color: CssColor) {
+function handleSetColor(hue: Hue, canExecute: () => boolean, light: Light, color: CssColor) {
   const { xy, brightness } = hexToXy(color.value);
 
   // Darker colors will result in a lower brightness value to better match the color.
@@ -215,7 +205,7 @@ function handleSetColor(hue: ReturnType<typeof useHue>, canExecute: () => boolea
 }
 
 function handleColorTemperatureChange(
-  hue: ReturnType<typeof useHue>,
+  hue: Hue,
   canExecute: () => boolean,
   light: Light,
   direction: "warmer" | "cooler",

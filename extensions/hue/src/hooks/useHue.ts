@@ -25,10 +25,12 @@ export function useHueResources() {
   return { lights, setLights, rooms, setRooms, zones, setZones, scenes, setScenes };
 }
 
+export type Hue = ReturnType<typeof useHue>;
+
 export function useHue() {
   const [isLoading, setIsLoading] = useState(true);
-  const resources = useHueResources();
-  const { setLights, setRooms, setZones, setScenes } = resources;
+  const { setRooms, setZones, ...resources } = useHueResources();
+  const { setLights, setScenes } = resources;
 
   const { hueBridgeState, sendHueMessage } = useHueBridgeMachine();
   const { hueClient } = hueBridgeState.context;
@@ -76,5 +78,5 @@ export function useHue() {
     return stopListening;
   }, [hueClient]);
 
-  return { hueBridgeState, sendHueMessage, isLoading, ...resources };
+  return { hueBridgeState, hueClient, sendHueMessage, isLoading, ...resources };
 }

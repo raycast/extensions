@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Grid, Icon, Image } from "@raycast/api";
 import type { Group, Light } from "./lib/types";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { useHue } from "./hooks/useHue";
+import { Hue, useHue } from "./hooks/useHue";
 import React, { useMemo } from "react";
 import { createGroupIcon } from "./helpers/svgImages";
 import { useInputRateLimiter } from "./hooks/useInputRateLimiter";
@@ -18,8 +18,8 @@ import { byName } from "./helpers/collections";
 import { applyUpdate, withTransition } from "./helpers/raycast";
 
 export default function ControlGroups() {
-  const useHueObject = useHue();
-  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = useHueObject;
+  const hue = useHue();
+  const { hueBridgeState, sendHueMessage, isLoading, lights, rooms, zones } = hue;
   // groupedLightsQueue sends one request per second, so faster input would only be dropped there.
   const canExecute = useInputRateLimiter(1000);
   const icons = useMemo(
@@ -52,7 +52,7 @@ export default function ControlGroups() {
                   groupLights={getLightsFromGroup(lights, group)}
                   groupedLight={getGroupedLightFromGroup(lights, group)}
                   icon={icons.get(group.id)}
-                  useHue={useHueObject}
+                  hue={hue}
                   canExecute={canExecute}
                 />
               ))}
@@ -68,7 +68,7 @@ function GroupItem(props: {
   groupedLight?: GroupedLightState;
   group: Group;
   icon?: Image;
-  useHue: ReturnType<typeof useHue>;
+  hue: Hue;
   canExecute: () => boolean;
 }) {
   const { groupedLight } = props;
@@ -93,14 +93,12 @@ function GroupItem(props: {
             <ToggleGroupAction
               group={props.group}
               groupedLight={groupedLight}
-              onToggle={() =>
-                handleToggle(props.useHue, props.canExecute, props.groupLights, groupedLight, props.group)
-              }
+              onToggle={() => handleToggle(props.hue, props.canExecute, props.groupLights, groupedLight, props.group)}
             />
             <Action.Push
               title="Set Scene"
               icon={Icon.Image}
-              target={<SetScene group={props.group} useHue={props.useHue} />}
+              target={<SetScene group={props.group} hue={props.hue} />}
             />
             <ActionPanel.Section>
               {groupedLight.dimming && (
@@ -108,7 +106,7 @@ function GroupItem(props: {
                   brightness={groupedLight.dimming.brightness}
                   onSet={(brightness) =>
                     handleSetBrightness(
-                      props.useHue,
+                      props.hue,
                       props.canExecute,
                       props.groupLights,
                       groupedLight,
@@ -121,7 +119,7 @@ function GroupItem(props: {
             </ActionPanel.Section>
 
             <ActionPanel.Section>
-              <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
+              <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
             </ActionPanel.Section>
           </ActionPanel>
         )
@@ -141,7 +139,7 @@ function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLightStat
 }
 
 function handleToggle(
-  hue: ReturnType<typeof useHue>,
+  hue: Hue,
   canExecute: () => boolean,
   groupLights: Light[],
   groupedLight: GroupedLightState,
@@ -167,7 +165,7 @@ function handleToggle(
 }
 
 function handleSetBrightness(
-  hue: ReturnType<typeof useHue>,
+  hue: Hue,
   canExecute: () => boolean,
   groupLights: Light[],
   groupedLight: GroupedLightState,

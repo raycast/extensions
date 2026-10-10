@@ -1,6 +1,6 @@
 import { CssColor, DeepPartial, HasId, Id, Light, Scene } from "../lib/types";
 import type HueClient from "../lib/HueClient";
-import type { useHue } from "../hooks/useHue";
+import type { Hue } from "../hooks/useHue";
 import React from "react";
 import { getPreferenceValues, Icon, Image, showToast, Toast } from "@raycast/api";
 import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
@@ -34,7 +34,7 @@ export const withTransition = <T extends object>(changes: T) => ({
 });
 
 export async function applyUpdate(
-  { hueBridgeState, lights, scenes, setLights, setScenes }: ReturnType<typeof useHue>,
+  { hueClient, lights, scenes, setLights, setScenes }: Hue,
   update: {
     canExecute?: () => boolean;
     lights: Map<Id, DeepPartial<Light>>;
@@ -45,7 +45,6 @@ export async function applyUpdate(
   },
 ) {
   try {
-    const { hueClient } = hueBridgeState.context;
     if (hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (update.canExecute && !update.canExecute()) return;
     // Rooms and zones follow from their lights while rendering.

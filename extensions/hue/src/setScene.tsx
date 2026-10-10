@@ -2,7 +2,7 @@ import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
 import type { Group, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
-import { useHue, useHueResources } from "./hooks/useHue";
+import { Hue, useHue, useHueResources } from "./hooks/useHue";
 import { createGradientUri } from "./helpers/svgImages";
 import { useMemo } from "react";
 import { getBrightnessFromScene, getColorsFromScene, getScenesFromGroup } from "./helpers/hueResources";
@@ -10,11 +10,11 @@ import { getBrightnessFromScene, getColorsFromScene, getScenesFromGroup } from "
 import { applyUpdate, getTransitionTimeInMs } from "./helpers/raycast";
 
 export default function SetSceneCommand() {
-  return <SetScene useHue={useHue()} />;
+  return <SetScene hue={useHue()} />;
 }
 
-export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHue> }) {
-  const { hueBridgeState, sendHueMessage, isLoading } = props.useHue;
+export function SetScene(props: { group?: Group; hue: Hue }) {
+  const { hueBridgeState, sendHueMessage, isLoading } = props.hue;
   const { rooms, zones, scenes } = useHueResources();
   const gradientUris = useMemo(
     () =>
@@ -47,7 +47,7 @@ export function SetScene(props: { group?: Group; useHue: ReturnType<typeof useHu
               scene={scene}
               gradientUri={gradientUris.get(scene.id)}
               onSetScene={props.group && pop}
-              useHue={props.useHue}
+              hue={props.hue}
             />
           ))}
         </Grid.Section>
@@ -61,7 +61,7 @@ function SceneItem(props: {
   group: Group;
   gradientUri: string | undefined;
   onSetScene?: () => void;
-  useHue: ReturnType<typeof useHue>;
+  hue: Hue;
 }) {
   const activeEmoji = props.scene.status.active !== "inactive" ? "💡 " : "";
   return (
@@ -75,12 +75,12 @@ function SceneItem(props: {
             title="Set Scene"
             icon={Icon.Image}
             onAction={() => {
-              handleSetScene(props.useHue, props.group, props.scene).then();
+              handleSetScene(props.hue, props.group, props.scene).then();
               props.onSetScene?.();
             }}
           />
           <ActionPanel.Section>
-            <UnlinkAction sendHueMessage={props.useHue.sendHueMessage} />
+            <UnlinkAction sendHueMessage={props.hue.sendHueMessage} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -88,7 +88,7 @@ function SceneItem(props: {
   );
 }
 
-function handleSetScene(hue: ReturnType<typeof useHue>, group: Group, scene: Scene) {
+function handleSetScene(hue: Hue, group: Group, scene: Scene) {
   const changesToLights = new Map(
     scene.actions.map(({ target, action: { on, dimming, color, color_temperature } }) => [
       target.rid,
