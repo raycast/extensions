@@ -3,7 +3,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { jsonSchema, streamText, tool, type ModelMessage, type ToolSet } from "ai";
 import { readFileSync } from "node:fs";
-import { loadCapabilities, lookupCapabilities } from "./capabilities";
+import { cachedCapabilities, loadCapabilities, lookupCapabilities } from "./capabilities";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -102,8 +102,9 @@ export const streamCompletion: AI.StreamCompletion = (model, request) =>
 /** Each model lists the endpoints it answers on: Claude only on /messages, the rest on /chat/completions. */
 async function languageModel(modelId: string) {
   const apiKey = getApiKey();
-  const models = readCachedModels() ?? (await fetchModels()).models;
-  const endpoints = models.find((m) => m.id === modelId)?.supported_endpoints ?? [];
+  const find = (models?: ProviderModel[]) => models?.find((m) => m.id === modelId);
+  // Not in the cached list (never fetched, or a newer model): check the live list before routing.
+  const endpoints = (find(readCachedModels()) ?? find((await fetchModels()).models))?.supported_endpoints ?? [];
   return endpoints.includes("/messages") && !endpoints.includes("/chat/completions")
     ? createAnthropic({ baseURL: BASE_URL, apiKey })(modelId)
     : createOpenAICompatible({ name: "commandcode", baseURL: BASE_URL, apiKey })(modelId);
@@ -115,7 +116,7 @@ export async function* generate(modelId: string, request: GenerateRequest): Asyn
   const model = await languageModel(modelId);
   const anthropic = model.provider.startsWith("anthropic");
   const effort = request.reasoningEffort;
-  const caps = lookupCapabilities(await loadCapabilities(), modelId);
+  const caps = lookupCapabilities(cachedCapabilities(), modelId);
   const { tools, restoreName } = toTools(request.tools);
   const result = streamText({
     model,

@@ -36,9 +36,18 @@ interface CachedIndex {
 
 const cache = new Cache();
 
-export async function loadCapabilities(): Promise<Index> {
+function readCache(): CachedIndex | undefined {
   const raw = cache.get(CACHE_KEY);
-  const cached = raw ? (JSON.parse(raw) as CachedIndex) : undefined;
+  return raw ? (JSON.parse(raw) as CachedIndex) : undefined;
+}
+
+/** Whatever was last fetched, however old: requests shouldn't wait on models.dev. Refreshed by `getModels`. */
+export function cachedCapabilities(): Index {
+  return readCache()?.index ?? {};
+}
+
+export async function loadCapabilities(): Promise<Index> {
+  const cached = readCache();
   if (cached && Date.now() - cached.fetchedAt < TTL) return cached.index;
   try {
     const res = await fetch(MODELS_DEV_URL, {
