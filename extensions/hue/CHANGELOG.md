@@ -5,6 +5,7 @@
 - Restyle tiles after the Hue app: its colors and whites, shading that darkens with brightness, and its translucent off cards instead of a crossed-out bulb
 - Show each room and zone's icon on its Control Groups tile, and draw all icons as sharp vector shapes from the Hue app, in black or white, whichever stands out
 - Show each color once in room, zone and scene images, and only those of lights that are on
+- Fix room and zone images showing their colors out of order when a light is set to a white from Set Color
 - Show scenes at their own brightness instead of all looking dim
 - Show images instantly
 - Update lights, rooms, zones and the active scene at once when setting a scene, turning a room or zone on or off, or changing a light

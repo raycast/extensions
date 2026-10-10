@@ -85,13 +85,16 @@ const distinctColors = (colors: string[]) =>
     [],
   );
 
+// Grays, like a light set to White, have no hue, which chroma gives as NaN, so they sort with the reds.
+const hue = (color: string) => chroma(color).get("hsl.h") || 0;
+
 // The Hue app shows the colors of the lights that are on, warm to cool.
 export const getColorsFromGroup = (lights: Light[], group: Group): Palette =>
   distinctColors(
     getLightsFromGroup(lights, group)
       .filter((light) => light.on.on)
       .map(getColorFromLight),
-  ).sort((a, b) => chroma(a).get("hsl.h") - chroma(b).get("hsl.h"));
+  ).sort((a, b) => hue(a) - hue(b));
 
 // The brightness the scene's lights get, averaged like a room's grouped light.
 export function getBrightnessFromScene({ actions }: Scene): number {
