@@ -24,7 +24,7 @@ Capture and manage Microsoft To Do tasks from Raycast using the local [ms-todo](
 
 4. The extension looks for `ms-todo` in the standard Homebrew paths, `~/.local/bin`, and Raycast's `PATH`. If it cannot find the binary, set the absolute **ms-todo CLI Path** in extension preferences.
 
-If the CLI is missing or not executable, opening any command shows these setup steps and a **Retry CLI Detection** action.
+Each command checks the local CLI diagnostics before showing its task UI. Missing CLI, sign-in, and first-sync states have direct instructions and retry actions. Choose **Start Initial Sync** to run and wait for a fresh sync; if the daemon already started its first sync, choose **Retry Setup Check** after it finishes. Task forms stay hidden until the initial task cache is ready. After a task cache exists, a new list's first sync or a later Microsoft sync failure does not block cached task use.
 
 ## Commands
 

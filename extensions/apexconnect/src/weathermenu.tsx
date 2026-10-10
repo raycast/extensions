@@ -57,7 +57,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
   const temp = getTemperatureFromState(weather);
   const error = stateError
     ? getErrorMessage(stateError)
-    : weather === undefined
+    : !isLoading && weather === undefined
       ? `Entity '${entity}' not found`
       : undefined;
   return (

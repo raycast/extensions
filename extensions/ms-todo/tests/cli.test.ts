@@ -25,6 +25,9 @@ import {
   deleteTask,
   addToMyDay,
   removeFromMyDay,
+  inspectSetup,
+  setupPhase,
+  syncAndWait,
 } from "../src/cli";
 
 const directories: string[] = [];
@@ -128,6 +131,99 @@ test("CLI discovery accepts an executable path and reports setup problems", () =
   assert.throws(() => findCli("relative/ms-todo"), CliError);
   chmodSync(cli.path, 0o644);
   assert.throws(() => findCli(cli.path), CliError);
+});
+test("setup guides first sync and preserves an existing task cache", () => {
+  const doctor = (signed_in: boolean, states: Array<"initial" | "ready">) => ({
+    schema_version: 2 as const,
+    sign_in: { signed_in },
+    daemon: { running: true, ready: true },
+    database: { path: "/tmp/ms-todo.db", bytes: 1 },
+    syncing: false,
+    scopes: states.map((state, index) => ({
+      scope: index === 0 ? "lists" : `tasks:list-${index}`,
+      state,
+    })),
+  });
+  assert.equal(setupPhase(doctor(false, [])), "sign-in");
+  assert.equal(setupPhase(doctor(true, [])), "sync");
+  assert.equal(setupPhase(doctor(true, ["ready", "initial"])), "sync");
+  assert.equal(setupPhase(doctor(true, ["ready", "ready"])), "ready");
+  assert.equal(
+    setupPhase({
+      ...doctor(true, ["ready"]),
+      syncing: true,
+    }),
+    "sync",
+  );
+  assert.equal(
+    setupPhase(doctor(false, ["ready", "ready", "initial"])),
+    "ready",
+  );
+  assert.equal(
+    setupPhase({
+      ...doctor(false, []),
+      daemon: { running: false, ready: false, problem: "daemon unavailable" },
+      database: null,
+    }),
+    "unavailable",
+  );
+});
+test("setup opens for a synced account with no task lists", () => {
+  assert.equal(
+    setupPhase({
+      schema_version: 2,
+      sign_in: { signed_in: true },
+      daemon: { running: true, ready: true },
+      database: { path: "/tmp/ms-todo.db", bytes: 1 },
+      syncing: false,
+      scopes: [{ scope: "lists", state: "ready" }],
+    }),
+    "ready",
+  );
+});
+test("setup checks the local doctor contract and can start a waited sync", async () => {
+  const cli = fakeCli(
+    JSON.stringify({
+      schema_version: 2,
+      sign_in: { signed_in: true },
+      daemon: { running: true, ready: true },
+      database: { path: "/tmp/ms-todo.db", bytes: 1 },
+      syncing: false,
+      scopes: [{ scope: "lists", state: "initial", last_error: null }],
+    }),
+  );
+  const doctor = await inspectSetup(cli.path);
+  assert.equal(setupPhase(doctor), "sync");
+  assert.deepEqual(cli.args(), ["--format", "json", "doctor"]);
+
+  const sync = fakeCli(
+    JSON.stringify({
+      schema_version: 2,
+      waited: true,
+      scopes: 1,
+      changed: 0,
+      generation: 1,
+    }),
+  );
+  await syncAndWait(sync.path);
+  assert.deepEqual(sync.args(), ["--format", "json", "sync", "--wait"]);
+});
+test("setup keeps CLI failures distinct from a signed-out account", async () => {
+  const cli = fakeCli(
+    JSON.stringify({
+      error: { kind: "daemon_unavailable", message: "daemon offline" },
+    }),
+    2,
+  );
+  let caught: unknown;
+  try {
+    await inspectSetup(cli.path);
+  } catch (cause) {
+    caught = cause;
+  }
+  assert.ok(caught instanceof CliError);
+  assert.equal(caught.message, "daemon offline");
+  assert.equal(caught.kind, "daemon_unavailable");
 });
 test("nonzero JSON stderr exposes CLI message", async () => {
   const cli = fakeCli(

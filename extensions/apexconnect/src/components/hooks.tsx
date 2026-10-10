@@ -1,8 +1,21 @@
 import { State } from "@lib/apexapi";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
+import { Toast } from "@raycast/api";
 import { Connection, entitiesColl, subscribeEntities } from "@apexinfosysindia/js-websocket";
 import { useEffect, useRef, useState } from "react";
 import { getApexWSConnection } from "../lib/common";
+
+// showFailureToast() must run as a side effect, not during render - calling
+// it inline in a component body (the common pattern elsewhere in this repo)
+// re-fires it on every re-render while the error is set, which can spam
+// duplicate toasts and trips React's "no side effects during render" rule.
+export function useFailureToast(error: unknown, options?: { title?: string; primaryAction?: Toast.ActionOptions }) {
+  useEffect(() => {
+    if (error) {
+      showFailureToast(error, options);
+    }
+  }, [error]);
+}
 
 interface EntityRegistryEntry {
   device_id?: string | null;

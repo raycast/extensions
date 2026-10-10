@@ -1,6 +1,5 @@
-import { showFailureToast } from "@raycast/utils";
 import { ShowAttributesAction } from "@components/entity";
-import { useHAStates } from "@components/hooks";
+import { useFailureToast, useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { PrimaryIconColor } from "@components/state/utils";
@@ -51,9 +50,7 @@ export function UpdatesList(): JSX.Element {
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "update", "", allStates);
 
-  if (error) {
-    showFailureToast(error, { title: "Cannot fetch Apex Connect Updates" });
-  }
+  useFailureToast(error, { title: "Cannot fetch Apex Connect Updates" });
 
   if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;

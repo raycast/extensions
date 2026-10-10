@@ -29,18 +29,27 @@ function createApexConnectClient(): ApexConnectClient {
   return apexClient;
 }
 
-let con: Connection;
+let con: Connection | undefined;
 export const apex = createApexConnectClient();
 
 export async function getApexWSConnection(): Promise<Connection> {
   if (con) {
     return con;
-  } else {
-    const instance = await apex.nearestURL();
-    const auth = createLongLivedTokenAuth(instance, apex.token);
-    con = await createConnection({ auth, createSocket: async () => createSocket(auth, apex.ignoreCerts) });
-    return con;
   }
+  // The library calls this factory for the initial connect AND for every
+  // internal reconnect attempt, passing the same Connection through each
+  // time (preserving existing subscriptions). Resolving nearestURL() fresh
+  // on every call - instead of baking in one Auth up front - is what lets a
+  // reconnect follow a network change instead of retrying a host that's no
+  // longer reachable.
+  con = await createConnection({
+    createSocket: async () => {
+      const instance = await apex.nearestURL();
+      const auth = createLongLivedTokenAuth(instance, apex.token);
+      return createSocket(auth, apex.ignoreCerts);
+    },
+  });
+  return con;
 }
 
 export function shouldDisplayEntityID(): boolean {

@@ -1,0 +1,93 @@
+instructions: |
+  # dia-ai-actions
+  Dia is a web browser by The Browser Company. Use open-url to open a page or run a web search in a new tab; pass the user's words as the url when they ask to search for something.
+  To switch to a tab, pass a short query that matches its title or URL (e.g. "github"), or no target at all when the user means the current tab. If the tool reports several matching tabs, ask the user which one they mean and retry with its tabId.
+  close-tab only closes a tab given its tabId. If the get-tabs tool is available, take the tabId from it. Otherwise call close-tab with a query (or no target for the current tab): it closes nothing and returns a candidate, then call close-tab again with that candidate's tabId. Never tell the user a tab was closed unless close-tab returned closed: true.
+  If a tool reports that Raycast needs permission to control Dia, relay its System Settings instructions instead of retrying or claiming the action succeeded.
+
+evals:
+  # dia-ai-actions
+  - input: "@dia open raycast.com"
+    mocks:
+      open-url:
+        openedURL: "https://raycast.com"
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "raycast.com"
+  - input: "@dia search the web for best espresso machines"
+    mocks:
+      open-url:
+        openedURL: "https://www.google.com/search?q=best%20espresso%20machines"
+    expected:
+      - callsTool:
+          name: open-url
+          arguments:
+            url:
+              includes: "espresso"
+  - input: "@dia switch to my Hacker News tab"
+    mocks:
+      select-tab:
+        title: "Hacker News"
+        url: "https://news.ycombinator.com/"
+    expected:
+      - callsTool:
+          name: select-tab
+          arguments:
+            query:
+              includes: "hacker news"
+  - input: "@dia close the current tab"
+    mocks:
+      close-tab: "Nothing was closed. Candidate: tabId T2, title Hacker News, url https://news.ycombinator.com/. Call close-tab again with tabId T2 to close it."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: "T2"
+  - input: "@dia close the YouTube tab"
+    mocks:
+      close-tab: "Nothing was closed. Candidate: tabId T7, title Lo-fi beats - YouTube, url https://www.youtube.com/watch?v=abc. Call close-tab again with tabId T7 to close it."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            query:
+              includes: "youtube"
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: "T7"
+  - input: "@dia close the tab with ID T9"
+    mocks:
+      close-tab:
+        closed: true
+        closedTab:
+          tabId: "T9"
+          title: "Raycast"
+          url: "https://www.raycast.com/"
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: "T9"
+  - input: "@dia close the tab with ID T5"
+    mocks:
+      close-tab: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again. Nothing was closed."
+    expected:
+      - callsTool:
+          name: close-tab
+          arguments:
+            tabId: "T5"
+      - includes: "Automation"
+  - input: "@dia switch to my GitHub tab"
+    mocks:
+      select-tab: "Error: No open tabs found in Dia. Make sure Dia is open. Raycast needs permission to control Dia. Enable Dia under Raycast in System Settings → Privacy & Security → Automation, then try again."
+    expected:
+      - callsTool:
+          name: select-tab
+          arguments:
+            query:
+              includes: "github"
+      - includes: "Automation"

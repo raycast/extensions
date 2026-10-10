@@ -1,3 +1,4 @@
+import { useFailureToast } from "@components/hooks";
 import { getApexWSConnection, apex } from "@lib/common";
 import { getErrorMessage } from "@lib/utils";
 import { Action, ActionPanel, Color, Icon, Image, List, clearSearchBar } from "@raycast/api";
@@ -136,24 +137,24 @@ export default function AssistCommand(): JSX.Element {
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
   const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
 
-  if (error) {
-    showFailureToast(error);
-  }
+  useFailureToast(error);
 
   // The dropdown's onChange only fires on an explicit user selection; with a
   // single pipeline (or none picked yet) it never fires, which otherwise
   // leaves the view loading forever with no Send action available.
   useEffect(() => {
-    if (!pipelines || selectedPipeline) {
+    if (!pipelines || selectedPipeline || conversations) {
       return;
     }
     const preferred = pipelines.pipelines?.find((p) => p.id === pipelines.preferred_pipeline);
     const initial = preferred ?? pipelines.pipelines?.[0];
     if (initial) {
       setSelectedPipeline(initial);
-      setConversations(getInitialConversations());
     }
-  }, [pipelines, selectedPipeline]);
+    // Pipelines have resolved either way - stop the infinite loading state
+    // even if the list came back empty (Assist not configured upstream).
+    setConversations(getInitialConversations());
+  }, [pipelines, selectedPipeline, conversations]);
 
   const process = async () => {
     try {

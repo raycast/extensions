@@ -199,7 +199,7 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
   return result;
 }
 
-async function getTabs(): Promise<Tab[]> {
+export async function getTabs(): Promise<Tab[]> {
   // JXA (JavaScript for Automation) is significantly faster than AppleScript
   // for complex data extraction: native JSON, no O(n^2) string concat.
   // If JXA fails (e.g. Dia doesn't expose JXA dictionary), fall back to
@@ -371,6 +371,15 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
     ...t,
     url: t.url || undefined,
   }));
+}
+
+/** Returns the focused tab, preferring the frontmost window when several windows report one. */
+export async function getFocusedTab(): Promise<Tab | undefined> {
+  const focusedTabs = (await getTabs()).filter((tab) => tab.isFocused);
+  if (focusedTabs.length <= 1) return focusedTabs[0];
+
+  const frontWindowId = (await runAppleScript(`tell application "Dia" to return id of window 1`)).trim();
+  return focusedTabs.find((tab) => tab.windowId === frontWindowId) ?? focusedTabs[0];
 }
 
 export function useTabs() {

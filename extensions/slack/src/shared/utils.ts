@@ -153,3 +153,35 @@ export {
   isValidChannelId,
   formatSlackFiles,
 };
+
+type MessageWithContent = {
+  text?: string;
+  attachments?: { pretext?: string; title?: string; text?: string; fallback?: string }[];
+  blocks?: { text?: { text?: string } }[];
+};
+
+/**
+ * Extracts the text content of a message. Bot/webhook messages (e.g. IFTTT tweet streams)
+ * often have an empty top-level `text` with the actual content living in `attachments` or `blocks`.
+ */
+export function getMessageText(message: MessageWithContent) {
+  if (message.text) {
+    return message.text;
+  }
+
+  const attachmentText = message.attachments
+    ?.map(
+      (attachment) =>
+        [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n") || attachment.fallback,
+    )
+    .filter(Boolean)
+    .join("\n\n");
+  if (attachmentText) {
+    return attachmentText;
+  }
+
+  return message.blocks
+    ?.map((block) => block.text?.text)
+    .filter(Boolean)
+    .join("\n");
+}

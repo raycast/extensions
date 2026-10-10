@@ -7,6 +7,9 @@
   "description": "Full-featured HTTP client with environments, variables, and request chaining",
   "icon": "icon.png",
   "author": "SebastianJarsve",
+  "contributors": [
+    "shanto462"
+  ],
   "categories": [
     "Developer Tools"
   ],

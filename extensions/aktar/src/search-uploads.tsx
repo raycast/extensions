@@ -24,6 +24,7 @@ import { UploadForm } from "./components/UploadForm";
 import { showAktarFailure } from "./lib/errors";
 import { formatExpiryDate } from "./lib/expiry";
 import { destinationIcon, FORMAT_TITLES, formatBytes, isImageUpload, parentPrefix } from "./lib/format";
+import { escapeMarkdown, markdownURL } from "./lib/markdown";
 import { primaryShortcut } from "./lib/platform";
 import { resolveFormat } from "./lib/output";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "./lib/thumbnails";
@@ -254,10 +255,10 @@ function UploadDetail({ upload, preview }: { upload: Upload; preview?: string | 
   // After a replace, a new query makes Raycast load the new image instead of its cached copy.
   const imageURL = upload.replacedAt ? `${upload.url}?v=${Date.parse(upload.replacedAt)}` : upload.url;
   const markdown = isImageUpload(upload)
-    ? `![](${imageURL})`
+    ? `![](${markdownURL(imageURL)})`
     : preview
       ? thumbnailMarkdown(preview)
-      : `### ${upload.filename}\n\n${preview === undefined ? "" : "No preview for this file."}`;
+      : `### ${escapeMarkdown(upload.filename)}\n\n${preview === undefined ? "" : "No preview for this file."}`;
   return (
     <List.Item.Detail
       markdown={markdown}

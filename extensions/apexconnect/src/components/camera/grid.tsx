@@ -1,6 +1,5 @@
-import { showFailureToast } from "@raycast/utils";
 import { EntityStandardActionSections } from "@components/entity";
-import { useHAStates } from "@components/hooks";
+import { useFailureToast, useHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { State } from "@lib/apexapi";
 import { getFriendlyName } from "@lib/utils";
@@ -78,9 +77,7 @@ export function CameraGrid(): JSX.Element {
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(undefined, "camera", "", allStates);
 
-  if (error) {
-    showFailureToast(error, { title: "Cannot get Apex Connect Cameras" });
-  }
+  useFailureToast(error, { title: "Cannot get Apex Connect Cameras" });
 
   if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;

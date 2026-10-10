@@ -15,7 +15,7 @@ instructions: |
   - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). That scan pages through the watchlist locally and stops at a page cap — it is not a server-side title search. Trust a negative ONLY when `exhaustive` is true. `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no. A year miss (Dune 1989 asked, Dune 2021 present) is not a confirmed absence.
   - To check what score you gave to a title (e.g. "Quelle note ai-je mise à Severance ?"), call `get-ratings` with the `query` parameter (e.g. `query: "Severance"`). `rated` / `userRating` cover that exact title only; entries that merely contain it come back in `ratings`, so mention them instead of answering with a flat no. Never conclude "never rated" from a browse page.
   - When several releases share a title, pass `year` on `get-ratings` the same way you do on `get-history`. A response that names another year is not a never-rated. Do not pass `rating` to hide other scores: the tool still reports the real score if it differs.
-  - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"` or `"episodes"`. A bare ID with `type: "all"` is refused because those namespaces overlap. Season IDs cannot be looked up; use `query` with `type: "seasons"`.
+  - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"` or `"episodes"` (plural, exactly as written: never `"movie"`). A bare ID with `type: "all"` is refused because those namespaces overlap. Season IDs cannot be looked up; use `query` with `type: "seasons"`.
   - When retrying a lookup with a `traktId` from `search-movies` or `search-shows`, always pass `type: "movies"` or `type: "shows"` to match the tool that produced the ID. Never send a bare `traktId` with the default `type: "all"`.
   - When the user asks to simply see their watchlist, watch history, ratings, or Continue Watching (`get-up-next`), fetch only page 1 and summarize it. Mention the total item count when the tool gives one (`get-up-next` does not: say more items exist when `hasMore` is true) and offer the next page instead of querying page after page.
 
@@ -28,7 +28,9 @@ instructions: |
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
   - For "what should I watch next?", "what can I finish tonight?" or "where was I?", use `get-up-next`: it is Trakt's Continue Watching. Shows in progress come back in `data` with their next episode, movies paused mid-playback in `movies` with `progressPercent` and `minutesLeft`. Pass `type: "shows"` or `type: "movies"` when the user asks for only one kind.
   - When `get-up-next` returns a `warning`, one of its two lists could not be loaded: tell the user, and never conclude that the missing list is empty.
+  - For "what's airing this week?" or "which movies come out soon?", use `get-calendar`. Omit `startDate` when the period starts today (this week, next N days, upcoming); only pass `startDate` (YYYY-MM-DD, in the user's local time) when the user names a specific date, and never guess the current date. For "this week", pass `calendarWeek: true`: the tool covers today through the coming Sunday, so never compute `days` for it. For "what's airing" or "upcoming" without a week, keep the default and say the answer covers the next 7 days from `window.startDate`. Pass `days` (max 32) for another length, and `type: "shows"` or `type: "movies"` for only one kind. Dates and times in the answer are already local: present them as is. The calendar only lists titles Trakt tracks for the user (shows they watched or watchlisted, minus shows hidden from the calendar), over 32 days at most. In a response that is not truncated, a title absent from it has nothing in that window among followed titles, which does not mean no episode or release is planned. When `truncated` is true, the lists stop at the date named in the message: never conclude that a missing title has nothing in the window, and offer to narrow it (fewer `days`, or a single `type`). Surface `warning` when present.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.
+  - For titles similar to one the user names ("movies like Inception", "shows like Severance"), resolve it with `search-movies` or `search-shows`, then call `get-related` with its `traktId` and the matching `type` ("movies" or "shows"). Use `get-recommendations` only for suggestions based on the user's own taste.
   - To check total hours watched, number of movies/episodes seen, or rating breakdown, use `get-user-stats`.
   - Format season and episode numbers clearly as S{season}E{episode} (e.g. S01E03) alongside episode titles.
   - When presenting ratings, format them out of 10 (e.g. 8.2/10).
@@ -51,6 +53,8 @@ instructions: |
   - To mark a movie as watched, use `mark-movie-watched`.
   - To mark a specific TV episode as watched, use `mark-episode-watched` with `showTraktId`, `seasonNumber`, and `episodeNumber`.
   - To mark an ENTIRE TV series (all seasons and episodes) as watched, use `mark-show-watched`. Only use this when the user explicitly asks to mark the whole show as watched.
+  - When the user says they are watching something now ("I'm watching Severance S02E03", "start Inception"), use `check-in` with `movieTraktId`, or with `showTraktId`, `seasonNumber` and `episodeNumber`. It becomes a play when the runtime ends, so do not also call a mark-as-watched tool. Use `stop-check-in` to cancel it ("I stopped watching"); it takes no argument. Only one check-in can be active: if `check-in` reports another one, tell the user and offer `stop-check-in`.
+  - To drop a show ("drop Severance", "I gave up on X"), use `drop-show` with its `showTraktId`. It leaves Continue Watching and the calendar but keeps history and ratings; it is not a removal from history. To undo it ("restore Severance", "un-drop X"), use `restore-show` with the same `showTraktId`.
   - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
   - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
   - To remove a rating from a movie, TV show, or episode, use `remove-rating`. Season ratings can appear in `get-ratings` but cannot be added or removed through these tools.
@@ -145,6 +149,98 @@ evals:
           name: "get-recommendations"
           arguments:
             type: shows
+
+  - input: "@trakt-manager what's airing this week?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-08"
+          endDate: "2026-10-11"
+          days: 4
+          timeZone: "Europe/Paris"
+          calendarWeek: true
+        episodes:
+          - localDate: "2026-10-09"
+            localTime: "03:00"
+            showTitle: "Severance"
+            showTraktId: 154784
+            season: 3
+            number: 1
+            episodeTitle: "Hello Again"
+            episodeTraktId: 4100001
+        movies: []
+        message: "1 episode(s) and 0 movie(s) from 2026-10-08 to 2026-10-11 (Europe/Paris), the rest of this calendar week."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+          arguments:
+            calendarWeek: true
+
+  - input: "@trakt-manager any movies coming out in the next two weeks?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-08"
+          endDate: "2026-10-21"
+          days: 14
+          timeZone: "Europe/Paris"
+        episodes: []
+        movies:
+          - releaseDate: "2026-10-16"
+            title: "Dune: Part Three"
+            year: 2026
+            traktId: 900001
+        message: "1 movie(s) from 2026-10-08 to 2026-10-21 (Europe/Paris)."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+          arguments:
+            type: movies
+            days: 14
+
+  - input: "@trakt-manager what's on my calendar from 2026-10-20?"
+    mocks:
+      get-calendar:
+        window:
+          startDate: "2026-10-20"
+          endDate: "2026-10-26"
+          days: 7
+          timeZone: "Europe/Paris"
+        episodes: []
+        movies: []
+        message: "0 episode(s) and 0 movie(s) from 2026-10-20 to 2026-10-26 (Europe/Paris)."
+    expected:
+      - callsTool:
+          name: "get-calendar"
+          arguments:
+            startDate: "2026-10-20"
+
+  - input: "@trakt-manager suggest movies like Inception"
+    mocks:
+      search-movies:
+        data:
+          - traktId: 16662
+            title: "Inception"
+            year: 2010
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      get-related:
+        relatedTo: '"Inception" (2010)'
+        movies:
+          - traktId: 1
+            title: "Interstellar"
+            year: 2014
+    expected:
+      - callsTool:
+          name: "search-movies"
+          arguments:
+            title: "Inception"
+      - callsTool:
+          name: "get-related"
+          arguments:
+            type: movies
+            traktId: 16662
 
   - input: "@trakt-manager when did I watch Inception?"
     mocks:
@@ -382,6 +478,12 @@ evals:
 
   - input: "@trakt-manager mark Inception as watched"
     mocks:
+      get-watchlist:
+        found: false
+        inWatchlist: false
+        exhaustive: true
+        message: '"Inception" is not in your watchlist.'
+        hasMore: false
       search-movies:
         data:
           - traktId: 16662
@@ -417,6 +519,19 @@ evals:
   # An episode write needs the show's ID, the season and the episode, not a title.
   - input: "@trakt-manager mark Severance S02E03 as watched"
     mocks:
+      get-up-next:
+        data:
+          - showTitle: "Severance"
+            showTraktId: 154784
+            nextEpisode:
+              traktId: 3959823
+              season: 2
+              number: 3
+              title: "Who Is Alive?"
+        movies: []
+        page: 1
+        hasMore: false
+        exhaustive: false
       search-shows:
         data:
           - traktId: 154784
@@ -425,6 +540,54 @@ evals:
         matchesForTitle: 1
         truncated: false
         hasMore: false
+      get-season-episodes:
+        showTitle: "Severance"
+        showTraktId: 154784
+        seasonNumber: 2
+        totalEpisodes: 10
+        episodes:
+          - traktId: 3959823
+            season: 2
+            number: 3
+            title: "Who Is Alive?"
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: true
+        wasWatched: true
+        message: '"Severance" (2022) was watched: 11 recorded play(s), most recently on 2025-01-24T02:00:00.000Z.'
+        hasMore: false
+        history:
+          - type: "episode"
+            title: "Severance"
+            year: 2022
+            watchedAt: "2025-01-24T02:00:00.000Z"
+            traktId: 154784
+            episode:
+              traktId: 3959822
+              season: 2
+              number: 2
+              title: "Goodbye, Mrs. Selvig"
+              episodeLabel: "S02E02"
+          - type: "episode"
+            title: "Severance"
+            year: 2022
+            watchedAt: "2025-01-17T02:00:00.000Z"
+            traktId: 154784
+            episode:
+              traktId: 3959821
+              season: 2
+              number: 1
+              title: "Hello, Ms. Cobel"
+              episodeLabel: "S02E01"
+        checked:
+          - type: "show"
+            title: "Severance"
+            year: 2022
+            traktId: 154784
+            watched: true
+            plays: 11
+            lastWatchedAt: "2025-01-24T02:00:00.000Z"
       mark-episode-watched:
         success: true
         message: 'Severance (2022) S02E03 has been successfully marked as watched in your Trakt history.'
@@ -440,6 +603,90 @@ evals:
             showTraktId: 154784
             seasonNumber: 2
             episodeNumber: 3
+
+  - input: "@trakt-manager I'm watching Severance S02E03 right now"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      check-in:
+        success: true
+        message: 'Checked in to "Severance" (2022) S02E03 "Who Is Alive?". It becomes a play at 2026-10-09T21:50:00.000Z unless the check-in is stopped.'
+        expiresAt: "2026-10-09T21:50:00.000Z"
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "check-in"
+          arguments:
+            showTraktId: 154784
+            seasonNumber: 2
+            episodeNumber: 3
+
+  - input: "@trakt-manager stop my check-in"
+    mocks:
+      stop-check-in:
+        success: true
+        message: 'Stopped the check-in to Severance · Who Is Alive?.'
+        stopped: "Severance · Who Is Alive?"
+    expected:
+      - callsTool:
+          name: "stop-check-in"
+
+  - input: "@trakt-manager drop Severance"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      drop-show:
+        success: true
+        calendarHidden: true
+        message: 'Dropped "Severance" (2022): it left Continue Watching and the calendar.'
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "drop-show"
+          arguments:
+            showTraktId: 154784
+
+  - input: "@trakt-manager restore Severance, I dropped it by mistake"
+    mocks:
+      search-shows:
+        data:
+          - traktId: 154784
+            title: "Severance"
+            year: 2022
+        matchesForTitle: 1
+        truncated: false
+        hasMore: false
+      restore-show:
+        success: true
+        calendarRestored: true
+        message: 'Restored "Severance" (2022) to Continue Watching and the calendar.'
+    expected:
+      - callsTool:
+          name: "search-shows"
+          arguments:
+            title: "Severance"
+      - callsTool:
+          name: "restore-show"
+          arguments:
+            showTraktId: 154784
 
   - input: "@trakt-manager rate Severance 9 out of 10"
     mocks:

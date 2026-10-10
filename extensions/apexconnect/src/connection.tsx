@@ -1,4 +1,4 @@
-import { showFailureToast } from "@raycast/utils";
+import { useFailureToast } from "@components/hooks";
 import { apex } from "@lib/common";
 import { getErrorMessage } from "@lib/utils";
 import { getWifiSSIDSync } from "@lib/wifi";
@@ -7,9 +7,7 @@ import { useEffect, useState } from "react";
 
 export default function ConnectionCommand(): JSX.Element {
   const { error, isLoading, nearestURL } = useConnection();
-  if (error) {
-    showFailureToast(error);
-  }
+  useFailureToast(error);
   return (
     <List isLoading={isLoading}>
       <List.Section title="Connection">

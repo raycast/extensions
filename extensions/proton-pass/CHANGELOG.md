@@ -18,7 +18,7 @@
 - Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
 - Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
 
-## [Item Counts and Shared Vaults] - {PR_MERGE_DATE}
+## [Item Counts and Shared Vaults] - 2026-10-10
 
 - The vault menu of Search Items shows the number of items in each vault, and in all vaults. The selected one stays in the search bar
 - List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
