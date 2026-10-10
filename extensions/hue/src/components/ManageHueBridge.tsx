@@ -41,6 +41,8 @@ const failedToLoadPreferencesMessage = `
 ![Failure](${failureImagePath})
 
 Please make sure you have entered a valid Hue Bridge IP address.
+
+If your saved Hue Bridge can’t be read, you can remove it by using the ‘Unlink Saved Hue Bridge’ action.
 `;
 
 const failedToLinkMessage = `
@@ -82,7 +84,10 @@ const retry = (send: SendHueBridgeEvent) => (
 
 const VIEWS: Record<StateName, View | null> = {
   loadingPreferences: null,
-  failedToLoadPreferences: { markdown: failedToLoadPreferencesMessage },
+  failedToLoadPreferences: {
+    markdown: failedToLoadPreferencesMessage,
+    actions: (send) => [<UnlinkAction key="unlink" send={send} />],
+  },
   loadingConfiguration: null,
   connecting: null,
   connected: null,
