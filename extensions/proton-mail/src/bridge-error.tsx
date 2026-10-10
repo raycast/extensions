@@ -119,9 +119,10 @@ export function BridgeErrorView({ reason, onRetry }: { reason: BridgeErrorReason
   const tryAgain = async () => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Connecting to Proton Mail Bridge" });
     const status = await checkBridge();
-    if (status === "unreachable" || status === "authentication") {
+    // Only reload once Bridge lets us in: any other answer would bring this screen right back
+    if (status !== "ready") {
       toast.style = Toast.Style.Failure;
-      toast.title = status === "unreachable" ? "Can't reach Proton Mail Bridge" : "Bridge rejected your credentials";
+      toast.title = status === "authentication" ? "Bridge rejected your credentials" : "Can't reach Proton Mail Bridge";
       return;
     }
     await toast.hide();

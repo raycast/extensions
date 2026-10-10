@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   Action,
   ActionPanel,
@@ -53,6 +53,48 @@ function usePreview(): [boolean, () => void] {
   return [shown, toggle];
 }
 
+// useCachedPromise drops the page it's loading as soon as another one is requested: asking for more while the first
+// page reloads would lose that page, and asking twice in a row would skip one. So a request made during a reload
+// waits for it, and requests for a page already on its way are ignored.
+function useLoadMore(
+  pagination: { hasMore: boolean; onLoadMore: () => void } | undefined,
+  isLoading: boolean,
+  view: string,
+): () => void {
+  const state = useRef({ isLoading, loadingMore: false, queued: false });
+  state.current.isLoading = isLoading;
+  const hasMore = pagination?.hasMore ?? false;
+  const onLoadMore = pagination?.onLoadMore;
+
+  const loadMore = useCallback(() => {
+    const current = state.current;
+    if (!hasMore || !onLoadMore || current.loadingMore) return;
+    if (current.isLoading) {
+      current.queued = true;
+      return;
+    }
+    current.loadingMore = true;
+    onLoadMore();
+  }, [hasMore, onLoadMore]);
+
+  // A request queued for another folder, filter or search doesn't apply to this one
+  useEffect(() => {
+    state.current.queued = false;
+    state.current.loadingMore = false;
+  }, [view]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    state.current.loadingMore = false;
+    if (state.current.queued) {
+      state.current.queued = false;
+      loadMore();
+    }
+  }, [isLoading, loadMore]);
+
+  return loadMore;
+}
+
 function applyUpdate(emails: Email[], update: EmailUpdate, filter: EmailFilter): Email[] {
   // An email marked as read no longer belongs under the Unread filter, and the other way around
   const leavesFilter = "read" in update && (filter === "unread" ? update.read : filter === "read" && !update.read);
@@ -94,6 +136,8 @@ export function EmailList({ folder, initialFilter }: { folder: string; initialFi
     [folder, filter, searchText],
     { keepPreviousData: true, onError: () => undefined },
   );
+
+  const loadMore = useLoadMore(pagination, isLoading, [folder, filter, searchText].join("\u0000"));
 
   // Keep the connections open while the list is shown; they close once the command closes
   useEffect(() => holdConnections(), []);
@@ -139,7 +183,7 @@ export function EmailList({ folder, initialFilter }: { folder: string; initialFi
     },
     showPreview,
     togglePreview,
-    loadMore: pagination?.hasMore ? pagination.onLoadMore : undefined,
+    loadMore: pagination?.hasMore ? loadMore : undefined,
     isLoadingMore: isLoading && emails.length > 0,
     emailCount: emails.length,
     demoMode,
@@ -150,7 +194,7 @@ export function EmailList({ folder, initialFilter }: { folder: string; initialFi
     <List
       // Raycast hides the empty view while loading, so the error screen would blink on each reload
       isLoading={isLoading && !bridgeError}
-      pagination={pagination}
+      pagination={pagination && { ...pagination, onLoadMore: loadMore }}
       navigationTitle={folderDisplayName(folder)}
       isShowingDetail={showPreview}
       searchBarPlaceholder="Search by subject or sender..."
