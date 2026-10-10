@@ -57,14 +57,31 @@ export default class HueClient {
   private readonly lightsQueue = new RateLimitedQueue(10);
   private readonly groupedLightsQueue = new RateLimitedQueue(1, 1);
 
+  readonly createdAt = Date.now();
+
   constructor(
     readonly bridgeConfig: BridgeConfig,
     private readonly http2Session: ClientHttp2Session,
-  ) {}
+  ) {
+    // An error also closes the session, which onDisconnect reports. Without a listener, it would crash the command.
+    http2Session.on("error", logError);
+  }
 
   // Ends the session once its open streams, like the event stream, close.
   public close() {
     this.http2Session.close();
+  }
+
+  // Calls back once the client can't be used any more: its session closed, also when the event stream ended, or the
+  // bridge sent GOAWAY, which it does after about 1000 requests on a session.
+  public onDisconnect(callback: () => void): () => void {
+    const session = this.http2Session;
+    if (session.closed || session.destroyed) {
+      callback();
+      return () => {};
+    }
+    session.once("goaway", callback).once("close", callback);
+    return () => session.off("goaway", callback).off("close", callback);
   }
 
   public getLights(): Promise<Light[]> {
@@ -165,6 +182,9 @@ export default class HueClient {
     });
 
     stream.on("error", logError);
+    // Without the event stream, the client would fall behind the bridge. It also ends when the bridge answers with an
+    // error, like 403 for a username it no longer accepts.
+    stream.once("close", () => this.close());
 
     return () => stream.close();
   }

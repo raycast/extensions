@@ -26,7 +26,12 @@ type HueContext = {
 
 type LinkInput = { ipAddress?: string; id?: string; username?: string };
 
-export type HueBridgeEvent = { type: "LINK" } | { type: "RETRY" } | { type: "DONE" } | { type: "UNLINK" };
+export type HueBridgeEvent =
+  | { type: "LINK" }
+  | { type: "RETRY" }
+  | { type: "DONE" }
+  | { type: "UNLINK" }
+  | { type: "DISCONNECTED" };
 export type SendHueBridgeEvent = (event: HueBridgeEvent) => void;
 export type HueBridgeState = SnapshotFrom<typeof hueBridgeMachine>;
 
@@ -76,6 +81,9 @@ export const hueBridgeMachine = setup({
       }
     }),
     unlink: fromPromise(clearBridgeConfig),
+    watchClient: fromCallback<HueBridgeEvent, HueClient>(({ input, sendBack }) =>
+      input.onDisconnect(() => sendBack({ type: "DISCONNECTED" })),
+    ),
     toast: fromCallback(({ input }: { input: Toast.Options }) => {
       let toast: Toast | undefined;
       enqueueToastRequest(async () => void (toast = await showToast(input)));
@@ -182,7 +190,20 @@ export const hueBridgeMachine = setup({
         },
       ],
     },
-    connected: {},
+    connected: {
+      invoke: { src: "watchClient", input: ({ context }) => context.hueClient! },
+      on: {
+        // A connection that drops again within seconds would only keep reconnecting.
+        DISCONNECTED: [
+          {
+            guard: ({ context }) => Date.now() - context.hueClient!.createdAt < 10_000,
+            target: "failedToConnect",
+            actions: assign({ hueClient: undefined, errorMessage: "Lost connection to Hue Bridge" }),
+          },
+          { target: "connecting", actions: assign({ hueClient: undefined }) },
+        ],
+      },
+    },
     failedToConnect: {
       invoke: {
         src: "toast",
