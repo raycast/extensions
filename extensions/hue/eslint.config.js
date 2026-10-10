@@ -3,6 +3,6 @@ const raycast = require("@raycast/eslint-config");
 
 module.exports = defineConfig([
   ...raycast,
-  // Its table predates Raycast 2.0, and its autofix would rebind the brightness and color shortcuts.
+  // Its MoveUp/MoveDown predate Raycast 2.0's ⌘⌥↑/↓, so its autofix would rebind the brightness shortcuts to them.
   { rules: { "@raycast/prefer-common-shortcut": "off" } },
 ]);
