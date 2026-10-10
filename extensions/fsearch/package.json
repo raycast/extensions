@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fsearch",
+  "title": "FSearch",
+  "description": "Instant whole-disk file search with fuzzy names, typo tolerance, and indexed content search, powered by fsearch.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "FSearch",
+      "description": "Search file names and contents across your disk with fsearch.",
+      "mode": "view"
+    },
+    {
+      "name": "install-fsearch",
+      "title": "Install fsearch",
+      "subtitle": "FSearch",
+      "description": "Build and install the fsearch binary in Terminal, or update an existing install.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Find files and folders on the Mac by name, with optional folder, extension, type, size, and modification-date filters."
+    },
+    {
+      "name": "search-file-contents",
+      "title": "Search File Contents",
+      "description": "Search inside files for text, a regular expression, or a symbol definition, with line numbers."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "fsearch Binary",
+      "description": "Path to the fsearch executable. Defaults to ~/.local/bin/fsearch.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/bin/fsearch"
+    },
+    {
+      "name": "limit",
+      "title": "Result Limit",
+      "description": "Maximum number of results per search.",
+      "type": "textfield",
+      "required": false,
+      "default": "100",
+      "placeholder": "100"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,69 @@
+instructions: |
+  fsearch indexes the whole disk of the user's Mac. Use search-files to find files or folders by name and
+  search-file-contents to look inside files.
+  - Prefer the structured filters (folder, extension, type, size, modified) over putting filter syntax in the query.
+  - When the user mentions a project or location, pass it as folder (paths may start with ~).
+  - For "where is X defined" questions, use search-file-contents with mode "symbol".
+  - Present results as file paths shortened with ~ for the home folder, and mention line numbers for content matches.
+  - If a tool reports that fsearch is not installed, tell the user to run the "Install fsearch" command.
+evals:
+  - input: "@fsearch find PDFs in my Downloads folder modified this week"
+    mocks:
+      search-files:
+        results:
+          - path: /Users/me/Downloads/invoice-october.pdf
+            kind: file
+            sizeBytes: 182044
+            modified: "2026-10-09T14:12:00.000Z"
+    expected:
+      - callsTool:
+          name: search-files
+          arguments:
+            folder: ~/Downloads
+            extension: pdf
+            modified: "<7d"
+  - input: "@fsearch where is the function parseResponse defined in ~/Projects/Extensions/fsearch?"
+    mocks:
+      search-file-contents:
+        files:
+          - path: /Users/me/Projects/Extensions/fsearch/src/lib/fsearch.ts
+            matches:
+              - line: 85
+                text: "function parseResponse(value: unknown): SearchResult {"
+        complete: true
+    expected:
+      - callsTool:
+          name: search-file-contents
+          arguments:
+            pattern: parseResponse
+            mode: symbol
+            folder: ~/Projects/Extensions/fsearch
+  - input: "@fsearch show me videos larger than 1 GB"
+    mocks:
+      search-files:
+        results:
+          - path: /Users/me/Movies/vacation.mov
+            kind: file
+            sizeBytes: 2400000000
+            modified: "2026-08-02T10:00:00.000Z"
+    expected:
+      - callsTool:
+          name: search-files
+          arguments:
+            type: video
+            size: ">1gb"
+  - input: "@fsearch which files in ~/Developer/api mention TODO?"
+    mocks:
+      search-file-contents:
+        files:
+          - path: /Users/me/Developer/api/src/server.ts
+            matches:
+              - line: 42
+                text: "// TODO: add rate limiting"
+        complete: true
+    expected:
+      - callsTool:
+          name: search-file-contents
+          arguments:
+            pattern: TODO
+            folder: ~/Developer/api
