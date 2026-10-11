@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "insight-journal",
+  "title": "The Insight Journal",
+  "description": "Browse and search Aryan Techie's blog posts from aryantechie.com, and get notified when a new post is published.",
+  "icon": "icon.png",
+  "author": "aryantechie",
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "blog",
+    "rss",
+    "aryan techie",
+    "aroice",
+    "insight journal",
+    "reading list"
+  ],
+  "commands": [
+    {
+      "name": "search-posts",
+      "title": "Search Blog Posts",
+      "subtitle": "The Insight Journal",
+      "description": "List and search all posts from aryantechie.com/blog.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "The Insight Journal",
+      "description": "List and search project write-ups from aryantechie.com/work.",
+      "mode": "view"
+    },
+    {
+      "name": "random-post",
+      "title": "Open Random Post",
+      "subtitle": "The Insight Journal",
+      "description": "Open a random blog post in your browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-posts",
+      "title": "New Blog Posts",
+      "subtitle": "The Insight Journal",
+      "description": "Menu bar item that checks for new posts in the background and notifies you.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "systemNotifications",
+          "title": "Notifications",
+          "label": "Show a macOS notification for new posts",
+          "description": "Send a system notification when a new post is found during a background check.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hideWhenEmpty",
+          "title": "Menu Bar",
+          "label": "Hide icon when there are no new posts",
+          "description": "Only show the menu bar icon while there are unread posts.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
