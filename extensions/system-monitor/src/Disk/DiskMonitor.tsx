@@ -4,8 +4,15 @@ import { useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 
 import { Actions } from "../components/Actions";
-import { MetadataLabel, MetadataSection, coloredAccessoryText } from "../components/MetadataLabel";
-import { calculateDiskStorage, getDiskHealthInfo, getRootVolumeDetails } from "../lib/disk-info";
+import { MetadataLabel, MetadataSection } from "../components/MetadataLabel";
+import { pendingText, percentTagAccessory, UsageTag } from "../components/CompactMetadata";
+import {
+  calculateDiskStorage,
+  DiskStorageEntry,
+  getDiskHealthInfo,
+  getRootVolumeDetails,
+  shortDiskSize,
+} from "../lib/disk-info";
 import { formatDiskRate, getDiskThroughput } from "../lib/disk-throughput";
 
 const { displayModeDisk } = getPreferenceValues<ExtensionPreferences>();
@@ -14,157 +21,174 @@ const diskPercentMode = displayModeDisk === "free" ? "free" : "usage";
 const STATIC_REFRESH_MS = 45_000;
 const THROUGHPUT_REFRESH_MS = 12_000;
 
-export default function DiskMonitor({ isActive = false }: { isActive?: boolean }) {
-  const { data: staticData, revalidate: revalidateStatic } = usePromise(
+const VOLUME_ITEM_ID_PREFIX = "disk-";
+export const BOOT_VOLUME_ITEM_ID = `${VOLUME_ITEM_ID_PREFIX}boot`;
+
+/**
+ * Stable per-volume row id: the boot volume gets a fixed id; every other volume is keyed by its mount
+ * point under a separate `volume:` namespace. Mount points are unique even when display names repeat
+ * (`/Volumes/Foo` vs `/Volumes/Backup/Foo`), and a drive called "boot" cannot collide with the boot id.
+ */
+function volumeItemId(disk: DiskStorageEntry): string {
+  return disk.isBoot ? BOOT_VOLUME_ITEM_ID : `${VOLUME_ITEM_ID_PREFIX}volume:${disk.mount}`;
+}
+
+const volumeActions = <Actions radioButtonNumber={4} />;
+
+/** One `List.Item` per mounted volume; the boot volume's pane also carries the physical-disk depth. */
+export default function DiskVolumes({ selectedItemId }: { selectedItemId?: string }) {
+  const isAnyVolumeActive = selectedItemId?.startsWith(VOLUME_ITEM_ID_PREFIX) ?? false;
+  const isBootActive = selectedItemId === BOOT_VOLUME_ITEM_ID;
+
+  // The rows need only `df`; the slower diskutil/system_profiler reads feed the boot pane alone.
+  const {
+    data: storage,
+    error: storageError,
+    revalidate: revalidateStorage,
+  } = usePromise(calculateDiskStorage, [], {
+    execute: true,
+  });
+
+  const {
+    data: bootDetails,
+    error: bootDetailsError,
+    revalidate: revalidateBootDetails,
+  } = usePromise(
     async () => {
-      const [storage, rootVolume, diskHealth] = await Promise.all([
-        calculateDiskStorage(),
-        getRootVolumeDetails(),
-        getDiskHealthInfo(),
-      ]);
-
-      const primaryDisk = storage[0];
-      const primaryTotal = primaryDisk ? +primaryDisk.totalSize : 0;
-      const usedPercentage = primaryTotal > 0 ? Math.round((+primaryDisk.usedStorage / primaryTotal) * 100) : 0;
-      const freePercentage = primaryTotal > 0 ? 100 - usedPercentage : 0;
-
-      return {
-        storage,
-        rootVolume,
-        diskHealth,
-        usedPercentage,
-        freePercentage,
-      };
+      const [rootVolume, diskHealth] = await Promise.all([getRootVolumeDetails(), getDiskHealthInfo()]);
+      return { rootVolume, diskHealth };
     },
     [],
-    { execute: true },
+    { execute: isBootActive },
   );
 
   useInterval(() => {
-    if (isActive) {
-      revalidateStatic();
+    if (isAnyVolumeActive) {
+      revalidateStorage();
+    }
+    if (isBootActive) {
+      revalidateBootDetails();
     }
   }, STATIC_REFRESH_MS);
 
   const { data: throughput, revalidate: revalidateThroughput } = usePromise(
     () => getDiskThroughput({ allowSlowSample: true }),
     [],
-    { execute: isActive },
+    { execute: isBootActive },
   );
 
   useInterval(() => {
-    if (isActive) {
+    if (isBootActive) {
       revalidateThroughput();
     }
   }, THROUGHPUT_REFRESH_MS);
 
   useEffect(() => {
-    if (isActive) {
+    if (isBootActive) {
       revalidateThroughput();
     }
-  }, [isActive, revalidateThroughput]);
+  }, [isBootActive, revalidateThroughput]);
 
-  const storageAccessory =
-    staticData?.storage[0] &&
-    (displayModeDisk === "free" ? `${staticData.freePercentage} % free` : `${staticData.usedPercentage} % used`);
-
-  const throughputAccessory =
-    isActive && throughput?.hasSample ? formatDiskRate(throughput.megabytesPerSecond) : undefined;
-
-  const accessoryText = throughputAccessory ?? storageAccessory ?? (isActive ? "Loading…" : "—");
-  const coloredAccessory =
-    throughputAccessory || accessoryText === "Loading…" || accessoryText === "—"
-      ? accessoryText
-      : coloredAccessoryText(accessoryText, diskPercentMode);
-
-  return (
-    <List.Item
-      id="disk"
-      title="Disk"
-      icon={Icon.HardDrive}
-      accessories={[{ text: coloredAccessory }]}
-      detail={
-        <DiskMonitorDetail
-          storage={staticData?.storage ?? []}
-          rootVolume={staticData?.rootVolume}
-          diskHealth={staticData?.diskHealth}
-          throughput={throughput}
-          isCollectingThroughput={isActive && !throughput?.hasSample}
-        />
-      }
-      actions={<Actions radioButtonNumber={4} />}
-    />
-  );
-}
-
-function DiskMonitorDetail({
-  storage,
-  rootVolume,
-  diskHealth,
-  throughput,
-  isCollectingThroughput,
-}: {
-  storage: Awaited<ReturnType<typeof calculateDiskStorage>>;
-  rootVolume?: Awaited<ReturnType<typeof getRootVolumeDetails>>;
-  diskHealth?: Awaited<ReturnType<typeof getDiskHealthInfo>>;
-  throughput?: Awaited<ReturnType<typeof getDiskThroughput>>;
-  isCollectingThroughput: boolean;
-}) {
-  const ioRateText = isCollectingThroughput
-    ? "Collecting sample…"
-    : throughput?.hasSample
-      ? formatDiskRate(throughput.megabytesPerSecond)
-      : "—";
-
-  return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <MetadataSection title="Physical Disk" />
-          <MetadataLabel title="Device" text={diskHealth?.deviceName ?? "Unknown"} />
-          <MetadataLabel title="Medium Type" text={diskHealth?.mediumType ?? "Unknown"} />
-          <MetadataLabel title="SMART Status" text={diskHealth?.smartStatus ?? "Unknown"} />
-          <MetadataLabel title="Disk Size" text={diskHealth?.diskSize ?? "Unknown"} />
-          <MetadataLabel title="Volume" text={rootVolume?.volumeName ?? "Unknown"} />
-          <MetadataLabel title="File System" text={rootVolume?.fileSystem ?? "Unknown"} />
-          <MetadataLabel title="Media Type" text={rootVolume?.mediaType ?? "Unknown"} />
-          <MetadataLabel title="Protocol" text={rootVolume?.protocol ?? "Unknown"} />
-          <MetadataLabel title="Physical Store" text={rootVolume?.physicalStore ?? "Unknown"} />
-          <MetadataLabel title="Container Total" text={rootVolume?.containerTotalSpace ?? "Unknown"} />
-          <MetadataLabel title="Container Free" text={rootVolume?.containerFreeSpace ?? "Unknown"} />
-          <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Disk I/O" />
-          <MetadataLabel title="Device" text={throughput?.device ?? rootVolume?.physicalStore ?? "Unknown"} />
-          <MetadataLabel title="I/O Rate" text={ioRateText} />
-          {throughput?.hasSample ? (
-            <>
-              <MetadataLabel
-                title="Transfers"
-                text={`${throughput.transfersPerSecond.toFixed(0)} tps · ${throughput.kilobytesPerTransfer.toFixed(1)} KB/t`}
-              />
-              <MetadataLabel title="Note" text="macOS reports combined read/write throughput" />
-            </>
-          ) : null}
-          <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Volumes" />
-          {storage.map((disk, index) => (
-            <MetadataLabel
-              key={index}
-              title={disk.diskName}
-              icon={
-                disk.isExternal
-                  ? { source: Icon.HardDrive, tintColor: Color.Blue }
-                  : { source: Icon.HardDrive, tintColor: Color.SecondaryText }
-              }
-              text={
-                displayModeDisk === "free"
-                  ? `${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`
-                  : `${disk.usedStorage} GB used of ${disk.totalSize} GB`
+  if (!storage?.length) {
+    // A failed `df` must read as a failure, not as a pane that never finishes loading.
+    return (
+      <List.Item
+        id={BOOT_VOLUME_ITEM_ID}
+        title="Disk"
+        icon={Icon.HardDrive}
+        accessories={[{ text: storageError ? "Unavailable" : pendingText(isAnyVolumeActive) }]}
+        detail={
+          storageError ? (
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <MetadataLabel title="Status" text="Unavailable" />
+                  <MetadataLabel title="Error" text={storageError.message} />
+                </List.Item.Detail.Metadata>
               }
             />
-          ))}
-        </List.Item.Detail.Metadata>
-      }
-    />
+          ) : (
+            <List.Item.Detail isLoading />
+          )
+        }
+        actions={volumeActions}
+      />
+    );
+  }
+
+  const ioRateText = throughput?.hasSample
+    ? `${formatDiskRate(throughput.megabytesPerSecond)} · ${throughput.transfersPerSecond.toFixed(0)} tps · ${throughput.kilobytesPerTransfer.toFixed(1)} KB/t`
+    : isBootActive
+      ? "Collecting sample…"
+      : "—";
+
+  const { rootVolume, diskHealth } = bootDetails ?? {};
+  // A failed diskutil/system_profiler read must not leave the physical-disk rows on "Loading…".
+  const bootText = (value: string | undefined) => (bootDetailsError ? "Unavailable" : value);
+
+  return (
+    <>
+      {storage.map((disk) => {
+        const total = +disk.totalSize;
+        const usedPercent = total > 0 ? Math.round((+disk.usedStorage / total) * 100) : 0;
+        const displayedPercent = displayModeDisk === "free" ? 100 - usedPercent : usedPercent;
+        const itemId = volumeItemId(disk);
+
+        return (
+          <List.Item
+            key={itemId}
+            id={itemId}
+            title={disk.diskName}
+            icon={{ source: Icon.HardDrive, tintColor: disk.isExternal ? Color.Blue : Color.SecondaryText }}
+            accessories={[percentTagAccessory(displayedPercent, diskPercentMode)]}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <UsageTag title="Usage" percent={displayedPercent} displayMode={diskPercentMode} />
+                    <MetadataLabel title="Used" text={`${disk.usedStorage} GB`} />
+                    <MetadataLabel title="Free" text={`${disk.totalAvailableStorage} GB`} />
+                    <MetadataLabel title="Total" text={`${disk.totalSize} GB`} />
+                    {disk.isExternal ? <MetadataLabel title="External" text="Yes" /> : null}
+                    {disk.isBoot ? (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <MetadataSection title="Physical Disk" />
+                        <MetadataLabel title="SMART Status" text={bootText(diskHealth?.smartStatus)} />
+                        <MetadataLabel
+                          title="Device · Size"
+                          text={bootText(
+                            diskHealth && `${diskHealth.deviceName} · ${shortDiskSize(diskHealth.diskSize)}`,
+                          )}
+                        />
+                        <MetadataLabel
+                          title="Medium · Protocol"
+                          text={bootText(
+                            diskHealth && rootVolume && `${diskHealth.mediumType} · ${rootVolume.protocol}`,
+                          )}
+                        />
+                        <MetadataLabel title="File System" text={bootText(rootVolume?.fileSystem)} />
+                        <MetadataLabel
+                          title="Container"
+                          text={bootText(
+                            rootVolume &&
+                              `${shortDiskSize(rootVolume.containerFreeSpace)} free of ${shortDiskSize(rootVolume.containerTotalSpace)}`,
+                          )}
+                        />
+                        <MetadataLabel
+                          title={`I/O (${throughput?.device ?? rootVolume?.physicalStore ?? "disk"})`}
+                          text={ioRateText}
+                        />
+                      </>
+                    ) : null}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={volumeActions}
+          />
+        );
+      })}
+    </>
   );
 }
