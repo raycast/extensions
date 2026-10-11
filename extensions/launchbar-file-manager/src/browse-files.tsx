@@ -795,15 +795,36 @@ function RenameForm(props: { entry: FileEntry; onDone: () => void }) {
               }
               try {
                 // Never silently replace another item: renaming onto an
-                // existing path destroys it on macOS, so ask first.
+                // existing path destroys it on macOS, so ask first. Identity
+                // is by inode, not name string — on case-insensitive APFS a
+                // case-only rename ("Notes" → "notes") targets the same file
+                // and must NOT trigger the replace prompt.
+                let selfRename = false;
                 let occupied = false;
                 try {
-                  await fs.lstat(dest);
-                  occupied = true;
+                  const [fromStat, toStat] = await Promise.all([
+                    fs.stat(props.entry.fullPath),
+                    fs.stat(dest),
+                  ]);
+                  if (
+                    fromStat.dev === toStat.dev &&
+                    fromStat.ino === toStat.ino
+                  ) {
+                    selfRename = true;
+                  } else {
+                    occupied = true;
+                  }
                 } catch {
-                  occupied = false;
+                  // Either side missing/unreadable — fall through to the
+                  // lstat check (also catches dangling-link destinations).
+                  try {
+                    await fs.lstat(dest);
+                    occupied = true;
+                  } catch {
+                    occupied = false;
+                  }
                 }
-                if (occupied) {
+                if (occupied && !selfRename) {
                   const replace = await confirmAlert({
                     title: `Replace "${name.trim()}"?`,
                     message: "An item with that name already exists here.",

@@ -131,11 +131,12 @@ function copyFileStream(
   return new Promise((resolve, reject) => {
     const rs = nfs.createReadStream(src, { highWaterMark: 1024 * 1024 });
     const ws = nfs.createWriteStream(dest, {
-      // Created with the SOURCE mode up front (umask can only strip bits),
-      // so a private 0600 file is never world-readable mid-copy. O_EXCL
-      // ("wx") refuses symlinks and existing files — never follow or
-      // truncate something we didn't just reserve.
-      mode,
+      // Created owner-only (umask can only strip further): a private 0600
+      // file is never world-readable mid-copy, and a shared 0664 file gets
+      // its group bits back via the chmod on finish below. O_EXCL ("wx")
+      // refuses symlinks and existing files — never follow or truncate
+      // something we didn't just reserve.
+      mode: mode & 0o700,
       flags: "wx",
     });
     let opened = false;
@@ -163,7 +164,14 @@ function copyFileStream(
     };
     rs.on("error", fail);
     ws.on("error", fail);
-    ws.on("finish", () => resolve());
+    // Restore full source permissions only after a successful write
+    // (best-effort: failure leaves the file more restrictive, never less).
+    ws.on("finish", () => {
+      fs.chmod(dest, mode).then(
+        () => resolve(),
+        () => resolve(),
+      );
+    });
     rs.pipe(ws);
   });
 }
@@ -242,6 +250,9 @@ export async function copyManyWithProgress(
   let doneFiles = 0;
   const throttle = { last: 0 };
   const failedPlan = new Set<number>();
+  // Directory permission fixes wait until every child is written (deepest
+  // first, best-effort each).
+  const pendingDirModes: { dest: string; mode: number }[] = [];
 
   const showProgress = (current: string, force: boolean) => {
     toast.title = `${title} ${doneFiles}/${totalFiles}`;
@@ -262,13 +273,12 @@ export async function copyManyWithProgress(
     const current = path.basename(pair.src);
     try {
       if (pair.kind === "dir") {
+        // Created with default (writable) permissions and chmodded to the
+        // final mode only at the end: applying a read-only source mode now
+        // would lock us out of copying children into it.
         await ensureParent(pair.dest);
         await fs.mkdir(pair.dest);
-        try {
-          await fs.chmod(pair.dest, pair.mode);
-        } catch {
-          // non-fatal
-        }
+        pendingDirModes.push({ dest: pair.dest, mode: pair.mode });
       } else if (pair.kind === "file") {
         await ensureParent(pair.dest);
         await copyFileStream(pair.src, pair.dest, pair.mode, (delta) => {
@@ -305,6 +315,15 @@ export async function copyManyWithProgress(
     }
   }
 
+  // Now that every child is written, restore directory permissions
+  // (deepest first so parents stay traversable throughout). Best-effort:
+  // a chmod failure must not fail an otherwise good copy.
+  await Promise.allSettled(
+    pendingDirModes
+      .sort((a, b) => b.dest.length - a.dest.length)
+      .map(({ dest, mode }) => fs.chmod(dest, mode)),
+  );
+
   const copied = results.filter((r) => r.ok).length;
   return { results, copied, errors };
 }
@@ -332,6 +351,12 @@ export async function moveManyWithProgress(
 
   const fallbacks: string[] = [];
   for (const plan of plans) {
+    // Re-check right before the rename: another process may have claimed
+    // the name after planning (the in-memory set can't see that), and
+    // rename would silently replace it. Pick a fresh name instead.
+    if (await occupied(plan.dest)) {
+      plan.dest = await uniqueDest(destDir, path.basename(plan.src), reserved);
+    }
     try {
       await fs.rename(plan.src, plan.dest);
       moved++;
