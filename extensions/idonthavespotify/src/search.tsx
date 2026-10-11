@@ -13,25 +13,14 @@ import {
 } from "@raycast/api";
 
 import type { SearchResult } from "./@types/global";
-import { Adapter, MetadataType } from "./@types/global";
+import { MetadataType } from "./@types/global";
 
 import { getSiteUrl } from "./constants";
 
 import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
-import { apiCall, isAbortError, isLinkValid } from "./shared/searchToClipboard";
-
-const searchResultLinksTitles: Record<string, string> = {
-  [Adapter.YouTube]: "YouTube",
-  [Adapter.Deezer]: "Deezer",
-  [Adapter.AppleMusic]: "Apple Music",
-  [Adapter.Tidal]: "Tidal",
-  [Adapter.SoundCloud]: "SoundCloud",
-  [Adapter.Spotify]: "Spotify",
-  [Adapter.Qobuz]: "Qobuz",
-  [Adapter.Bandcamp]: "Bandcamp",
-  [Adapter.Pandora]: "Pandora",
-};
+import { apiCall, errorMessage as getErrorMessage, isAbortError } from "./shared/conversion";
+import { getPlatformTitle, getUniversalUrl, isKnownMusicLink, isLinkValid } from "./shared/links";
 
 const searchResultTypesTitles: Record<MetadataType, string> = {
   [MetadataType.Song]: "Song",
@@ -43,6 +32,7 @@ const searchResultTypesTitles: Record<MetadataType, string> = {
 };
 
 export default function Command() {
+  const inputChangedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -61,6 +51,7 @@ export default function Command() {
 
     try {
       const response = await apiCall(link, undefined, controller.signal);
+      if (controller.signal.aborted) return;
       setState((prev) => ({ ...prev, searchResult: response }));
       cacheLastSearch(link, response);
     } catch (error) {
@@ -69,7 +60,7 @@ export default function Command() {
       }
 
       console.error(error);
-      const message = (error as Error).message;
+      const message = getErrorMessage(error);
       setState((prev) => ({ ...prev, searchResult: null }));
       setErrorMessage(message);
       showToast(Toast.Style.Failure, "Error", message);
@@ -81,36 +72,61 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+    let disposed = false;
     (async () => {
-      const clipboardText = await Clipboard.readText();
-      const lastSearch = getLastSearch();
+      try {
+        const clipboardText = (await Clipboard.readText())?.trim();
+        if (disposed || inputChangedRef.current) return;
+        const lastSearch = getLastSearch();
 
-      if (lastSearch && clipboardText === lastSearch.link) {
-        setState({ searchText: lastSearch.link, searchResult: lastSearch.searchResult });
-        return;
-      }
+        if (lastSearch && clipboardText === lastSearch.link) {
+          setState({ searchText: lastSearch.link, searchResult: lastSearch.searchResult });
+          return;
+        }
 
-      if (clipboardText && isLinkValid(clipboardText)) {
-        setState((prev) => ({ ...prev, searchText: clipboardText }));
-        showToast(Toast.Style.Success, "Link captured from clipboard!");
-        await searchLinks(clipboardText);
-        return;
+        let instanceUrl: string | undefined;
+        try {
+          instanceUrl = getSiteUrl();
+        } catch {
+          // An invalid instance is reported when the user submits a link.
+        }
+        if (clipboardText && isKnownMusicLink(clipboardText, instanceUrl)) {
+          setState({ searchText: clipboardText, searchResult: null });
+          await searchLinks(clipboardText);
+        }
+      } catch (error) {
+        if (!disposed && !inputChangedRef.current) setErrorMessage(getErrorMessage(error));
       }
     })();
 
     return () => {
+      disposed = true;
       abortControllerRef.current?.abort();
+      stopAudio();
     };
   }, [searchLinks]);
+
+  let siteUrl: string | undefined;
+  try {
+    siteUrl = getSiteUrl();
+  } catch {
+    // Invalid preferences are reported by conversion; keep the preferences action accessible.
+  }
+  const universalUrl =
+    state.searchResult && siteUrl ? getUniversalUrl(state.searchResult.universalLink, siteUrl) : undefined;
 
   const showErrorView = Boolean(errorMessage) && !state.searchResult && !isLoading;
   const showEmptyPrompt = state.searchText === "" && !state.searchResult && !errorMessage;
 
   return (
     <List
+      filtering={false}
+      searchBarPlaceholder="Paste a music link…"
       isLoading={isLoading}
       searchText={state.searchText}
       onSearchTextChange={(link) => {
+        inputChangedRef.current = true;
+        stopAudio();
         setState({
           searchText: link,
           searchResult: null,
@@ -126,8 +142,7 @@ export default function Command() {
         if (!isLinkValid(link)) {
           abortControllerRef.current?.abort();
           setIsLoading(false);
-          setErrorMessage("Invalid link or not supported");
-          showToast(Toast.Style.Failure, "Error", "Invalid link or not supported");
+          setErrorMessage("Paste a valid HTTP or HTTPS music link.");
           return;
         }
 
@@ -157,7 +172,7 @@ export default function Command() {
                   onAction={() => searchLinks(state.searchText)}
                 />
               )}
-              <Action.OpenInBrowser title="Open Website" url={getSiteUrl()} />
+              {siteUrl && <Action.OpenInBrowser title="Open Website" url={siteUrl} />}
               <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -168,12 +183,11 @@ export default function Command() {
             <List.Section title={searchResultTypesTitles[state.searchResult.type]}>
               <List.Item
                 key="spotify-content"
-                icon={{ source: state.searchResult.image }}
+                icon={state.searchResult.image ? { source: state.searchResult.image } : Icon.Music}
                 title={state.searchResult.title}
                 subtitle={state.searchResult.description}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={`${getSiteUrl()}?id=${state.searchResult.universalLink}`} />
                     {state.searchResult.audio && (
                       <>
                         <Action
@@ -183,11 +197,21 @@ export default function Command() {
                         />
                         <Action
                           title="Stop Audio Preview"
-                          icon={Icon.Play}
+                          icon={Icon.Stop}
                           onAction={() => stopAudio()}
                           shortcut={Keyboard.Shortcut.Common.Pin}
                         />
                       </>
+                    )}
+                    {universalUrl && <Action.OpenInBrowser title="Open Universal Link" url={universalUrl} />}
+                    {universalUrl && <Action.CopyToClipboard title="Copy Universal Link" content={universalUrl} />}
+                    {state.searchResult.links.length > 0 && (
+                      <Action.CopyToClipboard
+                        title="Copy All Platform Links"
+                        content={state.searchResult.links
+                          .map(({ type, url }) => `${getPlatformTitle(type)}: ${url}`)
+                          .join("\n")}
+                      />
                     )}
                   </ActionPanel>
                 }
@@ -201,11 +225,16 @@ export default function Command() {
               )}
               {state.searchResult.links.map(({ type, url, isVerified }) => (
                 <List.Item
-                  key={type}
+                  key={`${type}-${url}`}
                   icon={Icon.Link}
-                  title={searchResultLinksTitles[type] ?? type}
+                  title={getPlatformTitle(type)}
                   subtitle={url}
-                  accessories={[{ icon: isVerified ? Icon.CheckCircle : null }]}
+                  accessories={[
+                    {
+                      icon: isVerified ? Icon.CheckCircle : Icon.QuestionMarkCircle,
+                      tooltip: isVerified ? "Verified match" : "Unverified match. Check before sharing.",
+                    },
+                  ]}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser url={url} />
