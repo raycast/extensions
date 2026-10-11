@@ -1,0 +1,927 @@
+[
+  {
+    "code": "zh-Hans",
+    "title": "简体中文 · Simplified Chinese",
+    "value": "简体中文"
+  },
+  {
+    "code": "zh-Hant",
+    "title": "繁體中文 · Traditional Chinese",
+    "value": "繁体中文"
+  },
+  {
+    "code": "aa",
+    "title": "阿法尔语 · Afar (aa)",
+    "value": "Afar"
+  },
+  {
+    "code": "ab",
+    "title": "阿布哈西亚语 · Abkhazian (ab)",
+    "value": "Abkhazian"
+  },
+  {
+    "code": "ae",
+    "title": "阿维斯塔语 · Avestan (ae)",
+    "value": "Avestan"
+  },
+  {
+    "code": "af",
+    "title": "南非荷兰语 · Afrikaans (af)",
+    "value": "Afrikaans"
+  },
+  {
+    "code": "ak",
+    "title": "阿肯语 · Akan (ak)",
+    "value": "Akan"
+  },
+  {
+    "code": "am",
+    "title": "阿姆哈拉语 · Amharic (am)",
+    "value": "Amharic"
+  },
+  {
+    "code": "an",
+    "title": "阿拉贡语 · Aragonese (an)",
+    "value": "Aragonese"
+  },
+  {
+    "code": "ar",
+    "title": "阿拉伯语 · Arabic (ar)",
+    "value": "Arabic"
+  },
+  {
+    "code": "as",
+    "title": "阿萨姆语 · Assamese (as)",
+    "value": "Assamese"
+  },
+  {
+    "code": "av",
+    "title": "阿瓦尔语 · Avaric (av)",
+    "value": "Avaric"
+  },
+  {
+    "code": "ay",
+    "title": "艾马拉语 · Aymara (ay)",
+    "value": "Aymara"
+  },
+  {
+    "code": "az",
+    "title": "阿塞拜疆语 · Azerbaijani (az)",
+    "value": "Azerbaijani"
+  },
+  {
+    "code": "ba",
+    "title": "巴什基尔语 · Bashkir (ba)",
+    "value": "Bashkir"
+  },
+  {
+    "code": "be",
+    "title": "白俄罗斯语 · Belarusian (be)",
+    "value": "Belarusian"
+  },
+  {
+    "code": "bg",
+    "title": "保加利亚语 · Bulgarian (bg)",
+    "value": "Bulgarian"
+  },
+  {
+    "code": "bh",
+    "title": "比哈尔语 · Bihari (bh)",
+    "value": "Bihari"
+  },
+  {
+    "code": "bi",
+    "title": "比斯拉马语 · Bislama (bi)",
+    "value": "Bislama"
+  },
+  {
+    "code": "bm",
+    "title": "班巴拉语 · Bambara (bm)",
+    "value": "Bambara"
+  },
+  {
+    "code": "bn",
+    "title": "孟加拉语 · Bangla (bn)",
+    "value": "Bangla"
+  },
+  {
+    "code": "bo",
+    "title": "藏语 · Tibetan (bo)",
+    "value": "Tibetan"
+  },
+  {
+    "code": "br",
+    "title": "布列塔尼语 · Breton (br)",
+    "value": "Breton"
+  },
+  {
+    "code": "bs",
+    "title": "波斯尼亚语 · Bosnian (bs)",
+    "value": "Bosnian"
+  },
+  {
+    "code": "ca",
+    "title": "加泰罗尼亚语 · Catalan (ca)",
+    "value": "Catalan"
+  },
+  {
+    "code": "ce",
+    "title": "车臣语 · Chechen (ce)",
+    "value": "Chechen"
+  },
+  {
+    "code": "ch",
+    "title": "查莫罗语 · Chamorro (ch)",
+    "value": "Chamorro"
+  },
+  {
+    "code": "co",
+    "title": "科西嘉语 · Corsican (co)",
+    "value": "Corsican"
+  },
+  {
+    "code": "cr",
+    "title": "克里语 · Cree (cr)",
+    "value": "Cree"
+  },
+  {
+    "code": "cs",
+    "title": "捷克语 · Czech (cs)",
+    "value": "Czech"
+  },
+  {
+    "code": "cu",
+    "title": "教会斯拉夫语 · Church Slavic (cu)",
+    "value": "Church Slavic"
+  },
+  {
+    "code": "cv",
+    "title": "楚瓦什语 · Chuvash (cv)",
+    "value": "Chuvash"
+  },
+  {
+    "code": "cy",
+    "title": "威尔士语 · Welsh (cy)",
+    "value": "Welsh"
+  },
+  {
+    "code": "da",
+    "title": "丹麦语 · Danish (da)",
+    "value": "Danish"
+  },
+  {
+    "code": "de",
+    "title": "德语 · German (de)",
+    "value": "German"
+  },
+  {
+    "code": "dv",
+    "title": "迪维希语 · Divehi (dv)",
+    "value": "Divehi"
+  },
+  {
+    "code": "dz",
+    "title": "宗卡语 · Dzongkha (dz)",
+    "value": "Dzongkha"
+  },
+  {
+    "code": "ee",
+    "title": "埃维语 · Ewe (ee)",
+    "value": "Ewe"
+  },
+  {
+    "code": "el",
+    "title": "希腊语 · Greek (el)",
+    "value": "Greek"
+  },
+  {
+    "code": "en",
+    "title": "英语 · English (en)",
+    "value": "English"
+  },
+  {
+    "code": "eo",
+    "title": "世界语 · Esperanto (eo)",
+    "value": "Esperanto"
+  },
+  {
+    "code": "es",
+    "title": "西班牙语 · Spanish (es)",
+    "value": "Spanish"
+  },
+  {
+    "code": "et",
+    "title": "爱沙尼亚语 · Estonian (et)",
+    "value": "Estonian"
+  },
+  {
+    "code": "eu",
+    "title": "巴斯克语 · Basque (eu)",
+    "value": "Basque"
+  },
+  {
+    "code": "fa",
+    "title": "波斯语 · Persian (fa)",
+    "value": "Persian"
+  },
+  {
+    "code": "ff",
+    "title": "富拉语 · Fula (ff)",
+    "value": "Fula"
+  },
+  {
+    "code": "fi",
+    "title": "芬兰语 · Finnish (fi)",
+    "value": "Finnish"
+  },
+  {
+    "code": "fj",
+    "title": "斐济语 · Fijian (fj)",
+    "value": "Fijian"
+  },
+  {
+    "code": "fo",
+    "title": "法罗语 · Faroese (fo)",
+    "value": "Faroese"
+  },
+  {
+    "code": "fr",
+    "title": "法语 · French (fr)",
+    "value": "French"
+  },
+  {
+    "code": "fy",
+    "title": "西弗里西亚语 · Western Frisian (fy)",
+    "value": "Western Frisian"
+  },
+  {
+    "code": "ga",
+    "title": "爱尔兰语 · Irish (ga)",
+    "value": "Irish"
+  },
+  {
+    "code": "gd",
+    "title": "苏格兰盖尔语 · Scottish Gaelic (gd)",
+    "value": "Scottish Gaelic"
+  },
+  {
+    "code": "gl",
+    "title": "加利西亚语 · Galician (gl)",
+    "value": "Galician"
+  },
+  {
+    "code": "gn",
+    "title": "瓜拉尼语 · Guarani (gn)",
+    "value": "Guarani"
+  },
+  {
+    "code": "gu",
+    "title": "古吉拉特语 · Gujarati (gu)",
+    "value": "Gujarati"
+  },
+  {
+    "code": "gv",
+    "title": "马恩语 · Manx (gv)",
+    "value": "Manx"
+  },
+  {
+    "code": "ha",
+    "title": "豪萨语 · Hausa (ha)",
+    "value": "Hausa"
+  },
+  {
+    "code": "he",
+    "title": "希伯来语 · Hebrew (he)",
+    "value": "Hebrew"
+  },
+  {
+    "code": "hi",
+    "title": "印地语 · Hindi (hi)",
+    "value": "Hindi"
+  },
+  {
+    "code": "ho",
+    "title": "希里莫图语 · Hiri Motu (ho)",
+    "value": "Hiri Motu"
+  },
+  {
+    "code": "hr",
+    "title": "克罗地亚语 · Croatian (hr)",
+    "value": "Croatian"
+  },
+  {
+    "code": "ht",
+    "title": "海地克里奥尔语 · Haitian Creole (ht)",
+    "value": "Haitian Creole"
+  },
+  {
+    "code": "hu",
+    "title": "匈牙利语 · Hungarian (hu)",
+    "value": "Hungarian"
+  },
+  {
+    "code": "hy",
+    "title": "亚美尼亚语 · Armenian (hy)",
+    "value": "Armenian"
+  },
+  {
+    "code": "hz",
+    "title": "赫雷罗语 · Herero (hz)",
+    "value": "Herero"
+  },
+  {
+    "code": "ia",
+    "title": "国际语 · Interlingua (ia)",
+    "value": "Interlingua"
+  },
+  {
+    "code": "id",
+    "title": "印度尼西亚语 · Indonesian (id)",
+    "value": "Indonesian"
+  },
+  {
+    "code": "ie",
+    "title": "国际文字（E） · Interlingue (ie)",
+    "value": "Interlingue"
+  },
+  {
+    "code": "ig",
+    "title": "伊博语 · Igbo (ig)",
+    "value": "Igbo"
+  },
+  {
+    "code": "ii",
+    "title": "凉山彝语 · Sichuan Yi (ii)",
+    "value": "Sichuan Yi"
+  },
+  {
+    "code": "ik",
+    "title": "伊努皮克语 · Inupiaq (ik)",
+    "value": "Inupiaq"
+  },
+  {
+    "code": "io",
+    "title": "伊多语 · Ido (io)",
+    "value": "Ido"
+  },
+  {
+    "code": "is",
+    "title": "冰岛语 · Icelandic (is)",
+    "value": "Icelandic"
+  },
+  {
+    "code": "it",
+    "title": "意大利语 · Italian (it)",
+    "value": "Italian"
+  },
+  {
+    "code": "iu",
+    "title": "因纽特语 · Inuktitut (iu)",
+    "value": "Inuktitut"
+  },
+  {
+    "code": "ja",
+    "title": "日语 · Japanese (ja)",
+    "value": "Japanese"
+  },
+  {
+    "code": "jv",
+    "title": "爪哇语 · Javanese (jv)",
+    "value": "Javanese"
+  },
+  {
+    "code": "ka",
+    "title": "格鲁吉亚语 · Georgian (ka)",
+    "value": "Georgian"
+  },
+  {
+    "code": "kg",
+    "title": "刚果语 · Kongo (kg)",
+    "value": "Kongo"
+  },
+  {
+    "code": "ki",
+    "title": "吉库尤语 · Kikuyu (ki)",
+    "value": "Kikuyu"
+  },
+  {
+    "code": "kj",
+    "title": "宽亚玛语 · Kuanyama (kj)",
+    "value": "Kuanyama"
+  },
+  {
+    "code": "kk",
+    "title": "哈萨克语 · Kazakh (kk)",
+    "value": "Kazakh"
+  },
+  {
+    "code": "kl",
+    "title": "格陵兰语 · Kalaallisut (kl)",
+    "value": "Kalaallisut"
+  },
+  {
+    "code": "km",
+    "title": "高棉语 · Khmer (km)",
+    "value": "Khmer"
+  },
+  {
+    "code": "kn",
+    "title": "卡纳达语 · Kannada (kn)",
+    "value": "Kannada"
+  },
+  {
+    "code": "ko",
+    "title": "韩语 · Korean (ko)",
+    "value": "Korean"
+  },
+  {
+    "code": "kr",
+    "title": "卡努里语 · Kanuri (kr)",
+    "value": "Kanuri"
+  },
+  {
+    "code": "ks",
+    "title": "克什米尔语 · Kashmiri (ks)",
+    "value": "Kashmiri"
+  },
+  {
+    "code": "ku",
+    "title": "库尔德语 · Kurdish (ku)",
+    "value": "Kurdish"
+  },
+  {
+    "code": "kv",
+    "title": "科米语 · Komi (kv)",
+    "value": "Komi"
+  },
+  {
+    "code": "kw",
+    "title": "康沃尔语 · Cornish (kw)",
+    "value": "Cornish"
+  },
+  {
+    "code": "ky",
+    "title": "吉尔吉斯语 · Kyrgyz (ky)",
+    "value": "Kyrgyz"
+  },
+  {
+    "code": "la",
+    "title": "拉丁语 · Latin (la)",
+    "value": "Latin"
+  },
+  {
+    "code": "lb",
+    "title": "卢森堡语 · Luxembourgish (lb)",
+    "value": "Luxembourgish"
+  },
+  {
+    "code": "lg",
+    "title": "卢干达语 · Ganda (lg)",
+    "value": "Ganda"
+  },
+  {
+    "code": "li",
+    "title": "林堡语 · Limburgish (li)",
+    "value": "Limburgish"
+  },
+  {
+    "code": "ln",
+    "title": "林加拉语 · Lingala (ln)",
+    "value": "Lingala"
+  },
+  {
+    "code": "lo",
+    "title": "老挝语 · Lao (lo)",
+    "value": "Lao"
+  },
+  {
+    "code": "lt",
+    "title": "立陶宛语 · Lithuanian (lt)",
+    "value": "Lithuanian"
+  },
+  {
+    "code": "lu",
+    "title": "鲁巴加丹加语 · Luba-Katanga (lu)",
+    "value": "Luba-Katanga"
+  },
+  {
+    "code": "lv",
+    "title": "拉脱维亚语 · Latvian (lv)",
+    "value": "Latvian"
+  },
+  {
+    "code": "mg",
+    "title": "马拉加斯语 · Malagasy (mg)",
+    "value": "Malagasy"
+  },
+  {
+    "code": "mh",
+    "title": "马绍尔语 · Marshallese (mh)",
+    "value": "Marshallese"
+  },
+  {
+    "code": "mi",
+    "title": "毛利语 · Māori (mi)",
+    "value": "Māori"
+  },
+  {
+    "code": "mk",
+    "title": "马其顿语 · Macedonian (mk)",
+    "value": "Macedonian"
+  },
+  {
+    "code": "ml",
+    "title": "马拉雅拉姆语 · Malayalam (ml)",
+    "value": "Malayalam"
+  },
+  {
+    "code": "mn",
+    "title": "蒙古语 · Mongolian (mn)",
+    "value": "Mongolian"
+  },
+  {
+    "code": "mr",
+    "title": "马拉地语 · Marathi (mr)",
+    "value": "Marathi"
+  },
+  {
+    "code": "ms",
+    "title": "马来语 · Malay (ms)",
+    "value": "Malay"
+  },
+  {
+    "code": "mt",
+    "title": "马耳他语 · Maltese (mt)",
+    "value": "Maltese"
+  },
+  {
+    "code": "my",
+    "title": "缅甸语 · Burmese (my)",
+    "value": "Burmese"
+  },
+  {
+    "code": "na",
+    "title": "瑙鲁语 · Nauru (na)",
+    "value": "Nauru"
+  },
+  {
+    "code": "nb",
+    "title": "书面挪威语 · Norwegian Bokmål (nb)",
+    "value": "Norwegian Bokmål"
+  },
+  {
+    "code": "nd",
+    "title": "北恩德贝勒语 · North Ndebele (nd)",
+    "value": "North Ndebele"
+  },
+  {
+    "code": "ne",
+    "title": "尼泊尔语 · Nepali (ne)",
+    "value": "Nepali"
+  },
+  {
+    "code": "ng",
+    "title": "恩东加语 · Ndonga (ng)",
+    "value": "Ndonga"
+  },
+  {
+    "code": "nl",
+    "title": "荷兰语 · Dutch (nl)",
+    "value": "Dutch"
+  },
+  {
+    "code": "nn",
+    "title": "挪威尼诺斯克语 · Norwegian Nynorsk (nn)",
+    "value": "Norwegian Nynorsk"
+  },
+  {
+    "code": "no",
+    "title": "挪威语 · Norwegian (no)",
+    "value": "Norwegian"
+  },
+  {
+    "code": "nr",
+    "title": "南恩德贝勒语 · South Ndebele (nr)",
+    "value": "South Ndebele"
+  },
+  {
+    "code": "nv",
+    "title": "纳瓦霍语 · Navajo (nv)",
+    "value": "Navajo"
+  },
+  {
+    "code": "ny",
+    "title": "齐切瓦语 · Nyanja (ny)",
+    "value": "Nyanja"
+  },
+  {
+    "code": "oc",
+    "title": "奥克语 · Occitan (oc)",
+    "value": "Occitan"
+  },
+  {
+    "code": "oj",
+    "title": "奥吉布瓦语 · Ojibwa (oj)",
+    "value": "Ojibwa"
+  },
+  {
+    "code": "om",
+    "title": "奥罗莫语 · Oromo (om)",
+    "value": "Oromo"
+  },
+  {
+    "code": "or",
+    "title": "奥里亚语 · Odia (or)",
+    "value": "Odia"
+  },
+  {
+    "code": "os",
+    "title": "奥塞梯语 · Ossetic (os)",
+    "value": "Ossetic"
+  },
+  {
+    "code": "pa",
+    "title": "旁遮普语 · Punjabi (pa)",
+    "value": "Punjabi"
+  },
+  {
+    "code": "pi",
+    "title": "巴利语 · Pali (pi)",
+    "value": "Pali"
+  },
+  {
+    "code": "pl",
+    "title": "波兰语 · Polish (pl)",
+    "value": "Polish"
+  },
+  {
+    "code": "ps",
+    "title": "普什图语 · Pashto (ps)",
+    "value": "Pashto"
+  },
+  {
+    "code": "pt",
+    "title": "葡萄牙语 · Portuguese (pt)",
+    "value": "Portuguese"
+  },
+  {
+    "code": "qu",
+    "title": "克丘亚语 · Quechua (qu)",
+    "value": "Quechua"
+  },
+  {
+    "code": "rm",
+    "title": "罗曼什语 · Romansh (rm)",
+    "value": "Romansh"
+  },
+  {
+    "code": "rn",
+    "title": "隆迪语 · Rundi (rn)",
+    "value": "Rundi"
+  },
+  {
+    "code": "ro",
+    "title": "罗马尼亚语 · Romanian (ro)",
+    "value": "Romanian"
+  },
+  {
+    "code": "ru",
+    "title": "俄语 · Russian (ru)",
+    "value": "Russian"
+  },
+  {
+    "code": "rw",
+    "title": "卢旺达语 · Kinyarwanda (rw)",
+    "value": "Kinyarwanda"
+  },
+  {
+    "code": "sa",
+    "title": "梵语 · Sanskrit (sa)",
+    "value": "Sanskrit"
+  },
+  {
+    "code": "sc",
+    "title": "萨丁语 · Sardinian (sc)",
+    "value": "Sardinian"
+  },
+  {
+    "code": "sd",
+    "title": "信德语 · Sindhi (sd)",
+    "value": "Sindhi"
+  },
+  {
+    "code": "se",
+    "title": "北方萨米语 · Northern Sami (se)",
+    "value": "Northern Sami"
+  },
+  {
+    "code": "sg",
+    "title": "桑戈语 · Sango (sg)",
+    "value": "Sango"
+  },
+  {
+    "code": "si",
+    "title": "僧伽罗语 · Sinhala (si)",
+    "value": "Sinhala"
+  },
+  {
+    "code": "sk",
+    "title": "斯洛伐克语 · Slovak (sk)",
+    "value": "Slovak"
+  },
+  {
+    "code": "sl",
+    "title": "斯洛文尼亚语 · Slovenian (sl)",
+    "value": "Slovenian"
+  },
+  {
+    "code": "sm",
+    "title": "萨摩亚语 · Samoan (sm)",
+    "value": "Samoan"
+  },
+  {
+    "code": "sn",
+    "title": "绍纳语 · Shona (sn)",
+    "value": "Shona"
+  },
+  {
+    "code": "so",
+    "title": "索马里语 · Somali (so)",
+    "value": "Somali"
+  },
+  {
+    "code": "sq",
+    "title": "阿尔巴尼亚语 · Albanian (sq)",
+    "value": "Albanian"
+  },
+  {
+    "code": "sr",
+    "title": "塞尔维亚语 · Serbian (sr)",
+    "value": "Serbian"
+  },
+  {
+    "code": "ss",
+    "title": "斯瓦蒂语 · Swati (ss)",
+    "value": "Swati"
+  },
+  {
+    "code": "st",
+    "title": "南索托语 · Southern Sotho (st)",
+    "value": "Southern Sotho"
+  },
+  {
+    "code": "su",
+    "title": "巽他语 · Sundanese (su)",
+    "value": "Sundanese"
+  },
+  {
+    "code": "sv",
+    "title": "瑞典语 · Swedish (sv)",
+    "value": "Swedish"
+  },
+  {
+    "code": "sw",
+    "title": "斯瓦希里语 · Swahili (sw)",
+    "value": "Swahili"
+  },
+  {
+    "code": "ta",
+    "title": "泰米尔语 · Tamil (ta)",
+    "value": "Tamil"
+  },
+  {
+    "code": "te",
+    "title": "泰卢固语 · Telugu (te)",
+    "value": "Telugu"
+  },
+  {
+    "code": "tg",
+    "title": "塔吉克语 · Tajik (tg)",
+    "value": "Tajik"
+  },
+  {
+    "code": "th",
+    "title": "泰语 · Thai (th)",
+    "value": "Thai"
+  },
+  {
+    "code": "ti",
+    "title": "提格利尼亚语 · Tigrinya (ti)",
+    "value": "Tigrinya"
+  },
+  {
+    "code": "tk",
+    "title": "土库曼语 · Turkmen (tk)",
+    "value": "Turkmen"
+  },
+  {
+    "code": "tl",
+    "title": "菲律宾语 · Filipino (tl)",
+    "value": "Filipino"
+  },
+  {
+    "code": "tn",
+    "title": "茨瓦纳语 · Tswana (tn)",
+    "value": "Tswana"
+  },
+  {
+    "code": "to",
+    "title": "汤加语 · Tongan (to)",
+    "value": "Tongan"
+  },
+  {
+    "code": "tr",
+    "title": "土耳其语 · Turkish (tr)",
+    "value": "Turkish"
+  },
+  {
+    "code": "ts",
+    "title": "聪加语 · Tsonga (ts)",
+    "value": "Tsonga"
+  },
+  {
+    "code": "tt",
+    "title": "鞑靼语 · Tatar (tt)",
+    "value": "Tatar"
+  },
+  {
+    "code": "tw",
+    "title": "特维语 · Twi (tw)",
+    "value": "Twi"
+  },
+  {
+    "code": "ty",
+    "title": "塔希提语 · Tahitian (ty)",
+    "value": "Tahitian"
+  },
+  {
+    "code": "ug",
+    "title": "维吾尔语 · Uyghur (ug)",
+    "value": "Uyghur"
+  },
+  {
+    "code": "uk",
+    "title": "乌克兰语 · Ukrainian (uk)",
+    "value": "Ukrainian"
+  },
+  {
+    "code": "ur",
+    "title": "乌尔都语 · Urdu (ur)",
+    "value": "Urdu"
+  },
+  {
+    "code": "uz",
+    "title": "乌兹别克语 · Uzbek (uz)",
+    "value": "Uzbek"
+  },
+  {
+    "code": "ve",
+    "title": "文达语 · Venda (ve)",
+    "value": "Venda"
+  },
+  {
+    "code": "vi",
+    "title": "越南语 · Vietnamese (vi)",
+    "value": "Vietnamese"
+  },
+  {
+    "code": "vo",
+    "title": "沃拉普克语 · Volapük (vo)",
+    "value": "Volapük"
+  },
+  {
+    "code": "wa",
+    "title": "瓦隆语 · Walloon (wa)",
+    "value": "Walloon"
+  },
+  {
+    "code": "wo",
+    "title": "沃洛夫语 · Wolof (wo)",
+    "value": "Wolof"
+  },
+  {
+    "code": "xh",
+    "title": "科萨语 · Xhosa (xh)",
+    "value": "Xhosa"
+  },
+  {
+    "code": "yi",
+    "title": "意第绪语 · Yiddish (yi)",
+    "value": "Yiddish"
+  },
+  {
+    "code": "yo",
+    "title": "约鲁巴语 · Yoruba (yo)",
+    "value": "Yoruba"
+  },
+  {
+    "code": "za",
+    "title": "壮语 · Zhuang (za)",
+    "value": "Zhuang"
+  },
+  {
+    "code": "zu",
+    "title": "祖鲁语 · Zulu (zu)",
+    "value": "Zulu"
+  }
+]
