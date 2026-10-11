@@ -180,8 +180,14 @@ async function frontmostBrowser(): Promise<string | undefined> {
   }
 }
 
-/** Every browser that currently has a readable tab, the frontmost one first. */
-async function tabsFromRunningBrowsers(): Promise<TabInfo[]> {
+/**
+ * Every browser that currently has a readable tab, the frontmost one first.
+ *
+ * The frontmost browser is looked up once, before any AppleScript runs, and
+ * returned with the tabs: by the time the scripts are done, Raycast is often in
+ * front, so asking again would lose the one reliable signal.
+ */
+async function tabsFromRunningBrowsers(): Promise<{ tabs: TabInfo[]; front?: string }> {
   const front = await frontmostBrowser();
   const names = await runningBrowsers();
   const ordered = front ? [front, ...names.filter((name) => name !== front)] : names;
@@ -191,7 +197,7 @@ async function tabsFromRunningBrowsers(): Promise<TabInfo[]> {
     const tab = await tabFromAppleScript(appName);
     if (tab) tabs.push(tab);
   }
-  return tabs;
+  return { tabs, front };
 }
 
 export interface LookupOptions {
@@ -217,7 +223,7 @@ export class AmbiguousTabError extends Error {
     super(
       reason === "browsers"
         ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
-        : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or set a preferred browser in the extension preferences.`,
+        : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or close the windows you don't need.`,
     );
     this.name = "AmbiguousTabError";
     this.candidates = candidates;
@@ -227,6 +233,9 @@ export class AmbiguousTabError extends Error {
 function noTabMessage(options: LookupOptions): string {
   if (!isMac()) {
     return "Could not read the current tab. On Windows this needs the Raycast browser extension.";
+  }
+  if (options.preferredBrowser && !isKnownBrowser(options.preferredBrowser)) {
+    return `${options.preferredBrowser} does not support AppleScript, so its tab is read through the Raycast browser extension. Is the extension installed and running in ${options.preferredBrowser}?`;
   }
   if (options.preferredBrowser) {
     return `Could not read a tab from ${options.preferredBrowser}. Is it running with an open window?`;
@@ -238,24 +247,25 @@ function noTabMessage(options: LookupOptions): string {
 }
 
 export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
-  const useAppleScript = options.browserSource !== "extension" && isMac();
-  const useExtension = options.browserSource !== "applescript";
+  const preferred = options.preferredBrowser;
+  // A preferred browser without AppleScript support (Firefox, Zen …) can only be
+  // read through the browser extension, so the other browsers must not be asked.
+  const preferredNeedsExtension = Boolean(preferred) && !isKnownBrowser(preferred!);
+  const useAppleScript = options.browserSource !== "extension" && isMac() && !preferredNeedsExtension;
+  const useExtension = options.browserSource !== "applescript" || preferredNeedsExtension;
 
   if (useAppleScript) {
-    if (options.preferredBrowser && isKnownBrowser(options.preferredBrowser)) {
-      const tab = await tabFromAppleScript(options.preferredBrowser);
+    if (preferred) {
+      const tab = await tabFromAppleScript(preferred);
       if (tab) return tab;
     } else {
-      const tabs = await tabsFromRunningBrowsers();
+      const { tabs, front } = await tabsFromRunningBrowsers();
       // One browser, or one in front: unambiguous. Several with none in front:
       // ask rather than pick an arbitrary one.
       if (tabs.length === 1) return tabs[0];
       if (tabs.length > 1) {
-        const front = await frontmostBrowser();
-        if (front) {
-          const tab = tabs.find((candidate) => candidate.source === front);
-          if (tab) return tab;
-        }
+        const tab = front ? tabs.find((candidate) => candidate.source === front) : undefined;
+        if (tab) return tab;
         throw new AmbiguousTabError(tabs, "browsers");
       }
     }
@@ -294,7 +304,13 @@ export async function getAllTabs(options: LookupOptions): Promise<TabInfo[]> {
     );
   }
 
-  if (options.preferredBrowser && isKnownBrowser(options.preferredBrowser)) {
+  if (options.preferredBrowser && !isKnownBrowser(options.preferredBrowser)) {
+    throw new NoTabError(
+      `Copying a whole window needs AppleScript, which ${options.preferredBrowser} does not support. Pick a different preferred browser, or copy tabs one at a time.`,
+    );
+  }
+
+  if (options.preferredBrowser) {
     const tabs = await allTabsFromAppleScript(options.preferredBrowser);
     if (tabs.length > 0) return tabs;
     throw new NoTabError(noTabMessage(options));
