@@ -42,6 +42,6 @@ The extension icon is copied from Sharply's favicon. This extension is separate 
 
 ## Price market
 
-In Raycast Settings → Extensions → Sharply Gear Search, choose **Price Market**: Automatic (default), US (USD), UK (GBP), or EU (EUR). Automatic reads the macOS Language & Region setting locally: GB selects UK, EU member countries select EU, and all other or unreadable regions select US. It does not use IP location. Open Extension Preferences is also available in the action menu.
+In Raycast Settings → Extensions → Sharply Gear Search, choose **Price Market**: US (USD, default), UK (GBP), or EU (EUR). Market selection is explicit; the extension does not detect your macOS locale or location. Open Extension Preferences is also available in the action menu.
 
 Prices use each market’s own estimate, without currency conversion or cross-market fallback. When an estimate is missing, the subtitle stays blank. New recent opens retain all three markets so switching preferences updates their prices. Older history contains only US prices until the items are reopened from search.

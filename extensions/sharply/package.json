@@ -47,15 +47,11 @@
     {
       "name": "priceMarket",
       "title": "Price Market",
-      "description": "Automatic uses your macOS region: UK, EU, or US. Unsupported regions default to US. Only estimates from the selected market are shown.",
+      "description": "Choose US (USD), UK (GBP), or EU (EUR). Only estimates from the selected market are shown.",
       "type": "dropdown",
       "required": false,
-      "default": "automatic",
+      "default": "US",
       "data": [
-        {
-          "title": "Automatic",
-          "value": "automatic"
-        },
         {
           "title": "US (USD)",
           "value": "US"

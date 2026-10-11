@@ -9,37 +9,23 @@ import {
   List,
   open,
 } from "@raycast/api";
-import {
-  showFailureToast,
-  useCachedPromise,
-  useLocalStorage,
-} from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { BASE_URL, searchGear, gearUrl } from "./catalog";
 
 import type { Gear } from "./catalog";
-import { detectMarket, formatUsedPrice } from "./pricing";
-import type { MarketPreference } from "./pricing";
-import { rememberGear } from "./recents";
+import { formatUsedPrice } from "./pricing";
+import { recentHistory, readRecentGear } from "./recents-storage";
 
 import { useState } from "react";
 
 export default function SearchGear() {
-  const { priceMarket } = getPreferenceValues<{
-    priceMarket: MarketPreference;
-  }>();
-  const { data: automaticMarket, isLoading: detectingMarket } =
-    useCachedPromise(detectMarket, [], {
-      execute: priceMarket === "automatic",
-    });
-  const market =
-    priceMarket === "automatic" ? (automaticMarket ?? "US") : priceMarket;
-  const priceReady = priceMarket !== "automatic" || !detectingMarket;
+  const { priceMarket: market } = getPreferenceValues<Preferences.SearchGear>();
   const [query, setQuery] = useState("");
   const {
-    value: recents = [],
-    setValue: setRecents,
+    data: recents = [],
+    mutate: updateRecents,
     isLoading: loadingRecents,
-  } = useLocalStorage<Gear[]>("recently-opened-gear", []);
+  } = useCachedPromise(readRecentGear);
   const blank = query.trim().length === 0;
   const ready = query.trim().length >= 2;
   const { data, error, isLoading, revalidate } = useCachedPromise(
@@ -52,8 +38,11 @@ export default function SearchGear() {
   );
   async function openGear(gear: Gear) {
     try {
+      await recentHistory.load();
       await open(gearUrl(gear.slug));
-      await setRecents(rememberGear(recents, gear));
+      await updateRecents(recentHistory.record(gear), {
+        shouldRevalidateAfter: false,
+      });
       await closeMainWindow();
     } catch (error) {
       await showFailureToast(error, { title: "Could not open or save gear" });
@@ -67,6 +56,7 @@ export default function SearchGear() {
           title="Refresh Results"
           icon={Icon.ArrowClockwise}
           onAction={revalidate}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       )}
       <Action
@@ -113,15 +103,11 @@ export default function SearchGear() {
             key={gear.slug}
             id={gear.slug}
             title={gear.name}
-            subtitle={
-              priceReady
-                ? formatUsedPrice(
-                    gear.estimatedUsedPrices,
-                    market,
-                    gear.estimatedUsedUsdCents,
-                  )
-                : undefined
-            }
+            subtitle={formatUsedPrice(
+              gear.estimatedUsedPrices,
+              market,
+              gear.estimatedUsedUsdCents,
+            )}
             icon={gear.thumbnailUrl ?? Icon.Camera}
             keywords={[
               gear.slug.replaceAll("-", " "),
