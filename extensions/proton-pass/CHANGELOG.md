@@ -1,5 +1,10 @@
 # proton-pass Changelog
 
+## [CLI Not Found Screen] - {PR_MERGE_DATE}
+
+- The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
+- Search Items and Get TOTP show that screen too, instead of their saved items, whose passwords and codes can't load without pass-cli
+
 ## [Login Fixes] - 2026-10-10
 
 - Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now

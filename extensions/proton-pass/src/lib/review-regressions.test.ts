@@ -329,6 +329,76 @@ test("a failed full load keeps early vault items visible and offers a working Re
   assert.deepEqual(render().props.items, [item]);
 });
 
+test("pass-cli not found shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+  const notFound = async (): Promise<never> => {
+    throw new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed");
+  };
+  const errorViews = { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) };
+
+  const search = hookHarness();
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: search.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: { Failure: "failure" } },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": { listItems: notFound, listVaultsAndItems: notFound },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+    },
+    "./error-views": errorViews,
+    "./login-view": {},
+    "./format": {},
+    "./item-counts": itemCounts,
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  search.render(SearchItemsView, {});
+  search.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(search.render(SearchItemsView, {}).props.error, "not_installed");
+
+  const totp = hookHarness();
+  const { default: Command } = loadView("../get-totp.tsx", {
+    react: totp.react,
+    "@raycast/api": {
+      List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Color: { Green: "green" },
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound },
+    "./lib/types": { PassCliError },
+    "./lib/utils": {
+      getTotpRemainingSeconds: () => 30,
+      getItemIcon: () => "",
+      formatTotpCode: (code: string) => code,
+    },
+    "./lib/cache": {
+      getCachedItems: async () => ({ data: [{ ...item, hasTotp: true }] }),
+      setCachedItems: async () => undefined,
+      clearCache: async () => undefined,
+    },
+    "./lib/refresh": refresh,
+    "./lib/error-views": errorViews,
+  });
+  totp.render(Command, {});
+  totp.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(totp.render(Command, {}).props.error, "not_installed");
+});
+
 test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
   let clears = 0;
   const vault = { shareId: "vault", name: "Personal" };
@@ -1384,6 +1454,7 @@ test("List Vaults shows and saves items before optional sharing, from complete l
     },
     "./lib/types": { PassCliError },
     "./lib/search-items-view": {},
+    "./lib/error-views": {},
     "./lib/login-view": {},
     "./lib/cache": {
       getCachedItems: async () => null,
@@ -1459,6 +1530,7 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
     },
     "./lib/types": { PassCliError },
     "./lib/search-items-view": {},
+    "./lib/error-views": {},
     "./lib/login-view": {},
     "./lib/cache": {
       getCachedItems: async () => null,

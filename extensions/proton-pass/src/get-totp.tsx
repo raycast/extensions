@@ -142,7 +142,8 @@ export default function Command() {
       if (!isLatest()) return;
       if (e instanceof PassCliError && e.type === "not_authenticated") {
         await resetSession();
-      } else if (itemsRef.current.length === 0) {
+      } else if (itemsRef.current.length === 0 || (e instanceof PassCliError && e.type === "not_installed")) {
+        // Without pass-cli, no code can load: the screen saying how to fix it comes first.
         if (e instanceof PassCliError) {
           setError(e.type);
         } else {

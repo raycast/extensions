@@ -51,7 +51,7 @@ pass-cli vault list
 
 ## Preferences
 
-- **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
