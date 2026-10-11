@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ActionPanel, Action, Color, Detail, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { cachedEmailBody, EmailBody, fetchEmailBody } from "./imap-client";
@@ -13,7 +13,13 @@ import { Email } from "./types";
 // disk. A body opened recently shows right away.
 function useEmailBody(folder: string, uid: number): { body?: EmailBody; isLoading: boolean } {
   const cached = cachedEmailBody(folder, uid);
-  const { data, isLoading } = usePromise(fetchEmailBody, [folder, uid], { execute: !cached });
+  // Aborted when the view closes, so a download still waiting for its turn is skipped
+  const abortable = useRef<AbortController>(null);
+  const { data, isLoading } = usePromise(
+    (f: string, u: number) => fetchEmailBody(f, u, abortable.current?.signal),
+    [folder, uid],
+    { execute: !cached, abortable },
+  );
   return { body: cached ?? data, isLoading: !cached && isLoading };
 }
 

@@ -44,8 +44,9 @@ function createClient(): ImapFlow {
 
 // Connections stay open for the whole command instead of one per action (a TLS handshake and a login each time).
 // imapflow runs one command at a time per connection, so each kind of work gets its own: emails don't wait for
-// the counts of every folder, and opening an email doesn't wait for a page of the list.
-type Channel = "list" | "folders" | "actions";
+// the counts of every folder, opening an email doesn't wait for a page of the list, and marking, archiving or
+// deleting doesn't wait for an email to download.
+type Channel = "list" | "folders" | "content" | "actions";
 
 interface ChannelState {
   client: ImapFlow | null;
@@ -55,6 +56,7 @@ interface ChannelState {
 const channels: Record<Channel, ChannelState> = {
   list: { client: null, connecting: null },
   folders: { client: null, connecting: null },
+  content: { client: null, connecting: null },
   actions: { client: null, connecting: null },
 };
 
@@ -514,22 +516,32 @@ export function cachedEmailBody(folderPath: string, uid: number): EmailBody | un
 
 // The text and HTML of an email, without its attachments: downloading the full source used to fetch several MB
 // for a short email with a few photos
-export async function fetchEmailBody(folderPath: string, uid: number): Promise<EmailBody> {
+//
+// With `signal`, a download that hasn't started when the signal aborts is skipped: moving through the list with the
+// preview open asks for every email on the way, and only the one still selected is worth downloading.
+export async function fetchEmailBody(folderPath: string, uid: number, signal?: AbortSignal): Promise<EmailBody> {
   const cached = cachedEmailBody(folderPath, uid);
   if (cached) return cached;
 
-  const body = await withMailbox(folderPath, async (client): Promise<EmailBody> => {
-    const message = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
-    const { text, html } = findBodyParts(message ? message.bodyStructure : undefined);
-    const parts = [text, html].filter((part): part is BodyPart => !!part).map(({ part }) => part);
-    if (parts.length === 0) return {};
+  const body = await withMailbox(
+    folderPath,
+    async (client): Promise<EmailBody | undefined> => {
+      if (signal?.aborted) return undefined;
+      const message = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+      const { text, html } = findBodyParts(message ? message.bodyStructure : undefined);
+      const parts = [text, html].filter((part): part is BodyPart => !!part).map(({ part }) => part);
+      if (parts.length === 0) return {};
 
-    const downloaded = await client.downloadMany(String(uid), parts, { uid: true });
-    const decode = (bodyPart?: BodyPart) =>
-      bodyPart &&
-      decodePart(downloaded[bodyPart.part]?.content, downloaded[bodyPart.part]?.meta?.charset || bodyPart.charset);
-    return { text: decode(text), html: decode(html) };
-  });
+      const downloaded = await client.downloadMany(String(uid), parts, { uid: true });
+      const decode = (bodyPart?: BodyPart) =>
+        bodyPart &&
+        decodePart(downloaded[bodyPart.part]?.content, downloaded[bodyPart.part]?.meta?.charset || bodyPart.charset);
+      return { text: decode(text), html: decode(html) };
+    },
+    "content",
+  );
+  // Skipped: the view that asked is gone. useEmailBody's usePromise ignores this AbortError.
+  if (!body) throw signal?.reason ?? new DOMException("Aborted", "AbortError");
 
   bodyCache.set(bodyCacheKey(folderPath, uid), body);
   if (bodyCache.size > BODY_CACHE_SIZE) bodyCache.delete(bodyCache.keys().next().value as string);
@@ -539,21 +551,25 @@ export async function fetchEmailBody(folderPath: string, uid: number): Promise<E
 // The HTML of an email with its inline images embedded, for opening the original in the browser.
 // Undefined for plain text emails.
 export async function fetchOriginalHtml(folderPath: string, uid: number): Promise<string | undefined> {
-  return withMailbox(folderPath, async (client) => {
-    // Check there is an HTML version before downloading the whole message for it
-    const structure = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
-    if (!structure || !findBodyParts(structure.bodyStructure).html) return undefined;
+  return withMailbox(
+    folderPath,
+    async (client) => {
+      // Check there is an HTML version before downloading the whole message for it
+      const structure = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+      if (!structure || !findBodyParts(structure.bodyStructure).html) return undefined;
 
-    // The inline images live in other parts of the message, so this needs the full source
-    const message = await client.fetchOne(uid, { source: true }, { uid: true });
-    if (!message || !message.source) return undefined;
-    const parsed: ParsedMail = await simpleParser(message.source, {
-      skipHtmlToText: true,
-      skipTextToHtml: true,
-      skipTextLinks: true,
-    });
-    return parsed.html || undefined;
-  });
+      // The inline images live in other parts of the message, so this needs the full source
+      const message = await client.fetchOne(uid, { source: true }, { uid: true });
+      if (!message || !message.source) return undefined;
+      const parsed: ParsedMail = await simpleParser(message.source, {
+        skipHtmlToText: true,
+        skipTextToHtml: true,
+        skipTextLinks: true,
+      });
+      return parsed.html || undefined;
+    },
+    "content",
+  );
 }
 
 export async function setRead(folderPath: string, uid: number, read: boolean): Promise<void> {
@@ -619,19 +635,23 @@ export interface Attachment {
 }
 
 export async function fetchAttachments(folderPath: string, uid: number): Promise<Attachment[]> {
-  return withMailbox(folderPath, async (client) => {
-    const message = await client.fetchOne(uid, { source: true }, { uid: true });
-    if (!message || !message.source) {
-      return [];
-    }
+  return withMailbox(
+    folderPath,
+    async (client) => {
+      const message = await client.fetchOne(uid, { source: true }, { uid: true });
+      if (!message || !message.source) {
+        return [];
+      }
 
-    const parsed: ParsedMail = await simpleParser(message.source);
-    return parsed.attachments.map((attachment, index) => ({
-      filename: attachment.filename || `attachment-${index + 1}`,
-      contentType: attachment.contentType,
-      content: attachment.content,
-    }));
-  });
+      const parsed: ParsedMail = await simpleParser(message.source);
+      return parsed.attachments.map((attachment, index) => ({
+        filename: attachment.filename || `attachment-${index + 1}`,
+        contentType: attachment.contentType,
+        content: attachment.content,
+      }));
+    },
+    "content",
+  );
 }
 
 export async function archiveEmail(folderPath: string, uid: number): Promise<void> {
