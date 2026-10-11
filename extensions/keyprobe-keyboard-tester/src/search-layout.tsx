@@ -12,7 +12,13 @@ import {
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
-import { readPidOrNull, stopHelper, startHelper, OVERRIDE_KEY } from "./helper";
+import {
+  readPidOrNull,
+  stopHelper,
+  startHelper,
+  showStartFailure,
+  OVERRIDE_KEY,
+} from "./helper";
 
 interface LayoutEntry {
   stem: string;
@@ -72,7 +78,7 @@ export default function Command() {
       await stopHelper(existingPid);
       const result = await startHelper(stem);
       if (!result.success) {
-        await showHUD(`⚠️ ${result.error}`);
+        await showStartFailure(result);
         return;
       }
       await showHUD(`KeyProbe layout set: ${displayName} (restarted)`);

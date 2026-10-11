@@ -133,6 +133,8 @@ if !EventTap.shared.start(onActivity: { activity in
         KeyProbeWindowController.shared.handleUp(keycode: activity.keycode)
     }
 }) {
+    // helper.ts matches "Input Monitoring permission not granted" to point
+    // the user at the right settings pane; keep that phrase intact.
     log("Failed to create event tap — Input Monitoring permission not granted.")
     if let pidPath = pidPath {
         try? FileManager.default.removeItem(atPath: pidPath)

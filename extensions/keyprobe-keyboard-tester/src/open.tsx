@@ -1,9 +1,10 @@
-import { showHUD, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import {
   readPidOrNull,
   focusExisting,
   startHelper,
   OVERRIDE_KEY,
+  showStartFailure,
 } from "./helper";
 
 export default async function Command() {
@@ -21,6 +22,6 @@ export default async function Command() {
   const layoutMode = override ?? getPreferenceValues<Preferences>().layoutMode;
   const result = await startHelper(layoutMode);
   if (!result.success) {
-    await showHUD(`⚠️ ${result.error}`);
+    await showStartFailure(result);
   }
 }

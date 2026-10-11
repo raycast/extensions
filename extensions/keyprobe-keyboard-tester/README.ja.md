@@ -30,7 +30,7 @@
 2. 権限を求められたら **入力監視 (Input Monitoring)** を許可し、もう一度コマンドを実行します
 
 > [!IMPORTANT]
-> 初回起動には **入力監視 (Input Monitoring)** 権限が必要です（アクセシビリティではありません）。システム設定 → プライバシーとセキュリティ → 入力監視 で `KeyProbeHelper` を有効にしてから、もう一度 **Open KeyProbe** を実行してください。許可するまではパネルが開かず、Raycast に「Helper failed to start」というメッセージが表示されます。
+> 初回起動には **入力監視 (Input Monitoring)** 権限が必要です（アクセシビリティではありません）。システム設定 → プライバシーとセキュリティ → 入力監視 で `KeyProbeHelper` を有効にしてから、もう一度 **Open KeyProbe** を実行してください。許可するまではパネルが開かず、代わりに入力監視の設定画面が開きます。
 
 ## レイアウトの選択
 
@@ -50,23 +50,3 @@
 > [!WARNING]
 > 輝度・音量などのハードウェアメディアキーは、このツールが捕捉できない別種のイベントとして送られてくるため、まったく反応しません（「レイアウト外キー」としても表示されません）。
 - cornixなどのzmkファームウェアなどの小キーレイアウトはデフォルトキーマップがマクロ多用で自動解析できなかったため、実際のデフォルトキーマップの画像を参考にレイアウトを作成しています。表示されているキー以外の入力確認は上部に表示されたテキストのキー入力または、100%(ANSI)など、その他のKeyboard Layout上でご確認ください。
-
-## 自作キーボードのレイアウトを追加する
-
-同梱されているボードは、`tools/` 以下のスクリプトでQMK/ZMKファームウェアのソースから変換しています:
-
-```bash
-# QMKボード（keyboard.json/info.json + keymap.c または keymap.json）
-python3 tools/qmk_to_layout.py \
-  --keyboard-json <qmk_firmware>/keyboards/<board>/keyboard.json \
-  --keymap <qmk_firmware>/keyboards/<board>/keymaps/default/keymap.json \
-  --name "My Board" --out assets/layouts/myboard.json
-
-# ZMKボード（物理レイアウトJSON + .keymap DTSファイル）
-python3 tools/zmk_to_layout.py \
-  --geometry <zmk-config>/config/myboard.json --layout-name default_layout \
-  --keymap <zmk-config>/config/myboard.keymap \
-  --name "My Board" --out assets/layouts/myboard.json
-```
-
-生成されたJSONを `assets/layouts/` に置くことで、コード変更なしに検索UIから選べるようになります。各スクリプトは `--help` で全オプションを確認できます。
