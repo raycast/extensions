@@ -3,7 +3,7 @@ import ToggleAllLights from "../src/toggleAllLights";
 import { useHueResources } from "../src/hooks/useHue";
 import { BRIDGE_CONFIG_KEY, RESOURCES_CACHE_NAMESPACE } from "../src/helpers/constants";
 import { caches, environment, LaunchType, preferences, showHUD, storage, updateCommandMetadata } from "./raycast-stub";
-import { BRIDGE_ID, closedAddress, type FakeBridge, html, json, resources, startBridge, USERNAME } from "./fakeBridge";
+import { BRIDGE_ID, closedAddress, html, json, puts, resources, startBridge, USERNAME } from "./fakeBridge";
 import { mdns } from "./mocks/bonjour";
 import * as fixtures from "./fixtures/resources";
 
@@ -29,9 +29,6 @@ async function linkedBridge(lit = LIT.all) {
   storage.set(BRIDGE_CONFIG_KEY, JSON.stringify(bridge.config));
   return { bridge, served };
 }
-
-const puts = (bridge: FakeBridge) =>
-  bridge.requests.filter(({ method }) => method === "PUT").map(({ path, body }) => ({ path, body: JSON.parse(body) }));
 
 const saveDeadBridge = async () =>
   storage.set(

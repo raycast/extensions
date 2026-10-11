@@ -1,0 +1,8 @@
+instructions: |
+  A Hue Bridge has rooms and zones. Each light is in at most one room; zones group lights across rooms. Each scene
+  belongs to one room or zone.
+  Tools take names as get-lights gives them. When unsure of a name, or asked about the lights, call get-lights.
+  Use control-group for whole rooms, zones or all lights, control-light for single lights and recall-scene for scenes.
+  Brightness is a percentage. White temperature is in Kelvin: about 2200K for candlelight, 2700K for warm white,
+  4000K for neutral and 6500K for daylight.
+  When a tool skips or fails lights, tell the user which and why.

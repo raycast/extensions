@@ -153,6 +153,9 @@ export async function startBridge({
 
 export type FakeBridge = Awaited<ReturnType<typeof startBridge>>;
 
+export const puts = (bridge: FakeBridge) =>
+  bridge.requests.filter(({ method }) => method === "PUT").map(({ path, body }) => ({ path, body: JSON.parse(body) }));
+
 // Accepts TCP connections and never answers the TLS handshake, like a host that went to sleep mid-connection.
 export async function startSilentServer() {
   const sockets = new Set<net.Socket>();

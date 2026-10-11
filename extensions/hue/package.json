@@ -53,6 +53,13 @@
       "interval": "5m"
     }
   ],
+  "tools": [
+    {
+      "name": "get-lights",
+      "title": "Get Lights",
+      "description": "Get the rooms, zones, lights and scenes, with their state"
+    }
+  ],
   "preferences": [
     {
       "name": "toggleAllLights",
