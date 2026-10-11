@@ -1,4 +1,5 @@
 import { LaunchType, launchCommand } from "@raycast/api";
+import { readyMintCLI } from "../mint-ai";
 
 const COMMANDS = {
   "free-disk": { name: "mint-scan", title: "Free Disk" },
@@ -27,6 +28,8 @@ type Input = {
 export default async function tool({ command }: Input) {
   const target = COMMANDS[command];
   if (!target) throw new Error(`Unknown Mint command: ${command}`);
+  // Without Mint the command would open its install page; say that instead.
+  readyMintCLI();
   await launchCommand({ name: target.name, type: LaunchType.UserInitiated });
   return `Opened ${target.title}. Nothing has changed yet: the person reviews it there and confirms.`;
 }
