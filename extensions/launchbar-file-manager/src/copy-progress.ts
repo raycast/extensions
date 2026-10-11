@@ -273,11 +273,11 @@ export async function copyManyWithProgress(
     const current = path.basename(pair.src);
     try {
       if (pair.kind === "dir") {
-        // Created with default (writable) permissions and chmodded to the
-        // final mode only at the end: applying a read-only source mode now
-        // would lock us out of copying children into it.
+        // Created owner-only (0700 survives any umask): private trees are
+        // never world-readable mid-copy, yet stay writable while children
+        // land inside. The final source mode is applied at the very end.
         await ensureParent(pair.dest);
-        await fs.mkdir(pair.dest);
+        await fs.mkdir(pair.dest, { mode: 0o700, recursive: true });
         pendingDirModes.push({ dest: pair.dest, mode: pair.mode });
       } else if (pair.kind === "file") {
         await ensureParent(pair.dest);

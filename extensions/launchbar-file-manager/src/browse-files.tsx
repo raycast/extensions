@@ -796,15 +796,17 @@ function RenameForm(props: { entry: FileEntry; onDone: () => void }) {
               try {
                 // Never silently replace another item: renaming onto an
                 // existing path destroys it on macOS, so ask first. Identity
-                // is by inode, not name string — on case-insensitive APFS a
-                // case-only rename ("Notes" → "notes") targets the same file
-                // and must NOT trigger the replace prompt.
+                // is by inode WITHOUT following links (lstat): on
+                // case-insensitive APFS a case-only rename ("Notes" →
+                // "notes", file or link) targets the same entry and must NOT
+                // prompt — but a link and its target are different entries,
+                // so renaming alias→report.txt still asks.
                 let selfRename = false;
                 let occupied = false;
                 try {
                   const [fromStat, toStat] = await Promise.all([
-                    fs.stat(props.entry.fullPath),
-                    fs.stat(dest),
+                    fs.lstat(props.entry.fullPath),
+                    fs.lstat(dest),
                   ]);
                   if (
                     fromStat.dev === toStat.dev &&
@@ -815,14 +817,8 @@ function RenameForm(props: { entry: FileEntry; onDone: () => void }) {
                     occupied = true;
                   }
                 } catch {
-                  // Either side missing/unreadable — fall through to the
-                  // lstat check (also catches dangling-link destinations).
-                  try {
-                    await fs.lstat(dest);
-                    occupied = true;
-                  } catch {
-                    occupied = false;
-                  }
+                  // Destination doesn't exist (or is unreadable) — free.
+                  occupied = false;
                 }
                 if (occupied && !selfRename) {
                   const replace = await confirmAlert({
