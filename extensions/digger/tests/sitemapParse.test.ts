@@ -204,3 +204,12 @@ test("a gzip file that ends early on its own is an error, not a complete sitemap
   const cut = gz.subarray(0, Math.floor(gz.length / 2));
   assert.throws(() => decodeSitemapBody(cut, 1024 * 1024, false), /decompress/i);
 });
+
+test("stripping comments stays linear when many CDATA sections precede a comment", () => {
+  // The two-search version rescanned to the comment once per CDATA: 7.9 s here.
+  const xml = `<urlset>${Array.from({ length: 20000 }, (_, i) => `<url><loc><![CDATA[https://example.com/${i}]]></loc></url>`).join("")}<!-- end --></urlset>`;
+  const start = performance.now();
+  const parsed = parseSitemap(xml);
+  assert.ok(performance.now() - start < 1000, "parse took over a second");
+  assert.equal(parsed.kind === "urlset" ? parsed.pages.length : -1, 20000);
+});

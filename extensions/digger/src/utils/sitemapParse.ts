@@ -223,31 +223,32 @@ function searchText(block: string, loc: string): string {
 
 /**
  * `xml` without its comments, so a commented-out `<url>` is not an entry. CDATA
- * sections are kept whole: a `<loc>` may hold `<!--` as text. Linear: each
- * search starts where the last one ended.
+ * sections are kept whole: a `<loc>` may hold `<!--` as text. One pass over each
+ * `<!`, every search starting past the last: searching for the next comment and
+ * the next CDATA separately rescanned the file once per CDATA section.
  */
 export function stripComments(xml: string): string {
   if (!xml.includes("<!--")) return xml;
   const parts: string[] = [];
-  let cursor = 0;
-  let cdata = xml.indexOf("<![CDATA[");
+  let kept = 0;
+  let at = 0;
   while (true) {
-    const comment = xml.indexOf("<!--", cursor);
-    if (comment === -1) break;
-    if (cdata !== -1 && cdata < cursor) cdata = xml.indexOf("<![CDATA[", cursor);
-    if (cdata !== -1 && cdata < comment) {
-      const end = xml.indexOf("]]>", cdata + 9);
+    const lt = xml.indexOf("<!", at);
+    if (lt === -1) break;
+    if (xml.startsWith("<!--", lt)) {
+      parts.push(xml.slice(kept, lt));
+      const end = xml.indexOf("-->", lt + 4);
+      // An unclosed comment runs to the end of the file.
+      kept = at = end === -1 ? xml.length : end + 3;
+    } else if (xml.startsWith("<![CDATA[", lt)) {
+      const end = xml.indexOf("]]>", lt + 9);
       if (end === -1) break;
-      parts.push(xml.slice(cursor, end + 3));
-      cursor = end + 3;
-      continue;
+      at = end + 3;
+    } else {
+      at = lt + 2;
     }
-    parts.push(xml.slice(cursor, comment));
-    const end = xml.indexOf("-->", comment + 4);
-    // An unclosed comment runs to the end of the file.
-    cursor = end === -1 ? xml.length : end + 3;
   }
-  parts.push(xml.slice(cursor));
+  parts.push(xml.slice(kept));
   return parts.join("");
 }
 
