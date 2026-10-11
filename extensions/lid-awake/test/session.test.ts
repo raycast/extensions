@@ -221,6 +221,45 @@ describe("getStatus", () => {
 
     expect(storedSession()).toEqual(fresh);
   });
+
+  it("does not delete a session that another enable wrote while the check ran", async () => {
+    // The check sees a stale session with sleep off. Meanwhile enable turns sleep on and saves a new session.
+    seedSession({ startedAt: NOW - 5 * MINUTE, endsAt: null, bootTime: BOOT });
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.isSleepDisabled)
+      .mockImplementationOnce(async () => {
+        seedSession(fresh);
+        return false;
+      })
+      .mockResolvedValue(true);
+
+    await expect(getStatus()).resolves.toEqual({ on: true, session: fresh, battery: ON_BATTERY_80 });
+    expect(storedSession()).toEqual(fresh);
+  });
+
+  it("runs a status check and an enable one after the other", async () => {
+    const order: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.mocked(system.isSleepDisabled).mockImplementation(async () => {
+      order.push("status reads sleep");
+      await gate;
+      return false;
+    });
+    vi.mocked(system.isRuleInstalled).mockImplementation(async () => {
+      order.push("enable checks rule");
+      return true;
+    });
+
+    const status = getStatus();
+    const turnOn = enable(60);
+    release();
+    await Promise.all([status, turnOn]);
+
+    expect(order).toEqual(["status reads sleep", "enable checks rule"]);
+  });
 });
 
 describe("enforce", () => {
@@ -280,7 +319,7 @@ describe("enforce", () => {
 });
 
 describe("enforce race", () => {
-  it("does not disable when a new session starts after the check", async () => {
+  it("keeps sleep on when a new session starts after the check", async () => {
     seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
     vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
     const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
@@ -290,8 +329,26 @@ describe("enforce race", () => {
     });
 
     await expect(enforce()).resolves.toBeNull();
-    expect(system.setSleepDisabled).not.toHaveBeenCalled();
+    expect(system.setSleepDisabled).toHaveBeenNthCalledWith(1, false, { allowPrompt: false });
+    expect(system.setSleepDisabled).toHaveBeenLastCalledWith(true);
     expect(storedSession()).toEqual(fresh);
+  });
+
+  it("turns sleep back on and keeps the new session when a Start lands while auto-off runs", async () => {
+    seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.setSleepDisabled).mockImplementation(async (on) => {
+      if (on === false) {
+        seedSession(fresh);
+      }
+    });
+
+    await expect(enforce()).resolves.toBeNull();
+    expect(system.setSleepDisabled).toHaveBeenCalledTimes(2);
+    expect(system.setSleepDisabled).toHaveBeenLastCalledWith(true);
+    expect(storedSession()).toEqual(fresh);
+    expect(raycast.launchCommand).not.toHaveBeenCalled();
   });
 });
 

@@ -52,6 +52,14 @@ async function clearSession(): Promise<void> {
   await LocalStorage.removeItem(SESSION_KEY);
 }
 
+// LocalStorage has no atomic operations, so the read-check-write steps below run one at a time in this process.
+let queue: Promise<unknown> = Promise.resolve();
+function serialized<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => undefined);
+  return run;
+}
+
 export async function refreshMenuBar(): Promise<void> {
   try {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
@@ -60,7 +68,7 @@ export async function refreshMenuBar(): Promise<void> {
   }
 }
 
-export async function enable(minutes: number | null): Promise<void> {
+async function startSession(minutes: number | null): Promise<void> {
   if (!(await isRuleInstalled())) {
     throw new Error("Run Set up Lid Awake first, so Lid Awake can turn itself off while the lid is closed");
   }
@@ -87,29 +95,34 @@ export async function enable(minutes: number | null): Promise<void> {
     await setSleepDisabled(false).catch(() => undefined);
     throw error;
   }
-  await refreshMenuBar();
 }
 
-export async function disable(options: { allowPrompt?: boolean } = { allowPrompt: true }): Promise<void> {
+async function stopSession(options: { allowPrompt?: boolean }): Promise<void> {
   await setSleepDisabled(false, { allowPrompt: options.allowPrompt });
   await clearSession();
-  await refreshMenuBar();
 }
 
-export async function getStatus(): Promise<Status> {
+async function readStatus(): Promise<Status> {
   // Read the session first: enable turns sleep on before saving, so a session seen here means sleep is already on.
   let session = await readSession();
-  const on = await isSleepDisabled();
+  let on = await isSleepDisabled();
   if (!on && session) {
-    await clearSession();
-    session = null;
+    // Clear only the session we read. If another enable saved a new one meanwhile, keep it and re-check sleep.
+    const current = await readSession();
+    if (current?.startedAt === session.startedAt) {
+      await clearSession();
+      session = null;
+    } else {
+      session = current;
+      on = await isSleepDisabled();
+    }
   }
   const battery = await getBattery();
   return { on, session, battery };
 }
 
-export async function enforce(): Promise<AutoDisableReason | null> {
-  const status = await getStatus();
+async function autoDisable(): Promise<AutoDisableReason | null> {
+  const status = await readStatus();
   if (!status.on || !status.session) {
     // Either off, or on without a session (turned on outside the extension): leave it alone.
     return null;
@@ -122,14 +135,39 @@ export async function enforce(): Promise<AutoDisableReason | null> {
     battery: status.battery,
     thresholdPercent,
   });
-  if (reason) {
-    // The user may have started a new session while this check ran; leave that one alone.
-    const current = await readSession();
-    if (!current || current.startedAt !== status.session.startedAt) {
-      return null;
-    }
-    await disable({ allowPrompt: false });
-    return reason;
+  if (!reason) {
+    return null;
   }
-  return null;
+  await setSleepDisabled(false, { allowPrompt: false });
+  // A Start may have saved a new session while sleep was being turned off. That session wins, so sleep goes back on.
+  const current = await readSession();
+  if (current && current.startedAt !== status.session.startedAt) {
+    await setSleepDisabled(true).catch(() => undefined);
+    return null;
+  }
+  await clearSession();
+  return reason;
+}
+
+export async function enable(minutes: number | null): Promise<void> {
+  await serialized(() => startSession(minutes));
+  // Refreshed outside the queue so launching the menu bar command never holds up other session actions.
+  await refreshMenuBar();
+}
+
+export async function disable(options: { allowPrompt?: boolean } = { allowPrompt: true }): Promise<void> {
+  await serialized(() => stopSession(options));
+  await refreshMenuBar();
+}
+
+export async function getStatus(): Promise<Status> {
+  return serialized(readStatus);
+}
+
+export async function enforce(): Promise<AutoDisableReason | null> {
+  const reason = await serialized(autoDisable);
+  if (reason) {
+    await refreshMenuBar();
+  }
+  return reason;
 }

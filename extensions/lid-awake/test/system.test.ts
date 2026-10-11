@@ -36,7 +36,8 @@ const SUDO = "/usr/bin/sudo";
 const OSASCRIPT = "/usr/bin/osascript";
 const SYSCTL = "/usr/sbin/sysctl";
 const SUDOERS = "/etc/sudoers.d/raycast-lid-awake";
-const SUDOERS_TMP = `${SUDOERS}.tmp`;
+const MKTEMP = "/usr/bin/mktemp";
+const STAGING_TEMPLATE = "/etc/sudoers.d/.raycast-lid-awake.XXXXXX";
 const RULE = `alice ALL=(root) NOPASSWD: ${PMSET} -a disablesleep 0, ${PMSET} -a disablesleep 1`;
 
 type Call = { file: string; args: string[] };
@@ -158,9 +159,19 @@ describe("installRule", () => {
     await installRule();
 
     const shell = adminShellCommand();
-    expect(shell).toContain(`T=${SUDOERS_TMP};`);
+    expect(shell).toContain(`T=$(${MKTEMP} ${STAGING_TEMPLATE}) || exit 1;`);
     expect(shell).toContain(`'${RULE}' > "$T"`);
     expect(shell).toContain(`/bin/mv -f "$T" ${SUDOERS}`);
+  });
+
+  it("stages in a unique mktemp file under sudoers.d with a dotted name, never a fixed path", async () => {
+    await installRule();
+
+    const shell = adminShellCommand();
+    const staging = /T=\$\(\/usr\/bin\/mktemp (\S+)\) \|\| exit 1;/.exec(shell);
+    expect(staging?.[1]).toMatch(/^\/etc\/sudoers\.d\/\.[^/]+\.X{6}$/);
+    expect(shell).not.toContain(".tmp");
+    expect(shell).not.toContain("umask");
   });
 
   it("validates with visudo before moving the file into place", async () => {

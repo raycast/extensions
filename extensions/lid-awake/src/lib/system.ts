@@ -17,6 +17,7 @@ const CHOWN = "/usr/sbin/chown";
 const CHMOD = "/bin/chmod";
 const MV = "/bin/mv";
 const RM = "/bin/rm";
+const MKTEMP = "/usr/bin/mktemp";
 
 export const SUDOERS_PATH = "/etc/sudoers.d/raycast-lid-awake";
 
@@ -78,8 +79,6 @@ export async function installRule(): Promise<void> {
 
   // The username check above guarantees the rule contains no quotes.
   const rule = `${username} ALL=(root) NOPASSWD: ${PMSET} -a disablesleep 0, ${PMSET} -a disablesleep 1`;
-  // A name with a dot is ignored by sudo, so this staging file is never read as a rule.
-  const tempFile = `${SUDOERS_PATH}.tmp`;
   const install = [
     `${PRINTF} '%s\\n' '${rule}' > "$T"`,
     `${VISUDO} -cf "$T"`,
@@ -88,7 +87,11 @@ export async function installRule(): Promise<void> {
     `${MV} -f "$T" ${SUDOERS_PATH}`,
   ].join(" && ");
   // Everything runs as root inside the root-owned sudoers.d directory, so the user cannot swap the file.
-  await runAsAdmin(`umask 077; T=${tempFile}; ${RM} -f "$T"; ${install}; S=$?; ${RM} -f "$T"; exit $S`);
+  // mktemp gives each attempt its own 0600 file, so overlapping installs never share one. The dotted name
+  // is ignored by sudo, so this staging file is never read as a rule.
+  await runAsAdmin(
+    `T=$(${MKTEMP} /etc/sudoers.d/.raycast-lid-awake.XXXXXX) || exit 1; ${install}; S=$?; ${RM} -f "$T"; exit $S`,
+  );
 }
 
 export async function removeRule(): Promise<void> {
