@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
@@ -17,6 +18,14 @@ import { CommandManagementActions, RunCommandAction } from "./actions/command";
 import Ask from "./ask";
 
 export default function Model() {
+  return (
+    <AuthGate>
+      <ModelContent />
+    </AuthGate>
+  );
+}
+
+function ModelContent() {
   const models = useModel();
   const commands = useCommand();
   const { catalog } = useModelCatalog();

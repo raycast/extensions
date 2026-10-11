@@ -213,14 +213,6 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
         onChange={(value) => changeSetting("model", value)}
         info={settingInfo("model")}
       />
-      <Form.TextField
-        title="Temperature"
-        placeholder="0 - 2"
-        {...itemProps.temperature}
-        value={effective.temperature}
-        onChange={(value) => changeSetting("temperature", value)}
-        info={settingInfo("temperature")}
-      />
       <Form.Checkbox
         title="Reasoning"
         label="Enable reasoning effort change"
@@ -237,7 +229,7 @@ function CommandFields(props: CommandFormProps & { models: Record<string, Model>
           onChange={(value) => changeSetting("reasoningEffort", value as ReasoningEffort)}
           info={settingInfo("reasoningEffort")}
         >
-          {(["none", "low", "medium", "high"] as const).map((effort) => (
+          {(["none", "low", "medium", "high", "xhigh", "max"] as const).map((effort) => (
             <Form.Dropdown.Item value={effort} title={effort} key={effort} />
           ))}
         </Form.Dropdown>

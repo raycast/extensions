@@ -41,7 +41,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
     "require('@raycast/api');require('node:worker_threads').parentPort.postMessage({kind:'ready'});\n",
   );
   const worker = new Worker(path.join(dir, "worker.cjs"), {
-    env: { ...process.env, NODE_ENV: "test" },
+    env: { ...process.env, ...options.env, NODE_ENV: "test" },
     workerData: {
       isDevelopment: false,
       appearance: "light",
@@ -73,6 +73,7 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
   });
   worker.on("message", async (message) => {
     if (message.kind === "ready") return events.emit("ready");
+    if (message.kind === "child-process") return;
     if (message.kind === "result") {
       const waiter = pending.get(message.id);
       pending.delete(message.id);
@@ -118,7 +119,8 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, opti
           value = { items: [] };
           break;
         case "clipboardRead":
-          value = { text: "", file: undefined };
+        case "getClipboard":
+          value = { text: "", file: options.clipboardFile };
           break;
         case "browserExtensionGetTabs":
           value = { value: [{ tabId: 1, title: "Fixture page", url: "https://example.com/", active: true }] };

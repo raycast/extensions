@@ -2,14 +2,31 @@ import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 import { useState } from "react";
 import { getConfigUrl } from "../utils";
+import { proxyClientOptions } from "../utils/proxy";
 
-export function useChatGPT(): OpenAI {
+interface UseChatGPTOptions {
+  allowMissingApiKey?: boolean;
+}
+
+export function useChatGPT(options?: { allowMissingApiKey?: false }): OpenAI;
+export function useChatGPT(options: { allowMissingApiKey: true }): OpenAI | null;
+export function useChatGPT(options: UseChatGPTOptions = {}): OpenAI | null {
+  const { allowMissingApiKey = false } = options;
   const [chatGPT] = useState(() => {
     const preferences = getPreferenceValues<Preferences>();
+    const apiKey = (preferences.apiKey ?? "").trim();
+
+    if (!apiKey) {
+      if (allowMissingApiKey) {
+        return null;
+      }
+      throw new Error("OpenAI API key is missing. Add it in extension preferences.");
+    }
 
     return new OpenAI({
-      apiKey: preferences.apiKey,
+      apiKey,
       baseURL: getConfigUrl(preferences),
+      ...proxyClientOptions(preferences),
     });
   });
   return chatGPT;
