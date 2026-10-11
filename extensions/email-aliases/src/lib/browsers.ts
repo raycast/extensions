@@ -166,15 +166,15 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
 /**
  * Whether any browser other than `target` is running. Unknown counts as yes.
  *
- * Process names are compared against the known browser lists and never used
- * to abort the lookup: a preferred browser whose process has another name
- * (Tor Browser runs as "firefox") still works.
+ * Compares displayed names, the same names the app picker and the frontmost
+ * application report, so a browser whose process has another internal name
+ * (Tor Browser runs as "firefox") is recognised as the target itself.
  */
 async function otherBrowsersRunning(target: string): Promise<boolean> {
   if (!isMac()) return false;
   try {
     const raw = await runAppleScript(
-      'tell application "System Events" to return name of every application process whose background only is false',
+      'tell application "System Events" to return displayed name of every application process whose background only is false',
       { timeout: 10_000 },
     );
     return raw
