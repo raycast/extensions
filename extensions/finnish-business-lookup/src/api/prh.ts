@@ -1,10 +1,22 @@
 import { PRH_API_BASE_URL } from "../constants";
 import type { PrhCompanyResult, PrhErrorResponse } from "../types/prh";
+import type { Language } from "../lib/language";
+import { translate } from "../lib/translations";
 
 export interface SearchCompaniesParams {
   name?: string;
   businessId?: string;
   page?: number;
+  language?: Language;
+}
+
+class PrhRequestError extends Error {
+  constructor(
+    readonly status: number,
+    readonly detail: string,
+  ) {
+    super(translate("requestFailed", "en", { status }));
+  }
 }
 
 const inFlightRequests = new Map<string, Promise<PrhCompanyResult>>();
@@ -86,8 +98,7 @@ function fetchCompanies(url: string): Promise<PrhCompanyResult> {
         detail = "";
       }
 
-      const suffix = detail ? `: ${detail}` : "";
-      throw new Error(`PRH request failed (${response.status})${suffix}`);
+      throw new PrhRequestError(response.status, detail);
     }
 
     return (await response.json()) as PrhCompanyResult;
@@ -103,7 +114,15 @@ export async function searchCompanies(params: SearchCompaniesParams, signal?: Ab
   const queryString = buildQueryString(params);
   const url = `${PRH_API_BASE_URL}/companies?${queryString}`;
 
-  return await withCallerAbort(fetchCompanies(url), signal);
+  try {
+    return await withCallerAbort(fetchCompanies(url), signal);
+  } catch (error) {
+    if (error instanceof PrhRequestError) {
+      const suffix = error.detail ? `: ${error.detail}` : "";
+      throw new Error(`${translate("requestFailed", params.language ?? "en", { status: error.status })}${suffix}`);
+    }
+    throw error;
+  }
 }
 
 export function getRawCompanyApiUrl(businessId: string): string {

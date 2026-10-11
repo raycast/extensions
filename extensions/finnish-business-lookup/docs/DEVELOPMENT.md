@@ -15,7 +15,10 @@ This guide covers how to develop and maintain this Raycast extension.
 - `src/components/company-detail.tsx`: detail screen
 - `src/api/prh.ts`: API client (`GET /companies`)
 - `src/hooks/use-prh-search.ts`: input classification + search orchestration
-- `src/lib/language.ts`: language preference + fallback order
+- `src/lib/language.ts`: language resolution + PRH fallback order
+- `src/lib/localization.ts`: Raycast language preference + macOS device-language detection
+- `src/lib/translations.ts`: paired English/Finnish interface translations
+- `src/lib/query.ts`: input classification + localized search hints
 - `src/lib/detail-view.tsx`: split-view right-panel render helpers
 - `src/lib/maps.ts`: map search-link construction from PRH address fields
 - `src/lib/search-ranking.ts`: name-query relevance ranking
@@ -34,6 +37,7 @@ bun install
 bun run dev
 bun run lint
 bun run build
+bun test
 ```
 
 Useful CLI commands:
@@ -127,6 +131,15 @@ Current enforced behavior:
 - Keep stored local data minimal.
 - Search cache is stored locally for query performance.
 
+## Localization
+
+- The extension-level `language` preference defaults to `system`, with `en` and `fi` overrides.
+- Automatic mode reads the first macOS `AppleLanguages` entry once per command process using `/usr/bin/defaults`. If reading fails, it falls back to the runtime locale. Other device languages use English.
+- PRH language codes are `1` (Finnish), `2` (Swedish), and `3` (English). The selected language is tried first, then English, Finnish, and Swedish, without duplicates.
+- Cached company records are remapped from their raw PRH payload before display so the cache remains reusable across languages.
+- Add interface text to the paired translation dictionary, rather than hard-coding it in views. Finnish uses sentence case; keep English Raycast action titles in Title Case.
+- `bun test` checks language resolution, translated query validation, data selection, cache remapping, and date/address formatting.
+
 ## Store Publishing
 
 Before opening the Raycast Store publish PR:
@@ -139,5 +152,4 @@ Before opening the Raycast Store publish PR:
 ## Suggested Improvements
 
 - Add `bun run check` script (`lint && build`)
-- Add optional language override preference
 - Add phone/email only if PRH (or another explicitly approved source) provides reliable contact fields

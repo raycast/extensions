@@ -20,6 +20,16 @@ bun run dev
 
 3. Open Raycast and run `Search Finnish Businesses`.
 
+## Language
+
+The interface follows your macOS language by default: Finnish when Finnish is your primary device language, and English otherwise. The region setting alone does not determine the language.
+
+To override this, open Raycast Settings → Extensions → FBL - Finnish Business Lookup and set **Language / Kieli** to **English**, **Suomi**, or **System Default / Laitteen kieli**. You can also open these settings from the start screen's action menu. Reopen the command after changing the language.
+
+Search, company details, actions, hints, error titles, dates, and in-app release notes use the selected language. PRH descriptions and city names prefer the selected language, with English, Finnish, and Swedish as fallbacks when a translation is unavailable. Official company names are preserved as supplied by PRH. Cached results also follow the selected language.
+
+Raycast's command name and its own interface remain controlled by Raycast.
+
 ## Search Behavior
 
 - Name search: type at least 3 characters (example: `nokia`)

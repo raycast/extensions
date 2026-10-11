@@ -1,7 +1,10 @@
 import type { PrhAddress, PrhLanguageCode, PrhPostOffice } from "../types/prh";
 import { EIGHT_DIGIT_BUSINESS_ID_REGEX, FULL_BUSINESS_ID_REGEX } from "../constants";
+import { getLanguageFromOrder } from "./language";
+import type { Language } from "./language";
+import { translate } from "./translations";
 
-export function getStatusText(label?: string, code?: string): string {
+export function getStatusText(label?: string, code?: string, language: Language = "en"): string {
   if (label && code) {
     return `${label} (${code})`;
   }
@@ -11,13 +14,13 @@ export function getStatusText(label?: string, code?: string): string {
   }
 
   if (code) {
-    return `Code ${code}`;
+    return translate("code", language, { code });
   }
 
-  return "Not available";
+  return translate("notAvailable", language);
 }
 
-export function formatDate(value?: string | null): string | undefined {
+export function formatDate(value?: string | null, language: Language = "en"): string | undefined {
   if (!value) {
     return undefined;
   }
@@ -27,7 +30,10 @@ export function formatDate(value?: string | null): string | undefined {
     return value;
   }
 
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+  return new Intl.DateTimeFormat(language === "fi" ? "fi-FI" : "en-GB", {
+    dateStyle: "medium",
+    timeZone: "Europe/Helsinki",
+  }).format(date);
 }
 
 export function normalizeWebsiteUrl(url?: string): string | undefined {
@@ -151,7 +157,7 @@ export function formatAddress(
   if (parts.streetAddress) {
     chunks.push(parts.streetAddress);
   } else if (parts.postOfficeBox) {
-    chunks.push(`P.O. Box ${parts.postOfficeBox}`);
+    chunks.push(translate("postOfficeBoxAddress", getLanguageFromOrder(languageOrder), { box: parts.postOfficeBox }));
   }
 
   const postalLine = [parts.postalCode, parts.city].filter(Boolean).join(" ");
@@ -177,7 +183,9 @@ export function formatAddressForClipboard(
   const lines = [
     parts.careOf ? `c/o ${parts.careOf}` : undefined,
     parts.streetAddress,
-    parts.postOfficeBox ? `P.O. Box ${parts.postOfficeBox}` : undefined,
+    parts.postOfficeBox
+      ? translate("postOfficeBoxAddress", getLanguageFromOrder(languageOrder), { box: parts.postOfficeBox })
+      : undefined,
     [parts.postalCode, parts.city].filter(Boolean).join(" ") || undefined,
     parts.country,
   ].filter((line): line is string => Boolean(line));
