@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, Icon, List, openExtensionPreferences, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { NoTabError, getActiveTab, getAllTabs } from "./lib/browsers";
+import { AmbiguousTabError, getActiveTab, getAllTabs } from "./lib/browsers";
 import { CleanTab, toCleanTab } from "./lib/clean";
 import { FORMATS } from "./lib/formats";
 import { Mode, deliver, renderTabList, toPayload } from "./lib/run";
@@ -12,7 +12,7 @@ export default function Command() {
   const [tab, setTab] = useState<CleanTab | undefined>();
   const [source, setSource] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | undefined>();
+  const [error, setError] = useState<{ title: string; message: string } | undefined>();
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +27,10 @@ export default function Command() {
         setSource(active.source);
       } catch (caught) {
         if (!cancelled) {
-          setError(caught instanceof NoTabError ? caught.message : String(caught));
+          setError({
+            title: caught instanceof AmbiguousTabError ? "Several browser windows are open" : "No browser tab found",
+            message: caught instanceof Error ? caught.message : String(caught),
+          });
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -56,8 +59,8 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="No browser tab found"
-          description={error}
+          title={error.title}
+          description={error.message}
           actions={
             <ActionPanel>
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -117,14 +120,14 @@ export default function Command() {
                       <Action title="Paste" icon={Icon.Text} onAction={run("paste")} />
                     </>
                   )}
+                  <Action.OpenInBrowser title="Open the Tab URL" url={tab.url} />
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                   <Action
                     title="Copy All Tabs of This Window"
                     icon={Icon.CopyClipboard}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                     onAction={copyAllTabs}
                   />
-                  <Action.OpenInBrowser title="Open the Tab URL" url={tab.url} />
-                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                 </ActionPanel>
               }
             />
