@@ -296,9 +296,12 @@ export async function fetchEmails(folderPath: string, { filter, query, offset, l
       const pageSource = () => (filter === "attachment" ? order.attachmentMatches : order.uids);
       const emails: Email[] = [];
 
-      // Emails deleted or moved since the order was computed come back missing. Drop them from the order
-      // (they sit at or after `offset`, so earlier pages keep their positions) and fill the page with the next ones,
-      // so a short page doesn't look like the end of the folder.
+      // Emails deleted or moved since the order was computed come back missing, and ones read (or marked unread)
+      // since then no longer match the Unread or Read filter. Drop them from the order (they sit at or after
+      // `offset`, so earlier pages keep their positions) and fill the page with the next ones, so a short page
+      // doesn't look like the end of the folder.
+      const stillMatches = (email: Email) =>
+        filter === "unread" ? !email.flags.includes("\\Seen") : filter !== "read" || email.flags.includes("\\Seen");
       for (;;) {
         if (filter === "attachment") {
           await scanForAttachments(client, order, offset + limit);
@@ -306,7 +309,7 @@ export async function fetchEmails(folderPath: string, { filter, query, offset, l
         const wanted = pageSource().slice(offset + emails.length, offset + limit);
         if (wanted.length === 0) break;
 
-        const fetched = await fetchEmailsByUid(client, wanted);
+        const fetched = (await fetchEmailsByUid(client, wanted)).filter(stillMatches);
         emails.push(...fetched);
         const found = new Set(fetched.map((email) => email.uid));
         const missing = new Set(wanted.filter((uid) => !found.has(uid)));
