@@ -74,7 +74,7 @@
   "preferences": [
     {
       "name": "mictapePath",
-      "title": "mictape Path",
+      "title": "MicTape CLI Path",
       "description": "Path to the mictape command. Leave empty to look in ~/.local/bin, /opt/homebrew/bin, and /usr/local/bin.",
       "type": "textfield",
       "required": false

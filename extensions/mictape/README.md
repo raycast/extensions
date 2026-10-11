@@ -22,7 +22,7 @@ mkdir -p ~/.local/bin
 install -m 755 .build/release/mictape ~/.local/bin/mictape
 ```
 
-The extension looks for `mictape` in `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`. If you installed it elsewhere, set **mictape Path** in the extension preferences.
+The extension looks for `mictape` in `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`. If you installed it elsewhere, set **MicTape CLI Path** in the extension preferences.
 
 The first recording started from Raycast asks for microphone access for Raycast.
 
