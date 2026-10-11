@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomUUID } from "crypto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import extension from "../../extension.json";
+import { DefaultModel, getCurrentModel } from "../lib/OpenAI";
 import { Action } from "../types";
 import { Colors, createStore } from "../utils";
 
@@ -21,7 +22,7 @@ const initialState: Action[] = [
     color: Colors.Blue,
     description: "Provide a concise summary of the provided text, highlighting the main points and key information.",
     systemPrompt: "You will be provided with text and your task is to summarize the key points and main information.",
-    model: "gpt-4o-mini",
+    model: DefaultModel,
     temperature: "0.7",
     maxTokens: "-1",
     favorite: false,
@@ -32,7 +33,7 @@ const initialState: Action[] = [
     color: Colors.Blue,
     description: "Correct grammatical errors and enhance the readability of the provided text, ensuring clarity and proper language use.",
     systemPrompt: "You will be provided with text and your task is to improve the grammar and readability.",
-    model: "gpt-4o-mini",
+    model: DefaultModel,
     temperature: "0.7",
     maxTokens: "-1",
     favorite: false,
@@ -44,7 +45,7 @@ const initialState: Action[] = [
     description:
       "Rewrite the provided text to convey the same meaning in a different way, offering a fresh perspective or alternative wording.",
     systemPrompt: "You will be provided with text and your task is to convey the same meaning in a different way.",
-    model: "gpt-4o-mini",
+    model: DefaultModel,
     temperature: "0.7",
     maxTokens: "-1",
     favorite: false,
@@ -56,7 +57,7 @@ const initialState: Action[] = [
     description:
       "Provide a detailed explanation of the provided code snippet, including its purpose, how it works, and any key concepts involved.",
     systemPrompt: "You will be provided with a code snippet and your task is to explain how it works and its purpose.",
-    model: "gpt-4o-mini",
+    model: DefaultModel,
     temperature: "0.7",
     maxTokens: "-1",
     favorite: false,
@@ -103,20 +104,18 @@ export const useActionsState = createStore<ActionState>({
     },
   }),
   migrate: (persistedState: any, version: number) => {
-    switch (version) {
-      case 1: // Migrate from v1 to v2, update model names from gpt-4-turbo-preview to gpt-4-turbo
-        persistedState.actions = persistedState.actions.map((action: Action) => ({
-          ...action,
-          model: action.model.replace("gpt-4-turbo-preview", "gpt-4-turbo"),
-        }));
-      // falls through
-      case 2:
-      // falls through
-      case 3: // Migrate from v3 to v4, remove deprecated OpenAI models
-        persistedState.actions = persistedState.actions.map((action: { model?: string } & Record<string, unknown>) => ({
-          ...action,
-          model: action.model === "gpt-3.5-turbo" || action.model === "gpt-4-turbo" ? "gpt-4o-mini" : action.model,
-        }));
+    if (version < 4) {
+      persistedState.actions = persistedState.actions.map((action: Action) => ({
+        ...action,
+        model: ["gpt-3.5-turbo", "gpt-4-turbo", "gpt-4-turbo-preview"].includes(action.model) ? DefaultModel : action.model,
+      }));
+    }
+
+    if (version < 5) {
+      persistedState.actions = persistedState.actions.map((action: Action) => ({
+        ...action,
+        model: getCurrentModel(action.model),
+      }));
     }
 
     return persistedState;
@@ -124,11 +123,13 @@ export const useActionsState = createStore<ActionState>({
 });
 
 export const useActionsAreReady = () => {
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(() => useActionsState.persist.hasHydrated());
 
-  useActionsState.persist.onFinishHydration(() => {
-    setReady(true);
-  });
+  useEffect(() => {
+    const unsubscribe = useActionsState.persist.onFinishHydration(() => setReady(true));
+    setReady(useActionsState.persist.hasHydrated());
+    return unsubscribe;
+  }, []);
 
   return ready;
 };

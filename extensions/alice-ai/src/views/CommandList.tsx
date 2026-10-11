@@ -9,7 +9,9 @@ import CommandForm from "./CommandForm";
 
 export default function CommandList() {
   const navigation = useNavigation();
-  const actions = useActionsState((state) => state.actions.sort((a, b) => a.name.localeCompare(b.name)));
+  const actions = useActionsState((state) => state.actions)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
   const favoriteActions = actions.filter((a) => a.favorite);
   const otherActions = actions.filter((a) => !a.favorite);
 
