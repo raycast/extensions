@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webeep",
+  "title": "WeBeep",
+  "description": "Browse your Politecnico di Milano WeBeep (Moodle) courses: materials, recordings, announcements, notifications and deadlines",
+  "icon": "webeep.png",
+  "author": "mattiacolombomc",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Documentation",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "sessionCookie",
+      "title": "MoodleSession Cookie",
+      "description": "Value of the MoodleSession cookie of webeep.polimi.it, copied from your browser after logging in (see the README for the steps). You paste it only once: it is exchanged for a Moodle token that stays valid for about three months.",
+      "type": "password",
+      "placeholder": "e.g. 4f9c2a1b7e0d3c8f9a6b5e2d1c0f7a3b",
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Content Language",
+      "description": "Language used for bilingual course names and resource titles",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        }
+      ],
+      "default": "en",
+      "required": false
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Folder where course files are saved (defaults to ~/Downloads)",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-courses",
+      "title": "Search Courses",
+      "subtitle": "WeBeep",
+      "description": "Browse your courses and their sections, resources, folders and links",
+      "mode": "view"
+    },
+    {
+      "name": "search-materials",
+      "title": "Search Materials",
+      "subtitle": "WeBeep",
+      "description": "Find files across all courses in progress and download or open them",
+      "mode": "view"
+    },
+    {
+      "name": "open-recordings",
+      "title": "Open Recordings",
+      "subtitle": "WeBeep",
+      "description": "Open the lecture recording archive or virtual classroom of a course",
+      "mode": "view"
+    },
+    {
+      "name": "read-announcements",
+      "title": "Read Announcements",
+      "subtitle": "WeBeep",
+      "description": "Latest posts from the announcements forums of your courses in progress",
+      "mode": "view"
+    },
+    {
+      "name": "read-notifications",
+      "title": "Read Notifications",
+      "subtitle": "WeBeep",
+      "description": "Your WeBeep notifications: new content, forum posts and deadlines",
+      "mode": "view"
+    },
+    {
+      "name": "show-upcoming-events",
+      "title": "Show Upcoming Events",
+      "subtitle": "WeBeep",
+      "description": "Upcoming calendar events and assignment deadlines",
+      "mode": "view"
+    },
+    {
+      "name": "search-course-catalog",
+      "title": "Search Course Catalog",
+      "subtitle": "WeBeep",
+      "description": "Search all WeBeep courses, including the ones you are not enrolled in",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Course name or code",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "react": "^19.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
