@@ -6,7 +6,13 @@ Built for long sessions such as lectures and meetings: audio is flushed to disk 
 
 ## Requirements
 
-This extension drives the [`mictape`](https://github.com/t4kamuna/mictape) command-line tool, which does the recording. Install it first:
+This extension drives the [`mictape`](https://github.com/t4kamuna/mictape) command-line tool (v0.2.0 or later), which does the recording. Install it first with Homebrew:
+
+```sh
+brew install t4kamuna/tap/mictape
+```
+
+Or build it from source:
 
 ```sh
 git clone https://github.com/t4kamuna/mictape.git
