@@ -65,13 +65,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.7.3",
-    "gpt-tokenizer": "^2.6.2"
+    "gpt-tokenizer": "^2.6.2",
+    "react": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "8.40.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
