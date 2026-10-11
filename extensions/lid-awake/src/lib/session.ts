@@ -1,20 +1,17 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
-import { getBattery, getBootTime, isSleepDisabled, setSleepDisabled } from "./system";
+import { getBattery, getBootTime, isRuleInstalled, isSleepDisabled, setSleepDisabled } from "./system";
 import { AutoDisableReason, Battery, Session, shouldAutoDisable } from "./parse";
 
 export type { Session } from "./parse";
 
 const SESSION_KEY = "session";
 
-// Hand-written so this file typechecks even before `ray build` generates raycast-env.d.ts.
-type LidPrefs = { batteryThreshold: string; defaultDuration: string };
-
 export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
 
 export type Status = { on: boolean; session: Session | null; battery: Battery };
 
 function getPrefs(): { thresholdPercent: number; defaultMinutes: number | null } {
-  const prefs = getPreferenceValues<LidPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const thresholdPercent = Number(prefs.batteryThreshold) || 0;
   const duration = Number(prefs.defaultDuration);
   return {
@@ -64,6 +61,9 @@ export async function refreshMenuBar(): Promise<void> {
 }
 
 export async function enable(minutes: number | null): Promise<void> {
+  if (!(await isRuleInstalled())) {
+    throw new Error("Run Set up Lid Awake first, so Lid Awake can turn itself off while the lid is closed");
+  }
   const { thresholdPercent } = getPrefs();
   const battery = await getBattery();
   if (thresholdPercent > 0 && battery.hasBattery && !battery.onAC && battery.percent != null) {
@@ -90,15 +90,16 @@ export async function enable(minutes: number | null): Promise<void> {
   await refreshMenuBar();
 }
 
-export async function disable(): Promise<void> {
-  await setSleepDisabled(false);
+export async function disable(options: { allowPrompt?: boolean } = { allowPrompt: true }): Promise<void> {
+  await setSleepDisabled(false, { allowPrompt: options.allowPrompt });
   await clearSession();
   await refreshMenuBar();
 }
 
 export async function getStatus(): Promise<Status> {
-  const on = await isSleepDisabled();
+  // Read the session first: enable turns sleep on before saving, so a session seen here means sleep is already on.
   let session = await readSession();
+  const on = await isSleepDisabled();
   if (!on && session) {
     await clearSession();
     session = null;
@@ -122,7 +123,12 @@ export async function enforce(): Promise<AutoDisableReason | null> {
     thresholdPercent,
   });
   if (reason) {
-    await disable();
+    // The user may have started a new session while this check ran; leave that one alone.
+    const current = await readSession();
+    if (!current || current.startedAt !== status.session.startedAt) {
+      return null;
+    }
+    await disable({ allowPrompt: false });
     return reason;
   }
   return null;

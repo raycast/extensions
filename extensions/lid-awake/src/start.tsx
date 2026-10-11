@@ -21,6 +21,7 @@ export default function Command() {
         message: error instanceof Error ? error.message : String(error),
       });
     }
+    revalidate();
   }
 
   async function turnOff() {
@@ -34,6 +35,7 @@ export default function Command() {
         message: error instanceof Error ? error.message : String(error),
       });
     }
+    revalidate();
   }
 
   const on = status?.on ?? false;

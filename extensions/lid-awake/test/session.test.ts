@@ -26,6 +26,7 @@ vi.mock("@raycast/api", () => ({
 }));
 
 vi.mock("../src/lib/system", () => ({
+  isRuleInstalled: vi.fn(),
   isSleepDisabled: vi.fn(),
   getBattery: vi.fn(),
   getBootTime: vi.fn(),
@@ -59,6 +60,7 @@ beforeEach(() => {
   raycast.prefs = { batteryThreshold: "20", defaultDuration: "60" };
   raycast.launchCommand.mockResolvedValue(undefined);
 
+  vi.mocked(system.isRuleInstalled).mockResolvedValue(true);
   vi.mocked(system.isSleepDisabled).mockResolvedValue(false);
   vi.mocked(system.getBattery).mockResolvedValue(ON_BATTERY_80);
   vi.mocked(system.getBootTime).mockResolvedValue(BOOT);
@@ -76,6 +78,16 @@ describe("enable", () => {
     expect(system.setSleepDisabled).toHaveBeenCalledWith(true);
     expect(storedSession()).toEqual({ startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT });
     expect(raycast.launchCommand).toHaveBeenCalledWith({ name: "menu-bar", type: "background" });
+  });
+
+  it("refuses to turn on when the passwordless rule is not installed, without touching sleep", async () => {
+    vi.mocked(system.isRuleInstalled).mockResolvedValue(false);
+
+    await expect(enable(60)).rejects.toThrow(
+      "Run Set up Lid Awake first, so Lid Awake can turn itself off while the lid is closed",
+    );
+    expect(system.setSleepDisabled).not.toHaveBeenCalled();
+    expect(storedSession()).toBeNull();
   });
 
   it("does not turn sleep off when the boot time cannot be read", async () => {
@@ -156,7 +168,7 @@ describe("disable", () => {
 
     await disable();
 
-    expect(system.setSleepDisabled).toHaveBeenCalledWith(false);
+    expect(system.setSleepDisabled).toHaveBeenCalledWith(false, { allowPrompt: true });
     expect(storedSession()).toBeNull();
     expect(raycast.launchCommand).toHaveBeenCalledWith({ name: "menu-bar", type: "background" });
   });
@@ -195,6 +207,20 @@ describe("getStatus", () => {
     await expect(getStatus()).resolves.toEqual({ on: false, session: null, battery: ON_BATTERY_80 });
     expect(storedSession()).toBeNull();
   });
+
+  it("keeps a session that enable saves between the sleep check and the session read", async () => {
+    // Simulates enable() running concurrently: it turns sleep on before saving, so getStatus must read
+    // the session first. Reading pmset first would see sleep off, then find the new session and delete it.
+    const fresh = { startedAt: NOW, endsAt: null, bootTime: BOOT };
+    vi.mocked(system.isSleepDisabled).mockImplementation(async () => {
+      seedSession(fresh);
+      return false;
+    });
+
+    await getStatus();
+
+    expect(storedSession()).toEqual(fresh);
+  });
 });
 
 describe("enforce", () => {
@@ -219,7 +245,7 @@ describe("enforce", () => {
     vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
 
     await expect(enforce()).resolves.toBe("timer");
-    expect(system.setSleepDisabled).toHaveBeenCalledWith(false);
+    expect(system.setSleepDisabled).toHaveBeenCalledWith(false, { allowPrompt: false });
     expect(storedSession()).toBeNull();
   });
 
@@ -228,7 +254,7 @@ describe("enforce", () => {
     vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
 
     await expect(enforce()).resolves.toBe("restart");
-    expect(system.setSleepDisabled).toHaveBeenCalledWith(false);
+    expect(system.setSleepDisabled).toHaveBeenCalledWith(false, { allowPrompt: false });
     expect(storedSession()).toBeNull();
   });
 
@@ -238,7 +264,7 @@ describe("enforce", () => {
     setBattery({ hasBattery: true, percent: 15, onAC: false });
 
     await expect(enforce()).resolves.toBe("battery");
-    expect(system.setSleepDisabled).toHaveBeenCalledWith(false);
+    expect(system.setSleepDisabled).toHaveBeenCalledWith(false, { allowPrompt: false });
     expect(storedSession()).toBeNull();
   });
 
@@ -250,6 +276,22 @@ describe("enforce", () => {
     await expect(enforce()).resolves.toBeNull();
     expect(system.setSleepDisabled).not.toHaveBeenCalled();
     expect(storedSession()).toEqual(session);
+  });
+});
+
+describe("enforce race", () => {
+  it("does not disable when a new session starts after the check", async () => {
+    seedSession({ startedAt: NOW - 61 * MINUTE, endsAt: NOW - MINUTE, bootTime: BOOT });
+    vi.mocked(system.isSleepDisabled).mockResolvedValue(true);
+    const fresh = { startedAt: NOW, endsAt: NOW + 60 * MINUTE, bootTime: BOOT };
+    vi.mocked(system.getBootTime).mockImplementation(async () => {
+      seedSession(fresh);
+      return BOOT;
+    });
+
+    await expect(enforce()).resolves.toBeNull();
+    expect(system.setSleepDisabled).not.toHaveBeenCalled();
+    expect(storedSession()).toEqual(fresh);
   });
 });
 

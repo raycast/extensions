@@ -19,7 +19,7 @@ function autoOffMessage(reason: AutoDisableReason): string {
     case "timer":
       return "Lid Awake turned off: timer ended";
     case "battery": {
-      const { batteryThreshold } = getPreferenceValues<{ batteryThreshold: string }>();
+      const { batteryThreshold } = getPreferenceValues<Preferences.MenuBar>();
       return `Lid Awake turned off: battery below ${batteryThreshold}%`;
     }
   }
@@ -32,7 +32,7 @@ async function loadState() {
       await showHUD(autoOffMessage(reason)).catch(() => undefined);
     }
   } catch {
-    // Keep showing status even if enforcement fails this cycle.
+    await showHUD("Lid Awake couldn't turn off automatically. Run Set up Lid Awake.").catch(() => undefined);
   }
   return getStatus();
 }
@@ -116,7 +116,7 @@ export default function Command() {
       </MenuBarExtra.Submenu>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Setup…"
+          title="Set up…"
           icon={Icon.Gear}
           onAction={() => launchCommand({ name: "setup", type: LaunchType.UserInitiated }).catch(() => undefined)}
         />
