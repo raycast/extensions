@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenCode Go — Menu-bar surface prototype (throwaway)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #e8e8ec; color: #1d1d1f;
+    min-height: 100%;
+  }
+  .menubar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    height: 26px; background: rgba(0,0,0,.85); color: #fff;
+    display: flex; align-items: center; padding: 0 14px; gap: 18px;
+    font-size: 12.5px;
+  }
+  .menubar .brand { font-weight: 700; }
+  .menubar .spacer { flex: 1; }
+  .pill {
+    display: flex; align-items: center; padding: 2px 7px;
+    border-radius: 5px; cursor: pointer; user-select: none;
+  }
+  .pill:hover, .pill.open { background: rgba(255,255,255,.18); }
+  .pill svg { display: block; }
+  .dropdown {
+    position: fixed; top: 30px; right: 14px; z-index: 60;
+    width: 360px; background: #fff; border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.25); overflow: hidden;
+    max-height: calc(100vh - 60px); overflow-y: auto;
+  }
+  .ddhead { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 14px 6px; border-bottom: 1px solid #eee; }
+  .ddhead .t { font-weight: 700; }
+  .ddhead .s { font-size: 11px; color: #6e6e73; }
+  .sec { padding: 8px 14px 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #6e6e73; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 7px 14px; cursor: default; }
+  .item:hover { background: #eef4ff; }
+  .item .ic { width: 20px; text-align: center; flex: none; }
+  .item .body { flex: 1; min-width: 0; }
+  .item .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .s { color: #6e6e73; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .r { flex: none; font-size: 12px; color: #6e6e73; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 2px; font-size: 12px; color: #6e6e73; }
+  .divider { height: 1px; background: #eee; margin: 4px 0; }
+  .pbar { width: 60px; height: 6px; border-radius: 3px; background: #d7e7fd; overflow: hidden; }
+  .pbar > span { display: block; height: 100%; background: #0a84ff; }
+  .tag { font-size: 11px; border-radius: 5px; padding: 1px 6px; background: #e8f0fe; color: #1a56a0; font-weight: 600; }
+  .tag.win { background: #eafaf0; color: #18794e; }
+  .tag.lose { background: #fff3e0; color: #b25e09; }
+  .stage { max-width: 720px; margin: 60px auto 40px; padding: 0 20px; text-align: center; color: #6e6e73; }
+  .stage b { color: #1d1d1f; }
+</style>
+</head>
+<body>
+
+<div class="menubar">
+  <span class="brand">Finder</span><span>File</span><span>Edit</span><span>View</span>
+  <span class="spacer"></span>
+  <span id="pill" class="pill"></span>
+</div>
+
+<div id="dropdown" class="dropdown hidden"></div>
+
+<div class="stage">
+  <p><b>Decided menu-bar design</b> — icon-only pill (the OpenCode icon), click opens the dropdown.<br>
+  The dropdown carries the <b>full Catalog-first view</b> from the Raycast UI layout decision.<br>
+  When unconfigured the pill still renders (see Auth and key handling) — icon present, dropdown shows the no-key setup item.</p>
+</div>
+
+<script>
+const OPENCODE_ICON = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="3.5" fill="white"/><path d="M4.5 5.5 L7.5 8 L4.5 10.5" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 11 H12" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+const WINDOWS = [
+  { key: "rolling", name: "Rolling 5h", pct: 42, cap: "$12", reset: "resets in 1h 12m" },
+  { key: "weekly",  name: "Weekly",     pct: 31, cap: "$30", reset: "resets in 4d 6h" },
+  { key: "monthly", name: "Monthly",    pct: 18, cap: "$60", reset: "resets in 26d 14h" },
+];
+const PICKS = [
+  { id: "glm-5.3-flash", kind: "stretch" },
+  { id: "deepseek-v4-flash", kind: "best-value" },
+];
+const MODELS = [
+  { id: "glm-5.3-flash",           in: 0.10, out: 0.30, req: 240, mod: "in text, image · out text" },
+  { id: "deepseek-v4-flash",       in: 0.075,out: 0.25, req: 210, mod: "in text · out text" },
+  { id: "qwen3-500b",              in: 0.30, out: 0.90, req: 120, mod: "in text, image · out text" },
+  { id: "gpt-5.1",                 in: 0.40, out: 1.20, req: 90,  mod: "in text, image · out text" },
+  { id: "claude-sonnet-4.5",       in: 0.80, out: 4.00, req: 40,  mod: "in text, image · out text" },
+  { id: "muse-spark-1.2-contributor", in: 0.20, out: 0.80, req: 180, note: "trains on prompts", mod: "in text, image · out text, image" },
+  { id: "opus-4.5",                in: 1.50, out: 7.50, req: 20,  mod: "in text, image · out text" },
+];
+const OTHER = 5;
+const money = (v) => "$" + (v < 0.1 ? v.toFixed(3) : v.toFixed(2)) + "/M";
+const req5h = (m) => "~" + m.req + " req/5h";
+
+const pill = document.getElementById("pill");
+const dd = document.getElementById("dropdown");
+let open = false;
+
+function render() {
+  pill.innerHTML = OPENCODE_ICON;
+  const sorted = [...MODELS].sort((a, b) => b.req - a.req);
+  const modelRows = sorted.map(m => {
+    const isPick = PICKS.find(p => p.id === m.id);
+    return `<div class="item">
+      <div class="ic">M</div>
+      <div class="body"><div class="t">${m.id}${m.note ? ' <span style="color:#6e6e73">(excluded)</span>' : ''}</div>
+        <div class="meta"><span>${m.mod}</span><span class="tag">${money(m.in)}/${money(m.out)}</span><span class="tag">${req5h(m)}</span>${isPick ? `<span class="tag ${isPick.kind==='stretch'?'win':'lose'}">${isPick.kind==='stretch'?'Stretch':'Value'}</span>` : ''}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  dd.innerHTML = `
+    <div class="ddhead"><span class="t">OpenCode Go</span><span class="s">updated just now</span></div>
+    <div class="sec">Go limits</div>
+    ${WINDOWS.map(w => `
+      <div class="item">
+        <div class="ic">◷</div>
+        <div class="body"><div class="t">${w.name} · ${w.cap}</div><div class="s">${w.reset}</div></div>
+        <div class="r"><div class="pbar"><span style="width:${w.pct}%"></span></div></div>
+        <div class="r">${w.pct}%</div>
+      </div>`).join("")}
+    <div class="sec">Model catalog · by quota</div>
+    ${modelRows}
+    <div class="item"><div class="ic">…</div><div class="body"><div class="s">and ${OTHER} more models (folded)</div></div></div>
+    <div class="divider"></div>
+    <div class="item"><div class="ic">⟳</div><div class="body"><div class="t">Force refresh</div></div></div>
+    <div class="item"><div class="ic">⌘</div><div class="body"><div class="t">Open full view</div></div></div>
+    <div class="item"><div class="ic">⚙</div><div class="body"><div class="t">Open Extension Preferences</div></div></div>`;
+  pill.classList.toggle("open", open);
+  dd.classList.toggle("hidden", !open);
+}
+
+pill.onclick = () => { open = !open; render(); };
+addEventListener("keydown", (e) => { if (e.key === "Escape") { open = false; render(); } });
+render();
+</script>
+</body>
+</html>
