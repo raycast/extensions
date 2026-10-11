@@ -11,7 +11,7 @@ import {
   loadBridgeConfig,
   saveBridgeConfig,
 } from "./hueBridge";
-import * as net from "net";
+import { isIPv4 } from "net";
 import { logError } from "../helpers/errors";
 import Style = Toast.Style;
 
@@ -92,7 +92,7 @@ export const hueBridgeMachine = setup({
   },
   guards: {
     hasIpAddress: ({ context }) => context.bridgeIpAddress !== undefined,
-    hasInvalidIpAddress: ({ context }) => context.bridgeIpAddress !== undefined && !net.isIP(context.bridgeIpAddress),
+    hasInvalidIpAddress: ({ context }) => context.bridgeIpAddress !== undefined && !isIPv4(context.bridgeIpAddress),
   },
   actions: {
     logError: (_, params: { error: unknown }) => logError(params.error),

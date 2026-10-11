@@ -34,6 +34,7 @@
 - Offer to link again when the bridge no longer accepts the extension, keeping its saved address, instead of only unlinking
 - Validate the bridge IP preference again after Unlink
 - Show the bridge IP preference in its error when it isn't a valid IPv4 address
+- Report an IPv6 address in the bridge IP preference as invalid instead of failing to link with “Invalid URL”
 - Fix the Bridge IP address and Bridge Username preferences clearing while typing and keeping only one character
 - Fix Done after linking connecting to the bridge a second time
 - Reconnect when the connection to the bridge drops, for example when it restarts, or goes silent after a network change or sleep, instead of failing every change and missing updates until the command is opened again
