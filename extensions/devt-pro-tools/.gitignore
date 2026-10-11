@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# logs
+*.log
+
+# build output
+build/
+dist/
+
+# editor / OS
+.idea/
+.vscode/
+*.swp
+

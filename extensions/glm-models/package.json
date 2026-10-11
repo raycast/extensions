@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "glm-models",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "GLM Models",
   "description": "Use Z.ai / BigModel GLM models inside Raycast AI Chat, Quick AI and AI Commands",
   "icon": "icon.png",
@@ -33,6 +33,14 @@
       "mode": "no-view",
       "icon": "icon.png",
       "description": "Re-fetch the list of GLM models available to your account"
+    },
+    {
+      "name": "show-models",
+      "title": "Show Models",
+      "subtitle": "GLM Models",
+      "mode": "view",
+      "icon": "icon.png",
+      "description": "List the GLM models available to your account with context windows and capabilities"
     }
   ],
   "preferences": [
@@ -62,7 +70,7 @@
           "title": "Custom base URL"
         }
       ],
-      "description": "Where your API key was created. Z.ai and BigModel are separate platforms with separate keys — pick the one matching your key. Pay-as-you-go API keys only: GLM Coding Plan and Team Plan keys are not supported."
+      "description": "Where your API key was created. Z.ai and BigModel are separate platforms with separate keys — pick the one matching your key. Pay-as-you-go API keys only: GLM Coding Plan and Team Plan keys are not supported. Picking Custom base URL? The setup form doesn't ask for the URL — after finishing, open Raycast Settings → Extensions → GLM Models, set Custom Base URL, then run Refresh Models."
     },
     {
       "name": "customBaseUrl",

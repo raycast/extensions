@@ -2,14 +2,17 @@
  * Search command for browsing and searching brew packages.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import { usePopularityRanks } from "./hooks/usePopularityRanks";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
+import { InstallFromTapAction } from "./components/actions";
+import { STATUS_COLOR, UP_TO_DATE_ICON } from "./components/palette";
+import { brewIdentifier, parseTapName } from "./utils";
 import { PAGE_SIZE, clampPage, pageCount, visibleTotal } from "./utils/paging";
 
 /**
@@ -114,6 +117,21 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   // Memoize isInstalled callback to avoid creating a new function every render
   const isInstalledCallback = useCallback((name: string) => isInstalled(name, installed), [installed]);
 
+  // A pasted qualified name (`user/repo/name`, or a whole install-page line)
+  // names a package the search index cannot have: it covers homebrew/core and
+  // homebrew/cask only. Offer it as one row above the results.
+  const tapTarget = useMemo(() => {
+    const target = parseTapName(searchText);
+    return target?.package ? { ...target, package: target.package } : undefined;
+  }, [searchText]);
+  const tapPackageInstalled =
+    tapTarget !== undefined &&
+    installed !== undefined &&
+    [...installed.formulae.values(), ...installed.casks.values()].some(
+      (item) => item.tap === tapTarget.tap && brewIdentifier(item) === tapTarget.package,
+    );
+  const tapName = tapTarget?.package.split("/").pop();
+
   // Track toast reference for updating progress
   const initToastRef = useRef<Toast | null>(null);
   const isCreatingToastRef = useRef(false);
@@ -191,6 +209,27 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
 
   return (
     <FormulaList
+      leadingSection={
+        tapTarget && (
+          <List.Section title="Third-Party Tap">
+            <List.Item
+              id="install-from-tap"
+              title={tapName ?? tapTarget.package}
+              subtitle={`from ${tapTarget.tap}`}
+              icon={tapPackageInstalled ? UP_TO_DATE_ICON : Icon.Plus}
+              accessories={tapPackageInstalled ? [{ tag: { value: "Installed", color: STATUS_COLOR.ok } }] : undefined}
+              actions={
+                <ActionPanel>
+                  {!tapPackageInstalled && (
+                    <InstallFromTapAction target={tapTarget} onAction={() => revalidateInstalled()} />
+                  )}
+                  <Action.CopyToClipboard title="Copy Package Name" content={tapTarget.package} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        )
+      }
       formulae={formulae}
       casks={casks}
       searchText={searchText}

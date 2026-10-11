@@ -11,6 +11,7 @@ export type Target = {
   url?: string;
   strategy?: "hostname" | "prefix" | "exact" | "search";
   pick?: "recent" | "first" | "pinned";
+  navigate?: boolean;
   favorite?: boolean;
 };
 
@@ -27,11 +28,20 @@ export type FirefoxTab = {
 
 export type UpsertOptions = {
   url?: string;
-  name?: string;
   title?: string;
   match?: string;
   strategy?: string;
   pick?: string;
+  navigate?: boolean;
+};
+
+export type EditOptions = {
+  url: string;
+  title: string;
+  match: string;
+  strategy: string;
+  pick: string;
+  navigate: boolean;
 };
 
 const buildEnv = (browser: string): NodeJS.ProcessEnv => ({
@@ -67,15 +77,32 @@ export const focusTarget = async (name: string): Promise<void> => {
   await run(["focus", name]);
 };
 
-export const upsertTarget = async (opts: UpsertOptions): Promise<void> => {
+// Adds a target; the CLI derives its id from the title and never overwrites a
+// different target.
+export const addTarget = async (opts: UpsertOptions): Promise<void> => {
   const args = ["add"];
   if (opts.url) args.push(opts.url);
-  if (opts.name) args.push("--name", opts.name);
   if (opts.title) args.push("--title", opts.title);
   if (opts.match) args.push("--match", opts.match);
   if (opts.strategy) args.push("--strategy", opts.strategy);
   if (opts.pick) args.push("--pick", opts.pick);
+  if (opts.navigate) args.push("--navigate");
   await run(args);
+};
+
+// Edits a target in place; its id never changes. An empty title or URL clears it.
+export const editTarget = async (name: string, opts: EditOptions): Promise<void> => {
+  // The --flag=value form keeps a value that starts with a dash from being read as a flag.
+  await run([
+    "edit",
+    name,
+    `--title=${opts.title}`,
+    `--url=${opts.url}`,
+    `--match=${opts.match}`,
+    `--strategy=${opts.strategy}`,
+    `--pick=${opts.pick}`,
+    opts.navigate ? "--navigate" : "--no-navigate",
+  ]);
 };
 
 export const removeTarget = async (name: string): Promise<void> => {

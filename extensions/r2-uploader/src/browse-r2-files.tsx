@@ -114,7 +114,7 @@ function FolderView({ prefix }: { prefix: string }) {
     <List
       isShowingDetail={entries.some((entry) => entry.type === "file")}
       isLoading={isLoading}
-      navigationTitle={prefix ? `/${prefix}` : "R2 Bucket"}
+      navigationTitle={prefix ? `/${prefix}` : undefined}
       searchBarPlaceholder="Filter files and folders"
     >
       <List.EmptyView title="No files found" description="This folder is empty." icon={Icon.Folder} />

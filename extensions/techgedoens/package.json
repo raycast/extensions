@@ -113,6 +113,107 @@
           "value": "90"
         }
       ]
+    },
+    {
+      "name": "menuBarDisplayArticleCount",
+      "title": "Menu Bar Article Count",
+      "description": "Selects how many articles are shown in each menu bar section.",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "data": [
+        {
+          "title": "3 Articles",
+          "value": "3"
+        },
+        {
+          "title": "5 Articles",
+          "value": "5"
+        },
+        {
+          "title": "10 Articles",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayTitleLength",
+      "title": "Menu Bar Title Length",
+      "description": "Selects the maximum article title length shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Very Short (Max. 40 Characters)",
+          "value": "very-short"
+        },
+        {
+          "title": "Short (Max. 55 Characters)",
+          "value": "short"
+        },
+        {
+          "title": "Medium (56-70 Characters)",
+          "value": "medium"
+        },
+        {
+          "title": "Long (71-90 Characters)",
+          "value": "long"
+        },
+        {
+          "title": "Full Title",
+          "value": "full"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayUnreadOnly",
+      "title": "Menu Bar Article Filter",
+      "description": "Only shows unread articles in the Latest Articles and Favorites sections.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Only show unread articles"
+    },
+    {
+      "name": "menuBarDisplayUnreadCounter",
+      "title": "Menu Bar Unread Counter",
+      "description": "Selects when the unread counter is shown in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "always",
+      "data": [
+        {
+          "title": "Always Show",
+          "value": "always"
+        },
+        {
+          "title": "Hide When Zero",
+          "value": "hide-zero"
+        },
+        {
+          "title": "Always Hide",
+          "value": "hidden"
+        }
+      ]
+    },
+    {
+      "name": "menuBarDisplayPublicationDate",
+      "title": "Menu Bar Article Details",
+      "description": "Shows the publication date next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show publication date"
+    },
+    {
+      "name": "menuBarDisplayCategory",
+      "title": "",
+      "description": "Shows the category next to each article in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show category"
     }
   ],
   "commands": [
@@ -148,30 +249,6 @@
       ]
     },
     {
-      "name": "ask-techgedoens",
-      "title": "Ask Techgedöns",
-      "subtitle": "Techgedöns.de",
-      "description": "Answers questions using saved Techgedöns articles",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "question",
-          "placeholder": "Question for Techgedöns",
-          "type": "text",
-          "required": true
-        }
-      ],
-      "keywords": [
-        "tchgdns",
-        "techgedöns",
-        "artikel",
-        "fragen",
-        "suche",
-        "wissen",
-        "ai"
-      ]
-    },
-    {
       "name": "saved-articles",
       "title": "Favorites",
       "subtitle": "Techgedöns.de",
@@ -184,6 +261,24 @@
         "favoriten",
         "gespeichert",
         "leseliste"
+      ]
+    },
+    {
+      "name": "search-selected-text",
+      "title": "Search Selected Text",
+      "subtitle": "Techgedöns.de",
+      "description": "Searches Techgedöns.de for text selected in the frontmost application",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "auswahl",
+        "markierter text",
+        "suchen",
+        "selected text",
+        "search"
       ]
     },
     {
@@ -233,6 +328,41 @@
         "website",
         "browser"
       ]
+    },
+    {
+      "name": "menu-bar-articles",
+      "title": "Techgedöns Menu Bar",
+      "subtitle": "Techgedöns.de",
+      "description": "Shows the unread count and latest articles in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "disabledByDefault": true,
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "ungelesen",
+        "menüleiste",
+        "menu bar"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "description": "Searches the public Techgedöns.de archive and returns the five most relevant articles with their full RSS content"
+    },
+    {
+      "name": "get-latest-articles",
+      "title": "Get Latest Articles",
+      "description": "Returns the five latest articles published on Techgedöns.de"
+    },
+    {
+      "name": "get-article",
+      "title": "Get Article",
+      "description": "Loads a specific Techgedöns.de article by its exact title or URL"
     }
   ],
   "dependencies": {

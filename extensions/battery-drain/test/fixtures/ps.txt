@@ -1,0 +1,5 @@
+10449  4620    22:12:22  1321:02.22 johndoe    -zsh
+  410     1 01-00:21:15    78:47.64 _windowserver /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer
+ 8598     1    22:23:18    60:00.12 johndoe    /Applications/Microsoft Teams.app/Contents/MacOS/MSTeams
+    1     0 01-00:22:16     8:54.02 root          /sbin/launchd
+29005     1       02:27      0:11.72 johndoe    /Applications/iTerm.app/Contents/MacOS/iTerm2

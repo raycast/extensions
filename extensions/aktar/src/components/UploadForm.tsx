@@ -7,6 +7,9 @@ import { onlyFiles, uploadPaths } from "../lib/upload";
 import { showAktarFailure } from "../lib/errors";
 import { DELETE_AFTER_OPTIONS, parseExpiry, preferredExpiry } from "../lib/expiry";
 
+/** The destination choice that leaves picking to Aktar's Use For rules. */
+const AUTOMATIC = "automatic";
+
 type Values = {
   files: string[];
   /** Optional new name for a single file; the extension is kept when left out. */
@@ -33,7 +36,8 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       showAktarFailure(error, "Couldn't load destinations");
     },
   });
-  const defaultDestination = destinationId ?? destinations?.find((destination) => destination.isDefault)?.id;
+  // Opened for a bucket, the form uploads there; otherwise Aktar picks by Use For.
+  const defaultDestination = destinationId ?? (destinations ? AUTOMATIC : undefined);
 
   const { handleSubmit, itemProps, setValidationError, values } = useForm<Values>({
     initialValues: {
@@ -54,6 +58,12 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         return false;
       }
       const folder = values.folder.trim();
+      const automatic = values.destinationId === AUTOMATIC;
+      if (folder && automatic) {
+        setValidationError("folder", "Pick a destination instead of Automatic to upload into a folder.");
+        return false;
+      }
+      setValidationError("folder", undefined);
       const expires = parseExpiry(values.deleteAfter);
       if (folder && expires) {
         setValidationError("deleteAfter", "Not available with a folder. Clear Folder or pick Never.");
@@ -61,7 +71,8 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       }
       setValidationError("deleteAfter", undefined);
       const uploads = await uploadPaths(files, {
-        destinationId: values.destinationId || undefined,
+        // Automatic sends no destination, so Aktar's Use For rules (or its selected destination) decide.
+        destinationId: automatic ? undefined : values.destinationId || undefined,
         // An empty folder means "use the destination's path template".
         prefix: folder ? folder : undefined,
         expires,
@@ -82,7 +93,7 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={prefix ? `Upload to ${prefix}` : "Upload File"}
+      navigationTitle={prefix ? `Upload to ${prefix}` : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Upload" icon={Icon.Upload} onSubmit={handleSubmit} />
@@ -104,7 +115,9 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
         // Rendered only once destinations load, so the default one is preselected.
         key={defaultDestination ?? "loading"}
         defaultValue={defaultDestination}
+        info="Automatic lets Aktar choose: each file goes to the destination whose Use For claims its type or extension, else to the one selected in Aktar. Use For needs Aktar for Mac 0.14.0 or Aktar for Windows 0.7.0; older versions use the selected destination."
       >
+        <Form.Dropdown.Item value={AUTOMATIC} title="Automatic" icon={Icon.Wand} />
         {(destinations ?? []).map((destination) => (
           <Form.Dropdown.Item
             key={destination.id}
@@ -117,12 +130,12 @@ export function UploadForm({ destinationId, prefix, initialFiles, onUploaded }: 
       <Form.TextField
         title="Folder"
         placeholder="Optional, e.g. screenshots/2026"
-        info="Leave empty to name files with the destination's path template, like a drop on the menu bar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
+        info="Leave empty to name files with the destination's path template, like a file dropped on Aktar. With a folder (or / for the bucket root), files keep their own names and are numbered instead of overwritten when a name is taken. Can't be combined with Delete After."
         {...itemProps.folder}
       />
       <Form.Dropdown
         title="Delete After"
-        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 or later with auto-delete set up for the destination (Delete after in Aktar's menu bar)."
+        info="Aktar deletes the files from your bucket after this time. Only works without a folder, and needs Aktar 0.5.0 for Mac or 0.1.2 for Windows with auto-delete set up for the destination (Delete after in Aktar's menu bar or tray panel)."
         {...itemProps.deleteAfter}
       >
         {DELETE_AFTER_OPTIONS.map((option) => (

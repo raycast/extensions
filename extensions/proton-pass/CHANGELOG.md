@@ -1,5 +1,31 @@
 # proton-pass Changelog
 
+## [Login Fixes] - 2026-10-10
+
+- Login with Browser no longer fails when the extension is opened again right after logging in in the browser. The extension ran other pass-cli commands while pass-cli was saving the new session, and pass-cli then deleted that session "for security": the browser showed a successful login, and the extension stayed logged out without saying why. No other pass-cli command runs during a login now
+- pass-cli runs the login on its own, so it completes even if Raycast closes while you're in the browser
+- While the login runs, the screen says what's left: log in in the browser, then the login finishing, with Open Login Page Again and Cancel Login. Once logged in, it says so while the items load, instead of showing an empty list. A failed login says why
+- Get TOTP's Not Logged In screen can log in too
+- The Login command has a Logout action, after a confirmation, with Force Logout when ending the session on Proton's servers fails
+- Not Logged In screens have a Check Again action (⌘R), to pick up a session started elsewhere, such as a browser login that completed after Raycast had closed
+- Open Terminal Login runs the same pass-cli as the rest of the extension, including the one it installed, instead of whichever `pass-cli` the shell finds, and brings Terminal to the front
+- List Vaults shows fetched vaults and item counts without waiting for optional sharing lookups
+
+## [Item Counts and Shared Vaults] - 2026-10-10
+
+- The vault menu of Search Items shows the number of items in each vault, and in all vaults. The selected one stays in the search bar
+- List Vaults shows the number of items in each vault. Its refresh lists the items too, which also keeps Search Items' cache fresh
+- List Vaults marks shared vaults with an icon. Its tooltip says whether you shared the vault, or it was shared with you and with which role (Manager, Editor or Viewer)
+
+## [Smoother List Scrolling] - 2026-10-05
+
+- The item list scrolls normally again: the selection is only set when the list appears, on the suggested login, instead of on every move, which recentred the list and made it flicker
+
+## [Password Generator Defaults] - 2026-10-05
+
+- Generate Password has its own preferences for every default: password type and length, uppercase letters, symbols, numbers, passphrase words, separator and capitalization
+- Default Password Type and Default Password Length move to the Generate Password preferences, so they're reset to their defaults once
+
 ## [Fill Logins] - 2026-10-02
 
 - Fill Login (macOS): closes Raycast, then pastes the email (or the username when there's no email), Tab and the password into the app you were using. If the item has a 2FA code, it's left in the clipboard for the next screen

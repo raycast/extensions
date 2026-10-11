@@ -3,8 +3,8 @@
 > Instructions for AI coding assistants working on this codebase.
 
 Digger analyzes a URL and reports what it found: metadata, discoverability files,
-resources, headers, DNS and certificates, archive history, host metadata. One command,
-one detail pane per section.
+resources, headers, DNS and certificates, archive history, host metadata. One detail pane per section; three commands, which differ only in
+where they look for the URL.
 
 ## Before Making Changes
 
@@ -162,6 +162,11 @@ private addresses. Two ways around it look harmless and are not:
   thumbnails, backdrops, Quick Look files, Copy as PNG, guarded image files and SVG
   data URIs. Copy as SVG and Export as SVG hand over the original, the file the user asked for.
 
+- **Digging a URL a page supplied.** The sitemap view's Dig This URL goes through
+  `GuardedDig` (`src/components/GuardedDig.tsx`), which runs `checkPageSuppliedUrl`
+  before the dig starts. That checks the first hop only; the dig then follows redirects
+  as it does for a typed URL.
+
 This was missed in four places in one release: the images grid, Overview's favicon, the
 SVG grid's file-backed tiles, and the Copy as PNG input. Each looked like displaying an
 image.
@@ -192,12 +197,36 @@ stripe.com's logos:
   view and its run loop inside JXA) or `@resvg/resvg-js` (correct filters on both
   platforms, but a native binary per platform).
 
+## Where a URL comes from
+
+Typed text, the selection and the clipboard all go through `urlFromInput` in
+`src/utils/urlText.ts`; the browser tab already holds a URL and is only checked for
+`http:`/`https:`.
+Do not call `validateUrl` on input directly: it accepts any single word as
+`https://word`, so "fart" was dug as a website and failed as a connection error that
+never said what was typed. A typed string counts as a URL only with a scheme, a dotted
+host, `localhost` or an IP address.
+
+The fallbacks in `src/utils/urlSources.ts` follow the three-state rule above: a
+clipboard with no URL is *absent*, a clipboard that could not be read is *unavailable*,
+and the empty view says which. `getSelectedText` rejects both when nothing is selected
+and when it fails; only its message tells them apart, and only the known
+nothing-selected message counts as absent.
+
+`DigFromSources` always renders one `List.EmptyView` and changes its copy as you type.
+Swapping it for a `List.Item` once the text became a URL left Raycast showing its own
+"No Results" until the next keystroke; ↵ pushes the dig instead.
+
 ## Layout
 
 ```text
-src/digger.tsx        the command — input resolution, then one List of sections
-src/hooks/            useFetchSite (the whole pipeline), useCache
-src/components/       one per detail section
+src/digger.tsx        the main command: a typed URL goes straight to DigResults; an empty
+                      one goes to DigFromSources with the fallbacks its preferences turn on.
+                      open-current-tab.tsx and open-clipboard.tsx each pass DigFromSources
+                      one reader from src/utils/urlSources.ts
+src/hooks/            useFetchSite (the whole pipeline), useCache, useSitemap (the sitemap view's spider)
+src/components/       the detail sections, and the views around them (DigResults, DigFromSources,
+                      ErrorDisplay, SitemapListView, the grids)
 src/actions/          ActionPanel contents, grouped by purpose
 src/utils/            fetchers, parsers, per-lookup clients, config
 src/types/            shared shapes; the status unions live here
@@ -211,7 +240,10 @@ npm run dev      # ray develop
 npm run build    # ray build
 npm run lint     # ray lint   (npm run fix-lint applies Prettier)
 npx tsc --noEmit # NOT covered by build — esbuild strips types
-npm test         # tests/: the SVG extractor and displaySafe() (node:test; XML checks use xmllint if on PATH)
+npm test         # tests/: the SVG extractor, displaySafe(), the sitemap parser, the guard's abort race,
+                 # finding a URL in typed or copied text
+                 # (node:test; XML checks use xmllint if on PATH). A tested module may not use
+                 # extensionless relative imports — node --test cannot resolve them.
 ```
 
 `npx tsc --noEmit` is a separate gate. `ray build` and `ray lint` pass on code that does

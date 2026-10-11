@@ -162,6 +162,16 @@
   ],
   "tools": [
     {
+      "title": "Read Canvas",
+      "name": "read-canvas",
+      "description": "Read an existing Slack canvas by URL or ID as Markdown and HTML, with a content snapshot and section IDs from a text/type lookup (headings by default). Lookup IDs have no section bodies or offsets; use specific criteria to identify exactly one target before editing."
+    },
+    {
+      "title": "Edit Canvas",
+      "name": "edit-canvas",
+      "description": "Apply one confirmed change to an existing Slack canvas after Read Canvas: insert before/after a section, insert at the start/end, replace/delete one section, or rename. Requires the latest snapshot; targeted operations require a section ID and unique lookup text. Whole-canvas replacement is prohibited. Table/rich-section replacement and deletion are refused; Slack has no documented cell/text-range edit API."
+    },
+    {
       "title": "Get Channels",
       "name": "get-channels",
       "description": "Lists all channels in the Slack team"
@@ -245,6 +255,11 @@
       "title": "Download Files",
       "name": "download-files",
       "description": "Download one or more files (attachments) from Slack to a local folder. Pass Slack file IDs, one per line; file IDs start with F and appear in the `files` array returned by Read Conversation, Read Thread, Get Channel History, or Search Messages. Files are saved to the user's ~/Downloads folder by default, or to an optional destination directory. Returns the saved absolute paths."
+    },
+    {
+      "title": "Archive Channels",
+      "name": "archive-channels",
+      "description": "Archive one or more Slack channels. Pass channel IDs (starting with C or G), one per line; use Get Channels to resolve channel names to IDs. Returns whether each channel was archived."
     }
   ],
   "ai": {

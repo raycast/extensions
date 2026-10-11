@@ -21,7 +21,7 @@ const singleLine = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
 export type ScriptDraft = {
   title: string;
   target: string;
-  /** `work` becomes ` · @work` on the subtitle and a `work.` prefix on the filename. Never on the title. */
+  /** `work` becomes ` · @work` on the subtitle. Never on the title, and never in the filename. */
   environment?: string;
   /** The brand — `YouTube`, `The Guardian`. Defaults to the target's domain, humanised. */
   packageName?: string;
@@ -133,14 +133,14 @@ const detailOf = (title: string, brand: string | undefined) => {
 };
 
 /**
- * `scope.brand.detail` — the filename is derived from the metadata rather than typed, so a command
+ * `brand.detail` — the filename is derived from the metadata rather than typed, so a command
  * cannot drift from its own header. `detail` is omitted when the title is just the brand, which is
- * why a plain opener is `netflix.sh` and not `netflix.netflix.sh`.
+ * why a plain opener is `netflix.sh` and not `netflix.netflix.sh`. The environment stays out of the
+ * filename entirely: it lives on the subtitle, where the list already groups and filters on it.
  */
 export const scriptFilename = (draft: ScriptDraft) => {
   const brand = brandOf(draft);
   const parts = [
-    draft.environment?.trim() ? slugify(draft.environment) : undefined,
     brand ? slugify(brand) : slugify(draft.title),
     brand ? detailOf(draft.title, brand) || undefined : undefined,
   ].filter(Boolean);

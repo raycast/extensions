@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { fetchPokemon } from "../api";
 import { PokemonSpeciesName, Pokemon, EvolutionSpecies } from "../types";
 import {
+  buildEvolutionHeader,
   fixFlavorText,
   getLocalizedName,
   getPokemonImageTag,
@@ -27,12 +28,12 @@ import PokemonLearnset from "./pokemon_learnset";
 const { language } = getPreferenceValues();
 
 enum GrowthRate {
-  "Slow" = 1,
-  "Medium" = 2,
-  "Fast" = 3,
+  Slow = 1,
+  Medium = 2,
+  Fast = 3,
   "Medium Slow" = 4,
-  "Erratic" = 5,
-  "Fluctuating" = 6,
+  Erratic = 5,
+  Fluctuating = 6,
 }
 
 export default function PokemonDetail(props: { id: number }) {
@@ -139,6 +140,8 @@ export default function PokemonDetail(props: { id: number }) {
     ];
 
     if (evolutionchain?.pokemonspecies.length) {
+      const stages = evolutions(evolutionchain.pokemonspecies);
+
       data.push(
         {
           h2: "Evolutions",
@@ -149,8 +152,12 @@ export default function PokemonDetail(props: { id: number }) {
               ? "_This Pokémon does not evolve._"
               : "",
         },
-        ...evolutions(evolutionchain.pokemonspecies).map((evolution) => ({
-          p: evolution.map((specy) => getPokemonImageTag(specy.id)).join(" "),
+        // @ts-expect-error - json2md's TableInput type isn't included in the DataObject union it exports
+        ...stages.map((stage) => ({
+          table: {
+            headers: stage.map(buildEvolutionHeader),
+            rows: [stage.map((specy) => getPokemonImageTag(specy.id))],
+          },
         })),
       );
     }

@@ -31,15 +31,15 @@ export function AccountList({ accounts, quotes, isLoading }: AccountListProps) {
       searchBarAccessory={<AccountDropdown accounts={accounts} names={names} onAccountChange={setSelectedAccount} />}
     >
       <List.Item
-        title="Portfolio Performance"
-        subtitle="View aggregate portfolio chart"
+        title="Current Holdings History"
+        subtitle="Price estimate · not account performance"
         icon={{ source: Icon.LineChart, tintColor: Color.Purple }}
         actions={
           <ActionPanel>
             <Action.Push
               title="View Portfolio Chart"
               icon={Icon.LineChart}
-              target={<PortfolioChart accounts={accounts} />}
+              target={<PortfolioChart accounts={filteredAccounts} />}
             />
           </ActionPanel>
         }

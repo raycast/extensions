@@ -10,14 +10,6 @@ export type Document = {
   mimeType: string;
   tags: Array<Omit<Tag, "documentsCount">>;
 };
-export type SearchResult = {
-  id: string;
-  created_at: string;
-  original_size: number;
-  name: string;
-  mime_type: string;
-  tags: Array<Omit<Tag, "documentsCount">>;
-};
 export type Tag = {
   id: string;
   createdAt: string;

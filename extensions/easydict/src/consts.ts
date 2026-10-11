@@ -13,7 +13,7 @@ export const userAgent =
 
 export const networkTimeout = 15000;
 
-export const EASYDICT_VERSION = "3.4.0";
+export const EASYDICT_VERSION = "3.5.0";
 
 const GITHUB_REPO = "https://github.com/tisfeng/Raycast-Easydict";
 
@@ -25,6 +25,24 @@ export function getReleaseTagUrl(version: string): string {
 
 export const RELEASE_MARKDOWN = `
 ## [v${EASYDICT_VERSION}]
+
+### ✨ New Features
+
+#### Windows OCR Screenshot Translation
+
+- **OCR Translate** now works on Windows: drag-select a screen area, recognize the text locally with the built-in Windows OCR engine, and query it in Easydict. Install an OCR language pack in Windows Settings to recognize languages other than your Windows display language.
+- Added the **Select OCR Language** command to pin an installed Windows OCR language; the default **Automatic (Windows profile)** uses the OCR languages from your Windows language settings.
+
+Thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Windows implementation ([raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884))!
+
+### 🐞 Bug Fixes
+
+- Query Cache, AI Query Cache, AnkiConnect URL, and Anki Deck no longer appear in the first-run preferences form. These are optional settings, and leaving them empty falls back to their defaults.
+
+---
+
+<details>
+<summary>Recent Updates [v3.4.0]</summary>
 
 ### ✨ New Features
 
@@ -49,34 +67,29 @@ Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributin
 - Keep the active query running when an AI provider falls back from unsupported JSON output.
 - Preserve AI model loading when a provider's catalog refreshes.
 
----
-
-<details>
-<summary>Recent Updates [v3.3.0]</summary>
-
-### ✨ New Features
-
-#### Optional Query Caching
-
-- Added local caching for completed dictionary lookups and translations, with separate **Query Cache** and **AI Query Cache** settings. Both default to **Off** and offer **Words Only** and **All Text** modes.
-- Language detection can reuse confirmed results for inputs covered by either cache setting.
-- Cached results show a clock indicator. Use **Requery All Services** to fetch fresh results, **Regenerate AI Result** to refresh one AI provider, or **Clear Query Cache** to remove cached results.
-
-### 💎 Improvements
-
-- Improved result previews, detailed views, and saved favorites with clearer headings, pronunciation and language direction, and compact tables for short word translations, word forms, and phrases.
-- Google Translate now supports full translations of text longer than 1,830 characters, with paragraph breaks preserved.
-
-### 🐞 Bug Fixes
-
-- Fixed Google Translate failures caused by the previous web translation endpoint.
-- Favorites now show language codes when **Flags are not languages** is enabled, keeping the source and target languages distinguishable.
-
 </details>
 
 ---
 
 ## [v${EASYDICT_VERSION}]
+
+### ✨ 新特性
+
+#### Windows OCR 截图翻译
+
+- **OCR Translate** 现已支持 Windows：框选屏幕区域，使用系统内置的 Windows OCR 引擎在本地识别文字，并在 Easydict 中查询。如需识别 Windows 显示语言以外的语言，请在 Windows 设置中安装对应的 OCR 语言包。
+- 新增 **Select OCR Language** 命令，可将某个已安装的 Windows OCR 语言固定为使用语言；默认的 **Automatic (Windows profile)** 会使用 Windows 语言设置中的 OCR 语言。
+
+感谢 [@duckieeeduck](https://github.com/duckieeeduck) 提供 Windows 版原始实现（[raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884)）。
+
+### 🐞 修复
+
+- Query Cache、AI Query Cache、AnkiConnect URL 和 Anki Deck 不再出现在首次运行的偏好设置表单中。这些均为可选设置，留空时会回退到默认值。
+
+---
+
+<details>
+<summary>最近更新 [v3.4.0]</summary>
 
 ### ✨ 新特性
 
@@ -100,29 +113,6 @@ Thanks to [@cassieliang6709](https://github.com/cassieliang6709) for contributin
 - 修正塞尔维亚语偏好别名（\`sr\` → \`sr-Latn\`）的解析。
 - AI Provider 从不受支持的 JSON 输出回退时，保持正在进行的查询继续运行。
 - Provider 目录刷新时，保持 AI 模型加载状态。
-
----
-
-<details>
-<summary>最近更新 [v3.3.0]</summary>
-
-### ✨ 新特性
-
-#### 可选查询缓存
-
-- 新增已完成的词典查询和翻译结果的本地缓存，可分别通过 **Query Cache** 和 **AI Query Cache** 设置。两项默认均为 **Off**，可选择 **Words Only** 或 **All Text** 模式。
-- 当任一缓存设置允许缓存当前输入时，语言检测也可复用已确认的检测结果。
-- 缓存结果会显示时钟标识。可使用 **Requery All Services** 重新查询所有服务、**Regenerate AI Result** 重新生成单个 AI Provider 的结果，或使用 **Clear Query Cache** 清除查询缓存。
-
-### 💎 改进
-
-- 优化结果预览、详情页和收藏内容的排版，让标题、音标和翻译方向更清晰，并用紧凑表格展示简短的单词译文、词形和短语。
-- Google 翻译现在支持完整翻译超过 1,830 字符的长文本，并保留段落换行。
-
-### 🐞 修复
-
-- 修复旧网页翻译接口导致的 Google 翻译失败。
-- 启用 **Flags are not languages** 后，收藏列表会显示语言代码，便于区分源语言和目标语言。
 
 </details>
 

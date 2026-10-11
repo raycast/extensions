@@ -166,7 +166,11 @@ export default (
             style: Toast.Style.Failure,
             title: "Could not get the selected text. Continue without it.",
           });
-          getResponse(argQuery);
+          if (argQuery === "") {
+            setPage(Pages.Form);
+          } else {
+            getResponse(argQuery);
+          }
         }
       } else {
         if (argQuery === "") {
@@ -231,7 +235,7 @@ export default (
                   .map((file) => fs.readFileSync(file));
               }
 
-              if (useSelected) {
+              if (useSelected && selectedState) {
                 getResponse(`${values.query}\n${selectedState}`, files);
                 return;
               }

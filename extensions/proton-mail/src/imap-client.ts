@@ -1,4 +1,4 @@
-import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
+import { ImapFlow, MailboxObject, ListResponse, MessageStructureObject } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Email, EmailAddress, Folder } from "./types";
@@ -152,6 +152,7 @@ export async function fetchEmails(
           envelope: true,
           bodyStructure: true,
           source: { maxLength: 10000 }, // Fetch partial source for preview
+          headers: ["x-pm-internal-id"],
         },
         { uid: true }, // Tell fetch to interpret limitedUids as UIDs, not sequence numbers
       )) {
@@ -174,6 +175,7 @@ export async function fetchEmails(
           flags: message.flags instanceof Set ? message.flags : new Set(message.flags || []),
           hasAttachment,
           preview: extractPreview(message.source),
+          protonId: extractProtonId(message.headers),
         };
 
         emails.push(email);
@@ -205,6 +207,13 @@ function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: 
   return false;
 }
 
+function extractProtonId(headers: Buffer | undefined): string | undefined {
+  if (!headers) return undefined;
+  // Unfold continuation lines before matching
+  const text = headers.toString("utf-8").replace(/\r?\n[ \t]+/g, " ");
+  return text.match(/^x-pm-internal-id:\s*(\S+)/im)?.[1];
+}
+
 function extractPreview(source: Buffer | undefined): string {
   if (!source) return "";
 
@@ -223,29 +232,118 @@ function extractPreview(source: Buffer | undefined): string {
   return "";
 }
 
-export async function fetchEmailBody(folderPath: string, uid: number): Promise<{ text?: string; html?: string }> {
+type BodyPart = { part: string; charset?: string };
+
+// Find the displayable text and HTML parts, skipping attachments and forwarded messages
+function findBodyParts(
+  node: MessageStructureObject | undefined,
+  found: { text?: BodyPart; html?: BodyPart } = {},
+): { text?: BodyPart; html?: BodyPart } {
+  if (!node) return found;
+  const type = node.type?.toLowerCase();
+
+  if (node.childNodes?.length) {
+    if (type !== "message/rfc822") {
+      for (const child of node.childNodes) findBodyParts(child, found);
+    }
+    return found;
+  }
+
+  // A text part named like a file (an attached .txt or .html) is an attachment even without that disposition
+  const paramNames = Object.keys({ ...node.parameters, ...node.dispositionParameters });
+  const isNamedFile = paramNames.some((name) => /^(?:file)?name\*?$/.test(name));
+  if (node.disposition === "attachment" || isNamedFile) return found;
+  // A single-part message has no part number; IMAP addresses its body as part 1
+  const bodyPart = { part: node.part || "1", charset: node.parameters?.charset };
+  if (type === "text/plain" && !found.text) found.text = bodyPart;
+  if (type === "text/html" && !found.html) found.html = bodyPart;
+  return found;
+}
+
+function decodePart(content: Buffer | null | undefined, charset?: string): string | undefined {
+  if (!content) return undefined;
+  try {
+    return new TextDecoder(charset || "utf-8").decode(content);
+  } catch {
+    // Unknown charset label
+    return new TextDecoder("utf-8").decode(content);
+  }
+}
+
+export interface EmailBody {
+  text?: string;
+  html?: string;
+}
+
+// Recently opened bodies, so moving through the list or expanding the selected email doesn't download them
+// again. Memory only: bodies are decrypted emails and must not be written to disk.
+const BODY_CACHE_SIZE = 20;
+const bodyCache = new Map<string, EmailBody>();
+
+function bodyCacheKey(folderPath: string, uid: number): string {
+  return `${folderPath}\u0000${uid}`;
+}
+
+// The body if it's already in memory, so a view can show it right away
+export function cachedEmailBody(folderPath: string, uid: number): EmailBody | undefined {
+  const key = bodyCacheKey(folderPath, uid);
+  const cached = bodyCache.get(key);
+  if (cached) {
+    // Most recently used last, so the oldest entry is the first one dropped
+    bodyCache.delete(key);
+    bodyCache.set(key, cached);
+  }
+  return cached;
+}
+
+// The text and HTML of an email, without its attachments: downloading the full source used to fetch several MB
+// for a short email with a few photos
+export async function fetchEmailBody(folderPath: string, uid: number): Promise<EmailBody> {
+  const cached = cachedEmailBody(folderPath, uid);
+  if (cached) return cached;
+
+  const body = await withClient(async (client) => {
+    const lock = await client.getMailboxLock(folderPath);
+    try {
+      const message = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+      const { text, html } = findBodyParts(message ? message.bodyStructure : undefined);
+      const parts = [text, html].filter((part): part is BodyPart => !!part).map(({ part }) => part);
+      if (parts.length === 0) return {};
+
+      const downloaded = await client.downloadMany(String(uid), parts, { uid: true });
+      const decode = (bodyPart?: BodyPart) =>
+        bodyPart &&
+        decodePart(downloaded[bodyPart.part]?.content, downloaded[bodyPart.part]?.meta?.charset || bodyPart.charset);
+      return { text: decode(text), html: decode(html) };
+    } finally {
+      lock.release();
+    }
+  });
+
+  bodyCache.set(bodyCacheKey(folderPath, uid), body);
+  if (bodyCache.size > BODY_CACHE_SIZE) bodyCache.delete(bodyCache.keys().next().value as string);
+  return body;
+}
+
+// The HTML of an email with its inline images embedded, for opening the original in the browser.
+// Undefined for plain text emails.
+export async function fetchOriginalHtml(folderPath: string, uid: number): Promise<string | undefined> {
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
-
     try {
-      const message = await client.fetchOne(
-        uid,
-        {
-          source: true,
-        },
-        { uid: true },
-      );
+      // Check there is an HTML version before downloading the whole message for it
+      const structure = await client.fetchOne(uid, { bodyStructure: true }, { uid: true });
+      if (!structure || !findBodyParts(structure.bodyStructure).html) return undefined;
 
-      if (!message || !message.source) {
-        return {};
-      }
-
-      const parsed: ParsedMail = await simpleParser(message.source as Buffer);
-
-      return {
-        text: parsed.text,
-        html: parsed.html || undefined,
-      };
+      // The inline images live in other parts of the message, so this needs the full source
+      const message = await client.fetchOne(uid, { source: true }, { uid: true });
+      if (!message || !message.source) return undefined;
+      const parsed: ParsedMail = await simpleParser(message.source, {
+        skipHtmlToText: true,
+        skipTextToHtml: true,
+        skipTextLinks: true,
+      });
+      return parsed.html || undefined;
     } finally {
       lock.release();
     }
@@ -276,17 +374,40 @@ export async function markAsUnread(folderPath: string, uid: number): Promise<voi
   });
 }
 
-export async function deleteEmail(folderPath: string, uid: number): Promise<void> {
-  return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+function findSpecialFolder(folders: Folder[], specialUse: string, name: string): Folder | undefined {
+  return folders.find((folder) => folder.specialUse === specialUse || folder.path.toLowerCase() === name);
+}
 
-    try {
-      await client.messageFlagsAdd(uid, ["\\Deleted"], { uid: true });
-      await client.messageDelete(uid, { uid: true });
-    } finally {
-      lock.release();
-    }
-  });
+// Bridge only deletes emails for good when they're removed from Trash or Drafts. Removing one from any
+// other folder doesn't send it to Trash: it either loses its folder (left only in All Mail) or stays put.
+export function deletesPermanently(folderPath: string, folders: Folder[]): boolean {
+  return [findSpecialFolder(folders, "\\Trash", "trash"), findSpecialFolder(folders, "\\Drafts", "drafts")].some(
+    (folder) => folder?.path === folderPath,
+  );
+}
+
+// Moves the email to Trash, or deletes it for good when it's already in Trash or Drafts
+export async function deleteEmail(folderPath: string, uid: number): Promise<"trashed" | "deleted"> {
+  const folders = await listFolders();
+
+  if (deletesPermanently(folderPath, folders)) {
+    await withClient(async (client) => {
+      const lock = await client.getMailboxLock(folderPath);
+      try {
+        await client.messageDelete(uid, { uid: true });
+      } finally {
+        lock.release();
+      }
+    });
+    return "deleted";
+  }
+
+  const trashFolder = findSpecialFolder(folders, "\\Trash", "trash");
+  if (!trashFolder) {
+    throw new Error("Trash folder not found");
+  }
+  await moveToFolder(folderPath, uid, trashFolder.path);
+  return "trashed";
 }
 
 export async function moveToFolder(folderPath: string, uid: number, targetFolder: string): Promise<void> {

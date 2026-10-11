@@ -51,10 +51,34 @@ interface LaunchContext {
 }
 
 /** Thrown to unwind out of filename resolution when the user cancels the preflight. */
-class PreparationCancelled extends Error {
+class PreparationCanceled extends Error {
   constructor() {
-    super("Preparation cancelled");
-    this.name = "PreparationCancelled";
+    super("Preparation canceled");
+    this.name = "PreparationCanceled";
+  }
+}
+
+/** Save a batch's completed and failed items to History. */
+async function recordInHistory(items: BatchDownloadItem[]): Promise<void> {
+  const historyItems = items
+    .filter(
+      (item): item is BatchDownloadItem & { status: "completed" | "failed" } =>
+        item.status === "completed" || item.status === "failed",
+    )
+    .map((item) => ({
+      // The runner's ticket id, so `reconcileHistory` recognizes this record
+      // as the same download rather than adding a duplicate.
+      id: item.result?.id ?? item.id,
+      url: item.url,
+      filename: item.filename,
+      outputPath: item.outputPath,
+      status: item.status,
+      bytesDownloaded: item.result?.bytesDownloaded,
+      error: item.error ? { code: item.errorCode ?? "unknown", message: item.error } : undefined,
+    }));
+
+  if (historyItems.length > 0) {
+    await addBatchToHistory(historyItems);
   }
 }
 
@@ -62,6 +86,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [batchDirectory, setBatchDirectory] = useState<string>();
   const [downloadItems, setDownloadItems] = useState<BatchDownloadItem[]>([]);
   const [urlsInput, setUrlsInput] = useState("");
 
@@ -101,7 +126,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
   // Set by "Cancel All" while filenames are still resolving — the preflight has no
   // batch handle to cancel yet, and on a large batch it can run for a long time.
-  const prepareCancelledRef = useRef(false);
+  const prepareCanceledRef = useRef(false);
 
   const preferences = getPreferences();
   const launchContext = props.launchContext;
@@ -123,8 +148,8 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
       try {
         for (let offset = 0; offset < urls.length; offset += batchSize) {
-          if (prepareCancelledRef.current) {
-            throw new PreparationCancelled();
+          if (prepareCanceledRef.current) {
+            throw new PreparationCanceled();
           }
 
           const slice = urls.slice(offset, offset + batchSize);
@@ -154,9 +179,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
         // Cancellation can land DURING the final wave: the wave resolves, the loop
         // condition is already false, and control would return normally with a full
-        // item list — launching everything the user just cancelled.
-        if (prepareCancelledRef.current) {
-          throw new PreparationCancelled();
+        // item list — launching everything the user just canceled.
+        if (prepareCanceledRef.current) {
+          throw new PreparationCanceled();
         }
 
         return items;
@@ -182,7 +207,8 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
       logInfo("Batch download initiated", { urlCount: urls.length, outputDirectory });
 
-      prepareCancelledRef.current = false;
+      prepareCanceledRef.current = false;
+      setBatchDirectory(outputDirectory);
       setIsDownloading(true);
       setIsPreparing(true);
       // A batch that starts without going through Start Over or Retry (a second
@@ -210,8 +236,8 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         await preparingToast.hide();
 
         // Reservations are already released by `prepareItems` on the way out.
-        if (error instanceof PreparationCancelled) {
-          await showToast({ style: Toast.Style.Success, title: "Cancelled" });
+        if (error instanceof PreparationCanceled) {
+          await showToast({ style: Toast.Style.Success, title: "Canceled" });
         } else {
           await showError(error, { title: "Could Not Prepare Downloads" });
         }
@@ -256,30 +282,10 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       // Wait for completion and get final results
       const finalResult = await handle.promise.finally(untrack);
 
-      // Save completed/failed items to history
-      const historyItems = finalResult.items
-        .filter(
-          (item): item is BatchDownloadItem & { status: "completed" | "failed" } =>
-            item.status === "completed" || item.status === "failed",
-        )
-        .map((item) => ({
-          // The runner's ticket id, so `reconcileHistory` recognises this record
-          // as the same download rather than adding a duplicate.
-          id: item.result?.id ?? item.id,
-          url: item.url,
-          filename: item.filename,
-          outputPath: item.outputPath,
-          status: item.status,
-          bytesDownloaded: item.result?.bytesDownloaded,
-          error: item.error ? { code: item.errorCode ?? "unknown", message: item.error } : undefined,
-        }));
-
-      if (historyItems.length > 0) {
-        await addBatchToHistory(historyItems);
-      }
+      await recordInHistory(finalResult.items);
 
       const completedCount = finalResult.items.filter((i) => i.status === "completed").length;
-      // Cancelled counts as "not downloaded" here: an all-cancelled batch reporting
+      // Canceled counts as "not downloaded" here: an all-canceled batch reporting
       // a green "0 files downloaded" would be the UI lying about what happened.
       const failedItems = finalResult.items.filter((i) => i.status === "failed" || i.status === "cancelled");
       const failedCount = failedItems.length;
@@ -293,9 +299,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       }
 
       if (failedCount > 0) {
-        const cancelledCount = failedItems.filter((i) => i.status === "cancelled").length;
+        const canceledCount = failedItems.filter((i) => i.status === "cancelled").length;
         const notCompleted =
-          cancelledCount === failedCount ? `${countOf(cancelledCount, "download")} cancelled` : `${failedCount} failed`;
+          canceledCount === failedCount ? `${countOf(canceledCount, "download")} canceled` : `${failedCount} failed`;
 
         // Every per-item error goes on the clipboard — the summary toast alone
         // gives the user no way to see which URLs failed or why.
@@ -329,15 +335,15 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   // Pre-fill the URLs textarea from the clipboard when opened directly.
   useEffect(() => {
     if (launchContext?.urls) return;
-    let cancelled = false;
+    let canceled = false;
     (async () => {
       const text = (await Clipboard.readText())?.trim();
-      if (!cancelled && text && extractUrlStringsFromText(text).length > 0) {
+      if (!canceled && text && extractUrlStringsFromText(text).length > 0) {
         setUrlsInput(text);
       }
     })();
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [launchContext]);
 
@@ -436,7 +442,10 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       );
 
       const untrack = trackBatch(handle);
-      await handle.promise.finally(untrack);
+      const retried = await handle.promise.finally(untrack);
+      // A retry is its own batch, so it records its own outcome. Left unrecorded,
+      // its status was swept into History later without a URL.
+      await recordInHistory(retried.items);
 
       // Same gate as the batch tail — item statuses and handle liveness are not
       // the same thing, and disagreeing about it let a retry outlive the view.
@@ -475,7 +484,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   }, []);
 
   const handleCancelPreparation = useCallback(() => {
-    prepareCancelledRef.current = true;
+    prepareCanceledRef.current = true;
   }, []);
 
   if (isDownloading) {
@@ -488,6 +497,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         isFinished={isFinished}
         onStartOver={handleStartOver}
         onCancelPreparation={handleCancelPreparation}
+        outputDirectory={batchDirectory}
       />
     );
   }

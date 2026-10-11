@@ -8,6 +8,10 @@
 - The Menu Bar Player dropdown now shows the track title and artist statically instead of a scrolling title, which froze at a random point while the menu was open. Long names are shortened with an ellipsis, and the full text is shown on hover.
 - The Menu Bar Player now refreshes right after the Next, Previous, Play, Pause, Play/Pause, and Dislike & Skip commands instead of waiting for its next interval run.
 
+## [Fix Add to Playlist] - 2026-10-08
+
+- Fixed adding a song that is not in your library yet to a playlist.
+
 ## [Playback and Search Reliability] - 2026-09-28
 
 - Added timeouts for Music scripts and fixed subprocess completion handling.

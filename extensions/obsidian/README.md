@@ -18,6 +18,7 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Create Note](https://github.com/KevinBatdorf/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#daily-note)
 - [Append to Daily Note](https://github.com/KevinBatdorf/obsidian-raycast#append-to-daily-note)
+- [Quick Capture](#quick-capture)
 - [Custom Append Actions](https://github.com/KevinBatdorf/obsidian-raycast#custom-append-actions)
 - [Bookmarked Note](https://github.com/KevinBatdorf/obsidian-raycast#bookmarked-notes)
 - [Obsidian Menu Bar Item](https://github.com/KevinBatdorf/obsidian-raycast#obsidian-menu-bar-item)
@@ -146,6 +147,22 @@ This command will append text to the daily note from the selected vault. If a da
 
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
 
+## Quick Capture
+
+Save a note, task, or shopping item directly to an existing Markdown file, without the Advanced URI plugin.
+
+1. Open the **Quick Capture** command preferences.
+2. Set **Obsidian Vault** to your vault name. If omitted, the first available vault is used.
+3. Configure the routes you use with paths relative to that vault, for example:
+   - **Daily Note Path:** `Daily Notes/{date}.md`
+   - **To Do Note Path:** `Tasks/To Do.md`
+   - **Shopping Note Path:** `Shopping.md`
+4. Run **Quick Capture**, choose a type, enter your text, and save.
+
+Only the selected route needs to be configured. Its target must already exist as a regular `.md` file inside the vault; Quick Capture does not create daily notes or other files. Path templates such as `{date}` resolve when saving (`2026-10-10`, for example).
+
+Every capture appends to the end of the file, including Shopping. Daily Note and Shopping use a bullet; To Do uses an unchecked task. Each save creates one item, with additional lines indented as continuation text. Text templates such as `{date}` are also supported.
+
 ## Custom Append Actions
 
 This command allows you to create your own "Append to Note" actions. You can configure specific notes, templates, and behaviors, and even assign global keyboard shortcuts to them.
@@ -156,6 +173,7 @@ This command allows you to create your own "Append to Note" actions. You can con
 4.  Run the action from the list or create a **Quicklink** (CMD+SHIFT+C) to run it directly with a hotkey.
 
 **Action Types:**
+
 - **Capture text:** Standard input mode. What you type fills the `{content}` placeholder in your template.
 - **Pre-fill with template:** Loads the resolved template into the input box so you can edit it before sending. Ideal for daily logs or structured entries.
 

@@ -42,23 +42,21 @@ export function useAvatar<T>({ items, avatarType, collectAvatars }: UseAvatarOpt
   }, [avatarList, avatarCache]);
 
   useQueries({
-    queries: uniqueList.map(
-      (item): AvatarQueryOptions => ({
-        queryKey: [{ scope: CURRENT_APP_TYPE, entity: "avatar", type: avatarType, url: item.url, key: item.key }],
-        queryFn: async ({ queryKey }) => {
-          const [{ type, url, key }] = queryKey;
-          const localPath = await downloadAvatar({ token: CURRENT_PAT, type, url, key });
+    queries: uniqueList.map((item): AvatarQueryOptions => ({
+      queryKey: [{ scope: CURRENT_APP_TYPE, entity: "avatar", type: avatarType, url: item.url, key: item.key }],
+      queryFn: async ({ queryKey }) => {
+        const [{ type, url, key }] = queryKey;
+        const localPath = await downloadAvatar({ token: CURRENT_PAT, type, url, key });
 
-          // Convert to relative path for storage to save space
-          const relativePath = path.relative(environment.supportPath, localPath);
-          avatarCache.set(key, path.normalize(relativePath));
+        // Convert to relative path for storage to save space
+        const relativePath = path.relative(environment.supportPath, localPath);
+        avatarCache.set(key, path.normalize(relativePath));
 
-          return relativePath;
-        },
-        staleTime: Infinity,
-        gcTime: Infinity,
-      }),
-    ),
+        return relativePath;
+      },
+      staleTime: Infinity,
+      gcTime: Infinity,
+    })),
     combine: (results) => results.filter((result) => result.isSuccess).length,
   });
 }

@@ -17,6 +17,8 @@ export type OneNoteItem = {
   GOSID: string;
   ParentGOID: string;
   GrandparentGOIDs: string;
+  ParentTitle?: string | null;
+  GrandparentTitles?: string;
   ContentRID: string;
   RootRevGenCount: number;
   LastModifiedTime: number;

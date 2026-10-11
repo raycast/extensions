@@ -2,14 +2,12 @@ export interface SearchResult {
   slug: string;
   title: string;
   snippet: string;
-  relevanceScore: number;
-  viewCount: number;
-  titleHighlights: unknown[];
-  snippetHighlights: unknown[];
+  viewCount?: number;
 }
 
 export interface SearchResponse {
   results: SearchResult[];
+  totalCount?: number;
 }
 
 export interface Citation {
@@ -32,15 +30,12 @@ export interface Page {
   citations: Citation[];
   images: unknown[];
   fixedIssues: unknown[];
-  metadata: object;
+  metadata: Record<string, unknown>;
   stats: PageStats;
   linkedPages: unknown[];
 }
 
-export interface PageResponse {
-  page: Page | null;
-  found: boolean;
-}
+export type PageResponse = { found: true; page: Page } | { found: false; page: null };
 
 export interface ConstantsResponse {
   accountUrl: string;

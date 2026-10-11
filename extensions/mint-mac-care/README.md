@@ -15,12 +15,23 @@ Every command is a list with a picture beside it: groups on the left, what is in
 - **Undo Mint Action**: what Mint did recently and which files each run moved. ↵ puts it back.
 - **Show Disk Growth**: what grew most this week, by app and folder, category or AI tool, each with its size over every map Mint has drawn.
 
+## Ask Mint in Raycast AI
+
+Type `@mint` in Raycast AI and ask in your own words:
+
+- "@mint what's taking up space on my Mac?"
+- "@mint how much space can I get back without deleting anything?"
+- "@mint which apps are using the most memory right now?"
+- "@mint what grew on my disk this week?"
+
+The answers come from Mint and only read. When you want the space or memory back, Mint opens Free Disk, Optimize Storage or Free Memory, and you review and confirm it there.
+
 ## Requirements
 
-Mint 1.0.80 or later (1.0.81 adds live progress and the Disk page's groups), the edition from [mintstorage.app](https://mintstorage.app/r/raycast-download), opened once from Applications. Mint is free to download: scanning, organizing and freeing memory stay free, and so does your first 1 GB of cleanup. Mint from the Mac App Store or Setapp does not include the command-line tool these commands use.
+Mint 1.0.80 or later (1.0.81 adds live progress and the Disk page's groups), the edition from [mintstorage.app](https://mintstorage.app/r/raycast-download), opened once from Applications (or `brew install --cask dzg-studio/mint/mint`). Mint is free to download: scanning, organizing and freeing memory stay free, and so does your first 1 GB of cleanup. Mint from the Mac App Store or Setapp does not include the command-line tool these commands use.
 
 macOS 14 Sonoma or later.
 
 ## How it works
 
-The extension never deletes or moves a file itself. It sends a short request to Mint's signed command-line tool after checking DZG Studio's Developer ID signature, and Mint checks every file again right before it acts. Paths on your Ignore list stay untouched. Paths, file names and scan results stay on this Mac; the extension sends nothing anywhere.
+The extension never deletes or moves a file itself. It sends a short request to Mint's signed command-line tool after checking DZG Studio's Developer ID signature, and Mint checks every file again right before it acts. Paths on your Ignore list stay untouched. Paths, file names and scan results stay on this Mac; the extension sends nothing anywhere. When you ask Mint in Raycast AI, the answer (sizes, group names and app or folder names) goes to the model Raycast AI uses, like anything else you ask it. If you share Mint's usage statistics, Mint can note that an action started in Raycast.

@@ -1,6 +1,6 @@
 // Ported from 28LunarMansionGuide/index.html (Meeus Ch.47 truncation, ±1-2°).
 // Do not retune constants without cross-validating 3 dates vs Stellarium/AstroSeek.
-import { ARAB_THEMES, BRANCHES, NAKSHATRAS, NakshatraInfo, XIU, XiuInfo } from "./systems";
+import { ARAB_THEMES, BRANCHES, NAKSHATRAS, NakshatraInfo, XIU, XiuInfo, XIU_ANIMALS } from "./systems";
 
 export interface Mansion {
   num: number;
@@ -442,6 +442,23 @@ function degStr(lon: number): string {
   return `${deg}°${String(min).padStart(2, "0")}'`;
 }
 
+// Degree-within-sign for the Moon, exposed for the display layers that show
+// "Cancer 14°32'" rather than a bare sign name.
+export function moonDegStr(lon: number): string {
+  return degStr(((lon % 360) + 360) % 360);
+}
+
+// Which way the Moon is travelling through its current sign: "→" leaving the
+// sign for the next one, "←" moving back into it. Derived from the sign index
+// across a short forward interval rather than assumed, so it stays correct if
+// the ephemeris ever reports the Moon retrograde in longitude (it does not
+// currently — tropical motion is always direct, so "→" is expected).
+export function moonSignMotion(jd: number, lon: number): "→" | "←" {
+  const from = Math.floor((((lon % 360) + 360) % 360) / 30) % 12;
+  const to = Math.floor(moonLon(jd + 1 / 1440) / 30) % 12;
+  return (to - from + 12) % 12 === 11 ? "←" : "→";
+}
+
 function planetRow(name: string, lon: number, jd: number, ayanamsa: number): PlanetPosition {
   let motion = "Direct";
   if (name !== "Sun" && name !== "Moon") {
@@ -687,10 +704,17 @@ export function getVocInfo(date = new Date()): VocInfo {
 }
 
 // Display label: "VOC" plus the clock time it ends, e.g. "VOC until 10:24 PM".
+// The date is added whenever the ingress lands on a later calendar day —
+// without it a tomorrow-morning end reads as a time already past.
 export function vocEndLabel(voc: VocInfo, now = Date.now()): string {
   if (!voc.isVoc || !isFinite(voc.ingressInHours)) return "VOC";
   const end = new Date(now + voc.ingressInHours * 3600e3);
-  return `VOC until ${end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  const time = end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const sameDay =
+    end.getFullYear() === new Date(now).getFullYear() &&
+    end.getMonth() === new Date(now).getMonth() &&
+    end.getDate() === new Date(now).getDate();
+  return `VOC until ${sameDay ? time : `${end.toLocaleDateString([], { weekday: "short" })} ${time}`}`;
 }
 
 export type MoonTrend = "Waxing" | "Waning";
@@ -703,12 +727,16 @@ export interface MoonInfo {
   age: number;
   zodiac: string;
   longitude: number;
+  // Exact degree within the sign, and the direction of travel through it.
+  deg: string;
+  signMotion: "→" | "←";
   siderealLon: number;
   siderealZodiac: string;
+  siderealDeg: string;
   ayanamsa: number;
   mansion: Mansion;
   nakshatra: NakshatraInfo;
-  xiu: XiuInfo;
+  xiu: XiuInfo & { animal: string; emoji: string };
   planets: PlanetPosition[];
   cal: Calendars;
   voc: VocInfo;
@@ -920,6 +948,9 @@ export function getMoonInfo(date = new Date()): MoonInfo {
     }
   }
   const xiu = XIU[xiuIdx];
+  // The animal and its emoji travel together from the audited table, so the
+  // displayed icon can never disagree with the named animal.
+  const xiuAnimal = XIU_ANIMALS[xiuIdx];
 
   const planets: PlanetPosition[] = [
     planetRow("Sun", sLon, jd, ayanamsa),
@@ -939,12 +970,15 @@ export function getMoonInfo(date = new Date()): MoonInfo {
     age,
     zodiac: SIGNS[Math.floor(mLon / 30) % 12],
     longitude: mLon,
+    deg: degStr(mLon),
+    signMotion: moonSignMotion(jd, mLon),
     siderealLon: sidereal,
     siderealZodiac: SIGNS[Math.floor(sidereal / 30) % 12],
+    siderealDeg: degStr(sidereal),
     ayanamsa,
     mansion,
     nakshatra,
-    xiu,
+    xiu: { ...xiu, animal: xiuAnimal.animal, emoji: xiuAnimal.emoji },
     planets,
     cal: getCalendars(date, angle, sunSid),
     voc: getVocInfo(date),

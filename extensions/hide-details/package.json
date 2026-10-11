@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hide-details",
+  "title": "Hide Details",
+  "description": "Redact names, emails, cards, secrets, and faces in a screenshot before you share. On-device.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "redact-clipboard",
+      "title": "Redact Clipboard Image",
+      "subtitle": "Hide Details",
+      "description": "Find sensitive details in the clipboard image and copy a redacted version",
+      "mode": "view"
+    },
+    {
+      "name": "redact-now",
+      "title": "Redact and Copy",
+      "subtitle": "Hide Details",
+      "description": "Redact the clipboard image immediately and copy it back",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showOCRConfidence",
+      "title": "OCR Confidence",
+      "label": "Show OCR Confidence",
+      "description": "Show text recognition confidence percentages in the detection list.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "recognition",
+      "title": "Text Recognition",
+      "description": "Fast works well for clear screenshots. Accurate can help with small or difficult text, but takes longer to start.",
+      "type": "dropdown",
+      "required": false,
+      "default": "fast",
+      "data": [
+        {
+          "title": "Fast",
+          "value": "fast"
+        },
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        }
+      ]
+    },
+    {
+      "name": "style",
+      "title": "Redaction Style",
+      "description": "Blackout covers detected regions. Blur and pixelation obscure them but can retain readable information.",
+      "type": "dropdown",
+      "required": false,
+      "default": "blackout",
+      "data": [
+        {
+          "title": "Pixelate",
+          "value": "pixelate"
+        },
+        {
+          "title": "Smooth Blur",
+          "value": "blur"
+        },
+        {
+          "title": "Blackout",
+          "value": "blackout"
+        }
+      ]
+    },
+    {
+      "name": "categories",
+      "title": "What to Hide",
+      "description": "Comma-separated: email, phone, card, secret, ip, name, face. Leave empty to use only Custom Regex.",
+      "type": "textfield",
+      "required": false,
+      "default": "email,phone,card,secret,ip,name,face"
+    },
+    {
+      "name": "extraWords",
+      "title": "Always Hide These Words",
+      "description": "Comma-separated names or strings to redact. Keep the name category enabled to use this list.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "customRegex",
+      "title": "Custom Regex",
+      "description": "Optional pattern applied to each OCR line. Combine patterns with | and use (?i) for case-insensitive matching. Enter the pattern without / delimiters.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "padding",
+      "title": "Padding",
+      "description": "Extra pixels around each detection. Enter a number from 0 to 1000.",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "publish": "ray publish"
+  }
+}

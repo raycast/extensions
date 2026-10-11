@@ -1,8 +1,8 @@
-# Atlassian Data Center (Self-Hosted)
+# Atlassian (Self-Hosted)
 
 A Raycast extension for self-hosted Atlassian products to search and manage Confluence contents and Jira issues, with CQL/JQL syntax support.
 
-## ⚙️ Setup Required
+## Setup Required
 
 This extension integrates with your Atlassian applications using Personal Access Token (PAT), which are a secure way to authenticate external applications. [Learn more](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)
 
@@ -19,12 +19,12 @@ On first use, you'll need to provide:
 > [!NOTE]
 > All configurations above are required. If you only use Confluence or Jira, you can enter any non-empty value for the unused service's configuration.
 
-## ✨ Features
+## Features
 
 > [!TIP]
 > Due to limited display space in Raycast List, additional information is available in tooltips. Hover over icons, titles, subtitles, timestamps, avatars, and other elements to view details.
 
-### 📚 Confluence
+### Confluence
 
 - **Search Contents** - Search Confluence contents, including pages, blog posts, comments, and attachments
 - **Search Spaces** - Search Confluence spaces
@@ -32,7 +32,7 @@ On first use, you'll need to provide:
 - **CQL Support** - Use [Confluence Query Language](https://developer.atlassian.com/server/confluence/rest/v1020/intro/#advanced-searching-using-cql) for advanced searches
 - **Common Filters** - Viewed Recently, Created by Me, Contributed by Me, Mentions Me, My Favourites, Watched by Me
 
-### 🐛 Jira
+### Jira
 
 - **Search Issues** - Search Jira issues
 - **Board View** - View Jira board
@@ -42,10 +42,10 @@ On first use, you'll need to provide:
 - **JQL Support** - Use [Jira Query Language](https://confluence.atlassian.com/jiracoreserver/advanced-searching-939937709.html) for complex searches
 - **Common Filters** - My Open Issues, Open Issues, Assigned to Me, Reported by Me, Created Recently, Updated Recently, Resolved Recently, Viewed Recently, Watched by Me
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 - If pagination doesn't work properly, try increasing the pagination size to ensure results exceed the Raycast window height.
 
-## 📄 License
+## License
 
-MIT
+MIT License © [Frankie](https://github.com/tofrankie)

@@ -15,6 +15,7 @@ import {
 import { CaskActionPanel, FormulaActionPanel, PagingSection } from "./actionPanels";
 import { installStateIcon, STATUS_COLOR, UNINSTALLABLE_COLOR, UPDATE_AVAILABLE_COLOR } from "./palette";
 import { FormulaListItemDetail, CaskListItemDetail } from "./listItemDetail";
+import type { MetadataOptions } from "./packageMetadata";
 import { hasNextPage, pageRangeCompact, pageRangeSummary } from "../utils/paging";
 import { isUnusedDependency } from "../utils/installed";
 import { uninstallableReason } from "../utils/brew/installability";
@@ -59,6 +60,10 @@ export interface FormulaListProps {
   totals?: { formulae: number; casks: number };
   /** Page navigation, when the matches span more than one page. */
   paging?: PagingProps;
+  /** Actions on what contains each row, appended to its panel: Manage Taps' tap section. */
+  extraActions?: ActionPanel.Children;
+  /** A section above the results: Search's install-from-a-tap row for a pasted qualified name. */
+  leadingSection?: React.ComponentProps<typeof List>["children"];
   /**
    * Every name something installed depends on (`brew leaves`). Only the
    * Dependencies section passes it on, so no other row evaluates "Unused".
@@ -90,6 +95,7 @@ export function FormulaList(props: FormulaListProps) {
   const pinnedCasks = props.pinnedCasks ?? [];
   const dependencies = props.dependencies ?? [];
   const hasResults =
+    props.leadingSection != undefined ||
     formulae.length > 0 ||
     dependencies.length > 0 ||
     casks.length > 0 ||
@@ -118,6 +124,7 @@ export function FormulaList(props: FormulaListProps) {
     onToggleDescription: props.onToggleDescription,
     showInstalledDate: props.showInstalledDate,
     paging: props.paging,
+    extraActions: props.extraActions,
   };
   // `CaskListItem` takes no dependency filter, so formula rows get their own object.
   const formulaRowProps = { ...rowProps, showDependenciesFilter: props.showDependenciesFilter };
@@ -137,7 +144,7 @@ export function FormulaList(props: FormulaListProps) {
     ) : null;
 
   const formulaeSection = formulae.length > 0 && (
-    <List.Section title="Formulae">
+    <List.Section title="Formulae" subtitle={sectionCount(props.totals?.formulae ?? formulae.length)}>
       {formulae.map((formula) => (
         <FormulaListItem
           key={`formula-${formula.name}`}
@@ -163,7 +170,7 @@ export function FormulaList(props: FormulaListProps) {
     </List.Section>
   );
   const casksSection = casks.length > 0 && (
-    <List.Section title="Casks">
+    <List.Section title="Casks" subtitle={sectionCount(props.totals?.casks ?? casks.length)}>
       {casks.map((cask) => (
         <CaskListItem key={`cask-${cask.token}`} id={`cask-${cask.token}`} cask={cask} {...rowProps} />
       ))}
@@ -212,6 +219,7 @@ export function FormulaList(props: FormulaListProps) {
       {!hasResults && !props.isLoading && props.dataFetched && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
       )}
+      {props.leadingSection}
       {pinnedFirst ? (
         <>
           {pinnedFormulaeSection}
@@ -233,9 +241,22 @@ export function FormulaList(props: FormulaListProps) {
   );
 }
 
+/**
+ * How many a section holds — the full match count when Search windowed it, not
+ * the page — like the counted Dependencies and Pinned sections beside it.
+ */
+function sectionCount(n: number): string {
+  return n.toLocaleString();
+}
+
 export function FormulaListItem(props: {
   /** Page navigation, forwarded into the row's action panel. */
   paging?: PagingProps;
+  extraActions?: ActionPanel.Children;
+  /** A trailing accessory a view adds of its own: Manage Taps' trust exception. */
+  extraAccessory?: List.Item.Accessory;
+  /** The sidebar's Trust row, for a view that knows it. */
+  trust?: MetadataOptions["trust"];
   id?: string;
   selectedId?: string | null;
   formula: Formula;
@@ -288,6 +309,7 @@ export function FormulaListItem(props: {
     formula.installs,
     formula.pinned,
   );
+  if (props.extraAccessory) accessories.push(props.extraAccessory);
 
   return (
     <List.Item
@@ -303,6 +325,7 @@ export function FormulaListItem(props: {
             isInstalled={props.isInstalled}
             isSelected={props.id != undefined && props.id === props.selectedId}
             showDescription={props.showDescription}
+            trust={props.trust}
           />
         ) : undefined
       }
@@ -319,6 +342,7 @@ export function FormulaListItem(props: {
           metadataPanelVisible={showMetadataPanel}
           showDependenciesFilter={props.showDependenciesFilter}
           paging={props.paging}
+          extraActions={props.extraActions}
         />
       }
     />
@@ -328,6 +352,9 @@ export function FormulaListItem(props: {
 export function CaskListItem(props: {
   /** Page navigation, forwarded into the row's action panel. */
   paging?: PagingProps;
+  extraActions?: ActionPanel.Children;
+  extraAccessory?: List.Item.Accessory;
+  trust?: MetadataOptions["trust"];
   id?: string;
   selectedId?: string | null;
   cask: Cask;
@@ -368,6 +395,7 @@ export function CaskListItem(props: {
     cask.installs,
     cask.pinned,
   );
+  if (props.extraAccessory) accessories.push(props.extraAccessory);
 
   return (
     <List.Item
@@ -383,6 +411,7 @@ export function CaskListItem(props: {
             isInstalled={props.isInstalled}
             isSelected={props.id != undefined && props.id === props.selectedId}
             showDescription={props.showDescription}
+            trust={props.trust}
           />
         ) : undefined
       }
@@ -398,6 +427,7 @@ export function CaskListItem(props: {
           onToggleDescription={props.onToggleDescription}
           metadataPanelVisible={showMetadataPanel}
           paging={props.paging}
+          extraActions={props.extraActions}
         />
       }
     />

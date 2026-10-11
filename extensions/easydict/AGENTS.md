@@ -63,6 +63,6 @@ When editing the changelog:
 
 - Describe user-observable changes in the final net diff against the actual PR/branch target (normally `origin/main`). Omit internal refactors, tests, documentation, already released changes, and regressions introduced and fixed within the same unreleased branch.
 - Fold presets and supporting fixes into their parent feature unless independently user-visible. State migration, deprecation, and fallback conditions precisely, including reversibility where relevant.
-- Use `## [vX.Y.Z] - {PR_MERGE_DATE}` for new PR entries; keep the placeholder and do not add an `Unreleased` section.
+- Use `## [vX.Y.Z] - {PR_MERGE_DATE}` for new PR entries; keep the placeholder and do not add an `Unreleased` section. The top entry may name an unreleased version while `EASYDICT_VERSION` and `RELEASE_MARKDOWN` still describe the last release; do not bump them with a changelog entry.
 
-When explicitly preparing a release, update `CHANGELOG.md`, `EASYDICT_VERSION`, and `RELEASE_MARKDOWN` in `src/consts.ts` together, with matching versions and the merge-date placeholder preserved. Commit and push release changes only when requested.
+When explicitly preparing a release, adopt the top CHANGELOG version with `node scripts/release.mts prepare --apply`, refresh `RELEASE_MARKDOWN`, and run `node scripts/release.mts check` to freeze the trio and verify that the English notes match the CHANGELOG section verbatim. Commit and push release changes only when requested.

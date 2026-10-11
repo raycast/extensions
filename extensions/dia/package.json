@@ -14,7 +14,8 @@
     "loris",
     "xmok",
     "heytommy",
-    "christianmagill"
+    "christianmagill",
+    "Berenger"
   ],
   "platforms": [
     "macOS"
@@ -138,6 +139,48 @@
           "required": false
         }
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open a URL or a web search in a new Dia tab"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Switch to an open Dia tab"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close an open Dia tab by its ID"
+    },
+    {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Return the visible text of a Dia tab or the focused tab"
+    },
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "Return the open tabs across all Dia windows"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Return the tab currently focused in Dia"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search the Dia browsing history"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search the Dia bookmarks"
     }
   ],
   "dependencies": {

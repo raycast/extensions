@@ -18,7 +18,7 @@ interface ThemeProps {
 /**
  * A swatch for the color, when Raycast can render one.
  *
- * `Image.Mask`-free coloured dots only accept a hex value, so a token written as
+ * `Image.Mask`-free colored dots only accept a hex value, so a token written as
  * `oklch(...)` or `color-mix(...)` gets a neutral icon rather than a wrong one.
  */
 export function swatchFor(value: string, computed?: string): Image.ImageLike {
