@@ -1,137 +1,169 @@
 ---
 name: raycast-extension-release
-description: Prepare a Raycast extension release — run TypeScript, lint, test, and build checks locally, fix any errors, update CHANGELOG.md, and draft release notes. Use this skill whenever the user mentions releasing, publishing, preparing a release, cutting a version, updating the changelog, or wants to make sure their code passes CI before pushing. Also trigger when the user says "prepublish", "ship it", "release prep", or asks to check everything before merging.
+description: Prepare a Raycast extension for a Store release — reconcile the changelog against the published copy, run the full quality gate, audit store metadata, and open the PR. Use whenever the user mentions releasing, publishing, shipping, cutting a version, preparing a release, updating the changelog, `npm run publish`, `pull-contributions`, or wants to be sure the extension passes store CI before pushing.
 ---
 
-# Raycast Extension Release Preparation
+# Raycast Extension Release
 
-You are preparing a Raycast extension for release. The goal is to catch every issue that CI would catch — and fix it — before the user pushes. Then update the changelog and draft release notes.
+Raycast extensions have **no version number** — no semver, no `version` field in the manifest, no git tags. A release is one merged PR into `raycast/extensions`, and the `## [Title]` line in `CHANGELOG.md` is the only release identity. Read `reference.md` in this directory for the requirement tables, CI constants, and the source URLs behind every rule here.
 
-This matters because CI failures on TypeScript errors, lint issues, or broken builds waste time and block releases. Running the same checks locally first eliminates surprises.
+Work through the steps in order. Step 1 is the one that catches the damage nothing else will.
 
-## Step 1: Pre-release quality gate
+## Step 1: Reconcile the changelog with what is actually published
 
-Run these checks **in this order**, because each layer catches different problems and earlier fixes can resolve later failures (e.g., a lint autofix might also fix a type error):
+**Do this before touching `CHANGELOG.md`, every single time.**
 
-### 1a. TypeScript type checking
+`{PR_MERGE_DATE}` is replaced by a `sed` in the *monorepo's* merge workflow — never in your repo. So after every merge, your local file still shows `{PR_MERGE_DATE}` on a section that **already shipped**. The next release then edits that section in place, silently deleting a dated entry from users' Version History.
 
-```bash
-./node_modules/.bin/tsc -p tsconfig.json --noEmit
-```
-
-This is the most important check. It catches type errors like null-narrowing issues with discriminated unions, missing properties, and incorrect argument types — the exact kind of errors that slip through to CI.
-
-If there are errors: read the failing files, understand the root cause, and fix them. Common patterns in this codebase:
-- **Discriminated union narrowing**: when using `useLanguagePair()`, guard on `!langResult.pair` (not `langResult.error`) so TypeScript narrows the union properly
-- **Null assertions**: prefer explicit null guards with early returns over `!` assertions
-
-Re-run `tsc` after fixes to confirm they resolve all errors.
-
-### 1b. ESLint
+Diff against the published copy:
 
 ```bash
-npm run lint
+EXT=<extension-name>   # package.json "name"
+curl -sS "https://raw.githubusercontent.com/raycast/extensions/main/extensions/$EXT/CHANGELOG.md" \
+  > /tmp/store-CHANGELOG.md
+diff -u /tmp/store-CHANGELOG.md CHANGELOG.md
 ```
 
-If there are auto-fixable issues, run `npm run fix-lint` first, then re-check. For remaining manual issues, fix them individually.
+Every `## [...] - YYYY-MM-DD` section in the store copy is immutable history. If one is missing or altered locally, restore it verbatim, then put the new work in a fresh section above it.
 
-### 1c. Tests
+Then check for bullets that already shipped. A bullet carried over from the section that was live at the last publish will re-announce work users already have:
 
 ```bash
-npm run test
+python3 - <<'PY'
+store = [l.rstrip("\n") for l in open("/tmp/store-CHANGELOG.md") if l.startswith("- ")]
+local = set(l.rstrip("\n") for l in open("CHANGELOG.md") if l.startswith("- "))
+print("LOST (shipped, now absent):")
+[print(" ", b) for b in store if b not in local]
+PY
 ```
 
-If tests fail, investigate and fix. Do not skip failing tests.
+Nothing should be listed. Anything that is, you deleted from the published history.
 
-### 1d. Build
+## Step 2: Decide what belongs in the new section
+
+The store's own copy is the release boundary, not a git tag. `npm run publish` also leaves a marker tag, useful as a cross-check:
 
 ```bash
-npm run build
-```
-
-This runs `ray build` and validates the full compilation pipeline. Build failures here mean the extension won't work when published.
-
-**If any check fails**: fix the issue, re-run that check, and then re-run all subsequent checks (a fix for one problem can introduce another). Only proceed to Step 2 when all four checks pass cleanly.
-
-## Step 2: Update CHANGELOG.md
-
-The changelog lives at the project root: `CHANGELOG.md`. It surfaces in Raycast under the extension's **Version History** and on the store, so follow Raycast's convention exactly — **not** generic semver.
-
-> Source of truth: Raycast docs — [Prepare an Extension for Store › Version History](https://developers.raycast.com/basics/prepare-an-extension-for-store) and [Versioning](https://developers.raycast.com/information/versioning).
-
-### Raycast changelog rules
-
-- **One h2 section per submission.** Each published update gets its own `## [Title] - {PR_MERGE_DATE}` heading at the **top** of the file (newest first).
-- **Title in square brackets**, then ` - ` (hyphen with a space on each side), then the date.
-- **Use the literal `{PR_MERGE_DATE}` placeholder** for the new entry — Raycast replaces it with the real merge date on merge (which can be days later, after review). Do **not** type today's date.
-- **Flat bullet points** under the heading describing user-visible changes. **No** `### Added / Changed / Fixed / Removed` subsections — Raycast doesn't use them.
-- **Never edit an already-published, dated section.** Past entries carry a hard `YYYY-MM-DD` date and are immutable history; new work always goes in a fresh `{PR_MERGE_DATE}` section. Slipping changes into a shipped entry buries them under the wrong date.
-
-Example (matches the Raycast docs):
-
-```markdown
-# Brew Changelog
-
-## [Added a bunch of new feedback] - {PR_MERGE_DATE}
-
-- Improve reliability of `outdated` command
-- Add action to copy formula/cask name
-
-## [New Additions] - 2022-12-13
-
-- Add greedy upgrade preference
-- Add `upgrade` command
-```
-
-### Determine what's genuinely new
-
-Raycast extensions aren't released via git tags or `package.json` version bumps, so don't look for those. The "since last publish" range is what's new since the store's current version:
-
-```bash
-# npm run publish moves this marker tag to the last-published commit
 git log "$(git tag -l '__raycast_latest_publish_ext/*' | head -1)"..HEAD --oneline
 ```
 
-If you ran `pull-contributions` during this release, the most reliable diff is against the store state directly — compare `CHANGELOG.md` (and the tree) against the contributions parent of the merge so you only list bullets the store doesn't already have:
+Read the **diff** of each unpublished commit, not its subject line. Subjects lie: a commit called "prototype" can ship real UI, and a later commit can revert an earlier one inside the same unpublished range — in which case neither gets a bullet.
+
+- One bullet per user-visible change: UI, behavior, preferences, shortcuts, exported file formats, error copy.
+- Skip internal-only work — dependency bumps, CI, tests, refactors.
+- Call out anything that breaks a format or a habit users rely on (an export's columns, a keyboard shortcut) and say what they must do about it.
+- Cross-check every bullet against the code. A bullet describing a mechanism a later commit removed is worse than no bullet.
+
+Heading format, exactly:
+
+```markdown
+## [Short descriptive title] - {PR_MERGE_DATE}
+```
+
+Square brackets around the title, ` - ` with a space each side, the placeholder spelled exactly. **One section per PR** — the merge `sed` uses `/g`, so two occurrences of the placeholder both become the same date. Newest first; Raycast renders file order verbatim and never sorts.
+
+`ray lint` does **not** validate any of this. Nothing local does. Check it by eye.
+
+## Step 3: Quality gate
+
+Run all four; don't stop at the first failure, so you see the whole picture.
 
 ```bash
-git diff <contributions-parent>..HEAD -- CHANGELOG.md
+mise exec -- npm run typecheck && mise exec -- npm run lint && mise exec -- npm run test && mise exec -- npm run build
 ```
 
-Guidelines:
-- Each bullet describes a **user-visible** change, not an implementation detail.
-- Group related commits into a single bullet when they're one logical change.
-- Skip merge commits, CI/config changes, and internal refactors that don't affect behavior.
-- After editing, run `npm run lint` — `ray lint` validates the changelog format and accepts `{PR_MERGE_DATE}`.
+Confirm `build` is a **distribution** build. `ray build` defaults to `-e dev`; the store expects `dist`, which does additional type checking and produces the optimized output:
 
-## Step 3: Draft release notes
-
-After updating the changelog, draft concise release notes suitable for the Raycast Store submission / PR description. Use the new changelog section's title (Raycast extensions have no semver version). The format:
-
-```
-**What's new — [changelog section title]**
-
-[2-3 sentence summary of the most important changes]
-
-Highlights:
-- [Key change 1]
-- [Key change 2]
-- [Key change 3]
+```bash
+grep '"build"' package.json   # want: "ray build -e dist"
 ```
 
-Present the release notes to the user for review — don't commit them automatically.
+Fix failures at the source, re-run the step, then re-run everything after it. `ray lint --fix` handles formatting and some shortcut conventions; read what it changed before keeping it.
 
-## Step 4: Summary
+Warnings are not blockers but are review-visible — `@raycast/prefer-common-shortcut` in particular tells you a chord collides with a `Keyboard.Shortcut.Common` convention.
 
-Present a summary to the user:
-- Which checks passed / what was fixed
-- The changelog diff
-- The draft release notes
-- Any remaining action items — for Raycast that's typically: run `npm run publish` to open/update the PR in `raycast/extensions`, then mark the draft PR **"Ready for review"**. (No version bumps or git tags — Raycast doesn't use them.)
+## Step 4: Store metadata
 
-## Important
+Screenshot validation is **automated and pixel-forensic**, not a human glance. Run the store's own validator locally before pushing:
 
-- Use `npm` to run scripts (not `bun` or `yarn`)
-- Do not push to remote or run `npm run publish` without explicit user approval — publishing opens/updates a public PR in `raycast/extensions`
-- Raycast extensions have no `package.json` version to bump and no release tags to create — don't invent them
-- Commit fixes from Step 1 separately from changelog updates — the user should be able to review each independently
+```bash
+mkdir -p /tmp/raycheck/scripts /tmp/raycheck/extensions/$EXT
+curl -sS -o /tmp/raycheck/scripts/check_metadata_images.py \
+  https://raw.githubusercontent.com/raycast/extensions/main/scripts/check_metadata_images.py
+curl -sS -o /tmp/raycheck/scripts/check_raycast_images.py \
+  https://raw.githubusercontent.com/raycast/extensions/main/scripts/check_raycast_images.py
+cp -R metadata /tmp/raycheck/extensions/$EXT/ && cp package.json /tmp/raycheck/extensions/$EXT/
+rm -f /tmp/raycheck/extensions/$EXT/metadata/.DS_Store
+python3 -m venv /tmp/raycheck/.venv && /tmp/raycheck/.venv/bin/pip install -q numpy pillow
+cd /tmp/raycheck && ./.venv/bin/python scripts/check_metadata_images.py extensions/$EXT
+```
+
+It checks exact 2000×1250 size, PNG format, max 6 screenshots, ~12.5% padding per side (±4.5%, sides symmetric within 4%), a consistent background across all shots, and a consistent light/dark appearance. None of those numbers are on the docs site.
+
+Then confirm the screenshots still show the **current** UI. Open them and compare against what the new changelog section says changed. A redesigned detail pane means the screenshot of that pane is stale — recapture with Raycast's Window Capture, which produces the right geometry automatically.
+
+Also verify: icon is a 512×512 PNG that reads on both light and dark backgrounds and is not Raycast's default; `README.md` exists (required when the extension needs an API key or other setup) and its shortcut table, feature list, and supported-language list match the code.
+
+## Step 5: Publish
+
+`publish` does **not** consult git when deciding what to ship. It runs a plain recursive copy of your whole working directory (`@raycast/api/dist/utils/publish/copy-dir.js`), skipping only a hardcoded list: `.git`, `.github`, `node_modules`, `raycast-env.d.ts`, `.raycast-swift-build`, `.swiftpm`, `compiled_raycast_swift`, `compiled_raycast_rust`. Editor folders, agent tooling, caches, and `.env` are all copied.
+
+Two consequences:
+
+- **`.gitignore` is load-bearing for secrets.** Ignored files are still *copied* into the monorepo checkout; they are merely not *staged*, because your own `.gitignore` is copied alongside them. An untracked directory that is not in `.gitignore` gets committed into the public PR. Check before publishing:
+
+  ```bash
+  mise exec -- node -e 'require("./node_modules/@raycast/api/dist/utils/publish/copy-dir.js").copyDir(".","/tmp/pubcheck")' \
+    && (cd /tmp/pubcheck && git init -q . && git add -A && git status --short | head -50)
+  ```
+
+  Anything listed that is not source, assets, metadata, or config should go in `.gitignore` first.
+
+- **A symlink to a directory breaks the publish.** `copyDir` branches on `lstat().isDirectory()`, which is false for any symlink, so a symlink-to-directory falls through to `copyFileSync` and throws `ENOTSUP`/`EISDIR`. A symlink to a *file* is fine — it is followed and copied as a regular file.
+
+`ray publish` also refuses to start while the working tree is dirty in any way — modified, renamed, unmerged, **or untracked**. Commit or ignore everything first. Watch for `raycast-env.d.ts`: it is tracked but regenerated by `ray build` and `ray develop`, so a local build that changes a preference dirties the tree.
+
+Then:
+
+```bash
+mise exec -- npm run publish
+```
+
+This forks, pushes to `ext/<name>`, and opens a PR **as a draft**. The CLI never un-drafts it — **go to GitHub and click "Ready for review"**, or it sits unreviewed.
+
+Confirm **"Allow edits from maintainers"** is on. It is a hard CI gate with its own workflow: the merge job pushes commits to your branch (the changelog date substitution, a `platforms` field, losslessly recompressed images), and fails outright if it cannot.
+
+Those pushed commits are why the next publish will refuse until you run:
+
+```bash
+mise exec -- npx @raycast/api@latest pull-contributions
+```
+
+Re-running `mise exec -- npm run publish` afterwards updates the same PR.
+
+## Guardrails
+
+- Never run `mise exec -- npm run publish` or push without explicit approval — it opens a public PR in `raycast/extensions`.
+- Never edit a `## [...] - YYYY-MM-DD` section that exists in the published copy.
+- Never leave two `{PR_MERGE_DATE}` placeholders in the file.
+- Never change `author` once published — the publish flow uses a GitHub code search on `name` + `author` to find your extension, and a change makes it look like a new one.
+- Don't invent a version bump, a `version` field, or a release tag. They do not exist for Raycast extensions.
+- Commit the Step 3 fixes separately from the changelog, so each is reviewable on its own.
+- Public extensions cannot be published from CI — `ray publish --non-interactive` is rejected for the public store.
+
+## Researching Raycast docs
+
+Append `.md` to any `developers.raycast.com` URL for clean Markdown, and `?ask=<question>` for a cited answer:
+
+```
+https://developers.raycast.com/basics/prepare-an-extension-for-store.md
+https://developers.raycast.com/information/manifest.md?ask=is%20platforms%20required
+```
+
+When the docs and the CI scripts disagree, **the scripts win**. `reference.md` lists the ones worth reading.
+
+## This repo (VocaBuilder)
+
+- Run every command through `mise exec --` (`mise exec -- npm run build`). The shell default Node is not the `.nvmrc` one, and git hooks inherit the Node of the `git commit` process.
+- Store CI provisions Node 22.22.2 / npm 10.9.7. Regenerate `package-lock.json` only on npm 10.x — npm 11 drops an optional-peer node that `npm ci` then reports as `Missing: <pkg> from lock file`.
+- `AGENTS.md` holds the project conventions; `CLAUDE.md` is a symlink to it and publishes as a regular file.

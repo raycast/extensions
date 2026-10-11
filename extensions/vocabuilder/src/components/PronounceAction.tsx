@@ -1,8 +1,7 @@
 import { Action, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useRef } from "react";
-import { hasMacOsFallback, isTtsSupported, pronounce, pronounceFallback } from "../lib/tts";
-import { getPreferenceDefault } from "../lib/manifest";
-import { runPronounceWithFallback } from "../lib/pronounceFlow";
+import { hasMacOsFallback, planPronunciation, pronounce, pronounceFallback } from "../lib/tts";
+import { runPronounceWithFallback, runSystemVoice } from "../lib/pronounceFlow";
 import { routeTtsError } from "../lib/ttsErrorRouter";
 
 interface PronounceActionProps {
@@ -21,29 +20,35 @@ export default function PronounceAction({ word, languageCode, title, shortcut }:
     };
   }, []);
 
-  if (!isTtsSupported(languageCode)) return null;
+  const plan = planPronunciation(languageCode, getPreferenceValues<Preferences>());
+  if (plan.kind === "unavailable") return null;
 
-  async function handlePronounce() {
+  const handlePronounce = async () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Playing pronunciation…" });
-    const { geminiApiKey, ttsModelPreset, ttsModel } = getPreferenceValues<Preferences>();
-    const model = ttsModel?.trim() || ttsModelPreset || getPreferenceDefault("ttsModelPreset");
 
-    const outcome = await runPronounceWithFallback({
-      signal: controller.signal,
-      attemptPrimary: () => pronounce(word, geminiApiKey, languageCode, controller.signal, model),
-      attemptFallback: hasMacOsFallback(languageCode) ? () => pronounceFallback(word, languageCode) : null,
-      routeError: (err) => routeTtsError(err, languageCode),
-    });
+    const outcome =
+      plan.kind === "system"
+        ? await runSystemVoice({ signal: controller.signal, attempt: () => pronounceFallback(word, languageCode) })
+        : await runPronounceWithFallback({
+            signal: controller.signal,
+            attemptPrimary: () =>
+              plan.kind === "provider"
+                ? pronounce(word, languageCode, plan.config, controller.signal)
+                : Promise.reject(plan.error),
+            attemptFallback: hasMacOsFallback(languageCode) ? () => pronounceFallback(word, languageCode) : null,
+            routeError: (err) => routeTtsError(err, languageCode),
+          });
 
     switch (outcome.kind) {
       case "primary":
         if (!outcome.cached) toast.title = "Generated pronunciation";
         await toast.hide();
         return;
+      case "system":
       case "aborted":
         await toast.hide();
         return;
@@ -56,7 +61,7 @@ export default function PronounceAction({ word, languageCode, title, shortcut }:
         await showToast({ style: Toast.Style.Failure, title: outcome.title, message: outcome.message });
         return;
     }
-  }
+  };
 
   return (
     <Action title={title ?? "Pronounce Word"} icon={Icon.SpeakerHigh} shortcut={shortcut} onAction={handlePronounce} />

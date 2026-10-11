@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { runPronounceWithFallback } from "./pronounceFlow";
+import { runPronounceWithFallback, runSystemVoice } from "./pronounceFlow";
 
 const NEVER_ABORT = new AbortController().signal;
 
@@ -12,7 +12,7 @@ function routedAsTerminal(title = "Pronunciation failed", message = "Bad key.") 
 }
 
 describe("runPronounceWithFallback", () => {
-  it("returns primary success with cached flag when Gemini succeeds", async () => {
+  it("returns primary success with cached flag when provider TTS succeeds", async () => {
     const outcome = await runPronounceWithFallback({
       signal: NEVER_ABORT,
       attemptPrimary: vi.fn(async () => ({ cached: true })),
@@ -22,7 +22,7 @@ describe("runPronounceWithFallback", () => {
     expect(outcome).toEqual({ kind: "primary", cached: true });
   });
 
-  // The regression: a transient Gemini failure that lets system-voice fallback recover
+  // The regression: a transient provider failure that lets system-voice fallback recover
   // must NOT report "failed" — otherwise the component shows a failure toast even
   // though the user just heard a pronunciation through say(1).
   it("returns fallback-ok (NOT failed) when primary errors but fallback succeeds", async () => {
@@ -103,5 +103,39 @@ describe("runPronounceWithFallback", () => {
     });
     expect(outcome).toEqual({ kind: "aborted" });
     expect(attemptFallback).not.toHaveBeenCalled();
+  });
+});
+
+describe("runSystemVoice", () => {
+  it("reports a silent system outcome, not fallback-ok, when the system voice plays", async () => {
+    const attempt = vi.fn(async () => {});
+    expect(await runSystemVoice({ signal: NEVER_ABORT, attempt })).toEqual({ kind: "system" });
+    expect(attempt).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns failed with fixed copy when say(1) fails, never the raw exec error", async () => {
+    const outcome = await runSystemVoice({
+      signal: NEVER_ABORT,
+      attempt: async () => {
+        throw new Error("Command failed: /usr/bin/say -v Lesya secret-path");
+      },
+    });
+    expect(outcome).toEqual({
+      kind: "failed",
+      title: "Pronunciation failed",
+      message: "Could not play the system voice.",
+    });
+  });
+
+  it("returns aborted when the action was superseded while speaking", async () => {
+    const controller = new AbortController();
+    const outcome = await runSystemVoice({
+      signal: controller.signal,
+      attempt: async () => {
+        controller.abort();
+        throw new Error("killed");
+      },
+    });
+    expect(outcome).toEqual({ kind: "aborted" });
   });
 });
