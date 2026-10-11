@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "accent-letters",
+  "title": "Accent Letters",
+  "description": "Strip the accents from selected text, and search 682 accented letters by language, accent mark, Unicode name or code point.",
+  "icon": "icon.png",
+  "author": "roshan_tiwari",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "remove-accents",
+      "title": "Remove Accents",
+      "subtitle": "Accent Letters",
+      "description": "Strip the accents from the text selected in the frontmost app and paste it back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-accent-letters",
+      "title": "Search Accent Letters",
+      "subtitle": "Accent Letters",
+      "description": "Find an accented letter by language, accent mark, Unicode name or code point, then paste it.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
