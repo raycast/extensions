@@ -210,32 +210,39 @@ async function keepAwakeWhileSessionStored(): Promise<void> {
   if (stored === false) {
     await setSleepDisabled(false, { allowPrompt: false });
   } else if (stored === null) {
-    await LocalStorage.setItem(RECHECK_KEY, "1").catch(() => undefined);
+    // Each pending check gets its own value, so settling an older one never removes a check saved after it.
+    await LocalStorage.setItem(RECHECK_KEY, `${Date.now()}-${Math.random()}`).catch(() => undefined);
   }
 }
 
-// Finishes a check keepAwakeWhileSessionStored could not complete. If a read now confirms that no session is stored,
-// sleep is allowed again. If storage still cannot be read, the check stays pending for the next run. Errors are ignored
-// so the regular auto-off check still runs.
-async function finishRecheck(on: boolean): Promise<void> {
-  try {
-    if ((await LocalStorage.getItem(RECHECK_KEY)) === undefined) {
-      return;
-    }
-    const stored = await sessionStored();
-    if (stored === null) {
-      return;
-    }
+// Removes the pending check only if it is still the one that was read, so a newer pending check is kept.
+async function settleRecheck(pending: string): Promise<void> {
+  if ((await LocalStorage.getItem(RECHECK_KEY)) === pending) {
     await LocalStorage.removeItem(RECHECK_KEY);
-    if (stored === false && on) {
-      await setSleepDisabled(false, { allowPrompt: false });
-      // A Start in another command may have saved a session while sleep was being allowed. Keep that one awake.
-      if ((await sessionStored()) !== false) {
-        await keepAwakeWhileSessionStored();
-      }
+  }
+}
+
+// Finishes a check keepAwakeWhileSessionStored could not complete. A successful read decides it: if a session is
+// stored, that session's own checks take over; if none is stored, sleep is allowed again. If storage still cannot be
+// read, or allowing sleep fails, the check stays pending for the next run.
+async function finishRecheck(on: boolean): Promise<void> {
+  const pending = await LocalStorage.getItem<string>(RECHECK_KEY);
+  if (pending === undefined) {
+    return;
+  }
+  const stored = await sessionStored();
+  if (stored === null) {
+    return;
+  }
+  if (stored === false && on) {
+    await setSleepDisabled(false, { allowPrompt: false });
+  }
+  await settleRecheck(pending);
+  if (stored === false && on) {
+    // A Start in another command may have saved a session while sleep was being allowed. Keep that one awake.
+    if ((await sessionStored()) !== false) {
+      await keepAwakeWhileSessionStored().catch(() => undefined);
     }
-  } catch {
-    // Ignored: see above.
   }
 }
 
@@ -291,6 +298,8 @@ async function autoDisable(): Promise<AutoDisableReason | null> {
     await finishRecheck(status.on);
     return null;
   }
+  // A session is stored, so a pending check is settled here. Errors are ignored so the auto-off check below still runs.
+  await finishRecheck(status.on).catch(() => undefined);
   if (!status.on) {
     return null;
   }

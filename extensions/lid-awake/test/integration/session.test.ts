@@ -336,6 +336,58 @@ describe("storage read failures", () => {
 
     expect(mac.sleepDisabled).toBe(true);
     expect(await storedSessionKeys()).toHaveLength(1);
+    // The read confirmed the session, so the pending check is settled.
+    expect(raycast.store.has("recheck")).toBe(false);
+  });
+
+  it("leaves another app's sleep setting alone after a pending check was settled by a stored session", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const start = Date.now();
+    let fired = false;
+    raycast.afterSetItem = (key) => {
+      if (!fired && key.startsWith("session:")) {
+        fired = true;
+        mac.sleepDisabled = false;
+        raycast.storageFaults = { skip: 1, fail: 2 };
+      }
+    };
+    await enable(30);
+    await expect(enforce()).resolves.toBeNull();
+    vi.setSystemTime(start + 31 * MINUTE);
+    await expect(enforce()).resolves.toBe("timer");
+    expect(mac.sleepDisabled).toBe(false);
+
+    // Another app disables sleep after the timer ended.
+    mac.sleepDisabled = true;
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(mac.sleepDisabled).toBe(true);
+  });
+
+  it("keeps a pending check when allowing sleep fails, and finishes it on the next check", async () => {
+    raycast.afterSetItem = (key) => {
+      if (key.startsWith("session:")) {
+        raycast.afterSetItem = undefined;
+        mac.sleepDisabled = false;
+        raycast.store.clear();
+        raycast.storageFaults = { skip: 1, fail: 2 };
+      }
+    };
+    await enable(30);
+    expect(mac.sleepDisabled).toBe(true);
+
+    // Without the passwordless rule, allowing sleep fails. The error reaches the menu bar and the check stays pending.
+    const rules = new Map(mac.sudoersFiles);
+    mac.sudoersFiles.clear();
+    await expect(enforce()).rejects.toThrow();
+    expect(mac.sleepDisabled).toBe(true);
+    expect(raycast.store.has("recheck")).toBe(true);
+
+    mac.sudoersFiles = rules;
+    await expect(enforce()).resolves.toBeNull();
+
+    expect(mac.sleepDisabled).toBe(false);
+    expect(raycast.store.has("recheck")).toBe(false);
   });
 
   it("allows sleep on the next check when a Turn Off cleared the sessions while a Start's reads failed", async () => {
