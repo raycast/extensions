@@ -20,6 +20,8 @@ Search, open, download and upload Proton Drive files from Raycast, using the off
    proton-drive auth login
    ```
 
+Tested with Proton Drive CLI 0.8.0 and 0.9.0.
+
 The CLI Path preference defaults to `proton-drive`, looked up in `/opt/homebrew/bin`, `/usr/local/bin`,
 `~/.local/bin`, `~/bin` and `PATH`; set a full path there if the CLI is installed elsewhere.
 

@@ -106,7 +106,10 @@ export function FolderView(props: { path: string; title?: string }) {
           </ActionPanel>
         }
       />
-      <List.Section title={query ? "In This Folder" : undefined}>{here.map((n) => item(n))}</List.Section>
+      {/* While typing, the placeholder (and its indexing progress) is hidden: repeat the progress here. */}
+      <List.Section title={query ? "In This Folder" : undefined} subtitle={query ? progress : undefined}>
+        {here.map((n) => item(n))}
+      </List.Section>
       {query && index && (
         <List.Section
           title="In the Whole Drive"
