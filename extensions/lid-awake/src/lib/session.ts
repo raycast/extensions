@@ -1,0 +1,129 @@
+import { getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { getBattery, getBootTime, isSleepDisabled, setSleepDisabled } from "./system";
+import { AutoDisableReason, Battery, Session, shouldAutoDisable } from "./parse";
+
+export type { Session } from "./parse";
+
+const SESSION_KEY = "session";
+
+// Hand-written so this file typechecks even before `ray build` generates raycast-env.d.ts.
+type LidPrefs = { batteryThreshold: string; defaultDuration: string };
+
+export const PRESETS: (number | null)[] = [30, 60, 120, 240, null];
+
+export type Status = { on: boolean; session: Session | null; battery: Battery };
+
+function getPrefs(): { thresholdPercent: number; defaultMinutes: number | null } {
+  const prefs = getPreferenceValues<LidPrefs>();
+  const thresholdPercent = Number(prefs.batteryThreshold) || 0;
+  const duration = Number(prefs.defaultDuration);
+  return {
+    thresholdPercent,
+    defaultMinutes: Number.isFinite(duration) && duration > 0 ? duration : null,
+  };
+}
+
+export function getDefaultMinutes(): number | null {
+  return getPrefs().defaultMinutes;
+}
+
+export function durationLabel(minutes: number | null): string {
+  if (minutes === null) {
+    return "Indefinitely";
+  }
+  if (minutes < 60) {
+    return `${minutes} minutes`;
+  }
+  const hours = minutes / 60;
+  return hours === 1 ? "1 hour" : `${hours} hours`;
+}
+
+async function readSession(): Promise<Session | null> {
+  try {
+    const raw = await LocalStorage.getItem<string>(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeSession(session: Session): Promise<void> {
+  await LocalStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+async function clearSession(): Promise<void> {
+  await LocalStorage.removeItem(SESSION_KEY);
+}
+
+export async function refreshMenuBar(): Promise<void> {
+  try {
+    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+  } catch {
+    // Menu bar command not enabled yet; nothing to refresh.
+  }
+}
+
+export async function enable(minutes: number | null): Promise<void> {
+  const { thresholdPercent } = getPrefs();
+  const battery = await getBattery();
+  if (thresholdPercent > 0 && battery.hasBattery && !battery.onAC && battery.percent != null) {
+    if (battery.percent <= thresholdPercent) {
+      throw new Error(`Battery is at ${battery.percent}%, below your ${thresholdPercent}% cutoff`);
+    }
+  }
+
+  const bootTime = await getBootTime();
+  const now = Date.now();
+  const session: Session = {
+    startedAt: now,
+    endsAt: minutes ? now + minutes * 60_000 : null,
+    bootTime,
+  };
+
+  await setSleepDisabled(true);
+  try {
+    await writeSession(session);
+  } catch (error) {
+    await setSleepDisabled(false).catch(() => undefined);
+    throw error;
+  }
+  await refreshMenuBar();
+}
+
+export async function disable(): Promise<void> {
+  await setSleepDisabled(false);
+  await clearSession();
+  await refreshMenuBar();
+}
+
+export async function getStatus(): Promise<Status> {
+  const on = await isSleepDisabled();
+  let session = await readSession();
+  if (!on && session) {
+    await clearSession();
+    session = null;
+  }
+  const battery = await getBattery();
+  return { on, session, battery };
+}
+
+export async function enforce(): Promise<AutoDisableReason | null> {
+  const status = await getStatus();
+  if (!status.on || !status.session) {
+    // Either off, or on without a session (turned on outside the extension): leave it alone.
+    return null;
+  }
+  const { thresholdPercent } = getPrefs();
+  const reason = shouldAutoDisable({
+    session: status.session,
+    currentBootTime: await getBootTime(),
+    now: Date.now(),
+    battery: status.battery,
+    thresholdPercent,
+  });
+  if (reason) {
+    await disable();
+    return reason;
+  }
+  return null;
+}
