@@ -116,10 +116,9 @@ export function moveToTrash(snapshot: SyncSnapshot, id: string): SyncSnapshot {
 export function restoreFromTrash(snapshot: SyncSnapshot, id: string): SyncSnapshot {
   const account = snapshot.trash.find((candidate) => candidate.id === id);
   if (!account) return snapshot;
-  const restored: AccountData = { ...account };
-  delete restored.deletedAt;
+  const { deletedAt: _deletedAt, ...restored } = account;
   return {
-    accounts: [...snapshot.accounts, restored],
+    accounts: [...snapshot.accounts, restored as AccountData],
     groups: snapshot.groups,
     trash: snapshot.trash.filter((candidate) => candidate.id !== id),
   };

@@ -15,11 +15,9 @@ if (process.platform !== "darwin") {
 }
 
 mkdirSync(path.dirname(output), { recursive: true });
-execFileSync(
-  "swiftc",
-  ["-O", "-o", output, source, "-framework", "Vision", "-framework", "AppKit"],
-  { stdio: "inherit" },
-);
+execFileSync("swiftc", ["-O", "-o", output, source, "-framework", "Vision", "-framework", "ImageIO"], {
+  stdio: "inherit",
+});
 chmodSync(output, 0o755);
 
 const size = statSync(output).size;

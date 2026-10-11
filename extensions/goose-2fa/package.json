@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "goose-2fa",
   "title": "Goose 2FA",
-  "description": "Local TOTP and HOTP accounts with QR screenshot scanning, copy/paste, JSON backups, and an optional shared data file",
+  "description": "Two-factor code manager with screenshot and image QR scanning, backups, and an optional shared JSON data source",
   "icon": "icon.png",
   "author": "eachann_",
   "categories": [
@@ -39,24 +39,6 @@
   ],
   "preferences": [
     {
-      "name": "viewMode",
-      "title": "Main View Layout",
-      "description": "Choose a list or grid for the main view.",
-      "type": "dropdown",
-      "required": false,
-      "default": "list",
-      "data": [
-        {
-          "title": "List (arrow-key navigation)",
-          "value": "list"
-        },
-        {
-          "title": "Grid",
-          "value": "grid"
-        }
-      ]
-    },
-    {
       "name": "enterAction",
       "title": "Return Action",
       "description": "Choose whether Return copies the code or pastes it into the previous field.",
@@ -86,7 +68,7 @@
     {
       "name": "dataFile",
       "title": "Data Source File",
-      "description": "Choose an existing JSON file here, or save current data as a new sync file in Settings & Data. Select the same iCloud file on both clients to sync. The file contains plaintext 2FA secrets.",
+      "description": "Choose an existing JSON file. Or create one in a chosen folder from Settings & Data. Select the same iCloud file on both clients to sync. The file contains plaintext 2FA secrets.",
       "type": "file",
       "required": false
     }

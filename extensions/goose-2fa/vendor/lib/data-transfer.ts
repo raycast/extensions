@@ -162,8 +162,8 @@ function try2FAS(json: Record<string, unknown>): NewAccountInput[] | null {
     if (!secret) continue;
 
     results.push({
-      name: ((otp?.account ?? otp?.label ?? svc.name ?? "Unknown") as string),
-      issuer: ((otp?.issuer ?? svc.name ?? "") as string),
+      name: (otp?.account ?? otp?.label ?? svc.name ?? "Unknown") as string,
+      issuer: (otp?.issuer ?? svc.name ?? "") as string,
       secret: String(secret).replace(/\s/g, "").toUpperCase(),
       type: normalizeType((otp?.tokenType ?? otp?.type ?? "TOTP") as string),
       digits: parseInt(String(otp?.digits ?? 6)) || 6,
@@ -211,8 +211,8 @@ function tryAndOTP(arr: unknown[]): NewAccountInput[] | null {
     const secret = entry.secret as string | undefined;
     if (!secret) continue;
 
-    let name = ((entry.label ?? entry.name ?? entry.account ?? "") as string);
-    let issuer = ((entry.issuer ?? entry.issuerExt ?? "") as string);
+    let name = (entry.label ?? entry.name ?? entry.account ?? "") as string;
+    let issuer = (entry.issuer ?? entry.issuerExt ?? "") as string;
 
     // andOTP uses "Issuer:Account" format in label
     if (!issuer && name.includes(":")) {
@@ -297,8 +297,11 @@ function tryFreeOTP(arr: unknown[]): NewAccountInput[] | null {
     if (!secret) continue;
 
     results.push({
-      name: ((entry.label ?? entry.name ?? "") as string) || ((entry.issuerExt ?? entry.issuerInt ?? "") as string) || "Unknown",
-      issuer: ((entry.issuerExt ?? entry.issuerInt ?? entry.issuer ?? "") as string),
+      name:
+        ((entry.label ?? entry.name ?? "") as string) ||
+        ((entry.issuerExt ?? entry.issuerInt ?? "") as string) ||
+        "Unknown",
+      issuer: (entry.issuerExt ?? entry.issuerInt ?? entry.issuer ?? "") as string,
       secret,
       type: normalizeType((entry.type ?? "TOTP") as string),
       digits: parseInt(String(entry.digits ?? 6)) || 6,
@@ -317,8 +320,8 @@ function parseAccountArray(arr: unknown[]): NewAccountInput[] {
     const secret = a.secret as string | undefined;
     if (!secret) continue;
 
-    let name = ((a.name ?? a.label ?? a.account ?? "") as string);
-    let issuer = ((a.issuer ?? a.issuerExt ?? "") as string);
+    let name = (a.name ?? a.label ?? a.account ?? "") as string;
+    let issuer = (a.issuer ?? a.issuerExt ?? "") as string;
 
     if (!issuer && name.includes(":")) {
       const idx = name.indexOf(":");
@@ -354,7 +357,10 @@ function parseImportDataUnchecked(text: string): NewAccountInput[] | null {
 
   // 2. Single or multi-line otpauth:// URIs
   if (trimmed.startsWith("otpauth://")) {
-    const lines = trimmed.split(/[\n\r]+/).map((l) => l.trim()).filter(Boolean);
+    const lines = trimmed
+      .split(/[\n\r]+/)
+      .map((l) => l.trim())
+      .filter(Boolean);
     const parsed: NewAccountInput[] = [];
     for (const line of lines) {
       if (line.startsWith("otpauth-migration://")) {
@@ -412,7 +418,10 @@ function parseImportDataUnchecked(text: string): NewAccountInput[] | null {
   }
 
   // 4. Mixed text: lines that are otpauth:// URIs or otpauth-migration:// URIs
-  const lines = trimmed.split(/[\n\r]+/).map((l) => l.trim()).filter(Boolean);
+  const lines = trimmed
+    .split(/[\n\r]+/)
+    .map((l) => l.trim())
+    .filter(Boolean);
   const fromUris: NewAccountInput[] = [];
   for (const line of lines) {
     if (line.startsWith("otpauth-migration://")) {
@@ -471,9 +480,7 @@ function normalizeGroups(value: unknown): VaultGroup[] {
 
 function normalizeAccounts(values: unknown): NewAccountInput[] {
   if (!Array.isArray(values)) return [];
-  return values
-    .map(normalizeNewAccountInput)
-    .filter((account): account is NewAccountInput => account !== null);
+  return values.map(normalizeNewAccountInput).filter((account): account is NewAccountInput => account !== null);
 }
 
 export function parseImportData(text: string): NewAccountInput[] | null {
@@ -506,7 +513,12 @@ export function deduplicateImports(
   existing: AccountData[],
 ): { newAccounts: NewAccountInput[]; dupeCount: number } {
   const identity = (account: Pick<NewAccountInput, "secret" | "type" | "issuer" | "name">) =>
-    [account.type, normalizeBase32Secret(account.secret) ?? account.secret, account.issuer.trim().toLocaleLowerCase(), account.name.trim().toLocaleLowerCase()].join("\u0000");
+    [
+      account.type,
+      normalizeBase32Secret(account.secret) ?? account.secret,
+      account.issuer.trim().toLocaleLowerCase(),
+      account.name.trim().toLocaleLowerCase(),
+    ].join("\u0000");
   const seen = new Set(existing.map(identity));
   const newAccounts: NewAccountInput[] = [];
   for (const account of incoming) {

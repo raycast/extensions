@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import path from "node:path";
 import { useEffect, useState } from "react";
@@ -64,7 +65,10 @@ export interface VaultState {
 }
 
 const fileMissingMessage = () =>
-  "Data source file is missing or empty. No changes were saved to prevent data loss. You can create a new data source file.";
+  t(
+    "Data source file is missing or empty. No changes were saved to prevent data loss. You can create a new data source file.",
+    "数据源文件不存在或为空，未写入以免清空数据。可选择「新建数据源文件」。",
+  );
 const WATCH_INTERVAL = 3000;
 
 let state: VaultState = {
@@ -103,11 +107,20 @@ function messageForRead(read: Exclude<VaultFileRead, { status: "ok" }>): string 
     case "empty":
       return fileMissingMessage();
     case "invalid":
-      return "File is not a goose-2fa data source. Current data was preserved and writes are disabled. Check the file path.";
+      return t(
+        "File is not a goose-2fa data source. Current data was preserved and writes are disabled. Check the file path.",
+        "数据源文件不是 goose-2fa 数据源格式，已保留当前数据且不会写入。请确认文件路径。",
+      );
     case "too-large":
-      return "Data source exceeds the 5 MB limit. Reading and writing are disabled.";
+      return t(
+        "Data source exceeds the 5 MB limit. Reading and writing are disabled.",
+        "数据源文件超过 5MB 上限，已停止读写。",
+      );
     default:
-      return "Cannot read data source. Writes are disabled. Check path permissions.";
+      return t(
+        "Cannot read data source. Writes are disabled. Check path permissions.",
+        "数据源文件无法读取，已停止写入。请检查路径权限。",
+      );
   }
 }
 
@@ -141,7 +154,10 @@ export async function loadVault(): Promise<void> {
     setState({
       status: "ready",
       syncStatus: "error",
-      message: "Data source must be an absolute path to a .json file; existing data was not written.",
+      message: t(
+        "Data source must be an absolute path to a .json file; existing data was not written.",
+        "数据源须为绝对路径的 .json 文件；原有数据未写入。",
+      ),
       needsCreate: false,
     });
     return;
@@ -159,8 +175,10 @@ export async function loadVault(): Promise<void> {
         source: "local",
         status: "ready",
         syncStatus: "error",
-        message:
+        message: t(
           "Raycast Local Vault contains invalid data. Original values were preserved and writes are disabled. Choose a data source file in preferences or explicitly rebuild the vault.",
+          "Raycast 本地库有无法解析的数据，已保留原值且不会写入。可在扩展设置里改用数据源文件，或显式重建本地库。",
+        ),
         notice: null,
         needsCreate: false,
         localBroken: true,
@@ -175,7 +193,10 @@ export async function loadVault(): Promise<void> {
       status: "ready",
       syncStatus: "success",
       message: null,
-      notice: "No data source file configured; using Raycast Local Vault.",
+      notice: t(
+        "No data source file configured; using Raycast Local Vault.",
+        "未配置数据源文件，使用 Raycast 本地库。",
+      ),
       needsCreate: false,
       localBroken: false,
       conflict: null,
@@ -194,7 +215,12 @@ export async function loadVault(): Promise<void> {
       status: "ready",
       syncStatus: "success",
       message: null,
-      notice: corrected ? "Data source corrected using the 30-day trash rule and HOTP counter floor." : null,
+      notice: corrected
+        ? t(
+            "Data source corrected using the 30-day trash rule and HOTP counter floor.",
+            "已按 30 天回收站规则与 HOTP 高水位纠正数据源文件。",
+          )
+        : null,
       needsCreate: false,
       conflict: null,
     });
@@ -245,8 +271,11 @@ export async function refreshVault(): Promise<void> {
     syncStatus: "success",
     message: null,
     notice: corrected
-      ? "Data source corrected using trash rules and the HOTP counter floor."
-      : "Reloaded from data source file.",
+      ? t(
+          "Data source corrected using trash rules and the HOTP counter floor.",
+          "已按回收站规则与 HOTP 高水位纠正数据源文件。",
+        )
+      : t("Reloaded from data source file.", "已按数据源文件重新载入。"),
     needsCreate: false,
     conflict: null,
   });
@@ -278,7 +307,7 @@ async function pollExternal(): Promise<void> {
     status: "ready",
     syncStatus: "success",
     message: null,
-    notice: "Loaded external changes to the data source file.",
+    notice: t("Loaded external changes to the data source file.", "已载入数据源文件的外部改动。"),
     needsCreate: false,
     conflict: null,
   });
@@ -294,8 +323,10 @@ async function persist(
     if (state.localBroken && !options.allowCreate) {
       setState({
         syncStatus: "error",
-        message:
+        message: t(
           "Local Vault contains invalid data; writes are disabled. Explicitly rebuild it or use a data source file.",
+          "本地库有无法解析的数据，已停止写入。请显式重建本地库或改用数据源文件。",
+        ),
         notice: null,
       });
       return false;
@@ -306,7 +337,7 @@ async function persist(
       setState({ ...snapshot, syncStatus: "success", message: null, notice: null, conflict: null, localBroken: false });
       return true;
     } catch {
-      setState({ syncStatus: "error", message: "Could not save the local vault." });
+      setState({ syncStatus: "error", message: t("Could not save the local vault.", "无法保存本地保险柜。") });
       return false;
     }
   }
@@ -329,7 +360,10 @@ async function persist(
     if (!baseline) {
       setState({
         syncStatus: "conflict",
-        message: "Data source has not been verified; writes are disabled. Reload it first.",
+        message: t(
+          "Data source has not been verified; writes are disabled. Reload it first.",
+          "尚未确认过数据源文件内容，已停止写入。请先重新读取文件。",
+        ),
         notice: null,
         conflict: {
           snapshot: fresh.snapshot,
@@ -342,7 +376,10 @@ async function persist(
     if (!isSameSyncContent(fresh.content, baseline.content)) {
       setState({
         syncStatus: "conflict",
-        message: "Another app changed the data source. Your changes were not saved. Choose which version to keep.",
+        message: t(
+          "Another app changed the data source. Your changes were not saved. Choose which version to keep.",
+          "数据源文件已被其他程序修改，本次改动没有写入。请选择以哪边为准。",
+        ),
         notice: null,
         conflict: {
           snapshot: fresh.snapshot,
@@ -376,8 +413,10 @@ async function persist(
     if (reread.status === "ok") {
       setState({
         syncStatus: "conflict",
-        message:
+        message: t(
           "Another app changed the data source before saving. Your changes were not saved. Choose which version to keep.",
+          "数据源文件在写入前被其他程序修改，本次改动没有写入。请选择以哪边为准。",
+        ),
         conflict: {
           snapshot: reread.snapshot,
           content: reread.content,
@@ -395,7 +434,10 @@ async function persist(
     message:
       result.status === "locked"
         ? lockMessage(lock)
-        : "Could not write data source; existing file was not overwritten.",
+        : t(
+            "Could not write data source; existing file was not overwritten.",
+            "写入数据源文件失败，原有文件未被覆盖。",
+          ),
     notice: null,
     lockHeld: lock,
     conflict: null,
@@ -405,9 +447,17 @@ async function persist(
 
 /** 锁不会按时间自动清理，只能由用户确认后显式清理。 */
 function lockMessage(lock: SyncLockInfo | null): string {
-  const holder = lock?.pid ? `process ${lock.pid}` : "unknown owner";
-  const created = lock?.createdAt ? `, created ${new Date(lock.createdAt).toLocaleString("en-US")}` : "";
-  return `Another app is writing the data source (${holder}${created}). Your changes were not saved. Stale locks are never removed automatically: confirm no client is writing before removing the lock and retrying.`;
+  const holder = lock?.pid ? t(`process ${lock.pid}`, `持有者进程 ${lock.pid}`) : t("unknown owner", "持有者未知");
+  const created = lock?.createdAt
+    ? t(
+        `, created ${new Date(lock.createdAt).toLocaleString("en-US")}`,
+        `，创建于 ${new Date(lock.createdAt).toLocaleString("zh-CN")}`,
+      )
+    : "";
+  return t(
+    `Another app is writing the data source (${holder}${created}). Your changes were not saved. Stale locks are never removed automatically: confirm no client is writing before removing the lock and retrying.`,
+    `另一个程序正在写入数据源文件（${holder}${created}），本次改动没有写入。残留锁不会被自动清理：确认没有任何一端在写入后可清理锁文件，再重试。`,
+  );
 }
 
 /** 所有改动的唯一入口：只有写盘成功才更新内存，避免出现没保存的“影子数据”。 */
@@ -463,7 +513,7 @@ export async function resolveConflict(choice: "file" | "local"): Promise<void> {
       ...snapshot,
       syncStatus: "success",
       message: null,
-      notice: "Local data replaced with file contents.",
+      notice: t("Local data replaced with file contents.", "已按数据源文件内容覆盖本地。"),
       needsCreate: false,
       conflict: null,
     });
@@ -479,7 +529,11 @@ export async function resolveConflict(choice: "file" | "local"): Promise<void> {
     trash: state.trash,
   };
   baseline = { content: conflict.content, stat: conflict.stat };
-  setState({ conflict: null, message: null, notice: "Local data will replace the data source file." });
+  setState({
+    conflict: null,
+    message: null,
+    notice: t("Local data will replace the data source file.", "将以本地数据覆盖数据源文件。"),
+  });
   await persist(merged);
 }
 

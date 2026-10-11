@@ -40,9 +40,8 @@ export function normalizeNewAccountInput(value: unknown): NewAccountInput | null
     return null;
   }
 
-  const algorithmRaw = typeof raw.algorithm === "string"
-    ? raw.algorithm.toUpperCase().replace(/^SHA(?=\d)/, "SHA-")
-    : "SHA-1";
+  const algorithmRaw =
+    typeof raw.algorithm === "string" ? raw.algorithm.toUpperCase().replace(/^SHA(?=\d)/, "SHA-") : "SHA-1";
   if (!ALGORITHMS.has(algorithmRaw as AccountData["algorithm"])) return null;
 
   const issuer = typeof raw.issuer === "string" ? raw.issuer.trim().slice(0, 200) : "";
@@ -71,15 +70,9 @@ export function normalizeStoredAccount(value: unknown, validGroupIds?: Set<strin
   const input = normalizeNewAccountInput(raw);
   if (!input) return null;
   const id = typeof raw.id === "string" && raw.id ? raw.id : crypto.randomUUID();
-  const createdAt = typeof raw.createdAt === "number" && Number.isFinite(raw.createdAt)
-    ? raw.createdAt
-    : Date.now();
-  const groupId = input.groupId && (!validGroupIds || validGroupIds.has(input.groupId))
-    ? input.groupId
-    : null;
-  const deletedAt = typeof raw.deletedAt === "number" && Number.isFinite(raw.deletedAt)
-    ? raw.deletedAt
-    : undefined;
+  const createdAt = typeof raw.createdAt === "number" && Number.isFinite(raw.createdAt) ? raw.createdAt : Date.now();
+  const groupId = input.groupId && (!validGroupIds || validGroupIds.has(input.groupId)) ? input.groupId : null;
+  const deletedAt = typeof raw.deletedAt === "number" && Number.isFinite(raw.deletedAt) ? raw.deletedAt : undefined;
   return { ...input, id, createdAt, groupId, deletedAt };
 }
 
