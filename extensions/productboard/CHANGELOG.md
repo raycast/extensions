@@ -1,5 +1,9 @@
 # Productboard Changelog
 
+## [Restore Productboard API access] - {PR_MERGE_DATE}
+
+- Migrated notes, objectives, and note creation to Productboard's v2 API
+
 ## [View `Objectives` + Modernize] - 2025-09-09
 
 - `Objectives` command allows you to view objectives
