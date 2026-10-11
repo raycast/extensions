@@ -2257,4 +2257,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://present.aitho.app/mcp"],
     },
   },
+  {
+    name: "flowra",
+    title: "Flowra",
+    description:
+      "One MCP server for your apps' tools and your own custom tools, plus hosted AI agents and workflows with approval gates and a run ledger.",
+    icon: "https://flowra.dev/icons/logo.svg",
+    homepage: "https://flowra.dev",
+    remoteUrl: "https://mcp.flowra.dev/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.flowra.dev/mcp"],
+    },
+  },
 ];
