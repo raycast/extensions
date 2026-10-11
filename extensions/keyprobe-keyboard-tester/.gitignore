@@ -1,0 +1,14 @@
+node_modules/
+dist/
+raycast-env.d.ts
+.raycast-swift-build/
+.DS_Store
+*.log
+.swiftpm/
+.build/
+__pycache__/
+# Tracked in this repo but kept out of the Raycast Store submission:
+# ray publish only adds files git doesn't ignore. New files under tools/
+# need `git add -f`.
+/tools/
+/LICENSE
