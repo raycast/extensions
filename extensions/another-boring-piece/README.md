@@ -40,6 +40,6 @@ None. The extension talks directly to the wallpaper service — no Mac app neede
 
 ## Screenshots
 
-![Screenshot 1](media/another-boring-piece-1.png)
-![Screenshot 2](media/another-boring-piece-2.png)
-![Screenshot 3](media/another-boring-piece-3.png)
+![Screenshot 1](metadata/another-boring-piece-1.png)
+![Screenshot 2](metadata/another-boring-piece-2.png)
+![Screenshot 3](metadata/another-boring-piece-3.png)
