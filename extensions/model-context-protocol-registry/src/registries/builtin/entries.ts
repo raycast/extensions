@@ -617,6 +617,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "looot",
+    title: "looot",
+    description:
+      "One key and one prepaid balance for about 2,500 data API operations from 90+ providers: work emails and phone numbers, company and people search, Google results, web pages, news, LinkedIn profiles and local businesses. The agent searches the catalog, sees the price before it runs, and pays per call; a failed call costs nothing. 19 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Bearer API key. No subscription, top up from $5.",
+    icon: "https://raw.githubusercontent.com/loootai/looot-plugin/main/plugins/claude-code/looot/.claude-plugin/icon.png",
+    homepage: "https://docs.looot.ai",
+    remoteUrl: "https://api.looot.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.looot.ai/mcp"],
+    },
+  },
+  {
     name: "maqami-travel",
     title: "MAQAMI Travel",
     description:
